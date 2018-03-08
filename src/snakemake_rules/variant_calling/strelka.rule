@@ -1,0 +1,37 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+bam_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "bam/"
+vcf_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "vcf/"
+strelka_dir = "strelka/"
+manta_dir = "manta/"
+
+rule strelka_somatic:
+  input:
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    bamN = bam_dir + "normal.merged.bam", 
+    bamT = bam_dir + "tumor.merged.bam",
+    mantaindel = vcf_dir + manta_dir + "candidateSmallIndels.vcf.gz" 
+  output:
+    expand(vcf_dir + strelka_dir + "{vcf_file}", vcf_file=config["vcf"]["strelka"])
+  params:
+    tmpdir = vcf_dir + "strelka_tmp",
+    result_dir = vcf_dir + strelka_dir,
+    runmode = "local",
+    conda = config["condaenvs"]["cancer_core_addition_python27"]
+  threads: 4
+  shell:
+    "source activate {params.conda};"
+    "configureStrelkaSomaticWorkflow.py "
+        "--normalBam={input.bamN} "
+        "--tumorBam={input.bamT} "
+        "--referenceFasta={input.fa} "
+        "--indelCandidates {input.mantaindel} "
+        " --outputCallableRegions "
+        "--runDir={params.tmpdir}; "
+    "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
+    "mv {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "for f in $(ls {params.result_dir}*.vcf.gz); do tabix -p vcf $f; done; "
+    "source deactivate; "

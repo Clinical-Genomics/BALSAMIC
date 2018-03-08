@@ -1,0 +1,32 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+bam_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "bam/"
+
+rule sambamba_depth:
+  input:
+    bam = bam_dir + "{sample}" + ".sorted.rmdup.bam",
+    bed = config["path"]["panel"] + config["bed"]["variant_panel"]
+  output:
+    bam_dir + "{sample}.sorted.rmdup.cov.bed"
+  params:
+    base_qual=10,
+    cov_1="100",
+    cov_2="200",
+    cov_3="300",
+    cov_4="400",
+    cov_5="500",
+    filter_string="'mapping_quality >= 10 and not duplicate and not failed_quality_control'",
+    conda=config["condaenvs"]["cancer_core"],
+  shell:
+    "source activate {params.conda}; "
+    "sambamba depth region "
+        "--regions {input.bed} "
+        "--min-base-quality {params.base_qual} "
+        "--filter {params.filter_string} "
+        "--cov-threshold {params.cov_1} --cov-threshold {params.cov_2} "
+        "--cov-threshold {params.cov_3} --cov-threshold {params.cov_4} "
+        "--cov-threshold {params.cov_4} {input.bam} > {output}; "
+    "source deactivate; "

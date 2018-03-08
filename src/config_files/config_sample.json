@@ -1,0 +1,51 @@
+{
+  "analysis":{
+      "sample_id": "AL-P-00065154",
+      "analysis_type": "paired",
+      "analysis_dir": "/mnt/hds/proj/cust000/hassan/",
+      "script": "scripts/",
+      "log":  "logs/",
+      "result": "results/"
+  },
+  "path": {
+      "genomefa": "/home/hassan.foroughi/db/",
+      "fastq": "/mnt/hds/proj/cust000/hassan/fastq/AL-P-00065154/",
+      "panel": "/home/hassan.foroughi/db/panel/",
+      "condaenv": "/home/hassan.foroughi/repo/CancerDev/condaenv/"
+  },
+  "references": {
+      "genomefa": "GRCh37/GRCh37_homo_sapiens_-d5-.fasta",
+      "dbsnp": "GRCh37/GRCh37_1000g_snps_high_confidence_-phase1-.vcf",
+      "1000G": "GRCh37/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz", 
+      "cosmic": "COSMIC/CosmicCodingMuts.vcf.gz"
+  },
+  "samples": {
+      "1_170322_HHGC5BCXY_AL-P-00065154-N-03127555-TP201703161500-CB201703171630_L001": {
+          "file_prefix": "1_170322_HHGC5BCXY_AL-P-00065154-N-03127555-TP201703161500-CB201703171630_L001",
+          "type": "normal",
+          "readpair_suffix": ["1", "2"]
+      },
+      "2_170322_HHGC5BCXY_AL-P-00065154-T-03126604-TP201703161500-CB201703171630_L002": {
+          "file_prefix": "2_170322_HHGC5BCXY_AL-P-00065154-T-03126604-TP201703161500-CB201703171630_L002",
+          "type": "tumor",
+          "readpair_suffix": ["1", "2"]
+      }
+  },
+  "bed": {
+      "variant_panel": "big_design.slopped20.bed"
+  },
+  "QC": {
+      "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+      "min_seq_length": "25"
+  },
+  "vcf": {
+      "strelka": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
+      "manta": ["diploidSV.vcf.gz", "somaticSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"],
+      "vardict": "vcf_vardict.vcf"
+  },
+  "condaenvs": {
+      "cancer_core_addition_python27": "cancer_core_addition_python27",
+      "cancer_core_addition_python36": "cancer_core_addition_python36",
+      "cancer_core": "cancer_core"
+  }
+}
