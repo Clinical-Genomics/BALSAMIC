@@ -1,0 +1,10 @@
+{
+  "__default__" :
+    {
+        "account" : "cust003",
+        "name"      : "cancer.{rule}.{wildcards}",
+        "time" : "12:00:00",
+        "n" : 6,
+        "partition" : "core"
+    }
+}

@@ -1,0 +1,138 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+bam_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "bam/"
+result_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"]
+
+rule GATK_RealignerTargetCreator:
+  input:
+    bam = bam_dir + "{sample}" + ".sorted.rmdup.bam",
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
+  output:
+    bam_dir + "{sample}.sorted.rmdup.intervals",
+  params:
+    conda = config["condaenvs"]["cancer_core_addition_python36"],
+  shell:
+    "source activate {params.conda}; "
+    "gatk "
+        "-T RealignerTargetCreator "
+        "-I {input.bam} "
+        "-R {input.fa} "
+        "--known {input.knownsites} "
+        "--out {output}; "
+    "source deactivate; "
+
+rule GATK_IndelRealigner:
+  input:
+    bam = bam_dir + "{sample}" + ".sorted.rmdup.bam",
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
+    intervals = bam_dir + "{sample}" + ".sorted.rmdup.intervals",
+  output:
+    bam_dir + "{sample}.sorted.rmdup.ralgn.bam",
+  params:
+    conda = config["condaenvs"]["cancer_core_addition_python36"],
+  shell:
+    "source activate {params.conda}; "
+    "gatk "
+        "-T IndelRealigner "
+        "-I {input.bam} "
+        "-R {input.fa} "
+        "-known {input.knownsites} "
+        "-targetIntervals {input.intervals} "
+        "--out {output}; "
+    "source deactivate; "
+
+rule GATK_baserecalibrator:
+  input:
+    bam = bam_dir + "{sample}" + ".sorted.rmdup.ralgn.bam",
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
+  output:
+    bam_dir + "{sample}.sorted.rmdup.ralgn.bsrcl.bam",
+  params:
+    conda = config["condaenvs"]["cancer_core_addition_python36"],
+  shell:
+    "source activate {params.conda}; "
+    "gatk "
+        "-T BaseRecalibrator "
+        "-R {input.fa} "
+        "--knownSites {input.knownsites} " 
+        "-I {input.bam} "
+        "--out {output}.bsrcl_list; "
+    "gatk "
+        "-T PrintReads "
+        "-R {input.fa} "
+        "-I {input.bam} "
+        "--out {output}; "
+    "samtools index {input.bam}; "
+    "source deactivate; "
+rule GATK_prepare_popvcf:
+  input:
+    ref1kg = config["path"]["genomefa"] + config["references"]["1000G"], 
+  output:
+    popvcf = result_dir + "popvcf.vcf"
+  params:
+    conda = config["condaenvs"]["cancer_core"],
+    anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
+    popcode = "EUR"
+  shell:
+    "source activate {params.conda}; "
+    "bcftools annotate "
+        "-x {params.anno_str1}{params.popcode}_AF "
+        "{input.ref1kg} "
+    " | "
+    "bcftools annotate "
+        "-i INFO/{params.popcode}_AF!=0.0 "
+    " | "
+    "awk -v OFS=\"\\t\" "
+      "'$1~/^#/ {{ print; }} "
+      " $1!~/^#/ {{ "
+        "split($8,INFO,\";\"); "
+        "newINFO=\"\";"
+        "for (i in INFO) {{ "
+          "if (INFO[i]~\"{params.popcode}_AF\") {{ "
+            "split(INFO[i],AF,\"=\"); "
+            "P=substr(AF[1], 1, length(AF[1])-3); "
+            "INFO[i]=P\"={{\"$4\"*=\"AF[2]\",\"$5\"=\"1-AF[2]\"}}\"; "
+            "INFO[i]=INFO[i]\";set=\"P;}} "
+          "newINFO=INFO[i] \";\" newINFO; "
+          "}} "
+        "$8=substr(newINFO, 1, length(newINFO)-1); "
+        "print; }}' > {output.popvcf}; "
+    "source deactivate; "
+
+rule GATK_contest:
+  input:
+    bamN = bam_dir + "normal.merged.bam",
+    bamT = bam_dir + "tumor.merged.bam",
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    popvcf = result_dir + "popvcf.vcf", 
+  output:
+    N_vs_T = bam_dir + "normal_tumor.contest", 
+    T_vs_N = bam_dir + "tumor_normal.contest", 
+  params:
+    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    min_genotype_ratio="0.95",
+  shell:
+    "source activate {params.conda}; "
+    "gatk "
+        "-T ContEst "
+        "-R {input.fa} "
+        "-I:eval {input.bamN} "
+        "-I:genotype {input.bamT} "
+        "--popfile {input.popvcf} "
+        "--min_genotype_ratio {params.min_genotype_ratio} "
+        "-o {output.N_vs_T}; " 
+    "gatk "
+        "-T ContEst "
+        "-R {input.fa} "
+        "-I:eval {input.bamT} "
+        "-I:genotype {input.bamN} "
+        "--popfile {input.popvcf} "
+        "--min_genotype_ratio {params.min_genotype_ratio} "
+        "-o {output.T_vs_N}; " 
+    "source deactivate; "
