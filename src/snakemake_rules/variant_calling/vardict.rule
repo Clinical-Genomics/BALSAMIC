@@ -60,5 +60,5 @@ rule vardict_merge_chrom:
     conda = config["condaenvs"]["cancer_core"]
   shell:
     "source activate {params.conda} ; "
-    "bcftools merge {input} --force-samples --output {output} ; "
+    "bcftools concat -o {output} {input}; " 
     "source deactivate;" 
