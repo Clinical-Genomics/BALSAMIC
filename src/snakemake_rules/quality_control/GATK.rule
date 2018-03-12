@@ -117,6 +117,7 @@ rule GATK_contest:
   params:
     conda = config["condaenvs"]["cancer_core_addition_python36"],
     min_genotype_ratio="0.95",
+    popcode = "EUR"
   shell:
     "source activate {params.conda}; "
     "gatk "
@@ -125,6 +126,7 @@ rule GATK_contest:
         "-I:eval {input.bamN} "
         "-I:genotype {input.bamT} "
         "--popfile {input.popvcf} "
+        "--population {params.popcode} "
         "--min_genotype_ratio {params.min_genotype_ratio} "
         "-o {output.N_vs_T}; " 
     "gatk "
@@ -133,6 +135,7 @@ rule GATK_contest:
         "-I:eval {input.bamT} "
         "-I:genotype {input.bamN} "
         "--popfile {input.popvcf} "
+        "--population {params.popcode} "
         "--min_genotype_ratio {params.min_genotype_ratio} "
         "-o {output.T_vs_N}; " 
     "source deactivate; "
