@@ -10,6 +10,7 @@ rule combine_vcf:
     vardict = expand(vcf_dir + "vardict/{vcf}", vcf=config["vcf"]["vardict"]),
     strelka = expand(vcf_dir + "strelka/{vcf}", vcf=config["vcf"]["strelka"]),
     manta = expand(vcf_dir + "manta/{vcf}", vcf=config["vcf"]["manta"]),
+    mutect = expand(vcf_dir + "mutect/{vcf}", vcf=config["vcf"]["mutect"]),
   output:
     vcf_dir + "combined_vcf.vcf"
   params:
@@ -19,5 +20,6 @@ rule combine_vcf:
     "ls {input.vardict}; "
     "ls {input.manta}; "
     "ls {input.strelka}; "
+    "ls {input.mutect}; "
     "touch {output}; "
     "source deactivate; "
