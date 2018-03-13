@@ -11,7 +11,7 @@ rule split_bed_by_chrom:
   input:
     bed = config["path"]["panel"] + config["bed"]["variant_panel"],
   output:
-    expand(vcf_dir + vardict_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
+    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
   params:
     lambda wildcards: vcf_dir + vardict_dir + "split_bed/" + "{wilcards.bedchrom}" + config["bed"]["variant_panel"], 
     split_bed_dir = vcf_dir + vardict_dir + "split_bed/",
@@ -28,7 +28,7 @@ rule vardict_paired:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
-    bed = vcf_dir + vardict_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["variant_panel"],
+    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["variant_panel"],
   output:
     vcf_dir + vardict_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"]["vardict"] + ".gz"
   params:
