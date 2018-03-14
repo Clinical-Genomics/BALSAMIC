@@ -1,0 +1,56 @@
+{
+  "analysis":{
+      "sample_id": "AL-P-00065154",
+      "analysis_type": "paired"
+  },
+  "bed": {
+      "variant_panel": "big_design.slopped20.bed"
+  },
+  "Metrics": {
+      "fastq": "123123123",
+      "BAM": "123123123",
+      "BAM_rmdup": "123123123"
+  },
+  "vcf": {
+      "strelka": {
+        "All": "123123",
+        "Passed": "123123",
+        "Annot": {
+          "Total": "123123",
+          "misense": "12313123",
+          "sense": "12313123",
+          "pathological": "12313123"
+        }
+      },
+      "manta": {
+        "All": "123123",
+        "Passed": "123123123",
+        "Annot": {
+          "Total": "123123",
+          "misense": "12313123",
+          "sense": "12313123",
+          "pathological": "12313123"
+        }
+      },
+      "vardict": {
+        "All": "123123",
+        "Passed": "123123123",
+        "Annot": {
+          "Total": "123123",
+          "misense": "12313123",
+          "sense": "12313123",
+          "pathological": "12313123"
+        }
+      },
+      "mutect2": {
+        "All": "123123",
+        "Passed": "123123123",
+        "Annot": {
+          "Total": "123123",
+          "misense": "12313123",
+          "sense": "12313123",
+          "pathological": "12313123"
+        }
+      }
+  }
+}
