@@ -29,6 +29,8 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/manta.rule"
 include:
+  rule_dir + "snakemake_rules/variant_calling/mutect.rule"
+include:
   rule_dir + "snakemake_rules/variant_calling/strelka.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/aggregate_vcf.rule"
@@ -39,10 +41,6 @@ fastqc_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"
 bam_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "bam/"
 vcf_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "vcf/"
 result_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]
-
-manta_dir = "manta/"
-strelka_dir = "strelka/"
-vardict_dir = "vardict/"
 
 rule all:
   input:
