@@ -1,0 +1,22 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+vcf_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "vcf/"
+
+rule split_bed_by_chrom:
+  input:
+    bed = config["path"]["panel"] + config["bed"]["variant_panel"],
+  output:
+    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
+  params:
+#    lambda wildcards: vcf_dir + "split_bed/" + "{wilcards.bedchrom}" + config["bed"]["variant_panel"], 
+    split_bed_dir = vcf_dir + "split_bed/",
+    origin_bed = config["bed"]["variant_panel"],
+    conda = config["condaenvs"]["cancer_core"]
+  shell:
+    "chromlist=`cut -f 1 {input.bed} | sort -u`; "
+    "for c in $chromlist; do awk -v C=$c '$1==C' {input.bed} > {params.split_bed_dir}$c.{params.origin_bed}; done; "
+    "unset chromlist; "
+
