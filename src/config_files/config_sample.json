@@ -16,6 +16,7 @@
   "references": {
       "genomefa": "GRCh37/GRCh37_homo_sapiens_-d5-.fasta",
       "dbsnp": "GRCh37/GRCh37_1000g_snps_high_confidence_-phase1-.vcf",
+      "dbsnp_all": "GRCh37/GRCh37_dbsnp_-138-.vcf.gz",
       "1000G": "GRCh37/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz", 
       "cosmic": "COSMIC/CosmicCodingMuts.vcf.gz"
   },
@@ -40,6 +41,7 @@
   },
   "vcf": {
       "strelka": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
+      "mutect": "vcf_mutect.vcf",
       "manta": ["diploidSV.vcf.gz", "somaticSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"],
       "vardict": "vcf_vardict.vcf"
   },
