@@ -47,5 +47,5 @@ rule all:
   input:
     result_dir + "qc/" + "qc_report.pdf",
     expand(vep_dir + "{vcf}", vcf=vcf_file_list(config) ),
-    expand(vep_dir + "vep_" + "{vcf}", vcf=vcf_file_list(config) ),
+    expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), vcf_file_list(config)))),
 
