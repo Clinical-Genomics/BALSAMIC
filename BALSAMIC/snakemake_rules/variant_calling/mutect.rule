@@ -16,9 +16,9 @@ rule mutect2_somatic:
     bamT = bam_dir + "tumor.merged.bam",
     bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["variant_panel"],
   output:
-    vcf_dir + mutect_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"]["mutect"] + ".gz"
+    vcf_dir + mutect_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"]["mutect"]["default"] + ".gz"
   params:
-    lambda wildcards: vcf_dir + "split_bed/" + "{wilcards.bedchrom}" + config["bed"]["variant_panel"],
+#    lambda wildcards: vcf_dir + "split_bed/" + "{wilcards.bedchrom}" + config["bed"]["variant_panel"],
     result_dir = vcf_dir + mutect_dir,
     conda = config["condaenvs"]["cancer_core_addition_python36"]
   threads: 6
@@ -40,13 +40,13 @@ rule mutect2_somatic:
 
 rule mutect2_merge_chrom:
   input:
-    expand(vcf_dir + mutect_dir + "split_vcf/{chrom}_" + config["vcf"]["mutect"] + ".gz", chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
+    expand(vcf_dir + mutect_dir + "split_vcf/{chrom}_" + config["vcf"]["mutect"]["default"] + ".gz", chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
   output:
-    vcf_dir + mutect_dir + config["vcf"]["mutect"]
+    vcf_dir + mutect_dir + config["vcf"]["mutect"]["merged"]
   params:
     conda = config["condaenvs"]["cancer_core"]
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat -o {output} {input}; " 
+    "bcftools concat -o {output} -O z {input}; " 
     "source deactivate;" 
 

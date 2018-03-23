@@ -2,6 +2,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+from BALSAMIC.tools import vcf_file_list
+
 rule_dir = "../"
 
 include:
@@ -33,8 +35,7 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/strelka.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/aggregate_vcf.rule"
-
+  rule_dir + "snakemake_rules/annotation/vep.rule"
 
 cutadapt_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "cutadapt/"
 fastqc_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "fastqc/"
@@ -44,16 +45,7 @@ result_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id
 
 rule all:
   input:
-    #expand(bam_dir + "{mysample}.bam", mysample=config["samples"]),
-    #expand(bam_dir + "{mysample}.sorted.bam", mysample=config["samples"]),
-    #expand(bam_dir + "{mysample}.sorted.rmdup.bam", mysample=config["samples"]),
-    #expand(bam_dir + "{mysample}.sorted.rmdup.hsmetric", mysample=config["samples"]),
-    #expand(bam_dir + "{mysample}.sorted.rmdup.cov.bed", mysample=config["samples"]),
-    #expand(bam_dir + "{mysample}.sorted.rmdup.intervals", mysample=config["samples"]),
-    #expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bam", mysample=config["samples"]),
-    #expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bsrcl.bam", mysample=config["samples"]),
     result_dir + "qc/" + "qc_report.pdf",
-    vcf_dir + "combined_vcf.vcf", 
-    #expand(vcf_dir + manta_dir + "{vcf_file}", vcf_file=config["vcf"]["manta"]),
-    #expand(vcf_dir + strelka_dir + "{vcf_file}", vcf_file=config["vcf"]["strelka"]),
-    #vcf_dir + vardict_dir + config["vcf"]["vardict"],
+    expand(vep_dir + "{vcf}", vcf=vcf_file_list(config) ),
+    expand(vep_dir + "vep_" + "{vcf}", vcf=vcf_file_list(config) ),
+

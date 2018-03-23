@@ -13,7 +13,8 @@ rule manta_somatic:
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
   output:
-    expand(vcf_dir + manta_dir + "{vcf_file}", vcf_file=config["vcf"]["manta"]),
+    default = expand(vcf_dir + manta_dir + "{vcf_file}", vcf_file=config["vcf"]["manta"]["default"]),
+    final = vcf_dir + manta_dir + config["vcf"]["manta"]["merged"],
   params:
     tmpdir = vcf_dir + "manta_tmp",
     result_dir = vcf_dir + manta_dir,
@@ -29,6 +30,7 @@ rule manta_somatic:
         "--referenceFasta={input.fa} "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-    "mv {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "cp {params.result_dir}/somaticSV.vcf.gz {output.final}; "
     "for f in $(ls {params.result_dir}*.vcf.gz); do tabix -p vcf $f; done; "
     "source deactivate; "

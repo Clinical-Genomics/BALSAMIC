@@ -10,7 +10,7 @@ rule collectqc:
   input:
     contest = expand(bam_dir + "{ct}", ct=["normal_tumor.contest", "tumor_normal.contest"]),
     fastqc = expand(fastqc_dir + "{mysample}_{read_num}_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
-    hsmetric = expand(bam_dir + "{sample}.sorted.rmdup.hsmetric", sample=config["samples"]),
+    hsmetric = expand(bam_dir + "{sample}.sorted.hsmetric", sample=config["samples"]),
     sambamba = expand(bam_dir + "{sample}.sorted.rmdup.cov.bed", sample=config["samples"]),
   output:
     result_dir + "qc/" + "qc_report.pdf"
