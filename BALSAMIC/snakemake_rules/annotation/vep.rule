@@ -32,13 +32,15 @@ rule vep_annotate_vcf:
   input:
     vep_dir + "{vcf}" + ".vcf.gz"
   output:
-    vep_dir + "vep_" + "{vcf}" + ".vcf.gz"
+    vep_dir + "vep_" + "{vcf}" + ".vcf"
   params:
     conda = config["condaenvs"]["cancer_core_addition_python36"]
   threads: 4
   shell:
     "source activate {params.conda}; "
     "/home/hassan.foroughi/repo/ensembl-vep/vep "
+        "-i {input} "
+        "-o {output} "
         "--fork {threads} "
         "--vcf "
         "--fasta ~/.vep/homo_sapiens/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz "
@@ -46,7 +48,5 @@ rule vep_annotate_vcf:
         "-format vcf "
         "--offline "
         "-v "
-        "--force_overwrite "
-    "| bgzip > {output} ;"
-    "tabix -p vcf {output} ; "
+        "--force_overwrite ; "
     "source deactivate; "
