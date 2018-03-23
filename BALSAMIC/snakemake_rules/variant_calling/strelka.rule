@@ -22,7 +22,6 @@ rule strelka_somatic:
     result_dir = vcf_dir + strelka_dir,
     runmode = "local",
     conda = config["condaenvs"]["cancer_core_addition_python27"],
-    conda_core = config["condaenvs"]["cancer_core"]
   threads: 4
   shell:
     "source activate {params.conda};"
@@ -35,8 +34,6 @@ rule strelka_somatic:
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
     "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
-    "source deactivate; "
-    "source activate {params.conda_core}; "
     "bcftools concat "
         "-o {output.final} "
         "-O z "
