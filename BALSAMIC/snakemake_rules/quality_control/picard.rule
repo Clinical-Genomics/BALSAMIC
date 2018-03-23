@@ -48,7 +48,7 @@ rule picard_collectHSmetric:
     bam = bam_dir + "{sample}.sorted.bam",
     bedinterval = resultdir + config["bed"]["variant_panel"] + "interval"
   output:
-    bam_dir + "{sample}.sorted.rmdup.hsmetric"
+    bam_dir + "{sample}.sorted.hsmetric"
   params:
     conda = config["condaenvs"]["cancer_core_addition_python36"],
   shell:

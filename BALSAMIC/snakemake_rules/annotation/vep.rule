@@ -3,23 +3,50 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-vcf_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "vcf/"
+from BALSAMIC.tools import vcf_file_list
 
-rule combine_vcf:
+result_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]
+vcf_dir = result_dir + "vcf/"
+vep_dir = result_dir + "vep/" 
+
+rule link_vcf:
   input:
-    vardict = expand(vcf_dir + "vardict/{vcf}", vcf=config["vcf"]["vardict"]),
-    strelka = expand(vcf_dir + "strelka/{vcf}", vcf=config["vcf"]["strelka"]),
-    manta = expand(vcf_dir + "manta/{vcf}", vcf=config["vcf"]["manta"]),
-    mutect = expand(vcf_dir + "mutect/{vcf}", vcf=config["vcf"]["mutect"]),
+    vardict = vcf_dir + "vardict/" + config["vcf"]["vardict"]["merged"],
+    strelka = vcf_dir + "strelka/" + config["vcf"]["strelka"]["merged"],
+    manta = vcf_dir + "manta/" + config["vcf"]["manta"]["merged"],
+    mutect = vcf_dir + "mutect/" + config["vcf"]["mutect"]["merged"],
   output:
-    vcf_dir + "combined_vcf.vcf"
+    expand(vep_dir + "{vcf}", vcf=vcf_file_list(config) )
   params:
+    vep = vep_dir,
     conda = config["condaenvs"]["cancer_core_addition_python36"]
   shell:
     "source activate {params.conda};"
-    "ls {input.vardict}; "
-    "ls {input.manta}; "
-    "ls {input.strelka}; "
-    "ls {input.mutect}; "
-    "touch {output}; "
+    "ln -s -f {input.vardict} {params.vep}; "
+    "ln -s -f {input.manta} {params.vep}; "
+    "ln -s -f {input.strelka} {params.vep}; "
+    "ln -s -f {input.mutect} {params.vep}; "
+    "source deactivate; "
+
+rule vep_annotate_vcf:
+  input:
+    vep_dir + "{vcf}" + ".vcf.gz"
+  output:
+    vep_dir + "vep_" + "{vcf}" + ".vcf.gz"
+  params:
+    conda = config["condaenvs"]["cancer_core_addition_python36"]
+  threads: 4
+  shell:
+    "source activate {params.conda}; "
+    "/home/hassan.foroughi/repo/ensembl-vep/vep "
+        "--fork {threads} "
+        "--vcf "
+        "--fasta ~/.vep/homo_sapiens/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz "
+        "--everything "
+        "-format vcf "
+        "--offline "
+        "-v "
+        "--force_overwrite "
+    "| bgzip > {output} ;"
+    "tabix -p vcf {output} ; "
     "source deactivate; "

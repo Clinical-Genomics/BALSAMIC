@@ -15,12 +15,14 @@ rule strelka_somatic:
     bamT = bam_dir + "tumor.merged.bam",
     mantaindel = vcf_dir + manta_dir + "candidateSmallIndels.vcf.gz" 
   output:
-    expand(vcf_dir + strelka_dir + "{vcf_file}", vcf_file=config["vcf"]["strelka"])
+    default = expand(vcf_dir + strelka_dir + "{vcf_file}", vcf_file=config["vcf"]["strelka"]["default"]),
+    final = vcf_dir + strelka_dir + config["vcf"]["strelka"]["merged"]
   params:
     tmpdir = vcf_dir + "strelka_tmp",
     result_dir = vcf_dir + strelka_dir,
     runmode = "local",
-    conda = config["condaenvs"]["cancer_core_addition_python27"]
+    conda = config["condaenvs"]["cancer_core_addition_python27"],
+    conda_core = config["condaenvs"]["cancer_core"]
   threads: 4
   shell:
     "source activate {params.conda};"
@@ -32,6 +34,12 @@ rule strelka_somatic:
         " --outputCallableRegions "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-    "mv {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "source deactivate; "
+    "source activate {params.conda_core}; "
+    "bcftools concat "
+        "-o {output.final} "
+        "-O z "
+        "{output.default}; " 
     "for f in $(ls {params.result_dir}*.vcf.gz); do tabix -p vcf $f; done; "
     "source deactivate; "

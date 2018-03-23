@@ -3,18 +3,13 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-def _get_type(sample, bio_type):
-  type_id = []
-  for sample_id in sample:
-      if sample[sample_id]["type"] == bio_type:
-          type_id.append(sample_id)
-  return type_id
-        
+from BALSAMIC.tools import get_sample_type
+
 bam_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "bam/"
   
 rule mergeBam_normal:
   input:
-    bamN = expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bsrcl.bam", mysample=_get_type(config["samples"], "normal")),
+    bamN = expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "normal")),
   output:
     bamN = bam_dir + "normal.merged.bam",
   params:
@@ -26,7 +21,7 @@ rule mergeBam_normal:
 
 rule mergeBam_tumor:
   input:
-    bamT = expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bsrcl.bam", mysample=_get_type(config["samples"], "tumor"))
+    bamT = expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
   output:
     bamT = bam_dir + "tumor.merged.bam",
   params:

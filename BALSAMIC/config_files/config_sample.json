@@ -40,10 +40,22 @@
       "min_seq_length": "25"
   },
   "vcf": {
-      "strelka": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
-      "mutect": "vcf_mutect.vcf",
-      "manta": ["diploidSV.vcf.gz", "somaticSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"],
-      "vardict": "vcf_vardict.vcf"
+      "strelka": {
+        "default": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
+        "merged": "strelka.vcf.gz"
+      },
+      "mutect": {
+        "default": "mutect.vcf.gz",
+        "merged": "mutect.vcf.gz"
+      },
+      "manta": {
+        "default": ["diploidSV.vcf.gz", "somaticSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"],
+        "merged": "manta.vcf.gz"
+      },
+      "vardict": {
+        "default": "vardict.vcf.gz",
+        "merged": "vardict.vcf.gz"
+      }
   },
   "condaenvs": {
       "cancer_core_addition_python27": "cancer_core_addition_python27",
