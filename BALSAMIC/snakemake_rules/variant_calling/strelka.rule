@@ -16,7 +16,7 @@ rule strelka_somatic:
     mantaindel = vcf_dir + manta_dir + "candidateSmallIndels.vcf.gz" 
   output:
     default = expand(vcf_dir + strelka_dir + "{vcf_file}", vcf_file=config["vcf"]["strelka"]["default"]),
-    final = vcf_dir + strelka_dir + config["vcf"]["strelka"]["merged"]
+    final = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + config["vcf"]["strelka"]["merged"]
   params:
     tmpdir = vcf_dir + "strelka_tmp",
     result_dir = vcf_dir + strelka_dir,
@@ -38,5 +38,5 @@ rule strelka_somatic:
         "-o {output.final} "
         "-O z "
         "{output.default}; " 
-    "for f in $(ls {params.result_dir}*.vcf.gz); do tabix -p vcf $f; done; "
+    "tabix -f -p vcf {output.final}; "
     "source deactivate; "
