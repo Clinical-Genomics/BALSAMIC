@@ -1,8 +1,9 @@
 
-def vcf_file_list(config):
+def get_vcf_files(config, vcf_type):
   vcf_files = []
   for var_caller in config["vcf"]:
-      vcf_files.append(config["vcf"][var_caller]["merged"])
+      if config["vcf"][var_caller]["type"] == vcf_type:
+          vcf_files.append(config["vcf"][var_caller]["merged"])
   return vcf_files
 
 def get_sample_type(sample, bio_type):
