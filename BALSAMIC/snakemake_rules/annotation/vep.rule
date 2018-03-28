@@ -3,34 +3,37 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import vcf_file_list
-
 result_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]
-vcf_dir = result_dir + "vcf/"
+vcf_snv_dir = result_dir + "vcf/SNV/"
+vcf_sv_dir = result_dir + "vcf/SV/"
 vep_dir = result_dir + "vep/" 
 
-rule link_vcf:
+rule vep_annotate_SNV:
   input:
-    vardict = vcf_dir + "vardict/" + config["vcf"]["vardict"]["merged"],
-    strelka = vcf_dir + "strelka/" + config["vcf"]["strelka"]["merged"],
-    manta = vcf_dir + "manta/" + config["vcf"]["manta"]["merged"],
-    mutect = vcf_dir + "mutect/" + config["vcf"]["mutect"]["merged"],
+    vcf_snv_dir + "{vcf}" + ".vcf.gz"
   output:
-    expand(vep_dir + "{vcf}", vcf=vcf_file_list(config) )
+    vep_dir + "vep_" + "{vcf}" + ".vcf"
   params:
-    vep = vep_dir,
     conda = config["condaenvs"]["cancer_core_addition_python36"]
+  threads: 4
   shell:
-    "source activate {params.conda};"
-    "ln -s -f {input.vardict} {params.vep}; "
-    "ln -s -f {input.manta} {params.vep}; "
-    "ln -s -f {input.strelka} {params.vep}; "
-    "ln -s -f {input.mutect} {params.vep}; "
+    "source activate {params.conda}; "
+    "/home/hassan.foroughi/repo/ensembl-vep/vep "
+        "-i {input} "
+        "-o {output} "
+        "--fork {threads} "
+        "--vcf "
+        "--fasta ~/.vep/homo_sapiens/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz "
+        "--everything "
+        "-format vcf "
+        "--offline "
+        "-v "
+        "--force_overwrite ; "
     "source deactivate; "
 
-rule vep_annotate_vcf:
+rule vep_annotate_SV:
   input:
-    vep_dir + "{vcf}" + ".vcf.gz"
+    vcf_sv_dir + "{vcf}" + ".vcf.gz"
   output:
     vep_dir + "vep_" + "{vcf}" + ".vcf"
   params:
