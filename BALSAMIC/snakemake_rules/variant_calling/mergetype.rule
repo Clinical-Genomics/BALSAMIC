@@ -4,9 +4,10 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.tools import get_sample_type
+from BALSAMIC.tools import get_result_dir
 
-bam_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "bam/"
-  
+bam_dir = get_result_dir(config) + "/bam/"
+
 rule mergeBam_normal:
   input:
     bamN = expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "normal")),
