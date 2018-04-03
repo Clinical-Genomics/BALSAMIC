@@ -2,7 +2,9 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+import os
 from BALSAMIC.tools import get_vcf_files
+from BALSAMIC.tools import get_result_dir
 
 rule_dir = "../"
 
@@ -39,16 +41,15 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/bcftools.rule"
 
-cutadapt_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "cutadapt/"
-fastqc_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "fastqc/"
-bam_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "bam/"
-vcf_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]  + "vcf/"
-result_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]
+
+bam_dir = get_result_dir(config) + "/bam/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
 
 var_type = ["SNV", "SV"]
 rule all:
   input:
-    result_dir + "qc/" + "qc_report.pdf",
+    os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
     expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
     expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
     expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),

@@ -5,7 +5,9 @@ from BALSAMIC.tools import get_vcf_files
 
 __author__ = "Hassan Foroughi Asl"
 
-vcf_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"] + "vcf/"
+from BALSAMIC.tools import get_result_dir
+
+vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_type = "SNV"
 
