@@ -3,8 +3,10 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-bam_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "bam/"
-cutadapt_dir = fastqc_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "cutadapt/"
+from BALSAMIC.tools import get_result_dir
+
+bam_dir = get_result_dir(config) + "/bam/"
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule bwa_mem:

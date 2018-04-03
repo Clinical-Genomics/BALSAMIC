@@ -3,8 +3,11 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-bam_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "bam/"
-vcf_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "vcf/"
+from BALSAMIC.tools import get_result_dir
+
+bam_dir = get_result_dir(config) + "/bam/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+
 strelka_dir = "strelka/"
 manta_dir = "manta/"
 
@@ -33,7 +36,10 @@ rule strelka_somatic:
         " --outputCallableRegions "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-    "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "bcftools view -Oz -f .,PASS {params.tmpdir}/somatic.indels.vcf.gz > {params.result_dir}/somatic.indels.vcf.gz; "
+    "tabix -p vcf -f {params.result_dir}/somatic.indels.vcf.gz; "
+    "bcftools view -Oz -f .,PASS {params.tmpdir}/somatic.snvs.vcf.gz > {params.result_dir}/somatic.snvs.vcf.gz; "
+    "tabix -p vcf -f {params.result_dir}/somatic.snvs.vcf.gz; "
     "bcftools concat "
         "-o {output.final} "
         "-O z "

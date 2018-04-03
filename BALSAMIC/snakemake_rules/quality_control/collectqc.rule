@@ -3,7 +3,9 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-result_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"]
+from BALSAMIC.tools import get_result_dir
+
+result_dir = get_result_dir(config) + "/" 
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule collectqc:

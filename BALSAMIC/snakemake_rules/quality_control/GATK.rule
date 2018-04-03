@@ -3,8 +3,11 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-bam_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "bam/"
-result_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"]
+from BALSAMIC.tools import get_result_dir
+
+bam_dir = get_result_dir(config) + "/bam/"
+
+result_dir = get_result_dir(config) + "/"
 
 rule GATK_RealignerTargetCreator:
   input:

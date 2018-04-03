@@ -3,8 +3,11 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-bam_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "bam/"
-vcf_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "vcf/"
+from BALSAMIC.tools import get_result_dir
+
+bam_dir = get_result_dir(config) + "/bam/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+
 manta_dir = "manta/"
 
 rule manta_somatic:
@@ -32,4 +35,5 @@ rule manta_somatic:
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
     "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
     "cp {params.result_dir}/somaticSV.vcf.gz {output.final}; "
+    "for $i in {output.default}; do tabix -p vcf -f $i; done; "
     "source deactivate; "

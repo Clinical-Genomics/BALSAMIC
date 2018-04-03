@@ -3,16 +3,18 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-result_dir = config["analysis"]["analysis_dir"]  + config["analysis"]["sample_id"]  + "/" + config["analysis"]["result"]
-vcf_snv_dir = result_dir + "vcf/SNV/"
-vcf_sv_dir = result_dir + "vcf/SV/"
-vep_dir = result_dir + "vep/" 
+from BALSAMIC.tools import get_result_dir
+
+bam_dir = get_result_dir(config) + "/bam/"
+vcf_snv_dir = get_result_dir(config) + "/vcf/SNV/"
+vcf_sv_dir = get_result_dir(config) + "/vcf/SV/"
+vep_dir = get_result_dir(config) + "/vep/"
 
 rule vep_annotate_SNV:
   input:
-    vcf_snv_dir + "{vcf}" + ".vcf.gz"
+    vcf_snv_dir + "{snv_vcf}" + ".vcf.gz"
   output:
-    vep_dir + "vep_" + "{vcf}" + ".vcf"
+    vep_dir + "vep_" + "{snv_vcf}" + ".vcf"
   params:
     conda = config["condaenvs"]["cancer_core_addition_python36"]
   threads: 4
@@ -33,9 +35,9 @@ rule vep_annotate_SNV:
 
 rule vep_annotate_SV:
   input:
-    vcf_sv_dir + "{vcf}" + ".vcf.gz"
+    vcf_sv_dir + "{sv_vcf}" + ".vcf.gz"
   output:
-    vep_dir + "vep_" + "{vcf}" + ".vcf"
+    vep_dir + "vep_" + "{sv_vcf}" + ".vcf"
   params:
     conda = config["condaenvs"]["cancer_core_addition_python36"]
   threads: 4
