@@ -1,4 +1,4 @@
-name: cancer_core_addition_python36
+name: P_Cancer-py36_180328 
 channels:
   - bioconda
 dependencies:
@@ -9,5 +9,5 @@ dependencies:
   - picard=2.17.0
   - cutadapt=1.15
   - tabix=0.2.5
-prefix: /home/hassan.foroughi/miniconda2/envs/cancer_core_addition_python36
+prefix: /home/hassan.foroughi/miniconda2/envs/P_Cancer-py36_180328 
 

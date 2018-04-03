@@ -1,4 +1,4 @@
-name: cancer_core_addition_python27
+name: P_Cancer-py27_180328 
 channels:
   - bioconda
   - conda-forge
@@ -9,5 +9,5 @@ dependencies:
   - manta=1.3.0
   - bcftools=1.6
   - tabix=0.2.5
-prefix: /home/hassan.foroughi/miniconda2/envs/cancer_core_addition_python27
+prefix: /home/hassan.foroughi/miniconda2/envs/P_Cancer-py27_180328
 
