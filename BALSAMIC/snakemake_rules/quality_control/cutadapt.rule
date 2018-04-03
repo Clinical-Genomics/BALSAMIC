@@ -4,7 +4,9 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-cutadapt_dir = config["analysis"]["analysis_dir"] + config["analysis"]["sample_id"] + "/" + config["analysis"]["result"] + "cutadapt/"
+from BALSAMIC.tools import get_result_dir
+
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 
 # remove adapter from paired end reads
 rule cutadapt:
