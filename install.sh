@@ -17,24 +17,34 @@ command -v conda > /dev/null 2>&1 || \
 env_name=P_BALSAMIC_$(date +%y%m%d)
 
 echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Creating conda env ${env_name}"
+echo -e "\n${B_GRN}Creating conda env ${env_name}"
 echo -e "\n${B_YLW}\tconda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force"
 conda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force
 
 echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Activating ${env_name}"
+echo -e "\n${B_GRN}Activating ${env_name}"
 echo -e "\n${B_YLW}\tsource activate ${env_name}"
 source activate ${env_name}
 
 echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Installing requirments.txt"
+echo -e "\n${B_GRN}Installing requirments.txt"
 echo -e "\n${B_YLW}\tpip install -r requirments.txt"
 pip install -r requirments.txt
 
 echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Installing BALSAMIC"
+echo -e "\n${B_GRN}Installing BALSAMIC"
 echo -e "\n${B_YLW}\tpip install --editable ."
 pip install --editable .
+
+echo -ne "${B_NOCOL}"
+echo -e "\n${B_GRN}Installting environments for the workflow"
+echo -e "\n${B_YLW}\tbalsamic install_conda -i BALSAMIC/conda_yaml/P_Cancer-Core.yaml -s _$(date +%y%m%d)  -i BALSAMIC/conda_yaml/P_Cancer-py36.yaml -i BALSAMIC/conda_yaml/P_Cancer-py27.yaml -o"
+echo -ne "${B_NOCOL}"
+balsamic install_conda -s _$(date +%y%m%d) \
+  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-Core.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-py36.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-py27.yaml \
+  --overwrite-env
 
 unset B_RED
 unset B_GRN
