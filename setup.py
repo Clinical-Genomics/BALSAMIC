@@ -16,9 +16,9 @@ setup(
     url="https://github.com/Clinical-Genomics/BALSAMIC",
     author="Hassan Foroughi Asl",
     author_email='hassan.foroughi@scilifelab.se',
-    #install_requires=install_requires,
-    #packages=find_packages(),
-    #include_package_data=True,
+    install_requires=install_requires,
+    packages=find_packages(),
+    include_package_data=True,
     zip_safe=False,
     entry_points={
         'console_scripts': ['balsamic=BALSAMIC.balsamic:cli'],
