@@ -26,6 +26,3 @@ def cli(context, verbose):
 
 
 cli.add_command(install_command)
-
-if __name__ == "__main__":
-  cli()
