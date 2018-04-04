@@ -1,1 +1,1 @@
-from .balsamic import balsamic
+from .balsamic import cli
