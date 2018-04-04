@@ -90,7 +90,7 @@ def conda_install(conda_yaml, env_prefix):
               required=True,
               type=str,
               help='Mandatory alphanumeric suffix for environment name.')
-@click.option('-o','overwrite_env',
+@click.option('-o','--overwrite-env',
               default=False,
               is_flag=True,
               help='Overwite conda enviroment if it exists. Default = no. WARNING: The environment with matching name will be deleted')
