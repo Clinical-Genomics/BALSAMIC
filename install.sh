@@ -18,36 +18,23 @@ env_name=P_BALSAMIC_$(date +%y%m%d)
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GREEN}Creating conda env ${env_name}"
-echo -e "\n${B_YLW}\tconda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml -c bioconda -c conda-forge --quiet --name ${env_name} python=3.6"
-
-echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Update .bashrc"
-echo -e "\n${B_YLW}\techo 'export PYTHONPATH=\$PYTHONPATH:/home/hassan.foroughi/repo/BALSAMIC/' >> ~/.bashrc"
+echo -e "\n${B_YLW}\tconda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force"
+conda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GREEN}Activating ${env_name}"
 echo -e "\n${B_YLW}\tsource activate ${env_name}"
-
-echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Installing snakemake"
-echo -e "\n${B_YLW}\tconda install -c bioconda snakemake=4.8.0"
-
-echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Installing pip"
-echo -e "\n${B_YLW}\tconda install -c bioconda pip=9.0.3"
+source activate ${env_name}
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GREEN}Installing requirments.txt"
-echo -e "\n${B_YLW}\tpip install requirments.txt"
+echo -e "\n${B_YLW}\tpip install -r requirments.txt"
+pip install -r requirments.txt
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GREEN}Installing BALSAMIC"
-echo -e "\n${B_YLW}\tpip install ../"
-
-echo -ne "${B_NOCOL}"
-echo -e "\n${B_GREEN}Registering GATK 3.8.0"
-echo -e "\n${B_YLW}\tsource activate GATKENV"
-echo -e "\n${B_YLW}\tgatk-register gatk_3.8.tar.bz2 "
+echo -e "\n${B_YLW}\tpip install --editable ."
+pip install --editable .
 
 unset B_RED
 unset B_GRN
