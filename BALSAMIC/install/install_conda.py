@@ -11,10 +11,10 @@ import json
 
 def conda_env_check(env_prefix):
     """
-  Check if conda env exists.
-  Input: Conda env prefix extracted from conda yaml file
-  Output: True/False
-  """
+    Check if conda env exists.
+    Input: Conda env prefix extracted from conda yaml file
+    Output: True/False
+    """
     try:
         p = json.loads(
             subprocess.check_output(
@@ -42,10 +42,10 @@ def conda_default_prefix():
 
 def get_prefix(yaml_handle):
     """
-  Return conda env prefix from yaml file. Raise error if it doesn't exist.
-  Input: yaml file handle
-  Output: conda env prefix string
-  """
+    Return conda env prefix from yaml file. Raise error if it doesn't exist.
+    Input: yaml file handle
+    Output: conda env prefix string
+    """
     try:
         env_prefix = yaml.load(yaml_handle)
     except yaml.YAMLError as e:
@@ -61,8 +61,8 @@ def get_prefix(yaml_handle):
 
 def conda_remove(env_prefix):
     """
-  Remove conda environment 
-  """
+    Remove conda environment 
+    """
 
     shellcmd = ["conda", "env", "remove", "--prefix", env_prefix, "--yes"]
 
@@ -78,8 +78,8 @@ def conda_remove(env_prefix):
 
 def conda_install(conda_yaml, env_prefix):
     """
-  Install conda environment 
-  """
+    Install conda environment 
+    """
 
     shellcmd = [
         "conda", "env", "create", "--file", conda_yaml, "--prefix", env_prefix
@@ -108,12 +108,11 @@ def conda_install(conda_yaml, env_prefix):
     '-s',
     '--env-name-suffix',
     required=True,
-    type=str,
     help='Mandatory alphanumeric suffix for environment name.')
 @click.option(
     '-o',
     '--overwrite-env',
-    default=False,
+    show_default=True,
     is_flag=True,
     help=
     'Overwite conda enviroment if it exists. Default = no. WARNING: The environment with matching name will be deleted'
@@ -121,7 +120,6 @@ def conda_install(conda_yaml, env_prefix):
 @click.option(
     '-d',
     '--env-dir-prefix',
-    type=str,
     help=
     'Conda enviroment directory. It will be ignored if its provided within yaml file. Format: /path/env/envname.'
 )
@@ -129,11 +127,11 @@ def conda_install(conda_yaml, env_prefix):
 def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                   env_name_suffix):
     """
-  Installs conda environments from a conda yaml file.
-
-  By default it doesn't overwrite if the environment by the same name exists. If _overwrite_ flag is provided, it tries to remove the
-  enviroment first, and then install it in the path provided.
-  """
+    Installs conda environments from a conda yaml file.
+    
+    By default it doesn't overwrite if the environment by the same name exists. If _overwrite_ flag is provided, it tries to remove the
+    enviroment first, and then install it in the path provided.
+    """
     for fname in input_conda_yaml:
 
         if os.path.exists(fname):
