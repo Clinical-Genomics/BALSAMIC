@@ -1,0 +1,8 @@
+channels:
+  - bioconda
+  - conda-forge 
+dependencies:
+  - python=3.6
+  - pip=9.0.3
+  - snakemake=4.8.0
+
