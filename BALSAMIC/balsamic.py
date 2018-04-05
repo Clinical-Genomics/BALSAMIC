@@ -10,19 +10,21 @@ import json
 
 from BALSAMIC.install import install_conda as install_command
 
-@click.group()
-@click.option('-v','--verbose',
-              default=False,
-              is_flag=True,
-              help='Verbose output *Not implented yet')
-@click.pass_context
 
+@click.group()
+@click.option(
+    '-v',
+    '--verbose',
+    default=False,
+    is_flag=True,
+    help='Verbose output *Not implented yet')
+@click.pass_context
 def cli(context, verbose):
-  """
+    """
   BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
 
   """
-  pass
+    pass
 
 
 cli.add_command(install_command)
