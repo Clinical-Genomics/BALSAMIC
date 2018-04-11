@@ -1,31 +1,28 @@
-from BALSAMIC.install import conda_env_check
-import json
+from BALSAMIC.install import conda_env_check, conda_default_prefix
+from unittest import TestCase, mock
 import subprocess
-
-#def test_conda_env_check(conda_env_json, _env_prefix)
-#  assert existing_conda_env == True
-
+import json
 
 def test_conda_env_check():
-    conda_env_json = json.loads(subprocess.check_output(["conda", "env", "list", "--json"], stderr=subprocess.STDOUT))
-    
-    p = conda_env_json["envs"][0]
-    assert conda_env_check(p) == True 
+    with mock.patch.object(subprocess, 'check_output') as mocked:
+        mocked.return_value = '{"envs": ["/path/to/env/prefix_1", "/path/to/env/prefix_2" ]}'
+        env_prefix = "/path/to/env/prefix_1"
+        assert conda_env_check(env_prefix) == True
 
+def test_conda_default_prefix():
+    with mock.patch.object(subprocess, 'check_output') as mocked:
+        mocked.return_value = '{"envs": ["/path/to/env/prefix_1", "/path/to/env/prefix_2" ], "conda_prefix": "default_prefix"}'
+        env_prefix = "default_prefix"
+        assert conda_default_prefix() == env_prefix
 
-#def conda_env_check(env_prefix):
-#    """
-#    Check if conda env exists.
-#    Input: Conda env prefix extracted from conda yaml file
-#    Output: True/False
-#    """
+#def conda_default_prefix():
 #    try:
 #        p = json.loads(
 #            subprocess.check_output(
-#                ["conda", "env", "list", "--json"], stderr=subprocess.STDOUT))
+#                ["conda", "info", "--json"], stderr=subprocess.STDOUT))
 #    except subprocess.CalledProcessError as e:
 #        print(e.output.decode())
 #        if verbose:
 #            raise e.output.decode()
 #
-#    return env_prefix in p["envs"]
+#    return p["conda_prefix"]
