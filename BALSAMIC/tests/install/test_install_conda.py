@@ -15,14 +15,3 @@ def test_conda_default_prefix():
         env_prefix = "default_prefix"
         assert conda_default_prefix() == env_prefix
 
-#def conda_default_prefix():
-#    try:
-#        p = json.loads(
-#            subprocess.check_output(
-#                ["conda", "info", "--json"], stderr=subprocess.STDOUT))
-#    except subprocess.CalledProcessError as e:
-#        print(e.output.decode())
-#        if verbose:
-#            raise e.output.decode()
-#
-#    return p["conda_prefix"]
