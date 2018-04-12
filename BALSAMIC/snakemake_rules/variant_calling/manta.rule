@@ -35,5 +35,5 @@ rule manta_somatic:
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
     "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
     "cp {params.result_dir}/somaticSV.vcf.gz {output.final}; "
-    "for $i in {output.default}; do tabix -p vcf -f $i; done; "
+    "for i in {params.result_dir}/*.vcf.gz; do tabix -p vcf -f $i; done; "
     "source deactivate; "
