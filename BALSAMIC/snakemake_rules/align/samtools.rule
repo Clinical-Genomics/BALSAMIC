@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 
@@ -13,7 +13,7 @@ rule samtools_sort_index:
   output:
     bam_dir + "{sample}.sorted.bam"
   params:
-    conda = config["condaenvs"]["cancer_core"],
+    conda = get_conda_env(config["conda_env_yaml"],"samtools") 
   threads: 4
   shell:
     "source activate {params.conda}; "
