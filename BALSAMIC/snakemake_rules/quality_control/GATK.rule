@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 
@@ -17,7 +17,7 @@ rule GATK_RealignerTargetCreator:
   output:
     bam_dir + "{sample}.sorted.rmdup.intervals",
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda}; "
     "gatk "
@@ -37,7 +37,7 @@ rule GATK_IndelRealigner:
   output:
     bam_dir + "{sample}.sorted.rmdup.ralgn.bam",
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda}; "
     "gatk "
@@ -57,7 +57,7 @@ rule GATK_baserecalibrator:
   output:
     bam_dir + "{sample}.sorted.rmdup.ralgn.bsrcl.bam",
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda}; "
     "gatk "
@@ -73,13 +73,14 @@ rule GATK_baserecalibrator:
         "--out {output}; "
     "samtools index {input.bam}; "
     "source deactivate; "
+
 rule GATK_prepare_popvcf:
   input:
     ref1kg = config["path"]["genomefa"] + config["references"]["1000G"], 
   output:
     popvcf = result_dir + "popvcf.vcf"
   params:
-    conda = config["condaenvs"]["cancer_core"],
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
     popcode = "EUR"
   shell:
@@ -118,7 +119,7 @@ rule GATK_contest:
     N_vs_T = bam_dir + "normal_tumor.contest", 
     T_vs_N = bam_dir + "tumor_normal.contest", 
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     min_genotype_ratio="0.95",
     popcode = "EUR"
   shell:

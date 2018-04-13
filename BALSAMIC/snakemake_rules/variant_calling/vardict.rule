@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
@@ -24,7 +24,7 @@ rule vardict_paired:
     max_mm = "4.5",
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["sample_id"],
-    conda = config["condaenvs"]["cancer_core"]
+    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
   shell:
     "source activate {params.conda}; "
     "vardict -G {input.fa} -f {params.af} -N {params.name} "
@@ -43,7 +43,7 @@ rule vardict_merge_chrom:
   output:
     vcf_dir + config["vcf"]["vardict"]["type"] + "/" + config["vcf"]["vardict"]["merged"]
   params:
-    conda = config["condaenvs"]["cancer_core"]
+    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
   shell:
     "source activate {params.conda} ; "
     "bcftools concat -o {output} -O z {input}; " 
