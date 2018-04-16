@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
@@ -19,7 +19,7 @@ rule bwa_mem:
     bamout = bam_dir + "{sample}.bam"
   params:
     header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-    conda = config["condaenvs"]["cancer_core"],
+    conda = get_conda_env(config["conda_env_yaml"],"bwa")
   threads: 4
   shell:
     "source activate {params.conda}; "

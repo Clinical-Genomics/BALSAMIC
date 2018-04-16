@@ -171,3 +171,6 @@
 54. **superFreq**: SuperFreq is an R package that analyses cancer exomes to track subclones. https://github.com/ChristofferFlensburg/superFreq
 55. **readVCF-r**: Read VCFs into R and annotatte them. https://bioconductor.org/packages/release/bioc/html/VariantAnnotation.html
 56. **vcfr**: Read VCFs into R. https://github.com/knausb/vcfR
+57. **msisensor**: microsatellite instability detection using paired tumor-normal https://github.com/ding-lab/msisensor
+58. **MOSAIC**: MicrOSAtellite Instability Classifier https://github.com/ronaldhause/mosaic
+59. **MANTIS**: Microsatellite Analysis for Normal-Tumor InStability https://github.com/OSU-SRLab/MANTIS

@@ -4,7 +4,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.tools import get_sample_type
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 
@@ -14,7 +14,7 @@ rule mergeBam_normal:
   output:
     bamN = bam_dir + "normal.merged.bam",
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"]
+    conda = get_conda_env(config["conda_env_yaml"],"samtools")
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamN} {input.bamN}; samtools index {output.bamN}; "
@@ -26,7 +26,7 @@ rule mergeBam_tumor:
   output:
     bamT = bam_dir + "tumor.merged.bam",
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"]
+    conda = get_conda_env(config["conda_env_yaml"],"samtools")
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
