@@ -9,6 +9,22 @@ import sys
 import json
 
 
+def get_packages(yaml_handle):
+    """
+    Retrieve dependencies from conda yaml installationfile
+    Input: yaml file name
+    Output: list of installed packages
+    """
+    try:
+        yaml_in = yaml.load(yaml_handle)
+    except yaml.YAMLError as e:
+        print("Error while reading yaml file")
+
+    installed_packages = [s.split("=")[0] for s in yaml_in["dependencies"]]
+
+    return installed_packages
+
+
 def conda_env_check(env_prefix):
     """
     Check if conda env exists.
@@ -123,15 +139,26 @@ def conda_install(conda_yaml, env_prefix):
     help=
     'Conda enviroment directory. It will be ignored if its provided within yaml file. Format: /path/env/envname.'
 )
+@click.option(
+    '-p',
+    '--packages-output-yaml',
+    required=True,
+    type=click.Path(),
+    help=
+    'Output a yaml file containing packages installed in each input yaml file.'
+)
 @click.pass_context
 def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
-                  env_name_suffix):
+                  env_name_suffix, packages_output_yaml):
     """
     Installs conda environments from a conda yaml file.
     
     By default it doesn't overwrite if the environment by the same name exists. If _overwrite_ flag is provided, it tries to remove the
     enviroment first, and then install it in the path provided.
     """
+
+    conda_packages = dict()
+     
     for fname in input_conda_yaml:
 
         if os.path.exists(fname):
@@ -139,8 +166,10 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
             with open(fname) as yaml_handle:
                 env_prefix = get_prefix(yaml_handle)
 
-            env_name = os.path.basename(
-                os.path.splitext(fname)[0]) + env_name_suffix
+            env_base_name = os.path.basename(os.path.splitext(fname)[0])
+
+            env_name = env_base_name + env_name_suffix
+
             click.echo(
                 click.style("Setting env name as %s" % env_name, fg='yellow'))
 
@@ -166,7 +195,11 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                     click.style(
                         "Installing conda environment from %s" % fname,
                         fg='green'))
+
                 conda_install(fname, env_prefix)
+
+                with open(fname) as yaml_handle:
+                    conda_packages[env_name] = get_packages(yaml_handle)
 
                 click.echo("Conda environment %s was installed." % env_prefix)
 
@@ -181,7 +214,13 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                         "Installing conda environment from %s" % fname,
                         fg='green'))
                 conda_install(fname, env_prefix)
+
+                with open(fname) as yaml_handle:
+                    conda_packages[env_name] = get_packages(yaml_handle)
+
                 click.echo(
                     click.style(
                         "Conda environment %s was installed." % env_prefix,
                         fg='green'))
+    
+    yaml.dump(conda_packages, open(packages_output_yaml, 'w') )
