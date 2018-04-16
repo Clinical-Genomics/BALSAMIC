@@ -1,13 +1,8 @@
-name: cancer_core
 channels:
   - bioconda
   - https://anaconda.org/bioconda/vardict/2017.11.23/download
 dependencies:
   - bcftools=1.6
-  - bwa=0.7.15
-  - fastqc=0.11.5
-  - sambamba=0.6.6
   - samtools=1.6
   - vardict=2017.11.23
   - tabix=0.2.5
-prefix: /home/hassan.foroughi/miniconda2/envs/cancer_core

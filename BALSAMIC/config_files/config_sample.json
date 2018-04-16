@@ -61,9 +61,5 @@
         "type": "SNV"
       }
   },
-  "condaenvs": {
-      "cancer_core_addition_python27": "cancer_core_addition_python27",
-      "cancer_core_addition_python36": "cancer_core_addition_python36",
-      "cancer_core": "cancer_core"
-  }
+  "conda_env_yaml": "/home/hassan.foroughi/repo/BALSAMIC/BALSAMIC_env.yaml"
 }

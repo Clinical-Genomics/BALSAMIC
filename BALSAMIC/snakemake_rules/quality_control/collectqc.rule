@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 result_dir = get_result_dir(config) + "/" 
 
@@ -17,7 +17,8 @@ rule collectqc:
   output:
     result_dir + "qc/" + "qc_report.pdf"
   params:
-    conda = config["condaenvs"]["cancer_core"],
+    # This is using same environment as gatk
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda};"
     "touch {output}; "

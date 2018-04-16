@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 resultdir = get_result_dir(config) + "/" 
@@ -16,7 +16,7 @@ rule picard_remove_duplicate:
   log:
     stats = bam_dir + "{sample}.sorted.rmdup.txt"
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
     "picard MarkDuplicates "
@@ -36,7 +36,7 @@ rule picard_bed_to_interval:
   output:
     resultdir + config["bed"]["variant_panel"] + "interval"
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
     "picard BedToIntervalList "
@@ -52,7 +52,7 @@ rule picard_collectHSmetric:
   output:
     bam_dir + "{sample}.sorted.hsmetric"
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
     "samtools index {input.bam}; "
