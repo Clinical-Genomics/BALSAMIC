@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 
@@ -21,7 +21,7 @@ rule sambamba_depth:
     cov_4="400",
     cov_5="500",
     filter_string="'mapping_quality >= 10 and not duplicate and not failed_quality_control'",
-    conda=config["condaenvs"]["cancer_core"],
+    conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   shell:
     "source activate {params.conda}; "
     "sambamba depth region "

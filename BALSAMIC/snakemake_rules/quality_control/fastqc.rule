@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 
@@ -18,7 +18,7 @@ rule fastqc:
     read1 = fastqc_dir + "{sample}_1_fastqc.zip",
     read2 = fastqc_dir + "{sample}_2_fastqc.zip"
   params:
-    conda = config["condaenvs"]["cancer_core"],
+    conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
     fastqc_dir=fastqc_dir
   shell:
     "source activate {params.conda};"

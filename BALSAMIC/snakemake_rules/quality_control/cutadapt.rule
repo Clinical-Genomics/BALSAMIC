@@ -4,7 +4,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 
@@ -24,7 +24,7 @@ rule cutadapt:
     lambda wildcards: config["path"]["fastq"] + config["samples"][wildcards.sample]["file_prefix"], 
     adapter = config["QC"]["adapter"],
     min_seq_length = config["QC"]["min_seq_length"],
-    conda = config["condaenvs"]["cancer_core_addition_python36"],
+    conda = get_conda_env(config["conda_env_yaml"],"cutadapt")
   threads: 4
   shell:
     "source activate {params.conda}; "

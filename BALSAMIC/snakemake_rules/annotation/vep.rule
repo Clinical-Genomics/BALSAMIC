@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_snv_dir = get_result_dir(config) + "/vcf/SNV/"
@@ -16,7 +16,9 @@ rule vep_annotate_SNV:
   output:
     vep_dir + "vep_" + "{snv_vcf}" + ".vcf"
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"]
+    # vep works within the same environment as gatk, but since it is
+    # not installed using conda, gatk's env name is retrieved
+    conda = get_conda_env(config["conda_env_yaml"],"gatk")
   threads: 4
   shell:
     "source activate {params.conda}; "
@@ -39,7 +41,7 @@ rule vep_annotate_SV:
   output:
     vep_dir + "vep_" + "{sv_vcf}" + ".vcf"
   params:
-    conda = config["condaenvs"]["cancer_core_addition_python36"]
+    conda = get_conda_env(config["conda_env_yaml"],"gatk")
   threads: 4
   shell:
     "source activate {params.conda}; "

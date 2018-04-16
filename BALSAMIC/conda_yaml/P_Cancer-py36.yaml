@@ -1,13 +1,10 @@
-name: cancer_core_addition_python36
 channels:
   - bioconda
 dependencies:
-  - bwa=0.7.15
   - python=3.6.2
   - gatk=3.8
+  - bcftools=1.6
   - samtools=1.6
   - picard=2.17.0
   - cutadapt=1.15
   - tabix=0.2.5
-prefix: /home/hassan.foroughi/miniconda2/envs/cancer_core_addition_python36
-

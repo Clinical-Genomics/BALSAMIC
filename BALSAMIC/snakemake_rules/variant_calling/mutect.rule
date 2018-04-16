@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
@@ -22,7 +22,7 @@ rule mutect2_somatic:
     vcf_dir + mutect_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"]["mutect"]["default"] + ".gz"
   params:
     result_dir = vcf_dir + mutect_dir,
-    conda = config["condaenvs"]["cancer_core_addition_python36"]
+    conda = get_conda_env(config["conda_env_yaml"],"gatk")
   threads: 6
   shell:
     "source activate {params.conda};"
@@ -45,7 +45,7 @@ rule mutect2_merge_chrom:
   output:
     vcf_dir + config["vcf"]["mutect"]["type"] + "/" + config["vcf"]["mutect"]["merged"]
   params:
-    conda = config["condaenvs"]["cancer_core"]
+    conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "source activate {params.conda} ; "
     "bcftools concat -o {output} -O z {input}; " 
