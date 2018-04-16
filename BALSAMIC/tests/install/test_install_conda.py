@@ -1,6 +1,5 @@
 from BALSAMIC.install import conda_env_check, conda_default_prefix, get_prefix
 from unittest import TestCase, mock
-#from unittest.mock import mock_open
 import subprocess
 import yaml
 
@@ -10,7 +9,7 @@ def test_conda_env_check():
         # GIVEN a dict of environment prefixes installed
         mocked.return_value = '{"envs": ["/path/to/env/prefix_1", "/path/to/env/prefix_2" ]}'
 
-        # WHEN matching an existing
+        # WHEN matching an existing conda environment
         env_prefix = '/path/to/env/prefix_1'
         actual = conda_env_check(env_prefix)
 
@@ -21,17 +20,17 @@ def test_conda_env_check():
 def test_conda_default_prefix():
     with mock.patch.object(subprocess, 'check_output') as mocked:
         # GIVEN a dict of conda environment config output
-        mocked.return_value = '{"envs": ["/path/to/env/prefix_1", "/path/to/env/prefix_2" ], "conda_prefix": "default_prefix"}'
+        mocked.return_value = '{"envs": ["/path/to/env/prefix_1", "/path/to/env/prefix_2" ], "conda_prefix": "prefix_1"}'
 
         # WHEN get default environment prefix
         actual = conda_default_prefix()
 
         # THEN assert if the default_prefix matches correctly
-        env_prefix = 'default_prefix'
+        env_prefix = 'prefix_1'
         assert actual == env_prefix
 
 
-def test_get_prefix():
+def test_get_prefix_with_prefix_key():
 
     # GIVEN conda env yaml with prefix entry
     env_yaml = yaml.load(
@@ -46,6 +45,7 @@ def test_get_prefix():
         assert get_prefix("mock_yaml_file") == "prefix1"
         assert not get_prefix("mock_yaml_file") == "chan1"
 
+def test_get_prefix_without_prefix_key():
     # GIVEN conda env yaml without prefix entry
     env_yaml = yaml.load(
         '{"channels": ["chan1", "chan2"], "dependencies": ["dep1", "dep2"]}')
