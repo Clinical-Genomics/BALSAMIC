@@ -80,7 +80,7 @@ rule GATK_prepare_popvcf:
   output:
     popvcf = result_dir + "popvcf.vcf"
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
     anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
     popcode = "EUR"
   shell:
