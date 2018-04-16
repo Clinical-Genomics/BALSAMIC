@@ -14,7 +14,8 @@ command -v conda > /dev/null 2>&1 || \
 # Conda env found
 # Conda env naming convention: [P,D]_BALSAMIC_%DATE
 # P: Production, D: Development
-env_name=P_BALSAMIC_$(date +%y%m%d)
+env_name_suffix=_180410 #_$(date +%y%m%d)
+env_name=P_BALSAMIC${env_name_suffix}
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Creating conda env ${env_name}"
@@ -38,13 +39,21 @@ pip install --editable .
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installting environments for the workflow"
-echo -e "\n${B_YLW}\tbalsamic install_conda -i BALSAMIC/conda_yaml/P_Cancer-Core.yaml -s _$(date +%y%m%d)  -i BALSAMIC/conda_yaml/P_Cancer-py36.yaml -i BALSAMIC/conda_yaml/P_Cancer-py27.yaml -o"
+echo -e "\n${B_YLW}\tbalsamic install_conda --packages-output-yaml BALSAMIC_env.yaml -s ${env_name_suffix} -i BALSAMIC/conda_yaml/P_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/P_Cancer-Core.yaml -i BALSAMIC/conda_yaml/P_Cancer-py36.yaml -i BALSAMIC/conda_yaml/P_Cancer-py27.yaml -o"
 echo -ne "${B_NOCOL}"
-balsamic install_conda -s _$(date +%y%m%d) \
+balsamic install_conda -s ${env_name_suffix} \
+  --overwrite-env \
+  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-vardict.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-Core.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-py36.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-py27.yaml \
-  --overwrite-env
+  --packages-output-yaml BALSAMIC_env.yaml
+
+gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
+
+source activate ${gatk_env}
+
+gatk-register BALSAMIC/install/gatk_3.8.tar.bz2
 
 unset B_RED
 unset B_GRN
