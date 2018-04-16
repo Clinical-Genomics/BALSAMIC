@@ -62,14 +62,11 @@ def run_analysis(context, snake_file, config_sample, config_slurm, dry_run,
     """
 
     click.echo("Running the analysis")
-    shellcmd = ["snakemake --immediate-submit -j 99 --notemp -np"]
+    shellcmd = ["snakemake --immediate-submit -j 99 --notemp -np --forceall"]
     shellcmd.append("--jobname " + get_sample_name(config_sample) + ".{rulename}.{jobid}.py")
     shellcmd.append("--snakefile " + snake_file)
     shellcmd.append("--configfile " + config_sample)
     shellcmd.append("--cluster-config " + config_slurm)
     shellcmd.append("--cluster 'python3 runSbatch.py --sample_config " + config_sample + " {dependencies} '")
-    print(" ".join(shellcmd))
-    print(shellcmd)
     
-    #subprocess.check_output(" ".join(shellcmd), shell=True, stderr=subprocess.STDOUT)
-    subprocess.Popen(" ".join(shellcmd), shell=True)
+    subprocess.run(" ".join(shellcmd), shell=True)
