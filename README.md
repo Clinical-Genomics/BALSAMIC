@@ -16,6 +16,22 @@ order:
 - Create a python 3.6 conda environment following the conda environment naming convention from
   [https://github.com/Clinical-Genomics/development/blob/master/conda/conda_conventions.md](https://github.com/Clinical-Genomics/development/blob/master/conda/conda_conventions.md)
 based on the config file: ```BALSAMIC/conda_yaml/BALSAMIC.yaml``` 
-- Activate BALSAMIC conda environment and run setup.py to install BALSAMIC itself
+- Create conda environments required for BALSAMIC to run properly
+- Install BALSAMIC
+- Install gatk
+
+
+## Usage
+
+For now snakemake rules are not linked externally, so variant calling has to run within ```workflows``` directory:
+
+```bash
+balsamic run_analysis -S VariantCalling -c  ../config_files/config_sample.json -s ../config_files/config_cluster.json
+```
+
+The template for structure of config_sample.json and config_cluster.json can be found inside
+```BALSAMIC/config_files``can be found inside ```BALSAMIC/config_files```
+
+ 
 
 
