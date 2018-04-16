@@ -12,9 +12,10 @@ def test_conda_env_check():
 
         # WHEN matching an existing
         env_prefix = '/path/to/env/prefix_1'
+        actual = conda_env_check(env_prefix)
 
-        # THEN assert that environment exists or not
-        assert conda_env_check(env_prefix) == True
+        # THEN assert that environment exists
+        assert actual == True
 
 
 def test_conda_default_prefix():
@@ -22,11 +23,12 @@ def test_conda_default_prefix():
         # GIVEN a dict of conda environment config output
         mocked.return_value = '{"envs": ["/path/to/env/prefix_1", "/path/to/env/prefix_2" ], "conda_prefix": "default_prefix"}'
 
-        # WHEN a default environment prefix exists
-        env_prefix = 'default_prefix'
+        # WHEN get default environment prefix
+        actual = conda_default_prefix()
 
-        # THEN assert if the default_prefix exists
-        assert conda_default_prefix() == env_prefix
+        # THEN assert if the default_prefix matches correctly
+        env_prefix = 'default_prefix'
+        assert actual == env_prefix
 
 
 def test_get_prefix():
