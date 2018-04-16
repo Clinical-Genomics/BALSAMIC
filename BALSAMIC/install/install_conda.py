@@ -199,7 +199,7 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                 conda_install(fname, env_prefix)
 
                 with open(fname) as yaml_handle:
-                    conda_packages[env_base_name] = get_packages(yaml_handle)
+                    conda_packages[env_name] = get_packages(yaml_handle)
 
                 click.echo("Conda environment %s was installed." % env_prefix)
 
@@ -216,7 +216,7 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                 conda_install(fname, env_prefix)
 
                 with open(fname) as yaml_handle:
-                    conda_packages[env_base_name] = get_packages(yaml_handle)
+                    conda_packages[env_name] = get_packages(yaml_handle)
 
                 click.echo(
                     click.style(
