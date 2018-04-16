@@ -1,10 +1,8 @@
 channels:
   - bioconda
+  - https://anaconda.org/bioconda/vardict/2017.11.23/download
 dependencies:
-  - python=3.6.2
-  - gatk=3.8
   - bcftools=1.6
   - samtools=1.6
-  - picard=2.17.0
-  - cutadapt=1.15
+  - vardict=2017.11.23
   - tabix=0.2.5
