@@ -6,7 +6,7 @@ Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
 ### Software
 
 BALSAMIC requires conda 4.3+ for automated installation. For detailed software and python requirments please see
-```requirments.txt``` and ```BALSAMIC/install/conda_yaml/*ysml``` 
+```requirments.txt``` and ```BALSAMIC/install/conda_yaml/*yaml``` 
 
 ## Installation
 
@@ -23,15 +23,16 @@ based on the config file: ```BALSAMIC/conda_yaml/BALSAMIC.yaml```
 
 ## Usage
 
-For now snakemake rules are not linked externally, so variant calling has to run within ```workflows``` directory:
+```rule_directory``` within ```config_sample.json``` has to be set correctly for VariantCalling snakefile to work
+properly. If it is set correctly, the analysis can be initiated using the following command:
 
 ```bash
-balsamic run_analysis -S VariantCalling -c  ../config_files/config_sample.json -s ../config_files/config_cluster.json
+balsamic run_analysis -S VariantCalling -c  config_sample.json -s config_cluster.json
 ```
 
+Where VariantCalling, config_sample.json, and config_cluster are snakefile, sample config file, and cluster config file
+respectively.
+
 The template for structure of config_sample.json and config_cluster.json can be found inside
-```BALSAMIC/config_files``can be found inside ```BALSAMIC/config_files```
-
- 
-
+```BALSAMIC/config_files```
 
