@@ -3,7 +3,11 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
-## [1.0.0-rc2] - 2018-04-05
+## [1.0.1-rc2] - 2018-04-16
+### Fixed
+- snakemake rules are now externally linked
+
+## [1.0.0-rc2] - 2018-04-16
 ### Added
 - run_analysis subcommand
 - Mutational Signature R script with CLI

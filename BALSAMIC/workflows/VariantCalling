@@ -6,7 +6,7 @@ import os
 from BALSAMIC.tools import get_vcf_files
 from BALSAMIC.tools import get_result_dir
 
-rule_dir = "../"
+rule_dir = config["rule_directory"]
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"
