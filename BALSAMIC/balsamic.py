@@ -9,7 +9,7 @@ import sys
 import json
 
 from BALSAMIC.install import install_conda as install_command
-from BALSAMIC.workflow import run_analysis as run_analysis
+from BALSAMIC.workflows import run_analysis as run_analysis
 
 
 @click.group()
