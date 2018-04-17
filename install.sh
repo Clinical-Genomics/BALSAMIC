@@ -15,12 +15,12 @@ command -v conda > /dev/null 2>&1 || \
 # Conda env naming convention: [P,D]_BALSAMIC_%DATE
 # P: Production, D: Development
 env_name_suffix=_180410 #_$(date +%y%m%d)
-env_name=P_BALSAMIC${env_name_suffix}
+env_name=D_BALSAMIC${env_name_suffix}
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Creating conda env ${env_name}"
 echo -e "\n${B_YLW}\tconda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force"
-conda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force
+conda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --prefix /mnt/hds/proj/bioinfo/SERVER/miniconda/envs/${env_name} --force
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Activating ${env_name}"
@@ -39,14 +39,16 @@ pip install --editable .
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installting environments for the workflow"
-echo -e "\n${B_YLW}\tbalsamic install_conda --packages-output-yaml BALSAMIC_env.yaml -s ${env_name_suffix} -i BALSAMIC/conda_yaml/P_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/P_Cancer-Core.yaml -i BALSAMIC/conda_yaml/P_Cancer-py36.yaml -i BALSAMIC/conda_yaml/P_Cancer-py27.yaml -o"
+echo -e "\n${B_YLW}\tbalsamic install_conda --packages-output-yaml BALSAMIC_env.yaml -s ${env_name_suffix} -i BALSAMIC/conda_yaml/D_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/D_Cancer-Core.yaml -i BALSAMIC/conda_yaml/D_Cancer-py36.yaml -i BALSAMIC/conda_yaml/D_Cancer-py27.yaml -i BALSAMIC/conda_yaml/D_Cancer-vt.yaml -o"
 echo -ne "${B_NOCOL}"
 balsamic install_conda -s ${env_name_suffix} \
   --overwrite-env \
-  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-vardict.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-Core.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-py36.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/P_Cancer-py27.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-vardict.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-Core.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-py36.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-py27.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-vt.yaml \
+  --env-dir-prefix /mnt/hds/proj/bioinfo/SERVER/miniconda/envs \
   --packages-output-yaml BALSAMIC_env.yaml
 
 gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
