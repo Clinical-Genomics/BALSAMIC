@@ -1,0 +1,14 @@
+channels:
+  - defaults
+dependencies:
+  - cloog=0.18.0=0
+  - gcc=4.8.5=7
+  - gmp=6.1.2=h6c8ec71_1
+  - isl=0.12.2=0
+  - libgcc=7.2.0=h69d50b8_2
+  - libgcc-ng=7.2.0=hdf63c60_3
+  - libstdcxx-ng=7.2.0=hdf63c60_3
+  - mpc=1.0.3=hec55b23_5
+  - mpfr=3.1.5=h11a74b3_2
+  - xz=5.2.3=h55aa19d_2
+  - zlib=1.2.11=ha838bed_2

@@ -158,7 +158,7 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
     """
 
     conda_packages = dict()
-     
+
     for fname in input_conda_yaml:
 
         if os.path.exists(fname):
@@ -180,6 +180,13 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                     click.style(
                         "Prefix is missing and no prefix was found in file. Setting prefix to %s"
                         % env_prefix,
+                        fg='yellow'))
+            elif env_dir_prefix and not env_prefix:
+                env_prefix = os.path.join(*[env_dir_prefix, env_name])
+                click.echo(
+                    click.style(
+                        "A conda prefix is provided. Setting prefix to %s" %
+                        env_prefix,
                         fg='yellow'))
 
             if conda_env_check(env_prefix) and not overwrite_env:
@@ -222,5 +229,5 @@ def install_conda(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                     click.style(
                         "Conda environment %s was installed." % env_prefix,
                         fg='green'))
-    
-    yaml.dump(conda_packages, open(packages_output_yaml, 'w') )
+
+    yaml.dump(conda_packages, open(packages_output_yaml, 'w'))
