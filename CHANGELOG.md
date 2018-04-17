@@ -3,6 +3,13 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.0.2-rc2] - 2018-04-17
+### Added
+- Added vt environment
+### Fixed
+- conda envs are now have D prefix instead of P (develop vs production)
+- install_conda subcommand now accepts a proper conda prefix
+
 ## [1.0.1-rc2] - 2018-04-16
 ### Fixed
 - snakemake rules are now externally linked
