@@ -3,6 +3,13 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.0.3-rc2] - 2018-04-18
+### Added
+- Added sbatch submitter to handle it outside snakemake
+### Changed
+- sample config file structure changed
+- coding styles updated
+
 ## [1.0.2-rc2] - 2018-04-17
 ### Added
 - Added vt environment
