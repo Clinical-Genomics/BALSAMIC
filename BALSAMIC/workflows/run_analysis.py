@@ -74,7 +74,7 @@ def run_analysis(
     shellcmd.append(
         "--jobname " +
         get_sample_name(config_sample) +
-        ".{rulename}.{jobid}.py")
+        ".{rulename}.{jobid}.sh")
     shellcmd.append("--snakefile " + snake_file)
     shellcmd.append("--configfile " + config_sample)
     shellcmd.append("--cluster-config " + config_slurm)
