@@ -10,6 +10,7 @@ import json
 
 from BALSAMIC.install import install_conda as install_command
 from BALSAMIC.workflows import run_analysis as run_analysis
+from BALSAMIC.config import create_config as create_config
 
 
 @click.group()
@@ -30,3 +31,4 @@ def cli(context, verbose):
 
 cli.add_command(install_command)
 cli.add_command(run_analysis)
+cli.add_command(create_config)
