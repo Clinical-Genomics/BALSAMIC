@@ -54,6 +54,10 @@ def get_sample_name(json_in):
     default=False,
     is_flag=True,
     help='Force run all analysis. This is same as snakemake --forceall')
+@click.option(
+    '--snakemake-opt',
+    help='Pass these options directly to snakemake')
+
 @click.pass_context
 def run_analysis(
         context,
@@ -62,14 +66,14 @@ def run_analysis(
         config_slurm,
         run_analysis,
         log_file,
-        force_all):
+        force_all,
+        snakemake_opt):
     """
 
     Runs BALSAMIC workflow on the provided sample's config file
 
     """
 
-    click.echo("Running the analysis")
     shellcmd = ["snakemake --immediate-submit -j 99 --notemp -p"]
     shellcmd.append(
         "--jobname " +
@@ -88,5 +92,9 @@ def run_analysis(
 
     if force_all:
         shellcmd.append("--forceall")
+
+    if snakemake_opt:
+        shellcmd.append(" " + snakemake_opt)
+
 
     subprocess.run(" ".join(shellcmd), shell=True)
