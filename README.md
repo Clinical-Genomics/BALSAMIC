@@ -23,16 +23,121 @@ based on the config file: ```BALSAMIC/conda_yaml/BALSAMIC.yaml```
 
 ## Usage
 
-```rule_directory``` within ```config_sample.json``` has to be set correctly for VariantCalling snakefile to work
-properly. If it is set correctly, the analysis can be initiated using the following command:
+After a successfull installation, BALSAMIC is within ```D_BALSAMIC_${prefix}``` conda environment. Base command,
+```balsamic``` has three subcommands: 1) ```install_env``` which is used for installting conda 
+environemnts 2) ```create_config``` is to create a config file necessary for running the analysis. 3) ```run_analysis```
+is for running the actual workflow.
 
-```bash
-balsamic run_analysis -S VariantCalling -c  config_sample.json -s config_cluster.json
+#### Base command
+```
+Usage: balsamic [OPTIONS] COMMAND [ARGS]...
+
+  BALSAMIC 1.0.3-rc2: Bioinformatic Analysis pipeLine for SomAtic MutatIons
+  in Cancer
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  create_config  Create a sample config file from input sample data
+  install_env    Installs required conda environments
+  run_analysis   Run BALSAMIC on a provided config file
 ```
 
-Where VariantCalling, config_sample.json, and config_cluster are snakefile, sample config file, and cluster config file
-respectively.
+#### install_env
+```
+Usage: balsamic install_env [OPTIONS]
 
-The template for structure of config_sample.json and config_cluster.json can be found inside
-```BALSAMIC/config_files```
+  Installs conda environments from a conda yaml file.
 
+  By default it doesn''t overwrite if the environment by the same name
+  exists. If _overwrite_ flag is provided, it tries to remove the enviroment
+  first, and then install it in the path provided.
+
+Options:
+  -i, --input-conda-yaml PATH     Input conda yaml file.  [required]
+  -s, --env-name-suffix TEXT      Mandatory alphanumeric suffix for
+                                  environment name.  [required]
+  -o, --overwrite-env             Overwite conda enviroment if it exists.
+                                  Default = no. WARNING: The environment with
+                                  matching name will be deleted  [default:
+                                  False]
+  -d, --env-dir-prefix TEXT       Conda enviroment directory. It will be
+                                  ignored if its provided within yaml file.
+                                  Format: /path/env/envname.
+  -p, --packages-output-yaml PATH
+                                  Output a yaml file containing packages
+                                  installed in each input yaml file.
+                                  [required]
+  --help                          Show this message and exit.
+```
+
+#### create_config
+```
+Usage: balsamic create_config [OPTIONS]
+
+      Prepares a config file for balsamic run_analysis. For now it is just
+      treating json as dictionary and merging them as it is. So this is just
+      a placeholder for future.
+
+
+
+Options:
+  -a, --analysis-config PATH   Analysis config file.  [required]
+  -i, --install-config PATH    Installation config file.  [required]
+  -r, --reference-config PATH  Reference config file.  [required]
+  -s, --sample-config PATH     Input sample config file.  [required]
+  -o, --output-config PATH     Output a json config file ready to be imported
+                               for run-analysis  [required]
+  --help                       Show this message and exit.
+
+```
+#### run_analysis
+```
+Usage: balsamic run_analysis [OPTIONS]
+
+  Runs BALSAMIC workflow on the provided sample''s config file
+
+Options:
+  -S, --snake-file PATH      Snakefile required for snakemake to function.
+                             [required]
+  -s, --sample-config PATH   Sample json config file.  [required]
+  -c, --cluster-config PATH  SLURM config json file.  [required]
+  -l, --log-file PATH        Log file output for BALSAMIC. This is raw log
+                             output from snakemake.
+  -r, --run-analysis         By default balsamic run_analysis will run in dry
+                             run mode. Raise thise flag to make the actual
+                             analysis  [default: False]
+  -f, --force-all            Force run all analysis. This is same as snakemake
+                             --forceall  [default: False]
+  --snakemake-opt TEXT       Pass these options directly to snakemake
+  --help                     Show this message and exit.
+```
+
+## Running variant calling workflow
+
+In order to run variant calling workflow, first a configuration file must be created.
+```bash
+balsamic create_config \
+  --analysis-config BALSAMIC/config/analysis.json \
+  --install-config BALSAMIC/config/install.json \
+  --reference-config BALSAMIC/config/referene.json \
+  --sample-config BALSAMIC/config/sample.json \
+  --output-config BALSAMIC/config/sample_analysis.json
+```  
+
+The final config file is then set as input for ```run_analysis``` subcommand.
+
+```bash
+balsamic run_analysis \
+  --snake-file VariantCalling \
+  --cluster-config BALSAMIC/config/cluster.json \
+  --sample-config BALSAMIC/config/sample_analysis.json
+```
+
+## Config files
+
+BALSAMIC requires two config files: job submission configuration and analysis configuration. Configurations and their
+template can be found within ```config``` directory. The only config file that user needs to provide is the
+```sample.json``` by updating the necessary entries.
