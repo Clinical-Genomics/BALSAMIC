@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from BALSAMIC import __version__
 from setuptools import setup, find_packages
 
