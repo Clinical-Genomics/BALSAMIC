@@ -3,6 +3,21 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.1.0] - 2018-04-18
+### Added
+- create config sub command added as a new feature to create input config file
+- templates to generate a config file for analysis added
+- code style template for YAPF input created. see: https://github.com/google/yapf
+- vt conda env added
+
+### Changed
+- install script changed to create an output config
+- README updated with usage
+
+### Fixed
+- fastq location for analysis config is now fixed
+- lambda rules removed from cutadapt and fastq
+
 ## [1.0.3-rc2] - 2018-04-18
 ### Added
 - Added sbatch submitter to handle it outside snakemake
