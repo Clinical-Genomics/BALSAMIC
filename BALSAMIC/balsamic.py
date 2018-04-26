@@ -8,27 +8,26 @@ import logging
 import sys
 import json
 
-from BALSAMIC.install import install_conda as install_command
-from BALSAMIC.workflows import run_analysis as run_analysis
-from BALSAMIC.config import create_config as create_config
+# Subcommands
+from BALSAMIC.install import install_env as install_command
+from BALSAMIC.workflows import run_analysis as analysis_command
+from BALSAMIC.config import create_config as config_command
 
+# CLI commands and decorators
+from BALSAMIC.tools.cli_utils import add_doc as doc
+
+# Get version
+from BALSAMIC import __version__
 
 @click.group()
-@click.option(
-    '-v',
-    '--verbose',
-    show_default=True,
-    is_flag=True,
-    help='Verbose output *Not implented yet')
+@click.version_option(version=__version__)
 @click.pass_context
-def cli(context, verbose):
-    """
-    BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
 
-    """
+@doc("BALSAMIC {version}: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer".format(version=__version__))
+def cli(context):
     pass
 
 
 cli.add_command(install_command)
-cli.add_command(run_analysis)
-cli.add_command(create_config)
+cli.add_command(analysis_command)
+cli.add_command(config_command)
