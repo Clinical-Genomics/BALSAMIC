@@ -16,6 +16,19 @@ command -v conda > /dev/null 2>&1 || \
 # P: Production, D: Development
 env_name_suffix=_180410 #_$(date +%y%m%d)
 env_name=D_BALSAMIC${env_name_suffix}
+BALSAMIC_ENVS=${PWD}'/BALSAMIC_env.yaml'
+BALSAMIC_RULEDIR=${PWD}'/BALSAMIC/'
+
+echo -ne "${B_NOCOL}"
+echo -e "\n${B_GRN}Writing BALSAMIC/config/install.json ${env_name}"
+cat > BALSAMIC/config/install.json << EOF
+{
+    "conda_env_yaml": "${BALSAMIC_ENVS}",
+    "rule_directory": "${BALSAMIC_RULEDIR}"
+}
+EOF
+echo -e "${B_YLW}"
+cat BALSAMIC/config/install.json
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Creating conda env ${env_name}"
@@ -39,9 +52,9 @@ pip install --editable .
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installting environments for the workflow"
-echo -e "\n${B_YLW}\tbalsamic install_conda --packages-output-yaml BALSAMIC_env.yaml -s ${env_name_suffix} -i BALSAMIC/conda_yaml/D_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/D_Cancer-Core.yaml -i BALSAMIC/conda_yaml/D_Cancer-py36.yaml -i BALSAMIC/conda_yaml/D_Cancer-py27.yaml -i BALSAMIC/conda_yaml/D_Cancer-vt.yaml -o"
+echo -e "\n${B_YLW}\tbalsamic install_env --packages-output-yaml ${BALSAMIC_ENVS} -s ${env_name_suffix} -i BALSAMIC/conda_yaml/D_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/D_Cancer-Core.yaml -i BALSAMIC/conda_yaml/D_Cancer-py36.yaml -i BALSAMIC/conda_yaml/D_Cancer-py27.yaml -i BALSAMIC/conda_yaml/D_Cancer-vt.yaml -o"
 echo -ne "${B_NOCOL}"
-balsamic install_conda -s ${env_name_suffix} \
+balsamic install_env -s ${env_name_suffix} \
   --overwrite-env \
   --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-vardict.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-Core.yaml \
@@ -49,7 +62,7 @@ balsamic install_conda -s ${env_name_suffix} \
   --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-py27.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-vt.yaml \
   --env-dir-prefix /mnt/hds/proj/bioinfo/SERVER/miniconda/envs \
-  --packages-output-yaml BALSAMIC_env.yaml
+  --packages-output-yaml ${BALSAMIC_ENVS}
 
 gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
 
