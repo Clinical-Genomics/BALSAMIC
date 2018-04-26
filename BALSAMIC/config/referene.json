@@ -1,0 +1,21 @@
+{
+    "path": {
+        "genomefa": "/mnt/hds/proj/bioinfo/BALSAMIC/references/",
+        "panel": "/mnt/hds/proj/bioinfo/BALSAMIC/references/GRCh37/panel/"
+    },
+    "references": {
+        "genomefa":
+        "GRCh37/GRCh37_homo_sapiens_-d5-.fasta",
+        "dbsnp":
+        "GRCh37/GRCh37_1000g_snps_high_confidence_-phase1-.vcf",
+        "dbsnp_all":
+        "GRCh37/GRCh37_dbsnp_-138-.vcf.gz",
+        "1000G":
+        "GRCh37/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz",
+        "cosmic":
+        "GRCh37/COSMIC/CosmicCodingMuts.vcf.gz"
+    },
+    "bed": {
+        "variant_panel": "big_design.slopped20.bed"
+    }
+}

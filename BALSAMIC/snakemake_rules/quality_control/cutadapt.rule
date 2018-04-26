@@ -11,17 +11,15 @@ cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 # remove adapter from paired end reads
 rule cutadapt:
   input:
-    #lambda wildcards: expand(config["path"]["fastq"] + config["samples"][wildcards.sample] + "_{read_num}.fastq.gz", read_num = ["1", "2"])
-    read1=config["path"]["fastq"] + "{sample}" + "_1.fastq.gz",
-    read2=config["path"]["fastq"] + "{sample}" + "_2.fastq.gz",
-    #read2=config["path"]["fastq"] + config["fastq"][wildcards.sample]["read2"] + ".fastq.gz",
+    read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
+    read2=config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
   output:
     read1 = cutadapt_dir + "{sample}_1.ca.fastq.gz",
     read2 = cutadapt_dir + "{sample}_2.ca.fastq.gz",
     read1_short = cutadapt_dir + "{sample}_1.ca.short.fastq.gz",
     read2_short = cutadapt_dir + "{sample}_2.ca.short.fastq.gz"
   params:
-    lambda wildcards: config["path"]["fastq"] + config["samples"][wildcards.sample]["file_prefix"], 
+    lambda wildcards: config["analysis"]["fastq_path"] + config["samples"][wildcards.sample]["file_prefix"], 
     adapter = config["QC"]["adapter"],
     min_seq_length = config["QC"]["min_seq_length"],
     conda = get_conda_env(config["conda_env_yaml"],"cutadapt")
