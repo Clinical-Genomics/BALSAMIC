@@ -1,5 +1,6 @@
 channels:
   - bioconda
+  - conda-forge
   - https://anaconda.org/bioconda/vardict/2017.11.23/download
 dependencies:
   - bcftools=1.6
