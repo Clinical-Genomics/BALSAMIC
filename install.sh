@@ -68,6 +68,9 @@ gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_e
 
 source activate ${gatk_env}
 
+echo -e "\n${B_YLW}Updating gatk tmp directory to ${CONDA_PREFIX}/gatk_tmp"
+sed -i 's/\/tmp\/gatk/\$\{CONDA_PREFIX\}\/gatk_tmp/g' ${CONDA_PREFIX}/opt/gatk-3.8/gatk-register.sh
+
 gatk-register BALSAMIC/install/gatk_3.8.tar.bz2
 
 unset B_RED

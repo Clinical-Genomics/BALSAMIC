@@ -3,7 +3,11 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
-## [1.1.0] - 2018-04-18
+## [1.1.1] - 2018-04-27
+### Fixed
+- gatk-register tmp directory
+
+## [1.1.0] - 2018-04-26
 ### Added
 - create config sub command added as a new feature to create input config file
 - templates to generate a config file for analysis added
