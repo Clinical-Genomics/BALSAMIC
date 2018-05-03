@@ -139,7 +139,4 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
     if snakemake_opt:
         shellcmd.append(" " + snakemake_opt)
 
-    print(" ".join(shellcmd))
-
-
-#    subprocess.run(" ".join(shellcmd), shell=True)
+    subprocess.run(" ".join(shellcmd), shell=True)
