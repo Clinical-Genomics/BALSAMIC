@@ -3,6 +3,10 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.2.0] -  2018-04-27
+### Added
+- snakefile and cluster config in run analysis are now optional with a default value
+
 ## [1.1.2] - 2018-04-27
 ### Fixed
 - vardict installation was failing without conda-forge channel
