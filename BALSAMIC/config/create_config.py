@@ -37,6 +37,19 @@ def write_json(json_out, output_config):
     except OSError:
         print("Write failed")
 
+def get_config(config_name):
+    """
+    Return a string path for config file.
+    """
+
+    try:
+        config_file = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), config_name, '.json')
+    except OSError:
+        print("Couldn't locate config file" + config_name + ".json")
+
+    return config_file
+
 
 @click.command(
     "create_config",
@@ -44,19 +57,25 @@ def write_json(json_out, output_config):
 @click.option(
     '-a',
     '--analysis-config',
-    required=True,
+    required=False,
+    default=get_config("analysis"),
+    show_default=True,
     type=click.Path(),
     help="Analysis config file.")
 @click.option(
     '-i',
     '--install-config',
-    required=True,
+    required=False,
+    default=get_config("install"),
+    show_default=True,
     type=click.Path(),
     help="Installation config file.")
 @click.option(
     '-r',
     '--reference-config',
-    required=True,
+    required=False,
+    default=get_config("reference"),
+    show_default=True,
     type=click.Path(),
     help='Reference config file.')
 @click.option(
