@@ -4,6 +4,8 @@
         "name": "cancer.{rule}.{wildcards}",
         "time": "12:00:00",
         "n": 6,
+        "mail_type": "FAIL",
+        "mail_user": "hassan.foroughi@scilifelab.se",
         "partition": "core"
     },
     "vardict_paired": {
