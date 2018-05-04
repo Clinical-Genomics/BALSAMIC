@@ -37,6 +37,8 @@ job_properties = read_job_properties(jobscript)
 time = job_properties["cluster"]["time"]
 cpu = job_properties["cluster"]["n"]
 account_slurm = job_properties["cluster"]["account"]
+mail_type = job_properties["cluster"]["mail_type"]
+mail_user = job_properties["cluster"]["mail_user"]
 
 logpath = os.path.join(
     sample_config["analysis"]["analysis_dir"],
@@ -62,8 +64,8 @@ jobscript = os.path.join(scriptpath, scriptname)
 
 output_log = logpath + scriptname + ".out"
 error_log = logpath + scriptname + ".err"
-cmdline = 'sbatch -A {account} -n {n} -t {time} --qos=low -o {output_log} -e {error_log}'.format(
-    n=cpu, time=time, output_log=output_log, error_log=error_log, account=account_slurm)
+cmdline = 'sbatch -A {account} -n {n} -t {time} --qos=low -o {output_log} -e {error_log} --mail-type {mail_type} --mail-user {mail_user}'.format(
+    n=cpu, time=time, output_log=output_log, error_log=error_log, account=account_slurm, mail_type=mail_type, mail_user=mail_user)
 
 cmdline += " "
 
