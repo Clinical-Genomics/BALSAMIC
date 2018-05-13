@@ -20,11 +20,12 @@ rule vep_annotate_SNV:
     # not installed using conda, gatk's env name is retrieved
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     vep_fa = config["references"]["vep_fa"],
+    vep_exec = config["path"]["vep_exec"],
     vep_cache = config["path"]["vep_cache"]
   threads: 4
   shell:
     "source activate {params.conda}; "
-    "/mnt/hds/proj/bioinfo/BALSAMIC/references/ensembl-vep/vep "
+    "{params.vep_exec}/vep "
         "--dir {params.vep_cache} "
         "--dir_cache {params.vep_cache} "
         "--dir_plugins {params.vep_cache} "
@@ -48,11 +49,12 @@ rule vep_annotate_SV:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     vep_fa = config["references"]["vep_fa"],
+    vep_exec = config["path"]["vep_exec"],
     vep_cache = config["path"]["vep_cache"]
   threads: 4
   shell:
     "source activate {params.conda}; "
-    "/mnt/hds/proj/bioinfo/BALSAMIC/references/ensembl-vep/vep "
+    "{params.vep_exec}/vep "
         "--dir {params.vep_cache} "
         "--dir_cache {params.vep_cache} "
         "--dir_plugins {params.vep_cache} "

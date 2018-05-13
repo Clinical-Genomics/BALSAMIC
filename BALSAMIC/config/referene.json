@@ -2,6 +2,7 @@
     "path": {
         "genomefa": "/mnt/hds/proj/bioinfo/BALSAMIC/references/",
         "panel": "/mnt/hds/proj/bioinfo/BALSAMIC/references/GRCh37/panel/",
+        "vep_exec": "/mnt/hds/proj/bioinfo/BALSAMIC/references/ensembl-vep/",
         "vep_cache": "/mnt/hds/proj/bioinfo/BALSAMIC/references/vep_cache/"
     },
     "references": {
