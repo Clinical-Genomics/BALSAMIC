@@ -18,16 +18,22 @@ rule vep_annotate_SNV:
   params:
     # vep works within the same environment as gatk, but since it is
     # not installed using conda, gatk's env name is retrieved
-    conda = get_conda_env(config["conda_env_yaml"],"gatk")
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    vep_fa = config["references"]["vep_fa"],
+    vep_exec = config["path"]["vep_exec"],
+    vep_cache = config["path"]["vep_cache"]
   threads: 4
   shell:
     "source activate {params.conda}; "
-    "/home/hassan.foroughi/repo/ensembl-vep/vep "
+    "{params.vep_exec}/vep "
+        "--dir {params.vep_cache} "
+        "--dir_cache {params.vep_cache} "
+        "--dir_plugins {params.vep_cache} "
         "-i {input} "
         "-o {output} "
         "--fork {threads} "
         "--vcf "
-        "--fasta ~/.vep/homo_sapiens/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz "
+        "--fasta {params.vep_cache}{params.vep_fa} "
         "--everything "
         "-format vcf "
         "--offline "
@@ -41,16 +47,22 @@ rule vep_annotate_SV:
   output:
     vep_dir + "vep_" + "{sv_vcf}" + ".vcf"
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"gatk")
+    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    vep_fa = config["references"]["vep_fa"],
+    vep_exec = config["path"]["vep_exec"],
+    vep_cache = config["path"]["vep_cache"]
   threads: 4
   shell:
     "source activate {params.conda}; "
-    "/home/hassan.foroughi/repo/ensembl-vep/vep "
+    "{params.vep_exec}/vep "
+        "--dir {params.vep_cache} "
+        "--dir_cache {params.vep_cache} "
+        "--dir_plugins {params.vep_cache} "
         "-i {input} "
         "-o {output} "
         "--fork {threads} "
         "--vcf "
-        "--fasta ~/.vep/homo_sapiens/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz "
+        "--fasta {params.vep_cache}{params.vep_fa} "
         "--everything "
         "-format vcf "
         "--offline "
