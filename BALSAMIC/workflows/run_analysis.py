@@ -145,7 +145,7 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
     shellcmd.append("--configfile " + sample_config)
     shellcmd.append("--cluster-config " + cluster_config)
     shellcmd.append("--cluster 'python3 " + get_sbatchpy() +
-                    " --sample-config " + sample_config + " {dependencies} '")
+                    " --sample-config " + os.path.abspath(sample_config) + " {dependencies} '")
 
     if not run_analysis:
         shellcmd.append("--dryrun")
