@@ -22,6 +22,21 @@ def get_sample_name(json_in):
     return sample_name
 
 
+def get_analysis_dir(json_in):
+    """
+    Get analysis dir from input json file
+    """
+
+    try:
+        with open(os.path.abspath(json_in), "r") as fn:
+            sample_json = json.load(fn)
+            analysis_dir = sample_json["analysis"]["analysis_dir"]
+    except OSError:
+        print("Couldn't load json file or file path is not absolute")
+
+    return analysis_dir
+
+
 def get_sbatchpy():
     """
     Returns a string path for runSbatch.py
@@ -125,6 +140,8 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
     shellcmd.append("--jobname " + get_sample_name(sample_config) +
                     ".{rulename}.{jobid}.sh")
     shellcmd.append("--snakefile " + snake_file)
+    shellcmd.append("--directory " + os.path.join(
+        get_analysis_dir(sample_config), get_sample_name(sample_config), "BALSAMIC_run"))
     shellcmd.append("--configfile " + sample_config)
     shellcmd.append("--cluster-config " + cluster_config)
     shellcmd.append("--cluster 'python3 " + get_sbatchpy() +
