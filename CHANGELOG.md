@@ -3,6 +3,10 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.3.0] - 2018-05-13
+### Added
+- bed file for panel analysis is now mandatory to create analaysis config
+
 ## [1.2.3] - 2018-05-13
 ### Changed
 - vep execution path
