@@ -3,6 +3,11 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.2.3] - 2018-05-13
+### Changed
+- vep execution path
+- working directory for snakemake 
+
 ## [1.2.2] - 2018-05-04
 ### Added
 - sbatch submitter and cluster config now has an mail field
