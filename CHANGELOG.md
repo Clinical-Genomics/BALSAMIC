@@ -6,6 +6,7 @@ Versioning](https://semver.org/)
 ## [1.4.0] - 2018-05-18
 ### Added
 - single sample analysis mode
+- alignment and insert size metrics are added to the workflow
 ### Changed
 - collectqc and contest have their own rule for paired (tumor vs normal) and single (tumor only) sample.
 
