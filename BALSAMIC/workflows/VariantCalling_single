@@ -21,27 +21,11 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/collectqc_paired.rule"
+  rule_dir + "snakemake_rules/quality_control/collectqc_single.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/contest.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/mergetype.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/vardict.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/manta.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/mutect.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/strelka.rule"
-include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/bcftools.rule"
 
 
 bam_dir = get_result_dir(config) + "/bam/"
@@ -52,6 +36,3 @@ var_type = ["SNV", "SV"]
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
-    expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
-    expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
-    expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),

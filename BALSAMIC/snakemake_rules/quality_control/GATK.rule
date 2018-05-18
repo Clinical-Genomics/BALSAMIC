@@ -109,37 +109,3 @@ rule GATK_prepare_popvcf:
         "print; }}' > {output.popvcf}; "
     "source deactivate; "
 
-rule GATK_contest:
-  input:
-    bamN = bam_dir + "normal.merged.bam",
-    bamT = bam_dir + "tumor.merged.bam",
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    popvcf = result_dir + "popvcf.vcf", 
-  output:
-    N_vs_T = bam_dir + "normal_tumor.contest", 
-    T_vs_N = bam_dir + "tumor_normal.contest", 
-  params:
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-    min_genotype_ratio="0.95",
-    popcode = "EUR"
-  shell:
-    "source activate {params.conda}; "
-    "gatk "
-        "-T ContEst "
-        "-R {input.fa} "
-        "-I:eval {input.bamN} "
-        "-I:genotype {input.bamT} "
-        "--popfile {input.popvcf} "
-        "--population {params.popcode} "
-        "--min_genotype_ratio {params.min_genotype_ratio} "
-        "-o {output.N_vs_T}; " 
-    "gatk "
-        "-T ContEst "
-        "-R {input.fa} "
-        "-I:eval {input.bamT} "
-        "-I:genotype {input.bamN} "
-        "--popfile {input.popvcf} "
-        "--population {params.popcode} "
-        "--min_genotype_ratio {params.min_genotype_ratio} "
-        "-o {output.T_vs_N}; " 
-    "source deactivate; "

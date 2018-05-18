@@ -37,6 +37,21 @@ def get_analysis_dir(json_in):
     return analysis_dir
 
 
+def get_analysis_type(json_in):
+    """
+    Get analysis type from input json file: single or paired
+    """
+
+    try:
+        with open(os.path.abspath(json_in), "r") as fn:
+            sample_json = json.load(fn)
+            analysis_type = sample_json["analysis"]["analysis_type"]
+    except OSError:
+        print("Couldn't load json file or file path is not absolute")
+
+    return analysis_type
+
+
 def get_sbatchpy():
     """
     Returns a string path for runSbatch.py
@@ -51,14 +66,21 @@ def get_sbatchpy():
     return sbatch
 
 
-def get_snakefile():
+def get_snakefile(analysis_type):
     """
     Return a string path for variant calling snakefile.
     """
 
     try:
-        snakefile = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'VariantCalling')
+        if analysis_type == "paired":
+            snakefile = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), 'VariantCalling_paired')
+        elif analysis_type == "single":
+            snakefile = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), 'VariantCalling_single')
+        else:
+            raise ValueError("analysis_type should be single or paired")
+
     except OSError:
         print("Couldn't locate variant calling snakefile.")
 
@@ -88,7 +110,6 @@ def get_cluster_config():
     '--snake-file',
     type=click.Path(),
     show_default=True,
-    default=get_snakefile(),
     help='Snakefile required for snakemake to function.')
 @click.option(
     '-s',
@@ -139,13 +160,15 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
     shellcmd = ["snakemake --immediate-submit -j 99 --notemp -p"]
     shellcmd.append("--jobname " + get_sample_name(sample_config) +
                     ".{rulename}.{jobid}.sh")
-    shellcmd.append("--snakefile " + snake_file)
+    shellcmd.append("--snakefile " + get_snakefile(get_analysis_type(sample_config)))
     shellcmd.append("--directory " + os.path.join(
-        get_analysis_dir(sample_config), get_sample_name(sample_config), "BALSAMIC_run"))
+        get_analysis_dir(sample_config), get_sample_name(sample_config),
+        "BALSAMIC_run"))
     shellcmd.append("--configfile " + sample_config)
     shellcmd.append("--cluster-config " + cluster_config)
-    shellcmd.append("--cluster 'python3 " + get_sbatchpy() +
-                    " --sample-config " + os.path.abspath(sample_config) + " {dependencies} '")
+    shellcmd.append(
+        "--cluster 'python3 " + get_sbatchpy() + " --sample-config " +
+        os.path.abspath(sample_config) + " {dependencies} '")
 
     if not run_analysis:
         shellcmd.append("--dryrun")
