@@ -63,3 +63,42 @@ rule picard_collectHSmetric:
       "O={output} "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
     "source deactivate; "
+
+rule picard_CollectAlignmentSummaryMetrics:
+  input:
+    bam = bam_dir + "{sample}.bam",
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"]
+  output:
+    bam_dir + "{sample}.sorted.alignmetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    adapter = config["QC"]["adapter"]
+  shell:
+    "source activate {params.conda};"
+    "samtools index {input.bam}; "
+    "picard CollectAlignmentSummaryMetrics "
+      "R={input.fa} "
+      "I={input.bam} "
+      "O={output} "
+      "ADAPTER_SEQUENCE={params.adapter} "
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
+    "source deactivate; "
+
+rule picard_CollectInsertSizeMetrics:
+  input:
+    bam = bam_dir + "{sample}.bam"
+  output:
+    pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
+    txt = bam_dir + "{sample}.sorted.insertsizemetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard")
+  shell:
+    "source activate {params.conda};"
+    "samtools index {input.bam}; "
+    "picard CollectInsertSizeMetrics "
+      "I={input.bam} "
+      "H={output.pdf} "
+      "O={output.txt} "
+      "M=0.01 "
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
+    "source deactivate; "

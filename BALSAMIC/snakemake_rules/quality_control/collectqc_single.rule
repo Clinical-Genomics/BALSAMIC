@@ -12,6 +12,8 @@ rule collectqc:
   input:
     fastqc = expand(fastqc_dir + "{mysample}_{read_num}_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
     hsmetric = expand(bam_dir + "{sample}.sorted.hsmetric", sample=config["samples"]),
+    insertsize = expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]),
+    alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
     sambamba = expand(bam_dir + "{sample}.sorted.rmdup.cov.bed", sample=config["samples"]),
   output:
     result_dir + "qc/" + "qc_report.pdf"
