@@ -21,9 +21,11 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/collectqc.rule"
+  rule_dir + "snakemake_rules/quality_control/collectqc_paired.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/contest.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/mergetype.rule"
 include:
