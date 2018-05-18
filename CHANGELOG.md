@@ -3,6 +3,12 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.4.0] - 2018-05-18
+### Added
+- single sample analysis mode
+### Changed
+- collectqc and contest have their own rule for paired (tumor vs normal) and single (tumor only) sample.
+
 ## [1.3.0] - 2018-05-13
 ### Added
 - bed file for panel analysis is now mandatory to create analaysis config
@@ -16,7 +22,7 @@ Versioning](https://semver.org/)
 ### Added
 - sbatch submitter and cluster config now has an mail field
 ### Changed
-- create_config now only requires sample and output json. The rest are optional
+- `create_config` now only requires sample and output json. The rest are optional
 
 ## [1.2.0] - 2018-05-02
 ### Added
