@@ -19,7 +19,8 @@ rule picard_remove_duplicate:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "picard MarkDuplicates "
+    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+        "MarkDuplicates "
         "INPUT={input} "
         "OUTPUT={output.rmdup} "
         "VALIDATION_STRINGENCY=SILENT "
@@ -55,8 +56,8 @@ rule picard_collectHSmetric:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "samtools index {input.bam}; "
-    "picard CollectHsMetrics "
+    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+      "CollectHsMetrics "
       "BI={input.bedinterval} "
       "TI={input.bedinterval} "
       "I={input.bam} "
@@ -66,7 +67,7 @@ rule picard_collectHSmetric:
 
 rule picard_CollectAlignmentSummaryMetrics:
   input:
-    bam = bam_dir + "{sample}.bam",
+    bam = bam_dir + "{sample}.sorted.bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"]
   output:
     bam_dir + "{sample}.sorted.alignmetric"
@@ -75,8 +76,8 @@ rule picard_CollectAlignmentSummaryMetrics:
     adapter = config["QC"]["adapter"]
   shell:
     "source activate {params.conda};"
-    "samtools index {input.bam}; "
-    "picard CollectAlignmentSummaryMetrics "
+    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+      "CollectAlignmentSummaryMetrics "
       "R={input.fa} "
       "I={input.bam} "
       "O={output} "
@@ -86,7 +87,7 @@ rule picard_CollectAlignmentSummaryMetrics:
 
 rule picard_CollectInsertSizeMetrics:
   input:
-    bam = bam_dir + "{sample}.bam"
+    bam = bam_dir + "{sample}.sorted.bam"
   output:
     pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
     txt = bam_dir + "{sample}.sorted.insertsizemetric"
@@ -94,8 +95,8 @@ rule picard_CollectInsertSizeMetrics:
     conda = get_conda_env(config["conda_env_yaml"],"picard")
   shell:
     "source activate {params.conda};"
-    "samtools index {input.bam}; "
-    "picard CollectInsertSizeMetrics "
+    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+      "CollectInsertSizeMetrics "
       "I={input.bam} "
       "H={output.pdf} "
       "O={output.txt} "
