@@ -18,4 +18,5 @@ rule samtools_sort_index:
   shell:
     "source activate {params.conda}; "
     "samtools sort -@ {threads} -o {output} {input}; "
+    "samtools index -@ {threads} {output}; "
     "source deactivate "
