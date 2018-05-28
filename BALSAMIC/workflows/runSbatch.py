@@ -14,6 +14,9 @@ import json
 import argparse
 from snakemake.utils import read_job_properties
 
+# CLI commands and decorators
+from BALSAMIC.tools.cli_utils import createDir
+
 parser = argparse.ArgumentParser(description='Process script and dependecies.')
 parser.add_argument(
     "dependencies",
@@ -53,9 +56,9 @@ resultpath = os.path.join(
     sample_config["analysis"]["sample_id"],
     sample_config["analysis"]["result"])
 
-os.system('mkdir -p ' + logpath)
-os.system('mkdir -p ' + scriptpath)
-os.system('mkdir -p ' + resultpath)
+createDir(logpath)
+createDir(scriptpath)
+os.path.makedirs(resultpath, exist_ok=TRUE)
 
 os.system('cp ' + jobscript + ' ' + scriptpath)
 scriptname = jobscript.split("/")
