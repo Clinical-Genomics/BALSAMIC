@@ -3,6 +3,12 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.5.0] - 2018-05-28
+### Changed
+- New log and script directories are now created for each re-run
+### Fixed
+- Picardtools' memory issue addressed for large samples
+
 ## [1.4.0] - 2018-05-18
 ### Added
 - single sample analysis mode
