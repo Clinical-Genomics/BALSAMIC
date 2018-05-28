@@ -19,7 +19,7 @@ rule picard_remove_duplicate:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
         "MarkDuplicates "
         "INPUT={input} "
         "OUTPUT={output.rmdup} "
@@ -56,7 +56,7 @@ rule picard_collectHSmetric:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
       "CollectHsMetrics "
       "BI={input.bedinterval} "
       "TI={input.bedinterval} "
@@ -76,7 +76,7 @@ rule picard_CollectAlignmentSummaryMetrics:
     adapter = config["QC"]["adapter"]
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
       "CollectAlignmentSummaryMetrics "
       "R={input.fa} "
       "I={input.bam} "
@@ -95,7 +95,7 @@ rule picard_CollectInsertSizeMetrics:
     conda = get_conda_env(config["conda_env_yaml"],"picard")
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms16G -Xmx8G $CONDA_PREFIX/share/pica*/picard "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
       "CollectInsertSizeMetrics "
       "I={input.bam} "
       "H={output.pdf} "
