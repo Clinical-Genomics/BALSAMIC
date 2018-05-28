@@ -6,6 +6,9 @@ import logging
 import sys
 import json
 
+# CLI commands and decorators
+from BALSAMIC.tools.cli_utils import createDir
+
 
 def get_sample_name(json_in):
     """
@@ -22,7 +25,7 @@ def get_sample_name(json_in):
     return sample_name
 
 
-def get_analysis_dir(json_in):
+def get_analysis_dir(json_in, dir_type):
     """
     Get analysis dir from input json file
     """
@@ -30,7 +33,7 @@ def get_analysis_dir(json_in):
     try:
         with open(os.path.abspath(json_in), "r") as fn:
             sample_json = json.load(fn)
-            analysis_dir = sample_json["analysis"]["analysis_dir"]
+            analysis_dir = sample_json["analysis"][dir_type]
     except OSError:
         print("Couldn't load json file or file path is not absolute")
 
@@ -74,10 +77,12 @@ def get_snakefile(analysis_type):
     try:
         if analysis_type == "paired":
             snakefile = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), 'VariantCalling_paired')
+                os.path.dirname(os.path.abspath(__file__)),
+                'VariantCalling_paired')
         elif analysis_type == "single":
             snakefile = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), 'VariantCalling_single')
+                os.path.dirname(os.path.abspath(__file__)),
+                'VariantCalling_single')
         else:
             raise ValueError("analysis_type should be single or paired")
 
@@ -157,21 +162,45 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
 
     """
 
+    # get result, log, script directories
+    logpath = os.path.join(
+        get_analysis_dir(sample_config, "analysis_dir"),
+        get_sample_name(sample_config), get_analysis_dir(sample_config, "log"))
+    scriptpath = os.path.join(
+        get_analysis_dir(sample_config, "analysis_dir"),
+        get_sample_name(sample_config),
+        get_analysis_dir(sample_config, "script"))
+    resultpath = os.path.join(
+        get_analysis_dir(sample_config, "analysis_dir"),
+        get_sample_name(sample_config),
+        get_analysis_dir(sample_config, "result"))
+
+    # Create result directory
+    os.makedirs(resultpath, exist_ok=True)
+
     shellcmd = ["snakemake --immediate-submit -j 99 --notemp -p"]
     shellcmd.append("--jobname " + get_sample_name(sample_config) +
                     ".{rulename}.{jobid}.sh")
-    shellcmd.append("--snakefile " + get_snakefile(get_analysis_type(sample_config)))
-    shellcmd.append("--directory " + os.path.join(
-        get_analysis_dir(sample_config), get_sample_name(sample_config),
-        "BALSAMIC_run"))
-    shellcmd.append("--configfile " + sample_config)
-    shellcmd.append("--cluster-config " + cluster_config)
     shellcmd.append(
-        "--cluster 'python3 " + get_sbatchpy() + " --sample-config " +
-        os.path.abspath(sample_config) + " {dependencies} '")
+        "--snakefile " + get_snakefile(get_analysis_type(sample_config)))
+    shellcmd.append("--directory " + os.path.join(
+        get_analysis_dir(sample_config, "analysis_dir"),
+        get_sample_name(sample_config), "BALSAMIC_run"))
 
     if not run_analysis:
         shellcmd.append("--dryrun")
+
+    if run_analysis:
+        # if not dry run, then create (new) log/script directory
+        logpath = createDir(logpath, [])
+        scriptpath = createDir(scriptpath, [])
+
+    shellcmd.append("--configfile " + sample_config)
+    shellcmd.append("--cluster-config " + cluster_config)
+    shellcmd.append(
+        "--cluster 'python3 " + get_sbatchpy() + " --sample-config " + os.path.
+        abspath(sample_config) + " --dir-log " + logpath + " --dir-script " +
+        scriptpath + " --dir-result " + resultpath + " {dependencies} '")
 
     if force_all:
         shellcmd.append("--forceall")
