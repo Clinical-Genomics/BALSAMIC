@@ -127,4 +127,5 @@ it is. So this is just a placeholder for future.
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
 
+    os.makedirs(os.path.dirname(json_out), exist_ok=True)
     write_json(json_out, output_config)
