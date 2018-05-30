@@ -76,7 +76,7 @@ def varCallerSummary(config, var_caller):
 
     return row
 
-@click.command()
+@click.command("report", short_help="Report generator for workflow results")
 @click.option('-j','--json-report',
               required=True,
               type=click.Path(),
@@ -85,8 +85,8 @@ def varCallerSummary(config, var_caller):
               required=True,
               type=click.Path(),
               help='Input rulegraph from workflow output')
-
-def main(json_report, rulegraph_img):
+@click.pass_context
+def report(json_report, rulegraph_img):
 
     config = json_report
     sample_config = json.load(open(config))
@@ -183,6 +183,3 @@ def main(json_report, rulegraph_img):
             pipeline_img.add_caption('Awesome pipeline')
 
     doc.generate_pdf('full', clean_tex=False)
-
-if __name__ == '__main__':
-    main()
