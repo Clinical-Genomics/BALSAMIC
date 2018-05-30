@@ -30,6 +30,28 @@ rule picard_remove_duplicate:
     "samtools index {output.rmdup}; "
     "source deactivate; "
 
+rule picard_mark_duplicate:
+  input:
+    bam_dir + "{sample}.sorted.bam"
+  output:
+    rmdup = bam_dir + "{sample}.sorted.mrkdup.bam"
+  log:
+    stats = bam_dir + "{sample}.sorted.mrkdup.txt"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
+        "MarkDuplicates "
+        "INPUT={input} "
+        "OUTPUT={output.rmdup} "
+        "VALIDATION_STRINGENCY=SILENT "
+        "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 "
+        "REMOVE_DUPLICATES=FALSE "
+        "METRICS_FILE='{log.stats}'; "
+    "samtools index {output.rmdup}; "
+    "source deactivate; "
+
 rule picard_bed_to_interval:
   input:
     dict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
@@ -62,6 +84,8 @@ rule picard_collectHSmetric:
       "TI={input.bedinterval} "
       "I={input.bam} "
       "O={output} "
+      "COVERAGE_CAP=2000 "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
     "source deactivate; "
 
@@ -82,6 +106,7 @@ rule picard_CollectAlignmentSummaryMetrics:
       "I={input.bam} "
       "O={output} "
       "ADAPTER_SEQUENCE={params.adapter} "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
     "source deactivate; "
 
@@ -101,5 +126,7 @@ rule picard_CollectInsertSizeMetrics:
       "H={output.pdf} "
       "O={output.txt} "
       "M=0.01 "
+      "INCLUDE_DUPLICATES=TRUE "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
     "source deactivate; "
