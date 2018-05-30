@@ -6,6 +6,7 @@ __author__ = "Hassan Foroughi Asl"
 from BALSAMIC.tools import get_result_dir, get_conda_env
 
 fastqc_dir = get_result_dir(config) + "/fastqc/"
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule fastqc:
@@ -15,6 +16,21 @@ rule fastqc:
   output:
     read1 = fastqc_dir + "{sample}_1_fastqc.zip",
     read2 = fastqc_dir + "{sample}_2_fastqc.zip"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
+    fastqc_dir=fastqc_dir
+  shell:
+    "source activate {params.conda};"
+    "fastqc {input.read1} --outdir {params.fastqc_dir};" 
+    "fastqc {input.read2} --outdir {params.fastqc_dir};"
+
+rule fastqc_postqc:
+  input:
+    read1 = cutadapt_dir + "{sample}_1.ca.fastq.gz",
+    read2 = cutadapt_dir + "{sample}_2.ca.fastq.gz",
+  output:
+    read1 = fastqc_dir + "{sample}_1_fastqc.ca.zip",
+    read2 = fastqc_dir + "{sample}_2_fastqc.ca.zip"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
     fastqc_dir=fastqc_dir
