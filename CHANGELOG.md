@@ -3,6 +3,14 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.6.0] - 2018-05-30
+### Added
+- report subcommand for generating a pdf report from a json input file
+- Added fastqc after removing adapter
+### Changed
+- Markduplicate now has both REMOVE and MARK (rmdup vs mrkdup)
+- CollectHSMetrics now has more steps on PCT\_TARGET\_BASES
+
 ## [1.5.0] - 2018-05-28
 ### Changed
 - New log and script directories are now created for each re-run
