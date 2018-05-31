@@ -19,7 +19,7 @@ rule picard_remove_duplicate:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
         "MarkDuplicates "
         "INPUT={input} "
         "OUTPUT={output.rmdup} "
@@ -41,7 +41,7 @@ rule picard_mark_duplicate:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
         "MarkDuplicates "
         "INPUT={input} "
         "OUTPUT={output.rmdup} "
@@ -62,7 +62,8 @@ rule picard_bed_to_interval:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "picard BedToIntervalList "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
+      "BedToIntervalList "
       "I={input.bed} "
       "O={output} "
       "SD={input.dict}; "
@@ -78,7 +79,7 @@ rule picard_collectHSmetric:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
       "CollectHsMetrics "
       "BI={input.bedinterval} "
       "TI={input.bedinterval} "
@@ -100,7 +101,7 @@ rule picard_CollectAlignmentSummaryMetrics:
     adapter = config["QC"]["adapter"]
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
       "CollectAlignmentSummaryMetrics "
       "R={input.fa} "
       "I={input.bam} "
@@ -120,7 +121,7 @@ rule picard_CollectInsertSizeMetrics:
     conda = get_conda_env(config["conda_env_yaml"],"picard")
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/pica*/picard.jar "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
       "CollectInsertSizeMetrics "
       "I={input.bam} "
       "H={output.pdf} "
