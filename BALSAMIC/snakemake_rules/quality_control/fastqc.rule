@@ -29,8 +29,8 @@ rule fastqc_postqc:
     read1 = cutadapt_dir + "{sample}_1.ca.fastq.gz",
     read2 = cutadapt_dir + "{sample}_2.ca.fastq.gz",
   output:
-    read1 = fastqc_dir + "{sample}_1_fastqc.ca.zip",
-    read2 = fastqc_dir + "{sample}_2_fastqc.ca.zip"
+    read1 = fastqc_dir + "{sample}_1.ca_fastqc.zip",
+    read2 = fastqc_dir + "{sample}_2.ca_fastqc.zip"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
     fastqc_dir=fastqc_dir
