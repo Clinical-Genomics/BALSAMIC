@@ -45,8 +45,8 @@ scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
 jobscript = os.path.join(scriptpath, scriptname)
 
-output_log = logpath + scriptname + ".out"
-error_log = logpath + scriptname + ".err"
+output_log = os.path.join(logpath, scriptname + ".out")
+error_log = os.path.join(logpath, scriptname + ".err")
 cmdline = 'sbatch -A {account} -n {n} -t {time} --qos=low -o {output_log} -e {error_log} --mail-type {mail_type} --mail-user {mail_user}'.format(
     n=cpu,
     time=time,
