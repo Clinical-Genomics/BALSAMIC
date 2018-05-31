@@ -68,8 +68,15 @@ gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_e
 
 source activate ${gatk_env}
 
-
 gatk-register BALSAMIC/install/GenomeAnalysisTK.jar
+
+echo -ne "${B_NOCOL}"
+echo -e "\n${B_GRN}Copying custom Picard to relevant conda environment"
+source activate ${env_name}
+picard_PATH=BALSAMIC/assests/picard-2.18.5-4-g63d860e-SNAPSHOT-all.jar
+picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
+picard_destination=`conda env export -n ${picard_conda_env} | grep prefix | cut -d" " -f 2`
+cp $picard_PATH ${picard_destination}/share/
 
 unset B_RED
 unset B_GRN
