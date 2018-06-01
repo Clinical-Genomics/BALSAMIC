@@ -177,6 +177,9 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
+    if not os.path.exists(logpath):
+        os.makedirs(logpath, exist_ok=True)
+        os.makedirs(scriptpath, exist_ok=True)
 
     shellcmd = ["snakemake --immediate-submit -j 99 --notemp -p"]
     shellcmd.append("--jobname " + get_sample_name(sample_config) +
@@ -192,8 +195,10 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
 
     if run_analysis:
         # if not dry run, then create (new) log/script directory
-        logpath = createDir(logpath, [])
-        scriptpath = createDir(scriptpath, [])
+        for dirpath, dirnames, files in os.walk(logpath):
+            if files:
+                logpath = createDir(logpath, [])
+                scriptpath = createDir(scriptpath, [])
 
     shellcmd.append("--configfile " + sample_config)
     shellcmd.append("--cluster-config " + cluster_config)
