@@ -3,6 +3,14 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.8.0] - 2018-06-01
+### Changed
+- picard create bed interval rule moved into collect hsmetric
+- split bed is dependent on bam merge rule
+- vardict env now has specific build rather than URL download (conda doesn't support URLs anymore)
+### Fixed
+- new logs and scripts dirs are not re-created if they are empty
+
 ## [1.7.0] - 2018-05-31
 ### Added
 - A source altered picard to generated more quality metrics output is added to installation and rules
