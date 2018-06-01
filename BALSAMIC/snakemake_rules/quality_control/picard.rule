@@ -52,27 +52,11 @@ rule picard_mark_duplicate:
     "samtools index {output.rmdup}; "
     "source deactivate; "
 
-rule picard_bed_to_interval:
-  input:
-    dict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
-    bed = config["path"]["panel"] + config["bed"]["variant_panel"],
-  output:
-    resultdir + config["bed"]["variant_panel"] + "interval"
-  params:
-    conda = get_conda_env(config["conda_env_yaml"],"picard"),
-  shell:
-    "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
-      "BedToIntervalList "
-      "I={input.bed} "
-      "O={output} "
-      "SD={input.dict}; "
-    "source deactivate; "
-
 rule picard_collectHSmetric:
   input:
+    fadict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
+    bed = config["path"]["panel"] + config["bed"]["variant_panel"],
     bam = bam_dir + "{sample}.sorted.bam",
-    bedinterval = resultdir + config["bed"]["variant_panel"] + "interval"
   output:
     bam_dir + "{sample}.sorted.hsmetric"
   params:
@@ -80,9 +64,14 @@ rule picard_collectHSmetric:
   shell:
     "source activate {params.conda};"
     "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
+      "BedToIntervalList "
+      "I={input.bed} "
+      "O={input.bam}.picard.bedintervals "
+      "SD={input.fadict}; "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
       "CollectHsMetrics "
-      "BI={input.bedinterval} "
-      "TI={input.bedinterval} "
+      "BI={input.bam}.picard.bedintervals "
+      "TI={input.bam}.picard.bedintervals "
       "I={input.bam} "
       "O={output} "
       "COVERAGE_CAP=2000 "
