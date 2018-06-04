@@ -3,6 +3,15 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.9.0] - 2018-06-04
+### Added
+- Single mode for vardict, manta, and mutect.
+- merge type for tumor only
+### Changed
+- Single mode variant calling now has all variant calling rules
+### Fixed
+- run\_analaysis now accepts workflows for testing pyrposes
+
 ## [1.8.0] - 2018-06-01
 ### Changed
 - picard create bed interval rule moved into collect hsmetric

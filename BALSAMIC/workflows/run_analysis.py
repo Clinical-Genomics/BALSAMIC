@@ -184,8 +184,11 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
     shellcmd = ["snakemake --immediate-submit -j 99 --notemp -p"]
     shellcmd.append("--jobname " + get_sample_name(sample_config) +
                     ".{rulename}.{jobid}.sh")
+    
+    snakefile = snake_file if snake_file else get_snakefile(get_analysis_type(sample_config)) 
     shellcmd.append(
-        "--snakefile " + get_snakefile(get_analysis_type(sample_config)))
+        "--snakefile " + snakefile )
+
     shellcmd.append("--directory " + os.path.join(
         get_analysis_dir(sample_config, "analysis_dir"),
         get_sample_name(sample_config), "BALSAMIC_run"))

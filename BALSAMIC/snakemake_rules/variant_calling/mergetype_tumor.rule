@@ -1,0 +1,21 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.tools import get_sample_type
+from BALSAMIC.tools import get_result_dir, get_conda_env
+
+bam_dir = get_result_dir(config) + "/bam/"
+
+rule mergeBam_tumor:
+  input:
+    bamT = expand(bam_dir + "{mysample}.sorted.rmdup.ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
+  output:
+    bamT = bam_dir + "tumor.merged.bam",
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+  shell:
+    "source activate {params.conda}; "
+    "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
+    "source deactivate; "
