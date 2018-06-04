@@ -25,6 +25,16 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
 include:
+  rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/mergetype_tumor.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/manta_single.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/mutect_single.rule"
+include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
 
 
@@ -36,3 +46,7 @@ var_type = ["SNV", "SV"]
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
+    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]),
+    expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
+#    expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
+#    expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
