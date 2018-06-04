@@ -1,0 +1,37 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.tools import get_result_dir, get_conda_env
+
+bam_dir = get_result_dir(config) + "/bam/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+
+manta_dir = "manta/"
+
+rule manta_somatic_single:
+  input:
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    bamT = bam_dir + "tumor.merged.bam",
+  output:
+    default = expand(vcf_dir + manta_dir + "{vcf_file}", vcf_file=config["vcf"]["manta"]["default"]),
+    final = vcf_dir + config["vcf"]["manta"]["type"] + "/" + config["vcf"]["manta"]["merged"],
+  params:
+    tmpdir = vcf_dir + "manta_tmp",
+    result_dir = vcf_dir + manta_dir,
+    runmode = "local",
+    conda = get_conda_env(config["conda_env_yaml"],"manta")
+  threads: 4
+  shell:
+    "source activate {params.conda};"
+    "mkdir -p {params.result_dir}; "
+    "configManta.py "
+        "--tumorBam={input.bamT} "
+        "--referenceFasta={input.fa} "
+        "--runDir={params.tmpdir}; "
+    "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
+    "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "cp {params.result_dir}/tumorSV.vcf.gz {output.final}; "
+    "for i in {params.result_dir}/*.vcf.gz; do tabix -p vcf -f $i; done; "
+    "source deactivate; "
