@@ -3,6 +3,10 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.10.0] - 2018-06-07
+## Added
+- Markduplicate flag to analysis config
+
 ## [1.9.0] - 2018-06-04
 ### Added
 - Single mode for vardict, manta, and mutect.
