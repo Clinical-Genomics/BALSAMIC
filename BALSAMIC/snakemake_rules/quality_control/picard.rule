@@ -3,53 +3,39 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 
 bam_dir = get_result_dir(config) + "/bam/"
 resultdir = get_result_dir(config) + "/" 
+picarddup = get_picard_mrkdup(config)
 
-rule picard_remove_duplicate:
-  input:
-    bam_dir + "{sample}.sorted.bam"
-  output:
-    rmdup = bam_dir + "{sample}.sorted.rmdup.bam"
-  log:
-    stats = bam_dir + "{sample}.sorted.rmdup.txt"
-  params:
-    conda = get_conda_env(config["conda_env_yaml"],"picard"),
-  shell:
-    "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
-        "MarkDuplicates "
-        "INPUT={input} "
-        "OUTPUT={output.rmdup} "
-        "VALIDATION_STRINGENCY=SILENT "
-        "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 "
-        "REMOVE_DUPLICATES=TRUE "
-        "METRICS_FILE='{log.stats}'; "
-    "samtools index {output.rmdup}; "
-    "source deactivate; "
+def picard_flag(picarddup):
+  if picarddup == "mrkdup":
+      return "FALSE"
+  else:
+      return "TRUE"
 
 rule picard_mark_duplicate:
   input:
     bam_dir + "{sample}.sorted.bam"
   output:
-    rmdup = bam_dir + "{sample}.sorted.mrkdup.bam"
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
   log:
     stats = bam_dir + "{sample}.sorted.mrkdup.txt"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    rm_dup = picard_flag(picarddup)
   shell:
     "source activate {params.conda};"
     "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
         "MarkDuplicates "
         "INPUT={input} "
-        "OUTPUT={output.rmdup} "
+        "OUTPUT={output.mrkdup} "
         "VALIDATION_STRINGENCY=SILENT "
         "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 "
-        "REMOVE_DUPLICATES=FALSE "
+        "REMOVE_DUPLICATES={params.rm_dup} "
         "METRICS_FILE='{log.stats}'; "
-    "samtools index {output.rmdup}; "
+    "samtools index {output.mrkdup}; "
     "source deactivate; "
 
 rule picard_collectHSmetric:

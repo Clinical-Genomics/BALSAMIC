@@ -3,9 +3,10 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 
 result_dir = get_result_dir(config) + "/" 
+picarddup = get_picard_mrkdup(config)
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule collectqc:
@@ -15,7 +16,7 @@ rule collectqc:
     insertsize = expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]),
     alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
     hsmetric = expand(bam_dir + "{sample}.sorted.hsmetric", sample=config["samples"]),
-    sambamba = expand(bam_dir + "{sample}.sorted.rmdup.cov.bed", sample=config["samples"]),
+    sambamba = expand(bam_dir + "{sample}.sorted." + picarddup + ".cov.bed", sample=config["samples"]),
   output:
     result_dir + "qc/" + "qc_report.pdf"
   params:
