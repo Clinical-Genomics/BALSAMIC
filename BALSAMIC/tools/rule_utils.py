@@ -36,3 +36,13 @@ def get_conda_env(yaml_file, pkg):
             break
 
     return conda_env
+
+def get_picard_mrkdup(config):
+    
+    picard_str = "mrkdup"
+    
+    if "picard_rmdup" in config["QC"]:
+        if config["QC"]["picard_rmdup"]:
+            picard_str = "rmdup"
+
+    return picard_str
