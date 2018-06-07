@@ -3,19 +3,19 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 
 bam_dir = get_result_dir(config) + "/bam/"
-
+picarddup = get_picard_mrkdup(config)
 result_dir = get_result_dir(config) + "/"
 
 rule GATK_RealignerTargetCreator:
   input:
-    bam = bam_dir + "{sample}" + ".sorted.rmdup.bam",
+    bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
   output:
-    bam_dir + "{sample}.sorted.rmdup.intervals",
+    bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
@@ -30,12 +30,12 @@ rule GATK_RealignerTargetCreator:
 
 rule GATK_IndelRealigner:
   input:
-    bam = bam_dir + "{sample}" + ".sorted.rmdup.bam",
+    bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
-    intervals = bam_dir + "{sample}" + ".sorted.rmdup.intervals",
+    intervals = bam_dir + "{sample}" + ".sorted." + picarddup + ".intervals",
   output:
-    bam_dir + "{sample}.sorted.rmdup.ralgn.bam",
+    bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
@@ -51,11 +51,11 @@ rule GATK_IndelRealigner:
 
 rule GATK_baserecalibrator:
   input:
-    bam = bam_dir + "{sample}" + ".sorted.rmdup.ralgn.bam",
+    bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".ralgn.bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
   output:
-    bam_dir + "{sample}.sorted.rmdup.ralgn.bsrcl.bam",
+    bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
