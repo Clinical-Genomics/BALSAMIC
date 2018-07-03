@@ -1,5 +1,6 @@
 {
     "QC": {
+        "picard_rmdup": "True",
         "adapter":
         "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         "min_seq_length": "25"
