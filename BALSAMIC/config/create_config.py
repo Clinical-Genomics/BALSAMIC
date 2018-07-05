@@ -19,7 +19,6 @@ def merge_json(*args):
 
     json_out = dict()
     for json_file in args:
-        print(json_file)
         try:
             with open(json_file) as fn:
                 json_out = {**json_out, **json.load(fn)}
@@ -37,6 +36,7 @@ def write_json(json_out, output_config):
     except OSError:
         print("Write failed")
 
+
 def get_config(config_name):
     """
     Return a string path for config file.
@@ -50,17 +50,21 @@ def get_config(config_name):
 
     return config_file
 
+
 def set_panel_bed(json_out, panel_bed):
     """
     Set panel path in config file
     """
     try:
-        json_out['path']['panel'] = os.path.split(os.path.abspath(panel_bed))[0] + "/"
-        json_out['bed']['variant_panel'] = os.path.split(os.path.abspath(panel_bed))[1]
+        json_out['path']['panel'] = os.path.split(
+            os.path.abspath(panel_bed))[0] + "/"
+        json_out['bed']['variant_panel'] = os.path.split(
+            os.path.abspath(panel_bed))[1]
     except OSError:
         print("Couldn't locate bed file" + panel_bed)
 
     return json_out
+
 
 @click.command(
     "create_config",
@@ -69,10 +73,12 @@ def set_panel_bed(json_out, panel_bed):
     '-a',
     '--analysis-config',
     required=False,
-    default=get_config("analysis"),
+    default='paired',
     show_default=True,
-    type=click.Path(),
-    help="Analysis config file.")
+    type=click.Choice(['paired', 'single']),
+    help=
+    "Analysis config file for paired (tumor vs normal) or single (tumor-only) mode."
+)
 @click.option(
     '-i',
     '--install-config',
@@ -115,6 +121,9 @@ def create_config(context, analysis_config, install_config, sample_config,
 it is. So this is just a placeholder for future.
 
     """
+    analysis_config = get_config("analysis_" + analysis_config)
+    output_config = os.path.abspath(output_config)
+    sample_config = os.path.abspath(sample_config)
 
     click.echo("Reading analysis config file %s" % analysis_config)
     click.echo("Reading sample config file %s" % sample_config)
@@ -123,9 +132,9 @@ it is. So this is just a placeholder for future.
 
     json_out = merge_json(analysis_config, sample_config, reference_config,
                           install_config)
-    
+
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
 
-    os.makedirs(os.path.dirname(json_out), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(output_config)), exist_ok=True)
     write_json(json_out, output_config)
