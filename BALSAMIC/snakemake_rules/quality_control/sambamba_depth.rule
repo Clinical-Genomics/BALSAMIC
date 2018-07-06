@@ -31,5 +31,5 @@ rule sambamba_depth:
         "--filter {params.filter_string} "
         "--cov-threshold {params.cov_1} --cov-threshold {params.cov_2} "
         "--cov-threshold {params.cov_3} --cov-threshold {params.cov_4} "
-        "--cov-threshold {params.cov_4} {input.bam} > {output}; "
+        "--cov-threshold {params.cov_5} {input.bam} > {output}; "
     "source deactivate; "
