@@ -3,6 +3,17 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.11.0] - 2018-07-05
+## Changed
+- create\_config is now accepting a paired|single mode instead of analysis json template (see help for changes). It is
+  not backward compatible
+## Added
+- analysis\_{paired single}.json for creating config. Analysis.json is now obsolete.
+## Fixed
+- A bug with writing output for analysis config, and creating the path if it doesn't exist.
+- A bug with manta rule to correctly set output files in config.
+- A bug that strelka was still included in sample analysis.
+
 ## [1.10.0] - 2018-06-07
 ## Added
 - Markduplicate flag to analysis config
