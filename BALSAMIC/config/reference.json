@@ -17,7 +17,9 @@
         "cosmic":
         "GRCh37/COSMIC/CosmicCodingMuts.vcf.gz",
         "vep_fa":
-        "homo_sapiens_refseq/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa"
+        "homo_sapiens_refseq/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
+        "exon_bed":
+        "GRCh37/GFF/attribute_extract/gencode.v19.annotation.exons.extended.simpleid"
     },
     "bed": {
         "variant_panel": "big_design.slopped20.bed"
