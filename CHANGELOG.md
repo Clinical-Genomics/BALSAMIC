@@ -3,13 +3,28 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.12.0] - 2018-07-06
+Coverage report patch
+### Added
+- Added a new script to retrieve coverage report for a list of gene(s) and transcripts(s)
+- Added sambamba exon depth rule for coverage report
+- Added a new entry in reference json for exon bed file, this file generated using: https://github.com/hassanfa/GFFtoolkit 
+### Changed
+- sambamba\_depth rule changed to sambama\_panel\_depth
+- sambamba depth now has fix-mate-overlaps parameter enabled
+- sambamba string filter changed to `unmapped or mate\_is\_unmapped) and not duplicate and not failed\_quality\_control`.
+- sambamba depth for both panel and exon work on picard flag (rmdup or mrkdup).
+### Fixed
+- Fixed sambamba panel depth rule for redundant coverage parameter
+
 ## [1.11.0] - 2018-07-05
-## Changed
+create config patch for single and paired mode
+### Changed
 - create\_config is now accepting a paired|single mode instead of analysis json template (see help for changes). It is
   not backward compatible
-## Added
+### Added
 - analysis\_{paired single}.json for creating config. Analysis.json is now obsolete.
-## Fixed
+### Fixed
 - A bug with writing output for analysis config, and creating the path if it doesn't exist.
 - A bug with manta rule to correctly set output files in config.
 - A bug that strelka was still included in sample analysis.
