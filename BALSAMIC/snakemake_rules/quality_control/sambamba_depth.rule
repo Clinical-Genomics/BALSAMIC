@@ -8,7 +8,7 @@ from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 bam_dir = get_result_dir(config) + "/bam/"
 picarddup = get_picard_mrkdup(config)
 
-rule sambamba_depth:
+rule sambamba_panel_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["path"]["panel"] + config["bed"]["variant_panel"]
@@ -21,15 +21,43 @@ rule sambamba_depth:
     cov_3="300",
     cov_4="400",
     cov_5="500",
-    filter_string="'mapping_quality >= 10 and not duplicate and not failed_quality_control'",
+    filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   shell:
     "source activate {params.conda}; "
     "sambamba depth region "
+        "--fix-mate-overlaps "
         "--regions {input.bed} "
-        "--min-base-quality {params.base_qual} "
+        "--min-base-quality={params.base_qual} "
         "--filter {params.filter_string} "
         "--cov-threshold {params.cov_1} --cov-threshold {params.cov_2} "
         "--cov-threshold {params.cov_3} --cov-threshold {params.cov_4} "
-        "--cov-threshold {params.cov_4} {input.bam} > {output}; "
+        "--cov-threshold {params.cov_5} {input.bam} > {output}; "
+    "source deactivate; "
+
+rule sambamba_exon_depth:
+  input:
+    bam = bam_dir + "{sample}" + ".sorted.bam",
+    bed = config["path"]["genomefa"] + config["references"]["exon_bed"]
+  output:
+    bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed"
+  params:
+    base_qual=10,
+    cov_1="50",
+    cov_2="100",
+    cov_3="150",
+    cov_4="200",
+    cov_5="250",
+    filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control'",
+    conda = get_conda_env(config["conda_env_yaml"],"sambamba")
+  shell:
+    "source activate {params.conda}; "
+    "sambamba depth region "
+        "--fix-mate-overlaps "
+        "--regions {input.bed} "
+        "--min-base-quality={params.base_qual} "
+        "--filter {params.filter_string} "
+        "--cov-threshold {params.cov_1} --cov-threshold {params.cov_2} "
+        "--cov-threshold {params.cov_3} --cov-threshold {params.cov_4} "
+        "--cov-threshold {params.cov_5} {input.bam} > {output}; "
     "source deactivate; "
