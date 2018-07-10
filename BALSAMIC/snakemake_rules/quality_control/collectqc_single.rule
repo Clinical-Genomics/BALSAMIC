@@ -18,6 +18,7 @@ rule collectqc:
     alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
     mrkdup = expand(bam_dir + "{sample}.sorted" + picarddup + ".txt", sample=config["samples"]),
     sambamba = expand(bam_dir + "{sample}.sorted." + picarddup + ".cov.bed", sample=config["samples"]),
+    sambambaexon = expand(bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed", sample=config["samples"]),
   output:
     result_dir + "qc/" + "qc_report.pdf"
   params:
