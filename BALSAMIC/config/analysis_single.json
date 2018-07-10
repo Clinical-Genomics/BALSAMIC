@@ -1,0 +1,30 @@
+{
+    "QC": {
+        "picard_rmdup": "True",
+        "adapter":
+        "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+        "min_seq_length": "25"
+    },
+    "vcf": {
+        "manta": {
+            "default": [
+                "tumorSV.vcf.gz", "candidateSV.vcf.gz",
+                "candidateSmallIndels.vcf.gz"
+            ],
+            "merged":
+            "manta.vcf.gz",
+            "type":
+            "SV"
+        },
+        "mutect": {
+            "default": "mutect.vcf.gz",
+            "merged": "mutect.vcf.gz",
+            "type": "SNV"
+        },
+        "vardict": {
+            "default": "vardict.vcf.gz",
+            "merged": "vardict.vcf.gz",
+            "type": "SNV"
+        }
+    }
+}
