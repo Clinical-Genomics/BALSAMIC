@@ -1,5 +1,5 @@
 # BALSAMIC
-Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
+Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (__version__ = 1.12.0)
 
 ## Requirments
 
