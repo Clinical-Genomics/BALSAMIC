@@ -73,20 +73,20 @@ if ( arg$verbose ) {
 
 sample.coverage = fread(file)
 
-
+fragLength = 100
 if (! is.null(arg$genename)) {
   genelist = unlist(strsplit(arg$genename, ","))
   dt.gene = sample.coverage[F10 %in% genelist & F9 == "KNOWN" & F6 == "protein_coding", 
                             .(exonCount = .N,
-                              readPerbp = sum(readCount)/F7,
-                              meanExonCoverage = mean(readCount/(abs(chromStart-chromEnd))),
-                              medianExonCoverage = median(readCount/(abs(chromStart-chromEnd))),
-                              readPerbpPerExon = sum(readCount)/(F7/.N),
+                              readCountPerExon = sum(readCount)/.N,
+                              meanExonCoverage = mean(readCount*fragLength/(abs(chromStart-chromEnd))),
+                              medianExonCoverage = median(readCount*fragLength/(abs(chromStart-chromEnd))),
+                              readPerbpPerExon = sum(readCount*fragLength)/(F7/.N),
                               totalRead = sum(readCount)),
                             by=.(F3, F7, F11, F10)][, .(txID = F3, txLength = F7, geneName = F10,
-                                                        exonCount, readPerbp, readPerbpPerExon, totalRead,
-                                                        maxLength = max(F7), maxRead = max(totalRead),
-                                                        meanExonCoverage, medianExonCoverage),
+                                                        exonCount, readCountPerExon,
+                                                        medianExonCoverage, meanExonCoverage,
+                                                        maxLength = max(F7), totalReadCount = max(totalRead)),
                                                     keyby=F11][txLength==maxLength, !c("maxLength")]
 }
 
@@ -94,15 +94,15 @@ if (! is.null(arg$ensemble)) {
   genelist = unlist(strsplit(arg$ensemble, ","))
   dt.gene = sample.coverage[F11 %in% genelist & F9 == "KNOWN" & F6 == "protein_coding", 
                             .(exonCount = .N,
-                              readPerbp = sum(readCount)/F7,
-                              meanExonCoverage = mean(readCount/(abs(chromStart-chromEnd))),
-                              medianExonCoverage = median(readCount/(abs(chromStart-chromEnd))),
-                              readPerbpPerExon = sum(readCount)/(F7/.N),
+                              readCountPerExon = sum(readCount)/.N,
+                              meanExonCoverage = mean(readCount*fragLength/(abs(chromStart-chromEnd))),
+                              medianExonCoverage = median(readCount*fragLength/(abs(chromStart-chromEnd))),
+                              readPerbpPerExon = sum(readCount*fragLength)/(F7/.N),
                               totalRead = sum(readCount)),
                             by=.(F3, F7, F11, F10)][, .(txID = F3, txLength = F7, geneName = F10,
-                                                        exonCount, readPerbp, readPerbpPerExon, totalRead,
-                                                        maxLength = max(F7), maxRead = max(totalRead),
-                                                        meanExonCoverage, medianExonCoverage),
+                                                        exonCount, readCountPerExon,
+                                                        medianExonCoverage, meanExonCoverage,
+                                                        maxLength = max(F7), totalReadCount = max(totalRead)),
                                                     keyby=F11][txLength==maxLength, !c("maxLength")]
 }
 setnames(dt.gene, "F11", "geneID")
