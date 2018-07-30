@@ -122,17 +122,18 @@ it is. So this is just a placeholder for future.
 
     """
     analysis_config = get_config("analysis_" + analysis_config)
-    output_config = os.path.abspath(output_config)
     sample_config = os.path.abspath(sample_config)
 
     click.echo("Reading analysis config file %s" % analysis_config)
     click.echo("Reading sample config file %s" % sample_config)
     click.echo("Reading reference config file %s" % reference_config)
-    click.echo("Writing output config file %s" % output_config)
 
     json_out = merge_json(analysis_config, sample_config, reference_config,
                           install_config)
 
+    output_config = os.path.join(os.path.abspath(json_out["analysis"]["analysis_dir"]), json_out["analysis"]["sample_id"] , output_config)
+    click.echo("Writing output config file %s" % output_config)
+    
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
 
