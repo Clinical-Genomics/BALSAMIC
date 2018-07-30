@@ -3,6 +3,16 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.13.0] - 2018-07-25
+VCF union patch paired end
+### Added
+- rule for all three variant callers for paired analysis now generate a simple VCF file
+- Exome specific option for strelka paired
+### Changed
+- variant ids are now updated from simple VCF file
+### Fixed
+- Strelka rule doesn't filter out PASS variants anymore fixes issue #63
+
 ## [1.12.0] - 2018-07-06
 Coverage report patch
 ### Added
