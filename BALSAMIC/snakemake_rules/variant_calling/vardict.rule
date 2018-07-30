@@ -24,7 +24,7 @@ rule vardict_paired:
     max_mm = "4.5",
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["sample_id"],
-    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+    conda = get_conda_env(config["conda_env_yaml"], "vardict"),
   shell:
     "source activate {params.conda}; "
     "vardict -G {input.fa} -f {params.af} -N {params.name} "
@@ -43,9 +43,30 @@ rule vardict_merge_chrom:
   output:
     vcf_dir + config["vcf"]["vardict"]["type"] + "/" + config["vcf"]["vardict"]["merged"]
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+    conda = get_conda_env(config["conda_env_yaml"], "vardict"),
   shell:
     "source activate {params.conda} ; "
     "bcftools concat -o {output} -O z {input}; " 
     "tabix -f -p vcf {output}; "
     "source deactivate;" 
+
+rule vardict_simple:
+  input:
+    vcf_dir + config["vcf"]["vardict"]["type"] + "/" + config["vcf"]["vardict"]["merged"]
+  output:
+    vcf_dir + config["vcf"]["vardict"]["type"] + "/" + "simple." + config["vcf"]["vardict"]["merged"]
+  params:
+    name = config["analysis"]["sample_id"]
+    conda = get_conda_env(config["conda_env_yaml"], "bcftools")
+  shell:
+    "bcftools annotate "
+        "--annotations {input} "
+        "--mark-sites +CALLER=VARDICT "
+        "-h <(echo '##INFO=<ID=CALLER,Number=1,Type=String,Description=\"VariantCaller\">') "
+        "--remove \"^INF/STATUS,INF/TYPE,INF/DP,INF/VD,INF/AF\","
+        "\"^FMT/GT,FMT/DP,FMT/VD,FMT/AD,FMT/AF\" {input} "
+    "| "
+    "bcftools annotate "
+        "--remove \"INF/CALLER=VARDICT\" - "
+    "| "
+    "sed '/^#CHROM/s/{params.name}-match/NORMAL/;/^#CHROM/s/{params.name}/TUMOR/' > {output}"
