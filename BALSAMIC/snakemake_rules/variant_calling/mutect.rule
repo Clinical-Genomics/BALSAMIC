@@ -52,3 +52,21 @@ rule mutect2_merge_chrom:
     "tabix -f -p vcf {output}; "
     "source deactivate;" 
 
+rule mutect_simple:
+  input:
+    vcf_dir + config["vcf"]["mutect"]["type"] + "/" + config["vcf"]["mutect"]["merged"]
+  output:
+    vcf_dir + config["vcf"]["mutect"]["type"] + "/" + "simple." + config["vcf"]["mutect"]["merged"]
+  params:
+    name = config["analysis"]["sample_id"]
+    conda = get_conda_env(config["conda_env_yaml"], "bcftools")
+  shell:
+    "bcftools annotate "
+        "--annotation {input} "
+        "--mark-sites +CALLER=MUTECT2 "
+        "-h <(echo '##INFO=<ID=CALLER,Number=1,Type=String,Description=\"VariantCaller\">') "
+        "--remove \"^INF/DP\",\"^FMT/GT,FMT/AD,FMT/AF\" {input} "
+    "| "
+    "bcftools annotate "
+        "--remove \"INFO/CALLER=MUTECT2\" - "
+    "> {output}"
