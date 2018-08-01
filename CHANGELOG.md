@@ -7,7 +7,8 @@ Versioning](https://semver.org/)
 VCF union patch paired end
 ### Added
 - rule for all three variant callers for paired analysis now generate a simple VCF file
-- Exome specific option for strelka paired
+- exome specific option for strelka paired
+- create\_config subcommand is now more granular, it accepts all enteries from sample.json as commandline arguments
 ### Changed
 - variant ids are now updated from simple VCF file
 ### Fixed
