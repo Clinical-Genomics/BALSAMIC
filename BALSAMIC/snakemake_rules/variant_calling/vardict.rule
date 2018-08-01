@@ -56,9 +56,10 @@ rule vardict_simple:
   output:
     vcf_dir + config["vcf"]["vardict"]["type"] + "/" + "simple." + config["vcf"]["vardict"]["merged"]
   params:
-    name = config["analysis"]["sample_id"]
+    name = config["analysis"]["sample_id"],
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
   shell:
+    "source activate {params.conda};"
     "bcftools annotate "
         "--annotations {input} "
         "--mark-sites +CALLER=VARDICT "

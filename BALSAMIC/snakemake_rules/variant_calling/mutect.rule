@@ -58,9 +58,10 @@ rule mutect_simple:
   output:
     vcf_dir + config["vcf"]["mutect"]["type"] + "/" + "simple." + config["vcf"]["mutect"]["merged"]
   params:
-    name = config["analysis"]["sample_id"]
+    name = config["analysis"]["sample_id"],
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
   shell:
+    "source activate {params.conda};"
     "bcftools annotate "
         "--annotation {input} "
         "--mark-sites +CALLER=MUTECT2 "
