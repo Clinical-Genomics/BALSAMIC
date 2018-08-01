@@ -8,7 +8,7 @@ Requirments
 -----------
 
 Software
-~~~~~~~~
+~~~~~~~
 
 BALSAMIC requires conda 4.3+ for automated installation. For detailed
 software and python requirments please see ``requirments.txt`` and
@@ -39,7 +39,7 @@ necessary for running the analysis. 3) ``run_analysis`` is for running
 the actual workflow.
 
 Base command
-^^^^^^^^^^^^
+------------
 
 ::
 
@@ -58,7 +58,7 @@ Base command
      run_analysis   Run BALSAMIC on a provided config file
 
 install_env
-^^^^^^^^^^^
+-----------
 
 ::
 
@@ -88,7 +88,7 @@ install_env
      --help                          Show this message and exit.
 
 create_config
-^^^^^^^^^^^^^
+-------------
 
 ::
 
@@ -110,28 +110,29 @@ create_config
      --help                       Show this message and exit.
 
 run_analysis
-^^^^^^^^^^^^
+------------
 
-::
+Options::
 
-   Usage: balsamic run_analysis [OPTIONS]
-
-     Runs BALSAMIC workflow on the provided sample''s config file
-
-   Options:
-     -S, --snake-file PATH      Snakefile required for snakemake to function.
-                                [required]
-     -s, --sample-config PATH   Sample json config file.  [required]
-     -c, --cluster-config PATH  SLURM config json file.  [required]
-     -l, --log-file PATH        Log file output for BALSAMIC. This is raw log
-                                output from snakemake.
-     -r, --run-analysis         By default balsamic run_analysis will run in dry
-                                run mode. Raise thise flag to make the actual
-                                analysis  [default: False]
-     -f, --force-all            Force run all analysis. This is same as snakemake
-                                --forceall  [default: False]
-     --snakemake-opt TEXT       Pass these options directly to snakemake
-     --help                     Show this message and exit.
+    Usage: balsamic run_analysis [OPTIONS]
+    
+        Runs BALSAMIC workflow on the provided sample''s config file
+    
+    Options:
+    -S, --snake-file PATH      Snakefile required for snakemake to function.
+                            [required]
+    -s, --sample-config PATH   Sample json config file.  [required]
+    -c, --cluster-config PATH  SLURM config json file.  [required]
+    -l, --log-file PATH        Log file output for BALSAMIC. This is raw log
+                            output from snakemake.
+    -r, --run-analysis         By default balsamic run_analysis will run in dry
+                            run mode. Raise thise flag to make the actual
+                            analysis  [default: False]
+    -f, --force-all            Force run all analysis. This is same as snakemake
+                            --forceall  [default: False]
+    --snakemake-opt TEXT       Pass these options directly to snakemake
+    --help                     Show this message and exit.
+    
 
 Running variant calling workflow
 --------------------------------
@@ -139,7 +140,7 @@ Running variant calling workflow
 In order to run variant calling workflow, first a configuration file
 must be created.
 
-.. code:: bash
+.. code-block:: shell
 
    balsamic create_config \
      --analysis-config BALSAMIC/config/analysis.json \
