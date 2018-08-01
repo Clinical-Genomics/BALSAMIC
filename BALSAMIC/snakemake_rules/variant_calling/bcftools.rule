@@ -48,7 +48,6 @@ rule bcftools_SV_update_variant_ID:
       "--apply-filter .,PASS "
       "{input} "
     "| bcftools norm -Oz -m-any "
-    "| bcftools norm -Oz -f {params.ref_fa} "
     "| bcftools annotate -Oz "
       "-x 'ID' -I +'%CHROM:%POS:%REF:%ALT' "
     "> {output} ; "
