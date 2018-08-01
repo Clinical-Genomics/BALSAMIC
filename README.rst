@@ -1,21 +1,19 @@
+========
 BALSAMIC
 ========
 
 Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
 (**version** = 1.13.0)
 
-Requirments
+Installation
 -----------
 
-Software
-~~~~~~~
+Software Requirments
+~~~~~~~~~~~~~~~~~~~~
 
 BALSAMIC requires conda 4.3+ for automated installation. For detailed
 software and python requirments please see ``requirments.txt`` and
 ``BALSAMIC/install/conda_yaml/*yaml``
-
-Installation
-------------
 
 BALSAMIC requires multiple conda environments. ``install.sh`` will
 automatically install BALSAMIC in the following order:
@@ -39,7 +37,7 @@ necessary for running the analysis. 3) ``run_analysis`` is for running
 the actual workflow.
 
 Base command
-------------
+~~~~~~~~~~~~
 
 ::
 
@@ -58,7 +56,7 @@ Base command
      run_analysis   Run BALSAMIC on a provided config file
 
 install_env
------------
+~~~~~~~~~~~
 
 ::
 
@@ -88,7 +86,7 @@ install_env
      --help                          Show this message and exit.
 
 create_config
--------------
+~~~~~~~~~~~~~
 
 ::
 
@@ -110,9 +108,9 @@ create_config
      --help                       Show this message and exit.
 
 run_analysis
-------------
+~~~~~~~~~~~~
 
-Options::
+::
 
     Usage: balsamic run_analysis [OPTIONS]
     
@@ -138,25 +136,35 @@ Running variant calling workflow
 --------------------------------
 
 In order to run variant calling workflow, first a configuration file
-must be created.
+must be created. It requires a sample.json file, and panel data file. A template for sample.json can be found within
+`BALSAMIC/config/sample.json`. Otherwise, the following parameters must be provided. A example with or without
+sample.json file is as below
 
 .. code-block:: shell
 
    balsamic create_config \
-     --analysis-config BALSAMIC/config/analysis.json \
-     --install-config BALSAMIC/config/install.json \
-     --reference-config BALSAMIC/config/referene.json \
+     --panel-bed path_to_panel_bed_file \
      --sample-config BALSAMIC/config/sample.json \
      --output-config BALSAMIC/config/sample_analysis.json
+
+.. code-block:: shell
+    
+    balsamic create_config \
+      --normal base_name_to_normal_sample \
+      --tumor base_name_to_tumor_sample \
+      --sample-id sample_name \
+      --analysis_type paired \
+      --analysis-dir path_to_store_analysis_dir \
+      --fastq-path path_to_fastq_files_for_tumor_and_normal \
+      --output-config path_and_filename_output_config_file \
+      --panel-bed path_to_panel_bed_file
 
 The final config file is then set as input for ``run_analysis``
 subcommand.
 
-.. code:: bash
+.. code-block:: shell
 
    balsamic run_analysis \
-     --snake-file VariantCalling \
-     --cluster-config BALSAMIC/config/cluster.json \
      --sample-config BALSAMIC/config/sample_analysis.json
 
 Config files
