@@ -62,7 +62,7 @@ rule strelka_simple:
         "--annotations {input} "
         "--mark-sites +CALLER=STRELKA "
         "-h <(echo '##INFO=<ID=CALLER,Number=1,Type=String,Description=\"VariantCaller\">') "
-        "--remove \"^INFO/DP,^INFO/SOMATIC\",\"^FMT/AU,FMT/DP,FMT/TU,FMT/GU,FMT/CU\" {input} "
+        "--remove \"^INFO/DP,^INFO/SOMATIC\",\"^FMT/AU,FMT/DP,FMT/TU,FMT/GU,FMT/CU,FMT/TAR,FMT/TIR,FMT/TOR\" {input} "
     "| "
     "bcftools annotate "
         "--remove \"INF/CALLER=STRELKA\" -  > {output}"
