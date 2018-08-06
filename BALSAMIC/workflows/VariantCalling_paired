@@ -52,6 +52,7 @@ var_type = ["SNV", "SV"]
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
+    expand(vcf_dir + var_type[0] + "/" + "table.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
     expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
     expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
     expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
