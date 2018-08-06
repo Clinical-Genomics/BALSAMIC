@@ -52,7 +52,8 @@ rule strelka_simple:
   input:
     vcf_dir + config["vcf"]["strelka"]["type"] + "/" + config["vcf"]["strelka"]["merged"]
   output:
-    vcf_dir + config["vcf"]["strelka"]["type"] + "/" + "simple." + config["vcf"]["strelka"]["merged"]
+    vcf = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + "simple." + config["vcf"]["strelka"]["merged"],
+    tbl = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + "table." + config["vcf"]["strelka"]["merged"]
   params:
     name = config["analysis"]["sample_id"],
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
@@ -65,4 +66,16 @@ rule strelka_simple:
         "--remove \"^INFO/DP,^INFO/SOMATIC\",\"^FMT/AU,FMT/DP,FMT/TU,FMT/GU,FMT/CU,FMT/TAR,FMT/TIR,FMT/TOR\" {input} "
     "| "
     "bcftools annotate "
-        "--remove \"INF/CALLER=STRELKA\" -  > {output}"
+        "--remove \"INF/CALLER=STRELKA\" -  > {output.vcf}; "
+    "bcftools view -f .,PASS {output.vcf} "
+    "| "
+    "bcftools query --print-header -f "
+        "\'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t[%DP\\t][%AU{{0}}\\t][%CU{{0}}\\t][%GU{{0}}\\t][%TU{{0}}\\t][%TAR{{0}}]\\t[%TIR{{0}}]\\n\' "
+        "-s TUMOR "
+    "| "
+    "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
+        "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \",\"\",$0); for (i=1; i<=NF; i++) gsub(/\[[[:digit:]]*\]/,\"\",$i); "
+            "print $0,\"TUMOR:AD\\tTUMOR:AD\\tFILTERED\" }} "
+        "NR>1 {{ if ($5!=\"INDEL\") {{s[\"A\"]=\"7\"; s[\"G\"]=\"9\"; s[\"C\"]=\"8\"; s[\"T\"]=\"10\"; "
+            "alt=$s[$4]; ref=$s[$3];}} else {{ref=$11; alt=$12}}; "
+            "if ((alt+ref)!=$6 ) {{ print $0,ref,alt,\"YES\"}} else {{ print $0,ref,alt,\"NO\" }} }}' | bgzip > {output.tbl}"

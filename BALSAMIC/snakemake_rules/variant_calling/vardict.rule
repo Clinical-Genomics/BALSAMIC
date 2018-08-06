@@ -54,7 +54,8 @@ rule vardict_simple:
   input:
     vcf_dir + config["vcf"]["vardict"]["type"] + "/" + config["vcf"]["vardict"]["merged"]
   output:
-    vcf_dir + config["vcf"]["vardict"]["type"] + "/" + "simple." + config["vcf"]["vardict"]["merged"]
+    vcf = vcf_dir + config["vcf"]["vardict"]["type"] + "/" + "simple." + config["vcf"]["vardict"]["merged"],
+    tbl = vcf_dir + config["vcf"]["vardict"]["type"] + "/" + "table." + config["vcf"]["vardict"]["merged"],
   params:
     name = config["analysis"]["sample_id"],
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
@@ -70,4 +71,16 @@ rule vardict_simple:
     "bcftools annotate "
         "--remove \"INF/CALLER=VARDICT\" - "
     "| "
-    "sed '/^#CHROM/s/{params.name}-match/NORMAL/;/^#CHROM/s/{params.name}/TUMOR/' > {output}"
+    "sed '/^#CHROM/s/{params.name}-match/NORMAL/;/^#CHROM/s/{params.name}/TUMOR/' > {output.vcf}; "
+    "bcftools view -f .,PASS -e 'STATUS !~ \".*Somatic\"' "
+        "{output.vcf} "
+    "| "
+    "bcftools query --print-header "
+        "-f \'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER\\t%DP\\t[%AD{{0}}\\t][%AD{{1}}\\t][%AF\\t]%STATUS\\n\' "
+        "-s TUMOR "
+    "| "
+    "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
+        "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \", \"\", $0); for (i=1; i<=NF; i++) gsub(/\[[[:digit:]]*\]/,\"\",$i); "
+        "print $0,\"FILTERED\" }} "
+        "NR>1  {{ if (($8+$9)!=$7) {{ print $0,\"NO\"}} else {{ print $0,\"YES\" }} }}' | bgzip > {output.tbl}"
+
