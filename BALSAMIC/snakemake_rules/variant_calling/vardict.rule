@@ -59,6 +59,7 @@ rule vardict_simple:
     vcf = vep_dir + "vep_simple_" + config["vcf"]["vardict"]["merged"]
   params:
     name = config["analysis"]["sample_id"],
+    MVL = "/mnt/hds/proj/bioinfo/BALSAMIC/references/GRCh37/MVL/MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz",
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
   shell:
     "source activate {params.conda};"
@@ -72,26 +73,31 @@ rule vardict_simple:
     "bcftools annotate "
         "--remove \"INF/CALLER=VARDICT\" - "
     "| "
-    "sed '/^#CHROM/s/{params.name}-match/NORMAL/;/^#CHROM/s/{params.name}/TUMOR/' > {output.vcf}; "
+    "sed '/^#CHROM/s/{params.name}-match/NORMAL/;/^#CHROM/s/{params.name}/TUMOR/' "
+    "| "
+    "bcftools annotate -a {params.MVL} -Oz "
+        "-c CHROM,POS --mark-sites +\"MSK_MVL\" "
+    " > {output.vcf}; "
     "HEADER=`bcftools view -h {input} | sed -n '/Consequence annotations/p' | sed 's/#.* //g;s/\">//g'`; "
     "bcftools view -f .,PASS -e 'STATUS !~ \".*Somatic\"' "
         "{output.vcf} "
     "| "
     "bcftools query --print-header "
-        "-f \'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER\\t%DP\\t[%AD{{0}}\\t][%AD{{1}}\\t][%AF\\t]%STATUS\\t%CSQ\\n\' "
+        "-f \'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER"
+        "\\t%DP\\t[%AD{{0}}\\t][%AD{{1}}\\t][%AF\\t]%STATUS\\t%CSQ\\t%MSK_MVL\\n\' "
         "-s TUMOR "
     "| "
     "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
         "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \", \"\", $0); "
                    "for (i=1; i<=NF; i++) gsub(/\[[[:digit:]]*\]/,\"\",$i); "
-                   "print $0,\"FILTERED\",$12 }} "
-        " NR>1  {{ if (($8+$9)!=$7) {{ print $0,\"NO\",$12}} else {{ print $0,\"YES\",$12 }} }}' "
-    "| cut -f 1-9,13,14 "
+                   "print $0,\"FILTERED\",$12,$13 }} "
+        " NR>1  {{ if (($8+$9)!=$7) {{ print $0,\"NO\",$12 }} else {{ print $0,\"YES\",$12 }} }}' "
+    "| cut -f 1-9,13,14,15 "
     "| "
     "awk -v H=$HEADER -v OFS=\"\t\" "
         "'NR==1 {{C=split(H,h,\"|\");"
-        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,h[2],h[3],h[4],h[5],h[6] }} "
-        " NR>1 {{split($11,a,\",\"); for (x in a) {{ split(a[x],b,\"|\"); "
-        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,b[2],b[3],b[4],b[5],b[6] }} }}' "
+        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,h[2],h[3],h[4],h[5],h[6] }} "
+        " NR>1 {{split($12,a,\",\"); for (x in a) {{ split(a[x],b,\"|\"); "
+        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,b[2],b[3],b[4],b[5],b[6] }} }}' "
     "| bgzip > {output.tbl}"
 
