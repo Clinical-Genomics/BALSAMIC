@@ -1,0 +1,32 @@
+{
+    "version": "0.1.0",
+    "reference_documents":
+    {"https://www.accessdata.fda.gov/cdrh_docs/reviews/DEN170058.pdf"},
+    "base_line": {
+        "VF_ratio": "5"
+    },
+    "high_confidence": {
+        "in_mvl": "True",
+        "TUMOR": {
+            "DP": "20",
+            "AD": "8",
+            "AF": "0.02"
+        },
+        "annotation": {
+            "SNV": {"non-synonomious", "splice-site"},
+            "INDEL": {"frameshift", "non-frameshit"}
+        }
+    },
+    "low_confidence": {
+        "in_mvl": "False",
+        "TUMOR": {
+            "DP": "20",
+            "AD": "10",
+            "AF": "0.05"
+        },
+        "annotatoin": {
+            "SNV": {"non-synonomious", "splice-site"},
+            "INDEL": {"frameshift", "non-frameshit"}
+        }
+    }
+}
