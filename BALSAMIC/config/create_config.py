@@ -7,7 +7,7 @@ import click
 import logging
 import sys
 import json
-
+from yapf.yapflib.yapf_api import FormatFile
 
 def merge_json(*args):
     '''
@@ -196,3 +196,4 @@ it is. So this is just a placeholder for future.
 
     os.makedirs(os.path.dirname(os.path.abspath(output_config)), exist_ok=True)
     write_json(json_out, output_config)
+    FormatFile(output_config, in_place=True)
