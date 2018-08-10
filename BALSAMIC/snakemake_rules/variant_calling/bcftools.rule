@@ -13,7 +13,7 @@ var_type = "SNV"
 
 rule bcftools_SNV_update_variant_ID:
   input:
-    vcf = vcf_dir + var_type + "/" + "simple.{vcf}.vcf.gz"
+    vcf = vcf_dir + var_type + "/" + "{vcf}.vcf.gz"
   output:
     vcf_dir + var_type + "/" + "id.{vcf}.vcf.gz"
   params:
