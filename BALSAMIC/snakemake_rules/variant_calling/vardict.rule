@@ -94,7 +94,7 @@ rule vardict_simple:
         " NR>1  {{ if (($8+$9)!=$7) {{ print $0,\"NO\",$12 }} else {{ print $0,\"YES\",$12 }} }}' "
     "| cut -f 1-9,13,14,15 "
     "| "
-    "awk -v H=$HEADER -v OFS=\"\t\" "
+    "awk -v H=$HEADER -v OFS=\"\\t\" "
         "'NR==1 {{C=split(H,h,\"|\");"
         " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,h[2],h[3],h[4],h[5],h[6] }} "
         " NR>1 {{split($12,a,\",\"); for (x in a) {{ split(a[x],b,\"|\"); "

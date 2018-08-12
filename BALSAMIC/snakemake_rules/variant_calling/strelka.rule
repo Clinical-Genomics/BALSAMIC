@@ -89,7 +89,7 @@ rule strelka_simple:
     "| "
     "cut -f 1-7,15-19 "
     "| "
-    "awk -v H=$HEADER -v OFS=\"\t\" "
+    "awk -v H=$HEADER -v OFS=\"\\t\" "
         "'NR==1 {{C=split(H,h,\"|\"); "
         " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,h[2],h[3],h[4],h[5],h[6] }} "
         " NR>1 {{split($12,a,\",\"); for (x in a) {{ split(a[x],b,\"|\"); "
