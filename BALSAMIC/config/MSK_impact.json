@@ -13,8 +13,11 @@
             "AF": "0.02"
         },
         "annotation": {
-            "SNV": {"non-synonomious", "splice-site"},
-            "INDEL": {"frameshift", "non-frameshit"}
+            "SNV": {"missense_variant", "nonsynonymous_variant",
+                    "stop_gained", "stop_lost", "start_lost",
+                    "splice_acceptor_variant", "splice_donor_variant", 
+                    "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant"},
+            "INDEL": {"frameshift_variant", "frameshift", "non-frameshit"}
         }
     },
     "low_confidence": {
@@ -25,8 +28,11 @@
             "AF": "0.05"
         },
         "annotatoin": {
-            "SNV": {"non-synonomious", "splice-site"},
-            "INDEL": {"frameshift", "non-frameshit"}
+            "SNV": {"missense_variant", "nonsynonymous_variant",
+                    "stop_gained", "stop_lost", "start_lost",
+                    "splice_acceptor_variant", "splice_donor_variant", 
+                    "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant"},
+            "INDEL": {"frameshift_variant", "frameshift", "non-frameshit"}
         }
     }
 }
