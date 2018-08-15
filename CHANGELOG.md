@@ -16,6 +16,7 @@ Versioning](https://semver.org/)
 - Leaner VCF output from mutect2 with coverage and MQ annotation according to #64
 - variant ids are now updated from simple VCF file
 ### Fixed
+- Fixed a bug with sambamba depth coverage reporting wrong exon and panel coverage see #68
 - The json output is now properly formatted using yapf
 - Strelka rule doesn't filter out PASS variants anymore fixes issue #63
 
