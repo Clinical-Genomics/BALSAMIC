@@ -53,7 +53,6 @@ rule sambamba_exon_depth:
   shell:
     "source activate {params.conda}; "
     "sambamba depth region "
-        "--fix-mate-overlaps "
         "--regions {input.bed} "
         "--min-base-quality={params.base_qual} "
         "--filter {params.filter_string} "
