@@ -12,6 +12,7 @@ Versioning](https://semver.org/)
 - exome specific option for strelka paired
 - create\_config subcommand is now more granular, it accepts all enteries from sample.json as commandline arguments
 - Added tabQuery to the assests as a tool to query the tabulated output of summarized VCF
+- Added MQ annotation field to Mutect2 output see #67
 ### Changed
 - Leaner VCF output from mutect2 with coverage and MQ annotation according to #64
 - variant ids are now updated from simple VCF file
