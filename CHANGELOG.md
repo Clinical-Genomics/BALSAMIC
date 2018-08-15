@@ -3,6 +3,24 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.13.0] - 2018-08-10
+### Added
+- rule for all three variant callers for paired analysis now generate a simple VCF file
+- rule for all three variant callers for paired analysis to convert VCF into table format
+- MVL config file and MVL annotation to VCF calls for SNV/INDEL callers
+- CALLER annotation added to SNV/INDEL callers
+- exome specific option for strelka paired
+- create\_config subcommand is now more granular, it accepts all enteries from sample.json as commandline arguments
+- Added tabQuery to the assests as a tool to query the tabulated output of summarized VCF
+- Added MQ annotation field to Mutect2 output see #67
+### Changed
+- Leaner VCF output from mutect2 with coverage and MQ annotation according to #64
+- variant ids are now updated from simple VCF file
+### Fixed
+- Fixed a bug with sambamba depth coverage reporting wrong exon and panel coverage see #68
+- The json output is now properly formatted using yapf
+- Strelka rule doesn't filter out PASS variants anymore fixes issue #63
+
 ## [1.12.0] - 2018-07-06
 Coverage report patch
 ### Added

@@ -54,4 +54,7 @@ rule all:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
     expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
     expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
-    expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
+    #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
+    expand(vep_dir + "vep_" + "{vcf}", vcf=list(get_vcf_files(config, "SNV") + get_vcf_files(config, "SV"))),
+    expand(vep_dir + "vep_simple_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
+    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),

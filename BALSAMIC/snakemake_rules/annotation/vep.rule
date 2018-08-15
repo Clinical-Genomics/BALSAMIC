@@ -14,7 +14,8 @@ rule vep_annotate_SNV:
   input:
     vcf_snv_dir + "{snv_vcf}" + ".vcf.gz"
   output:
-    vep_dir + "vep_" + "{snv_vcf}" + ".vcf"
+    vep = vep_dir + "vep_" + "{snv_vcf}" + ".vcf",
+    vcf = vep_dir + "vep_" + "{snv_vcf}" + ".vcf.gz"
   params:
     # vep works within the same environment as gatk, but since it is
     # not installed using conda, gatk's env name is retrieved
@@ -30,7 +31,7 @@ rule vep_annotate_SNV:
         "--dir_cache {params.vep_cache} "
         "--dir_plugins {params.vep_cache} "
         "-i {input} "
-        "-o {output} "
+        "-o {output.vep} "
         "--fork {threads} "
         "--vcf "
         "--fasta {params.vep_cache}{params.vep_fa} "
@@ -38,14 +39,17 @@ rule vep_annotate_SNV:
         "-format vcf "
         "--offline "
         "-v "
-        "--force_overwrite ; "
+        "--force_overwrite && "
+    "bgzip -f -c {output.vep} > {output.vcf} && "
+    "tabix -f -p vcf {output.vcf};"
     "source deactivate; "
 
 rule vep_annotate_SV:
   input:
     vcf_sv_dir + "{sv_vcf}" + ".vcf.gz"
   output:
-    vep_dir + "vep_" + "{sv_vcf}" + ".vcf"
+    vep = vep_dir + "vep_" + "{sv_vcf}" + ".vcf",
+    vcf = vep_dir + "vep_" + "{sv_vcf}" + ".vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     vep_fa = config["references"]["vep_fa"],
@@ -67,5 +71,7 @@ rule vep_annotate_SV:
         "-format vcf "
         "--offline "
         "-v "
-        "--force_overwrite ; "
+        "--force_overwrite && "
+    "bgzip -f -c {output.vep} > {output.vcf} && "
+    "tabix -f -p vcf {output.vcf};"
     "source deactivate; "

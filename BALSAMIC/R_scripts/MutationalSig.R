@@ -1,4 +1,4 @@
-#!/Users/hassanforoughi/miniconda3/envs/MutationalSig/bin/Rscript
+#!/usr/bin/env Rscript
 #  Copyright 2018, Hassan Foroughi Asl <hassan.foroughi@scilifelab.se>
 #  
 #  This file is free software: you may copy, redistribute and/or modify it  

@@ -7,6 +7,7 @@ from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
 
 mutect_dir = "mutect/"
 
@@ -33,6 +34,7 @@ rule mutect2_somatic:
         "--dbsnp {input.dbsnp} "
         "-I:normal {input.bamN} "
         "-I:tumor {input.bamT} "
+        "--annotation Coverage --useNewAFCalculator --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
         "--disable_auto_index_creation_and_locking_when_reading_rods "
         "-L {input.bed} "
     " | bgzip > {output}; "
@@ -52,3 +54,49 @@ rule mutect2_merge_chrom:
     "tabix -f -p vcf {output}; "
     "source deactivate;" 
 
+rule mutect_simple:
+  input:
+    vep_dir + "vep_" + config["vcf"]["mutect"]["merged"]
+  output:
+    tbl = vep_dir + "vep_table_" + config["vcf"]["mutect"]["merged"],
+    vcf = vep_dir + "vep_simple_" + config["vcf"]["mutect"]["merged"]
+  params:
+    name = config["analysis"]["sample_id"],
+    MVL = "/mnt/hds/proj/bioinfo/BALSAMIC/references/GRCh37/MVL/MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz",
+    conda = get_conda_env(config["conda_env_yaml"], "bcftools")
+  shell:
+    "source activate {params.conda};"
+    "bcftools annotate "
+        "--annotation {input} "
+        "--mark-sites +CALLER=MUTECT2 "
+        "-h <(echo '##INFO=<ID=CALLER,Number=1,Type=String,Description=\"VariantCaller\">') "
+        "--remove \"^INF/DP,INF/CSQ\",\"^FMT/GT,FMT/AD,FMT/AF\" {input} "
+    "| "
+    "bcftools annotate "
+        "--remove \"INFO/CALLER=MUTECT2\" - "
+    "| "
+    "bcftools annotate -a {params.MVL} -Oz "
+        "-c CHROM,POS --mark-sites +\"MSK_MVL\" "
+    " > {output.vcf}; "
+    "HEADER=`bcftools view -h {input} | sed -n '/Consequence annotations/p' | sed 's/#.* //g;s/\">//g'`; "
+    "bcftools view -f .,PASS {output.vcf} "
+    "| "
+    "bcftools query --print-header "
+        "-f \'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER\\t[%AD{{0}}\\t][%AD{{1}}\\t][%AF\\t]%CSQ\\t%MSK_MVL\\n\' "
+        "-s TUMOR "
+    "| "
+    "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
+        "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \",\"\",$0); "
+                  "for (i=1; i<=NF; i++) gsub(/\[[[:digit:]]*\]/,\"\",$i); "
+                  "print $1,$2,$3,$4,$5,$6,\"DP\",$7,$8,\"FILTERED\",$11,$10 }}"
+        " NR>1 {{ print $1,$2,$3,$4,$5,$6,\"NA\",$7,$8,\"NA\",$11,$10 }}'"
+    "| "
+    "awk -v H=$HEADER -v OFS=\"\\t\" "
+        "'NR==1 {{C=split(H,h,\"|\");"
+        " sep=\"\\t\"; for (i=1; i<=C; i++) {{if (i==1) s = h[i]; else s = s sep h[i]}}; "
+        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} "
+        " NR>1 {{split($12,a,\",\"); for (x in a) {{ C=split(a[x],b,\"|\"); "
+        " sep=\"\\t\"; for (i=1; i<=C; i++) {{ if (b[i]==\"\") b[i]=\".\"; if (i==1) s = b[i]; else s = s sep b[i]}}; "
+        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} }}' "
+    "| awk -v OFS=\"\\t\" '{{ split($12,a,\"&\"); for (i in a) {{ $12=a[i]; print; }} }}' "
+    "| bgzip > {output.tbl}"
