@@ -16,6 +16,7 @@
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("data.table"))
 suppressPackageStartupMessages(library("stargazer"))
+#suppressPackageStartupMessages(library("bit64"))
 
 option_list <- list(
                     make_option(c("-i", "--infile"), type="character",

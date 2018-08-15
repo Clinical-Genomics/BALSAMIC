@@ -13,7 +13,7 @@ var_type = "SNV"
 
 rule bcftools_SNV_update_variant_ID:
   input:
-    vcf_dir + var_type + "/" + "{vcf}.vcf.gz"
+    vcf = vcf_dir + var_type + "/" + "{vcf}.vcf.gz"
   output:
     vcf_dir + var_type + "/" + "id.{vcf}.vcf.gz"
   params:
@@ -23,7 +23,7 @@ rule bcftools_SNV_update_variant_ID:
     "source activate {params.conda};"
     "bcftools view "
       "--apply-filter .,PASS "
-      "{input} "
+      "{input.vcf} "
     "| bcftools norm -Oz -m-any "
     "| bcftools norm -Oz -f {params.ref_fa} "
     "| bcftools annotate -Oz "
@@ -48,7 +48,6 @@ rule bcftools_SV_update_variant_ID:
       "--apply-filter .,PASS "
       "{input} "
     "| bcftools norm -Oz -m-any "
-    "| bcftools norm -Oz -f {params.ref_fa} "
     "| bcftools annotate -Oz "
       "-x 'ID' -I +'%CHROM:%POS:%REF:%ALT' "
     "> {output} ; "
