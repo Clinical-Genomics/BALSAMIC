@@ -44,6 +44,19 @@ rule vep_annotate_SNV:
     "tabix -f -p vcf {output.vcf};"
     "source deactivate; "
 
+rule vep_merge_SNV:
+  input:
+    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV"))
+  output:
+    vep_dir + "vep_" + "SNV" + ".merged.table" 
+  shell:
+    "for i in {input}; do zcat $i | awk 'NR==1'; done | "
+    "awk -v OFS=\"\\t\" '{{$7=\"TUMOR_DP\"; $8=\"TUMOR_AD_REF\"; $9=\"TUMOR_AD_ALT\"; print}}' | "
+    "sort -u > {output}; "
+    "touch {output}.tmp; "
+    "for i in {input}; do zcat $i | awk 'NR>1' >> {output}.tmp; done; "
+    "sort -k1,1 -k2,2g -k6,6r {output}.tmp >> {output}; "
+
 rule vep_annotate_SV:
   input:
     vcf_sv_dir + "{sv_vcf}" + ".vcf.gz"
