@@ -19,7 +19,7 @@
                     "stop_gained", "stop_lost", "start_lost",
                     "splice_acceptor_variant", "splice_donor_variant", 
                     "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant"},
-            "INDEL": {"frameshift_variant", "frameshift", "non-frameshit"}
+            "INDEL": {"frameshift_variant", "frameshift", "non-frameshift"}
         }
     },
     "set_2": {
@@ -37,7 +37,7 @@
                     "stop_gained", "stop_lost", "start_lost",
                     "splice_acceptor_variant", "splice_donor_variant", 
                     "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant"},
-            "INDEL": {"frameshift_variant", "frameshift", "non-frameshit"}
+            "INDEL": {"frameshift_variant", "frameshift", "non-frameshift"}
         }
     },
     "set_3": {
@@ -55,7 +55,7 @@
                     "stop_gained", "stop_lost", "start_lost",
                     "splice_acceptor_variant", "splice_donor_variant", 
                     "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant"},
-            "INDEL": {"frameshift_variant", "frameshift", "non-frameshit"}
+            "INDEL": {"frameshift_variant", "frameshift", "non-frameshift"}
         }
     },
     "set_4": {
@@ -73,7 +73,7 @@
                     "stop_gained", "stop_lost", "start_lost",
                     "splice_acceptor_variant", "splice_donor_variant", 
                     "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant"},
-            "INDEL": {"frameshift_variant", "frameshift", "non-frameshit"}
+            "INDEL": {"frameshift_variant", "frameshift", "non-frameshift"}
         }
     },
     "set_5": {
@@ -91,7 +91,7 @@
                     "stop_gained", "stop_lost", "start_lost",
                     "splice_acceptor_variant", "splice_donor_variant", 
                     "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant"},
-            "INDEL": {"frameshift_variant", "frameshift", "non-frameshit"}
+            "INDEL": {"frameshift_variant", "frameshift", "non-frameshift"}
         }
     }
 
