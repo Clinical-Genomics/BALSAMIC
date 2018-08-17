@@ -101,5 +101,5 @@ rule vardict_simple:
         " NR>1 {{split($12,a,\",\"); for (x in a) {{ C=split(a[x],b,\"|\"); "
         " sep=\"\\t\"; for (i=1; i<=C; i++) {{ if (b[i]==\"\") b[i]=\".\"; if (i==1) s = b[i]; else s = s sep b[i]}}; "
         " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} }}' "
-    "| awk -v OFS=\"\\t\" '{{ split($12,a,\"&\"); for (i in a) {{ $12=a[i]; print; }} }}' "
+    "| awk -v OFS=\"\\t\" '{{ split($13,a,\"&\"); for (i in a) {{ $13=a[i]; print; }} }}' "
     "| bgzip > {output.tbl}"
