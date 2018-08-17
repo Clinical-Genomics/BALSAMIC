@@ -58,3 +58,4 @@ rule all:
     expand(vep_dir + "vep_" + "{vcf}", vcf=list(get_vcf_files(config, "SNV") + get_vcf_files(config, "SV"))),
     expand(vep_dir + "vep_simple_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
     expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
+    vep_dir + "vep_" + "SNV" + ".merged.table",
