@@ -3,6 +3,11 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [1.13.1] - 2018-08-17
+### Fixed
+- fixed a typo in MSKMVL config
+- fixed a bug in strelka\_simple for correct column orders
+
 ## [1.13.0] - 2018-08-10
 ### Added
 - rule for all three variant callers for paired analysis now generate a simple VCF file
