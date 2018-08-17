@@ -12,7 +12,8 @@
         "TUMOR": {
             "DP": "20",
             "AD": "8",
-            "AF": "0.02"
+            "AF_max": "0.05",
+            "AF_min": "0.02"
         },
         "annotation": {
             "SNV": {"missense_variant", "nonsynonymous_variant",
@@ -30,6 +31,7 @@
         "TUMOR": {
             "DP": "20",
             "AD": "10",
+            "AF_max": "0.05",
             "AF": "0.05"
         },
         "annotatoin": {
@@ -48,6 +50,7 @@
         "TUMOR": {
             "DP": "20",
             "AD": "8",
+            "AF_max": "0.05",
             "AF": "0.02"
         },
         "annotation": {
@@ -66,6 +69,7 @@
         "TUMOR": {
             "DP": "20",
             "AD": "8",
+            "AF_max": "0.05",
             "AF": "0.02"
         },
         "annotation": {
@@ -84,6 +88,7 @@
         "TUMOR": {
             "DP": "20",
             "AD": "8",
+            "AF_max": "0.05",
             "AF": "0.02"
         },
         "annotation": {
