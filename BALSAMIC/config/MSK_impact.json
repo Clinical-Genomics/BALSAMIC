@@ -8,7 +8,7 @@
         "VF_ratio": "5",
         "name": "MSK-IMPACT high confidence",
         "in_mvl": "True",
-        "variantcaller": "mutect2",
+        "variantcaller": {"MUTECT2"},
         "TUMOR": {
             "DP": "20",
             "AD": "8",
@@ -27,7 +27,7 @@
         "VF_ratio": "5",
         "name": "MSK-IMPACT low confidence",
         "in_mvl": "False",
-        "variantcaller": "mutect2",
+        "variantcaller": {"MUTECT2"},
         "TUMOR": {
             "DP": "20",
             "AD": "10",
@@ -46,7 +46,7 @@
         "VF_ratio": "5",
         "name": "Discovery High confidence",
         "in_mvl": "True",
-        "variantcaller": "any",
+        "variantcaller": {"MUTECT2", "VARDICT", "STRELKA"},
         "TUMOR": {
             "DP": "20",
             "AD": "8",
@@ -65,7 +65,7 @@
         "VF_ratio": "5",
         "name": "Discovery low confidence",
         "in_mvl": "False",
-        "variantcaller": "any",
+        "variantcaller": {"MUTECT2", "VARDICT", "STRELKA"},
         "TUMOR": {
             "DP": "20",
             "AD": "8",
@@ -84,7 +84,7 @@
         "VF_ratio": "1",
         "name": "Discovery extra",
         "in_mvl": "False",
-        "variantcaller": "any",
+        "variantcaller": {"MUTECT2", "VARDICT", "STRELKA"},
         "TUMOR": {
             "DP": "20",
             "AD": "8",
