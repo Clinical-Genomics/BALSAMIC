@@ -21,23 +21,35 @@ suppressPackageStartupMessages(library("stargazer"))
 option_list <- list(
                     make_option(c("-i", "--infile"), type="character",
                                 help="Input coverage analysis of Sambamba for exons.", metavar="character"),
-                    make_option(c("--dp"), type="integer"),
-                    make_option(c("-F","--afmax"), type="double"),
-                    make_option(c("-f","--afmin"), type="double"),
-                    make_option(c("-a","--tumorad"), type="double"),
-                    make_option(c("-m","--inMVL"), type="logical"),
-                    make_option(c("--vartype"), type="character"),
-                    make_option(c("--varcaller"), type="character"),
-                    make_option(c("--ann"), type="character"),
-                    make_option(c("--name"), type="character"),
-                    make_option(c("--num"), type="integer"),
-                    make_option(c("--inExon"), type="logical"),
-                    make_option(c("--inGene"), type="logical"),
-                    make_option(c("--exportGene"), type="logical"),
+                    make_option(c("--dp"), type="integer", help="Total read depth filter [default %default].",
+                                default=100),
+                    make_option(c("-F","--afmax"), type="double", help="Maximum tumor AF filter [default %default].",
+                                default=0.05),
+                    make_option(c("-f","--afmin"), type="double", help="Minimum tumor AF filter [default %default].",
+                                default=0.01),
+                    make_option(c("-a","--tumorad"), type="double", help="Allelic depth for alternative allele in tumor
+                                [default %default].", default=10),
+                    make_option(c("-m","--inMVL"), type="logical", help="Flag to filter variant in MVL or not [default
+                                %default].", default=FALSE),
+                    make_option(c("--vartype"), type="character", help="Variant type filter. The value must exist in the
+                                TYPE column [default %default]", default="SNP"),
+                    make_option(c("--varcaller"), type="character", help="Variant caller name filter. Choose from:
+                                STRELKA, MUTECT2, VARDICT, or ANY. Use multiple variant caller names sepraterd by comma and no space in between. [default %default].",
+                                default="VARDICT"),
+                    make_option(c("--ann"), type="character", help="Annotation string to exact match and filter.
+                                [default %default].", default="missense_variant"),
+                    make_option(c("--name"), type="character", help="A name for the output table [default %default].",
+                                default="Variant filter table"),
+                    make_option(c("--inExon"), type="logical", help="A flag to select variants that are only found in
+                                exons [default %default]", default=TRUE),
+                    make_option(c("--inGene"), type="logical", help="A flag to select variants that have a gene symbol
+                                annotation [default %default]", default=TRUE),
+                    make_option(c("--exportGene"), type="logical", help="A flag to not output the table, instead comma
+                                separated list of genes [default %default]", default=FALSE),
                     make_option(c("-t", "--type"), type="character", default="text",
-                                help="Output table type format for exon coverage report [default %default].", metavar="character"),
+                                help="Output table fortmat type. Choose from: text, latex, html. And output file name is required for html and latex [default %default].", metavar="character"),
                     make_option(c("-o", "--outfile"), type="character",
-                                help="In case of PDF, output file name [default infile.Coverage.pdf].", metavar="character"),
+                                help="In case of PDF, output file name.", metavar="character"),
                     make_option(c("-v", "--verbose"), action="store_true", default=FALSE,
                                 help="Print some extra output [default %default]")
                     )
@@ -57,6 +69,11 @@ outfile <- arg$outfile
 if (is.null(file)){
   print_help(opt_parser)
   stop("An input is required.", call.=FALSE)
+}
+
+if (is.null(outfile) && arg$type != "text"){
+  print_help(opt_parser)
+  stop("An output is required for non text output type.", call.=FALSE)
 }
 
 if (! arg$verbose ) {
@@ -122,10 +139,9 @@ if (arg$inGene) {
 }
 
 dt = dt[,
-       .(Chr = CHROM,
-         Pos = POS,
+       .("Chr:Pos" = paste0(CHROM,":",POS),
          "Ref/Alt" = paste0(REF,"/",ALT),
-         "Var Caller" = ConcatVarCall(paste(unique(c(CALLER)), collapse = "/")),
+         "Caller" = ConcatVarCall(paste(unique(c(CALLER)), collapse = "/")),
          "CallerCount" = length(unique(c(CALLER))),
          "DP (Ref/Alt)" = paste0(floor(mean(TUMOR_AD_REF + TUMOR_AD_ALT)),
                                  "(",
@@ -139,14 +155,25 @@ dt = dt[,
        ,by=.(ID)]
 
 dt = unique(dt)
-dt = dt[,c("Chr", "Pos", "Ref/Alt", "Var Caller", "DP (Ref/Alt)", "AF", "Gene", "Consequence", "Features")]
+dt = dt[,c("Chr:Pos", "Ref/Alt", "Caller", "DP (Ref/Alt)", "AF", "Gene", "Consequence", "Features")]
 
 if (arg$exportGene) {
   print(paste(unlist(unique(dt[, c("Gene")])), collapse=","))
+} else {
+  if (arg$type == "text") {
+
+    stargazer(dt, summary = FALSE, type = "text", title = table_name,
+              digit.separator = "", rownames = F, style = "io",
+              notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
+                        paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))))
+  } else {
+    sink("/dev/null")    
+    stargazer(dt, summary = FALSE, type = arg$type, title = table_name,
+              digit.separator = "", rownames = F, style = "io", float = T,
+              notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
+                        paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))),
+              header = F, out.header = F, out = arg$outfile)
+    sink()
+  }
 }
-stargazer(dt, summary = FALSE, type = "text", title = paste0("Table ", table_num, ": ", table_name),
-          digit.separator = "",
-          notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
-                    paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))))#,
-#          out.header = T, out = "notebook_data/OTT3801A3_R.sorted.rmdup.exon.cov.bed.report")
 
