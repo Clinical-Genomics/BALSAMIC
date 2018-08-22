@@ -8,7 +8,7 @@
         "set_1": {
             "VF_ratio": "5",
             "name": "MSK-IMPACT high confidence",
-            "in_mvl": "True",
+            "in_mvl": "T",
             "variantcaller": ["MUTECT2"],
             "TUMOR": {
                 "DP": "20",
@@ -30,7 +30,7 @@
         "set_2": {
             "VF_ratio": "5",
             "name": "MSK-IMPACT low confidence",
-            "in_mvl": "False",
+            "in_mvl": "F",
             "variantcaller": ["MUTECT2"],
             "TUMOR": {
                 "DP": "20",
@@ -38,7 +38,7 @@
                 "AF_max": "0.05",
                 "AF": "0.05"
             },
-            "annotatoin": {
+            "annotation": {
                 "SNV": [
                     "missense_variant", "nonsynonymous_variant", "stop_gained",
                     "stop_lost", "start_lost", "splice_acceptor_variant",
@@ -52,7 +52,7 @@
         "set_3": {
             "VF_ratio": "5",
             "name": "Discovery High confidence",
-            "in_mvl": "True",
+            "in_mvl": "T",
             "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
             "TUMOR": {
                 "DP": "20",
@@ -74,7 +74,7 @@
         "set_4": {
             "VF_ratio": "5",
             "name": "Discovery low confidence",
-            "in_mvl": "False",
+            "in_mvl": "F",
             "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
             "TUMOR": {
                 "DP": "20",
@@ -96,7 +96,7 @@
         "set_5": {
             "VF_ratio": "1",
             "name": "Discovery extra",
-            "in_mvl": "False",
+            "in_mvl": "F",
             "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
             "TUMOR": {
                 "DP": "20",
