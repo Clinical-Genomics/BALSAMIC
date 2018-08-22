@@ -12,6 +12,7 @@
         "BAM_rmdup": "123123123"
     },
     "vcf": {
+        "merged": {"SNV": "/mnt/hds/proj/bioinfo/BALSAMIC_analysis/analyses/TEST_OTT3801A1_vs_OTT3801A3/results/vep/vep_SNV.merged.table"},
         "strelka": {
             "All": "123123",
             "Passed": "123123",
