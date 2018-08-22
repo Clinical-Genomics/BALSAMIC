@@ -4,109 +4,116 @@
     "reference_documents":
     ["https://www.accessdata.fda.gov/cdrh_docs/reviews/DEN170058.pdf"],
     "base_line": {},
-    "set_1": {
-        "VF_ratio": "5",
-        "name": "MSK-IMPACT high confidence",
-        "in_mvl": "True",
-        "variantcaller": ["MUTECT2"],
-        "TUMOR": {
-            "DP": "20",
-            "AD": "8",
-            "AF_max": "0.05",
-            "AF_min": "0.02"
+    "filters": {
+        "set_1": {
+            "VF_ratio": "5",
+            "name": "MSK-IMPACT high confidence",
+            "in_mvl": "True",
+            "variantcaller": ["MUTECT2"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "8",
+                "AF_max": "0.05",
+                "AF_min": "0.02"
+            },
+            "annotation": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
         },
-        "annotation": {
-            "SNV": [
-                "missense_variant", "nonsynonymous_variant", "stop_gained",
-                "stop_lost", "start_lost", "splice_acceptor_variant",
-                "splice_donor_variant", "splice_donor_5th_base_variant",
-                "splice_site_variant", "splicing_variant"
-            ],
-            "INDEL": ["frameshift_variant", "frameshift", "non-frameshift"]
-        }
-    },
-    "set_2": {
-        "VF_ratio": "5",
-        "name": "MSK-IMPACT low confidence",
-        "in_mvl": "False",
-        "variantcaller": ["MUTECT2"],
-        "TUMOR": {
-            "DP": "20",
-            "AD": "10",
-            "AF_max": "0.05",
-            "AF": "0.05"
+        "set_2": {
+            "VF_ratio": "5",
+            "name": "MSK-IMPACT low confidence",
+            "in_mvl": "False",
+            "variantcaller": ["MUTECT2"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "10",
+                "AF_max": "0.05",
+                "AF": "0.05"
+            },
+            "annotatoin": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
         },
-        "annotatoin": {
-            "SNV": [
-                "missense_variant", "nonsynonymous_variant", "stop_gained",
-                "stop_lost", "start_lost", "splice_acceptor_variant",
-                "splice_donor_variant", "splice_donor_5th_base_variant",
-                "splice_site_variant", "splicing_variant"
-            ],
-            "INDEL": ["frameshift_variant", "frameshift", "non-frameshift"]
-        }
-    },
-    "set_3": {
-        "VF_ratio": "5",
-        "name": "Discovery High confidence",
-        "in_mvl": "True",
-        "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
-        "TUMOR": {
-            "DP": "20",
-            "AD": "8",
-            "AF_max": "0.05",
-            "AF": "0.02"
+        "set_3": {
+            "VF_ratio": "5",
+            "name": "Discovery High confidence",
+            "in_mvl": "True",
+            "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "8",
+                "AF_max": "0.05",
+                "AF": "0.02"
+            },
+            "annotation": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
         },
-        "annotation": {
-            "SNV": [
-                "missense_variant", "nonsynonymous_variant", "stop_gained",
-                "stop_lost", "start_lost", "splice_acceptor_variant",
-                "splice_donor_variant", "splice_donor_5th_base_variant",
-                "splice_site_variant", "splicing_variant"
-            ],
-            "INDEL": ["frameshift_variant", "frameshift", "non-frameshift"]
-        }
-    },
-    "set_4": {
-        "VF_ratio": "5",
-        "name": "Discovery low confidence",
-        "in_mvl": "False",
-        "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
-        "TUMOR": {
-            "DP": "20",
-            "AD": "8",
-            "AF_max": "0.05",
-            "AF": "0.02"
+        "set_4": {
+            "VF_ratio": "5",
+            "name": "Discovery low confidence",
+            "in_mvl": "False",
+            "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "8",
+                "AF_max": "0.05",
+                "AF": "0.02"
+            },
+            "annotation": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
         },
-        "annotation": {
-            "SNV": [
-                "missense_variant", "nonsynonymous_variant", "stop_gained",
-                "stop_lost", "start_lost", "splice_acceptor_variant",
-                "splice_donor_variant", "splice_donor_5th_base_variant",
-                "splice_site_variant", "splicing_variant"
-            ],
-            "INDEL": ["frameshift_variant", "frameshift", "non-frameshift"]
-        }
-    },
-    "set_5": {
-        "VF_ratio": "1",
-        "name": "Discovery extra",
-        "in_mvl": "False",
-        "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
-        "TUMOR": {
-            "DP": "20",
-            "AD": "8",
-            "AF_max": "0.05",
-            "AF": "0.02"
-        },
-        "annotation": {
-            "SNV": [
-                "missense_variant", "nonsynonymous_variant", "stop_gained",
-                "stop_lost", "start_lost", "splice_acceptor_variant",
-                "splice_donor_variant", "splice_donor_5th_base_variant",
-                "splice_site_variant", "splicing_variant"
-            ],
-            "INDEL": ["frameshift_variant", "frameshift", "non-frameshift"]
+        "set_5": {
+            "VF_ratio": "1",
+            "name": "Discovery extra",
+            "in_mvl": "False",
+            "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "8",
+                "AF_max": "0.05",
+                "AF": "0.02"
+            },
+            "annotation": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
         }
     }
 }
