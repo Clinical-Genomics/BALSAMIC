@@ -1,3 +1,5 @@
+import os
+import subprocess
 import json
 import click
 
@@ -16,14 +18,7 @@ def extractSampleName(config):
 
 def extractVCFstat():
 
-    variant_stat = [
-        "21",
-        "15479624",
-        "G",
-        "T",
-        "SNV",
-        "300/0.01"
-    ]
+    variant_stat = ["21", "15479624", "G", "T", "SNV", "300/0.01"]
 
     return variant_stat
 
@@ -62,6 +57,7 @@ def countVCF(config, var_caller, flag):
 
     return vcf_count
 
+
 def varCallerSummary(config, var_caller):
 
     row = [var_caller]
@@ -76,25 +72,32 @@ def varCallerSummary(config, var_caller):
 
     return row
 
+
 @click.command("report", short_help="Report generator for workflow results")
-@click.option('-j','--json-report',
-#              required=True,
-              type=click.Path(),
-              help='Input JSON file from workflow output')
-@click.option('--var-table',
-              multiple=True,
-              required=True,
-              type=click.Path(),
-              help='Input variant table tex file')
-@click.option('-r','--rulegraph-img',
-#              required=True,
-              type=click.Path(),
-              help='Input rulegraph from workflow output')
+@click.option(
+    '-j',
+    '--json-report',
+    required=True,
+    type=click.Path(),
+    help='Input JSON file from workflow output')
+@click.option(
+    '-c',
+    '--json-varreport',
+    required=True,
+    type=click.Path(),
+    help='Input JSON file for variant filters')
+@click.option(
+    '-r',
+    '--rulegraph-img',
+    #              required=True,
+    type=click.Path(),
+    help='Input rulegraph from workflow output')
 @click.pass_context
-def report(context, json_report, rulegraph_img, var_table):
+def report(context, json_report, json_varreport, rulegraph_img):
 
     config = json_report
-    sample_config = json.load(open(config))
+    sample_config = json.load(open(json_report))
+    var_config = json.load(open(json_varreport))
 
     geometry_options = {
         "tmargin": "2.5cm",
@@ -107,8 +110,11 @@ def report(context, json_report, rulegraph_img, var_table):
     doc.packages.append(Package('lscape'))
     doc.packages.append(Package('longtable'))
     doc.packages.append(Package('caption', options='labelfont=bf'))
-    doc.append(NoEscape(r'\captionsetup[table]{labelsep=space, justification=raggedright, singlelinecheck=off}'))
-    
+    doc.append(
+        NoEscape(
+            r'\captionsetup[table]{labelsep=space, justification=raggedright, singlelinecheck=off}'
+        ))
+
     doc.preamble.append(
         Command('title', NoEscape(r'BALSAMIC 0.1 \\ \large Developer Report')))
     doc.preamble.append(
@@ -119,10 +125,11 @@ def report(context, json_report, rulegraph_img, var_table):
     with doc.create(Section(title='Pipeline', numbering=False)):
         with doc.create(
                 Subsection('Summary of alignment report', numbering=False)):
-            doc.append(
-                "Of total of " + countReads(config=sample_config, flag="fastq") +
-                " paired reads from fastq files, ")
-            doc.append("where  " + countReads(config=sample_config, flag="bam") +
+            doc.append("Of total of " +
+                       countReads(config=sample_config, flag="fastq") +
+                       " paired reads from fastq files, ")
+            doc.append("where  " +
+                       countReads(config=sample_config, flag="bam") +
                        " were aligned to reference genome. ")
             doc.append(
                 "Applying quality control measures (removing duplicates), there were  "
@@ -133,16 +140,36 @@ def report(context, json_report, rulegraph_img, var_table):
         with doc.create(
                 Subsection(
                     'Summary of variant calling report', numbering=False)):
-            
-            for i in var_table:
-                #doc.append(NoEscape(r'\begin{landscape}'))
-                with open(i, 'r') as myfile:
-                    varreport=myfile.read().replace('\n', '')
-                #doc.append(NoEscape(r'\end{landscape}'))
-                #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
-                #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
-                #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
-                doc.append(NoEscape(varreport.replace("\\centering", "\\tiny")))
+            out = dict()
+            for i in var_config["filters"]:
+                shellcmd = [
+                    os.path.join(
+                        os.path.dirname(os.path.abspath(__file__)), "..",
+                        "R_scripts/VariantReport.R")
+                ]
+                shellcmd.extend([
+                    "--infile", sample_config["vcf"]["merged"]["SNV"], "--dp",
+                    var_config["filters"][i]["TUMOR"]["DP"], "--tumorad",
+                    var_config["filters"][i]["TUMOR"]["AD"], "--inMVL",
+                    var_config["filters"][i]["in_mvl"], "--vartype", "SNP",
+                    "--varcaller", ",".join(
+                        var_config["filters"][i]["variantcaller"]), "--ann",
+                    ",".join(var_config["filters"][i]["annotation"]["SNV"]),
+                    "--name", var_config["filters"][i]["name"], "--type",
+                    "latex"
+                ])
+                print(" ".join(shellcmd))
+                out[i] = subprocess.check_output(shellcmd)
+                if out[i] != b"FALSE\n":
+                    #doc.append(NoEscape(r'\begin{landscape}'))
+                    #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
+                    #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
+                    #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
+                    doc.append(
+                        NoEscape(out[i].decode('utf-8').replace(
+                            "\\centering", "\\tiny")))
+                    #doc.append(NoEscape(r'\end{landscape}'))
+
             doc.append(NoEscape(r'\normalsize'))
 
 #        with doc.create(Figure(position='h!')) as pipeline_img:
@@ -152,6 +179,7 @@ def report(context, json_report, rulegraph_img, var_table):
 #            pipeline_img.add_caption('Awesome pipeline')
 
     doc.generate_pdf('full', clean_tex=False)
+
 
 #            for var_caller in sample_config["vcf"]:
 #                with doc.create(Subsubsection(var_caller, numbering=False)):
@@ -204,5 +232,3 @@ def report(context, json_report, rulegraph_img, var_table):
 #                row = varCallerSummary( config=sample_config, var_caller=var_caller)
 #                data_table.add_row(row)
 #            data_table.add_hline()
-
-
