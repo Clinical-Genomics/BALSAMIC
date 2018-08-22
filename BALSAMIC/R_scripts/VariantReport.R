@@ -71,10 +71,10 @@ if (is.null(file)){
   stop("An input is required.", call.=FALSE)
 }
 
-if (is.null(outfile) && arg$type != "text"){
-  print_help(opt_parser)
-  stop("An output is required for non text output type.", call.=FALSE)
-}
+#if (is.null(outfile) && arg$type != "text"){
+#  print_help(opt_parser)
+#  stop("An output is required for non text output type.", call.=FALSE)
+#}
 
 if (! arg$verbose ) {
   options( warn = 0 )
@@ -113,7 +113,7 @@ ConcatVarCall <- function(x) {
     return(x)
 }
 
-sample.coverage = fread(arg$infile)
+sample.coverage = fread(arg$infile, showProgress=F)
 sample.coverage[,ID:=paste0(CHROM,"_",POS,"_",REF,"_",ALT)]
 options(repr.matrix.max.cols = 80)
 
@@ -157,23 +157,26 @@ dt = dt[,
 dt = unique(dt)
 dt = dt[,c("Chr:Pos", "Ref/Alt", "Caller", "DP (Ref/Alt)", "AF", "Gene", "Consequence", "Features")]
 
-if (arg$exportGene) {
-  print(paste(unlist(unique(dt[, c("Gene")])), collapse=","))
+if (nrow(dt)==0) {
+  write("FALSE","")
 } else {
-  if (arg$type == "text") {
-
-    stargazer(dt, summary = FALSE, type = "text", title = table_name,
-              digit.separator = "", rownames = F, style = "io",
-              notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
-                        paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))))
+  if (arg$exportGene) {
+    print(paste(unlist(unique(dt[, c("Gene")])), collapse=","))
   } else {
-    sink("/dev/null")    
-    stargazer(dt, summary = FALSE, type = arg$type, title = table_name,
-              digit.separator = "", rownames = F, style = "io", float = T,
-              notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
-                        paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))),
-              header = F, out.header = F, out = arg$outfile)
-    sink()
+    if (arg$type == "text") {
+
+      stargazer(dt, summary = FALSE, type = "text", title = table_name,
+                digit.separator = "", rownames = F, style = "io",
+                notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
+                          paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))))
+    } else {
+#      sink("/dev/null")    
+      stargazer(dt, summary = FALSE, type = arg$type, title = table_name,
+                digit.separator = "", rownames = F, style = "io", float = T,
+                notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
+                          paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))),
+                header = F, out.header = F)#, out = arg$outfile)
+#      sink()
+    }
   }
 }
-
