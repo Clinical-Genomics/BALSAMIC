@@ -161,7 +161,7 @@ if (nrow(dt)==0) {
   write("FALSE","")
 } else {
   if (arg$exportGene) {
-    print(paste(unlist(unique(dt[, c("Gene")])), collapse=","))
+    write(paste(unlist(unique(dt[, c("Gene")])), collapse=","), "")
   } else {
     if (arg$type == "text") {
 
@@ -172,6 +172,7 @@ if (nrow(dt)==0) {
     } else {
 #      sink("/dev/null")    
       stargazer(dt, summary = FALSE, type = arg$type, title = table_name,
+                table.placement = "H",
                 digit.separator = "", rownames = F, style = "io", float = T,
                 notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
                           paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))),
