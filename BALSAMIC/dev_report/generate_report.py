@@ -109,6 +109,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
     doc = Document(geometry_options=geometry_options)
     doc.packages.append(Package('lscape'))
     doc.packages.append(Package('longtable'))
+    doc.packages.append(Package('float'))
     doc.packages.append(Package('caption', options='labelfont=bf'))
     doc.append(
         NoEscape(
@@ -122,26 +123,44 @@ def report(context, json_report, json_varreport, rulegraph_img):
     doc.preamble.append(Command('date', NoEscape(r'\today')))
     doc.append(NoEscape(r'\maketitle'))
 
-    with doc.create(Section(title='Pipeline', numbering=False)):
+    with doc.create(Section(title='Analysis report', numbering=True)):
         with doc.create(
-                Subsection('Summary of alignment report', numbering=False)):
-            doc.append("Of total of " +
-                       countReads(config=sample_config, flag="fastq") +
-                       " paired reads from fastq files, ")
-            doc.append("where  " +
-                       countReads(config=sample_config, flag="bam") +
-                       " were aligned to reference genome. ")
+                Subsection('Summary of alignment report', numbering=True)):
             doc.append(
-                "Applying quality control measures (removing duplicates), there were  "
-                + countReads(config=sample_config, flag="bam_rmdup") +
-                " aligned reads left. For details of BAM file manipulation" +
-                " see Figure 1.")
+                "Placeholder for text about BAM alignment. Here comes the info on reads, "
+                +
+                "QC metrics, align metrics, and general sample information. preferabily in table format."
+            )
+            doc.append("\n")
+            fmt = "p{2cm}p{3cm}p{3cm}p{3cm}p{3cm}p{3cm}"
+            with doc.create(Tabular(fmt, pos="H")) as data_table:
+                header_row1 = [""]
+                for i in var_config["filters"]:
+                    header_row1.append(var_config["filters"][i]["name"])
+                print(header_row1)
+                data_table.add_hline()
+                data_table.add_row(header_row1, mapper=[bold])
+                data_table.add_hline()
+                data_table.add_empty_row()
+                column = list(var_config["filters"][next(
+                    iter(var_config["filters"]))]["TUMOR"].keys())
+                for i in column:
+                    row = [i]
+                    for j in var_config["filters"]:
+                        row.append(var_config["filters"][j]["TUMOR"][i])
+                    print(row)
+                    data_table.add_row(row)
+            data_table.add_hline()
 
-        with doc.create(
-                Subsection(
-                    'Summary of variant calling report', numbering=False)):
-            out = dict()
-            for i in var_config["filters"]:
+        with doc.create(Subsection("Summary of MVL report", numbering=True)):
+            doc.append(
+                "Placeholder for general description of MVL settings. A mention to summary "
+                +
+                "pipeline, summary of MVL settings. Gene coverage for identified genes should go here. Figures!"
+            )
+            outVar = dict()
+            outCov = dict()
+            for i in ["set_2"]:#var_config["filters"]:
                 shellcmd = [
                     os.path.join(
                         os.path.dirname(os.path.abspath(__file__)), "..",
@@ -159,24 +178,82 @@ def report(context, json_report, json_varreport, rulegraph_img):
                     "latex"
                 ])
                 print(" ".join(shellcmd))
-                out[i] = subprocess.check_output(shellcmd)
-                if out[i] != b"FALSE\n":
-                    #doc.append(NoEscape(r'\begin{landscape}'))
-                    #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
-                    #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
-                    #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
-                    doc.append(
-                        NoEscape(out[i].decode('utf-8').replace(
-                            "\\centering", "\\tiny")))
-                    #doc.append(NoEscape(r'\end{landscape}'))
+                outVar[i] = subprocess.check_output(shellcmd)
+                with doc.create(
+                        Subsubsection(
+                            var_config["filters"][i]["name"], numbering=True)):
+                    if outVar[i] != b"FALSE\n":
+                        shellcmd.extend(["--exportGene", "T"])
+                        print(" ".join(shellcmd))
+                        genes = subprocess.check_output(shellcmd).decode('utf-8')
+                        shellcmd = [
+                            os.path.join(
+                                os.path.dirname(os.path.abspath(__file__)), "..",
+                                "R_scripts/CoverageRep.R")
+                        ]
+                        shellcmd.extend([
+                            "--infile", sample_config["bed"]["exon_cov"],
+                            "--genename", genes, "--type", "latex"])
+                        print(genes)
+                        print(" ".join(shellcmd))
+                        outCov[i] = subprocess.check_output(shellcmd) 
+                        #doc.append(NoEscape(r'\begin{landscape}'))
+                        #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
+                        #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
+                        #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
+                        doc.append(
+                            NoEscape(outVar[i].decode('utf-8').replace(
+                                "\\centering", "\\tiny")))
+                        doc.append(
+                            NoEscape(outCov[i].decode('utf-8').replace(
+                                "\\centering", "\\tiny")))
+                        #doc.append(NoEscape(r'\end{landscape}'))
+                    else:
+                        doc.append("No variants were found for this filter")
+                break
 
-            doc.append(NoEscape(r'\normalsize'))
+                doc.append(NoEscape(r'\normalsize'))
 
-#        with doc.create(Figure(position='h!')) as pipeline_img:
-#            pipeline_img.add_image(
-#                rulegraph_img,
-#                width='300px')
-#            pipeline_img.add_caption('Awesome pipeline')
+        with doc.create(
+                Subsection(
+                    'Summary of variant calling report', numbering=True)):
+            doc.append("Variant calling reports and summaries go here")
+
+        with doc.create(Subsection('Analysis pipeline')):
+            with doc.create(Figure(position='h!')) as pipeline_img:
+                pipeline_img.add_image(rulegraph_img, width='450px')
+                pipeline_img.add_caption('Awesome pipeline')
+
+    with doc.create(Section(title="Appendix", numbering=True)):
+        with doc.create(Subsection("MVL settings", numbering=True)):
+            fmt = "p{2cm}p{3cm}p{3cm}p{3cm}p{3cm}p{3cm}"
+            with doc.create(Tabular(fmt)) as data_table:
+                header_row1 = [""]
+                for i in var_config["filters"]:
+                    header_row1.append(var_config["filters"][i]["name"])
+                print(header_row1)
+                data_table.add_hline()
+                data_table.add_row(header_row1, mapper=[bold])
+                data_table.add_hline()
+                data_table.add_empty_row()
+                column = list(var_config["filters"][next(
+                    iter(var_config["filters"]))]["TUMOR"].keys())
+                for i in column:
+                    row = [i]
+                    for j in var_config["filters"]:
+                        row.append(var_config["filters"][j]["TUMOR"][i])
+                    print(row)
+                    data_table.add_row(row)
+                
+                row = ["MVL"]
+                for i in var_config["filters"]:
+                    row.append(var_config["filters"][i]["in_mvl"])
+                
+                row = ["Variantcallers"]
+                for i in var_config["filters"]:
+                    row.append("\n".join(var_config["filters"][i]["variantcaller"]))
+                data_table.add_row(row)
+                data_table.add_hline()
 
     doc.generate_pdf('full', clean_tex=False)
 
