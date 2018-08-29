@@ -7,7 +7,7 @@
     "filters": {
         "set_1": {
             "VF_ratio": "5",
-            "name": "MSK-IMPACT high confidence",
+            "name": "'MSK-IMPACT high confidence'",
             "in_mvl": "T",
             "variantcaller": ["MUTECT2"],
             "TUMOR": {
@@ -29,14 +29,14 @@
         },
         "set_2": {
             "VF_ratio": "5",
-            "name": "MSK-IMPACT low confidence",
+            "name": "'MSK-IMPACT low confidence'",
             "in_mvl": "F",
             "variantcaller": ["MUTECT2"],
             "TUMOR": {
                 "DP": "20",
                 "AD": "10",
                 "AF_max": "0.05",
-                "AF": "0.05"
+                "AF_min": "0.02"
             },
             "annotation": {
                 "SNV": [
@@ -51,14 +51,14 @@
         },
         "set_3": {
             "VF_ratio": "5",
-            "name": "Discovery High confidence",
+            "name": "'Discovery High confidence'",
             "in_mvl": "T",
             "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
             "TUMOR": {
                 "DP": "20",
                 "AD": "8",
                 "AF_max": "0.05",
-                "AF": "0.02"
+                "AF_min": "0.02"
             },
             "annotation": {
                 "SNV": [
@@ -73,14 +73,14 @@
         },
         "set_4": {
             "VF_ratio": "5",
-            "name": "Discovery low confidence",
+            "name": "'Discovery low confidence'",
             "in_mvl": "F",
             "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
             "TUMOR": {
                 "DP": "20",
                 "AD": "8",
                 "AF_max": "0.05",
-                "AF": "0.02"
+                "AF_min": "0.02"
             },
             "annotation": {
                 "SNV": [
@@ -95,14 +95,14 @@
         },
         "set_5": {
             "VF_ratio": "1",
-            "name": "Discovery extra",
+            "name": "'Discovery extra'",
             "in_mvl": "F",
             "variantcaller": ["MUTECT2", "VARDICT", "STRELKA"],
             "TUMOR": {
                 "DP": "20",
                 "AD": "8",
                 "AF_max": "0.05",
-                "AF": "0.02"
+                "AF_min": "0.02"
             },
             "annotation": {
                 "SNV": [
