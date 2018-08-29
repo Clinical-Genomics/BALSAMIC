@@ -180,7 +180,8 @@ it is. So this is just a placeholder for future.
         sample_config["analysis"]["fastq_path"]=fastq_path+"/"
         sample_config["analysis"]["analysis_type"]=analysis_type
         sample_config["samples"]={}
-        sample_config["samples"][normal]={"file_prefix": normal, "type":"normal", "readpair_suffix":["1", "2"]}
+        if normal:
+            sample_config["samples"][normal]={"file_prefix": normal, "type":"normal", "readpair_suffix":["1", "2"]}
         sample_config["samples"][tumor]={"file_prefix": tumor, "type":"tumor", "readpair_suffix":["1", "2"]}
 
     json_out = merge_json(analysis_config, sample_config, reference_config,
