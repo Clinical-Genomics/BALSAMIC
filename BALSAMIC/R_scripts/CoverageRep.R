@@ -29,8 +29,8 @@ option_list <- list(
                                 help="Output table type format for exon coverage report [default %default].", metavar="character"),
                     make_option(c("-r", "--resolution"), type="integer", default=7,
                                 help="Print image resolution in inches, as an input to pdf() for heigh and width [default %default]"),
-                    make_option(c("-f", "--fontsize"), type="integer", default=12,
-                                help="Fontsize as an input to pointsize in pdf() for heigh and width [default %default]"),
+                    make_option(c("--name"), type="character", help="A name for the output table [default %default].",
+                                default="Coverage report"),
                     make_option(c("-o", "--outfile"), type="character",
                                 help="In case of PDF, output file name [default infile.Coverage.pdf].", metavar="character"),
                     make_option(c("-v", "--verbose"), action="store_true", default=FALSE,
@@ -72,7 +72,7 @@ if ( arg$verbose ) {
   write("Read coverage file.", stderr())
 }
 
-sample.coverage = fread(file)
+sample.coverage = fread(file, showProgress=F)
 
 fragLength = 100
 if (! is.null(arg$genename)) {
@@ -108,18 +108,7 @@ if (! is.null(arg$ensemble)) {
 }
 setnames(dt.gene, "F11", "geneID")
 
-stargazer(dt.gene, summary = FALSE, type = "text")
-
-if ( arg$verbose ) {
-  write("Converting data frame into mutation", stderr())
-}
-
-if ( arg$verbose ) {
-  write("Matching signatures with reference.", stderr())
-}
-
-#pdf(arg$outfile, width = arg$resolution, height = arg$resolution, pointsize = arg$fontsize)
-#plotSignatures(sample_sig)
-#garbage <- dev.off()
-
-
+stargazer(dt.gene, summary = FALSE, type = arg$type, title = arg$name,
+          #table.placement = "H",
+          digit.separator = "", rownames = F, style = "io", float = T,
+          header = F, out.header = F)
