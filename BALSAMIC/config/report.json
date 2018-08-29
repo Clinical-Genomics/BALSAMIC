@@ -1,15 +1,16 @@
 {
     "analysis": {
-        "sample_id": "AL-P-00065154",
+        "sample_id": "TEST_sample",
         "analysis_type": "paired"
     },
     "bed": {
-        "variant_panel": "big_design.slopped20.bed"
+        "variant_panel": "PANEL_name",
+        "exon_cov": "/mnt/hds/proj/bioinfo/BALSAMIC_analysis/analyses/TEST_OTT3801A1_vs_OTT3801A3/results/bam/OTT3801A3_R.sorted.rmdup.exon.cov.bed"
     },
     "Metrics": {
-        "fastq": "123123123",
-        "BAM": "123123123",
-        "BAM_rmdup": "123123123"
+        "fastq": "XXXXXXXX",
+        "BAM": "XXXXXXXX",
+        "BAM_rmdup": "XXXXXX"
     },
     "vcf": {
         "merged": {"SNV": "/mnt/hds/proj/bioinfo/BALSAMIC_analysis/analyses/TEST_OTT3801A1_vs_OTT3801A3/results/vep/vep_SNV.merged.table"},
