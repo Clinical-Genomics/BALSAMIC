@@ -19,47 +19,31 @@ suppressPackageStartupMessages(library("data.table"))
 suppressPackageStartupMessages(library("stargazer"))
 
 option_list <- list(
-                    make_option(c("-i", "--infile"), type="character",
-                                help="Input coverage analysis of Sambamba for exons.", metavar="character"),
-                    make_option(c("--dp"), type="integer", help="Total read depth filter [default %default].",
-                                default=100),
-                    make_option(c("-F","--afmax"), type="double", help="Maximum tumor AF filter [default %default].",
-                                default=0.05),
-                    make_option(c("-f","--afmin"), type="double", help="Minimum tumor AF filter [default %default].",
-                                default=0.01),
-                    make_option(c("-a","--tumorad"), type="double", help="Allelic depth for alternative allele in tumor
-                                [default %default].", default=10),
-                    make_option(c("-m","--inMVL"), type="logical", help="Flag to filter variant in MVL or not [default
-                                %default].", default=FALSE),
-                    make_option(c("--vartype"), type="character", help="Variant type filter. The value must exist in the
-                                TYPE column [default %default]", default="SNP"),
-                    make_option(c("--varcaller"), type="character", help="Variant caller name filter. Choose from:
-                                STRELKA, MUTECT2, VARDICT, or ANY. Use multiple variant caller names sepraterd by comma and no space in between. [default %default].",
-                                default="VARDICT"),
-                    make_option(c("--ann"), type="character", help="Annotation string to exact match and filter.
-                                [default %default].", default="missense_variant"),
-                    make_option(c("--name"), type="character", help="A name for the output table [default %default].",
-                                default="Variant filter table"),
-                    make_option(c("--inExon"), type="logical", help="A flag to select variants that are only found in
-                                exons [default %default]", default=TRUE),
-                    make_option(c("--inGene"), type="logical", help="A flag to select variants that have a gene symbol
-                                annotation [default %default]", default=TRUE),
-                    make_option(c("--exportGene"), type="logical", help="A flag to not output the table, instead comma
-                                separated list of genes [default %default]", default=FALSE),
-                    make_option(c("-t", "--type"), type="character", default="text",
-                                help="Output table fortmat type. Choose from: text, latex, html. And output file name is required for html and latex [default %default].", metavar="character"),
-                    make_option(c("-o", "--outfile"), type="character",
-                                help="In case of PDF, output file name.", metavar="character"),
-                    make_option(c("-v", "--verbose"), action="store_true", default=FALSE,
-                                help="Print some extra output [default %default]")
-                    )
+          make_option(c("-i", "--infile"), type="character", help="Input coverage analysis of Sambamba for exons.", metavar="character"),
+          make_option(c("--mode"), type="character", help="Run mode. Select one from the list: MVL,TMB,VarClass,VarCaller,VarCallerClass [default %default]", default="MVL"),
+          make_option(c("--dp"), type="integer", help="Total read depth filter [default %default].", default=100),
+          make_option(c("-F","--afmax"), type="double", help="Maximum tumor AF filter [default %default].", default=0.05),
+          make_option(c("-f","--afmin"), type="double", help="Minimum tumor AF filter [default %default].", default=0.01),
+          make_option(c("-a","--tumorad"), type="double", help="Allelic depth for alternative allele in tumor [default %default].", default=10),
+          make_option(c("-m","--inMVL"), type="logical", help="Flag to filter variant in MVL or not [default %default].", default=FALSE),
+          make_option(c("--vartype"), type="character", help="Variant type filter. The value must exist in the TYPE column [default %default]", default="SNP"),
+          make_option(c("--varcaller"), type="character", help="Variant caller name filter. Choose from: STRELKA, MUTECT2, VARDICT, or ANY. Use multiple variant caller names sepraterd by comma and no space in between. [default %default].", default="VARDICT"),
+          make_option(c("--ann"), type="character", help="Annotation string to exact match and filter. [default %default].", default="missense_variant"),
+          make_option(c("--name"), type="character", help="A name for the output table [default %default].", default="Variant filter table"),
+          make_option(c("--inExon"), type="logical", help="A flag to select variants that are only found in exons [default %default]", default=TRUE),
+          make_option(c("--inGene"), type="logical", help="A flag to select variants that have a gene symbol annotation [default %default]", default=TRUE),
+          make_option(c("--genomeSize"), type="integer", help="Genome or panel or exome size to calculate TMB"),
+          make_option(c("--exportGene"), type="logical", help="A flag to not output the table, instead comma separated list of genes [default %default]", default=FALSE),
+          make_option(c("-t", "--type"), type="character", default="text", help="Output table fortmat type. Choose from: text, latex, html. And output file name is required for html and latex [default %default].", metavar="character"),
+          make_option(c("-o", "--outfile"), type="character", help="In case of PDF, output file name.", metavar="character"),
+          make_option(c("-v", "--verbose"), action="store_true", default=FALSE, help="Print some extra output [default %default]")
+          )
 
 '
     %prog [options]
-    
+
     A script to report variants based on series of inputs. Data.table is sometimes faster than Pandas is aggregating
 results, thus it was developed in R instead of Python.
-
 ' -> usage
 opt_parser <- OptionParser(usage = usage, option_list=option_list);
 arg <- parse_args(opt_parser)
@@ -84,6 +68,7 @@ if (arg$inMVL) {
 } else {
   mvl = "."
 }
+
 af_max = arg$afmax
 af_min = arg$afmin
 var_type = arg$vartype
@@ -107,67 +92,179 @@ sample.coverage = fread(arg$infile, showProgress=F)
 sample.coverage[,ID:=paste0(CHROM,"_",POS,"_",REF,"_",ALT)]
 options(repr.matrix.max.cols = 80)
 
-dt = sample.coverage[CALLER %in% var_caller
-                     & MSK_MVL == mvl
-                     & (TUMOR_AD_REF + TUMOR_AD_ALT) >= dp
-                     & TUMOR_AD_ALT / (TUMOR_AD_REF + TUMOR_AD_ALT) <= af_max
-                     & TUMOR_AD_ALT / (TUMOR_AD_REF + TUMOR_AD_ALT) >= af_min
-                     & TUMOR_AD_ALT >= tumor_ad_alt
-                     & TYPE == var_type]
+if (arg$mode == "MVL") {
+    dt = sample.coverage[CALLER %in% var_caller
+                         & MSK_MVL == mvl
+                         & (TUMOR_AD_REF + TUMOR_AD_ALT) >= dp
+                         & TUMOR_AD_ALT / (TUMOR_AD_REF + TUMOR_AD_ALT) <= af_max
+                         & TUMOR_AD_ALT / (TUMOR_AD_REF + TUMOR_AD_ALT) >= af_min
+                         & TUMOR_AD_ALT >= tumor_ad_alt
+                         & TYPE == var_type]
 
-if (! is.null(arg$ann)) {
-  var_ann = unlist(strsplit(arg$ann, ",")) 
-  dt = dt[Consequence %in% var_ann]
-}
-
-if (arg$inExon) {
-  dt = dt[EXON != "."]
-}
-
-if (arg$inGene) {
-  dt = dt[SYMBOL != "."]
-}
-
-dt = dt[,
-       .("Chr:Pos" = paste0(CHROM,":",POS),
-         "Ref/Alt" = paste0(REF,"/",ALT),
-         "Caller" = ConcatVarCall(paste(unique(c(CALLER)), collapse = "/")),
-         "CallerCount" = length(unique(c(CALLER))),
-         "DP (Ref/Alt)" = paste0(floor(mean(TUMOR_AD_REF + TUMOR_AD_ALT)),
-                                 "(",
-                                 paste0(floor(mean(TUMOR_AD_REF)),"/", floor(mean(TUMOR_AD_ALT))),
-                                 ")"),
-         "AF" = mean(TUMOR_AD_ALT/(TUMOR_AD_REF + TUMOR_AD_ALT)),
-         "Consequence" = paste(unique(c(Consequence)), collapse = ", "),
-         "Gene" = SYMBOL,
-         "Features" = paste(unique(c(BIOTYPE)), collapse = ", ")
-        )
-       ,by=.(ID)]
-
-dt = unique(dt)
-dt = dt[,c("Chr:Pos", "Ref/Alt", "Caller", "DP (Ref/Alt)", "AF", "Gene", "Consequence", "Features")]
-
-if (nrow(dt)==0) {
-  write("FALSE","")
-} else {
-  if (arg$exportGene) {
-    write(paste(unlist(unique(dt[, c("Gene")])), collapse=","), "")
-  } else {
-    if (arg$type == "text") {
-
-      stargazer(dt, summary = FALSE, type = "text", title = table_name,
-                digit.separator = "", rownames = F, style = "io",
-                notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
-                          paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))))
-    } else {
-#      sink("/dev/null")    
-      stargazer(dt, summary = FALSE, type = arg$type, title = table_name,
-                table.placement = "H",
-                digit.separator = "", rownames = F, style = "io", float = T,
-                notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
-                          paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))),
-                header = F, out.header = F)#, out = arg$outfile)
-#      sink()
+    if (! is.null(arg$ann)) {
+      var_ann = unlist(strsplit(arg$ann, ",")) 
+      dt = dt[Consequence %in% var_ann]
     }
+
+    if (arg$inExon) {
+      dt = dt[EXON != "."]
+    }
+
+    if (arg$inGene) {
+      dt = dt[SYMBOL != "."]
+    }
+
+    dt = dt[,
+           .("Chr:Pos" = paste0(CHROM,":",POS),
+             "Ref/Alt" = paste0(REF,"/",ALT),
+             "Caller" = ConcatVarCall(paste(unique(c(CALLER)), collapse = "/")),
+             "CallerCount" = length(unique(c(CALLER))),
+             "DP (Ref/Alt)" = paste0(floor(mean(TUMOR_AD_REF + TUMOR_AD_ALT)),
+                                     "(",
+                                     paste0(floor(mean(TUMOR_AD_REF)),"/", floor(mean(TUMOR_AD_ALT))),
+                                     ")"),
+             "AF" = mean(TUMOR_AD_ALT/(TUMOR_AD_REF + TUMOR_AD_ALT)),
+             "Consequence" = paste(unique(c(Consequence)), collapse = ", "),
+             "Gene" = SYMBOL,
+             "Features" = paste(unique(c(BIOTYPE)), collapse = ", ")
+            )
+           ,by=.(ID)]
+
+    dt = unique(dt)
+    dt = dt[,c("Chr:Pos", "Ref/Alt", "Caller", "DP (Ref/Alt)", "AF", "Gene", "Consequence", "Features")]
+
+    if (nrow(dt)==0) {
+      write("FALSE","")
+    } else {
+      if (arg$exportGene) {
+        write(paste(unlist(unique(dt[, c("Gene")])), collapse=","), "")
+      } else {
+        stargazer(dt, summary = FALSE, type = arg$type, title = table_name,
+                  table.placement = "H",
+                  digit.separator = "", rownames = F, style = "io", float = T,
+                  notes = c(paste0("1. A summary of results based on \"", table_name, "\" specification."),
+                            paste0("2. Variant callers included: ", tolower(paste(var_caller, collapse = ", ")))),
+                  header = F, out.header = F)
+      }
+    }
+} else if ( arg$mode == "TMB" ) {
+  if (is.null(arg$genomeSize)) {
+    stop("Genome/panel size is required.", call.=FALSE)
   }
+  genomeLength = arg$genomeSize / 1e6
+
+  var_caller = as.list(unique(sample.coverage[,"CALLER"]))$CALLER
+  annotation = c("stop_gained", "stop_lost", "start_lost",
+                 "missense_variant", "nonsynonymous_variant",
+                 "splice_acceptor_variant", "splice_donor_variant",
+                 "splice_donor_5th_base_variant", "splice_site_variant",
+                 "splicing_variant", "frameshift_variant")
+
+  dt1 = unique(sample.coverage[CALLER %in% var_caller
+                       & Consequence %in% annotation, .(CHROM, POS),
+                       by=.(ID, CALLER)])[,.(.N,"TMB"=.N/genomeLength),by=.(CALLER)]
+
+  dt2 = unique(sample.coverage[CALLER %in% var_caller
+                       & Consequence %in% annotation, .(CALLER),
+                       by=.(ID)][,.(ID)])[,.(.N)]
+  dt2[,"CALLER":="ALL"]
+  setcolorder(dt2, neworder = c("CALLER", "N"))
+  dt = dt2[,.(CALLER, N, "TMB"=N/genomeLength)]
+
+  str_annot = paste(gsub("_", "-", annotation), collapse = ", ")
+  dt.TMB = rbind(dt1, dt)
+  stargazer(unique(dt.TMB), summary = FALSE, type = arg$type,
+            title = "Tumor mutation burden (TMB)",
+            digit.separator = "", rownames = F, style = "io",
+            header = F, out.header = F, table.placement = "H", float = T, 
+            notes = c(paste0("1. Variant callers included: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"CALLER"]))$CALLER,
+                                           collapse = ", "))),
+                      paste0("2. Variant types: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"VARIANT_CLASS"]))$VARIANT_CLASS,
+                                           collapse=", "))),
+                      paste0("3. Only all coding variants (all subchilds of nonsynonymous variants annotation)")))
+
+} else if ( arg$mode == "VarClass" ) {
+  dt = unique(sample.coverage[,.(ID,CALLER,VARIANT_CLASS)])
+  dt.typevars = dt[,.("CALLERCOUNT"=length(unique(c(CALLER))),.N),
+                   by=.("CALLERS"=CALLER,VARIANT_CLASS)][order(CALLERS,-VARIANT_CLASS)]
+  
+  dt = unique(sample.coverage[,.(ID,CALLER,VARIANT_CLASS)])
+  dt = dt[,.("CALLERS"="ALL","CALLERCOUNT"=length(unique(c(CALLER))),.N),
+          by=(VARIANT_CLASS)]
+  
+  setcolorder(dt, neworder = c("CALLERS", "VARIANT_CLASS", "CALLERCOUNT","N"))
+  dt.typecensus = rbind(dt, dt.typevars)
+  
+  dt = unique(sample.coverage[,.(ID,CALLER)])
+  dt.allcallers = dt[,.("VARIANT_CLASS"="All_types","CALLERCOUNT"=1,.N), by=.("CALLERS"=CALLER) ][order(CALLERS)]
+  
+  dt.callercensus = rbind(dt.allcallers,dt.typecensus)[order(CALLERS,VARIANT_CLASS,CALLERCOUNT)]
+  stargazer(unique(dt.callercensus), summary = FALSE, type = arg$type,
+            title = "Variant class summary",
+            digit.separator = "", rownames = F, style = "io",
+            header = F, out.header = F, table.placement = "H", float = T, 
+            notes = c(paste0("1. A summary of variant classes devided by variant class and variant caller"),
+                      paste0("2. Variant callers included: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"CALLER"]))$CALLER,
+                                           collapse = ", "))),
+                      paste0("3. Variant types: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"VARIANT_CLASS"]))$VARIANT_CLASS,
+                                           collapse=", ")))))
+} else if ( arg$mode == "VarCaller" ) {
+  
+  var_caller = as.list(unique(sample.coverage[,"CALLER"]))$CALLER
+  var_caller_combn = do.call("c", lapply(seq_along(var_caller),
+                                         function(i) {combn(var_caller, i, simplify = F)}))
+
+  dt = unique(sample.coverage[,.(ID,CALLER,VARIANT_CLASS)])
+  dt = dt[,.("CALLERS"=paste(unique(c(CALLER)),collapse = "-"),
+                          "CALLERCOUNT"=length(unique(c(CALLER)))),
+                       by=.(ID)][,.(.N),
+                                 by=.(CALLERS,CALLERCOUNT)
+                                ]
+
+  dt.venn = dt[order(CALLERCOUNT,CALLERS)]
+  stargazer(unique(dt.venn), summary = FALSE, type = arg$type,
+            title = "Variant caller summary",
+            digit.separator = "", rownames = F, style = "io",
+            header = F, out.header = F, table.placement = "H", float = T, 
+            notes = c(paste0("1. A summary of exclusive variant types ",
+                             "devided by variant callers that identified them"),
+                      paste0("2. Variant callers included: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"CALLER"]))$CALLER,
+                                           collapse = ", "))),
+                      paste0("3. Variant types: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"VARIANT_CLASS"]))$VARIANT_CLASS,
+                                           collapse=", ")))))
+} else if ( arg$mode == "VarCallerClass" ){
+  
+  var_caller = as.list(unique(sample.coverage[,"CALLER"]))$CALLER
+  var_caller_combn = do.call("c", lapply(seq_along(var_caller),
+                                         function(i) {combn(var_caller, i, simplify = F)}))
+
+  dt = unique(sample.coverage[,.(ID,CALLER,VARIANT_CLASS)])
+  dt = dt[,.("CALLERS"=paste(unique(c(CALLER)),collapse = "-"),
+                          "CALLERCOUNT"=length(unique(c(CALLER))),
+                          VARIANT_CLASS),
+                       by=.(ID)][,.(.N),
+                                 by=.(CALLERS,VARIANT_CLASS,CALLERCOUNT)
+                                ]
+
+  dt.venn = dt[order(CALLERCOUNT,CALLERS,VARIANT_CLASS)]
+  stargazer(unique(dt.venn), summary = FALSE, type = arg$type,
+            title = "Variant caller summary by class",
+            digit.separator = "", rownames = F, style = "io",
+            header = F, out.header = F, table.placement = "H", float = T, 
+            notes = c(paste0("1. A summary of exclusive variant types ",
+                             "devided by variant callers that identified them"),
+                      paste0("2. Variant callers included: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"CALLER"]))$CALLER,
+                                           collapse = ", "))),
+                      paste0("3. Variant types: ",
+                             tolower(paste(as.list(unique(sample.coverage[,"VARIANT_CLASS"]))$VARIANT_CLASS,
+                                           collapse=", ")))))
+} else {
+  stop("Run mode not recognized", call.=FALSE) 
 }
