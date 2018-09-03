@@ -71,11 +71,6 @@ if (is.null(file)){
   stop("An input is required.", call.=FALSE)
 }
 
-#if (is.null(outfile) && arg$type != "text"){
-#  print_help(opt_parser)
-#  stop("An output is required for non text output type.", call.=FALSE)
-#}
-
 if (! arg$verbose ) {
   options( warn = 0 )
 } else {
@@ -92,11 +87,6 @@ if (arg$inMVL) {
 af_max = arg$afmax
 af_min = arg$afmin
 var_type = arg$vartype
-#c("stop_gained", "stop_lost", "start_lost",
-#                  "missense_variant", "nonsynonymous_variant",
-#                  "splice_acceptor_variant", "splice_donor_variant",
-#                  "splice_donor_5th_base_variant", "splice_site_variant", "splicing_variant")
-#annotation_indel = c("frameshift_variant", "frameshift", "non-frameshift")
 var_caller = unlist(strsplit(arg$varcaller, ","))
 table_name = arg$name
 table_num = arg$num
