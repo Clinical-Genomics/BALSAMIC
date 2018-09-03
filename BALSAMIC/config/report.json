@@ -5,6 +5,7 @@
     },
     "bed": {
         "variant_panel": "PANEL_name",
+        "genome_size": "38874504",
         "exon_cov": "/mnt/hds/proj/bioinfo/BALSAMIC_analysis/analyses/TEST_OTT3801A1_vs_OTT3801A3/results/bam/OTT3801A3_R.sorted.rmdup.exon.cov.bed"
     },
     "Metrics": {
