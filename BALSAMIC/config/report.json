@@ -8,52 +8,7 @@
         "genome_size": "38874504",
         "exon_cov": "/mnt/hds/proj/bioinfo/BALSAMIC_analysis/analyses/TEST_OTT3801A1_vs_OTT3801A3/results/bam/OTT3801A3_R.sorted.rmdup.exon.cov.bed"
     },
-    "Metrics": {
-        "fastq": "XXXXXXXX",
-        "BAM": "XXXXXXXX",
-        "BAM_rmdup": "XXXXXX"
-    },
     "vcf": {
-        "merged": {"SNV": "/mnt/hds/proj/bioinfo/BALSAMIC_analysis/analyses/TEST_OTT3801A1_vs_OTT3801A3/results/vep/vep_SNV.merged.table"},
-        "strelka": {
-            "All": "123123",
-            "Passed": "123123",
-            "Annot": {
-                "Total": "123123",
-                "misense": "12313123",
-                "sense": "12313123",
-                "pathological": "12313123"
-            }
-        },
-        "manta": {
-            "All": "123123",
-            "Passed": "123123123",
-            "Annot": {
-                "Total": "123123",
-                "misense": "12313123",
-                "sense": "12313123",
-                "pathological": "12313123"
-            }
-        },
-        "vardict": {
-            "All": "123123",
-            "Passed": "123123123",
-            "Annot": {
-                "Total": "123123",
-                "misense": "12313123",
-                "sense": "12313123",
-                "pathological": "12313123"
-            }
-        },
-        "mutect2": {
-            "All": "123123",
-            "Passed": "123123123",
-            "Annot": {
-                "Total": "123123",
-                "misense": "12313123",
-                "sense": "12313123",
-                "pathological": "12313123"
-            }
-        }
+        "merged": {"SNV": "/mnt/hds/proj/bioinfo/BALSAMIC_analysis/analyses/TEST_OTT3801A1_vs_OTT3801A3/results/vep/vep_SNV.merged.table"}
     }
 }
