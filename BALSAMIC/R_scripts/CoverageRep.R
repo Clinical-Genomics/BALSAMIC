@@ -77,36 +77,79 @@ sample.coverage = fread(file, showProgress=F)
 fragLength = 100
 if (! is.null(arg$genename)) {
   genelist = unlist(strsplit(arg$genename, ","))
-  dt.gene = sample.coverage[F10 %in% genelist & F9 == "KNOWN" & F6 == "protein_coding", 
-                            .(exonCount = .N,
-                              readCountPerExon = sum(readCount)/.N,
-                              meanExonCoverage = mean(readCount*fragLength/(abs(chromStart-chromEnd))),
-                              medianExonCoverage = median(readCount*fragLength/(abs(chromStart-chromEnd))),
-                              readPerbpPerExon = sum(readCount*fragLength)/(F7/.N),
-                              totalRead = sum(readCount)),
-                            by=.(F3, F7, F11, F10)][, .(txID = F3, txLength = F7, geneName = F10,
-                                                        exonCount, readCountPerExon,
-                                                        medianExonCoverage, meanExonCoverage,
-                                                        maxLength = max(F7), totalReadCount = max(totalRead)),
-                                                    keyby=F11][txLength==maxLength, !c("maxLength")]
+  dt.gene = sample.coverage[F10 %in% genelist,]
 }
 
 if (! is.null(arg$ensemble)) {
   genelist = unlist(strsplit(arg$ensemble, ","))
-  dt.gene = sample.coverage[F11 %in% genelist & F9 == "KNOWN" & F6 == "protein_coding", 
-                            .(exonCount = .N,
-                              readCountPerExon = sum(readCount)/.N,
-                              meanExonCoverage = mean(readCount*fragLength/(abs(chromStart-chromEnd))),
-                              medianExonCoverage = median(readCount*fragLength/(abs(chromStart-chromEnd))),
-                              readPerbpPerExon = sum(readCount*fragLength)/(F7/.N),
-                              totalRead = sum(readCount)),
-                            by=.(F3, F7, F11, F10)][, .(txID = F3, txLength = F7, geneName = F10,
-                                                        exonCount, readCountPerExon,
-                                                        medianExonCoverage, meanExonCoverage,
-                                                        maxLength = max(F7), totalReadCount = max(totalRead)),
-                                                    keyby=F11][txLength==maxLength, !c("maxLength")]
+  dt.gene = sample.coverage[F11 %in% genelist,]
 }
-setnames(dt.gene, "F11", "geneID")
+
+dt.gene = dt.gene[,
+                  .(exonCount = .N,
+                    readPerExon = sum(readCount)/.N,
+                    meanExonCoverage = mean(readCount*fragLength/(abs(chromStart-chromEnd))),
+                    medianExonCoverage = median(readCount*fragLength/(abs(chromStart-chromEnd))),
+                    readPerbpPerExon = sum(readCount*fragLength)/(F7/.N),
+                    txID = F3,
+                    geneID = F11,
+                    txLength = F7,
+                    geneName = F10,
+                    txType = F6,
+                    txStatus = F9,
+                    totalRead = sum(readCount),
+                    zeroExonCov = sum(readCount==0),
+                    zeroExonCovMid = !(any(which(!readCount)==length(readCount)) 
+                    || any(which(!readCount)==1)),
+                    zeroExonCovLastFirst = any(which(!readCount)==length(readCount)) 
+                    || any(which(!readCount)==1)
+                   ),
+                  by=.(F3, F6, F7, F9, F10, F11)
+                 ]
+
+dt.geme = dt.gene[zeroExonCov <= 1 & txType=="protein_coding",]
+
+dt.gene = dt.gene[,
+                  .("Gene" = geneName,
+                    txID,
+                    "tx_exonCount" = paste0(txID, "_", exonCount), 
+                    "tx length" = txLength,
+                    txLength,
+                    maxLength = max(txLength),
+                    "tx type" = txType,
+                    "tx status" = txStatus,
+                    exonCount,
+                    "read per exon" = readPerExon,
+                    readPerbpPerExon,
+                    "Median exon cov" = medianExonCoverage, 
+                    meanExonCoverage,
+                    totalRead,
+                    zeroExonCov,
+                    zeroExonCovLastFirst,
+                    zeroExonCovMid,
+                    "No. exon with zero count (Last or first / middle)" = paste0(zeroExonCov,
+                                                                                 " (",
+                                                                                 zeroExonCovLastFirst,
+                                                                                 " / ",
+                                                                                 zeroExonCovMid,
+                                                                                 ")"),
+                    maxTxReadCount = max(totalRead)
+                   ),keyby=geneID]
+
+dt.gene = dt.gene[maxLength==txLength,
+                  !c("maxLength",
+                     "zeroExonCovLastFirst",
+                     "zeroExonCovMid",
+                     "txLength",
+                     "geneID",
+                     "txID",
+                     "exonCount",
+                     "totalRead",
+                     "readPerbpPerExon",
+                     "meanExonCoverage",
+                     "zeroExonCov",
+                     "maxTxReadCount")
+                 ]
 
 stargazer(dt.gene, summary = FALSE, type = arg$type, title = arg$name,
           #table.placement = "H",
