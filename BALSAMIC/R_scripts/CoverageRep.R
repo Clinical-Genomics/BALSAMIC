@@ -127,12 +127,12 @@ dt.gene = dt.gene[,
                     zeroExonCov,
                     zeroExonCovLastFirst,
                     zeroExonCovMid,
-                    "No. exon with zero count (Last or first / middle)" = paste0(zeroExonCov,
-                                                                                 " (",
-                                                                                 zeroExonCovLastFirst,
-                                                                                 " / ",
-                                                                                 zeroExonCovMid,
-                                                                                 ")"),
+                    "Exon zero cov" = paste0(zeroExonCov,
+                                               " (",
+                                               as.integer(zeroExonCovLastFirst),
+                                               " / ",
+                                               as.integer(zeroExonCovMid),
+                                               ")"),
                     maxTxReadCount = max(totalRead)
                    ),keyby=geneID]
 
@@ -152,6 +152,7 @@ dt.gene = dt.gene[maxLength==txLength,
                  ]
 
 stargazer(dt.gene, summary = FALSE, type = arg$type, title = arg$name,
+          notes = c("Exon zero cov shows the number of exons with zero coverage in total (first or last exon / any intermediate exons)"), 
           #table.placement = "H",
           digit.separator = "", rownames = F, style = "io", float = T,
           header = F, out.header = F)
