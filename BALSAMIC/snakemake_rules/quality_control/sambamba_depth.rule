@@ -21,7 +21,7 @@ rule sambamba_panel_depth:
     cov_3="300",
     cov_4="400",
     cov_5="500",
-    filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control'",
+    filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   shell:
     "source activate {params.conda}; "
@@ -36,7 +36,7 @@ rule sambamba_panel_depth:
 
 rule sambamba_exon_depth:
   input:
-    bam = bam_dir + "{sample}" + ".sorted.bam",
+    bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["path"]["genomefa"] + config["references"]["exon_bed"]
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed"
@@ -47,7 +47,7 @@ rule sambamba_exon_depth:
     cov_3="150",
     cov_4="200",
     cov_5="250",
-    filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control'",
+    filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   shell:
     "source activate {params.conda}; "
