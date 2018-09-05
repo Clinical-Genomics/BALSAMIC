@@ -1,1 +1,1 @@
-from .generate_report import report
+from .report import report

@@ -3,6 +3,21 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.0.0] - 2018-09-05
+Variant reporter patch and cli update
+### Added
+- Added `balsamic config sample` and `balsamic config report` to generate run analysis and reporting config
+- Added `VariantRep.R` script to information from merged variant table: variant summry, TMB, and much more
+- Added a workflow for single sample mode alignment and QC only
+- Added QC skimming script to qccollect to generate nicely formatted information from picard
+### Changed
+- Change to CLI for running and creating config
+- Major overhaul to coverage report script. It's now simpler and more readable!
+### Fixed
+- Fixed sambamba depth to include mapping quality
+- Markduplicate now is now by default on marking mode, and will NOT remove duplicates
+- Minor formatting and script beautification happened
+
 ## [1.13.1] - 2018-08-17
 ### Fixed
 - fixed a typo in MSKMVL config

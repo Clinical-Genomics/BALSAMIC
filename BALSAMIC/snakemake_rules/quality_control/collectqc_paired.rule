@@ -22,8 +22,24 @@ rule collectqc:
     result_dir + "qc/" + "qc_report.pdf"
   params:
     # This is using same environment as gatk
+    resultdir = result_dir,
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda};"
     "touch {output}; "
+    "unset FILELIST; "
+    "FILELIST=`find {params.resultdir}bam -type f`; "
+    "for i in $FILELIST; "
+    "do "
+    "   [ `file -b --mime-encoding $i` != \"binary\" ]"
+    "   && grep -qs \"METRICS CLASS\" $i "
+    "   && m=`grep \"METRICS CLASS\" $i | rev | cut -d\".\" -f 1 | rev` "
+    "   && f=`echo $i | rev | cut -d\"/\" -f 1 | rev` "
+    "   && echo $m > {params.resultdir}qc/${{f}}.csv "
+    "   && sed -n '/## METRICS CLASS/,/^\s*$/{{/METRICS/!p}}' $i "
+    "       | awk -v OFS=\"\\t\" ' {{ for (i=1; i<=NF; i++) {{ a[NR,i] = $i }} }} "
+    "NF>p {{ p = NF }} END {{ for(j=1; j<=p; j++) {{ str=a[1,j]; for(i=2;"
+    "i<=NR; i++) {{ str=str\"\\t\"a[i,j]; }}; print str }} }}' "
+    "| awk 'NR==1 {{ v=NF }} NF==v {{ print }}' >> {params.resultdir}qc/${{f}}.csv ; "
+    "done; "
     "source deactivate; "

@@ -1,0 +1,48 @@
+#!python
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+import os
+from BALSAMIC.tools import get_vcf_files
+from BALSAMIC.tools import get_result_dir
+
+rule_dir = config["rule_directory"]
+
+include:
+  rule_dir + "snakemake_rules/align/bwa_mem.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/fastqc.rule"
+include:
+  rule_dir + "snakemake_rules/align/samtools.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/picard.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/collectqc_single.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/GATK.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/mergetype_tumor.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/manta_single.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/mutect_single.rule"
+include:
+  rule_dir + "snakemake_rules/annotation/vep.rule"
+
+
+bam_dir = get_result_dir(config) + "/bam/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
+
+var_type = ["SNV", "SV"]
+rule all:
+  input:
+    os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
