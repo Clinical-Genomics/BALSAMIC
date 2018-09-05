@@ -70,7 +70,7 @@ def set_panel_bed(json_out, panel_bed):
 
 
 @click.command(
-    "create_config",
+    "sample",
     short_help="Create a sample config file from input sample data")
 @click.option(
     '-a',
@@ -154,7 +154,7 @@ def set_panel_bed(json_out, panel_bed):
 #    default=False,
 #    help='Check if fastq files exist')
 @click.pass_context
-def create_config(context, analysis_type, install_config, sample_config,
+def sample(context, analysis_type, install_config, sample_config,
                   reference_config, panel_bed, output_config, normal, tumor,
                   sample_id, analysis_dir, fastq_path):
     """
@@ -180,7 +180,8 @@ it is. So this is just a placeholder for future.
         sample_config["analysis"]["fastq_path"]=fastq_path+"/"
         sample_config["analysis"]["analysis_type"]=analysis_type
         sample_config["samples"]={}
-        sample_config["samples"][normal]={"file_prefix": normal, "type":"normal", "readpair_suffix":["1", "2"]}
+        if normal:
+            sample_config["samples"][normal]={"file_prefix": normal, "type":"normal", "readpair_suffix":["1", "2"]}
         sample_config["samples"][tumor]={"file_prefix": tumor, "type":"tumor", "readpair_suffix":["1", "2"]}
 
     json_out = merge_json(analysis_config, sample_config, reference_config,
