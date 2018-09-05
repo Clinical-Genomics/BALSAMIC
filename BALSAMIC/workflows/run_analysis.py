@@ -109,7 +109,7 @@ def get_cluster_config():
 
 
 @click.command(
-    "run_analysis", short_help="Run BALSAMIC on a provided config file")
+    "run", short_help="Run BALSAMIC on a provided config file")
 @click.option(
     '-S',
     '--snake-file',
