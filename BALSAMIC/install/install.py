@@ -112,7 +112,7 @@ def conda_install(conda_yaml, env_prefix):
 
 
 @click.command(
-    "install_env", short_help="Installs required conda environments")
+    "install", short_help="Installs required conda environments")
 @click.option(
     '-i',
     '--input-conda-yaml',
@@ -148,7 +148,7 @@ def conda_install(conda_yaml, env_prefix):
     'Output a yaml file containing packages installed in each input yaml file.'
 )
 @click.pass_context
-def install_env(context, input_conda_yaml, env_dir_prefix, overwrite_env,
+def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                   env_name_suffix, packages_output_yaml):
     """
     Installs conda environments from a conda yaml file.
