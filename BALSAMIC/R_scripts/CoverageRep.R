@@ -153,6 +153,6 @@ dt.gene = dt.gene[maxLength==txLength,
 
 stargazer(dt.gene, summary = FALSE, type = arg$type, title = arg$name,
           notes = c("Exon zero cov shows the number of exons with zero coverage in total (first or last exon / any intermediate exons)"), 
-          #table.placement = "H",
+          table.placement = "H",
           digit.separator = "", rownames = F, style = "io", float = T,
           header = F, out.header = F)
