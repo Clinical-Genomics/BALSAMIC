@@ -7,13 +7,7 @@ from pylatex import Document, Section, Subsection, Subsubsection, Tabular, Math,
     Plot, Figure, Matrix, Alignat, Command, LongTabu, Package
 from pylatex.utils import italic, NoEscape, bold
 
-
-def extractSampleName(config):
-
-    sample_config = json.load(open(config))
-    sample_name = sample_config["analysis"]["sample_id"]
-
-    return sample_name
+from BALSAMIC.workflows.run_analysis import get_sample_name
 
 
 @click.command("report", short_help="Report generator for workflow results")
@@ -62,7 +56,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
     doc.preamble.append(
         Command('title', NoEscape(r'BALSAMIC 0.1 \\ \large Developer Report')))
     doc.preamble.append(
-        Command('author', 'Patient ID: ' + extractSampleName(config=config)))
+        Command('author', 'Patient ID: ' + get_sample_name(config)))
     doc.preamble.append(Command('date', NoEscape(r'\today')))
     doc.append(NoEscape(r'\maketitle'))
 
@@ -94,8 +88,9 @@ def report(context, json_report, json_varreport, rulegraph_img):
 
                 outTab = subprocess.check_output(shellcmd)
                 doc.append(
-                    NoEscape(outTab.decode('utf-8').replace(
-                        "\\centering", "\\small")))
+                    NoEscape(
+                        outTab.decode('utf-8').replace("\\centering",
+                                                       "\\small")))
             doc.append(NoEscape(r'\normalsize'))
 
         with doc.create(Subsection("Summary of MVL report", numbering=True)):
@@ -134,28 +129,32 @@ def report(context, json_report, json_varreport, rulegraph_img):
                         genes = subprocess.check_output(shellcmd).decode(
                             'utf-8')
                         genes = genes.rstrip("\n\r")
-                        shellcmd = [
-                            os.path.join(
-                                os.path.dirname(os.path.abspath(__file__)),
-                                "..", "R_scripts/CoverageRep.R")
-                        ]
-                        shellcmd.extend([
-                            "--infile", sample_config["bed"]["exon_cov"],
-                            "--genename", genes, "--type", "latex"
-                        ])
-                        print(" ".join(shellcmd))
-                        outCov[i] = subprocess.check_output(shellcmd)
-                        #doc.append(NoEscape(r'\begin{landscape}'))
-                        #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
-                        #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
-                        #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
-                        doc.append(
-                            NoEscape(outVar[i].decode('utf-8').replace(
-                                "\\centering", "\\tiny")))
-                        doc.append(
-                            NoEscape(outCov[i].decode('utf-8').replace(
-                                "\\centering", "\\tiny")))
-                        #doc.append(NoEscape(r'\end{landscape}'))
+
+                        for s in sample_config["bed"]["exon_cov"]:
+                            shellcmd = [
+                                os.path.join(
+                                    os.path.dirname(os.path.abspath(__file__)),
+                                    "..", "R_scripts/CoverageRep.R")
+                            ]
+                            shellcmd.extend([
+                                "--infile",
+                                sample_config["bed"]["exon_cov"][s],
+                                "--genename", genes, "--name", s.replace("_","\_"), "--type",
+                                "latex"
+                            ])
+                            print(" ".join(shellcmd))
+                            outCov[i] = subprocess.check_output(shellcmd)
+                            #doc.append(NoEscape(r'\begin{landscape}'))
+                            #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
+                            #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
+                            #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
+                            doc.append(
+                                NoEscape(outVar[i].decode('utf-8').replace(
+                                    "\\centering", "\\tiny")))
+                            doc.append(
+                                NoEscape(outCov[i].decode('utf-8').replace(
+                                    "\\centering", "\\tiny")))
+                            #doc.append(NoEscape(r'\end{landscape}'))
                     else:
                         doc.append("No variants were found for this filter")
 
