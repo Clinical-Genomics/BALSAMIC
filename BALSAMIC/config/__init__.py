@@ -1,1 +1,1 @@
-from .create_config import create_config
+from .base import config

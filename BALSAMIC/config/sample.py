@@ -70,7 +70,7 @@ def set_panel_bed(json_out, panel_bed):
 
 
 @click.command(
-    "create_config",
+    "sample",
     short_help="Create a sample config file from input sample data")
 @click.option(
     '-a',
@@ -154,7 +154,7 @@ def set_panel_bed(json_out, panel_bed):
 #    default=False,
 #    help='Check if fastq files exist')
 @click.pass_context
-def create_config(context, analysis_type, install_config, sample_config,
+def sample(context, analysis_type, install_config, sample_config,
                   reference_config, panel_bed, output_config, normal, tumor,
                   sample_id, analysis_dir, fastq_path):
     """

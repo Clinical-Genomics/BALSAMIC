@@ -11,7 +11,7 @@ import json
 # Subcommands
 from BALSAMIC.install import install_env as install_command
 from BALSAMIC.workflows import run_analysis as analysis_command
-from BALSAMIC.config import create_config as config_command
+from BALSAMIC.config import config as config_command
 from BALSAMIC.dev_report import report as report_command
 
 # CLI commands and decorators
