@@ -19,7 +19,7 @@ from BALSAMIC.workflows.run_analysis import get_analysis_dir
 
 
 @click.command(
-    "report", short_help="Create a sample config file from input sample data")
+    "report", short_help="Create a report config file for report generation.")
 @click.option(
     '-s',
     '--sample-config',
