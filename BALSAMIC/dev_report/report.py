@@ -54,7 +54,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
         ))
 
     doc.preamble.append(
-        Command('title', NoEscape(r'BALSAMIC 0.1 \\ \large Developer Report')))
+        Command('title', NoEscape(r'BALSAMIC \\ \large Developer Report')))
     doc.preamble.append(
         Command('author', 'Patient ID: ' + get_sample_name(config)))
     doc.preamble.append(Command('date', NoEscape(r'\today')))
@@ -195,4 +195,6 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 data_table.add_row(row)
                 data_table.add_hline()
 
-    doc.generate_pdf('full', clean_tex=False)
+    tex_path = os.path.abspath(os.path.join(sample_config["analysis"]["analysis_dir"], "delivery_report" ) )
+    os.makedirs(tex_path, exist_ok=True)
+    doc.generate_pdf(os.path.join(tex_path, get_sample_name(config)), clean_tex=False)
