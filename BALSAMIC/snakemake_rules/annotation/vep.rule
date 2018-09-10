@@ -26,6 +26,7 @@ rule vep_annotate_SNV:
   threads: 4
   shell:
     "source activate {params.conda}; "
+    "perlbrew use perl-5.26.0; "
     "{params.vep_exec}/vep "
         "--dir {params.vep_cache} "
         "--dir_cache {params.vep_cache} "
@@ -71,6 +72,7 @@ rule vep_annotate_SV:
   threads: 4
   shell:
     "source activate {params.conda}; "
+    "perlbrew use perl-5.26.0; "
     "{params.vep_exec}/vep "
         "--dir {params.vep_cache} "
         "--dir_cache {params.vep_cache} "

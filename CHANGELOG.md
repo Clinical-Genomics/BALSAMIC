@@ -3,6 +3,10 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.0.1] - 2018-09-10
+### Fixed
+- Fixed package dependencies with vep and installation
+
 ## [2.0.0] - 2018-09-05
 Variant reporter patch and cli update
 ### Added
