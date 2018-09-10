@@ -80,7 +80,7 @@ cp $picard_PATH ${picard_destination}/share/
 ln -s ${picard_destination}/share/picard-2.18.5-4-g63d860e-SNAPSHOT-all.jar  ${picard_destination}/share/picard-2.18.5.jar
 
 echo -e "\n${B_GRN}Installing stargazer"
-stargazer_path= BALSAMIC/assests/stargazer_5.2.2.tar.gz
+stargazer_path=BALSAMIC/assests/stargazer_5.2.2.tar.gz
 R CMD INSTALL $stargazer_path
 
 unset B_RED
