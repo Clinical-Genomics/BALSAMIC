@@ -76,6 +76,7 @@ create config for sample analysis
       sample  Create a sample config file from input sample data
 
 ::
+
     Usage: balsamic config sample [OPTIONS]
 
           Prepares a config file for balsamic run_analysis. For now it is just
@@ -116,6 +117,7 @@ create config for sample analysis
 
 
 ::
+
     Usage: balsamic config report [OPTIONS]
 
       Prepares a config file for balsamic config report to export results as pdf
@@ -129,6 +131,7 @@ run analysis
 ~~~~~~~~~~~~
 
 ::
+
     Usage: balsamic run [OPTIONS]
 
       Runs BALSAMIC workflow on the provided sample's config file
@@ -153,6 +156,7 @@ report generation
 ~~~~~~~~~~~~
 
 ::
+    
     Usage: balsamic report [OPTIONS]
 
     Options:
