@@ -54,7 +54,7 @@ echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installting environments for the workflow"
 echo -e "\n${B_YLW}\tbalsamic install_env --packages-output-yaml ${BALSAMIC_ENVS} -s ${env_name_suffix} -i BALSAMIC/conda_yaml/D_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/D_Cancer-Core.yaml -i BALSAMIC/conda_yaml/D_Cancer-py36.yaml -i BALSAMIC/conda_yaml/D_Cancer-py27.yaml -i BALSAMIC/conda_yaml/D_Cancer-vt.yaml -o"
 echo -ne "${B_NOCOL}"
-balsamic install_env -s ${env_name_suffix} \
+balsamic install -s ${env_name_suffix} \
   --overwrite-env \
   --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-vardict.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-Core.yaml \
