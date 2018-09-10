@@ -27,7 +27,8 @@ automatically install BALSAMIC in the following order:
 -  Create conda environments required for BALSAMIC to run properly
 -  Install BALSAMIC
 -  Install gatk
--  A perlbrew installation with perl 5.26.0. i.e. `perlbrew use perl-5.26.0` should be accessable.
+-  A perlbrew installation with perl 5.26.0. i.e. ``perlbrew use perl-5.26.0`` should be accessable
+-  Cache, fasta, plugin, and executables for vep should be set within ``BALSAMIC/config/reference.json``
 
 BALSAMIC commands
 -----
