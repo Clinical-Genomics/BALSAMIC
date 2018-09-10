@@ -27,10 +27,10 @@ automatically install BALSAMIC in the following order:
 -  Create conda environments required for BALSAMIC to run properly
 -  Install BALSAMIC
 -  Install gatk
+-  A perlbrew installation with perl 5.26.0. i.e. `perlbrew use perl-5.26.0` should be accessable.
 
-Usage
+BALSAMIC commands
 -----
-
 After a successfull installation, BALSAMIC is within
 ``D_BALSAMIC_${prefix}`` conda environment. Base command, ``balsamic``
 has three subcommands: 1) ``install_env`` which is used for installting
