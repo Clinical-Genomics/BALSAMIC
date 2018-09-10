@@ -68,7 +68,7 @@ gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_e
 
 source activate ${gatk_env}
 
-gatk-register BALSAMIC/install/GenomeAnalysisTK.jar
+gatk-register BALSAMIC/assests/GenomeAnalysisTK.jar
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Copying custom Picard to relevant conda environment"
@@ -78,6 +78,10 @@ picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get
 picard_destination=`conda env export -n ${picard_conda_env} | grep prefix | cut -d" " -f 2`
 cp $picard_PATH ${picard_destination}/share/
 ln -s ${picard_destination}/share/picard-2.18.5-4-g63d860e-SNAPSHOT-all.jar  ${picard_destination}/share/picard-2.18.5.jar
+
+echo -e "\n${B_GRN}Installing stargazer"
+stargazer_path= BALSAMIC/assests/stargazer_5.2.2.tar.gz
+R CMD INSTALL $stargazer_path
 
 unset B_RED
 unset B_GRN
