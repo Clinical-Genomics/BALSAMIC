@@ -9,6 +9,8 @@
         "partition": "core"
     },
     "all": {
+        "mail_type": "END",
+        "mail_user": "hassan.foroughi@scilifelab.se",
         "time": "00:15:00",
         "n": 1
     },
