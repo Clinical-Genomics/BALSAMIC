@@ -108,8 +108,7 @@ def get_cluster_config():
     return cluster_config
 
 
-@click.command(
-    "run", short_help="Run BALSAMIC on a provided config file")
+@click.command("run", short_help="Run BALSAMIC on a provided config file")
 @click.option(
     '-S',
     '--snake-file',
@@ -145,6 +144,12 @@ def get_cluster_config():
     'By default balsamic run_analysis will run in dry run mode. Raise thise flag to make the actual analysis'
 )
 @click.option(
+    '--qos',
+    type=click.Choice(['low', 'normal', 'high']),
+    show_default=True,
+    default="low",
+    help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
+@click.option(
     '-f',
     '--force-all',
     show_default=True,
@@ -155,7 +160,7 @@ def get_cluster_config():
     '--snakemake-opt', help='Pass these options directly to snakemake')
 @click.pass_context
 def run_analysis(context, snake_file, sample_config, cluster_config,
-                 run_analysis, log_file, force_all, snakemake_opt):
+                 run_analysis, log_file, force_all, snakemake_opt, qos):
     """
 
     Runs BALSAMIC workflow on the provided sample's config file
@@ -182,12 +187,12 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
         os.makedirs(scriptpath, exist_ok=True)
 
     shellcmd = ["snakemake --immediate-submit -j 99 --notemp -p"]
-    shellcmd.append("--jobname " + get_sample_name(sample_config) +
+    shellcmd.append("--jobname " + get_sample_name(sample_config)+
                     ".{rulename}.{jobid}.sh")
-    
-    snakefile = snake_file if snake_file else get_snakefile(get_analysis_type(sample_config)) 
-    shellcmd.append(
-        "--snakefile " + snakefile )
+
+    snakefile = snake_file if snake_file else get_snakefile(
+        get_analysis_type(sample_config))
+    shellcmd.append("--snakefile " + snakefile)
 
     shellcmd.append("--directory " + os.path.join(
         get_analysis_dir(sample_config, "analysis_dir"),
@@ -205,10 +210,11 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
 
     shellcmd.append("--configfile " + sample_config)
     shellcmd.append("--cluster-config " + cluster_config)
-    shellcmd.append(
-        "--cluster 'python3 " + get_sbatchpy() + " --sample-config " + os.path.
-        abspath(sample_config) + " --dir-log " + logpath + " --dir-script " +
-        scriptpath + " --dir-result " + resultpath + " {dependencies} '")
+    shellcmd.append("--cluster 'python3 " + get_sbatchpy()+
+                    " --sample-config " + os.path.abspath(sample_config)+
+                    " --qos " + qos + " --dir-log " + logpath +
+                    " --dir-script " + scriptpath + " --dir-result " +
+                    resultpath + " {dependencies} '")
 
     if force_all:
         shellcmd.append("--forceall")
