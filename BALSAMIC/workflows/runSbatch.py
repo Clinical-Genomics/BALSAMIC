@@ -24,6 +24,8 @@ parser.add_argument(
 parser.add_argument("--dir-log", help="Log directory")
 parser.add_argument("--dir-result", help="Result directory")
 parser.add_argument("--dir-script", help="Script directory")
+parser.add_argument(
+    "--qos", default="low", help="QOS for sbatch jobs. [Default: low]")
 args = parser.parse_args()
 
 sample_config = json.load(open(args.sample_config))
@@ -47,9 +49,10 @@ jobscript = os.path.join(scriptpath, scriptname)
 
 output_log = os.path.join(logpath, scriptname + ".out")
 error_log = os.path.join(logpath, scriptname + ".err")
-cmdline = 'sbatch -A {account} -n {n} -t {time} --qos=low -o {output_log} -e {error_log} --mail-type {mail_type} --mail-user {mail_user}'.format(
+cmdline = 'sbatch -A {account} -n {n} -t {time} --qos={qos} -o {output_log} -e {error_log} --mail-type {mail_type} --mail-user {mail_user}'.format(
     n=cpu,
     time=time,
+    qos=args.qos,
     output_log=output_log,
     error_log=error_log,
     account=account_slurm,
