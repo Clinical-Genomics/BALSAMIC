@@ -69,6 +69,20 @@ def set_panel_bed(json_out, panel_bed):
     return json_out
 
 
+def check_exist(path):
+    """
+    Checks if fastq file readable and accessable.
+    """
+    
+    try:
+        f = open(path, 'r')
+        f.close()
+    except (IOError, FileNotFoundError) as e:
+        print("File not found or unreadable.", path)
+        raise e
+
+    return True
+
 @click.command(
     "sample",
     short_help="Create a sample config file from input sample data")
@@ -118,18 +132,15 @@ def set_panel_bed(json_out, panel_bed):
 @click.option(
     '-t',
     '--tumor',
-#    type=click.Tuple([str, str]),
-#    default=(None,None),
+    required=True,
     help=
-    'Fastq files for tumor sample. Example: --tumor tumor_1.fastq.gz tumor_2.fastq.gz'
+    'Fastq files for tumor sample. Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, the input should be --tumor tumor_fqreads'
 )
 @click.option(
     '-n',
     '--normal',
-#    type=click.Tuple([str, str]),
-#    default=(None,None),
     help=
-    'Fastq files for normal sample. Example: --normal normal_1.fastq.gz normal_2.fastq.gz'
+    'Fastq files for normal sample. Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, the input should be --normal normal_fqreads'
 )
 @click.option(
     '--sample-id',
@@ -148,15 +159,14 @@ def set_panel_bed(json_out, panel_bed):
     help=
     'Path for fastq files. All fastq files should be within same path and that path has to exist.'
 )
-#@click.option(
-#    '--check-files',
-#    is_flag=True,
-#    default=False,
-#    help='Check if fastq files exist')
+@click.option(
+    '--check-files/--no-check-files',
+    default=True,
+    help='Check if fastq input files exist')
 @click.pass_context
 def sample(context, analysis_type, install_config, sample_config,
                   reference_config, panel_bed, output_config, normal, tumor,
-                  sample_id, analysis_dir, fastq_path):
+                  sample_id, analysis_dir, fastq_path, check_files):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as dictionary and merging them as
 it is. So this is just a placeholder for future.
@@ -166,6 +176,8 @@ it is. So this is just a placeholder for future.
 
     click.echo("Reading analysis config file %s" % analysis_config)
     click.echo("Reading reference config file %s" % reference_config)
+
+    read_prefix = ["1", "2"]
 
     if sample_config:
         click.echo("Reading sample config file %s" % sample_config)
@@ -180,10 +192,20 @@ it is. So this is just a placeholder for future.
         sample_config["analysis"]["fastq_path"]=fastq_path+"/"
         sample_config["analysis"]["analysis_type"]=analysis_type
         sample_config["samples"]={}
-        if normal:
-            sample_config["samples"][normal]={"file_prefix": normal, "type":"normal", "readpair_suffix":["1", "2"]}
-        sample_config["samples"][tumor]={"file_prefix": tumor, "type":"tumor", "readpair_suffix":["1", "2"]}
+        
+        sample_config["samples"][tumor]={"file_prefix": tumor, "type":"tumor", "readpair_suffix": read_prefix }
+        if check_files:
+            fq_list = [ os.path.join(fastq_path, tumor + "_" + r + ".fastq.gz") for r in read_prefix ]
+            for f in fq_list:
+                check_exist(f) 
 
+        if normal:
+            sample_config["samples"][normal]={"file_prefix": normal, "type":"normal", "readpair_suffix": read_prefix }
+            if check_files:
+                fq_list = [ os.path.join(fastq_path, tumor + "_" + r + ".fastq.gz") for r in read_prefix ]
+                for f in fq_list:
+                    check_exist(f) 
+            
     json_out = merge_json(analysis_config, sample_config, reference_config,
                       install_config)
     
