@@ -8,6 +8,7 @@ import logging
 import sys
 import json
 from yapf.yapflib.yapf_api import FormatFile
+from datetime import datetime
 
 def merge_json(*args):
     '''
@@ -73,7 +74,7 @@ def check_exist(path):
     """
     Checks if fastq file readable and accessable.
     """
-    
+
     try:
         f = open(path, 'r')
         f.close()
@@ -83,9 +84,9 @@ def check_exist(path):
 
     return True
 
+
 @click.command(
-    "sample",
-    short_help="Create a sample config file from input sample data")
+    "sample", short_help="Create a sample config file from input sample data")
 @click.option(
     '-a',
     '--analysis-type',
@@ -165,8 +166,8 @@ def check_exist(path):
     help='Check if fastq input files exist')
 @click.pass_context
 def sample(context, analysis_type, install_config, sample_config,
-                  reference_config, panel_bed, output_config, normal, tumor,
-                  sample_id, analysis_dir, fastq_path, check_files):
+           reference_config, panel_bed, output_config, normal, tumor,
+           sample_id, analysis_dir, fastq_path, check_files):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as dictionary and merging them as
 it is. So this is just a placeholder for future.
@@ -186,29 +187,45 @@ it is. So this is just a placeholder for future.
         sample_config = get_config("sample")
         click.echo("Reading sample config file %s" % sample_config)
         with open(sample_config) as j:
-            sample_config=json.load(j)
-        sample_config["analysis"]["sample_id"]=sample_id
-        sample_config["analysis"]["analysis_dir"]=analysis_dir+"/"
-        sample_config["analysis"]["fastq_path"]=fastq_path+"/"
-        sample_config["analysis"]["analysis_type"]=analysis_type
-        sample_config["samples"]={}
-        
-        sample_config["samples"][tumor]={"file_prefix": tumor, "type":"tumor", "readpair_suffix": read_prefix }
+            sample_config = json.load(j)
+        sample_config["analysis"]["sample_id"] = sample_id
+        sample_config["analysis"][
+            "config_creation_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
+        sample_config["analysis"]["fastq_path"] = fastq_path + "/"
+        sample_config["analysis"]["analysis_type"] = analysis_type
+        sample_config["samples"] = {}
+
+        sample_config["samples"][tumor] = {
+            "file_prefix": tumor,
+            "type": "tumor",
+            "readpair_suffix": read_prefix
+        }
         if check_files:
-            fq_list = [ os.path.join(fastq_path, tumor + "_" + r + ".fastq.gz") for r in read_prefix ]
+            fq_list = [
+                os.path.join(fastq_path, tumor + "_" + r + ".fastq.gz")
+                for r in read_prefix
+            ]
             for f in fq_list:
-                check_exist(f) 
+                check_exist(f)
 
         if normal:
-            sample_config["samples"][normal]={"file_prefix": normal, "type":"normal", "readpair_suffix": read_prefix }
+            sample_config["samples"][normal] = {
+                "file_prefix": normal,
+                "type": "normal",
+                "readpair_suffix": read_prefix
+            }
             if check_files:
-                fq_list = [ os.path.join(fastq_path, tumor + "_" + r + ".fastq.gz") for r in read_prefix ]
+                fq_list = [
+                    os.path.join(fastq_path, tumor + "_" + r + ".fastq.gz")
+                    for r in read_prefix
+                ]
                 for f in fq_list:
-                    check_exist(f) 
-            
+                    check_exist(f)
+
     json_out = merge_json(analysis_config, sample_config, reference_config,
-                      install_config)
-    
+                          install_config)
+
     output_config = os.path.join(
         os.path.abspath(json_out["analysis"]["analysis_dir"]),
         json_out["analysis"]["sample_id"], output_config)
