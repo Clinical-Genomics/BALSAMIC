@@ -16,7 +16,8 @@ from BALSAMIC.config.sample import get_config
 from BALSAMIC.config.sample import write_json
 from BALSAMIC.workflows.run_analysis import get_sample_name
 from BALSAMIC.workflows.run_analysis import get_analysis_dir
-
+from BALSAMIC import __version__ as bv
+from datetime import datetime
 
 @click.command(
     "report", short_help="Create a report config file for report generation.")
@@ -44,6 +45,12 @@ def report(context, sample_config, output_config):
     json_out = dict()
 
     json_out["analysis"] = dict()
+    json_out["analysis"]["BALSAMIC"] = bv 
+    json_out["analysis"]["date"] = dict()
+    json_out["analysis"]["date"]["report"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    json_out["analysis"]["date"]["analysis_start"] = "NA" 
+    json_out["analysis"]["date"]["analysis_finish"] = "NA"
+    json_out["analysis"]["date"]["sample_received"] = "NA"
     json_out["analysis"]["sample_id"] = get_sample_name(sample_config)
     json_out["analysis"]["analysis_dir"] = os.path.join(
         get_analysis_dir(sample_config, "analysis_dir"),
