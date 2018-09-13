@@ -27,8 +27,6 @@ option_list <- list(
                                 help="List of comma separeted gene ensemble ids, not both.", metavar="character"),
                     make_option(c("-t", "--type"), type="character", default="text",
                                 help="Output table type format for exon coverage report [default %default].", metavar="character"),
-                    make_option(c("-r", "--resolution"), type="integer", default=7,
-                                help="Print image resolution in inches, as an input to pdf() for heigh and width [default %default]"),
                     make_option(c("--name"), type="character", help="A name for the output table [default %default].",
                                 default="Coverage report"),
                     make_option(c("-o", "--outfile"), type="character",
@@ -41,7 +39,9 @@ option_list <- list(
     %prog [options]
     
     A script to report the exon coverage summary output from Sambamba with for canonical transcripts (longest
-transcript) of each gene.
+transcript) of each gene. In coverage, the following is taken into account: 1. transcript must be protein coding. 2.
+Transcript should not have more than one exon with zero coverage. 3. A canonical transcript is a transcript that is
+longest and meets criteria 1 and 2.
 
 ' -> usage
 opt_parser <- OptionParser(usage = usage, option_list=option_list);
