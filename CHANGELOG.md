@@ -3,6 +3,15 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.1.0] - 2018-09-11
+### Added
+- normalized coverage plot script
+- fastq file IO check for config creation
+- added qos option to `balsamic run`
+### Fixed
+- Sambamba depth coverage parameters
+- bug with picard markduplicate flag
+
 ## [2.0.2] - 2018-09-11
 ### Added
 - Added qos option for setting qos to run jobs with a default value of low
