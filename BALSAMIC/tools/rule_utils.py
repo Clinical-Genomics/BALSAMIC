@@ -42,7 +42,7 @@ def get_picard_mrkdup(config):
     picard_str = "mrkdup"
     
     if "picard_rmdup" in config["QC"]:
-        if config["QC"]["picard_rmdup"]:
+        if config["QC"]["picard_rmdup"].upper() == "TRUE":
             picard_str = "rmdup"
 
     return picard_str
