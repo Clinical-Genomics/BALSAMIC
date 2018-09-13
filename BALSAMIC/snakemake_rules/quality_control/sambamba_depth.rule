@@ -16,22 +16,19 @@ rule sambamba_panel_depth:
     bam_dir + "{sample}.sorted." + picarddup + ".cov.bed"
   params:
     base_qual=10,
-    cov_1="100",
-    cov_2="200",
-    cov_3="300",
-    cov_4="400",
-    cov_5="500",
+    cov_start=50,
+    cov_end=1000,
+    cov_step=50,
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   shell:
     "source activate {params.conda}; "
+    "covStr=`seq {params.cov_start} {params.cov_step} {params.cov_end} | xargs -n1 echo -n \" --cov-threshold\"`; "
     "sambamba depth region "
         "--regions {input.bed} "
         "--min-base-quality={params.base_qual} "
         "--filter {params.filter_string} "
-        "--cov-threshold {params.cov_1} --cov-threshold {params.cov_2} "
-        "--cov-threshold {params.cov_3} --cov-threshold {params.cov_4} "
-        "--cov-threshold {params.cov_5} {input.bam} > {output}; "
+        "`echo $covStr` {input.bam} > {output}; "
     "source deactivate; "
 
 rule sambamba_exon_depth:
