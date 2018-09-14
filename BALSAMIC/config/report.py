@@ -16,8 +16,11 @@ from BALSAMIC.config.sample import get_config
 from BALSAMIC.config.sample import write_json
 from BALSAMIC.workflows.run_analysis import get_sample_name
 from BALSAMIC.workflows.run_analysis import get_analysis_dir
+from BALSAMIC.tools import get_picard_mrkdup
 from BALSAMIC import __version__ as bv
+
 from datetime import datetime
+from collections import defaultdict
 
 @click.command(
     "report", short_help="Create a report config file for report generation.")
@@ -42,7 +45,7 @@ def report(context, sample_config, output_config):
 
     config_json = json.load(open(sample_config))
 
-    json_out = dict()
+    json_out = dict() 
 
     json_out["analysis"] = dict()
     json_out["analysis"]["BALSAMIC"] = bv 
@@ -70,6 +73,7 @@ def report(context, sample_config, output_config):
     json_out["bed"]["genome_size"] = list(set(genome_size))[0]
 
     json_out["bed"]["exon_cov"] = dict()
+    json_out["bed"]["target_cov"] = dict()
     for i in config_json["samples"]:
         json_out["bed"]["exon_cov"][i] = "".join(
             glob.glob(
@@ -77,7 +81,16 @@ def report(context, sample_config, output_config):
                     get_analysis_dir(sample_config, "analysis_dir"),
                     get_sample_name(sample_config), "results", "bam",
                     config_json["samples"][i]["file_prefix"] +
-                    "*exon.cov.bed")))
+                    ".sorted." +  get_picard_mrkdup(config_json) +
+                    ".exon.cov.bed")))
+        json_out["bed"]["target_cov"][i] = "".join(
+            glob.glob(
+                os.path.join(
+                    get_analysis_dir(sample_config, "analysis_dir"),
+                    get_sample_name(sample_config), "results", "bam",
+                    config_json["samples"][i]["file_prefix"] +
+                    ".sorted." +  get_picard_mrkdup(config_json) +
+                    ".cov.bed")))
 
     json_out["vcf"] = dict()
     json_out["vcf"]["merged"] = dict()
