@@ -3,11 +3,13 @@ import subprocess
 import json
 import click
 
-from pylatex import Document, Section, Subsection, Subsubsection, Tabular, Math, TikZ, Axis, \
-    Plot, Figure, Matrix, Alignat, Command, LongTabu, Package
+from pylatex import Document, PageStyle, Section, Subsection, Subsubsection, Tabular, Math, TikZ, Axis, \
+    Plot, Figure, Matrix, Alignat, Command, LongTabu, Package, Head, Foot, MiniPage, LargeText, MediumText, \
+    LineBreak, SmallText, Tabularx, TextColor, MultiColumn, simple_page_number, NewPage
 from pylatex.utils import italic, NoEscape, bold
 
 from BALSAMIC.workflows.run_analysis import get_sample_name
+from datetime import datetime
 
 
 @click.command("report", short_help="Report generator for workflow results")
@@ -32,18 +34,32 @@ from BALSAMIC.workflows.run_analysis import get_sample_name
 @click.pass_context
 def report(context, json_report, json_varreport, rulegraph_img):
 
+
     config = json_report
     sample_config = json.load(open(json_report))
     var_config = json.load(open(json_varreport))
+    
+    tex_path = os.path.abspath(
+        os.path.join(sample_config["analysis"]["analysis_dir"],
+                     "delivery_report"))
 
+    #    geometry_options = {
+    #        "tmargin": "2.5cm",
+    #        "lmargin": "1cm",
+    #        "margin": "1cm",
+    #        "paperwidth": "210mm",
+    #        "paperheight": "297mm"
+    #    }
     geometry_options = {
-        "tmargin": "2.5cm",
-        "lmargin": "1cm",
-        "margin": "1cm",
-        "paperwidth": "210mm",
-        "paperheight": "297mm"
+        "head": "40pt",
+        "headheight": "130pt",
+        "headsep": "1cm",
+        "margin": "1.5cm",
+        "bottom": "1.5cm",
+        "includeheadfoot": True
     }
     doc = Document(geometry_options=geometry_options)
+
     doc.packages.append(Package('lscape'))
     doc.packages.append(Package('longtable'))
     doc.packages.append(Package('float'))
@@ -53,14 +69,61 @@ def report(context, json_report, json_varreport, rulegraph_img):
             r'\captionsetup[table]{labelsep=space, justification=raggedright, singlelinecheck=off}'
         ))
 
-    doc.preamble.append(
-        Command('title', NoEscape(r'BALSAMIC \\ \large Developer Report')))
-    doc.preamble.append(
-        Command('author', 'Patient ID: ' + get_sample_name(config)))
-    doc.preamble.append(Command('date', NoEscape(r'\today')))
-    doc.append(NoEscape(r'\maketitle'))
+    #Add first page style
+    first_page = PageStyle("header", header_thickness=1)
+
+    #Add Header
+    with first_page.create(Head("C")) as mid_header:
+        with mid_header.create(
+                Tabularx(
+                    "p{3cm} p{3cm} X X p{4cm} p{3cm}",
+                    width_argument=NoEscape(r"\textwidth"))) as mid_table:
+            mid_table.add_row(
+                [MultiColumn(6, align='r', data=simple_page_number())])
+            mid_table.add_row([
+                MultiColumn(
+                    6, align='c', data=LargeText("Molecular report on XXX"))
+            ])
+            mid_table.add_empty_row()
+            mid_table.add_row([
+                'sample ID',
+                get_sample_name(config), " ", " ", 'Analysis:',
+                r'BALSAMIC v' + sample_config['analysis']['BALSAMIC']
+            ])
+            mid_table.add_row([
+                'gender', "NA", " ", " ", 'Sample recieved:',
+                sample_config['analysis']['date']['sample_received']
+            ])
+            mid_table.add_row([
+                'tumor type', "NA", " ", " ", 'Analysis completion:',
+                sample_config['analysis']['date']['analysis_finish']
+            ])
+            mid_table.add_row([
+                'analysis type', "NA", " ", " ", 'PDF Report date:',
+                datetime.now().strftime("%Y-%m-%d %H:%M")
+            ])
+            mid_table.add_row(
+                ['sample type', "NA", " ", " ", 'Delivery date', "NA"])
+            mid_table.add_row(['sample origin', "NA", " ", " ", ' ', ' '])
+
+    doc.preamble.append(first_page)
+
+    #End First page
+
+    #    doc.preamble.append(
+    #        Command(
+    #            'title',
+    #            NoEscape(r'BALSAMIC v' + sample_config["analysis"]["BALSAMIC"] +
+    #                     r'\\ \large Developer Report')))
+    #    doc.preamble.append(
+    #        Command('author', 'Patient ID: ' + get_sample_name(config)))
+    #    doc.preamble.append(Command('date', NoEscape(r'\today')))
+    #    doc.append(NoEscape(r'\maketitle'))
+    doc.change_document_style("header")
 
     with doc.create(Section(title='Analysis report', numbering=True)):
+        
+
         with doc.create(
                 Subsection(
                     'Summary of variants and variant callers',
@@ -139,8 +202,8 @@ def report(context, json_report, json_varreport, rulegraph_img):
                             shellcmd.extend([
                                 "--infile",
                                 sample_config["bed"]["exon_cov"][s],
-                                "--genename", genes, "--name", s.replace("_","\_"), "--type",
-                                "latex"
+                                "--genename", genes, "--name",
+                                s.replace("_", "\_"), "--type", "latex"
                             ])
                             print(" ".join(shellcmd))
                             outCov[i] = subprocess.check_output(shellcmd)
@@ -160,6 +223,17 @@ def report(context, json_report, json_varreport, rulegraph_img):
 
                 doc.append(NoEscape(r'\normalsize'))
 
+        with doc.create(Subsection('Coverage report')):
+            with doc.create(Figure(position='h!')) as cov_img:
+                for s in sample_config["bed"]["target_cov"]:
+                    covplot = ".".join([os.path.join(tex_path, s) , "Coverage.pdf"])
+                    print(covplot)
+                    shellcmd = [os.path.join(os.path.dirname(os.path.abspath(__file__)), "..","R_scripts/CoveragePlot.R")]
+                    shellcmd.extend(["--infile", sample_config["bed"]["target_cov"][s], "--outfile", covplot  ])
+                    subprocess.check_output(shellcmd)
+                    cov_img.add_image(covplot, width='450px')
+                    cov_img.add_caption('Coverage report')
+                    
         with doc.create(Subsection('Analysis pipeline')):
             with doc.create(Figure(position='h!')) as pipeline_img:
                 pipeline_img.add_image(rulegraph_img, width='450px')
@@ -195,6 +269,15 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 data_table.add_row(row)
                 data_table.add_hline()
 
-    tex_path = os.path.abspath(os.path.join(sample_config["analysis"]["analysis_dir"], "delivery_report" ) )
     os.makedirs(tex_path, exist_ok=True)
-    doc.generate_pdf(os.path.join(tex_path, get_sample_name(config)), clean_tex=False)
+    print(tex_path)
+    doc.generate_tex(os.path.join(tex_path, get_sample_name(config)))
+    #    doc.generate_pdf(
+    #        os.path.join(tex_path, get_sample_name(config)), clean_tex=False)
+    shellcmd = [
+        "pdflatex", "-output-directory=" + tex_path,
+        os.path.join(tex_path, get_sample_name(config))+ ".tex", "1>",
+        "/dev/null"
+    ]
+    subprocess.run(" ".join(shellcmd), shell=True)
+    subprocess.run(" ".join(shellcmd), shell=True)
