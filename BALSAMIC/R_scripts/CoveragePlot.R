@@ -67,7 +67,7 @@ if (is.null(arg$avgcov) ) {
 
 pdf(arg$outfile, width = arg$resolution, height = arg$resolution, pointsize = arg$fontsize)
 
-par(mfrow = c(2,2))
+par(mfrow = c(1,2), pty = "s")
 
 hist(covSample$meanCoverage, breaks = 100, xlab = "Coverage", main = arg$title)
 abline(v=arg$covline,col="red")
