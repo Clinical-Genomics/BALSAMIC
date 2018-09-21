@@ -13,6 +13,7 @@ rule collectqc:
   input:
     contest = expand(bam_dir + "{ct}", ct=["normal_tumor.contest", "tumor_normal.contest"]),
     fastqc = expand(fastqc_dir + "{mysample}_{read_num}_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
+    fastqc_ca = expand(fastqc_dir + "{mysample}_{read_num}.ca_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
     insertsize = expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]),
     alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
     hsmetric = expand(bam_dir + "{sample}.sorted.hsmetric", sample=config["samples"]),
