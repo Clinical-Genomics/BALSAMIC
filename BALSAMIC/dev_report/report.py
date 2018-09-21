@@ -2,14 +2,25 @@ import os
 import subprocess
 import json
 import click
+import glob
+import yaml
+
+from datetime import datetime
+from itertools import chain
+from collections import defaultdict
 
 from pylatex import Document, PageStyle, Section, Subsection, Subsubsection, Tabular, Math, TikZ, Axis, \
     Plot, Figure, Matrix, Alignat, Command, LongTabu, Package, Head, Foot, MiniPage, LargeText, MediumText, \
-    LineBreak, SmallText, Tabularx, TextColor, MultiColumn, simple_page_number, NewPage
+    LineBreak, SmallText, Tabularx, TextColor, MultiColumn, simple_page_number, NewPage, StandAloneGraphic
 from pylatex.utils import italic, NoEscape, bold
 
 from BALSAMIC.workflows.run_analysis import get_sample_name
-from datetime import datetime
+from BALSAMIC import __version__ as bv
+
+
+def get_packages(yaml_file):
+    with open(yaml_file, 'r') as f:
+        return yaml.load(f)['dependencies']
 
 
 @click.command("report", short_help="Report generator for workflow results")
@@ -34,11 +45,10 @@ from datetime import datetime
 @click.pass_context
 def report(context, json_report, json_varreport, rulegraph_img):
 
-
     config = json_report
     sample_config = json.load(open(json_report))
     var_config = json.load(open(json_varreport))
-    
+
     tex_path = os.path.abspath(
         os.path.join(sample_config["analysis"]["analysis_dir"],
                      "delivery_report"))
@@ -74,22 +84,29 @@ def report(context, json_report, json_varreport, rulegraph_img):
 
     #Add Header
     with first_page.create(Head("C")) as mid_header:
+
+        with mid_header.create(MiniPage(width=NoEscape(r"0.2\textwidth"),
+                                         pos='c')) as logo_wrapper:
+            logo_file = os.path.join(os.path.dirname(__file__),
+                                     '..', 'assests/cg.png')
+            logo_wrapper.append(StandAloneGraphic(image_options="width=50px",
+                                filename=logo_file))
+
         with mid_header.create(
                 Tabularx(
-                    "p{3cm} p{3cm} X X p{4cm} p{3cm}",
-                    width_argument=NoEscape(r"\textwidth"))) as mid_table:
+                    "p{3cm} p{2cm} X X p{4cm} p{3cm}",
+                    width_argument=NoEscape(r"0.8\textwidth"))) as mid_table:
             mid_table.add_row(
                 [MultiColumn(6, align='r', data=simple_page_number())])
             mid_table.add_row([
                 MultiColumn(
-                    6, align='c', data=LargeText("Molecular report on XXX"))
+                    6, align='c', data=MediumText("Molecular report on"))
+            ])
+            mid_table.add_row([
+                MultiColumn(
+                    6, align='c', data=MediumText(get_sample_name(config)))
             ])
             mid_table.add_empty_row()
-            mid_table.add_row([
-                'sample ID',
-                get_sample_name(config), " ", " ", 'Analysis:',
-                r'BALSAMIC v' + sample_config['analysis']['BALSAMIC']
-            ])
             mid_table.add_row([
                 'gender', "NA", " ", " ", 'Sample recieved:',
                 sample_config['analysis']['date']['sample_received']
@@ -104,7 +121,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
             ])
             mid_table.add_row(
                 ['sample type', "NA", " ", " ", 'Delivery date', "NA"])
-            mid_table.add_row(['sample origin', "NA", " ", " ", ' ', ' '])
+            mid_table.add_row(['sample origin', "NA", " ", " ", 'Analysis:', r'BALSAMIC v' + sample_config['analysis']['BALSAMIC']])
 
     doc.preamble.append(first_page)
 
@@ -122,7 +139,6 @@ def report(context, json_report, json_varreport, rulegraph_img):
     doc.change_document_style("header")
 
     with doc.create(Section(title='Analysis report', numbering=True)):
-        
 
         with doc.create(
                 Subsection(
@@ -155,6 +171,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                         outTab.decode('utf-8').replace("\\centering",
                                                        "\\small")))
             doc.append(NoEscape(r'\normalsize'))
+            doc.append(NewPage())
 
         with doc.create(Subsection("Summary of MVL report", numbering=True)):
             doc.append(
@@ -162,36 +179,70 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 +
                 "pipeline, summary of MVL settings. Gene coverage for identified genes should go here. Figures!"
             )
-            outVar = dict()
             outCov = dict()
+
+            cmd_param = defaultdict(list)
+            J = defaultdict(list)
             for i in var_config["filters"]:
-                shellcmd = [
-                    os.path.join(
-                        os.path.dirname(os.path.abspath(__file__)), "..",
-                        "R_scripts/VariantReport.R")
-                ]
-                shellcmd.extend([
-                    "--infile", sample_config["vcf"]["merged"]["SNV"], "--dp",
-                    var_config["filters"][i]["TUMOR"]["DP"], "--tumorad",
-                    var_config["filters"][i]["TUMOR"]["AD"], "--inMVL",
-                    var_config["filters"][i]["in_mvl"], "--vartype", "SNP",
-                    "--varcaller", ",".join(
-                        var_config["filters"][i]["variantcaller"]), "--ann",
-                    ",".join(var_config["filters"][i]["annotation"]["SNV"]),
-                    "--name", var_config["filters"][i]["name"], "--type",
-                    "latex"
-                ])
-                print(" ".join(shellcmd))
-                outVar[i] = subprocess.check_output(shellcmd)
+                cmd_param["TUMOR_DP"].append(var_config["filters"][i]["TUMOR"]["DP"])
+                cmd_param["TUMOR_AD"].append(var_config["filters"][i]["TUMOR"]["AD"])
+                cmd_param["TUMOR_AFmax"].append(var_config["filters"][i]["TUMOR"]["AF_max"])
+                cmd_param["TUMOR_AFmin"].append(var_config["filters"][i]["TUMOR"]["AF_min"])
+                cmd_param["TUMOR_inMVL"].append(var_config["filters"][i]["in_mvl"])
+                cmd_param["var_type"].append("SNP")
+                cmd_param["varcaller"].append(",".join(var_config["filters"][i]["variantcaller"]))
+                cmd_param["ann"].append(",".join(var_config["filters"][i]["annotation"]["SNV"]))
+                cmd_param["name"].append(i.replace("_", "\_"))
+                cmd_param["outfile_tex"].append(tex_path + "/" + i + ".tex")
+                cmd_param["outfile_gene"].append(tex_path + "/" + i + ".genelist")
+
+            for i in cmd_param:
+                J[i] = ";".join(cmd_param[i])
+
+            shellcmd = [
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), "..",
+                    "R_scripts/VariantReport.R")
+            ]
+            shellcmd.extend([
+                "--infile", "'" + sample_config["vcf"]["merged"]["SNV"] + "'" ,
+                "--dp", "'" + J["TUMOR_DP"] + "'",
+                "--tumorad", "'" + J["TUMOR_AD"] + "'",
+                "--afmax", "'" + J["TUMOR_AFmax"] + "'",
+                "--afmin", "'" + J["TUMOR_AFmin"] + "'",
+                "--inMVL", "'" + J["TUMOR_inMVL"] + "'",
+                "--exclusiveSets", "TRUE",
+                "--vartype", "'" + J["var_type"] + "'",
+                "--varcaller", "'" + J["varcaller"] + "'",
+                "--ann", "'" + J["ann"] + "'",
+                "--name", "'" + J["name"] + "'",
+                "--type", "text"
+            ])
+
+            subprocess.check_output(" ".join(shellcmd + ["--outfile", "'" + J["outfile_tex"] + "'"]), shell=True)
+
+            subprocess.check_output(" ".join(shellcmd + ["--outfile", "'" + J["outfile_gene"] + "'", "--exportGene", "T"]), shell=True)
+
+            for c, i in enumerate(var_config["filters"]):
                 with doc.create(
                         Subsubsection(
                             var_config["filters"][i]["name"], numbering=True)):
-                    if outVar[i] != b"FALSE\n":
-                        shellcmd.extend(["--exportGene", "T"])
-                        print(" ".join(shellcmd))
-                        genes = subprocess.check_output(shellcmd).decode(
-                            'utf-8')
-                        genes = genes.rstrip("\n\r")
+                    fname = cmd_param["outfile_tex"][c]
+                    print(fname)
+                    if os.stat(fname).st_size > 10:
+                        #get gene list
+                        with open(cmd_param["outfile_gene"][c]) as myfile:
+                            genes=myfile.read().replace('\n', '')
+
+                        with open(fname, 'r') as myfile:
+                            data=myfile.read()#.replace('\n', '')
+
+                        #doc.append(NoEscape(r'\begin{landscape}'))
+                        #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
+                        #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
+                        #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
+                        doc.append(
+                            NoEscape(data.replace("\\centering", "\\tiny")))
 
                         for s in sample_config["bed"]["exon_cov"]:
                             shellcmd = [
@@ -206,38 +257,35 @@ def report(context, json_report, json_varreport, rulegraph_img):
                                 s.replace("_", "\_"), "--type", "latex"
                             ])
                             print(" ".join(shellcmd))
-                            outCov[i] = subprocess.check_output(shellcmd)
-                            #doc.append(NoEscape(r'\begin{landscape}'))
-                            #longtable instead of tabular makes the table span multiple pages, but the header doesn't span. Occasionally
-                            #the alignment also is messed up. There must be a hidden package conflict OR general alignment issues.
-                            #doc.append(NoEscape(varreport.replace("{tabular}","{longtable}")))
+                            outCov = subprocess.check_output(shellcmd)
+
                             doc.append(
-                                NoEscape(outVar[i].decode('utf-8').replace(
+                                NoEscape(outCov.decode('utf-8').replace(
                                     "\\centering", "\\tiny")))
-                            doc.append(
-                                NoEscape(outCov[i].decode('utf-8').replace(
-                                    "\\centering", "\\tiny")))
-                            #doc.append(NoEscape(r'\end{landscape}'))
+                        #doc.append(NoEscape(r'\end{landscape}'))
                     else:
                         doc.append("No variants were found for this filter")
+#                doc.append(NoEscape(r'\normalsize'))
 
-                doc.append(NoEscape(r'\normalsize'))
+            doc.append(NewPage())
 
         with doc.create(Subsection('Coverage report')):
-            with doc.create(Figure(position='h!')) as cov_img:
-                for s in sample_config["bed"]["target_cov"]:
+            for s in sample_config["bed"]["target_cov"]:
+                with doc.create(Figure(position='h!')) as cov_img:
                     covplot = ".".join([os.path.join(tex_path, s) , "Coverage.pdf"])
                     print(covplot)
                     shellcmd = [os.path.join(os.path.dirname(os.path.abspath(__file__)), "..","R_scripts/CoveragePlot.R")]
-                    shellcmd.extend(["--infile", sample_config["bed"]["target_cov"][s], "--outfile", covplot  ])
+                    shellcmd.extend(["--infile", sample_config["bed"]["target_cov"][s], "--outfile", covplot, "--title", s.replace("_", "\_")])
                     subprocess.check_output(shellcmd)
                     cov_img.add_image(covplot, width='450px')
-                    cov_img.add_caption('Coverage report')
-                    
+                    cov_img.add_caption('Coverage report for sample ' +  s.replace("_", "\_"))
+
+            doc.append(NewPage())
         with doc.create(Subsection('Analysis pipeline')):
             with doc.create(Figure(position='h!')) as pipeline_img:
                 pipeline_img.add_image(rulegraph_img, width='450px')
                 pipeline_img.add_caption('Awesome pipeline')
+            doc.append(NewPage())
 
     with doc.create(Section(title="Appendix", numbering=True)):
         with doc.create(Subsection("MVL settings", numbering=True)):
@@ -247,7 +295,8 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 for i in var_config["filters"]:
                     header_row1.append(var_config["filters"][i]["name"])
                 data_table.add_hline()
-                data_table.add_row(header_row1, mapper=[bold])
+                data_table.add_row(
+                    header_row1, mapper=[bold], color="lightgray")
                 data_table.add_hline()
                 data_table.add_empty_row()
                 column = list(var_config["filters"][next(
@@ -268,6 +317,34 @@ def report(context, json_report, json_varreport, rulegraph_img):
                         var_config["filters"][i]["variantcaller"]))
                 data_table.add_row(row)
                 data_table.add_hline()
+            doc.append(NewPage)
+
+        with doc.create(
+                Subsection("Bioinformatic tool in pipeline", numbering=True)):
+            doc.append(
+                "The following Bioinformatic tools were used in the analysis:\n\n"
+            )
+            with doc.create(Tabular("p{4cm}p{4cm}")) as data_table:
+                data_table.add_hline()
+                conda_env = glob.glob(
+                    os.path.join(
+                        os.path.dirname(os.path.abspath(__file__)), "..",
+                        "conda_yaml/*.yaml"))
+                pkgs = [
+                    "bwa", "bcftools", "cutadapt", "fastqc", "gatk", "manta",
+                    "picard", "sambamba", "strelka", "samtools", "tabix",
+                    "vardic"
+                ]
+                pkgs = [[y.split("=")[0], y.split("=")[1]] for y in set(
+                    chain.from_iterable([get_packages(s) for s in conda_env
+                                         ])) if y.split("=")[0] in pkgs]
+                data_table.add_row(["Package", "Version"], color="lightgray")
+                data_table.add_hline()
+                data_table.add_row(
+                    ["BALSAMIC", sample_config['analysis']['BALSAMIC']])
+                for i in pkgs:
+                    data_table.add_row([i[0], i[1]])
+            doc.append(NewPage())
 
     os.makedirs(tex_path, exist_ok=True)
     print(tex_path)
@@ -279,5 +356,8 @@ def report(context, json_report, json_varreport, rulegraph_img):
         os.path.join(tex_path, get_sample_name(config))+ ".tex", "1>",
         "/dev/null"
     ]
+    #generate_pdf doesn't run AUX files properly and ends up with incorrect total page numbers. So subprocess for
+    #pdflatex is called twice instead.
+
     subprocess.run(" ".join(shellcmd), shell=True)
     subprocess.run(" ".join(shellcmd), shell=True)
