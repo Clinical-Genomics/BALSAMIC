@@ -3,6 +3,19 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.2.0] - 2018-09-11
+### Added
+- Coverage plot to report
+- target coverage file to report json
+- post-cutadapt fastqc to collectqc
+- A header to report pdf
+- list of bioinfo tools used in the analysis added to report
+### Changed
+- VariantRep.R now accepts multiple inputs for each parameter (see help)
+- AF values for MSKIMPACT config
+### Fixed
+- Output figure for coverageplot is now fully square :-)
+
 ## [2.1.0] - 2018-09-11
 ### Added
 - normalized coverage plot script
@@ -63,7 +76,7 @@ Coverage report patch
 ### Added
 - Added a new script to retrieve coverage report for a list of gene(s) and transcripts(s)
 - Added sambamba exon depth rule for coverage report
-- Added a new entry in reference json for exon bed file, this file generated using: https://github.com/hassanfa/GFFtoolkit 
+- Added a new entry in reference json for exon bed file, this file generated using: https://github.com/hassanfa/GFFtoolkit
 ### Changed
 - sambamba\_depth rule changed to sambama\_panel\_depth
 - sambamba depth now has fix-mate-overlaps parameter enabled
@@ -85,7 +98,7 @@ create config patch for single and paired mode
 - A bug that strelka was still included in sample analysis.
 
 ## [1.10.0] - 2018-06-07
-## Added
+### Added
 - Markduplicate flag to analysis config
 
 ## [1.9.0] - 2018-06-04
@@ -137,7 +150,7 @@ create config patch for single and paired mode
 ## [1.2.3] - 2018-05-13
 ### Changed
 - vep execution path
-- working directory for snakemake 
+- working directory for snakemake
 
 ## [1.2.2] - 2018-05-04
 ### Added
@@ -205,7 +218,7 @@ create config patch for single and paired mode
 
 ## [1.0.0-rc1] - 2018-04-05
 ### Added
-- install.sh to install balsamic 
+- install.sh to install balsamic
 - balsamic barebone cli
 - subcommand to install required environments
 - README.md updated with basic installation instructions
