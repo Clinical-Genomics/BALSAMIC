@@ -1,0 +1,147 @@
+#!python
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+rule all:
+  input:
+    "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip" + ".bam"
+
+rule picard_FastqToSam:
+    input:
+        fq1="S1_R" + "1" + "fastq.gz",
+        fq2="S1_R" + "2" + "fastq.gz",
+    output:
+        "S1_" + "unalg" + ".bam"
+    shell:
+        """
+        picard FastqToSam {input.fq1} {input.fq2} {output}
+        """
+
+rule fgbio_ExtractUmisFromBam:
+    input:
+        "S1_" + "unalg" + ".bam"
+    output:
+        "S1_" + "unalg.umi" +  ".bam"
+    shell:
+        """
+        fgbio ExtractUmisFromBam
+        {input}
+        {output}
+        """
+
+rule picard_MarkIlluminaAdapters:
+    input:
+        "S1_" + "unalg.umi" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp" + ".bam"
+    shell:
+        """
+        picard MarkIlluminaAdapters {input} {output}
+        """
+
+rule picard_SamToFastq:
+    input:
+        "S1_" + "unalg.umi.mrkadp" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp" + ".fastq"
+    shell:
+        """
+        picard SamToFastq {input} {output}
+        """
+
+rule bwa_mem_umi_mrkadp:
+    input:
+        "S1_" + "unalg.umi.mrkadp" + ".fastq"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa" + ".bam"
+    shell:
+        """
+        bwa mem {input} {output}
+        """
+rule picard_MergeBamAlignment_mrkadp:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map" + ".bam"
+    shell:
+        """
+        picard MergeBamAlignment {input} {output}
+        """
+
+rule fgbio_GroupReadsByUmi:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi" + ".bam"
+    shell:
+        """
+        fgbio GroupReadsByUmi {input} {output}
+        """
+rule fgbio_CallDuplexConsensusReads:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".bam"
+    shell:
+        """
+        fgbio CallDuplexConsensusReads {input} {output}
+        """
+rule picard_SamToFastq_cnsalg:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".fastq"
+    shell:
+        """
+        picard SamToFastq {input} {output}
+        """
+
+rule bwa_mem_umi_cnsalg:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".fastq"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa" + ".bam"
+    shell:
+        """
+        bwa mem {input} {output}
+        """
+
+rule picard_MergeBamAlignment_cnsalg:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map" + ".bam"
+    shell:
+        """
+        picard MergeBamAlignment {input} {output}
+        """
+
+rule fgbio_FilterConsensusReads:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr" + ".bam"
+    shell:
+        """
+        fgbio FilterConsensusReads {input} {output}
+        """
+
+rule fgio_ClipBam:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip" + ".bam"
+    shell:
+        """
+        fgbio ClipBam {input} {output}
+        """
+
+rule fgbio_CollectDuplexSeqMetrics:
+    input:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi" + ".bam"
+    output:
+        "S1_" + "unalg.umi.mrkadp.bwa.map.umi.metrics"
+    shell:
+        """
+        fgbio CollectDuplexSeqMetrics {input} {output}
+        """
