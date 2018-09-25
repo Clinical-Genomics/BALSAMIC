@@ -3,12 +3,14 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 
 mutect_dir = "mutect/"
+
+chromlist = get_chrom(config["path"]["panel"] + config["bed"]["variant_panel"])
 
 rule mutect2_somatic_single:
   input:
@@ -39,7 +41,7 @@ rule mutect2_somatic_single:
 
 rule mutect2_merge_chrom:
   input:
-    expand(vcf_dir + mutect_dir + "split_vcf/{chrom}_" + config["vcf"]["mutect"]["default"] + ".gz", chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
+    expand(vcf_dir + mutect_dir + "split_vcf/{chrom}_" + config["vcf"]["mutect"]["default"] + ".gz", chrom=chromlist) 
   output:
     vcf_dir + config["vcf"]["mutect"]["type"] + "/" + config["vcf"]["mutect"]["merged"]
   params:

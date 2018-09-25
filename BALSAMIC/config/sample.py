@@ -10,6 +10,8 @@ import json
 from yapf.yapflib.yapf_api import FormatFile
 from datetime import datetime
 
+from BALSAMIC.tools import get_chrom
+
 def merge_json(*args):
     '''
     Take a list of json files and merges them together
@@ -64,6 +66,8 @@ def set_panel_bed(json_out, panel_bed):
             os.path.abspath(panel_bed))[0] + "/"
         json_out['bed']['variant_panel'] = os.path.split(
             os.path.abspath(panel_bed))[1]
+        json_out['bed']['chrom'] = get_chrom(panel_bed) 
+
     except OSError:
         print("Couldn't locate bed file" + panel_bed)
 

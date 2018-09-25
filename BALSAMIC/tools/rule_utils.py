@@ -1,6 +1,11 @@
 import os
 import yaml
 
+def get_chrom(panelfile):
+    lines = [line.rstrip('\n') for line in open(panelfile,'r')]
+    chrom = list(set([s.split('\t')[0] for s in lines]))
+    return chrom
+
 def get_vcf_files(config, vcf_type):
     vcf_files = []
     for var_caller in config["vcf"]:
