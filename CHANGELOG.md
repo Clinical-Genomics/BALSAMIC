@@ -3,6 +3,14 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.3.0] - 2018-09-25
+### Changed
+- Sample config file now includes a list of chromosomes in the panel bed file
+
+### Fixed
+- Non-matching chrom won't break the splitbed rule anymore
+- collectqc rules now properly parse tab delimited metric files
+
 ## [2.2.0] - 2018-09-11
 ### Added
 - Coverage plot to report

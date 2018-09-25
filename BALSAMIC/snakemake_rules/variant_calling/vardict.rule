@@ -3,13 +3,15 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
 vardict_dir = "vardict/"
+
+chromlist = get_chrom(config["path"]["panel"] + config["bed"]["variant_panel"])
 
 rule vardict_paired:
   input:
@@ -40,7 +42,7 @@ rule vardict_paired:
 
 rule vardict_merge_chrom:
   input:
-    expand(vcf_dir + vardict_dir + "split_vcf/{chrom}_" + config["vcf"]["vardict"]["default"], chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
+    expand(vcf_dir + vardict_dir + "split_vcf/{chrom}_" + config["vcf"]["vardict"]["default"], chrom=chromlist) 
   output:
     vcf_dir + config["vcf"]["vardict"]["type"] + "/" + config["vcf"]["vardict"]["merged"]
   params:
