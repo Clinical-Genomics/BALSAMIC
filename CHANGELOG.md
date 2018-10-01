@@ -3,6 +3,10 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.3.1] - 2018-09-25
+### Added
+- CollectHSmetric now run twice for before and after markduplicate
+
 ## [2.3.0] - 2018-09-25
 ### Changed
 - Sample config file now includes a list of chromosomes in the panel bed file
