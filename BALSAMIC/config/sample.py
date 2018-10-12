@@ -66,7 +66,7 @@ def set_panel_bed(json_out, panel_bed):
             os.path.abspath(panel_bed))[0] + "/"
         json_out['bed']['variant_panel'] = os.path.split(
             os.path.abspath(panel_bed))[1]
-        json_out['bed']['chrom'] = get_chrom(panel_bed) 
+        json_out['bed']['chrom'] = get_chrom(panel_bed)
 
     except OSError:
         print("Couldn't locate bed file" + panel_bed)
@@ -168,10 +168,19 @@ def check_exist(path):
     '--check-files/--no-check-files',
     default=True,
     help='Check if fastq input files exist')
+@click.option(
+    '--overwrite-config/--no-overwrite-config'
+    default=True,
+    help='Overwrite output config file')
+@click.option(
+    '--create-dir/--no-create-dir'
+    default=True,
+    help='Craete analysis directiry.')
 @click.pass_context
 def sample(context, analysis_type, install_config, sample_config,
            reference_config, panel_bed, output_config, normal, tumor,
-           sample_id, analysis_dir, fastq_path, check_files):
+           sample_id, analysis_dir, fastq_path, check_files,
+           overwrite_config, create_dir):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as dictionary and merging them as
 it is. So this is just a placeholder for future.
@@ -230,14 +239,25 @@ it is. So this is just a placeholder for future.
     json_out = merge_json(analysis_config, sample_config, reference_config,
                           install_config)
 
-    output_config = os.path.join(
-        os.path.abspath(json_out["analysis"]["analysis_dir"]),
-        json_out["analysis"]["sample_id"], output_config)
+    output_dir = os.path.join(
+            os.path.abspath(json_out["analysis"]["analysis_dir"]),
+            json_out["analysis"]["sample_id"])
+
+    output_config = os.path.join(output_dir, output_config)
+
     click.echo("Writing output config file %s" % output_config)
 
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
 
-    os.makedirs(os.path.dirname(os.path.abspath(output_config)), exist_ok=True)
-    write_json(json_out, output_config)
+    if create_dir:
+        os.makedirs(os.path.dirname(os.path.abspath(output_config)),
+        exist_ok=True)
+
+    if os.path.isdir(output_dir) & os.path.exists(output_dir):
+        os.makedirs(os.path.join(output_dir, "fastq"), exists_ok=True)
+
+    if overwrite_config:
+        write_json(json_out, output_config)
+
     FormatFile(output_config, in_place=True)
