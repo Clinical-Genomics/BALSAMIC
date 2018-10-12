@@ -2,38 +2,39 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-sample="S1_R"
+SAMPLES=["S1_R", "S2_R"]
 
 rule all:
   input:
-    sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip" + ".bam"
+    expand("{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam", sample=SAMPLES),
+    expand("{sample}.unalg.umi.mrkadp.bwa.map.umi.metrics", sample=SAMPLES)
+    #"{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam",
+    #"{sample}.unalg.umi.bam"
 
 rule picard_FastqToSam:
 #TODO: add -Xmx4f memory to java
 #TODO: add jar excution to picard
     input:
-        fq1=sample + "_1." + "fastq.gz",
-        fq2=sample + "_2." + "fastq.gz",
+        fq1="{sample}_1.fastq.gz",
+        fq2="{sample}_2.fastq.gz",
     output:
-        sample + ".unalg" + ".bam"
-    params:
-        sample = sample
+        "{sample}.unalg.bam"
     shell:
         """
 picard FastqToSam \
 --O={output} \
 F1={input.fq1} \
 F2={input.fq2} \
-SM={params.sample} \
+SM={wildcards.sample} \
 LB=Library1 \
-PU=Unit1
+PU=Unit1 \
 PL=illumina
         """
 rule fgbio_ExtractUmisFromBam:
     input:
-        sample + ".unalg" + ".bam"
+        "{sample}.unalg.bam"
     output:
-        sample + ".unalg.umi" +  ".bam"
+        "{sample}.unalg.umi.bam"
     shell:
         """
 fgbio ExtractUmisFromBam \
@@ -46,10 +47,10 @@ fgbio ExtractUmisFromBam \
 
 rule picard_MarkIlluminaAdapters:
     input:
-        sample + ".unalg.umi" + ".bam"
+        "{sample}.unalg.umi.bam"
     output:
-        bam = sample + ".unalg.umi.mrkadp" + ".bam",
-        txt = sample + ".unalg.umi.mrkadp" + ".txt"
+        bam = "{sample}.unalg.umi.mrkadp.bam",
+        txt = "{sample}.unalg.umi.mrkadp.txt"
     shell:
         """
 picard MarkIlluminaAdapters \
@@ -60,107 +61,197 @@ M={output.txt}
 
 rule picard_SamToFastq:
     input:
-        sample + ".unalg.umi.mrkadp" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bam"
     output:
-        sample + ".unalg.umi.mrkadp" + ".fastq"
+        "{sample}.unalg.umi.mrkadp.fastq"
     shell:
         """
-picard SamToFastq {input} {output}
+ picard.jar SamToFastq \
+ I={input} \
+ CLIPPING_ATTRIBUTE=XT \
+ CLIPPING_ACTION=X \
+ CLIPPING_MIN_LENGTH=36 \
+ INCLUDE_NON_PF_READS=true \
+ F={output} \
+ INTERLEAVE=true
         """
 
 rule bwa_mem_umi_mrkadp:
     input:
-        sample + ".unalg.umi.mrkadp" + ".fastq"
+        "{sample}.unalg.umi.mrkadp.fastq"
     output:
-        sample + ".unalg.umi.mrkadp.bwa" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.sam"
     shell:
         """
-bwa mem {input} {output}
+bam mem -p -t 8 {input} > {output}
         """
 rule picard_MergeBamAlignment_mrkadp:
     input:
-        sample + ".unalg.umi.mrkadp.bwa" + ".bam"
+        aligned = "{sample}.unalg.umi.mrkadp.bwa.sam",
+        unaligned = "{sample}.unalg.umi.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.bam"
+    params:
+        ref = "hs38DH.fa"
     shell:
         """
-picard MergeBamAlignment {input} {output}
+picard MergeBamAlignment \
+UNMAPPED={input.unaligned} \
+ALIGNED={input.aligned} \
+O={output} \
+R={params.ref} \
+CLIP_ADAPTERS=false \
+VALIDATION_STRINGENCY=SILENT \
+EXPECTED_ORIENTATIONS=FR \
+MAX_GAPS=-1 \
+SO=coordinate \
+ALIGNER_PROPER_PAIR_FLAGS=false \
+CREATE_INDEX=true
         """
 
 rule fgbio_GroupReadsByUmi:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     shell:
         """
-fgbio GroupReadsByUmi {input} {output}
+fgbio GroupReadsByUmi \
+--strategy=paired \
+--input={input} \
+--output={output} \
+--raw-tag=RX \
+--assign-tag=MI \
+--min-map-q=10 \
+--edits=1
         """
+
 rule fgbio_CallDuplexConsensusReads:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     shell:
         """
-fgbio CallDuplexConsensusReads {input} {output}
+fgbio CallDuplexConsensusReads \
+--input={input} \
+--output={output} \
+--error-rate-pre-umi=45 \
+--error-rate-post-umi=30 \
+--min-input-base-quality=30
         """
+
 rule picard_SamToFastq_cnsalg:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".fastq"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
     shell:
         """
-picard SamToFastq {input} {output}
+picard SamToFastq \
+VALIDATION_STRINGENCY=SILENT \
+INPUT={input} \
+F={output} \
+INTERLEAVE=true \
+INCLUDE_NON_PF_READS=true \
+CREATE_INDEX=true
         """
 
 rule bwa_mem_umi_cnsalg:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg" + ".fastq"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam"
     shell:
         """
-bwa mem {input} {output}
+bam mem -p -t 8 {input} > {output}
         """
 
 rule picard_MergeBamAlignment_cnsalg:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa" + ".bam"
+        aligned = "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam",
+        unaligned = "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
+    params:
+        ref = "hs38DH.fa"
     shell:
         """
-picard MergeBamAlignment {input} {output}
+picard MergeBamAlignment
+VALIDATION_STRINGENCY=SILENT \
+UNMAPPED={input.unaligned} \
+ALIGNED={input.aligned} \
+OUTPUT=S1_ds_consensus_aligned.bam \
+REFERENCE_SEQUENCE= {params.ref} \
+CLIP_ADAPTERS=false \
+ORIENTATIONS=FR \
+MAX_GAPS=-1 \
+SORT_ORDER=coordinate \
+ALIGNER_PROPER_PAIR_FLAGS=false \
+ATTRIBUTES_TO_RETAIN=X0 \
+ATTRIBUTES_TO_RETAIN=ZS \
+ATTRIBUTES_TO_RETAIN=ZI \
+ATTRIBUTES_TO_RETAIN=ZM \
+ATTRIBUTES_TO_RETAIN=ZC \
+ATTRIBUTES_TO_RETAIN=ZN \
+ATTRIBUTES_TO_REVERSE=ad \
+ATTRIBUTES_TO_REVERSE=bd \
+ATTRIBUTES_TO_REVERSE=cd \
+ATTRIBUTES_TO_REVERSE=ae \
+ATTRIBUTES_TO_REVERSE=be \
+ATTRIBUTES_TO_REVERSE=ce \
+CREATE_INDEX=true
         """
 
 rule fgbio_FilterConsensusReads:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
+    params:
+        ref = "hs38DH.fa"
     shell:
         """
-fgbio FilterConsensusReads {input} {output}
+fgbio FilterConsensusReads \
+-i {input} \
+-o {output} \
+--ref {params.ref} \
+--min-reads 10 5 3 \
+--max-read-error-rate 0.05 \
+--max-base-error-rate 0.1 \
+--min-base-quality 50 \
+--max-no-call-fraction 0.05
         """
 
 rule fgio_ClipBam:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam"
+    params:
+        ref = "hs38DH.fa"
     shell:
         """
-fgbio ClipBam {input} {output}
+fgbio ClipBam \
+--input={input} \
+--output={output} \
+--ref={params.ref} \
+--soft-clip=false \
+--overlapping-reads=true
         """
 
 rule fgbio_CollectDuplexSeqMetrics:
     input:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi" + ".bam"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     output:
-        sample + ".unalg.umi.mrkadp.bwa.map.umi.metrics"
+        "{sample}.unalg.umi.mrkadp.bwa.map.umi.metrics"
+    params:
+        intervals = "interval.txt"
     shell:
         """
-fgbio CollectDuplexSeqMetrics {input} {output}
+fgbio CollectDuplexSeqMetrics \
+--input={input} \
+--output={output} \
+--intervals={params.intervals} \
+--description={wildcards.sample}
         """
