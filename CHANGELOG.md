@@ -3,6 +3,14 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.3.2] - 2018-10-19
+### Changed
+- Fastq files are now always linked to `fastq` directory within the analysis directory
+
+### Added
+- `balsamic config sample` now accepts individual files and paths. See README for usage.
+
+
 ## [2.3.1] - 2018-09-25
 ### Added
 - CollectHSmetric now run twice for before and after markduplicate
