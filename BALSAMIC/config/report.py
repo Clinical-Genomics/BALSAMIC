@@ -22,6 +22,7 @@ from BALSAMIC import __version__ as bv
 from datetime import datetime
 from collections import defaultdict
 
+
 @click.command(
     "report", short_help="Create a report config file for report generation.")
 @click.option(
@@ -45,19 +46,26 @@ def report(context, sample_config, output_config):
 
     config_json = json.load(open(sample_config))
 
-    json_out = dict() 
+    json_out = dict()
 
     json_out["analysis"] = dict()
-    json_out["analysis"]["BALSAMIC"] = bv 
+    json_out["analysis"]["BALSAMIC"] = bv
     json_out["analysis"]["date"] = dict()
-    json_out["analysis"]["date"]["report"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-    json_out["analysis"]["date"]["analysis_start"] = "NA" 
+    json_out["analysis"]["date"]["report"] = datetime.now().strftime(
+        "%Y-%m-%d %H:%M")
+    json_out["analysis"]["date"]["analysis_start"] = "NA"
     json_out["analysis"]["date"]["analysis_finish"] = "NA"
     json_out["analysis"]["date"]["sample_received"] = "NA"
     json_out["analysis"]["sample_id"] = get_sample_name(sample_config)
     json_out["analysis"]["analysis_dir"] = os.path.join(
         get_analysis_dir(sample_config, "analysis_dir"),
         get_sample_name(sample_config))
+
+    report_dir = os.path.join(
+        os.path.abspath(json_out["analysis"]["analysis_dir"]),
+        "delivery_report")
+
+    os.makedirs(report_dir, exist_ok=True)
 
     json_out["bed"] = dict()
     genome_size = list()
@@ -80,17 +88,15 @@ def report(context, sample_config, output_config):
                 os.path.join(
                     get_analysis_dir(sample_config, "analysis_dir"),
                     get_sample_name(sample_config), "results", "bam",
-                    config_json["samples"][i]["file_prefix"] +
-                    ".sorted." +  get_picard_mrkdup(config_json) +
-                    ".exon.cov.bed")))
+                    config_json["samples"][i]["file_prefix"] + ".sorted." +
+                    get_picard_mrkdup(config_json) + ".exon.cov.bed")))
         json_out["bed"]["target_cov"][i] = "".join(
             glob.glob(
                 os.path.join(
                     get_analysis_dir(sample_config, "analysis_dir"),
                     get_sample_name(sample_config), "results", "bam",
-                    config_json["samples"][i]["file_prefix"] +
-                    ".sorted." +  get_picard_mrkdup(config_json) +
-                    ".cov.bed")))
+                    config_json["samples"][i]["file_prefix"] + ".sorted." +
+                    get_picard_mrkdup(config_json) + ".cov.bed")))
 
     json_out["vcf"] = dict()
     json_out["vcf"]["merged"] = dict()
@@ -98,6 +104,24 @@ def report(context, sample_config, output_config):
         get_analysis_dir(sample_config, "analysis_dir"),
         get_sample_name(sample_config), "results", "vep",
         "vep_SNV.merged.table")
+
+    dag_image = os.path.join(
+        report_dir, json_out["analysis"]["sample_id"] + '_BALSAMIC-' + bv +
+        '_graph.pdf')
+
+    json_out["analysis"]["dag"] = dag_image
+
+    shellcmd = ([
+        'balsamic', 'run', '-s', sample_config, '--snakemake-opt',
+        '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
+        '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
+        'BALSAMIC', bv, 'workflow', 'for', 'sample:',
+        json_out["analysis"]["sample_id"], '\\"\;/g"', '|', 'dot', '-Tpdf',
+        '1>', dag_image
+    ])
+
+    click.echo("Creating workflow dag image file: %s" % dag_image)
+    subprocess.run(" ".join(shellcmd), shell=True)
 
     write_json(json_out, output_config)
     FormatFile(output_config, in_place=True)
