@@ -160,8 +160,9 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 shellcmd.extend([
                     "--infile", sample_config["vcf"]["merged"]["SNV"],
                     "--genomeSize", sample_config["bed"]["genome_size"],
-                    "--type", "latex", "--mode", i
+                    "--type", "latex", "--mode", i, "--outfile", os.path.join(tex_path,sample_config['analysis']['sample_id'])
                 ])
+                print(" ".join(shellcmd))
 
                 outTab = subprocess.check_output(shellcmd)
                 doc.append(
