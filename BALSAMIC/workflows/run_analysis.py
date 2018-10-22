@@ -83,6 +83,10 @@ def get_snakefile(analysis_type):
             snakefile = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
                 'VariantCalling_single')
+        elif analysis_type == "qc":
+            snakefile = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'Alignment')
         else:
             raise ValueError("analysis_type should be single or paired")
 
@@ -110,11 +114,19 @@ def get_cluster_config():
 
 @click.command("run", short_help="Run BALSAMIC on a provided config file")
 @click.option(
+    '-a',
+    '--analysis-type',
+    required=False,
+    type=click.Choice(['qc', 'paired', 'single']),
+    help='Type of analysis to run from input config file. By default it will read from config file, but it will override config file if it is set here.'
+)
+@click.option(
     '-S',
     '--snake-file',
     type=click.Path(),
     show_default=True,
-    help='Snakefile required for snakemake to function.')
+    help='Input for a custom snakefile. WARNING: This is for internal testing, and should not be used. Providing a snakefile supersedes analysis_type option.'
+)
 @click.option(
     '-s',
     '--sample-config',
@@ -160,7 +172,7 @@ def get_cluster_config():
     '--snakemake-opt', help='Pass these options directly to snakemake')
 @click.pass_context
 def run_analysis(context, snake_file, sample_config, cluster_config,
-                 run_analysis, log_file, force_all, snakemake_opt, qos):
+                 run_analysis, log_file, force_all, snakemake_opt, analysis_type, qos):
     """
 
     Runs BALSAMIC workflow on the provided sample's config file
@@ -190,8 +202,11 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
     shellcmd.append("--jobname " + get_sample_name(sample_config)+
                     ".{rulename}.{jobid}.sh")
 
-    snakefile = snake_file if snake_file else get_snakefile(
-        get_analysis_type(sample_config))
+    if not analysis_type:
+        analysis_type = get_analysis_type(sample_config)
+
+    snakefile = snake_file if snake_file else get_snakefile(analysis_type)
+
     shellcmd.append("--snakefile " + snakefile)
 
     shellcmd.append("--directory " + os.path.join(
