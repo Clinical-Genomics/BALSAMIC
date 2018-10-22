@@ -39,10 +39,10 @@ def get_packages(yaml_file):
 @click.option(
     '-r',
     '--rulegraph-img',
-    #              required=True,
     type=click.Path(),
-    help='Input rulegraph from workflow output')
+    help='Input rulegraph from workflow output.')
 @click.pass_context
+
 def report(context, json_report, json_varreport, rulegraph_img):
 
     config = json_report
@@ -53,15 +53,11 @@ def report(context, json_report, json_varreport, rulegraph_img):
         os.path.join(sample_config["analysis"]["analysis_dir"],
                      "delivery_report"))
 
+    if not rulegraph_img:
+        rulegraph_img = sample_config['analysis']['dag']
+
     os.makedirs(tex_path, exist_ok=True)
 
-    #    geometry_options = {
-    #        "tmargin": "2.5cm",
-    #        "lmargin": "1cm",
-    #        "margin": "1cm",
-    #        "paperwidth": "210mm",
-    #        "paperheight": "297mm"
-    #    }
     geometry_options = {
         "head": "40pt",
         "headheight": "130pt",
@@ -357,7 +353,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
     ]
     #generate_pdf doesn't run AUX files properly and ends up with incorrect total page numbers. So subprocess for
     #pdflatex is called twice instead.
-    
+
     print(" ".join(shellcmd))
     subprocess.run(" ".join(shellcmd), shell=True)
     subprocess.run(" ".join(shellcmd), shell=True)
