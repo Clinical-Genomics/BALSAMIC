@@ -3,6 +3,11 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.4.0] - 2018-10-22
+### Changed
+- `balsamic run` has 3 stop points: paired variant calling, single mode variant calling, and QC/Alignment mode.
+- `balsamic run [OPTIONS] -S ...` is depricated, but it supersedes `analysis_type` mode if provided.
+
 ## [2.3.3] - 2018-10-22
 ### Added
 - CSV output for variants in each variant caller based on variant filters
