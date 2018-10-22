@@ -1,0 +1,75 @@
+{
+    "version":
+    "0.1.1",
+    "reference_documents":
+    ["https://www.accessdata.fda.gov/cdrh_docs/reviews/DEN170058.pdf"],
+    "base_line": {},
+    "filters": {
+        "set_1": {
+            "VF_ratio": "5",
+            "name": "'High confidence set (in MSK-IMPACT)'",
+            "in_mvl": "T",
+            "variantcaller": ["MUTECT2"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "8",
+                "AF_max": "1",
+                "AF_min": "0.01"
+            },
+            "annotation": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
+        },
+        "set_2": {
+            "VF_ratio": "5",
+            "name": "'Low confidence set (not in MSK-IMPACT)'",
+            "in_mvl": "F",
+            "variantcaller": ["MUTECT2"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "8",
+                "AF_max": "1",
+                "AF_min": "0.01"
+            },
+            "annotation": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
+        },
+        "set_3": {
+            "VF_ratio": "5",
+            "name": "'Discovery High confidence (in MSK-IMPACT)'",
+            "in_mvl": "T",
+            "variantcaller": ["MUTECT2", "VARDICT"],
+            "TUMOR": {
+                "DP": "20",
+                "AD": "8",
+                "AF_max": "1",
+                "AF_min": "0.01"
+            },
+            "annotation": {
+                "SNV": [
+                    "missense_variant", "nonsynonymous_variant", "stop_gained",
+                    "stop_lost", "start_lost", "splice_acceptor_variant",
+                    "splice_donor_variant", "splice_donor_5th_base_variant",
+                    "splice_site_variant", "splicing_variant"
+                ],
+                "INDEL":
+                ["frameshift_variant", "frameshift", "non-frameshift"]
+            }
+        }
+    }
+}
