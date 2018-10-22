@@ -15,6 +15,7 @@ from pylatex import Document, PageStyle, Section, Subsection, Subsubsection, Tab
 from pylatex.utils import italic, NoEscape, bold
 
 from BALSAMIC.workflows.run_analysis import get_sample_name
+from BALSAMIC.config.sample import get_config
 from BALSAMIC import __version__ as bv
 
 
@@ -33,8 +34,10 @@ def get_packages(yaml_file):
 @click.option(
     '-c',
     '--json-varreport',
-    required=True,
-    type=click.Path(),
+    required=False,
+    default=get_config('MSK_impact'),
+    show_default=True,
+    type=click.Choice(['MSK_impact', 'MSK_impact_noStrelka']),
     help='Input JSON file for variant filters')
 @click.option(
     '-r',
