@@ -3,6 +3,15 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.3.3] - 2018-10-22
+### Added
+- CSV output for variants in each variant caller based on variant filters
+- DAG image of workflow
+### Changed
+- Input for variant filter has a default value
+- `delivery_report` is no created during config generation
+- Variant reporter R script cmd updated in `balsamic report`
+
 ## [2.3.2] - 2018-10-19
 ### Changed
 - Fastq files are now always linked to `fastq` directory within the analysis directory
