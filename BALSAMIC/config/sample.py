@@ -9,10 +9,12 @@ import sys
 import json
 import re
 import copy
-from yapf.yapflib.yapf_api import FormatFile
+import glob
 from datetime import datetime
+from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.tools import get_chrom
+from BALSAMIC.tools import get_chrom, get_package_split
+from BALSAMIC import __version__ as bv
 
 
 def merge_json(*args):
@@ -53,8 +55,7 @@ def get_config(config_name):
 
     try:
         config_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), config_name + ".json"
-        )
+            os.path.dirname(os.path.abspath(__file__)), config_name + ".json")
     except OSError:
         print("Couldn't locate config file" + config_name + ".json")
 
@@ -66,8 +67,10 @@ def set_panel_bed(json_out, panel_bed):
     Set panel path in config file
     """
     try:
-        json_out["path"]["panel"] = os.path.split(os.path.abspath(panel_bed))[0] + "/"
-        json_out["bed"]["variant_panel"] = os.path.split(os.path.abspath(panel_bed))[1]
+        json_out["path"]["panel"] = os.path.split(
+            os.path.abspath(panel_bed))[0] + "/"
+        json_out["bed"]["capture_kit"] = os.path.split(
+            os.path.abspath(panel_bed))[1]
         json_out["bed"]["chrom"] = get_chrom(panel_bed)
 
     except OSError:
@@ -99,12 +102,14 @@ def link_fastq(src_path, dst_path, fq_prefix, read_prefix, check_fastq):
     # It is assumed that the format of input fastq files is: samplename_R_{1,2}.fastq.gz
     # This is hardcoded and should be changed when going in production.
     src_fq = [
-        os.path.join(src_path, fq_prefix + "_" + r + ".fastq.gz") for r in read_prefix
+        os.path.join(src_path, fq_prefix + "_" + r + ".fastq.gz")
+        for r in read_prefix
     ]
 
     # The output fastq files will be: samplename_R_{1,2}.fastq.gz
     dst_fq = [
-        os.path.join(dst_path, fq_prefix + "_" + r + ".fastq.gz") for r in read_prefix
+        os.path.join(dst_path, fq_prefix + "_" + r + ".fastq.gz")
+        for r in read_prefix
     ]
 
     for s, d in zip(src_fq, dst_fq):
@@ -112,14 +117,14 @@ def link_fastq(src_path, dst_path, fq_prefix, read_prefix, check_fastq):
             check_exist(s)
 
         try:
-            subprocess.check_output(["ln", "-s", s, dst_path], stderr=subprocess.STDOUT)
+            subprocess.check_output(["ln", "-s", s, dst_path],
+                                    stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             print(e.output.decode())
 
 
 @click.command(
-    "sample", short_help="Create a sample config file from input sample data"
-)
+    "sample", short_help="Create a sample config file from input sample data")
 @click.option(
     "-a",
     "--analysis-type",
@@ -127,7 +132,8 @@ def link_fastq(src_path, dst_path, fq_prefix, read_prefix, check_fastq):
     default="single",
     show_default=True,
     type=click.Choice(["paired", "single"]),
-    help="Analysis config file for paired (tumor vs normal) or single (tumor-only) mode.",
+    help=
+    "Analysis config file for paired (tumor vs normal) or single (tumor-only) mode.",
 )
 @click.option(
     "-i",
@@ -155,8 +161,10 @@ def link_fastq(src_path, dst_path, fq_prefix, read_prefix, check_fastq):
     help="Panel bed file for variant calling.",
 )
 @click.option(
-    "-s", "--sample-config", type=click.Path(), help="Input sample config file."
-)
+    "-s",
+    "--sample-config",
+    type=click.Path(),
+    help="Input sample config file.")
 @click.option(
     "-o",
     "--output-config",
@@ -168,33 +176,39 @@ def link_fastq(src_path, dst_path, fq_prefix, read_prefix, check_fastq):
     "-t",
     "--tumor",
     required=True,
-    help="Fastq files for tumor sample. Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, the input should be --tumor tumor_fqreads",
+    help=
+    "Fastq files for tumor sample. Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, the input should be --tumor tumor_fqreads",
 )
 @click.option(
     "-n",
     "--normal",
-    help="Fastq files for normal sample. Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, the input should be --normal normal_fqreads",
+    help=
+    "Fastq files for normal sample. Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, the input should be --normal normal_fqreads",
 )
 @click.option(
     "--sample-id",
     required=True,
-    help="Sample id that is used for reporting, naming the analysis jobs, and analysis path",
+    help=
+    "Sample id that is used for reporting, naming the analysis jobs, and analysis path",
 )
 @click.option(
     "--analysis-dir",
     type=click.Path(),
-    help="Root analysis path to store analysis logs and results. The final path will be analysis-dir/sample-id",
+    help=
+    "Root analysis path to store analysis logs and results. The final path will be analysis-dir/sample-id",
 )
 @click.option(
     "--fastq-path",
     type=click.Path(),
-    help="Path for fastq files. All fastq files should be within same path and that path has to exist.",
+    help=
+    "Path for fastq files. All fastq files should be within same path and that path has to exist.",
 )
 @click.option(
     "--check-fastq/--no-check-fastq",
     default=True,
     show_default=True,
-    help="Check if fastq input files exist. An internal check, so it's recommended not to change it.",
+    help=
+    "Check if fastq input files exist. An internal check, so it's recommended not to change it.",
 )
 @click.option(
     "--overwrite-config/--no-overwrite-config",
@@ -202,25 +216,26 @@ def link_fastq(src_path, dst_path, fq_prefix, read_prefix, check_fastq):
     help="Overwrite output config file",
 )
 @click.option(
-    "--create-dir/--no-create-dir", default=True, help="Create analysis directiry."
-)
+    "--create-dir/--no-create-dir",
+    default=True,
+    help="Create analysis directiry.")
 @click.pass_context
 def sample(
-    context,
-    analysis_type,
-    install_config,
-    sample_config,
-    reference_config,
-    panel_bed,
-    output_config,
-    normal,
-    tumor,
-    sample_id,
-    analysis_dir,
-    fastq_path,
-    check_fastq,
-    overwrite_config,
-    create_dir,
+        context,
+        analysis_type,
+        install_config,
+        sample_config,
+        reference_config,
+        panel_bed,
+        output_config,
+        normal,
+        tumor,
+        sample_id,
+        analysis_dir,
+        fastq_path,
+        check_fastq,
+        overwrite_config,
+        create_dir,
 ):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as dictionary and merging them as
@@ -247,9 +262,8 @@ it is. So this is just a placeholder for future.
         with open(sample_config) as j:
             sample_config = json.load(j)
         sample_config["analysis"]["sample_id"] = sample_id
-        sample_config["analysis"]["config_creation_date"] = datetime.now().strftime(
-            "%Y-%m-%d %H:%M"
-        )
+        sample_config["analysis"]["config_creation_date"] = datetime.now(
+        ).strftime("%Y-%m-%d %H:%M")
         sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
         sample_config["analysis"]["analysis_type"] = analysis_type
         sample_config["samples"] = {}
@@ -298,7 +312,7 @@ it is. So this is just a placeholder for future.
         tumor = os.path.basename(tumor)
         m = re.search(r"R_[12].fastq.gz$", tumor)
         if m is not None:
-            tumor = tumor[0 : (m.span()[0] + 1)]
+            tumor = tumor[0:(m.span()[0] + 1)]
 
         link_fastq(
             os.path.abspath(tumor_path),
@@ -313,7 +327,7 @@ it is. So this is just a placeholder for future.
             normal = os.path.basename(normal)
             m = re.search(r"R_[12].fastq.gz$", normal)
             if m is not None:
-                normal = normal[0 : (m.span()[0] + 1)]
+                normal = normal[0:(m.span()[0] + 1)]
 
             link_fastq(
                 os.path.abspath(normal_path),
@@ -337,13 +351,22 @@ it is. So this is just a placeholder for future.
         }
 
     sample_config["analysis"]["fastq_path"] = os.path.abspath(fastq_path) + "/"
+    sample_config["analysis"]["BALSAMIC_version"] = bv
+
+    conda_env = glob.glob(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..",
+            "conda_yaml/*.yaml"))
+
+    bioinfo_config = dict()
+    bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)
 
     output_config = os.path.join(output_dir, output_config)
-    click.echo("Writing output config file %s" % os.path.abspath(output_config))
+    click.echo(
+        "Writing output config file %s" % os.path.abspath(output_config))
 
-    json_out = merge_json(
-        analysis_config, sample_config, reference_config, install_config
-    )
+    json_out = merge_json(analysis_config, sample_config, reference_config,
+                          install_config, bioinfo_config)
 
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)

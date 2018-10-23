@@ -49,7 +49,12 @@ def report(context, sample_config, output_config):
     json_out = dict()
 
     json_out["analysis"] = dict()
+
+    if config_json["analysis"]["BALSAMIC_version"]:
+        bv = config_json["analysis"]["BALSAMIC_version"]
+
     json_out["analysis"]["BALSAMIC"] = bv
+
     json_out["analysis"]["date"] = dict()
     json_out["analysis"]["date"]["report"] = datetime.now().strftime(
         "%Y-%m-%d %H:%M")
@@ -106,8 +111,8 @@ def report(context, sample_config, output_config):
         "vep_SNV.merged.table")
 
     dag_image = os.path.join(
-        report_dir, json_out["analysis"]["sample_id"] + '_BALSAMIC-' + bv +
-        '_graph.pdf')
+        report_dir,
+        json_out["analysis"]["sample_id"] + '_BALSAMIC-' + bv + '_graph.pdf')
 
     json_out["analysis"]["dag"] = dag_image
 

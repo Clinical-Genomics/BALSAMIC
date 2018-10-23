@@ -11,14 +11,14 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 vardict_dir = "vardict/"
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["variant_panel"])
+chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
 
 rule vardict_paired:
   input:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
-    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["variant_panel"],
+    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["capture_kit"],
   output:
     vcf_dir + vardict_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"]["vardict"]["default"]
   params:
