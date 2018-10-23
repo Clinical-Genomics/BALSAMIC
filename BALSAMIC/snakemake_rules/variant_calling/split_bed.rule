@@ -8,17 +8,17 @@ from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
 vcf_dir = get_result_dir(config) + "/vcf/"
 bam_dir = get_result_dir(config) + "/bam/"
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["variant_panel"])
+chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
 
 rule split_bed_by_chrom:
   input:
-    bed = config["path"]["panel"] + config["bed"]["variant_panel"],
+    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
     bamT= bam_dir + "tumor.merged.bam",
   output:
-    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=chromlist) 
+    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist) 
   params:
     split_bed_dir = vcf_dir + "split_bed/",
-    origin_bed = config["bed"]["variant_panel"],
+    origin_bed = config["bed"]["capture_kit"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "chromlist=`cut -f 1 {input.bed} | sort -u`; "

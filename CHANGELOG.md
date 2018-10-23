@@ -3,6 +3,15 @@
 This change log will document the notable changes to this project in this file and it is following [Semantic
 Versioning](https://semver.org/)
 
+## [2.5.0] - 2018-10-22
+### Changed
+- `variant_panel` changed to `capture_kit`
+- sample config file takes balsamic version
+- bioinfo tool config moved bioinfotool to cli_utils from `config report`
+
+### Added
+- bioinfo tool versions is now added to analysis config file
+
 ## [2.4.0] - 2018-10-22
 ### Changed
 - `balsamic run` has 3 stop points: paired variant calling, single mode variant calling, and QC/Alignment mode.

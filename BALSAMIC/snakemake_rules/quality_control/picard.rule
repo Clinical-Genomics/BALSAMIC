@@ -41,7 +41,7 @@ rule picard_mark_duplicate:
 rule picard_collectHSmetric:
   input:
     fadict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
-    bed = config["path"]["panel"] + config["bed"]["variant_panel"],
+    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
     bam = bam_dir + "{sample}.sorted.bam",
     bammrkdup = bam_dir + "{sample}.sorted." + picarddup + ".bam",
   output:

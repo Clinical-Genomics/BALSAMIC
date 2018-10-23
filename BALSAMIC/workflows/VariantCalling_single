@@ -43,13 +43,13 @@ bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["variant_panel"])
+chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
 
 var_type = ["SNV", "SV"]
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
-    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=chromlist),
+    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist),
     expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
 #    expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
 #    expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
