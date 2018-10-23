@@ -1,4 +1,7 @@
 import os
+import glob
+import yaml
+from itertools import chain
 
 
 def add_doc(docstring):
@@ -14,6 +17,9 @@ def add_doc(docstring):
 
 
 def createDir(path, interm_path=[]):
+    '''
+    Creates directories by recursively checking if it exists, otherwise increments the number
+    '''
     if os.path.isdir(os.path.abspath(path)):
         basepath = os.path.basename(os.path.abspath(path))
         basepath_number = 0
@@ -30,3 +36,41 @@ def createDir(path, interm_path=[]):
     else:
         os.makedirs(os.path.abspath(path), exist_ok=True)
         return interm_path[-1]
+
+
+def get_packages(yaml_file):
+    '''
+    return packages found in a conda yaml file
+
+    input: conda yaml file path
+    output: list of packages
+    '''
+    try:
+        with open(yaml_file, 'r') as f:
+            pkgs = yaml.load(f)['dependencies']
+    except OSError:
+        print('File not found', yaml_file)
+
+    return (pkgs)
+
+
+def get_package_split(conda_yamls):
+    '''
+    Get a list of conda env files, and extract pacakges
+
+    input: conda env files
+    output: dict of packages and their version
+    '''
+
+    pkgs = [
+        "bwa", "bcftools", "cutadapt", "fastqc", "gatk", "manta", "picard",
+        "sambamba", "strelka", "samtools", "tabix", "vardic"
+    ]
+
+    pkgs = dict(
+        [[y.split("=")[0], y.split("=")[1]]
+         for y in set(
+             chain.from_iterable([get_packages(s) for s in conda_yamls]))
+         if y.split("=")[0] in pkgs])
+
+    return (pkgs)
