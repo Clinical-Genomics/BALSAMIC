@@ -6,7 +6,7 @@
         "fastq_path": "BASE_PATH_TO_FASTQ",
         "script": "scripts/",
         "log": "logs/",
-        "result": "results/"
+        "result": "analysis/"
     },
     "samples": {
         "BASE_NAME_FOR_FIRST_SAMPLE": {
