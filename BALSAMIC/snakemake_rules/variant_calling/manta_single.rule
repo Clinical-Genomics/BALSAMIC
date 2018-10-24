@@ -31,7 +31,7 @@ rule manta_somatic_single:
         "--referenceFasta={input.fa} "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-    "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
+    "cp {params.tmpdir}/analysis/variants/*vcf.gz {params.result_dir}; "
     "cp {params.result_dir}/tumorSV.vcf.gz {output.final}; "
     "for i in {params.result_dir}/*.vcf.gz; do tabix -p vcf -f $i; done; "
     "source deactivate; "

@@ -40,7 +40,7 @@ from collections import defaultdict
 @click.pass_context
 def report(context, sample_config, output_config):
     """
-    Prepares a config file for balsamic config report to export results as pdf
+    Prepares a config file for balsamic config report to export analysis as pdf
 
     """
 
@@ -77,7 +77,7 @@ def report(context, sample_config, output_config):
     target_line_num = 5
 
     hsmetric_files = glob.glob(
-        os.path.join(json_out["analysis"]["analysis_dir"], "results", "qc",
+        os.path.join(json_out["analysis"]["analysis_dir"], "analysis", "qc",
                      "*hsmetric.csv"))
     for i in hsmetric_files:
         genome_size.extend(
@@ -92,14 +92,14 @@ def report(context, sample_config, output_config):
             glob.glob(
                 os.path.join(
                     get_analysis_dir(sample_config, "analysis_dir"),
-                    get_sample_name(sample_config), "results", "bam",
+                    get_sample_name(sample_config), "analysis", "bam",
                     config_json["samples"][i]["file_prefix"] + ".sorted." +
                     get_picard_mrkdup(config_json) + ".exon.cov.bed")))
         json_out["bed"]["target_cov"][i] = "".join(
             glob.glob(
                 os.path.join(
                     get_analysis_dir(sample_config, "analysis_dir"),
-                    get_sample_name(sample_config), "results", "bam",
+                    get_sample_name(sample_config), "analysis", "bam",
                     config_json["samples"][i]["file_prefix"] + ".sorted." +
                     get_picard_mrkdup(config_json) + ".cov.bed")))
 
@@ -107,7 +107,7 @@ def report(context, sample_config, output_config):
     json_out["vcf"]["merged"] = dict()
     json_out["vcf"]["merged"]["SNV"] = os.path.join(
         get_analysis_dir(sample_config, "analysis_dir"),
-        get_sample_name(sample_config), "results", "vep",
+        get_sample_name(sample_config), "analysis", "vep",
         "vep_SNV.merged.table")
 
     dag_image = os.path.join(
