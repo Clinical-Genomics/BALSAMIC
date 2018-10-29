@@ -8,7 +8,7 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
-## [2.6.0] - 2018-10-29
+## [2.6.1] - 2018-10-29
 ### Fixed
 - patched a bug for copying results for strelka and manta which was introduced in `2.5.0`
 
