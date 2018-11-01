@@ -39,6 +39,12 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/strelka.rule"
 include:
+  rule_dir + "snakemake_rules/variant_calling/strelka_germline.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/freebayes.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/haplotypecaller.rule"
+include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/bcftools.rule"
@@ -59,3 +65,6 @@ rule all:
     expand(vep_dir + "vep_simple_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
     expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
     vep_dir + "vep_" + "SNV" + ".merged.table",
+    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.vcf", mysample=config["samples"]),
+    expand(vcf_dir + var_type[0] + "/" + "{mysample}.freebayes.germline.vcf", mysample=config["samples"]),
+    expand(vcf_dir + var_type[0] + "/" + "{mysample}.haplotypecaller.germline.vcf", mysample=config["samples"]),
