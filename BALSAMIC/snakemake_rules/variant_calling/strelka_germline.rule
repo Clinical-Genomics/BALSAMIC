@@ -1,0 +1,45 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+
+bam_dir = get_result_dir(config) + "/bam/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
+
+strelka_dir = "strelka_germline/"
+manta_dir = "manta/" #CHANGE TO MANTA GERMLINE
+picarddup = get_picard_mrkdup(config)
+
+rule strelka_germline:
+  input:
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+    mantaindel = vcf_dir + manta_dir + "candidateSmallIndels.vcf.gz" 
+  output:
+    final = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + "{sample}.germline.vcf"
+  params:
+    tmpdir = vcf_dir + "strelka_tmp_germline",
+    result_dir = vcf_dir + strelka_dir,
+    runmode = "local",
+    conda = get_conda_env(config["conda_env_yaml"],"strelka"),
+  threads: 4
+  shell:
+    "source activate {params.conda};"
+    "rm -rf {params.tmpdir}; "
+    "configureStrelkaGermlineWorkflow.py "
+        "--bam={input.bam} "
+        "--referenceFasta={input.fa} "
+        "--indelCandidates {input.mantaindel} "
+        "--outputCallableRegions "
+        "--exome "
+        "--runDir={params.tmpdir}; "
+    "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
+    "cp {params.tmpdir}/results/variants/variants.vcf.gz {params.result_dir}strelka.germline.variants.vcf.gz; "
+    "tabix -p vcf -f {params.result_dir}/variants.vcf.gz; "
+    "cp {params.tmpdir}/results/variants/genome.S1.vcf.gz {params.result_dir}strelka.germline.genome.S1.vcf.gz; "
+    "tabix -p vcf -f {params.result_dir}/genome.S1.vcf.gz; "
+    "tabix -f -p vcf {output.final}; "
+    "source deactivate; "
