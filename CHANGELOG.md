@@ -8,6 +8,10 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.6.3] - 2018-11-01
+### Changed
+- Ugly and godforsaken `runSbatch.py` is now dumping sacct files with job IDs. Yikes!
+ 
 ## [2.6.2] - 2018-10-31
 ### Fixed
 - added `--fastq-prefix` option for `config sample` to set fastq prefix name. Linking is not changed.
