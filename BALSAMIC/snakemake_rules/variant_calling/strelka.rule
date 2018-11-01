@@ -51,42 +51,6 @@ rule strelka_somatic:
     "tabix -f -p vcf {output.final}; "
     "source deactivate; "
 
-rule strelka_germline_tumor:
-  input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    bamT = bam_dir + "tumor.merged.bam",
-    mantaindel = vcf_dir + manta_dir + "candidateSmallIndels.vcf.gz" 
-  output:
-    default = expand(vcf_dir + strelka_dir + "{vcf_file}", vcf_file=config["vcf"]["strelka"]["default"]),
-    final = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + config["vcf"]["strelka"]["merged"]
-  params:
-    tmpdir = vcf_dir + "strelka_tmp_germline",
-    result_dir = vcf_dir + strelka_dir,
-    runmode = "local",
-    conda = get_conda_env(config["conda_env_yaml"],"strelka"),
-  threads: 4
-  shell:
-    "source activate {params.conda};"
-    "rm -rf {params.tmpdir}; "
-    "configureStrelkaGermlineWorkflow.py "
-        "--bam={input.bamT} "
-        "--referenceFasta={input.fa} "
-        "--indelCandidates {input.mantaindel} "
-        "--outputCallableRegions "
-        "--exome "
-        "--runDir={params.tmpdir}; "
-    "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-    "cp {params.tmpdir}/results/variants/variants.vcf.gz {params.result_dir}strelka.germline.variants.vcf.gz; "
-    "tabix -p vcf -f {params.result_dir}/variants.vcf.gz; "
-    "cp {params.tmpdir}/results/variants/genome.S1.vcf.gz {params.result_dir}strelka.germline.genome.S1.vcf.gz; "
-    "tabix -p vcf -f {params.result_dir}/genome.S1.vcf.gz; "
-    "bcftools concat -a "
-        "-o {output.final} "
-        "-O z "
-        "{output.default}; "
-    "tabix -f -p vcf {output.final}; "
-    "source deactivate; "
-
 rule strelka_simple:
   input:
     vep_dir + "vep_" + config["vcf"]["strelka"]["merged"]
