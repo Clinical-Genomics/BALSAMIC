@@ -7,10 +7,9 @@ from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
 
 strelka_dir = "strelka_germline/"
-manta_dir = "manta/" #CHANGE TO MANTA GERMLINE
+manta_dir = "manta_germline/"
 picarddup = get_picard_mrkdup(config)
 
 rule strelka_germline:
@@ -21,7 +20,7 @@ rule strelka_germline:
   output:
     final = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + "{sample}.germline.vcf"
   params:
-    tmpdir = vcf_dir + "strelka_tmp_germline",
+    tmpdir = vcf_dir + "strelka_germline_tmp",
     result_dir = vcf_dir + strelka_dir,
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
