@@ -8,20 +8,19 @@ from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 
-strelka_dir = "strelka_germline/"
-manta_dir = "manta_germline/"
+var_caller = "strelka_germline"
+strelka_dir = vcf_dir + var_caller + "_{sample}/"
 picarddup = get_picard_mrkdup(config)
 
 rule strelka_germline:
   input:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
-    mantaindel = vcf_dir + manta_dir + "candidateSmallIndels.vcf.gz" 
+    mantaindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz"
   output:
-    final = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + "{sample}.germline.vcf"
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "/" + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz"
   params:
-    tmpdir = vcf_dir + "strelka_germline_tmp",
-    result_dir = vcf_dir + strelka_dir,
+    tmpdir = strelka_dir,
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
   threads: 4
@@ -36,9 +35,6 @@ rule strelka_germline:
         "--exome "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-    "cp {params.tmpdir}/results/variants/variants.vcf.gz {params.result_dir}strelka.germline.variants.vcf.gz; "
-    "tabix -p vcf -f {params.result_dir}/variants.vcf.gz; "
-    "cp {params.tmpdir}/results/variants/genome.S1.vcf.gz {params.result_dir}strelka.germline.genome.S1.vcf.gz; "
-    "tabix -p vcf -f {params.result_dir}/genome.S1.vcf.gz; "
-    "tabix -f -p vcf {output.final}; "
+    "cp {params.tmpdir}/results/variants/variants.vcf.gz {output.final}; " 
+    "tabix -p vcf -f {output.final}; "
     "source deactivate; "
