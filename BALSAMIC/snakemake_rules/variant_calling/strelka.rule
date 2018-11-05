@@ -9,8 +9,8 @@ bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
-strelka_dir = "strelka/"
-manta_dir = "manta/"
+var_caller = "strelka"
+strelka_dir = vcf_dir + var_caller + "/"
 picarddup = get_picard_mrkdup(config)
 
 rule strelka_somatic:
@@ -18,13 +18,12 @@ rule strelka_somatic:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
-    mantaindel = vcf_dir + manta_dir + "candidateSmallIndels.vcf.gz" 
+    mantaindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz" 
   output:
-    default = expand(vcf_dir + strelka_dir + "{vcf_file}", vcf_file=config["vcf"]["strelka"]["default"]),
-    final = vcf_dir + config["vcf"]["strelka"]["type"] + "/" + config["vcf"]["strelka"]["merged"]
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "/" + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz", 
+    default = expand(strelka_dir + "results/variants/" + "{vcf_file}", vcf_file=config["vcf"][var_caller]["default"]),
   params:
-    tmpdir = vcf_dir + "strelka_tmp",
-    result_dir = vcf_dir + strelka_dir,
+    tmpdir = strelka_dir, 
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
   threads: 4
@@ -40,10 +39,6 @@ rule strelka_somatic:
         "--exome "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-    "cp {params.tmpdir}/results/variants/somatic.indels.vcf.gz {params.result_dir}somatic.indels.vcf.gz; "
-    "tabix -p vcf -f {params.result_dir}/somatic.indels.vcf.gz; "
-    "cp {params.tmpdir}/results/variants/somatic.snvs.vcf.gz {params.result_dir}somatic.snvs.vcf.gz; "
-    "tabix -p vcf -f {params.result_dir}/somatic.snvs.vcf.gz; "
     "bcftools concat -a "
         "-o {output.final} "
         "-O z "
