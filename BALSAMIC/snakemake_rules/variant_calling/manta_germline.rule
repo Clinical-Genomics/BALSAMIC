@@ -8,7 +8,8 @@ from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 
-manta_dir = "manta_germline/"
+var_caller = "manta_germline"
+manta_dir = vcf_dir + var_caller + "_{sample}/"
 picarddup = get_picard_mrkdup(config)
 
 rule manta_germline:
@@ -16,24 +17,21 @@ rule manta_germline:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
   output:
-    final = vcf_dir + config["vcf"]["manta"]["type"] + "/" + "manta.{sample}.germline.vcf",
-    default = expand(vcf_dir + manta_dir + "{vcf_file}", vcf_file = config["vcf"]["manta"]["default"]),
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "/" + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz", 
+    candidateindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz" 
   params:
-    tmpdir = vcf_dir + "manta_germline_tmp",
-    result_dir = vcf_dir + manta_dir,
+    tmpdir = manta_dir,
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"manta"),
   threads: 4
   shell:
     "source activate {params.conda}; "
-    "mkdir -p {params.result_dir}; "
     "rm -rf {params.tmpdir}; "
     "configManta.py "
         "--bam={input.bam} "
         "--referenceFasta={input.fa} "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-    "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
-    "cp {params.result_dir}/diploidSV.vcf.gz {output.final}; "
-    "for i in {params.result_dir}/*.vcf.gz; do tabix -p vcf -f $i; done; "
+    "cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final}; "
+    "tabix -p vcf -f {output.final}; "
     "source deactivate; "
