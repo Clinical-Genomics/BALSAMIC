@@ -41,13 +41,15 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/strelka_germline.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/freebayes.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/haplotypecaller.rule"
+  rule_dir + "snakemake_rules/variant_calling/manta_germline.rule"
+#include:
+#  rule_dir + "snakemake_rules/variant_calling/freebayes.rule"
+#include:
+#  rule_dir + "snakemake_rules/variant_calling/haplotypecaller.rule"
 include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/bcftools.rule"
+#include:
+#  rule_dir + "snakemake_rules/variant_calling/bcftools.rule"
 
 
 bam_dir = get_result_dir(config) + "/bam/"
@@ -55,16 +57,31 @@ vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
 var_type = ["SNV", "SV"]
+var_class = ["somatic", "germline"]
+
+def get_vcf(config, var_caller, sample):
+  vcf = []
+  for v in var_caller:
+    for s in sample:
+      vcf.append( config["vcf"][v]["type"] + "/" + config["vcf"][v]["mutation"] + "." + s + "." + v + ".vcf.gz")
+  return vcf
+
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
-    expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
-    expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
+    #expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
+    #expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
     #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
-    expand(vep_dir + "vep_" + "{vcf}", vcf=list(get_vcf_files(config, "SNV") + get_vcf_files(config, "SV"))),
-    expand(vep_dir + "vep_simple_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
-    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
-    vep_dir + "vep_" + "SNV" + ".merged.table",
-    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.vcf", mysample=config["samples"]),
-    expand(vcf_dir + var_type[0] + "/" + "{mysample}.freebayes.germline.vcf", mysample=config["samples"]),
-    expand(vcf_dir + var_type[0] + "/" + "{mysample}.haplotypecaller.germline.vcf", mysample=config["samples"]),
+    expand(vcf_dir + "{vcf}", vcf=get_vcf(config, ["mutect", "vardict", "strelka", "manta"], [config["analysis"]["sample_id"]])),
+    expand(vcf_dir + "{vcf}", vcf=get_vcf(config, ["strelka_germline"], config["samples"])),
+    expand(vcf_dir + "{vcf}", vcf=get_vcf(config, ["manta_germline"], config["samples"])),
+#    vep_dir + "vep_" + config["vcf"]["vardict"]["mutation"] + "." + config["vcf"]["vardict"]["merged"],
+#    expand(vep_dir + "vep_" + "{vcf}", vcf=list(get_vcf_files(config, "SNV") + get_vcf_files(config, "SV"))),
+#    expand(vep_dir + "vep_simple_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
+#    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
+#    vep_dir + "vep_" + "SNV" + ".merged.table",
+#    expand(vcf_dir + var_type[1] + "/" + "{mysample}.germline.manta.vcf.gz", mysample=config["samples"]),
+    #vcf_dir + config["vcf"]["manta"]["type"] + "/" + "{sample}.germline.manta.vcf.gz"
+#    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.strelka.vcf.gz", mysample=config["samples"]),
+#    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.freebayes.vcf", mysample=config["samples"]),
+#    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.haplotypecaller.vcf", mysample=config["samples"]),
