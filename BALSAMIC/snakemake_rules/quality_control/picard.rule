@@ -15,7 +15,7 @@ def picard_flag(picarddup):
   else:
       return "TRUE"
 
-rule picard_mark_duplicate:
+rule MarkDuplicates:
   input:
     bam_dir + "{sample}.sorted.bam"
   output:
@@ -38,7 +38,7 @@ rule picard_mark_duplicate:
     "samtools index {output.mrkdup}; "
     "source deactivate; "
 
-rule picard_collectHSmetric:
+rule CollectHsMetrics:
   input:
     fadict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
     bed = config["path"]["panel"] + config["bed"]["capture_kit"],
@@ -76,7 +76,7 @@ rule picard_collectHSmetric:
       "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
     "source deactivate; "
 
-rule picard_CollectAlignmentSummaryMetrics:
+rule CollectAlignmentSummaryMetrics:
   input:
     bam = bam_dir + "{sample}.sorted.bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"]
@@ -97,7 +97,7 @@ rule picard_CollectAlignmentSummaryMetrics:
       "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
     "source deactivate; "
 
-rule picard_CollectInsertSizeMetrics:
+rule CollectInsertSizeMetrics:
   input:
     bam = bam_dir + "{sample}.sorted.bam"
   output:
