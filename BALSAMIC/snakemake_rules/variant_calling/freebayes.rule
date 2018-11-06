@@ -32,7 +32,7 @@ rule freebayes_merge:
   input:
     expand(vcf_dir + freebayes_dir + "split_vcf/{{sample}}.{chrom}_" + config["vcf"][var_caller]["default"], chrom=chromlist)
   output:
-    vcf_dir + config["vcf"][var_caller]["type"] + "/" + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz"
+    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"], "freebayes"),
   shell:

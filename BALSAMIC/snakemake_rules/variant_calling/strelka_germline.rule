@@ -18,7 +18,7 @@ rule strelka_germline:
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     mantaindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz"
   output:
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "/" + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz"
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz"
   params:
     tmpdir = strelka_dir,
     runmode = "local",
