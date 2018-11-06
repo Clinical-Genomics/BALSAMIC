@@ -17,7 +17,7 @@ rule manta_germline:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
   output:
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "/" + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz", 
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz", 
     candidateindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz" 
   params:
     tmpdir = manta_dir,

@@ -44,11 +44,11 @@ rule mutect2_somatic:
     "tabix -p vcf {output}; " 
     "source deactivate; "
 
-rule mutect2_merge_chrom:
+rule mutect2_merge:
   input:
     expand(vcf_dir + mutect_dir + "split_vcf/{chrom}_" + config["vcf"][var_caller]["default"] + ".gz", chrom=chromlist) 
   output:
-    vcf_dir + config["vcf"][var_caller]["type"] + "/" + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
@@ -59,10 +59,10 @@ rule mutect2_merge_chrom:
 
 rule mutect_simple:
   input:
-    vep_dir + "vep_" + config["vcf"][var_caller]["merged"]
+    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz", 
   output:
-    tbl = vep_dir + "vep_table_" + config["vcf"][var_caller]["merged"],
-    vcf = vep_dir + "vep_simple_" + config["vcf"][var_caller]["merged"]
+    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".tbl", 
+    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
   params:
     name = config["analysis"]["sample_id"],
     MVL = "/mnt/hds/proj/bioinfo/BALSAMIC/references/GRCh37/MVL/MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz",
