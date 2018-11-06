@@ -41,6 +41,18 @@
             "merged": "mutect.vcf.gz",
             "type": "SNV"
         },
+        "freebayes": {
+            "default": "freebayes.vcf.gz",
+            "mutation": "germline",
+            "merged": "freebayes.vcf.gz",
+            "type": "SNV"
+        },
+        "haplotypecaller": {
+            "default": "haplotypecaller.vcf.gz",
+            "mutation": "germline",
+            "merged": "haplotypecaller.vcf.gz",
+            "type": "SNV"
+        },
         "vardict": {
             "default": "vardict.vcf.gz",
             "mutation": "somatic",
