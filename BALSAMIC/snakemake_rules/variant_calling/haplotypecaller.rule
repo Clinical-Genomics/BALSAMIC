@@ -23,9 +23,16 @@ rule haplotypecaller:
     vcf_dir + haplotypecaller_dir + "split_vcf/" + "{sample}.{bedchrom}_" + config["vcf"][var_caller]["default"]
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    result_dir = vcf_dir + haplotypecaller_dir,
   threads: 4
   shell:
     "source activate {params.conda};"
+    "gatk -T HaplotypeCaller "
+        "-R {input.fa} "
+        "-I {input.bam} "
+        "-L {input.bed} "
+        "--emit-ref-confidence "
+        "| bgzip > {output}; " 
     "source deactivate; "
 
 rule haplotypecaller_merge:
@@ -40,3 +47,4 @@ rule haplotypecaller_merge:
     "bcftools concat -o {output} -O z {input}; "
     "tabix -f -p vcf {output}; "
     "source deactivate;"
+
