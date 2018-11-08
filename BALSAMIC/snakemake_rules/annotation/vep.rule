@@ -6,16 +6,16 @@ __author__ = "Hassan Foroughi Asl"
 from BALSAMIC.tools import get_result_dir, get_conda_env
 
 bam_dir = get_result_dir(config) + "/bam/"
-vcf_snv_dir = get_result_dir(config) + "/vcf/SNV/"
-vcf_sv_dir = get_result_dir(config) + "/vcf/SV/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+#vcf_sv_dir = get_result_dir(config) + "/vcf/SV/"
 vep_dir = get_result_dir(config) + "/vep/"
 
-rule vep_annotate_SNV:
+rule vep:
   input:
-    vcf_snv_dir + "{snv_vcf}" + ".vcf.gz"
+    vcf_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
   output:
-    vep = vep_dir + "vep_" + "{snv_vcf}" + ".vcf",
-    vcf = vep_dir + "vep_" + "{snv_vcf}" + ".vcf.gz"
+    vep = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf",
+    vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
   params:
     # vep works within the same environment as gatk, but since it is
     # not installed using conda, gatk's env name is retrieved
@@ -45,48 +45,15 @@ rule vep_annotate_SNV:
     "tabix -f -p vcf {output.vcf};"
     "source deactivate; "
 
-rule vep_merge_SNV:
-  input:
-    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV"))
-  output:
-    vep_dir + "vep_" + "SNV" + ".merged.table" 
-  shell:
-    "for i in {input}; do zcat $i | awk 'NR==1'; done | "
-    "awk -v OFS=\"\\t\" '{{$7=\"TUMOR_DP\"; $8=\"TUMOR_AD_REF\"; $9=\"TUMOR_AD_ALT\"; print}}' | "
-    "sort -u > {output}; "
-    "touch {output}.tmp; "
-    "for i in {input}; do zcat $i | awk 'NR>1' >> {output}.tmp; done; "
-    "sort -k1,1 -k2,2g -k6,6r {output}.tmp >> {output}; "
-
-rule vep_annotate_SV:
-  input:
-    vcf_sv_dir + "{sv_vcf}" + ".vcf.gz"
-  output:
-    vep = vep_dir + "vep_" + "{sv_vcf}" + ".vcf",
-    vcf = vep_dir + "vep_" + "{sv_vcf}" + ".vcf.gz"
-  params:
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-    vep_fa = config["references"]["vep_fa"],
-    vep_exec = config["path"]["vep_exec"],
-    vep_cache = config["path"]["vep_cache"]
-  threads: 4
-  shell:
-    "source activate {params.conda}; "
-    "perlbrew use perl-5.26.0; "
-    "{params.vep_exec}/vep "
-        "--dir {params.vep_cache} "
-        "--dir_cache {params.vep_cache} "
-        "--dir_plugins {params.vep_cache} "
-        "-i {input} "
-        "-o {output} "
-        "--fork {threads} "
-        "--vcf "
-        "--fasta {params.vep_cache}{params.vep_fa} "
-        "--everything "
-        "-format vcf "
-        "--offline "
-        "-v "
-        "--force_overwrite && "
-    "bgzip -f -c {output.vep} > {output.vcf} && "
-    "tabix -f -p vcf {output.vcf};"
-    "source deactivate; "
+#rule vep_merge_SNV:
+#  input:
+#    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV"))
+#  output:
+#    vep_dir + "vep_" + "SNV" + ".merged.table"
+#  shell:
+#    "for i in {input}; do zcat $i | awk 'NR==1'; done | "
+#    "awk -v OFS=\"\\t\" '{{$7=\"TUMOR_DP\"; $8=\"TUMOR_AD_REF\"; $9=\"TUMOR_AD_ALT\"; print}}' | "
+#    "sort -u > {output}; "
+#    "touch {output}.tmp; "
+#    "for i in {input}; do zcat $i | awk 'NR>1' >> {output}.tmp; done; "
+#    "sort -k1,1 -k2,2g -k6,6r {output}.tmp >> {output}; "
