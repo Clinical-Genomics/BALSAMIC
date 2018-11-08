@@ -8,6 +8,25 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.7.0] - 2018-11-08
+Germline patch
+### Added
+- Germline caller tested and added to the paired analysis workflow: Freebayes, HaplotypeCaller, Strelka, Manta
+
+### Changed
+- Analysis config files updated
+- Output directory structure changed
+- vep rule is now a single rule
+- Bunch of rule names updated and shortened, specifically in Picard and GATK
+- Variant caller rules are all updated and changed
+- output vcf file names are now more sensible: {SNV,SV}.{somatic,germline}.sampleId.variantCaller.vcf.gz
+- Job limit increased to 300
+
+### Removed
+- removed bcftools.rule for var id annotation
+
+### Changed
+### Fixed
 ## [2.6.3] - 2018-11-01
 ### Changed
 - Ugly and godforsaken `runSbatch.py` is now dumping sacct files with job IDs. Yikes!
