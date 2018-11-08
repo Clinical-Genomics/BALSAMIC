@@ -200,7 +200,7 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
         os.makedirs(logpath, exist_ok=True)
         os.makedirs(scriptpath, exist_ok=True)
 
-    shellcmd = ["snakemake --immediate-submit -j 99 --notemp -p"]
+    shellcmd = ["snakemake --immediate-submit -j 300 --notemp -p"]
     shellcmd.append("--jobname " + get_sample_name(sample_config) +
                     ".{rulename}.{jobid}.sh")
 
