@@ -16,6 +16,16 @@
             "type":
             "SV"
         },
+        "manta_germline": {
+              "default": ["diploidSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz" ],
+              "merged": "manta_germline.vcf.gz",
+              "type": "SV"
+        }, 
+        "strelka_germline": {
+            "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
+            "merged": "strelka_germline.vcf.gz",
+            "type": "SNV"
+        },
         "mutect": {
             "default": "mutect.vcf.gz",
             "merged": "mutect.vcf.gz",
