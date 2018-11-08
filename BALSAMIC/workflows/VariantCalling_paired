@@ -3,7 +3,7 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_vcf_files
+from BALSAMIC.tools import get_vcf
 from BALSAMIC.tools import get_result_dir
 
 rule_dir = config["rule_directory"]
@@ -59,34 +59,10 @@ vep_dir = get_result_dir(config) + "/vep/"
 var_type = ["SNV", "SV"]
 var_class = ["somatic", "germline"]
 
-def get_vcf(config, var_caller, sample):
-  vcf = []
-  for v in var_caller:
-    for s in sample:
-      vcf.append( config["vcf"][v]["type"] + "." + config["vcf"][v]["mutation"] + "." + s + "." + v)
-  return vcf
-
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
-    #expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
-    #expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
     #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
-#    expand(vcf_dir + "{vcf}", vcf=get_vcf(config, ["mutect", "vardict", "strelka", "manta"], [config["analysis"]["sample_id"]])),
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "strelka", "manta"], [config["analysis"]["sample_id"]])),
-#    expand(vep_dir + "simple/{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "strelka"], [config["analysis"]["sample_id"]])),
     expand(vep_dir + "{vcf}.tbl", vcf=get_vcf(config, ["mutect", "vardict", "strelka"], [config["analysis"]["sample_id"]])),
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["freebayes", "haplotypecaller", "strelka_germline", "manta_germline"], config["samples"])),
-#    expand(vep_dir + "table_{vcf}"
-#tbl = vep_dir + "table/" + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz" 
-#    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
-#    vep_dir + "vep_" + config["vcf"]["vardict"]["mutation"] + "." + config["vcf"]["vardict"]["merged"],
-#    expand(vep_dir + "vep_" + "{vcf}", vcf=list(get_vcf_files(config, "SNV") + get_vcf_files(config, "SV"))),
-#    expand(vep_dir + "vep_simple_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
-#    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV")),
-#    vep_dir + "vep_" + "SNV" + ".merged.table",
-#    expand(vcf_dir + var_type[1] + "/" + "{mysample}.germline.manta.vcf.gz", mysample=config["samples"]),
-    #vcf_dir + config["vcf"]["manta"]["type"] + "/" + "{sample}.germline.manta.vcf.gz"
-#    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.strelka.vcf.gz", mysample=config["samples"]),
-#    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.freebayes.vcf", mysample=config["samples"]),
-#    expand(vcf_dir + var_type[0] + "/" + "{mysample}.germline.haplotypecaller.vcf", mysample=config["samples"]),
