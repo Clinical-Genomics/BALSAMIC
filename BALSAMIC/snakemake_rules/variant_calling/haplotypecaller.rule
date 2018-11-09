@@ -31,7 +31,7 @@ rule haplotypecaller:
         "-R {input.fa} "
         "-I {input.bam} "
         "-L {input.bed} "
-        "--emit-ref-confidence "
+        "--emitRefConfidence "
         "| bgzip > {output}; " 
     "source deactivate; "
 
