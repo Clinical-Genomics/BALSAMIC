@@ -44,7 +44,7 @@ rule haplotypecaller_merge:
     conda = get_conda_env(config["conda_env_yaml"], "gatk"),
   shell:
     "source activate {params.conda}; "
-    "bcftools concat -o {output} -O z {input}; "
+    "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
     "tabix -f -p vcf {output}; "
     "source deactivate;"
 
