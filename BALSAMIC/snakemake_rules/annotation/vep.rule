@@ -39,6 +39,8 @@ rule vep:
         "--everything "
         "-format vcf "
         "--offline "
+        "--variant_class "
+        "--cache "
         "-v "
         "--force_overwrite && "
     "bgzip -f -c {output.vep} > {output.vcf} && "
