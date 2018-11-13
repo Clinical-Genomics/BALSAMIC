@@ -31,7 +31,6 @@ rule strelka_germline:
         "--bam={input.bam} "
         "--referenceFasta={input.fa} "
         "--indelCandidates {input.mantaindel} "
-        "--outputCallableRegions "
         "--exome "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
