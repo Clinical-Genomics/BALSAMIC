@@ -9,6 +9,7 @@ bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 
 mutect_dir = "mutect/"
+picarddup = get_picard_mrkdup(config)
 
 chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
 
@@ -17,7 +18,7 @@ rule mutect2_somatic_single:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     dbsnp = config["path"]["genomefa"] + config["references"]["dbsnp_all"],
     cosmic = config["path"]["genomefa"] + config["references"]["cosmic"],
-    bamT = bam_dir + "tumor.merged.bam",
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
     bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["capture_kit"],
   output:
     vcf_dir + mutect_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"]["mutect"]["default"] + ".gz"
