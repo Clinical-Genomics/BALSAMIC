@@ -9,11 +9,11 @@ from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
 bam_dir = get_result_dir(config) + "/bam/"
 picarddup = get_picard_mrkdup(config)
 
-rule mergeBam_normal:
+rule mergeBam_normal_gatk:
   input:
     bamN = expand(bam_dir + "{mysample}.sorted." + picarddup + ".ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "normal")),
   output:
-    bamN = bam_dir + "normal.merged.bam",
+    bamN = bam_dir + "normal.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"samtools")
   shell:
@@ -21,9 +21,33 @@ rule mergeBam_normal:
     "samtools merge {output.bamN} {input.bamN}; samtools index {output.bamN}; "
     "source deactivate; "
 
-rule mergeBam_tumor:
+rule mergeBam_normal:
+  input:
+    bamN = expand(bam_dir + "{mysample}.sorted." + picarddup + ".bam", mysample=get_sample_type(config["samples"], "normal")),
+  output:
+    bamN = bam_dir + "normal.merged.bam", 
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+  shell:
+    "source activate {params.conda}; "
+    "samtools merge {output.bamN} {input.bamN}; samtools index {output.bamN}; "
+    "source deactivate; "
+
+rule mergeBam_tumor_gatk:
   input:
     bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
+  output:
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+  shell:
+    "source activate {params.conda}; "
+    "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
+    "source deactivate; "
+
+rule mergeBam_tumor:
+  input:
+    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".bam", mysample=get_sample_type(config["samples"], "tumor"))
   output:
     bamT = bam_dir + "tumor.merged.bam",
   params:
