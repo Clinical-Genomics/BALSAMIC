@@ -8,6 +8,10 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.7.2] - 2018-11-15
+## Changed
+- Vardict, Strelka, and Manta separated from GATK best practice pipeline
+
 ## [2.7.1] - 2018-11-13
 ### Fixed
 - minro bugs with strelka\_germline and freebayes merge
