@@ -11,6 +11,7 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 var_caller = "mutect"
 mutect_dir = var_caller + "/"
+picarddup = get_picard_mrkdup(config)
 
 chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
 
@@ -19,8 +20,8 @@ rule mutect2_somatic:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     dbsnp = config["path"]["genomefa"] + config["references"]["dbsnp_all"],
     cosmic = config["path"]["genomefa"] + config["references"]["cosmic"],
-    bamN = bam_dir + "normal.merged.bam", 
-    bamT = bam_dir + "tumor.merged.bam",
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+    bamN = bam_dir + "normal.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
     bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["capture_kit"],
   output:
     vcf_dir + mutect_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"][var_caller]["default"] + ".gz"

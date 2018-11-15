@@ -11,9 +11,21 @@ picarddup = get_picard_mrkdup(config)
 
 rule mergeBam_tumor:
   input:
-    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
+    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".bam", mysample=get_sample_type(config["samples"], "tumor"))
   output:
     bamT = bam_dir + "tumor.merged.bam",
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+  shell:
+    "source activate {params.conda}; "
+    "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
+    "source deactivate; "
+
+rule mergeBam_tumor_gatk:
+  input:
+    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
+  output:
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"samtools")
   shell:
