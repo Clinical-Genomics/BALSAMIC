@@ -14,8 +14,7 @@ picarddup = get_picard_mrkdup(config)
 rule split_bed_by_chrom:
   input:
     bed = config["path"]["panel"] + config["bed"]["capture_kit"],
-    bamTgatk = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
-    bamT = bam_dir + "tumor.merged.bam",
+    bam = bam_dir + "normal.merged.bam"
   output:
     bed = expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist) 
   params:
@@ -26,4 +25,5 @@ rule split_bed_by_chrom:
     "chromlist=`cut -f 1 {input.bed} | sort -u`; "
     "for c in $chromlist; do awk -v C=$c '$1==C' {input.bed} > {params.split_bed_dir}$c.{params.origin_bed}; done; "
     "unset chromlist; "
+    "readlink -e {input.bam}; "
 
