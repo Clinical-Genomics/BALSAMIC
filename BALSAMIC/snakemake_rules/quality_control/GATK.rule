@@ -78,6 +78,7 @@ rule PreparePopVCF:
   input:
     ref1kg = config["path"]["genomefa"] + config["references"]["1000G"], 
   output:
+    bamT = bam_dir + "tumor.merged.bam",
     popvcf = result_dir + "popvcf.vcf"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
