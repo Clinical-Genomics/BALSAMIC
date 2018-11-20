@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 B_RED='\033[0;31m';
 B_GRN='\033[0;32m';
@@ -87,7 +88,7 @@ source activate ${env_name}
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installing requirments.txt"
 echo -e "\n${B_YLW}\tpip install -r requirments.txt"
-pip install -r requirments.txt
+pip install -r requirements.txt
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installing BALSAMIC"
