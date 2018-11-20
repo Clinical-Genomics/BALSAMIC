@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 B_RED='\033[0;31m';
 B_GRN='\033[0;32m';
@@ -59,8 +59,8 @@ command -v conda > /dev/null 2>&1 || \
 # Conda env found
 # Conda env naming convention: [P,D]_BALSAMIC_%DATE
 # P: Production, D: Development 
-env_name_suffix=${CONDADATE} 
-env_name=${CONDAPREFIX}_BALSAMIC_${env_name_suffix}
+env_name_suffix=_${CONDADATE} 
+env_name=${CONDAPREFIX}_BALSAMIC${env_name_suffix}
 BALSAMIC_ENVS=${PWD}'/BALSAMIC_env.yaml'
 BALSAMIC_RULEDIR=${PWD}'/BALSAMIC/'
 
