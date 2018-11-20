@@ -9,7 +9,7 @@ bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_caller = "manta"
-manta_dir = var_caller + "/"
+manta_dir = vcf_dir + var_caller + "/"
 
 rule manta_somatic_single:
   input:
@@ -31,6 +31,6 @@ rule manta_somatic_single:
         "--referenceFasta={input.fa} "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-    "cp {params.tmpdir}/results/tumorSV.vcf.gz {output.final}; "
+    "cp {params.tmpdir}/results/variants/tumorSV.vcf.gz {output.final}; "
     "tabix -p vcf -f {output.final}; "
     "source deactivate; "
