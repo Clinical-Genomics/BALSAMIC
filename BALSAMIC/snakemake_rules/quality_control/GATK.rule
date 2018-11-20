@@ -76,6 +76,7 @@ rule BaseRecalibrator:
 
 rule PreparePopVCF:
   input:
+    bam = bam_dir + "tumor.merged.bam",
     ref1kg = config["path"]["genomefa"] + config["references"]["1000G"], 
   output:
     popvcf = result_dir + "popvcf.vcf"
@@ -85,6 +86,7 @@ rule PreparePopVCF:
     popcode = "EUR"
   shell:
     "source activate {params.conda}; "
+    "readlink -e {input.bam}; "
     "bcftools annotate "
         "-x {params.anno_str1}{params.popcode}_AF "
         "{input.ref1kg} "
