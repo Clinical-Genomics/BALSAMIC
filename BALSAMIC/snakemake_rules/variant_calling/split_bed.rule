@@ -13,7 +13,7 @@ chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
 rule split_bed_by_chrom:
   input:
     bed = config["path"]["panel"] + config["bed"]["capture_kit"],
-#    bamT= bam_dir + "tumor.merged.bam",
+    bamT= bam_dir + "tumor.merged.bam",
   output:
     expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist) 
   params:
