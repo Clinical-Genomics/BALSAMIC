@@ -9,7 +9,7 @@ bam_dir = get_result_dir(config) + "/bam/"
 picarddup = get_picard_mrkdup(config)
 result_dir = get_result_dir(config) + "/"
 
-rule GATK_RealignerTargetCreator:
+rule RealignerTargetCreator:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
@@ -28,7 +28,7 @@ rule GATK_RealignerTargetCreator:
         "--out {output}; "
     "source deactivate; "
 
-rule GATK_IndelRealigner:
+rule IndelRealigner:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
@@ -49,7 +49,7 @@ rule GATK_IndelRealigner:
         "--out {output}; "
     "source deactivate; "
 
-rule GATK_baserecalibrator:
+rule BaseRecalibrator:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".ralgn.bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
@@ -74,8 +74,9 @@ rule GATK_baserecalibrator:
     "samtools index {input.bam}; "
     "source deactivate; "
 
-rule GATK_prepare_popvcf:
+rule PreparePopVCF:
   input:
+    bam = bam_dir + "tumor.merged.bam",
     ref1kg = config["path"]["genomefa"] + config["references"]["1000G"], 
   output:
     popvcf = result_dir + "popvcf.vcf"
@@ -85,6 +86,7 @@ rule GATK_prepare_popvcf:
     popcode = "EUR"
   shell:
     "source activate {params.conda}; "
+    "readlink -e {input.bam}; "
     "bcftools annotate "
         "-x {params.anno_str1}{params.popcode}_AF "
         "{input.ref1kg} "

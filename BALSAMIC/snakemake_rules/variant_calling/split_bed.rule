@@ -3,23 +3,27 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
 
 vcf_dir = get_result_dir(config) + "/vcf/"
 bam_dir = get_result_dir(config) + "/bam/"
 
+chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
+picarddup = get_picard_mrkdup(config)
+
 rule split_bed_by_chrom:
   input:
-    bed = config["path"]["panel"] + config["bed"]["variant_panel"],
-    bamT= bam_dir + "tumor.merged.bam",
+    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
+    bam = bam_dir + "normal.merged.bam"
   output:
-    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]) 
+    bed = expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist) 
   params:
     split_bed_dir = vcf_dir + "split_bed/",
-    origin_bed = config["bed"]["variant_panel"],
+    origin_bed = config["bed"]["capture_kit"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "chromlist=`cut -f 1 {input.bed} | sort -u`; "
     "for c in $chromlist; do awk -v C=$c '$1==C' {input.bed} > {params.split_bed_dir}$c.{params.origin_bed}; done; "
     "unset chromlist; "
+    "readlink -e {input.bam}; "
 

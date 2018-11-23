@@ -68,6 +68,12 @@ ConcatVarCall <- function(x) {
     return(x)
 }
 
+trimStr <- function(x) {
+    if (nchar(x) > 10) {
+        x = paste0(substring(x, 1, 3), "...", substring(x, nchar(x)-3, nchar(x)))
+    }
+    return(x)
+}
 
 sample.coverage = fread(arg$infile, showProgress=F)
 sample.coverage[,ID:=paste0(CHROM,"_",POS,"_",REF,"_",ALT)]
@@ -108,7 +114,7 @@ if (arg$mode == "MVL") {
         tumor_ad_alt = arg$tumorad[i]
         af_max = arg$afmax[i]
         af_min = arg$afmin[i]
-        var_type = arg$vartype[i]
+        var_type = unlist(strsplit(arg$vartype[i], ","))
         var_caller = unlist(strsplit(arg$varcaller[i], ","))
         table_name = arg$name[i]
         table_num = arg$num[i]
@@ -125,10 +131,8 @@ if (arg$mode == "MVL") {
                              & TUMOR_AD_ALT / (TUMOR_AD_REF + TUMOR_AD_ALT) <= af_max
                              & TUMOR_AD_ALT / (TUMOR_AD_REF + TUMOR_AD_ALT) >= af_min
                              & TUMOR_AD_ALT >= tumor_ad_alt
-                             & TYPE == var_type]
+                             & TYPE %in% var_type]
 
-
-        
         if (! is.null(arg$ann)) {
           var_ann = unlist(strsplit(arg$ann, ",")) 
           dt = dt[Consequence %in% var_ann]
@@ -142,28 +146,32 @@ if (arg$mode == "MVL") {
           dt = dt[SYMBOL != "."]
         }
 
-        dt = dt[,
-               .("Chr:Pos" = paste0(CHROM,":",POS),
-                 "Ref/Alt" = paste0(REF,"/",ALT),
-                 "Caller" = ConcatVarCall(paste(unique(c(CALLER)), collapse = "/")),
-                 "CallerCount" = length(unique(c(CALLER))),
-                 "DP (Ref/Alt)" = paste0(floor(mean(TUMOR_AD_REF + TUMOR_AD_ALT)),
-                                         "(",
-                                         paste0(floor(mean(TUMOR_AD_REF)),"/", floor(mean(TUMOR_AD_ALT))),
-                                         ")"),
-                 "AF" = mean(TUMOR_AD_ALT/(TUMOR_AD_REF + TUMOR_AD_ALT)),
-                 "Consequence" = paste(unique(c(Consequence)), collapse = ", "),
-                 "Gene" = SYMBOL,
-                 "Features" = paste(unique(c(BIOTYPE)), collapse = ", ")
-                )
-               ,by=.(ID)]
+        if (nrow(dt)!=0) {       
 
-        dt = unique(dt)
-        dt = dt[,c("Chr:Pos", "Ref/Alt", "Caller", "DP (Ref/Alt)", "AF", "Gene", "Consequence", "Features")]
+            dt = dt[,
+                   .("Chr:Pos" = paste0(CHROM,":",POS),
+                     "Ref/Alt" = paste0(unlist(lapply(FUN = trimStr, REF)),"/",unlist(lapply(FUN = trimStr, ALT))),
+                     "Caller" = ConcatVarCall(paste(unique(c(CALLER)), collapse = "/")),
+                     "CallerCount" = length(unique(c(CALLER))),
+                     "DP (Ref/Alt)" = paste0(floor(mean(TUMOR_AD_REF + TUMOR_AD_ALT)),
+                                             "(",
+                                             paste0(floor(mean(TUMOR_AD_REF)),"/", floor(mean(TUMOR_AD_ALT))),
+                                             ")"),
+                     "AF" = mean(TUMOR_AD_ALT/(TUMOR_AD_REF + TUMOR_AD_ALT)),
+                     "Consequence" = paste(unique(c(Consequence)), collapse = ", "),
+                     "Protein"=paste(unlist(strsplit(HGVSp,":"))[2], collapse=", "),
+                     "Gene" = SYMBOL
+                    )
+                   ,by=.(ID)]
 
-        if (i == 1) {
-            dt_excl = dt[0,]
+            dt = unique(dt)
+            dt = dt[,c("Chr:Pos", "Ref/Alt", "Caller", "DP (Ref/Alt)", "AF", "Gene", "Consequence", "Protein")]
+
+            if (nrow(dt_excl)==0) {
+                dt_excl = dt[0,]
+            }
         }
+
 
         if (arg$exclusiveSets & unique(set_cnt) > 1 & nrow(dt)>0) {
             dt = fsetdiff(dt, dt_excl, all = FALSE)
@@ -179,7 +187,7 @@ if (arg$mode == "MVL") {
                       paste(unlist(unique(dt[, c("Gene")])), collapse=",")), "")
                 write(paste(unlist(unique(dt[, c("Gene")])), collapse=","), file = outfile)
             } else {
-                if (is.null(arg$outfile)) {
+                if (is.null(arg$outfile) || arg$type == "text") {
                     stargazer(dt, summary = FALSE, type = arg$type, title = table_name,
                               table.placement = "H", digit.separator = "", rownames = F, style = "io", float = T,
                               notes = c(paste0("1. A summary of results based on \"",
@@ -195,6 +203,7 @@ if (arg$mode == "MVL") {
                                         paste0("2. Variant callers included: ",
                                                tolower(paste(var_caller, collapse = ", ")))),
                               header = F, out.header = F, out = outfile)
+                    fwrite(x = dt, file = paste0(outfile, ".csv"))
                 }
             }
         }
@@ -237,6 +246,25 @@ if (arg$mode == "MVL") {
                                            collapse=", "))),
                       paste0("3. Only all coding variants (all subchilds of nonsynonymous variants annotation)")))
 
+  if (!is.null(arg$outfile)){
+      for (v in var_caller) {
+          fwrite(x = unique(sample.coverage[CALLER==v & SYMBOL!=".",
+                   .("Chr:Pos" = paste0(CHROM,":",POS),
+                     "Ref/Alt" = paste0(unlist(lapply(FUN = trimStr, REF)),"/",unlist(lapply(FUN = trimStr, ALT))),
+                     "Caller" = ConcatVarCall(paste(unique(c(CALLER)), collapse = "/")),
+                     "CallerCount" = length(unique(c(CALLER))),
+                     "DP (Ref/Alt)" = paste0(floor(mean(TUMOR_AD_REF + TUMOR_AD_ALT)),
+                                             "(",
+                                             paste0(floor(mean(TUMOR_AD_REF)),"/", floor(mean(TUMOR_AD_ALT))),
+                                             ")"),
+                     "AF" = mean(TUMOR_AD_ALT/(TUMOR_AD_REF + TUMOR_AD_ALT)),
+                     "Consequence" = paste(unique(c(Consequence)), collapse = ", "),
+                     "Protein" = paste(unlist(unique(HGVSp)), collapse=", "),
+                     "Gene" = paste(unlist(unique(SYMBOL)), collapse=", ")
+                    )
+                   ,by=.(ID)]), file = paste0(arg$outfile, "_", v, ".csv"))
+      }
+  }
 } else if ( arg$mode == "VarClass" ) {
   dt = unique(sample.coverage[,.(ID,CALLER,VARIANT_CLASS)])
   dt.typevars = dt[,.("CALLERCOUNT"=length(unique(c(CALLER))),.N),

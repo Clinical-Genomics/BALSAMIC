@@ -3,8 +3,9 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_vcf_files
+from BALSAMIC.tools import get_vcf
 from BALSAMIC.tools import get_result_dir
+from BALSAMIC.tools import get_chrom
 
 rule_dir = config["rule_directory"]
 
@@ -35,18 +36,26 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/mutect_single.rule"
 include:
+  rule_dir + "snakemake_rules/variant_calling/strelka_germline.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/manta_germline.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/freebayes.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/haplotypecaller.rule"
+include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
-
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
 var_type = ["SNV", "SV"]
+var_class = ["somatic", "germline"]
+
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
-    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["variant_panel"], chrom=["1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","X","Y"]),
-    expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
-#    expand(vcf_dir + var_type[0] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[0]) ),
-#    expand(vcf_dir + var_type[1] + "/" + "id.{vcf}", vcf=get_vcf_files(config, var_type[1]) ),
+    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "manta"], [config["analysis"]["sample_id"]])),
+    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["freebayes", "haplotypecaller", "strelka_germline", "manta_germline"], config["samples"])),
+    #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
