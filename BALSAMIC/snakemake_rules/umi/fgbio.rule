@@ -100,12 +100,10 @@ rule fgbio_CollectDuplexSeqMetrics:
         "{sample}.unalg.umi.mrkadp.bwa.map.umi.metrics"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"fgbio"),
-        intervals = "interval.txt"
     shell:
         """
 fgbio CollectDuplexSeqMetrics \
 --input={input} \
 --output={output} \
---intervals={params.intervals} \
 --description={wildcards.sample}
         """
