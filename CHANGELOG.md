@@ -8,6 +8,14 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.7.4] - 2018-11-23
+Germline single sample
+## Added
+- Germline single sample addition
+## Changed
+- Minor fixes to some rules to make them compatible with tumor mode
+
+
 ## [2.7.3] - 2018-11-20
 ## Fixed
 - Various bugs with DAG to keep popvcf and splitbed depending on merge bam file
