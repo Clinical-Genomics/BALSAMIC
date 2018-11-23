@@ -8,31 +8,29 @@ from BALSAMIC.tools import get_result_dir, get_conda_env
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 
-manta_dir = "manta/"
+var_caller = "manta"
+manta_dir = vcf_dir + var_caller + "/"
 
 rule manta_somatic_single:
   input:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bamT = bam_dir + "tumor.merged.bam",
   output:
-    default = expand(vcf_dir + manta_dir + "{vcf_file}", vcf_file=config["vcf"]["manta"]["default"]),
-    final = vcf_dir + config["vcf"]["manta"]["type"] + "/" + config["vcf"]["manta"]["merged"],
+    candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz",
   params:
-    tmpdir = vcf_dir + "manta_tmp",
-    result_dir = vcf_dir + manta_dir,
+    tmpdir = manta_dir,
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"manta")
   threads: 4
   shell:
     "source activate {params.conda};"
-    "mkdir -p {params.result_dir}; "
     "rm -rf {params.tmpdir}; "
     "configManta.py "
         "--tumorBam={input.bamT} "
         "--referenceFasta={input.fa} "
         "--runDir={params.tmpdir}; "
     "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-    "cp {params.tmpdir}/results/variants/*vcf.gz {params.result_dir}; "
-    "cp {params.result_dir}/tumorSV.vcf.gz {output.final}; "
-    "for i in {params.result_dir}/*.vcf.gz; do tabix -p vcf -f $i; done; "
+    "cp {params.tmpdir}/results/variants/tumorSV.vcf.gz {output.final}; "
+    "tabix -p vcf -f {output.final}; "
     "source deactivate; "
