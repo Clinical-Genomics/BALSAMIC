@@ -7,6 +7,8 @@ rule fgbio_ExtractUmisFromBam:
         "{sample}.unalg.bam"
     output:
         "{sample}.unalg.umi.bam"
+    params:
+        conda = get_conda_env(config["conda_env_yaml"],"fgbio"),
     shell:
         """
 fgbio ExtractUmisFromBam \
@@ -22,6 +24,8 @@ rule fgbio_GroupReadsByUmi:
         "{sample}.unalg.umi.mrkadp.bwa.map.bam"
     output:
         "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
+    params:
+        conda = get_conda_env(config["conda_env_yaml"],"fgbio"),
     shell:
         """
 fgbio GroupReadsByUmi \
@@ -39,6 +43,8 @@ rule fgbio_CallDuplexConsensusReads:
         "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     output:
         "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
+    params:
+        conda = get_conda_env(config["conda_env_yaml"],"fgbio"),
     shell:
         """
 fgbio CallDuplexConsensusReads \
@@ -75,6 +81,7 @@ rule fgio_ClipBam:
     output:
         "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam"
     params:
+        conda = get_conda_env(config["conda_env_yaml"],"fgbio"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"], 
     shell:
         """
@@ -92,6 +99,7 @@ rule fgbio_CollectDuplexSeqMetrics:
     output:
         "{sample}.unalg.umi.mrkadp.bwa.map.umi.metrics"
     params:
+        conda = get_conda_env(config["conda_env_yaml"],"fgbio"),
         intervals = "interval.txt"
     shell:
         """
