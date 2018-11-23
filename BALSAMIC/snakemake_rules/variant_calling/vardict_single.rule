@@ -7,8 +7,10 @@ from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
 
-vardict_dir = "vardict/"
+var_caller = "vardict"
+vardict_dir = var_caller + "/"
 
 chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
 
@@ -18,7 +20,7 @@ rule vardict_single:
     bamT = bam_dir + "tumor.merged.bam",
     bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["capture_kit"],
   output:
-    vcf_dir + vardict_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"]["vardict"]["default"]
+    vcf_dir + vardict_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"][var_caller]["default"]
   params:
     af = "0.01",
     max_pval = "0.9",
@@ -38,11 +40,11 @@ rule vardict_single:
     "tabix -p vcf {output}; "
     "source deactivate;"
 
-rule vardict_merge_chrom:
+rule vardict_merge:
   input:
-    expand(vcf_dir + vardict_dir + "split_vcf/{chrom}_" + config["vcf"]["vardict"]["default"], chrom=chromlist) 
+    expand(vcf_dir + vardict_dir + "split_vcf/{chrom}_" + config["vcf"][var_caller]["default"], chrom=chromlist)
   output:
-    vcf_dir + config["vcf"]["vardict"]["type"] + "/" + config["vcf"]["vardict"]["merged"]
+    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
   shell:

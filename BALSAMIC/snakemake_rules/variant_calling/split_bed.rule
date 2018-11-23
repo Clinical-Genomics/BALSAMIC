@@ -9,13 +9,14 @@ vcf_dir = get_result_dir(config) + "/vcf/"
 bam_dir = get_result_dir(config) + "/bam/"
 
 chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
+picarddup = get_picard_mrkdup(config)
 
 rule split_bed_by_chrom:
   input:
     bed = config["path"]["panel"] + config["bed"]["capture_kit"],
     bam = bam_dir + "normal.merged.bam"
   output:
-    expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist) 
+    bed = expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist) 
   params:
     split_bed_dir = vcf_dir + "split_bed/",
     origin_bed = config["bed"]["capture_kit"],
