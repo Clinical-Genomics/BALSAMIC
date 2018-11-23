@@ -8,3 +8,4 @@ dependencies:
   - picard=2.17.0
   - cutadapt=1.15
   - tabix=0.2.5
+  - freebayes=1.2.0

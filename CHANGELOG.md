@@ -1,7 +1,109 @@
 # Change Log
 
 This change log will document the notable changes to this project in this file and it is following [Semantic
-Versioning](https://semver.org/)
+Versioning](https://semver.org/). The version numbering consists of three digits: major.minor.patch. Since October 24,
+2018, the major version is expected to increment following major structural changes to the BALSAMIC workflow. Typically,
+any changes to the user interface (command line arguments etc.), or output files will increment the minor version.
+Under-the-hood changes that do not have an impact on how end-users run our process the output will typically only
+increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
+10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
+
+## [2.7.4] - 2018-11-23
+Germline single sample
+## Added
+- Germline single sample addition
+## Changed
+- Minor fixes to some rules to make them compatible with tumor mode
+
+
+## [2.7.3] - 2018-11-20
+## Fixed
+- Various bugs with DAG to keep popvcf and splitbed depending on merge bam file
+- install script script fixed and help added
+
+## [2.7.2] - 2018-11-15
+## Changed
+- Vardict, Strelka, and Manta separated from GATK best practice pipeline
+
+## [2.7.1] - 2018-11-13
+### Fixed
+- minro bugs with strelka\_germline and freebayes merge
+### Changed
+- removed ERC from haplotypecaller
+
+## [2.7.0] - 2018-11-08
+Germline patch
+### Added
+- Germline caller tested and added to the paired analysis workflow: Freebayes, HaplotypeCaller, Strelka, Manta
+
+### Changed
+- Analysis config files updated
+- Output directory structure changed
+- vep rule is now a single rule
+- Bunch of rule names updated and shortened, specifically in Picard and GATK
+- Variant caller rules are all updated and changed
+- output vcf file names are now more sensible: {SNV,SV}.{somatic,germline}.sampleId.variantCaller.vcf.gz
+- Job limit increased to 300
+
+### Removed
+- removed bcftools.rule for var id annotation
+
+### Changed
+### Fixed
+## [2.6.3] - 2018-11-01
+### Changed
+- Ugly and godforsaken `runSbatch.py` is now dumping sacct files with job IDs. Yikes!
+ 
+## [2.6.2] - 2018-10-31
+### Fixed
+- added `--fastq-prefix` option for `config sample` to set fastq prefix name. Linking is not changed.
+
+## [2.6.1] - 2018-10-29
+### Fixed
+- patched a bug for copying results for strelka and manta which was introduced in `2.5.0`
+
+## [2.5.0] - 2018-10-22
+### Changed
+- `variant_panel` changed to `capture_kit`
+- sample config file takes balsamic version
+- bioinfo tool config moved bioinfotool to cli_utils from `config report`
+
+### Added
+- bioinfo tool versions is now added to analysis config file
+
+## [2.4.0] - 2018-10-22
+### Changed
+- `balsamic run` has 3 stop points: paired variant calling, single mode variant calling, and QC/Alignment mode.
+- `balsamic run [OPTIONS] -S ...` is depricated, but it supersedes `analysis_type` mode if provided.
+
+## [2.3.3] - 2018-10-22
+### Added
+- CSV output for variants in each variant caller based on variant filters
+- DAG image of workflow
+### Changed
+- Input for variant filter has a default value
+- `delivery_report` is no created during config generation
+- Variant reporter R script cmd updated in `balsamic report`
+
+## [2.3.2] - 2018-10-19
+### Changed
+- Fastq files are now always linked to `fastq` directory within the analysis directory
+
+### Added
+- `balsamic config sample` now accepts individual files and paths. See README for usage.
+
+
+## [2.3.1] - 2018-09-25
+### Added
+- CollectHSmetric now run twice for before and after markduplicate
+
+## [2.3.0] - 2018-09-25
+### Changed
+- Sample config file now includes a list of chromosomes in the panel bed file
+
+### Fixed
+- Non-matching chrom won't break the splitbed rule anymore
+- collectqc rules now properly parse tab delimited metric files
 
 ## [2.2.0] - 2018-09-11
 ### Added

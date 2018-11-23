@@ -148,6 +148,7 @@ dt.gene = dt.gene[maxLength==txLength,
                      "readPerbpPerExon",
                      "meanExonCoverage",
                      "zeroExonCov",
+                     "Exon zero cov",
                      "maxTxReadCount")
                  ]
 

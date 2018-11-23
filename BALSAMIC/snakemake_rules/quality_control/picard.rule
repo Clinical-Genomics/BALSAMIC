@@ -15,13 +15,13 @@ def picard_flag(picarddup):
   else:
       return "TRUE"
 
-rule picard_mark_duplicate:
+rule MarkDuplicates:
   input:
     bam_dir + "{sample}.sorted.bam"
   output:
     mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
   log:
-    stats = bam_dir + "{sample}.sorted.mrkdup.txt"
+    stats = bam_dir + "{sample}.sorted." + picarddup + ".txt"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
@@ -38,13 +38,15 @@ rule picard_mark_duplicate:
     "samtools index {output.mrkdup}; "
     "source deactivate; "
 
-rule picard_collectHSmetric:
+rule CollectHsMetrics:
   input:
     fadict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
-    bed = config["path"]["panel"] + config["bed"]["variant_panel"],
+    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
     bam = bam_dir + "{sample}.sorted.bam",
+    bammrkdup = bam_dir + "{sample}.sorted." + picarddup + ".bam",
   output:
-    bam_dir + "{sample}.sorted.hsmetric"
+    unmrk = bam_dir + "{sample}.sorted.hsmetric",
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
@@ -59,13 +61,22 @@ rule picard_collectHSmetric:
       "BI={input.bam}.picard.bedintervals "
       "TI={input.bam}.picard.bedintervals "
       "I={input.bam} "
-      "O={output} "
+      "O={output.unmrk} "
       "COVERAGE_CAP=2000 "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS "
-      "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar "
+      "CollectHsMetrics "
+      "BI={input.bam}.picard.bedintervals "
+      "TI={input.bam}.picard.bedintervals "
+      "I={input.bammrkdup} "
+      "O={output.mrkdup} "
+      "COVERAGE_CAP=2000 "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
     "source deactivate; "
 
-rule picard_CollectAlignmentSummaryMetrics:
+rule CollectAlignmentSummaryMetrics:
   input:
     bam = bam_dir + "{sample}.sorted.bam",
     fa = config["path"]["genomefa"] + config["references"]["genomefa"]
@@ -86,7 +97,7 @@ rule picard_CollectAlignmentSummaryMetrics:
       "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
     "source deactivate; "
 
-rule picard_CollectInsertSizeMetrics:
+rule CollectInsertSizeMetrics:
   input:
     bam = bam_dir + "{sample}.sorted.bam"
   output:

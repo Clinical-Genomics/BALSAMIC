@@ -2,6 +2,7 @@
 import sys
 import re
 import os
+import subprocess
 import json
 import argparse
 from snakemake.utils import read_job_properties
@@ -29,6 +30,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 sample_config = json.load(open(args.sample_config))
+
 jobscript = args.snakescript
 job_properties = read_job_properties(jobscript)
 logpath = args.dir_log
@@ -41,14 +43,15 @@ account_slurm = job_properties["cluster"]["account"]
 mail_type = job_properties["cluster"]["mail_type"]
 mail_user = job_properties["cluster"]["mail_user"]
 
-os.system('cp ' + jobscript + ' ' + scriptpath + '/')
+subprocess.call('cp ' + jobscript + ' ' + scriptpath + '/', shell=True)
 
 scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
 jobscript = os.path.join(scriptpath, scriptname)
+sacct_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sacct")
 
-output_log = os.path.join(logpath, scriptname + ".out")
-error_log = os.path.join(logpath, scriptname + ".err")
+output_log = os.path.join(logpath, scriptname + "_%j.out")
+error_log = os.path.join(logpath, scriptname + "_%j.err")
 cmdline = 'sbatch -A {account} -n {n} -t {time} --qos={qos} -o {output_log} -e {error_log} --mail-type {mail_type} --mail-user {mail_user}'.format(
     n=cpu,
     time=time,
@@ -68,4 +71,7 @@ if dependencies:
 
 cmdline += " " + jobscript + " | cut -d' ' -f 4"
 
-os.system(cmdline)
+cmdline += " " + " >> " + sacct_file
+
+subprocess.call(cmdline, shell=True)
+subprocess.call("tail -n1 " +  sacct_file, shell=True)

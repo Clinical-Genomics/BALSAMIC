@@ -19,14 +19,16 @@ suppressPackageStartupMessages(library("deconstructSigs"))
 option_list <- list(
                     make_option(c("-i", "--infile"), type="character",
                                 help="Input mutation file.", metavar="character"),
+                    make_option(c("-o", "--outfile"), type="character",
+                                help="output file name.", metavar="character"),
+                    make_option(c("-m", "--model"), type="character", default="nature2013",
+                                help="Choose between two models: nature2013 or cosmic. Refer to deconstructSigs documentatation. [default %default]"),
                     make_option(c("-r", "--resolution"), type="integer", default=7,
                                 help="Print image resolution in inches, as an input to pdf() for heigh and width [default %default]"),
                     make_option(c("-f", "--fontsize"), type="integer", default=12,
                                 help="Fontsize as an input to pointsize in pdf() for heigh and width [default %default]"),
                     make_option(c("-s", "--sampleid"), type="integer", default=1,
                                 help="Numeric id for sample in input file. [default %default]"),
-                    make_option(c("-o", "--outfile"), type="character",
-                                help="output file name.", metavar="character"),
                     make_option(c("-v", "--verbose"), action="store_true", default=FALSE,
                                 help="Print extra output [default %default]")
                     )
@@ -74,8 +76,16 @@ if ( arg$verbose ) {
   write("Matching signatures with reference.", stderr())
 }
 
+if ( arg$model == "nature2013" ) {
+  sigmodel = signatures.nature2013
+} else if ( arg$model == "cosmic" ) {
+  sigmodel = signatures.cosmic
+} else {
+  stop("Unknown model paramters. See help")
+}
+
 sample_sig = whichSignatures(tumor.ref = sigs.input,
-                             signatures.ref = signatures.nature2013,
+                             signatures.ref = sigmodel,
                              sample.id = arg$sampleid,
                              contexts.needed = TRUE,
                              tri.counts.method = 'default')
