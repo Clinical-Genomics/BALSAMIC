@@ -120,10 +120,10 @@ rule CollectInsertSizeMetrics:
 
 rule picard_FastqToSam_umi:
     input:
-        fq1="{sample}_1.fastq.gz",
-        fq2="{sample}_2.fastq.gz",
+        fq1 = config["analysis"]["fastq_path"] + "{sample}_1.fastq.gz",
+        fq2 = config["analysis"]["fastq_path"] + "{sample}_2.fastq.gz",
     output:
-        "{sample}.unalg.bam"
+        bam_dir + "{sample}.unalg.bam"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard")
     shell:
@@ -141,10 +141,10 @@ PL=illumina
 
 rule picard_MarkIlluminaAdaptersi_umi:
     input:
-        "{sample}.unalg.umi.bam"
+        bam_dir + "{sample}.unalg.umi.bam"
     output:
-        bam = "{sample}.unalg.umi.mrkadp.bam",
-        txt = "{sample}.unalg.umi.mrkadp.txt"
+        bam = bam_dir + "{sample}.unalg.umi.mrkadp.bam",
+        txt = bam_dir + "{sample}.unalg.umi.mrkadp.txt"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard")
     shell:
@@ -158,9 +158,9 @@ M={output.txt}
 
 rule picard_SamToFastq_umi:
     input:
-        "{sample}.unalg.umi.mrkadp.bam"
+        bam_dir + "{sample}.unalg.umi.mrkadp.bam"
     output:
-        "{sample}.unalg.umi.mrkadp.fastq"
+        bam_dir + "{sample}.unalg.umi.mrkadp.fastq"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard")
     shell:
@@ -178,10 +178,10 @@ java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.5.jar SamToFastq \
 
 rule picard_MergeBamAlignment_mrkadp_umi:
     input:
-        aligned = "{sample}.unalg.umi.mrkadp.bwa.sam",
-        unaligned = "{sample}.unalg.umi.bam"
+        aligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.sam",
+        unaligned = bam_dir + "{sample}.unalg.umi.bam"
     output:
-        "{sample}.unalg.umi.mrkadp.bwa.map.bam"
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.bam"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
@@ -204,9 +204,9 @@ CREATE_INDEX=true
 
 rule picard_SamToFastq_cnsalg_umi:
     input:
-        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     output:
-        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
@@ -223,10 +223,10 @@ CREATE_INDEX=true
 
 rule picard_MergeBamAlignment_cnsalg_umi:
     input:
-        aligned = "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam",
-        unaligned = "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
+        aligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam",
+        unaligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     output:
-        "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
