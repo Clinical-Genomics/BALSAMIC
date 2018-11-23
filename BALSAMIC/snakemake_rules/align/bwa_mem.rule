@@ -31,3 +31,26 @@ rule bwa_mem:
         "{input.fa} {input.read1} {input.read2} "
         "| samtools view -Sb - > {output.bamout}; "
     "source deactivate;"
+
+rule bwa_mem_umi_mrkadp:
+  input:
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    refidx = expand(config["path"]["genomefa"] + config["references"]["genomefa"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"]),
+    fastq = "{sample}.unalg.umi.mrkadp.fastq"
+  output:
+    "{sample}.unalg.umi.mrkadp.bwa.sam"
+  shell:
+    """
+  bam mem -p -t 8 {input.fa} {input.fastq} > {output}
+    """
+rule bwa_mem_umi_cnsalg:
+  input:
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    refidx = expand(config["path"]["genomefa"] + config["references"]["genomefa"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"]),
+    fastq = "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
+  output:
+    "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam"
+  shell:
+    """
+  bam mem -p -t 8 {input.fa} {input.fastq} > {output}
+    """
