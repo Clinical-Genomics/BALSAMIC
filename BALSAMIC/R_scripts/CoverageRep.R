@@ -107,7 +107,7 @@ dt.gene = dt.gene[,
                   by=.(F3, F6, F7, F9, F10, F11)
                  ]
 
-dt.geme = dt.gene[zeroExonCov <= 1 & txType=="protein_coding",]
+dt.gene = dt.gene[zeroExonCov <= 1 & txType=="protein_coding",]
 
 dt.gene = dt.gene[,
                   .("Gene" = geneName,
