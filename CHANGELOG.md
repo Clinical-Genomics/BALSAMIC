@@ -8,25 +8,30 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.8.1] - 2018-11-28
+### Fixed
+- VEP's perl module errors
+- CoverageRep.R now properly takes protein_coding transcatipts only
+ 
 ## [2.8.0] - 2018-11-23
 UMI single sample align and QC
-## Added
+### Added
 - Added rules and workflows for UMI analysis: QC and alignment
 
 ## [2.7.4] - 2018-11-23
 Germline single sample
-## Added
+### Added
 - Germline single sample addition
-## Changed
+### Changed
 - Minor fixes to some rules to make them compatible with tumor mode
 
 ## [2.7.3] - 2018-11-20
-## Fixed
+### Fixed
 - Various bugs with DAG to keep popvcf and splitbed depending on merge bam file
 - install script script fixed and help added
 
 ## [2.7.2] - 2018-11-15
-## Changed
+### Changed
 - Vardict, Strelka, and Manta separated from GATK best practice pipeline
 
 ## [2.7.1] - 2018-11-13

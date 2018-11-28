@@ -9,3 +9,8 @@ dependencies:
   - cutadapt=1.15
   - tabix=0.2.5
   - freebayes=1.2.0
+  - perl=5.26.2
+  - perl-dbi
+  - perl-list-util
+  - perl-list-moreutils
+
