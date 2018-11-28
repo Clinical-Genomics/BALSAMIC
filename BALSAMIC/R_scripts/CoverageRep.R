@@ -107,7 +107,7 @@ dt.gene = dt.gene[,
                   by=.(F3, F6, F7, F9, F10, F11)
                  ]
 
-dt.gene = dt.gene[zeroExonCov <= 1 & txType=="protein_coding",]
+dt.gene = dt.gene[txType=="protein_coding"]
 
 dt.gene = dt.gene[,
                   .("Gene" = geneName,
@@ -153,7 +153,6 @@ dt.gene = dt.gene[maxLength==txLength,
                  ]
 
 stargazer(dt.gene, summary = FALSE, type = arg$type, title = arg$name,
-          notes = c("Exon zero cov shows the number of exons with zero coverage in total (first or last exon / any intermediate exons)"), 
           table.placement = "H",
           digit.separator = "", rownames = F, style = "io", float = T,
           header = F, out.header = F)
