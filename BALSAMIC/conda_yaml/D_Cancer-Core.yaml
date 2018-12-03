@@ -6,4 +6,5 @@ dependencies:
   - fastqc=0.11.5
   - sambamba=0.6.6
   - samtools=1.6
+  - libgcc-ng=7.2.0
   - tabix=0.2.5
