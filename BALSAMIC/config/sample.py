@@ -129,7 +129,7 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_pre
     required=False,
     default="single",
     show_default=True,
-    type=click.Choice(["paired", "single"]),
+    type=click.Choice(["paired", "single", "paired_umi"]),
     help="Analysis config file for paired (tumor vs normal) or single (tumor-only) mode.",
 )
 @click.option(
@@ -238,7 +238,7 @@ it is. So this is just a placeholder for future.
 
     """
 
-    if normal:
+    if normal and analysis_type == "single":
         analysis_type = "paired"
 
     analysis_config = get_config("analysis_" + analysis_type)
