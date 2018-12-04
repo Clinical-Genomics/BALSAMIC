@@ -85,7 +85,16 @@ def get_snakefile(analysis_type):
                 'VariantCalling_single')
         elif analysis_type == "qc":
             snakefile = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), 'Alignment')
+                os.path.dirname(os.path.abspath(__file__)),
+                'Alignment')
+        elif analysis_type == "paired_umi":
+            snakefile = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'VariantCalling_paired_umi')
+        elif analysis_type == "single_umi":
+            snakefile = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'VariantCalling_single_umi')
         else:
             raise ValueError("analysis_type should be single or paired")
 
