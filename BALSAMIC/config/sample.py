@@ -163,9 +163,8 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_pre
 @click.option(
     "-o",
     "--output-config",
-    required=True,
-    type=click.Path(),
-    help="Output a json config file ready to be imported for run-analysis",
+    required=False,
+    help="Output a json config filename ready to be imported for run-analysis",
 )
 @click.option(
     "-t",
@@ -240,6 +239,9 @@ it is. So this is just a placeholder for future.
 
     if normal and analysis_type == "single":
         analysis_type = "paired"
+
+    if not output_config:
+        output_config = sample_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
 
     analysis_config = get_config("analysis_" + analysis_type)
 
