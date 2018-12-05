@@ -22,6 +22,7 @@ run the following command:
         --sample-id id1 \
         --analysis-dir ./ \
         --analysis-type paired \
+        --output-config id1_analysis.json \
         --reference-config references/reference.json
 
 
@@ -37,7 +38,7 @@ This will create a directory within test_data directory with the following struc
       │   ├── S1_R_2.fastq.gz -> ../fastq/S1_R_2.fastq.gz
       │   ├── S2_R_1.fastq.gz -> ../fastq/S2_R_1.fastq.gz
       │   └── S2_R_2.fastq.gz -> ../fastq/S2_R_2.fastq.gz
-      ├── id1_20181205.json
-      ├── id1_20181205.json_BALSAMIC_2.8.1_graph.pdf
+      ├── id1_analysis.json
+      ├── id1_analysis.json_BALSAMIC_2.8.1_graph.pdf
       ├── logs
       └── scripts
