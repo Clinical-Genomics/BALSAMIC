@@ -42,3 +42,12 @@ This will create a directory within test_data directory with the following struc
       ├── id1_analysis.json_BALSAMIC_2.8.1_graph.pdf
       ├── logs
       └── scripts
+
+
+And to test run balsamic:
+
+::
+
+  balsamic run -s id1/id1_analysis.json
+
+BALSAMIC is always in dry-run mode. If you want to run an actual config file, make sure you add `-f` flag.
