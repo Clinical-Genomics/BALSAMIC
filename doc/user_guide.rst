@@ -13,6 +13,7 @@ Prior to run a sample through BALSAMIC, a config file must be generated. In orde
 run the following command:
 
 ::
+
     cd test_data
     balsamic config sample \
         --tumor fastq/S1_R_1.fastq.gz \
@@ -27,6 +28,7 @@ run the following command:
 This will create a directory within test_data directory with the following structure:
 
 ::
+
     id1
       ├── BALSAMIC_run
       ├── analysis
