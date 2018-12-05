@@ -26,3 +26,16 @@ run the following command:
 
 This will create a directory within test_data directory with the following structure:
 
+::
+    id1
+      ├── BALSAMIC_run
+      ├── analysis
+      ├── fastq
+      │   ├── S1_R_1.fastq.gz -> ../fastq/S1_R_1.fastq.gz
+      │   ├── S1_R_2.fastq.gz -> ../fastq/S1_R_2.fastq.gz
+      │   ├── S2_R_1.fastq.gz -> ../fastq/S2_R_1.fastq.gz
+      │   └── S2_R_2.fastq.gz -> ../fastq/S2_R_2.fastq.gz
+      ├── id1_20181205.json
+      ├── id1_20181205.json_BALSAMIC_2.8.1_graph.pdf
+      ├── logs
+      └── scripts
