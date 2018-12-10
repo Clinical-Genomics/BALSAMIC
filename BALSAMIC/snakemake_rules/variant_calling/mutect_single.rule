@@ -35,6 +35,7 @@ rule mutect2_somatic_single:
         "--cosmic {input.cosmic} "
         "--dbsnp {input.dbsnp} "
         "-I:tumor {input.bamT} "
+        "--annotation Coverage --useNewAFCalculator --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
         "--disable_auto_index_creation_and_locking_when_reading_rods "
         "-L {input.bed} "
     " | bgzip > {output}; "
