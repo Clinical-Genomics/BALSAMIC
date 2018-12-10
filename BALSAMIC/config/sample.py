@@ -371,6 +371,12 @@ it is. So this is just a placeholder for future.
         analysis_config, sample_config, reference_config, install_config, bioinfo_config
     )
 
+    dag_image = os.path.join(
+        output_dir,
+        output_config + '_BALSAMIC_' + bv + '_graph.pdf')
+
+    json_out["analysis"]["dag"] = dag_image
+
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
 
@@ -378,3 +384,15 @@ it is. So this is just a placeholder for future.
         write_json(json_out, output_config)
 
     FormatFile(output_config, in_place=True)
+
+    shellcmd = ([
+        'balsamic', 'run', '-s', output_config, '--snakemake-opt',
+        '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
+        '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
+        'BALSAMIC', bv, 'workflow', 'for', 'sample:',
+        json_out["analysis"]["sample_id"], '\\"\;/g"', '|', 'dot', '-Tpdf',
+        '1>', dag_image
+    ])
+
+    click.echo("Creating workflow dag image file: %s" % dag_image)
+    subprocess.run(" ".join(shellcmd), shell=True)
