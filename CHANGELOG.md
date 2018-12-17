@@ -8,10 +8,18 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.9.0] - XXXXXXX
+### Changed
+- Readme structure and example
+- Mutect2's single sample output is similar to paired now
+### Added
+- test data and sample inputs
+- A dag PDF will be generated when config is made
+- umi specific variant calling
 ## [2.8.1] - 2018-11-28
 ### Fixed
 - VEP's perl module errors
-- CoverageRep.R now properly takes protein_coding transcatipts only
+- CoverageRep.R now properly takes protein\_coding transcatipts only
  
 ## [2.8.0] - 2018-11-23
 UMI single sample align and QC
