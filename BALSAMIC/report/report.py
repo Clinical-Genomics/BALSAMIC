@@ -157,7 +157,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 shellcmd = [
                     os.path.join(
                         os.path.dirname(os.path.abspath(__file__)), "..",
-                        "R_scripts/VariantReport.R")
+                        "scripts/VariantReport.R")
                 ]
                 shellcmd.extend([
                     "--infile", sample_config["vcf"]["merged"]["SNV"],
@@ -216,7 +216,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
             shellcmd = [
                 os.path.join(
                     os.path.dirname(os.path.abspath(__file__)), "..",
-                    "R_scripts/VariantReport.R")
+                    "scripts/VariantReport.R")
             ]
             shellcmd.extend([
                 "--infile", "'" + sample_config["vcf"]["merged"]["SNV"] + "'",
@@ -270,7 +270,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                             shellcmd = [
                                 os.path.join(
                                     os.path.dirname(os.path.abspath(__file__)),
-                                    "..", "R_scripts/CoverageRep.R")
+                                    "..", "scripts/CoverageRep.R")
                             ]
                             shellcmd.extend([
                                 "--infile",
@@ -301,7 +301,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                     shellcmd = [
                         os.path.join(
                             os.path.dirname(os.path.abspath(__file__)), "..",
-                            "R_scripts/CoveragePlot.R")
+                            "scripts/CoveragePlot.R")
                     ]
                     shellcmd.extend([
                         "--infile", sample_config["bed"]["target_cov"][s],
