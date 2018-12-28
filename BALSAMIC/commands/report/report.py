@@ -14,8 +14,8 @@ from pylatex import Document, PageStyle, Section, Subsection, Subsubsection, Tab
     LineBreak, SmallText, Tabularx, TextColor, MultiColumn, simple_page_number, NewPage, StandAloneGraphic
 from pylatex.utils import italic, NoEscape, bold
 
-from BALSAMIC.workflows.run_analysis import get_sample_name
-from BALSAMIC.config.sample import get_config
+from BALSAMIC.commands.run.run_analysis import get_sample_name
+from BALSAMIC.commands.config.sample import get_config
 from BALSAMIC.tools import get_packages, get_package_split
 
 

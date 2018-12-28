@@ -9,10 +9,10 @@ import sys
 import json
 
 # Subcommands
-from BALSAMIC.install import install as install_command
-from BALSAMIC.workflows import run_analysis as analysis_command
-from BALSAMIC.config import config as config_command
-from BALSAMIC.dev_report import report as report_command
+from BALSAMIC.commands.install import install as install_command
+from BALSAMIC.commands.run import run_analysis as analysis_command
+from BALSAMIC.commands.config import config as config_command
+from BALSAMIC.commands.report import report as report_command
 
 # CLI commands and decorators
 from BALSAMIC.tools.cli_utils import add_doc as doc

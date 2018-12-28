@@ -12,10 +12,8 @@ import json
 
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.config.sample import get_config
-from BALSAMIC.config.sample import write_json
-from BALSAMIC.workflows.run_analysis import get_sample_name
-from BALSAMIC.workflows.run_analysis import get_analysis_dir
+from BALSAMIC.commands.config.sample import get_config, write_json
+from BALSAMIC.commands.run.run_analysis import get_sample_name,get_analysis_dir
 from BALSAMIC.tools import get_picard_mrkdup
 from BALSAMIC import __version__ as bv
 
