@@ -9,8 +9,8 @@ import sys
 import json
 from yapf.yapflib.yapf_api import FormatFile
 
-from .sample import sample as sample_command
-from .report import report as report_command
+from BALSAMIC.commands.config.sample import sample as sample_command
+from BALSAMIC.commands.config.report import report as report_command
  
 @click.group()
 @click.pass_context

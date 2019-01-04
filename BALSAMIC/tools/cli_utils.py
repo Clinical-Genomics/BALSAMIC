@@ -1,5 +1,6 @@
 import os
 import glob
+import json
 import yaml
 from itertools import chain
 
@@ -74,3 +75,31 @@ def get_package_split(conda_yamls):
          if y.split("=")[0] in pkgs])
 
     return (pkgs)
+
+def get_sample_name(json_in):
+    """
+    Get sample name from input json file
+    """
+
+    try:
+        with open(os.path.abspath(json_in), "r") as fn:
+            sample_json = json.load(fn)
+            sample_name = sample_json["analysis"]["sample_id"]
+    except OSError:
+        print("Couldn't load json file or file path is not absolute")
+
+    return sample_name
+
+def get_analysis_dir(json_in, dir_type):
+    """
+    Get analysis dir from input json file
+    """
+
+    try:
+        with open(os.path.abspath(json_in), "r") as fn:
+            sample_json = json.load(fn)
+            analysis_dir = sample_json["analysis"][dir_type]
+    except OSError:
+        print("Couldn't load json file or file path is not absolute")
+
+    return analysis_dir

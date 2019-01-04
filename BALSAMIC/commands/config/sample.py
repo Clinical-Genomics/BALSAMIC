@@ -11,6 +11,7 @@ import re
 import copy
 import glob
 from datetime import datetime
+from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.tools import get_chrom, get_package_split
@@ -54,9 +55,8 @@ def get_config(config_name):
     """
 
     try:
-        config_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), config_name + ".json"
-        )
+        p = Path(__file__).parents[2]
+        config_file = str(Path(p,'config',config_name+".json"))
     except OSError:
         print("Couldn't locate config file" + config_name + ".json")
 
@@ -357,7 +357,7 @@ it is. So this is just a placeholder for future.
 
     conda_env = glob.glob(
         os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "conda_yaml/*.yaml"
+            os.path.dirname(os.path.abspath(__file__)), "../..", "conda_yaml/*.yaml"
         )
     )
 
