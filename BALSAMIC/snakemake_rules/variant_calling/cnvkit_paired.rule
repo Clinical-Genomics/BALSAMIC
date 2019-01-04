@@ -16,7 +16,7 @@ rule cnvkit_paired:
     bamT = expand(bam_dir + "{mysample}.sorted.bam", mysample=get_sample_type(config["samples"], "tumor")),
     bed = config["path"]["panel"] + config["bed"]["capture_kit"],
   output:
-    cnv_dir + config["vcf"][var_caller]["default"]
+    cnv_dir + "cnvkit_paired.done" 
   params:
     name = config["analysis"]["sample_id"],
     refurl = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refFlat.txt.gz",
@@ -31,4 +31,5 @@ rule cnvkit_paired:
       "--targets {params.targetCNV} "
       "--output-reference {params.cnn} "
       "--output-dir {params.outdir}; "
+    "touch {output}; "
     "source deactivate;"
