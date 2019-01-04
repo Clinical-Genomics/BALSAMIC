@@ -1,5 +1,6 @@
 channels:
   - bioconda
+  - conda-forge
 dependencies:
   - python=3.6.2
   - gatk=3.8
@@ -7,6 +8,7 @@ dependencies:
   - samtools=1.6
   - picard=2.17.0
   - cutadapt=1.15
+  - cnvkit=0.9.4a0
   - tabix=0.2.5
   - freebayes=1.2.0
   - perl=5.26.2
