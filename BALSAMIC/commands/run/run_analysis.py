@@ -5,39 +5,13 @@ import click
 import logging
 import sys
 import json
+from pathlib import Path
 
 # CLI commands and decorators
 from BALSAMIC.tools.cli_utils import createDir
-
-
-def get_sample_name(json_in):
-    """
-    Get sample name from input json file
-    """
-
-    try:
-        with open(os.path.abspath(json_in), "r") as fn:
-            sample_json = json.load(fn)
-            sample_name = sample_json["analysis"]["sample_id"]
-    except OSError:
-        print("Couldn't load json file or file path is not absolute")
-
-    return sample_name
-
-
-def get_analysis_dir(json_in, dir_type):
-    """
-    Get analysis dir from input json file
-    """
-
-    try:
-        with open(os.path.abspath(json_in), "r") as fn:
-            sample_json = json.load(fn)
-            analysis_dir = sample_json["analysis"][dir_type]
-    except OSError:
-        print("Couldn't load json file or file path is not absolute")
-
-    return analysis_dir
+from BALSAMIC.tools.cli_utils import get_sample_name
+from BALSAMIC.tools.cli_utils import get_analysis_dir
+from BALSAMIC.commands.config.sample import get_config
 
 
 def get_analysis_type(json_in):
@@ -61,8 +35,7 @@ def get_sbatchpy():
     """
 
     try:
-        sbatch = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'runSbatch.py')
+        sbatch = str(Path(__file__, 'runSbatch.py')) 
     except OSError:
         print("Couldn't locate sbatch submitter.")
 
@@ -75,48 +48,35 @@ def get_snakefile(analysis_type):
     """
 
     try:
+        p = Path(__file__).parents[2]
         if analysis_type == "paired":
-            snakefile = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                'VariantCalling_paired')
+            snakefile = Path(p, 'workflows', 'VariantCalling_paired')
         elif analysis_type == "single":
-            snakefile = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
+            snakefile = Path(p, 'workflows', 
                 'VariantCalling_single')
         elif analysis_type == "qc":
-            snakefile = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), 'Alignment')
+            snakefile = Path(p, 'workflows', 
+                'Alignment')
+        elif analysis_type == "paired_umi":
+            snakefile = Path(p, 'workflows', 
+                'VariantCalling_paired_umi')
+        elif analysis_type == "single_umi":
+            snakefile = Path(p, 'workflows', 
+                'VariantCalling_single_umi')
         else:
             raise ValueError("analysis_type should be single or paired")
 
     except OSError:
         print("Couldn't locate variant calling snakefile.")
 
-    return snakefile
-
-
-def get_cluster_config():
-    """
-    Returns a string path for cluster config file.
-    """
-
-    try:
-        cluster_config = os.path.abspath(
-            os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), os.pardir,
-                'config/cluster.json'))
-    except OSError:
-        print("Couldn't locate cluster config file.")
-
-    return cluster_config
-
+    return str(snakefile)
 
 @click.command("run", short_help="Run BALSAMIC on a provided config file")
 @click.option(
     '-a',
     '--analysis-type',
     required=False,
-    type=click.Choice(['qc', 'paired', 'single']),
+    type=click.Choice(['qc', 'paired', 'single','paired_umi']),
     help=
     'Type of analysis to run from input config file. By default it will read from config file, but it will override config file if it is set here.'
 )
@@ -138,7 +98,7 @@ def get_cluster_config():
     '-c',
     '--cluster-config',
     show_default=True,
-    default=get_cluster_config(),
+    default=get_config('cluster'),
     type=click.Path(),
     help='SLURM config json file.')
 @click.option(

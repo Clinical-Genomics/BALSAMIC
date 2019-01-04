@@ -11,6 +11,7 @@ import re
 import copy
 import glob
 from datetime import datetime
+from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.tools import get_chrom, get_package_split
@@ -54,9 +55,8 @@ def get_config(config_name):
     """
 
     try:
-        config_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), config_name + ".json"
-        )
+        p = Path(__file__).parents[2]
+        config_file = str(Path(p,'config',config_name+".json"))
     except OSError:
         print("Couldn't locate config file" + config_name + ".json")
 
@@ -129,7 +129,7 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_pre
     required=False,
     default="single",
     show_default=True,
-    type=click.Choice(["paired", "single"]),
+    type=click.Choice(["paired", "single", "paired_umi"]),
     help="Analysis config file for paired (tumor vs normal) or single (tumor-only) mode.",
 )
 @click.option(
@@ -163,9 +163,8 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_pre
 @click.option(
     "-o",
     "--output-config",
-    required=True,
-    type=click.Path(),
-    help="Output a json config file ready to be imported for run-analysis",
+    required=False,
+    help="Output a json config filename ready to be imported for run-analysis",
 )
 @click.option(
     "-t",
@@ -238,8 +237,11 @@ it is. So this is just a placeholder for future.
 
     """
 
-    if normal:
+    if normal and analysis_type == "single":
         analysis_type = "paired"
+
+    if not output_config:
+        output_config = sample_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
 
     analysis_config = get_config("analysis_" + analysis_type)
 
@@ -355,7 +357,7 @@ it is. So this is just a placeholder for future.
 
     conda_env = glob.glob(
         os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "conda_yaml/*.yaml"
+            os.path.dirname(os.path.abspath(__file__)), "../..", "conda_yaml/*.yaml"
         )
     )
 
@@ -369,6 +371,12 @@ it is. So this is just a placeholder for future.
         analysis_config, sample_config, reference_config, install_config, bioinfo_config
     )
 
+    dag_image = os.path.join(
+        output_dir,
+        output_config + '_BALSAMIC_' + bv + '_graph.pdf')
+
+    json_out["analysis"]["dag"] = dag_image
+
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
 
@@ -376,3 +384,15 @@ it is. So this is just a placeholder for future.
         write_json(json_out, output_config)
 
     FormatFile(output_config, in_place=True)
+
+    shellcmd = ([
+        'balsamic', 'run', '-s', output_config, '--snakemake-opt',
+        '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
+        '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
+        'BALSAMIC', bv, 'workflow', 'for', 'sample:',
+        json_out["analysis"]["sample_id"], '\\"\;/g"', '|', 'dot', '-Tpdf',
+        '1>', dag_image
+    ])
+
+    click.echo("Creating workflow dag image file: %s" % dag_image)
+    subprocess.run(" ".join(shellcmd), shell=True)
