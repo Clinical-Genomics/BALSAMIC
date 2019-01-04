@@ -14,9 +14,9 @@ from pylatex import Document, PageStyle, Section, Subsection, Subsubsection, Tab
     LineBreak, SmallText, Tabularx, TextColor, MultiColumn, simple_page_number, NewPage, StandAloneGraphic
 from pylatex.utils import italic, NoEscape, bold
 
-from BALSAMIC.workflows.run_analysis import get_sample_name
-from BALSAMIC.config.sample import get_config
-from BALSAMIC.tools import get_packages, get_package_split
+from BALSAMIC.tools.cli_utils import get_sample_name
+from BALSAMIC.commands.config.sample import get_config
+from BALSAMIC.tools.cli_utils import get_packages, get_package_split
 
 
 @click.command("report", short_help="Report generator for workflow results")
@@ -157,7 +157,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 shellcmd = [
                     os.path.join(
                         os.path.dirname(os.path.abspath(__file__)), "..",
-                        "R_scripts/VariantReport.R")
+                        "scripts/VariantReport.R")
                 ]
                 shellcmd.extend([
                     "--infile", sample_config["vcf"]["merged"]["SNV"],
@@ -216,7 +216,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
             shellcmd = [
                 os.path.join(
                     os.path.dirname(os.path.abspath(__file__)), "..",
-                    "R_scripts/VariantReport.R")
+                    "scripts/VariantReport.R")
             ]
             shellcmd.extend([
                 "--infile", "'" + sample_config["vcf"]["merged"]["SNV"] + "'",
@@ -270,7 +270,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                             shellcmd = [
                                 os.path.join(
                                     os.path.dirname(os.path.abspath(__file__)),
-                                    "..", "R_scripts/CoverageRep.R")
+                                    "..", "scripts/CoverageRep.R")
                             ]
                             shellcmd.extend([
                                 "--infile",
@@ -301,7 +301,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                     shellcmd = [
                         os.path.join(
                             os.path.dirname(os.path.abspath(__file__)), "..",
-                            "R_scripts/CoveragePlot.R")
+                            "scripts/CoveragePlot.R")
                     ]
                     shellcmd.extend([
                         "--infile", sample_config["bed"]["target_cov"][s],

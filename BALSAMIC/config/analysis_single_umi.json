@@ -1,0 +1,55 @@
+{
+    "QC": {
+        "picard_rmdup": "False",
+        "adapter":
+        "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+        "min_seq_length": "25"
+    },
+    "vcf": {
+        "manta": {
+            "default": [
+                "tumorSV.vcf.gz", "candidateSV.vcf.gz",
+                "candidateSmallIndels.vcf.gz"
+            ],
+            "mutation": "somatic",
+            "merged": "manta.vcf.gz",
+            "type": "SV"
+        },
+        "mutect": {
+            "default": "mutect.vcf.gz",
+            "mutation": "somatic",
+            "merged": "mutect.vcf.gz",
+            "type": "SNV"
+        },
+        "vardict": {
+            "default": "vardict.vcf.gz",
+            "mutation": "somatic",
+            "merged": "vardict.vcf.gz",
+            "type": "SNV"
+        },
+        "manta_germline": {
+            "default": ["diploidSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz" ],
+            "mutation": "germline",
+            "merged": "manta_germline.vcf.gz",
+            "type": "SV"
+        }, 
+        "strelka_germline": {
+            "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
+            "mutation": "germline",
+            "merged": "strelka_germline.vcf.gz",
+            "type": "SNV"
+        },
+        "freebayes": {
+            "default": "freebayes.vcf.gz",
+            "mutation": "germline",
+            "merged": "freebayes.vcf.gz",
+            "type": "SNV"
+        },
+        "haplotypecaller": {
+            "default": "haplotypecaller.vcf.gz",
+            "mutation": "germline",
+            "merged": "haplotypecaller.vcf.gz",
+            "type": "SNV"
+        }
+    }
+}
