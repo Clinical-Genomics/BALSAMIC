@@ -113,7 +113,7 @@ gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_e
 
 source activate ${gatk_env}
 
-gatk-register BALSAMIC/assests/GenomeAnalysisTK.jar
+gatk3-register BALSAMIC/assests/GenomeAnalysisTK.jar
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Copying custom Picard to relevant conda environment"
