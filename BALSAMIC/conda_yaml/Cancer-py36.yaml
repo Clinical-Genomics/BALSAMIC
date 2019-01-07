@@ -15,4 +15,7 @@ dependencies:
   - perl-dbi
   - perl-list-util
   - perl-list-moreutils
+  - perl-bio-db-hts
+  - perl-try-tiny
+  - perl-module-build
 
