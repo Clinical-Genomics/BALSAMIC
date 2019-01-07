@@ -147,9 +147,15 @@ def conda_install(conda_yaml, env_prefix):
     help=
     'Output a yaml file containing packages installed in each input yaml file.'
 )
+@click.option(
+    '-t',
+    '--env-type',
+    type=click.Choice(['D','P']),
+    default='D',
+    help='Environment type. P: Production, D: Development. It will be added to filename: "[D|P]_"+filename+env-name-suffix')
 @click.pass_context
 def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
-                  env_name_suffix, packages_output_yaml):
+                  env_name_suffix, packages_output_yaml, env_type):
     """
     Installs conda environments from a conda yaml file.
     
@@ -168,7 +174,7 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
 
             env_base_name = os.path.basename(os.path.splitext(fname)[0])
 
-            env_name = env_base_name + env_name_suffix
+            env_name = env_type + "_" + env_base_name + env_name_suffix
 
             click.echo(
                 click.style("Setting env name as %s" % env_name, fg='yellow'))
