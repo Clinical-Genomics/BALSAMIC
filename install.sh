@@ -101,11 +101,12 @@ echo -e "\n${B_YLW}\tbalsamic install_env --packages-output-yaml ${BALSAMIC_ENVS
 echo -ne "${B_NOCOL}"
 balsamic install -s ${env_name_suffix} \
   --overwrite-env \
-  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-vardict.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-Core.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-py36.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-py27.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/D_Cancer-vt.yaml \
+  --env-type ${CONDAPREFIX} \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-vardict.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-Core.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-py36.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-py27.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-vt.yaml \
   --env-dir-prefix ${CONDAPATH} \
   --packages-output-yaml ${BALSAMIC_ENVS}
 
