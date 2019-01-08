@@ -17,21 +17,19 @@ rule vep:
     vep = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf",
     vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
   params:
-    # vep works within the same environment as gatk, but since it is
-    # not installed using conda, gatk's env name is retrieved
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_fa = config["references"]["vep_fa"],
-    vep_exec = config["path"]["vep_exec"],
     vep_cache = config["path"]["vep_cache"]
   threads: 4
   shell:
     "source activate {params.conda}; "
-    "{params.vep_exec}/vep "
-        "--dir {params.vep_cache} "
+    "vep_path=$(dirname $(realpath $(which vep))); "
+    "vep "
+        "--dir $vep_path "
         "--dir_cache {params.vep_cache} "
-        "--dir_plugins {params.vep_cache} "
-        "-i {input} "
-        "-o {output.vep} "
+        "--dir_plugins $vep_path "
+        "--input_file {input} "
+        "--output_file {output.vep} "
         "--fork {threads} "
         "--vcf "
         "--fasta {params.vep_cache}{params.vep_fa} "
@@ -40,21 +38,9 @@ rule vep:
         "--offline "
         "--variant_class "
         "--cache "
-        "-v "
+        "--verbose "
         "--force_overwrite && "
     "bgzip -f -c {output.vep} > {output.vcf} && "
     "tabix -f -p vcf {output.vcf};"
     "source deactivate; "
 
-#rule vep_merge_SNV:
-#  input:
-#    expand(vep_dir + "vep_table_" + "{vcf}", vcf=get_vcf_files(config, "SNV"))
-#  output:
-#    vep_dir + "vep_" + "SNV" + ".merged.table"
-#  shell:
-#    "for i in {input}; do zcat $i | awk 'NR==1'; done | "
-#    "awk -v OFS=\"\\t\" '{{$7=\"TUMOR_DP\"; $8=\"TUMOR_AD_REF\"; $9=\"TUMOR_AD_ALT\"; print}}' | "
-#    "sort -u > {output}; "
-#    "touch {output}.tmp; "
-#    "for i in {input}; do zcat $i | awk 'NR>1' >> {output}.tmp; done; "
-#    "sort -k1,1 -k2,2g -k6,6r {output}.tmp >> {output}; "
