@@ -18,6 +18,7 @@ rule vep:
     vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    vep_cache_ver = "94",
     vep_fa = config["references"]["vep_fa"],
     vep_cache = config["path"]["vep_cache"]
   threads: 4
@@ -38,6 +39,7 @@ rule vep:
         "--offline "
         "--variant_class "
         "--cache "
+        "--cache_version {params.vep_cache_version} "
         "--verbose "
         "--force_overwrite && "
     "bgzip -f -c {output.vep} > {output.vcf} && "
