@@ -35,7 +35,8 @@ def get_sbatchpy():
     """
 
     try:
-        sbatch = str(Path(__file__, 'runSbatch.py')) 
+        p = Path(__file__).parents[0]
+        sbatch = str(Path(p,'runSbatch.py'))
     except OSError:
         print("Couldn't locate sbatch submitter.")
 
