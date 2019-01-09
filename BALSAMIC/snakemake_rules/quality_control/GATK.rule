@@ -20,7 +20,7 @@ rule RealignerTargetCreator:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda}; "
-    "gatk "
+    "gatk3 "
         "-T RealignerTargetCreator "
         "-I {input.bam} "
         "-R {input.fa} "
@@ -40,7 +40,7 @@ rule IndelRealigner:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda}; "
-    "gatk "
+    "gatk3 "
         "-T IndelRealigner "
         "-I {input.bam} "
         "-R {input.fa} "
@@ -60,13 +60,13 @@ rule BaseRecalibrator:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   shell:
     "source activate {params.conda}; "
-    "gatk "
+    "gatk3 "
         "-T BaseRecalibrator "
         "-R {input.fa} "
         "--knownSites {input.knownsites} " 
         "-I {input.bam} "
         "--out {output}.bsrcl_list; "
-    "gatk "
+    "gatk3 "
         "-T PrintReads "
         "-R {input.fa} "
         "-I {input.bam} "

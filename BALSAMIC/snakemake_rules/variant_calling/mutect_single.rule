@@ -30,7 +30,7 @@ rule mutect2_somatic_single:
   shell:
     "source activate {params.conda};"
     "mkdir -p {params.result_dir}; "
-    "gatk  -T MuTect2 "
+    "gatk3  -T MuTect2 "
         "-R {input.fa} "
         "--cosmic {input.cosmic} "
         "--dbsnp {input.dbsnp} "

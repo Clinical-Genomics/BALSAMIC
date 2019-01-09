@@ -27,7 +27,7 @@ rule haplotypecaller:
   threads: 4
   shell:
     "source activate {params.conda};"
-    "gatk -T HaplotypeCaller "
+    "gatk3 -T HaplotypeCaller "
         "-R {input.fa} "
         "-I {input.bam} "
         "-L {input.bed} "
