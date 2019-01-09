@@ -18,7 +18,6 @@ rule vep:
     vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
-    vep_fa = config["references"]["vep_fa"],
     vep_cache = config["path"]["vep_cache"]
   threads: 4
   shell:
@@ -32,9 +31,8 @@ rule vep:
         "--output_file {output.vep} "
         "--fork {threads} "
         "--vcf "
-        "--fasta {params.vep_cache}{params.vep_fa} "
         "--everything "
-        "-format vcf "
+        "--format vcf "
         "--offline "
         "--variant_class "
         "--cache "
@@ -43,4 +41,3 @@ rule vep:
     "bgzip -f -c {output.vep} > {output.vcf} && "
     "tabix -f -p vcf {output.vcf};"
     "source deactivate; "
-
