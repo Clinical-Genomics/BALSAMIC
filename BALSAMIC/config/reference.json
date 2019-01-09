@@ -2,7 +2,6 @@
     "path": {
         "genomefa": "/mnt/hds/proj/bioinfo/BALSAMIC/references/",
         "panel": "/mnt/hds/proj/bioinfo/BALSAMIC/references/GRCh37/panel/",
-        "vep_exec": "/mnt/hds/proj/bioinfo/BALSAMIC/references/ensembl-vep/",
         "vep_cache": "/mnt/hds/proj/bioinfo/BALSAMIC/references/vep_cache/"
     },
     "references": {
@@ -17,7 +16,7 @@
         "cosmic":
         "GRCh37/COSMIC/v83/CosmicCodingMuts.vcf.gz",
         "vep_fa":
-        "homo_sapiens_refseq/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
+        "homo_sapiens/94_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
         "exon_bed":
         "GRCh37/GFF/attribute_extract/gencode.v19.annotation.exons.extended.simpleid"
     },
