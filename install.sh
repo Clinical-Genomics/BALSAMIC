@@ -78,7 +78,7 @@ cat BALSAMIC/config/install.json
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Creating conda env ${env_name}"
 echo -e "\n${B_YLW}\tconda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force"
-conda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --prefix /mnt/hds/proj/bioinfo/SERVER/miniconda/envs/${env_name} --force
+conda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --prefix ${CONDAPATH}/${env_name} --force
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Activating ${env_name}"
