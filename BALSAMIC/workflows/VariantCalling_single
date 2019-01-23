@@ -7,6 +7,8 @@ from BALSAMIC.tools import get_vcf
 from BALSAMIC.tools import get_result_dir
 from BALSAMIC.tools import get_chrom
 
+shell.prefix("set -eo pipefail; ")
+
 rule_dir = config["rule_directory"]
 
 include:
@@ -57,5 +59,6 @@ rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "manta"], [config["analysis"]["sample_id"]])),
+    expand(vep_dir + "{vcf}.tbl", vcf=get_vcf(config, ["mutect", "vardict"], [config["analysis"]["sample_id"]])),
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["freebayes", "haplotypecaller", "strelka_germline", "manta_germline"], config["samples"])),
     #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
