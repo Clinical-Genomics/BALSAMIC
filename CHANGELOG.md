@@ -8,6 +8,13 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.9.1] - 2019-01-22
+### Added
+- Simple table for somatic variant callers for single sample mode added
+
+### Fixed
+- Fixes an issue with conda that unset variables threw an error issue #141
+
 ## [2.9.0] - 2019-01-04 
 ### Changed
 - Readme structure and example
