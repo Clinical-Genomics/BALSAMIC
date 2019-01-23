@@ -54,3 +54,52 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
     "tabix -f -p vcf {output}; "
     "source deactivate;" 
+
+rule mutect_simple:
+  input:
+    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz", 
+  output:
+    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".tbl", 
+    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+  params:
+    name = config["analysis"]["sample_id"],
+    MVL = "/mnt/hds/proj/bioinfo/BALSAMIC/references/GRCh37/MVL/MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz",
+    conda = get_conda_env(config["conda_env_yaml"], "bcftools")
+  shell:
+    "source activate {params.conda};"
+    "bcftools annotate "
+        "--annotation {input} "
+        "--mark-sites +CALLER=MUTECT2 "
+        "-h <(echo '##INFO=<ID=CALLER,Number=1,Type=String,Description=\"VariantCaller\">') "
+        "--remove \"^INF/DP,INF/CSQ\",\"^FMT/GT,FMT/AD,FMT/AF\" {input} "
+    "| "
+    "bcftools annotate "
+        "--remove \"INFO/CALLER=MUTECT2\" - "
+    "| "
+    "sed '/^#CHROM/s/{params.name}.*$/TUMOR/' "
+    "| "
+    "bcftools annotate -a {params.MVL} -Oz "
+        "-c CHROM,POS --mark-sites +\"MSK_MVL\" "
+    " > {output.vcf}; "
+    "HEADER=`bcftools view -h {input} | sed -n '/Consequence annotations/p' | sed 's/#.* //g;s/\">//g'`; "
+    "bcftools view -f .,PASS {output.vcf} "
+    "| "
+    "bcftools query --print-header --allow-undef-tags "
+        "-f \'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER\\t[%AD{{0}}\\t][%AD{{1}}\\t][%AF\\t]%CSQ\\t%MSK_MVL\\n\' "
+        "-s TUMOR "
+    "| "
+    "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
+        "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \",\"\",$0); "
+                  "for (i=1; i<=NF; i++) gsub(/\[[[:digit:]]*\]/,\"\",$i); "
+                  "print $1,$2,$3,$4,$5,$6,\"DP\",$7,$8,\"FILTERED\",$11,$10 }}"
+        " NR>1 {{ print $1,$2,$3,$4,$5,$6,\"NA\",$7,$8,\"NA\",$11,$10 }}'"
+    "| "
+    "awk -v H=$HEADER -v OFS=\"\\t\" "
+        "'NR==1 {{C=split(H,h,\"|\");"
+        " sep=\"\\t\"; for (i=1; i<=C; i++) {{if (i==1) s = h[i]; else s = s sep h[i]}}; "
+        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} "
+        " NR>1 {{split($12,a,\",\"); for (x in a) {{ C=split(a[x],b,\"|\"); "
+        " sep=\"\\t\"; for (i=1; i<=C; i++) {{ if (b[i]==\"\") b[i]=\".\"; if (i==1) s = b[i]; else s = s sep b[i]}}; "
+        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} }}' "
+    "| awk -v OFS=\"\\t\" '{{ split($13,a,\"&\"); for (i in a) {{ $13=a[i]; print; }} }}' "
+    " > {output.tbl}"
