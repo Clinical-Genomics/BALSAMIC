@@ -18,7 +18,7 @@ rule cnvkit_single:
   output:
     bed = cnv_dir + "CNV." + config["bed"]["capture_kit"],
     refcnn = cnv_dir + "FlatReference.cnn",
-    done = cnv_dir + "cnvkit_paired.done" 
+    done = cnv_dir + "{sample}.cnvkit_single.done" 
   params:
     name = config["analysis"]["sample_id"],
     refurl = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refFlat.txt.gz",
@@ -27,13 +27,12 @@ rule cnvkit_single:
     conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
   shell:
     "source activate {params.conda}; "
-    "cnvkit.py target {input.bed} --annotate {input.refflat}; --split -o {output.bed}; "
-    "cnvkit.py reference -o {output.refcnn} -f {input.reffa} -t {output.bed} "
+    "cnvkit.py target {input.bed} --annotate {input.refflat} --split -o {output.bed}; "
+    "cnvkit.py reference -o {output.refcnn} -f {input.reffa} -t {output.bed}; "
     "cnvkit.py batch "
       "--method hybrid "
       "--drop-low-coverage "
       "--reference {output.refcnn} "
       "--output-dir {params.outdir} "
-      "--scatter --diagram {input.bamT}"
-    "touch {output.done}; "
+      "--scatter --diagram {input.bamT} && touch {output.done}; "
     "source deactivate;"
