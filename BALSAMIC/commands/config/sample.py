@@ -115,8 +115,11 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_pre
             check_exist(s)
 
         try:
+
             subprocess.check_output(["ln", "-s", s, d], stderr=subprocess.STDOUT)
+
         except subprocess.CalledProcessError as e:
+            print(f"Desitination file {d} exists. No symbolic link was created.")
             print(e.output.decode())
 
 
