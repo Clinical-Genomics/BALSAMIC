@@ -156,7 +156,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
 
                 shellcmd = [
                     os.path.join(
-                        os.path.dirname(os.path.abspath(__file__)), "..",
+                        os.path.dirname(os.path.abspath(__file__)), "..", "..",
                         "scripts/VariantReport.R")
                 ]
                 shellcmd.extend([
@@ -215,7 +215,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
 
             shellcmd = [
                 os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), "..",
+                    os.path.dirname(os.path.abspath(__file__)), "..", "..",
                     "scripts/VariantReport.R")
             ]
             shellcmd.extend([
@@ -300,7 +300,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                         [os.path.join(tex_path, s), "Coverage.pdf"])
                     shellcmd = [
                         os.path.join(
-                            os.path.dirname(os.path.abspath(__file__)), "..",
+                            os.path.dirname(os.path.abspath(__file__)), "..", "..",
                             "scripts/CoveragePlot.R")
                     ]
                     shellcmd.extend([
@@ -360,7 +360,7 @@ def report(context, json_report, json_varreport, rulegraph_img):
                 data_table.add_hline()
                 conda_env = glob.glob(
                     os.path.join(
-                        os.path.dirname(os.path.abspath(__file__)), "..",
+                        os.path.dirname(os.path.abspath(__file__)), "..", "..",
                         "conda_yaml/*.yaml"))
 
                 pkgs = get_package_split(conda_env)
