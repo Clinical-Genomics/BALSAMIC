@@ -8,6 +8,11 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.9.3] - 2019-02-12
+## Fixed
+- Mutect single mode table generation fix
+- Vardict single mode MVL annotation fix
+
 ## [2.9.2] - 2019-02-04
 ### Added
 - CNVkit single sample mode now in workflow
