@@ -86,7 +86,6 @@ rule mutect_simple:
     "| "
     "bcftools query --print-header --allow-undef-tags "
         "-f \'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER\\t[%AD{{0}}\\t][%AD{{1}}\\t][%AF\\t]%CSQ\\t%MSK_MVL\\n\' "
-        "-s TUMOR "
     "| "
     "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
         "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \",\"\",$0); "
