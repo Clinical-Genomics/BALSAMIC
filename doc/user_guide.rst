@@ -3,7 +3,7 @@ BALSAMIC
 ========
 
 Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 2.9.2)
+(**version** = 2.9.3)
 
 .. contents::
 
@@ -39,7 +39,7 @@ This will create a directory within test_data directory with the following struc
       │   ├── S2_R_1.fastq.gz -> ../fastq/S2_R_1.fastq.gz
       │   └── S2_R_2.fastq.gz -> ../fastq/S2_R_2.fastq.gz
       ├── id1_analysis.json
-      ├── id1_analysis.json_BALSAMIC_2.9.2_graph.pdf
+      ├── id1_analysis.json_BALSAMIC_2.9.3_graph.pdf
       ├── logs
       └── scripts
 
