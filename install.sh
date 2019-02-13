@@ -120,11 +120,12 @@ gatk3-register BALSAMIC/assests/GenomeAnalysisTK.jar
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Copying custom Picard to relevant conda environment"
 source activate ${env_name}
-picard_PATH=BALSAMIC/assests/picard-2.18.5-4-g63d860e-SNAPSHOT-all.jar
+picard_PATH=BALSAMIC/assests/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
 picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
 picard_destination=`conda env export -n ${picard_conda_env} | grep prefix | cut -d" " -f 2`
 cp $picard_PATH ${picard_destination}/share/
-ln -s ${picard_destination}/share/picard-2.18.5-4-g63d860e-SNAPSHOT-all.jar  ${picard_destination}/share/picard-2.18.5.jar
+# link picard from assests to conda's share path
+ln -s ${picard_destination}/share/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/share/picard-2.18.11.jar
 
 echo -e "\n${B_YLW}Installing stargazer"
 stargazer_path=BALSAMIC/assests/stargazer_5.2.2.tar.gz
