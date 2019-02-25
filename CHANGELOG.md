@@ -8,6 +8,10 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.9.5] - 2019-02-25
+### Added
+- An analysis finish file is generated with date and time inside (%Y-%M-%d T%T %:z)
+
 ## [2.9.4] - 2019-02-13
 ### Fixed
 - picard version update to 2.18.11 github.com/hassanfa/picard
