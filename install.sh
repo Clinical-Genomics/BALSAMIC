@@ -7,7 +7,6 @@ B_YLW='\033[1;33m';
 B_NOCOL='\033[0m';
 CONDAPREFIX=D
 CONDADATE=$(date +%y%m%d)
-CONDAPATH=/mnt/hds/proj/bioinfo/SERVER/miniconda/envs
 
 #if [ $# -eq 0 ]; then
 #  echo $"
@@ -55,6 +54,17 @@ command -v conda > /dev/null 2>&1 || \
   { echo -e "${B_RED}conda command was not found. Please make sure conda is installed and it is in path. Aborting." >&2;\
   exit 1;
   }
+
+if [[ -z "$CONDAPATH"  ]]
+then
+  echo -e "\n${B_YLW}No conda env path is provided. Setting default conda path to $CONDA_ENVS_PATH"
+  if [[ -z "$CONDA_ENVS_PATH"  ]]
+  then
+    echo -e "\n${B_RED}CONDA_ENVS_PATH env variable not found. Exiting!"
+    exit 1
+  fi
+  CONDAPATH=$CONDA_ENVS_PATH
+fi
 
 # Conda env found
 # Conda env naming convention: [P,D]_BALSAMIC_%DATE
