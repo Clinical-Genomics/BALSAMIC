@@ -11,6 +11,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ## [2.9.6] - 2019-02-25
 ### Fixed
 - Reference to issue #141, fix for 3 other workflows
+- CNVkit rule update for refflat file
 
 ## [2.9.5] - 2019-02-25
 ### Added
