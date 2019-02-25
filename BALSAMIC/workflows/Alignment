@@ -45,3 +45,7 @@ var_type = ["SNV", "SV"]
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
+  params:
+    analysis_finish_file = os.path.join(get_result_dir(config), "analysis_finish") 
+  shell:
+    "date +'%Y-%M-%d T%T %:z' > {params.analysis_finish_file}"
