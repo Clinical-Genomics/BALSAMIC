@@ -5,6 +5,8 @@
 import os
 from BALSAMIC.tools import get_result_dir, get_vcf
 
+shell.prefix("set -eo pipefail; ")
+
 rule_dir = config["rule_directory"]
 
 include:
