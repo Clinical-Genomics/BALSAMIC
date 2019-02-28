@@ -132,7 +132,7 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_pre
     required=False,
     default="single",
     show_default=True,
-    type=click.Choice(["paired", "single", "paired_umi"]),
+    type=click.Choice(["paired", "single", "paired_umi", "single_umi"]),
     help="Analysis config file for paired (tumor vs normal) or single (tumor-only) mode.",
 )
 @click.option(
