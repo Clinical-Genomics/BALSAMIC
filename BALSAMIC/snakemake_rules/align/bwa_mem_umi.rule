@@ -14,9 +14,14 @@ rule bwa_mem_umi_mrkadp:
     fastq = "{sample}.unalg.umi.mrkadp.fastq"
   output:
     "{sample}.unalg.umi.mrkadp.bwa.sam"
+  params:
+    header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+    conda = get_conda_env(config["conda_env_yaml"],"bwa")
+  threads: 4
   shell:
     """
-  bam mem -p -t 8 {input.fa} {input.fastq} > {output}
+  source activate {params.conda};
+  bwa mem -p -t 8 {input.fa} {input.fastq} > {output}
     """
 
 rule bwa_mem_umi_cnsalg:
@@ -26,7 +31,12 @@ rule bwa_mem_umi_cnsalg:
     fastq = "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
   output:
     "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam"
+  params:
+    header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+    conda = get_conda_env(config["conda_env_yaml"],"bwa")
+  threads: 4
   shell:
     """
-  bam mem -p -t 8 {input.fa} {input.fastq} > {output}
+  source activate {params.conda};
+  bwa mem -p -t 8 {input.fa} {input.fastq} > {output}
     """
