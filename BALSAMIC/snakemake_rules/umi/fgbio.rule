@@ -15,11 +15,12 @@ rule fgbio_ExtractUmisFromBam:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
+source activate {params.conda}; 
 fgbio ExtractUmisFromBam \
 --input={input} \
 --output={output} \
 --read-structure=3M2S146T 3M2S146T \
---molecular-barcode-tags=ZA ZB \
+--molecular-index-tags=ZA ZB \
 --single-tag=RX
         """
 
@@ -32,6 +33,7 @@ rule fgbio_GroupReadsByUmi:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
+source activate {params.conda}; 
 fgbio GroupReadsByUmi \
 --strategy=paired \
 --input={input} \
@@ -51,6 +53,7 @@ rule fgbio_CallDuplexConsensusReads:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
+source activate {params.conda}; 
 fgbio CallDuplexConsensusReads \
 --input={input} \
 --output={output} \
@@ -65,14 +68,16 @@ rule fgbio_FilterConsensusReads:
     output:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
     params:
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
     shell:
         """
+source activate {params.conda}; 
 fgbio FilterConsensusReads \
 -i {input} \
 -o {output} \
 --ref {params.ref} \
---min-reads 10 5 3 \
+--min-reads 3 2 1 \
 --max-read-error-rate 0.05 \
 --max-base-error-rate 0.1 \
 --min-base-quality 50 \
@@ -89,25 +94,27 @@ rule fgio_ClipBam:
         ref = config["path"]["genomefa"] + config["references"]["genomefa"], 
     shell:
         """
+source activate {params.conda}; 
 fgbio ClipBam \
 --input={input} \
 --output={output} \
 --ref={params.ref} \
 --soft-clip=false \
---overlapping-reads=true
+--clip-overlapping-reads=true
         """
 
 rule fgbio_CollectDuplexSeqMetrics:
     input:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     output:
-        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.metrics"
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam.duplex_qc.pdf"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
+source activate {params.conda}; 
 fgbio CollectDuplexSeqMetrics \
 --input={input} \
---output={output} \
+--output={input} \
 --description={wildcards.sample}
         """
