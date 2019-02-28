@@ -66,7 +66,7 @@ rule all:
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["freebayes", "haplotypecaller", "strelka_germline", "manta_germline"], config["samples"])),
     expand(cnv_dir + "{sample}.cnvkit_single.done", sample = config["samples"])
     #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
-  params:
-    analysis_finish_file = os.path.join(get_result_dir(config), "analysis_finish") 
+  output:
+    os.path.join(get_result_dir(config), "analysis_finish")
   shell:
-    "date +'%Y-%M-%d T%T %:z' > {params.analysis_finish_file}"
+    "date +'%Y-%M-%d T%T %:z' > {output}"

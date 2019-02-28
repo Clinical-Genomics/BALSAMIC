@@ -38,7 +38,7 @@ rule all:
     expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["vardict", "strelka"], [config["analysis"]["sample_id"]])),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.metrics", sample=config["samples"])
-  params:
-    analysis_finish_file = os.path.join(get_result_dir(config), "analysis_finish") 
+  output:
+    os.path.join(get_result_dir(config), "analysis_finish")
   shell:
-    "date +'%Y-%M-%d T%T %:z' > {params.analysis_finish_file}"
+    "date +'%Y-%M-%d T%T %:z' > {output}"
