@@ -128,7 +128,7 @@ rule picard_FastqToSam_umi:
         """
 source activate {params.conda}; 
 java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar FastqToSam \
---O={output} \
+O={output} \
 F1={input.fq1} \
 F2={input.fq2} \
 SM={wildcards.sample} \
@@ -235,8 +235,8 @@ java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignmen
 VALIDATION_STRINGENCY=SILENT \
 UNMAPPED={input.unaligned} \
 ALIGNED={input.aligned} \
-OUTPUT=S1_ds_consensus_aligned.bam \
-REFERENCE_SEQUENCE= {params.ref} \
+OUTPUT={output} \
+REFERENCE_SEQUENCE={params.ref} \
 CLIP_ADAPTERS=false \
 ORIENTATIONS=FR \
 MAX_GAPS=-1 \
