@@ -8,6 +8,15 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.9.7] - 2019-02-28
+### Fixed
+- Various fixes to umi_single mode
+- analysis_finish file does not block reruns anymore
+- Added missing single_umi to analysis workflow cli
+
+### Changed
+- vardict in single mode has lower AF threshold filter (0.005 -> 0.001)
+
 ## [2.9.6] - 2019-02-25
 ### Fixed
 - Reference to issue #141, fix for 3 other workflows
