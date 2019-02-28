@@ -22,7 +22,7 @@ rule vardict_single:
   output:
     vcf_dir + vardict_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"][var_caller]["default"]
   params:
-    af = "0.005",
+    af = "0.001",
     max_pval = "0.9",
     max_mm = "4.5",
     col_info = "-c 1 -S 2 -E 3 -g 4",
