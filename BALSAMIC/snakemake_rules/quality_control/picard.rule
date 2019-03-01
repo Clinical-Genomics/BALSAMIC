@@ -62,7 +62,7 @@ rule CollectHsMetrics:
       "TI={input.bam}.picard.bedintervals "
       "I={input.bam} "
       "O={output.unmrk} "
-      "COVERAGE_CAP=2000 "
+      "COVERAGE_CAP=50000 "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
     "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
       "CollectHsMetrics "
@@ -70,7 +70,7 @@ rule CollectHsMetrics:
       "TI={input.bam}.picard.bedintervals "
       "I={input.bammrkdup} "
       "O={output.mrkdup} "
-      "COVERAGE_CAP=2000 "
+      "COVERAGE_CAP=50000 "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
     "source deactivate; "
 
