@@ -3,7 +3,7 @@ BALSAMIC
 ========
 
 Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 2.9.7)
+(**version** = 2.9.8)
 
 
 * `Installation <doc/install.rst>`_
