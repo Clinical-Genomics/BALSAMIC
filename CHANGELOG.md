@@ -8,6 +8,11 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [2.9.8] - 2019-01-01
+### Fixed
+- picard hsmetrics now has 50000 cov max
+- cnvkit single wildcard resolve bug fixed
+
 ## [2.9.7] - 2019-02-28
 ### Fixed
 - Various fixes to umi_single mode
