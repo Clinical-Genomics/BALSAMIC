@@ -13,7 +13,7 @@ rule cnvkit_single:
   input:
     refflat = config["path"]["genomefa"] + "GRCh37/GFF/refFlat.chr1_20_X_Y.txt",
     reffa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    bamT = expand(bam_dir + "{mysample}.sorted.bam", mysample=get_sample_type(config["samples"], "tumor")),
+    bamT = bam_dir + "{sample}.sorted.bam",
     bed = config["path"]["panel"] + config["bed"]["capture_kit"],
   output:
     bed = cnv_dir + "CNV." + config["bed"]["capture_kit"],
