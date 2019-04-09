@@ -15,15 +15,14 @@ from BALSAMIC.tools.cli_utils import add_doc as doc
 # Get version
 from BALSAMIC import __version__
 
-
 @click.group()
 @click.version_option(version=__version__)
 @click.pass_context
+
 @doc("""BALSAMIC {version}: Bioinformatic Analysis pipeLine for
         SomAtic MutatIons in Cancer""".format(version=__version__))
 def cli():
     "BALSAMIC"
-
 
 cli.add_command(install_command)
 cli.add_command(analysis_command)
