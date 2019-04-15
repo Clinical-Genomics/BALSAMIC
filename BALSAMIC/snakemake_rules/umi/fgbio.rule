@@ -16,7 +16,8 @@ rule fgbio_ExtractUmisFromBam:
     shell:
         """
 source activate {params.conda}; 
-fgbio ExtractUmisFromBam \
+java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+ExtractUmisFromBam \
 --input={input} \
 --output={output} \
 --read-structure=3M2S146T 3M2S146T \
@@ -34,7 +35,8 @@ rule fgbio_GroupReadsByUmi:
     shell:
         """
 source activate {params.conda}; 
-fgbio GroupReadsByUmi \
+java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+GroupReadsByUmi \
 --strategy=paired \
 --input={input} \
 --output={output} \
@@ -54,7 +56,8 @@ rule fgbio_CallDuplexConsensusReads:
     shell:
         """
 source activate {params.conda}; 
-fgbio CallDuplexConsensusReads \
+java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+CallDuplexConsensusReads \
 --input={input} \
 --output={output} \
 --error-rate-pre-umi=45 \
@@ -73,7 +76,8 @@ rule fgbio_FilterConsensusReads:
     shell:
         """
 source activate {params.conda}; 
-fgbio FilterConsensusReads \
+java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+FilterConsensusReads \
 -i {input} \
 -o {output} \
 --ref {params.ref} \
@@ -95,7 +99,8 @@ rule fgio_ClipBam:
     shell:
         """
 source activate {params.conda}; 
-fgbio ClipBam \
+java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+ClipBam \
 --input={input} \
 --output={output} \
 --ref={params.ref} \
@@ -113,7 +118,8 @@ rule fgbio_CollectDuplexSeqMetrics:
     shell:
         """
 source activate {params.conda}; 
-fgbio CollectDuplexSeqMetrics \
+java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+CollectDuplexSeqMetrics \
 --input={input} \
 --output={input} \
 --description={wildcards.sample}
