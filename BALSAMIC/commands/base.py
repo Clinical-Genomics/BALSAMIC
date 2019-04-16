@@ -21,7 +21,7 @@ from BALSAMIC import __version__
 
 @doc("""BALSAMIC {version}: Bioinformatic Analysis pipeLine for
         SomAtic MutatIons in Cancer""".format(version=__version__))
-def cli():
+def cli(context):
     "BALSAMIC"
 
 cli.add_command(install_command)
