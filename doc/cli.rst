@@ -170,8 +170,11 @@ Misc. internal commands
                                       Output a yaml file containing packages
                                       installed in each input yaml file.
                                       [required]
+      -t, --env-type [D|P|S]          Environment type. P: Production, D:
+                                      Development, S: Stage. It will be added to
+                                      filename: "[D|P|S]_"+filename+env-name-
+                                      suffix
       --help                          Show this message and exit.
-
 
 
 Running variant calling workflow
