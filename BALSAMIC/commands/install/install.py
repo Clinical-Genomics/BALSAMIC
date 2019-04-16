@@ -150,9 +150,9 @@ def conda_install(conda_yaml, env_prefix):
 @click.option(
     '-t',
     '--env-type',
-    type=click.Choice(['D','P']),
+    type=click.Choice(['D','P', 'S']),
     default='D',
-    help='Environment type. P: Production, D: Development. It will be added to filename: "[D|P]_"+filename+env-name-suffix')
+    help='Environment type. P: Production, D: Development, S: Stage. It will be added to filename: "[D|P|S]_"+filename+env-name-suffix')
 @click.pass_context
 def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                   env_name_suffix, packages_output_yaml, env_type):
