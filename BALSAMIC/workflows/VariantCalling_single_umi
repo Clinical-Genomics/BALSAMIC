@@ -12,11 +12,11 @@ rule_dir = config["rule_directory"]
 include:
   rule_dir + "snakemake_rules/umi/bwa_mem_umi.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
-include:
   rule_dir + "snakemake_rules/umi/picard.rule"
 include:
   rule_dir + "snakemake_rules/umi/fgbio.rule"
+include:
+  rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/mergetype_single_umi.rule"
 include:
