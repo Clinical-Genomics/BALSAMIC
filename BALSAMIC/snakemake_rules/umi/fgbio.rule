@@ -81,7 +81,7 @@ FilterConsensusReads \
 -i {input} \
 -o {output} \
 --ref {params.ref} \
---min-reads 3 2 1 \
+--min-reads 10 5 3 \
 --max-read-error-rate 0.05 \
 --max-base-error-rate 0.1 \
 --min-base-quality 50 \
