@@ -10,17 +10,13 @@ shell.prefix("set -eo pipefail; ")
 rule_dir = config["rule_directory"]
 
 include:
-  rule_dir + "snakemake_rules/umi/bwa_mem_umi.rule"
-include:
-  rule_dir + "snakemake_rules/umi/picard.rule"
-include:
-  rule_dir + "snakemake_rules/umi/fgbio.rule"
+  rule_dir + "snakemake_rules/umi/fgbio_v2.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/mergetype_single_umi.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
+  rule_dir + "snakemake_rules/umi/vardict_single_umi.rule"
 
 bam_dir = get_result_dir(config) + "/bam/"
 vcf_dir = get_result_dir(config) + "/vcf/"
