@@ -12,11 +12,12 @@ rule fgbio_ExtractUmisFromBam:
     output:
         bam_dir + "{sample}.unalg.umi.bam"
     params:
+        tmpdir=bam_dir,
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
 source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
 ExtractUmisFromBam \
 --input={input} \
 --output={output} \
@@ -31,11 +32,12 @@ rule fgbio_GroupReadsByUmi:
     output:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     params:
+        tmpdir=bam_dir,
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
 source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
 GroupReadsByUmi \
 --strategy=paired \
 --input={input} \
@@ -52,14 +54,16 @@ rule fgbio_CallDuplexConsensusReads:
     output:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     params:
+        tmpdir=bam_dir,
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
 source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
 CallDuplexConsensusReads \
 --input={input} \
 --output={output} \
+--min-reads=1 \
 --error-rate-pre-umi=45 \
 --error-rate-post-umi=30 \
 --min-input-base-quality=30
@@ -71,17 +75,18 @@ rule fgbio_FilterConsensusReads:
     output:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
     params:
+        tmpdir=bam_dir,
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
     shell:
         """
 source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
 FilterConsensusReads \
 -i {input} \
 -o {output} \
 --ref {params.ref} \
---min-reads 10 5 3 \
+--min-reads 3 1 1 \
 --max-read-error-rate 0.05 \
 --max-base-error-rate 0.1 \
 --min-base-quality 50 \
@@ -94,12 +99,13 @@ rule fgio_ClipBam:
     output:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam"
     params:
+        tmpdir=bam_dir,
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"], 
     shell:
         """
 source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
 ClipBam \
 --input={input} \
 --output={output} \
@@ -114,11 +120,12 @@ rule fgbio_CollectDuplexSeqMetrics:
     output:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam.duplex_qc.pdf"
     params:
+        tmpdir=bam_dir,
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     shell:
         """
 source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
 CollectDuplexSeqMetrics \
 --input={input} \
 --output={input} \
