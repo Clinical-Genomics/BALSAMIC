@@ -1,0 +1,27 @@
+{
+    "path": {
+        "genomefa": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/",
+        "panel": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/GRCh37/panel/",
+        "vep_exec": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/ensembl-vep/",
+        "vep_cache": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/vep_cache/"
+    },
+    "references": {
+        "genomefa":
+        "GRCh37/GRCh37_homo_sapiens_-d5-.fasta",
+        "dbsnp":
+        "GRCh37/GRCh37_1000g_snps_high_confidence_-phase1-.vcf",
+        "dbsnp_all":
+        "GRCh37/GRCh37_dbsnp_-138-.vcf.gz",
+        "1000G":
+        "GRCh37/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz",
+        "cosmic":
+        "GRCh37/COSMIC/v83/CosmicCodingMuts.vcf.gz",
+        "vep_fa":
+        "homo_sapiens_refseq/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
+        "exon_bed":
+        "GRCh37/GFF/attribute_extract/gencode.v19.annotation.exons.extended.simpleid"
+    },
+    "bed": {
+        "capture_kit": "big_design.slopped20.bed"
+    }
+}
