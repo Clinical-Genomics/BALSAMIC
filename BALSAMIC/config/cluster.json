@@ -1,9 +1,9 @@
 {
     "__default__": {
-        "account": "cust003",
+        "account": "development",
         "name": "cancer.{rule}.{wildcards}",
         "time": "12:00:00",
-        "n": 6,
+        "n": 8,
         "mail_type": "FAIL",
         "mail_user": "hassan.foroughi@scilifelab.se",
         "partition": "core"
@@ -13,6 +13,10 @@
         "mail_user": "hassan.foroughi@scilifelab.se",
         "time": "00:15:00",
         "n": 1
+    },
+    "S_4_align_the_reads": {
+        "n": 12,
+        "mem": 
     },
     "vardict_paired": {
         "time": "24:00:00"
