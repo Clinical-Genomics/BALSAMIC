@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.tools import get_chrom, get_package_split
+from BALSAMIC.tools import get_chrom, get_package_split, get_ref_path
 from BALSAMIC import __version__ as bv
 
 
@@ -39,7 +39,6 @@ def merge_json(*args):
 
     return json_out
 
-
 def write_json(json_out, output_config):
 
     try:
@@ -47,7 +46,6 @@ def write_json(json_out, output_config):
             json.dump(json_out, fn)
     except OSError:
         print("Write failed")
-
 
 def get_config(config_name):
     """
@@ -61,7 +59,6 @@ def get_config(config_name):
         print("Couldn't locate config file" + config_name + ".json")
 
     return config_file
-
 
 def set_panel_bed(json_out, panel_bed):
     """
@@ -77,7 +74,6 @@ def set_panel_bed(json_out, panel_bed):
 
     return json_out
 
-
 def check_exist(path):
     """
     Checks if fastq file readable and accessable.
@@ -91,7 +87,6 @@ def check_exist(path):
         raise e
 
     return True
-
 
 def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_prefix):
     """
@@ -121,7 +116,6 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq, fq_pre
         except subprocess.CalledProcessError as e:
             print(f"Desitination file {d} exists. No symbolic link was created.")
             print(e.output.decode())
-
 
 @click.command(
     "sample", short_help="Create a sample config file from input sample data"
@@ -251,6 +245,9 @@ it is. So this is just a placeholder for future.
     click.echo("Reading analysis config file %s" % analysis_config)
     click.echo("Reading reference config file %s" % reference_config)
 
+    reference_json = get_ref_path(reference_config)
+   
+
     read_prefix = ["1", "2"]
 
     if sample_config:
@@ -371,7 +368,7 @@ it is. So this is just a placeholder for future.
     click.echo("Writing output config file %s" % os.path.abspath(output_config))
 
     json_out = merge_json(
-        analysis_config, sample_config, reference_config, install_config, bioinfo_config
+        analysis_config, sample_config, reference_json, install_config, bioinfo_config
     )
 
     dag_image = os.path.join(
