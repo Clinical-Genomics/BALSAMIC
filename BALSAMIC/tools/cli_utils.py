@@ -28,9 +28,9 @@ def createDir(path, interm_path=[]):
             basepath_number = int(basepath.split(".")[1])
         basepath_string = basepath.split(".")[0]
         basepath_number += 1
-        path = os.path.join(
-            os.path.dirname(os.path.abspath(path)),
-            ".".join([basepath_string, str(basepath_number)]))
+        path = os.path.join(os.path.dirname(os.path.abspath(path)),
+                            ".".join([basepath_string,
+                                      str(basepath_number)]))
         interm_path.append(path)
         createDir(path, interm_path)
         return interm_path[-1]
@@ -68,13 +68,13 @@ def get_package_split(conda_yamls):
         "sambamba", "strelka", "samtools", "tabix", "vardic"
     ]
 
-    pkgs = dict(
-        [[y.split("=")[0], y.split("=")[1]]
-         for y in set(
-             chain.from_iterable([get_packages(s) for s in conda_yamls]))
-         if y.split("=")[0] in pkgs])
+    pkgs = dict([[
+        y.split("=")[0], y.split("=")[1]
+    ] for y in set(chain.from_iterable([get_packages(s) for s in conda_yamls]))
+                 if y.split("=")[0] in pkgs])
 
     return (pkgs)
+
 
 def get_sample_name(json_in):
     """
@@ -90,6 +90,7 @@ def get_sample_name(json_in):
 
     return sample_name
 
+
 def get_analysis_dir(json_in, dir_type):
     """
     Get analysis dir from input json file
@@ -103,3 +104,18 @@ def get_analysis_dir(json_in, dir_type):
         print("Couldn't load json file or file path is not absolute")
 
     return analysis_dir
+
+
+def get_ref_path(reference_config):
+    """
+    Set full path to reference files
+
+    Input: reference config file
+    Return: json file with abspath
+    """
+    with open(reference_config) as fh:
+        ref_json = json.load(fh)
+        for k, v in ref_json['path'].items():
+            ref_json['path'][k] = os.path.abspath(v) + '/'
+
+    return ref_json
