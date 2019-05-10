@@ -103,17 +103,3 @@ def get_analysis_dir(json_in, dir_type):
         print("Couldn't load json file or file path is not absolute")
 
     return analysis_dir
-
-def get_ref_path(reference_config):
-    """
-    Set full path to reference files
-
-    Input: reference config file
-    Return: json file with abspath
-    """
-    with open(reference_config) as fh:
-        ref_json = json.load(fh)
-        for k,v in ref_json['path'].items():
-            ref_json['path'][k] = os.path.abspath(v) + '/'
-
-    return ref_json
