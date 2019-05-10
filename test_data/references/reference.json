@@ -1,9 +1,9 @@
 {
     "path": {
-        "genomefa": "references/",
-        "panel": "references/GRCh37/panel/",
-        "vep_exec": "references/ensembl-vep/",
-        "vep_cache": "references/vep_cache/"
+        "genomefa": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/",
+        "panel": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/GRCh37/panel/",
+        "vep_exec": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/ensembl-vep/",
+        "vep_cache": "/Users/hassanforoughi/repos/BALSAMIC/test_data/references/vep_cache/"
     },
     "references": {
         "genomefa":
