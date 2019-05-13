@@ -36,7 +36,7 @@ def get_sbatchpy():
 
     try:
         p = Path(__file__).parents[0]
-        sbatch = str(Path(p,'runSbatch.py'))
+        sbatch = str(Path(p, 'runSbatch.py'))
     except OSError:
         print("Couldn't locate sbatch submitter.")
 
@@ -53,17 +53,13 @@ def get_snakefile(analysis_type):
         if analysis_type == "paired":
             snakefile = Path(p, 'workflows', 'VariantCalling_paired')
         elif analysis_type == "single":
-            snakefile = Path(p, 'workflows', 
-                'VariantCalling_single')
+            snakefile = Path(p, 'workflows', 'VariantCalling_single')
         elif analysis_type == "qc":
-            snakefile = Path(p, 'workflows', 
-                'Alignment')
+            snakefile = Path(p, 'workflows', 'Alignment')
         elif analysis_type == "paired_umi":
-            snakefile = Path(p, 'workflows', 
-                'VariantCalling_paired_umi')
+            snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
         elif analysis_type == "single_umi":
-            snakefile = Path(p, 'workflows', 
-                'VariantCalling_single_umi')
+            snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
         else:
             raise ValueError("analysis_type should be single or paired")
 
@@ -72,12 +68,13 @@ def get_snakefile(analysis_type):
 
     return str(snakefile)
 
+
 @click.command("run", short_help="Run BALSAMIC on a provided config file")
 @click.option(
     '-a',
     '--analysis-type',
     required=False,
-    type=click.Choice(['qc', 'paired', 'single','paired_umi']),
+    type=click.Choice(['qc', 'paired', 'single', 'paired_umi']),
     help=
     'Type of analysis to run from input config file. By default it will read from config file, but it will override config file if it is set here.'
 )
@@ -89,19 +86,26 @@ def get_snakefile(analysis_type):
     help=
     'Input for a custom snakefile. WARNING: This is for internal testing, and should not be used. Providing a snakefile supersedes analysis_type option.'
 )
+@click.option('-s',
+              '--sample-config',
+              required=True,
+              type=click.Path(),
+              help='Sample json config file.')
 @click.option(
-    '-s',
-    '--sample-config',
-    required=True,
-    type=click.Path(),
-    help='Sample json config file.')
-@click.option(
-    '-c',
-    '--cluster-config',
+    '-R',
+    '--runner',
     show_default=True,
-    default=get_config('cluster'),
-    type=click.Path(),
-    help='SLURM config json file.')
+    default='local',
+    type=click.Choice(["local", "slurm"]),
+    help=
+    'Runner to use. By default local shell runner will be used to run the analysis. slurm runner also available for cluster computing'
+)
+@click.option('-c',
+              '--cluster-config',
+              show_default=True,
+              default=get_config('cluster'),
+              type=click.Path(),
+              help='SLURM config json file.')
 @click.option(
     '-l',
     '--log-file',
@@ -117,12 +121,11 @@ def get_snakefile(analysis_type):
     help=
     'By default balsamic run_analysis will run in dry run mode. Raise thise flag to make the actual analysis'
 )
-@click.option(
-    '--qos',
-    type=click.Choice(['low', 'normal', 'high']),
-    show_default=True,
-    default="low",
-    help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
+@click.option('--qos',
+              type=click.Choice(['low', 'normal', 'high']),
+              show_default=True,
+              default="low",
+              help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
 @click.option(
     '-f',
     '--force-all',
@@ -130,10 +133,10 @@ def get_snakefile(analysis_type):
     default=False,
     is_flag=True,
     help='Force run all analysis. This is same as snakemake --forceall')
-@click.option(
-    '--snakemake-opt', help='Pass these options directly to snakemake')
+@click.option('--snakemake-opt',
+              help='Pass these options directly to snakemake')
 @click.pass_context
-def run_analysis(context, snake_file, sample_config, cluster_config,
+def run_analysis(context, snake_file, sample_config, runner, cluster_config,
                  run_analysis, log_file, force_all, snakemake_opt,
                  analysis_type, qos):
     """
@@ -143,17 +146,15 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
     """
 
     # get result, log, script directories
-    logpath = os.path.join(
-        get_analysis_dir(sample_config, "analysis_dir"),
-        get_sample_name(sample_config), get_analysis_dir(sample_config, "log"))
-    scriptpath = os.path.join(
-        get_analysis_dir(sample_config, "analysis_dir"),
-        get_sample_name(sample_config),
-        get_analysis_dir(sample_config, "script"))
-    resultpath = os.path.join(
-        get_analysis_dir(sample_config, "analysis_dir"),
-        get_sample_name(sample_config),
-        get_analysis_dir(sample_config, "result"))
+    logpath = os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
+                           get_sample_name(sample_config),
+                           get_analysis_dir(sample_config, "log"))
+    scriptpath = os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
+                              get_sample_name(sample_config),
+                              get_analysis_dir(sample_config, "script"))
+    resultpath = os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
+                              get_sample_name(sample_config),
+                              get_analysis_dir(sample_config, "result"))
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
@@ -161,9 +162,12 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
         os.makedirs(logpath, exist_ok=True)
         os.makedirs(scriptpath, exist_ok=True)
 
-    shellcmd = ["snakemake --immediate-submit -j 300 --notemp -p"]
-    shellcmd.append("--jobname " + get_sample_name(sample_config) +
-                    ".{rulename}.{jobid}.sh")
+    shellcmd = ["snakemake --notemp -p"]
+
+    shellcmd.append(
+        "--directory " +
+        os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
+                     get_sample_name(sample_config), "BALSAMIC_run"))
 
     if not analysis_type:
         analysis_type = get_analysis_type(sample_config)
@@ -172,12 +176,21 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
 
     shellcmd.append("--snakefile " + snakefile)
 
-    shellcmd.append("--directory " + os.path.join(
-        get_analysis_dir(sample_config, "analysis_dir"),
-        get_sample_name(sample_config), "BALSAMIC_run"))
+    shellcmd.append("--configfile " + sample_config)
 
     if not run_analysis:
         shellcmd.append("--dryrun")
+
+    if runner == 'slurm':
+        shellcmd.append(" --immediate-submit -j 300 ")
+        shellcmd.append("--jobname " + get_sample_name(sample_config) +
+                        ".{rulename}.{jobid}.sh")
+        shellcmd.append("--cluster-config " + cluster_config)
+        shellcmd.append("--cluster 'python3 " + get_sbatchpy() +
+                        " --sample-config " + os.path.abspath(sample_config) +
+                        " --qos " + qos + " --dir-log " + logpath +
+                        " --dir-script " + scriptpath + " --dir-result " +
+                        resultpath + " {dependencies} '")
 
     if run_analysis:
         # if not dry run, then create (new) log/script directory
@@ -185,14 +198,6 @@ def run_analysis(context, snake_file, sample_config, cluster_config,
             if files:
                 logpath = createDir(logpath, [])
                 scriptpath = createDir(scriptpath, [])
-
-    shellcmd.append("--configfile " + sample_config)
-    shellcmd.append("--cluster-config " + cluster_config)
-    shellcmd.append("--cluster 'python3 " + get_sbatchpy() +
-                    " --sample-config " + os.path.abspath(sample_config) +
-                    " --qos " + qos + " --dir-log " + logpath +
-                    " --dir-script " + scriptpath + " --dir-result " +
-                    resultpath + " {dependencies} '")
 
     if force_all:
         shellcmd.append("--forceall")
