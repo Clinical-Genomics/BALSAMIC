@@ -92,13 +92,12 @@ def get_snakefile(analysis_type):
               type=click.Path(),
               help='Sample json config file.')
 @click.option(
-    '-R',
-    '--runner',
+    '--run-mode',
     show_default=True,
-    default='local',
+    default='slurm',
     type=click.Choice(["local", "slurm"]),
     help=
-    'Runner to use. By default local shell runner will be used to run the analysis. slurm runner also available for cluster computing'
+    'Run mode to use. By default SLURM will be used to run the analysis. But local runner also available for local computing'
 )
 @click.option('-c',
               '--cluster-config',
@@ -136,7 +135,7 @@ def get_snakefile(analysis_type):
 @click.option('--snakemake-opt',
               help='Pass these options directly to snakemake')
 @click.pass_context
-def run_analysis(context, snake_file, sample_config, runner, cluster_config,
+def run_analysis(context, snake_file, sample_config, run_mode, cluster_config,
                  run_analysis, log_file, force_all, snakemake_opt,
                  analysis_type, qos):
     """
@@ -181,7 +180,7 @@ def run_analysis(context, snake_file, sample_config, runner, cluster_config,
     if not run_analysis:
         shellcmd.append("--dryrun")
 
-    if runner == 'slurm':
+    if run_mode == 'slurm':
         shellcmd.append(" --immediate-submit -j 300 ")
         shellcmd.append("--jobname " + get_sample_name(sample_config) +
                         ".{rulename}.{jobid}.sh")
