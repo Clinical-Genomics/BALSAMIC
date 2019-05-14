@@ -1,0 +1,14 @@
+language: python
+
+python:
+  - '3.6'
+
+install:
+  - pip install pytest
+  - pip install --editable .
+
+script:
+  - py.test -v tests/*
+
+notification:
+  - email: false
