@@ -1,4 +1,5 @@
-[![BuildStatus](https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master)](https://travis-ci.org/Clinical-Genomics/BALSAMIC)
+.. image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master 
+    :target: https://travis-ci.org/Clinical-Genomics/BALSAMIC
 
 ========
 BALSAMIC
