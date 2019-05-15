@@ -4,11 +4,13 @@ python:
   - '3.6'
 
 install:
-  - pip install pytest
+  - pip install pytest pytest-cov coveralls
   - pip install --editable .
 
 script:
-  - py.test -v tests/*
+  - py.test --cov tests/*
 
+after_success: coveralls
+  
 notification:
   - email: false
