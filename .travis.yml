@@ -4,9 +4,7 @@ python:
   - '3.6'
 
 install:
-  - pip install pytest
-  - pip install pytest-cov
-  - pip install python-coveralls
+  - pip install pytest pytest-cov coveralls
   - pip install --editable .
 
 script:
