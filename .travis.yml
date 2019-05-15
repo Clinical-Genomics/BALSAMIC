@@ -10,5 +10,7 @@ install:
 script:
   - py.test -v tests/*
 
+after_success: coveralls
+  
 notification:
   - email: false
