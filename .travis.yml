@@ -6,6 +6,7 @@ python:
 install:
   - pip install pytest
   - pip install pytest-cov
+  - pip install python-coveralls
   - pip install --editable .
 
 script:
