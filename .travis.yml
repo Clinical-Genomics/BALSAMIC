@@ -5,10 +5,11 @@ python:
 
 install:
   - pip install pytest
+  - pip install pytest-cov
   - pip install --editable .
 
 script:
-  - py.test -v tests/*
+  - py.test -v --cov tests/*
 
 after_success: coveralls
   
