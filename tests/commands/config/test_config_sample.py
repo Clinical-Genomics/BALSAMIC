@@ -9,7 +9,7 @@ def iterdict(dic):
     """ dictionary iteration - returns generator"""
     for key, value in dic.items():
         if isinstance(value, dict):
-            iterdict(value)
+            yield from iterdict(value)
         else:
             yield key, value
 
@@ -36,5 +36,6 @@ def test_write_json(tmp_path, config_files):
     output = output_json.read_text()
 
     for key, value in iterdict(ref_json):
+        print(key)
         assert key in output
         assert value in output
