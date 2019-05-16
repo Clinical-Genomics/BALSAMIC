@@ -26,7 +26,7 @@ data/simulated_data_131217/patient_0result*
 *.coverage
 *pytest_cache
 *pdf
-test_data*
+tests/test_data*
 BALSAMIC/config/install.json
 BALSAMIC/workflows/VariantCalling_testing
 build/
