@@ -10,6 +10,6 @@ script:
   - py.test -v --cov -rsx tests 
 
 after_success: coveralls
-  
+
 notification:
   - email: false
