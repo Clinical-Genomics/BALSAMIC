@@ -119,3 +119,12 @@ def get_ref_path(reference_config):
             ref_json['path'][k] = os.path.abspath(v) + '/'
 
     return ref_json
+
+
+def iterdict(dic):
+    """ dictionary iteration - returns generator"""
+    for key, value in dic.items():
+        if isinstance(value, dict):
+            yield from iterdict(value)
+        else:
+            yield key, value
