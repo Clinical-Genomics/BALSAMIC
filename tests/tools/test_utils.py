@@ -7,7 +7,7 @@ class TestUtils(unittest.TestCase):
     """docstring for TestUtils"""
 
     def test_get_ref_path(self):
-        test_ref = "test_data/references/reference.json"
+        test_ref = "tests/test_data/references/reference.json"
 
         test_ref_json = get_ref_path(test_ref)
 
