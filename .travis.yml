@@ -7,9 +7,9 @@ install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
 
 script:
-  - py.test --cov tests/*
+  - py.test -v --cov -rsx tests
 
 after_success: coveralls
-  
+
 notification:
   - email: false
