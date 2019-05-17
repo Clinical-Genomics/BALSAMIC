@@ -1,0 +1,15 @@
+language: python
+
+python:
+  - '3.6'
+
+install:
+  - pip install -r requirements-dev.txt -r requirements.txt -e .
+
+script:
+  - py.test -v --cov -rsx tests 
+
+after_success: coveralls
+
+notification:
+  - email: false
