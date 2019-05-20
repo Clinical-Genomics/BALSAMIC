@@ -1,0 +1,269 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+
+bam_dir = get_result_dir(config) + "/bam/"
+resultdir = get_result_dir(config) + "/" 
+picarddup = get_picard_mrkdup(config)
+
+rule S_1_convert_Fastq_to_unaligned_bam:
+    input:
+        fq1 = config["analysis"]["fastq_path"] + "{sample}_1.fastq.gz",
+        fq2 = config["analysis"]["fastq_path"] + "{sample}_2.fastq.gz",
+    output:
+        bam_dir + "{sample}.unalg.bam"
+    params:
+        tmpdir = bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard")
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar FastqToSam \
+O={output} \
+F1={input.fq1} \
+F2={input.fq2} \
+SM={wildcards.sample} \
+LB=Library1 \
+PU=NovaSeq \
+PL=illumina
+        """
+
+rule S_2_Extract_inline_umi:
+    input:
+        bam_dir + "{sample}.unalg.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+ExtractUmisFromBam \
+--input={input} \
+--output={output} \
+--read-structure=3M2S146T 3M2S146T \
+--molecular-index-tags=ZA ZB \
+--single-tag=RX
+        """
+
+
+rule S_3_mark_illumina_adapter:
+    input:
+        bam_dir + "{sample}.unalg.umi.bam"
+    output:
+        bam = bam_dir + "{sample}.unalg.umi.mrkadp.bam",
+        txt = bam_dir + "{sample}.unalg.umi.mrkadp.txt"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard")
+    shell:
+        """
+source activate {params.conda}; 
+#java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MarkIlluminaAdapters \
+#I={input} \
+#O={output.bam} \
+#M={output.txt}
+ln -s {input} {output.bam}; 
+touch {output.txt}
+        """
+
+# CLIPPING_ATTRIBUTE=XT \
+# CLIPPING_ACTION=X \
+# CLIPPING_MIN_LENGTH=36 \
+# INCLUDE_NON_PF_READS=true \
+
+rule S_4_align_the_reads:
+    input:
+        fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+        refidx = expand(config["path"]["genomefa"] + config["references"]["genomefa"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"]),
+        unaligned = bam_dir + "{sample}.unalg.umi.bam",
+        mrkadp = bam_dir + "{sample}.unalg.umi.mrkadp.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.bam"
+    params:
+        tmpdir=bam_dir,
+        ref = config["path"]["genomefa"] + config["references"]["genomefa"],
+        conda = get_conda_env(config["conda_env_yaml"],"picard")
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+ I={input.unaligned} \
+ F=/dev/stdout \
+ INTERLEAVE=true \
+| bwa mem -K 1000000 -p -t 8 {input.fa} /dev/stdin \
+| java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+UNMAPPED={input.unaligned} \
+ALIGNED=/dev/stdin \
+O={output} \
+R={params.ref} \
+CLIP_ADAPTERS=false \
+VALIDATION_STRINGENCY=SILENT \
+EXPECTED_ORIENTATIONS=FR \
+MAX_GAPS=-1 \
+SO=coordinate \
+ALIGNER_PROPER_PAIR_FLAGS=false \
+CREATE_INDEX=true
+        """
+
+rule S_5_1_groupreadsbyumi:
+    input:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.bam"
+    output:
+        hist = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.hist",
+        bam = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+GroupReadsByUmi \
+--strategy=paired \
+--input={input} \
+--output={output.bam} \
+--raw-tag=RX \
+--assign-tag=MI \
+--family-size-histogram={output.hist} \
+--min-map-q=10 \
+--edits=1
+        """
+
+rule S_5_2_callduplexconsensusreads:
+    input:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+CallDuplexConsensusReads \
+--input={input} \
+--output={output} \
+--min-reads=1 \
+--error-rate-pre-umi=45 \
+--error-rate-post-umi=30 \
+--min-input-base-quality=30
+        """
+
+rule S_6_map_duplex_consensus_reads:
+    input:
+        fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+        refidx = expand(config["path"]["genomefa"] + config["references"]["genomefa"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"]),
+        unaligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam",
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        ref = config["path"]["genomefa"] + config["references"]["genomefa"]
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+VALIDATION_STRINGENCY=SILENT \
+INPUT={input.unaligned} \
+F=/dev/stdout \
+INTERLEAVE=true \
+INCLUDE_NON_PF_READS=true \
+CREATE_INDEX=true \
+| bwa mem -K 1000000 -p -t 8 {input.fa} /dev/stdin \
+| java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+VALIDATION_STRINGENCY=SILENT \
+UNMAPPED={input.unaligned} \
+ALIGNED=/dev/stdin \
+OUTPUT={output} \
+REFERENCE_SEQUENCE={params.ref} \
+CLIP_ADAPTERS=false \
+ORIENTATIONS=FR \
+MAX_GAPS=-1 \
+SORT_ORDER=coordinate \
+ALIGNER_PROPER_PAIR_FLAGS=false \
+ATTRIBUTES_TO_RETAIN=X0 \
+ATTRIBUTES_TO_RETAIN=ZS \
+ATTRIBUTES_TO_RETAIN=ZI \
+ATTRIBUTES_TO_RETAIN=ZM \
+ATTRIBUTES_TO_RETAIN=ZC \
+ATTRIBUTES_TO_RETAIN=ZN \
+ATTRIBUTES_TO_REVERSE=ad \
+ATTRIBUTES_TO_REVERSE=bd \
+ATTRIBUTES_TO_REVERSE=cd \
+ATTRIBUTES_TO_REVERSE=ae \
+ATTRIBUTES_TO_REVERSE=be \
+ATTRIBUTES_TO_REVERSE=ce \
+CREATE_INDEX=true
+        """
+
+rule S_7_filter_mapped_duplex_consensus_reads:
+    input:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        ref = config["path"]["genomefa"] + config["references"]["genomefa"]
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+FilterConsensusReads \
+-i {input} \
+-o {output} \
+--ref {params.ref} \
+--min-reads 3 1 1 \
+--max-read-error-rate 0.05 \
+--max-base-error-rate 0.1 \
+--min-base-quality 50 \
+--max-no-call-fraction 0.05
+        """
+
+rule S_8_clip_overlapping_reads:
+    input:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        ref = config["path"]["genomefa"] + config["references"]["genomefa"], 
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+ClipBam \
+--input={input} \
+--output={output} \
+--ref={params.ref} \
+--soft-clip=false \
+--clip-overlapping-reads=true
+        """
+
+rule S_9_get_duplex_seq_metrics:
+    input:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam.duplex_qc.pdf"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/fgbio/fgbio.jar \
+CollectDuplexSeqMetrics \
+--duplex-umi-counts=true \
+--input={input} \
+--output={input} \
+--description={wildcards.sample}
+        """
