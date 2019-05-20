@@ -21,7 +21,7 @@ rule bwa_mem_umi_mrkadp:
   shell:
     """
   source activate {params.conda};
-  bwa mem -p -t 8 {input.fa} {input.fastq} > {output}
+  bwa mem -K 1000000 -p -t 8 {input.fa} {input.fastq} > {output}
     """
 
 rule bwa_mem_umi_cnsalg:
@@ -38,5 +38,5 @@ rule bwa_mem_umi_cnsalg:
   shell:
     """
   source activate {params.conda};
-  bwa mem -p -t 8 {input.fa} {input.fastq} > {output}
+  bwa mem -K 1000000 -p -t 8 {input.fa} {input.fastq} > {output}
     """
