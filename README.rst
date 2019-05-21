@@ -4,6 +4,9 @@
 .. image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
     :target: https://coveralls.io/github/Clinical-Genomics/BALSAMIC 
 
+.. image:: https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg
+   :target: https://singularity-hub.org/collections/3005
+
 ========
 BALSAMIC
 ========
