@@ -47,4 +47,10 @@ Include: yum
     ./install.sh -s P -d singularity -p /usr/local/anaconda/envs
 
 %environment
+    # The following fixes the error for Click
+    # RuntimeError: Click will abort further execution because Python 3 was
+    # configured to use ASCII as encoding for the environment. Consult
+    # https://click.palletsprojects.com/en/7.x/python3/ for mitigation steps.
+    export LC_ALL=en_US.utf-8
+    export LANG=en_US.utf-8
     export PATH=$PATH:/usr/local/anaconda/bin
