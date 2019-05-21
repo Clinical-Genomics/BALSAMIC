@@ -27,14 +27,9 @@ Include: yum
         rm ~/anaconda.sh
     fi
 
-
-    function create-dir(){
-      if [ ! -d $1 ]; then
-        echo $1" doesn not exist.";
-        mkdir $1;
-        echo "Created "$1
-      fi
-    }
+    # create necessary directories
+    if [ ! -d /git_repos ]; then mkdir git_repos; fi
+    if [ ! -d /conda_envs ]; then mkdir /conda_envs; fi
 
     # set anaconda path
     export PATH=$PATH:/usr/local/anaconda/bin
@@ -46,11 +41,9 @@ Include: yum
     conda install -y pip=9.0.3
     
     # Git clone BALSAMIC
-    create-dir /git_repos
     cd /git_repos
     git clone https://github.com/Clinical-Genomics/BALSAMIC
     cd BALSAMIC
-    create-dir /conda_envs
     ./install.sh -s P -d singularity -p /conda_envs
 
 %environment
