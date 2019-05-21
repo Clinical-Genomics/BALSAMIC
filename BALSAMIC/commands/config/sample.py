@@ -34,8 +34,9 @@ def merge_json(*args):
             else:
                 with open(json_file) as fn:
                     json_out = {**json_out, **json.load(fn)}
-        except OSError:
+        except OSError as error:
             print("File not found", json_file)
+            raise error
 
     return json_out
 
@@ -45,7 +46,8 @@ def write_json(json_out, output_config):
     try:
         with open(output_config, "w") as fn:
             json.dump(json_out, fn)
-    except OSError:
+    except OSError as error:
+        raise error
         print("Write failed")
 
 
@@ -57,9 +59,9 @@ def get_config(config_name):
     try:
         p = Path(__file__).parents[2]
         config_file = str(Path(p, 'config', config_name + ".json"))
-    except OSError:
+    except OSError:        
         print("Couldn't locate config file" + config_name + ".json")
-
+    
     return config_file
 
 
@@ -74,8 +76,9 @@ def set_panel_bed(json_out, panel_bed):
             os.path.abspath(panel_bed))[1]
         json_out["bed"]["chrom"] = get_chrom(panel_bed)
 
-    except OSError:
+    except OSError as error:
         print("Couldn't locate bed file" + panel_bed)
+        raise error
 
     return json_out
 
@@ -93,6 +96,37 @@ def check_exist(path):
         raise e
 
     return True
+
+def get_analysis_type(normal):
+    """ return analysis type """
+    if normal:
+        return "paired"
+    else:
+        return "single"
+
+def get_output_config(config):
+    """ return output config json file"""
+    if not config:
+        return sample_id + "_" + datetime.now().strftime(
+            "%Y%m%d") + ".json"
+    else:
+        return config
+
+def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
+    """
+    creating sample config to run the analysis
+    """
+    with open(sample_config) as sample_json:
+        sample_config = json.load(sample_json)
+
+    sample_config["analysis"]["sample_id"] = sample_id
+    sample_config["analysis"]["config_creation_date"] = datetime.now(
+    ).strftime("%Y-%m-%d %H:%M")
+    sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
+    sample_config["analysis"]["analysis_type"] = analysis_type
+    sample_config["samples"] = {}
+
+    return sample_config
 
 
 def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
@@ -253,12 +287,9 @@ it is. So this is just a placeholder for future.
 
     """
 
-    if normal and analysis_type == "single":
-        analysis_type = "paired"
+    analysis_type = get_analysis_type(normal)
 
-    if not output_config:
-        output_config = sample_id + "_" + datetime.now().strftime(
-            "%Y%m%d") + ".json"
+    output_config = get_output_config(output_config)
 
     analysis_config = get_config("analysis_" + analysis_type)
 
@@ -270,20 +301,14 @@ it is. So this is just a placeholder for future.
     read_prefix = ["1", "2"]
 
     if sample_config:
-        click.echo("Reading sample config file %s" % sample_config)
-        sample_config = os.path.abspath(sample_config)
+        sample_config_path = os.path.abspath(sample_config)
     else:
-        sample_config = get_config("sample")
-        click.echo("Reading sample config file %s" % sample_config)
-        with open(sample_config) as j:
-            sample_config = json.load(j)
-        sample_config["analysis"]["sample_id"] = sample_id
-        sample_config["analysis"]["config_creation_date"] = datetime.now(
-        ).strftime("%Y-%m-%d %H:%M")
-        sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
-        sample_config["analysis"]["analysis_type"] = analysis_type
-        sample_config["samples"] = {}
+        sample_config_path = get_config("sample")
 
+    click.echo("Reading sample config file %s" % sample_config_path)
+    
+    sample_config = get_sample_config(sample_config_path, sample_id, analysis_dir, analysis_type)
+    
     output_dir = os.path.join(os.path.abspath(analysis_dir), sample_id)
 
     if create_dir:
