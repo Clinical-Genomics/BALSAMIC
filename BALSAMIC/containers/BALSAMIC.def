@@ -44,7 +44,7 @@ Include: yum
     cd /git_repos
     git clone https://github.com/Clinical-Genomics/BALSAMIC
     cd BALSAMIC
-    ./install.sh -s P -d singularity -p /conda_envs
+    ./install.sh -s P -d singularity -p /usr/local/anaconda/envs
 
 %environment
     export PATH=$PATH:/usr/local/anaconda/bin
