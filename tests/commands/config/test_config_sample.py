@@ -128,3 +128,33 @@ def test_check_exist_error():
 
         #THEN It will raise the error 
         assert "FileIsNotFound" in str(error.value)
+
+def test_get_analysis_type():
+    #GIVEN umi flag(boolean value) and normal fq file 
+    umi_true = True 
+    normal_valid = 'normal.fastq'
+    umi_false = False 
+    normal_invalid = ''
+    #WHEN passing values 
+    #THEN it will return possible analysis type
+    assert 'paired_umi' == get_analysis_type(normal_valid, umi_true)
+    assert 'single_umi' == get_analysis_type(normal_invalid, umi_true)
+    assert 'paired' == get_analysis_type(normal_valid, umi_false)
+    assert 'single' == get_analysis_type(normal_invalid, umi_false)
+
+def test_get_output_config():
+    #GIVEN a config arg and sample id 
+    sample_id = 'test_sample'
+    config_json = 'config.json'
+    _config_json = ''
+
+    #WHEN passing values 
+    config = get_output_config(config_json, sample_id)
+    _config = get_output_config(_config_json, sample_id)
+    #THEN it will return config json file
+    assert config != ''
+    assert _config != ''
+    assert config.split('.')[-1] == 'json'
+    assert _config.split('.')[-1] == 'json'
+
+

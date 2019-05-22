@@ -35,15 +35,6 @@ def test_sample_missing_opt(invoke_cli):
     assert 'Error: Missing option' in result.output
     assert result.exit_code == 2
 
-
-def test_sample_invalid(invoke_cli):
-    """ Invalid option for analysis type """
-    result = invoke_cli(['config', 'sample', '-a', 'foo'])
-
-    assert result.exit_code == 2
-    assert 'Error: Invalid' in result.output
-
-
 def test_install(invoke_cli):
 
     result = invoke_cli(['install', '--help'])

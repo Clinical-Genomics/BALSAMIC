@@ -105,7 +105,7 @@ def get_analysis_type(normal, umi):
         return "paired" if normal else "single"
 
 
-def get_output_config(config):
+def get_output_config(config, sample_id):
     """ return output config json file"""
     if not config:
         return sample_id + "_" + datetime.now().strftime(
@@ -285,7 +285,7 @@ it is. So this is just a placeholder for future.
 
     analysis_type = get_analysis_type(normal, umi)
 
-    output_config = get_output_config(output_config)
+    output_config = get_output_config(output_config, sample_id)
 
     analysis_config = get_config("analysis_" + analysis_type)
 
