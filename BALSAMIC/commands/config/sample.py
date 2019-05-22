@@ -97,12 +97,13 @@ def check_exist(path):
 
     return True
 
-def get_analysis_type(normal):
+def get_analysis_type(normal, umi):
     """ return analysis type """
-    if normal:
-        return "paired"
+    if umi:
+        return "paired_umi" if normal else "single_umi"
     else:
-        return "single"
+        return "paired" if normal else "single"
+
 
 def get_output_config(config):
     """ return output config json file"""
@@ -166,14 +167,9 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 @click.command("sample",
                short_help="Create a sample config file from input sample data")
 @click.option(
-    "-a",
-    "--analysis-type",
-    required=False,
-    default="single",
-    show_default=True,
-    type=click.Choice(["paired", "single", "paired_umi", "single_umi"]),
-    help=
-    "Analysis config file for paired (tumor vs normal) or single (tumor-only) mode.",
+    '--umi', 
+    is_flag=True,
+    help="UMI processing steps for samples with umi tags"
 )
 @click.option(
     "-i",
@@ -265,7 +261,7 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 @click.pass_context
 def sample(
         context,
-        analysis_type,
+        umi,
         install_config,
         sample_config,
         reference_config,
@@ -287,7 +283,7 @@ it is. So this is just a placeholder for future.
 
     """
 
-    analysis_type = get_analysis_type(normal)
+    analysis_type = get_analysis_type(normal, umi)
 
     output_config = get_output_config(output_config)
 
