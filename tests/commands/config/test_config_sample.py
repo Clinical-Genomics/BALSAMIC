@@ -1,11 +1,13 @@
 import os
 import json
 import pytest
+from datetime import datetime
 
 from BALSAMIC.commands.config import get_config, write_json, merge_json, \
                         set_panel_bed, get_output_config, get_sample_config,  \
                         get_analysis_type, check_exist
 from BALSAMIC.tools import iterdict
+
 
 
 def test_get_config(config_files):
@@ -108,6 +110,7 @@ def test_set_panel_bed_error(config_files):
         #THEN It will add two more items into the dict
         assert "FileIsNotFound" in str(error.value)
 
+
 def test_check_exist(config_files):
     #GVIEN a file path 
     reference_json = config_files['reference']
@@ -117,6 +120,7 @@ def test_check_exist(config_files):
 
     #THEN It will return the boolean value if the file exists in path
     assert check == True
+
 
 def test_check_exist_error():
     with pytest.raises(FileNotFoundError) as error:
@@ -128,6 +132,7 @@ def test_check_exist_error():
 
         #THEN It will raise the error 
         assert "FileIsNotFound" in str(error.value)
+
 
 def test_get_analysis_type():
     #GIVEN umi flag(boolean value) and normal fq file 
@@ -142,6 +147,7 @@ def test_get_analysis_type():
     assert 'paired' == get_analysis_type(normal_valid, umi_false)
     assert 'single' == get_analysis_type(normal_invalid, umi_false)
 
+
 def test_get_output_config():
     #GIVEN a config arg and sample id 
     sample_id = 'test_sample'
@@ -151,10 +157,28 @@ def test_get_output_config():
     #WHEN passing values 
     config = get_output_config(config_json, sample_id)
     _config = get_output_config(_config_json, sample_id)
+
     #THEN it will return config json file
     assert config != ''
     assert _config != ''
     assert config.split('.')[-1] == 'json'
     assert _config.split('.')[-1] == 'json'
+
+
+def test_get_sample_config(config_files):
+    #GIVEN a sample config json with sample id, analysis dir, analysis type
+    sample_id = 'sample1'
+    sample_config = config_files['sample']
+    analysis_dir = './'
+    analysis_type = 'paired'
+
+    #WHEN passing args into the function
+    sample_config = get_sample_config(sample_config, sample_id, analysis_dir, analysis_type)
+    date = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    #THEN it will return the updated python dict with given values
+    assert isinstance(sample_config, dict) == True
+    assert sample_id in sample_config['analysis'].values()
+    assert date in sample_config['analysis'].values()
 
 
