@@ -35,6 +35,7 @@ def test_sample_missing_opt(invoke_cli):
     assert 'Error: Missing option' in result.output
     assert result.exit_code == 2
 
+
 def test_install(invoke_cli):
 
     result = invoke_cli(['install', '--help'])

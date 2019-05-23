@@ -59,9 +59,9 @@ def get_config(config_name):
     try:
         p = Path(__file__).parents[2]
         config_file = str(Path(p, 'config', config_name + ".json"))
-    except OSError:        
+    except OSError:
         print("Couldn't locate config file" + config_name + ".json")
-    
+
     return config_file
 
 
@@ -97,6 +97,7 @@ def check_exist(path):
 
     return True
 
+
 def get_analysis_type(normal, umi):
     """ return analysis type """
     if umi:
@@ -108,10 +109,10 @@ def get_analysis_type(normal, umi):
 def get_output_config(config, sample_id):
     """ return output config json file"""
     if not config:
-        return sample_id + "_" + datetime.now().strftime(
-            "%Y%m%d") + ".json"
+        return sample_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
     else:
         return config
+
 
 def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
     """
@@ -166,11 +167,9 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 
 @click.command("sample",
                short_help="Create a sample config file from input sample data")
-@click.option(
-    '--umi', 
-    is_flag=True,
-    help="UMI processing steps for samples with umi tags"
-)
+@click.option('--umi',
+              is_flag=True,
+              help="UMI processing steps for samples with umi tags")
 @click.option(
     "-i",
     "--install-config",
@@ -302,9 +301,10 @@ it is. So this is just a placeholder for future.
         sample_config_path = get_config("sample")
 
     click.echo("Reading sample config file %s" % sample_config_path)
-    
-    sample_config = get_sample_config(sample_config_path, sample_id, analysis_dir, analysis_type)
-    
+
+    sample_config = get_sample_config(sample_config_path, sample_id,
+                                      analysis_dir, analysis_type)
+
     output_dir = os.path.join(os.path.abspath(analysis_dir), sample_id)
 
     if create_dir:

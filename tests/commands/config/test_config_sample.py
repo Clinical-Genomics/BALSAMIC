@@ -9,7 +9,6 @@ from BALSAMIC.commands.config import get_config, write_json, merge_json, \
 from BALSAMIC.tools import iterdict
 
 
-
 def test_get_config(config_files):
     # GIVEN the config files name
     files = [
@@ -41,19 +40,20 @@ def test_write_json(tmp_path, config_files):
 
     assert len(list(tmp.iterdir())) == 1
 
+
 def test_write_json_error(tmp_path, config_files):
     with pytest.raises(OSError) as error:
-        #GIVEN a invalid dict 
-        ref_json = {"path": "/tmp","reference": ""}
+        #GIVEN a invalid dict
+        ref_json = {"path": "/tmp", "reference": ""}
         tmp = tmp_path / "tmp"
         tmp.mkdir()
         output_json = tmp / "/"
 
-        #WHEN passing a invalid dict 
+        #WHEN passing a invalid dict
         value = write_json(ref_json, output_json)
 
     assert "Is a directory" in str(error.value)
-    
+
 
 def test_merge_json(config_files):
     #GIVEN a dict and json file
@@ -112,10 +112,10 @@ def test_set_panel_bed_error(config_files):
 
 
 def test_check_exist(config_files):
-    #GVIEN a file path 
+    #GVIEN a file path
     reference_json = config_files['reference']
 
-    #WHEN passing ref file path 
+    #WHEN passing ref file path
     check = check_exist(reference_json)
 
     #THEN It will return the boolean value if the file exists in path
@@ -130,17 +130,17 @@ def test_check_exist_error():
         #WHEN passing a invalid file path
         check = check_exist(invalid_file_path)
 
-        #THEN It will raise the error 
+        #THEN It will raise the error
         assert "FileIsNotFound" in str(error.value)
 
 
 def test_get_analysis_type():
-    #GIVEN umi flag(boolean value) and normal fq file 
-    umi_true = True 
+    #GIVEN umi flag(boolean value) and normal fq file
+    umi_true = True
     normal_valid = 'normal.fastq'
-    umi_false = False 
+    umi_false = False
     normal_invalid = ''
-    #WHEN passing values 
+    #WHEN passing values
     #THEN it will return possible analysis type
     assert 'paired_umi' == get_analysis_type(normal_valid, umi_true)
     assert 'single_umi' == get_analysis_type(normal_invalid, umi_true)
@@ -149,12 +149,12 @@ def test_get_analysis_type():
 
 
 def test_get_output_config():
-    #GIVEN a config arg and sample id 
+    #GIVEN a config arg and sample id
     sample_id = 'test_sample'
     config_json = 'config.json'
     _config_json = ''
 
-    #WHEN passing values 
+    #WHEN passing values
     config = get_output_config(config_json, sample_id)
     _config = get_output_config(_config_json, sample_id)
 
@@ -173,12 +173,11 @@ def test_get_sample_config(config_files):
     analysis_type = 'paired'
 
     #WHEN passing args into the function
-    sample_config = get_sample_config(sample_config, sample_id, analysis_dir, analysis_type)
+    sample_config = get_sample_config(sample_config, sample_id, analysis_dir,
+                                      analysis_type)
     date = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     #THEN it will return the updated python dict with given values
     assert isinstance(sample_config, dict) == True
     assert sample_id in sample_config['analysis'].values()
     assert date in sample_config['analysis'].values()
-
-
