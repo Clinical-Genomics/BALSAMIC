@@ -1,7 +1,6 @@
-import os
 import json
-import pytest
 from datetime import datetime
+import pytest
 
 from BALSAMIC.commands.config import get_config, write_json, merge_json, \
                         set_panel_bed, get_output_config, get_sample_config,  \
@@ -50,9 +49,8 @@ def test_write_json_error(tmp_path, config_files):
         output_json = tmp / "/"
 
         #WHEN passing a invalid dict
-        value = write_json(ref_json, output_json)
-
-    assert "Is a directory" in str(error.value)
+        #THEN It will raise the error
+        assert write_json(ref_json, output_json)
 
 
 def test_merge_json(config_files):
@@ -65,7 +63,7 @@ def test_merge_json(config_files):
     merge_dict = merge_json(ref_dict, json_file)
 
     # THEN It will merge both the data and return dict
-    assert isinstance(merge_dict, dict) == True
+    assert isinstance(merge_dict, dict)
     assert "samples" in merge_dict
     assert "references" in merge_dict
 
@@ -74,14 +72,11 @@ def test_merge_json_error(config_files):
     with pytest.raises(OSError) as error:
         #GIVEN a dict and invalid json file path
         ref_dict = json.load(open(config_files['reference'], 'r'))
-
         json_file = 'reference.json'
 
         #WHEN passing python dict and invalid json path
-        merge_dict = merge_json(ref_dict, json_file)
-
         #THEN it should throw OSError as FileNotFoundError
-        assert 'FileNotFoundError' in error.value
+        assert merge_json(ref_dict, json_file)
 
 
 def test_set_panel_bed(config_files):
@@ -101,14 +96,11 @@ def test_set_panel_bed_error(config_files):
     with pytest.raises(OSError) as error:
         #GIVEN test reference json file and invalid panel bed file path
         ref_json = json.load(open(config_files['reference'], 'r'))
-
         panel_bed = "panel/panel.bed"
 
         #WHEN passing args to that function
-        json_out = set_panel_bed(ref_json, panel_bed)
-
         #THEN It will add two more items into the dict
-        assert "FileIsNotFound" in str(error.value)
+        assert set_panel_bed(ref_json, panel_bed)
 
 
 def test_check_exist(config_files):
@@ -116,10 +108,8 @@ def test_check_exist(config_files):
     reference_json = config_files['reference']
 
     #WHEN passing ref file path
-    check = check_exist(reference_json)
-
-    #THEN It will return the boolean value if the file exists in path
-    assert check == True
+    #THEN It will return true if the file exists in path
+    assert check_exist(reference_json)
 
 
 def test_check_exist_error():
@@ -128,10 +118,8 @@ def test_check_exist_error():
         invalid_file_path = "test.txt"
 
         #WHEN passing a invalid file path
-        check = check_exist(invalid_file_path)
-
         #THEN It will raise the error
-        assert "FileIsNotFound" in str(error.value)
+        assert check_exist(invalid_file_path)
 
 
 def test_get_analysis_type():
@@ -140,12 +128,13 @@ def test_get_analysis_type():
     normal_valid = 'normal.fastq'
     umi_false = False
     normal_invalid = ''
+
     #WHEN passing values
     #THEN it will return possible analysis type
-    assert 'paired_umi' == get_analysis_type(normal_valid, umi_true)
-    assert 'single_umi' == get_analysis_type(normal_invalid, umi_true)
-    assert 'paired' == get_analysis_type(normal_valid, umi_false)
-    assert 'single' == get_analysis_type(normal_invalid, umi_false)
+    assert get_analysis_type(normal_valid, umi_true) == 'paired_umi'
+    assert get_analysis_type(normal_invalid, umi_true) == 'single_umi'
+    assert get_analysis_type(normal_valid, umi_false) == 'paired'
+    assert get_analysis_type(normal_invalid, umi_false) == 'single'
 
 
 def test_get_output_config():

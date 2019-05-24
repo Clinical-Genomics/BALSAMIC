@@ -35,7 +35,6 @@ def merge_json(*args):
                 with open(json_file) as fn:
                     json_out = {**json_out, **json.load(fn)}
         except OSError as error:
-            print("File not found", json_file)
             raise error
 
     return json_out
@@ -48,7 +47,6 @@ def write_json(json_out, output_config):
             json.dump(json_out, fn)
     except OSError as error:
         raise error
-        print("Write failed")
 
 
 def get_config(config_name):
@@ -77,7 +75,6 @@ def set_panel_bed(json_out, panel_bed):
         json_out["bed"]["chrom"] = get_chrom(panel_bed)
 
     except OSError as error:
-        print("Couldn't locate bed file" + panel_bed)
         raise error
 
     return json_out
@@ -91,9 +88,8 @@ def check_exist(path):
     try:
         f = open(path, "r")
         f.close()
-    except (IOError, FileNotFoundError) as e:
-        print("File not found or unreadable.", path)
-        raise e
+    except (IOError, FileNotFoundError) as error:
+        raise error
 
     return True
 
