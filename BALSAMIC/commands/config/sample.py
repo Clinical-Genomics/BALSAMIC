@@ -34,8 +34,8 @@ def merge_json(*args):
             else:
                 with open(json_file) as fn:
                     json_out = {**json_out, **json.load(fn)}
-        except OSError:
-            print("File not found", json_file)
+        except OSError as error:
+            raise error
 
     return json_out
 
@@ -45,8 +45,8 @@ def write_json(json_out, output_config):
     try:
         with open(output_config, "w") as fn:
             json.dump(json_out, fn)
-    except OSError:
-        print("Write failed")
+    except OSError as error:
+        raise error
 
 
 def get_config(config_name):
@@ -54,11 +54,8 @@ def get_config(config_name):
     Return a string path for config file.
     """
 
-    try:
-        p = Path(__file__).parents[2]
-        config_file = str(Path(p, 'config', config_name + ".json"))
-    except OSError:
-        print("Couldn't locate config file" + config_name + ".json")
+    p = Path(__file__).parents[2]
+    config_file = str(Path(p, 'config', config_name + ".json"))
 
     return config_file
 
@@ -74,8 +71,8 @@ def set_panel_bed(json_out, panel_bed):
             os.path.abspath(panel_bed))[1]
         json_out["bed"]["chrom"] = get_chrom(panel_bed)
 
-    except OSError:
-        print("Couldn't locate bed file" + panel_bed)
+    except OSError as error:
+        raise error
 
     return json_out
 
@@ -88,11 +85,43 @@ def check_exist(path):
     try:
         f = open(path, "r")
         f.close()
-    except (IOError, FileNotFoundError) as e:
-        print("File not found or unreadable.", path)
-        raise e
+    except (IOError, FileNotFoundError) as error:
+        raise error
 
     return True
+
+
+def get_analysis_type(normal, umi):
+    """ return analysis type """
+    if umi:
+        return "paired_umi" if normal else "single_umi"
+    else:
+        return "paired" if normal else "single"
+
+
+def get_output_config(config, sample_id):
+    """ return output config json file"""
+    if not config:
+        return sample_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
+    else:
+        return config
+
+
+def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
+    """
+    creating sample config to run the analysis
+    """
+    with open(sample_config) as sample_json:
+        sample_config = json.load(sample_json)
+
+    sample_config["analysis"]["sample_id"] = sample_id
+    sample_config["analysis"]["config_creation_date"] = datetime.now(
+    ).strftime("%Y-%m-%d %H:%M")
+    sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
+    sample_config["analysis"]["analysis_type"] = analysis_type
+    sample_config["samples"] = {}
+
+    return sample_config
 
 
 def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
@@ -131,16 +160,9 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 
 @click.command("sample",
                short_help="Create a sample config file from input sample data")
-@click.option(
-    "-a",
-    "--analysis-type",
-    required=False,
-    default="single",
-    show_default=True,
-    type=click.Choice(["paired", "single", "paired_umi", "single_umi"]),
-    help=
-    "Analysis config file for paired (tumor vs normal) or single (tumor-only) mode.",
-)
+@click.option('--umi',
+              is_flag=True,
+              help="UMI processing steps for samples with umi tags")
 @click.option(
     "-i",
     "--install-config",
@@ -231,7 +253,7 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 @click.pass_context
 def sample(
         context,
-        analysis_type,
+        umi,
         install_config,
         sample_config,
         reference_config,
@@ -253,12 +275,9 @@ it is. So this is just a placeholder for future.
 
     """
 
-    if normal and analysis_type == "single":
-        analysis_type = "paired"
+    analysis_type = get_analysis_type(normal, umi)
 
-    if not output_config:
-        output_config = sample_id + "_" + datetime.now().strftime(
-            "%Y%m%d") + ".json"
+    output_config = get_output_config(output_config, sample_id)
 
     analysis_config = get_config("analysis_" + analysis_type)
 
@@ -270,19 +289,14 @@ it is. So this is just a placeholder for future.
     read_prefix = ["1", "2"]
 
     if sample_config:
-        click.echo("Reading sample config file %s" % sample_config)
-        sample_config = os.path.abspath(sample_config)
+        sample_config_path = os.path.abspath(sample_config)
     else:
-        sample_config = get_config("sample")
-        click.echo("Reading sample config file %s" % sample_config)
-        with open(sample_config) as j:
-            sample_config = json.load(j)
-        sample_config["analysis"]["sample_id"] = sample_id
-        sample_config["analysis"]["config_creation_date"] = datetime.now(
-        ).strftime("%Y-%m-%d %H:%M")
-        sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
-        sample_config["analysis"]["analysis_type"] = analysis_type
-        sample_config["samples"] = {}
+        sample_config_path = get_config("sample")
+
+    click.echo("Reading sample config file %s" % sample_config_path)
+
+    sample_config = get_sample_config(sample_config_path, sample_id,
+                                      analysis_dir, analysis_type)
 
     output_dir = os.path.join(os.path.abspath(analysis_dir), sample_id)
 
