@@ -29,5 +29,6 @@ def config_files():
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
         "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
         "analysis_single": "BALSAMIC/config/analysis_single.json",
-        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json"
+        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
+        "panel_bed_file": "tests/test_data/references/GRCh37/panel/panel.bed"
     }
