@@ -54,12 +54,8 @@ def get_config(config_name):
     Return a string path for config file.
     """
 
-    try:
-        p = Path(__file__).parents[2]
-        Path(p, 'config', config_name + ".json").exists()
-        config_file = str(Path(p, 'config', config_name + ".json"))
-    except OSError:
-        raise
+    p = Path(__file__).parents[2]
+    config_file = str(Path(p, 'config', config_name + ".json"))
 
     return config_file
 
