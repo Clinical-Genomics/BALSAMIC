@@ -41,7 +41,7 @@ def test_write_json(tmp_path, config_files):
 
 
 def test_write_json_error(tmp_path, config_files):
-    with pytest.raises(OSError) as error:
+    with pytest.raises(Exception, match=r"Is a directory") as error:
         #GIVEN a invalid dict
         ref_json = {"path": "/tmp", "reference": ""}
         tmp = tmp_path / "tmp"
@@ -69,7 +69,7 @@ def test_merge_json(config_files):
 
 
 def test_merge_json_error(config_files):
-    with pytest.raises(OSError) as error:
+    with pytest.raises(Exception, match=r"No such file or directory") as error:
         #GIVEN a dict and invalid json file path
         ref_dict = json.load(open(config_files['reference'], 'r'))
         json_file = 'reference.json'
@@ -93,7 +93,7 @@ def test_set_panel_bed(config_files):
 
 
 def test_set_panel_bed_error(config_files):
-    with pytest.raises(OSError) as error:
+    with pytest.raises(Exception, match=r"No such file or directory") as error:
         #GIVEN test reference json file and invalid panel bed file path
         ref_json = json.load(open(config_files['reference'], 'r'))
         panel_bed = "panel/panel.bed"
@@ -113,7 +113,7 @@ def test_check_exist(config_files):
 
 
 def test_check_exist_error():
-    with pytest.raises(FileNotFoundError) as error:
+    with pytest.raises(Exception, match=r"No such file or directory") as error:
         #GIVEN a invalid file path
         invalid_file_path = "test.txt"
 
@@ -167,6 +167,6 @@ def test_get_sample_config(config_files):
     date = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     #THEN it will return the updated python dict with given values
-    assert isinstance(sample_config, dict) == True
+    assert isinstance(sample_config, dict)
     assert sample_id in sample_config['analysis'].values()
     assert date in sample_config['analysis'].values()

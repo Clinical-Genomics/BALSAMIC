@@ -56,9 +56,10 @@ def get_config(config_name):
 
     try:
         p = Path(__file__).parents[2]
+        Path(p, 'config', config_name + ".json").exists()
         config_file = str(Path(p, 'config', config_name + ".json"))
     except OSError:
-        print("Couldn't locate config file" + config_name + ".json")
+        raise
 
     return config_file
 
