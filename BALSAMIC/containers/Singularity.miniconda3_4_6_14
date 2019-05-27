@@ -10,5 +10,4 @@ From: continuumio/miniconda3:4.6.14
     Version 0.0.1
 
 %runscript
-  exec echo "$@"
   exec "$@"
