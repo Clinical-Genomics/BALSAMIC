@@ -34,11 +34,6 @@ Include: yum
     # set anaconda path
     export PATH=$PATH:/usr/local/anaconda/bin
     conda update -y conda
-    conda config --add channels r
-    conda config --add channels defaults
-    conda config --add channels conda-forge
-    conda config --add channels bioconda
-    conda install -y pip=9.0.3
     
     # Git clone BALSAMIC
     # The following fixes the error for Click
@@ -50,7 +45,15 @@ Include: yum
     cd /git_repos
     git clone https://github.com/Clinical-Genomics/BALSAMIC
     cd BALSAMIC
+    git checkout singularity
     ./install.sh -s P -d singularity -p /usr/local/anaconda/envs
+    #conda env create --file BALSAMIC/conda_yaml/BALSAMIC.yaml --prefix /usr/local/anaconda/envs/BALSAMIC
+    #source activate BALSAMIC
+    #pip install --editable .
+    #source deactivate
+    #conda env create --file BALSAMIC/conda_yaml/Cancer-Core.yaml --prefix /usr/local/anaconda/envs/Cancer-Core
+    #conda env create --file BALSAMIC/conda_yaml/Cancer-py27.yaml --prefix /usr/local/anaconda/envs/Cancer-p27
+    #conda env create --file BALSAMIC/conda_yaml/Cancer-py36.yaml --prefix /usr/local/anaconda/envs/Cancer-p36
 
 %environment
     # The following fixes the error for Click
