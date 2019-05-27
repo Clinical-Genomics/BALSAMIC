@@ -2,71 +2,15 @@
 import os
 import subprocess
 import click
-import logging
-import sys
-import json
-from pathlib import Path
+
 
 # CLI commands and decorators
 from BALSAMIC.tools.cli_utils import createDir
 from BALSAMIC.tools.cli_utils import get_sample_name
 from BALSAMIC.tools.cli_utils import get_analysis_dir
+from BALSAMIC.tools.cli_utils import get_sbatchpy, get_analysis_type
+from BALSAMIC.tools.cli_utils import get_snakefile
 from BALSAMIC.commands.config.sample import get_config
-
-
-def get_analysis_type(json_in):
-    """
-    Get analysis type from input json file: single or paired
-    """
-
-    try:
-        with open(os.path.abspath(json_in), "r") as fn:
-            sample_json = json.load(fn)
-            analysis_type = sample_json["analysis"]["analysis_type"]
-    except OSError:
-        print("Couldn't load json file or file path is not absolute")
-
-    return analysis_type
-
-
-def get_sbatchpy():
-    """
-    Returns a string path for runSbatch.py
-    """
-
-    try:
-        p = Path(__file__).parents[0]
-        sbatch = str(Path(p, 'runSbatch.py'))
-    except OSError:
-        print("Couldn't locate sbatch submitter.")
-
-    return sbatch
-
-
-def get_snakefile(analysis_type):
-    """
-    Return a string path for variant calling snakefile.
-    """
-
-    try:
-        p = Path(__file__).parents[2]
-        if analysis_type == "paired":
-            snakefile = Path(p, 'workflows', 'VariantCalling_paired')
-        elif analysis_type == "single":
-            snakefile = Path(p, 'workflows', 'VariantCalling_single')
-        elif analysis_type == "qc":
-            snakefile = Path(p, 'workflows', 'Alignment')
-        elif analysis_type == "paired_umi":
-            snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
-        elif analysis_type == "single_umi":
-            snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
-        else:
-            raise ValueError("analysis_type should be single or paired")
-
-    except OSError:
-        print("Couldn't locate variant calling snakefile.")
-
-    return str(snakefile)
 
 
 @click.command("run", short_help="Run BALSAMIC on a provided config file")
