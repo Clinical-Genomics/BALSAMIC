@@ -146,7 +146,7 @@ picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get
 picard_destination=${picard_conda_env}/share/
 cp $picard_PATH ${picard_destination}
 # link picard from assests to conda's share path
-ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination/}picard-2.18.11.jar
+ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
 
 echo -e "\n${B_YLW}Installing stargazer"
 stargazer_path=BALSAMIC/assests/stargazer_5.2.2.tar.gz
