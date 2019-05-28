@@ -1,29 +1,32 @@
 import os
-import glob
 import json
-import yaml
 from pathlib import Path
 from itertools import chain
+import yaml
 
 
 class SnakeMake:
     """
     To build a snakemake command using cli options
 
-    Input:
-    sample_name - sample name
-    working_dir - working directory for snakemake
-    configfile - sample configuration file (json) output of -
-                balsamic-config-sample
-    run_mode - run mode - cluster or local shell run
-    cluster_config - cluster config json file
-    sbatch_py - slurm command constructor
-    log_path - log file path
-    script_path - file path for slurm scripts
-    result_path - result directory
-    qos - QOS for sbatch jobs
-    sm_opt - snakemake additional options
+    Params:
+    ------
+    sample_name     - sample name
+    working_dir     - working directory for snakemake
+    configfile      - sample configuration file (json) output of -
+                      balsamic-config-sample
+    run_mode        - run mode - cluster or local shell run
+    cluster_config  - cluster config json file
+    sbatch_py       - slurm command constructor
+    log_path        - log file path
+    script_path     - file path for slurm scripts
+    result_path     - result directory
+    qos             - QOS for sbatch jobs
+    forceall        - To add '--forceall' option for snakemake
+    run_analysis    - To run pipeline
+    sm_opt          - snakemake additional options
     """
+
     def __init__(self):
         self.sample_name = None
         self.working_dir = None
@@ -36,6 +39,8 @@ class SnakeMake:
         self.script_path = None
         self.result_path = None
         self.qos = None
+        self.forceall = False
+        self.run_analysis = False
         self.sm_opt = None
 
     def build_cmd(self):
@@ -50,7 +55,7 @@ class SnakeMake:
         if self.sm_opt:
             sm_opt = " " + self.sm_opt
 
-        if self.dryrun:
+        if not self.run_analysis:
             dryrun = " --dryrun "
 
         if self.run_mode == 'slurm':
@@ -62,7 +67,7 @@ class SnakeMake:
 
             cluster_cmd = " --immediate-submit -j 300 " + \
                 " --jobname " + self.sample_name + ".{rulename}.{jobid}.sh" + \
-                " --cluster-config " + cluster_config + \
+                " --cluster-config " + self.cluster_config + \
                 " --cluster " + sbatch_cmd
 
         sm_cmd = " snakemake --notemp -p " + \

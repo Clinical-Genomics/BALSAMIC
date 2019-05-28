@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 import os
 import subprocess
+import json
 import click
-
 
 # CLI commands and decorators
 from BALSAMIC.tools.cli_utils import createDir
-from BALSAMIC.tools.cli_utils import get_sample_name
-from BALSAMIC.tools.cli_utils import get_analysis_dir
-from BALSAMIC.tools.cli_utils import get_sbatchpy, get_analysis_type
-from BALSAMIC.tools.cli_utils import get_snakefile
+from BALSAMIC.tools.cli_utils import get_sbatchpy
+from BALSAMIC.tools.cli_utils import get_snakefile, SnakeMake
 from BALSAMIC.commands.config.sample import get_config
 
 
@@ -83,21 +81,17 @@ def run_analysis(context, snake_file, sample_config, run_mode, cluster_config,
                  run_analysis, log_file, force_all, snakemake_opt,
                  analysis_type, qos):
     """
-
     Runs BALSAMIC workflow on the provided sample's config file
-
     """
+    sample_config_path = sample_config
 
-    # get result, log, script directories
-    logpath = os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
-                           get_sample_name(sample_config),
-                           get_analysis_dir(sample_config, "log"))
-    scriptpath = os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
-                              get_sample_name(sample_config),
-                              get_analysis_dir(sample_config, "script"))
-    resultpath = os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
-                              get_sample_name(sample_config),
-                              get_analysis_dir(sample_config, "result"))
+    with open(sample_config, 'r') as sample_fh:
+        sample_config = json.load(sample_fh)
+
+    logpath = sample_config['analysis']['log']
+    scriptpath = sample_config['analysis']['script']
+    resultpath = sample_config['analysis']['result']
+    sample_name = sample_config['analysis']['sample_id']
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
@@ -105,35 +99,27 @@ def run_analysis(context, snake_file, sample_config, run_mode, cluster_config,
         os.makedirs(logpath, exist_ok=True)
         os.makedirs(scriptpath, exist_ok=True)
 
-    shellcmd = ["snakemake --notemp -p"]
-
-    shellcmd.append(
-        "--directory " +
-        os.path.join(get_analysis_dir(sample_config, "analysis_dir"),
-                     get_sample_name(sample_config), "BALSAMIC_run"))
-
     if not analysis_type:
-        analysis_type = get_analysis_type(sample_config)
+        analysis_type = sample_config['analysis']['analysis_type']
 
-    snakefile = snake_file if snake_file else get_snakefile(analysis_type)
-
-    shellcmd.append("--snakefile " + snakefile)
-
-    shellcmd.append("--configfile " + sample_config)
-
-    if not run_analysis:
-        shellcmd.append("--dryrun")
-
-    if run_mode == 'slurm':
-        shellcmd.append(" --immediate-submit -j 300 ")
-        shellcmd.append("--jobname " + get_sample_name(sample_config) +
-                        ".{rulename}.{jobid}.sh")
-        shellcmd.append("--cluster-config " + cluster_config)
-        shellcmd.append("--cluster 'python3 " + get_sbatchpy() +
-                        " --sample-config " + os.path.abspath(sample_config) +
-                        " --qos " + qos + " --dir-log " + logpath +
-                        " --dir-script " + scriptpath + " --dir-result " +
-                        resultpath + " {dependencies} '")
+    # Construct snakemake command to run workflow
+    balsamic_run = SnakeMake()
+    balsamic_run.sample_name = sample_name
+    balsamic_run.working_dir = sample_config['analysis']['analysis_dir'] +  \
+        sample_name + '/BALSAMIC_run/'
+    balsamic_run.snakefile = snake_file if snake_file else get_snakefile(
+        analysis_type)
+    balsamic_run.configfile = sample_config_path
+    balsamic_run.run_mode = run_mode
+    balsamic_run.cluster_config = cluster_config
+    balsamic_run.sbatch_py = get_sbatchpy()
+    balsamic_run.log_path = logpath
+    balsamic_run.script_path = scriptpath
+    balsamic_run.result_path = resultpath
+    balsamic_run.qos = qos
+    balsamic_run.forceall = force_all
+    balsamic_run.run_analysis = run_analysis
+    balsamic_run.sm_opt = snakemake_opt
 
     if run_analysis:
         # if not dry run, then create (new) log/script directory
@@ -142,10 +128,4 @@ def run_analysis(context, snake_file, sample_config, run_mode, cluster_config,
                 logpath = createDir(logpath, [])
                 scriptpath = createDir(scriptpath, [])
 
-    if force_all:
-        shellcmd.append("--forceall")
-
-    if snakemake_opt:
-        shellcmd.append(" " + snakemake_opt)
-
-    subprocess.run(" ".join(shellcmd), shell=True)
+    subprocess.run(balsamic_run.build_cmd(), shell=True)
