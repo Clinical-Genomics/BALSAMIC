@@ -63,6 +63,7 @@ fi
 if [[ $cFlag ]]
 then
   echo -e "\n${B_GRN}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14"
+  singularity pull shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
   echo -ne "${B_NOCOL}"
   function conda() {
     singularity run --bind ${CONDAPATH} BALSAMIC_miniconda3_4_6_14.sif conda "$@"
