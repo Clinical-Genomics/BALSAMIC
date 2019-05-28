@@ -45,15 +45,8 @@ Include: yum
     cd /git_repos
     git clone https://github.com/Clinical-Genomics/BALSAMIC
     cd BALSAMIC
-    git checkout singularity
-    ./install.sh -s P -d singularity -p /usr/local/anaconda/envs
-    #conda env create --file BALSAMIC/conda_yaml/BALSAMIC.yaml --prefix /usr/local/anaconda/envs/BALSAMIC
-    #source activate BALSAMIC
-    #pip install --editable .
-    #source deactivate
-    #conda env create --file BALSAMIC/conda_yaml/Cancer-Core.yaml --prefix /usr/local/anaconda/envs/Cancer-Core
-    #conda env create --file BALSAMIC/conda_yaml/Cancer-py27.yaml --prefix /usr/local/anaconda/envs/Cancer-p27
-    #conda env create --file BALSAMIC/conda_yaml/Cancer-py36.yaml --prefix /usr/local/anaconda/envs/Cancer-p36
+    git checkout develop
+    ./install.sh -s P -d dev -p /usr/local/anaconda/envs
 
 %environment
     # The following fixes the error for Click
@@ -63,3 +56,62 @@ Include: yum
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
     export PATH=$PATH:/usr/local/anaconda/bin
+
+# P_BALSAMIC_dev
+%appenv P_BALSAMIC_dev
+    source activate P_BALSAMIC_dev
+%apphelp P_BALSAMIC_dev
+    Runs core BALSAMIC CLI.
+%apprun P_BALSAMIC_dev
+    exec "$@"
+
+# P_Cancer-Core_dev
+%appenv P_Cancer-Core_dev
+    source activate P_Cancer-Core_dev
+%apphelp P_Cancer-Core_dev
+    Runs P_Cancer-Core_dev
+%apprun P_Cancer-Core_dev
+    exec "$@"
+
+# P_Cancer-py27_dev
+%appenv P_Cancer-py27_dev
+    source activate P_Cancer-py27_dev
+%apphelp P_Cancer-py27_dev
+    Runs P_Cancer-py27_dev
+%apprun P_Cancer-py27_dev
+    exec "$@"
+
+# P_Cancer-py36_dev
+%appenv P_Cancer-py36_dev
+    source activate P_Cancer-py36_dev
+%apphelp P_Cancer-py36_dev
+    Runs P_Cancer-py36_dev
+%apprun P_Cancer-py36_dev
+    exec "$@"
+
+# P_Cancer-vardict_dev
+%appenv P_Cancer-vardict_dev
+    source activate P_Cancer-vardict_dev
+%apphelp P_Cancer-vardict_dev
+    Runs P_Cancer-vardict_dev
+%apprun P_Cancer-vardict_dev
+    exec "$@"
+
+# P_Cancer-vep_dev
+%appenv P_Cancer-vep_dev
+    source activate P_Cancer-vep_dev
+%apphelp P_Cancer-vep_dev
+    Runs P_Cancer-vep_dev
+%apprun P_Cancer-vep_dev
+    exec "$@"
+
+# P_Cancer-vt_dev
+%appenv P_Cancer-vt_dev
+    source activate P_Cancer-vt_dev
+%apphelp P_Cancer-vt_dev
+    Runs P_Cancer-vt_dev
+%apprun P_Cancer-vt_dev
+    exec "$@"
+
+%runscript
+    exec echo "Try running with --app"
