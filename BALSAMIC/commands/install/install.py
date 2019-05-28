@@ -98,7 +98,7 @@ def conda_install(conda_yaml, env_prefix):
     """
 
     shellcmd = [
-        "conda", "env", "create", "--override-channels", "--file", conda_yaml,
+        "conda", "env", "create", "--file", conda_yaml,
         "--prefix", env_prefix
     ]
 
