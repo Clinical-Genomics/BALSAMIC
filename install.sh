@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eo pipefail
+shopt -s expand_aliases
 
 B_RED='\033[0;31m';
 B_GRN='\033[0;32m';
@@ -10,31 +11,34 @@ CONDADATE=$(date +%y%m%d)
 
 #if [ $# -eq 0 ]; then
 #  echo $"
-#USAGE: $0 [-s CONDAPREFIX -d CONDADATE -p CONDAPATH]
+#USAGE: $0 [-s CONDAPREFIX -d CONDADATE -p CONDAPATH -c]
 #  1. Conda naming convention: [P,D]_[ENVNAME]_%DATE. P: Production, D: Development
 #  2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
 #  
 #  -s CONDAPREFIX  Conda env name prefix. This will be P or D in the help above. 
 #  -d CONDADATE    Conda env name suffix. This will be a suffix, by default it will be current date: yymmdd 
 #  -p CONDAPATH    Conda env path prefix. See point 2 in help above.
+#  -c If set it will use Singularity container for conda instead 
 #" >&2
 #  exit 0
 #fi
 
-while getopts ":s:p:d:h" opt; do
+while getopts ":s:p:d:ch" opt; do
   case $opt in
     s) sFlag=true;CONDAPREFIX=${OPTARG};;
     d) dFlag=true;CONDADATE=${OPTARG};;
     p) pFlag=true;CONDAPATH=${OPTARG};;
+    c) cFlag=true;;
     h)
       echo $"
-USAGE: $0 [-s CONDAPREFIX -d CONDADATE -p CONDAPATH]
+USAGE: $0 [-s CONDAPREFIX -d CONDADATE -p CONDAPATH -c]
   1. Conda naming convention: [P,D]_[ENVNAME]_%DATE. P: Production, D: Development
   2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
   
   -s CONDAPREFIX  Conda env name prefix. This will be P or D in the help above. 
   -d CONDADATE    Conda env name suffix. This will be a suffix, by default it will be current date: yymmdd 
   -p CONDAPATH    Conda env path prefix. See point 2 in help above.
+  -c If set it will use Singularity container for conda instead 
 " >&2
       exit 0
       ;;
@@ -49,22 +53,32 @@ USAGE: $0 [-s CONDAPREFIX -d CONDADATE -p CONDAPATH]
   esac
 done
 
-# Check if conda exists
-command -v conda > /dev/null 2>&1 || \
-  { echo -e "${B_RED}conda command was not found. Please make sure conda is installed and it is in path. Aborting." >&2;\
-  exit 1;
-  }
-
-if [[ -z "$CONDAPATH"  ]]
+if [[ -z $CONDAPATH  ]]
 then
-  echo -e "\n${B_YLW}No conda env path is provided. Setting default conda path to $CONDA_ENVS_PATH"
-  if [[ -z "$CONDA_ENVS_PATH"  ]]
-  then
-    echo -e "\n${B_RED}CONDA_ENVS_PATH env variable not found. Exiting!"
-    exit 1
-  fi
-  CONDAPATH=$CONDA_ENVS_PATH
+  echo -e "\n${B_RED}No conda env path provided. Exiting!"
+  exit 1
 fi
+
+# Check if container flag is specified
+if [[ $cFlag ]]
+then
+  echo -e "\n${B_GRN}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14"
+  echo -ne "${B_NOCOL}"
+  function conda() {
+    singularity run --bind ${CONDAPATH} BALSAMIC_miniconda3_4_6_14.sif conda "$@"
+  }
+fi
+
+# Check if conda exists
+if [[ -z $cFlag ]]
+then
+  command -v conda > /dev/null 2>&1 || \
+    { echo -e "${B_RED}conda command was not found. Please make sure conda is installed and it is in path. Aborting." >&2;\
+      echo -e "${B_RED}If you want to installed without conda command available, consider using -c flag." >&2;\
+    exit 1;
+    }
+fi
+
 
 # Conda env found
 # Conda env naming convention: [P,D]_BALSAMIC_%DATE
@@ -87,7 +101,7 @@ cat BALSAMIC/config/install.json
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Creating conda env ${env_name}"
-echo -e "\n${B_YLW}\tconda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --name ${env_name} --force"
+echo -e "\n${B_YLW}\tconda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --prefix ${CONDAPATH}/${env_name} --force"
 conda env create -f BALSAMIC/conda_yaml/BALSAMIC.yaml --quiet --prefix ${CONDAPATH}/${env_name} --force
 
 echo -ne "${B_NOCOL}"
@@ -109,15 +123,16 @@ echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installting environments for the workflow"
 echo -e "\n${B_YLW}\tbalsamic install_env --packages-output-yaml ${BALSAMIC_ENVS} -s ${env_name_suffix} -i BALSAMIC/conda_yaml/D_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/D_Cancer-Core.yaml -i BALSAMIC/conda_yaml/D_Cancer-py36.yaml -i BALSAMIC/conda_yaml/D_Cancer-py27.yaml -i BALSAMIC/conda_yaml/D_Cancer-vt.yaml -i BALSAMIC/snakemake_rules/annotation/vep.rule "
 echo -ne "${B_NOCOL}"
+which conda
 balsamic install -s ${env_name_suffix} \
   --overwrite-env \
   --env-type ${CONDAPREFIX} \
-  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-vardict.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/Cancer-Core.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-py36.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/Cancer-py27.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-vt.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-py36.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-vardict.yaml \
   --input-conda-yaml BALSAMIC/conda_yaml/Cancer-vep.yaml \
+  --input-conda-yaml BALSAMIC/conda_yaml/Cancer-vt.yaml \
   --env-dir-prefix ${CONDAPATH} \
   --packages-output-yaml ${BALSAMIC_ENVS}
 
