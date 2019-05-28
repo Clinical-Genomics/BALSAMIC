@@ -195,6 +195,8 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                         env_prefix,
                         fg='yellow'))
 
+            print(env_prefix)
+
             if conda_env_check(env_prefix) and not overwrite_env:
                 click.echo(
                     click.style(
@@ -212,7 +214,7 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                 conda_install(fname, env_prefix)
 
                 with open(fname) as yaml_handle:
-                    conda_packages[env_name] = get_packages(yaml_handle)
+                    conda_packages[env_prefix] = get_packages(yaml_handle)
 
                 click.echo("Conda environment %s was installed." % env_prefix)
 
@@ -229,7 +231,7 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                 conda_install(fname, env_prefix)
 
                 with open(fname) as yaml_handle:
-                    conda_packages[env_name] = get_packages(yaml_handle)
+                    conda_packages[env_prefix] = get_packages(yaml_handle)
 
                 click.echo(
                     click.style(
