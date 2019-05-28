@@ -111,20 +111,15 @@ echo -e "\n${B_YLW}\tsource activate ${env_name}"
 source activate ${env_name}
 
 echo -ne "${B_NOCOL}"
-echo -e "\n${B_GRN}Installing requirments.txt"
-echo -e "\n${B_YLW}\tpip install -r requirments.txt"
-pip install -r requirements.txt
-
-echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installing BALSAMIC"
 echo -e "\n${B_YLW}\tpip install --editable ."
-pip install --editable .
+pip install -r requirements.txt --editable .
 
 echo -ne "${B_NOCOL}"
 echo -e "\n${B_GRN}Installting environments for the workflow"
 echo -e "\n${B_YLW}\tbalsamic install_env --packages-output-yaml ${BALSAMIC_ENVS} -s ${env_name_suffix} -i BALSAMIC/conda_yaml/D_Cancer-vardict.yaml -i BALSAMIC/conda_yaml/D_Cancer-Core.yaml -i BALSAMIC/conda_yaml/D_Cancer-py36.yaml -i BALSAMIC/conda_yaml/D_Cancer-py27.yaml -i BALSAMIC/conda_yaml/D_Cancer-vt.yaml -i BALSAMIC/snakemake_rules/annotation/vep.rule "
 echo -ne "${B_NOCOL}"
-which conda
+
 balsamic install -s ${env_name_suffix} \
   --overwrite-env \
   --env-type ${CONDAPREFIX} \
