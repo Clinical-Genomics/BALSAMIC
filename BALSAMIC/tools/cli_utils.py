@@ -124,7 +124,7 @@ def get_packages(yaml_file):
     '''
     try:
         with open(yaml_file, 'r') as f:
-            pkgs = yaml.load(f)['dependencies']
+            pkgs = yaml.safe_load(f)['dependencies']
     except OSError:
         print('File not found', yaml_file)
 
