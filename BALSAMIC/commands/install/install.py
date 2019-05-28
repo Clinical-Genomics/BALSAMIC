@@ -195,7 +195,6 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                         env_prefix,
                         fg='yellow'))
 
-            print(env_prefix)
 
             if conda_env_check(env_prefix) and not overwrite_env:
                 click.echo(
