@@ -15,6 +15,107 @@ def picard_flag(picarddup):
   else:
       return "TRUE"
 
+rule MarkDuplicates:
+  input:
+    bam_dir + "{sample}.sorted.bam"
+  output:
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
+  log:
+    stats = bam_dir + "{sample}.sorted." + picarddup + ".txt"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    rm_dup = picard_flag(picarddup)
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+        "MarkDuplicates "
+        "INPUT={input} "
+        "OUTPUT={output.mrkdup} "
+        "VALIDATION_STRINGENCY=SILENT "
+        "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 "
+        "REMOVE_DUPLICATES={params.rm_dup} "
+        "METRICS_FILE='{log.stats}'; "
+    "samtools index {output.mrkdup}; "
+    "source deactivate; "
+
+rule CollectHsMetrics:
+  input:
+    fadict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
+    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
+    bam = bam_dir + "{sample}.sorted.bam",
+    bammrkdup = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+  output:
+    unmrk = bam_dir + "{sample}.sorted.hsmetric",
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "BedToIntervalList "
+      "I={input.bed} "
+      "O={input.bam}.picard.bedintervals "
+      "SD={input.fadict}; "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectHsMetrics "
+      "BI={input.bam}.picard.bedintervals "
+      "TI={input.bam}.picard.bedintervals "
+      "I={input.bam} "
+      "O={output.unmrk} "
+      "COVERAGE_CAP=50000 "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectHsMetrics "
+      "BI={input.bam}.picard.bedintervals "
+      "TI={input.bam}.picard.bedintervals "
+      "I={input.bammrkdup} "
+      "O={output.mrkdup} "
+      "COVERAGE_CAP=50000 "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
+    "source deactivate; "
+
+rule CollectAlignmentSummaryMetrics:
+  input:
+    bam = bam_dir + "{sample}.sorted.bam",
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"]
+  output:
+    bam_dir + "{sample}.sorted.alignmetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    adapter = config["QC"]["adapter"]
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectAlignmentSummaryMetrics "
+      "R={input.fa} "
+      "I={input.bam} "
+      "O={output} "
+      "ADAPTER_SEQUENCE={params.adapter} "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
+    "source deactivate; "
+
+rule CollectInsertSizeMetrics:
+  input:
+    bam = bam_dir + "{sample}.sorted.bam"
+  output:
+    pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
+    txt = bam_dir + "{sample}.sorted.insertsizemetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard")
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectInsertSizeMetrics "
+      "I={input.bam} "
+      "H={output.pdf} "
+      "O={output.txt} "
+      "M=0.01 "
+      "INCLUDE_DUPLICATES=TRUE "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
+    "source deactivate; "
+
 rule picard_FastqToSam_umi:
     input:
         fq1 = config["analysis"]["fastq_path"] + "{sample}_1.fastq.gz",
