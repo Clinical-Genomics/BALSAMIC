@@ -1,12 +1,7 @@
-#!/usr/bin/env python
-import os
-import subprocess
-import hashlib
-import yaml
+"""
+Entry cli for balsamic
+"""
 import click
-import logging
-import sys
-import json
 
 # Subcommands
 from BALSAMIC.commands.install import install as install_command
@@ -24,9 +19,10 @@ from BALSAMIC import __version__
 @click.version_option(version=__version__)
 @click.pass_context
 
-@doc("BALSAMIC {version}: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer".format(version=__version__))
+@doc("""BALSAMIC {version}: Bioinformatic Analysis pipeLine for
+        SomAtic MutatIons in Cancer""".format(version=__version__))
 def cli(context):
-    pass
+    "BALSAMIC"
 
 cli.add_command(install_command)
 cli.add_command(analysis_command)
