@@ -1,17 +1,13 @@
 #!/usr/bin/env python
 import os
 import subprocess
-import hashlib
-import yaml
-import click
-import logging
-import sys
-import json
 import re
+import json
 import copy
 import glob
 from datetime import datetime
 from pathlib import Path
+import click
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.tools import get_chrom, get_package_split, get_ref_path
@@ -95,8 +91,8 @@ def get_analysis_type(normal, umi):
     """ return analysis type """
     if umi:
         return "paired_umi" if normal else "single_umi"
-    else:
-        return "paired" if normal else "single"
+
+    return "paired" if normal else "single"
 
 
 def get_output_config(config, sample_id):
@@ -118,6 +114,12 @@ def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
     sample_config["analysis"]["config_creation_date"] = datetime.now(
     ).strftime("%Y-%m-%d %H:%M")
     sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
+    sample_config["analysis"]["log"] = os.path.join(analysis_dir, sample_id,
+                                                    'logs/')
+    sample_config["analysis"]["script"] = os.path.join(analysis_dir, sample_id,
+                                                       'scripts/')
+    sample_config["analysis"]["result"] = os.path.join(analysis_dir, sample_id,
+                                                       'analysis/')
     sample_config["analysis"]["analysis_type"] = analysis_type
     sample_config["samples"] = {}
 
@@ -295,15 +297,16 @@ it is. So this is just a placeholder for future.
 
     click.echo("Reading sample config file %s" % sample_config_path)
 
+    analysis_dir = os.path.abspath(analysis_dir)
     sample_config = get_sample_config(sample_config_path, sample_id,
                                       analysis_dir, analysis_type)
 
-    output_dir = os.path.join(os.path.abspath(analysis_dir), sample_id)
+    output_dir = os.path.join(analysis_dir, sample_id)
 
     if create_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    ## Update fastq_path
+    # Update fastq_path
     if fastq_path:
         if os.path.isdir(output_dir) and os.path.exists(output_dir):
             os.makedirs(os.path.join(output_dir, "fastq"), exist_ok=True)

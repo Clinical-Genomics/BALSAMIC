@@ -33,7 +33,7 @@ def test_conda_default_prefix():
 def test_get_prefix_with_prefix_key():
 
     # GIVEN conda env yaml with prefix entry
-    env_yaml = yaml.load(
+    env_yaml = yaml.safe_load(
         '{"channels": ["chan1", "chan2"], "dependencies": ["dep1", "dep2"], "prefix": "prefix1"}'
     )
 
@@ -45,9 +45,10 @@ def test_get_prefix_with_prefix_key():
         assert get_prefix("mock_yaml_file") == "prefix1"
         assert not get_prefix("mock_yaml_file") == "chan1"
 
+
 def test_get_prefix_without_prefix_key():
     # GIVEN conda env yaml without prefix entry
-    env_yaml = yaml.load(
+    env_yaml = yaml.safe_load(
         '{"channels": ["chan1", "chan2"], "dependencies": ["dep1", "dep2"]}')
 
     # WHEN yaml read and return
