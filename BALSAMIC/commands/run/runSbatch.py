@@ -49,6 +49,7 @@ scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
 jobscript = os.path.join(scriptpath, scriptname)
 sacct_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sacct")
+sbatch_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sbatch")
 
 output_log = os.path.join(logpath, scriptname + "_%j.out")
 error_log = os.path.join(logpath, scriptname + "_%j.err")
@@ -75,3 +76,6 @@ cmdline += " " + " >> " + sacct_file
 
 subprocess.call(cmdline, shell=True)
 subprocess.call("tail -n1 " +  sacct_file, shell=True)
+with open(sbatch_file, 'a') as f:
+    f.write(cmdline)
+    f.write(sys.executable)
