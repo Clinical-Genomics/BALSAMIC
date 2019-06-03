@@ -1,13 +1,88 @@
 import os
-import glob
 import json
-import yaml
+from pathlib import Path
 from itertools import chain
+import yaml
+
+
+class SnakeMake:
+    """
+    To build a snakemake command using cli options
+
+    Params:
+    ------
+    sample_name     - sample name
+    working_dir     - working directory for snakemake
+    configfile      - sample configuration file (json) output of -
+                      balsamic-config-sample
+    run_mode        - run mode - cluster or local shell run
+    cluster_config  - cluster config json file
+    sbatch_py       - slurm command constructor
+    log_path        - log file path
+    script_path     - file path for slurm scripts
+    result_path     - result directory
+    qos             - QOS for sbatch jobs
+    forceall        - To add '--forceall' option for snakemake
+    run_analysis    - To run pipeline
+    sm_opt          - snakemake additional options
+    """
+
+    def __init__(self):
+        self.sample_name = None
+        self.working_dir = None
+        self.snakefile = None
+        self.configfile = None
+        self.run_mode = None
+        self.cluster_config = None
+        self.sbatch_py = None
+        self.log_path = None
+        self.script_path = None
+        self.result_path = None
+        self.qos = None
+        self.forceall = False
+        self.run_analysis = False
+        self.sm_opt = None
+
+    def build_cmd(self):
+        forceall = ''
+        sm_opt = ''
+        cluster_cmd = ''
+        dryrun = ''
+
+        if self.forceall:
+            forceall = " --forceall "
+
+        if self.sm_opt:
+            sm_opt = " ".join(self.sm_opt)
+
+        if not self.run_analysis:
+            dryrun = " --dryrun "
+
+        if self.run_mode == 'slurm':
+            sbatch_cmd = " 'python3 {} ".format(self.sbatch_py) + \
+                " --sample-config " + self.configfile + \
+                " --qos " + self.qos + " --dir-log " + self.log_path + \
+                " --dir-script " + self.script_path + \
+                " --dir-result " + self.result_path + " {dependencies} '"
+
+            cluster_cmd = " --immediate-submit -j 300 " + \
+                " --jobname " + self.sample_name + ".{rulename}.{jobid}.sh" + \
+                " --cluster-config " + self.cluster_config + \
+                " --cluster " + sbatch_cmd
+
+        sm_cmd = " snakemake --notemp -p " + \
+            " --directory " + self.working_dir + \
+            " --snakefile " + self.snakefile + \
+            " --configfile " + self.configfile + \
+            " " + forceall + " " + dryrun + \
+            " " + cluster_cmd + " " + sm_opt
+
+        return sm_cmd
 
 
 def add_doc(docstring):
     """
-    A decorator for adding docstring. Taken shamelessly from stackexchange. 
+    A decorator for adding docstring. Taken shamelessly from stackexchange.
     """
 
     def document(func):
@@ -19,7 +94,8 @@ def add_doc(docstring):
 
 def createDir(path, interm_path=[]):
     '''
-    Creates directories by recursively checking if it exists, otherwise increments the number
+    Creates directories by recursively checking if it exists,
+    otherwise increments the number
     '''
     if os.path.isdir(os.path.abspath(path)):
         basepath = os.path.basename(os.path.abspath(path))
@@ -48,7 +124,7 @@ def get_packages(yaml_file):
     '''
     try:
         with open(yaml_file, 'r') as f:
-            pkgs = yaml.load(f)['dependencies']
+            pkgs = yaml.safe_load(f)['dependencies']
     except OSError:
         print('File not found', yaml_file)
 
@@ -128,3 +204,43 @@ def iterdict(dic):
             yield from iterdict(value)
         else:
             yield key, value
+
+
+def get_sbatchpy():
+    """
+    Returns a string path for runSbatch.py
+    """
+
+    try:
+        p = Path(__file__).parents[1]
+        sbatch = str(Path(p, 'commands/run/runSbatch.py'))
+    except OSError:
+        print("Couldn't locate sbatch submitter.")
+
+    return sbatch
+
+
+def get_snakefile(analysis_type):
+    """
+    Return a string path for variant calling snakefile.
+    """
+
+    try:
+        p = Path(__file__).parents[1]
+        if analysis_type == "paired":
+            snakefile = Path(p, 'workflows', 'VariantCalling_paired')
+        elif analysis_type == "single":
+            snakefile = Path(p, 'workflows', 'VariantCalling_single')
+        elif analysis_type == "qc":
+            snakefile = Path(p, 'workflows', 'Alignment')
+        elif analysis_type == "paired_umi":
+            snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
+        elif analysis_type == "single_umi":
+            snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
+        else:
+            raise ValueError("analysis_type should be single or paired")
+
+    except OSError:
+        print("Couldn't locate variant calling snakefile.")
+
+    return str(snakefile)
