@@ -33,8 +33,8 @@ def conda_env_check(env_prefix):
     """
     try:
         p = json.loads(
-            subprocess.check_output(
-                ["conda", "env", "list", "--json"], stderr=subprocess.STDOUT))
+            subprocess.check_output(["conda", "env", "list", "--json"],
+                                    stderr=subprocess.STDOUT))
     except subprocess.CalledProcessError as e:
         print(e.output.decode())
         if verbose:
@@ -46,8 +46,8 @@ def conda_env_check(env_prefix):
 def conda_default_prefix():
     try:
         p = json.loads(
-            subprocess.check_output(
-                ["conda", "info", "--json"], stderr=subprocess.STDOUT))
+            subprocess.check_output(["conda", "info", "--json"],
+                                    stderr=subprocess.STDOUT))
     except subprocess.CalledProcessError as e:
         print(e.output.decode())
         if verbose:
@@ -98,7 +98,8 @@ def conda_install(conda_yaml, env_prefix):
     """
 
     shellcmd = [
-        "conda", "env", "create", "--file", conda_yaml, "--prefix", env_prefix
+        "conda", "env", "create", "--file", conda_yaml,
+        "--prefix", env_prefix
     ]
 
     try:
@@ -111,20 +112,17 @@ def conda_install(conda_yaml, env_prefix):
 #      raise e.output.decode()
 
 
-@click.command(
-    "install", short_help="Installs required conda environments")
-@click.option(
-    '-i',
-    '--input-conda-yaml',
-    required=True,
-    multiple=True,
-    type=click.Path(),
-    help='Input conda yaml file.')
-@click.option(
-    '-s',
-    '--env-name-suffix',
-    required=True,
-    help='Mandatory alphanumeric suffix for environment name.')
+@click.command("install", short_help="Installs required conda environments")
+@click.option('-i',
+              '--input-conda-yaml',
+              required=True,
+              multiple=True,
+              type=click.Path(),
+              help='Input conda yaml file.')
+@click.option('-s',
+              '--env-name-suffix',
+              required=True,
+              help='Mandatory alphanumeric suffix for environment name.')
 @click.option(
     '-o',
     '--overwrite-env',
@@ -150,12 +148,14 @@ def conda_install(conda_yaml, env_prefix):
 @click.option(
     '-t',
     '--env-type',
-    type=click.Choice(['D','P', 'S']),
+    type=click.Choice(['D', 'P', 'S']),
     default='D',
-    help='Environment type. P: Production, D: Development, S: Stage. It will be added to filename: "[D|P|S]_"+filename+env-name-suffix')
+    help=
+    'Environment type. P: Production, D: Development, S: Stage. It will be added to filename: "[D|P|S]_"+filename+env-name-suffix'
+)
 @click.pass_context
 def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
-                  env_name_suffix, packages_output_yaml, env_type):
+            env_name_suffix, packages_output_yaml, env_type):
     """
     Installs conda environments from a conda yaml file.
     
@@ -195,6 +195,7 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                         env_prefix,
                         fg='yellow'))
 
+
             if conda_env_check(env_prefix) and not overwrite_env:
                 click.echo(
                     click.style(
@@ -205,35 +206,33 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
 
             elif not conda_env_check(env_prefix):
                 click.echo(
-                    click.style(
-                        "Installing conda environment from %s" % fname,
-                        fg='green'))
+                    click.style("Installing conda environment from %s" % fname,
+                                fg='green'))
 
                 conda_install(fname, env_prefix)
 
                 with open(fname) as yaml_handle:
-                    conda_packages[env_name] = get_packages(yaml_handle)
+                    conda_packages[env_prefix] = get_packages(yaml_handle)
 
                 click.echo("Conda environment %s was installed." % env_prefix)
 
             elif conda_env_check(env_prefix) and overwrite_env:
                 click.echo(
-                    click.style(
-                        "Removing old conda environment: %s" % env_prefix,
-                        fg='yellow'))
+                    click.style("Removing old conda environment: %s" %
+                                env_prefix,
+                                fg='yellow'))
                 conda_remove(env_prefix)
                 click.echo(
-                    click.style(
-                        "Installing conda environment from %s" % fname,
-                        fg='green'))
+                    click.style("Installing conda environment from %s" % fname,
+                                fg='green'))
                 conda_install(fname, env_prefix)
 
                 with open(fname) as yaml_handle:
-                    conda_packages[env_name] = get_packages(yaml_handle)
+                    conda_packages[env_prefix] = get_packages(yaml_handle)
 
                 click.echo(
-                    click.style(
-                        "Conda environment %s was installed." % env_prefix,
-                        fg='green'))
+                    click.style("Conda environment %s was installed." %
+                                env_prefix,
+                                fg='green'))
 
     yaml.dump(conda_packages, open(packages_output_yaml, 'w'))

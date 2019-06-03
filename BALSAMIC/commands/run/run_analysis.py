@@ -75,6 +75,7 @@ from BALSAMIC.commands.config.sample import get_config
     is_flag=True,
     help='Force run all analysis. This is same as snakemake --forceall')
 @click.option('--snakemake-opt',
+              multiple=True,
               help='Pass these options directly to snakemake')
 @click.pass_context
 def run_analysis(context, snake_file, sample_config, run_mode, cluster_config,

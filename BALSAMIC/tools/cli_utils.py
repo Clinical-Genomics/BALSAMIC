@@ -53,7 +53,7 @@ class SnakeMake:
             forceall = " --forceall "
 
         if self.sm_opt:
-            sm_opt = " " + self.sm_opt
+            sm_opt = " " + " ".join(self.sm_opt)
 
         if not self.run_analysis:
             dryrun = " --dryrun "

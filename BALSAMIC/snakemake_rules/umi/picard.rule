@@ -1,0 +1,163 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+
+bam_dir = get_result_dir(config) + "/bam/"
+resultdir = get_result_dir(config) + "/" 
+picarddup = get_picard_mrkdup(config)
+
+def picard_flag(picarddup):
+  if picarddup == "mrkdup":
+      return "FALSE"
+  else:
+      return "TRUE"
+
+rule picard_FastqToSam_umi:
+    input:
+        fq1 = config["analysis"]["fastq_path"] + "{sample}_1.fastq.gz",
+        fq2 = config["analysis"]["fastq_path"] + "{sample}_2.fastq.gz",
+    output:
+        bam_dir + "{sample}.unalg.bam"
+    params:
+        tmpdir = bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard")
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar FastqToSam \
+O={output} \
+F1={input.fq1} \
+F2={input.fq2} \
+SM={wildcards.sample} \
+LB=Library1 \
+PU=NovaSeq \
+PL=illumina
+        """
+
+rule picard_MarkIlluminaAdaptersi_umi:
+    input:
+        bam_dir + "{sample}.unalg.umi.bam"
+    output:
+        bam = bam_dir + "{sample}.unalg.umi.mrkadp.bam",
+        txt = bam_dir + "{sample}.unalg.umi.mrkadp.txt"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard")
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MarkIlluminaAdapters \
+I={input} \
+O={output.bam} \
+M={output.txt}
+        """
+
+rule picard_SamToFastq_umi:
+    input:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.fastq"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard")
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+ I={input} \
+ CLIPPING_ATTRIBUTE=XT \
+ CLIPPING_ACTION=X \
+ CLIPPING_MIN_LENGTH=36 \
+ INCLUDE_NON_PF_READS=true \
+ F={output} \
+ INTERLEAVE=true
+        """
+
+rule picard_MergeBamAlignment_mrkadp_umi:
+    input:
+        aligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.sam",
+        unaligned = bam_dir + "{sample}.unalg.umi.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        ref = config["path"]["genomefa"] + config["references"]["genomefa"]
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+UNMAPPED={input.unaligned} \
+ALIGNED={input.aligned} \
+O={output} \
+R={params.ref} \
+CLIP_ADAPTERS=false \
+VALIDATION_STRINGENCY=SILENT \
+EXPECTED_ORIENTATIONS=FR \
+MAX_GAPS=-1 \
+SO=coordinate \
+ALIGNER_PROPER_PAIR_FLAGS=false \
+CREATE_INDEX=true
+        """
+
+rule picard_SamToFastq_cnsalg_umi:
+    input:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+VALIDATION_STRINGENCY=SILENT \
+INPUT={input} \
+F={output} \
+INTERLEAVE=true \
+INCLUDE_NON_PF_READS=true \
+CREATE_INDEX=true
+        """
+
+rule picard_MergeBamAlignment_cnsalg_umi:
+    input:
+        aligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam",
+        unaligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
+    output:
+        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
+    params:
+        tmpdir=bam_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        ref = config["path"]["genomefa"] + config["references"]["genomefa"]
+    shell:
+        """
+source activate {params.conda}; 
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+VALIDATION_STRINGENCY=SILENT \
+UNMAPPED={input.unaligned} \
+ALIGNED={input.aligned} \
+OUTPUT={output} \
+REFERENCE_SEQUENCE={params.ref} \
+CLIP_ADAPTERS=false \
+ORIENTATIONS=FR \
+MAX_GAPS=-1 \
+SORT_ORDER=coordinate \
+ALIGNER_PROPER_PAIR_FLAGS=false \
+ATTRIBUTES_TO_RETAIN=X0 \
+ATTRIBUTES_TO_RETAIN=ZS \
+ATTRIBUTES_TO_RETAIN=ZI \
+ATTRIBUTES_TO_RETAIN=ZM \
+ATTRIBUTES_TO_RETAIN=ZC \
+ATTRIBUTES_TO_RETAIN=ZN \
+ATTRIBUTES_TO_REVERSE=ad \
+ATTRIBUTES_TO_REVERSE=bd \
+ATTRIBUTES_TO_REVERSE=cd \
+ATTRIBUTES_TO_REVERSE=ae \
+ATTRIBUTES_TO_REVERSE=be \
+ATTRIBUTES_TO_REVERSE=ce \
+CREATE_INDEX=true
+        """
