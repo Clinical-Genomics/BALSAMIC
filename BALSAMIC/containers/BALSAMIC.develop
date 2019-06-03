@@ -57,6 +57,7 @@ Include: yum
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
     export PATH=$PATH:/usr/local/anaconda/bin
+    export BALSAMIC_STATUS='container'
 
 # P_BALSAMIC_dev
 %appenv P_BALSAMIC_dev
