@@ -206,21 +206,6 @@ def iterdict(dic):
             yield key, value
 
 
-def get_analysis_type(json_in):
-    """
-    Get analysis type from input json file: single or paired
-    """
-
-    try:
-        with open(os.path.abspath(json_in), "r") as fn:
-            sample_json = json.load(fn)
-            analysis_type = sample_json["analysis"]["analysis_type"]
-    except OSError:
-        print("Couldn't load json file or file path is not absolute")
-
-    return analysis_type
-
-
 def get_sbatchpy():
     """
     Returns a string path for runSbatch.py
