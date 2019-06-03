@@ -66,7 +66,7 @@ class TestUtils(unittest.TestCase):
         snakemake_slurm.script_path = "scripts/"
         snakemake_slurm.result_path = "results/"
         snakemake_slurm.qos = "normal"
-        snakemake_slurm.sm_opt = ("containers")
+        snakemake_slurm.sm_opt = ("containers",)
         snakemake_slurm.run_analysis = True
 
         # WHEN calling the build command
