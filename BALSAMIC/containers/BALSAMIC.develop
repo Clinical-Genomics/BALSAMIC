@@ -1,0 +1,119 @@
+Bootstrap: yum
+OSVersion: 7
+MirrorURL: http://mirror.centos.org/centos-%{OSVERSION}/%{OSVERSION}/os/$basearch/
+Include: yum
+
+%help
+    Bioinformatic analysis pipeline for somatic mutations in cancer.
+
+%labels
+    Maintainer Hassan Foroughi Asl <hassan.foroughi@scilifelab.se>
+    Description Core container for BALSAMIC
+    Version 0.0.1
+
+%post
+    yum install -y coreutils
+    yum install -y wget
+    yum install -y which
+    yum install -y bzip2
+    yum install -y graphviz
+    yum install -y git
+    yum install -y gcc
+    yum install -y fontconfig
+    # install anaconda
+    if [ ! -d /usr/local/anaconda ]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh\
+           -O ~/anaconda.sh && \
+        bash ~/anaconda.sh -b -p /usr/local/anaconda && \
+        rm ~/anaconda.sh
+    fi
+
+    # create necessary directories
+    if [ ! -d /git_repos ]; then mkdir git_repos; fi
+    if [ ! -d /conda_envs ]; then mkdir /conda_envs; fi
+
+    # set anaconda path
+    export PATH=$PATH:/usr/local/anaconda/bin
+    conda update -y conda
+    
+    # Git clone BALSAMIC
+    # The following fixes the error for Click
+    # RuntimeError: Click will abort further execution because Python 3 was
+    # configured to use ASCII as encoding for the environment. Consult
+    # https://click.palletsprojects.com/en/7.x/python3/ for mitigation steps.
+    export LC_ALL=en_US.utf-8
+    export LANG=en_US.utf-8
+    cd /git_repos
+    git clone https://github.com/Clinical-Genomics/BALSAMIC
+    cd BALSAMIC
+    git checkout develop
+    ./install.sh -s P -d dev -p /usr/local/anaconda/envs
+
+%environment
+    # The following fixes the error for Click
+    # RuntimeError: Click will abort further execution because Python 3 was
+    # configured to use ASCII as encoding for the environment. Consult
+    # https://click.palletsprojects.com/en/7.x/python3/ for mitigation steps.
+    export LC_ALL=en_US.utf-8
+    export LANG=en_US.utf-8
+    export PATH=$PATH:/usr/local/anaconda/bin
+    export BALSAMIC_STATUS='container'
+
+# P_BALSAMIC_dev
+%appenv P_BALSAMIC_dev
+    source activate P_BALSAMIC_dev
+%apphelp P_BALSAMIC_dev
+    Runs core BALSAMIC CLI.
+%apprun P_BALSAMIC_dev
+    exec "$@"
+
+# P_Cancer-Core_dev
+%appenv P_Cancer-Core_dev
+    source activate P_Cancer-Core_dev
+%apphelp P_Cancer-Core_dev
+    Runs P_Cancer-Core_dev
+%apprun P_Cancer-Core_dev
+    exec "$@"
+
+# P_Cancer-py27_dev
+%appenv P_Cancer-py27_dev
+    source activate P_Cancer-py27_dev
+%apphelp P_Cancer-py27_dev
+    Runs P_Cancer-py27_dev
+%apprun P_Cancer-py27_dev
+    exec "$@"
+
+# P_Cancer-py36_dev
+%appenv P_Cancer-py36_dev
+    source activate P_Cancer-py36_dev
+%apphelp P_Cancer-py36_dev
+    Runs P_Cancer-py36_dev
+%apprun P_Cancer-py36_dev
+    exec "$@"
+
+# P_Cancer-vardict_dev
+%appenv P_Cancer-vardict_dev
+    source activate P_Cancer-vardict_dev
+%apphelp P_Cancer-vardict_dev
+    Runs P_Cancer-vardict_dev
+%apprun P_Cancer-vardict_dev
+    exec "$@"
+
+# P_Cancer-vep_dev
+%appenv P_Cancer-vep_dev
+    source activate P_Cancer-vep_dev
+%apphelp P_Cancer-vep_dev
+    Runs P_Cancer-vep_dev
+%apprun P_Cancer-vep_dev
+    exec "$@"
+
+# P_Cancer-vt_dev
+%appenv P_Cancer-vt_dev
+    source activate P_Cancer-vt_dev
+%apphelp P_Cancer-vt_dev
+    Runs P_Cancer-vt_dev
+%apprun P_Cancer-vt_dev
+    exec "$@"
+
+%runscript
+    exec echo "Try running with --app"

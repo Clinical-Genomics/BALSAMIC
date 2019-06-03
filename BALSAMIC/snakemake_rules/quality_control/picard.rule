@@ -15,143 +15,103 @@ def picard_flag(picarddup):
   else:
       return "TRUE"
 
-rule picard_FastqToSam_umi:
-    input:
-        fq1 = config["analysis"]["fastq_path"] + "{sample}_1.fastq.gz",
-        fq2 = config["analysis"]["fastq_path"] + "{sample}_2.fastq.gz",
-    output:
-        bam_dir + "{sample}.unalg.bam"
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
-    shell:
-        """
-source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar FastqToSam \
-O={output} \
-F1={input.fq1} \
-F2={input.fq2} \
-SM={wildcards.sample} \
-LB=Library1 \
-PU=Unit1 \
-PL=illumina
-        """
+rule MarkDuplicates:
+  input:
+    bam_dir + "{sample}.sorted.bam"
+  output:
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
+  log:
+    stats = bam_dir + "{sample}.sorted." + picarddup + ".txt"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    rm_dup = picard_flag(picarddup)
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+        "MarkDuplicates "
+        "INPUT={input} "
+        "OUTPUT={output.mrkdup} "
+        "VALIDATION_STRINGENCY=SILENT "
+        "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 "
+        "REMOVE_DUPLICATES={params.rm_dup} "
+        "METRICS_FILE='{log.stats}'; "
+    "samtools index {output.mrkdup}; "
+    "source deactivate; "
 
-rule picard_MarkIlluminaAdaptersi_umi:
-    input:
-        bam_dir + "{sample}.unalg.umi.bam"
-    output:
-        bam = bam_dir + "{sample}.unalg.umi.mrkadp.bam",
-        txt = bam_dir + "{sample}.unalg.umi.mrkadp.txt"
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
-    shell:
-        """
-source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MarkIlluminaAdapters \
-I={input} \
-O={output.bam} \
-M={output.txt}
-        """
+rule CollectHsMetrics:
+  input:
+    fadict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
+    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
+    bam = bam_dir + "{sample}.sorted.bam",
+    bammrkdup = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+  output:
+    unmrk = bam_dir + "{sample}.sorted.hsmetric",
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "BedToIntervalList "
+      "I={input.bed} "
+      "O={input.bam}.picard.bedintervals "
+      "SD={input.fadict}; "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectHsMetrics "
+      "BI={input.bam}.picard.bedintervals "
+      "TI={input.bam}.picard.bedintervals "
+      "I={input.bam} "
+      "O={output.unmrk} "
+      "COVERAGE_CAP=50000 "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectHsMetrics "
+      "BI={input.bam}.picard.bedintervals "
+      "TI={input.bam}.picard.bedintervals "
+      "I={input.bammrkdup} "
+      "O={output.mrkdup} "
+      "COVERAGE_CAP=50000 "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
+    "source deactivate; "
 
-rule picard_SamToFastq_umi:
-    input:
-        bam_dir + "{sample}.unalg.umi.mrkadp.bam"
-    output:
-        bam_dir + "{sample}.unalg.umi.mrkadp.fastq"
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
-    shell:
-        """
-source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
- I={input} \
- CLIPPING_ATTRIBUTE=XT \
- CLIPPING_ACTION=X \
- CLIPPING_MIN_LENGTH=36 \
- INCLUDE_NON_PF_READS=true \
- F={output} \
- INTERLEAVE=true
-        """
+rule CollectAlignmentSummaryMetrics:
+  input:
+    bam = bam_dir + "{sample}.sorted.bam",
+    fa = config["path"]["genomefa"] + config["references"]["genomefa"]
+  output:
+    bam_dir + "{sample}.sorted.alignmetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    adapter = config["QC"]["adapter"]
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectAlignmentSummaryMetrics "
+      "R={input.fa} "
+      "I={input.bam} "
+      "O={output} "
+      "ADAPTER_SEQUENCE={params.adapter} "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
+    "source deactivate; "
 
-rule picard_MergeBamAlignment_mrkadp_umi:
-    input:
-        aligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.sam",
-        unaligned = bam_dir + "{sample}.unalg.umi.bam"
-    output:
-        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.bam"
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
-        ref = config["path"]["genomefa"] + config["references"]["genomefa"]
-    shell:
-        """
-source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
-UNMAPPED={input.unaligned} \
-ALIGNED={input.aligned} \
-O={output} \
-R={params.ref} \
-CLIP_ADAPTERS=false \
-VALIDATION_STRINGENCY=SILENT \
-EXPECTED_ORIENTATIONS=FR \
-MAX_GAPS=-1 \
-SO=coordinate \
-ALIGNER_PROPER_PAIR_FLAGS=false \
-CREATE_INDEX=true
-        """
-
-rule picard_SamToFastq_cnsalg_umi:
-    input:
-        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
-    output:
-        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
-    shell:
-        """
-source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
-VALIDATION_STRINGENCY=SILENT \
-INPUT={input} \
-F={output} \
-INTERLEAVE=true \
-INCLUDE_NON_PF_READS=true \
-CREATE_INDEX=true
-        """
-
-rule picard_MergeBamAlignment_cnsalg_umi:
-    input:
-        aligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam",
-        unaligned = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
-    output:
-        bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
-        ref = config["path"]["genomefa"] + config["references"]["genomefa"]
-    shell:
-        """
-source activate {params.conda}; 
-java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
-VALIDATION_STRINGENCY=SILENT \
-UNMAPPED={input.unaligned} \
-ALIGNED={input.aligned} \
-OUTPUT={output} \
-REFERENCE_SEQUENCE={params.ref} \
-CLIP_ADAPTERS=false \
-ORIENTATIONS=FR \
-MAX_GAPS=-1 \
-SORT_ORDER=coordinate \
-ALIGNER_PROPER_PAIR_FLAGS=false \
-ATTRIBUTES_TO_RETAIN=X0 \
-ATTRIBUTES_TO_RETAIN=ZS \
-ATTRIBUTES_TO_RETAIN=ZI \
-ATTRIBUTES_TO_RETAIN=ZM \
-ATTRIBUTES_TO_RETAIN=ZC \
-ATTRIBUTES_TO_RETAIN=ZN \
-ATTRIBUTES_TO_REVERSE=ad \
-ATTRIBUTES_TO_REVERSE=bd \
-ATTRIBUTES_TO_REVERSE=cd \
-ATTRIBUTES_TO_REVERSE=ae \
-ATTRIBUTES_TO_REVERSE=be \
-ATTRIBUTES_TO_REVERSE=ce \
-CREATE_INDEX=true
-        """
+rule CollectInsertSizeMetrics:
+  input:
+    bam = bam_dir + "{sample}.sorted.bam"
+  output:
+    pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
+    txt = bam_dir + "{sample}.sorted.insertsizemetric"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard")
+  shell:
+    "source activate {params.conda};"
+    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+      "CollectInsertSizeMetrics "
+      "I={input.bam} "
+      "H={output.pdf} "
+      "O={output.txt} "
+      "M=0.01 "
+      "INCLUDE_DUPLICATES=TRUE "
+      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
+      "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
+    "source deactivate; "
