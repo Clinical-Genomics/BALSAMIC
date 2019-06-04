@@ -77,5 +77,5 @@ cmdline += " " + " >> " + sacct_file
 subprocess.call(cmdline, shell=True)
 subprocess.call("tail -n1 " +  sacct_file, shell=True)
 with open(sbatch_file, 'a') as f:
-    f.write(cmdline)
-    f.write(sys.executable)
+    f.write(cmdline + "\n")
+    f.write(sys.executable + "\n")
