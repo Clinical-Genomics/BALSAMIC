@@ -144,10 +144,9 @@ def get_package_split(conda_yamls):
         "sambamba", "strelka", "samtools", "tabix", "vardic"
     ]
 
-    pkgs = dict([[
-        y.split("=")[0], y.split("=")[1]
-    ] for y in set(chain.from_iterable([get_packages(s) for s in conda_yamls]))
-                 if y.split("=")[0] in pkgs])
+    pkgs = dict([[y.split("=")[0], y.split("=")[1]]
+                for y in set(chain.from_iterable([get_packages(s) for s in conda_yamls]))
+                if y.split("=")[0] in pkgs])
 
     return (pkgs)
 
@@ -211,11 +210,8 @@ def get_sbatchpy():
     Returns a string path for runSbatch.py
     """
 
-    try:
-        p = Path(__file__).parents[1]
-        sbatch = str(Path(p, 'commands/run/runSbatch.py'))
-    except OSError:
-        print("Couldn't locate sbatch submitter.")
+    p = Path(__file__).parents[1]
+    sbatch = str(Path(p, 'commands/run/runSbatch.py'))
 
     return sbatch
 

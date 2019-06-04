@@ -43,8 +43,8 @@ def conda_yaml():
     return {
         "balsamic": "BALSAMIC/conda_yaml/BALSAMIC.yaml",
         "cancer-core": "BALSAMIC/conda_yaml/Cancer-Core.yaml",
-        "cancer-p27": "BALSAMIC/conda_yaml/Cancer-p27.yaml",
-        "cancer-py36": "BALSAMIC/conda_yaml/Cacner-py36.yaml",
+        "cancer-p27": "BALSAMIC/conda_yaml/Cancer-py27.yaml",
+        "cancer-py36": "BALSAMIC/conda_yaml/Cancer-py36.yaml",
         "cancer-vardict": "BALSAMIC/conda_yaml/Cancer-vardict.yaml",
         "cancer-vep": "BALSAMIC/conda_yaml/Cancer-vep.yaml",
         "cancer-vt": "BALSAMIC/conda_yaml/Cancer-vt.yaml"

@@ -2,7 +2,7 @@ import json
 import pytest
 
 from BALSAMIC.tools import get_ref_path, iterdict
-from BALSAMIC.tools.cli_utils import SnakeMake, get_packages
+from BALSAMIC.tools.cli_utils import SnakeMake, get_packages, get_package_split
 
 
 def test_get_ref_path(config_files):
@@ -98,5 +98,22 @@ def test_get_pacakges_error(conda_yaml):
         invalid_yaml = "/tmp/balsamic.yaml"
 
         # WHEN passing this invalid path into get_packages
-        # THEN It shoudl raise the file not found error
+        # THEN It shoud raise the file not found error
         assert get_packages(invalid_yaml)
+
+
+def test_get_package_split(conda_yaml):
+    # GIVEN a list of conda config yaml file paths
+    yamls = conda_yaml.values()
+
+    # WHEN giving this list of yamls to get_packaged split
+    packages = get_package_split(yamls)
+
+    # THEN It should return a dictionary with tools information
+    assert isinstance(packages, dict)
+    assert "bwa" in packages
+    assert "bcftools" in packages
+    assert "cutadapt" in packages
+    assert "fastqc" in packages
+
+
