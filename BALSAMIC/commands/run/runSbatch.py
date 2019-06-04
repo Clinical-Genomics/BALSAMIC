@@ -61,11 +61,13 @@ if "BALSAMIC_CONTAINER" not in os.environ:
 else:
     container = os.getenv("BALSAMIC_CONTAINER")
 
-with open(os.path.join(scriptpath, "sbatch" + os.path.basename(jobscript)), 'a') as f:
+sbatch_script = os.path.join(scriptpath, "sbatch" + os.path.basename(jobscript))
+with open(sbatch_script, 'a') as f:
     f.write("#!/bin/bash" + "\n")
     if balsamic_status == "container":
-       f.write("function balsamic_run {{ singularity exec -B {bind_path} --app {main_env} {container} $@; }}" + "\n")
-       f.write("balsamic_run bash {jobscript}" + "\n")
+       f.write(f"function balsamic_run {{ singularity exec -B {bind_path} --app {main_env} {container} $@; }}" + "\n")
+       f.write(f"# Snakemake original script {jobscript}" + "\n")
+       f.write(f"balsamic_run bash {sbatch_script}" + "\n")
   
 scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
