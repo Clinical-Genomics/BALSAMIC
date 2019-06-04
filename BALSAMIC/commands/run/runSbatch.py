@@ -29,7 +29,8 @@ parser.add_argument(
     "--qos", default="low", help="QOS for sbatch jobs. [Default: low]")
 args = parser.parse_args()
 
-sample_config = json.load(open(args.sample_config))
+with open(args.sample_config) as f:
+  sample_config = json.load(f)
 
 jobscript = args.snakescript
 job_properties = read_job_properties(jobscript)
@@ -45,6 +46,14 @@ mail_user = job_properties["cluster"]["mail_user"]
 
 subprocess.call('cp ' + jobscript + ' ' + scriptpath + '/', shell=True)
 
+balsamic_status = os.getenv("BALSAMIC_STATUS","conda")
+
+with open(os.path.join(scriptpath, "sbatch" + os.path.basename(jobscript)), 'a') as f:
+    f.write("#!/bin/bash" + "\n")
+    if balsamic_status == "container":
+       f.write("function balsamic_run {{ singularity exec -B {singularity_bindpath} --app {singularity_main_env} {singularity_container} $@; }}" + "\n")
+       f.write("balsamic_run bash {jobscript}" + "\n")
+  
 scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
 jobscript = os.path.join(scriptpath, scriptname)
