@@ -2,7 +2,7 @@ import json
 import pytest
 
 from BALSAMIC.tools import get_ref_path, iterdict
-from BALSAMIC.tools.cli_utils import SnakeMake, get_packages, get_package_split
+from BALSAMIC.tools.cli_utils import SnakeMake, get_packages, get_package_split, get_snakefile
 
 
 def test_get_ref_path(config_files):
@@ -116,4 +116,13 @@ def test_get_package_split(conda_yaml):
     assert "cutadapt" in packages
     assert "fastqc" in packages
 
+def test_get_snakefile():
+    # GIVEN analysis_type for snakemake workflow
+    analysis_type = "paired"
 
+    # WHEN asking to see snakefile for paired
+    snakefile = get_snakefile(analysis_type)
+
+    #THEN it should return the snakefile path
+    assert snakefile.startswith('/')
+    assert "BALSAMIC/workflows/VariantCalling_paired" in snakefile

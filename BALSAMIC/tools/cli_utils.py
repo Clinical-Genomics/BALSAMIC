@@ -221,22 +221,16 @@ def get_snakefile(analysis_type):
     Return a string path for variant calling snakefile.
     """
 
-    try:
-        p = Path(__file__).parents[1]
-        if analysis_type == "paired":
-            snakefile = Path(p, 'workflows', 'VariantCalling_paired')
-        elif analysis_type == "single":
-            snakefile = Path(p, 'workflows', 'VariantCalling_single')
-        elif analysis_type == "qc":
-            snakefile = Path(p, 'workflows', 'Alignment')
-        elif analysis_type == "paired_umi":
-            snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
-        elif analysis_type == "single_umi":
-            snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
-        else:
-            raise ValueError("analysis_type should be single or paired")
-
-    except OSError:
-        print("Couldn't locate variant calling snakefile.")
+    p = Path(__file__).parents[1]
+    if analysis_type == "paired":
+        snakefile = Path(p, 'workflows', 'VariantCalling_paired')
+    elif analysis_type == "single":
+        snakefile = Path(p, 'workflows', 'VariantCalling_single')
+    elif analysis_type == "qc":
+        snakefile = Path(p, 'workflows', 'Alignment')
+    elif analysis_type == "paired_umi":
+        snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
+    elif analysis_type == "single_umi":
+        snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
 
     return str(snakefile)
