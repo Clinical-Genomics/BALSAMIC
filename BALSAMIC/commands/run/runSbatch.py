@@ -61,7 +61,7 @@ if "BALSAMIC_CONTAINER" not in os.environ:
 else:
     container = os.getenv("BALSAMIC_CONTAINER")
 
-sbatch_script = os.path.join(scriptpath, "sbatch" + os.path.basename(jobscript))
+sbatch_script = os.path.join(scriptpath, "sbatch." + os.path.basename(jobscript))
 with open(sbatch_script, 'a') as f:
     f.write("#!/bin/bash" + "\n")
     if balsamic_status == "container":
