@@ -3,6 +3,7 @@ import pytest
 
 from BALSAMIC.tools import get_ref_path, iterdict
 from BALSAMIC.tools.cli_utils import SnakeMake, get_packages, get_package_split, get_snakefile
+from BALSAMIC.tools.rule_utils import get_chrom, get_vcf, get_sample_type
 
 
 def test_get_ref_path(config_files):
@@ -116,6 +117,7 @@ def test_get_package_split(conda_yaml):
     assert "cutadapt" in packages
     assert "fastqc" in packages
 
+
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
     analysis_type = "paired"
@@ -123,6 +125,19 @@ def test_get_snakefile():
     # WHEN asking to see snakefile for paired
     snakefile = get_snakefile(analysis_type)
 
-    #THEN it should return the snakefile path
+    # THEN it should return the snakefile path
     assert snakefile.startswith('/')
     assert "BALSAMIC/workflows/VariantCalling_paired" in snakefile
+
+
+def test_get_chrom(config_files):
+    # Given a panel bed file
+    bed_file = config_files["panel_bed_file"]
+
+    # WHEN passing this bed file
+    chrom = get_chrom(bed_file)
+
+    # THEN It should return list of chrom presents in that bed file
+    for chr_num in range(1, 21):
+        assert str(chr_num) in chrom
+

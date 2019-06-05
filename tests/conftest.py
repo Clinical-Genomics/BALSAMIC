@@ -49,3 +49,99 @@ def conda_yaml():
         "cancer-vep": "BALSAMIC/conda_yaml/Cancer-vep.yaml",
         "cancer-vt": "BALSAMIC/conda_yaml/Cancer-vt.yaml"
     }
+
+
+@pytest.fixture(scope='session')
+def sample_config():
+    """
+    sample config dict to test workflow utils
+    """
+    test_config = {
+        "QC": {
+            "picard_rmdup": "False",
+            "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+            "min_seq_length": "25"
+        },
+        "vcf": {
+            "manta": {
+                "default": [
+                    "diploidSV.vcf.gz", "somaticSV.vcf.gz", "candidateSV.vcf.gz",
+                    "candidateSmallIndels.vcf.gz"
+                ],
+                "merged": "manta.vcf.gz",
+                "mutation": "somatic",
+                "type": "SV"
+            },
+            "manta_germline": {
+                "default": [
+                    "diploidSV.vcf.gz", "candidateSV.vcf.gz",
+                    "candidateSmallIndels.vcf.gz"
+                ],
+                "mutation": "germline",
+                "merged": "manta_germline.vcf.gz",
+                "type": "SV"
+            },
+            "strelka_germline": {
+                "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
+                "mutation": "germline",
+                "merged": "strelka_germline.vcf.gz",
+                "type": "SNV"
+            },
+            "strelka": {
+                "default": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
+                "mutation": "somatic",
+                "merged": "strelka.vcf.gz",
+                "type": "SNV"
+            },
+            "mutect": {
+                "default": "mutect.vcf.gz",
+                "mutation": "somatic",
+                "merged": "mutect.vcf.gz",
+                "type": "SNV"
+            },
+            "freebayes": {
+                "default": "freebayes.vcf.gz",
+                "mutation": "germline",
+                "merged": "freebayes.vcf.gz",
+                "type": "SNV"
+            },
+            "haplotypecaller": {
+                "default": "haplotypecaller.vcf.gz",
+                "mutation": "germline",
+                "merged": "haplotypecaller.vcf.gz",
+                "type": "SNV"
+            },
+            "vardict": {
+                "default": "vardict.vcf.gz",
+                "mutation": "somatic",
+                "merged": "vardict.vcf.gz",
+                "type": "SNV"
+            }
+        },
+        "analysis": {
+            "sample_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "/BALSAMIC/tests/test_data/",
+            "fastq_path": "/BALSAMIC/tests/test_data/id1/fastq/",
+            "script": "/BALSAMIC/tests/test_data/id1/scripts/",
+            "log": "/BALSAMIC/tests/test_data/id1/logs/",
+            "result": "/BALSAMIC/tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
+            "dag": "/BALSAMIC/tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+        },
+        "samples": {
+            "S1_R": {
+                "file_prefix": "S1_R",
+                "type": "tumor",
+                "readpair_suffix": ["1", "2"]
+            },
+            "S2_R": {
+                "file_prefix": "S2_R",
+                "type": "normal",
+                "readpair_suffix": ["1", "2"]
+            }
+        },
+    }
+
+    return test_config
