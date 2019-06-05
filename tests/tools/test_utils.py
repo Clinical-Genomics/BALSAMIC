@@ -120,14 +120,18 @@ def test_get_package_split(conda_yaml):
 
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
-    analysis_type = "paired"
+    analysis_types = ["paired", "single", "qc", "paired_umi", "single_umi"]
 
     # WHEN asking to see snakefile for paired
-    snakefile = get_snakefile(analysis_type)
+    for analysis_type in analysis_types:
+        snakefile = get_snakefile(analysis_type)
 
-    # THEN it should return the snakefile path
-    assert snakefile.startswith('/')
-    assert "BALSAMIC/workflows/VariantCalling_paired" in snakefile
+        # THEN it should return the snakefile path
+        assert snakefile.startswith('/')
+        if analysis_type != 'qc':
+            assert "BALSAMIC/workflows/VariantCalling_" + analysis_type in snakefile
+        else:
+            assert "BALSAMIC/workflows/Alignment" in snakefile
 
 
 def test_get_chrom(config_files):
