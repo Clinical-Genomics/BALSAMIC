@@ -62,12 +62,14 @@ else:
     container = os.getenv("BALSAMIC_CONTAINER")
 
 sbatch_script = os.path.join(scriptpath, "sbatch." + os.path.basename(jobscript))
+sm_script = os.path.join(scriptpath, os.path.basename(jobscript))
+
 with open(sbatch_script, 'a') as f:
     f.write("#!/bin/bash" + "\n")
     if balsamic_status == "container":
        f.write(f"function balsamic_run {{ singularity exec -B {bind_path} --app {main_env} {container} $@; }}" + "\n")
        f.write(f"# Snakemake original script {jobscript}" + "\n")
-       f.write(f"balsamic_run bash {sbatch_script}" + "\n")
+       f.write(f"balsamic_run bash {sm_script}" + "\n")
   
 scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
@@ -94,7 +96,8 @@ if dependencies:
     cmdline += '--dependency=' + \
         ','.join(["afterok:%s" % d for d in dependencies])
 
-cmdline += " " + jobscript + " | cut -d' ' -f 4"
+#cmdline += " " + jobscript + " | cut -d' ' -f 4"
+cmdline += " " + sbatch_script + " | cut -d' ' -f 4"
 
 cmdline += " " + " >> " + sacct_file
 
