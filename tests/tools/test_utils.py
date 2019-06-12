@@ -3,7 +3,8 @@ import pytest
 
 from BALSAMIC.tools import get_ref_path, iterdict
 from BALSAMIC.tools.cli_utils import SnakeMake, get_packages, get_package_split, get_snakefile
-from BALSAMIC.tools.rule_utils import get_chrom, get_vcf, get_sample_type
+from BALSAMIC.tools.rule_utils import get_chrom, get_vcf, get_sample_type, get_conda_env, \
+    get_picard_mrkdup
 
 
 def test_get_ref_path(config_files):
@@ -66,7 +67,7 @@ def test_snakemake_slurm():
     snakemake_slurm.script_path = "scripts/"
     snakemake_slurm.result_path = "results/"
     snakemake_slurm.qos = "normal"
-    snakemake_slurm.sm_opt = ("containers",)
+    snakemake_slurm.sm_opt = ("containers", )
     snakemake_slurm.run_analysis = True
 
     # WHEN calling the build command
@@ -153,7 +154,8 @@ def test_get_vcf(sample_config):
     variant_callers = ['mutect', 'vardict', 'manta']
 
     # WHEN passing args to that function
-    vcf_list = get_vcf(sample_config, variant_callers, [sample_config["analysis"]["sample_id"]])
+    vcf_list = get_vcf(sample_config, variant_callers,
+                       [sample_config["analysis"]["sample_id"]])
 
     # THEN It should return the list of vcf file names
     assert any("mutect" in vcf_name for vcf_name in vcf_list)
@@ -162,11 +164,30 @@ def test_get_vcf(sample_config):
 
 
 def test_get_sample_type(sample_config):
-    # GIVEN a sample_config dict, bio_type
+    # GIVEN a sample_config dict, bio_type as tumor
     bio_type = 'tumor'
 
     # WHEN calling get_sample_type with bio_type
     sample_id = get_sample_type(sample_config["samples"], bio_type)
 
-    # THEN It should return the type of the sample
+    # THEN It should return the tumor samples id
     assert sample_id == ['S1_R']
+
+
+def test_get_conda_env(sample_config):
+    # GIVEN a balsamic_env yaml file path
+    balsamic_env = "BALSAMIC_env.yaml"
+
+    # WHEN passing pkg name with this yaml file
+    conda_env = get_conda_env(balsamic_env, 'ensembl-vep')
+
+    # THEN It should return the conda env which has that pkg
+    assert "Cancer-vep" in conda_env
+
+
+def test_get_picard_mrkdup(sample_config):
+    # WHEN passing sample_config
+    picard_str = get_picard_mrkdup(sample_config)
+
+    # THEN It will return the picard str as rmdup
+    assert "rmdup" == picard_str

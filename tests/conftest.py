@@ -58,28 +58,35 @@ def sample_config():
     """
     sample_config = {
         "QC": {
-            "picard_rmdup": "False",
-            "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+            "picard_rmdup": "TRUE",
+            "adapter":
+            "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
             "min_seq_length": "25"
         },
         "vcf": {
             "manta": {
                 "default": [
-                    "diploidSV.vcf.gz", "somaticSV.vcf.gz", "candidateSV.vcf.gz",
-                    "candidateSmallIndels.vcf.gz"
+                    "diploidSV.vcf.gz", "somaticSV.vcf.gz",
+                    "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"
                 ],
-                "merged": "manta.vcf.gz",
-                "mutation": "somatic",
-                "type": "SV"
+                "merged":
+                "manta.vcf.gz",
+                "mutation":
+                "somatic",
+                "type":
+                "SV"
             },
             "manta_germline": {
                 "default": [
                     "diploidSV.vcf.gz", "candidateSV.vcf.gz",
                     "candidateSmallIndels.vcf.gz"
                 ],
-                "mutation": "germline",
-                "merged": "manta_germline.vcf.gz",
-                "type": "SV"
+                "mutation":
+                "germline",
+                "merged":
+                "manta_germline.vcf.gz",
+                "type":
+                "SV"
             },
             "strelka_germline": {
                 "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
@@ -119,16 +126,26 @@ def sample_config():
             }
         },
         "analysis": {
-            "sample_id": "id1",
-            "analysis_type": "paired",
-            "analysis_dir": "/BALSAMIC/tests/test_data/",
-            "fastq_path": "/BALSAMIC/tests/test_data/id1/fastq/",
-            "script": "/BALSAMIC/tests/test_data/id1/scripts/",
-            "log": "/BALSAMIC/tests/test_data/id1/logs/",
-            "result": "/BALSAMIC/tests/test_data/id1/analysis/",
-            "config_creation_date": "yyyy-mm-dd xx",
-            "BALSAMIC_version": "2.9.8",
-            "dag": "/BALSAMIC/tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+            "sample_id":
+            "id1",
+            "analysis_type":
+            "paired",
+            "analysis_dir":
+            "/BALSAMIC/tests/test_data/",
+            "fastq_path":
+            "/BALSAMIC/tests/test_data/id1/fastq/",
+            "script":
+            "/BALSAMIC/tests/test_data/id1/scripts/",
+            "log":
+            "/BALSAMIC/tests/test_data/id1/logs/",
+            "result":
+            "/BALSAMIC/tests/test_data/id1/analysis/",
+            "config_creation_date":
+            "yyyy-mm-dd xx",
+            "BALSAMIC_version":
+            "2.9.8",
+            "dag":
+            "/BALSAMIC/tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
         },
         "samples": {
             "S1_R": {
