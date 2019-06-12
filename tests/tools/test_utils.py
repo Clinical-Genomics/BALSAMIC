@@ -38,6 +38,7 @@ def test_snakemake_local():
     snakemake_local.snakefile = "worflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
+    snakemake_local.forceall = True
 
     # WHEN calling the build command
     shell_command = snakemake_local.build_cmd()
@@ -48,6 +49,7 @@ def test_snakemake_local():
     assert "sample_config.json" in shell_command
     assert "/tmp/snakemake" in shell_command
     assert "--dryrun" in shell_command
+    assert "--forceall" in shell_command
 
 
 def test_snakemake_slurm():
@@ -145,3 +147,26 @@ def test_get_chrom(config_files):
     for chr_num in range(1, 21):
         assert str(chr_num) in chrom
 
+
+def test_get_vcf(sample_config):
+    # GIVEN a sample_config dict, varinat callers list
+    variant_callers = ['mutect', 'vardict', 'manta']
+
+    # WHEN passing args to that function
+    vcf_list = get_vcf(sample_config, variant_callers, [sample_config["analysis"]["sample_id"]])
+
+    # THEN It should return the list of vcf file names
+    assert any("mutect" in vcf_name for vcf_name in vcf_list)
+    assert any("vardict" in vcf_name for vcf_name in vcf_list)
+    assert any("manta" in vcf_name for vcf_name in vcf_list)
+
+
+def test_get_sample_type(sample_config):
+    # GIVEN a sample_config dict, bio_type
+    bio_type = 'tumor'
+
+    # WHEN calling get_sample_type with bio_type
+    sample_id = get_sample_type(sample_config["samples"], bio_type)
+
+    # THEN It should return the type of the sample
+    assert sample_id == ['S1_R']

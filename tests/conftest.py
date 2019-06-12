@@ -56,7 +56,7 @@ def sample_config():
     """
     sample config dict to test workflow utils
     """
-    test_config = {
+    sample_config = {
         "QC": {
             "picard_rmdup": "False",
             "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
@@ -144,4 +144,4 @@ def sample_config():
         },
     }
 
-    return test_config
+    return sample_config
