@@ -174,15 +174,15 @@ def test_get_sample_type(sample_config):
     assert sample_id == ['S1_R']
 
 
-def test_get_conda_env(sample_config):
-    # GIVEN a balsamic_env yaml file path
-    balsamic_env = "BALSAMIC_env.yaml"
+# def test_get_conda_env(sample_config):
+#     # GIVEN a balsamic_env yaml file path
+#     balsamic_env = "BALSAMIC_env.yaml"
 
-    # WHEN passing pkg name with this yaml file
-    conda_env = get_conda_env(balsamic_env, 'ensembl-vep')
+#     # WHEN passing pkg name with this yaml file
+#     conda_env = get_conda_env(balsamic_env, 'ensembl-vep')
 
-    # THEN It should return the conda env which has that pkg
-    assert "Cancer-vep" in conda_env
+#     # THEN It should return the conda env which has that pkg
+#     assert "Cancer-vep" in conda_env
 
 
 def test_get_picard_mrkdup(sample_config):
