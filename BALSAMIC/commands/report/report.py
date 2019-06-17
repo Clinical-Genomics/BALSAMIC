@@ -14,9 +14,23 @@ from pylatex import Document, PageStyle, Section, Subsection, Subsubsection, Tab
     LineBreak, SmallText, Tabularx, TextColor, MultiColumn, simple_page_number, NewPage, StandAloneGraphic
 from pylatex.utils import italic, NoEscape, bold
 
-from BALSAMIC.tools.cli_utils import get_sample_name
 from BALSAMIC.commands.config.sample import get_config
 from BALSAMIC.tools.cli_utils import get_packages, get_package_split
+
+
+def get_sample_name(json_in):
+    """
+    Get sample name from input json file
+    """
+
+    try:
+        with open(os.path.abspath(json_in), "r") as fn:
+            sample_json = json.load(fn)
+            sample_name = sample_json["analysis"]["sample_id"]
+    except OSError:
+        print("Couldn't load json file or file path is not absolute")
+
+    return sample_name
 
 
 @click.command("report", short_help="Report generator for workflow results")
