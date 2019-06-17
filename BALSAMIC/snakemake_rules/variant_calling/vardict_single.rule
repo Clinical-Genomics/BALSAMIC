@@ -3,11 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
+from BALSAMIC tools import get_conda_env, get_chrom
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
 
 var_caller = "vardict"
 vardict_dir = var_caller + "/"

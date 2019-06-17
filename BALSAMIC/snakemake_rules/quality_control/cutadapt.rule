@@ -4,9 +4,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC tools import get_conda_env
 
-cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 
 # remove adapter from paired end reads
 rule cutadapt:

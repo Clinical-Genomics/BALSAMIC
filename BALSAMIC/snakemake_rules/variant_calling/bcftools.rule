@@ -5,9 +5,8 @@ from BALSAMIC.tools import get_vcf_files
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC tools import get_conda_env
 
-vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_type = "SNV"
 
