@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC tools import get_conda_env, get_chrom, get_picard_mrkdup
+from BALSAMIC.tools import get_conda_env, get_chrom, get_picard_mrkdup
 
 
 chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])

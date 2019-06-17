@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC tools import get_conda_env
+from BALSAMIC.tools import get_conda_env
 
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format

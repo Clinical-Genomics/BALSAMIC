@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC tools import get_conda_env
+from BALSAMIC.tools import get_conda_env
 
 
 rule vep:
