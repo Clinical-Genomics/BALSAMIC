@@ -3,10 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.tools import get_conda_env, get_picard_mrkdup
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_caller = 'freebayes'
 freebayes_dir = var_caller + "/"
