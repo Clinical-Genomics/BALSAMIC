@@ -3,9 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.tools import get_conda_env, get_picard_mrkdup
 
-result_dir = get_result_dir(config) + "/"
 picarddup = get_picard_mrkdup(config)
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format

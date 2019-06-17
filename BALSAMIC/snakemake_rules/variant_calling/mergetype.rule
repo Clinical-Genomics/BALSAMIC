@@ -4,9 +4,8 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.tools import get_sample_type
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.tools import get_conda_env, get_picard_mrkdup
 
-bam_dir = get_result_dir(config) + "/bam/"
 picarddup = get_picard_mrkdup(config)
 
 rule mergeBam_normal_gatk:
