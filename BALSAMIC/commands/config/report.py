@@ -14,12 +14,40 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.commands.config.sample import get_config, write_json
 from BALSAMIC.tools.rule_utils import get_picard_mrkdup
-from BALSAMIC.tools.cli_utils import get_sample_name
-from BALSAMIC.tools.cli_utils import get_analysis_dir
 from BALSAMIC import __version__ as bv
 
 from datetime import datetime
 from collections import defaultdict
+
+
+def get_sample_name(json_in):
+    """
+    Get sample name from input json file
+    """
+
+    try:
+        with open(os.path.abspath(json_in), "r") as fn:
+            sample_json = json.load(fn)
+            sample_name = sample_json["analysis"]["sample_id"]
+    except OSError:
+        print("Couldn't load json file or file path is not absolute")
+
+    return sample_name
+
+
+def get_analysis_dir(json_in, dir_type):
+    """
+    Get analysis dir from input json file
+    """
+
+    try:
+        with open(os.path.abspath(json_in), "r") as fn:
+            sample_json = json.load(fn)
+            analysis_dir = sample_json["analysis"][dir_type]
+    except OSError:
+        print("Couldn't load json file or file path is not absolute")
+
+    return analysis_dir
 
 
 @click.command(
