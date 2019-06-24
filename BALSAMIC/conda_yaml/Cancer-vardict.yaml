@@ -1,8 +1,0 @@
-channels:
-  - bioconda
-  - conda-forge
-dependencies:
-  - bcftools=1.6
-  - samtools=1.6
-  - vardict=2017.11.23=pl5.22.0r3.4.1_0
-  - tabix=0.2.5
