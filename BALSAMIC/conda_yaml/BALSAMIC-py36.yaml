@@ -1,4 +1,3 @@
-name: BALSAMIC-py36
 channels:
   - conda-forge
   - bioconda

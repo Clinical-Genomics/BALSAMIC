@@ -1,4 +1,3 @@
-name: BALSAMIC-base
 channels:
   - conda-forge
   - bioconda
