@@ -97,3 +97,34 @@ def test_run_invalid(invoke_cli):
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
+
+
+def test_initiate(invoke_cli):
+    # GIVEN initiate subcommand
+    # WHEN invoking initiate subcommand
+    result = invoke_cli(['initiate'])
+
+    # THEN It should show config options in result
+    assert 'reference' in result.output
+    assert result.exit_code == 0
+
+
+def test_initiate_reference(invoke_cli):
+    # GIVEN initiate reference subcommand
+    # WHEN invoking initiate reference subcommand
+    result = invoke_cli(['initiate', 'reference', '--help'])
+
+    # THEN It should show config options in result
+    assert '--output-dir' in result.output
+    assert '--output-config' in result.output
+    assert result.exit_code == 0
+
+
+def test_initiate_reference_missing_opt(invoke_cli):
+    # GIVEN initiate reference subcommand
+    # WHEN invoking initiate reference subcommand
+    result = invoke_cli(['initiate', 'reference'])
+
+    # THEN It should show config options in result
+    assert 'Error: Missing option ' in result.output
+    assert result.exit_code == 2
