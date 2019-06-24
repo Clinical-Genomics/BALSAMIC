@@ -20,3 +20,4 @@ dependencies:
   - vardict-java=1.6.0=0
   - ensembl-vep=94.5
   - cnvkit=0.9.4a0
+  - cutadapt=1.15
