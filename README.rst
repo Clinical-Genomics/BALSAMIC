@@ -28,3 +28,8 @@ is using Snakemake as its core, but the goal is to make easily extensible to use
 Nextflow.
 
 Essentially, one can run the sample using workflows available within this package and standard Snakemake cli.
+
+Development and branching model
+======
+
+BALSAMIC is using a development structure similar to GitHub Flow: https://guides.github.com/introduction/flow/ , where a development branch is maintained and features branch are merged into development branch. For deployment, a pull request is created from development branch into master. It is then validated, verified, and a bumpversion justified. Finally, the code owner(s) will approve the merge and merge it into the master branch and release.
