@@ -41,13 +41,9 @@ def conda_yaml():
     conda env config file paths
     """
     return {
-        "balsamic": "BALSAMIC/conda_yaml/BALSAMIC.yaml",
-        "cancer-core": "BALSAMIC/conda_yaml/Cancer-Core.yaml",
-        "cancer-p27": "BALSAMIC/conda_yaml/Cancer-py27.yaml",
-        "cancer-py36": "BALSAMIC/conda_yaml/Cancer-py36.yaml",
-        "cancer-vardict": "BALSAMIC/conda_yaml/Cancer-vardict.yaml",
-        "cancer-vep": "BALSAMIC/conda_yaml/Cancer-vep.yaml",
-        "cancer-vt": "BALSAMIC/conda_yaml/Cancer-vt.yaml"
+        "balsamic-base": "BALSAMIC/conda_yaml/BALSAMIC-base.yaml",
+        "balsamic-p27": "BALSAMIC/conda_yaml/BALSAMIC-py27.yaml",
+        "balsamic-py36": "BALSAMIC/conda_yaml/BALSAMIC-py36.yaml",
     }
 
 
