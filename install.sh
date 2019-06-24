@@ -2,10 +2,11 @@
 set -eo pipefail
 shopt -s expand_aliases
 
-_red='['$(date) $(whoami)']''\033[0;31m';
-_green='['$(date) $(whoami)']''\033[0;32m';
-_yellow='['$(date) $(whoami)']''\033[1;33m';
-_nocol='['$(date) $(whoami)']''\033[0m';
+_log="[$(date) $(whoami)] "
+_red=${_log}'\033[0;31m';
+_green=${_log}'\033[0;32m';
+_yellow=${_log}'\033[1;33m';
+_nocol='\033[0m';
 _condaprefix=D
 _condadate=$(date +%y%m%d)
 
@@ -88,29 +89,28 @@ _env_name=${_condaprefix}_BALSAMIC${_env_name_suffix}
 _balsamic_envs=${PWD}'/BALSAMIC_env.yaml'
 _balsamic_ruledir=${PWD}'/BALSAMIC/'
 
-echo -e "\n${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
+echo -e "${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
 cat > BALSAMIC/config/install.json << EOF
 {
     "conda_env_yaml": "${_balsamic_envs}",
     "rule_directory": "${_balsamic_ruledir}"
 }
 EOF
-echo -e "${_yellow}"
 cat BALSAMIC/config/install.json
 
-echo -e "\n${_green}Creating conda env ${_env_name}${_nocol}"
+echo -e "${_green}Creating conda env ${_env_name}${_nocol}"
 conda env create -f BALSAMIC/conda_yaml/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
 
-echo -e "\n${_green}Activating ${_env_name}${_nocol}"
-conda activate ${_env_name}
+echo -e "${_green}Activating ${_env_name}${_nocol}"
+echo $_env_name
+source activate ${_env_name}
 
-echo -e "\n${_green}Installing BALSAMIC${_nocol}"
-echo -e "\n${_yellow}\tpip install --editable .${_nocol}"
+echo -e "${_green}Installing BALSAMIC${_nocol}"
+echo -e "${_yellow}\tpip install --editable .${_nocol}"
 pip install -r requirements.txt --editable .
 
-echo -e "\n${_green}Installting environments for the workflow.${_nocol}"
+echo -e "${_green}Installting environments for the workflow.${_nocol}"
 
-set -x
 balsamic install -s ${_env_name_suffix} \
   --overwrite-env \
   --env-type ${_condaprefix} \
@@ -118,16 +118,14 @@ balsamic install -s ${_env_name_suffix} \
   --input-conda-yaml BALSAMIC/conda_yaml/BALSAMIC-py36.yaml \
   --env-dir-prefix ${_condapath} \
   --packages-output-yaml ${_balsamic_envs}
-set +x
 
 gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
 
-conda activate ${gatk_env}
-
+source activate ${gatk_env}
 gatk3-register BALSAMIC/assests/GenomeAnalysisTK.jar
 
-echo -e "\n${_green}Copying custom Picard to relevant conda environment.${_nocol}"
-conda activate ${_env_name}
+echo -e "${_green}Copying custom Picard to relevant conda environment.${_nocol}"
+source activate ${_env_name}
 picard_PATH=BALSAMIC/assests/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
 picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
 picard_destination=${picard_conda_env}/share/
@@ -136,7 +134,7 @@ cp $picard_PATH ${picard_destination}
 ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
 
 echo -e "\n${_green}Install finished. Make sure you set reference.json and cluster.json.${_nocol}"
-echo -e "\n${_green}To start working with BALSAMIC, run: conda activate ${_env_name}.${_nocol}"
+echo -e "\n${_green}To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
 
 unset _red
 unset _green
