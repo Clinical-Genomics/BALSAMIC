@@ -85,7 +85,7 @@ fi
 # Conda env naming convention: [P,D]_BALSAMIC_%DATE
 # P: Production, D: Development 
 _env_name_suffix=_${_condadate} 
-_env_name=${_condaprefix}_BALSAMIC${_env_name_suffix}
+_env_name=${_condaprefix}_BALSAMIC-base${_env_name_suffix}
 _balsamic_envs=${PWD}'/BALSAMIC_env.yaml'
 _balsamic_ruledir=${PWD}'/BALSAMIC/'
 
