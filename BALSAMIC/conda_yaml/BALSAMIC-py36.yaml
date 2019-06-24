@@ -1,4 +1,4 @@
-name: balsamic_env
+name: BALSAMIC-py36
 channels:
   - conda-forge
   - bioconda
@@ -7,7 +7,6 @@ channels:
 dependencies:
   - python=3.6 
   - pip=9.0.3 
-  - snakemake=4.8.0
   - bcftools=1.6
   - bwa=0.7.15
   - fastqc=0.11.5
