@@ -4,6 +4,7 @@ Entry cli for balsamic
 import click
 
 # Subcommands
+from BALSAMIC.commands.initiate import initiate as initiate_command
 from BALSAMIC.commands.install import install as install_command
 from BALSAMIC.commands.run import run_analysis as analysis_command
 from BALSAMIC.commands.config import config as config_command
@@ -24,6 +25,7 @@ from BALSAMIC import __version__
 def cli(context):
     "BALSAMIC"
 
+cli.add_command(initiate_command)
 cli.add_command(install_command)
 cli.add_command(analysis_command)
 cli.add_command(config_command)
