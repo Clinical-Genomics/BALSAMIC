@@ -59,7 +59,7 @@ Include: yum
     export PATH=$PATH:/usr/local/anaconda/bin
     export BALSAMIC_STATUS='container'
 
-# P_BALSAMIC_dev
+# P_BALSAMIC-base_dev
 %appenv P_BALSAMIC-base_dev
     source activate P_BALSAMIC-base_dev
 %apphelp P_BALSAMIC-base_dev
