@@ -9,7 +9,7 @@ from BALSAMIC.commands.run.run_analysis import run_analysis as analysis_command
 from BALSAMIC.commands.config.base import config as config_command
 
 # CLI commands and decorators
-from BALSAMIC.utils.cli_utils import add_doc as doc
+from BALSAMIC.utils.cli import add_doc as doc
 
 # Get version
 from BALSAMIC import __version__
