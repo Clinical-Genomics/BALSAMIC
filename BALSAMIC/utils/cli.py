@@ -131,7 +131,7 @@ def get_packages(yaml_file):
     return (pkgs)
 
 
-def get_package_split(conda_yamls):
+def get_package_split(condas):
     '''
     Get a list of conda env files, and extract pacakges
 
@@ -145,7 +145,7 @@ def get_package_split(conda_yamls):
     ]
 
     pkgs = dict([[y.split("=")[0], y.split("=")[1]]
-                for y in set(chain.from_iterable([get_packages(s) for s in conda_yamls]))
+                for y in set(chain.from_iterable([get_packages(s) for s in condas]))
                 if y.split("=")[0] in pkgs])
 
     return (pkgs)

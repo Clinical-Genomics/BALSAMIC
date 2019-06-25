@@ -10,7 +10,8 @@ from pathlib import Path
 import click
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.tools import get_chrom, get_package_split, get_ref_path
+from BALSAMIC.utils.cli import get_package_split, get_ref_path
+from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
 
 
@@ -392,7 +393,7 @@ it is. So this is just a placeholder for future.
 
     conda_env = glob.glob(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "../..",
-                     "conda_yaml/*.yaml"))
+                     "conda/*.yaml"))
 
     bioinfo_config = dict()
     bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)

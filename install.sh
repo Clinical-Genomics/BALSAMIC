@@ -99,7 +99,7 @@ EOF
 cat BALSAMIC/config/install.json
 
 echo -e "${_green}Creating conda env ${_env_name}${_nocol}"
-conda env create -f BALSAMIC/conda_yaml/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
+conda env create -f BALSAMIC/conda/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
 
 echo -e "${_green}Activating ${_env_name}${_nocol}"
 echo $_env_name
@@ -114,23 +114,23 @@ echo -e "${_green}Installting environments for the workflow.${_nocol}"
 balsamic install -s ${_env_name_suffix} \
   --overwrite-env \
   --env-type ${_condaprefix} \
-  --input-conda-yaml BALSAMIC/conda_yaml/BALSAMIC-py27.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/BALSAMIC-py36.yaml \
+  --input-conda-yaml BALSAMIC/conda/BALSAMIC-py27.yaml \
+  --input-conda-yaml BALSAMIC/conda/BALSAMIC-py36.yaml \
   --env-dir-prefix ${_condapath} \
   --packages-output-yaml ${_balsamic_envs}
 
 gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
 
 source activate ${gatk_env}
-gatk3-register BALSAMIC/assests/GenomeAnalysisTK.jar
+gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
 
 echo -e "${_green}Copying custom Picard to relevant conda environment.${_nocol}"
 source activate ${_env_name}
-picard_PATH=BALSAMIC/assests/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
+picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
 picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
 picard_destination=${picard_conda_env}/share/
 cp $picard_PATH ${picard_destination}
-# link picard from assests to conda's share path
+# link picard from assets to conda's share path
 ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
 
 echo -e "\n${_green}Install finished. Make sure you set reference.json and cluster.json.${_nocol}"
