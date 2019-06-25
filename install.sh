@@ -122,15 +122,15 @@ balsamic install -s ${_env_name_suffix} \
 gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
 
 source activate ${gatk_env}
-gatk3-register BALSAMIC/assests/GenomeAnalysisTK.jar
+gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
 
 echo -e "${_green}Copying custom Picard to relevant conda environment.${_nocol}"
 source activate ${_env_name}
-picard_PATH=BALSAMIC/assests/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
+picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
 picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
 picard_destination=${picard_conda_env}/share/
 cp $picard_PATH ${picard_destination}
-# link picard from assests to conda's share path
+# link picard from assets to conda's share path
 ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
 
 echo -e "\n${_green}Install finished. Make sure you set reference.json and cluster.json.${_nocol}"
