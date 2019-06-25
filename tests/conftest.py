@@ -3,7 +3,7 @@ import pytest
 from functools import partial
 from click.testing import CliRunner
 
-from BALSAMIC.commands import cli
+from BALSAMIC.commands.base import cli
 
 
 @pytest.fixture
@@ -36,14 +36,14 @@ def config_files():
 
 
 @pytest.fixture(scope='session')
-def conda_yaml():
+def conda():
     """
     conda env config file paths
     """
     return {
-        "balsamic-base": "BALSAMIC/conda_yaml/BALSAMIC-base.yaml",
-        "balsamic-p27": "BALSAMIC/conda_yaml/BALSAMIC-py27.yaml",
-        "balsamic-py36": "BALSAMIC/conda_yaml/BALSAMIC-py36.yaml",
+        "balsamic-base": "BALSAMIC/conda/BALSAMIC-base.yaml",
+        "balsamic-p27": "BALSAMIC/conda/BALSAMIC-py27.yaml",
+        "balsamic-py36": "BALSAMIC/conda/BALSAMIC-py36.yaml",
     }
 
 

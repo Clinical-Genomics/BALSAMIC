@@ -43,7 +43,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ## [2.9.2] - 2019-02-04
 ### Added
 - CNVkit single sample mode now in workflow
-- MVL list from cheng et al. 2015 moved to assests
+- MVL list from cheng et al. 2015 moved to assets
 
 ## [2.9.1] - 2019-01-22
 ### Added
@@ -227,7 +227,7 @@ Variant reporter patch and cli update
 - CALLER annotation added to SNV/INDEL callers
 - exome specific option for strelka paired
 - create\_config subcommand is now more granular, it accepts all enteries from sample.json as commandline arguments
-- Added tabQuery to the assests as a tool to query the tabulated output of summarized VCF
+- Added tabQuery to the assets as a tool to query the tabulated output of summarized VCF
 - Added MQ annotation field to Mutect2 output see #67
 ### Changed
 - Leaner VCF output from mutect2 with coverage and MQ annotation according to #64

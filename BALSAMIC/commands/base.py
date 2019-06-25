@@ -4,14 +4,13 @@ Entry cli for balsamic
 import click
 
 # Subcommands
-from BALSAMIC.commands.initiate import initiate as initiate_command
-from BALSAMIC.commands.install import install as install_command
-from BALSAMIC.commands.run import run_analysis as analysis_command
-from BALSAMIC.commands.config import config as config_command
-from BALSAMIC.commands.report import report as report_command
+from BALSAMIC.commands.initiate.initiate import initiate as initiate_command
+from BALSAMIC.commands.install.install import install as install_command
+from BALSAMIC.commands.run.run_analysis import run_analysis as analysis_command
+from BALSAMIC.commands.config.base import config as config_command
 
 # CLI commands and decorators
-from BALSAMIC.tools.cli_utils import add_doc as doc
+from BALSAMIC.utils.cli import add_doc as doc
 
 # Get version
 from BALSAMIC import __version__
@@ -29,4 +28,3 @@ cli.add_command(initiate_command)
 cli.add_command(install_command)
 cli.add_command(analysis_command)
 cli.add_command(config_command)
-cli.add_command(report_command)

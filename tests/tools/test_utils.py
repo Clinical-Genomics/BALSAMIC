@@ -1,9 +1,9 @@
 import json
 import pytest
 
-from BALSAMIC.tools import get_ref_path, iterdict
-from BALSAMIC.tools.cli_utils import SnakeMake, get_packages, get_package_split, get_snakefile
-from BALSAMIC.tools.rule_utils import get_chrom, get_vcf, get_sample_type, get_conda_env, \
+from BALSAMIC.utils.cli import get_ref_path, iterdict
+from BALSAMIC.utils.cli import SnakeMake, get_packages, get_package_split, get_snakefile
+from BALSAMIC.utils.rule import get_chrom, get_vcf, get_sample_type, get_conda_env, \
     get_picard_mrkdup
 
 
@@ -84,9 +84,9 @@ def test_snakemake_slurm():
     assert "containers" in shell_command
 
 
-def test_get_packages(conda_yaml):
+def test_get_packages(conda):
     # GIVEN a conda yaml file
-    balsamic_yaml = conda_yaml['balsamic-base']
+    balsamic_yaml = conda['balsamic-base']
 
     # WHEN passing conda yaml file to get_packages
     packages = get_packages(balsamic_yaml)
@@ -96,7 +96,7 @@ def test_get_packages(conda_yaml):
     assert any("python=3" in tool for tool in packages)
 
 
-def test_get_pacakges_error(conda_yaml):
+def test_get_pacakges_error(conda):
     with pytest.raises(Exception, match=r"No such file or directory"):
         # GIVEN a wrong path for config yaml file
         invalid_yaml = "/tmp/balsamic.yaml"
@@ -106,9 +106,9 @@ def test_get_pacakges_error(conda_yaml):
         assert get_packages(invalid_yaml)
 
 
-def test_get_package_split(conda_yaml):
+def test_get_package_split(conda):
     # GIVEN a list of conda config yaml file paths
-    yamls = conda_yaml.values()
+    yamls = conda.values()
 
     # WHEN giving this list of yamls to get_packaged split
     packages = get_package_split(yamls)

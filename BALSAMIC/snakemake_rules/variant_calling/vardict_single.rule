@@ -3,7 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_conda_env, get_chrom
+from BALSAMIC.utils.rule import get_conda_env, get_chrom
 
 
 var_caller = "vardict"
@@ -58,7 +58,7 @@ rule vardict_simple:
     vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
   params:
     name = config["analysis"]["sample_id"],
-    MVL = os.path.join(config["rule_directory"], "assests", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
+    MVL = os.path.join(config["rule_directory"], "assets", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
   shell:
     "source activate {params.conda};"

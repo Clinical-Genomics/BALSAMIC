@@ -1,5 +1,5 @@
-from BALSAMIC.commands.install import conda_default_prefix, conda_env_check, get_prefix
-from unittest import TestCase, mock
+from BALSAMIC.commands.install.install import conda_default_prefix, conda_env_check, get_prefix
+from unittest import mock
 import subprocess
 import yaml
 

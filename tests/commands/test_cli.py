@@ -17,7 +17,6 @@ def test_config(invoke_cli):
 
     # THEN It should show config options in result
     assert 'sample' in result.output
-    assert 'report' in result.output
 
 
 def test_sample(invoke_cli):
