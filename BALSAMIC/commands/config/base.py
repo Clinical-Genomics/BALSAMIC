@@ -18,3 +18,4 @@ def config(context):
     "create config files required for running the pipeline."
     pass
 
+config.add_command(sample_command)
