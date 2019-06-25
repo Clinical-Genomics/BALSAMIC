@@ -36,14 +36,14 @@ def config_files():
 
 
 @pytest.fixture(scope='session')
-def conda_yaml():
+def conda():
     """
     conda env config file paths
     """
     return {
-        "balsamic-base": "BALSAMIC/conda_yaml/BALSAMIC-base.yaml",
-        "balsamic-p27": "BALSAMIC/conda_yaml/BALSAMIC-py27.yaml",
-        "balsamic-py36": "BALSAMIC/conda_yaml/BALSAMIC-py36.yaml",
+        "balsamic-base": "BALSAMIC/conda/BALSAMIC-base.yaml",
+        "balsamic-p27": "BALSAMIC/conda/BALSAMIC-py27.yaml",
+        "balsamic-py36": "BALSAMIC/conda/BALSAMIC-py36.yaml",
     }
 
 

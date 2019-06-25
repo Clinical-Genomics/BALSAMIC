@@ -89,13 +89,13 @@ def conda_remove(env_prefix):
 #      raise e.output.decode()
 
 
-def conda_install(conda_yaml, env_prefix):
+def conda_install(conda, env_prefix):
     """
     Install conda environment
     """
 
     shellcmd = [
-        "conda", "env", "create", "--file", conda_yaml,
+        "conda", "env", "create", "--file", conda,
         "--prefix", env_prefix
     ]
 
@@ -151,7 +151,7 @@ def conda_install(conda_yaml, env_prefix):
     'Environment type. P: Production, D: Development, S: Stage. It will be added to filename: "[D|P|S]_"+filename+env-name-suffix'
 )
 @click.pass_context
-def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
+def install(context, input_conda, env_dir_prefix, overwrite_env,
             env_name_suffix, packages_output_yaml, env_type):
     """
     Installs conda environments from a conda yaml file.
@@ -162,7 +162,7 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
 
     conda_packages = dict()
 
-    for fname in input_conda_yaml:
+    for fname in input_conda:
 
         if os.path.exists(fname):
 
