@@ -99,7 +99,7 @@ EOF
 cat BALSAMIC/config/install.json
 
 echo -e "${_green}Creating conda env ${_env_name}${_nocol}"
-conda env create -f BALSAMIC/conda_yaml/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
+conda env create -f BALSAMIC/conda/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
 
 echo -e "${_green}Activating ${_env_name}${_nocol}"
 echo $_env_name
@@ -114,8 +114,8 @@ echo -e "${_green}Installting environments for the workflow.${_nocol}"
 balsamic install -s ${_env_name_suffix} \
   --overwrite-env \
   --env-type ${_condaprefix} \
-  --input-conda-yaml BALSAMIC/conda_yaml/BALSAMIC-py27.yaml \
-  --input-conda-yaml BALSAMIC/conda_yaml/BALSAMIC-py36.yaml \
+  --input-conda-yaml BALSAMIC/conda/BALSAMIC-py27.yaml \
+  --input-conda-yaml BALSAMIC/conda/BALSAMIC-py36.yaml \
   --env-dir-prefix ${_condapath} \
   --packages-output-yaml ${_balsamic_envs}
 
