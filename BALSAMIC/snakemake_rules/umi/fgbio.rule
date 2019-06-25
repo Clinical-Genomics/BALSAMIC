@@ -2,7 +2,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.rule_utils import get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
 
 rule fgbio_ExtractUmisFromBam:
