@@ -21,3 +21,4 @@ dependencies:
   - ensembl-vep=94.5
   - cnvkit=0.9.4a0
   - cutadapt=1.15
+  - pindel=0.2.5b9
