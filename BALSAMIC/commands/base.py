@@ -4,12 +4,12 @@ Entry cli for balsamic
 import click
 
 # Subcommands
-from BALSAMIC.commands.install import install as install_command
-from BALSAMIC.commands.run import run_analysis as analysis_command
-from BALSAMIC.commands.config import config as config_command
+from BALSAMIC.commands.install.install import install as install_command
+from BALSAMIC.commands.run.run_analysis import run_analysis as analysis_command
+from BALSAMIC.commands.config.base import config as config_command
 
 # CLI commands and decorators
-from BALSAMIC.tools.cli_utils import add_doc as doc
+from BALSAMIC.utils.cli_utils import add_doc as doc
 
 # Get version
 from BALSAMIC import __version__
@@ -22,6 +22,7 @@ from BALSAMIC import __version__
         SomAtic MutatIons in Cancer""".format(version=__version__))
 def cli(context):
     "BALSAMIC"
+
 
 cli.add_command(install_command)
 cli.add_command(analysis_command)

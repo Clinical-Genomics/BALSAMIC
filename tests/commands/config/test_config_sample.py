@@ -2,10 +2,10 @@ import json
 from datetime import datetime
 import pytest
 
-from BALSAMIC.commands.config import get_config, write_json, merge_json, \
+from BALSAMIC.commands.config.sample import get_config, write_json, merge_json, \
     set_panel_bed, get_output_config, get_sample_config, get_analysis_type, \
     check_exist
-from BALSAMIC.tools import iterdict
+from BALSAMIC.utils.cli_utils import iterdict
 
 
 def test_get_config(config_files):
