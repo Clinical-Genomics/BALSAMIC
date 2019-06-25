@@ -3,13 +3,12 @@ import click
 
 from BALSAMIC.commands.config.sample import sample as sample_command
 
-
 @click.group()
 @click.pass_context
 
 
 def config(context):
-    "create config files required for running the pipeline and reporting it"
+    "create config files required for running the pipeline."
     pass
 
 
