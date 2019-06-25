@@ -10,8 +10,8 @@ from pathlib import Path
 import click
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.utils.cli_utils import get_package_split, get_ref_path
-from BALSAMIC.utils.rule_utils import get_chrom
+from BALSAMIC.utils.cli import get_package_split, get_ref_path
+from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
 
 
