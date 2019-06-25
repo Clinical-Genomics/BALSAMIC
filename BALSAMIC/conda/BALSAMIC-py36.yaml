@@ -1,7 +1,7 @@
 channels:
-  - conda-forge
   - bioconda
   - defaults
+  - conda-forge
 
 dependencies:
   - python=3.6 
@@ -22,3 +22,4 @@ dependencies:
   - cnvkit=0.9.4a0
   - cutadapt=1.15
   - pindel=0.2.5b9
+  - multiqc=1.7 
