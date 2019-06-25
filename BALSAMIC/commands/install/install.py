@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 import os
 import subprocess
-import hashlib
 import yaml
 import click
-import logging
-import sys
 import json
 
 
@@ -16,8 +13,8 @@ def get_packages(yaml_handle):
     Output: list of installed packages
     """
     try:
-        yaml_in = yaml.load(yaml_handle)
-    except yaml.YAMLError as e:
+        yaml_in = yaml.safe_load(yaml_handle)
+    except yaml.YAMLError:
         print("Error while reading yaml file")
 
     installed_packages = [s.split("=")[0] for s in yaml_in["dependencies"]]
@@ -63,8 +60,8 @@ def get_prefix(yaml_handle):
     Output: conda env prefix string
     """
     try:
-        env_prefix = yaml.load(yaml_handle)
-    except yaml.YAMLError as e:
+        env_prefix = yaml.safe_load(yaml_handle)
+    except yaml.YAMLError:
         print("Error while reading yaml file")
 
     if "prefix" in env_prefix:
@@ -77,7 +74,7 @@ def get_prefix(yaml_handle):
 
 def conda_remove(env_prefix):
     """
-    Remove conda environment 
+    Remove conda environment
     """
 
     shellcmd = ["conda", "env", "remove", "--prefix", env_prefix, "--yes"]
@@ -94,7 +91,7 @@ def conda_remove(env_prefix):
 
 def conda_install(conda_yaml, env_prefix):
     """
-    Install conda environment 
+    Install conda environment
     """
 
     shellcmd = [
