@@ -3,7 +3,7 @@ import pytest
 from functools import partial
 from click.testing import CliRunner
 
-from BALSAMIC.commands import cli
+from BALSAMIC.commands.base import cli
 
 
 @pytest.fixture

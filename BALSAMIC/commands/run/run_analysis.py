@@ -5,9 +5,9 @@ import json
 import click
 
 # CLI commands and decorators
-from BALSAMIC.tools.cli_utils import createDir
-from BALSAMIC.tools.cli_utils import get_sbatchpy
-from BALSAMIC.tools.cli_utils import get_snakefile, SnakeMake
+from BALSAMIC.utils.cli_utils import createDir
+from BALSAMIC.utils.cli_utils import get_sbatchpy
+from BALSAMIC.utils.cli_utils import get_snakefile, SnakeMake
 from BALSAMIC.commands.config.sample import get_config
 
 

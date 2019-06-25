@@ -3,9 +3,9 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_vcf
-from BALSAMIC.tools import get_result_dir
-from BALSAMIC.tools import get_chrom
+from BALSAMIC.utils.rule_utils import get_vcf
+from BALSAMIC.utils.rule_utils import get_result_dir
+from BALSAMIC.utils.rule_utils import get_chrom
 
 shell.prefix("set -eo pipefail; ")
 
