@@ -1,9 +1,9 @@
 import json
 import pytest
 
-from BALSAMIC.tools import get_ref_path, iterdict
-from BALSAMIC.tools.cli_utils import SnakeMake, get_packages, get_package_split, get_snakefile
-from BALSAMIC.tools.rule_utils import get_chrom, get_vcf, get_sample_type, get_conda_env, \
+from BALSAMIC.utils.cli_utils import get_ref_path, iterdict
+from BALSAMIC.utils.cli_utils import SnakeMake, get_packages, get_package_split, get_snakefile
+from BALSAMIC.utils.rule_utils import get_chrom, get_vcf, get_sample_type, get_conda_env, \
     get_picard_mrkdup
 
 
