@@ -9,7 +9,7 @@ from BALSAMIC.utils.rule import get_conda_env
 var_caller = "pindel"
 pindel_dir = vcf_dir + var_caller + "/"
 
-rule manta_somatic_single:
+rule pindel_somatic_single:
   input:
     fa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bamT = bam_dir + "tumor.merged.bam",
@@ -18,7 +18,7 @@ rule manta_somatic_single:
   params:
     sample_id = config["analysis"]["sample_id"],
     config = pindel_dir + config["analysis"]["sample_id"] + ".config",
-    tmpdir = pindle_dir,
+    tmpdir = pindel_dir,
     conda = get_conda_env(config["conda_env_yaml"],"pindel")
   threads: 4
   shell:
@@ -27,5 +27,5 @@ rule manta_somatic_single:
     "<( echo {input.bamT} ) \\"
     "<( samtools stats {input.bamT} | grep ^SN | cut -f 2- | grep \"insert size average\" | awk \'{{print $NF}}\' ) \\"
     "<( echo {params.sample_id} ) > {params.config}; " 
-    "pindel -T {threads} -i {params.config} -f {input.ref} -o {params.tmpdir} && touch {output.final};"
+    "pindel -T {threads} -i {params.config} -f {input.fa} -o {params.tmpdir} && touch {output.final};"
     "source deactivate; "
