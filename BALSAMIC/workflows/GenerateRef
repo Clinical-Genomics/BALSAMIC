@@ -1,0 +1,194 @@
+#! python
+# syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Sarath Murugan"
+
+
+# LINKS TO REFERENCE FILES
+REF_GENOME_LINK = "https://storage.googleapis.com/gatk-legacy-bundles/b37/human_g1k_v37_decoy.fasta.gz"
+TH_GENOME_LINK = "ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz"
+DBSNP_LINK = "https://storage.googleapis.com/gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz"
+TG_HIGH_LINK = "https://storage.googleapis.com/gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz"
+COSMIC_DB_LINK = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v89/VCF/CosmicCodingMuts.vcf.gz"
+
+# VCF files list for wildcards
+VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
+       '1kg_phase1_snps_high_confidence_b37.vcf', 'cosmic_coding_muts_v89.vcf']
+
+BASEDIR = config['output']
+COSMICDB_KEY = config['cosmic_key']
+
+# OUTPUT FILE NAMES
+GENOME_FASTA = BASEDIR + "reference/genome/human_g1k_v37_decoy.fasta"
+GENOME_FASTA_INDEX = BASEDIR + "reference/genome/human_g1k_v37_decoy.fasta.fai"
+GENOME_DICT = BASEDIR + "reference/genome/human_g1k_v37_decoy.dict"
+VCF_DIR = BASEDIR + "reference/variants/"
+DBSNP_VCF = BASEDIR + "reference/variants/dbsnp_grch37_b138.vcf"
+TH_GENOME_VCF = BASEDIR + "reference/variants/1k_genome_wgs_p1_v3_all_sites.vcf"
+TG_HIG_VCF = BASEDIR + "reference/variants/1kg_phase1_snps_high_confidence_b37.vcf"
+COSMICDB_VCF = BASEDIR + "reference/variants/cosmic_coding_muts_v89.vcf"
+VEP_DIR = BASEDIR + "reference/vep/"
+
+
+##########################################################
+# Generating Reference files for BALSAMIC pipeline
+#
+##########################################################
+
+rule all:
+    input:
+        GENOME_FASTA,
+        GENOME_FASTA_INDEX,
+        expand(VCF_DIR + "{vcf}.gz", vcf=VCF),
+        expand( VCF_DIR + "{vcf}.gz.tbi", vcf=VCF),
+        expand(GENOME_FASTA + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
+        GENOME_DICT,
+        VEP_DIR     
+
+
+##########################################################
+# Download the reference genome, variant db 
+#                       - .fasta, dbsnp.vcf, 1kg.vcf
+##########################################################
+
+rule download_reference:
+    params:
+        ref_genome = REF_GENOME_LINK,
+        dbsnp = DBSNP_LINK,
+        th_genome = TH_GENOME_LINK,
+        tg_high = TG_HIGH_LINK
+    output:
+        ref_fasta = GENOME_FASTA,
+        dbsnp_vcf = DBSNP_VCF,
+        tg_vcf = TH_GENOME_VCF,
+        tg_high_vcf = TG_HIG_VCF
+    shell:
+        "wget {params.ref_genome} -O {output.ref_fasta}.gz; gunzip {output.ref_fasta}.gz;"
+        "wget {params.dbsnp} -O {output.dbsnp_vcf}.gz; gunzip {output.dbsnp_vcf}.gz;"
+        "wget {params.th_genome} -O {output.tg_vcf}.gz; gunzip {output.tg_vcf}.gz;"
+        "wget {params.tg_high} -O {output.tg_high_vcf}.gz; gunzip {output.tg_high_vcf}.gz;"
+
+
+##########################################################
+# Download cosmic data using basic authentication 
+#
+##########################################################
+
+rule cosmicdb_download:
+    output:
+        COSMICDB_KEY
+    run:
+        import requests
+
+        ## request the download url link
+        response = requests.get(COSMIC_DB, headers={'Authorization': 'Basic %s'%COSMICDB_KEY })
+        download_url = response.json()["url"]
+
+        ## request the download file 
+        vcf = requests.get(download_url)
+
+        ## write the file 
+        with open(str(output)+'.gz', "wb") as fh:
+          fh.write(vcf.content)
+
+        ## unzip the file for indexing
+        shell("gunzip {output}.gz;")
+
+
+##########################################################
+# Bgzipping and tabix the vcf files
+# 
+##########################################################
+
+rule bgzip_tabix:
+    input: 
+        VCF_DIR + "{vcf}"
+    params:
+        type = 'vcf'    
+    output:
+        VCF_DIR + "{vcf}.gz",
+        VCF_DIR + "{vcf}.gz.tbi"
+    log:
+        VCF_DIR + "{vcf}.gz_tbi.log"
+    shell:
+        "bgzip {input} && tabix -p {params.type} {input}.gz 2> {log} "
+
+
+##########################################################
+# Create BWA Index for reference genome
+#
+##########################################################
+
+rule bwa_index:
+    input:
+        GENOME_FASTA
+    output:
+        expand(GENOME_FASTA + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
+    log:
+        GENOME_FASTA + ".bwa_index.log"
+    shell:
+        "bwa index -a bwtsw {input} 2> {log} "
+
+
+##########################################################
+# Create index for fasta file - .fai
+# 
+##########################################################
+
+rule samtools_index_fasta:
+    input:
+        GENOME_FASTA
+    output:
+        GENOME_FASTA_INDEX
+    log:
+        GENOME_FASTA + ".faidx.log"
+    shell:
+        "samtools faidx {input} 2> {log} "
+
+
+# ##########################################################
+# # create reference dictionary using picard
+# # 
+# ##########################################################
+
+rule picard_ref_dict:
+    input:
+        GENOME_FASTA
+    output:
+        GENOME_DICT
+    log:
+        GENOME_FASTA + ".ref_dict.log"
+    shell:
+        "picard CreateSequenceDictionary "
+          " REFERENCE={input} " 
+          " OUTPUT={output} 2> {log} "
+
+
+##########################################################
+# ENSEMBL VEP - download and install vep package, 
+#                 cache coversion
+##########################################################
+
+rule vep_install:
+    params:
+        species = "homo_sapiens",
+        assembly = "GRCh37",
+        plugins = "all"
+    output:
+        VEP_DIR
+    log:
+        VEP_DIR + "vep_install_cache.log"
+    shell:
+        "vep_install --SPECIES {params.species} "
+          " --AUTO cf "
+          " --ASSEMBLY {params.assembly} "
+          " --CACHEDIR {output} "
+          " --PLUGINS {params.plugins} "
+          " --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log} "
+
+##########################################################
+# Writing reference json file 
+#
+##########################################################
+
