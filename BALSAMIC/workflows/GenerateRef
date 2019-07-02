@@ -20,15 +20,15 @@ BASEDIR = config['output']
 COSMICDB_KEY = config['cosmic_key']
 
 # OUTPUT FILE NAMES
-GENOME_FASTA = BASEDIR + "reference/genome/human_g1k_v37_decoy.fasta"
-GENOME_FASTA_INDEX = BASEDIR + "reference/genome/human_g1k_v37_decoy.fasta.fai"
-GENOME_DICT = BASEDIR + "reference/genome/human_g1k_v37_decoy.dict"
-VCF_DIR = BASEDIR + "reference/variants/"
-DBSNP_VCF = BASEDIR + "reference/variants/dbsnp_grch37_b138.vcf"
-TH_GENOME_VCF = BASEDIR + "reference/variants/1k_genome_wgs_p1_v3_all_sites.vcf"
-TG_HIG_VCF = BASEDIR + "reference/variants/1kg_phase1_snps_high_confidence_b37.vcf"
-COSMICDB_VCF = BASEDIR + "reference/variants/cosmic_coding_muts_v89.vcf"
-VEP_DIR = BASEDIR + "reference/vep/"
+GENOME_FASTA = BASEDIR + "/genome/human_g1k_v37_decoy.fasta"
+GENOME_FASTA_INDEX = BASEDIR + "/genome/human_g1k_v37_decoy.fasta.fai"
+GENOME_DICT = BASEDIR + "/genome/human_g1k_v37_decoy.dict"
+VCF_DIR = BASEDIR + "/variants/"
+DBSNP_VCF = BASEDIR + "/variants/dbsnp_grch37_b138.vcf"
+TH_GENOME_VCF = BASEDIR + "/variants/1k_genome_wgs_p1_v3_all_sites.vcf"
+TG_HIG_VCF = BASEDIR + "/variants/1kg_phase1_snps_high_confidence_b37.vcf"
+COSMICDB_VCF = BASEDIR + "/variants/cosmic_coding_muts_v89.vcf"
+VEP_DIR = BASEDIR + "/vep/"
 
 
 ##########################################################
@@ -44,7 +44,7 @@ rule all:
         expand( VCF_DIR + "{vcf}.gz.tbi", vcf=VCF),
         expand(GENOME_FASTA + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
         GENOME_DICT,
-        VEP_DIR     
+        VEP_DIR
 
 
 ##########################################################
@@ -176,7 +176,7 @@ rule vep_install:
         assembly = "GRCh37",
         plugins = "all"
     output:
-        VEP_DIR
+        directory(VEP_DIR)
     log:
         VEP_DIR + "vep_install_cache.log"
     shell:

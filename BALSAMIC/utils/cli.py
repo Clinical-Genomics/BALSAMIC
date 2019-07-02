@@ -131,6 +131,15 @@ def get_packages(yaml_file):
     return (pkgs)
 
 
+def write_json(json_out, output_config):
+
+    try:
+        with open(output_config, "w") as fn:
+            json.dump(json_out, fn)
+    except OSError as error:
+        raise error
+
+
 def get_package_split(condas):
     '''
     Get a list of conda env files, and extract pacakges
