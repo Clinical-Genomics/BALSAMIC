@@ -2,6 +2,8 @@
 # syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+import os
+
 __author__ = "Sarath Murugan"
 
 
@@ -16,7 +18,7 @@ COSMIC_DB_LINK = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
        '1kg_phase1_snps_high_confidence_b37.vcf', 'cosmic_coding_muts_v89.vcf']
 
-BASEDIR = config['output']
+BASEDIR = os.path.abspath(config['output'])
 COSMICDB_KEY = config['cosmic_key']
 
 # OUTPUT FILE NAMES
@@ -29,22 +31,18 @@ TH_GENOME_VCF = BASEDIR + "/variants/1k_genome_wgs_p1_v3_all_sites.vcf"
 TG_HIG_VCF = BASEDIR + "/variants/1kg_phase1_snps_high_confidence_b37.vcf"
 COSMICDB_VCF = BASEDIR + "/variants/cosmic_coding_muts_v89.vcf"
 VEP_DIR = BASEDIR + "/vep/"
+REFERENCE_JSON = BASEDIR + "/reference.json"
 
 
 ##########################################################
 # Generating Reference files for BALSAMIC pipeline
 #
 ##########################################################
+singularity: config['singularity']
 
 rule all:
     input:
-        GENOME_FASTA,
-        GENOME_FASTA_INDEX,
-        expand(VCF_DIR + "{vcf}.gz", vcf=VCF),
-        expand( VCF_DIR + "{vcf}.gz.tbi", vcf=VCF),
-        expand(GENOME_FASTA + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
-        GENOME_DICT,
-        VEP_DIR
+        REFERENCE_JSON
 
 
 ##########################################################
@@ -76,13 +74,16 @@ rule download_reference:
 ##########################################################
 
 rule cosmicdb_download:
+    params:
+        cosmic_db = COSMIC_DB_LINK,
+        cosmicdb_key = COSMICDB_KEY
     output:
-        COSMICDB_KEY
+        COSMICDB_VCF
     run:
         import requests
 
         ## request the download url link
-        response = requests.get(COSMIC_DB, headers={'Authorization': 'Basic %s'%COSMICDB_KEY })
+        response = requests.get(params.cosmic_db, headers={'Authorization': 'Basic %s' % params.cosmicdb_key })
         download_url = response.json()["url"]
 
         ## request the download file 
@@ -147,10 +148,10 @@ rule samtools_index_fasta:
         "samtools faidx {input} 2> {log} "
 
 
-# ##########################################################
-# # create reference dictionary using picard
-# # 
-# ##########################################################
+##########################################################
+# create reference dictionary using picard
+# 
+##########################################################
 
 rule picard_ref_dict:
     input:
@@ -191,4 +192,37 @@ rule vep_install:
 # Writing reference json file 
 #
 ##########################################################
+
+rule write_json:
+    input:
+        reference_genome = GENOME_FASTA,
+        refgenome_fai = GENOME_FASTA_INDEX,
+        variants = expand(VCF_DIR + "{vcf}.gz", vcf=VCF),
+        variants_idx = expand( VCF_DIR + "{vcf}.gz.tbi", vcf=VCF),
+        bwa_index = expand(GENOME_FASTA + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
+        refgenome_dict = GENOME_DICT,
+        vep = VEP_DIR
+    params:
+        dbsnp_vcf = DBSNP_VCF,
+        th_genome_vcf = TH_GENOME_VCF,
+        tg_high_vcf = TG_HIG_VCF,
+        cosmic_vcf = COSMICDB_VCF
+    output:
+        REFERENCE_JSON
+    run:
+        import json
+
+        ref_json = dict()
+        ref_json['reference'] = {
+            "reference_genome": input.reference_genome,
+            "dbsnp": params.dbsnp_vcf,
+            "1kg_snps_all": params.th_genome_vcf,
+            "1kg_snps_high": params.tg_high_vcf,
+            "cosmic": params.cosmic_vcf,
+            "vep": input.vep
+        }
+
+        with open(str(output), "w") as fh:
+            json.dump(ref_json, fh, indent=4)
+
 
