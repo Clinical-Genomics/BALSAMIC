@@ -11,7 +11,7 @@ from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.commands.config.sample import get_config
 
 
-@click.command("run", short_help="Run BALSAMIC on a provided config file")
+@click.command("analysis", short_help="Run the analysis on a provided sample config-file")
 @click.option(
     '-a',
     '--analysis-type',
@@ -78,9 +78,9 @@ from BALSAMIC.commands.config.sample import get_config
               multiple=True,
               help='Pass these options directly to snakemake')
 @click.pass_context
-def run_analysis(context, snake_file, sample_config, run_mode, cluster_config,
-                 run_analysis, log_file, force_all, snakemake_opt,
-                 analysis_type, qos):
+def analysis(context, snake_file, sample_config, run_mode, cluster_config,
+             run_analysis, log_file, force_all, snakemake_opt,
+             analysis_type, qos):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
