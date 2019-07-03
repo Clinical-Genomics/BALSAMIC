@@ -19,7 +19,7 @@ VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
        '1kg_phase1_snps_high_confidence_b37.vcf', 'cosmic_coding_muts_v89.vcf']
 
 BASEDIR = os.path.abspath(config['output'])
-COSMICDB_KEY = config['cosmic_key']
+COSMICDB_KEY = config['cosmic_key'] 
 
 # OUTPUT FILE NAMES
 GENOME_FASTA = BASEDIR + "/genome/human_g1k_v37_decoy.fasta"
@@ -34,12 +34,15 @@ VEP_DIR = BASEDIR + "/vep/"
 REFERENCE_JSON = BASEDIR + "/reference.json"
 
 
+if 'singularity' in config:
+    singularity: config['singularity']
+
+
+
 ##########################################################
 # Generating Reference files for BALSAMIC pipeline
 #
 ##########################################################
-singularity: config['singularity']
-
 rule all:
     input:
         REFERENCE_JSON

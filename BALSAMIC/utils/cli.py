@@ -135,7 +135,7 @@ def write_json(json_out, output_config):
 
     try:
         with open(output_config, "w") as fn:
-            json.dump(json_out, fn)
+            json.dump(json_out, fn, indent=4)
     except OSError as error:
         raise error
 
@@ -211,5 +211,7 @@ def get_snakefile(analysis_type):
         snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
     elif analysis_type == "single_umi":
         snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
+    elif analysis_type == "generate_ref":
+        snakefile = Path(p, 'workflows', 'GenerateRef')
 
     return str(snakefile)
