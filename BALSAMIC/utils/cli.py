@@ -215,3 +215,14 @@ def get_snakefile(analysis_type):
         snakefile = Path(p, 'workflows', 'GenerateRef')
 
     return str(snakefile)
+
+
+def get_config(config_name):
+    """
+    Return a string path for config file.
+    """
+
+    p = Path(__file__).parents[1]
+    config_file = str(Path(p, 'config', config_name + ".json"))
+
+    return config_file

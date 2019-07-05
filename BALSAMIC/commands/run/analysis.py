@@ -8,7 +8,7 @@ import click
 from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_sbatchpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
-from BALSAMIC.commands.config.sample import get_config
+from BALSAMIC.utils.cli import get_config
 
 
 @click.command("analysis", short_help="Run the analysis on a provided sample config-file")

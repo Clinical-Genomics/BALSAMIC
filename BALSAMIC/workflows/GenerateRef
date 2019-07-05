@@ -2,7 +2,7 @@
 # syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-import os
+from BALSAMIC.utils.rule import get_conda_env
 
 __author__ = "Sarath Murugan"
 
@@ -18,7 +18,7 @@ COSMIC_DB_LINK = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
        '1kg_phase1_snps_high_confidence_b37.vcf', 'cosmic_coding_muts_v89.vcf']
 
-BASEDIR = os.path.abspath(config['output'])
+BASEDIR = config['output']
 COSMICDB_KEY = config['cosmic_key'] 
 
 # OUTPUT FILE NAMES
@@ -36,7 +36,6 @@ REFERENCE_JSON = BASEDIR + "/reference.json"
 
 if 'singularity' in config:
     singularity: config['singularity']
-
 
 
 ##########################################################

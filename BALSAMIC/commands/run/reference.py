@@ -3,8 +3,8 @@
 import click
 
 from BALSAMIC.utils.cli import get_sbatchpy
-from BALSAMIC.utils.cli import get_snakefile, SnakeMake
-from BALSAMIC.commands.config.sample import get_config
+from BALSAMIC.utils.cli import get_snakefile, SnakeMake, get_config
+
 
 
 @click.command('reference', short_help="Run the GenerateRef workflow")
