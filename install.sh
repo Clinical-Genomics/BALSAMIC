@@ -63,8 +63,13 @@ fi
 # Check if container flag is specified
 if [[ $cFlag ]]
 then
-  echo -e "\n${_green}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14.${_nocol}"
-  singularity pull shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
+  if [[ -f BALSAMIC_miniconda3_4_6_14.sif ]];
+  then
+    echo -e "\n${_green}Container for miniconda3 4.6.14 exists.${_nocol}"
+  else
+    echo -e "\n${_green}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14.${_nocol}"
+    singularity pull shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
+  fi
   function conda() {
     singularity run --bind ${_condapath} BALSAMIC_miniconda3_4_6_14.sif conda "$@"
   }
