@@ -63,8 +63,13 @@ fi
 # Check if container flag is specified
 if [[ $cFlag ]]
 then
-  echo -e "\n${_green}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14.${_nocol}"
-  singularity pull shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
+  if [[ -f BALSAMIC_miniconda3_4_6_14.sif ]];
+  then
+    echo -e "\n${_green}Container for miniconda3 4.6.14 exists.${_nocol}"
+  else
+    echo -e "\n${_green}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14.${_nocol}"
+    singularity pull shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
+  fi
   function conda() {
     singularity run --bind ${_condapath} BALSAMIC_miniconda3_4_6_14.sif conda "$@"
   }
@@ -119,7 +124,7 @@ balsamic install -s ${_env_name_suffix} \
   --env-dir-prefix ${_condapath} \
   --packages-output-yaml ${_balsamic_envs}
 
-gatk_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
+gatk_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
 
 source activate ${gatk_env}
 gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
@@ -127,7 +132,7 @@ gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
 echo -e "${_green}Copying custom Picard to relevant conda environment.${_nocol}"
 source activate ${_env_name}
 picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
-picard_conda_env=`python -c 'from BALSAMIC.tools import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
+picard_conda_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
 picard_destination=${picard_conda_env}/share/
 cp $picard_PATH ${picard_destination}
 # link picard from assets to conda's share path
