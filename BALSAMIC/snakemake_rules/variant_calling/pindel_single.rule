@@ -23,9 +23,9 @@ rule pindel_somatic_single:
   threads: 4
   shell:
     "source activate {params.conda};"
-    "paste -d\"\\t\" \\ "
-    "<( echo {input.bamT} ) \\"
-    "<( samtools stats {input.bamT} | grep ^SN | cut -f 2- | grep \"insert size average\" | awk \'{{print $NF}}\' ) \\"
+    "paste -d\"\\t\" "
+    "<( echo {input.bamT} ) "
+    "<( samtools stats {input.bamT} | grep ^SN | cut -f 2- | grep \"insert size average\" | awk \'{{print $NF}}\' ) "
     "<( echo {params.sample_id} ) > {params.config}; " 
     "pindel -T {threads} -i {params.config} -f {input.fa} -o {params.tmpdir} && touch {output.final};"
     "source deactivate; "
