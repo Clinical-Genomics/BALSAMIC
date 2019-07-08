@@ -33,6 +33,7 @@ cosmicdb = basedir + "/variants/cosmic_coding_muts_v89.vcf"
 vep_dir = basedir + "/vep/"
 reference_json = basedir + "/reference.json"
 
+shell.prefix("set -eo pipefail; ")
 
 if 'singularity' in config:
     singularity: config['singularity']
@@ -63,6 +64,7 @@ rule download_reference:
         dbsnp = dbsnp,
         vcf_1kg = vcf_1kg,
         hc_vcf_1kg = hc_vcf_1kg
+    threads: 4
     shell:
         "wget {params.reference_genome} -O {output.reference_genome}.gz && gunzip {output.reference_genome}.gz;"
         "wget {params.dbsnp} -O {output.dbsnp}.gz; gunzip {output.dbsnp}.gz;"
