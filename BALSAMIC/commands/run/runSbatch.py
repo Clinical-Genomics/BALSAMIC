@@ -46,36 +46,38 @@ mail_user = job_properties["cluster"]["mail_user"]
 subprocess.call('cp ' + jobscript + ' ' + scriptpath + '/', shell=True)
 
 balsamic_status = os.getenv("BALSAMIC_STATUS","conda")
-if "BALSAMIC_BIND_PATH" not in os.environ:
-    raise ValueError("BALSAMIC_BIND_PATH environment variable was not found")
-else:
-    bind_path = os.getenv("BALSAMIC_BIND_PATH")
+if "BALSAMIC_STATUS" == "container":
+  if "BALSAMIC_BIND_PATH" not in os.environ:
+      raise ValueError("BALSAMIC_BIND_PATH environment variable was not found")
+  else:
+      bind_path = os.getenv("BALSAMIC_BIND_PATH")
 
-if "BALSAMIC_MAIN_ENV" not in os.environ:
-    raise ValueError("BALSAMIC_MAIN_ENV environment variable was not found")
-else:
-    main_env = os.getenv("BALSAMIC_MAIN_ENV")
+  if "BALSAMIC_MAIN_ENV" not in os.environ:
+      raise ValueError("BALSAMIC_MAIN_ENV environment variable was not found")
+  else:
+      main_env = os.getenv("BALSAMIC_MAIN_ENV")
 
-if "BALSAMIC_CONTAINER" not in os.environ:
-    raise ValueError("BALSAMIC_CONTAINER environment variable was not found")
-else:
-    container = os.getenv("BALSAMIC_CONTAINER")
+  if "BALSAMIC_CONTAINER" not in os.environ:
+      raise ValueError("BALSAMIC_CONTAINER environment variable was not found")
+  else:
+      container = os.getenv("BALSAMIC_CONTAINER")
 
-sbatch_script = os.path.join(scriptpath, "sbatch." + os.path.basename(jobscript))
-sm_script = os.path.join(scriptpath, os.path.basename(jobscript))
+  sbatch_script = os.path.join(scriptpath, "sbatch." + os.path.basename(jobscript))
+  sm_script = os.path.join(scriptpath, os.path.basename(jobscript))
 
-with open(sbatch_script, 'a') as f:
-    f.write("#!/bin/bash" + "\n")
-    if balsamic_status == "container":
-       f.write(f"function balsamic_run {{ singularity exec -B {bind_path} --app {main_env} {container} $@; }}" + "\n")
-       f.write(f"# Snakemake original script {jobscript}" + "\n")
-       f.write(f"balsamic_run bash {sm_script}" + "\n")
+  with open(sbatch_script, 'a') as f:
+      f.write("#!/bin/bash" + "\n")
+      if balsamic_status == "container":
+         f.write(f"function balsamic_run {{ singularity exec -B {bind_path} --app {main_env} {container} $@; }}" + "\n")
+         f.write(f"# Snakemake original script {jobscript}" + "\n")
+         f.write(f"balsamic_run bash {sm_script}" + "\n")
   
+  sbatch_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sbatch")
+    
 scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
 jobscript = os.path.join(scriptpath, scriptname)
 sacct_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sacct")
-sbatch_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sbatch")
 
 output_log = os.path.join(logpath, scriptname + "_%j.out")
 error_log = os.path.join(logpath, scriptname + "_%j.err")
@@ -96,13 +98,17 @@ if dependencies:
     cmdline += '--dependency=' + \
         ','.join(["afterok:%s" % d for d in dependencies])
 
-#cmdline += " " + jobscript + " | cut -d' ' -f 4"
-cmdline += " " + sbatch_script + " | cut -d' ' -f 4"
+if "BALSAMIC_STATUS" == "container":
+  cmdline += " " + sbatch_script + " | cut -d' ' -f 4"
+else:
+  cmdline += " " + jobscript + " | cut -d' ' -f 4"
 
 cmdline += " " + " >> " + sacct_file
 
 subprocess.call(cmdline, shell=True)
 subprocess.call("tail -n1 " +  sacct_file, shell=True)
-with open(sbatch_file, 'a') as f:
-    f.write(cmdline + "\n")
-    f.write(sys.executable + "\n")
+
+if "BALSAMIC_STATUS" == "container":
+  with open(sbatch_file, 'a') as f:
+      f.write(cmdline + "\n")
+      f.write(sys.executable + "\n")

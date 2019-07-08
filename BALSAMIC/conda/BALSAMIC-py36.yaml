@@ -1,12 +1,12 @@
 channels:
-  - conda-forge
   - bioconda
   - defaults
+  - conda-forge
 
 dependencies:
   - python=3.6 
   - pip=9.0.3 
-  - bcftools=1.6
+  - bcftools=1.9
   - bwa=0.7.15
   - fastqc=0.11.5
   - sambamba=0.6.6
@@ -21,3 +21,5 @@ dependencies:
   - ensembl-vep=94.5
   - cnvkit=0.9.4a0
   - cutadapt=1.15
+  - pindel=0.2.5b9
+  - multiqc=1.7 
