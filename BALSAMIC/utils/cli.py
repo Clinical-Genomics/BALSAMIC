@@ -125,13 +125,22 @@ def get_packages(yaml_file):
     try:
         with open(yaml_file, 'r') as f:
             pkgs = yaml.safe_load(f)['dependencies']
-    except OSError:
-        print('File not found', yaml_file)
+    except OSError as error:
+        raise error
 
     return (pkgs)
 
 
-def get_package_split(conda_yamls):
+def write_json(json_out, output_config):
+
+    try:
+        with open(output_config, "w") as fn:
+            json.dump(json_out, fn, indent=4)
+    except OSError as error:
+        raise error
+
+
+def get_package_split(condas):
     '''
     Get a list of conda env files, and extract pacakges
 
@@ -144,42 +153,11 @@ def get_package_split(conda_yamls):
         "sambamba", "strelka", "samtools", "tabix", "vardic"
     ]
 
-    pkgs = dict([[
-        y.split("=")[0], y.split("=")[1]
-    ] for y in set(chain.from_iterable([get_packages(s) for s in conda_yamls]))
-                 if y.split("=")[0] in pkgs])
+    pkgs = dict([[y.split("=")[0], y.split("=")[1]]
+                for y in set(chain.from_iterable([get_packages(s) for s in condas]))
+                if y.split("=")[0] in pkgs])
 
     return (pkgs)
-
-
-def get_sample_name(json_in):
-    """
-    Get sample name from input json file
-    """
-
-    try:
-        with open(os.path.abspath(json_in), "r") as fn:
-            sample_json = json.load(fn)
-            sample_name = sample_json["analysis"]["sample_id"]
-    except OSError:
-        print("Couldn't load json file or file path is not absolute")
-
-    return sample_name
-
-
-def get_analysis_dir(json_in, dir_type):
-    """
-    Get analysis dir from input json file
-    """
-
-    try:
-        with open(os.path.abspath(json_in), "r") as fn:
-            sample_json = json.load(fn)
-            analysis_dir = sample_json["analysis"][dir_type]
-    except OSError:
-        print("Couldn't load json file or file path is not absolute")
-
-    return analysis_dir
 
 
 def get_ref_path(reference_config):
@@ -211,11 +189,8 @@ def get_sbatchpy():
     Returns a string path for runSbatch.py
     """
 
-    try:
-        p = Path(__file__).parents[1]
-        sbatch = str(Path(p, 'commands/run/runSbatch.py'))
-    except OSError:
-        print("Couldn't locate sbatch submitter.")
+    p = Path(__file__).parents[1]
+    sbatch = str(Path(p, 'commands/run/runSbatch.py'))
 
     return sbatch
 
@@ -225,22 +200,29 @@ def get_snakefile(analysis_type):
     Return a string path for variant calling snakefile.
     """
 
-    try:
-        p = Path(__file__).parents[1]
-        if analysis_type == "paired":
-            snakefile = Path(p, 'workflows', 'VariantCalling_paired')
-        elif analysis_type == "single":
-            snakefile = Path(p, 'workflows', 'VariantCalling_single')
-        elif analysis_type == "qc":
-            snakefile = Path(p, 'workflows', 'Alignment')
-        elif analysis_type == "paired_umi":
-            snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
-        elif analysis_type == "single_umi":
-            snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
-        else:
-            raise ValueError("analysis_type should be single or paired")
-
-    except OSError:
-        print("Couldn't locate variant calling snakefile.")
+    p = Path(__file__).parents[1]
+    if analysis_type == "paired":
+        snakefile = Path(p, 'workflows', 'VariantCalling_paired')
+    elif analysis_type == "single":
+        snakefile = Path(p, 'workflows', 'VariantCalling_single')
+    elif analysis_type == "qc":
+        snakefile = Path(p, 'workflows', 'Alignment')
+    elif analysis_type == "paired_umi":
+        snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
+    elif analysis_type == "single_umi":
+        snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
+    elif analysis_type == "generate_ref":
+        snakefile = Path(p, 'workflows', 'GenerateRef')
 
     return str(snakefile)
+
+
+def get_config(config_name):
+    """
+    Return a string path for config file.
+    """
+
+    p = Path(__file__).parents[1]
+    config_file = str(Path(p, 'config', config_name + ".json"))
+
+    return config_file

@@ -3,10 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
-bam_dir = get_result_dir(config) + "/bam/"
-resultdir = get_result_dir(config) + "/" 
 picarddup = get_picard_mrkdup(config)
 
 def picard_flag(picarddup):
@@ -23,11 +21,12 @@ rule MarkDuplicates:
   log:
     stats = bam_dir + "{sample}.sorted." + picarddup + ".txt"
   params:
+    tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
         "MarkDuplicates "
         "INPUT={input} "
         "OUTPUT={output.mrkdup} "
@@ -48,10 +47,11 @@ rule CollectHsMetrics:
     unmrk = bam_dir + "{sample}.sorted.hsmetric",
     mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
   params:
+    tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
       "BedToIntervalList "
       "I={input.bed} "
       "O={input.bam}.picard.bedintervals "
@@ -81,11 +81,12 @@ rule CollectAlignmentSummaryMetrics:
   output:
     bam_dir + "{sample}.sorted.alignmetric"
   params:
+    tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     adapter = config["QC"]["adapter"]
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
       "CollectAlignmentSummaryMetrics "
       "R={input.fa} "
       "I={input.bam} "
@@ -102,10 +103,11 @@ rule CollectInsertSizeMetrics:
     pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
     txt = bam_dir + "{sample}.sorted.insertsizemetric"
   params:
+    tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard")
   shell:
     "source activate {params.conda};"
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
       "CollectInsertSizeMetrics "
       "I={input.bam} "
       "H={output.pdf} "

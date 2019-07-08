@@ -3,36 +3,31 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
+from BALSAMIC.utils.rule import get_conda_env, get_chrom
 
-bam_dir = get_result_dir(config) + "/bam/"
-cnv_dir = get_result_dir(config) + "/cnv/"
-vep_dir = get_result_dir(config) + "/vep/"
 
 rule cnvkit_single:
   input:
     refflat = config["path"]["genomefa"] + "GRCh37/GFF/refFlat.chr1_20_X_Y.txt",
     reffa = config["path"]["genomefa"] + config["references"]["genomefa"],
     bamT = bam_dir + "{sample}.sorted.bam",
-    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
+    bed = config["path"]["panel"] + config["bed"]["capture_kit"]
   output:
-    bed = cnv_dir + "CNV." + config["bed"]["capture_kit"],
-    refcnn = cnv_dir + "FlatReference.cnn",
     done = cnv_dir + "{sample}.cnvkit_single.done" 
   params:
+    bed = cnv_dir + "CNV." + config["bed"]["capture_kit"],
+    refcnn = cnv_dir + "FlatReference.cnn",
     name = config["analysis"]["sample_id"],
-    refurl = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refFlat.txt.gz",
-    bed = cnv_dir + "CNV." + config["bed"]["capture_kit"], 
     outdir = cnv_dir,
     conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
   shell:
     "source activate {params.conda}; "
-    "cnvkit.py target {input.bed} --annotate {input.refflat} --split -o {output.bed}; "
-    "cnvkit.py reference -o {output.refcnn} -f {input.reffa} -t {output.bed}; "
+    "cnvkit.py target {input.bed} --annotate {input.refflat} --split -o {params.bed}; "
+    "cnvkit.py reference -o {params.refcnn} -f {input.reffa} -t {params.bed}; "
     "cnvkit.py batch "
       "--method hybrid "
       "--drop-low-coverage "
-      "--reference {output.refcnn} "
+      "--reference {params.refcnn} "
       "--output-dir {params.outdir} "
       "--scatter --diagram {input.bamT} && touch {output.done}; "
     "source deactivate;"

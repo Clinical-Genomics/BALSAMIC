@@ -3,10 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.utils.rule import get_conda_env
 
-bam_dir = get_result_dir(config) + "/bam/"
-cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule bwa_mem:

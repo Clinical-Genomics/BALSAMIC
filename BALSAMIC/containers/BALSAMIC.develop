@@ -59,60 +59,28 @@ Include: yum
     export PATH=$PATH:/usr/local/anaconda/bin
     export BALSAMIC_STATUS='container'
 
-# P_BALSAMIC_dev
-%appenv P_BALSAMIC_dev
-    source activate P_BALSAMIC_dev
-%apphelp P_BALSAMIC_dev
+# P_BALSAMIC-base_dev
+%appenv P_BALSAMIC-base_dev
+    source activate P_BALSAMIC-base_dev
+%apphelp P_BALSAMIC-base_dev
     Runs core BALSAMIC CLI.
-%apprun P_BALSAMIC_dev
+%apprun P_BALSAMIC-base_dev
     exec "$@"
 
-# P_Cancer-Core_dev
-%appenv P_Cancer-Core_dev
-    source activate P_Cancer-Core_dev
-%apphelp P_Cancer-Core_dev
-    Runs P_Cancer-Core_dev
-%apprun P_Cancer-Core_dev
+# P_BALSAMIC-py27_dev
+%appenv P_BALSAMIC-py27_dev
+    source activate P_BALSAMIC-py27_dev
+%apphelp P_BALSAMIC-py27_dev
+    Runs P_BALSAMIC-py27_dev
+%apprun P_BALSAMIC-py27_dev
     exec "$@"
 
-# P_Cancer-py27_dev
-%appenv P_Cancer-py27_dev
-    source activate P_Cancer-py27_dev
-%apphelp P_Cancer-py27_dev
-    Runs P_Cancer-py27_dev
-%apprun P_Cancer-py27_dev
-    exec "$@"
-
-# P_Cancer-py36_dev
-%appenv P_Cancer-py36_dev
-    source activate P_Cancer-py36_dev
-%apphelp P_Cancer-py36_dev
-    Runs P_Cancer-py36_dev
-%apprun P_Cancer-py36_dev
-    exec "$@"
-
-# P_Cancer-vardict_dev
-%appenv P_Cancer-vardict_dev
-    source activate P_Cancer-vardict_dev
-%apphelp P_Cancer-vardict_dev
-    Runs P_Cancer-vardict_dev
-%apprun P_Cancer-vardict_dev
-    exec "$@"
-
-# P_Cancer-vep_dev
-%appenv P_Cancer-vep_dev
-    source activate P_Cancer-vep_dev
-%apphelp P_Cancer-vep_dev
-    Runs P_Cancer-vep_dev
-%apprun P_Cancer-vep_dev
-    exec "$@"
-
-# P_Cancer-vt_dev
-%appenv P_Cancer-vt_dev
-    source activate P_Cancer-vt_dev
-%apphelp P_Cancer-vt_dev
-    Runs P_Cancer-vt_dev
-%apprun P_Cancer-vt_dev
+# P_BALSAMIC-py36_dev
+%appenv P_BALSAMIC-py36_dev
+    source activate P_BALSAMIC-py36_dev
+%apphelp P_BALSAMIC-py36_dev
+    Runs P_BALSAMIC-py36_dev
+%apprun P_BALSAMIC-py36_dev
     exec "$@"
 
 %runscript

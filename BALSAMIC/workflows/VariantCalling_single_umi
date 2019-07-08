@@ -3,11 +3,18 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_result_dir, get_vcf
+from BALSAMIC.utils.rule import get_result_dir, get_vcf
 
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+bam_dir = get_result_dir(config) + "/bam/"
+cnv_dir = get_result_dir(config) + "/cnv/"
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
+fastqc_dir = get_result_dir(config) + "/fastqc/"
+result_dir = get_result_dir(config) + "/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
 
 include:
   rule_dir + "snakemake_rules/umi/fgbio_v2.rule"
@@ -17,10 +24,6 @@ include:
   rule_dir + "snakemake_rules/variant_calling/mergetype_single_umi.rule"
 include:
   rule_dir + "snakemake_rules/umi/vardict_single_umi.rule"
-
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
 
 var_type = ["SNV"]
 var_class = ["somatic", "germline"]
