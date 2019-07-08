@@ -84,7 +84,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
-    sample_config_path = sample_config
+    sample_config_path = os.path.abspath(sample_config)
 
     with open(sample_config, 'r') as sample_fh:
         sample_config = json.load(sample_fh)
@@ -93,6 +93,13 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     scriptpath = sample_config['analysis']['script']
     resultpath = sample_config['analysis']['result']
     sample_name = sample_config['analysis']['sample_id']
+
+    if run_analysis:
+        # if not dry run, then create (new) log/script directory
+        for dirpath, dirnames, files in os.walk(logpath):
+            if files:
+                logpath = createDir(logpath, [])
+                scriptpath = createDir(scriptpath, [])
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
@@ -121,12 +128,5 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
     balsamic_run.sm_opt = snakemake_opt
-
-    if run_analysis:
-        # if not dry run, then create (new) log/script directory
-        for dirpath, dirnames, files in os.walk(logpath):
-            if files:
-                logpath = createDir(logpath, [])
-                scriptpath = createDir(scriptpath, [])
 
     subprocess.run(balsamic_run.build_cmd(), shell=True)
