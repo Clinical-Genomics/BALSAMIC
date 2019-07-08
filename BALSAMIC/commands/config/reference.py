@@ -52,6 +52,5 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
 
     cmd = config_reference.build_cmd() + " " + " ".join(shell_cmd)
     click.echo("Creating workflow DAG image: %s" % dagfile_path)
-    print(cmd)
     subprocess.run(cmd, shell=True)
 
