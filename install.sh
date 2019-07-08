@@ -121,11 +121,11 @@ balsamic install -s ${_env_name_suffix} \
 
 gatk_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
 
-conda activate ${gatk_env}
+source activate ${gatk_env}
 gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
 
 echo -e "${_green}Copying custom Picard to relevant conda environment.${_nocol}"
-conda activate ${_env_name}
+source activate ${_env_name}
 picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
 picard_conda_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
 picard_destination=${picard_conda_env}/share/

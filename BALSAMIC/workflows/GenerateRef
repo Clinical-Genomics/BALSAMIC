@@ -8,30 +8,30 @@ __author__ = "Sarath Murugan"
 
 
 # LINKS TO REFERENCE FILES
-REF_GENOME_LINK = "https://storage.googleapis.com/gatk-legacy-bundles/b37/human_g1k_v37_decoy.fasta.gz"
-TH_GENOME_LINK = "ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz"
-DBSNP_LINK = "https://storage.googleapis.com/gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz"
-TG_HIGH_LINK = "https://storage.googleapis.com/gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz"
-COSMIC_DB_LINK = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v89/VCF/CosmicCodingMuts.vcf.gz"
+reference_genome_link = "https://storage.googleapis.com/gatk-legacy-bundles/b37/human_g1k_v37_decoy.fasta.gz"
+vcf_1kg_link = "ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz"
+dbsnp_link = "https://storage.googleapis.com/gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz"
+hc_vcf_1kg_link = "https://storage.googleapis.com/gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz"
+cosmicdb_link = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v89/VCF/CosmicCodingMuts.vcf.gz"
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
        '1kg_phase1_snps_high_confidence_b37.vcf', 'cosmic_coding_muts_v89.vcf']
 
-BASEDIR = config['output']
-COSMICDB_KEY = config['cosmic_key'] 
+basedir = config['output']
+cosmicdb_key = config['cosmic_key'] 
 
 # OUTPUT FILE NAMES
-GENOME_FASTA = BASEDIR + "/genome/human_g1k_v37_decoy.fasta"
-GENOME_FASTA_INDEX = BASEDIR + "/genome/human_g1k_v37_decoy.fasta.fai"
-GENOME_DICT = BASEDIR + "/genome/human_g1k_v37_decoy.dict"
-VCF_DIR = BASEDIR + "/variants/"
-DBSNP_VCF = BASEDIR + "/variants/dbsnp_grch37_b138.vcf"
-TH_GENOME_VCF = BASEDIR + "/variants/1k_genome_wgs_p1_v3_all_sites.vcf"
-TG_HIG_VCF = BASEDIR + "/variants/1kg_phase1_snps_high_confidence_b37.vcf"
-COSMICDB_VCF = BASEDIR + "/variants/cosmic_coding_muts_v89.vcf"
-VEP_DIR = BASEDIR + "/vep/"
-REFERENCE_JSON = BASEDIR + "/reference.json"
+reference_genome = basedir + "/genome/human_g1k_v37_decoy.fasta"
+reference_genome_index = basedir + "/genome/human_g1k_v37_decoy.fasta.fai"
+genome_dict = basedir + "/genome/human_g1k_v37_decoy.dict"
+vcf_dir = basedir + "/variants/"
+dbsnp = basedir + "/variants/dbsnp_grch37_b138.vcf"
+vcf_1kg = basedir + "/variants/1k_genome_wgs_p1_v3_all_sites.vcf"
+hc_vcf_1kg = basedir + "/variants/1kg_phase1_snps_high_confidence_b37.vcf"
+cosmicdb = basedir + "/variants/cosmic_coding_muts_v89.vcf"
+vep_dir = basedir + "/vep/"
+reference_json = basedir + "/reference.json"
 
 
 if 'singularity' in config:
@@ -44,7 +44,7 @@ if 'singularity' in config:
 ##########################################################
 rule all:
     input:
-        REFERENCE_JSON
+        reference_json
 
 
 ##########################################################
@@ -54,20 +54,20 @@ rule all:
 
 rule download_reference:
     params:
-        ref_genome = REF_GENOME_LINK,
-        dbsnp = DBSNP_LINK,
-        th_genome = TH_GENOME_LINK,
-        tg_high = TG_HIGH_LINK
+        reference_genome = reference_genome_link,
+        dbsnp = dbsnp_link,
+        vcf_1kg = vcf_1kg_link,
+        hc_vcf_1kg = hc_vcf_1kg_link
     output:
-        ref_fasta = GENOME_FASTA,
-        dbsnp_vcf = DBSNP_VCF,
-        tg_vcf = TH_GENOME_VCF,
-        tg_high_vcf = TG_HIG_VCF
+        reference_genome = reference_genome,
+        dbsnp = dbsnp,
+        vcf_1kg = vcf_1kg,
+        hc_vcf_1kg = hc_vcf_1kg
     shell:
-        "wget {params.ref_genome} -O {output.ref_fasta}.gz; gunzip {output.ref_fasta}.gz;"
-        "wget {params.dbsnp} -O {output.dbsnp_vcf}.gz; gunzip {output.dbsnp_vcf}.gz;"
-        "wget {params.th_genome} -O {output.tg_vcf}.gz; gunzip {output.tg_vcf}.gz;"
-        "wget {params.tg_high} -O {output.tg_high_vcf}.gz; gunzip {output.tg_high_vcf}.gz;"
+        "wget {params.reference_genome} -O {output.reference_genome}.gz && gunzip {output.reference_genome}.gz;"
+        "wget {params.dbsnp} -O {output.dbsnp}.gz; gunzip {output.dbsnp}.gz;"
+        "wget {params.vcf_1kg} -O {output.vcf_1kg}.gz; gunzip {output.vcf_1kg}.gz;"
+        "wget {params.hc_vcf_1kg} -O {output.hc_vcf_1kg}.gz; gunzip {output.hc_vcf_1kg}.gz;"
 
 
 ##########################################################
@@ -77,11 +77,13 @@ rule download_reference:
 
 rule cosmicdb_download:
     params:
-        cosmic_db = COSMIC_DB_LINK,
-        cosmicdb_key = COSMICDB_KEY
+        cosmic_db = cosmicdb_link,
+        cosmicdb_key = cosmicdb_key,
+        conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
-        COSMICDB_VCF
+        cosmicdb
     run:
+        shell("source activate {params.conda_env};")
         import requests
 
         ## request the download url link
@@ -97,6 +99,7 @@ rule cosmicdb_download:
 
         ## unzip the file for indexing
         shell("gunzip {output}.gz;")
+        shell("source deactivate;")
 
 
 ##########################################################
@@ -106,16 +109,19 @@ rule cosmicdb_download:
 
 rule bgzip_tabix:
     input: 
-        VCF_DIR + "{vcf}"
+        vcf_dir + "{vcf}"
     params:
-        type = 'vcf'    
+        type = 'vcf',
+        conda_env = get_conda_env(config["conda_env_yaml"], "tabix")    
     output:
-        VCF_DIR + "{vcf}.gz",
-        VCF_DIR + "{vcf}.gz.tbi"
+        vcf_dir + "{vcf}.gz",
+        vcf_dir + "{vcf}.gz.tbi"
     log:
-        VCF_DIR + "{vcf}.gz_tbi.log"
+        vcf_dir + "{vcf}.gz_tbi.log"
     shell:
-        "bgzip {input} && tabix -p {params.type} {input}.gz 2> {log} "
+        "source activate {params.conda_env};"
+        "bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};"
+        "source deactivate;"
 
 
 ##########################################################
@@ -125,14 +131,17 @@ rule bgzip_tabix:
 
 rule bwa_index:
     input:
-        GENOME_FASTA
+        reference_genome
+    params:
+        conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
-        expand(GENOME_FASTA + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
+        expand(reference_genome + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
-        GENOME_FASTA + ".bwa_index.log"
+        reference_genome + ".bwa_index.log"
     shell:
-        "bwa index -a bwtsw {input} 2> {log} "
-
+        "source activate {params.conda_env};"
+        "bwa index -a bwtsw {input} 2> {log};"
+        "source deactivate;"
 
 ##########################################################
 # Create index for fasta file - .fai
@@ -141,13 +150,17 @@ rule bwa_index:
 
 rule samtools_index_fasta:
     input:
-        GENOME_FASTA
+        reference_genome
+    params:
+        conda_env = get_conda_env(config["conda_env_yaml"], "samtools")
     output:
-        GENOME_FASTA_INDEX
+        reference_genome_index
     log:
-        GENOME_FASTA + ".faidx.log"
+        reference_genome + ".faidx.log"
     shell:
-        "samtools faidx {input} 2> {log} "
+        "source activate {params.conda_env};"
+        "samtools faidx {input} 2> {log};"
+        "source deactivate;"
 
 
 ##########################################################
@@ -157,15 +170,19 @@ rule samtools_index_fasta:
 
 rule picard_ref_dict:
     input:
-        GENOME_FASTA
+        reference_genome
+    params:
+        conda_env = get_conda_env(config["conda_env_yaml"], "picard")
     output:
-        GENOME_DICT
+        genome_dict
     log:
-        GENOME_FASTA + ".ref_dict.log"
+        reference_genome + ".ref_dict.log"
     shell:
+        "source activate {params.conda_env};"
         "picard CreateSequenceDictionary "
           " REFERENCE={input} " 
-          " OUTPUT={output} 2> {log} "
+          " OUTPUT={output} 2> {log};"
+        "source deactivate;"
 
 
 ##########################################################
@@ -177,18 +194,21 @@ rule vep_install:
     params:
         species = "homo_sapiens",
         assembly = "GRCh37",
-        plugins = "all"
+        plugins = "all",
+        conda_env = get_conda_env(config["conda_env_yaml"], "ensembl-vep")
     output:
-        directory(VEP_DIR)
+        directory(vep_dir)
     log:
-        VEP_DIR + "vep_install_cache.log"
+        vep_dir + "vep_install_cache.log"
     shell:
+        "source activate {params.conda_env};"
         "vep_install --SPECIES {params.species} "
           " --AUTO cf "
           " --ASSEMBLY {params.assembly} "
           " --CACHEDIR {output} "
           " --PLUGINS {params.plugins} "
-          " --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log} "
+          " --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log}; "
+          "source deactivate;"
 
 ##########################################################
 # Writing reference json file 
@@ -197,21 +217,23 @@ rule vep_install:
 
 rule write_json:
     input:
-        reference_genome = GENOME_FASTA,
-        refgenome_fai = GENOME_FASTA_INDEX,
-        variants = expand(VCF_DIR + "{vcf}.gz", vcf=VCF),
-        variants_idx = expand( VCF_DIR + "{vcf}.gz.tbi", vcf=VCF),
-        bwa_index = expand(GENOME_FASTA + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
-        refgenome_dict = GENOME_DICT,
-        vep = VEP_DIR
+        reference_genome = reference_genome,
+        refgenome_fai = reference_genome_index,
+        variants = expand(vcf_dir + "{vcf}.gz", vcf=VCF),
+        variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
+        bwa_index = expand(reference_genome + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
+        refgenome_dict = genome_dict,
+        vep = vep_dir
     params:
-        dbsnp_vcf = DBSNP_VCF,
-        th_genome_vcf = TH_GENOME_VCF,
-        tg_high_vcf = TG_HIG_VCF,
-        cosmic_vcf = COSMICDB_VCF
+        dbsnp_vcf = dbsnp,
+        th_genome_vcf = vcf_1kg,
+        tg_high_vcf = hc_vcf_1kg,
+        cosmic_vcf = cosmicdb,
+        conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
-        REFERENCE_JSON
+        reference_json
     run:
+        shell("source activate {params.conda_env};")
         import json
 
         ref_json = dict()
@@ -226,5 +248,5 @@ rule write_json:
 
         with open(str(output), "w") as fh:
             json.dump(ref_json, fh, indent=4)
-
+        shell("source deactivate;")
 
