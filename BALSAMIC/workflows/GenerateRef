@@ -33,6 +33,9 @@ cosmicdb = basedir + "/variants/cosmic_coding_muts_v89.vcf"
 vep_dir = basedir + "/vep/"
 reference_json = basedir + "/reference.json"
 
+# list of download link and output file name
+link_list = [(reference_genome_link, reference_genome), (vcf_1kg_link, vcf_1kg), (dbsnp_link, dbsnp), (hc_vcf_1kg_link, hc_vcf_1kg)]
+
 shell.prefix("set -eo pipefail; ")
 
 if 'singularity' in config:
@@ -55,21 +58,12 @@ rule all:
 
 rule download_reference:
     params:
-        reference_genome = reference_genome_link,
-        dbsnp = dbsnp_link,
-        vcf_1kg = vcf_1kg_link,
-        hc_vcf_1kg = hc_vcf_1kg_link
+        link = link_list
     output:
-        reference_genome = reference_genome,
-        dbsnp = dbsnp,
-        vcf_1kg = vcf_1kg,
-        hc_vcf_1kg = hc_vcf_1kg
-    threads: 4
-    shell:
-        "wget {params.reference_genome} -O {output.reference_genome}.gz && gunzip {output.reference_genome}.gz;"
-        "wget {params.dbsnp} -O {output.dbsnp}.gz; gunzip {output.dbsnp}.gz;"
-        "wget {params.vcf_1kg} -O {output.vcf_1kg}.gz; gunzip {output.vcf_1kg}.gz;"
-        "wget {params.hc_vcf_1kg} -O {output.hc_vcf_1kg}.gz; gunzip {output.hc_vcf_1kg}.gz;"
+        expand("{output}", output=[list[1] for list in link_list])
+    run:
+        for tup in link_list:
+            shell("wget {tup[0]} -O {tup[1]}.gz && gunzip {tup[1]}.gz 2> {tup[1]}.log")
 
 
 ##########################################################
