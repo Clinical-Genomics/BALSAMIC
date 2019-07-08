@@ -72,6 +72,14 @@ def test_run(invoke_cli):
 
     # THEN It should show all the params without any error
     assert result.exit_code == 0
+    assert "analysis" in result.output
+
+
+def test_run_analysis(invoke_cli):
+    # WHEN invoking run analysis command
+    result = invoke_cli(['run', 'analysis', '--help'])
+
+    # THEN it should show all params without error
     assert "--analysis-type" in result.output
     assert "--snake-file" in result.output
     assert "--sample-config" in result.output
@@ -82,17 +90,39 @@ def test_run(invoke_cli):
 
 def test_run_missing_opt(invoke_cli):
     # WHEN invoking run command with missing option
-    result = invoke_cli(['run'])
+    result = invoke_cli(['run', 'analysis'])
 
     # THEN It should throw missiong option error
     assert 'Error: Missing option' in result.output
     assert result.exit_code == 2
 
 
-def test_run_invalid(invoke_cli):
+def test_run_analysis_invalid(invoke_cli):
     # WHEN invoking run with invalid input value
-    result = invoke_cli(['run', '--run-mode', 'foo'])
+    result = invoke_cli(['run', 'analysis', '--run-mode', 'foo'])
 
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
+
+
+def test_run_reference(invoke_cli):
+    # WHEN invoking run reference command
+    result = invoke_cli(['run', 'reference', '--help'])
+
+    # THEN It should show the help message with all params
+    assert "--snakefile" in result.output
+    assert "--configfile" in result.output
+    assert "--run-mode" in result.output
+    assert "--cluster-config" in result.output
+    assert "--run-analysis" in result.output
+
+
+def test_run_ref_invalid(invoke_cli):
+    # WHEN invoking run reference command with invalid param
+    result = invoke_cli(['run', 'reference', '--run-mode', 'foo'])
+
+    # THEN It should throw invalid value error
+    assert result.exit_code == 2
+    assert 'Error: Invalid value' in result.output
+
