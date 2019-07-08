@@ -131,6 +131,15 @@ def get_packages(yaml_file):
     return (pkgs)
 
 
+def write_json(json_out, output_config):
+
+    try:
+        with open(output_config, "w") as fn:
+            json.dump(json_out, fn, indent=4)
+    except OSError as error:
+        raise error
+
+
 def get_package_split(condas):
     '''
     Get a list of conda env files, and extract pacakges
@@ -202,5 +211,18 @@ def get_snakefile(analysis_type):
         snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
     elif analysis_type == "single_umi":
         snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
+    elif analysis_type == "generate_ref":
+        snakefile = Path(p, 'workflows', 'GenerateRef')
 
     return str(snakefile)
+
+
+def get_config(config_name):
+    """
+    Return a string path for config file.
+    """
+
+    p = Path(__file__).parents[1]
+    config_file = str(Path(p, 'config', config_name + ".json"))
+
+    return config_file

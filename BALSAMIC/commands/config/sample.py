@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.utils.cli import get_package_split, get_ref_path
+from BALSAMIC.utils.cli import get_package_split, get_ref_path, write_json, get_config
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
 
@@ -35,26 +35,6 @@ def merge_json(*args):
             raise error
 
     return json_out
-
-
-def write_json(json_out, output_config):
-
-    try:
-        with open(output_config, "w") as fn:
-            json.dump(json_out, fn)
-    except OSError as error:
-        raise error
-
-
-def get_config(config_name):
-    """
-    Return a string path for config file.
-    """
-
-    p = Path(__file__).parents[2]
-    config_file = str(Path(p, 'config', config_name + ".json"))
-
-    return config_file
 
 
 def set_panel_bed(json_out, panel_bed):
