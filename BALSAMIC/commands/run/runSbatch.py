@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 import sys
 import os
+import re
 import subprocess
 import json
 import argparse
+from BALSAMIC.utils.cli import sbatch as sbatch_cmd
 from snakemake.utils import read_job_properties
 
-parser = argparse.ArgumentParser(
-    description=
-    'This is an internal script and should be invoked independently. This script gets a list of arugments (see --help) and submits a job to slurm as afterok dependency. All inputs are mandatory!'
-)
-parser.add_argument(
-    "dependencies",
-    nargs="*",
-    help="{{dependencies}} string given by snakemake\n")
-parser.add_argument(
-    "snakescript",
-    help=
-    "Snakemake generated shell script with commands to execute snakemake rule\n"
-)
-parser.add_argument(
-    "--sample-config", help="Config file to read sbatch settings from.")
+parser = argparse.ArgumentParser(description='''
+    This is an internal script and should be invoked independently.
+    This script gets a list of arugments (see --help) and submits a job to slurm as
+    afterok dependency.
+    ''')
+parser.add_argument("dependencies",
+                    nargs="*",
+                    help="{{dependencies}} from snakemake")
+parser.add_argument("snakescript", help="Snakemake script")
+parser.add_argument("--sample-config", help="balsamic config sample output")
+parser.add_argument('--slurm-account', help='SLURM account name')
+parser.add_argument('--slurm-qos', help='SLURM job QOS')
+parser.add_argument('--slurm-mail-type', help='SLURM mail type')
+parser.add_argument('--slurm-mail-user', help='SLURM mail user')
 parser.add_argument("--dir-log", help="Log directory")
 parser.add_argument("--dir-result", help="Result directory")
 parser.add_argument("--dir-script", help="Script directory")
-parser.add_argument(
-    "--qos", default="low", help="QOS for sbatch jobs. [Default: low]")
+
 args = parser.parse_args()
 
 with open(args.sample_config) as f:
@@ -33,15 +33,13 @@ with open(args.sample_config) as f:
 
 jobscript = args.snakescript
 job_properties = read_job_properties(jobscript)
+
 logpath = args.dir_log
 scriptpath = args.dir_script
 resultpath = args.dir_result
 
 time = job_properties["cluster"]["time"]
 cpu = job_properties["cluster"]["n"]
-account_slurm = job_properties["cluster"]["account"]
-mail_type = job_properties["cluster"]["mail_type"]
-mail_user = job_properties["cluster"]["mail_user"]
 
 subprocess.call('cp ' + jobscript + ' ' + scriptpath + '/', shell=True)
 
@@ -73,42 +71,48 @@ if "BALSAMIC_STATUS" == "container":
          f.write(f"balsamic_run bash {sm_script}" + "\n")
   
   sbatch_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sbatch")
-    
+
 scriptname = jobscript.split("/")
 scriptname = scriptname[-1]
 jobscript = os.path.join(scriptpath, scriptname)
 sacct_file = os.path.join(logpath, sample_config["analysis"]["sample_id"] + ".sacct")
 
-output_log = os.path.join(logpath, scriptname + "_%j.out")
-error_log = os.path.join(logpath, scriptname + "_%j.err")
-cmdline = 'sbatch -A {account} -n {n} -t {time} --qos={qos} -o {output_log} -e {error_log} --mail-type {mail_type} --mail-user {mail_user}'.format(
-    n=cpu,
-    time=time,
-    qos=args.qos,
-    output_log=output_log,
-    error_log=error_log,
-    account=account_slurm,
-    mail_type=mail_type,
-    mail_user=mail_user)
-
-cmdline += " "
-
-dependencies = args.dependencies
-if dependencies:
-    cmdline += '--dependency=' + \
-        ','.join(["afterok:%s" % d for d in dependencies])
+sbatch = sbatch_cmd()
+sbatch.account = args.slurm_account
+if args.dependencies:
+    sbatch.dependency = ','.join(["afterok:%s" % d for d in args.dependencies])
+sbatch.error = os.path.join(args.dir_log, jobscript + "_%j.err")
+sbatch.output = os.path.join(args.dir_log, jobscript + "_%j.out")
+sbatch.mail_type = args.slurm_mail_type
+sbatch.mail_user = args.slurm_mail_user
+sbatch.ntasks = cpu
+sbatch.time = time
 
 if "BALSAMIC_STATUS" == "container":
-  cmdline += " " + sbatch_script + " | cut -d' ' -f 4"
+  sbatch.script = sbatch_script
 else:
-  cmdline += " " + jobscript + " | cut -d' ' -f 4"
+  sbatch.script = jobscript 
 
-cmdline += " " + " >> " + sacct_file
+# run sbatch cmd
+try:
+    res = subprocess.run(sbatch.build_cmd(), check=True, shell=True, stdout=subprocess.PIPE)
+except subprocess.CalledProcessError as e:
+    raise e
 
-subprocess.call(cmdline, shell=True)
-subprocess.call("tail -n1 " +  sacct_file, shell=True)
+# Get jobid
+res = res.stdout.decode()
+try:
+    m = re.search("Submitted batch job (\d+)", res)
+    jobid = m.group(1)
+    print(jobid)
+except Exception as e:
+    print(e)
+    raise
 
 if "BALSAMIC_STATUS" == "container":
   with open(sbatch_file, 'a') as f:
       f.write(cmdline + "\n")
       f.write(sys.executable + "\n")
+
+with open(sacct_file, 'a') as f:
+    f.write(jobid + "\n")
