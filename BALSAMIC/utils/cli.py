@@ -234,7 +234,7 @@ def get_sbatchpy():
     """
 
     p = Path(__file__).parents[1]
-    sbatch = str(Path(p, 'commands/run/runSbatch.py'))
+    sbatch = str(Path(p, 'commands/run/sbatch.py'))
 
     return sbatch
 
