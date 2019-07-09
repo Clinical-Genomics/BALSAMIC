@@ -399,7 +399,7 @@ it is. So this is just a placeholder for future.
     FormatFile(output_config, in_place=True)
 
     shellcmd = ([
-        'balsamic', 'run', '-s', output_config, '--snakemake-opt',
+        'balsamic', 'run', 'analysis','-s', output_config, '--snakemake-opt',
         '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
         '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
         'BALSAMIC', bv, 'workflow', 'for', 'sample:',
