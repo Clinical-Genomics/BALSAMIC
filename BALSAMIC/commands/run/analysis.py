@@ -92,6 +92,15 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
+
+    if run_mode=='slurm' and not run_analysis:
+        click.echo('Changing run-mode to local on dry-run')
+        run_mode='local'
+
+    if run_mode=='slurm' and not slurm_account:
+        click.echo('slurm account is required for slurm run mode')
+        raise click.Abort()
+
     sample_config_path = os.path.abspath(sample_config)
 
     with open(sample_config, 'r') as sample_fh:
@@ -100,7 +109,6 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     logpath = sample_config['analysis']['log']
     scriptpath = sample_config['analysis']['script']
     resultpath = sample_config['analysis']['result']
-    print(resultpath)
     sample_name = sample_config['analysis']['sample_id']
 
     if run_analysis:
@@ -141,5 +149,5 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
     balsamic_run.sm_opt = snakemake_opt
-
+    
     subprocess.run(balsamic_run.build_cmd(), shell=True)
