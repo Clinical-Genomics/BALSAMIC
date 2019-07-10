@@ -1,16 +1,13 @@
 {
     "__default__": {
-        "account": "development",
-        "name": "cancer.{rule}.{wildcards}",
+        "name": "BALSAMIC.{rule}.{wildcards}",
         "time": "12:00:00",
         "n": 8,
         "mail_type": "FAIL",
-        "mail_user": "hassan.foroughi@scilifelab.se",
         "partition": "core"
     },
     "all": {
         "mail_type": "END",
-        "mail_user": "hassan.foroughi@scilifelab.se",
         "time": "00:15:00",
         "n": 1
     },
