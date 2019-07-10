@@ -5,6 +5,7 @@ from pathlib import Path
 from itertools import chain
 import yaml
 
+
 class sbatch:
     '''
     Builds sbatch command. Commands map to SLURM sbatch options.
@@ -21,34 +22,38 @@ class sbatch:
     qos             - -q/--qos 
     time            - -t/--time
     '''
-    
-    def __init__ (self):
+
+    def __init__(self):
         self.account = None
         self.dependency = None
         self.error = None
         self.mail_type = None
         self.mail_user = None
-        self.ntasks = None 
+        self.ntasks = None
         self.output = None
         self.qos = None
         self.script = None
         self.time = None
-    
+
     def build_cmd(self):
         sbatch_options = list()
-        
-        job_attributes = ['account', 'dependency', 'error', 'output', 'mail_type', 'mail_user', 'ntasks', 'qos', 'time']
+
+        job_attributes = [
+            'account', 'dependency', 'error', 'output', 'mail_type',
+            'mail_user', 'ntasks', 'qos', 'time'
+        ]
 
         for attribute in job_attributes:
-          if getattr(self, attribute):
-              attribute_value = getattr(self, attribute)
-              sbatch_options.append('--{} \"{}\"'.format(attribute.replace("_", "-"), attribute_value))
-        
+            if getattr(self, attribute):
+                attribute_value = getattr(self, attribute)
+                sbatch_options.append('--{} \"{}\"'.format(
+                    attribute.replace("_", "-"), attribute_value))
+
         sbatch_options.append(self.script)
 
         return 'sbatch' + ' ' + ' '.join(sbatch_options)
-            
- 
+
+
 class SnakeMake:
     """
     To build a snakemake command using cli options
@@ -83,6 +88,9 @@ class SnakeMake:
         self.script_path = None
         self.result_path = None
         self.qos = None
+        self.account = None
+        self.mail_type = None
+        self.mail_user = None
         self.forceall = False
         self.run_analysis = False
         self.sm_opt = None
@@ -104,8 +112,12 @@ class SnakeMake:
 
         if self.run_mode == 'slurm':
             sbatch_cmd = " 'python3 {} ".format(self.sbatch_py) + \
-                " --sample-config " + self.configfile + \
-                " --qos " + self.qos + " --dir-log " + self.log_path + \
+                " --sample-config " + self.configfile +  \
+                " --slurm-account " + self.account + \
+                " --slurm-qos " + self.qos + \
+                " --slurm-mail-type " + self.mail_type + \
+                " --slurm-mail-user " + self.mail_user + \
+                " --dir-log " + self.log_path + \
                 " --dir-script " + self.script_path + \
                 " --dir-result " + self.result_path + " {dependencies} '"
 
@@ -197,9 +209,10 @@ def get_package_split(condas):
         "sambamba", "strelka", "samtools", "tabix", "vardic"
     ]
 
-    pkgs = dict([[y.split("=")[0], y.split("=")[1]]
-                for y in set(chain.from_iterable([get_packages(s) for s in condas]))
-                if y.split("=")[0] in pkgs])
+    pkgs = dict(
+        [[y.split("=")[0], y.split("=")[1]]
+         for y in set(chain.from_iterable([get_packages(s) for s in condas]))
+         if y.split("=")[0] in pkgs])
 
     return (pkgs)
 
