@@ -34,7 +34,6 @@ Include: yum
 
     # set anaconda path
     export PATH=$PATH:/usr/local/anaconda/bin
-    conda update -y conda
     
     # Git clone BALSAMIC
     # The following fixes the error for Click
@@ -44,10 +43,9 @@ Include: yum
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
     cd /git_repos
-    git clone https://github.com/Clinical-Genomics/BALSAMIC
+    git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=develop
     cd BALSAMIC
-    git checkout develop
-    ./install.sh -s P -d dev -p /usr/local/anaconda/envs
+    ./install.sh -s D -d dev -p /usr/local/anaconda/envs
 
 %environment
     # The following fixes the error for Click
@@ -59,28 +57,28 @@ Include: yum
     export PATH=$PATH:/usr/local/anaconda/bin
     export BALSAMIC_STATUS='container'
 
-# P_BALSAMIC-base_dev
-%appenv P_BALSAMIC-base_dev
-    source activate P_BALSAMIC-base_dev
-%apphelp P_BALSAMIC-base_dev
+# D_BALSAMIC-base_dev
+%appenv D_BALSAMIC-base_dev
+    source activate D_BALSAMIC-base_dev
+%apphelp D_BALSAMIC-base_dev
     Runs core BALSAMIC CLI.
-%apprun P_BALSAMIC-base_dev
+%apprun D_BALSAMIC-base_dev
     exec "$@"
 
-# P_BALSAMIC-py27_dev
-%appenv P_BALSAMIC-py27_dev
-    source activate P_BALSAMIC-py27_dev
-%apphelp P_BALSAMIC-py27_dev
-    Runs P_BALSAMIC-py27_dev
-%apprun P_BALSAMIC-py27_dev
+# D_BALSAMIC-py27_dev
+%appenv D_BALSAMIC-py27_dev
+    source activate D_BALSAMIC-py27_dev
+%apphelp D_BALSAMIC-py27_dev
+    Runs D_BALSAMIC-py27_dev
+%apprun D_BALSAMIC-py27_dev
     exec "$@"
 
-# P_BALSAMIC-py36_dev
-%appenv P_BALSAMIC-py36_dev
-    source activate P_BALSAMIC-py36_dev
-%apphelp P_BALSAMIC-py36_dev
-    Runs P_BALSAMIC-py36_dev
-%apprun P_BALSAMIC-py36_dev
+# D_BALSAMIC-py36_dev
+%appenv D_BALSAMIC-py36_dev
+    source activate D_BALSAMIC-py36_dev
+%apphelp D_BALSAMIC-py36_dev
+    Runs D_BALSAMIC-py36_dev
+%apprun D_BALSAMIC-py36_dev
     exec "$@"
 
 %runscript
