@@ -9,7 +9,7 @@ from BALSAMIC.utils.rule import get_conda_env, get_chrom
 rule cnvkit_single:
   input:
     refflat = config["path"]["genomefa"] + "GRCh37/GFF/refFlat.chr1_20_X_Y.txt",
-    reffa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    reffa = config["reference"]["reference_genome"],
     bamT = bam_dir + "{sample}.sorted.bam",
     bed = config["path"]["panel"] + config["bed"]["capture_kit"]
   output:

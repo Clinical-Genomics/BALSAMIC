@@ -235,10 +235,10 @@ rule write_json:
         ref_json = dict()
         ref_json['reference'] = {
             "reference_genome": input.reference_genome,
-            "dbsnp": params.dbsnp_vcf,
-            "1kg_snps_all": params.th_genome_vcf,
-            "1kg_snps_high": params.tg_high_vcf,
-            "cosmic": params.cosmic_vcf,
+            "dbsnp": params.dbsnp_vcf + '.gz',
+            "1kg_snps_all": params.th_genome_vcf + '.gz',
+            "1kg_snps_high": params.tg_high_vcf + '.gz',
+            "cosmic": params.cosmic_vcf + '.gz',
             "vep": input.vep
         }
 
