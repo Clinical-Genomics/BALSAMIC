@@ -18,8 +18,8 @@ parser.add_argument("dependencies",
                     help="{{dependencies}} from snakemake")
 parser.add_argument("snakescript", help="Snakemake script")
 parser.add_argument("--sample-config", help="balsamic config sample output")
-parser.add_argument('--slurm-account', help='SLURM account name')
-parser.add_argument('--slurm-qos', help='SLURM job QOS')
+parser.add_argument('--slurm-account', required=True, help='SLURM account name')
+parser.add_argument('--slurm-qos', default='low', help='SLURM job QOS')
 parser.add_argument('--slurm-mail-type', help='SLURM mail type')
 parser.add_argument('--slurm-mail-user', help='SLURM mail user')
 parser.add_argument("--dir-log", help="Log directory")
@@ -40,6 +40,8 @@ resultpath = args.dir_result
 
 time = job_properties["cluster"]["time"]
 cpu = job_properties["cluster"]["n"]
+if not args.slurm_mail_type:
+    mail_type = job_properties["cluster"]["mail_type"]
 
 subprocess.call('cp ' + jobscript + ' ' + scriptpath + '/', shell=True)
 
@@ -83,7 +85,7 @@ if args.dependencies:
     sbatch.dependency = ','.join(["afterok:%s" % d for d in args.dependencies])
 sbatch.error = os.path.join(args.dir_log, jobscript + "_%j.err")
 sbatch.output = os.path.join(args.dir_log, jobscript + "_%j.out")
-sbatch.mail_type = args.slurm_mail_type
+sbatch.mail_type = mail_type
 sbatch.mail_user = args.slurm_mail_user
 sbatch.ntasks = cpu
 sbatch.time = time
