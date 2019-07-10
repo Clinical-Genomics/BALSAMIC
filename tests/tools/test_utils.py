@@ -62,24 +62,28 @@ def test_snakemake_slurm():
     snakemake_slurm.configfile = "sample_config.json"
     snakemake_slurm.run_mode = "slurm"
     snakemake_slurm.cluster_config = "cluster_config.json"
-    snakemake_slurm.sbatch_py = "runsbatch.py"
+    snakemake_slurm.scheduler = "sbatch.py"
     snakemake_slurm.log_path = "logs/"
     snakemake_slurm.script_path = "scripts/"
     snakemake_slurm.result_path = "results/"
     snakemake_slurm.qos = "normal"
+    snakemake_slurm.account = "development"
+    snakemake_slurm.mail_type = "FAIL"
+    snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
     snakemake_slurm.run_analysis = True
 
     # WHEN calling the build command
     shell_command = snakemake_slurm.build_cmd()
 
+    print(shell_command)
     # THEN constructing snakecommand for slurm runner
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
     assert "/tmp/snakemake" in shell_command
     assert "--dryrun" not in shell_command
-    assert "runsbatch.py" in shell_command
+    assert "sbatch.py" in shell_command
     assert "test_sample" in shell_command
     assert "containers" in shell_command
 
