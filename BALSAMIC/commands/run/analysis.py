@@ -77,9 +77,17 @@ from BALSAMIC.utils.cli import get_config
 @click.option('--snakemake-opt',
               multiple=True,
               help='Pass these options directly to snakemake')
+@click.option('--slurm-account',
+              help='SLURM account to run jobs')
+@click.option('--slurm-mail-user',
+              help='SLURM mail user to send out email.')
+@click.option('--slurm-mail-type',
+              type=click.Choice(['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL','TIME_LIMIT']),
+              help='SLURM mail type to send out email. This will be applied to all jobs and override snakemake settings.')
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, log_file, force_all, snakemake_opt,
+             slurm_mail_type, slurm_mail_user, slurm_account,
              analysis_type, qos):
     """
     Runs BALSAMIC workflow on the provided sample's config file
@@ -92,6 +100,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     logpath = sample_config['analysis']['log']
     scriptpath = sample_config['analysis']['script']
     resultpath = sample_config['analysis']['result']
+    print(resultpath)
     sample_name = sample_config['analysis']['sample_id']
 
     if run_analysis:
@@ -120,11 +129,15 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
-    balsamic_run.sbatch_py = get_sbatchpy()
+    balsamic_run.scheduler = get_sbatchpy()
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath
     balsamic_run.result_path = resultpath
     balsamic_run.qos = qos
+    balsamic_run.account = slurm_account
+    if slurm_mail_type:
+        balsamic_run.mail_type = slurm_mail_type
+    balsamic_run.mail_user = slurm_mail_user
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
     balsamic_run.sm_opt = snakemake_opt
