@@ -114,7 +114,7 @@ class SnakeMake:
 
         if self.run_mode == 'slurm':
             sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
-                " --sample-config " + self.configfile +  \
+                " --sample-config " + self.configfile + \
                 " --slurm-account " + self.account + \
                 " --slurm-qos " + self.qos + \
                 " --dir-log " + self.log_path + \
@@ -130,7 +130,7 @@ class SnakeMake:
             sbatch_cmd += " {dependencies} '"
 
             cluster_cmd = " --immediate-submit -j 300 " + \
-                " --jobname " + self.sample_name + ".{rulename}.{jobid}.sh" + \
+                " --jobname BALSAMIC." + self.sample_name + ".{rulename}.{jobid}.sh" + \
                 " --cluster-config " + self.cluster_config + \
                 " --cluster " + sbatch_cmd
 
