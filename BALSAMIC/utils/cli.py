@@ -66,11 +66,13 @@ class SnakeMake:
                       balsamic-config-sample
     run_mode        - run mode - cluster or local shell run
     cluster_config  - cluster config json file
-    sbatch_py       - slurm command constructor
+    scheduler       - slurm command constructor
     log_path        - log file path
     script_path     - file path for slurm scripts
     result_path     - result directory
     qos             - QOS for sbatch jobs
+    account         - scheduler(e.g. slurm) account
+    mail_user       - email to account to send job run status
     forceall        - To add '--forceall' option for snakemake
     run_analysis    - To run pipeline
     sm_opt          - snakemake additional options
@@ -83,7 +85,7 @@ class SnakeMake:
         self.configfile = None
         self.run_mode = None
         self.cluster_config = None
-        self.sbatch_py = None
+        self.scheduler = None
         self.log_path = None
         self.script_path = None
         self.result_path = None
@@ -111,15 +113,21 @@ class SnakeMake:
             dryrun = " --dryrun "
 
         if self.run_mode == 'slurm':
-            sbatch_cmd = " 'python3 {} ".format(self.sbatch_py) + \
+            sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
                 " --sample-config " + self.configfile +  \
                 " --slurm-account " + self.account + \
                 " --slurm-qos " + self.qos + \
-                " --slurm-mail-type " + self.mail_type + \
-                " --slurm-mail-user " + self.mail_user + \
                 " --dir-log " + self.log_path + \
                 " --dir-script " + self.script_path + \
-                " --dir-result " + self.result_path + " {dependencies} '"
+                " --dir-result " + self.result_path
+
+            if self.mail_user:
+                sbatch_cmd += " --slurm-mail-user " + self.mail_user
+
+            if self.mail_type:
+                sbatch_cmd += " --slurm-mail-type " + self.mail_type
+
+            sbatch_cmd += " {dependencies} '"
 
             cluster_cmd = " --immediate-submit -j 300 " + \
                 " --jobname " + self.sample_name + ".{rulename}.{jobid}.sh" + \
