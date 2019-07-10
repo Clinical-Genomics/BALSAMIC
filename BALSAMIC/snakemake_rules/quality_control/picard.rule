@@ -39,8 +39,8 @@ rule MarkDuplicates:
 
 rule CollectHsMetrics:
   input:
-    fadict = (config["path"]["genomefa"] + config["references"]["genomefa"]).replace(".fasta",".dict"),
-    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
+    fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
+    bed = config["panel"]["capture_kit"],
     bam = bam_dir + "{sample}.sorted.bam",
     bammrkdup = bam_dir + "{sample}.sorted." + picarddup + ".bam",
   output:
@@ -77,7 +77,7 @@ rule CollectHsMetrics:
 rule CollectAlignmentSummaryMetrics:
   input:
     bam = bam_dir + "{sample}.sorted.bam",
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"]
+    fa = config["reference"]["reference_genome"]
   output:
     bam_dir + "{sample}.sorted.alignmetric"
   params:

@@ -10,7 +10,7 @@ picarddup = get_picard_mrkdup(config)
 rule sambamba_panel_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
-    bed = config["path"]["panel"] + config["bed"]["capture_kit"]
+    bed = config["panel"]["capture_kit"]
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".cov.bed"
   params:

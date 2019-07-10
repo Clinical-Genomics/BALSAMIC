@@ -10,8 +10,8 @@ picarddup = get_picard_mrkdup(config)
 rule RealignerTargetCreator:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
+    fa = config["reference"]["reference_genome"],
+    knownsites = config["reference"]["dbsnp"], 
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
@@ -29,8 +29,8 @@ rule RealignerTargetCreator:
 rule IndelRealigner:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
+    fa = config["reference"]["reference_genome"],
+    knownsites = config["reference"]["dbsnp"], 
     intervals = bam_dir + "{sample}" + ".sorted." + picarddup + ".intervals",
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam",
@@ -50,8 +50,8 @@ rule IndelRealigner:
 rule BaseRecalibrator:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".ralgn.bam",
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    knownsites = config["path"]["genomefa"] + config["references"]["dbsnp"], 
+    fa = config["reference"]["reference_genome"],
+    knownsites = config["reference"]["dbsnp"], 
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
   params:
@@ -75,7 +75,7 @@ rule BaseRecalibrator:
 rule PreparePopVCF:
   input:
     bam = bam_dir + "tumor.merged.bam",
-    ref1kg = config["path"]["genomefa"] + config["references"]["1000G"], 
+    ref1kg = config["references"]["1kg_snps_all"], 
   output:
     popvcf = result_dir + "popvcf.vcf"
   params:
