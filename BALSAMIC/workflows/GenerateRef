@@ -188,7 +188,7 @@ rule picard_ref_dict:
 
 rule vep_install:
     params:
-        species = "homo_sapiens,homo_sapiens_refseq,homo_sapiens_merged",
+        species = "homo_sapiens_merged",
         assembly = "GRCh37",
         plugins = "all",
         conda_env = get_conda_env(config["conda_env_yaml"], "ensembl-vep")
