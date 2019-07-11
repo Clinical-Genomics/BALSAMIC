@@ -1,11 +1,12 @@
 import json
 import pytest
+from pathlib import Path
 
 from BALSAMIC.utils.cli import get_ref_path, iterdict
 from BALSAMIC.utils.cli import SnakeMake, get_packages, get_package_split, get_snakefile
 from BALSAMIC.utils.rule import get_chrom, get_vcf, get_sample_type, get_conda_env, \
     get_picard_mrkdup
-
+from BALSAMIC.utils.rule import get_script_path
 
 def test_get_ref_path(config_files):
     # GIVEN a sample json file path
@@ -120,6 +121,17 @@ def test_get_package_split(conda):
     assert "cutadapt" in packages
     assert "fastqc" in packages
 
+def test_get_script_path():
+    # GIVEN list of scripts
+    custom_scripts = ["refseq_sql.awk"]
+
+    # WHEN asking to get path for the script
+    for script in custom_scripts:
+        # THEN assert full path for script
+        assert get_script_path(script).startswith('/')
+        
+        # THEN assert if script file exists
+        assert Path(get_script_path(script)).is_file()
 
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
@@ -135,6 +147,8 @@ def test_get_snakefile():
             assert "BALSAMIC/workflows/VariantCalling_" + analysis_type in snakefile
         else:
             assert "BALSAMIC/workflows/Alignment" in snakefile
+        # THEN assert file exists
+        assert Path(snakefile).is_file()
 
 
 def test_get_chrom(config_files):
