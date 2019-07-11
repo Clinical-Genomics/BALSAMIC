@@ -1,8 +1,57 @@
 import os
+import re
 import json
 from pathlib import Path
 from itertools import chain
 import yaml
+
+
+class sbatch:
+    '''
+    Builds sbatch command. Commands map to SLURM sbatch options.
+    
+    Params:
+    ------
+    account         - -A/--account
+    dependency      - 
+    error           - -e/--error
+    mail_type       - --mail-type
+    mail_user       - --mail-user 
+    ntasks          - -n/--ntasks
+    output          - -o/--output
+    qos             - -q/--qos 
+    time            - -t/--time
+    '''
+
+    def __init__(self):
+        self.account = None
+        self.dependency = None
+        self.error = None
+        self.mail_type = None
+        self.mail_user = None
+        self.ntasks = None
+        self.output = None
+        self.qos = None
+        self.script = None
+        self.time = None
+
+    def build_cmd(self):
+        sbatch_options = list()
+
+        job_attributes = [
+            'account', 'dependency', 'error', 'output', 'mail_type',
+            'mail_user', 'ntasks', 'qos', 'time'
+        ]
+
+        for attribute in job_attributes:
+            if getattr(self, attribute):
+                attribute_value = getattr(self, attribute)
+                sbatch_options.append('--{} \"{}\"'.format(
+                    attribute.replace("_", "-"), attribute_value))
+
+        sbatch_options.append(self.script)
+
+        return 'sbatch' + ' ' + ' '.join(sbatch_options)
 
 
 class SnakeMake:
@@ -17,11 +66,13 @@ class SnakeMake:
                       balsamic-config-sample
     run_mode        - run mode - cluster or local shell run
     cluster_config  - cluster config json file
-    sbatch_py       - slurm command constructor
+    scheduler       - slurm command constructor
     log_path        - log file path
     script_path     - file path for slurm scripts
     result_path     - result directory
     qos             - QOS for sbatch jobs
+    account         - scheduler(e.g. slurm) account
+    mail_user       - email to account to send job run status
     forceall        - To add '--forceall' option for snakemake
     run_analysis    - To run pipeline
     sm_opt          - snakemake additional options
@@ -34,11 +85,14 @@ class SnakeMake:
         self.configfile = None
         self.run_mode = None
         self.cluster_config = None
-        self.sbatch_py = None
+        self.scheduler = None
         self.log_path = None
         self.script_path = None
         self.result_path = None
         self.qos = None
+        self.account = None
+        self.mail_type = None
+        self.mail_user = None
         self.forceall = False
         self.run_analysis = False
         self.sm_opt = None
@@ -59,14 +113,24 @@ class SnakeMake:
             dryrun = " --dryrun "
 
         if self.run_mode == 'slurm':
-            sbatch_cmd = " 'python3 {} ".format(self.sbatch_py) + \
+            sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
                 " --sample-config " + self.configfile + \
-                " --qos " + self.qos + " --dir-log " + self.log_path + \
+                " --slurm-account " + self.account + \
+                " --slurm-qos " + self.qos + \
+                " --dir-log " + self.log_path + \
                 " --dir-script " + self.script_path + \
-                " --dir-result " + self.result_path + " {dependencies} '"
+                " --dir-result " + self.result_path
+
+            if self.mail_user:
+                sbatch_cmd += " --slurm-mail-user " + self.mail_user
+
+            if self.mail_type:
+                sbatch_cmd += " --slurm-mail-type " + self.mail_type
+
+            sbatch_cmd += " {dependencies} '"
 
             cluster_cmd = " --immediate-submit -j 300 " + \
-                " --jobname " + self.sample_name + ".{rulename}.{jobid}.sh" + \
+                " --jobname BALSAMIC." + self.sample_name + ".{rulename}.{jobid}.sh" + \
                 " --cluster-config " + self.cluster_config + \
                 " --cluster " + sbatch_cmd
 
@@ -153,9 +217,10 @@ def get_package_split(condas):
         "sambamba", "strelka", "samtools", "tabix", "vardic"
     ]
 
-    pkgs = dict([[y.split("=")[0], y.split("=")[1]]
-                for y in set(chain.from_iterable([get_packages(s) for s in condas]))
-                if y.split("=")[0] in pkgs])
+    pkgs = dict(
+        [[y.split("=")[0], y.split("=")[1]]
+         for y in set(chain.from_iterable([get_packages(s) for s in condas]))
+         if y.split("=")[0] in pkgs])
 
     return (pkgs)
 
@@ -190,7 +255,7 @@ def get_sbatchpy():
     """
 
     p = Path(__file__).parents[1]
-    sbatch = str(Path(p, 'commands/run/runSbatch.py'))
+    sbatch = str(Path(p, 'commands/run/sbatch.py'))
 
     return sbatch
 
