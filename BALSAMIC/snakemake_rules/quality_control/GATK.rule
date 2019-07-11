@@ -11,7 +11,7 @@ rule RealignerTargetCreator:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     fa = config["reference"]["reference_genome"],
-    knownsites = config["reference"]["dbsnp"], 
+    knownsites = config["reference"]["1kg_snps_high"], 
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
@@ -30,7 +30,7 @@ rule IndelRealigner:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     fa = config["reference"]["reference_genome"],
-    knownsites = config["reference"]["dbsnp"], 
+    knownsites = config["reference"]["1kg_snps_high"], 
     intervals = bam_dir + "{sample}" + ".sorted." + picarddup + ".intervals",
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam",
@@ -51,7 +51,7 @@ rule BaseRecalibrator:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".ralgn.bam",
     fa = config["reference"]["reference_genome"],
-    knownsites = config["reference"]["dbsnp"], 
+    knownsites = config["reference"]["1kg_snps_high"], 
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
   params:
