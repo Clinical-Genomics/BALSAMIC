@@ -31,6 +31,7 @@ rule vep:
         "--format vcf "
         "--offline "
         "--variant_class "
+        "--merged "
         "--cache "
         "--verbose "
         "--force_overwrite && "
