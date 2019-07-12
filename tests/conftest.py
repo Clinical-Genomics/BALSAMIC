@@ -26,8 +26,8 @@ def config_files():
     """ dict: path of the config files """
     return {
         "install": "BALSAMIC/config/install.json",
-        "reference": "BALSAMIC/config/reference.json",
         "sample": "BALSAMIC/config/sample.json",
+        "reference": "tests/test_data/references/reference.json",
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
         "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
         "analysis_single": "BALSAMIC/config/analysis_single.json",
