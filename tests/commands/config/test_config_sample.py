@@ -11,7 +11,7 @@ from BALSAMIC.utils.cli import iterdict, write_json, get_config
 def test_get_config(config_files):
     # GIVEN the config files name
     files = [
-        "install", "reference", "sample", "analysis_paired",
+        "install", "sample", "analysis_paired",
         "analysis_paired_umi", "analysis_single", "analysis_single_umi"
     ]
     # WHEN passing file names
