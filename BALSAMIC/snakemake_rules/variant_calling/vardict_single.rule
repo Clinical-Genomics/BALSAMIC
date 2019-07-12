@@ -10,7 +10,7 @@ from BALSAMIC.utils.rule import get_conda_env, get_chrom
 var_caller = "vardict"
 vardict_dir = var_caller + "/"
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
+chromlist = config["panel"]["chrom"]
 capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 rule vardict_single:
