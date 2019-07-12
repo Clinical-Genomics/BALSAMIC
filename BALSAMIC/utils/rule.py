@@ -1,5 +1,6 @@
 import os
 import yaml
+from pathlib import Path
 
 
 def get_chrom(panelfile):
@@ -83,3 +84,12 @@ def get_picard_mrkdup(config):
 
     return picard_str
 
+def get_script_path(script_name: str):
+    """
+    Retrieves script path where name is matching {{script_name}}.
+    """
+
+    p = Path(__file__).parents[1]
+    script_path = str(Path(p, 'assets/scripts', script_name))
+
+    return script_path

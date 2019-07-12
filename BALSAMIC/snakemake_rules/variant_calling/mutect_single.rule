@@ -3,6 +3,7 @@
 
 __author__ = "Hassan Foroughi Asl"
 
+import os
 from BALSAMIC.utils.rule import get_conda_env, get_chrom
 
 
@@ -10,15 +11,16 @@ var_caller = "mutect"
 mutect_dir = var_caller + "/"
 picarddup = get_picard_mrkdup(config)
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
+chromlist = config["panel"]["chrom"]
+capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 rule mutect2_somatic_single:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    dbsnp = config["path"]["genomefa"] + config["references"]["dbsnp_all"],
-    cosmic = config["path"]["genomefa"] + config["references"]["cosmic"],
+    fa = config["reference"]["reference_genome"],
+    dbsnp = config["reference"]["dbsnp"],
+    cosmic = config["reference"]["cosmic"],
     bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
-    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["capture_kit"],
+    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + capture_kit,
   output:
     vcf_dir + mutect_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"][var_caller]["default"] + ".gz"
   params:

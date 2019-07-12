@@ -3,20 +3,22 @@
 
 __author__ = "Hassan Foroughi Asl"
 
+import os
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
 
 var_caller = "haplotypecaller"
 haplotypecaller_dir = var_caller + "/"
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
+chromlist = config["panel"]["chrom"]
 picarddup = get_picard_mrkdup(config)
+capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 rule haplotypecaller:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
-    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["capture_kit"],
+    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + capture_kit,
   output:
     vcf_dir + haplotypecaller_dir + "split_vcf/" + "{sample}.{bedchrom}_" + config["vcf"][var_caller]["default"]
   params:

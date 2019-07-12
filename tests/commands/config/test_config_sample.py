@@ -89,7 +89,7 @@ def test_set_panel_bed(config_files):
     json_out = set_panel_bed(ref_json, panel_bed)
 
     # THEN It will add two more items into the dict
-    assert "chrom" in json_out['bed']
+    assert "chrom" in json_out['panel']
 
 
 def test_set_panel_bed_error(config_files):

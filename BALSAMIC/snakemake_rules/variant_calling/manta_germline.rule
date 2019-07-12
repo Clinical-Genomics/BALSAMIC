@@ -12,7 +12,7 @@ picarddup = get_picard_mrkdup(config)
 
 rule manta_germline:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
   output:
     final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz", 

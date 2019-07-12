@@ -12,7 +12,7 @@ picarddup = get_picard_mrkdup(config)
 
 rule strelka_somatic:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
     mantaindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz" 

@@ -11,7 +11,7 @@ pindel_dir = vcf_dir + var_caller + "/"
 
 rule pindel_somatic_single:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     bamT = bam_dir + "tumor.merged.bam",
   output: 
     final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz",
