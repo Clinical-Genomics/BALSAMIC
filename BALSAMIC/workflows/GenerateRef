@@ -66,13 +66,15 @@ rule all:
         dbsnp_vcf = dbsnp + ".gz",
         th_genome_vcf = vcf_1kg + ".gz",
         tg_high_vcf = hc_vcf_1kg + ".gz",
-        mill_1kg = mills_1kg + ".gz",
+        mills_1kg = mills_1kg + ".gz",
         cosmic_vcf = cosmicdb + ".gz",
         variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
         vep = vep_dir
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = reference_json
+    log:
+        reference_json + ".log"
     run:
         import json
 
@@ -116,7 +118,6 @@ rule download_refgene:
         refgene_txt = refgene_txt_link,
         refgene_sql = refgene_sql_link,
         refgene_sql_awk = get_script_path('refseq_sql.awk'), 
-        tabQuery = get_script_path('tabQuery'), 
         bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
@@ -127,9 +128,11 @@ rule download_refgene:
     shell:
         "source activate {params.conda_env}; " 
         "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk}); " 
-        "(echo \"$header\"; wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip;) > {output}.tmp; "
-        "{params.tabQuery} select {params.bed_header} from {output}.tmp | bedtools expand -c 2,3 > {output}; "
-        "rm {output}.tmp; "
+        "(echo \"$header\"; wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip;) "
+        "| csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 "
+        "| csvformat -T "
+        "| bedtools expand -c 2,3 "
+        "| awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output}; "
         "source deactivate; "
 
 ##########################################################
