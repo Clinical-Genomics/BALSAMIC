@@ -22,3 +22,5 @@ dependencies:
   - cutadapt=1.15
   - pindel=0.2.5b9
   - multiqc=1.7 
+  - bedtools=2.28.0
+  - csvkit=1.0.4

@@ -12,7 +12,7 @@ picarddup = get_picard_mrkdup(config)
 
 rule strelka_germline:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     mantaindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz"
   output:

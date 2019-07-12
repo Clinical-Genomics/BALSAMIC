@@ -42,11 +42,8 @@ def set_panel_bed(json_out, panel_bed):
     Set panel path in config file
     """
     try:
-        json_out["path"]["panel"] = os.path.split(
-            os.path.abspath(panel_bed))[0] + "/"
-        json_out["bed"]["capture_kit"] = os.path.split(
-            os.path.abspath(panel_bed))[1]
-        json_out["bed"]["chrom"] = get_chrom(panel_bed)
+        json_out["panel"] = {"capture_kit": os.path.abspath(panel_bed)}
+        json_out["panel"]["chrom"] = get_chrom(panel_bed)
 
     except OSError as error:
         raise error
@@ -158,8 +155,7 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 @click.option(
     "-r",
     "--reference-config",
-    required=False,
-    default=get_config("reference"),
+    required=True,
     show_default=True,
     type=click.Path(),
     help="Reference config file.",
@@ -267,7 +263,7 @@ it is. So this is just a placeholder for future.
     click.echo("Reading analysis config file %s" % analysis_config)
     click.echo("Reading reference config file %s" % reference_config)
 
-    reference_json = get_ref_path(reference_config)
+    # reference_json = get_ref_path(reference_config)
 
     read_prefix = ["1", "2"]
 
@@ -382,7 +378,7 @@ it is. So this is just a placeholder for future.
     click.echo("Writing output config file %s" %
                os.path.abspath(output_config))
 
-    json_out = merge_json(analysis_config, sample_config, reference_json,
+    json_out = merge_json(analysis_config, sample_config, reference_config,
                           install_config, bioinfo_config)
 
     dag_image = os.path.join(output_dir,
