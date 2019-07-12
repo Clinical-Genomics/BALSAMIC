@@ -8,17 +8,19 @@ from BALSAMIC.utils.rule import get_script_path
 __author__ = "Sarath Murugan"
 
 # LINKS TO REFERENCE FILES
-reference_genome_link = "https://storage.googleapis.com/gatk-legacy-bundles/b37/human_g1k_v37_decoy.fasta.gz"
-vcf_1kg_link = "ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz"
-dbsnp_link = "https://storage.googleapis.com/gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz"
-hc_vcf_1kg_link = "https://storage.googleapis.com/gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz"
+# ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/
+reference_genome_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/human_g1k_v37.fasta.gz"
+dbsnp_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz"
+hc_vcf_1kg_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg19/1000G_phase1.snps.high_confidence.hg19.sites.vcf.gz"
+mills_1kg_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz"
+vcf_1kg_link = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz"
 cosmicdb_link = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v89/VCF/CosmicCodingMuts.vcf.gz"
 refgene_txt_link = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
 refgene_sql_link = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql"
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
-       '1kg_phase1_snps_high_confidence_b37.vcf', 'cosmic_coding_muts_v89.vcf']
+       '1kg_phase1_snps_high_confidence_b37.vcf', 'mills_1kg_index.vcf', 'cosmic_coding_muts_v89.vcf']
 
 basedir = config['output']
 genome_dir = basedir + "/genome/"
@@ -37,10 +39,11 @@ genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
 dbsnp = os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf")
 vcf_1kg = os.path.join(vcf_dir, "1k_genome_wgs_p1_v3_all_sites.vcf")
 hc_vcf_1kg = os.path.join(vcf_dir, "1kg_phase1_snps_high_confidence_b37.vcf")
+mills_1kg = os.path.join(vcf_dir, "mills_1kg_index.vcf")
 cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
 
 # list of reference download link and output file name
-ref_list = [(reference_genome_link, reference_genome), (vcf_1kg_link, vcf_1kg), (dbsnp_link, dbsnp), (hc_vcf_1kg_link, hc_vcf_1kg)]
+ref_list = [(reference_genome_link, reference_genome), (vcf_1kg_link, vcf_1kg), (dbsnp_link, dbsnp), (hc_vcf_1kg_link, hc_vcf_1kg), (mills_1kg_link, mills_1kg)]
 
 shell.prefix("set -eo pipefail; ")
 
@@ -63,6 +66,7 @@ rule all:
         dbsnp_vcf = dbsnp + ".gz",
         th_genome_vcf = vcf_1kg + ".gz",
         tg_high_vcf = hc_vcf_1kg + ".gz",
+        mill_1kg = mills_1kg + ".gz",
         cosmic_vcf = cosmicdb + ".gz",
         variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
         vep = vep_dir
@@ -75,10 +79,11 @@ rule all:
         ref_json = dict()
         ref_json['reference'] = {
             "reference_genome": input.reference_genome,
-            "dbsnp": input.dbsnp_vcf + '.gz',
-            "1kg_snps_all": input.th_genome_vcf + '.gz',
-            "1kg_snps_high": input.tg_high_vcf + '.gz',
-            "cosmic": input.cosmic_vcf + '.gz',
+            "dbsnp": input.dbsnp_vcf,
+            "1kg_snps_all": input.th_genome_vcf,
+            "1kg_snps_high": input.tg_high_vcf,
+            "mills_1kg": input.mills_1kg,
+            "cosmic": input.cosmic_vcf,
             "exon_bed": input.refseq_bed,
             "vep": input.vep
         }
@@ -102,15 +107,17 @@ rule download_reference:
     run:
         for ref in ref_list:
             try:
-                shell("wget -a {ref[1]}.log -O - {ref[0]} | gunzip {ref[1]}")
+                shell("wget -a {ref[1]}.log -O - {ref[0]} | gunzip > {ref[1]}")
             except:
-                shell("echo wget -a {ref[1]}.log -O - {ref[0]} \"\"|\"\" gunzip {ref[1]}) > {ref[1]}.fail")
+                shell("echo wget -a {ref[1]}.log -O - {ref[0]} \"\"|\"\" gunzip > {ref[1]}.fail")
 
 rule download_refgene:
     params:
         refgene_txt = refgene_txt_link,
         refgene_sql = refgene_sql_link,
         refgene_sql_awk = get_script_path('refseq_sql.awk'), 
+        tabQuery = get_script_path('tabQuery'), 
+        bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
         refseq_bed
@@ -118,10 +125,12 @@ rule download_refgene:
         refgene_sql = genome_dir + "refgene_sql.log",
         refgene_txt = genome_dir + "refgene_txt.log"
     shell:
-        "source activate {params.conda_env};" 
-        "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk});" 
-        "(echo $header; wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip;) > {output};"
-        "source deactivate;"
+        "source activate {params.conda_env}; " 
+        "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk}); " 
+        "(echo \"$header\"; wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip;) > {output}.tmp; "
+        "{params.tabQuery} select {params.bed_header} from {output}.tmp | bedtools expand -c 2,3 > {output}; "
+        "rm {output}.tmp; "
+        "source deactivate; "
 
 ##########################################################
 # Download cosmic data using basic authentication 
