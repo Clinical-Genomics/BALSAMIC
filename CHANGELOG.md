@@ -19,7 +19,7 @@ TL;DR:
 ### Added
 - Creating and downloading reference files: `balsamic config reference` and `balsamic run reference`
 - Container definitions for install and running BALSAMIC
-- 
+- Bunch of tests, setup coveralls and travis. 
 
 ### Fixed
 - Multiple fixes to snakemake rules 
