@@ -9,6 +9,7 @@ from BALSAMIC.utils.cli import sbatch
 from BALSAMIC.utils.cli import get_packages
 from BALSAMIC.utils.cli import get_package_split
 from BALSAMIC.utils.cli import get_snakefile
+from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -237,3 +238,25 @@ def test_get_picard_mrkdup(sample_config):
 
     # THEN It will return the picard str as rmdup
     assert "rmdup" == picard_str
+
+def test_createDir(tmp_path):
+    # GIVEN a directory path
+    # WHEN directory path is not yet created 
+    test_new_dir = tmp_path / "new_dir"
+    
+    # THEN it should create and return dir name
+    test_new_dir_created = createDir(str(test_new_dir))
+    assert test_new_dir_created == str(tmp_path / "new_dir")
+    assert Path(test_new_dir_created).is_dir()
+
+    # GIVEN a directory path
+    test_log_dir = tmp_path / "existing_dir"
+    
+    # WHEN directory path exists 
+    test_log_dir.mkdir()
+    
+    # THEN it should return log_dir name incremented
+    test_log_dir_created = createDir(str(test_log_dir), []) 
+    assert test_log_dir_created == str(tmp_path / "existing_dir.1")
+    assert Path(test_log_dir_created).is_dir()
+
