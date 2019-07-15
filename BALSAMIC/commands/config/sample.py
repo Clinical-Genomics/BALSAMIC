@@ -113,10 +113,8 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 
     # It is assumed that the format of input fastq files is: samplename_R_{1,2}.fastq.gz
     # This is hardcoded and should be changed when going in production.
-    src_fq = [
-        os.path.join(src_path, sample_name + "_" + r + fq_prefix + ".fastq.gz")
-        for r in read_prefix
-    ]
+    src_fq = [os.path.join(src_path, sample_name + "_" + r + fq_prefix + ".fastq.gz")
+              for r in read_prefix]
 
     # The output fastq files will be: samplename_R_{1,2}.fastq.gz
     dst_fq = [
@@ -139,94 +137,76 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
             print(e.output.decode())
 
 
-@click.command("sample",
-               short_help="Create a sample config file from input sample data")
-@click.option('--umi',
-              is_flag=True,
-              help="UMI processing steps for samples with umi tags")
-@click.option(
-    "-i",
-    "--install-config",
-    required=False,
-    default=get_config("install"),
-    show_default=True,
-    type=click.Path(),
-    help="Installation config file.",
-)
-@click.option(
-    "-r",
-    "--reference-config",
-    required=True,
-    show_default=True,
-    type=click.Path(),
-    help="Reference config file.",
-)
-@click.option(
-    "-p",
-    "--panel-bed",
-    required=True,
-    type=click.Path(),
-    help="Panel bed file for variant calling.",
-)
-@click.option("-s",
-              "--sample-config",
-              type=click.Path(),
-              help="Input sample config file.")
-@click.option(
-    "-o",
-    "--output-config",
-    required=False,
-    help="Output a json config filename ready to be imported for run-analysis",
-)
-@click.option(
-    "-t",
-    "--tumor",
-    required=True,
-    help=
-    "Fastq files for tumor sample. Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, the input should be --tumor tumor_fqreads",
-)
-@click.option(
-    "-n",
-    "--normal",
-    help=
-    "Fastq files for normal sample. Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, the input should be --normal normal_fqreads",
-)
-@click.option(
-    "--sample-id",
-    required=True,
-    help=
-    "Sample id that is used for reporting, naming the analysis jobs, and analysis path",
-)
-@click.option(
-    "--fastq-prefix",
-    required=False,
-    default="",
-    help="Prefix to fastq file. The string that comes after readprefix",
-)
-@click.option(
-    "--analysis-dir",
-    type=click.Path(),
-    help=
-    "Root analysis path to store analysis logs and results. The final path will be analysis-dir/sample-id",
-)
-@click.option(
-    "--fastq-path",
-    type=click.Path(),
-    help=
-    "Path for fastq files. All fastq files should be within same path and that path has to exist.",
-)
-@click.option(
-    "--check-fastq/--no-check-fastq",
-    default=True,
-    show_default=True,
-    help=
-    "Check if fastq input files exist. An internal check, so it's recommended not to change it.",
-)
-@click.option(
-    "--overwrite-config/--no-overwrite-config",
-    default=True,
-    help="Overwrite output config file",
-)
+def link_fq(src_files, des_path):
+    for src_file in src_files:
+        basename = os.path.basename(src_file)
+        des_file = os.path.join(des_path, basename)
+        try:
+            os.symlink(src_file, des_file)
+        except FileExistsError:
+            print(f"Desitination file {des_file} exists. No symbolic link was created.")
+
+
+def configure_fastq(output_dir, tumor, normal, fastq_prefix):
+    # create dir for fastq symlink creation
+    fq_path = os.path.join(output_dir, 'fastq')
+    os.makedirs(fq_path, exist_ok=True)
+
+    # fastq file pattern
+    fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
+    paths = list()
+
+    # get a list of fq files
+    tumor = os.path.abspath(tumor)
+    tumor_base = os.path.basename(tumor)
+    tumor_str = tumor_base[0: (fq_pattern.search(tumor_base).span()[0] + 1)]
+    paths.append(os.path.split(tumor)[0])
+
+    if normal:
+        normal = os.path.abspath(normal)
+        normal_base = os.path.basename(normal)
+        normal_str = normal_base[0: (fq_pattern.search(normal_base).span()[0] + 1)]
+        paths.append(os.path.split(normal)[0])
+
+    fq_files = set()
+    for path in paths:
+        for file in os.listdir(path):
+            if fq_pattern.search(file):
+                fq_files.add(os.path.join(path, file))
+
+    link_fq(fq_files, fq_path)
+
+
+@click.command("sample", short_help="Create a sample config file from input sample data")
+@click.option('--umi', is_flag=True, help="UMI processing steps for samples with umi tags")
+@click.option("-i", "--install-config", required=False, default=get_config("install"),
+              show_default=True, type=click.Path(), help="Installation config file.")
+@click.option("-r", "--reference-config", required=True, show_default=True, type=click.Path(),
+              help="Reference config file.")
+@click.option("-p", "--panel-bed", required=True, type=click.Path(),
+              help="Panel bed file for variant calling.")
+@click.option("-s", "--sample-config", type=click.Path(), help="Input sample config file.")
+@click.option("-o", "--output-config", required=False,
+              help="Output a json config filename ready to be imported for run-analysis")
+@click.option("-t", "--tumor", required=True, help="Fastq files for tumor sample. \
+              Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, \
+              the input should be --tumor tumor_fqreads",)
+@click.option("-n", "--normal", help="Fastq files for normal sample. \
+              Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, \
+              the input should be --normal normal_fqreads")
+@click.option("--sample-id", required=True, help="Sample id that is used for reporting, \
+              naming the analysis jobs, and analysis path")
+@click.option("--fastq-prefix", required=False, default="", help="Prefix to fastq file. \
+              The string that comes after readprefix")
+@click.option("--analysis-dir", type=click.Path(), help="Root analysis path to store \
+              analysis logs and results. The final path will be analysis-dir/sample-id")
+@click.option("--fastq-path", type=click.Path(), help="Path for fastq files. All fastq files \
+              should be within same path and that path has to exist.",)
+@click.option("--check-fastq/--no-check-fastq", default=True, show_default=True,
+              help="Check if fastq input files exist. An internal check, \
+              so it's recommended not to change it.")
+@click.option("--overwrite-config/--no-overwrite-config", default=True,
+              help="Overwrite output config file")
 @click.option("--create-dir/--no-create-dir",
               default=True,
               help="Create analysis directiry.")
@@ -247,8 +227,7 @@ def sample(
         check_fastq,
         overwrite_config,
         create_dir,
-        fastq_prefix,
-):
+        fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as dictionary and merging them as
 it is. So this is just a placeholder for future.
@@ -284,6 +263,8 @@ it is. So this is just a placeholder for future.
     if create_dir:
         os.makedirs(output_dir, exist_ok=True)
 
+    configure_fastq(output_dir, tumor, normal, fastq_prefix)
+    
     # Update fastq_path
     if fastq_path:
         if os.path.isdir(output_dir) and os.path.exists(output_dir):
