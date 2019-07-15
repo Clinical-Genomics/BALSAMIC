@@ -11,6 +11,7 @@ import click
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import get_package_split, get_ref_path, write_json, get_config
+from BALSAMIC.utils.cli import SnakeMake, get_snakefile
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
 
@@ -394,14 +395,18 @@ it is. So this is just a placeholder for future.
 
     FormatFile(output_config, in_place=True)
 
-    shellcmd = ([
-        'balsamic', 'run', 'analysis','--run-mode', 'local', '-s', output_config, '--snakemake-opt',
-        '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
-        '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
-        'BALSAMIC', bv, 'workflow', 'for', 'sample:',
-        json_out["analysis"]["sample_id"], '\\"\;/g"', '|', 'dot', '-Tpdf',
-        '1>', dag_image
-    ])
+    # configure snakemake cmd
+    config_sample = SnakeMake()
+    config_sample.working_dir = os.path.join(sample_config['analysis']['analysis_dir'], sample_id,
+                                             'BALSAMIC_run')
+    config_sample.snakefile = get_snakefile(analysis_type)
+    config_sample.configfile = output_config
 
+    shellcmd = (['"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
+                 '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
+                 'BALSAMIC', bv, 'workflow', 'for', 'sample:', json_out["analysis"]["sample_id"],
+                 '\\"\;/g"', '|', 'dot', '-Tpdf', '1>', dag_image])
+
+    cmd = config_sample.build_cmd() + " " + " ".join(shellcmd)
     click.echo("Creating workflow dag image file: %s" % dag_image)
-    subprocess.run(" ".join(shellcmd), shell=True)
+    subprocess.run(cmd, shell=True)
