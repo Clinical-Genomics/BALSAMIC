@@ -155,7 +155,6 @@ def add_doc(docstring):
 
     return document
 
-
 def createDir(path, interm_path=[]):
     '''
     Creates directories by recursively checking if it exists,
@@ -173,11 +172,10 @@ def createDir(path, interm_path=[]):
                                       str(basepath_number)]))
         interm_path.append(path)
         createDir(path, interm_path)
-        return interm_path[-1]
+        return os.path.abspath(interm_path[-1])
     else:
         os.makedirs(os.path.abspath(path), exist_ok=True)
-        return interm_path[-1]
-
+        return os.path.abspath(path)
 
 def get_packages(yaml_file):
     '''
