@@ -1,4 +1,5 @@
 import json
+import os
 import pytest
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_script_path
+from BALSAMIC.utils.rule import get_result_dir
 
 def test_get_ref_path(config_files):
     # GIVEN a sample json file path
@@ -221,17 +223,6 @@ def test_get_sample_type(sample_config):
     assert sample_id == ['S1_R']
 
 
-# def test_get_conda_env(sample_config):
-#     # GIVEN a balsamic_env yaml file path
-#     balsamic_env = "BALSAMIC_env.yaml"
-
-#     # WHEN passing pkg name with this yaml file
-#     conda_env = get_conda_env(balsamic_env, 'ensembl-vep')
-
-#     # THEN It should return the conda env which has that pkg
-#     assert "Cancer-vep" in conda_env
-
-
 def test_get_picard_mrkdup(sample_config):
     # WHEN passing sample_config
     picard_str = get_picard_mrkdup(sample_config)
@@ -260,3 +251,16 @@ def test_createDir(tmp_path):
     assert test_log_dir_created == str(tmp_path / "existing_dir.1")
     assert Path(test_log_dir_created).is_dir()
 
+def test_get_result_dir(sample_config):
+    # WHEN a sample_config dict
+    # GIVEN a sample_config dict
+    # THEN get_result_dir should return result directory
+    assert get_result_dir(sample_config) == os.path.abspath(sample_config["analysis"]["result"]) 
+
+def test_get_conda_env(BALSAMIC_env, tmp_path):
+    # GIVEN a BALSAMIC_env yaml
+    # WHEN passing pkg name with this yaml file
+    conda_env = get_conda_env(BALSAMIC_env, 'package_1')
+
+    # THEN It should return the conda env which has that pkg
+    assert conda_env == "env_1"
