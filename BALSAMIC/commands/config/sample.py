@@ -114,8 +114,9 @@ def link_fastq(src_files, des_path):
         des_file = os.path.join(des_path, basename)
         try:
             os.symlink(src_file, des_file)
-        except FileExistsError:
+        except FileExistsError as error:
             print(f"Desitination file {des_file} exists. No symbolic link was created.")
+            raise error
 
 
 def configure_fastq(fq_path, tumor, normal, fastq_prefix):
