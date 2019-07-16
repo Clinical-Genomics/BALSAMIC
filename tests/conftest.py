@@ -1,7 +1,9 @@
 #! /usr/bin/python
 
 import pytest
+import yaml
 
+from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
 
@@ -48,6 +50,26 @@ def conda():
         "balsamic-py36": "BALSAMIC/conda/BALSAMIC-py36.yaml",
     }
 
+
+@pytest.fixture(scope='session')
+def BALSAMIC_env(tmp_path_factory):
+    """
+    Writes BALSAMIC_env.yaml file.
+    """
+    # create a conda_env directory
+    conda_env_path = tmp_path_factory.mktemp("conda_env")
+
+    # create a yaml file inside conda_env_path
+    conda_packages = {
+        str("env_1"): ["package_1", "package_2"],
+        str("env_2"): ["package_4"]
+    }
+
+    conda_env_file = conda_env_path / "test_BALSAMIC_env.yaml"
+
+    yaml.dump(conda_packages, open(conda_env_file, 'w'))
+
+    return str(conda_env_file)
 
 @pytest.fixture(scope='session')
 def sample_config():
