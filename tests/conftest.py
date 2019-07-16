@@ -129,21 +129,21 @@ def sample_config():
             "analysis_type":
             "paired",
             "analysis_dir":
-            "/BALSAMIC/tests/test_data/",
+            "tests/test_data/",
             "fastq_path":
-            "/BALSAMIC/tests/test_data/id1/fastq/",
+            "tests/test_data/id1/fastq/",
             "script":
-            "/BALSAMIC/tests/test_data/id1/scripts/",
+            "tests/test_data/id1/scripts/",
             "log":
-            "/BALSAMIC/tests/test_data/id1/logs/",
+            "tests/test_data/id1/logs/",
             "result":
-            "/BALSAMIC/tests/test_data/id1/analysis/",
+            "tests/test_data/id1/analysis/",
             "config_creation_date":
             "yyyy-mm-dd xx",
             "BALSAMIC_version":
             "2.9.8",
             "dag":
-            "/BALSAMIC/tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+            "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
         },
         "samples": {
             "S1_R": {

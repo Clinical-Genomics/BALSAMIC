@@ -105,39 +105,10 @@ def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
     return sample_config
 
 
-def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
-               fq_prefix):
+def link_fastq(src_files, des_path):
     """
-    Links fastq files inside the analysis directory
+    Creating fastq symlinks in given destination
     """
-
-    # It is assumed that the format of input fastq files is: samplename_R_{1,2}.fastq.gz
-    # This is hardcoded and should be changed when going in production.
-    src_fq = [os.path.join(src_path, sample_name + "_" + r + fq_prefix + ".fastq.gz")
-              for r in read_prefix]
-
-    # The output fastq files will be: samplename_R_{1,2}.fastq.gz
-    dst_fq = [
-        os.path.join(dst_path, sample_name + "_" + r + ".fastq.gz")
-        for r in read_prefix
-    ]
-
-    for s, d in zip(src_fq, dst_fq):
-        if check_fastq:
-            check_exist(s)
-
-        try:
-
-            subprocess.check_output(["ln", "-s", s, d],
-                                    stderr=subprocess.STDOUT)
-
-        except subprocess.CalledProcessError as e:
-            print(
-                f"Desitination file {d} exists. No symbolic link was created.")
-            print(e.output.decode())
-
-
-def link_fq(src_files, des_path):
     for src_file in src_files:
         basename = os.path.basename(src_file)
         des_file = os.path.join(des_path, basename)
@@ -147,12 +118,10 @@ def link_fq(src_files, des_path):
             print(f"Desitination file {des_file} exists. No symbolic link was created.")
 
 
-def configure_fastq(output_dir, tumor, normal, fastq_prefix):
-    # create dir for fastq symlink creation
-    fq_path = os.path.join(output_dir, 'fastq')
-    os.makedirs(fq_path, exist_ok=True)
-
-    # fastq file pattern
+def configure_fastq(fq_path, tumor, normal, fastq_prefix):
+    """
+    Configure the fastq files for analysis
+    """
     fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
     paths = list()
 
@@ -174,7 +143,11 @@ def configure_fastq(output_dir, tumor, normal, fastq_prefix):
             if fq_pattern.search(file):
                 fq_files.add(os.path.join(path, file))
 
-    link_fq(fq_files, fq_path)
+    # create symlink
+    link_fastq(fq_files, fq_path)
+
+    # return file prefix
+    return normal_str, tumor_str
 
 
 @click.command("sample", short_help="Create a sample config file from input sample data")
@@ -211,33 +184,16 @@ def configure_fastq(output_dir, tumor, normal, fastq_prefix):
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(
-        context,
-        umi,
-        install_config,
-        sample_config,
-        reference_config,
-        panel_bed,
-        output_config,
-        normal,
-        tumor,
-        sample_id,
-        analysis_dir,
-        fastq_path,
-        check_fastq,
-        overwrite_config,
-        create_dir,
-        fastq_prefix):
+def sample(context, umi, install_config, sample_config, reference_config, panel_bed, output_config,
+           normal, tumor, sample_id, analysis_dir, fastq_path, check_fastq, overwrite_config,
+           create_dir, fastq_prefix):
     """
-    Prepares a config file for balsamic run_analysis. For now it is just treating json as dictionary and merging them as
-it is. So this is just a placeholder for future.
-
+    Prepares a config file for balsamic run_analysis. For now it is just treating json as
+    dictionary and merging them as it is. So this is just a placeholder for future.
     """
 
     analysis_type = get_analysis_type(normal, umi)
-
     output_config = get_output_config(output_config, sample_id)
-
     analysis_config = get_config("analysis_" + analysis_type)
 
     click.echo("Reading analysis config file %s" % analysis_config)
@@ -263,75 +219,11 @@ it is. So this is just a placeholder for future.
     if create_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    configure_fastq(output_dir, tumor, normal, fastq_prefix)
-    
-    # Update fastq_path
-    if fastq_path:
-        if os.path.isdir(output_dir) and os.path.exists(output_dir):
-            os.makedirs(os.path.join(output_dir, "fastq"), exist_ok=True)
+    # create dir for fastq symlink creation
+    fq_path = os.path.join(output_dir, 'fastq')
+    os.makedirs(fq_path, exist_ok=True)
 
-        tumor_path = copy.deepcopy(os.path.abspath(fastq_path))
-        if normal:
-            normal_path = copy.deepcopy(os.path.abspath(fastq_path))
-
-        fastq_path = os.path.join(output_dir, "fastq")
-
-        link_fastq(
-            os.path.abspath(tumor_path),
-            os.path.abspath(fastq_path),
-            tumor,
-            read_prefix,
-            check_fastq,
-            fastq_prefix,
-        )
-
-        if normal:
-
-            link_fastq(
-                os.path.abspath(normal_path),
-                os.path.abspath(fastq_path),
-                normal,
-                read_prefix,
-                check_fastq,
-                fastq_prefix,
-            )
-
-    else:
-        fastq_path = os.path.join(output_dir, "fastq")
-
-        if os.path.exists(output_dir) and not os.path.exists(fastq_path):
-            os.makedirs(os.path.join(output_dir, "fastq"), exist_ok=True)
-
-        tumor_path = os.path.dirname(os.path.abspath(tumor))
-        tumor = os.path.basename(tumor)
-        m = re.search(r"R_[12]" + fastq_prefix + ".fastq.gz$", tumor)
-        if m is not None:
-            tumor = tumor[0:(m.span()[0] + 1)]
-
-        link_fastq(
-            os.path.abspath(tumor_path),
-            os.path.abspath(fastq_path),
-            tumor,
-            read_prefix,
-            check_fastq,
-            fastq_prefix,
-        )
-
-        if normal:
-            normal_path = os.path.dirname(os.path.abspath(normal))
-            normal = os.path.basename(normal)
-            m = re.search(r"R_[12]" + fastq_prefix + ".fastq.gz$", normal)
-            if m is not None:
-                normal = normal[0:(m.span()[0] + 1)]
-
-            link_fastq(
-                os.path.abspath(normal_path),
-                os.path.abspath(fastq_path),
-                normal,
-                read_prefix,
-                check_fastq,
-                fastq_prefix,
-            )
+    normal, tumor = configure_fastq(fq_path, tumor, normal, fastq_prefix)
 
     sample_config["samples"][tumor] = {
         "file_prefix": tumor,
@@ -346,7 +238,7 @@ it is. So this is just a placeholder for future.
             "readpair_suffix": read_prefix,
         }
 
-    sample_config["analysis"]["fastq_path"] = os.path.abspath(fastq_path) + "/"
+    sample_config["analysis"]["fastq_path"] = fq_path + "/"
     sample_config["analysis"]["BALSAMIC_version"] = bv
 
     conda_env = glob.glob(
