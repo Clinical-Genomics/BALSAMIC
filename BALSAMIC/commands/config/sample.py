@@ -98,7 +98,7 @@ def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
     sample_config["analysis"]["script"] = os.path.join(analysis_dir, sample_id,
                                                        'scripts/')
     sample_config["analysis"]["result"] = os.path.join(analysis_dir, sample_id,
-                                                       'analysis/')
+                                                       'analysis')
     sample_config["analysis"]["analysis_type"] = analysis_type
     sample_config["samples"] = {}
 

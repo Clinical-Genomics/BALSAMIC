@@ -230,11 +230,12 @@ def test_get_picard_mrkdup(sample_config):
     # THEN It will return the picard str as rmdup
     assert "rmdup" == picard_str
 
+
 def test_createDir(tmp_path):
     # GIVEN a directory path
-    # WHEN directory path is not yet created 
+    # WHEN directory path is not yet created
     test_new_dir = tmp_path / "new_dir"
-    
+
     # THEN it should create and return dir name
     test_new_dir_created = createDir(str(test_new_dir))
     assert test_new_dir_created == str(tmp_path / "new_dir")
@@ -242,20 +243,22 @@ def test_createDir(tmp_path):
 
     # GIVEN a directory path
     test_log_dir = tmp_path / "existing_dir"
-    
-    # WHEN directory path exists 
+
+    # WHEN directory path exists
     test_log_dir.mkdir()
-    
+
     # THEN it should return log_dir name incremented
-    test_log_dir_created = createDir(str(test_log_dir), []) 
+    test_log_dir_created = createDir(str(test_log_dir), [])
     assert test_log_dir_created == str(tmp_path / "existing_dir.1")
     assert Path(test_log_dir_created).is_dir()
+
 
 def test_get_result_dir(sample_config):
     # WHEN a sample_config dict
     # GIVEN a sample_config dict
     # THEN get_result_dir should return result directory
-    assert get_result_dir(sample_config) == os.path.abspath(sample_config["analysis"]["result"]) 
+    assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
+
 
 def test_get_conda_env(BALSAMIC_env, tmp_path):
     # GIVEN a BALSAMIC_env yaml
