@@ -290,3 +290,16 @@ def get_config(config_name):
     config_file = str(Path(p, 'config', config_name + ".json"))
 
     return config_file
+
+def get_ref_path(input_json):
+    """
+    Set full path to reference files
+    Input: reference config file
+    Return: json file with abspath
+    """
+    with open(input_json) as fh:
+        ref_json = json.load(fh)
+        for k, v in ref_json['reference'].items():
+            ref_json['reference'][k] = os.path.abspath(v)
+
+    return ref_json

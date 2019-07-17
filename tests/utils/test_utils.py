@@ -10,6 +10,7 @@ from BALSAMIC.utils.cli import get_packages
 from BALSAMIC.utils.cli import get_package_split
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import createDir
+from BALSAMIC.utils.cli import get_ref_path
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -19,16 +20,17 @@ from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_result_dir
 
 
-# def test_get_ref_path(config_files):
-#     # GIVEN a sample json file path
-#     test_ref = config_files['test_reference']
+def test_get_ref_path(config_files):
+    # GIVEN a sample json file path
+    test_ref = config_files['test_reference']
 
-#     # WHEN giving a path for json file,
-#     test_ref_json = get_ref_path(test_ref)
+    # WHEN giving a path for json file,
+    test_ref_json = get_ref_path(test_ref)
 
-#     # THEN It will read the file and return a dict with updated absolute path
-#     assert isinstance(test_ref_json, dict)
-#     assert test_ref_json['path']['genomefa'].startswith('/')
+    # THEN It will read the file and return a dict with updated absolute path
+    assert isinstance(test_ref_json, dict)
+    for ref, ref_path in test_ref_json['reference'].items():
+        assert Path(ref_path).exists()
 
 
 def test_iterdict(config_files):

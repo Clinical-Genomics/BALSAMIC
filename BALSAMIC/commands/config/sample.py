@@ -10,7 +10,9 @@ from pathlib import Path
 import click
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.utils.cli import get_package_split, write_json, get_config
+from BALSAMIC.utils.cli import get_package_split
+from BALSAMIC.utils.cli import write_json, get_config
+from BALSAMIC.utils.cli import get_ref_path
 from BALSAMIC.utils.cli import SnakeMake, get_snakefile
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
@@ -199,7 +201,7 @@ def sample(context, umi, install_config, sample_config, reference_config, panel_
     click.echo("Reading analysis config file %s" % analysis_config)
     click.echo("Reading reference config file %s" % reference_config)
 
-    # reference_json = get_ref_path(reference_config)
+    reference_json = get_ref_path(reference_config)
 
     read_prefix = ["1", "2"]
 
@@ -252,7 +254,7 @@ def sample(context, umi, install_config, sample_config, reference_config, panel_
     click.echo("Writing output config file %s" %
                os.path.abspath(output_config))
 
-    json_out = merge_json(analysis_config, sample_config, reference_config,
+    json_out = merge_json(analysis_config, sample_config, reference_json,
                           install_config, bioinfo_config)
 
     dag_image = os.path.join(output_dir,
