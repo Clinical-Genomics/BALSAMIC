@@ -5,5 +5,4 @@ channels:
 
 dependencies:
   - python=3.6 
-  - pip=9.0.3 
-  - snakemake=5.5.1
+  - pip=9.0.3

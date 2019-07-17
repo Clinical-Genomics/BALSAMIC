@@ -32,20 +32,8 @@ include:
   rule_dir + "snakemake_rules/quality_control/collectqc_single.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/mergetype_tumor.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/manta_single.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/mutect_single.rule"
-include:
-  rule_dir + "snakemake_rules/annotation/vep.rule"
 
-var_type = ["SNV", "SV"]
+
 rule all:
   input:
     os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),

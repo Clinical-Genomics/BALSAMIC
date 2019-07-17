@@ -1,27 +1,11 @@
 {
-    "path": {
-        "genomefa": "references/",
-        "panel": "references/GRCh37/panel/",
-        "vep_exec": "references/ensembl-vep/",
-        "vep_cache": "references/vep_cache/"
-    },
-    "references": {
-        "genomefa":
-        "GRCh37/GRCh37_homo_sapiens_-d5-.fasta",
-        "dbsnp":
-        "GRCh37/GRCh37_1000g_snps_high_confidence_-phase1-.vcf",
-        "dbsnp_all":
-        "GRCh37/GRCh37_dbsnp_-138-.vcf.gz",
-        "1000G":
-        "GRCh37/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz",
-        "cosmic":
-        "GRCh37/COSMIC/v83/CosmicCodingMuts.vcf.gz",
-        "vep_fa":
-        "homo_sapiens_refseq/91_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
-        "exon_bed":
-        "GRCh37/GFF/attribute_extract/gencode.v19.annotation.exons.extended.simpleid"
-    },
-    "bed": {
-        "capture_kit": "big_design.slopped20.bed"
+    "reference": {
+        "reference_genome": "genome/human_g1k_v37_decoy.fasta",
+        "dbsnp": "variants/dbsnp_grch37_b138.vcf.gz",
+        "1kg_snps_all": "variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "1kg_snps_high": "variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "cosmic": "variants/cosmic_coding_muts_v89.vcf.gz",
+        "vep": "vep/",
+        "exon_bed": "genome/refseq.flat.bed"
     }
 }

@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.utils.cli import get_package_split, get_ref_path, write_json, get_config
+from BALSAMIC.utils.cli import get_package_split, write_json, get_config
 from BALSAMIC.utils.cli import SnakeMake, get_snakefile
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv

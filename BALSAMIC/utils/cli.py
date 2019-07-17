@@ -223,19 +223,20 @@ def get_package_split(condas):
     return (pkgs)
 
 
-def get_ref_path(reference_config):
+def get_abs_path(config):
     """
     Set full path to reference files
 
     Input: reference config file
     Return: json file with abspath
     """
-    with open(reference_config) as fh:
+    with open(config) as fh:
         ref_json = json.load(fh)
-        for k, v in ref_json['path'].items():
-            ref_json['path'][k] = os.path.abspath(v) + '/'
+        # key_list = ['reference', 'conda_env_yaml', 'rule_directory']
+        # for k, v in ref_json[].items():
+        ref_json['rule_directory'] = os.path.abspath(ref_json['rule_directory']) + '/'
 
-    return ref_json
+    return ref_json['rule_directory']
 
 
 def iterdict(dic):

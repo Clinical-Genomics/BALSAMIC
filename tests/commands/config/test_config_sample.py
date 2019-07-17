@@ -67,7 +67,7 @@ def test_merge_json(config_files):
     # THEN It will merge both the data and return dict
     assert isinstance(merge_dict, dict)
     assert "samples" in merge_dict
-    assert "references" in merge_dict
+    assert "reference" in merge_dict
 
 
 def test_merge_json_error(config_files):
