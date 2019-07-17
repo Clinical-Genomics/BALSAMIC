@@ -3,7 +3,6 @@ import os
 import pytest
 from pathlib import Path
 
-from BALSAMIC.utils.cli import get_ref_path
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import iterdict
 from BALSAMIC.utils.cli import sbatch
@@ -19,16 +18,17 @@ from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_result_dir
 
-def test_get_ref_path(config_files):
-    # GIVEN a sample json file path
-    test_ref = config_files['test_reference']
 
-    # WHEN giving a path for json file,
-    test_ref_json = get_ref_path(test_ref)
+# def test_get_ref_path(config_files):
+#     # GIVEN a sample json file path
+#     test_ref = config_files['test_reference']
 
-    # THEN It will read the file and return a dict with updated absolute path
-    assert isinstance(test_ref_json, dict)
-    assert test_ref_json['path']['genomefa'].startswith('/')
+#     # WHEN giving a path for json file,
+#     test_ref_json = get_ref_path(test_ref)
+
+#     # THEN It will read the file and return a dict with updated absolute path
+#     assert isinstance(test_ref_json, dict)
+#     assert test_ref_json['path']['genomefa'].startswith('/')
 
 
 def test_iterdict(config_files):
@@ -128,7 +128,7 @@ def test_get_packages(conda):
     packages = get_packages(balsamic_yaml)
 
     # THEN It should return all tools(packages) in that yaml file
-    assert any("snakemake" in tool for tool in packages)
+    assert any("pip=9" in tool for tool in packages)
     assert any("python=3" in tool for tool in packages)
 
 

@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.utils.cli import get_package_split, get_ref_path, write_json, get_config
+from BALSAMIC.utils.cli import get_package_split, write_json, get_config
 from BALSAMIC.utils.cli import SnakeMake, get_snakefile
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
@@ -114,9 +114,8 @@ def link_fastq(src_files, des_path):
         des_file = os.path.join(des_path, basename)
         try:
             os.symlink(src_file, des_file)
-        except FileExistsError as error:
+        except FileExistsError:
             print(f"Desitination file {des_file} exists. No symbolic link was created.")
-            raise error
 
 
 def configure_fastq(fq_path, tumor, normal, fastq_prefix):
@@ -221,7 +220,7 @@ def sample(context, umi, install_config, sample_config, reference_config, panel_
         os.makedirs(output_dir, exist_ok=True)
 
     # create dir for fastq symlink creation
-    fq_path = os.path.join(output_dir, 'fastq')
+    fq_path = os.path.join(output_dir, 'analysis', 'fastq')
     os.makedirs(fq_path, exist_ok=True)
 
     normal, tumor = configure_fastq(fq_path, tumor, normal, fastq_prefix)
