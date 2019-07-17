@@ -4,6 +4,7 @@
         "dbsnp": "variants/dbsnp_grch37_b138.vcf.gz",
         "1kg_snps_all": "variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
         "1kg_snps_high": "variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
         "cosmic": "variants/cosmic_coding_muts_v89.vcf.gz",
         "vep": "vep/",
         "exon_bed": "genome/refseq.flat.bed"

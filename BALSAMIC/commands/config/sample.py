@@ -220,7 +220,7 @@ def sample(context, umi, install_config, sample_config, reference_config, panel_
         os.makedirs(output_dir, exist_ok=True)
 
     # create dir for fastq symlink creation
-    fq_path = os.path.join(output_dir, 'fastq')
+    fq_path = os.path.join(output_dir, 'analysis', 'fastq')
     os.makedirs(fq_path, exist_ok=True)
 
     normal, tumor = configure_fastq(fq_path, tumor, normal, fastq_prefix)
