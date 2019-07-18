@@ -133,19 +133,27 @@ def test_config_reference(tmp_path, invoke_cli):
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_dir" 
     test_new_dir.mkdir()
+
     test_output_reference_config = test_new_dir / "config.json" 
     test_output_reference_pdf = test_new_dir / "generate_ref_dag.pdf" 
-    import glob
 
     test_output_reference_config.touch()
     test_output_reference_pdf.touch()
-    print(glob.glob(str(test_new_dir)+"/*"))
+
     # WHEN invoking config sample
     result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
-    print(glob.glob(str(test_new_dir)+"/*"))
 
     # THEN it should create test_reference.json and exist with no error
-    #assert result.exit_code == 0
-    #assert Path(str(test_output_reference_config)).exists()
-    print(result.exit_code)
-    assert 1 == 0
+    assert result.exit_code == 0
+    assert Path(str(test_output_reference_config)).exists()
+    assert Path(str(test_output_reference_pdf)).exists()
+
+def test_config_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
+    # Given a path with no write permission
+    test_new_dir = str(no_write_perm_path)
+
+    # WHEN invoking config sample
+    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
+
+    # THEN it should create test_reference.json and exist with no error
+    assert result.exit_code == 1
