@@ -1,6 +1,8 @@
-from pathlib import Path
-import BALSAMIC
 import pytest
+from pathlib import Path
+
+import BALSAMIC
+from BALSAMIC.commands.base import cli
 
 
 def test_cli(invoke_cli):
@@ -146,7 +148,8 @@ def test_config_reference(tmp_path, invoke_cli):
     from click.testing import CliRunner
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
+        #result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
+        result = runner.invoke(cli, ['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
     import glob
     print(glob.glob(str(test_new_dir)+"/*"))
 
