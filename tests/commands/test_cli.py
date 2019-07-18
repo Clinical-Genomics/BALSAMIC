@@ -134,10 +134,14 @@ def test_config_reference(tmp_path, invoke_cli):
     test_new_dir = tmp_path / "test_reference_dir" 
     test_new_dir.mkdir()
     test_output_reference_config = test_new_dir / "config.json" 
+    import glob
 
     # WHEN invoking config sample
     result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
+    print(glob.glob(str(test_new_dir)+"/*"))
 
     # THEN it should create test_reference.json and exist with no error
-    assert result.exit_code == 0
-    assert Path(str(test_output_reference_config)).exists()
+    #assert result.exit_code == 0
+    #assert Path(str(test_output_reference_config)).exists()
+    print(result.exit_code)
+    assert 1 == 0
