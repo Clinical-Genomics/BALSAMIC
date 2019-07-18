@@ -1,5 +1,7 @@
 import pytest
+import glob
 from pathlib import Path
+from click.testing import CliRunner
 
 import BALSAMIC
 from BALSAMIC.commands.base import cli
@@ -145,13 +147,12 @@ def test_config_reference():#tmp_path, invoke_cli):
     #test_output_reference_pdf.touch()
 
     # WHEN invoking config sample
-    from click.testing import CliRunner
     runner = CliRunner()
     with runner.isolated_filesystem():
         #result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
         result = runner.invoke(cli, ['config', 'reference', '-c', 'secret_key', '-o', "./"])
-        import glob
         print(glob.glob("./*"))
+        print(dir(result))
 
         # THEN it should create test_reference.json and exist with no error
         assert result.exit_code == 0
