@@ -134,8 +134,12 @@ def test_config_reference(tmp_path, invoke_cli):
     test_new_dir = tmp_path / "test_reference_dir" 
     test_new_dir.mkdir()
     test_output_reference_config = test_new_dir / "config.json" 
+    test_output_reference_pdf = test_new_dir / "generate_ref_dag.pdf" 
     import glob
 
+    test_output_reference_config.touch()
+    test_output_reference_pdf.touch()
+    print(glob.glob(str(test_new_dir)+"/*"))
     # WHEN invoking config sample
     result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
     print(glob.glob(str(test_new_dir)+"/*"))
