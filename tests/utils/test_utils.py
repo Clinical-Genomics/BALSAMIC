@@ -1,9 +1,11 @@
 import json
 import os
 import pytest
+import sys
 from pathlib import Path
 
 from BALSAMIC.utils.cli import SnakeMake
+from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import iterdict
 from BALSAMIC.utils.cli import sbatch
 from BALSAMIC.utils.cli import get_packages
@@ -269,3 +271,11 @@ def test_get_conda_env(BALSAMIC_env, tmp_path):
 
     # THEN It should return the conda env which has that pkg
     assert conda_env == "env_1"
+
+def test_capturestdout():
+    # GIVEN a catpurestdout context
+    test_stdout_message = 'Message to stdout'
+    with CaptureStdout() as captured_stdout_message:
+        print(test_stdout_message, file=sys.stdout)
+
+    assert "".join(captured_stdout_message) == test_stdout_message
