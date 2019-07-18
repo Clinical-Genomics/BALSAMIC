@@ -1,3 +1,4 @@
+import os
 import json
 from datetime import datetime
 import pytest
@@ -5,6 +6,7 @@ import pytest
 from BALSAMIC.commands.config.sample import merge_json, \
     set_panel_bed, get_output_config, get_sample_config, get_analysis_type, \
     check_exist
+from BALSAMIC.commands.config.sample import configure_fastq, link_fastq
 from BALSAMIC.utils.cli import iterdict, write_json, get_config
 
 
@@ -65,7 +67,7 @@ def test_merge_json(config_files):
     # THEN It will merge both the data and return dict
     assert isinstance(merge_dict, dict)
     assert "samples" in merge_dict
-    assert "references" in merge_dict
+    assert "reference" in merge_dict
 
 
 def test_merge_json_error(config_files):
@@ -170,3 +172,53 @@ def test_get_sample_config(config_files):
     assert isinstance(sample_config, dict)
     assert sample_id in sample_config['analysis'].values()
     assert date in sample_config['analysis'].values()
+
+
+def test_configure_fastq(sample_config, tmp_path):
+    # GIVEN sample_config, normal and tumor fastq files
+    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
+    tumor = os.path.join(fastq_src, 'S1_R_1.fastq.gz')
+    normal = os.path.join(fastq_src, 'S2_R_1.fastq.gz')
+    fastq_prefix = ''
+    fastq_dir = tmp_path / "output"
+    fastq_dir.mkdir()
+
+    # WHEN invoking configure fastq with required params
+    normal_str, tumor_str = configure_fastq(fastq_dir, tumor, normal, fastq_prefix)
+
+    # THEN It should return sample prefixes
+    assert normal_str in sample_config['samples']
+    assert tumor_str in sample_config['samples']
+    assert len(list(tmp_path.iterdir())) == 1
+
+
+def test_link_fastq(sample_config, tmp_path):
+    # GIVEN list of fastq files and destination to create symlink
+    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
+    fastq_files = [os.path.join(fastq_src, file) for file in os.listdir(fastq_src)]
+    dest_dir = tmp_path / "output"
+    dest_dir.mkdir()
+
+    # WHEN calling link fastq function
+    link_fastq(fastq_files, dest_dir)
+
+    # THEN it should create symlinks for fastq files
+    assert len(list(dest_dir.iterdir())) == 4
+
+
+def test_link_fastq_error(sample_config, tmp_path):
+    # GIVEN a invalid fastq files list
+    with pytest.raises(Exception) as e:
+        fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
+        fastq_files = [os.path.join(fastq_src, file) for file in os.listdir(fastq_src)]
+        dest_dir = tmp_path / "output"
+        dest_dir.mkdir()
+
+        # WHEN calling link fastq
+        link_fastq(fastq_files, dest_dir)
+
+        # THEN It should return exception
+        link_fastq(fastq_files, dest_dir)
+
+        assert e.value
+

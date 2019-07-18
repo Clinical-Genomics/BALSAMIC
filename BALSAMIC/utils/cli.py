@@ -1,9 +1,27 @@
 import os
 import re
 import json
+import yaml
+import sys
+from io import StringIO
 from pathlib import Path
 from itertools import chain
-import yaml
+
+
+class CaptureStdout(list):
+    '''
+    Captures stdout.
+    '''
+
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio  # free up some memory
+        sys.stdout = self._stdout
 
 
 class sbatch:
@@ -155,6 +173,7 @@ def add_doc(docstring):
 
     return document
 
+
 def createDir(path, interm_path=[]):
     '''
     Creates directories by recursively checking if it exists,
@@ -176,6 +195,7 @@ def createDir(path, interm_path=[]):
     else:
         os.makedirs(os.path.abspath(path), exist_ok=True)
         return os.path.abspath(path)
+
 
 def get_packages(yaml_file):
     '''
@@ -223,19 +243,21 @@ def get_package_split(condas):
     return (pkgs)
 
 
-def get_ref_path(reference_config):
+def get_abs_path(config):
     """
     Set full path to reference files
 
     Input: reference config file
     Return: json file with abspath
     """
-    with open(reference_config) as fh:
+    with open(config) as fh:
         ref_json = json.load(fh)
-        for k, v in ref_json['path'].items():
-            ref_json['path'][k] = os.path.abspath(v) + '/'
+        # key_list = ['reference', 'conda_env_yaml', 'rule_directory']
+        # for k, v in ref_json[].items():
+        ref_json['rule_directory'] = os.path.abspath(
+            ref_json['rule_directory']) + '/'
 
-    return ref_json
+    return ref_json['rule_directory']
 
 
 def iterdict(dic):
@@ -289,3 +311,17 @@ def get_config(config_name):
     config_file = str(Path(p, 'config', config_name + ".json"))
 
     return config_file
+
+
+def get_ref_path(input_json):
+    """
+    Set full path to reference files
+    Input: reference config file
+    Return: json file with abspath
+    """
+    with open(input_json) as fh:
+        ref_json = json.load(fh)
+        for k, v in ref_json['reference'].items():
+            ref_json['reference'][k] = os.path.abspath(v)
+
+    return ref_json
