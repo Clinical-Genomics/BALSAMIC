@@ -147,7 +147,7 @@ def test_config_reference(tmp_path, invoke_cli):
     # THEN it should create test_reference.json and exist with no error
     #assert result.exit_code == 0
     import glob
-    print(glob.glog(str(test_new_dir)+"/*"))
+    print(glob.glob(str(test_new_dir)+"/*"))
     assert Path(str(test_output_reference_config)).exists()
     assert Path(str(test_output_reference_pdf)).exists()
 
