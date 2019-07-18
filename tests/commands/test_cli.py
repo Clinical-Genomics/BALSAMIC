@@ -131,15 +131,15 @@ def test_run_ref_invalid(invoke_cli):
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
 
-def test_config_reference(tmp_path, invoke_cli):
+def test_config_reference():#tmp_path, invoke_cli):
     # Given test_reference.json
-    test_new_dir = tmp_path / "test_reference_dir" 
+    #test_new_dir = tmp_path / "test_reference_dir" 
     #test_new_dir.mkdir()
     #assert test_new_dir.exists()
     #test_new_dir.chmod(0o777)
 
-    test_output_reference_config = test_new_dir / "config.json" 
-    test_output_reference_pdf = test_new_dir / "generate_ref_dag.pdf" 
+    #test_output_reference_config = test_new_dir / "config.json" 
+    #test_output_reference_pdf = test_new_dir / "generate_ref_dag.pdf" 
 
     #test_output_reference_config.touch()
     #test_output_reference_pdf.touch()
@@ -149,14 +149,14 @@ def test_config_reference(tmp_path, invoke_cli):
     runner = CliRunner()
     with runner.isolated_filesystem():
         #result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
-        result = runner.invoke(cli, ['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
-    import glob
-    print(glob.glob(str(test_new_dir)+"/*"))
+        result = runner.invoke(cli, ['config', 'reference', '-c', 'secret_key', '-o', "./"])
+        import glob
+        print(glob.glob("./*"))
 
-    # THEN it should create test_reference.json and exist with no error
-    assert result.exit_code == 0
-    assert Path(str(test_output_reference_config)).exists()
-    assert Path(str(test_output_reference_pdf)).exists()
+        # THEN it should create test_reference.json and exist with no error
+        assert result.exit_code == 0
+        assert Path("generate_ref_dag.pdf").exists()
+        assert Path("config.json").exists()
 
 def test_config_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
     # Given a path with no write permission
