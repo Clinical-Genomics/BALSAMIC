@@ -130,7 +130,6 @@ def test_run_ref_invalid(invoke_cli):
     assert 'Error: Invalid value' in result.output
 
 def test_config_reference(tmp_path, invoke_cli):
-    import glob
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_dir" 
     test_new_dir.mkdir()
@@ -139,7 +138,6 @@ def test_config_reference(tmp_path, invoke_cli):
     # WHEN invoking config sample
     result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
 
-    print(glob.glob(str(test_new_dir)+"/*"))
     # THEN it should create test_reference.json and exist with no error
     assert result.exit_code == 0
     assert Path(str(test_output_reference_config)).exists()
