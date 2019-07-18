@@ -5,15 +5,19 @@ import re
 import json
 import copy
 import glob
+import click
+import snakemake
+import graphviz
 from datetime import datetime
 from pathlib import Path
-import click
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import get_package_split
-from BALSAMIC.utils.cli import write_json, get_config
+from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import get_config
 from BALSAMIC.utils.cli import get_ref_path
-from BALSAMIC.utils.cli import SnakeMake, get_snakefile
+from BALSAMIC.utils.cli import get_snakefile
+from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
 
@@ -117,7 +121,9 @@ def link_fastq(src_files, des_path):
         try:
             os.symlink(src_file, des_file)
         except FileExistsError:
-            print(f"Desitination file {des_file} exists. No symbolic link was created.")
+            print(
+                f"Desitination file {des_file} exists. No symbolic link was created."
+            )
 
 
 def configure_fastq(fq_path, tumor, normal, fastq_prefix):
@@ -130,13 +136,14 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
     # get a list of fq files
     tumor = os.path.abspath(tumor)
     tumor_base = os.path.basename(tumor)
-    tumor_str = tumor_base[0: (fq_pattern.search(tumor_base).span()[0] + 1)]
+    tumor_str = tumor_base[0:(fq_pattern.search(tumor_base).span()[0] + 1)]
     paths.append(os.path.split(tumor)[0])
 
     if normal:
         normal = os.path.abspath(normal)
         normal_base = os.path.basename(normal)
-        normal_str = normal_base[0: (fq_pattern.search(normal_base).span()[0] + 1)]
+        normal_str = normal_base[0:(fq_pattern.search(normal_base).span()[0] +
+                                    1)]
         paths.append(os.path.split(normal)[0])
 
     fq_files = set()
@@ -152,43 +159,87 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
     return normal_str, tumor_str
 
 
-@click.command("sample", short_help="Create a sample config file from input sample data")
-@click.option('--umi', is_flag=True, help="UMI processing steps for samples with umi tags")
-@click.option("-i", "--install-config", required=False, default=get_config("install"),
-              show_default=True, type=click.Path(), help="Installation config file.")
-@click.option("-r", "--reference-config", required=True, show_default=True, type=click.Path(),
+@click.command("sample",
+               short_help="Create a sample config file from input sample data")
+@click.option('--umi',
+              is_flag=True,
+              help="UMI processing steps for samples with umi tags")
+@click.option("-i",
+              "--install-config",
+              required=False,
+              default=get_config("install"),
+              show_default=True,
+              type=click.Path(),
+              help="Installation config file.")
+@click.option("-r",
+              "--reference-config",
+              required=True,
+              show_default=True,
+              type=click.Path(),
               help="Reference config file.")
-@click.option("-p", "--panel-bed", required=True, type=click.Path(),
+@click.option("-p",
+              "--panel-bed",
+              required=True,
+              type=click.Path(),
               help="Panel bed file for variant calling.")
-@click.option("-s", "--sample-config", type=click.Path(), help="Input sample config file.")
-@click.option("-o", "--output-config", required=False,
-              help="Output a json config filename ready to be imported for run-analysis")
-@click.option("-t", "--tumor", required=True, help="Fastq files for tumor sample. \
+@click.option("-s",
+              "--sample-config",
+              type=click.Path(),
+              help="Input sample config file.")
+@click.option(
+    "-o",
+    "--output-config",
+    required=False,
+    help="Output a json config filename ready to be imported for run-analysis")
+@click.option(
+    "-t",
+    "--tumor",
+    required=True,
+    help="Fastq files for tumor sample. \
               Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, \
-              the input should be --tumor tumor_fqreads",)
-@click.option("-n", "--normal", help="Fastq files for normal sample. \
+              the input should be --tumor tumor_fqreads",
+)
+@click.option("-n",
+              "--normal",
+              help="Fastq files for normal sample. \
               Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, \
               the input should be --normal normal_fqreads")
-@click.option("--sample-id", required=True, help="Sample id that is used for reporting, \
+@click.option("--sample-id",
+              required=True,
+              help="Sample id that is used for reporting, \
               naming the analysis jobs, and analysis path")
-@click.option("--fastq-prefix", required=False, default="", help="Prefix to fastq file. \
+@click.option("--fastq-prefix",
+              required=False,
+              default="",
+              help="Prefix to fastq file. \
               The string that comes after readprefix")
-@click.option("--analysis-dir", type=click.Path(), help="Root analysis path to store \
-              analysis logs and results. The final path will be analysis-dir/sample-id")
-@click.option("--fastq-path", type=click.Path(), help="Path for fastq files. All fastq files \
-              should be within same path and that path has to exist.",)
-@click.option("--check-fastq/--no-check-fastq", default=True, show_default=True,
+@click.option("--analysis-dir",
+              type=click.Path(),
+              help="Root analysis path to store \
+              analysis logs and results. The final path will be analysis-dir/sample-id"
+              )
+@click.option(
+    "--fastq-path",
+    type=click.Path(),
+    help="Path for fastq files. All fastq files \
+              should be within same path and that path has to exist.",
+)
+@click.option("--check-fastq/--no-check-fastq",
+              default=True,
+              show_default=True,
               help="Check if fastq input files exist. An internal check, \
               so it's recommended not to change it.")
-@click.option("--overwrite-config/--no-overwrite-config", default=True,
+@click.option("--overwrite-config/--no-overwrite-config",
+              default=True,
               help="Overwrite output config file")
 @click.option("--create-dir/--no-create-dir",
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(context, umi, install_config, sample_config, reference_config, panel_bed, output_config,
-           normal, tumor, sample_id, analysis_dir, fastq_path, check_fastq, overwrite_config,
-           create_dir, fastq_prefix):
+def sample(context, umi, install_config, sample_config, reference_config,
+           panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
+           fastq_path, check_fastq, overwrite_config, create_dir,
+           fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
@@ -251,16 +302,16 @@ def sample(context, umi, install_config, sample_config, reference_config, panel_
     bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)
 
     output_config = os.path.join(output_dir, output_config)
-    click.echo("Writing output config file %s" %
-               os.path.abspath(output_config))
+    click.echo(
+        "Writing output config file %s" % os.path.abspath(output_config))
 
     json_out = merge_json(analysis_config, sample_config, reference_json,
                           install_config, bioinfo_config)
 
     dag_image = os.path.join(output_dir,
-                             output_config + '_BALSAMIC_' + bv + '_graph.pdf')
+                             output_config + '_BALSAMIC_' + bv + '_graph')
 
-    json_out["analysis"]["dag"] = dag_image
+    json_out["analysis"]["dag"] = dag_image + ".pdf"
 
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
@@ -270,18 +321,20 @@ def sample(context, umi, install_config, sample_config, reference_config, panel_
 
     FormatFile(output_config, in_place=True)
 
-    # configure snakemake cmd
-    config_sample = SnakeMake()
-    config_sample.working_dir = os.path.join(sample_config['analysis']['analysis_dir'], sample_id,
-                                             'BALSAMIC_run')
-    config_sample.snakefile = get_snakefile(analysis_type)
-    config_sample.configfile = output_config
+    with CaptureStdout() as graph_dot:
+        snakemake.snakemake(snakefile=get_snakefile(analysis_type),
+                            dryrun=True,
+                            configfile=output_config,
+                            printrulegraph=True)
 
-    shellcmd = (['"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
-                 '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
-                 'BALSAMIC', bv, 'workflow', 'for', 'sample:', json_out["analysis"]["sample_id"],
-                 '\\"\;/g"', '|', 'dot', '-Tpdf', '1>', dag_image])
-
-    cmd = config_sample.build_cmd() + " " + " ".join(shellcmd)
-    click.echo("Creating workflow dag image file: %s" % dag_image)
-    subprocess.run(cmd, shell=True)
+    graph_title = "_".join(['BALSAMIC', bv, json_out["analysis"]["sample_id"]])
+    graph_dot = "".join(graph_dot).replace(
+        'snakemake_dag {',
+        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+    graph_obj = graphviz.Source(graph_dot,
+                                filename=dag_image,
+                                format="pdf",
+                                engine="dot")
+    #    graph_obj.attr('graph',label='BALSAMIC')
+    #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
+    graph_obj.render()
