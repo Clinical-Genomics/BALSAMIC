@@ -73,6 +73,23 @@ def BALSAMIC_env(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
+def sample_fastq(tmp_path_factory):
+    """
+    create sample fastq files
+    """
+    tmp_dir = tmp_path_factory.mktemp("fastq")
+    fastq_valid = tmp_dir / "S1_R_1.fastq.gz"
+    fastq_invalid = tmp_dir / "sample.fastq.gz"
+
+    for file in (fastq_valid, fastq_invalid):
+        with open(file, 'w') as fh:
+            fh.write("ATCG")
+            fh.close()
+
+    return {"fastq_valid": fastq_valid, "fastq_invalid": fastq_invalid}
+
+
+@pytest.fixture(scope='session')
 def sample_config():
     """
     sample config dict to test workflow utils
