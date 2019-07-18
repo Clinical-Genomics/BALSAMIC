@@ -71,6 +71,17 @@ def BALSAMIC_env(tmp_path_factory):
 
     return str(conda_env_file)
 
+@pytest.fixture(scope='session')
+def no_write_perm_path(tmp_path_factory):
+    """
+    Writes BALSAMIC_env.yaml file.
+    """
+    # create a conda_env directory
+    bad_perm_path = tmp_path_factory.mktemp("bad_perm_path")
+    
+    Path(bad_perm_path).chmod(0o444)
+
+    return str(bad_perm_path)
 
 @pytest.fixture(scope='session')
 def sample_fastq(tmp_path_factory):
