@@ -7,18 +7,22 @@ from io import StringIO
 from pathlib import Path
 from itertools import chain
 
+
 class CaptureStdout(list):
     '''
     Captures stdout.
     '''
+
     def __enter__(self):
         self._stdout = sys.stdout
         sys.stdout = self._stringio = StringIO()
         return self
+
     def __exit__(self, *args):
         self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio    # free up some memory
+        del self._stringio  # free up some memory
         sys.stdout = self._stdout
+
 
 class sbatch:
     '''
@@ -169,6 +173,7 @@ def add_doc(docstring):
 
     return document
 
+
 def createDir(path, interm_path=[]):
     '''
     Creates directories by recursively checking if it exists,
@@ -190,6 +195,7 @@ def createDir(path, interm_path=[]):
     else:
         os.makedirs(os.path.abspath(path), exist_ok=True)
         return os.path.abspath(path)
+
 
 def get_packages(yaml_file):
     '''
@@ -248,7 +254,8 @@ def get_abs_path(config):
         ref_json = json.load(fh)
         # key_list = ['reference', 'conda_env_yaml', 'rule_directory']
         # for k, v in ref_json[].items():
-        ref_json['rule_directory'] = os.path.abspath(ref_json['rule_directory']) + '/'
+        ref_json['rule_directory'] = os.path.abspath(
+            ref_json['rule_directory']) + '/'
 
     return ref_json['rule_directory']
 
@@ -304,6 +311,7 @@ def get_config(config_name):
     config_file = str(Path(p, 'config', config_name + ".json"))
 
     return config_file
+
 
 def get_ref_path(input_json):
     """
