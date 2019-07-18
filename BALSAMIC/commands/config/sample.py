@@ -126,6 +126,22 @@ def link_fastq(src_files, des_path):
             )
 
 
+def get_fastq_path(file, fq_pattern):
+    # check the fastq if exists
+    file = os.path.abspath(file)
+    if Path(file).exists():
+        file_basename = os.path.basename(file)
+        try:
+            # extracting file prefix
+            file_str = file_basename[0:(fq_pattern.search(file_basename).span()[0] + 1)]
+        except AttributeError as error:
+            raise error
+    else:
+        raise Exception(FileNotFoundError)
+
+    return file_str, os.path.split(file)[0]
+
+
 def configure_fastq(fq_path, tumor, normal, fastq_prefix):
     """
     Configure the fastq files for analysis
@@ -134,17 +150,12 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
     paths = list()
 
     # get a list of fq files
-    tumor = os.path.abspath(tumor)
-    tumor_base = os.path.basename(tumor)
-    tumor_str = tumor_base[0:(fq_pattern.search(tumor_base).span()[0] + 1)]
-    paths.append(os.path.split(tumor)[0])
+    tumor_str, tumor_path = get_fastq_path(tumor, fq_pattern)
+    paths.append(tumor_path)
 
     if normal:
-        normal = os.path.abspath(normal)
-        normal_base = os.path.basename(normal)
-        normal_str = normal_base[0:(fq_pattern.search(normal_base).span()[0] +
-                                    1)]
-        paths.append(os.path.split(normal)[0])
+        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
+        paths.append(normal_path)
 
     fq_files = set()
     for path in paths:
@@ -218,12 +229,6 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
               help="Root analysis path to store \
               analysis logs and results. The final path will be analysis-dir/sample-id"
               )
-@click.option(
-    "--fastq-path",
-    type=click.Path(),
-    help="Path for fastq files. All fastq files \
-              should be within same path and that path has to exist.",
-)
 @click.option("--check-fastq/--no-check-fastq",
               default=True,
               show_default=True,
@@ -238,8 +243,7 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
 @click.pass_context
 def sample(context, umi, install_config, sample_config, reference_config,
            panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
-           fastq_path, check_fastq, overwrite_config, create_dir,
-           fastq_prefix):
+           check_fastq, overwrite_config, create_dir, fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
