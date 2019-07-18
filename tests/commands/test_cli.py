@@ -1,4 +1,6 @@
+from pathlib import Path
 import BALSAMIC
+import pytest
 
 
 def test_cli(invoke_cli):
@@ -116,6 +118,7 @@ def test_run_reference(invoke_cli):
     assert "--run-mode" in result.output
     assert "--cluster-config" in result.output
     assert "--run-analysis" in result.output
+    assert result.exit_code == 0
 
 
 def test_run_ref_invalid(invoke_cli):
@@ -126,3 +129,15 @@ def test_run_ref_invalid(invoke_cli):
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
 
+def test_config_reference(tmp_path, invoke_cli):
+    # Given test_reference.json
+    test_new_dir = tmp_path / "test_reference_dir" 
+    test_new_dir.mkdir()
+    test_output_reference_config = test_new_dir / "test_reference.json" 
+
+    # WHEN invoking config sample
+    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_output_reference_config)])
+
+    # THEN it should create test_reference.json and exist with no error
+    assert result.exit_code == 0
+    assert Path(test_output_reference_config).exists()
