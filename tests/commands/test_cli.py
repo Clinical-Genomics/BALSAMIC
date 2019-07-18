@@ -142,10 +142,10 @@ def test_config_reference(tmp_path, invoke_cli):
     #test_output_reference_pdf.touch()
 
     # WHEN invoking config sample
-    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
+    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir), '--help'])
 
     # THEN it should create test_reference.json and exist with no error
-    #assert result.exit_code == 0
+    assert result.exit_code == 0
     import glob
     print(glob.glob(str(test_new_dir)+"/*"))
     assert Path(str(test_output_reference_config)).exists()
