@@ -1,4 +1,5 @@
 click
 pyyaml
-pylatex
 yapf
+graphviz
+snakemake==5.5.1

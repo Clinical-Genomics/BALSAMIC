@@ -34,7 +34,7 @@ def config_files():
         "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
         "analysis_single": "BALSAMIC/config/analysis_single.json",
         "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
-        "panel_bed_file": "tests/test_data/references/GRCh37/panel/panel.bed",
+        "panel_bed_file": "tests/test_data/references/panel/panel.bed",
         "test_reference": "tests/test_data/references/reference.json"
     }
 
@@ -71,6 +71,7 @@ def BALSAMIC_env(tmp_path_factory):
 
     return str(conda_env_file)
 
+
 @pytest.fixture(scope='session')
 def sample_config():
     """
@@ -89,24 +90,18 @@ def sample_config():
                     "diploidSV.vcf.gz", "somaticSV.vcf.gz",
                     "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"
                 ],
-                "merged":
-                "manta.vcf.gz",
-                "mutation":
-                "somatic",
-                "type":
-                "SV"
+                "merged": "manta.vcf.gz",
+                "mutation": "somatic",
+                "type": "SV"
             },
             "manta_germline": {
                 "default": [
                     "diploidSV.vcf.gz", "candidateSV.vcf.gz",
                     "candidateSmallIndels.vcf.gz"
                 ],
-                "mutation":
-                "germline",
-                "merged":
-                "manta_germline.vcf.gz",
-                "type":
-                "SV"
+                "mutation": "germline",
+                "merged": "manta_germline.vcf.gz",
+                "type": "SV"
             },
             "strelka_germline": {
                 "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
@@ -146,26 +141,16 @@ def sample_config():
             }
         },
         "analysis": {
-            "sample_id":
-            "id1",
-            "analysis_type":
-            "paired",
-            "analysis_dir":
-            "/BALSAMIC/tests/test_data/",
-            "fastq_path":
-            "/BALSAMIC/tests/test_data/id1/fastq/",
-            "script":
-            "/BALSAMIC/tests/test_data/id1/scripts/",
-            "log":
-            "/BALSAMIC/tests/test_data/id1/logs/",
-            "result":
-            "/BALSAMIC/tests/test_data/id1/analysis/",
-            "config_creation_date":
-            "yyyy-mm-dd xx",
-            "BALSAMIC_version":
-            "2.9.8",
-            "dag":
-            "/BALSAMIC/tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+            "sample_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "tests/test_data/",
+            "fastq_path": "tests/test_data/id1/fastq/",
+            "script": "tests/test_data/id1/scripts/",
+            "log": "tests/test_data/id1/logs/",
+            "result": "tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
+            "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
         },
         "samples": {
             "S1_R": {
@@ -178,7 +163,7 @@ def sample_config():
                 "type": "normal",
                 "readpair_suffix": ["1", "2"]
             }
-        },
+        }
     }
 
     return sample_config

@@ -1,16 +1,18 @@
 import json
 import os
 import pytest
+import sys
 from pathlib import Path
 
-from BALSAMIC.utils.cli import get_ref_path
 from BALSAMIC.utils.cli import SnakeMake
+from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import iterdict
 from BALSAMIC.utils.cli import sbatch
 from BALSAMIC.utils.cli import get_packages
 from BALSAMIC.utils.cli import get_package_split
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import createDir
+from BALSAMIC.utils.cli import get_ref_path
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -18,6 +20,7 @@ from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_result_dir
+
 
 def test_get_ref_path(config_files):
     # GIVEN a sample json file path
@@ -28,7 +31,8 @@ def test_get_ref_path(config_files):
 
     # THEN It will read the file and return a dict with updated absolute path
     assert isinstance(test_ref_json, dict)
-    assert test_ref_json['path']['genomefa'].startswith('/')
+    for ref, ref_path in test_ref_json['reference'].items():
+        assert Path(ref_path).exists()
 
 
 def test_iterdict(config_files):
@@ -128,7 +132,7 @@ def test_get_packages(conda):
     packages = get_packages(balsamic_yaml)
 
     # THEN It should return all tools(packages) in that yaml file
-    assert any("snakemake" in tool for tool in packages)
+    assert any("pip=9" in tool for tool in packages)
     assert any("python=3" in tool for tool in packages)
 
 
@@ -230,11 +234,12 @@ def test_get_picard_mrkdup(sample_config):
     # THEN It will return the picard str as rmdup
     assert "rmdup" == picard_str
 
+
 def test_createDir(tmp_path):
     # GIVEN a directory path
-    # WHEN directory path is not yet created 
+    # WHEN directory path is not yet created
     test_new_dir = tmp_path / "new_dir"
-    
+
     # THEN it should create and return dir name
     test_new_dir_created = createDir(str(test_new_dir))
     assert test_new_dir_created == str(tmp_path / "new_dir")
@@ -242,20 +247,22 @@ def test_createDir(tmp_path):
 
     # GIVEN a directory path
     test_log_dir = tmp_path / "existing_dir"
-    
-    # WHEN directory path exists 
+
+    # WHEN directory path exists
     test_log_dir.mkdir()
-    
+
     # THEN it should return log_dir name incremented
-    test_log_dir_created = createDir(str(test_log_dir), []) 
+    test_log_dir_created = createDir(str(test_log_dir), [])
     assert test_log_dir_created == str(tmp_path / "existing_dir.1")
     assert Path(test_log_dir_created).is_dir()
+
 
 def test_get_result_dir(sample_config):
     # WHEN a sample_config dict
     # GIVEN a sample_config dict
     # THEN get_result_dir should return result directory
-    assert get_result_dir(sample_config) == os.path.abspath(sample_config["analysis"]["result"]) 
+    assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
+
 
 def test_get_conda_env(BALSAMIC_env, tmp_path):
     # GIVEN a BALSAMIC_env yaml
@@ -264,3 +271,11 @@ def test_get_conda_env(BALSAMIC_env, tmp_path):
 
     # THEN It should return the conda env which has that pkg
     assert conda_env == "env_1"
+
+def test_capturestdout():
+    # GIVEN a catpurestdout context
+    test_stdout_message = 'Message to stdout'
+    with CaptureStdout() as captured_stdout_message:
+        print(test_stdout_message, file=sys.stdout)
+
+    assert "".join(captured_stdout_message) == test_stdout_message
