@@ -1,0 +1,17 @@
+[run]
+source = BALSAMIC
+omit =
+    # Excluding snakemake rules
+    BALSAMIC/snakemake_rules/*
+    # Excluding snakemake workflows
+    BALSAMIC/workflows/*
+    # Excluding assests
+    BALSAMIC/assets/*
+[report]
+omit =
+    # Excluding snakemake rules
+    BALSAMIC/snakemake_rules/*
+    # Excluding snakemake workflows
+    BALSAMIC/workflows/*
+    # Excluding assests
+    BALSAMIC/assets/*
