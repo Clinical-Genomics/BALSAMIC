@@ -28,11 +28,11 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
     config["output"] = outdir
     if cosmic_key:
         config["cosmic_key"] = cosmic_key
-#
-#    # add install.json
-#    install_config = get_config('install')
-#    config = merge_json(config, install_config)
-#
+
+    # add install.json
+    install_config = get_config('install')
+    config = merge_json(config, install_config)
+
 #    if not os.path.exists(outdir):
 #        os.makedirs(outdir)
 #
