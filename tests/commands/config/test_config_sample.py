@@ -252,8 +252,17 @@ def test_get_fastq_path_error(sample_fastq):
         assert get_fastq_path(fastq_file, fq_pattern)
         assert 'FileNotFoundError' in error.value
 
-        fastq_file = sample_fastq['fastq_invalid']
 
+def test_get_fqpath_mismatch_error(sample_fastq):
+    with pytest.raises(Exception) as error:
+        # GIVEN a fastq file path, and file pattern
+        fastq_prefix = ''
+        fastq_file = sample_fastq['fastq_invalid']
+        fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
+
+        # WHEN invoking get fastq path
+        # THEN It should return fileprefix and fastq_path
         assert get_fastq_path(fastq_file, fq_pattern)
         assert 'AttributeError' in error.value
-        
+
+
