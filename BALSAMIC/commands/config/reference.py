@@ -33,9 +33,9 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
     install_config = get_config('install')
     config = merge_json(config, install_config)
 
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-
+#    if not os.path.exists(outdir):
+#        os.makedirs(outdir)
+#
 #    write_json(config, config_json)
 
 #    # configure snakemake cmd
