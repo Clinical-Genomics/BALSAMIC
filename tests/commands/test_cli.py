@@ -156,15 +156,15 @@ def test_config_reference_write_json():#tmp_path, invoke_cli):
 
         # THEN it should create test_reference.json and exist with no error
         assert result.exit_code == 0
-        #assert Path("generate_ref_dag.pdf").exists()
+        assert Path("generate_ref_dag.pdf").exists()
         #assert Path("config.json").exists()
 
-def test_config_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
-    # Given a path with no write permission
-    test_new_dir = str(no_write_perm_path)
-
-    # WHEN invoking config sample
-    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
-
-    # THEN it should create test_reference.json and exist with no error
-    assert result.exit_code == 1
+#def test_config_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
+#    # Given a path with no write permission
+#    test_new_dir = str(no_write_perm_path)
+#
+#    # WHEN invoking config sample
+#    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
+#
+#    # THEN it should create test_reference.json and exist with no error
+#    assert result.exit_code == 1
