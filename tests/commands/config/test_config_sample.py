@@ -1,7 +1,8 @@
 import os
 import json
-from datetime import datetime
 import pytest
+from datetime import datetime
+from pathlib import Path
 
 from BALSAMIC.commands.config.sample import merge_json, \
     set_panel_bed, get_output_config, get_sample_config, get_analysis_type, \
@@ -10,7 +11,7 @@ from BALSAMIC.commands.config.sample import configure_fastq, link_fastq
 from BALSAMIC.utils.cli import iterdict, write_json, get_config
 
 
-def test_get_config(config_files):
+def test_get_config(install_config):#config_files):
     # GIVEN the config files name
     files = [
         "install", "sample", "analysis_paired",
@@ -19,7 +20,7 @@ def test_get_config(config_files):
     # WHEN passing file names
     for file in files:
         # THEN return the config files path
-        assert config_files[file] in get_config(file)
+        assert Path(get_config(file)).exists()
 
 
 def test_write_json(tmp_path, config_files):
