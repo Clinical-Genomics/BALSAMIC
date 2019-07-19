@@ -241,7 +241,7 @@ def test_get_fastq_path(sample_fastq):
 
 
 def test_get_fastq_path_error(sample_fastq):
-    with pytest.raises(Exception) as error:
+    with pytest.raises(SystemExit) as exit:
         # GIVEN a fastq file path, and file pattern
         fastq_prefix = ''
         fastq_file = 'S1_R_1.fastq.gz'
@@ -250,11 +250,11 @@ def test_get_fastq_path_error(sample_fastq):
         # WHEN invoking get fastq path
         # THEN It should return fileprefix and fastq_path
         assert get_fastq_path(fastq_file, fq_pattern)
-        assert 'FileNotFoundError' in error.value
+        assert exit.type == SystemExit
 
 
 def test_get_fqpath_mismatch_error(sample_fastq):
-    with pytest.raises(Exception) as error:
+    with pytest.raises(SystemExit) as exit:
         # GIVEN a fastq file path, and file pattern
         fastq_prefix = ''
         fastq_file = sample_fastq['fastq_invalid']
@@ -263,6 +263,6 @@ def test_get_fqpath_mismatch_error(sample_fastq):
         # WHEN invoking get fastq path
         # THEN It should return fileprefix and fastq_path
         assert get_fastq_path(fastq_file, fq_pattern)
-        assert 'AttributeError' in error.value
+        assert exit.type == SystemExit
 
 

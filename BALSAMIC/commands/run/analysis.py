@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import logging
 import subprocess
 import json
 import click
@@ -9,6 +10,9 @@ from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_sbatchpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
+
+
+LOG = logging.getLogger(__name__)
 
 
 @click.command("analysis", short_help="Run the analysis on a provided sample config-file")
