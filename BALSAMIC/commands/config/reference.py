@@ -36,7 +36,7 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    write_json(config, config_json)
+#    write_json(config, config_json)
 
 #    # configure snakemake cmd
 #    config_reference = SnakeMake()
