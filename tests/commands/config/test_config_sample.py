@@ -13,7 +13,7 @@ from BALSAMIC.commands.config.sample import get_fastq_path
 from BALSAMIC.utils.cli import iterdict, write_json, get_config
 
 
-def test_get_config(install_config):
+def test_get_config():
     # GIVEN the config files name
     config_files = [
         "sample", "analysis_paired",
@@ -23,10 +23,6 @@ def test_get_config(install_config):
     for config_file in config_files:
         # THEN return the config files path
         assert Path(get_config(config_file)).exists()
-
-    #THEN install.json should exist
-    assert Path(get_config(install_config)).exists()
-
 
 def test_write_json(tmp_path, config_files):
     # GIVEN a dict from sample json file (reference.json)
