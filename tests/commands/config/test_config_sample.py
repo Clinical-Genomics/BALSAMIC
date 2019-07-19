@@ -181,16 +181,14 @@ def test_configure_fastq(sample_config, tmp_path):
     # GIVEN sample_config, normal and tumor fastq files
     fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
     tumor = os.path.join(fastq_src, 'S1_R_1.fastq.gz')
-    normal = os.path.join(fastq_src, 'S2_R_1.fastq.gz')
     fastq_prefix = ''
     fastq_dir = tmp_path / "output"
     fastq_dir.mkdir()
 
     # WHEN invoking configure fastq with required params
-    normal_str, tumor_str = configure_fastq(fastq_dir, tumor, normal, fastq_prefix)
+    tumor_str = configure_fastq(fastq_dir, tumor, fastq_prefix)
 
     # THEN It should return sample prefixes
-    assert normal_str in sample_config['samples']
     assert tumor_str in sample_config['samples']
     assert len(list(tmp_path.iterdir())) == 1
 
