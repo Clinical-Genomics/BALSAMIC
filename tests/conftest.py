@@ -144,7 +144,7 @@ def analysis_dir(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir):
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, install_config):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -158,7 +158,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir):
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'sample', '-p', panel_bed_file, '-t',
+        'config', 'sample', '-p', panel_bed_file, '-i', install_config, '-t',
         str(tumor), '-n',
         str(normal), '--sample-id', sample_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
@@ -169,7 +169,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir):
 
 
 @pytest.fixture(scope='session')
-def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir):
+def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir, install_config):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -182,7 +182,7 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir):
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'sample', '-p', panel_bed_file, '-t',
+        'config', 'sample', '-p', panel_bed_file, '-i', install_config, '-t',
         str(tumor), '--sample-id', sample_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
