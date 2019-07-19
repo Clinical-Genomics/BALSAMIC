@@ -143,7 +143,7 @@ def test_config_reference_write_json(install_config, invoke_cli, tmp_path):
     test_output_reference_config = test_new_dir / "config.json" 
     test_output_reference_pdf = test_new_dir / "generate_ref_dag.pdf" 
 
-    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
+    result = invoke_cli(['config', 'reference', '-i', install_config, '-c', 'secret_key', '-o', str(test_new_dir)])
 
     # THEN output config and pdf file generate and command exit code 0
     assert result.exit_code == 0

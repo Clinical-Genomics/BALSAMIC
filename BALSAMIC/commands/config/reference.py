@@ -11,14 +11,36 @@ from BALSAMIC.commands.config.sample import merge_json
 from BALSAMIC import __version__ as bv
 
 
-@click.command("reference", short_help="config workflow for generate reference")
-@click.option("-o", "--outdir", required=True, help="output directory for ref files eg: reference")
-@click.option("-c", "--cosmic-key", required=True, help="cosmic db authentication key")
-@click.option("-s", "--snakefile", default=get_snakefile('generate_ref'),
+@click.command("reference",
+               short_help="config workflow for generate reference")
+@click.option("-o",
+              "--outdir",
+              required=True,
+              help="output directory for ref files eg: reference")
+@click.option("-i",
+              "--install-config",
+              show_default=True,
+              default=get_config("install"),
+              help="install config file.")
+@click.option("-c",
+              "--cosmic-key",
+              required=True,
+              help="cosmic db authentication key")
+@click.option("-s",
+              "--snakefile",
+              default=get_snakefile('generate_ref'),
+              show_default=True,
               help="snakefile for reference generation")
-@click.option("-d", "--dagfile", default="generate_ref_dag.pdf", help="DAG file for overview")
-@click.option("--singularity", is_flag=True, help="To run the workflow on container")
-def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
+@click.option("-d",
+              "--dagfile",
+              default="generate_ref_dag.pdf",
+              show_default=True,
+              help="DAG file for overview")
+@click.option("--singularity",
+              is_flag=True,
+              help="To run the workflow on container")
+def reference(outdir, cosmic_key, snakefile, dagfile, singularity,
+              install_config):
     """ Configure workflow for reference generation """
     config = dict()
     outdir = os.path.abspath(outdir)
@@ -29,8 +51,6 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
     if cosmic_key:
         config["cosmic_key"] = cosmic_key
 
-    # add install.json
-    install_config = get_config('install')
     config = merge_json(config, install_config)
 
     if not os.path.exists(outdir):
@@ -45,12 +65,13 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
     config_reference.configfile = config_json
 
     # To create DAG file
-    shell_cmd = ['"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
-                 '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
-                 'Reference', 'generation', 'for', 'BALSAMIC', bv, 'workflow', '\\"\;/g"',
-                 '|', 'dot', '-Tpdf', '1>', dagfile_path]
+    shell_cmd = [
+        '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
+        '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
+        'Reference', 'generation', 'for', 'BALSAMIC', bv, 'workflow',
+        '\\"\;/g"', '|', 'dot', '-Tpdf', '1>', dagfile_path
+    ]
 
     cmd = config_reference.build_cmd() + " " + " ".join(shell_cmd)
     click.echo("Creating workflow DAG image: %s" % dagfile_path)
     subprocess.run(cmd, shell=True)
-
