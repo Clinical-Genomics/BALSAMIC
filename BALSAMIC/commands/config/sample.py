@@ -142,7 +142,7 @@ def get_fastq_path(file, fq_pattern):
     return file_str, os.path.split(file)[0]
 
 
-def configure_fastq(fq_path, tumor, normal, fastq_prefix):
+def configure_fastq(fq_path, sample, fastq_prefix):
     """
     Configure the fastq files for analysis
     """
@@ -150,12 +150,12 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
     paths = list()
 
     # get a list of fq files
-    tumor_str, tumor_path = get_fastq_path(tumor, fq_pattern)
-    paths.append(tumor_path)
+    sample_str, sample_path = get_fastq_path(sample, fq_pattern)
+    paths.append(sample_path)
 
-    if normal:
-        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
-        paths.append(normal_path)
+#    if normal:
+#        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
+#        paths.append(normal_path)
 
     fq_files = set()
     for path in paths:
@@ -167,7 +167,7 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
     link_fastq(fq_files, fq_path)
 
     # return file prefix
-    return normal_str, tumor_str
+    return sample_str 
 
 
 @click.command("sample",
@@ -275,7 +275,9 @@ def sample(context, umi, install_config, sample_config, reference_config,
     fq_path = os.path.join(output_dir, 'analysis', 'fastq')
     os.makedirs(fq_path, exist_ok=True)
 
-    normal, tumor = configure_fastq(fq_path, tumor, normal, fastq_prefix)
+    tumor = configure_fastq(fq_path, tumor, fastq_prefix)
+    if normal:
+        normal = configure_fastq(fq_path, normal, fastq_prefix)
 
     sample_config["samples"][tumor] = {
         "file_prefix": tumor,
