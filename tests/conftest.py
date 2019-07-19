@@ -80,7 +80,7 @@ def no_write_perm_path(tmp_path_factory):
     """
     # create a conda_env directory
     bad_perm_path = tmp_path_factory.mktemp("bad_perm_path")
-    
+
     Path(bad_perm_path).chmod(0o444)
 
     return str(bad_perm_path)
@@ -91,28 +91,104 @@ def sample_fastq(tmp_path_factory):
     """
     create sample fastq files
     """
-    tmp_dir = tmp_path_factory.mktemp("fastq")
-    fastq_valid = tmp_dir / "S1_R_1.fastq.gz"
-    fastq_invalid = tmp_dir / "sample.fastq.gz"
+    fastq_dir = tmp_path_factory.mktemp("fastq")
+    fastq_valid = fastq_dir / "S1_R_1.fastq.gz"
+    fastq_invalid = fastq_dir / "sample.fastq.gz"
 
-    for file in (fastq_valid, fastq_invalid):
-        Path(file).touch(exist_ok=True)
+    # dummy tumor fastq file
+    tumor_fastq_R_1 = fastq_dir / "tumor_R_1.fastq.gz"
+    tumor_fastq_R_2 = fastq_dir / "tumor_R_2.fastq.gz"
 
-    return {"fastq_valid": fastq_valid, "fastq_invalid": fastq_invalid}
+    # dummy normal fastq file
+    normal_fastq_R_1 = fastq_dir / "normal_R_1.fastq.gz"
+    normal_fastq_R_2 = fastq_dir / "normal_R_2.fastq.gz"
+
+    for fastq_file in (fastq_valid, fastq_invalid, tumor_fastq_R_1,
+                       tumor_fastq_R_2, normal_fastq_R_1, normal_fastq_R_2):
+        fastq_file.touch()
+
+    return {
+        "fastq_valid": str(fastq_valid.absolute()),
+        "fastq_invalid": str(fastq_invalid.absolute()),
+        "tumor": str(tumor_fastq_R_1.absolute()),
+        "normal": str(normal_fastq_R_2.absolute())
+    }
 
 
 @pytest.fixture(scope='session')
-def install_config(BALSAMIC_env):
+def install_config(BALSAMIC_env, tmp_path_factory):
     """
     Fixture for install.json
     """
+    config_dir = tmp_path_factory.mktemp("config")
     install_json = {
-      "conda_env_yaml": BALSAMIC_env,
-      "rule_directory": str(Path('BALSAMIC/snakemake_rules').absolute())
-    } 
-    
-    with open('BALSAMIC/config/install.json', 'w') as install_json_file:
+        "conda_env_yaml": BALSAMIC_env,
+        "rule_directory": str(Path('BALSAMIC/snakemake_rules').absolute())
+    }
+
+    install_config_file = str(config_dir/ "install.json")
+
+    with open(install_config_file, 'w') as install_json_file:
         json.dump(install_json, install_json_file)
+    
+    return install_config_file
+
+
+@pytest.fixture(scope='session')
+def analysis_dir(tmp_path_factory):
+    """
+    Creates and returns analysis directory
+    """
+    analysis_dir = tmp_path_factory.mktemp('analysis')
+    return analysis_dir
+
+
+@pytest.fixture(scope='session')
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir):
+    """
+    invokes balsamic config sample -t xxx -n xxx to create sample config
+    for tumor-normal
+    """
+    sample_name = 'sample_tumor_normal'
+    tumor = sample_fastq['tumor']
+    normal = sample_fastq['normal']
+    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    reference_json = 'tests/test_data/references/reference.json'
+    sample_config_file_name = 'sample.json'
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        'config', 'sample', '-p', panel_bed_file, '-t',
+        str(tumor), '-n',
+        str(normal), '--sample-id', sample_name, '--analysis-dir',
+        str(analysis_dir), '--output-config', sample_config_file_name,
+        '--reference-config', reference_json
+    ])
+
+    return str(analysis_dir / sample_name / sample_config_file_name)
+
+
+@pytest.fixture(scope='session')
+def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    sample_name = 'sample_tumor_only'
+    tumor = sample_fastq['tumor']
+    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    reference_json = 'tests/test_data/references/reference.json'
+    sample_config_file_name = 'sample.json'
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        'config', 'sample', '-p', panel_bed_file, '-t',
+        str(tumor), '--sample-id', sample_name, '--analysis-dir',
+        str(analysis_dir), '--output-config', sample_config_file_name,
+        '--reference-config', reference_json
+    ])
+
+    return str(analysis_dir / sample_name / sample_config_file_name)
 
 
 @pytest.fixture(scope='session')
@@ -133,18 +209,24 @@ def sample_config():
                     "diploidSV.vcf.gz", "somaticSV.vcf.gz",
                     "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"
                 ],
-                "merged": "manta.vcf.gz",
-                "mutation": "somatic",
-                "type": "SV"
+                "merged":
+                "manta.vcf.gz",
+                "mutation":
+                "somatic",
+                "type":
+                "SV"
             },
             "manta_germline": {
                 "default": [
                     "diploidSV.vcf.gz", "candidateSV.vcf.gz",
                     "candidateSmallIndels.vcf.gz"
                 ],
-                "mutation": "germline",
-                "merged": "manta_germline.vcf.gz",
-                "type": "SV"
+                "mutation":
+                "germline",
+                "merged":
+                "manta_germline.vcf.gz",
+                "type":
+                "SV"
             },
             "strelka_germline": {
                 "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
@@ -193,7 +275,8 @@ def sample_config():
             "result": "tests/test_data/id1/analysis/",
             "config_creation_date": "yyyy-mm-dd xx",
             "BALSAMIC_version": "2.9.8",
-            "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+            "dag":
+            "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
         },
         "samples": {
             "S1_R": {
