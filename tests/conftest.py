@@ -2,6 +2,7 @@
 
 import pytest
 import yaml
+import json
 
 from pathlib import Path
 from functools import partial
@@ -82,6 +83,19 @@ def no_write_perm_path(tmp_path_factory):
     Path(bad_perm_path).chmod(0o444)
 
     return str(bad_perm_path)
+
+@pytest.fixture(scope='session')
+def install_config(BALSAMIC_env):
+    """
+    Fixture for install.json
+    """
+    install_json = {
+      "conda_env_yaml": BALSAMIC_env, 
+      "rule_directory": str(Path('BALSAMIC/snakemake_rules').absolute()) 
+    } 
+    
+    with open('BALSAMIC/config/install.json', 'w') as install_json_file:
+        json.dump(install_json, install_json_file)
 
 @pytest.fixture(scope='session')
 def sample_config():
