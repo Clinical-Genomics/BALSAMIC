@@ -309,8 +309,12 @@ def get_config(config_name):
 
     p = Path(__file__).parents[1]
     config_file = str(Path(p, 'config', config_name + ".json"))
+    try:
+        Path(config_file).exists()
+        return config_file
+    except FileNotFoundError as err:
+        raise err
 
-    return config_file
 
 
 def get_ref_path(input_json):
