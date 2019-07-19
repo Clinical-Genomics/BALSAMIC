@@ -1,6 +1,10 @@
-from pathlib import Path
-import BALSAMIC
 import pytest
+import glob
+from pathlib import Path
+from click.testing import CliRunner
+
+import BALSAMIC
+from BALSAMIC.commands.base import cli
 
 
 def test_cli(invoke_cli):
@@ -129,27 +133,31 @@ def test_run_ref_invalid(invoke_cli):
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
 
-def test_config_reference(tmp_path, invoke_cli):
+def test_config_reference_write_json(install_config, invoke_cli, tmp_path):
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_dir" 
     test_new_dir.mkdir()
-    test_new_dir.chmod(0o777)
 
+
+    # WHEN creating config.json in reference dir
     test_output_reference_config = test_new_dir / "config.json" 
     test_output_reference_pdf = test_new_dir / "generate_ref_dag.pdf" 
 
-    #test_output_reference_config.touch()
-    #test_output_reference_pdf.touch()
+    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir)])
 
-    # WHEN invoking config sample
-    result = invoke_cli(['config', 'reference', '-c', 'secret_key', '-o', str(test_new_dir), '--help'])
-
-    # THEN it should create test_reference.json and exist with no error
+    # THEN output config and pdf file generate and command exit code 0
     assert result.exit_code == 0
-    import glob
-    print(glob.glob(str(test_new_dir)+"/*"))
-    assert Path(str(test_output_reference_config)).exists()
-    assert Path(str(test_output_reference_pdf)).exists()
+    assert Path(test_output_reference_pdf).exists()
+    assert Path(test_output_reference_config).exists()
+
+#    runner = CliRunner()
+#    with runner.isolated_filesystem():
+#        result = runner.invoke(cli, ['config', 'reference', '-c', 'secret_key', '-o', "./"])
+#        print(glob.glob("./*"))
+#        print(dir(result))
+#
+#        # THEN it should create test_reference.json and exist with no error
+#        print(result.exception)
 
 def test_config_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
     # Given a path with no write permission
