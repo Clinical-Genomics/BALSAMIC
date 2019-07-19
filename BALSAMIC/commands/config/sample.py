@@ -229,11 +229,6 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
               help="Root analysis path to store \
               analysis logs and results. The final path will be analysis-dir/sample-id"
               )
-@click.option("--check-fastq/--no-check-fastq",
-              default=True,
-              show_default=True,
-              help="Check if fastq input files exist. An internal check, \
-              so it's recommended not to change it.")
 @click.option("--overwrite-config/--no-overwrite-config",
               default=True,
               help="Overwrite output config file")
@@ -243,7 +238,7 @@ def configure_fastq(fq_path, tumor, normal, fastq_prefix):
 @click.pass_context
 def sample(context, umi, install_config, sample_config, reference_config,
            panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
-           check_fastq, overwrite_config, create_dir, fastq_prefix):
+           overwrite_config, create_dir, fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.

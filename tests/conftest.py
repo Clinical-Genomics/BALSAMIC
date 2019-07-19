@@ -96,9 +96,7 @@ def sample_fastq(tmp_path_factory):
     fastq_invalid = tmp_dir / "sample.fastq.gz"
 
     for file in (fastq_valid, fastq_invalid):
-        with open(file, 'w') as fh:
-            fh.write("ATCG")
-            fh.close()
+        Path(file).touch(exist_ok=True)
 
     return {"fastq_valid": fastq_valid, "fastq_invalid": fastq_invalid}
 
