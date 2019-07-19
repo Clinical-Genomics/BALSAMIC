@@ -33,24 +33,24 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity):
     install_config = get_config('install')
     config = merge_json(config, install_config)
 
-#    if not os.path.exists(outdir):
-#        os.makedirs(outdir)
-#
-#    write_json(config, config_json)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 
-#    # configure snakemake cmd
-#    config_reference = SnakeMake()
-#    config_reference.working_dir = outdir
-#    config_reference.snakefile = snakefile
-#    config_reference.configfile = config_json
-#
-#    # To create DAG file
-#    shell_cmd = ['"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
-#                 '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
-#                 'Reference', 'generation', 'for', 'BALSAMIC', bv, 'workflow', '\\"\;/g"',
-#                 '|', 'dot', '-Tpdf', '1>', dagfile_path]
-#
-#    cmd = config_reference.build_cmd() + " " + " ".join(shell_cmd)
-#    click.echo("Creating workflow DAG image: %s" % dagfile_path)
-#    subprocess.run(cmd, shell=True)
-#
+    write_json(config, config_json)
+
+    # configure snakemake cmd
+    config_reference = SnakeMake()
+    config_reference.working_dir = outdir
+    config_reference.snakefile = snakefile
+    config_reference.configfile = config_json
+
+    # To create DAG file
+    shell_cmd = ['"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
+                 '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
+                 'Reference', 'generation', 'for', 'BALSAMIC', bv, 'workflow', '\\"\;/g"',
+                 '|', 'dot', '-Tpdf', '1>', dagfile_path]
+
+    cmd = config_reference.build_cmd() + " " + " ".join(shell_cmd)
+    click.echo("Creating workflow DAG image: %s" % dagfile_path)
+    subprocess.run(cmd, shell=True)
+
