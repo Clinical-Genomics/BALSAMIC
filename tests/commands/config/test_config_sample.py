@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import pytest
 from datetime import datetime
@@ -8,6 +9,7 @@ from BALSAMIC.commands.config.sample import merge_json, \
     set_panel_bed, get_output_config, get_sample_config, get_analysis_type, \
     check_exist
 from BALSAMIC.commands.config.sample import configure_fastq, link_fastq
+from BALSAMIC.commands.config.sample import get_fastq_path
 from BALSAMIC.utils.cli import iterdict, write_json, get_config
 
 
@@ -222,4 +224,45 @@ def test_link_fastq_error(sample_config, tmp_path):
         link_fastq(fastq_files, dest_dir)
 
         assert e.value
+
+
+def test_get_fastq_path(sample_fastq):
+    # GIVEN a fastq file path, and file pattern
+    fastq_prefix = ''
+    fastq_file = sample_fastq['fastq_valid']
+    fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
+
+    # WHEN invoking get fastq path
+    fq_str, fq_path = get_fastq_path(fastq_file, fq_pattern)
+
+    # THEN It should return fileprefix and fastq_path
+    assert fq_str == 'S1_R'
+    assert os.path.dirname(fastq_file) in fq_path
+
+
+def test_get_fastq_path_error(sample_fastq):
+    with pytest.raises(Exception) as error:
+        # GIVEN a fastq file path, and file pattern
+        fastq_prefix = ''
+        fastq_file = 'S1_R_1.fastq.gz'
+        fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
+
+        # WHEN invoking get fastq path
+        # THEN It should return fileprefix and fastq_path
+        assert get_fastq_path(fastq_file, fq_pattern)
+        assert 'FileNotFoundError' in error.value
+
+
+def test_get_fqpath_mismatch_error(sample_fastq):
+    with pytest.raises(Exception) as error:
+        # GIVEN a fastq file path, and file pattern
+        fastq_prefix = ''
+        fastq_file = sample_fastq['fastq_invalid']
+        fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
+
+        # WHEN invoking get fastq path
+        # THEN It should return fileprefix and fastq_path
+        assert get_fastq_path(fastq_file, fq_pattern)
+        assert 'AttributeError' in error.value
+
 

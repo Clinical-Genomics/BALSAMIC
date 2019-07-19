@@ -72,6 +72,7 @@ def BALSAMIC_env(tmp_path_factory):
 
     return str(conda_env_file)
 
+
 @pytest.fixture(scope='session')
 def no_write_perm_path(tmp_path_factory):
     """
@@ -84,18 +85,35 @@ def no_write_perm_path(tmp_path_factory):
 
     return str(bad_perm_path)
 
+
+@pytest.fixture(scope='session')
+def sample_fastq(tmp_path_factory):
+    """
+    create sample fastq files
+    """
+    tmp_dir = tmp_path_factory.mktemp("fastq")
+    fastq_valid = tmp_dir / "S1_R_1.fastq.gz"
+    fastq_invalid = tmp_dir / "sample.fastq.gz"
+
+    for file in (fastq_valid, fastq_invalid):
+        Path(file).touch(exist_ok=True)
+
+    return {"fastq_valid": fastq_valid, "fastq_invalid": fastq_invalid}
+
+
 @pytest.fixture(scope='session')
 def install_config(BALSAMIC_env):
     """
     Fixture for install.json
     """
     install_json = {
-      "conda_env_yaml": BALSAMIC_env, 
-      "rule_directory": str(Path('BALSAMIC/snakemake_rules').absolute()) 
+      "conda_env_yaml": BALSAMIC_env,
+      "rule_directory": str(Path('BALSAMIC/snakemake_rules').absolute())
     } 
     
     with open('BALSAMIC/config/install.json', 'w') as install_json_file:
         json.dump(install_json, install_json_file)
+
 
 @pytest.fixture(scope='session')
 def sample_config():
