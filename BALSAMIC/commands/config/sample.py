@@ -179,8 +179,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 @click.option("-i",
               "--install-config",
               required=False,
-              default=get_config("install"),
-              show_default=True,
               type=click.Path(),
               help="Installation config file.")
 @click.option("-r",
@@ -244,6 +242,12 @@ def sample(context, umi, install_config, sample_config, reference_config,
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
     """
+
+    if not install_config:
+        try:
+            install_config = get_config("install")
+        except:
+            context.Abort() 
 
     analysis_type = get_analysis_type(normal, umi)
     output_config = get_output_config(output_config, sample_id)
