@@ -133,7 +133,8 @@ def get_fastq_path(file, fq_pattern):
         file_basename = os.path.basename(file)
         try:
             # extracting file prefix
-            file_str = file_basename[0:(fq_pattern.search(file_basename).span()[0] + 1)]
+            file_str = file_basename[0:(
+                fq_pattern.search(file_basename).span()[0] + 1)]
         except AttributeError as error:
             raise error
     else:
@@ -153,9 +154,9 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     sample_str, sample_path = get_fastq_path(sample, fq_pattern)
     paths.append(sample_path)
 
-#    if normal:
-#        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
-#        paths.append(normal_path)
+    #    if normal:
+    #        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
+    #        paths.append(normal_path)
 
     fq_files = set()
     for path in paths:
@@ -167,7 +168,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     link_fastq(fq_files, fq_path)
 
     # return file prefix
-    return sample_str 
+    return sample_str
 
 
 @click.command("sample",

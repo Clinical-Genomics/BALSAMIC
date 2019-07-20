@@ -49,6 +49,7 @@ def test_iterdict(config_files):
         assert isinstance(key, str)
         assert isinstance(value, str)
 
+
 def test_sbatch():
     # GIVEN values for sbatch command
     sbatch_cmd = sbatch()
@@ -61,14 +62,15 @@ def test_sbatch():
     sbatch_cmd.ntasks = "2"
     sbatch_cmd.qos = "low"
     sbatch_cmd.time = "01:00:00"
-    sbatch_cmd.script = "example_script.sh" 
+    sbatch_cmd.script = "example_script.sh"
 
     # WHEN sbatch command is built
     sbatch_cmd = sbatch_cmd.build_cmd()
 
     # THEN sbatch command string is constructed
     assert isinstance(sbatch_cmd, str)
-    assert sbatch_cmd == 'sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" --output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" --ntasks "2" --qos "low" --time "01:00:00" example_script.sh'   
+    assert sbatch_cmd == 'sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" --output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" --ntasks "2" --qos "low" --time "01:00:00" example_script.sh'
+
 
 def test_snakemake_local():
     # GIVEN required params
@@ -162,6 +164,7 @@ def test_get_package_split(conda):
     assert "cutadapt" in packages
     assert "fastqc" in packages
 
+
 def test_get_script_path():
     # GIVEN list of scripts
     custom_scripts = ["refseq_sql.awk"]
@@ -170,9 +173,10 @@ def test_get_script_path():
     for script in custom_scripts:
         # THEN assert full path for script
         assert get_script_path(script).startswith('/')
-        
+
         # THEN assert if script file exists
         assert Path(get_script_path(script)).is_file()
+
 
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
@@ -270,7 +274,6 @@ def test_createDir(tmp_path):
     assert Path(test_log_dir_created).is_dir()
 
 
-
 def test_get_result_dir(sample_config):
     # WHEN a sample_config dict
     # GIVEN a sample_config dict
@@ -303,16 +306,18 @@ def test_capturestdout():
 
     assert "".join(captured_stdout_message) == test_stdout_message
 
+
 def test_get_config():
     # GIVEN the config files name
     config_files = [
-        "sample", "analysis_paired",
-        "analysis_paired_umi", "analysis_single", "analysis_single_umi"
+        "sample", "analysis_paired", "analysis_paired_umi", "analysis_single",
+        "analysis_single_umi"
     ]
     # WHEN passing file names
     for config_file in config_files:
         # THEN return the config files path
         assert get_config(config_file)
+
 
 def test_get_config_wrong_config():
     # GIVEN the config files name
@@ -322,7 +327,6 @@ def test_get_config_wrong_config():
     # THEN return the config files path
     with pytest.raises(FileNotFoundError):
         assert get_config(config_file)
-
 
 
 def test_write_json(tmp_path, config_files):

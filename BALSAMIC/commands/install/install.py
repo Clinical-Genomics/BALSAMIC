@@ -95,8 +95,7 @@ def conda_install(conda, env_prefix):
     """
 
     shellcmd = [
-        "conda", "env", "create", "--file", conda,
-        "--prefix", env_prefix
+        "conda", "env", "create", "--file", conda, "--prefix", env_prefix
     ]
 
     try:
@@ -192,7 +191,6 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                         env_prefix,
                         fg='yellow'))
 
-
             if conda_env_check(env_prefix) and not overwrite_env:
                 click.echo(
                     click.style(
@@ -215,9 +213,9 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
 
             elif conda_env_check(env_prefix) and overwrite_env:
                 click.echo(
-                    click.style("Removing old conda environment: %s" %
-                                env_prefix,
-                                fg='yellow'))
+                    click.style(
+                        "Removing old conda environment: %s" % env_prefix,
+                        fg='yellow'))
                 conda_remove(env_prefix)
                 click.echo(
                     click.style("Installing conda environment from %s" % fname,
@@ -228,8 +226,8 @@ def install(context, input_conda_yaml, env_dir_prefix, overwrite_env,
                     conda_packages[env_prefix] = get_packages(yaml_handle)
 
                 click.echo(
-                    click.style("Conda environment %s was installed." %
-                                env_prefix,
-                                fg='green'))
+                    click.style(
+                        "Conda environment %s was installed." % env_prefix,
+                        fg='green'))
 
     yaml.dump(conda_packages, open(packages_output_yaml, 'w'))

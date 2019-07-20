@@ -133,7 +133,8 @@ def test_get_sample_config(config_files):
 
 def test_configure_fastq(sample_config, tmp_path):
     # GIVEN sample_config, normal and tumor fastq files
-    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
+    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'],
+                             'fastq')
     tumor = os.path.join(fastq_src, 'S1_R_1.fastq.gz')
     fastq_prefix = ''
     fastq_dir = tmp_path / "output"
@@ -149,8 +150,11 @@ def test_configure_fastq(sample_config, tmp_path):
 
 def test_link_fastq(sample_config, tmp_path):
     # GIVEN list of fastq files and destination to create symlink
-    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
-    fastq_files = [os.path.join(fastq_src, file) for file in os.listdir(fastq_src)]
+    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'],
+                             'fastq')
+    fastq_files = [
+        os.path.join(fastq_src, file) for file in os.listdir(fastq_src)
+    ]
     dest_dir = tmp_path / "output"
     dest_dir.mkdir()
 
@@ -164,8 +168,11 @@ def test_link_fastq(sample_config, tmp_path):
 def test_link_fastq_error(sample_config, tmp_path):
     # GIVEN a invalid fastq files list
     with pytest.raises(Exception) as e:
-        fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
-        fastq_files = [os.path.join(fastq_src, file) for file in os.listdir(fastq_src)]
+        fastq_src = os.path.join(sample_config['analysis']['analysis_dir'],
+                                 'fastq')
+        fastq_files = [
+            os.path.join(fastq_src, file) for file in os.listdir(fastq_src)
+        ]
         dest_dir = tmp_path / "output"
         dest_dir.mkdir()
 
@@ -216,5 +223,3 @@ def test_get_fqpath_mismatch_error(sample_fastq):
         # THEN It should return fileprefix and fastq_path
         assert get_fastq_path(fastq_file, fq_pattern)
         assert 'AttributeError' in error.value
-
-

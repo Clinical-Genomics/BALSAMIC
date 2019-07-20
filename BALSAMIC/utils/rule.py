@@ -67,7 +67,8 @@ def get_conda_env(yaml_file, pkg):
     if conda_env_found is not None:
         return conda_env_found
     else:
-        raise KeyError(f'Installed package {pkg} was not found in {yaml_file}') 
+        raise KeyError(f'Installed package {pkg} was not found in {yaml_file}')
+
 
 def get_picard_mrkdup(config):
     """
@@ -82,6 +83,7 @@ def get_picard_mrkdup(config):
             picard_str = "rmdup"
 
     return picard_str
+
 
 def get_script_path(script_name: str):
     """
