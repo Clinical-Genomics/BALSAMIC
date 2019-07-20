@@ -10,51 +10,6 @@ from BALSAMIC.commands.config.sample import merge_json, \
     check_exist
 from BALSAMIC.commands.config.sample import configure_fastq, link_fastq
 from BALSAMIC.commands.config.sample import get_fastq_path
-from BALSAMIC.utils.cli import iterdict, write_json, get_config
-
-
-def test_get_config():
-    # GIVEN the config files name
-    config_files = [
-        "sample", "analysis_paired",
-        "analysis_paired_umi", "analysis_single", "analysis_single_umi"
-    ]
-    # WHEN passing file names
-    for config_file in config_files:
-        # THEN return the config files path
-        assert Path(get_config(config_file)).exists()
-
-def test_write_json(tmp_path, config_files):
-    # GIVEN a dict from sample json file (reference.json)
-    ref_json = json.load(open(config_files['reference'], 'r'))
-
-    tmp = tmp_path / "tmp"
-    tmp.mkdir()
-    output_json = tmp / "output.json"
-
-    # WHEN passing dict and file name
-    write_json(ref_json, output_json)
-    output = output_json.read_text()
-
-    # THEN It will create a json file with given dict
-    for key, value in iterdict(ref_json):
-        assert key in output
-        assert value in output
-
-    assert len(list(tmp.iterdir())) == 1
-
-
-def test_write_json_error(tmp_path, config_files):
-    with pytest.raises(Exception, match=r"Is a directory"):
-        # GIVEN a invalid dict
-        ref_json = {"path": "/tmp", "reference": ""}
-        tmp = tmp_path / "tmp"
-        tmp.mkdir()
-        output_json = tmp / "/"
-
-        # WHEN passing a invalid dict
-        # THEN It will raise the error
-        assert write_json(ref_json, output_json)
 
 
 def test_merge_json(config_files):

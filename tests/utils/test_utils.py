@@ -13,6 +13,8 @@ from BALSAMIC.utils.cli import get_package_split
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_ref_path
+from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import get_config
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -256,6 +258,18 @@ def test_createDir(tmp_path):
     assert test_log_dir_created == str(tmp_path / "existing_dir.1")
     assert Path(test_log_dir_created).is_dir()
 
+    # GIVEN a directory path
+    test_log_dir = tmp_path / "existing_dir.1"
+
+    # WHEN directory path exists
+    test_log_dir.mkdir()
+
+    # THEN it should return log_dir name incremented
+    test_log_dir_created = createDir(str(test_log_dir), [])
+    assert test_log_dir_created == str(tmp_path / "existing_dir.2")
+    assert Path(test_log_dir_created).is_dir()
+
+
 
 def test_get_result_dir(sample_config):
     # WHEN a sample_config dict
@@ -288,3 +302,57 @@ def test_capturestdout():
         print(test_stdout_message, file=sys.stdout)
 
     assert "".join(captured_stdout_message) == test_stdout_message
+
+def test_get_config():
+    # GIVEN the config files name
+    config_files = [
+        "sample", "analysis_paired",
+        "analysis_paired_umi", "analysis_single", "analysis_single_umi"
+    ]
+    # WHEN passing file names
+    for config_file in config_files:
+        # THEN return the config files path
+        assert get_config(config_file)
+
+def test_get_config_wrong_config():
+    # GIVEN the config files name
+    config_file = 'non_existing_config'
+
+    # WHEN passing file names
+    # THEN return the config files path
+    with pytest.raises(FileNotFoundError):
+        assert get_config(config_file)
+
+
+
+def test_write_json(tmp_path, config_files):
+    # GIVEN a dict from sample json file (reference.json)
+    ref_json = json.load(open(config_files['reference'], 'r'))
+
+    tmp = tmp_path / "tmp"
+    tmp.mkdir()
+    output_json = tmp / "output.json"
+
+    # WHEN passing dict and file name
+    write_json(ref_json, output_json)
+    output = output_json.read_text()
+
+    # THEN It will create a json file with given dict
+    for key, value in iterdict(ref_json):
+        assert key in output
+        assert value in output
+
+    assert len(list(tmp.iterdir())) == 1
+
+
+def test_write_json_error(tmp_path, config_files):
+    with pytest.raises(Exception, match=r"Is a directory"):
+        # GIVEN a invalid dict
+        ref_json = {"path": "/tmp", "reference": ""}
+        tmp = tmp_path / "tmp"
+        tmp.mkdir()
+        output_json = tmp / "/"
+
+        # WHEN passing a invalid dict
+        # THEN It will raise the error
+        assert write_json(ref_json, output_json)
