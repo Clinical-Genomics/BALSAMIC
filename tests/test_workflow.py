@@ -3,7 +3,7 @@
 
 import snakemake
 
-from BALSAMIC.utils.cli import get_snakefile, get_abs_path
+from BALSAMIC.utils.cli import get_snakefile
 
 
 def test_workflow_tumor_normal(tumor_normal_config):
