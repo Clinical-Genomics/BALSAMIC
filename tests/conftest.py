@@ -62,8 +62,13 @@ def BALSAMIC_env(tmp_path_factory):
 
     # create a yaml file inside conda_env_path
     conda_packages = {
-        str("env_1"): ["package_1", "package_2"],
-        str("env_2"): ["package_4"]
+        "env_py27": ["python", "strelka", "manta", "tabix"],
+        "env_py36": [
+            "python", "pip", "bcftools", "bwa", "fastqc", "sambamba",
+            "samtools", "tabix", "gatk", "picard", "fgbio", "freebayes",
+            "vardict", "vardict-java", "ensembl-vep", "cnvkit", "cutadapt",
+            "pindel", "multiqc", "bedtools"
+        ]
     }
 
     conda_env_file = conda_env_path / "test_BALSAMIC_env.yaml"
@@ -76,7 +81,7 @@ def BALSAMIC_env(tmp_path_factory):
 @pytest.fixture(scope='session')
 def no_write_perm_path(tmp_path_factory):
     """
-    Writes BALSAMIC_env.yaml file.
+    A path with no write permission
     """
     # create a conda_env directory
     bad_perm_path = tmp_path_factory.mktemp("bad_perm_path")
@@ -123,14 +128,14 @@ def install_config(BALSAMIC_env, tmp_path_factory):
     config_dir = tmp_path_factory.mktemp("config")
     install_json = {
         "conda_env_yaml": BALSAMIC_env,
-        "rule_directory": str(Path('BALSAMIC/snakemake_rules').absolute())
+        "rule_directory": str(Path('BALSAMIC').absolute()) + "/"
     }
 
-    install_config_file = str(config_dir/ "install.json")
+    install_config_file = str(config_dir / "install.json")
 
     with open(install_config_file, 'w') as install_json_file:
         json.dump(install_json, install_json_file)
-    
+
     return install_config_file
 
 
@@ -144,7 +149,8 @@ def analysis_dir(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, install_config):
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
+                        install_config):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -169,7 +175,8 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, install_co
 
 
 @pytest.fixture(scope='session')
-def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir, install_config):
+def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
+                      install_config):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
