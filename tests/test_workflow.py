@@ -14,9 +14,7 @@ def test_workflow_tumor_normal(tumor_normal_config):
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
-    assert snakemake.snakemake(snakefile,
-                               configfile=config_json,
-                               dryrun=True)
+    assert snakemake.snakemake(snakefile, configfile=config_json, dryrun=True)
 
 
 def test_workflow_tumor_only(tumor_only_config):
@@ -27,9 +25,7 @@ def test_workflow_tumor_only(tumor_only_config):
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
-    assert snakemake.snakemake(snakefile,
-                               configfile=config_json,
-                               dryrun=True)
+    assert snakemake.snakemake(snakefile, configfile=config_json, dryrun=True)
 
 
 def test_workflow_qc(tumor_normal_config, tumor_only_config):
