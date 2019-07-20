@@ -154,16 +154,6 @@ def test_config_reference_write_json(install_config, invoke_cli, tmp_path):
     assert Path(test_output_reference_config).exists()
 
 
-#    runner = CliRunner()
-#    with runner.isolated_filesystem():
-#        result = runner.invoke(cli, ['config', 'reference', '-c', 'secret_key', '-o', "./"])
-#        print(glob.glob("./*"))
-#        print(dir(result))
-#
-#        # THEN it should create test_reference.json and exist with no error
-#        print(result.exception)
-
-
 def test_config_reference_no_write_perm(tmp_path, invoke_cli,
                                         no_write_perm_path):
     # Given a path with no write permission
