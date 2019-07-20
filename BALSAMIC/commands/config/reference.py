@@ -19,8 +19,7 @@ from BALSAMIC import __version__ as bv
               help="output directory for ref files eg: reference")
 @click.option("-i",
               "--install-config",
-              show_default=True,
-              default=get_config("install"),
+              type=click.Path(),
               help="install config file.")
 @click.option("-c",
               "--cosmic-key",
@@ -29,6 +28,7 @@ from BALSAMIC import __version__ as bv
 @click.option("-s",
               "--snakefile",
               default=get_snakefile('generate_ref'),
+              type=click.Path(),
               show_default=True,
               help="snakefile for reference generation")
 @click.option("-d",
@@ -42,6 +42,12 @@ from BALSAMIC import __version__ as bv
 def reference(outdir, cosmic_key, snakefile, dagfile, singularity,
               install_config):
     """ Configure workflow for reference generation """
+    if not install_config:
+        try:
+            install_config = get_config("install")
+        except:
+            context.Abort() 
+
     config = dict()
     outdir = os.path.abspath(outdir)
     config_json = os.path.join(outdir, "config.json")
