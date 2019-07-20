@@ -263,14 +263,14 @@ def test_createDir(tmp_path):
     assert Path(test_log_dir_created).is_dir()
 
     # GIVEN a directory path
-    test_log_dir = tmp_path / "existing_dir.1"
+    test_log_dir = tmp_path / "existing_dir_with_dot.1"
 
     # WHEN directory path exists
     test_log_dir.mkdir()
 
     # THEN it should return log_dir name incremented
     test_log_dir_created = createDir(str(test_log_dir), [])
-    assert test_log_dir_created == str(tmp_path / "existing_dir.2")
+    assert test_log_dir_created == str(tmp_path / "existing_dir_with_dot.2")
     assert Path(test_log_dir_created).is_dir()
 
 
