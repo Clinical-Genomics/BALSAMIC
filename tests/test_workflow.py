@@ -6,18 +6,40 @@ import snakemake
 from BALSAMIC.utils.cli import get_snakefile, get_abs_path
 
 
-def test_workflow(sample_config):
+def test_workflow_tumor_normal(tumor_normal_config):
     # GIVEN a sample config dict and snakefile
-    workflows = ['paired', 'qc', 'single']
-    config_json = 'tests/test_data/config.json'
-    rules = {'rule_directory': get_abs_path(config_json)}
+    workflow = 'paired'
+    snakefile = get_snakefile(workflow)
+    config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
-    for workflow in workflows:
-        snakefile = get_snakefile(workflow)
+    assert snakemake.snakemake(snakefile,
+                               configfile=config_json,
+                               dryrun=True)
+
+
+def test_workflow_tumor_only(tumor_only_config):
+    # GIVEN a sample config dict and snakefile
+    workflow = 'single'
+    snakefile = get_snakefile(workflow)
+    config_json = tumor_only_config
+
+    # WHEN invoking snakemake module with dryrun option
+    # THEN it should return true
+    assert snakemake.snakemake(snakefile,
+                               configfile=config_json,
+                               dryrun=True)
+
+
+def test_workflow_qc(tumor_normal_config, tumor_only_config):
+    # GIVEN a sample config dict and snakefile
+    workflow = 'qc'
+    snakefile = get_snakefile(workflow)
+
+    # WHEN invoking snakemake module with dryrun option
+    # THEN it should return true
+    for config_json in (tumor_normal_config, tumor_only_config):
         assert snakemake.snakemake(snakefile,
-                                   config=rules,
                                    configfile=config_json,
                                    dryrun=True)
-
