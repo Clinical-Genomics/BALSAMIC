@@ -223,3 +223,51 @@ def test_get_fqpath_mismatch_error(sample_fastq):
         # THEN It should return fileprefix and fastq_path
         assert get_fastq_path(fastq_file, fq_pattern)
         assert 'AttributeError' in error.value
+
+
+def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
+                                    install_config, invoke_cli):
+    # GIVEN input sample tumor and normal
+    test_sample_name = 'sample_tumor_normal'
+    test_tumor = sample_fastq['tumor']
+    test_normal = sample_fastq['normal']
+    test_panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    test_reference_json = 'tests/test_data/references/reference.json'
+    test_sample_config_file_name = 'test_sample_tumor_normal.json'
+
+    # WHEN invoking cli to create config files
+    result = invoke_cli([
+        'config', 'sample', '-p', test_panel_bed_file, '-i', install_config,
+        '-t',
+        str(test_tumor), '-n',
+        str(test_normal), '--sample-id', test_sample_name, '--analysis-dir',
+        str(analysis_dir), '--output-config', test_sample_config_file_name,
+        '--reference-config', test_reference_json
+    ])
+
+    assert result.exit_code == 0
+    assert Path(analysis_dir / test_sample_name /
+                test_sample_config_file_name).exists()
+
+
+def test_config_sample_missing_install(tmp_path, sample_fastq, analysis_dir,
+                                       invoke_cli):
+    # GIVEN input sample tumor and normal
+    test_sample_name = 'sample_tumor_normal'
+    test_tumor = sample_fastq['tumor']
+    test_normal = sample_fastq['normal']
+    test_panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    test_reference_json = 'tests/test_data/references/reference.json'
+    test_sample_config_file_name = 'test_sample_tumor_normal.json'
+
+
+    # WHEN invoking cli to create config files
+    result = invoke_cli([
+        'config', 'sample', '-p', test_panel_bed_file, '-t',
+        str(test_tumor), '-n',
+        str(test_normal), '--sample-id', test_sample_name,
+        '--analysis-dir',
+        str(analysis_dir), '--output-config', test_sample_config_file_name,
+        '--reference-config', test_reference_json
+    ])
+    assert result.exit_code==1

@@ -192,10 +192,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               required=True,
               type=click.Path(),
               help="Panel bed file for variant calling.")
-@click.option("-s",
-              "--sample-config",
-              type=click.Path(),
-              help="Input sample config file.")
 @click.option(
     "-o",
     "--output-config",
@@ -235,7 +231,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(context, umi, install_config, sample_config, reference_config,
+def sample(context, umi, install_config, reference_config,
            panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
            overwrite_config, create_dir, fastq_prefix):
     """
@@ -244,10 +240,7 @@ def sample(context, umi, install_config, sample_config, reference_config,
     """
 
     if not install_config:
-        try:
-            install_config = get_config("install")
-        except:
-            context.Abort() 
+        install_config = get_config("install")
 
     analysis_type = get_analysis_type(normal, umi)
     output_config = get_output_config(output_config, sample_id)
@@ -260,10 +253,7 @@ def sample(context, umi, install_config, sample_config, reference_config,
 
     read_prefix = ["1", "2"]
 
-    if sample_config:
-        sample_config_path = os.path.abspath(sample_config)
-    else:
-        sample_config_path = get_config("sample")
+    sample_config_path = get_config("sample")
 
     click.echo("Reading sample config file %s" % sample_config_path)
 
