@@ -24,54 +24,6 @@ class CaptureStdout(list):
         sys.stdout = self._stdout
 
 
-class sbatch:
-    '''
-    Builds sbatch command. Commands map to SLURM sbatch options.
-    
-    Params:
-    ------
-    account         - -A/--account
-    dependency      - 
-    error           - -e/--error
-    mail_type       - --mail-type
-    mail_user       - --mail-user 
-    ntasks          - -n/--ntasks
-    output          - -o/--output
-    qos             - -q/--qos 
-    time            - -t/--time
-    '''
-
-    def __init__(self):
-        self.account = None
-        self.dependency = None
-        self.error = None
-        self.mail_type = None
-        self.mail_user = None
-        self.ntasks = None
-        self.output = None
-        self.qos = None
-        self.script = None
-        self.time = None
-
-    def build_cmd(self):
-        sbatch_options = list()
-
-        job_attributes = [
-            'account', 'dependency', 'error', 'output', 'mail_type',
-            'mail_user', 'ntasks', 'qos', 'time'
-        ]
-
-        for attribute in job_attributes:
-            if getattr(self, attribute):
-                attribute_value = getattr(self, attribute)
-                sbatch_options.append('--{} \"{}\"'.format(
-                    attribute.replace("_", "-"), attribute_value))
-
-        sbatch_options.append(self.script)
-
-        return 'sbatch' + ' ' + ' '.join(sbatch_options)
-
-
 class SnakeMake:
     """
     To build a snakemake command using cli options
