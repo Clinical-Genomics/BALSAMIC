@@ -1,10 +1,9 @@
 
+from BALSAMIC.commands.run.sbatch import SbatchScheduler 
 
-from BALSAMIC.
-
-def test_sbatch():
+def test_SbatchScheduler():
     # GIVEN values for sbatch command
-    sbatch_cmd = sbatch()
+    sbatch_cmd = SbatchScheduler()
     sbatch_cmd.account = "development"
     sbatch_cmd.dependency = "afterok:12345"
     sbatch_cmd.error = "test_job.err"

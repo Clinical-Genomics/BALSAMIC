@@ -87,9 +87,9 @@ class SnakeMake:
                 " --sample-config " + self.configfile + \
                 " --slurm-account " + self.account + \
                 " --slurm-qos " + self.qos + \
-                " --dir-log " + self.log_path + \
-                " --dir-script " + self.script_path + \
-                " --dir-result " + self.result_path
+                " --log-dir " + self.log_path + \
+                " --script-dir " + self.script_path + \
+                " --result-dir " + self.result_path
 
             if self.mail_user:
                 sbatch_cmd += " --slurm-mail-user " + self.mail_user

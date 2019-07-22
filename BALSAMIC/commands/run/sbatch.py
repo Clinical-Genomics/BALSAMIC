@@ -6,45 +6,22 @@ import subprocess
 import json
 import argparse
 import shutil
-from BALSAMIC.utils.cli import sbatch as sbatch_cmd
 from snakemake.utils import read_job_properties
 
-parser = argparse.ArgumentParser(description='''
-    This is an internal script and should be invoked independently.
-    This script gets a list of arugments (see --help) and submits a job to slurm as
-    afterok dependency.
-    ''')
-parser.add_argument("dependencies",
-                    nargs="*",
-                    help="{{dependencies}} from snakemake")
-parser.add_argument("snakescript", help="Snakemake script")
-parser.add_argument("--sample-config", help="balsamic config sample output")
-parser.add_argument('--slurm-account',
-                    required=True,
-                    help='SLURM account name')
-parser.add_argument('--slurm-qos', default='low', help='SLURM job QOS')
-parser.add_argument('--slurm-mail-type', help='SLURM mail type')
-parser.add_argument('--slurm-mail-user', help='SLURM mail user')
-parser.add_argument("--dir-log", help="Log directory")
-parser.add_argument("--dir-result", help="Result directory")
-parser.add_argument("--dir-script", help="Script directory")
 
-args = parser.parse_args()
-
-class sbatch:
+class SbatchScheduler:
     '''
     Builds sbatch command. Commands map to SLURM sbatch options.
-    
     Params:
     ------
     account         - -A/--account
-    dependency      - 
+    dependency      - {{dependencies}}
     error           - -e/--error
     mail_type       - --mail-type
-    mail_user       - --mail-user 
+    mail_user       - --mail-user
     ntasks          - -n/--ntasks
     output          - -o/--output
-    qos             - -q/--qos 
+    qos             - -q/--qos
     time            - -t/--time
     '''
 
@@ -61,6 +38,7 @@ class sbatch:
         self.time = None
 
     def build_cmd(self):
+        ''' builds sbatch command matching its options '''
         sbatch_options = list()
 
         job_attributes = [
@@ -78,103 +56,157 @@ class sbatch:
 
         return 'sbatch' + ' ' + ' '.join(sbatch_options)
 
-with open(args.sample_config) as f:
-    sample_config = json.load(f)
 
-logpath = args.dir_log
-scriptpath = args.dir_script
-resultpath = args.dir_result
-jobscript = args.snakescript
-job_properties = read_job_properties(jobscript)
+def read_sample_config(input_json):
+    ''' load input sample_config file. Output of balsamic config sample. '''
 
-shutil.copy2(jobscript, scriptpath)
-jobscript = os.path.join(scriptpath, os.path.basename(jobscript))
-log_error = os.path.join(logpath, os.path.basename(jobscript) + "_%j.err")
-log_output = os.path.join(logpath, os.path.basename(jobscript) + "_%j.out")
+    try:
+        with open(input_json) as f:
+            return json.load(f)
+    except:
+        raise ValueError
 
-sacct_file = os.path.join(logpath,
-                          sample_config["analysis"]["sample_id"] + ".sacct")
 
-time = job_properties["cluster"]["time"]
-cpu = job_properties["cluster"]["n"]
+def write_sacct_file(sacct_file, job_id):
+    ''' writes a yaml file with job ids '''
+    try:
+        with open(sacct_file, 'a') as f:
+            f.write(job_id + "\n")
+    except OSError:
+        raise
 
-if not args.slurm_mail_type:
-    mail_type = job_properties["cluster"]["mail_type"]
 
-balsamic_status = os.getenv("BALSAMIC_STATUS", "conda")
-if "BALSAMIC_STATUS" == "container":
-    if "BALSAMIC_BIND_PATH" not in os.environ:
-        raise ValueError(
-            "BALSAMIC_BIND_PATH environment variable was not found")
-    else:
-        bind_path = os.getenv("BALSAMIC_BIND_PATH")
+def write_sbatch_dump(sbatch_file, sbatch_cmd):
+    ''' writes sbatch dump for debuging purpose '''
+    try:
+        with open(sbatch_file, 'a') as f:
+            f.write(sbatch_cmd + "\n")
+            f.write(sys.executable + "\n")
+    except OSError:
+        raise
 
-    if "BALSAMIC_MAIN_ENV" not in os.environ:
-        raise ValueError(
-            "BALSAMIC_MAIN_ENV environment variable was not found")
-    else:
-        main_env = os.getenv("BALSAMIC_MAIN_ENV")
 
-    if "BALSAMIC_CONTAINER" not in os.environ:
-        raise ValueError(
-            "BALSAMIC_CONTAINER environment variable was not found")
-    else:
-        container = os.getenv("BALSAMIC_CONTAINER")
+def submit_job(sbatch_cmd):
+    ''' subprocess call for sbatch command '''
+    # run sbatch cmd
+    try:
+        res = subprocess.run(sbatch_cmd,
+                             check=True,
+                             shell=True,
+                             stdout=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        raise e
 
-    sbatch_script = os.path.join(scriptpath,
-                                 "sbatch." + os.path.basename(jobscript))
+    # Get jobid
+    res = res.stdout.decode()
+    try:
+        m = re.search("Submitted batch job (\d+)", res)
+        jobid = m.group(1)
+        print(jobid)
+        return jobid
+    except Exception as e:
+        print(e)
+        raise
 
-    with open(sbatch_script, 'a') as f:
-        f.write("#!/bin/bash" + "\n")
-        if balsamic_status == "container":
+
+def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
+    ''' write a modified sbatch script based on singularity parameters '''
+    if 'bind_path' not in sample_config['singularity']:
+        raise KeyError("bind_path was not found in sample config.")
+
+    if 'main_env' not in sample_config['singularity']:
+        raise KeyError("main_env was not found in sample config.")
+
+    if 'container_path' not in sample_config['singularity']:
+        raise KeyError("container_path was not found sample config.")
+
+    try:
+        bind_path = sample_config['singularity']['bind_path']
+        main_env = sample_config['singularity']['main_env']
+        container_path = sample_config['singularity']['container_path']
+        with open(sbatch_script, 'a') as f:
+            f.write("#!/bin/bash" + "\n")
             f.write(
-                f"function balsamic_run {{ singularity exec -B {bind_path} --app {main_env} {container} $@; }}"
+                f"function balsamic-run {{ singularity exec -B {bind_path} --app {main_env} {container_path} $@; }}"
                 + "\n")
             f.write(f"# Snakemake original script {jobscript}" + "\n")
-            f.write(f"balsamic_run bash {jobscript}" + "\n")
+            f.write(f"balsamic-run bash {jobscript}" + "\n")
+        sbatch_file = os.path.join(
+            script_dir, sample_config["analysis"]["sample_id"] + ".sbatch")
+        return sbatch_file
+    except OSError:
+        raise
 
-    sbatch_file = os.path.join(
-        logpath, sample_config["analysis"]["sample_id"] + ".sbatch")
 
-sbatch = sbatch_cmd()
-sbatch.account = args.slurm_account
-if args.dependencies:
-    sbatch.dependency = ','.join(["afterok:%s" % d for d in args.dependencies])
-sbatch.error = log_error
-sbatch.output = log_output
-sbatch.mail_type = mail_type
-sbatch.mail_user = args.slurm_mail_user
-sbatch.ntasks = cpu
-sbatch.time = time
+if __name__ == '__main__':
 
-if "BALSAMIC_STATUS" == "container":
-    sbatch.script = sbatch_script
-else:
-    sbatch.script = jobscript
+    parser = argparse.ArgumentParser(description='''
+        This is an internal script and should be invoked independently.
+        This script gets a list of arugments (see --help) and submits a job to slurm as
+        afterok dependency.
+        ''')
+    parser.add_argument("dependencies",
+                        nargs="*",
+                        help="{{dependencies}} from snakemake")
+    parser.add_argument("snakescript", help="Snakemake script")
+    parser.add_argument("--sample-config",
+                        help="balsamic config sample output")
+    parser.add_argument('--slurm-account',
+                        required=True,
+                        help='SLURM account name')
+    parser.add_argument('--slurm-qos', default='low', help='SLURM job QOS')
+    parser.add_argument('--slurm-mail-type', help='SLURM mail type')
+    parser.add_argument('--slurm-mail-user', help='SLURM mail user')
+    parser.add_argument("--log-dir", help="Log directory")
+    parser.add_argument("--result-dir", help="Result directory")
+    parser.add_argument("--script-dir", help="Script directory")
 
-# run sbatch cmd
-try:
-    res = subprocess.run(sbatch.build_cmd(),
-                         check=True,
-                         shell=True,
-                         stdout=subprocess.PIPE)
-except subprocess.CalledProcessError as e:
-    raise e
+    args = parser.parse_args()
+    sbatch_cmd = SbatchScheduler()
 
-# Get jobid
-res = res.stdout.decode()
-try:
-    m = re.search("Submitted batch job (\d+)", res)
-    jobid = m.group(1)
-    print(jobid)
-except Exception as e:
-    print(e)
-    raise
+    jobscript = args.snakescript
+    job_properties = read_job_properties(jobscript)
+    shutil.copy2(jobscript, args.script_dir)
+    jobscript = os.path.join(args.script_dir, os.path.basename(jobscript))
 
-if "BALSAMIC_STATUS" == "container":
-    with open(sbatch_file, 'a') as f:
-        f.write(sbatch.build_cmd() + "\n")
-        f.write(sys.executable + "\n")
+    if not args.slurm_mail_type:
+        mail_type = job_properties["cluster"]["mail_type"]
 
-with open(sacct_file, 'a') as f:
-    f.write(jobid + "\n")
+    sample_config = read_sample_config(input_json=args.sample_config)
+
+    sacct_file = os.path.join(
+        args.log_dir, sample_config["analysis"]["sample_id"] + ".sacct")
+
+    balsamic_run_mode = os.getenv("BALSAMIC_STATUS", "conda")
+    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
+        sbatch_script = os.path.join(args.script_dir,
+                                     "sbatch." + os.path.basename(jobscript))
+        sbatch_file = singularity_param(sample_config=sample_config,
+                                        script_dir=args.script_dir,
+                                        jobscript=jobscript,
+                                        sbatch_script=sbatch_script)
+        jobscript = sbatch_script
+
+    sbatch_cmd.account = args.slurm_account
+    sbatch_cmd.mail_type = mail_type
+    sbatch_cmd.error = os.path.join(args.log_dir,
+                                    os.path.basename(jobscript) + "_%j.err")
+    sbatch_cmd.output = os.path.join(args.log_dir,
+                                     os.path.basename(jobscript) + "_%j.out")
+
+    sbatch_cmd.ntasks = job_properties["cluster"]["n"]
+    sbatch_cmd.time = job_properties["cluster"]["time"]
+    sbatch_cmd.mail_user = args.slurm_mail_user
+    sbatch_cmd.script = jobscript
+
+    if args.dependencies:
+        sbatch_cmd.dependency = ','.join(
+            ["afterok:%s" % d for d in args.dependencies])
+
+    jobid = submit_job(sbatch_cmd=sbatch_cmd.build_cmd())
+
+    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
+        write_sbatch_dump(sbatch_file=sbatch_file,
+                          sbatch_cmd=sbatch_cmd.build_cmd())
+
+    write_sacct_file(sacct_file=sacct_file, job_id=jobid)
