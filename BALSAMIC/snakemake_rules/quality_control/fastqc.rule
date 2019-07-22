@@ -9,8 +9,8 @@ from BALSAMIC.utils.rule import get_conda_env
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule fastqc:
   input:
-    read1 = config["analysis"]["fastq_path"] + "{sample}_1.fastq.gz",
-    read2 = config["analysis"]["fastq_path"] + "{sample}_2.fastq.gz",
+    read1 = fastq_dir + "{sample}_1.fastq.gz",
+    read2 = fastq_dir + "{sample}_2.fastq.gz",
   output:
     read1 = fastqc_dir + "{sample}_1_fastqc.zip",
     read2 = fastqc_dir + "{sample}_2_fastqc.zip"
