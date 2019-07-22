@@ -137,7 +137,8 @@ def get_fastq_path(file, fq_pattern):
         file_basename = os.path.basename(file)
         try:
             # extracting file prefix
-            file_str = file_basename[0:(fq_pattern.search(file_basename).span()[0] + 1)]
+            file_str = file_basename[0:(
+                fq_pattern.search(file_basename).span()[0] + 1)]
         except AttributeError as error:
             LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
             sys.exit()
@@ -159,9 +160,9 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     sample_str, sample_path = get_fastq_path(sample, fq_pattern)
     paths.append(sample_path)
 
-#    if normal:
-#        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
-#        paths.append(normal_path)
+    #    if normal:
+    #        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
+    #        paths.append(normal_path)
 
     fq_files = set()
     for path in paths:
@@ -173,7 +174,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     link_fastq(fq_files, fq_path)
 
     # return file prefix
-    return sample_str 
+    return sample_str
 
 
 @click.command("sample",
@@ -184,8 +185,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 @click.option("-i",
               "--install-config",
               required=False,
-              default=get_config("install"),
-              show_default=True,
               type=click.Path(),
               help="Installation config file.")
 @click.option("-r",
@@ -199,10 +198,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               required=True,
               type=click.Path(),
               help="Panel bed file for variant calling.")
-@click.option("-s",
-              "--sample-config",
-              type=click.Path(),
-              help="Input sample config file.")
 @click.option(
     "-o",
     "--output-config",
@@ -242,13 +237,16 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(context, umi, install_config, sample_config, reference_config,
+def sample(context, umi, install_config, reference_config,
            panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
            overwrite_config, create_dir, fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
     """
+
+    if not install_config:
+        install_config = get_config("install")
 
     analysis_type = get_analysis_type(normal, umi)
     output_config = get_output_config(output_config, sample_id)
@@ -261,10 +259,7 @@ def sample(context, umi, install_config, sample_config, reference_config,
 
     read_prefix = ["1", "2"]
 
-    if sample_config:
-        sample_config_path = os.path.abspath(sample_config)
-    else:
-        sample_config_path = get_config("sample")
+    sample_config_path = get_config("sample")
 
     LOG.info("Reading sample config file %s" % sample_config_path)
 

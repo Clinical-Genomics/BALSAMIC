@@ -10,51 +10,6 @@ from BALSAMIC.commands.config.sample import merge_json, \
     check_exist
 from BALSAMIC.commands.config.sample import configure_fastq, link_fastq
 from BALSAMIC.commands.config.sample import get_fastq_path
-from BALSAMIC.utils.cli import iterdict, write_json, get_config
-
-
-def test_get_config():
-    # GIVEN the config files name
-    config_files = [
-        "sample", "analysis_paired",
-        "analysis_paired_umi", "analysis_single", "analysis_single_umi"
-    ]
-    # WHEN passing file names
-    for config_file in config_files:
-        # THEN return the config files path
-        assert Path(get_config(config_file)).exists()
-
-def test_write_json(tmp_path, config_files):
-    # GIVEN a dict from sample json file (reference.json)
-    ref_json = json.load(open(config_files['reference'], 'r'))
-
-    tmp = tmp_path / "tmp"
-    tmp.mkdir()
-    output_json = tmp / "output.json"
-
-    # WHEN passing dict and file name
-    write_json(ref_json, output_json)
-    output = output_json.read_text()
-
-    # THEN It will create a json file with given dict
-    for key, value in iterdict(ref_json):
-        assert key in output
-        assert value in output
-
-    assert len(list(tmp.iterdir())) == 1
-
-
-def test_write_json_error(tmp_path, config_files):
-    with pytest.raises(Exception, match=r"Is a directory"):
-        # GIVEN a invalid dict
-        ref_json = {"path": "/tmp", "reference": ""}
-        tmp = tmp_path / "tmp"
-        tmp.mkdir()
-        output_json = tmp / "/"
-
-        # WHEN passing a invalid dict
-        # THEN It will raise the error
-        assert write_json(ref_json, output_json)
 
 
 def test_merge_json(config_files):
@@ -178,7 +133,8 @@ def test_get_sample_config(config_files):
 
 def test_configure_fastq(sample_config, tmp_path):
     # GIVEN sample_config, normal and tumor fastq files
-    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
+    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'],
+                             'fastq')
     tumor = os.path.join(fastq_src, 'S1_R_1.fastq.gz')
     fastq_prefix = ''
     fastq_dir = tmp_path / "output"
@@ -194,8 +150,11 @@ def test_configure_fastq(sample_config, tmp_path):
 
 def test_link_fastq(sample_config, tmp_path):
     # GIVEN list of fastq files and destination to create symlink
-    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
-    fastq_files = [os.path.join(fastq_src, file) for file in os.listdir(fastq_src)]
+    fastq_src = os.path.join(sample_config['analysis']['analysis_dir'],
+                             'fastq')
+    fastq_files = [
+        os.path.join(fastq_src, file) for file in os.listdir(fastq_src)
+    ]
     dest_dir = tmp_path / "output"
     dest_dir.mkdir()
 
@@ -209,8 +168,11 @@ def test_link_fastq(sample_config, tmp_path):
 def test_link_fastq_error(sample_config, tmp_path):
     # GIVEN a invalid fastq files list
     with pytest.raises(Exception) as e:
-        fastq_src = os.path.join(sample_config['analysis']['analysis_dir'], 'fastq')
-        fastq_files = [os.path.join(fastq_src, file) for file in os.listdir(fastq_src)]
+        fastq_src = os.path.join(sample_config['analysis']['analysis_dir'],
+                                 'fastq')
+        fastq_files = [
+            os.path.join(fastq_src, file) for file in os.listdir(fastq_src)
+        ]
         dest_dir = tmp_path / "output"
         dest_dir.mkdir()
 
@@ -263,3 +225,49 @@ def test_get_fqpath_mismatch_error(sample_fastq):
         assert exit.type == SystemExit
 
 
+def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
+                                    install_config, invoke_cli):
+    # GIVEN input sample tumor and normal
+    test_sample_name = 'sample_tumor_normal'
+    test_tumor = sample_fastq['tumor']
+    test_normal = sample_fastq['normal']
+    test_panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    test_reference_json = 'tests/test_data/references/reference.json'
+    test_sample_config_file_name = 'test_sample_tumor_normal.json'
+
+    # WHEN invoking cli to create config files
+    result = invoke_cli([
+        'config', 'sample', '-p', test_panel_bed_file, '-i', install_config,
+        '-t',
+        str(test_tumor), '-n',
+        str(test_normal), '--sample-id', test_sample_name, '--analysis-dir',
+        str(analysis_dir), '--output-config', test_sample_config_file_name,
+        '--reference-config', test_reference_json
+    ])
+
+    assert result.exit_code == 0
+    assert Path(analysis_dir / test_sample_name /
+                test_sample_config_file_name).exists()
+
+
+def test_config_sample_missing_install(tmp_path, sample_fastq, analysis_dir,
+                                       invoke_cli):
+    # GIVEN input sample tumor and normal
+    test_sample_name = 'sample_tumor_normal'
+    test_tumor = sample_fastq['tumor']
+    test_normal = sample_fastq['normal']
+    test_panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    test_reference_json = 'tests/test_data/references/reference.json'
+    test_sample_config_file_name = 'test_sample_tumor_normal.json'
+
+
+    # WHEN invoking cli to create config files
+    result = invoke_cli([
+        'config', 'sample', '-p', test_panel_bed_file, '-t',
+        str(test_tumor), '-n',
+        str(test_normal), '--sample-id', test_sample_name,
+        '--analysis-dir',
+        str(analysis_dir), '--output-config', test_sample_config_file_name,
+        '--reference-config', test_reference_json
+    ])
+    assert result.exit_code==1

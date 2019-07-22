@@ -14,4 +14,3 @@ def config(context):
 
 config.add_command(sample_command)
 config.add_command(reference_command)
-

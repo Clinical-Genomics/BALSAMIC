@@ -15,41 +15,82 @@ from BALSAMIC.utils.cli import get_config
 LOG = logging.getLogger(__name__)
 
 
-@click.command("analysis", short_help="Run the analysis on a provided sample config-file")
-@click.option('-a', '--analysis-type', required=False, type=click.Choice(['qc', 'paired',
-              'single', 'paired_umi']), help='Type of analysis to run from input config file.\
+@click.command("analysis",
+               short_help="Run the analysis on a provided sample config-file")
+@click.option('-a',
+              '--analysis-type',
+              required=False,
+              type=click.Choice(['qc', 'paired', 'single', 'paired_umi']),
+              help='Type of analysis to run from input config file.\
               By default it will read from config file, but it will override config file \
               if it is set here.')
-@click.option('-S', '--snake-file', type=click.Path(), show_default=True,
-              help='Input for a custom snakefile. WARNING: This is for internal testing,\
-              and should not be used. Providing a snakefile supersedes analysis_type option.')
-@click.option('-s', '--sample-config', required=True, type=click.Path(),
+@click.option(
+    '-S',
+    '--snake-file',
+    type=click.Path(),
+    show_default=True,
+    help='Input for a custom snakefile. WARNING: This is for internal testing,\
+              and should not be used. Providing a snakefile supersedes analysis_type option.'
+)
+@click.option('-s',
+              '--sample-config',
+              required=True,
+              type=click.Path(),
               help='Sample json config file.')
-@click.option('--run-mode', show_default=True, default='slurm', type=click.Choice(["local",
-              "slurm"]), help='Run mode to use. By default SLURM will be used to run the analysis.\
+@click.option(
+    '--run-mode',
+    show_default=True,
+    default='slurm',
+    type=click.Choice(["local", "slurm"]),
+    help='Run mode to use. By default SLURM will be used to run the analysis.\
               But local runner also available for local computing')
-@click.option('-c', '--cluster-config', show_default=True, default=get_config('cluster'),
-              type=click.Path(), help='SLURM config json file.')
-@click.option('-l', '--log-file', type=click.Path(), help='Log file output for BALSAMIC.\
+@click.option('-c',
+              '--cluster-config',
+              show_default=True,
+              default=get_config('cluster'),
+              type=click.Path(),
+              help='SLURM config json file.')
+@click.option('-l',
+              '--log-file',
+              type=click.Path(),
+              help='Log file output for BALSAMIC.\
               This is raw log output from snakemake.')
-@click.option('-r', '--run-analysis', show_default=True, default=False, is_flag=True,
-              help='By default balsamic run_analysis will run in dry run mode. \
+@click.option(
+    '-r',
+    '--run-analysis',
+    show_default=True,
+    default=False,
+    is_flag=True,
+    help='By default balsamic run_analysis will run in dry run mode. \
               Raise thise flag to make the actual analysis')
-@click.option('--qos', type=click.Choice(['low', 'normal', 'high']), show_default=True,
-              default="low", help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
-@click.option('-f', '--force-all', show_default=True, default=False, is_flag=True,
-              help='Force run all analysis. This is same as snakemake --forceall')
-@click.option('--snakemake-opt', multiple=True, help='Pass these options directly to snakemake')
+@click.option('--qos',
+              type=click.Choice(['low', 'normal', 'high']),
+              show_default=True,
+              default="low",
+              help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
+@click.option(
+    '-f',
+    '--force-all',
+    show_default=True,
+    default=False,
+    is_flag=True,
+    help='Force run all analysis. This is same as snakemake --forceall')
+@click.option('--snakemake-opt',
+              multiple=True,
+              help='Pass these options directly to snakemake')
 @click.option('--slurm-account', help='SLURM account to run jobs')
 @click.option('--slurm-mail-user', help='SLURM mail user to send out email.')
-@click.option('--slurm-mail-type', type=click.Choice(['NONE', 'BEGIN', 'END',
-              'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']), help='SLURM mail type to send out email.\
-              This will be applied to all jobs and override snakemake settings.')
+@click.option(
+    '--slurm-mail-type',
+    type=click.Choice(
+        ['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
+    help='SLURM mail type to send out email.\
+              This will be applied to all jobs and override snakemake settings.'
+)
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
-             run_analysis, log_file, force_all, snakemake_opt,
-             slurm_mail_type, slurm_mail_user, slurm_account,
-             analysis_type, qos):
+             run_analysis, log_file, force_all, snakemake_opt, slurm_mail_type,
+             slurm_mail_user, slurm_account, analysis_type, qos):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
