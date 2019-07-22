@@ -161,6 +161,7 @@ def get_parser():
     parser.add_argument("--result-dir", help="Result directory")
     parser.add_argument("--script-dir", help="Script directory")
 
+    return parser
 
 def main():
     ''' entry point for sbatch.py '''
