@@ -138,8 +138,8 @@ def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
         raise
 
 
-if __name__ == '__main__':
-
+def get_parse():
+    ''' argument parser '''
     parser = argparse.ArgumentParser(description='''
         This is an internal script and should be invoked independently.
         This script gets a list of arugments (see --help) and submits a job to slurm as
@@ -161,7 +161,12 @@ if __name__ == '__main__':
     parser.add_argument("--result-dir", help="Result directory")
     parser.add_argument("--script-dir", help="Script directory")
 
+
+def main():
+    ''' entry point for sbatch.py '''
+    parser = get_parser()
     args = parser.parse_args()
+
     sbatch_cmd = SbatchScheduler()
 
     jobscript = args.snakescript
@@ -210,3 +215,7 @@ if __name__ == '__main__':
                           sbatch_cmd=sbatch_cmd.build_cmd())
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
+
+
+if __name__ == '__main__':
+    main()
