@@ -138,7 +138,7 @@ def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
         raise
 
 
-def get_parse():
+def get_parser():
     ''' argument parser '''
     parser = argparse.ArgumentParser(description='''
         This is an internal script and should be invoked independently.
