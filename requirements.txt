@@ -2,4 +2,5 @@ click
 pyyaml
 yapf
 graphviz
+coloredlogs
 snakemake==5.5.1
