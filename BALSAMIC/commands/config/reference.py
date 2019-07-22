@@ -1,14 +1,19 @@
 #! /usr/bin/env python
 
 import os
-import subprocess
+import sys
+import logging
 import click
+import graphviz
+import snakemake
 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile, get_config
-from BALSAMIC.utils.cli import SnakeMake
+from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.commands.config.sample import merge_json
 from BALSAMIC import __version__ as bv
+
+LOG = logging.getLogger(__name__)
 
 
 @click.command("reference",
@@ -33,7 +38,7 @@ from BALSAMIC import __version__ as bv
               help="snakefile for reference generation")
 @click.option("-d",
               "--dagfile",
-              default="generate_ref_dag.pdf",
+              default="generate_ref_worflow_graph",
               show_default=True,
               help="DAG file for overview")
 @click.option("--singularity",
@@ -64,20 +69,23 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity,
 
     write_json(config, config_json)
 
-    # configure snakemake cmd
-    config_reference = SnakeMake()
-    config_reference.working_dir = outdir
-    config_reference.snakefile = snakefile
-    config_reference.configfile = config_json
+    with CaptureStdout() as graph_dot:
+        snakemake.snakemake(snakefile=snakefile,
+                            dryrun=True,
+                            configfile=config_json,
+                            printrulegraph=True)
 
-    # To create DAG file
-    shell_cmd = [
-        '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
-        '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
-        'Reference', 'generation', 'for', 'BALSAMIC', bv, 'workflow',
-        '\\"\;/g"', '|', 'dot', '-Tpdf', '1>', dagfile_path
-    ]
-
-    cmd = config_reference.build_cmd() + " " + " ".join(shell_cmd)
-    click.echo("Creating workflow DAG image: %s" % dagfile_path)
-    subprocess.run(cmd, shell=True)
+    graph_title = "_".join(['BALSAMIC', bv, 'Generate reference'])
+    graph_dot = "".join(graph_dot).replace(
+        'snakemake_dag {',
+        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+    graph_obj = graphviz.Source(graph_dot,
+                                filename=dagfile_path,
+                                format="pdf",
+                                engine="dot")
+    
+    if graph_obj.render():
+        LOG.info(f'Reference generation workflow configured successfully - {outdir}')
+    else:
+        LOG.error(f'Reference generation workflow configure failed - {outdir}')
+        sys.exit()
