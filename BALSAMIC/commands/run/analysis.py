@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import logging
 import subprocess
 import json
 import click
@@ -9,6 +10,9 @@ from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_sbatchpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
+
+
+LOG = logging.getLogger(__name__)
 
 
 @click.command("analysis",
@@ -92,11 +96,11 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     """
 
     if run_mode == 'slurm' and not run_analysis:
-        click.echo('Changing run-mode to local on dry-run')
+        LOG.info('Changing run-mode to local on dry-run')
         run_mode = 'local'
 
     if run_mode == 'slurm' and not slurm_account:
-        click.echo('slurm account is required for slurm run mode')
+        LOG.info('slurm account is required for slurm run mode')
         raise click.Abort()
 
     sample_config_path = os.path.abspath(sample_config)

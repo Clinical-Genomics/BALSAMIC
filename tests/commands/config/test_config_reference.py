@@ -13,7 +13,7 @@ def test_config_reference_write_json(install_config, invoke_cli, tmp_path):
 
     # WHEN creating config.json in reference dir
     test_output_reference_config = test_new_dir / "config.json"
-    test_output_reference_pdf = test_new_dir / "generate_ref_dag.pdf"
+    test_output_reference_pdf = test_new_dir / "generate_ref_worflow_graph.pdf"
 
     result = invoke_cli([
         'config', 'reference', '-i', install_config, '-c', 'secret_key', '-o',
