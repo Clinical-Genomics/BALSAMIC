@@ -5,6 +5,7 @@ import re
 import json
 import copy
 import glob
+import logging
 import click
 import snakemake
 import graphviz
@@ -20,6 +21,8 @@ from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
+
+LOG = logging.getLogger(__name__)
 
 
 def merge_json(*args):
@@ -121,7 +124,7 @@ def link_fastq(src_files, des_path):
         try:
             os.symlink(src_file, des_file)
         except FileExistsError:
-            print(
+            LOG.warning(
                 f"Desitination file {des_file} exists. No symbolic link was created."
             )
 
@@ -136,9 +139,11 @@ def get_fastq_path(file, fq_pattern):
             file_str = file_basename[0:(
                 fq_pattern.search(file_basename).span()[0] + 1)]
         except AttributeError as error:
-            raise error
+            LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
+            raise click.Abort()
     else:
-        raise Exception(FileNotFoundError)
+        LOG.error(f"{file} is not found, update correct file path")
+        raise click.Abort()
 
     return file_str, os.path.split(file)[0]
 
@@ -153,10 +158,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     # get a list of fq files
     sample_str, sample_path = get_fastq_path(sample, fq_pattern)
     paths.append(sample_path)
-
-    #    if normal:
-    #        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
-    #        paths.append(normal_path)
 
     fq_files = set()
     for path in paths:
@@ -246,8 +247,8 @@ def sample(context, umi, install_config, reference_config,
     output_config = get_output_config(output_config, sample_id)
     analysis_config = get_config("analysis_" + analysis_type)
 
-    click.echo("Reading analysis config file %s" % analysis_config)
-    click.echo("Reading reference config file %s" % reference_config)
+    LOG.info("Reading analysis config file %s" % analysis_config)
+    LOG.info("Reading reference config file %s" % reference_config)
 
     reference_json = get_ref_path(reference_config)
 
@@ -255,7 +256,7 @@ def sample(context, umi, install_config, reference_config,
 
     sample_config_path = get_config("sample")
 
-    click.echo("Reading sample config file %s" % sample_config_path)
+    LOG.info("Reading sample config file %s" % sample_config_path)
 
     analysis_dir = os.path.abspath(analysis_dir)
     sample_config = get_sample_config(sample_config_path, sample_id,
@@ -298,7 +299,7 @@ def sample(context, umi, install_config, reference_config,
     bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)
 
     output_config = os.path.join(output_dir, output_config)
-    click.echo(
+    LOG.info(
         "Writing output config file %s" % os.path.abspath(output_config))
 
     json_out = merge_json(analysis_config, sample_config, reference_json,
@@ -333,4 +334,8 @@ def sample(context, umi, install_config, reference_config,
                                 engine="dot")
     #    graph_obj.attr('graph',label='BALSAMIC')
     #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
-    graph_obj.render()
+    if graph_obj.render():
+        LOG.info(f'BALSAMIC Workflow has been configured successfully !!- {output_config}')
+    else:
+        LOG.error(f'BALSAMIC dag graph generation failed - {dag_image}')
+        raise click.Abort()
