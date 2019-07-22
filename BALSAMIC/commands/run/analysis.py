@@ -152,4 +152,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.run_analysis = run_analysis
     balsamic_run.sm_opt = snakemake_opt
 
-    subprocess.run(balsamic_run.build_cmd(), shell=True)
+    try:
+        subprocess.run(balsamic_run.build_cmd(), shell=True)
+    except:
+        raise 

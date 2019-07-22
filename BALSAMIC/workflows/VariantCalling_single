@@ -12,6 +12,7 @@ shell.prefix("set -eo pipefail; ")
 rule_dir = config["rule_directory"]
 
 bam_dir = get_result_dir(config) + "/bam/"
+fastq_dir = get_result_dir(config) + "/fastq/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
@@ -21,8 +22,8 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
+#include:
+#  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/fastqc.rule"
 include:

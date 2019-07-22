@@ -9,6 +9,7 @@ from BALSAMIC.utils.rule import get_result_dir
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
@@ -19,8 +20,8 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
+#include:
+#  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/fastqc.rule"
 include:
