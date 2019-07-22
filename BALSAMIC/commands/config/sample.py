@@ -339,4 +339,8 @@ def sample(context, umi, install_config, reference_config,
                                 engine="dot")
     #    graph_obj.attr('graph',label='BALSAMIC')
     #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
-    graph_obj.render()
+    if graph_obj.render():
+        LOG.info(f'BALSAMIC Workflow has been configured successfully !!- {output_config}')
+    else:
+        LOG.error(f'BALSAMIC Workflow has been failed to configure - {output_config}')
+        sys.exit()

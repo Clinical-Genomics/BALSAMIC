@@ -2,10 +2,13 @@
 
 import json
 import subprocess
+import logging
 import click
 
 from BALSAMIC.utils.cli import get_sbatchpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake, get_config
+
+LOG = logging.getLogger(__name__)
 
 
 @click.command('reference', short_help="Run the GenerateRef workflow")
@@ -59,7 +62,7 @@ from BALSAMIC.utils.cli import get_snakefile, SnakeMake, get_config
 def reference(context, snakefile, configfile, run_mode, cluster_config,
               log_file, run_analysis, qos, force_all, snakemake_opt):
     """ Run generate reference workflow """
-    click.echo("Reference generation workflow started")
+    LOG.info("Reference generation workflow started")
 
     with open(configfile, "r") as config_fh:
         config = json.load(config_fh)

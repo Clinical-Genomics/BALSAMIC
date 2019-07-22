@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
         SomAtic MutatIons in Cancer""".format(version=__version__))
 def cli(context):
     "BALSAMIC"
-    coloredlogs.install(level='INFO', fmt='%(asctime)s %(hostname)s %(name)s %(levelname)s %(message)s')
+    coloredlogs.install(level='INFO', fmt='[%(hostname)s] %(asctime)s %(levelname)s %(message)s')
     LOG.info("BALSAMIC started with logger !!")
 
 
