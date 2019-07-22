@@ -1,7 +1,9 @@
 """
 Entry cli for balsamic
 """
+import logging
 import click
+import coloredlogs
 
 # Subcommands
 from BALSAMIC.commands.install.install import install as install_command
@@ -14,14 +16,21 @@ from BALSAMIC.utils.cli import add_doc as doc
 # Get version
 from BALSAMIC import __version__
 
+LOG = logging.getLogger(__name__)
+LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+
 
 @click.group()
+@click.option('--loglevel', default='DEBUG', type=click.Choice(LOG_LEVELS),
+              help="Set the level of log output.", show_default=True)
 @click.version_option(version=__version__)
 @click.pass_context
 @doc("""BALSAMIC {version}: Bioinformatic Analysis pipeLine for
         SomAtic MutatIons in Cancer""".format(version=__version__))
-def cli(context):
+def cli(context, loglevel):
     "BALSAMIC"
+    coloredlogs.install(level=loglevel, fmt='[%(hostname)s] %(asctime)s %(levelname)s %(message)s')
+    LOG.info("BALSAMIC started with logger !!")
 
 
 cli.add_command(install_command)
