@@ -337,5 +337,5 @@ def sample(context, umi, install_config, reference_config,
     if graph_obj.render():
         LOG.info(f'BALSAMIC Workflow has been configured successfully !!- {output_config}')
     else:
-        LOG.error(f'BALSAMIC Workflow has been failed to configure - {output_config}')
+        LOG.error(f'BALSAMIC dag graph generation failed - {dag_image}')
         raise click.Abort()
