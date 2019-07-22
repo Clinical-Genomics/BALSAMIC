@@ -4,6 +4,7 @@ import json
 import pytest
 from datetime import datetime
 from pathlib import Path
+import click
 
 from BALSAMIC.commands.config.sample import merge_json, \
     set_panel_bed, get_output_config, get_sample_config, get_analysis_type, \
@@ -200,7 +201,7 @@ def test_get_fastq_path(sample_fastq):
 
 
 def test_get_fastq_path_error(sample_fastq):
-    with pytest.raises(SystemExit) as exit:
+    with pytest.raises(click.Abort):
         # GIVEN a fastq file path, and file pattern
         fastq_prefix = ''
         fastq_file = 'S1_R_1.fastq.gz'
@@ -209,11 +210,10 @@ def test_get_fastq_path_error(sample_fastq):
         # WHEN invoking get fastq path
         # THEN It should return fileprefix and fastq_path
         assert get_fastq_path(fastq_file, fq_pattern)
-        assert exit.type == SystemExit
 
 
 def test_get_fqpath_mismatch_error(sample_fastq):
-    with pytest.raises(SystemExit) as exit:
+    with pytest.raises(click.Abort):
         # GIVEN a fastq file path, and file pattern
         fastq_prefix = ''
         fastq_file = sample_fastq['fastq_invalid']
@@ -222,7 +222,6 @@ def test_get_fqpath_mismatch_error(sample_fastq):
         # WHEN invoking get fastq path
         # THEN It should return fileprefix and fastq_path
         assert get_fastq_path(fastq_file, fq_pattern)
-        assert exit.type == SystemExit
 
 
 def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,

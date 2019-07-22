@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import sys
 import subprocess
 import re
 import json
@@ -141,10 +140,10 @@ def get_fastq_path(file, fq_pattern):
                 fq_pattern.search(file_basename).span()[0] + 1)]
         except AttributeError as error:
             LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
-            sys.exit()
+            raise click.Abort()
     else:
         LOG.error(f"{file} is not found, update correct file path")
-        sys.exit()
+        raise click.Abort()
 
     return file_str, os.path.split(file)[0]
 
@@ -159,10 +158,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     # get a list of fq files
     sample_str, sample_path = get_fastq_path(sample, fq_pattern)
     paths.append(sample_path)
-
-    #    if normal:
-    #        normal_str, normal_path = get_fastq_path(normal, fq_pattern)
-    #        paths.append(normal_path)
 
     fq_files = set()
     for path in paths:
@@ -343,4 +338,4 @@ def sample(context, umi, install_config, reference_config,
         LOG.info(f'BALSAMIC Workflow has been configured successfully !!- {output_config}')
     else:
         LOG.error(f'BALSAMIC Workflow has been failed to configure - {output_config}')
-        sys.exit()
+        raise click.Abort()

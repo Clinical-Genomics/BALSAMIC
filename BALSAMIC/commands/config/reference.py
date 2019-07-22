@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import os
-import sys
 import logging
 import click
 import graphviz
@@ -83,9 +82,9 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity,
                                 filename=dagfile_path,
                                 format="pdf",
                                 engine="dot")
-    
+
     if graph_obj.render():
         LOG.info(f'Reference generation workflow configured successfully - {outdir}')
     else:
-        LOG.error(f'Reference generation workflow configure failed - {outdir}')
-        sys.exit()
+        LOG.error(f'Snakemake DAG graph generation failed - {dagfile_path}')
+        click.Abort()
