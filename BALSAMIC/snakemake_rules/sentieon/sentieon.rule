@@ -25,7 +25,6 @@ rule sentieon_align_sort:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
 alias sentieon={params.sentieon_exec};
-sentieon --version;
 sentieon bwa mem -M -R {params.header} -t {threads} \
 -K 50000000 ${input.ref} {input.read1} {input.read2} \
 | sentieon util sort -o {output.bamout} -t {threads} \
@@ -49,7 +48,6 @@ rule sentieon_dedup:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
 alias sentieon={params.sentieon_exec};
-sentieon --version;
 sentieon driver -t $nt -i {input.bam} --algo LocusCollector --fun score_info {output.score};
 sentieon driver -t $nt -i tumor_sorted.bam --algo Dedup --rmdup --score_info {output.score} --metrics {output.metrics} {output.bam};
     """
@@ -72,7 +70,6 @@ rule sentieon_realign:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
 alias sentieon={params.sentieon_exec};
-sentieon --version;
 sentieon driver -r {input.ref} -t {threads} -i {input.bam} --algo Realigner -k {input.mills} -k {input.highconf} {output} 
     """
 
