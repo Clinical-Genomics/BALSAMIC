@@ -10,8 +10,8 @@ from BALSAMIC.utils.rule import get_conda_env
 rule bwa_mem:
   input:
     fa = config["reference"]["reference_genome"],
-    read1 = cutadapt_dir + "{sample}_1.ca.fastq.gz",
-    read2 = cutadapt_dir + "{sample}_2.ca.fastq.gz",
+    read1 = cutadapt_dir + "{sample}_1.fastq.gz",
+    read2 = cutadapt_dir + "{sample}_2.fastq.gz",
     refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
   output:
     bamout = bam_dir + "{sample}.bam"
