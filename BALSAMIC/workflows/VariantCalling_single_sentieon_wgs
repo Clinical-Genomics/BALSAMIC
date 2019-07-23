@@ -12,7 +12,6 @@ rule_dir = config["rule_directory"]
 fastq_dir = config["analysis"]["fastq_path"]
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
-cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
@@ -24,7 +23,7 @@ SENTIEON_INSTALL_DIR="/home/proj/development/cancer/sentieon/sentieon-genomics-2
 include:
   os.path.join(rule_dir , "snakemake_rules/sentieon/sentieon_align_recall.rule") 
 include:
-  os.path.join(rule_dir , "snakemake_rules/sentieon/sentieon_tn_varcall.rule") 
+  os.path.join(rule_dir , "snakemake_rules/sentieon/sentieon_t_varcall.rule") 
 
 rule all:
   input:
@@ -34,7 +33,6 @@ rule all:
     expand(bam_dir + "{sample}.dedup.realign.recal_data.table", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.recal.csv", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.recal.pdf", sample=config["samples"]),
-    bam_dir + config["analysis"]["sample_id"] + ".corealign.bam",
     expand(vcf_dir + config["analysis"]["sample_id"] + ".{algo}.vcf.gz", algo = ["tnsnv", "tnhaplotyper"])
   output:
     os.path.join(get_result_dir(config), "analysis_finish")

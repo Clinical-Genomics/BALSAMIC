@@ -9,14 +9,15 @@ __author__ = "Sarath Murugan"
 
 # LINKS TO REFERENCE FILES
 # ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/
-reference_genome_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/human_g1k_v37.fasta.gz"
-dbsnp_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz"
-hc_vcf_1kg_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg19/1000G_phase1.snps.high_confidence.hg19.sites.vcf.gz"
-mills_1kg_link = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz"
-vcf_1kg_link = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz"
-cosmicdb_link = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v89/VCF/CosmicCodingMuts.vcf.gz"
-refgene_txt_link = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
-refgene_sql_link = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql"
+reference_genome_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/human_g1k_v37.fasta.gz"
+dbsnp_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz"
+hc_vcf_1kg_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg19/1000G_phase1.snps.high_confidence.hg19.sites.vcf.gz"
+mills_1kg_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz"
+known_indel_1kg_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/1000G_phase1.indels.b37.vcf.gz"
+vcf_1kg_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz"
+cosmicdb_url = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v89/VCF/CosmicCodingMuts.vcf.gz"
+refgene_txt_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
+refgene_sql_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql"
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
@@ -39,11 +40,13 @@ genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
 dbsnp = os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf")
 vcf_1kg = os.path.join(vcf_dir, "1k_genome_wgs_p1_v3_all_sites.vcf")
 hc_vcf_1kg = os.path.join(vcf_dir, "1kg_phase1_snps_high_confidence_b37.vcf")
+known_indel_1kg = os.path.join(vcf_dir, "1kg_known_indels_b37.vcf.gz")
 mills_1kg = os.path.join(vcf_dir, "mills_1kg_index.vcf")
 cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
 
 # list of reference download link and output file name
-ref_list = [(reference_genome_link, reference_genome), (vcf_1kg_link, vcf_1kg), (dbsnp_link, dbsnp), (hc_vcf_1kg_link, hc_vcf_1kg), (mills_1kg_link, mills_1kg)]
+ref_list = [(reference_genome_url, reference_genome), (vcf_1kg_url, vcf_1kg), (dbsnp_url, dbsnp),
+            (hc_vcf_1kg_url,hc_vcf_1kg), (mills_1kg_url, mills_1kg), (known_indel_1kg_url, known_indel_1kg)]
 
 shell.prefix("set -eo pipefail; ")
 
@@ -67,6 +70,7 @@ rule all:
         th_genome_vcf = vcf_1kg + ".gz",
         tg_high_vcf = hc_vcf_1kg + ".gz",
         mills_1kg = mills_1kg + ".gz",
+        known_indel_1kg = mills_1kg + ".gz",
         cosmic_vcf = cosmicdb + ".gz",
         variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
         vep = vep_dir
@@ -84,6 +88,7 @@ rule all:
             "dbsnp": input.dbsnp_vcf,
             "1kg_snps_all": input.th_genome_vcf,
             "1kg_snps_high": input.tg_high_vcf,
+            "1kg_known_indel": input.known_indel_1kg,
             "mills_1kg": input.mills_1kg,
             "cosmic": input.cosmic_vcf,
             "exon_bed": input.refseq_bed,
@@ -115,8 +120,8 @@ rule download_reference:
 
 rule download_refgene:
     params:
-        refgene_txt = refgene_txt_link,
-        refgene_sql = refgene_sql_link,
+        refgene_txt = refgene_txt_url,
+        refgene_sql = refgene_sql_url,
         refgene_sql_awk = get_script_path('refseq_sql.awk'), 
         bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
@@ -142,7 +147,7 @@ rule download_refgene:
 
 rule download_cosmicdb:
     params:
-        cosmic_db = cosmicdb_link,
+        cosmic_db = cosmicdb_url,
         cosmicdb_key = cosmicdb_key,
         conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
