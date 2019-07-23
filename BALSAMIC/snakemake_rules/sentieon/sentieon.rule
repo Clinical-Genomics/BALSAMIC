@@ -24,10 +24,9 @@ rule sentieon_align_sort:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-alias sentieon={params.sentieon_exec};
-sentieon bwa mem -M -R {params.header} -t {threads} \
--K 50000000 ${input.ref} {input.read1} {input.read2} \
-| sentieon util sort -o {output.bamout} -t {threads} \
+{params.sentieon_exec} bwa mem -M -R {params.header} -t {threads} \
+-K 50000000 {input.ref} {input.read1} {input.read2} \
+| {params.sentieon_exec} util sort -o {output.bamout} -t {threads} \
 --block_size 3G --sam2bam -i -
     """
 
@@ -47,9 +46,8 @@ rule sentieon_dedup:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-alias sentieon={params.sentieon_exec};
-sentieon driver -t $nt -i {input.bam} --algo LocusCollector --fun score_info {output.score};
-sentieon driver -t $nt -i tumor_sorted.bam --algo Dedup --rmdup --score_info {output.score} --metrics {output.metrics} {output.bam};
+{params.sentieon_exec} driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.score};
+{params.sentieon_exec} driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.score} --metrics {output.metrics} {output.bam};
     """
 
 rule sentieon_realign:
@@ -69,8 +67,7 @@ rule sentieon_realign:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-alias sentieon={params.sentieon_exec};
-sentieon driver -r {input.ref} -t {threads} -i {input.bam} --algo Realigner -k {input.mills} -k {input.highconf} {output} 
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo Realigner -k {input.mills} -k {input.highconf} {output} 
     """
 
 rule sentieon_base_calibration:
@@ -93,11 +90,10 @@ rule sentieon_base_calibration:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-alias sentieon={params.sentieon_exec};
-sentieon driver -r {input.ref} -t {threads} -i {input.bam} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.highconf} {output.recal_data_table};
-sentieon driver -r {input.ref} -t {threads} -i {input.bam} -q {output.recal_data_table} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.highconf} {output.recal_data_table}.post
-sentieon driver -t {threads} --algo QualCal --plot --before {output.recal_data_table} --after {output.recal_data_table}.post {output.qual_recal}
-sentieon plot QualCal -o {output.qual_recal_plot} {output.qual_recal}
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.highconf} {output.recal_data_table};
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {output.recal_data_table} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.highconf} {output.recal_data_table}.post
+{params.sentieon_exec} driver -t {threads} --algo QualCal --plot --before {output.recal_data_table} --after {output.recal_data_table}.post {output.qual_recal}
+{params.sentieon_exec} plot QualCal -o {output.qual_recal_plot} {output.qual_recal}
     """
 
 rule sentieon_corealign:
@@ -120,9 +116,8 @@ rule sentieon_corealign:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-alias sentieon={params.sentieon_exec};
-sentieon driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} -q {input.recalT} -q {input.recalN} --algo Realigner -k {input.mills} -k {input.highconf} {output.bam}
-    """
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} -q {input.recalT} -q {input.recalN} --algo Realigner -k {input.mills} -k {input.highconf} {output.bam}
+"""
 
 rule sentieon_TNsnv:
   input:
@@ -143,8 +138,7 @@ rule sentieon_TNsnv:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-alias sentieon={params.sentieon_exec};
-sentieon driver -r {input.ref} -t {threads} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
     """
 
 rule sentieon_TNhaplotyper:
@@ -165,6 +159,5 @@ rule sentieon_TNhaplotyper:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-alias sentieon={params.sentieon_exec};
-sentieon driver -r {input.ref} -t {threads} -i {input.bam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} {output.vcf}
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} {output.vcf}
     """
