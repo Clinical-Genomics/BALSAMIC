@@ -273,7 +273,7 @@ rule vep_install:
     shell:
         "source activate {params.conda_env};"
         "vep_install --SPECIES {params.species} "
-          " --AUTO cf "
+          " --AUTO cfp "
           " --ASSEMBLY {params.assembly} "
           " --CACHEDIR {output} "
           " --PLUGINS {params.plugins} "
