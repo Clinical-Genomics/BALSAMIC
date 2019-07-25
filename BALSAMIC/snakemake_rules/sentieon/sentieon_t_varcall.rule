@@ -11,7 +11,7 @@ def get_pon(config):
     if "PON" in config["analysis"]:
         return os.path.abspth(config["analysis"]["PON"])
     else:
-        return ""
+        return None
 
 rule sentieon_TNsnv_tumor_only:
   input:
@@ -19,13 +19,13 @@ rule sentieon_TNsnv_tumor_only:
     recal_data_table = expand(bam_dir + "{mysample}.dedup.realign.recal_data.table", mysample=get_sample_type(config["samples"], "tumor")),
     ref = config["reference"]["reference_genome"],
     dbsnp = config["reference"]["dbsnp"],
-    cosmic = config["reference"]["comic"],
+    cosmic = config["reference"]["cosmic"],
   output:
     vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.vcf.gz",
     stats = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.call_stats",
   params:
     tumor = get_sample_type(config["samples"], "tumor"),
-    pon = " ".join(["--pon", get_pon(config)]), 
+    pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
     sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
     sentieon_lic = SENTIEON_LICENSE, 
   threads: 16
@@ -34,7 +34,7 @@ rule sentieon_TNsnv_tumor_only:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --aglo TNsnv --tumor_sample {params.tumor} -q {input.recal_data.table} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -q {input.recal_data_table} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
     """
 
 rule sentieon_TNhaplotyper_tumor_only:
@@ -43,12 +43,12 @@ rule sentieon_TNhaplotyper_tumor_only:
     recal_data_table = expand(bam_dir + "{mysample}.dedup.realign.recal_data.table", mysample=get_sample_type(config["samples"], "tumor")),
     ref = config["reference"]["reference_genome"],
     dbsnp = config["reference"]["dbsnp"],
-    cosmic = config["reference"]["comic"],
+    cosmic = config["reference"]["cosmic"],
   output:
     vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnhaplotyper.vcf.gz",
   params:
     tumor = get_sample_type(config["samples"], "tumor"),
-    pon = " ".join(["--pon", get_pon(config)]), 
+    pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
     sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
     sentieon_lic = SENTIEON_LICENSE, 
   threads: 16
@@ -57,5 +57,5 @@ rule sentieon_TNhaplotyper_tumor_only:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --aglo TNhaplotyper --tumor_sample {params.tumor} -q {input.recal_data.table} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {input.recal_data_table} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} --call_stats_out {output.vcf} 
     """
