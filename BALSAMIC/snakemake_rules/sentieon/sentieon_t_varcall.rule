@@ -57,5 +57,5 @@ rule sentieon_TNhaplotyper_tumor_only:
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {input.recal_data_table} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} --call_stats_out {output.vcf} 
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {input.recal_data_table} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
     """
