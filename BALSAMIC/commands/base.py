@@ -9,6 +9,7 @@ import coloredlogs
 from BALSAMIC.commands.install.install import install as install_command
 from BALSAMIC.commands.run.base import run as run_command
 from BALSAMIC.commands.config.base import config as config_command
+from BALSAMIC.commands.plugins.base import plugins as plugins_command
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import add_doc as doc
@@ -30,9 +31,10 @@ LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 def cli(context, loglevel):
     "BALSAMIC"
     coloredlogs.install(level=loglevel, fmt='[%(hostname)s] %(asctime)s %(levelname)s %(message)s')
-    LOG.info("BALSAMIC started with logger !!")
+    LOG.info(f"BALSAMIC started with log level {loglevel}.")
 
 
 cli.add_command(install_command)
 cli.add_command(run_command)
 cli.add_command(config_command)
+cli.add_command(plugins_command)
