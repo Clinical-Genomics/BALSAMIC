@@ -8,7 +8,6 @@ import hashlib
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
 
-__author__ = "Sarath Murugan"
 
 # LINKS TO REFERENCE FILES
 # ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/
@@ -46,6 +45,7 @@ hc_vcf_1kg = os.path.join(vcf_dir, "1kg_phase1_snps_high_confidence_b37.vcf")
 known_indel_1kg = os.path.join(vcf_dir, "1kg_known_indels_b37.vcf.gz")
 mills_1kg = os.path.join(vcf_dir, "mills_1kg_index.vcf")
 cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
+check_md5 = os.path.join(basedir, "reference_check.md5")
 
 # list of reference download link and output file name
 ref_list = [(reference_genome_url, reference_genome), (vcf_1kg_url, vcf_1kg), (dbsnp_url, dbsnp),
@@ -62,9 +62,9 @@ def get_md5(filename):
     return hash_md5.hexdigest()
 
 
-def create_md5(reference):
+def create_md5(reference, check_md5):
     """ create a md5 file for all reference data"""
-    with open(basedir + '/reference_check.md5', 'w') as fh:
+    with open(check_md5, 'w') as fh:
         for key, value in reference.items():
             if os.path.isfile(value):
                 fh.write( get_md5(value) + ' ' + value + '\n')
@@ -90,13 +90,14 @@ rule all:
         th_genome_vcf = vcf_1kg + ".gz",
         tg_high_vcf = hc_vcf_1kg + ".gz",
         mills_1kg = mills_1kg + ".gz",
-        known_indel_1kg = mills_1kg + ".gz",
+        known_indel_1kg = known_indel_1kg + ".gz",
         cosmic_vcf = cosmicdb + ".gz",
         variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
         vep = vep_dir
     output:
         finished = os.path.join(basedir,"reference.finished"),
-        reference_json = reference_json
+        reference_json = reference_json,
+        check_md5 = check_md5
     log:
         reference_json + ".log"
     run:
@@ -118,7 +119,7 @@ rule all:
         with open(str(output.reference_json), "w") as fh:
             json.dump(ref_json, fh, indent=4)
 
-        create_md5(ref_json['reference'])
+        create_md5(ref_json['reference'], output.check_md5)
 
         shell("date +'%Y-%M-%d T%T %:z' > {output.finished}") 
 
