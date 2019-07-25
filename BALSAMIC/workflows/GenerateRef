@@ -4,10 +4,13 @@
 
 import os
 import hashlib
+from datetime import date
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
 
+
+current_day = date.today()
 
 # LINKS TO REFERENCE FILES
 # ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/
@@ -25,7 +28,7 @@ refgene_sql_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGe
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
        '1kg_phase1_snps_high_confidence_b37.vcf', 'mills_1kg_index.vcf', 'cosmic_coding_muts_v89.vcf']
 
-basedir = config['output'] + '/GRCh37'
+basedir = os.path.join(config['output'], 'GRCh37')
 genome_dir = basedir + "/genome/"
 vcf_dir = basedir + "/variants/"
 vep_dir = basedir + "/vep/"
@@ -45,7 +48,7 @@ hc_vcf_1kg = os.path.join(vcf_dir, "1kg_phase1_snps_high_confidence_b37.vcf")
 known_indel_1kg = os.path.join(vcf_dir, "1kg_known_indels_b37.vcf.gz")
 mills_1kg = os.path.join(vcf_dir, "mills_1kg_index.vcf")
 cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
-check_md5 = os.path.join(basedir, "reference_check.md5")
+check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
 # list of reference download link and output file name
 ref_list = [(reference_genome_url, reference_genome), (vcf_1kg_url, vcf_1kg), (dbsnp_url, dbsnp),
@@ -118,7 +121,7 @@ rule all:
 
         with open(str(output.reference_json), "w") as fh:
             json.dump(ref_json, fh, indent=4)
-
+        
         create_md5(ref_json['reference'], output.check_md5)
 
         shell("date +'%Y-%M-%d T%T %:z' > {output.finished}") 
