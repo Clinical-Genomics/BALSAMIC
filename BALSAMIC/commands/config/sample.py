@@ -335,7 +335,7 @@ def sample(context, umi, install_config, reference_config,
     #    graph_obj.attr('graph',label='BALSAMIC')
     #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
     if graph_obj.render():
-        LOG.info(f'BALSAMIC Workflow has been configured successfully !!- {output_config}')
+        LOG.info(f'BALSAMIC Workflow has been configured successfully - {output_config}')
     else:
         LOG.error(f'BALSAMIC dag graph generation failed - {dag_image}')
         raise click.Abort()
