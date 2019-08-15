@@ -52,6 +52,29 @@ def test_install(invoke_cli):
     assert result.exit_code == 0
     assert '--input-conda-yaml' in result.output
 
+def test_plugins(invoke_cli):
+    # GIVEN want to see config-sample params with help option
+    # WHEN asking to show params for config-sample
+    result = invoke_cli(['plugins', '--help'])
+
+    # THEN It should show all params reuired for config-sample
+    assert result.exit_code == 0
+
+
+def test_plugins_housekeeper(invoke_cli):
+    # WHEN invoking command with missing options
+    result = invoke_cli(['plugins', 'housekeeper', '--help'])
+
+    # THEN It should throw missiong option error
+    assert result.exit_code == 0
+
+def test_plugins_scout(invoke_cli):
+    # WHEN invoking command with missing options
+    result = invoke_cli(['plugins', 'scout', '--help'])
+
+    # THEN It should throw missiong option error
+    assert result.exit_code == 0
+
 
 def test_install_missing_opt(invoke_cli):
     # WHEN invoking install command with missing option
