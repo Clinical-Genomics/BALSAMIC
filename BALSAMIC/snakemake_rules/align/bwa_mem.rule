@@ -9,10 +9,10 @@ from BALSAMIC.utils.rule import get_conda_env
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule bwa_mem:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    read1 = cutadapt_dir + "{sample}_1.ca.fastq.gz",
-    read2 = cutadapt_dir + "{sample}_2.ca.fastq.gz",
-    refidx = expand(config["path"]["genomefa"] + config["references"]["genomefa"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
+    fa = config["reference"]["reference_genome"],
+    read1 = fastq_dir + "{sample}_1.fastq.gz",
+    read2 = fastq_dir + "{sample}_2.fastq.gz",
+    refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
   output:
     bamout = bam_dir + "{sample}.bam"
   params:

@@ -1,8 +1,27 @@
 import os
+import re
 import json
+import yaml
+import sys
+from io import StringIO
 from pathlib import Path
 from itertools import chain
-import yaml
+
+
+class CaptureStdout(list):
+    '''
+    Captures stdout.
+    '''
+
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio  # free up some memory
+        sys.stdout = self._stdout
 
 
 class SnakeMake:
@@ -17,11 +36,13 @@ class SnakeMake:
                       balsamic-config-sample
     run_mode        - run mode - cluster or local shell run
     cluster_config  - cluster config json file
-    sbatch_py       - slurm command constructor
+    scheduler       - slurm command constructor
     log_path        - log file path
     script_path     - file path for slurm scripts
     result_path     - result directory
     qos             - QOS for sbatch jobs
+    account         - scheduler(e.g. slurm) account
+    mail_user       - email to account to send job run status
     forceall        - To add '--forceall' option for snakemake
     run_analysis    - To run pipeline
     sm_opt          - snakemake additional options
@@ -34,11 +55,14 @@ class SnakeMake:
         self.configfile = None
         self.run_mode = None
         self.cluster_config = None
-        self.sbatch_py = None
+        self.scheduler = None
         self.log_path = None
         self.script_path = None
         self.result_path = None
         self.qos = None
+        self.account = None
+        self.mail_type = None
+        self.mail_user = None
         self.forceall = False
         self.run_analysis = False
         self.sm_opt = None
@@ -59,14 +83,24 @@ class SnakeMake:
             dryrun = " --dryrun "
 
         if self.run_mode == 'slurm':
-            sbatch_cmd = " 'python3 {} ".format(self.sbatch_py) + \
+            sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
                 " --sample-config " + self.configfile + \
-                " --qos " + self.qos + " --dir-log " + self.log_path + \
-                " --dir-script " + self.script_path + \
-                " --dir-result " + self.result_path + " {dependencies} '"
+                " --slurm-account " + self.account + \
+                " --slurm-qos " + self.qos + \
+                " --log-dir " + self.log_path + \
+                " --script-dir " + self.script_path + \
+                " --result-dir " + self.result_path
+
+            if self.mail_user:
+                sbatch_cmd += " --slurm-mail-user " + self.mail_user
+
+            if self.mail_type:
+                sbatch_cmd += " --slurm-mail-type " + self.mail_type
+
+            sbatch_cmd += " {dependencies} '"
 
             cluster_cmd = " --immediate-submit -j 300 " + \
-                " --jobname " + self.sample_name + ".{rulename}.{jobid}.sh" + \
+                " --jobname BALSAMIC." + self.sample_name + ".{rulename}.{jobid}.sh" + \
                 " --cluster-config " + self.cluster_config + \
                 " --cluster " + sbatch_cmd
 
@@ -109,10 +143,10 @@ def createDir(path, interm_path=[]):
                                       str(basepath_number)]))
         interm_path.append(path)
         createDir(path, interm_path)
-        return interm_path[-1]
+        return os.path.abspath(interm_path[-1])
     else:
         os.makedirs(os.path.abspath(path), exist_ok=True)
-        return interm_path[-1]
+        return os.path.abspath(path)
 
 
 def get_packages(yaml_file):
@@ -153,26 +187,12 @@ def get_package_split(condas):
         "sambamba", "strelka", "samtools", "tabix", "vardic"
     ]
 
-    pkgs = dict([[y.split("=")[0], y.split("=")[1]]
-                for y in set(chain.from_iterable([get_packages(s) for s in condas]))
-                if y.split("=")[0] in pkgs])
+    pkgs = dict(
+        [[y.split("=")[0], y.split("=")[1]]
+         for y in set(chain.from_iterable([get_packages(s) for s in condas]))
+         if y.split("=")[0] in pkgs])
 
     return (pkgs)
-
-
-def get_ref_path(reference_config):
-    """
-    Set full path to reference files
-
-    Input: reference config file
-    Return: json file with abspath
-    """
-    with open(reference_config) as fh:
-        ref_json = json.load(fh)
-        for k, v in ref_json['path'].items():
-            ref_json['path'][k] = os.path.abspath(v) + '/'
-
-    return ref_json
 
 
 def iterdict(dic):
@@ -190,7 +210,7 @@ def get_sbatchpy():
     """
 
     p = Path(__file__).parents[1]
-    sbatch = str(Path(p, 'commands/run/runSbatch.py'))
+    sbatch = str(Path(p, 'commands/run/sbatch.py'))
 
     return sbatch
 
@@ -224,5 +244,21 @@ def get_config(config_name):
 
     p = Path(__file__).parents[1]
     config_file = str(Path(p, 'config', config_name + ".json"))
+    if Path(config_file).exists():
+        return config_file
+    else:
+        raise FileNotFoundError(f'Config for {config_name} was not found.')
 
-    return config_file
+
+def get_ref_path(input_json):
+    """
+    Set full path to reference files
+    Input: reference config file
+    Return: json file with abspath
+    """
+    with open(input_json) as fh:
+        ref_json = json.load(fh)
+        for k, v in ref_json['reference'].items():
+            ref_json['reference'][k] = os.path.abspath(v)
+
+    return ref_json

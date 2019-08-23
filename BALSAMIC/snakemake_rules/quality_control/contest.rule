@@ -11,7 +11,7 @@ rule GATK_contest:
   input:
     bamN = bam_dir + "normal.merged.bam",
     bamT = bam_dir + "tumor.merged.bam",
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     popvcf = result_dir + "popvcf.vcf", 
   output:
     N_vs_T = bam_dir + "normal_tumor.contest", 

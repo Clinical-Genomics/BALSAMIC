@@ -1,0 +1,163 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.utils.rule import get_conda_env, get_sample_type
+
+# Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
+rule sentieon_align_sort:
+  input:
+    ref = config["reference"]["reference_genome"],
+    read1 = fastq_dir + "{sample}_1.fastq.gz",
+    read2 = fastq_dir  + "{sample}_2.fastq.gz",
+    refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
+  output:
+    bamout = bam_dir + "{sample}.bam"
+  params:
+    header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+    sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+    sentieon_lic = SENTIEON_LICENSE, 
+  threads: 16
+  log:
+    bam_dir + "{sample}.bam.log"
+  shell:
+    """
+export SENTIEON_LICENSE={params.sentieon_lic};
+{params.sentieon_exec} bwa mem -M -R {params.header} -t {threads} \
+-K 50000000 {input.ref} {input.read1} {input.read2} \
+| {params.sentieon_exec} util sort -o {output.bamout} -t {threads} \
+--block_size 3G --sam2bam -i -
+    """
+
+rule sentieon_dedup:
+  input:
+    bam = bam_dir + "{sample}.bam",
+  output:
+    bam = bam_dir + "{sample}.dedup.bam",
+    score = bam_dir + "{sample}.dedup.score",
+    metrics = bam_dir + "{sample}.dedup.metrics"
+  params:
+    sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+    sentieon_lic = SENTIEON_LICENSE, 
+  threads: 16
+  log:
+    bam_dir + "{sample}.dedup.bam.log"
+  shell:
+    """
+export SENTIEON_LICENSE={params.sentieon_lic};
+{params.sentieon_exec} driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.score};
+{params.sentieon_exec} driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.score} --metrics {output.metrics} {output.bam};
+    """
+
+rule sentieon_realign:
+  input:
+    ref = config["reference"]["reference_genome"],
+    mills = config["reference"]["mills_1kg"],
+    highconf = config["reference"]["1kg_snps_high"],
+    bam = bam_dir + "{sample}.dedup.bam",
+  output:
+    bam = bam_dir + "{sample}.dedup.realign.bam",
+  params:
+    sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+    sentieon_lic = SENTIEON_LICENSE, 
+  threads: 16
+  log:
+    bam_dir + "{sample}.dedup.realign.bam.log"
+  shell:
+    """
+export SENTIEON_LICENSE={params.sentieon_lic};
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo Realigner -k {input.mills} -k {input.highconf} {output} 
+    """
+
+rule sentieon_base_calibration:
+  input:
+    ref = config["reference"]["reference_genome"],
+    mills = config["reference"]["mills_1kg"],
+    highconf = config["reference"]["1kg_snps_high"],
+    dbsnp = config["reference"]["dbsnp"],
+    bam = bam_dir + "{sample}.dedup.realign.bam",
+  output:
+    recal_data_table = bam_dir + "{sample}.dedup.realign.recal_data.table",
+    qual_recal = bam_dir + "{sample}.dedup.realign.recal.csv",
+    qual_recal_plot = bam_dir + "{sample}.dedup.realign.recal.pdf",
+  params:
+    sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+    sentieon_lic = SENTIEON_LICENSE, 
+  threads: 16
+  log:
+    bam_dir + "{sample}.dedup.realign.recal.log"
+  shell:
+    """
+export SENTIEON_LICENSE={params.sentieon_lic};
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.highconf} {output.recal_data_table};
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {output.recal_data_table} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.highconf} {output.recal_data_table}.post
+{params.sentieon_exec} driver -t {threads} --algo QualCal --plot --before {output.recal_data_table} --after {output.recal_data_table}.post {output.qual_recal}
+{params.sentieon_exec} plot QualCal -o {output.qual_recal_plot} {output.qual_recal}
+    """
+
+rule sentieon_corealign:
+  input:
+    ref = config["reference"]["reference_genome"],
+    bamT = expand(bam_dir + "{mysample}.dedup.realign.bam", mysample=get_sample_type(config["samples"], "tumor")),
+    bamN = expand(bam_dir + "{mysample}.dedup.realign.bam", mysample=get_sample_type(config["samples"], "normal")),
+    recalT = expand(bam_dir + "{mysample}.dedup.realign.recal_data.table", mysample=get_sample_type(config["samples"], "tumor")),
+    recalN = expand(bam_dir + "{mysample}.dedup.realign.recal_data.table", mysample=get_sample_type(config["samples"], "normal")),
+    mills = config["reference"]["mills_1kg"],
+    highconf = config["reference"]["1kg_snps_high"],
+  output:
+    bam = bam_dir + config["analysis"]["sample_id"] + ".corealign.bam"
+  params:
+    sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+    sentieon_lic = SENTIEON_LICENSE, 
+  threads: 16
+  log:
+    bam_dir + config["analysis"]["sample_id"] + ".corealign.log"
+  shell:
+    """
+export SENTIEON_LICENSE={params.sentieon_lic};
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} -q {input.recalT} -q {input.recalN} --algo Realigner -k {input.mills} -k {input.highconf} {output.bam}
+"""
+
+rule sentieon_TNsnv:
+  input:
+    bam = bam_dir + config["analysis"]["sample_id"] + ".corealign.bam",
+    ref = config["reference"]["reference_genome"],
+    dbsnp = config["reference"]["dbsnp"],
+  output:
+    vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.vcf.gz",
+    stats = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.call_stats",
+  params:
+    tumor = get_sample_type(config["samples"], "tumor"),
+    normal = get_sample_type(config["samples"], "normal"),
+    sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+    sentieon_lic = SENTIEON_LICENSE, 
+  threads: 16
+  log:
+    bam_dir + config["analysis"]["sample_id"] + ".tnsnv.log"
+  shell:
+    """
+export SENTIEON_LICENSE={params.sentieon_lic};
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
+    """
+
+rule sentieon_TNhaplotyper:
+  input:
+    bam = bam_dir + config["analysis"]["sample_id"] + ".corealign.bam",
+    ref = config["reference"]["reference_genome"],
+    dbsnp = config["reference"]["dbsnp"],
+  output:
+    vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnhaplotyper.vcf.gz",
+  params:
+    tumor = get_sample_type(config["samples"], "tumor"),
+    normal = get_sample_type(config["samples"], "normal"),
+    sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+    sentieon_lic = SENTIEON_LICENSE, 
+  threads: 16
+  log:
+    bam_dir + config["analysis"]["sample_id"] + ".tnsnv.log"
+  shell:
+    """
+export SENTIEON_LICENSE={params.sentieon_lic};
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} {output.vcf}
+    """

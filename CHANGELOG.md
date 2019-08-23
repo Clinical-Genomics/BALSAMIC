@@ -8,6 +8,31 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [3.0.0] - 2019-07-12
+This is major release.
+TL;DR:
+- Major changes to CLI. See documentation for updates.
+- New additions to reference generation and reference config file generation and complete overhaul
+- Major changes to reposityory structure, conda environments.
+- Addition of containers and running jobs on SLURM using container only.
+
+### Added
+- Creating and downloading reference files: `balsamic config reference` and `balsamic run reference`
+- Container definitions for install and running BALSAMIC
+- Bunch of tests, setup coveralls and travis. 
+
+### Fixed
+- Multiple fixes to snakemake rules 
+
+### Changed
+- Running analysis through: `balsamic run analysis`
+- Cluster account and email info added to `balsamic run analysis`
+- `umi` workflow through `--umi` tag. [workflow still in evaluation]
+
+### Removed
+- `balsamic config report` and `balsamic report`
+- `sample.config` and `reference.json` from config directory
+
 ## [2.9.8] - 2019-01-01
 ### Fixed
 - picard hsmetrics now has 50000 cov max

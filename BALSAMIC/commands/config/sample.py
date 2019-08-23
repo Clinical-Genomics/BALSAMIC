@@ -5,14 +5,24 @@ import re
 import json
 import copy
 import glob
+import logging
+import click
+import snakemake
+import graphviz
 from datetime import datetime
 from pathlib import Path
-import click
 from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.utils.cli import get_package_split, get_ref_path, write_json, get_config
+from BALSAMIC.utils.cli import get_package_split
+from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import get_config
+from BALSAMIC.utils.cli import get_ref_path
+from BALSAMIC.utils.cli import get_snakefile
+from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC import __version__ as bv
+
+LOG = logging.getLogger(__name__)
 
 
 def merge_json(*args):
@@ -42,11 +52,8 @@ def set_panel_bed(json_out, panel_bed):
     Set panel path in config file
     """
     try:
-        json_out["path"]["panel"] = os.path.split(
-            os.path.abspath(panel_bed))[0] + "/"
-        json_out["bed"]["capture_kit"] = os.path.split(
-            os.path.abspath(panel_bed))[1]
-        json_out["bed"]["chrom"] = get_chrom(panel_bed)
+        json_out["panel"] = {"capture_kit": os.path.abspath(panel_bed)}
+        json_out["panel"]["chrom"] = get_chrom(panel_bed)
 
     except OSError as error:
         raise error
@@ -100,45 +107,69 @@ def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
     sample_config["analysis"]["script"] = os.path.join(analysis_dir, sample_id,
                                                        'scripts/')
     sample_config["analysis"]["result"] = os.path.join(analysis_dir, sample_id,
-                                                       'analysis/')
+                                                       'analysis')
     sample_config["analysis"]["analysis_type"] = analysis_type
     sample_config["samples"] = {}
 
     return sample_config
 
 
-def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
-               fq_prefix):
+def link_fastq(src_files, des_path):
     """
-    Links fastq files inside the analysis directory
+    Creating fastq symlinks in given destination
     """
-
-    # It is assumed that the format of input fastq files is: samplename_R_{1,2}.fastq.gz
-    # This is hardcoded and should be changed when going in production.
-    src_fq = [
-        os.path.join(src_path, sample_name + "_" + r + fq_prefix + ".fastq.gz")
-        for r in read_prefix
-    ]
-
-    # The output fastq files will be: samplename_R_{1,2}.fastq.gz
-    dst_fq = [
-        os.path.join(dst_path, sample_name + "_" + r + ".fastq.gz")
-        for r in read_prefix
-    ]
-
-    for s, d in zip(src_fq, dst_fq):
-        if check_fastq:
-            check_exist(s)
-
+    for src_file in src_files:
+        basename = os.path.basename(src_file)
+        des_file = os.path.join(des_path, basename)
         try:
+            os.symlink(src_file, des_file)
+        except FileExistsError:
+            LOG.warning(
+                f"Desitination file {des_file} exists. No symbolic link was created."
+            )
 
-            subprocess.check_output(["ln", "-s", s, d],
-                                    stderr=subprocess.STDOUT)
 
-        except subprocess.CalledProcessError as e:
-            print(
-                f"Desitination file {d} exists. No symbolic link was created.")
-            print(e.output.decode())
+def get_fastq_path(file, fq_pattern):
+    # check the fastq if exists
+    file = os.path.abspath(file)
+    if Path(file).exists():
+        file_basename = os.path.basename(file)
+        try:
+            # extracting file prefix
+            file_str = file_basename[0:(
+                fq_pattern.search(file_basename).span()[0] + 1)]
+        except AttributeError as error:
+            LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
+            raise click.Abort()
+    else:
+        LOG.error(f"{file} is not found, update correct file path")
+        raise click.Abort()
+
+    return file_str, os.path.split(file)[0]
+
+
+def configure_fastq(fq_path, sample, fastq_prefix):
+    """
+    Configure the fastq files for analysis
+    """
+    fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
+    paths = list()
+
+    # get a list of fq files
+    sample_str, sample_path = get_fastq_path(sample, fq_pattern)
+    paths.append(sample_path)
+
+    fq_files = set()
+    for path in paths:
+        for file in os.listdir(path):
+            if fq_pattern.search(file):
+                fq_files.add(os.path.join(path, file))
+
+    # create symlink
+    link_fastq(fq_files, fq_path)
+
+    # return file prefix
+    return sample_str
 
 
 @click.command("sample",
@@ -146,137 +177,86 @@ def link_fastq(src_path, dst_path, sample_name, read_prefix, check_fastq,
 @click.option('--umi',
               is_flag=True,
               help="UMI processing steps for samples with umi tags")
-@click.option(
-    "-i",
-    "--install-config",
-    required=False,
-    default=get_config("install"),
-    show_default=True,
-    type=click.Path(),
-    help="Installation config file.",
-)
-@click.option(
-    "-r",
-    "--reference-config",
-    required=False,
-    default=get_config("reference"),
-    show_default=True,
-    type=click.Path(),
-    help="Reference config file.",
-)
-@click.option(
-    "-p",
-    "--panel-bed",
-    required=True,
-    type=click.Path(),
-    help="Panel bed file for variant calling.",
-)
-@click.option("-s",
-              "--sample-config",
+@click.option("-i",
+              "--install-config",
+              required=False,
               type=click.Path(),
-              help="Input sample config file.")
+              help="Installation config file.")
+@click.option("-r",
+              "--reference-config",
+              required=True,
+              show_default=True,
+              type=click.Path(),
+              help="Reference config file.")
+@click.option("-p",
+              "--panel-bed",
+              required=True,
+              type=click.Path(),
+              help="Panel bed file for variant calling.")
 @click.option(
     "-o",
     "--output-config",
     required=False,
-    help="Output a json config filename ready to be imported for run-analysis",
-)
+    help="Output a json config filename ready to be imported for run-analysis")
 @click.option(
     "-t",
     "--tumor",
     required=True,
-    help=
-    "Fastq files for tumor sample. Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, the input should be --tumor tumor_fqreads",
+    help="Fastq files for tumor sample. \
+              Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, \
+              the input should be --tumor tumor_fqreads",
 )
-@click.option(
-    "-n",
-    "--normal",
-    help=
-    "Fastq files for normal sample. Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, the input should be --normal normal_fqreads",
-)
-@click.option(
-    "--sample-id",
-    required=True,
-    help=
-    "Sample id that is used for reporting, naming the analysis jobs, and analysis path",
-)
-@click.option(
-    "--fastq-prefix",
-    required=False,
-    default="",
-    help="Prefix to fastq file. The string that comes after readprefix",
-)
-@click.option(
-    "--analysis-dir",
-    type=click.Path(),
-    help=
-    "Root analysis path to store analysis logs and results. The final path will be analysis-dir/sample-id",
-)
-@click.option(
-    "--fastq-path",
-    type=click.Path(),
-    help=
-    "Path for fastq files. All fastq files should be within same path and that path has to exist.",
-)
-@click.option(
-    "--check-fastq/--no-check-fastq",
-    default=True,
-    show_default=True,
-    help=
-    "Check if fastq input files exist. An internal check, so it's recommended not to change it.",
-)
-@click.option(
-    "--overwrite-config/--no-overwrite-config",
-    default=True,
-    help="Overwrite output config file",
-)
+@click.option("-n",
+              "--normal",
+              help="Fastq files for normal sample. \
+              Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, \
+              the input should be --normal normal_fqreads")
+@click.option("--sample-id",
+              required=True,
+              help="Sample id that is used for reporting, \
+              naming the analysis jobs, and analysis path")
+@click.option("--fastq-prefix",
+              required=False,
+              default="",
+              help="Prefix to fastq file. \
+              The string that comes after readprefix")
+@click.option("--analysis-dir",
+              type=click.Path(),
+              help="Root analysis path to store \
+              analysis logs and results. The final path will be analysis-dir/sample-id"
+              )
+@click.option("--overwrite-config/--no-overwrite-config",
+              default=True,
+              help="Overwrite output config file")
 @click.option("--create-dir/--no-create-dir",
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(
-        context,
-        umi,
-        install_config,
-        sample_config,
-        reference_config,
-        panel_bed,
-        output_config,
-        normal,
-        tumor,
-        sample_id,
-        analysis_dir,
-        fastq_path,
-        check_fastq,
-        overwrite_config,
-        create_dir,
-        fastq_prefix,
-):
+def sample(context, umi, install_config, reference_config,
+           panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
+           overwrite_config, create_dir, fastq_prefix):
     """
-    Prepares a config file for balsamic run_analysis. For now it is just treating json as dictionary and merging them as
-it is. So this is just a placeholder for future.
+    Prepares a config file for balsamic run_analysis. For now it is just treating json as
+    dictionary and merging them as it is. So this is just a placeholder for future.
+    """
 
-    """
+    if not install_config:
+        install_config = get_config("install")
 
     analysis_type = get_analysis_type(normal, umi)
-
     output_config = get_output_config(output_config, sample_id)
-
     analysis_config = get_config("analysis_" + analysis_type)
 
-    click.echo("Reading analysis config file %s" % analysis_config)
-    click.echo("Reading reference config file %s" % reference_config)
+    LOG.info("Reading analysis config file %s" % analysis_config)
+    LOG.info("Reading reference config file %s" % reference_config)
 
     reference_json = get_ref_path(reference_config)
 
     read_prefix = ["1", "2"]
 
-    if sample_config:
-        sample_config_path = os.path.abspath(sample_config)
-    else:
-        sample_config_path = get_config("sample")
+    sample_config_path = get_config("sample")
 
-    click.echo("Reading sample config file %s" % sample_config_path)
+    LOG.info("Reading sample config file %s" % sample_config_path)
 
     analysis_dir = os.path.abspath(analysis_dir)
     sample_config = get_sample_config(sample_config_path, sample_id,
@@ -287,73 +267,13 @@ it is. So this is just a placeholder for future.
     if create_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    # Update fastq_path
-    if fastq_path:
-        if os.path.isdir(output_dir) and os.path.exists(output_dir):
-            os.makedirs(os.path.join(output_dir, "fastq"), exist_ok=True)
+    # create dir for fastq symlink creation
+    fq_path = os.path.join(output_dir, 'analysis', 'fastq')
+    os.makedirs(fq_path, exist_ok=True)
 
-        tumor_path = copy.deepcopy(os.path.abspath(fastq_path))
-        if normal:
-            normal_path = copy.deepcopy(os.path.abspath(fastq_path))
-
-        fastq_path = os.path.join(output_dir, "fastq")
-
-        link_fastq(
-            os.path.abspath(tumor_path),
-            os.path.abspath(fastq_path),
-            tumor,
-            read_prefix,
-            check_fastq,
-            fastq_prefix,
-        )
-
-        if normal:
-
-            link_fastq(
-                os.path.abspath(normal_path),
-                os.path.abspath(fastq_path),
-                normal,
-                read_prefix,
-                check_fastq,
-                fastq_prefix,
-            )
-
-    else:
-        fastq_path = os.path.join(output_dir, "fastq")
-
-        if os.path.exists(output_dir) and not os.path.exists(fastq_path):
-            os.makedirs(os.path.join(output_dir, "fastq"), exist_ok=True)
-
-        tumor_path = os.path.dirname(os.path.abspath(tumor))
-        tumor = os.path.basename(tumor)
-        m = re.search(r"R_[12]" + fastq_prefix + ".fastq.gz$", tumor)
-        if m is not None:
-            tumor = tumor[0:(m.span()[0] + 1)]
-
-        link_fastq(
-            os.path.abspath(tumor_path),
-            os.path.abspath(fastq_path),
-            tumor,
-            read_prefix,
-            check_fastq,
-            fastq_prefix,
-        )
-
-        if normal:
-            normal_path = os.path.dirname(os.path.abspath(normal))
-            normal = os.path.basename(normal)
-            m = re.search(r"R_[12]" + fastq_prefix + ".fastq.gz$", normal)
-            if m is not None:
-                normal = normal[0:(m.span()[0] + 1)]
-
-            link_fastq(
-                os.path.abspath(normal_path),
-                os.path.abspath(fastq_path),
-                normal,
-                read_prefix,
-                check_fastq,
-                fastq_prefix,
-            )
+    tumor = configure_fastq(fq_path, tumor, fastq_prefix)
+    if normal:
+        normal = configure_fastq(fq_path, normal, fastq_prefix)
 
     sample_config["samples"][tumor] = {
         "file_prefix": tumor,
@@ -368,7 +288,7 @@ it is. So this is just a placeholder for future.
             "readpair_suffix": read_prefix,
         }
 
-    sample_config["analysis"]["fastq_path"] = os.path.abspath(fastq_path) + "/"
+    sample_config["analysis"]["fastq_path"] = fq_path + "/"
     sample_config["analysis"]["BALSAMIC_version"] = bv
 
     conda_env = glob.glob(
@@ -379,16 +299,16 @@ it is. So this is just a placeholder for future.
     bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)
 
     output_config = os.path.join(output_dir, output_config)
-    click.echo("Writing output config file %s" %
-               os.path.abspath(output_config))
+    LOG.info(
+        "Writing output config file %s" % os.path.abspath(output_config))
 
     json_out = merge_json(analysis_config, sample_config, reference_json,
                           install_config, bioinfo_config)
 
     dag_image = os.path.join(output_dir,
-                             output_config + '_BALSAMIC_' + bv + '_graph.pdf')
+                             output_config + '_BALSAMIC_' + bv + '_graph')
 
-    json_out["analysis"]["dag"] = dag_image
+    json_out["analysis"]["dag"] = dag_image + ".pdf"
 
     if panel_bed:
         json_out = set_panel_bed(json_out, panel_bed)
@@ -398,14 +318,24 @@ it is. So this is just a placeholder for future.
 
     FormatFile(output_config, in_place=True)
 
-    shellcmd = ([
-        'balsamic', 'run', '-s', output_config, '--snakemake-opt',
-        '"--rulegraph"', "|", "sed", '"s/digraph', 'snakemake_dag',
-        '{/digraph', 'BALSAMIC', '{', 'labelloc=\\"t\\"\;', 'label=\\"Title:',
-        'BALSAMIC', bv, 'workflow', 'for', 'sample:',
-        json_out["analysis"]["sample_id"], '\\"\;/g"', '|', 'dot', '-Tpdf',
-        '1>', dag_image
-    ])
+    with CaptureStdout() as graph_dot:
+        snakemake.snakemake(snakefile=get_snakefile(analysis_type),
+                            dryrun=True,
+                            configfile=output_config,
+                            printrulegraph=True)
 
-    click.echo("Creating workflow dag image file: %s" % dag_image)
-    subprocess.run(" ".join(shellcmd), shell=True)
+    graph_title = "_".join(['BALSAMIC', bv, json_out["analysis"]["sample_id"]])
+    graph_dot = "".join(graph_dot).replace(
+        'snakemake_dag {',
+        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+    graph_obj = graphviz.Source(graph_dot,
+                                filename=dag_image,
+                                format="pdf",
+                                engine="dot")
+    #    graph_obj.attr('graph',label='BALSAMIC')
+    #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
+    if graph_obj.render():
+        LOG.info(f'BALSAMIC Workflow has been configured successfully - {output_config}')
+    else:
+        LOG.error(f'BALSAMIC dag graph generation failed - {dag_image}')
+        raise click.Abort()

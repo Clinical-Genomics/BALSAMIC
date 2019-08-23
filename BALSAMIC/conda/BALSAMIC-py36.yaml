@@ -17,9 +17,10 @@ dependencies:
   - fgbio=0.8.0
   - freebayes=1.2.0
   - vardict=2019.06.04=pl526_0
-  - vardict-java=1.6.0=0
   - ensembl-vep=94.5
   - cnvkit=0.9.4a0
   - cutadapt=1.15
   - pindel=0.2.5b9
   - multiqc=1.7 
+  - bedtools=2.28.0
+  - csvkit=1.0.4

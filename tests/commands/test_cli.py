@@ -1,4 +1,10 @@
+import pytest
+import glob
+from pathlib import Path
+from click.testing import CliRunner
+
 import BALSAMIC
+from BALSAMIC.commands.base import cli
 
 
 def test_cli(invoke_cli):
@@ -45,6 +51,29 @@ def test_install(invoke_cli):
     # THEN It should list all the params without error
     assert result.exit_code == 0
     assert '--input-conda-yaml' in result.output
+
+def test_plugins(invoke_cli):
+    # GIVEN want to see config-sample params with help option
+    # WHEN asking to show params for config-sample
+    result = invoke_cli(['plugins', '--help'])
+
+    # THEN It should show all params reuired for config-sample
+    assert result.exit_code == 0
+
+
+def test_plugins_housekeeper(invoke_cli):
+    # WHEN invoking command with missing options
+    result = invoke_cli(['plugins', 'housekeeper', '--help'])
+
+    # THEN It should throw missiong option error
+    assert result.exit_code == 0
+
+def test_plugins_scout(invoke_cli):
+    # WHEN invoking command with missing options
+    result = invoke_cli(['plugins', 'scout', '--help'])
+
+    # THEN It should throw missiong option error
+    assert result.exit_code == 0
 
 
 def test_install_missing_opt(invoke_cli):
@@ -116,6 +145,7 @@ def test_run_reference(invoke_cli):
     assert "--run-mode" in result.output
     assert "--cluster-config" in result.output
     assert "--run-analysis" in result.output
+    assert result.exit_code == 0
 
 
 def test_run_ref_invalid(invoke_cli):
@@ -125,4 +155,6 @@ def test_run_ref_invalid(invoke_cli):
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
+
+
 

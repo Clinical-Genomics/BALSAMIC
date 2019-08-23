@@ -1,10 +1,26 @@
 import json
+import os
 import pytest
+import sys
+from pathlib import Path
 
-from BALSAMIC.utils.cli import get_ref_path, iterdict
-from BALSAMIC.utils.cli import SnakeMake, get_packages, get_package_split, get_snakefile
-from BALSAMIC.utils.rule import get_chrom, get_vcf, get_sample_type, get_conda_env, \
-    get_picard_mrkdup
+from BALSAMIC.utils.cli import SnakeMake
+from BALSAMIC.utils.cli import CaptureStdout
+from BALSAMIC.utils.cli import iterdict
+from BALSAMIC.utils.cli import get_packages
+from BALSAMIC.utils.cli import get_package_split
+from BALSAMIC.utils.cli import get_snakefile
+from BALSAMIC.utils.cli import createDir
+from BALSAMIC.utils.cli import get_ref_path
+from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import get_config
+from BALSAMIC.utils.rule import get_chrom
+from BALSAMIC.utils.rule import get_vcf
+from BALSAMIC.utils.rule import get_sample_type
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_picard_mrkdup
+from BALSAMIC.utils.rule import get_script_path
+from BALSAMIC.utils.rule import get_result_dir
 
 
 def test_get_ref_path(config_files):
@@ -16,7 +32,8 @@ def test_get_ref_path(config_files):
 
     # THEN It will read the file and return a dict with updated absolute path
     assert isinstance(test_ref_json, dict)
-    assert test_ref_json['path']['genomefa'].startswith('/')
+    for ref, ref_path in test_ref_json['reference'].items():
+        assert Path(ref_path).exists()
 
 
 def test_iterdict(config_files):
@@ -62,24 +79,28 @@ def test_snakemake_slurm():
     snakemake_slurm.configfile = "sample_config.json"
     snakemake_slurm.run_mode = "slurm"
     snakemake_slurm.cluster_config = "cluster_config.json"
-    snakemake_slurm.sbatch_py = "runsbatch.py"
+    snakemake_slurm.scheduler = "sbatch.py"
     snakemake_slurm.log_path = "logs/"
     snakemake_slurm.script_path = "scripts/"
     snakemake_slurm.result_path = "results/"
     snakemake_slurm.qos = "normal"
+    snakemake_slurm.account = "development"
+    snakemake_slurm.mail_type = "FAIL"
+    snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
     snakemake_slurm.run_analysis = True
 
     # WHEN calling the build command
     shell_command = snakemake_slurm.build_cmd()
 
+    print(shell_command)
     # THEN constructing snakecommand for slurm runner
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
     assert "/tmp/snakemake" in shell_command
     assert "--dryrun" not in shell_command
-    assert "runsbatch.py" in shell_command
+    assert "sbatch.py" in shell_command
     assert "test_sample" in shell_command
     assert "containers" in shell_command
 
@@ -92,7 +113,7 @@ def test_get_packages(conda):
     packages = get_packages(balsamic_yaml)
 
     # THEN It should return all tools(packages) in that yaml file
-    assert any("snakemake" in tool for tool in packages)
+    assert any("pip=9" in tool for tool in packages)
     assert any("python=3" in tool for tool in packages)
 
 
@@ -121,6 +142,19 @@ def test_get_package_split(conda):
     assert "fastqc" in packages
 
 
+def test_get_script_path():
+    # GIVEN list of scripts
+    custom_scripts = ["refseq_sql.awk"]
+
+    # WHEN asking to get path for the script
+    for script in custom_scripts:
+        # THEN assert full path for script
+        assert get_script_path(script).startswith('/')
+
+        # THEN assert if script file exists
+        assert Path(get_script_path(script)).is_file()
+
+
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
     analysis_types = ["paired", "single", "qc", "paired_umi", "single_umi"]
@@ -135,6 +169,8 @@ def test_get_snakefile():
             assert "BALSAMIC/workflows/VariantCalling_" + analysis_type in snakefile
         else:
             assert "BALSAMIC/workflows/Alignment" in snakefile
+        # THEN assert file exists
+        assert Path(snakefile).is_file()
 
 
 def test_get_chrom(config_files):
@@ -174,20 +210,130 @@ def test_get_sample_type(sample_config):
     assert sample_id == ['S1_R']
 
 
-# def test_get_conda_env(sample_config):
-#     # GIVEN a balsamic_env yaml file path
-#     balsamic_env = "BALSAMIC_env.yaml"
-
-#     # WHEN passing pkg name with this yaml file
-#     conda_env = get_conda_env(balsamic_env, 'ensembl-vep')
-
-#     # THEN It should return the conda env which has that pkg
-#     assert "Cancer-vep" in conda_env
-
-
 def test_get_picard_mrkdup(sample_config):
     # WHEN passing sample_config
     picard_str = get_picard_mrkdup(sample_config)
 
     # THEN It will return the picard str as rmdup
     assert "rmdup" == picard_str
+
+
+def test_createDir(tmp_path):
+    # GIVEN a directory path
+    # WHEN directory path is not yet created
+    test_new_dir = tmp_path / "new_dir"
+
+    # THEN it should create and return dir name
+    test_new_dir_created = createDir(str(test_new_dir))
+    assert test_new_dir_created == str(tmp_path / "new_dir")
+    assert Path(test_new_dir_created).is_dir()
+
+    # GIVEN a directory path
+    test_log_dir = tmp_path / "existing_dir"
+
+    # WHEN directory path exists
+    test_log_dir.mkdir()
+
+    # THEN it should return log_dir name incremented
+    test_log_dir_created = createDir(str(test_log_dir), [])
+    assert test_log_dir_created == str(tmp_path / "existing_dir.1")
+    assert Path(test_log_dir_created).is_dir()
+
+    # GIVEN a directory path
+    test_log_dir = tmp_path / "existing_dir_with_dot.1"
+
+    # WHEN directory path exists
+    test_log_dir.mkdir()
+
+    # THEN it should return log_dir name incremented
+    test_log_dir_created = createDir(str(test_log_dir), [])
+    assert test_log_dir_created == str(tmp_path / "existing_dir_with_dot.2")
+    assert Path(test_log_dir_created).is_dir()
+
+
+def test_get_result_dir(sample_config):
+    # WHEN a sample_config dict
+    # GIVEN a sample_config dict
+    # THEN get_result_dir should return result directory
+    assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
+
+
+def test_get_conda_env_found(BALSAMIC_env, tmp_path):
+    # GIVEN a BALSAMIC_env yaml
+    # WHEN passing pkg name with this yaml file
+    conda_env = get_conda_env(BALSAMIC_env, 'cnvkit')
+
+    # THEN It should return the conda env which has that pkg
+    assert conda_env == "env_py36"
+
+
+def test_get_conda_env_not_found(BALSAMIC_env, tmp_path):
+    # GIVEN a BALSAMIC_env yaml
+    # WHEN passing pkg name with this yaml file
+    # THEN It should return the conda env which has that pkg
+    with pytest.raises(KeyError):
+        get_conda_env(BALSAMIC_env, 'unknown_package')
+
+
+def test_capturestdout():
+    # GIVEN a catpurestdout context
+    test_stdout_message = 'Message to stdout'
+    with CaptureStdout() as captured_stdout_message:
+        print(test_stdout_message, file=sys.stdout)
+
+    assert "".join(captured_stdout_message) == test_stdout_message
+
+
+def test_get_config():
+    # GIVEN the config files name
+    config_files = [
+        "sample", "analysis_paired", "analysis_paired_umi", "analysis_single",
+        "analysis_single_umi"
+    ]
+    # WHEN passing file names
+    for config_file in config_files:
+        # THEN return the config files path
+        assert get_config(config_file)
+
+
+def test_get_config_wrong_config():
+    # GIVEN the config files name
+    config_file = 'non_existing_config'
+
+    # WHEN passing file names
+    # THEN return the config files path
+    with pytest.raises(FileNotFoundError):
+        assert get_config(config_file)
+
+
+def test_write_json(tmp_path, config_files):
+    # GIVEN a dict from sample json file (reference.json)
+    ref_json = json.load(open(config_files['reference'], 'r'))
+
+    tmp = tmp_path / "tmp"
+    tmp.mkdir()
+    output_json = tmp / "output.json"
+
+    # WHEN passing dict and file name
+    write_json(ref_json, output_json)
+    output = output_json.read_text()
+
+    # THEN It will create a json file with given dict
+    for key, value in iterdict(ref_json):
+        assert key in output
+        assert value in output
+
+    assert len(list(tmp.iterdir())) == 1
+
+
+def test_write_json_error(tmp_path, config_files):
+    with pytest.raises(Exception, match=r"Is a directory"):
+        # GIVEN a invalid dict
+        ref_json = {"path": "/tmp", "reference": ""}
+        tmp = tmp_path / "tmp"
+        tmp.mkdir()
+        output_json = tmp / "/"
+
+        # WHEN passing a invalid dict
+        # THEN It will raise the error
+        assert write_json(ref_json, output_json)

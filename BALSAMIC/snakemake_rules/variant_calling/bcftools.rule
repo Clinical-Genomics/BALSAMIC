@@ -16,7 +16,7 @@ rule bcftools_SNV_update_variant_ID:
   output:
     vcf_dir + var_type + "/" + "id.{vcf}.vcf.gz"
   params:
-    ref_fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    ref_fa = config["reference"]["reference_genome"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "source activate {params.conda};"
@@ -39,7 +39,7 @@ rule bcftools_SV_update_variant_ID:
   output:
     vcf_dir + var_type + "/" + "id.{vcf}.vcf.gz"
   params:
-    ref_fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    ref_fa = config["reference"]["reference_genome"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "source activate {params.conda};"

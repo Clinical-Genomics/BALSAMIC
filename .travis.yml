@@ -1,13 +1,17 @@
+sudo: true
+
 language: python
 
 python:
   - '3.6'
 
+before_install:
+  - sudo apt-get install graphviz
 install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
 
 script:
-  - py.test --cov=BALSAMIC --cov=tests -rsxv
+  - py.test --cov=BALSAMIC -rsxv tests/* 
 
 after_success: coveralls
 

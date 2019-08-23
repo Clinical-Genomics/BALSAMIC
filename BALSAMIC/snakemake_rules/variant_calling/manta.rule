@@ -11,7 +11,7 @@ manta_dir = vcf_dir + var_caller + "/"
 
 rule manta_somatic:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"] ,
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
   output:

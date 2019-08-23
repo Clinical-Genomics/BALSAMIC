@@ -11,7 +11,7 @@ rule cnvkit_paired:
     refflat = config["path"]["genomefa"] + "GRCh37/GFF/refFlat.chr1_20_X_Y.txt",
     bamN = expand(bam_dir + "{mysample}.sorted.bam", mysample=get_sample_type(config["samples"], "normal")),
     bamT = expand(bam_dir + "{mysample}.sorted.bam", mysample=get_sample_type(config["samples"], "tumor")),
-    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
+    bed = config["panel"]["capture_kit"],
   output:
     done = cnv_dir + "cnvkit_paired.done" 
   params:

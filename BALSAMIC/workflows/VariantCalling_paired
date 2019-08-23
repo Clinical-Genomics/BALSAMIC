@@ -9,6 +9,7 @@ from BALSAMIC.utils.rule import get_result_dir
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
@@ -19,8 +20,8 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
+#include:
+#  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/fastqc.rule"
 include:
@@ -30,7 +31,7 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/collectqc_paired.rule"
+  rule_dir + "snakemake_rules/quality_control/multiqc.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
 include:
@@ -65,7 +66,7 @@ var_class = ["somatic", "germline"]
 
 rule all:
   input:
-    os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
+    os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
     #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "strelka", "manta"], [config["analysis"]["sample_id"]])),
     expand(vep_dir + "{vcf}.tbl", vcf=get_vcf(config, ["mutect", "vardict", "strelka"], [config["analysis"]["sample_id"]])),

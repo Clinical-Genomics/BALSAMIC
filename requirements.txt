@@ -1,4 +1,6 @@
 click
 pyyaml
-pylatex
 yapf
+graphviz
+coloredlogs
+snakemake==5.5.1
