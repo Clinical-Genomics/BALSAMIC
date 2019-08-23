@@ -1,0 +1,29 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+
+picarddup = get_picard_mrkdup(config)
+
+# Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
+rule collectqc:
+  input:
+    fastqc = expand(fastqc_dir + "{mysample}_{read_num}_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
+    insertsize = expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]),
+    alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
+    hsmetric = expand(bam_dir + "{sample}.sorted.hsmetric", sample=config["samples"]),
+    sambamba = expand(bam_dir + "{sample}.sorted." + picarddup + ".cov.bed", sample=config["samples"]),
+    sambambaexon = expand(bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed", sample=config["samples"])
+  output:
+    result_dir + "qc/" + "multiqc_report.html"
+  params:
+    # This is using same environment as gatk
+    dir_list = "\n".join([bam_dir, fastqc_dir]),
+    qc_dir = result_dir + "qc/",
+    conda = get_conda_env(config["conda_env_yaml"],"multiqc"),
+  shell:
+    "source activate {params.conda};"
+    "echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list; "
+    "multiqc --outdir {params.qc_dir} --data-format json {params.qc_dir}/dir_list; " 
