@@ -30,14 +30,14 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/collectqc_single.rule"
+  rule_dir + "snakemake_rules/quality_control/multiqc.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
 
 
 rule all:
   input:
-    os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
+    os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
   output:
     os.path.join(get_result_dir(config), "analysis_finish")
   shell:
