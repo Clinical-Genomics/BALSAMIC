@@ -33,7 +33,7 @@ def housekeeper(context, sample_config):
         'bam': ['*merged.bam'],
         'vcf': ['*merged.vcf.gz'],
         'vep': ['*merged.vcf.gz'],
-        'multiqc': ['multiqc_report.txt'],
+        'qc': ['*multiqc_report*'],
         'scout': ['*.scout_config.yaml']
     }
     result_dir = get_result_dir(sample_config)
