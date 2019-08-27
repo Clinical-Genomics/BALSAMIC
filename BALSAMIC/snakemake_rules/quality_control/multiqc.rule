@@ -26,4 +26,4 @@ rule collectqc:
   shell:
     "source activate {params.conda};"
     "echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list; "
-    "multiqc --outdir {params.qc_dir} --data-format json {params.qc_dir}/dir_list; " 
+    "multiqc --outdir {params.qc_dir} --data-format json -l {params.qc_dir}/dir_list; " 
