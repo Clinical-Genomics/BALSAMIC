@@ -66,8 +66,8 @@ def BALSAMIC_env(tmp_path_factory):
         "env_py36": [
             "python", "pip", "bcftools", "bwa", "fastqc", "sambamba",
             "samtools", "tabix", "gatk", "picard", "fgbio", "freebayes",
-            "vardict", "vardict-java", "ensembl-vep", "cnvkit", "cutadapt",
-            "pindel", "multiqc", "bedtools"
+            "vardict", "vardict-java", "ensembl-vep", "cnvkit",
+            "pindel", "multiqc", "bedtools", "fastp"
         ]
     }
 
