@@ -24,3 +24,4 @@ dependencies:
   - multiqc=1.7 
   - bedtools=2.28.0
   - csvkit=1.0.4
+  - fastp=0.20.0
