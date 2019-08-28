@@ -22,8 +22,8 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"
-#include:
-#  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
+include:
+  rule_dir + "snakemake_rules/quality_control/fastp.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/fastqc.rule"
 include:
