@@ -9,8 +9,8 @@ from BALSAMIC.utils.rule import get_conda_env, get_sample_type
 rule sentieon_align_sort:
   input:
     ref = config["reference"]["reference_genome"],
-    read1 = fastq_dir + "{sample}_1.fastq.gz",
-    read2 = fastq_dir  + "{sample}_2.fastq.gz",
+    read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
+    read2 = fastq_dir  + "{sample}_2.fp.fastq.gz",
     refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
   output:
     bamout = bam_dir + "{sample}.bam"
