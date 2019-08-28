@@ -16,7 +16,7 @@ rule fastp:
     read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
   params:
     fastq_dir = fastq_dir,
-    qc_dir = result_dir + "qc/",
+    qc_dir = result_dir + "qc",
     min_seq_length = config["QC"]["min_seq_length"],
     conda = get_conda_env(config["conda_env_yaml"],"fastp")
   shell:
@@ -24,9 +24,10 @@ rule fastp:
     "fastp "
     "--in1 {input.read1} --in2 {input.read2} "
     "--out1 {output.read1} --out2 {output.read2} "
-    "--trim_tail1 1 --n_base_limit 5"
+    "--trim_tail1 1 --n_base_limit 5 "
     "--umi --umi_loc per_read --umi_len 5 --umi_prefix UMI "
     "--length_required {params.min_seq_length} "
-    "--low_complexity_filter --disable_adapter_trimming --trim_poly_g; "
-    "cp {params.fastq_dir}/fastp*  {params.qc_dir}; " 
+    "--low_complexity_filter --disable_adapter_trimming --trim_poly_g "
+    "--json {params.qc_dir}/fastp.json "
+    "--html {params.qc_dir}/fastp.html; "
     "source deactivate;"
