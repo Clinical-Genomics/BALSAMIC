@@ -22,6 +22,8 @@ SENTIEON_LICENSE = "10.10.10.1:8990"
 SENTIEON_INSTALL_DIR="/home/proj/development/cancer/sentieon/sentieon-genomics-201808.03"
 
 include:
+  os.path.join(rule_dir , "snakemake_rules/quality_control/fastp.rule") 
+include:
   os.path.join(rule_dir , "snakemake_rules/sentieon/sentieon_align_recall.rule") 
 include:
   os.path.join(rule_dir , "snakemake_rules/sentieon/sentieon_tn_varcall.rule") 
