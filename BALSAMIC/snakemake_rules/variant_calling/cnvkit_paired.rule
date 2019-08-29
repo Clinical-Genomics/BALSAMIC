@@ -9,13 +9,13 @@ from BALSAMIC.utils.rule import get_conda_env, get_chrom
 rule cnvkit_paired:
   input:
     refflat = config["path"]["genomefa"] + "GRCh37/GFF/refFlat.chr1_20_X_Y.txt",
-    bamN = expand(bam_dir + "{mysample}.sorted.bam", mysample=get_sample_type(config["samples"], "normal")),
-    bamT = expand(bam_dir + "{mysample}.sorted.bam", mysample=get_sample_type(config["samples"], "tumor")),
+    bamN = bam_dir + "normal.merged.bam", 
+    bamT = bam_dir + "tumor.merged.bam", 
     bed = config["panel"]["capture_kit"],
   output:
     done = cnv_dir + "cnvkit_paired.done" 
   params:
-    bed = cnv_dir + "CNV." + config["bed"]["capture_kit"], 
+    bed = cnv_dir + "CNV." + config["panel"]["capture_kit"], 
     name = config["analysis"]["sample_id"],
     outdir = cnv_dir,
     conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
