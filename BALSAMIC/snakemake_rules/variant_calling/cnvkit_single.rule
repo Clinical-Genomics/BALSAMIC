@@ -8,14 +8,14 @@ from BALSAMIC.utils.rule import get_conda_env, get_chrom
 
 rule cnvkit_single:
   input:
-    refflat = config["path"]["genomefa"] + "GRCh37/GFF/refFlat.chr1_20_X_Y.txt",
+    refflat = config["reference"]["refflat"],
     reffa = config["reference"]["reference_genome"],
     bamT = bam_dir + "tumor.merged.bam",
     bed = config["panel"]["capture_kit"],
   output:
     done = cnv_dir + "cnvkit_single.done" 
   params:
-    bed = cnv_dir + "CNV." + config["panel"]["capture_kit"],
+    bed = cnv_dir + "CNV." + os.path.basename(config["panel"]["capture_kit"]), 
     refcnn = cnv_dir + "FlatReference.cnn",
     name = config["analysis"]["sample_id"],
     outdir = cnv_dir,
