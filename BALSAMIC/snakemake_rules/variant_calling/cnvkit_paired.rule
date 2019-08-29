@@ -8,14 +8,15 @@ from BALSAMIC.utils.rule import get_conda_env, get_chrom
 
 rule cnvkit_paired:
   input:
-    refflat = config["path"]["genomefa"] + "GRCh37/GFF/refFlat.chr1_20_X_Y.txt",
+    refflat = config["reference"]["refflat"],
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam", 
     bed = config["panel"]["capture_kit"],
   output:
-    done = cnv_dir + "cnvkit_paired.done" 
+    done = cnv_dir + "cnvkit_paired.done",
+    cnn = cnv_dir + config["analysis"]["sample_id"] + ".cnn" 
   params:
-    bed = cnv_dir + "CNV." + config["panel"]["capture_kit"], 
+    bed = cnv_dir + "CNV." + os.path.basename(config["panel"]["capture_kit"]), 
     name = config["analysis"]["sample_id"],
     outdir = cnv_dir,
     conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
@@ -24,8 +25,8 @@ rule cnvkit_paired:
     "cnvkit.py target {input.bed} --annotate {input.refflat} --split -o {params.bed}; "
     "cnvkit.py batch {input.bamT} "
       "--normal {input.bamN} "
-      "--targets {params.targetCNV} "
-      "--output-reference {params.cnn} "
+      "--targets {params.bed} "
+      "--output-reference {output.cnn} "
       "--output-dir {params.outdir}; "
     "touch {output}; "
     "source deactivate;"

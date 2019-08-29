@@ -43,6 +43,8 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
 include:
+  rule_dir + "snakemake_rules/variant_calling/cnvkit_paired.rule"
+include:
   rule_dir + "snakemake_rules/variant_calling/manta.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/mutect.rule"
