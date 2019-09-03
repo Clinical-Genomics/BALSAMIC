@@ -91,8 +91,9 @@ def test_get_analysis_type():
 
     # WHEN passing values
     # THEN it will return possible analysis type
-    assert get_analysis_type(normal_valid, umi_true) == 'paired_umi'
-    assert get_analysis_type(normal_invalid, umi_true) == 'single_umi'
+    # disabling umi
+    #assert get_analysis_type(normal_valid, umi_true) == 'paired_umi'
+    #assert get_analysis_type(normal_invalid, umi_true) == 'single_umi'
     assert get_analysis_type(normal_valid, umi_false) == 'paired'
     assert get_analysis_type(normal_invalid, umi_false) == 'single'
 
