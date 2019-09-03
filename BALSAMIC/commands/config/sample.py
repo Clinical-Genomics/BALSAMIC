@@ -291,14 +291,6 @@ def sample(context, umi, umi_trim, umi_trim_length, quality_trim, adapter_trim,
     fq_path = os.path.join(output_dir, 'analysis', 'fastq')
     os.makedirs(fq_path, exist_ok=True)
 
-    if umi:
-        sample_config["QC"]["umi_trim"] = umi_trim
-        sample_config["QC"]["umi_trim_length"] = umi_trim_length
-    if quality_trim:
-        sample_config["QC"]["quality_trim"] = quality_trim
-    if adapter_trim:
-        sample_config["QC"]["adapter_trim"] = adapter_trim
-
     tumor = configure_fastq(fq_path, tumor, fastq_prefix)
     if normal:
         normal = configure_fastq(fq_path, normal, fastq_prefix)
@@ -331,6 +323,14 @@ def sample(context, umi, umi_trim, umi_trim_length, quality_trim, adapter_trim,
 
     json_out = merge_json(analysis_config, sample_config, reference_json,
                           install_config, bioinfo_config)
+
+    if umi:
+        json_out["QC"]["umi_trim"] = umi_trim
+        json_out["QC"]["umi_trim_length"] = umi_trim_length
+    if quality_trim:
+        json_out["QC"]["quality_trim"] = quality_trim
+    if adapter_trim:
+        json_out["QC"]["adapter_trim"] = adapter_trim
 
     dag_image = os.path.join(output_dir,
                              output_config + '_BALSAMIC_' + bv + '_graph')

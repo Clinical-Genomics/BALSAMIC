@@ -19,7 +19,7 @@ if 'quality_trim' in config['QC'].keys():
         fastp_param.extend(["--disable_adapter_trimming"])
 
     if config['QC']['umi_trim']:
-        fastp_param.extend(["--umi","--umi_loc per_read","--umi_len","5","--umi_prefix","UMI"]
+        fastp_param.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
 
     fastp_param = " ".join(fastp_param)
 
@@ -43,6 +43,6 @@ rule fastp:
     "--out1 {output.read1} --out2 {output.read2} "
     "--json {params.qc_dir}/fastp.json "
     "--overrepresentation_analysis "
-    "{param.extra} "
+    "{params.extra} "
     "--html {params.qc_dir}/fastp.html; "
     "source deactivate;"

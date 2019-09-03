@@ -2,7 +2,11 @@
   "QC": {
     "picard_rmdup": "False",
     "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-    "min_seq_length": "25"
+    "min_seq_length": "25",
+    "quality_trim": "True",
+    "adapter_trim": "False",
+    "umi_trim": "True",
+    "umi_trim_length": "5"
   },
   "vcf": {
     "manta_single": {
