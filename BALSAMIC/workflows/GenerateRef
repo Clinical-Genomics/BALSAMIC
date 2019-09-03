@@ -40,6 +40,7 @@ reference_json = os.path.join(basedir, "reference.json")
 reference_genome = os.path.join(genome_dir, "human_g1k_v37_decoy.fasta")
 reference_genome_index = os.path.join(genome_dir, "human_g1k_v37_decoy.fasta.fai")
 refseq_bed = os.path.join(genome_dir, "refseq.flat.bed")
+refseq_flat = os.path.join(genome_dir, "refseq.flat")
 genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
 
 dbsnp = os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf")
@@ -89,6 +90,7 @@ rule all:
         refgenome_fai = reference_genome_index,
         refgenome_dict = genome_dict,
         refseq_bed = refseq_bed,
+        refseq_flat = refseq_flat,
         dbsnp_vcf = dbsnp + ".gz",
         th_genome_vcf = vcf_1kg + ".gz",
         tg_high_vcf = hc_vcf_1kg + ".gz",
@@ -116,6 +118,7 @@ rule all:
             "mills_1kg": input.mills_1kg,
             "cosmic": input.cosmic_vcf,
             "exon_bed": input.refseq_bed,
+            "refflat": input.refseq_flat,
             "vep": input.vep
         }
 
@@ -152,7 +155,8 @@ rule download_refgene:
         bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
-        refseq_bed
+        refflat = refseq_flat,
+        bed = refseq_bed
     log:
         refgene_sql = genome_dir + "refgene_sql.log",
         refgene_txt = genome_dir + "refgene_txt.log"
@@ -163,7 +167,10 @@ rule download_refgene:
         "| csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 "
         "| csvformat -T "
         "| bedtools expand -c 2,3 "
-        "| awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output}; "
+        "| awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed}; "
+        "(wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip) "
+        "| awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' "
+        "| cut -f 1-11 > {output.refflat}; "
         "source deactivate; "
 
 ##########################################################
