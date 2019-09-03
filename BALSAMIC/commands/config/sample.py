@@ -139,7 +139,9 @@ def get_fastq_path(file, fq_pattern):
             file_str = file_basename[0:(
                 fq_pattern.search(file_basename).span()[0] + 1)]
         except AttributeError as error:
-            LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
+            LOG.error(
+                f"File name is invalid, fastq file should be sample_R_1.fastq.gz"
+            )
             raise click.Abort()
     else:
         LOG.error(f"{file} is not found, update correct file path")
@@ -176,7 +178,24 @@ def configure_fastq(fq_path, sample, fastq_prefix):
                short_help="Create a sample config file from input sample data")
 @click.option('--umi',
               is_flag=True,
+              show_default=True,
               help="UMI processing steps for samples with umi tags")
+@click.option('--umi-trim',
+              default=True,
+              show_default=True,
+              help='Trim umi from reads in fastq')
+@click.option('--umi-trim-length',
+              default=5,
+              show_default=True,
+              help='Trim N bases from reads in fastq')
+@click.option('--quality-trim',
+              default=True,
+              show_default=True,
+              help='Trim low quality reads in fastq')
+@click.option('--adapter-trim',
+              default=False,
+              show_default=True,
+              help='Trim adapters from reads in fastq')
 @click.option("-i",
               "--install-config",
               required=False,
@@ -232,9 +251,10 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(context, umi, install_config, reference_config,
-           panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
-           overwrite_config, create_dir, fastq_prefix):
+def sample(context, umi, umi_trim, umi_trim_length, quality_trim, adapter_trim,
+           install_config, reference_config, panel_bed, output_config, normal,
+           tumor, sample_id, analysis_dir, overwrite_config, create_dir,
+           fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
@@ -271,6 +291,14 @@ def sample(context, umi, install_config, reference_config,
     fq_path = os.path.join(output_dir, 'analysis', 'fastq')
     os.makedirs(fq_path, exist_ok=True)
 
+    if umi:
+        sample_config["QC"]["umi_trim"] = umi_trim
+        sample_config["QC"]["umi_trim_length"] = umi_trim_length
+    if quality_trim:
+        sample_config["QC"]["quality_trim"] = quality_trim
+    if adapter_trim:
+        sample_config["QC"]["adapter_trim"] = adapter_trim
+
     tumor = configure_fastq(fq_path, tumor, fastq_prefix)
     if normal:
         normal = configure_fastq(fq_path, normal, fastq_prefix)
@@ -299,8 +327,7 @@ def sample(context, umi, install_config, reference_config,
     bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)
 
     output_config = os.path.join(output_dir, output_config)
-    LOG.info(
-        "Writing output config file %s" % os.path.abspath(output_config))
+    LOG.info("Writing output config file %s" % os.path.abspath(output_config))
 
     json_out = merge_json(analysis_config, sample_config, reference_json,
                           install_config, bioinfo_config)
@@ -335,7 +362,9 @@ def sample(context, umi, install_config, reference_config,
     #    graph_obj.attr('graph',label='BALSAMIC')
     #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
     if graph_obj.render():
-        LOG.info(f'BALSAMIC Workflow has been configured successfully - {output_config}')
+        LOG.info(
+            f'BALSAMIC Workflow has been configured successfully - {output_config}'
+        )
     else:
         LOG.error(f'BALSAMIC dag graph generation failed - {dag_image}')
         raise click.Abort()
