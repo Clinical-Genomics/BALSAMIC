@@ -77,8 +77,9 @@ def check_exist(path):
 
 def get_analysis_type(normal, umi):
     """ return analysis type """
-    if umi:
-        return "paired_umi" if normal else "single_umi"
+#Temporarily disabling umi workflow
+#    if umi:
+#        return "paired_umi" if normal else "single_umi"
 
     return "paired" if normal else "single"
 
@@ -176,23 +177,19 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 
 @click.command("sample",
                short_help="Create a sample config file from input sample data")
-@click.option('--umi',
-              is_flag=True,
-              show_default=True,
-              help="UMI processing steps for samples with umi tags")
-@click.option('--umi-trim',
+@click.option('--umi/--no-umi',
               default=True,
               show_default=True,
-              help='Trim umi from reads in fastq')
+              help="UMI processing steps for samples with umi tags")
 @click.option('--umi-trim-length',
               default=5,
               show_default=True,
               help='Trim N bases from reads in fastq')
-@click.option('--quality-trim',
+@click.option('--quality-trim/--no-quality-trim',
               default=True,
               show_default=True,
               help='Trim low quality reads in fastq')
-@click.option('--adapter-trim',
+@click.option('--adapter-trim/--no-adapter-trim',
               default=False,
               show_default=True,
               help='Trim adapters from reads in fastq')
@@ -251,7 +248,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(context, umi, umi_trim, umi_trim_length, quality_trim, adapter_trim,
+def sample(context, umi, umi_trim_length, quality_trim, adapter_trim,
            install_config, reference_config, panel_bed, output_config, normal,
            tumor, sample_id, analysis_dir, overwrite_config, create_dir,
            fastq_prefix):
@@ -325,12 +322,11 @@ def sample(context, umi, umi_trim, umi_trim_length, quality_trim, adapter_trim,
                           install_config, bioinfo_config)
 
     if umi:
-        json_out["QC"]["umi_trim"] = "True"
-        json_out["QC"]["umi_trim_length"] = umi_trim_length
-    if quality_trim:
-        json_out["QC"]["quality_trim"] = "True"
-    if adapter_trim:
-        json_out["QC"]["adapter_trim"] = "True"
+        json_out["QC"]["umi_trim"] = str(umi)
+        json_out["QC"]["umi_trim_length"] = str(umi_trim_length)
+
+    json_out["QC"]["quality_trim"] = str(quality_trim)
+    json_out["QC"]["adapter_trim"] = str(adapter_trim)
 
     dag_image = os.path.join(output_dir,
                              output_config + '_BALSAMIC_' + bv + '_graph')
