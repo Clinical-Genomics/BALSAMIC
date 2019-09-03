@@ -325,12 +325,12 @@ def sample(context, umi, umi_trim, umi_trim_length, quality_trim, adapter_trim,
                           install_config, bioinfo_config)
 
     if umi:
-        json_out["QC"]["umi_trim"] = umi_trim
+        json_out["QC"]["umi_trim"] = "True"
         json_out["QC"]["umi_trim_length"] = umi_trim_length
     if quality_trim:
-        json_out["QC"]["quality_trim"] = quality_trim
+        json_out["QC"]["quality_trim"] = "True"
     if adapter_trim:
-        json_out["QC"]["adapter_trim"] = adapter_trim
+        json_out["QC"]["adapter_trim"] = "True"
 
     dag_image = os.path.join(output_dir,
                              output_config + '_BALSAMIC_' + bv + '_graph')

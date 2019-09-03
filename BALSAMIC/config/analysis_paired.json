@@ -4,9 +4,9 @@
         "adapter":
         "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         "min_seq_length": "25",
-        "quality_trim": "True",
+        "quality_trim": "False",
         "adapter_trim": "False",
-        "umi_trim": "True",
+        "umi_trim": "False",
         "umi_trim_length": "5"
     },
     "vcf": {
