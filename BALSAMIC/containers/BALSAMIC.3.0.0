@@ -41,9 +41,9 @@ From: centos:latest
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
     cd /git_repos
-    git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=develop
+    git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=release/3.0.0
     cd BALSAMIC
-    ./install.sh -s D -d dev -p /usr/local/anaconda/envs
+    ./install.sh -s P -d 3_0_0_stable -p /usr/local/anaconda/envs
 
 %environment
     # The following fixes the error for Click
@@ -55,28 +55,28 @@ From: centos:latest
     export PATH=$PATH:/usr/local/anaconda/bin
     export BALSAMIC_STATUS='container'
 
-# D_BALSAMIC-base_dev
-%appenv D_BALSAMIC-base_dev
-    source activate D_BALSAMIC-base_dev
-%apphelp D_BALSAMIC-base_dev
+# P_BALSAMIC-base_3_0_0_stable
+%appenv P_BALSAMIC-base_3_0_0_stable
+    source activate P_BALSAMIC-base_3_0_0_stable
+%apphelp P_BALSAMIC-base_3_0_0_stable
     Runs core BALSAMIC CLI.
-%apprun D_BALSAMIC-base_dev
+%apprun P_BALSAMIC-base_3_0_0_stable
     exec "$@"
 
-# D_BALSAMIC-py27_dev
-%appenv D_BALSAMIC-py27_dev
-    source activate D_BALSAMIC-py27_dev
-%apphelp D_BALSAMIC-py27_dev
-    Runs D_BALSAMIC-py27_dev
-%apprun D_BALSAMIC-py27_dev
+# P_BALSAMIC-py27_3_0_0_stable
+%appenv P_BALSAMIC-py27_3_0_0_stable
+    source activate P_BALSAMIC-py27_3_0_0_stable
+%apphelp P_BALSAMIC-py27_3_0_0_stable
+    Runs P_BALSAMIC-py27_3_0_0_stable
+%apprun P_BALSAMIC-py27_3_0_0_stable
     exec "$@"
 
-# D_BALSAMIC-py36_dev
-%appenv D_BALSAMIC-py36_dev
-    source activate D_BALSAMIC-py36_dev
-%apphelp D_BALSAMIC-py36_dev
-    Runs D_BALSAMIC-py36_dev
-%apprun D_BALSAMIC-py36_dev
+# P_BALSAMIC-py36_3_0_0_stable
+%appenv P_BALSAMIC-py36_3_0_0_stable
+    source activate P_BALSAMIC-py36_3_0_0_stable
+%apphelp P_BALSAMIC-py36_3_0_0_stable
+    Runs P_BALSAMIC-py36_3_0_0_stable
+%apprun P_BALSAMIC-py36_3_0_0_stable
     exec "$@"
 
 %runscript
