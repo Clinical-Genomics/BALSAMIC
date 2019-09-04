@@ -15,11 +15,11 @@ run the following command:
 ::
 
     cd test_data
-    balsamic config sample \
+    balsamic config case \
         --tumor fastq/S1_R_1.fastq.gz \
         --normal fastq/S2_R_1.fastq.gz \
         --panel-bed references/GRCh37/panel/panel.bed \
-        --sample-id id1 \
+        --case-id id1 \
         --analysis-dir ./ \
         --analysis-type paired \
         --output-config id1_analysis.json \
