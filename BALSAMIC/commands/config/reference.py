@@ -9,7 +9,7 @@ import snakemake
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile, get_config
 from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC.commands.config.sample import merge_json
+from BALSAMIC.commands.config.case import merge_json
 from BALSAMIC import __version__ as bv
 
 LOG = logging.getLogger(__name__)

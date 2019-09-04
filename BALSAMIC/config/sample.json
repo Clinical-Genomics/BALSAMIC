@@ -1,6 +1,6 @@
 {
     "analysis": {
-        "sample_id": "SAMPLE_BASE_NAME",
+        "case_id": "CASE_BASE_NAME",
         "analysis_type": "ANALYSIS_TYPE[paired, single]",
         "analysis_dir": "BASE_DIR_RESULTS",
         "fastq_path": "BASE_PATH_TO_FASTQ",

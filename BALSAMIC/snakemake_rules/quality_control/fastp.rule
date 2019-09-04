@@ -11,7 +11,7 @@ if 'quality_trim' in config['QC'].keys():
     if config['QC']['quality_trim']:
         fastp_param.extend(["--trim_tail1", "1", "--n_base_limit", "5",
                             "--length_required", config["QC"]["min_seq_length"],
-                            "--low_complexity_filteri", "--trim_poly_g"])
+                            "--low_complexity_filter", "--trim_poly_g"])
     else:
         fastp_param.extend(["--disable_quality_filtering", "--disable_length_filtering", "--disable_trim_poly_g"])
 

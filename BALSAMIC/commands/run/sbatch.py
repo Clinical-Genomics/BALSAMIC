@@ -132,7 +132,7 @@ def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
             f.write(f"# Snakemake original script {jobscript}" + "\n")
             f.write(f"balsamic-run bash {jobscript}" + "\n")
         sbatch_file = os.path.join(
-            script_dir, sample_config["analysis"]["sample_id"] + ".sbatch")
+            script_dir, sample_config["analysis"]["case_id"] + ".sbatch")
         return sbatch_file
     except OSError:
         raise
@@ -181,7 +181,7 @@ def main():
     sample_config = read_sample_config(input_json=args.sample_config)
 
     sacct_file = os.path.join(
-        args.log_dir, sample_config["analysis"]["sample_id"] + ".sacct")
+        args.log_dir, sample_config["analysis"]["case_id"] + ".sacct")
 
     balsamic_run_mode = os.getenv("BALSAMIC_STATUS", "conda")
     if balsamic_run_mode == 'container' and 'singularity' in sample_config:

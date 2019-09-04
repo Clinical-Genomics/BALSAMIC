@@ -22,7 +22,7 @@ rule vardict_single:
     af = "0.0005",
     vardict = "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0",
     var2vcf = "-E",
-    name = config["analysis"]["sample_id"],
+    name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
   shell:
     "source activate {params.conda}; "
@@ -40,7 +40,7 @@ rule vardict_merge:
   input:
     expand(vcf_dir + vardict_dir + "split_vcf/{chrom}_" + config["vcf"][var_caller]["default"], chrom=chromlist)
   output:
-    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
   shell:

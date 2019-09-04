@@ -16,7 +16,7 @@ rule manta_somatic:
     bamT = bam_dir + "tumor.merged.bam",
   output:
     candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz",
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz",
   params:
     tmpdir = manta_dir,
     runmode = "local",
