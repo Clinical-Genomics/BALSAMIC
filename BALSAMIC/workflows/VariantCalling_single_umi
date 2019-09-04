@@ -30,7 +30,7 @@ var_class = ["somatic", "germline"]
 
 rule all:
   input:
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["sample_id"]])),
+    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam.duplex_qc.pdf", sample=config["samples"])
   output:

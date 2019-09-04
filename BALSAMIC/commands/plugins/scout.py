@@ -37,7 +37,7 @@ def scout(context, sample_config):
 
     scout_config_src = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                   "../../assets/scout_config_template.yaml")
-    scout_config_dst = os.path.join(dst_directory, sample_config['analysis']['sample_id'] + ".scout.yaml")
+    scout_config_dst = os.path.join(dst_directory, sample_config['analysis']['case_id'] + ".scout.yaml")
 
     LOG.debug('Creating scout config %s', scout_config_dst)
     shutil.copyfile(scout_config_src, scout_config_dst)

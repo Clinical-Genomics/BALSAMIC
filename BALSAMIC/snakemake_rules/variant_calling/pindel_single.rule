@@ -14,10 +14,10 @@ rule pindel_somatic_single:
     fa = config["reference"]["reference_genome"],
     bamT = bam_dir + "tumor.merged.bam",
   output: 
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz",
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz",
   params:
-    sample_id = config["analysis"]["sample_id"],
-    config = pindel_dir + config["analysis"]["sample_id"] + ".config",
+    case_id = config["analysis"]["case_id"],
+    config = pindel_dir + config["analysis"]["case_id"] + ".config",
     tmpdir = pindel_dir,
     conda = get_conda_env(config["conda_env_yaml"],"pindel")
   threads: 4
@@ -26,6 +26,6 @@ rule pindel_somatic_single:
     "paste -d\"\\t\" "
     "<( echo {input.bamT} ) "
     "<( samtools stats {input.bamT} | grep ^SN | cut -f 2- | grep \"insert size average\" | awk \'{{print $NF}}\' ) "
-    "<( echo {params.sample_id} ) > {params.config}; " 
+    "<( echo {params.case_id} ) > {params.config}; " 
     "pindel -T {threads} -i {params.config} -f {input.fa} -o {params.tmpdir} && touch {output.final};"
     "source deactivate; "

@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 def housekeeper(context, sample_config):
     '''
     cli for housekeeper sub-command.
-    Writes <case_name/sample_id>.hk in result_directory.
+    Writes <case_id>.hk in result_directory.
     '''
 
     LOG.debug("Reading input sample config")
@@ -53,7 +53,7 @@ def housekeeper(context, sample_config):
         os.makedirs(yaml_write_directory)
 
     yaml_file_name = os.path.join(
-        yaml_write_directory, sample_config['analysis']['sample_id'] + ".hk")
+        yaml_write_directory, sample_config['analysis']['case_id'] + ".hk")
 
     LOG.debug(f"Writing output file {yaml_file_name}.")
     with open(yaml_file_name, 'w') as f:
