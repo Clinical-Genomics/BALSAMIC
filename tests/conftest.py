@@ -164,7 +164,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'sample', '-p', panel_bed_file, '-i', install_config, '-t',
+        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
         str(tumor), '-n',
         str(normal), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
@@ -189,7 +189,7 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'sample', '-p', panel_bed_file, '-i', install_config, '-t',
+        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
         str(tumor), '--case-id', case_name , '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json

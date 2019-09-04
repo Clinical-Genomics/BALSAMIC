@@ -77,9 +77,9 @@ def check_exist(path):
 
 def get_analysis_type(normal, umi):
     """ return analysis type """
-#Temporarily disabling umi workflow
-#    if umi:
-#        return "paired_umi" if normal else "single_umi"
+    #Temporarily disabling umi workflow
+    #    if umi:
+    #        return "paired_umi" if normal else "single_umi"
 
     return "paired" if normal else "single"
 
@@ -175,7 +175,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     return sample_str
 
 
-@click.command("sample",
+@click.command("case",
                short_help="Create a sample config file from input sample data")
 @click.option('--umi/--no-umi',
               default=True,
@@ -248,10 +248,10 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(context, umi, umi_trim_length, quality_trim, adapter_trim,
-           install_config, reference_config, panel_bed, output_config, normal,
-           tumor, case_id, analysis_dir, overwrite_config, create_dir,
-           fastq_prefix):
+def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
+                install_config, reference_config, panel_bed, output_config,
+                normal, tumor, case_id, analysis_dir, overwrite_config,
+                create_dir, fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.

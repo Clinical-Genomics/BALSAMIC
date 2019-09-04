@@ -6,11 +6,11 @@ from datetime import datetime
 from pathlib import Path
 import click
 
-from BALSAMIC.commands.config.sample import merge_json, \
+from BALSAMIC.commands.config.case import merge_json, \
     set_panel_bed, get_output_config, get_sample_config, get_analysis_type, \
     check_exist
-from BALSAMIC.commands.config.sample import configure_fastq, link_fastq
-from BALSAMIC.commands.config.sample import get_fastq_path
+from BALSAMIC.commands.config.case import configure_fastq, link_fastq
+from BALSAMIC.commands.config.case import get_fastq_path
 
 
 def test_merge_json(config_files):
@@ -237,7 +237,7 @@ def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
 
     # WHEN invoking cli to create config files
     result = invoke_cli([
-        'config', 'sample', '-p', test_panel_bed_file, '-i', install_config,
+        'config', 'case', '-p', test_panel_bed_file, '-i', install_config,
         '-t',
         str(test_tumor), '-n',
         str(test_normal), '--case-id', test_case_name , '--analysis-dir',
@@ -263,7 +263,7 @@ def test_config_sample_missing_install(tmp_path, sample_fastq, analysis_dir,
 
     # WHEN invoking cli to create config files
     result = invoke_cli([
-        'config', 'sample', '-p', test_panel_bed_file, '-t',
+        'config', 'case', '-p', test_panel_bed_file, '-t',
         str(test_tumor), '-n',
         str(test_normal), '--case-id', test_case_name,
         '--analysis-dir',
