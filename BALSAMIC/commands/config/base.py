@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import click
 
-from BALSAMIC.commands.config.sample import sample as sample_command
+from BALSAMIC.commands.config.case import case_config as case_command
 from BALSAMIC.commands.config.reference import reference as reference_command
 
 
@@ -12,5 +12,5 @@ def config(context):
     pass
 
 
-config.add_command(sample_command)
+config.add_command(case_command)
 config.add_command(reference_command)

@@ -73,7 +73,7 @@ def test_snakemake_local():
 def test_snakemake_slurm():
     # GIVEN required params
     snakemake_slurm = SnakeMake()
-    snakemake_slurm.sample_name = "test_sample"
+    snakemake_slurm.case_name = "test_case"
     snakemake_slurm.working_dir = "/tmp/snakemake"
     snakemake_slurm.snakefile = "worflow/variantCalling_paired"
     snakemake_slurm.configfile = "sample_config.json"
@@ -101,7 +101,7 @@ def test_snakemake_slurm():
     assert "/tmp/snakemake" in shell_command
     assert "--dryrun" not in shell_command
     assert "sbatch.py" in shell_command
-    assert "test_sample" in shell_command
+    assert "test_case" in shell_command
     assert "containers" in shell_command
 
 
@@ -191,7 +191,7 @@ def test_get_vcf(sample_config):
 
     # WHEN passing args to that function
     vcf_list = get_vcf(sample_config, variant_callers,
-                       [sample_config["analysis"]["sample_id"]])
+                       [sample_config["analysis"]["case_id"]])
 
     # THEN It should return the list of vcf file names
     assert any("mutect" in vcf_name for vcf_name in vcf_list)

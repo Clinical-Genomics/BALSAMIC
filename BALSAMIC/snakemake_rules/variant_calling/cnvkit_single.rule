@@ -17,7 +17,7 @@ rule cnvkit_single:
   params:
     bed = cnv_dir + "CNV." + os.path.basename(config["panel"]["capture_kit"]), 
     refcnn = cnv_dir + "FlatReference.cnn",
-    name = config["analysis"]["sample_id"],
+    name = config["analysis"]["case_id"],
     outdir = cnv_dir,
     conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
   shell:
