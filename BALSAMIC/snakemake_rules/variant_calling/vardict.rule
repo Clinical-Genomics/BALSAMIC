@@ -26,7 +26,7 @@ rule vardict_paired:
     max_pval = "0.9",
     max_mm = "4.5",
     col_info = "-c 1 -S 2 -E 3 -g 4",
-    name = config["analysis"]["sample_id"],
+    name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
   shell:
     "source activate {params.conda}; "
@@ -44,7 +44,7 @@ rule vardict_merge:
   input:
     expand(vcf_dir + vardict_dir + "split_vcf/{chrom}_" + config["vcf"][var_caller]["default"], chrom=chromlist) 
   output:
-    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
   shell:
@@ -55,12 +55,12 @@ rule vardict_merge:
 
 rule vardict_simple:
   input:
-    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   output:
-    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".tbl", 
-    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".tbl", 
+    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   params:
-    name = config["analysis"]["sample_id"],
+    name = config["analysis"]["case_id"],
     MVL = os.path.join(config["rule_directory"], "assets", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
   shell:

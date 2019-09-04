@@ -30,7 +30,7 @@ class SnakeMake:
 
     Params:
     ------
-    sample_name     - sample name
+    case_name       - analysis case name
     working_dir     - working directory for snakemake
     configfile      - sample configuration file (json) output of -
                       balsamic-config-sample
@@ -49,7 +49,7 @@ class SnakeMake:
     """
 
     def __init__(self):
-        self.sample_name = None
+        self.case_name = None
         self.working_dir = None
         self.snakefile = None
         self.configfile = None
@@ -100,7 +100,7 @@ class SnakeMake:
             sbatch_cmd += " {dependencies} '"
 
             cluster_cmd = " --immediate-submit -j 300 " + \
-                " --jobname BALSAMIC." + self.sample_name + ".{rulename}.{jobid}.sh" + \
+                " --jobname BALSAMIC." + self.case_name + ".{rulename}.{jobid}.sh" + \
                 " --cluster-config " + self.cluster_config + \
                 " --cluster " + sbatch_cmd
 

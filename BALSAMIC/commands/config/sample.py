@@ -84,30 +84,30 @@ def get_analysis_type(normal, umi):
     return "paired" if normal else "single"
 
 
-def get_output_config(config, sample_id):
+def get_output_config(config, case_id):
     """ return output config json file"""
     if not config:
-        return sample_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
+        return case_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
     else:
         return config
 
 
-def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
+def get_sample_config(sample_config, case_id, analysis_dir, analysis_type):
     """
     creating sample config to run the analysis
     """
     with open(sample_config) as sample_json:
         sample_config = json.load(sample_json)
 
-    sample_config["analysis"]["sample_id"] = sample_id
+    sample_config["analysis"]["case_id"] = case_id
     sample_config["analysis"]["config_creation_date"] = datetime.now(
     ).strftime("%Y-%m-%d %H:%M")
     sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
-    sample_config["analysis"]["log"] = os.path.join(analysis_dir, sample_id,
+    sample_config["analysis"]["log"] = os.path.join(analysis_dir, case_id,
                                                     'logs/')
-    sample_config["analysis"]["script"] = os.path.join(analysis_dir, sample_id,
+    sample_config["analysis"]["script"] = os.path.join(analysis_dir, case_id,
                                                        'scripts/')
-    sample_config["analysis"]["result"] = os.path.join(analysis_dir, sample_id,
+    sample_config["analysis"]["result"] = os.path.join(analysis_dir, case_id,
                                                        'analysis')
     sample_config["analysis"]["analysis_type"] = analysis_type
     sample_config["samples"] = {}
@@ -227,7 +227,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               help="Fastq files for normal sample. \
               Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, \
               the input should be --normal normal_fqreads")
-@click.option("--sample-id",
+@click.option("--case-id",
               required=True,
               help="Sample id that is used for reporting, \
               naming the analysis jobs, and analysis path")
@@ -250,7 +250,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 @click.pass_context
 def sample(context, umi, umi_trim_length, quality_trim, adapter_trim,
            install_config, reference_config, panel_bed, output_config, normal,
-           tumor, sample_id, analysis_dir, overwrite_config, create_dir,
+           tumor, case_id, analysis_dir, overwrite_config, create_dir,
            fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
@@ -261,7 +261,7 @@ def sample(context, umi, umi_trim_length, quality_trim, adapter_trim,
         install_config = get_config("install")
 
     analysis_type = get_analysis_type(normal, umi)
-    output_config = get_output_config(output_config, sample_id)
+    output_config = get_output_config(output_config, case_id)
     analysis_config = get_config("analysis_" + analysis_type)
 
     LOG.info("Reading analysis config file %s" % analysis_config)
@@ -276,10 +276,10 @@ def sample(context, umi, umi_trim_length, quality_trim, adapter_trim,
     LOG.info("Reading sample config file %s" % sample_config_path)
 
     analysis_dir = os.path.abspath(analysis_dir)
-    sample_config = get_sample_config(sample_config_path, sample_id,
+    sample_config = get_sample_config(sample_config_path, case_id,
                                       analysis_dir, analysis_type)
 
-    output_dir = os.path.join(analysis_dir, sample_id)
+    output_dir = os.path.join(analysis_dir, case_id)
 
     if create_dir:
         os.makedirs(output_dir, exist_ok=True)
@@ -347,7 +347,7 @@ def sample(context, umi, umi_trim_length, quality_trim, adapter_trim,
                             configfile=output_config,
                             printrulegraph=True)
 
-    graph_title = "_".join(['BALSAMIC', bv, json_out["analysis"]["sample_id"]])
+    graph_title = "_".join(['BALSAMIC', bv, json_out["analysis"]["case_id"]])
     graph_dot = "".join(graph_dot).replace(
         'snakemake_dag {',
         'BALSAMIC { label="' + graph_title + '";labelloc="t";')
@@ -356,7 +356,7 @@ def sample(context, umi, umi_trim_length, quality_trim, adapter_trim,
                                 format="pdf",
                                 engine="dot")
     #    graph_obj.attr('graph',label='BALSAMIC')
-    #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
+    #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["case_id"]])
     if graph_obj.render():
         LOG.info(
             f'BALSAMIC Workflow has been configured successfully - {output_config}'

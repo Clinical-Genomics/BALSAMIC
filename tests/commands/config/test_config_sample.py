@@ -100,13 +100,13 @@ def test_get_analysis_type():
 
 def test_get_output_config():
     # GIVEN a config arg and sample id
-    sample_id = 'test_sample'
+    case_id = 'test_sample'
     config_json = 'config.json'
     _config_json = ''
 
     # WHEN passing values
-    config = get_output_config(config_json, sample_id)
-    _config = get_output_config(_config_json, sample_id)
+    config = get_output_config(config_json, case_id)
+    _config = get_output_config(_config_json, case_id)
 
     # THEN it will return config json file
     assert config != ''
@@ -117,19 +117,19 @@ def test_get_output_config():
 
 def test_get_sample_config(config_files):
     # GIVEN a sample config json with sample id, analysis dir, analysis type
-    sample_id = 'sample1'
+    case_id = 'sample1'
     sample_config = config_files['sample']
     analysis_dir = './'
     analysis_type = 'paired'
 
     # WHEN passing args into the function
-    sample_config = get_sample_config(sample_config, sample_id, analysis_dir,
+    sample_config = get_sample_config(sample_config, case_id, analysis_dir,
                                       analysis_type)
     date = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     # THEN it will return the updated python dict with given values
     assert isinstance(sample_config, dict)
-    assert sample_id in sample_config['analysis'].values()
+    assert case_id in sample_config['analysis'].values()
     assert date in sample_config['analysis'].values()
 
 
@@ -228,7 +228,7 @@ def test_get_fqpath_mismatch_error(sample_fastq):
 def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
                                     install_config, invoke_cli):
     # GIVEN input sample tumor and normal
-    test_sample_name = 'sample_tumor_normal'
+    test_case_name = 'sample_tumor_normal'
     test_tumor = sample_fastq['tumor']
     test_normal = sample_fastq['normal']
     test_panel_bed_file = 'tests/test_data/references/panel/panel.bed'
@@ -240,20 +240,20 @@ def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
         'config', 'sample', '-p', test_panel_bed_file, '-i', install_config,
         '-t',
         str(test_tumor), '-n',
-        str(test_normal), '--sample-id', test_sample_name, '--analysis-dir',
+        str(test_normal), '--case-id', test_case_name , '--analysis-dir',
         str(analysis_dir), '--output-config', test_sample_config_file_name,
         '--reference-config', test_reference_json
     ])
 
     assert result.exit_code == 0
-    assert Path(analysis_dir / test_sample_name /
+    assert Path(analysis_dir / test_case_name /
                 test_sample_config_file_name).exists()
 
 
 def test_config_sample_missing_install(tmp_path, sample_fastq, analysis_dir,
                                        invoke_cli):
     # GIVEN input sample tumor and normal
-    test_sample_name = 'sample_tumor_normal'
+    test_case_name = 'sample_tumor_normal'
     test_tumor = sample_fastq['tumor']
     test_normal = sample_fastq['normal']
     test_panel_bed_file = 'tests/test_data/references/panel/panel.bed'
@@ -265,7 +265,7 @@ def test_config_sample_missing_install(tmp_path, sample_fastq, analysis_dir,
     result = invoke_cli([
         'config', 'sample', '-p', test_panel_bed_file, '-t',
         str(test_tumor), '-n',
-        str(test_normal), '--sample-id', test_sample_name,
+        str(test_normal), '--case-id', test_case_name,
         '--analysis-dir',
         str(analysis_dir), '--output-config', test_sample_config_file_name,
         '--reference-config', test_reference_json
