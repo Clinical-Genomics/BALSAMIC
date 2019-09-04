@@ -15,13 +15,13 @@ rule sentieon_TN_corealign:
     mills = config["reference"]["mills_1kg"],
     indel_1kg = config["reference"]["known_indel_1kg"],
   output:
-    bam = bam_dir + config["analysis"]["sample_id"] + ".corealign.bam"
+    bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam"
   params:
     sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
     sentieon_lic = SENTIEON_LICENSE, 
   threads: 16
   log:
-    bam_dir + config["analysis"]["sample_id"] + ".corealign.log"
+    bam_dir + config["analysis"]["case_id"] + ".corealign.log"
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -30,12 +30,12 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_TNsnv:
   input:
-    bam = bam_dir + config["analysis"]["sample_id"] + ".corealign.bam",
+    bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam",
     ref = config["reference"]["reference_genome"],
     dbsnp = config["reference"]["dbsnp"],
   output:
-    vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.vcf.gz",
-    stats = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.call_stats",
+    vcf = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.vcf.gz",
+    stats = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.call_stats",
   params:
     tumor = get_sample_type(config["samples"], "tumor"),
     normal = get_sample_type(config["samples"], "normal"),
@@ -43,7 +43,7 @@ rule sentieon_TNsnv:
     sentieon_lic = SENTIEON_LICENSE, 
   threads: 16
   log:
-    bam_dir + config["analysis"]["sample_id"] + ".tnsnv.log"
+    bam_dir + config["analysis"]["case_id"] + ".tnsnv.log"
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -52,11 +52,11 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_TNhaplotyper:
   input:
-    bam = bam_dir + config["analysis"]["sample_id"] + ".corealign.bam",
+    bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam",
     ref = config["reference"]["reference_genome"],
     dbsnp = config["reference"]["dbsnp"],
   output:
-    vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnhaplotyper.vcf.gz",
+    vcf = vcf_dir + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
   params:
     tumor = get_sample_type(config["samples"], "tumor"),
     normal = get_sample_type(config["samples"], "normal"),
@@ -64,7 +64,7 @@ rule sentieon_TNhaplotyper:
     sentieon_lic = SENTIEON_LICENSE, 
   threads: 16
   log:
-    bam_dir + config["analysis"]["sample_id"] + ".tnsnv.log"
+    bam_dir + config["analysis"]["case_id"] + ".tnsnv.log"
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};

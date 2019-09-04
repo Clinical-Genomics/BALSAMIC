@@ -22,13 +22,14 @@ def test_config(invoke_cli):
     result = invoke_cli(['config'])
 
     # THEN It should show config options in result
-    assert 'sample' in result.output
+    assert 'case' in result.output
+    assert 'reference' in result.output
 
 
 def test_sample(invoke_cli):
     # GIVEN want to see config-sample params with help option
     # WHEN asking to show params for config-sample
-    result = invoke_cli(['config', 'sample', '--help'])
+    result = invoke_cli(['config', 'case', '--help'])
 
     # THEN It should show all params reuired for config-sample
     assert 'sample-id' in result.output
@@ -37,7 +38,7 @@ def test_sample(invoke_cli):
 
 def test_sample_missing_opt(invoke_cli):
     # WHEN invoking command with missing options
-    result = invoke_cli(['config', 'sample'])
+    result = invoke_cli(['config', 'case'])
 
     # THEN It should throw missiong option error
     assert 'Error: Missing option' in result.output

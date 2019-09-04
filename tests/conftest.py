@@ -155,7 +155,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
     """
-    sample_name = 'sample_tumor_normal'
+    case_name = 'sample_tumor_normal'
     tumor = sample_fastq['tumor']
     normal = sample_fastq['normal']
     panel_bed_file = 'tests/test_data/references/panel/panel.bed'
@@ -164,14 +164,14 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'sample', '-p', panel_bed_file, '-i', install_config, '-t',
+        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
         str(tumor), '-n',
-        str(normal), '--sample-id', sample_name, '--analysis-dir',
+        str(normal), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
 
-    return str(analysis_dir / sample_name / sample_config_file_name)
+    return str(analysis_dir / case_name / sample_config_file_name)
 
 
 @pytest.fixture(scope='session')
@@ -181,7 +181,7 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
     """
-    sample_name = 'sample_tumor_only'
+    case_name = 'sample_tumor_only'
     tumor = sample_fastq['tumor']
     panel_bed_file = 'tests/test_data/references/panel/panel.bed'
     reference_json = 'tests/test_data/references/reference.json'
@@ -189,13 +189,13 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'sample', '-p', panel_bed_file, '-i', install_config, '-t',
-        str(tumor), '--sample-id', sample_name, '--analysis-dir',
+        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
+        str(tumor), '--case-id', case_name , '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
 
-    return str(analysis_dir / sample_name / sample_config_file_name)
+    return str(analysis_dir / case_name / sample_config_file_name)
 
 
 @pytest.fixture(scope='session')
@@ -273,7 +273,7 @@ def sample_config():
             }
         },
         "analysis": {
-            "sample_id": "id1",
+            "case_id": "id1",
             "analysis_type": "paired",
             "analysis_dir": "tests/test_data/",
             "fastq_path": "tests/test_data/id1/fastq/",

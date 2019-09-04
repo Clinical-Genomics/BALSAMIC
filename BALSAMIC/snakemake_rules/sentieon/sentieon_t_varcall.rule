@@ -21,8 +21,8 @@ rule sentieon_TNsnv_tumor_only:
     dbsnp = config["reference"]["dbsnp"],
     cosmic = config["reference"]["cosmic"],
   output:
-    vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.vcf.gz",
-    stats = vcf_dir + config["analysis"]["sample_id"] + ".tnsnv.call_stats",
+    vcf = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.vcf.gz",
+    stats = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.call_stats",
   params:
     tumor = get_sample_type(config["samples"], "tumor"),
     pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
@@ -30,7 +30,7 @@ rule sentieon_TNsnv_tumor_only:
     sentieon_lic = SENTIEON_LICENSE, 
   threads: 16
   log:
-    bam_dir + config["analysis"]["sample_id"] + ".tnsnv.log"
+    bam_dir + config["analysis"]["case_id"] + ".tnsnv.log"
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -45,7 +45,7 @@ rule sentieon_TNhaplotyper_tumor_only:
     dbsnp = config["reference"]["dbsnp"],
     cosmic = config["reference"]["cosmic"],
   output:
-    vcf = vcf_dir + config["analysis"]["sample_id"] + ".tnhaplotyper.vcf.gz",
+    vcf = vcf_dir + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
   params:
     tumor = get_sample_type(config["samples"], "tumor"),
     pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
@@ -53,7 +53,7 @@ rule sentieon_TNhaplotyper_tumor_only:
     sentieon_lic = SENTIEON_LICENSE, 
   threads: 16
   log:
-    bam_dir + config["analysis"]["sample_id"] + ".tnsnv.log"
+    bam_dir + config["analysis"]["case_id"] + ".tnsnv.log"
   shell:
     """
 export SENTIEON_LICENSE={params.sentieon_lic};
