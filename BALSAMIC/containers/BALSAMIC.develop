@@ -27,7 +27,7 @@ From: centos:latest
     fi
 
     # create necessary directories
-    if [ ! -d /git_repos ]; then mkdir git_repos; fi
+    if [ ! -d /git_repos ]; then mkdir /git_repos; fi
     if [ ! -d /conda_envs ]; then mkdir /conda_envs; fi
 
     # set anaconda path
@@ -40,10 +40,40 @@ From: centos:latest
     # https://click.palletsprojects.com/en/7.x/python3/ for mitigation steps.
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
+
     cd /git_repos
     git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=develop
     cd BALSAMIC
-    ./install.sh -s D -d dev -p /usr/local/anaconda/envs
+
+    _env_name=D_BALSAMIC-base
+    _condapath="/conda_envs"
+
+    conda env create -f BALSAMIC/conda/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
+
+    source activate ${_env_name}
+    pip install -r requirements.txt --editable .
+
+    balsamic install -s singularity \
+      --overwrite-env \
+      --env-type D \
+      --input-conda-yaml BALSAMIC/conda/BALSAMIC-py27.yaml \
+      --input-conda-yaml BALSAMIC/conda/BALSAMIC-py36.yaml \
+      --env-dir-prefix ${_condapath} \
+      --packages-output-yaml BALSAMIC_env.yaml
+
+    gatk_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
+
+    source activate ${gatk_env}
+    gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
+
+    source deactivate
+    source activate ${_env_name}
+    picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
+    picard_conda_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
+    picard_destination=${picard_conda_env}/share/
+    cp $picard_PATH ${picard_destination}
+    # link picard from assets to conda's share path
+    ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
 
 %environment
     # The following fixes the error for Click
@@ -55,29 +85,5 @@ From: centos:latest
     export PATH=$PATH:/usr/local/anaconda/bin
     export BALSAMIC_STATUS='container'
 
-# D_BALSAMIC-base_dev
-%appenv D_BALSAMIC-base_dev
-    source activate D_BALSAMIC-base_dev
-%apphelp D_BALSAMIC-base_dev
-    Runs core BALSAMIC CLI.
-%apprun D_BALSAMIC-base_dev
-    exec "$@"
-
-# D_BALSAMIC-py27_dev
-%appenv D_BALSAMIC-py27_dev
-    source activate D_BALSAMIC-py27_dev
-%apphelp D_BALSAMIC-py27_dev
-    Runs D_BALSAMIC-py27_dev
-%apprun D_BALSAMIC-py27_dev
-    exec "$@"
-
-# D_BALSAMIC-py36_dev
-%appenv D_BALSAMIC-py36_dev
-    source activate D_BALSAMIC-py36_dev
-%apphelp D_BALSAMIC-py36_dev
-    Runs D_BALSAMIC-py36_dev
-%apprun D_BALSAMIC-py36_dev
-    exec "$@"
-
 %runscript
-    exec echo "Try running with --app"
+    exec "$@"
