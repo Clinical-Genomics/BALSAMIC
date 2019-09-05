@@ -62,7 +62,7 @@
         }
     },
     "analysis": {
-        "sample_id": "id1",
+        "case_id": "id1",
         "analysis_type": "paired",
         "analysis_dir": "tests/test_data/",
         "fastq_path": "tests/test_data/fastq/",

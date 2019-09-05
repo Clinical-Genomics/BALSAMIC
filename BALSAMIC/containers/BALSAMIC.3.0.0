@@ -27,7 +27,7 @@ From: centos:latest
     fi
 
     # create necessary directories
-    if [ ! -d /git_repos ]; then mkdir /git_repos; fi
+    if [ ! -d /git_repos ]; then mkdir git_repos; fi
     if [ ! -d /conda_envs ]; then mkdir /conda_envs; fi
 
     # set anaconda path
@@ -41,9 +41,9 @@ From: centos:latest
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
     cd /git_repos
-    git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=3.0.0
+    git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=release/3.0.0
     cd BALSAMIC
-    ./install.sh -s P -d master -p /usr/local/anaconda/envs
+    ./install.sh -s P -d 3_0_0_stable -p /usr/local/anaconda/envs
 
 %environment
     # The following fixes the error for Click
@@ -55,28 +55,28 @@ From: centos:latest
     export PATH=$PATH:/usr/local/anaconda/bin
     export BALSAMIC_STATUS='container'
 
-# P_BALSAMIC-base_master
-%appenv P_BALSAMIC-base_master
-    source activate P_BALSAMIC-base_master
-%apphelp P_BALSAMIC-base_master
+# P_BALSAMIC-base_3_0_0_stable
+%appenv P_BALSAMIC-base_3_0_0_stable
+    source activate P_BALSAMIC-base_3_0_0_stable
+%apphelp P_BALSAMIC-base_3_0_0_stable
     Runs core BALSAMIC CLI.
-%apprun P_BALSAMIC-base_master
+%apprun P_BALSAMIC-base_3_0_0_stable
     exec "$@"
 
-# P_BALSAMIC-py27_master
-%appenv P_BALSAMIC-py27_master
-    source activate P_BALSAMIC-py27_master
-%apphelp P_BALSAMIC-py27_master
-    Runs P_BALSAMIC-py27_master
-%apprun P_BALSAMIC-py27_master
+# P_BALSAMIC-py27_3_0_0_stable
+%appenv P_BALSAMIC-py27_3_0_0_stable
+    source activate P_BALSAMIC-py27_3_0_0_stable
+%apphelp P_BALSAMIC-py27_3_0_0_stable
+    Runs P_BALSAMIC-py27_3_0_0_stable
+%apprun P_BALSAMIC-py27_3_0_0_stable
     exec "$@"
 
-# P_BALSAMIC-py36_master
-%appenv P_BALSAMIC-py36_master
-    source activate P_BALSAMIC-py36_master
-%apphelp P_BALSAMIC-py36_master
-    Runs P_BALSAMIC-py36_master
-%apprun P_BALSAMIC-py36_master
+# P_BALSAMIC-py36_3_0_0_stable
+%appenv P_BALSAMIC-py36_3_0_0_stable
+    source activate P_BALSAMIC-py36_3_0_0_stable
+%apphelp P_BALSAMIC-py36_3_0_0_stable
+    Runs P_BALSAMIC-py36_3_0_0_stable
+%apprun P_BALSAMIC-py36_3_0_0_stable
     exec "$@"
 
 %runscript

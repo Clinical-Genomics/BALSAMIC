@@ -3,7 +3,7 @@ BALSAMIC
 ========
 
 Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 2.9.8)
+(**version** = 3.0.0)
 
 .. contents::
 
@@ -23,7 +23,7 @@ Base command
 
   Usage: balsamic [OPTIONS] COMMAND [ARGS]...
 
-    BALSAMIC 2.9.8: Bioinformatic Analysis pipeLine for SomAtic MutatIons in
+    BALSAMIC 3.0.0: Bioinformatic Analysis pipeLine for SomAtic MutatIons in
     Cancer
 
   Options:
@@ -36,111 +36,177 @@ Base command
     report   Report generator for workflow results
     run      Run BALSAMIC on a provided config file
 
-create config for sample analysis
+create config for case analysis
 ~~~~~~~~~~~~~
 
 ::
 
-    Usage: balsamic config [OPTIONS] COMMAND [ARGS]...
+  Usage: balsamic config [OPTIONS] COMMAND [ARGS]...
 
-      create config files required for running the pipeline and reporting it
+    create config files required for running the pipeline.
 
-    Options:
-      --help  Show this message and exit.
+  Options:
+    --help  Show this message and exit.
 
-    Commands:
-      report  Create a report config file for report generation.
-      sample  Create a sample config file from input sample data
-
-::
-
-    Usage: balsamic config sample [OPTIONS]
-
-          Prepares a config file for balsamic run_analysis. For now it is just
-          treating json as dictionary and merging them as it is. So this is just
-          a placeholder for future.
-
-
-
-    Options:
-      -a, --analysis-type [paired|single]
-                                      Analysis config file for paired (tumor vs
-                                      normal) or single (tumor-only) mode.
-                                      [default: paired]
-      -i, --install-config PATH       Installation config file.  [default: /home/h
-                                      assan.foroughi/repo/BALSAMIC/BALSAMIC/config
-                                      /install.json]
-      -r, --reference-config PATH     Reference config file.  [default: /home/hass
-                                      an.foroughi/repo/BALSAMIC/BALSAMIC/config/re
-                                      ference.json]
-      -p, --panel-bed PATH            Panel bed file for variant calling.
-                                      [required]
-      -s, --sample-config PATH        Input sample config file.
-      -o, --output-config PATH        Output a json config file ready to be
-                                      imported for run-analysis  [required]
-      -t, --tumor TEXT                Fastq files for tumor sample. Example:
-                                      --tumor tumor_1.fastq.gz tumor_2.fastq.gz
-      -n, --normal TEXT               Fastq files for normal sample. Example:
-                                      --normal normal_1.fastq.gz normal_2.fastq.gz
-      --sample-id TEXT                Sample id that is used for reporting, naming
-                                      the analysis jobs, and analysis path
-      --analysis-dir PATH             Root analysis path to store analysis logs
-                                      and results. The final path will be
-                                      analysis-dir/sample-id
-      --fastq-path PATH               Path for fastq files. All fastq files should
-                                      be within same path and that path has to
-                                      exist.
-      --help                          Show this message and exit.
-
+  Commands:
+    case       Create a sample config file from input sample data
+    reference  config workflow for generate reference
 
 ::
 
-    Usage: balsamic config report [OPTIONS]
+  Usage: balsamic config case [OPTIONS]
 
-      Prepares a config file for balsamic config report to export results as pdf
+    Prepares a config file for balsamic run_analysis. For now it is just
+    treating json as dictionary and merging them as it is. So this is just a
+    placeholder for future.
 
-    Options:
-      -s, --sample-config PATH  Sample json config file.  [required]
-      -o, --output-config PATH  Path to output config file to write.  [required]
-      --help                    Show this message and exit.v
+  Options:
+    --umi / --no-umi                UMI processing steps for samples with umi
+                                    tags  [default: True]
+    --umi-trim-length INTEGER       Trim N bases from reads in fastq  [default:
+                                    5]
+    --quality-trim / --no-quality-trim
+                                    Trim low quality reads in fastq  [default:
+                                    True]
+    --adapter-trim / --no-adapter-trim
+                                    Trim adapters from reads in fastq  [default:
+                                    False]
+    -i, --install-config PATH       Installation config file.
+    -r, --reference-config PATH     Reference config file.  [required]
+    -p, --panel-bed PATH            Panel bed file for variant calling.
+                                    [required]
+    -o, --output-config TEXT        Output a json config filename ready to be
+                                    imported for run-analysis
+    -t, --tumor TEXT                Fastq files for tumor sample.
+                                    Example: if files are
+                                    tumor_fqreads_1.fastq.gz
+                                    tumor_fqreads_2.fastq.gz,               the
+                                    input should be --tumor tumor_fqreads
+                                    [required]
+    -n, --normal TEXT               Fastq files for normal sample.
+                                    Example: if files are
+                                    normal_fqreads_1.fastq.gz
+                                    normal_fqreads_2.fastq.gz,               the
+                                    input should be --normal normal_fqreads
+    --case-id TEXT                  Sample id that is used for reporting,
+                                    naming the analysis jobs, and analysis path
+                                    [required]
+    --fastq-prefix TEXT             Prefix to fastq file.               The
+                                    string that comes after readprefix
+    --analysis-dir PATH             Root analysis path to store
+                                    analysis logs and results. The final path
+                                    will be analysis-dir/sample-id
+    --overwrite-config / --no-overwrite-config
+                                    Overwrite output config file
+    --create-dir / --no-create-dir  Create analysis directiry.
+    --help                          Show this message and exit.
 
-run analysis
+::
+
+  Usage: balsamic config reference [OPTIONS]
+
+    Configure workflow for reference generation
+
+  Options:
+    -o, --outdir TEXT          output directory for ref files eg: reference
+                               [required]
+    -i, --install-config PATH  install config file.
+    -c, --cosmic-key TEXT      cosmic db authentication key  [required]
+    -s, --snakefile PATH       snakefile for reference generation  [default:
+                               /home/proj/long-term-stage/cancer/BALSAMIC/BALSAM
+                               IC/workflows/GenerateRef]
+    -d, --dagfile TEXT         DAG file for overview  [default:
+                               generate_ref_worflow_graph]
+    --singularity              To run the workflow on container
+    --help                     Show this message and exit.
+
+run case analysis and reference creation
 ~~~~~~~~~~~~
 
 ::
 
-    Usage: balsamic run [OPTIONS]
+  Usage: balsamic run [OPTIONS] COMMAND [ARGS]...
 
-      Runs BALSAMIC workflow on the provided sample's config file
+    Run BALSAMIC on a provided config file
 
-    Options:
-      -S, --snake-file PATH      Snakefile required for snakemake to function.
-      -s, --sample-config PATH   Sample json config file.  [required]
-      -c, --cluster-config PATH  SLURM config json file.  [default: /home/hassan.f
-                                 oroughi/repo/BALSAMIC/BALSAMIC/config/cluster.jso
-                                 n]
-      -l, --log-file PATH        Log file output for BALSAMIC. This is raw log
-                                 output from snakemake.
-      -r, --run-analysis         By default balsamic run_analysis will run in dry
-                                 run mode. Raise thise flag to make the actual
-                                 analysis  [default: False]
-      -f, --force-all            Force run all analysis. This is same as snakemake
-                                 --forceall  [default: False]
-      --snakemake-opt TEXT       Pass these options directly to snakemake
-      --help                     Show this message and exit.
+  Options:
+    --help  Show this message and exit.
 
-report generation
-~~~~~~~~~~~~
+  Commands:
+    analysis   Run the analysis on a provided sample config-file
+    reference  Run the GenerateRef workflow
 
 ::
-    
-    Usage: balsamic report [OPTIONS]
 
-    Options:
-      -j, --json-report PATH     Input JSON file from workflow output  [required]
-      -c, --json-varreport PATH  Input JSON file for variant filters  [required]
-      -r, --rulegraph-img PATH   Input rulegraph from workflow output
-      --help                     Show this message and exit.
+  Usage: balsamic run analysis [OPTIONS]
+
+    Runs BALSAMIC workflow on the provided sample's config file
+
+  Options:
+    -a, --analysis-type [qc|paired|single|paired_umi]
+                                    Type of analysis to run from input config
+                                    file.              By default it will read
+                                    from config file, but it will override
+                                    config file               if it is set here.
+    -S, --snake-file PATH           Input for a custom snakefile. WARNING: This
+                                    is for internal testing,              and
+                                    should not be used. Providing a snakefile
+                                    supersedes analysis_type option.
+    -s, --sample-config PATH        Sample json config file.  [required]
+    --run-mode [local|slurm]        Run mode to use. By default SLURM will be
+                                    used to run the analysis.              But
+                                    local runner also available for local
+                                    computing  [default: slurm]
+    -c, --cluster-config PATH       SLURM config json file.  [default:
+                                    /home/proj/long-term-stage/cancer/BALSAMIC/B
+                                    ALSAMIC/config/cluster.json]
+    -l, --log-file PATH             Log file output for BALSAMIC.
+                                    This is raw log output from snakemake.
+    -r, --run-analysis              By default balsamic run_analysis will run in
+                                    dry run mode.               Raise thise flag
+                                    to make the actual analysis  [default:
+                                    False]
+    --qos [low|normal|high]         QOS for sbatch jobs. Passed to
+                                    /home/proj/long-term-stage/cancer/BALSAMIC/B
+                                    ALSAMIC/commands/run/sbatch.py  [default:
+                                    low]
+    -f, --force-all                 Force run all analysis. This is same as
+                                    snakemake --forceall  [default: False]
+    --snakemake-opt TEXT            Pass these options directly to snakemake
+    --slurm-account TEXT            SLURM account to run jobs
+    --slurm-mail-user TEXT          SLURM mail user to send out email.
+    --slurm-mail-type [NONE|BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT]
+                                    SLURM mail type to send out email.
+                                    This will be applied to all jobs and
+                                    override snakemake settings.
+    --help                          Show this message and exit.
+
+::
+
+  Usage: balsamic run reference [OPTIONS]
+
+    Run generate reference workflow
+
+  Options:
+    -s, --snakefile TEXT      snakefile for reference generation
+    -c, --configfile TEXT     Config file to run the workflow  [required]
+    --run-mode [slurm|local]  Run mode to use.(LOCAL, SLURM for HPC)
+    --cluster-config PATH     SLURM config json file.  [default:
+                              /home/proj/long-term-stage/cancer/BALSAMIC/BALSAMI
+                              C/config/cluster.json]
+    -l, --log-file PATH       Log file output for BALSAMIC. This is raw log
+                              output from snakemake.
+    -r, --run-analysis        By default balsamic run_analysis will run in dry
+                              run mode.               Raise thise flag to make
+                              the actual analysis  [default: False]
+    --qos [low|normal|high]   QOS for sbatch jobs. Passed to /home/proj/long-
+                              term-stage/cancer/BALSAMIC/BALSAMIC/commands/run/s
+                              batch.py  [default: low]
+    -f, --force-all           Force run all analysis. This is same as snakemake
+                              --forceall  [default: False]
+    --snakemake-opt TEXT      Pass these options directly to snakemake
+    --help                    Show this message and exit.
+
 
 Misc. internal commands
 ~~~~~~~~~
@@ -200,21 +266,3 @@ The final config file is then set as input for ``run`` subcommand.
 
   balsamic run \
     --sample-config sample_analysis_config_file_name -r
-
-After the analysis is finished, the following commands will generate a PDF report
-
-.. code-block:: shell
-
-  balsamic config report --sample-config sample_analysis_config_file_name \
-    --output-config sample_report_config_file
-    
-  balsamic report \
-    --json-report sample_report_config_file \
-    --json-varreport path_to_BALSAMIC_repo/BALSAMIC/BALSAMIC/config/MSK_impact.json \
- 
-Config files
-------------
-
-BALSAMIC requires two config files: job submission configuration and
-analysis configuration. Configurations and their template can be found
-within ``config`` directory.

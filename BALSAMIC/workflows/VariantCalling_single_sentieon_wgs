@@ -21,6 +21,8 @@ SENTIEON_LICENSE = "10.10.10.1:8990"
 SENTIEON_INSTALL_DIR="/home/proj/development/cancer/sentieon/sentieon-genomics-201808.03"
 
 include:
+  os.path.join(rule_dir , "snakemake_rules/quality_control/fastp.rule") 
+include:
   os.path.join(rule_dir , "snakemake_rules/sentieon/sentieon_align_recall.rule") 
 include:
   os.path.join(rule_dir , "snakemake_rules/sentieon/sentieon_t_varcall.rule") 
@@ -33,7 +35,7 @@ rule all:
     expand(bam_dir + "{sample}.dedup.realign.recal_data.table", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.recal.csv", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.recal.pdf", sample=config["samples"]),
-    expand(vcf_dir + config["analysis"]["sample_id"] + ".{algo}.vcf.gz", algo = ["tnsnv", "tnhaplotyper"])
+    expand(vcf_dir + config["analysis"]["case_id"] + ".{algo}.vcf.gz", algo = ["tnsnv", "tnhaplotyper"])
   output:
     os.path.join(get_result_dir(config), "analysis_finish")
   shell:

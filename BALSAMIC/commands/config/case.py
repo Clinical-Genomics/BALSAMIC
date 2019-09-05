@@ -77,36 +77,37 @@ def check_exist(path):
 
 def get_analysis_type(normal, umi):
     """ return analysis type """
-    if umi:
-        return "paired_umi" if normal else "single_umi"
+    #Temporarily disabling umi workflow
+    #    if umi:
+    #        return "paired_umi" if normal else "single_umi"
 
     return "paired" if normal else "single"
 
 
-def get_output_config(config, sample_id):
+def get_output_config(config, case_id):
     """ return output config json file"""
     if not config:
-        return sample_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
+        return case_id + "_" + datetime.now().strftime("%Y%m%d") + ".json"
     else:
         return config
 
 
-def get_sample_config(sample_config, sample_id, analysis_dir, analysis_type):
+def get_sample_config(sample_config, case_id, analysis_dir, analysis_type):
     """
     creating sample config to run the analysis
     """
     with open(sample_config) as sample_json:
         sample_config = json.load(sample_json)
 
-    sample_config["analysis"]["sample_id"] = sample_id
+    sample_config["analysis"]["case_id"] = case_id
     sample_config["analysis"]["config_creation_date"] = datetime.now(
     ).strftime("%Y-%m-%d %H:%M")
     sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
-    sample_config["analysis"]["log"] = os.path.join(analysis_dir, sample_id,
+    sample_config["analysis"]["log"] = os.path.join(analysis_dir, case_id,
                                                     'logs/')
-    sample_config["analysis"]["script"] = os.path.join(analysis_dir, sample_id,
+    sample_config["analysis"]["script"] = os.path.join(analysis_dir, case_id,
                                                        'scripts/')
-    sample_config["analysis"]["result"] = os.path.join(analysis_dir, sample_id,
+    sample_config["analysis"]["result"] = os.path.join(analysis_dir, case_id,
                                                        'analysis')
     sample_config["analysis"]["analysis_type"] = analysis_type
     sample_config["samples"] = {}
@@ -139,7 +140,9 @@ def get_fastq_path(file, fq_pattern):
             file_str = file_basename[0:(
                 fq_pattern.search(file_basename).span()[0] + 1)]
         except AttributeError as error:
-            LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
+            LOG.error(
+                f"File name is invalid, fastq file should be sample_R_1.fastq.gz"
+            )
             raise click.Abort()
     else:
         LOG.error(f"{file} is not found, update correct file path")
@@ -172,11 +175,24 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     return sample_str
 
 
-@click.command("sample",
+@click.command("case",
                short_help="Create a sample config file from input sample data")
-@click.option('--umi',
-              is_flag=True,
+@click.option('--umi/--no-umi',
+              default=True,
+              show_default=True,
               help="UMI processing steps for samples with umi tags")
+@click.option('--umi-trim-length',
+              default=5,
+              show_default=True,
+              help='Trim N bases from reads in fastq')
+@click.option('--quality-trim/--no-quality-trim',
+              default=True,
+              show_default=True,
+              help='Trim low quality reads in fastq')
+@click.option('--adapter-trim/--no-adapter-trim',
+              default=False,
+              show_default=True,
+              help='Trim adapters from reads in fastq')
 @click.option("-i",
               "--install-config",
               required=False,
@@ -202,6 +218,10 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     "-t",
     "--tumor",
     required=True,
+<<<<<<< HEAD
+=======
+    multiple=True,
+>>>>>>> origin/master
     help="Fastq files for tumor sample. \
               Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, \
               the input should be --tumor tumor_fqreads",
@@ -211,7 +231,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               help="Fastq files for normal sample. \
               Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, \
               the input should be --normal normal_fqreads")
-@click.option("--sample-id",
+@click.option("--case-id",
               required=True,
               help="Sample id that is used for reporting, \
               naming the analysis jobs, and analysis path")
@@ -232,9 +252,10 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=True,
               help="Create analysis directiry.")
 @click.pass_context
-def sample(context, umi, install_config, reference_config,
-           panel_bed, output_config, normal, tumor, sample_id, analysis_dir,
-           overwrite_config, create_dir, fastq_prefix):
+def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
+                install_config, reference_config, panel_bed, output_config,
+                normal, tumor, case_id, analysis_dir, overwrite_config,
+                create_dir, fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
@@ -244,7 +265,7 @@ def sample(context, umi, install_config, reference_config,
         install_config = get_config("install")
 
     analysis_type = get_analysis_type(normal, umi)
-    output_config = get_output_config(output_config, sample_id)
+    output_config = get_output_config(output_config, case_id)
     analysis_config = get_config("analysis_" + analysis_type)
 
     LOG.info("Reading analysis config file %s" % analysis_config)
@@ -259,10 +280,10 @@ def sample(context, umi, install_config, reference_config,
     LOG.info("Reading sample config file %s" % sample_config_path)
 
     analysis_dir = os.path.abspath(analysis_dir)
-    sample_config = get_sample_config(sample_config_path, sample_id,
+    sample_config = get_sample_config(sample_config_path, case_id,
                                       analysis_dir, analysis_type)
 
-    output_dir = os.path.join(analysis_dir, sample_id)
+    output_dir = os.path.join(analysis_dir, case_id)
 
     if create_dir:
         os.makedirs(output_dir, exist_ok=True)
@@ -271,17 +292,17 @@ def sample(context, umi, install_config, reference_config,
     fq_path = os.path.join(output_dir, 'analysis', 'fastq')
     os.makedirs(fq_path, exist_ok=True)
 
-    tumor = configure_fastq(fq_path, tumor, fastq_prefix)
+    for t in tumor:
+      t = configure_fastq(fq_path, t, fastq_prefix)
+
+      sample_config["samples"][t] = {
+          "file_prefix": t,
+          "type": "tumor",
+          "readpair_suffix": read_prefix,
+      }
+
     if normal:
         normal = configure_fastq(fq_path, normal, fastq_prefix)
-
-    sample_config["samples"][tumor] = {
-        "file_prefix": tumor,
-        "type": "tumor",
-        "readpair_suffix": read_prefix,
-    }
-
-    if normal:
         sample_config["samples"][normal] = {
             "file_prefix": normal,
             "type": "normal",
@@ -299,11 +320,17 @@ def sample(context, umi, install_config, reference_config,
     bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)
 
     output_config = os.path.join(output_dir, output_config)
-    LOG.info(
-        "Writing output config file %s" % os.path.abspath(output_config))
+    LOG.info("Writing output config file %s" % os.path.abspath(output_config))
 
     json_out = merge_json(analysis_config, sample_config, reference_json,
                           install_config, bioinfo_config)
+
+    if umi:
+        json_out["QC"]["umi_trim"] = str(umi)
+        json_out["QC"]["umi_trim_length"] = str(umi_trim_length)
+
+    json_out["QC"]["quality_trim"] = str(quality_trim)
+    json_out["QC"]["adapter_trim"] = str(adapter_trim)
 
     dag_image = os.path.join(output_dir,
                              output_config + '_BALSAMIC_' + bv + '_graph')
@@ -324,7 +351,7 @@ def sample(context, umi, install_config, reference_config,
                             configfile=output_config,
                             printrulegraph=True)
 
-    graph_title = "_".join(['BALSAMIC', bv, json_out["analysis"]["sample_id"]])
+    graph_title = "_".join(['BALSAMIC', bv, json_out["analysis"]["case_id"]])
     graph_dot = "".join(graph_dot).replace(
         'snakemake_dag {',
         'BALSAMIC { label="' + graph_title + '";labelloc="t";')
@@ -333,9 +360,11 @@ def sample(context, umi, install_config, reference_config,
                                 format="pdf",
                                 engine="dot")
     #    graph_obj.attr('graph',label='BALSAMIC')
-    #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["sample_id"]])
+    #    graph_obj.graph_attr['label'] = "_".join(['BALSAMIC',bv,json_out["analysis"]["case_id"]])
     if graph_obj.render():
-        LOG.info(f'BALSAMIC Workflow has been configured successfully - {output_config}')
+        LOG.info(
+            f'BALSAMIC Workflow has been configured successfully - {output_config}'
+        )
     else:
         LOG.error(f'BALSAMIC dag graph generation failed - {dag_image}')
         raise click.Abort()

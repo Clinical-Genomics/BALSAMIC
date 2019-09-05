@@ -7,6 +7,7 @@
         "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
         "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
         "vep": "tests/test_data/references/vep/",
+        "refflat": "tests/test_data/references/genome/refseq.flat", 
         "exon_bed": "tests/test_data/references/genome/refseq.flat.bed"
     }
 }
