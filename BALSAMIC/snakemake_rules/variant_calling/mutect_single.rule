@@ -3,24 +3,24 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom
+import os
+from BALSAMIC.utils.rule import get_conda_env, get_chrom
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_caller = "mutect"
 mutect_dir = var_caller + "/"
 picarddup = get_picard_mrkdup(config)
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
+chromlist = config["panel"]["chrom"]
+capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 rule mutect2_somatic_single:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
-    dbsnp = config["path"]["genomefa"] + config["references"]["dbsnp_all"],
-    cosmic = config["path"]["genomefa"] + config["references"]["cosmic"],
+    fa = config["reference"]["reference_genome"],
+    dbsnp = config["reference"]["dbsnp"],
+    cosmic = config["reference"]["cosmic"],
     bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
-    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + config["bed"]["capture_kit"],
+    bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + capture_kit,
   output:
     vcf_dir + mutect_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"][var_caller]["default"] + ".gz"
   params:
@@ -46,7 +46,7 @@ rule mutect2_merge:
   input:
     expand(vcf_dir + mutect_dir + "split_vcf/{chrom}_" + config["vcf"][var_caller]["default"] + ".gz", chrom=chromlist) 
   output:
-    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
@@ -57,13 +57,13 @@ rule mutect2_merge:
 
 rule mutect_simple:
   input:
-    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz", 
+    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz", 
   output:
-    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".tbl", 
-    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".tbl", 
+    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   params:
-    name = config["analysis"]["sample_id"],
-    MVL = os.path.join(config["rule_directory"], "assests", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
+    name = config["analysis"]["case_id"],
+    MVL = os.path.join(config["rule_directory"], "assets", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
   shell:
     "source activate {params.conda};"

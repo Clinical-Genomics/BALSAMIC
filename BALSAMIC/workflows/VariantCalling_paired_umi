@@ -3,11 +3,20 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_result_dir, get_vcf
+from BALSAMIC.utils.rule import get_result_dir, get_vcf
 
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+bam_dir = get_result_dir(config) + "/bam/"
+cnv_dir = get_result_dir(config) + "/cnv/"
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
+fastqc_dir = get_result_dir(config) + "/fastqc/"
+result_dir = get_result_dir(config) + "/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
+
+include:
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem_umi.rule"
@@ -26,16 +35,12 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/manta.rule"
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
-
 var_type = ["SNV", "SV"]
 var_class = ["somatic", "germline"]
 
 rule all:
   input:
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["vardict", "strelka"], [config["analysis"]["sample_id"]])),
+    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["vardict", "strelka"], [config["analysis"]["case_id"]])),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.metrics", sample=config["samples"])
   output:

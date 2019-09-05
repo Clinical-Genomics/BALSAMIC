@@ -3,11 +3,13 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_sample_type
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_sample_type
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
-bam_dir = get_result_dir(config) + "/bam/"
 picarddup = get_picard_mrkdup(config)
+
+picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
+picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
 rule mergeBam_normal_gatk:
   input:
@@ -15,10 +17,14 @@ rule mergeBam_normal_gatk:
   output:
     bamN = bam_dir + "normal.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    picard=picard_extra_normal
   shell:
     "source activate {params.conda}; "
-    "samtools merge {output.bamN} {input.bamN}; samtools index {output.bamN}; "
+    "samtools merge {output.bamN}.tmp {input.bamN}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={output.bamN}.tmp OUTPUT={output.bamN}; "
+    "samtools index {output.bamN}; "
+    "rm {output.bamN}.tmp; "
     "source deactivate; "
 
 rule mergeBam_normal:
@@ -27,22 +33,14 @@ rule mergeBam_normal:
   output:
     bamN = bam_dir + "normal.merged.bam", 
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    picard=picard_extra_normal
   shell:
     "source activate {params.conda}; "
-    "samtools merge {output.bamN} {input.bamN}; samtools index {output.bamN}; "
-    "source deactivate; "
-
-rule mergeBam_tumor_gatk:
-  input:
-    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
-  output:
-    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
-  params:
-    conda = get_conda_env(config["conda_env_yaml"],"samtools")
-  shell:
-    "source activate {params.conda}; "
-    "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
+    "samtools merge {output.bamN}.tmp {input.bamN}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={output.bamN}.tmp OUTPUT={output.bamN}; "
+    "samtools index {output.bamN}; "
+    "rm {output.bamN}.tmp; "
     "source deactivate; "
 
 rule mergeBam_tumor:
@@ -51,8 +49,28 @@ rule mergeBam_tumor:
   output:
     bamT = bam_dir + "tumor.merged.bam",
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    picard=picard_extra_tumor
   shell:
     "source activate {params.conda}; "
-    "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
+    "samtools merge {output.bamT}.tmp {input.bamT}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={output.bamT}.tmp OUTPUT={output.bamT}; "
+    "samtools index {output.bamT}; "
+    "rm {output.bamT}.tmp; "
+    "source deactivate; "
+
+rule mergeBam_tumor_gatk:
+  input:
+    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
+  output:
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    picard=picard_extra_tumor
+  shell:
+    "source activate {params.conda}; "
+    "samtools merge {output.bamT}.tmp {input.bamT}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={output.bamT}.tmp OUTPUT={output.bamT}; "
+    "samtools index {output.bamT}; "
+    "rm {output.bamT}.tmp; "
     "source deactivate; "

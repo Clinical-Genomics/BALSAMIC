@@ -3,16 +3,24 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_result_dir
+from BALSAMIC.utils.rule import get_result_dir
 
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+fastq_dir = get_result_dir(config) + "/fastq/"
+bam_dir = get_result_dir(config) + "/bam/"
+cnv_dir = get_result_dir(config) + "/cnv/"
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
+fastqc_dir = get_result_dir(config) + "/fastqc/"
+result_dir = get_result_dir(config) + "/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
+  rule_dir + "snakemake_rules/quality_control/fastp.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/fastqc.rule"
 include:
@@ -22,31 +30,14 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/collectqc_single.rule"
+  rule_dir + "snakemake_rules/quality_control/multiqc.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/mergetype_tumor.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/manta_single.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/mutect_single.rule"
-include:
-  rule_dir + "snakemake_rules/annotation/vep.rule"
 
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
-
-var_type = ["SNV", "SV"]
 rule all:
   input:
-    os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
+    os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
   output:
     os.path.join(get_result_dir(config), "analysis_finish")
   shell:

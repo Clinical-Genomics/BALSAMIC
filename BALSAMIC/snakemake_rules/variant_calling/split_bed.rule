@@ -3,23 +3,23 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_chrom, get_picard_mrkdup
+import os
+from BALSAMIC.utils.rule import get_conda_env, get_chrom, get_picard_mrkdup
 
-vcf_dir = get_result_dir(config) + "/vcf/"
-bam_dir = get_result_dir(config) + "/bam/"
 
-chromlist = get_chrom(config["path"]["panel"] + config["bed"]["capture_kit"])
+chromlist = config["panel"]["chrom"]
+capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 picarddup = get_picard_mrkdup(config)
 
 rule split_bed_by_chrom:
   input:
-    bed = config["path"]["panel"] + config["bed"]["capture_kit"],
+    bed = config["panel"]["capture_kit"],
     bam = bam_dir + "tumor.merged.bam"
   output:
-    bed = expand(vcf_dir + "split_bed/" + "{chrom}." + config["bed"]["capture_kit"], chrom=chromlist) 
+    bed = expand(vcf_dir + "split_bed/" + "{chrom}." + capture_kit, chrom=chromlist) 
   params:
     split_bed_dir = vcf_dir + "split_bed/",
-    origin_bed = config["bed"]["capture_kit"],
+    origin_bed = capture_kit,
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "chromlist=`cut -f 1 {input.bed} | sort -u`; "

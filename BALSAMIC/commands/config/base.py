@@ -1,23 +1,16 @@
 #!/usr/bin/env python
-import os
-import subprocess
-import hashlib
-import yaml
 import click
-import logging
-import sys
-import json
-from yapf.yapflib.yapf_api import FormatFile
 
-from BALSAMIC.commands.config.sample import sample as sample_command
-from BALSAMIC.commands.config.report import report as report_command
- 
+from BALSAMIC.commands.config.case import case_config as case_command
+from BALSAMIC.commands.config.reference import reference as reference_command
+
+
 @click.group()
 @click.pass_context
-
 def config(context):
-    "create config files required for running the pipeline and reporting it"
+    "create config files required for running the pipeline."
     pass
 
-config.add_command(sample_command)
-config.add_command(report_command)
+
+config.add_command(case_command)
+config.add_command(reference_command)

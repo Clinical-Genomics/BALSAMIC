@@ -3,12 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.utils.rule import get_conda_env
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-#vcf_sv_dir = get_result_dir(config) + "/vcf/SV/"
-vep_dir = get_result_dir(config) + "/vep/"
 
 rule vep:
   input:
@@ -18,7 +14,7 @@ rule vep:
     vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
-    vep_cache = config["path"]["vep_cache"]
+    vep_cache = config["reference"]["vep"]
   threads: 4
   shell:
     "source activate {params.conda}; "
@@ -35,6 +31,7 @@ rule vep:
         "--format vcf "
         "--offline "
         "--variant_class "
+        "--merged "
         "--cache "
         "--verbose "
         "--force_overwrite && "

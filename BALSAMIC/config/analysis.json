@@ -1,0 +1,123 @@
+{
+  "QC": {
+    "picard_rmdup": "False",
+    "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+    "min_seq_length": "25",
+    "quality_trim": "False",
+    "adapter_trim": "False",
+    "umi_trim": "False",
+    "umi_trim_length": "5"
+  },
+  "vcf": {
+    "manta_single": {
+      "mode": ["single"],
+      "wgs": "False",
+      "default": [
+        "tumorSV.vcf.gz", "candidateSV.vcf.gz",
+        "candidateSmallIndels.vcf.gz"
+      ],
+      "mutation": "somatic",
+      "merged": "manta.vcf.gz",
+      "type": "SV"
+    },
+    "manta_paired": {
+      "mode": ["paired"],
+      "wgs": "False",
+      "default": [
+        "diploidSV.vcf.gz", "somaticSV.vcf.gz", "candidateSV.vcf.gz",
+        "candidateSmallIndels.vcf.gz"
+      ],
+      "merged": "manta.vcf.gz",
+      "mutation": "somatic",
+      "type": "SV"
+    },
+    "pindel": {
+      "mode": ["single"],
+      "wgs": "False",
+      "default": "pindel.vcf.gz",
+      "mutation": "somatic",
+      "merged": "pindel.vcf.gz",
+      "type": "SV"
+    },
+    "strelka": {
+      "mode": ["paired"],
+      "wgs": "False",
+      "default": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
+      "mutation": "somatic",
+      "merged": "strelka.vcf.gz",
+      "type": "SNV"
+    },
+    "mutect": {
+      "mode": ["paired", "single"],
+      "wgs": "False",
+      "default": "mutect.vcf.gz",
+      "mutation": "somatic",
+      "merged": "mutect.vcf.gz",
+      "type": "SNV"
+    },
+    "vardict": {
+      "mode": ["paired", "single"],
+      "wgs": "False",
+      "default": "vardict.vcf.gz",
+      "mutation": "somatic",
+      "merged": "vardict.vcf.gz",
+      "type": "SNV"
+    },
+    "sentieon_tnsnv": {
+      "mode": ["paired", "single"],
+      "wgs": "True",
+      "default": "sentieon_tnsnv.vcf.gz",
+      "mutation": "somatic",
+      "merged": "sentieon_tnsnv.vcf.gz",
+      "type": "SNV"
+    },
+    "sentieon_tnscope": {
+      "mode": ["paired", "single"],
+      "wgs": "True",
+      "default": "sentieon_tnscope.vcf.gz",
+      "mutation": "somatic",
+      "merged": "sentieon_tnscope.vcf.gz",
+      "type": "SNV"
+    },
+    "sentieon_tnhaplotyper": {
+      "mode": ["paired", "single"],
+      "wgs": "True",
+      "default": "sentieon_tnhaplotyper.vcf.gz",
+      "mutation": "somatic",
+      "merged": "sentieon_tnhaplotyper.vcf.gz",
+      "type": "SNV"
+    },
+    "freebayes": {
+      "mode": ["paired", "single"],
+      "wgs": "False",
+      "default": "freebayes.vcf.gz",
+      "mutation": "germline",
+      "merged": "freebayes.vcf.gz",
+      "type": "SNV"
+    },
+    "haplotypecaller": {
+      "mode": ["paired", "single"],
+      "wgs": "False",
+      "default": "haplotypecaller.vcf.gz",
+      "mutation": "germline",
+      "merged": "haplotypecaller.vcf.gz",
+      "type": "SNV"
+    },
+    "strelka_germline": {
+      "mode": ["paired", "single"],
+      "wgs": "False",
+      "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
+      "mutation": "germline",
+      "merged": "strelka_germline.vcf.gz",
+      "type": "SNV"
+    },
+    "manta_germline": {
+      "mode": ["paired", "single"],
+      "wgs": "False",
+      "default": ["diploidSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"],
+      "mutation": "germline",
+      "merged": "manta_germline.vcf.gz",
+      "type": "SV"
+    }
+  }
+}

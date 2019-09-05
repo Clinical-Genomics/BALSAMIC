@@ -1,0 +1,105 @@
+{
+    "QC": {
+        "picard_rmdup": "TRUE",
+        "adapter":
+        "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+        "min_seq_length": "25"
+    },
+    "vcf": {
+        "manta": {
+            "default": [
+                "diploidSV.vcf.gz", "somaticSV.vcf.gz",
+                "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"
+            ],
+            "merged": "manta.vcf.gz",
+            "mutation": "somatic",
+            "type": "SV"
+        },
+        "manta_germline": {
+            "default": [
+                "diploidSV.vcf.gz", "candidateSV.vcf.gz",
+                "candidateSmallIndels.vcf.gz"
+            ],
+            "mutation": "germline",
+            "merged": "manta_germline.vcf.gz",
+            "type": "SV"
+        },
+        "strelka_germline": {
+            "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
+            "mutation": "germline",
+            "merged": "strelka_germline.vcf.gz",
+            "type": "SNV"
+        },
+        "strelka": {
+            "default": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
+            "mutation": "somatic",
+            "merged": "strelka.vcf.gz",
+            "type": "SNV"
+        },
+        "mutect": {
+            "default": "mutect.vcf.gz",
+            "mutation": "somatic",
+            "merged": "mutect.vcf.gz",
+            "type": "SNV"
+        },
+        "freebayes": {
+            "default": "freebayes.vcf.gz",
+            "mutation": "germline",
+            "merged": "freebayes.vcf.gz",
+            "type": "SNV"
+        },
+        "haplotypecaller": {
+            "default": "haplotypecaller.vcf.gz",
+            "mutation": "germline",
+            "merged": "haplotypecaller.vcf.gz",
+            "type": "SNV"
+        },
+        "vardict": {
+            "default": "vardict.vcf.gz",
+            "mutation": "somatic",
+            "merged": "vardict.vcf.gz",
+            "type": "SNV"
+        }
+    },
+    "analysis": {
+        "case_id": "id1",
+        "analysis_type": "paired",
+        "analysis_dir": "tests/test_data/",
+        "fastq_path": "tests/test_data/fastq/",
+        "script": "tests/test_data/id1/scripts/",
+        "log": "tests/test_data/id1/logs/",
+        "result": "tests/test_data/id1/analysis/",
+        "config_creation_date": "yyyy-mm-dd xx",
+        "BALSAMIC_version": "2.9.8",
+        "dag": "tests/test_data/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+    },
+    "samples": {
+        "S1_R": {
+            "file_prefix": "S1_R",
+            "type": "tumor",
+            "readpair_suffix": ["1", "2"]
+        },
+        "S2_R": {
+            "file_prefix": "S2_R",
+            "type": "normal",
+            "readpair_suffix": ["1", "2"]
+        }
+    },
+    "reference": {
+        "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+        "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+        "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+        "vep": "tests/test_data/references/vep/",
+        "exon_bed": "tests/test_data/references/genome/refseq.flat.bed"
+    },
+    "panel": {
+        "capture_kit": "tests/test_data/references/panel/panel.bed",
+        "chrom": ["18", "14", "11", "4", "10", "12", "3", "5", "13", "20", "7", "2",
+                  "8", "21", "15", "9", "17", "16", "22", "19", "1", "6"]
+    },
+    "conda_env_yaml": "tests/test_data/BALSAMIC_env.yaml",
+    "rule_directory": "BALSAMIC/"
+}
