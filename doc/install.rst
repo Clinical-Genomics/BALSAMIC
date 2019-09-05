@@ -24,6 +24,22 @@ automatically install BALSAMIC in the following order:
    naming convention from
    https://github.com/Clinical-Genomics/development/blob/master/conda/conda_conventions.md
    based on the config file: ``BALSAMIC/conda_yaml/BALSAMIC.yaml``
--  Create conda environments required for BALSAMIC to run properly
--  Install BALSAMIC
--  Install gatk
+-  ``install.sh`` has following options:
+
+::
+
+  USAGE: ./install.sh [-s _condaprefix -d _condadate -p _condapath -c]
+    1. Conda naming convention: [P,D,S]_[ENVNAME]_%DATE. P: Production, D: Development
+    2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
+    
+    -s _condaprefix  Conda env name prefix. This will be P, D, or S in the help above. 
+    -d _condadate    Conda env name suffix. This will be a suffix, by default it will be current date: yymmdd 
+    -p _condapath    Conda env path prefix. See point 2 in help above.
+    -c If set it will use Singularity container for conda instead
+
+-  Example command to install BALSAMIC and its environments:
+
+::
+
+  ./install.sh -s D -d 190905 -p path_to_conda_env -c
+

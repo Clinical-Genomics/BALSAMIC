@@ -14,6 +14,6 @@ script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
 
 after_success: coveralls
-
+  
 notification:
   - email: false

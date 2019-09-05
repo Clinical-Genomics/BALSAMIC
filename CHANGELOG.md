@@ -8,18 +8,24 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
-## [3.0.0] - 2019-07-12
+## [3.0.0] - 2019-09-05
 This is major release.
 TL;DR:
 - Major changes to CLI. See documentation for updates.
 - New additions to reference generation and reference config file generation and complete overhaul
 - Major changes to reposityory structure, conda environments.
-- Addition of containers and running jobs on SLURM using container only.
 
 ### Added
 - Creating and downloading reference files: `balsamic config reference` and `balsamic run reference`
 - Container definitions for install and running BALSAMIC
-- Bunch of tests, setup coveralls and travis. 
+- Bunch of tests, setup coveralls and travis.
+- Added Mutliqc, fastp to rule utilities
+- Create Housekeeper and Scout files after analysis completes
+- Added Sentieon tumor-normal and tumor only workflows
+- Added trimming option while creating workflow
+- Added multiple tumor sample QC analysis
+- Added pindle for indel variant calling
+- Added Analysis finish file in the analysis directory
 
 ### Fixed
 - Multiple fixes to snakemake rules 
@@ -28,10 +34,13 @@ TL;DR:
 - Running analysis through: `balsamic run analysis`
 - Cluster account and email info added to `balsamic run analysis`
 - `umi` workflow through `--umi` tag. [workflow still in evaluation]
+- `sample-id` replaced by `case-id`
+- Plan to remove FastQC as well
 
 ### Removed
 - `balsamic config report` and `balsamic report`
 - `sample.config` and `reference.json` from config directory
+- Removed cutadapt from workflows
 
 ## [2.9.8] - 2019-01-01
 ### Fixed
