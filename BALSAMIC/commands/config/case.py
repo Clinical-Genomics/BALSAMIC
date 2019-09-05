@@ -218,6 +218,10 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     "-t",
     "--tumor",
     required=True,
+<<<<<<< HEAD
+=======
+    multiple=True,
+>>>>>>> origin/master
     help="Fastq files for tumor sample. \
               Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, \
               the input should be --tumor tumor_fqreads",
@@ -288,17 +292,17 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     fq_path = os.path.join(output_dir, 'analysis', 'fastq')
     os.makedirs(fq_path, exist_ok=True)
 
-    tumor = configure_fastq(fq_path, tumor, fastq_prefix)
+    for t in tumor:
+      t = configure_fastq(fq_path, t, fastq_prefix)
+
+      sample_config["samples"][t] = {
+          "file_prefix": t,
+          "type": "tumor",
+          "readpair_suffix": read_prefix,
+      }
+
     if normal:
         normal = configure_fastq(fq_path, normal, fastq_prefix)
-
-    sample_config["samples"][tumor] = {
-        "file_prefix": tumor,
-        "type": "tumor",
-        "readpair_suffix": read_prefix,
-    }
-
-    if normal:
         sample_config["samples"][normal] = {
             "file_prefix": normal,
             "type": "normal",
