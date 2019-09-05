@@ -218,10 +218,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     "-t",
     "--tumor",
     required=True,
-<<<<<<< HEAD
-=======
     multiple=True,
->>>>>>> origin/master
     help="Fastq files for tumor sample. \
               Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, \
               the input should be --tumor tumor_fqreads",
