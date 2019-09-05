@@ -3,22 +3,20 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.utils.rule import get_conda_env
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_caller = "manta"
 manta_dir = vcf_dir + var_caller + "/"
 
 rule manta_somatic:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"] ,
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
   output:
     candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz",
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz",
   params:
     tmpdir = manta_dir,
     runmode = "local",

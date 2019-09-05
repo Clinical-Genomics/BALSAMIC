@@ -3,7 +3,7 @@ BALSAMIC
 ========
 
 Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 2.9.8)
+(**version** = 3.0.0)
 
 .. contents::
 
@@ -15,11 +15,11 @@ run the following command:
 ::
 
     cd test_data
-    balsamic config sample \
+    balsamic config case \
         --tumor fastq/S1_R_1.fastq.gz \
         --normal fastq/S2_R_1.fastq.gz \
         --panel-bed references/GRCh37/panel/panel.bed \
-        --sample-id id1 \
+        --case-id id1 \
         --analysis-dir ./ \
         --analysis-type paired \
         --output-config id1_analysis.json \
@@ -39,7 +39,7 @@ This will create a directory within test_data directory with the following struc
       │   ├── S2_R_1.fastq.gz -> ../fastq/S2_R_1.fastq.gz
       │   └── S2_R_2.fastq.gz -> ../fastq/S2_R_2.fastq.gz
       ├── id1_analysis.json
-      ├── id1_analysis.json_BALSAMIC_2.9.8_graph.pdf
+      ├── id1_analysis.json_BALSAMIC_3.0.0_graph.pdf
       ├── logs
       └── scripts
 

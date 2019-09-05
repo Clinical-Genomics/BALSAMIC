@@ -1,13 +1,12 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.tools import get_vcf_files
+from BALSAMIC.utils.rule import get_vcf_files
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.utils.rule import get_conda_env
 
-vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_type = "SNV"
 
@@ -17,7 +16,7 @@ rule bcftools_SNV_update_variant_ID:
   output:
     vcf_dir + var_type + "/" + "id.{vcf}.vcf.gz"
   params:
-    ref_fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    ref_fa = config["reference"]["reference_genome"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "source activate {params.conda};"
@@ -40,7 +39,7 @@ rule bcftools_SV_update_variant_ID:
   output:
     vcf_dir + var_type + "/" + "id.{vcf}.vcf.gz"
   params:
-    ref_fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    ref_fa = config["reference"]["reference_genome"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   shell:
     "source activate {params.conda};"

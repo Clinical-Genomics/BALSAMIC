@@ -3,11 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
 
 var_caller = "strelka"
 strelka_dir = vcf_dir + var_caller + "/"
@@ -15,12 +12,12 @@ picarddup = get_picard_mrkdup(config)
 
 rule strelka_somatic:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
     mantaindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz" 
   output:
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz", 
+    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz", 
     default = expand(strelka_dir + "results/variants/" + "{vcf_file}", vcf_file=config["vcf"][var_caller]["default"]),
   params:
     tmpdir = strelka_dir, 
@@ -48,13 +45,13 @@ rule strelka_somatic:
 
 rule strelka_simple:
   input:
-    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz", 
+    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz", 
   output:
-    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".tbl", 
-    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["sample_id"] + "." + var_caller + ".vcf.gz"
+    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".tbl", 
+    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   params:
-    name = config["analysis"]["sample_id"],
-    MVL = os.path.join(config["rule_directory"], "assests", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
+    name = config["analysis"]["case_id"],
+    MVL = os.path.join(config["rule_directory"], "assets", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
     conda = get_conda_env(config["conda_env_yaml"], "bcftools")
   shell:
     "source activate {params.conda};"

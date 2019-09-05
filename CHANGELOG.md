@@ -8,6 +8,40 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [3.0.0] - 2019-09-05
+This is major release.
+TL;DR:
+- Major changes to CLI. See documentation for updates.
+- New additions to reference generation and reference config file generation and complete overhaul
+- Major changes to reposityory structure, conda environments.
+
+### Added
+- Creating and downloading reference files: `balsamic config reference` and `balsamic run reference`
+- Container definitions for install and running BALSAMIC
+- Bunch of tests, setup coveralls and travis.
+- Added Mutliqc, fastp to rule utilities
+- Create Housekeeper and Scout files after analysis completes
+- Added Sentieon tumor-normal and tumor only workflows
+- Added trimming option while creating workflow
+- Added multiple tumor sample QC analysis
+- Added pindle for indel variant calling
+- Added Analysis finish file in the analysis directory
+
+### Fixed
+- Multiple fixes to snakemake rules 
+
+### Changed
+- Running analysis through: `balsamic run analysis`
+- Cluster account and email info added to `balsamic run analysis`
+- `umi` workflow through `--umi` tag. [workflow still in evaluation]
+- `sample-id` replaced by `case-id`
+- Plan to remove FastQC as well
+
+### Removed
+- `balsamic config report` and `balsamic report`
+- `sample.config` and `reference.json` from config directory
+- Removed cutadapt from workflows
+
 ## [2.9.8] - 2019-01-01
 ### Fixed
 - picard hsmetrics now has 50000 cov max
@@ -43,7 +77,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ## [2.9.2] - 2019-02-04
 ### Added
 - CNVkit single sample mode now in workflow
-- MVL list from cheng et al. 2015 moved to assests
+- MVL list from cheng et al. 2015 moved to assets
 
 ## [2.9.1] - 2019-01-22
 ### Added
@@ -227,7 +261,7 @@ Variant reporter patch and cli update
 - CALLER annotation added to SNV/INDEL callers
 - exome specific option for strelka paired
 - create\_config subcommand is now more granular, it accepts all enteries from sample.json as commandline arguments
-- Added tabQuery to the assests as a tool to query the tabulated output of summarized VCF
+- Added tabQuery to the assets as a tool to query the tabulated output of summarized VCF
 - Added MQ annotation field to Mutect2 output see #67
 ### Changed
 - Leaner VCF output from mutect2 with coverage and MQ annotation according to #64

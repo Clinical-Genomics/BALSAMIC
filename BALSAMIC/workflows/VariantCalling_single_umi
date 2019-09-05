@@ -3,35 +3,34 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_result_dir, get_vcf
+from BALSAMIC.utils.rule import get_result_dir, get_vcf
 
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+bam_dir = get_result_dir(config) + "/bam/"
+cnv_dir = get_result_dir(config) + "/cnv/"
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
+fastqc_dir = get_result_dir(config) + "/fastqc/"
+result_dir = get_result_dir(config) + "/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
 
 include:
-  rule_dir + "snakemake_rules/align/bwa_mem_umi.rule"
+  rule_dir + "snakemake_rules/umi/fgbio_v2.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/picard.rule"
-include:
-  rule_dir + "snakemake_rules/umi/fgbio.rule"
-include:
   rule_dir + "snakemake_rules/variant_calling/mergetype_single_umi.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
-
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
+  rule_dir + "snakemake_rules/umi/vardict_single_umi.rule"
 
 var_type = ["SNV"]
 var_class = ["somatic", "germline"]
 
 rule all:
   input:
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["sample_id"]])),
+    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam.duplex_qc.pdf", sample=config["samples"])
   output:

@@ -3,17 +3,15 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env
+from BALSAMIC.utils.rule import get_conda_env
 
-bam_dir = get_result_dir(config) + "/bam/"
 
-result_dir = get_result_dir(config) + "/"
 
 rule GATK_contest:
   input:
     bamN = bam_dir + "normal.merged.bam",
     bamT = bam_dir + "tumor.merged.bam",
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     popvcf = result_dir + "popvcf.vcf", 
   output:
     N_vs_T = bam_dir + "normal_tumor.contest", 

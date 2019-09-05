@@ -1,0 +1,48 @@
+#!python
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+from BALSAMIC.utils.rule import get_conda_env
+
+if 'quality_trim' in config['QC'].keys():
+    fastp_param = list()
+    if config['QC']['quality_trim']:
+        fastp_param.extend(["--trim_tail1", "1", "--n_base_limit", "5",
+                            "--length_required", config["QC"]["min_seq_length"],
+                            "--low_complexity_filter", "--trim_poly_g"])
+    else:
+        fastp_param.extend(["--disable_quality_filtering", "--disable_length_filtering", "--disable_trim_poly_g"])
+
+    if not config['QC']['adapter_trim']:
+        fastp_param.extend(["--disable_adapter_trimming"])
+
+    if config['QC']['umi_trim']:
+        fastp_param.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
+
+    fastp_param = " ".join(fastp_param)
+
+# remove adapter from paired end reads
+rule fastp:
+  input:
+    read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
+    read2=config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
+  output:
+    read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
+    read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
+  params:
+    fastq_dir = fastq_dir,
+    qc_dir = result_dir + "qc",
+    extra = fastp_param,
+    conda = get_conda_env(config["conda_env_yaml"],"fastp")
+  shell:
+    "source activate {params.conda}; "
+    "fastp "
+    "--in1 {input.read1} --in2 {input.read2} "
+    "--out1 {output.read1} --out2 {output.read2} "
+    "--json {params.qc_dir}/fastp.json "
+    "--overrepresentation_analysis "
+    "{params.extra} "
+    "--html {params.qc_dir}/fastp.html; "
+    "source deactivate;"

@@ -3,10 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
-bam_dir = get_result_dir(config) + "/bam/"
-vcf_dir = get_result_dir(config) + "/vcf/"
 
 var_caller = "strelka_germline"
 strelka_dir = vcf_dir + var_caller + "_{sample}/"
@@ -14,7 +12,7 @@ picarddup = get_picard_mrkdup(config)
 
 rule strelka_germline:
   input:
-    fa = config["path"]["genomefa"] + config["references"]["genomefa"],
+    fa = config["reference"]["reference_genome"],
     bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     mantaindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz"
   output:

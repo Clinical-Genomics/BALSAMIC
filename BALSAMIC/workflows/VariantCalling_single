@@ -3,18 +3,27 @@
 # coding: utf-8
 
 import os
-from BALSAMIC.tools import get_vcf
-from BALSAMIC.tools import get_result_dir
-from BALSAMIC.tools import get_chrom
+from BALSAMIC.utils.rule import get_vcf
+from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.rule import get_chrom
 
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
 
+bam_dir = get_result_dir(config) + "/bam/"
+fastq_dir = get_result_dir(config) + "/fastq/"
+cnv_dir = get_result_dir(config) + "/cnv/"
+cutadapt_dir = get_result_dir(config) + "/cutadapt/"
+fastqc_dir = get_result_dir(config) + "/fastqc/"
+result_dir = get_result_dir(config) + "/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
+
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/cutadapt.rule"
+  rule_dir + "snakemake_rules/quality_control/fastp.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/fastqc.rule"
 include:
@@ -24,7 +33,7 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
 include:
-  rule_dir + "snakemake_rules/quality_control/collectqc_single.rule"
+  rule_dir + "snakemake_rules/quality_control/multiqc.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
 include:
@@ -33,6 +42,8 @@ include:
   rule_dir + "snakemake_rules/variant_calling/mergetype_tumor.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
+# include:
+#   rule_dir + "snakemake_rules/variant_calling/pindel_single.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/cnvkit_single.rule"
 include:
@@ -50,22 +61,17 @@ include:
 include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
 
-bam_dir = get_result_dir(config) + "/bam/"
-cnv_dir = get_result_dir(config) + "/cnv/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
 
 var_type = ["SNV", "SV"]
 var_class = ["somatic", "germline"]
 
 rule all:
   input:
-    os.path.join(*([result_dir + "qc/" + "qc_report.pdf"])),
-    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "manta"], [config["analysis"]["sample_id"]])),
-    expand(vep_dir + "{vcf}.tbl", vcf=get_vcf(config, ["mutect", "vardict"], [config["analysis"]["sample_id"]])),
+    cnv_dir + "cnvkit_single.done",
+    os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
+    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "manta"], [config["analysis"]["case_id"]])),
+    expand(vep_dir + "{vcf}.tbl", vcf=get_vcf(config, ["mutect", "vardict"], [config["analysis"]["case_id"]])),
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["freebayes", "haplotypecaller", "strelka_germline", "manta_germline"], config["samples"])),
-    expand(cnv_dir + "{sample}.cnvkit_single.done", sample = config["samples"])
-    #expand(vep_dir + "vep_" + "{vcf}", vcf=list(map(lambda vcf: str.replace(vcf,".gz",""), get_vcf_files(config, "SNV") + get_vcf_files(config, "SV")))),
   output:
     os.path.join(get_result_dir(config), "analysis_finish")
   shell:

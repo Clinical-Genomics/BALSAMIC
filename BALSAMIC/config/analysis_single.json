@@ -3,7 +3,11 @@
         "picard_rmdup": "False",
         "adapter":
         "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-        "min_seq_length": "25"
+        "min_seq_length": "25",
+        "quality_trim": "False",
+        "adapter_trim": "False",
+        "umi_trim": "False",
+        "umi_trim_length": "5"
     },
     "vcf": {
         "manta": {
@@ -26,6 +30,12 @@
             "mutation": "somatic",
             "merged": "vardict.vcf.gz",
             "type": "SNV"
+        },
+        "pindel": {
+            "default": "pindel.vcf.gz",
+            "mutation": "somatic",
+            "merged": "pindel.vcf.gz",
+            "type": "SV"
         },
         "manta_germline": {
             "default": ["diploidSV.vcf.gz", "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz" ],

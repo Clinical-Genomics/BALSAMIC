@@ -3,16 +3,15 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.tools import get_result_dir, get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
-result_dir = get_result_dir(config) + "/"
 picarddup = get_picard_mrkdup(config)
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule collectqc:
   input:
     fastqc = expand(fastqc_dir + "{mysample}_{read_num}_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
-    fastqc_ca = expand(fastqc_dir + "{mysample}_{read_num}.ca_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
+#    fastqc_ca = expand(fastqc_dir + "{mysample}_{read_num}.ca_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
     hsmetric = expand(bam_dir + "{sample}.sorted.hsmetric", sample=config["samples"]),
     insertsize = expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]),
     alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
@@ -41,5 +40,4 @@ rule collectqc:
     "NF>p {{ p = NF }} END {{ for(j=1; j<=p; j++) {{ str=a[1,j]; for(i=2;"
     "i<=NR; i++) {{ str=str\"\\t\"a[i,j]; }}; print str }} }}' "
     "| awk 'NR==1 {{ v=NF }} NF==v {{ print }}' >> {params.resultdir}qc/${{f}}.csv ; "
-    "done; "
-    "source deactivate; "
+    "done; source deactivate;"

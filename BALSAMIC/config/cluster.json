@@ -1,27 +1,48 @@
 {
     "__default__": {
-        "account": "development",
-        "name": "cancer.{rule}.{wildcards}",
+        "name": "BALSAMIC.{rule}.{wildcards}",
         "time": "12:00:00",
         "n": 8,
         "mail_type": "FAIL",
-        "mail_user": "hassan.foroughi@scilifelab.se",
         "partition": "core"
     },
     "all": {
         "mail_type": "END",
-        "mail_user": "hassan.foroughi@scilifelab.se",
         "time": "00:15:00",
         "n": 1
-    },
-    "S_4_align_the_reads": {
-        "n": 12,
-        "mem": 
     },
     "vardict_paired": {
         "time": "24:00:00"
     },
     "mutect2_somatic": {
         "time": "24:00:00"
+    },
+    "sentieon_align_sort": {
+        "time": "24:00:00",
+        "n": "16"
+    },
+    "sentieon_dedup": {
+        "time": "24:00:00",
+        "n": "16"
+    },
+    "sentieon_realign": {
+        "time": "24:00:00",
+        "n": "16"
+    },
+    "sentieon_base_calibration": {
+        "time": "24:00:00",
+        "n": "16"
+    },
+    "sentieon_corealign": {
+        "time": "24:00:00",
+        "n": "16"
+    },
+    "sentieon_TNsnv": {
+        "time": "24:00:00",
+        "n": "16"
+    },
+    "sentieon_TNhaplotyper": {
+        "time": "24:00:00",
+        "n": "16"
     }
 }
