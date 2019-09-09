@@ -50,10 +50,10 @@ From: centos:latest
 
     conda env create -f BALSAMIC/conda/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
 
-    source activate ${_env_name}
+    source activate ${_condapath}/${_env_name}
     pip install -r requirements.txt --editable .
 
-    balsamic install -s singularity \
+    balsamic install -s _singularity \
       --overwrite-env \
       --env-type D \
       --input-conda-yaml BALSAMIC/conda/BALSAMIC-py27.yaml \
@@ -67,7 +67,7 @@ From: centos:latest
     gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
 
     source deactivate
-    source activate ${_env_name}
+    source activate ${_condapath}/${_env_name}
     picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
     picard_conda_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
     picard_destination=${picard_conda_env}/share/
