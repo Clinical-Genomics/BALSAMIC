@@ -40,24 +40,14 @@ include:
   rule_dir + "snakemake_rules/variant_calling/split_bed.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/mergetype_tumor.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/vardict_single.rule"
 # include:
 #   rule_dir + "snakemake_rules/variant_calling/pindel_single.rule"
 include:
   rule_dir + "snakemake_rules/variant_calling/cnvkit_single.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/manta_single.rule"
+  rule_dir + "snakemake_rules/variant_calling/somatic_tumor_only.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/mutect_single.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/strelka_germline.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/manta_germline.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/freebayes.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/haplotypecaller.rule"
+    rule_dir + "snakemake_rules/variant_calling/germline.rule"
 include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
 
@@ -70,8 +60,7 @@ rule all:
     cnv_dir + "cnvkit_single.done",
     os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["mutect", "vardict", "manta"], [config["analysis"]["case_id"]])),
-    expand(vep_dir + "{vcf}.tbl", vcf=get_vcf(config, ["mutect", "vardict"], [config["analysis"]["case_id"]])),
-    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["freebayes", "haplotypecaller", "strelka_germline", "manta_germline"], config["samples"])),
+    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, ["haplotypecaller", "strelka_germline", "manta_germline"], config["samples"])),
   output:
     os.path.join(get_result_dir(config), "analysis_finish")
   shell:
