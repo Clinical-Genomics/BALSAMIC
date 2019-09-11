@@ -1,7 +1,7 @@
-.. image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=develop 
+.. image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
     :target: https://travis-ci.org/Clinical-Genomics/BALSAMIC
 
-.. image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=develop 
+.. image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
     :target: https://coveralls.io/github/Clinical-Genomics/BALSAMIC 
 
 .. image:: https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg
