@@ -45,11 +45,7 @@ include:
 include:
   rule_dir + "snakemake_rules/variant_calling/somatic_tumor_normal.rule"
 include:
-  rule_dir + "snakemake_rules/variant_calling/strelka_germline.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/manta_germline.rule"
-include:
-  rule_dir + "snakemake_rules/variant_calling/haplotypecaller.rule"
+  rule_dir + "snakemake_rules/variant_calling/germline.rule"
 include:
   rule_dir + "snakemake_rules/annotation/vep.rule"
 
