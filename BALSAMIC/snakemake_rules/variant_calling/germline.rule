@@ -16,7 +16,7 @@ rule haplotypecaller:
     input:
         fa = config["reference"]["reference_genome"],
         bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
-        bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + capture_kit,
+        bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
