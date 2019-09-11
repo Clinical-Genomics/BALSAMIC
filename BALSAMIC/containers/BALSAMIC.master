@@ -41,7 +41,7 @@ From: centos:latest
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
     cd /git_repos
-    git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=3.0.0
+    git clone https://github.com/Clinical-Genomics/BALSAMIC --branch=3.0.1
     cd BALSAMIC
     ./install.sh -s P -d master -p /usr/local/anaconda/envs
 
