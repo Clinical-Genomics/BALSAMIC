@@ -1,14 +1,3 @@
-# vim: syntax=python tabstop=4 expandtab
-# coding: utf-8
-
-__author__ = "Hassan Foroughi Asl"
-
-from BALSAMIC.utils.rule import get_conda_env
-
-
-var_caller = "manta"
-manta_dir = vcf_dir + var_caller + "/"
-
 rule manta_somatic:
   input:
     fa = config["reference"]["reference_genome"] ,
@@ -16,9 +5,9 @@ rule manta_somatic:
     bamT = bam_dir + "tumor.merged.bam",
   output:
     candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz",
+    final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
   params:
-    tmpdir = manta_dir,
+    tmpdir = vcf_dir + "manta/",
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"manta")
   threads: 4

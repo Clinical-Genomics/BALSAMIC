@@ -1,13 +1,9 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_picard_mrkdup
 
-from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
-
-
-var_caller = "strelka"
-strelka_dir = vcf_dir + var_caller + "/"
 picarddup = get_picard_mrkdup(config)
 
 rule strelka_somatic:
@@ -17,10 +13,10 @@ rule strelka_somatic:
     bamT = bam_dir + "tumor.merged.bam",
     mantaindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz" 
   output:
-    final = vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz", 
-    default = expand(strelka_dir + "results/variants/" + "{vcf_file}", vcf_file=config["vcf"][var_caller]["default"]),
+    final = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.vcf.gz", 
+    default = expand(vcf_dir + "strelka/results/variants/" + "{vcf_file}", vcf_file=["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"])
   params:
-    tmpdir = strelka_dir, 
+    tmpdir = vcf_dir + "strelka/", 
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
   threads: 4
@@ -42,53 +38,3 @@ rule strelka_somatic:
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
     "source deactivate; "
-
-rule strelka_simple:
-  input:
-    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz", 
-  output:
-    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".tbl", 
-    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
-  params:
-    name = config["analysis"]["case_id"],
-    MVL = os.path.join(config["rule_directory"], "assets", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
-    conda = get_conda_env(config["conda_env_yaml"], "bcftools")
-  shell:
-    "source activate {params.conda};"
-    "bcftools annotate "
-        "--annotations {input} "
-        "--mark-sites +CALLER=STRELKA "
-        "-h <(echo '##INFO=<ID=CALLER,Number=1,Type=String,Description=\"VariantCaller\">') "
-        "--remove \"^INFO/DP,^INFO/CSQ,^INFO/SOMATIC\",\"^FMT/AU,FMT/DP,FMT/TU,FMT/GU,FMT/CU,FMT/TAR,FMT/TIR,FMT/TOR\" {input} "
-    "| "
-    "bcftools annotate "
-        "--remove \"INF/CALLER=STRELKA\" - "
-    "| "
-    "bcftools annotate -a {params.MVL} -Oz "
-        "-c CHROM,POS --mark-sites +\"MSK_MVL\" "
-    " > {output.vcf}; "
-    "HEADER=`bcftools view -h {input} | sed -n '/Consequence annotations/p' | sed 's/#.* //g;s/\">//g'`; "
-    "bcftools view -f .,PASS {output.vcf} "
-    "| "
-    "bcftools query --print-header -f "
-        "\'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER\\t[%DP\\t][%AU{{0}}\\t][%CU{{0}}\\t][%GU{{0}}\\t][%TU{{0}}\\t][%TAR{{0}}]\\t[%TIR{{0}}]\\t%CSQ\\t%MSK_MVL\\n\' "
-        "-s TUMOR "
-    "| "
-    "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
-        "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \",\"\",$0); for (i=1; i<=NF; i++) gsub(/\[[[:digit:]]*\]/,\"\",$i); "
-            "print $0,\"TUMOR:AD\\tTUMOR:AD\\tFILTERED\",$15,$14 }} "
-        "NR>1 {{ if ($5!=\"INDEL\") {{s[\"A\"]=\"8\"; s[\"C\"]=\"9\"; s[\"G\"]=\"10\"; s[\"T\"]=\"11\"; "
-            "alt=$s[$4]; ref=$s[$3];}} else {{ref=$12; alt=$13}}; "
-            "if ((alt+ref)!=$7 ) {{ print $0,ref,alt,\"YES\",$15,$14 }} else {{ print $0,ref,alt,\"NO\",$15,$14 }} }}' "
-    "| "
-    "cut -f 1-7,16-20 "
-    "| "
-    "awk -v H=$HEADER -v OFS=\"\\t\" "
-        "'NR==1 {{C=split(H,h,\"|\");"
-        " sep=\"\\t\"; for (i=1; i<=C; i++) {{if (i==1) s = h[i]; else s = s sep h[i]}}; "
-        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} "
-        " NR>1 {{split($12,a,\",\"); for (x in a) {{ C=split(a[x],b,\"|\"); "
-        " sep=\"\\t\"; for (i=1; i<=C; i++) {{ if (b[i]==\"\") b[i]=\".\"; if (i==1) s = b[i]; else s = s sep b[i]}}; "
-        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} }}' "
-    "| awk -v OFS=\"\\t\" '{{ split($13,a,\"&\"); for (i in a) {{ $13=a[i]; print; }} }}' "
-    "| bgzip > {output.tbl}"

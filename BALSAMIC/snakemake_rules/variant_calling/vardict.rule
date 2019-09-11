@@ -1,14 +1,9 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
-
 import os
-from BALSAMIC.utils.rule import get_conda_env, get_chrom
-
-var_caller = "vardict"
-vardict_dir = var_caller + "/"
-
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_chrom
 
 chromlist = config["panel"]["chrom"]
 capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
@@ -20,7 +15,7 @@ rule vardict_paired:
     bamT = bam_dir + "tumor.merged.bam",
     bed = vcf_dir + "split_bed/" + "{bedchrom}" + "." + capture_kit,
   output:
-    vcf_dir + vardict_dir + "split_vcf/" + "{bedchrom}_" + config["vcf"][var_caller]["default"]
+    vcf_dir + "vardict/split_vcf/" + "{bedchrom}_vardict.vcf.gz"
   params:
     af = "0.005",
     max_pval = "0.9",
@@ -42,9 +37,9 @@ rule vardict_paired:
 
 rule vardict_merge:
   input:
-    expand(vcf_dir + vardict_dir + "split_vcf/{chrom}_" + config["vcf"][var_caller]["default"], chrom=chromlist) 
+    expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist) 
   output:
-    vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
+    vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
   shell:
@@ -52,56 +47,3 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; " 
     "tabix -f -p vcf {output}; "
     "source deactivate;" 
-
-rule vardict_simple:
-  input:
-    vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
-  output:
-    tbl = vep_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".tbl", 
-    vcf = vep_dir + "simple/" + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
-  params:
-    name = config["analysis"]["case_id"],
-    MVL = os.path.join(config["rule_directory"], "assets", "MVL", "MSK_IMPAKT_supp_S11_Cheng_2015.bed.gz"),
-    conda = get_conda_env(config["conda_env_yaml"], "bcftools")
-  shell:
-    "source activate {params.conda};"
-    "bcftools annotate "
-        "--annotations {input} "
-        "--mark-sites +CALLER=VARDICT "
-        "-h <(echo '##INFO=<ID=CALLER,Number=1,Type=String,Description=\"VariantCaller\">') "
-        "--remove \"^INF/STATUS,INF/TYPE,INF/DP,INF/VD,INF/AF,INF/CSQ\","
-        "\"^FMT/GT,FMT/DP,FMT/VD,FMT/AD,FMT/AF\" {input} "
-    "| "
-    "bcftools annotate "
-        "--remove \"INF/CALLER=VARDICT\" - "
-    "| "
-    "sed '/^#CHROM/s/{params.name}-match/NORMAL/;/^#CHROM/s/{params.name}/TUMOR/' "
-    "| "
-    "bcftools annotate -a {params.MVL} -Oz "
-        "-c CHROM,POS --mark-sites +\"MSK_MVL\" "
-    " > {output.vcf}; "
-    "HEADER=`bcftools view -h {input} | sed -n '/Consequence annotations/p' | sed 's/#.* //g;s/\">//g'`; "
-    "bcftools view -f .,PASS -e 'STATUS !~ \".*Somatic\"' "
-        "{output.vcf} "
-    "| "
-    "bcftools query --print-header "
-        "-f \'%CHROM\\t%POS\\t%REF\\t%ALT\\t%TYPE\\t%CALLER"
-        "\\t%DP\\t[%AD{{0}}\\t][%AD{{1}}\\t][%AF\\t]%STATUS\\t%CSQ\\t%MSK_MVL\\n\' "
-        "-s TUMOR "
-    "| "
-    "awk -v FS=\"\\t\" -v OFS=\"\\t\" "
-        "'NR==1 {{ gsub(\"#\", \"\", $0); gsub(\" \", \"\", $0); "
-                   "for (i=1; i<=NF; i++) gsub(/\[[[:digit:]]*\]/,\"\",$i); "
-                   "print $0,\"FILTERED\",$13,$12 }} "
-        " NR>1  {{ if (($8+$9)==$7) {{ print $0,\"NO\",$13,$12 }} else {{ print $0,\"YES\",$13,$12 }} }}' "
-    "| cut -f 1-9,14-16 "
-    "| "
-    "awk -v H=$HEADER -v OFS=\"\\t\" "
-        "'NR==1 {{C=split(H,h,\"|\");"
-        " sep=\"\\t\"; for (i=1; i<=C; i++) {{if (i==1) s = h[i]; else s = s sep h[i]}}; "
-        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} "
-        " NR>1 {{split($12,a,\",\"); for (x in a) {{ C=split(a[x],b,\"|\"); "
-        " sep=\"\\t\"; for (i=1; i<=C; i++) {{ if (b[i]==\"\") b[i]=\".\"; if (i==1) s = b[i]; else s = s sep b[i]}}; "
-        " print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,s }} }}' "
-    "| awk -v OFS=\"\\t\" '{{ split($13,a,\"&\"); for (i in a) {{ $13=a[i]; print; }} }}' "
-    "| bgzip > {output.tbl}"
