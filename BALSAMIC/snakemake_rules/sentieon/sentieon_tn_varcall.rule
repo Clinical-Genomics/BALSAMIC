@@ -3,7 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.utils.rule import get_conda_env, get_sample_type
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_sample_type
 
 rule sentieon_TN_corealign:
     input:
@@ -37,7 +38,7 @@ rule sentieon_TNsnv:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
     output:
-        vcf = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.vcf.gz",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnsnv.vcf.gz",
         stats = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.call_stats",
     params:
         tumor = get_sample_type(config["samples"], "tumor"),
@@ -61,7 +62,7 @@ rule sentieon_TNhaplotyper:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
     output:
-        vcf = vcf_dir + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
     params:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
@@ -108,13 +109,32 @@ rule sentieon_TNscope:
         """
 
 
+rule sentioen_filter_TNscope:
+    input:
+        ref = config["reference"]["reference_genome"],
+        tnscope_vcf = vcf_dir + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+    output:
+        tnscope_filtered_vcf = vcf_dir + config["analysis"]["case_id"] + ".tnscope.filtered.vcf.gz",
+    params:
+        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+        sentieon_lic = SENTIEON_LICENSE, 
+        sentieon_ml_tnscope = SENTIEON_TNSCOPE
+    log:
+        vcf_dir + config["analysis"]["case_id"] + ".tnscope.filtered.log",
+    shell:
+        """
+        {params.sentieon_exec} driver -r {input.ref} --algo TNModelApply -m {params.sentieon_ml_tnscope} \
+                -v {input.tnscope_vcf} {output.tnscope_filtered_vcf}
+        """
+
+
 rule sentieon_DNAscope:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         bam = bam_dir + "{sample}.dedup.bam"
     output:
-        vcf = vcf_dir + "{sample}.dnascope.vcf.gz",
+        vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
@@ -126,6 +146,8 @@ rule sentieon_DNAscope:
         """
         export SENTIEON_LICENSE={params.sentieon_lic};
         {params.sentieon_exec} - t [Threads] -r {input.ref} -i {input.bam} \
-                    --algo DNAscope --pcr_indel_model NONE -d [DBSNP] --var_type snp,indel \
+                    --algo DNAscope --pcr_indel_model NONE -d {input.dbsnp} --var_type snp,indel \
                     --model {params.sentieon_ml_dnascope} {output.vcf}
         """
+
+
