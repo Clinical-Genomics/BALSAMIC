@@ -47,45 +47,45 @@ germline_caller = ["haplotypecaller", "strelka_germline", "manta_germline"]
 
 if config['analysis']['analysis_type'] == "paired":
 
-  qc_rules.append("snakemake_rules/quality_control/contest.rule")
+    qc_rules.append("snakemake_rules/quality_control/contest.rule")
 
-  variantcalling_rules.extend([
-    "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
-    "snakemake_rules/variant_calling/mergetype.rule",
-    "snakemake_rules/variant_calling/cnvkit_paired.rule"
-    ])
+    variantcalling_rules.extend([
+      "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
+      "snakemake_rules/variant_calling/mergetype.rule",
+      "snakemake_rules/variant_calling/cnvkit_paired.rule"
+      ])
 
-  somatic_caller = ["mutect", "vardict", "strelka", "manta"]
+    somatic_caller = ["mutect", "vardict", "strelka", "manta"]
 
-  cnvkit_output = cnv_dir + "cnvkit_paired.done"
+    cnvkit_output = cnv_dir + "cnvkit_paired.done"
 
 else:
 
-  variantcalling_rules.extend([
-    "snakemake_rules/variant_calling/cnvkit_single.rule",
-    "snakemake_rules/variant_calling/mergetype_tumor.rule",
-    "snakemake_rules/variant_calling/somatic_tumor_only.rule"
-    ])
+    variantcalling_rules.extend([
+      "snakemake_rules/variant_calling/cnvkit_single.rule",
+      "snakemake_rules/variant_calling/mergetype_tumor.rule",
+      "snakemake_rules/variant_calling/somatic_tumor_only.rule"
+      ])
 
-  somatic_caller = ["mutect", "vardict", "manta"]
-    
-  cnvkit_output = cnv_dir + "cnvkit_single.done"
+    somatic_caller = ["mutect", "vardict", "manta"]
+      
+    cnvkit_output = cnv_dir + "cnvkit_single.done"
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
 for r in config["rules"]:
-  include: os.path.join(rule_dir + r)
+    include: os.path.join(rule_dir + r)
 
 var_class = ["somatic", "germline"]
 var_type = ["SNV", "SV"]
 
 rule all:
-  input:
-    os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-    cnvkit_output
-  output:
-    os.path.join(get_result_dir(config), "analysis_finish")
-  shell:
-    "date +'%Y-%M-%d T%T %:z' > {output}"
+    input:
+        os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
+        expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+        expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
+        cnvkit_output
+    output:
+        os.path.join(get_result_dir(config), "analysis_finish")
+    shell:
+        "date +'%Y-%M-%d T%T %:z' > {output}"
