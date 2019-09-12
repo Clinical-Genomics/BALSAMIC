@@ -221,18 +221,24 @@ def get_snakefile(analysis_type):
     """
 
     p = Path(__file__).parents[1]
-    if analysis_type == "paired":
-        snakefile = Path(p, 'workflows', 'VariantCalling_paired')
-    elif analysis_type == "single":
-        snakefile = Path(p, 'workflows', 'VariantCalling_single')
-    elif analysis_type == "qc":
+    if analysis_type == "qc":
         snakefile = Path(p, 'workflows', 'Alignment')
-    elif analysis_type == "paired_umi":
-        snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
-    elif analysis_type == "single_umi":
-        snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
+    elif analysis_type in ["single", "paired"]:
+        snakefile = Path(p, 'workflows', 'VariantCalling')
     elif analysis_type == "generate_ref":
         snakefile = Path(p, 'workflows', 'GenerateRef')
+#    if analysis_type == "paired":
+#        snakefile = Path(p, 'workflows', 'VariantCalling_paired')
+#    elif analysis_type == "single":
+#        snakefile = Path(p, 'workflows', 'VariantCalling_single')
+#    elif analysis_type == "qc":
+#        snakefile = Path(p, 'workflows', 'Alignment')
+#    elif analysis_type == "paired_umi":
+#        snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
+#    elif analysis_type == "single_umi":
+#        snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
+#    elif analysis_type == "generate_ref":
+#        snakefile = Path(p, 'workflows', 'GenerateRef')
 
     return str(snakefile)
 
