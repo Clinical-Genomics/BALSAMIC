@@ -66,8 +66,8 @@ def BALSAMIC_env(tmp_path_factory):
         "env_py36": [
             "python", "pip", "bcftools", "bwa", "fastqc", "sambamba",
             "samtools", "tabix", "gatk", "picard", "fgbio", "freebayes",
-            "vardict", "vardict-java", "ensembl-vep", "cnvkit",
-            "pindel", "multiqc", "bedtools", "fastp"
+            "vardict", "vardict-java", "ensembl-vep", "cnvkit", "pindel",
+            "multiqc", "bedtools", "fastp"
         ]
     }
 
@@ -190,7 +190,7 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
     runner = CliRunner()
     result = runner.invoke(cli, [
         'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
-        str(tumor), '--case-id', case_name , '--analysis-dir',
+        str(tumor), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
@@ -205,72 +205,14 @@ def sample_config():
     """
     sample_config = {
         "QC": {
-            "picard_rmdup": "TRUE",
+            "picard_rmdup": "False",
             "adapter":
             "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-            "min_seq_length": "25"
-        },
-        "vcf": {
-            "manta": {
-                "default": [
-                    "diploidSV.vcf.gz", "somaticSV.vcf.gz",
-                    "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"
-                ],
-                "merged":
-                "manta.vcf.gz",
-                "mutation":
-                "somatic",
-                "type":
-                "SV"
-            },
-            "manta_germline": {
-                "default": [
-                    "diploidSV.vcf.gz", "candidateSV.vcf.gz",
-                    "candidateSmallIndels.vcf.gz"
-                ],
-                "mutation":
-                "germline",
-                "merged":
-                "manta_germline.vcf.gz",
-                "type":
-                "SV"
-            },
-            "strelka_germline": {
-                "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
-                "mutation": "germline",
-                "merged": "strelka_germline.vcf.gz",
-                "type": "SNV"
-            },
-            "strelka": {
-                "default": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
-                "mutation": "somatic",
-                "merged": "strelka.vcf.gz",
-                "type": "SNV"
-            },
-            "mutect": {
-                "default": "mutect.vcf.gz",
-                "mutation": "somatic",
-                "merged": "mutect.vcf.gz",
-                "type": "SNV"
-            },
-            "freebayes": {
-                "default": "freebayes.vcf.gz",
-                "mutation": "germline",
-                "merged": "freebayes.vcf.gz",
-                "type": "SNV"
-            },
-            "haplotypecaller": {
-                "default": "haplotypecaller.vcf.gz",
-                "mutation": "germline",
-                "merged": "haplotypecaller.vcf.gz",
-                "type": "SNV"
-            },
-            "vardict": {
-                "default": "vardict.vcf.gz",
-                "mutation": "somatic",
-                "merged": "vardict.vcf.gz",
-                "type": "SNV"
-            }
+            "min_seq_length": "25",
+            "quality_trim": "True",
+            "adapter_trim": "False",
+            "umi_trim": "True",
+            "umi_trim_length": "5"
         },
         "analysis": {
             "case_id": "id1",
@@ -284,6 +226,56 @@ def sample_config():
             "BALSAMIC_version": "2.9.8",
             "dag":
             "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+        },
+        "vcf": {
+            "manta": {
+                "mutation": "somatic",
+                "type": "SV"
+            },
+            "vardict": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "pindel": {
+                "mutation": "somatic",
+                "type": "SV"
+            },
+            "strelka": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "mutect": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnscope": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnsnv": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnhaplotyper": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "dnascope": {
+                "mutation": "germline",
+                "type": "SNV"
+            },
+            "manta_germline": {
+                "mutation": "germline",
+                "type": "SV"
+            },
+            "haplotypecaller": {
+                "mutation": "germline",
+                "type": "SNV"
+            },
+            "strelka_germline": {
+                "mutation": "germline",
+                "type": "SNV"
+            }
         },
         "samples": {
             "S1_R": {
@@ -300,3 +292,74 @@ def sample_config():
     }
 
     return sample_config
+
+
+#
+#{
+#    "analysis": {
+#        "case_id":
+#        "test_sample",
+#        "analysis_type":
+#        "paired",
+#        "analysis_dir":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/",
+#        "fastq_path":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/analysis/fastq/",
+#        "script":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/scripts/",
+#        "log":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/logs/",
+#        "result":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/analysis",
+#        "config_creation_date":
+#        "2019-09-13 11:15",
+#        "BALSAMIC_version":
+#        "3.0.0",
+#        "dag":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/test_sample.json_BALSAMIC_3.0.0_graph.pdf"
+#    },
+#    "reference": {
+#        "reference_genome":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+#        "dbsnp":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+#        "1kg_snps_all":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+#        "1kg_snps_high":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+#        "mills_1kg":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+#        "cosmic":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+#        "vep":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/vep",
+#        "refflat":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/genome/refseq.flat",
+#        "exon_bed":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/genome/refseq.flat.bed"
+#    },
+#    "conda_env_yaml":
+#    "/home/proj/long-term-stage/cancer/BALSAMIC/BALSAMIC_env.yaml",
+#    "rule_directory": "/home/proj/long-term-stage/cancer/BALSAMIC/BALSAMIC/",
+#    "bioinfo_tools": {
+#        "bcftools": "1.9.0",
+#        "fastqc": "0.11.5",
+#        "gatk": "3.8",
+#        "sambamba": "0.6.6",
+#        "strelka": "2.8.4",
+#        "bwa": "0.7.15",
+#        "cutadapt": "1.15",
+#        "samtools": "1.6",
+#        "picard": "2.17.0",
+#        "tabix": "0.2.5",
+#        "manta": "1.3.0"
+#    },
+#    "panel": {
+#        "capture_kit":
+#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/panel/panel.bed",
+#        "chrom": [
+#            "11", "5", "14", "12", "17", "9", "19", "2", "7", "20", "13", "1",
+#            "22", "6", "10", "4", "15", "18", "8", "16", "3", "21"
+#        ]
+#    }
+#}
