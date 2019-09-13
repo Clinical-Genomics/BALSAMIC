@@ -82,8 +82,8 @@ var_type = ["SNV", "SV"]
 rule all:
     input:
         os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
-        expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-        expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
+        expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+        expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
         cnvkit_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
