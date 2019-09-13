@@ -17,7 +17,7 @@
         "vardict": {
             "mutation": "somatic",
             "type": "SNV"
-        }
+        },
         "pindel": {
             "mutation": "somatic",
             "type": "SV"
@@ -28,6 +28,22 @@
         },
         "mutect": {
             "mutation": "somatic",
+            "type": "SNV"
+        },
+        "tnscope": {
+            "mutation": "somatic",
+            "type": "SNV"
+        },
+        "tnsnv": {
+            "mutation": "somatic",
+            "type": "SNV"
+        },
+        "tnhaplotyper": {
+            "mutation": "somatic",
+            "type": "SNV"
+        },
+        "dnascope": {
+            "mutation": "germline",
             "type": "SNV"
         },
         "manta_germline": {
