@@ -29,13 +29,20 @@ quality_check = ["snakemake_rules/quality_control/fastp.rule"]
 preprocessing = ["snakemake_rules/sentieon/sentieon_alignment.rule"]
 
 if config['analysis']['analysis_type'] == "paired":
-    variant_calling = ["snakemake_rules/sentieon/sentieon_tn_varcall.rule"]
+    variant_calling = ["snakemake_rules/sentieon/sentieon_tn_varcall.rule", \
+                       "snakemake_rules/sentieon/sentieon_germline.rule"]
+    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope']
+    germline_caller = ['dnascope']
 else:
-    variant_calling = ["snakemake_rules/sentieon/sentieon_t_varcall.rule"]
+    variant_calling = ["snakemake_rules/sentieon/sentieon_t_varcall.rule", \
+                       "snakemake_rules/sentieon/sentieon_germline.rule"]
+    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope']
+    germline_caller = ['dnascope']
 
 annotation = ["snakemake_rules/annotation/vep.rule"]
 
 pipeline = quality_check + preprocessing + variant_calling + annotation 
+
 
 for rule in pipeline:
     include: os.path.join(rule_dir, rule)
@@ -49,12 +56,8 @@ rule all:
         expand(bam_dir + "{sample}.dedup.realign.recal_data.table", sample=config["samples"]),
         expand(bam_dir + "{sample}.dedup.realign.recal.csv", sample=config["samples"]),
         expand(bam_dir + "{sample}.dedup.realign.recal.pdf", sample=config["samples"]),
-        bam_dir + config["analysis"]["case_id"] + ".corealign.bam",
-        expand(vcf_dir + "{vcf}.vcf.gz", vcf= get_vcf(config, ['tnhaplotyper','tnsnv', 'tnscope'], [config["analysis"]["case_id"]])),
-        expand(vcf_dir + "{vcf}_filtered.vcf.gz", vcf= get_vcf(config, ['tnscope'], [config["analysis"]["case_id"]])),
-        expand(vcf_dir + "SNV.germline.{sample}.dnascope_filtered.vcf.gz", sample=config["samples"]),
-        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, ['tnscope'], [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, ['dnascope'], config["samples"])),
+        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, germline_caller, config["samples"])),
         expand(vep_dir + "{vcf}_filtered.vcf.gz", vcf = get_vcf(config, ['tnscope'], [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}_filtered.vcf.gz", vcf = get_vcf(config, ['dnascope'], config["samples"]))
     output:
