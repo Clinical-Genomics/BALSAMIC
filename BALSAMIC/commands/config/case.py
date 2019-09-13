@@ -77,9 +77,6 @@ def check_exist(path):
 
 def get_analysis_type(normal, umi):
     """ return analysis type """
-    #Temporarily disabling umi workflow
-    #    if umi:
-    #        return "paired_umi" if normal else "single_umi"
 
     return "paired" if normal else "single"
 
@@ -263,7 +260,7 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
 
     analysis_type = get_analysis_type(normal, umi)
     output_config = get_output_config(output_config, case_id)
-    analysis_config = get_config("analysis_" + analysis_type)
+    analysis_config = get_config("analysis")
 
     LOG.info("Reading analysis config file %s" % analysis_config)
     LOG.info("Reading reference config file %s" % reference_config)
