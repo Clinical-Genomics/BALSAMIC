@@ -215,7 +215,7 @@ def test_get_picard_mrkdup(sample_config):
     picard_str = get_picard_mrkdup(sample_config)
 
     # THEN It will return the picard str as rmdup
-    assert "rmdup" == picard_str
+    assert "mrkdup" == picard_str
 
 
 def test_createDir(tmp_path):
@@ -287,8 +287,7 @@ def test_capturestdout():
 def test_get_config():
     # GIVEN the config files name
     config_files = [
-        "sample", "analysis_paired", "analysis_paired_umi", "analysis_single",
-        "analysis_single_umi"
+        "sample", "analysis"
     ]
     # WHEN passing file names
     for config_file in config_files:
