@@ -57,9 +57,7 @@ rule all:
         expand(bam_dir + "{sample}.dedup.realign.recal.csv", sample=config["samples"]),
         expand(bam_dir + "{sample}.dedup.realign.recal.pdf", sample=config["samples"]),
         expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, germline_caller, config["samples"])),
-        expand(vep_dir + "{vcf}_filtered.vcf.gz", vcf = get_vcf(config, ['tnscope'], [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}_filtered.vcf.gz", vcf = get_vcf(config, ['dnascope'], config["samples"]))
+        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, germline_caller, config["samples"]))
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
