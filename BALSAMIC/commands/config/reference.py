@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
               help="cosmic db authentication key")
 @click.option("-s",
               "--snakefile",
-              default=get_snakefile('generate_ref'),
+              default=get_snakefile('generate_ref',""),
               type=click.Path(),
               show_default=True,
               help="snakefile for reference generation")

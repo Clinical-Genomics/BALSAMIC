@@ -215,7 +215,7 @@ def get_sbatchpy():
     return sbatch
 
 
-def get_snakefile(analysis_type):
+def get_snakefile(analysis_type, sequencing_type):
     """
     Return a string path for variant calling snakefile.
     """
@@ -225,6 +225,8 @@ def get_snakefile(analysis_type):
         snakefile = Path(p, 'workflows', 'Alignment')
     elif analysis_type in ["single", "paired"]:
         snakefile = Path(p, 'workflows', 'VariantCalling')
+        if sequencing_type == "wgs":
+            snakefile = Path(p, 'workflows', 'VariantCalling_sentieon')
     elif analysis_type == "generate_ref":
         snakefile = Path(p, 'workflows', 'GenerateRef')
 
