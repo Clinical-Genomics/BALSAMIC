@@ -8,7 +8,8 @@ from BALSAMIC.utils.rule import get_conda_env
 
 rule vep:
   input:
-    vcf_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
+    vcf = vcf_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
+    cosmic = config["reference"]["cosmic"]
   output:
     vep = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf",
     vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
@@ -23,7 +24,7 @@ rule vep:
         "--dir $vep_path "
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
-        "--input_file {input} "
+        "--input_file {input.vcf} "
         "--output_file {output.vep} "
         "--fork {threads} "
         "--vcf "
@@ -33,6 +34,7 @@ rule vep:
         "--variant_class "
         "--merged "
         "--cache "
+        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
         "--verbose "
         "--force_overwrite && "
     "bgzip -f -c {output.vep} > {output.vcf} && "

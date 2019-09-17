@@ -4,6 +4,7 @@
         "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
         "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
         "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "1kg_known_indel": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
         "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
         "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
         "vep": "tests/test_data/references/vep/",
