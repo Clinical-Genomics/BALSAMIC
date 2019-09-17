@@ -21,7 +21,7 @@ vep_dir = get_result_dir(config) + "/vep/"
 try:
     SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
     SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
-    SENTIEON_DNASCOPE = os.environ["SENTIEON_DNASCOPE_ML"]
+    SENTIEON_DNASCOPE = os.environ["SENTIEON_DNASCOPE"]
     SENTIEON_TNSCOPE = os.environ["SENTIEON_TNSCOPE"]
 except Exception as error:
     print("ERROR: Set Environment variable to run this pipeline.")
