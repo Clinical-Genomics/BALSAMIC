@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 @click.command('reference', short_help="Run the GenerateRef workflow")
 @click.option('-s',
               "--snakefile",
-              default=get_snakefile('generate_ref',""),
+              default=get_snakefile('generate_ref'),
               help="snakefile for reference generation")
 @click.option('-c',
               '--configfile',

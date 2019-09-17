@@ -9,7 +9,7 @@ from BALSAMIC.utils.cli import get_snakefile
 def test_workflow_tumor_normal(tumor_normal_config):
     # GIVEN a sample config dict and snakefile
     workflow = 'paired'
-    snakefile = get_snakefile(workflow, "")
+    snakefile = get_snakefile(workflow)
     config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dryrun option
@@ -20,7 +20,7 @@ def test_workflow_tumor_normal(tumor_normal_config):
 def test_workflow_tumor_only(tumor_only_config):
     # GIVEN a sample config dict and snakefile
     workflow = 'single'
-    snakefile = get_snakefile(workflow, "")
+    snakefile = get_snakefile(workflow)
     config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dryrun option
@@ -31,7 +31,7 @@ def test_workflow_tumor_only(tumor_only_config):
 def test_workflow_qc(tumor_normal_config, tumor_only_config):
     # GIVEN a sample config dict and snakefile
     workflow = 'qc'
-    snakefile = get_snakefile(workflow, "")
+    snakefile = get_snakefile(workflow)
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true

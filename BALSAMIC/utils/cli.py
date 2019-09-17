@@ -215,7 +215,7 @@ def get_sbatchpy():
     return sbatch
 
 
-def get_snakefile(analysis_type, sequencing_type):
+def get_snakefile(analysis_type, sequencing_type = "targeted"):
     """
     Return a string path for variant calling snakefile.
     """
