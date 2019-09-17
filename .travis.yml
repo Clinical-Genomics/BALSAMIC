@@ -15,11 +15,5 @@ script:
 
 after_success: coveralls
 
-env:
-  - SENTIEON_LICENSE="/path/to/sentieon_license" 
-  - SENTIEON_INSTALL_DIR="/path/to/sentieon_install" 
-  - SENTIEON_DNASCOPE_ML="/path/to/sentieon_dnascope"  
-  - SENTIEON_TNSCOPE="/path/to/sentieon_tnscope" 
-
 notification:
   - email: false
