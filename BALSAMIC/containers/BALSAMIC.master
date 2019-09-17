@@ -1,3 +1,4 @@
+# vim: syntax=ruby tabstop=4 expandtab
 Bootstrap: docker 
 From: centos:latest
 
