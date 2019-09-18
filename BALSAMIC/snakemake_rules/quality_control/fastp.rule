@@ -5,6 +5,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC import __version__ as bv
 
 if 'quality_trim' in config['QC'].keys():
     fastp_param = list()
@@ -36,6 +37,7 @@ rule fastp:
     qc_dir = result_dir + "qc",
     extra = fastp_param,
     conda = get_conda_env(config["conda_env_yaml"],"fastp")
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "fastp "

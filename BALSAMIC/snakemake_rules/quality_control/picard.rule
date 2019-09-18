@@ -4,6 +4,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
@@ -24,6 +25,7 @@ rule MarkDuplicates:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -49,6 +51,7 @@ rule CollectHsMetrics:
   params:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -84,6 +87,7 @@ rule CollectAlignmentSummaryMetrics:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     adapter = config["QC"]["adapter"]
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -105,6 +109,7 @@ rule CollectInsertSizeMetrics:
   params:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard")
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "

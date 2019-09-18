@@ -4,6 +4,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
@@ -20,6 +21,7 @@ rule sambamba_panel_depth:
     cov_step=50,
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "covStr=`seq {params.cov_start} {params.cov_step} {params.cov_end} | xargs -n1 echo -n \" --cov-threshold\"`; "
@@ -45,6 +47,7 @@ rule sambamba_exon_depth:
     cov_5="250",
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "sambamba depth region "

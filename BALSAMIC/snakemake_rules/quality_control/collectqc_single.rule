@@ -4,6 +4,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
@@ -23,6 +24,7 @@ rule collectqc:
     # This is using same environment as gatk
     resultdir = result_dir,
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda};"
     "touch {output}; "
