@@ -29,3 +29,4 @@ rule multiqc:
     "source activate {params.conda};"
     "echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list; "
     "multiqc --outdir {params.qc_dir} --data-format json -l {params.qc_dir}/dir_list; " 
+    "chmod -R 777 {params.qc_dir};"
