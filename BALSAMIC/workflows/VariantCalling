@@ -51,6 +51,7 @@ if config['analysis']['analysis_type'] == "paired":
 
     variantcalling_rules.extend([
       "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
+      "snakemake_rules/variant_calling/somatic_sv.rule",
       "snakemake_rules/variant_calling/mergetype.rule",
       "snakemake_rules/variant_calling/cnvkit_paired.rule"
       ])
