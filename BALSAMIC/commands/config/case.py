@@ -203,7 +203,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               help="Reference config file.")
 @click.option("-p",
               "--panel-bed",
-              required=True,
               type=click.Path(),
               help="Panel bed file for variant calling.")
 @click.option(
@@ -259,6 +258,7 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
         install_config = get_config("install")
 
     analysis_type = get_analysis_type(normal, umi)
+    sequencing_type = "targeted" if panel_bed else "wgs"
     output_config = get_output_config(output_config, case_id)
     analysis_config = get_config("analysis")
 
@@ -305,6 +305,7 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
 
     sample_config["analysis"]["fastq_path"] = fq_path + "/"
     sample_config["analysis"]["BALSAMIC_version"] = bv
+    sample_config["analysis"]["sequencing_type"] = sequencing_type
 
     conda_env = glob.glob(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "../..",
@@ -340,7 +341,7 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     FormatFile(output_config, in_place=True)
 
     with CaptureStdout() as graph_dot:
-        snakemake.snakemake(snakefile=get_snakefile(analysis_type),
+        snakemake.snakemake(snakefile=get_snakefile(analysis_type, sequencing_type),
                             dryrun=True,
                             configfile=output_config,
                             printrulegraph=True)

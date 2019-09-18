@@ -175,6 +175,30 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope='session')
+def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                        install_config):
+    """
+    invokes balsamic config sample -t xxx -n xxx to create sample config
+    for tumor-normal
+    """
+    case_name = 'sample_tumor_normal'
+    tumor = sample_fastq['tumor']
+    normal = sample_fastq['normal']
+    reference_json = 'tests/test_data/references/reference.json'
+    sample_config_file_name = 'sample.json'
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        'config', 'case', '-i', install_config, '-t',
+        str(tumor), '-n', str(normal), '--case-id', case_name, '--analysis-dir',
+        str(analysis_dir), '--output-config', sample_config_file_name,
+        '--reference-config', reference_json
+    ])
+
+    return str(analysis_dir / case_name / sample_config_file_name)
+
+
+@pytest.fixture(scope='session')
 def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
                       install_config):
     """
@@ -194,6 +218,27 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
+
+    return str(analysis_dir / case_name / sample_config_file_name)
+
+
+@pytest.fixture(scope='session')
+def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                          install_config):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_name = 'sample_tumor_only'
+    tumor = sample_fastq['tumor']
+    reference_json = 'tests/test_data/references/reference.json'
+    sample_config_file_name = 'sample.json'
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ['config', 'case', '-i', install_config, '-t', str(tumor),
+                                 '--case-id', case_name, '--analysis-dir', str(analysis_dir),
+                                 '--output-config', sample_config_file_name, '--reference-config',
+                                 reference_json])
 
     return str(analysis_dir / case_name / sample_config_file_name)
 

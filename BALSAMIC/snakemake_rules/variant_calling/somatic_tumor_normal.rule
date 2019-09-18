@@ -125,29 +125,3 @@ rule strelka_tumor_normal:
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
     "source deactivate; "
-
-rule manta_tumor_normal:
-  input:
-    fa = config["reference"]["reference_genome"] ,
-    bamN = bam_dir + "normal.merged.bam", 
-    bamT = bam_dir + "tumor.merged.bam",
-  output:
-    candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
-    final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
-  params:
-    tmpdir = vcf_dir + "manta/",
-    runmode = "local",
-    conda = get_conda_env(config["conda_env_yaml"],"manta")
-  threads: 4
-  shell:
-    "source activate {params.conda};"
-    "rm -rf {params.tmpdir}; "
-    "configManta.py "
-        "--normalBam={input.bamN} "
-        "--tumorBam={input.bamT} "
-        "--referenceFasta={input.fa} "
-        "--runDir={params.tmpdir}; "
-    "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-    "cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final}; "
-    "tabix -p vcf -f {output.final}; "
-    "source deactivate; "

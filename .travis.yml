@@ -14,6 +14,9 @@ script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
 
 after_success: coveralls
+
+env:
+  - SENTIEON_LICENSE="/path/to/sentieon_license" SENTIEON_INSTALL_DIR="/path/to/sentieon_install_dir" SENTIEON_DNASCOPE="/path/to/sentieon_dnascope" SENTIEON_TNSCOPE="/path/to/sentieon_dnascope"
   
 notification:
   - email: false
