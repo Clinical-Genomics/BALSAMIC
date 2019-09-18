@@ -33,13 +33,14 @@ preprocessing = ["snakemake_rules/sentieon/sentieon_alignment.rule"]
 if config['analysis']['analysis_type'] == "paired":
     variant_calling = ["snakemake_rules/sentieon/sentieon_tn_varcall.rule", \
                        "snakemake_rules/sentieon/sentieon_germline.rule", \
-                       "snakemake_rules/variant_calling/somatic_sv.rule"]
+                       "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule"]
     somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope', 'manta']
     germline_caller = ['dnascope']
 else:
     variant_calling = ["snakemake_rules/sentieon/sentieon_t_varcall.rule", \
-                       "snakemake_rules/sentieon/sentieon_germline.rule"]
-    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope']
+                       "snakemake_rules/sentieon/sentieon_germline.rule", \
+                       "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule"]
+    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope', 'manta']
     germline_caller = ['dnascope']
 
 annotation = ["snakemake_rules/annotation/vep.rule"]
