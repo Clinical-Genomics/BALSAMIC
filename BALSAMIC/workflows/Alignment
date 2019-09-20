@@ -4,6 +4,7 @@
 
 import os
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
 
@@ -16,6 +17,11 @@ fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
+
+if config['singularity']['library'] == "remote":
+  singularity_image = "shub://Clinical-Genomics/BALSAMIC:"+bv 
+else:
+  singularity_image = config['singularity']['image'] 
 
 include:
   rule_dir + "snakemake_rules/align/bwa_mem.rule"

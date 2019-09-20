@@ -17,7 +17,7 @@ rule RealignerTargetCreator:
     bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -38,7 +38,7 @@ rule IndelRealigner:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -59,7 +59,7 @@ rule BaseRecalibrator:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -86,7 +86,7 @@ rule PreparePopVCF:
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
     anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
     popcode = "EUR"
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda}; "
     "readlink -e {input.bam}; "

@@ -25,7 +25,7 @@ rule collectqc:
     # This is using same environment as gatk
     resultdir = result_dir,
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda};"
     "touch {output}; "

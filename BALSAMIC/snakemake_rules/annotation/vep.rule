@@ -4,7 +4,6 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC import __version__ as bv
 
 rule vep:
   input:
@@ -17,7 +16,7 @@ rule vep:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: 4
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image 
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "

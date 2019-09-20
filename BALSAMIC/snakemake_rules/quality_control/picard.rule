@@ -25,7 +25,7 @@ rule MarkDuplicates:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -51,7 +51,7 @@ rule CollectHsMetrics:
   params:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -87,7 +87,7 @@ rule CollectAlignmentSummaryMetrics:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     adapter = config["QC"]["adapter"]
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -109,7 +109,7 @@ rule CollectInsertSizeMetrics:
   params:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard")
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+  singularity: singularity_image
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "

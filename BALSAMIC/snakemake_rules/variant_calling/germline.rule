@@ -23,7 +23,7 @@ rule haplotypecaller:
     params:
         conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     threads: 4
-    singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+    singularity: singularity_image
     shell:
         "source activate {params.conda};"
         "gatk3 -T HaplotypeCaller "
@@ -40,7 +40,7 @@ rule haplotypecaller_merge:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
         conda = get_conda_env(config["conda_env_yaml"], "gatk"),
-    singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+    singularity: singularity_image
     shell:
         "source activate {params.conda}; "
         "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
@@ -60,7 +60,7 @@ rule strelka_germline:
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"strelka"),
     threads: 4
-    singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+    singularity: singularity_image
     shell:
         "source activate {params.conda};"
         "rm -rf {params.tmpdir}; "
@@ -88,7 +88,7 @@ rule manta_germline:
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"manta"),
     threads: 4
-    singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
+    singularity: singularity_image
     shell:
         "source activate {params.conda}; "
         "rm -rf {params.tmpdir}; "
