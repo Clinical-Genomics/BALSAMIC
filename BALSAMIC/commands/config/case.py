@@ -324,11 +324,11 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
                           install_config, bioinfo_config)
 
     if umi:
-        json_out["QC"]["umi_trim"] = str(umi)
+        json_out["QC"]["umi_trim"] = umi
         json_out["QC"]["umi_trim_length"] = str(umi_trim_length)
 
-    json_out["QC"]["quality_trim"] = str(quality_trim)
-    json_out["QC"]["adapter_trim"] = str(adapter_trim)
+    json_out["QC"]["quality_trim"] = quality_trim
+    json_out["QC"]["adapter_trim"] = adapter_trim
 
     dag_image = os.path.join(output_dir,
                              output_config + '_BALSAMIC_' + bv + '_graph')
