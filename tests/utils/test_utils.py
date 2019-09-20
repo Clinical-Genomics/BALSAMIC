@@ -56,6 +56,8 @@ def test_snakemake_local():
     snakemake_local.snakefile = "worflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
+    snakemake_local.use_singularity = True
+    snakemake_local.singularity_bind = ["path_1", "path_2"]
     snakemake_local.forceall = True
 
     # WHEN calling the build command
@@ -88,6 +90,8 @@ def test_snakemake_slurm():
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
+    snakemake_slurm.use_singularity = True
+    snakemake_slurm.singularity_bind = ["path_1", "path_2"]
     snakemake_slurm.run_analysis = True
 
     # WHEN calling the build command

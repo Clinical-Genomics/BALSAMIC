@@ -144,7 +144,7 @@ def get_fastq_path(fq_file, fq_pattern):
             )
             raise click.Abort()
     else:
-        LOG.error(f"{file} is not found, update correct file path")
+        LOG.error(f"{fq_file} is not found, update correct file path")
         raise click.Abort()
 
     return file_str, os.path.split(fq_file)[0]
