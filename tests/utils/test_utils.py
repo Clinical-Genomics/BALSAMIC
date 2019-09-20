@@ -161,19 +161,27 @@ def test_get_script_path():
 
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
-    analysis_types = ["paired", "single", "qc"]
+    workflow = [("paired", "wgs"), ("paired", "targeted"), ("single", "wgs"),
+                ("single", "targeted"), ("qc", ""), ("generate_ref", "")]
 
     # WHEN asking to see snakefile for paired
-    for analysis_type in analysis_types:
-        snakefile = get_snakefile(analysis_type)
+    for analysis_type, sequencing_type in workflow:
+        snakefile = get_snakefile(analysis_type, sequencing_type)
+        pipeline = ''
+
+        if sequencing_type == 'targeted':
+            pipline = "BALSAMIC/workflows/VariantCalling"
+        elif sequencing_type == 'wgs':
+            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon"
+        elif analysis_type == 'qc':
+            pipeline = "BALSAMIC/workflows/Alignment"
+        elif analysis_type == 'generate_ref':
+            pipeline = "BALSAMIC/workflows/GenerateRef"
 
         # THEN it should return the snakefile path
-        assert snakefile.startswith('/')
-        if analysis_type != 'qc':
-            assert "BALSAMIC/workflows/VariantCalling" in snakefile
-        else:
-            assert "BALSAMIC/workflows/Alignment" in snakefile
         # THEN assert file exists
+        assert snakefile.startswith('/')
+        assert pipeline in snakefile
         assert Path(snakefile).is_file()
 
 
