@@ -8,36 +8,21 @@ _green=${_log}'\033[0;32m';
 _yellow=${_log}'\033[1;33m';
 _nocol='\033[0m';
 _condaprefix=D
-_condadate=$(date +%y%m%d)
-
-#if [ $# -eq 0 ]; then
-#  echo $"
-#USAGE: $0 [-s _condaprefix -d _condadate -p _condapath -c]
-#  1. Conda naming convention: [P,D]_[ENVNAME]_%DATE. P: Production, D: Development
-#  2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
-#  
-#  -s _condaprefix  Conda env name prefix. This will be P or D in the help above. 
-#  -d _condadate    Conda env name suffix. This will be a suffix, by default it will be current date: yymmdd 
-#  -p _condapath    Conda env path prefix. See point 2 in help above.
-#  -c If set it will use Singularity container for conda instead 
-#" >&2
-#  exit 0
-#fi
 
 while getopts ":s:p:d:ch" opt; do
   case $opt in
     s) sFlag=true;_condaprefix=${OPTARG};;
-    d) dFlag=true;_condadate=${OPTARG};;
+    d) vFlag=true;_balsamic_ver=${OPTARG};;
     p) pFlag=true;_condapath=${OPTARG};;
     c) cFlag=true;;
     h)
       echo $"
-USAGE: $0 [-s _condaprefix -d _condadate -p _condapath -c]
-  1. Conda naming convention: [P,D]_[ENVNAME]_%DATE. P: Production, D: Development
+USAGE: $0 [-s _condaprefix -t _balsamic_ver -p _condapath -c]
+  1. Conda naming convention: [P,D,S]_[ENVNAME]_%DATE. P: Production, D: Development, S: Stage
   2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
   
   -s _condaprefix  Conda env name prefix. This will be P or D in the help above. 
-  -d _condadate    Conda env name suffix. This will be a suffix, by default it will be current date: yymmdd 
+  -v _balsamic_ver Balsamic version to install
   -p _condapath    Conda env path prefix. See point 2 in help above.
   -c If set it will use Singularity container for conda instead 
 " >&2
@@ -85,19 +70,21 @@ then
     }
 fi
 
-
-# Conda env found
-# Conda env naming convention: [P,D]_BALSAMIC_%DATE
-# P: Production, D: Development 
-_env_name_suffix=_${_condadate} 
-_env_name=${_condaprefix}_BALSAMIC-base${_env_name_suffix}
+_env_name_suffix=_${_balsamic_ver} 
+_env_name=${_condaprefix}_BALSAMIC-base_${_env_name_suffix}
 _balsamic_envs=${PWD}'/BALSAMIC_env.yaml'
 _balsamic_ruledir=${PWD}'/BALSAMIC/'
+
+if config['singularity']['library'] == "remote":
+  singularity_image = "shub://Clinical-Genomics/BALSAMIC:"+bv 
+else:
+  singularity_image = config['singularity']['image'] 
 
 echo -e "${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
 cat > BALSAMIC/config/install.json << EOF
 {
     "conda_env_yaml": "${_balsamic_envs}",
+    "singularity": ${PWD}/BALSAMIC_${_balsamic_ver}.sif
     "rule_directory": "${_balsamic_ruledir}"
 }
 EOF
@@ -114,29 +101,8 @@ echo -e "${_green}Installing BALSAMIC${_nocol}"
 echo -e "${_yellow}\tpip install --editable .${_nocol}"
 pip install -r requirements.txt --editable .
 
-echo -e "${_green}Installting environments for the workflow.${_nocol}"
-
-balsamic install -s ${_env_name_suffix} \
-  --overwrite-env \
-  --env-type ${_condaprefix} \
-  --input-conda-yaml BALSAMIC/conda/BALSAMIC-py27.yaml \
-  --input-conda-yaml BALSAMIC/conda/BALSAMIC-py36.yaml \
-  --env-dir-prefix ${_condapath} \
-  --packages-output-yaml ${_balsamic_envs}
-
-gatk_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "gatk"))'`
-
-source activate ${gatk_env}
-gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
-
-echo -e "${_green}Copying custom Picard to relevant conda environment.${_nocol}"
-source activate ${_env_name}
-picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
-picard_conda_env=`python -c 'from BALSAMIC.utils.rule import get_conda_env; print(get_conda_env("BALSAMIC_env.yaml", "picard"))'`
-picard_destination=${picard_conda_env}/share/
-cp $picard_PATH ${picard_destination}
-# link picard from assets to conda's share path
-ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
+echo -e "${_green}Pulling singularity container${_nocol}"
+singularity pull shub://Clinical-Genomics/BALSAMIC:${_balsamic_ver} ${PWD}/BALSAMIC_${_balsamic_ver}.sif
 
 echo -e "\n${_green}Install finished. Make sure you set reference.json and cluster.json.${_nocol}"
 echo -e "\n${_green}To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
