@@ -1,12 +1,12 @@
 {
     "QC": {
-        "picard_rmdup": "False",
+        "picard_rmdup": false,
         "adapter":
         "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         "min_seq_length": "25",
-        "quality_trim": "False",
-        "adapter_trim": "False",
-        "umi_trim": "False",
+        "quality_trim": false,
+        "adapter_trim": false,
+        "umi_trim": false,
         "umi_trim_length": "5"
     },
     "vcf": {
