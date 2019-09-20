@@ -11,7 +11,6 @@ from BALSAMIC.utils.cli import get_sbatchpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -87,10 +86,16 @@ LOG = logging.getLogger(__name__)
     help='SLURM mail type to send out email.\
               This will be applied to all jobs and override snakemake settings.'
 )
+@click.option('--use-singularity',
+              is_flag=True,
+              show_default=True,
+              default=False,
+              help='Use singularity container to run analysis')
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, log_file, force_all, snakemake_opt, slurm_mail_type,
-             slurm_mail_user, slurm_account, analysis_type, qos):
+             slurm_mail_user, slurm_account, analysis_type, qos,
+             use_singularity):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
@@ -129,9 +134,15 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     if not analysis_type:
         analysis_type = sample_config['analysis']['analysis_type']
 
+    # Singularity bind path
+    bind_path = list()
+    bind_path.append(os.path.commonpath(sample_config['reference'].values()))
+    bind_path.append(sample_config['panel']['capture_kit'])
+    bind_path.append(sample_config['analysis']['analysis_dir'])
+
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
-    balsamic_run.case_name = case_name 
+    balsamic_run.case_name = case_name
     balsamic_run.working_dir = sample_config['analysis']['analysis_dir'] +  \
         case_name + '/BALSAMIC_run/'
     balsamic_run.snakefile = snake_file if snake_file else get_snakefile(
@@ -150,9 +161,11 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.mail_user = slurm_mail_user
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
+    balsamic_run.use_singularity = use_singularity
+    balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
 
     try:
         subprocess.run(balsamic_run.build_cmd(), shell=True)
     except:
-        raise 
+        raise
