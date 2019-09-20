@@ -5,6 +5,7 @@ import os
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_chrom
+from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 chromlist = config["panel"]["chrom"]
@@ -24,6 +25,7 @@ rule vardict_tumor_only:
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "vardict -G {input.fa} -f {params.af} -N {params.name} "
@@ -43,6 +45,7 @@ rule vardict_merge:
     vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
@@ -62,6 +65,7 @@ rule mutect2_tumor_only:
     result_dir = vcf_dir + "mutect/",
     conda = get_conda_env(config["conda_env_yaml"],"gatk")
   threads: 6
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda};"
     "mkdir -p {params.result_dir}; "
@@ -84,6 +88,7 @@ rule mutect2_merge:
     vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
   params: 
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"), 
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:  
     "source activate {params.conda} ; " 
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "  
@@ -102,6 +107,7 @@ rule manta_tumor_only:
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"manta")
   threads: 4
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda};"
     "rm -rf {params.tmpdir}; "

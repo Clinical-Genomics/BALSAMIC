@@ -5,6 +5,7 @@ __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
@@ -19,6 +20,7 @@ rule mergeBam_normal_gatk:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard=picard_extra_normal
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamN}.tmp {input.bamN}; "
@@ -35,6 +37,7 @@ rule mergeBam_normal:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard=picard_extra_normal
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamN}.tmp {input.bamN}; "
@@ -51,6 +54,7 @@ rule mergeBam_tumor:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard=picard_extra_tumor
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamT}.tmp {input.bamT}; "
@@ -67,6 +71,7 @@ rule mergeBam_tumor_gatk:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard=picard_extra_tumor
+  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamT}.tmp {input.bamT}; "
