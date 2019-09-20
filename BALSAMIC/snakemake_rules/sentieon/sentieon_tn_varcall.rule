@@ -26,7 +26,7 @@ rule sentieon_TN_corealign:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} -q {input.recalT} -q {input.recalN} --algo Realigner -k {input.mills} -k {input.indel_1kg} {output.bam}
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} -q {input.recalT} -q {input.recalN} --algo Realigner -k {input.mills} -k {input.indel_1kg} {output.bam}
         """
 
 

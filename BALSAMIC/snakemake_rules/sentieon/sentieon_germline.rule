@@ -20,7 +20,7 @@ rule sentieon_DNAscope:
     	"""
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} - t {threads} -r {input.ref} -i {input.bam} --algo DNAscope --pcr_indel_model NONE -d {input.dbsnp} --var_type snp,indel --model {params.sentieon_ml_dnascope} {output.vcf}
+{params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} --algo DNAscope --pcr_indel_model NONE -d {input.dbsnp} --var_type snp,indel --model {params.sentieon_ml_dnascope} {output.vcf}
 		"""
 
 
@@ -41,6 +41,6 @@ rule sentieon_filter_DNAscope:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver - t {threads} -r {input.ref} --algo DNAModelApply --model {params.sentieon_ml_dnascope} -v {input.dnascope_vcf} {output.dnascope_filtered_vcf}
+{params.sentieon_exec} driver -t {threads} -r {input.ref} --algo DNAModelApply --model {params.sentieon_ml_dnascope} -v {input.dnascope_vcf} {output.dnascope_filtered_vcf}
         """
 
