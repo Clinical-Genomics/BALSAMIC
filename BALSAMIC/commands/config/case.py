@@ -4,6 +4,7 @@ import subprocess
 import re
 import json
 import copy
+import shutil
 import glob
 import logging
 import click
@@ -114,24 +115,25 @@ def get_sample_config(sample_config, case_id, analysis_dir, analysis_type):
 
 def link_fastq(src_files, des_path):
     """
-    Creating fastq symlinks in given destination
+    Creating fastq copy in given destination
     """
     for src_file in src_files:
         basename = os.path.basename(src_file)
         des_file = os.path.join(des_path, basename)
         try:
-            os.symlink(src_file, des_file)
-        except FileExistsError:
+            shutil.copyfile(Path(src_file).resolve(), des_file)
+        except (SameFileError, OSError) as e:
+            LOG.warning(e)
             LOG.warning(
-                f"Desitination file {des_file} exists. No symbolic link was created."
+                f"Desitination file {des_file} exists. No copy link was created."
             )
 
 
-def get_fastq_path(file, fq_pattern):
+def get_fastq_path(fq_file, fq_pattern):
     # check the fastq if exists
-    file = os.path.abspath(file)
-    if Path(file).exists():
-        file_basename = os.path.basename(file)
+    fq_file = os.path.abspath(fq_file)
+    if Path(fq_file).exists():
+        file_basename = os.path.basename(fq_file)
         try:
             # extracting file prefix
             file_str = file_basename[0:(
@@ -145,13 +147,14 @@ def get_fastq_path(file, fq_pattern):
         LOG.error(f"{file} is not found, update correct file path")
         raise click.Abort()
 
-    return file_str, os.path.split(file)[0]
+    return file_str, os.path.split(fq_file)[0]
 
 
 def configure_fastq(fq_path, sample, fastq_prefix):
     """
     Configure the fastq files for analysis
     """
+    print(sample)
     fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
     paths = list()
 
@@ -161,9 +164,9 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 
     fq_files = set()
     for path in paths:
-        for file in os.listdir(path):
-            if fq_pattern.search(file):
-                fq_files.add(os.path.join(path, file))
+        for fq_file in os.listdir(path):
+            if fq_pattern.search(fq_file):
+                fq_files.add(os.path.join(path, fq_file))
 
     # create symlink
     link_fastq(fq_files, fq_path)
