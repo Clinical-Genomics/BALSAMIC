@@ -94,28 +94,3 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "  
     "tabix -f -p vcf {output}; "  
     "source deactivate;" 
-
-rule manta_tumor_only:
-  input:
-    fa = config["reference"]["reference_genome"],
-    bamT = bam_dir + "tumor.merged.bam",
-  output:
-    candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
-    final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
-  params:
-    tmpdir = vcf_dir + "manta/",
-    runmode = "local",
-    conda = get_conda_env(config["conda_env_yaml"],"manta")
-  threads: 4
-  singularity: "shub://Clinical-Genomics/BALSAMIC:"+bv
-  shell:
-    "source activate {params.conda};"
-    "rm -rf {params.tmpdir}; "
-    "configManta.py "
-        "--tumorBam={input.bamT} "
-        "--referenceFasta={input.fa} "
-        "--runDir={params.tmpdir}; "
-    "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-    "cp {params.tmpdir}/results/variants/tumorSV.vcf.gz {output.final}; "
-    "tabix -p vcf -f {output.final}; "
-    "source deactivate; "
