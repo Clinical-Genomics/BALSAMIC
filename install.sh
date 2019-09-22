@@ -9,10 +9,10 @@ _yellow=${_log}'\033[1;33m';
 _nocol='\033[0m';
 _condaprefix=D
 
-while getopts ":s:p:d:ch" opt; do
+while getopts ":s:p:v:ch" opt; do
   case $opt in
     s) sFlag=true;_condaprefix=${OPTARG};;
-    d) vFlag=true;_balsamic_ver=${OPTARG};;
+    v) vFlag=true;_balsamic_ver=${OPTARG};;
     p) pFlag=true;_condapath=${OPTARG};;
     c) cFlag=true;;
     h)
@@ -70,25 +70,9 @@ then
     }
 fi
 
-_env_name_suffix=_${_balsamic_ver} 
-_env_name=${_condaprefix}_BALSAMIC-base_${_env_name_suffix}
+_env_name=${_condaprefix}_BALSAMIC-base_${_balsamic_ver}
 _balsamic_envs=${PWD}'/BALSAMIC_env.yaml'
 _balsamic_ruledir=${PWD}'/BALSAMIC/'
-
-if config['singularity']['library'] == "remote":
-  singularity_image = "shub://Clinical-Genomics/BALSAMIC:"+bv 
-else:
-  singularity_image = config['singularity']['image'] 
-
-echo -e "${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
-cat > BALSAMIC/config/install.json << EOF
-{
-    "conda_env_yaml": "${_balsamic_envs}",
-    "singularity": ${PWD}/BALSAMIC_${_balsamic_ver}.sif
-    "rule_directory": "${_balsamic_ruledir}"
-}
-EOF
-cat BALSAMIC/config/install.json
 
 echo -e "${_green}Creating conda env ${_env_name}${_nocol}"
 conda env create -f BALSAMIC/conda/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
@@ -98,11 +82,20 @@ echo $_env_name
 source activate ${_env_name}
 
 echo -e "${_green}Installing BALSAMIC${_nocol}"
-echo -e "${_yellow}\tpip install --editable .${_nocol}"
 pip install -r requirements.txt --editable .
 
 echo -e "${_green}Pulling singularity container${_nocol}"
-singularity pull shub://Clinical-Genomics/BALSAMIC:${_balsamic_ver} ${PWD}/BALSAMIC_${_balsamic_ver}.sif
+singularity pull --force ${PWD}/BALSAMIC_${_balsamic_ver}.sif shub://Clinical-Genomics/BALSAMIC:${_balsamic_ver}
+
+echo -e "${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
+cat > BALSAMIC/config/install.json << EOF
+{
+    "conda_env_yaml": "${_balsamic_envs}",
+    "singularity": {"image":${PWD}/BALSAMIC_${_balsamic_ver}.sif},
+    "rule_directory": "${_balsamic_ruledir}"
+}
+EOF
+cat BALSAMIC/config/install.json
 
 echo -e "\n${_green}Install finished. Make sure you set reference.json and cluster.json.${_nocol}"
 echo -e "\n${_green}To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
