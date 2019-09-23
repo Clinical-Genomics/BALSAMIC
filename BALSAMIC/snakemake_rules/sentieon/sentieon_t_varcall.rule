@@ -32,6 +32,8 @@ rule sentieon_TNsnv_tumor_only:
     threads: 16
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
+    benchmark:
+        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnsnv.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -56,6 +58,8 @@ rule sentieon_TNhaplotyper_tumor_only:
     threads: 16
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
+    benchmark:
+        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -71,7 +75,7 @@ rule sentieon_TNscope_tumor_only:
         bam = expand(bam_dir + "{tumor}.dedup.realign.bam", tumor=get_sample_type(config["samples"], "tumor")),
         recal = expand(bam_dir + "{tumor}.dedup.realign.recal_data.table", tumor=get_sample_type(config["samples"], "tumor")),
     output:
-        vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     params:
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
@@ -80,6 +84,8 @@ rule sentieon_TNscope_tumor_only:
     threads: 16
     log: 
         vcf_dir + config["analysis"]["case_id"] + ".tnscope_tumor_only.log"
+    benchmark:
+        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnscope.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -88,21 +94,23 @@ export SENTIEON_LICENSE={params.sentieon_lic};
         """
 
 
-rule sentioen_filter_TNscope_tumor_only:
-    input:
-        ref = config["reference"]["reference_genome"],
-        tnscope_vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-    output:
-        tnscope_filtered_vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-    params:
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
-        sentieon_ml_tnscope = SENTIEON_TNSCOPE
-    log:
-        vcf_dir + config["analysis"]["case_id"] + ".tnscope.filtered.log",
-    shell:
-        """
-export SENTIEON_LICENSE={params.sentieon_lic};
+#rule sentioen_filter_TNscope_tumor_only:
+#    input:
+#        ref = config["reference"]["reference_genome"],
+#        tnscope_vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+#    output:
+#        tnscope_filtered_vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+#    params:
+#        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+#        sentieon_lic = SENTIEON_LICENSE, 
+#        sentieon_ml_tnscope = SENTIEON_TNSCOPE
+#    log:
+#        vcf_dir + config["analysis"]["case_id"] + ".tnscope.filtered.log",
+#    shell:
+#        """
+#export SENTIEON_LICENSE={params.sentieon_lic};
+#
+#{params.sentieon_exec} driver -r {input.ref} --algo TNModelApply -m {params.sentieon_ml_tnscope} -v {input.tnscope_vcf} {output.tnscope_filtered_vcf}
+#        """
+#
 
-{params.sentieon_exec} driver -r {input.ref} --algo TNModelApply -m {params.sentieon_ml_tnscope} -v {input.tnscope_vcf} {output.tnscope_filtered_vcf}
-        """

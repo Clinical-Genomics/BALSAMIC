@@ -9,7 +9,7 @@ rule sentieon_DNAscope:
         bam = bam_dir + "{sample}.dedup.realign.bam",
         recal_table = bam_dir + "{sample}.dedup.realign.recal_data.table"
     output:
-        vcf = vcf_dir + "sentieon_dnascope/SNV.germline.{sample}.dnascope.vcf.gz",
+        vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
@@ -17,6 +17,8 @@ rule sentieon_DNAscope:
     threads: 16
     log: 
         vcf_dir + "{sample}.dnascope.log"
+    benchmark:
+        vcf_dir + "benchmarks/{sample}.dnascope.tsv"
     shell:
     	"""
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -25,23 +27,23 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 		"""
 
 
-rule sentieon_filter_DNAscope:
-    input:
-        ref = config["reference"]["reference_genome"],
-        dnascope_vcf = vcf_dir + "sentieon_dnascope/SNV.germline.{sample}.dnascope.vcf.gz"
-    output:
-        dnascope_filtered_vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz"
-    params:
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
-        sentieon_ml_dnascope = SENTIEON_DNASCOPE
-    threads: 16
-    log:
-        vcf_dir + "{sample}.dnascope.filtered.log"
-    shell:
-        """
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver -t {threads} -r {input.ref} --algo DNAModelApply --model {params.sentieon_ml_dnascope} -v {input.dnascope_vcf} {output.dnascope_filtered_vcf}
-        """
-
+#rule sentieon_filter_DNAscope:
+#    input:
+#        ref = config["reference"]["reference_genome"],
+#        dnascope_vcf = vcf_dir + "sentieon_dnascope/SNV.germline.{sample}.dnascope.vcf.gz"
+#    output:
+#        dnascope_filtered_vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz"
+#    params:
+#        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+#        sentieon_lic = SENTIEON_LICENSE, 
+#        sentieon_ml_dnascope = SENTIEON_DNASCOPE
+#    threads: 16
+#    log:
+#        vcf_dir + "{sample}.dnascope.filtered.log"
+#    shell:
+#        """
+#export SENTIEON_LICENSE={params.sentieon_lic};
+#
+#{params.sentieon_exec} driver -t {threads} -r {input.ref} --algo DNAModelApply --model {params.sentieon_ml_dnascope} -v {input.dnascope_vcf} {output.dnascope_filtered_vcf}
+#        """
+#
