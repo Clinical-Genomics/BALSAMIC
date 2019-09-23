@@ -10,10 +10,10 @@ import logging
 import click
 import snakemake
 import graphviz
+from urllib.parse import urlparse
 from datetime import datetime
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
-
 from BALSAMIC.utils.cli import get_package_split
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_config
@@ -154,7 +154,7 @@ def configure_fastq(fq_path, sample, fastq_prefix):
     """
     Configure the fastq files for analysis
     """
-    print(sample)
+
     fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
     paths = list()
 
@@ -247,11 +247,15 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 @click.option("--create-dir/--no-create-dir",
               default=True,
               help="Create analysis directiry.")
+@click.option("--singularity-path",
+              default="shub://Clinical-Genomics/BALSAMIC:" + bv,
+              show_default=True,
+              help="Singularity image path")
 @click.pass_context
 def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
                 install_config, reference_config, panel_bed, output_config,
                 normal, tumor, case_id, analysis_dir, overwrite_config,
-                create_dir, fastq_prefix):
+                create_dir, fastq_prefix, singularity_path):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
@@ -280,6 +284,14 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     sample_config = get_sample_config(sample_config_path, case_id,
                                       analysis_dir, analysis_type)
 
+    # Add singularity image path
+    sample_config['singularity'] = dict()
+    if urlparse(singularity_path).scheme != "shub":
+        sample_config['singularity']['image'] = os.path.abspath(
+            singularity_path)
+    else:
+        sample_config['singularity']['image'] = singularity_path
+
     output_dir = os.path.join(analysis_dir, case_id)
 
     if create_dir:
@@ -290,13 +302,13 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     os.makedirs(fq_path, exist_ok=True)
 
     for t in tumor:
-      t = configure_fastq(fq_path, t, fastq_prefix)
+        t = configure_fastq(fq_path, t, fastq_prefix)
 
-      sample_config["samples"][t] = {
-          "file_prefix": t,
-          "type": "tumor",
-          "readpair_suffix": read_prefix,
-      }
+        sample_config["samples"][t] = {
+            "file_prefix": t,
+            "type": "tumor",
+            "readpair_suffix": read_prefix,
+        }
 
     if normal:
         normal = configure_fastq(fq_path, normal, fastq_prefix)
@@ -344,7 +356,8 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     FormatFile(output_config, in_place=True)
 
     with CaptureStdout() as graph_dot:
-        snakemake.snakemake(snakefile=get_snakefile(analysis_type, sequencing_type),
+        snakemake.snakemake(snakefile=get_snakefile(analysis_type,
+                                                    sequencing_type),
                             dryrun=True,
                             configfile=output_config,
                             printrulegraph=True)

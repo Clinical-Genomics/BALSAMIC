@@ -19,10 +19,7 @@ result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
-if not 'image' in config['singularity'].keys():
-  singularity_image = "shub://Clinical-Genomics/BALSAMIC:"+bv 
-else:
-  singularity_image = config['singularity']['image'] 
+singularity_image = config['singularity']['image'] 
 
 # Define set of rules
 qc_rules = [

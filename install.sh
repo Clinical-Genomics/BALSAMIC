@@ -22,7 +22,7 @@ USAGE: $0 [-s _condaprefix -t _balsamic_ver -p _condapath -c]
   2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
   
   -s _condaprefix  Conda env name prefix. This will be P or D in the help above. 
-  -v _balsamic_ver Balsamic version to install
+  -v _balsamic_ver Balsamic version tag for conda env name 
   -p _condapath    Conda env path prefix. See point 2 in help above.
   -c If set it will use Singularity container for conda instead 
 " >&2
@@ -84,21 +84,10 @@ source activate ${_env_name}
 echo -e "${_green}Installing BALSAMIC${_nocol}"
 pip install -r requirements.txt --editable .
 
-
-if [[ -f ${PWD}/BALSAMIC/containers/BALSAMIC_${_balsamic_ver}.sif ]];
-then
-  echo -e "\n${_green}Container for BALSAMIC ${_balsamic_ver} exists.${_nocol}"
-else
-  echo -e "${_green}Pulling singularity container${_nocol}"
-  singularity pull ${PWD}/BALSAMIC/containers/BALSAMIC_${_balsamic_ver}.sif shub://Clinical-Genomics/BALSAMIC:${_balsamic_ver}
-fi
-
-
 echo -e "${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
 cat > BALSAMIC/config/install.json << EOF
 {
     "conda_env_yaml": "${_balsamic_envs}",
-    "singularity": {"image":"${PWD}/BALSAMIC/containers/BALSAMIC_${_balsamic_ver}.sif"},
     "rule_directory": "${_balsamic_ruledir}"
 }
 EOF
