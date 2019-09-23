@@ -48,15 +48,15 @@ fi
 # Check if container flag is specified
 if [[ $cFlag ]]
 then
-  if [[ -f BALSAMIC_miniconda3_4_6_14.sif ]];
+  if [[ -f ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' ]];
   then
     echo -e "\n${_green}Container for miniconda3 4.6.14 exists.${_nocol}"
   else
     echo -e "\n${_green}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14.${_nocol}"
-    singularity pull shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
+    singularity pull ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
   fi
   function conda() {
-    singularity run --bind ${_condapath} BALSAMIC_miniconda3_4_6_14.sif conda "$@"
+    singularity run --bind ${_condapath} ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' conda "$@"
   }
 fi
 
@@ -84,14 +84,21 @@ source activate ${_env_name}
 echo -e "${_green}Installing BALSAMIC${_nocol}"
 pip install -r requirements.txt --editable .
 
-echo -e "${_green}Pulling singularity container${_nocol}"
-singularity pull --force ${PWD}/BALSAMIC_${_balsamic_ver}.sif shub://Clinical-Genomics/BALSAMIC:${_balsamic_ver}
+
+if [[ -f ${PWD}/BALSAMIC/containers/BALSAMIC_${_balsamic_ver}.sif ]];
+then
+  echo -e "\n${_green}Container for BALSAMIC ${_balsamic_ver} exists.${_nocol}"
+else
+  echo -e "${_green}Pulling singularity container${_nocol}"
+  singularity pull ${PWD}/BALSAMIC/containers/BALSAMIC_${_balsamic_ver}.sif shub://Clinical-Genomics/BALSAMIC:${_balsamic_ver}
+fi
+
 
 echo -e "${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
 cat > BALSAMIC/config/install.json << EOF
 {
     "conda_env_yaml": "${_balsamic_envs}",
-    "singularity": {"image":${PWD}/BALSAMIC_${_balsamic_ver}.sif},
+    "singularity": {"image":"${PWD}/BALSAMIC/containers/BALSAMIC_${_balsamic_ver}.sif"},
     "rule_directory": "${_balsamic_ruledir}"
 }
 EOF
