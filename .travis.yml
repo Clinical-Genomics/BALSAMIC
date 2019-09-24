@@ -9,6 +9,8 @@ before_install:
   - sudo apt-get install graphviz
 install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
+  - touch BALSAMIC/containers/fake_singularity_image
+  - balsamic init --singularity BALSAMIC/containers/fake_singularity_image
 
 script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
