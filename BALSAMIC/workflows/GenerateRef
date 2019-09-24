@@ -159,7 +159,7 @@ rule download_refgene:
     log:
         refgene_sql = genome_dir + "refgene_sql.log",
         refgene_txt = genome_dir + "refgene_txt.log"
-    singulartiy: singularity_image
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env}; " 
         "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk}); " 
@@ -185,7 +185,7 @@ rule download_cosmicdb:
         conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
         cosmicdb
-    singulartiy: singularity_image
+    singularity: singularity_image
     run:
         shell("source activate {params.conda_env};")
         import requests
@@ -222,7 +222,7 @@ rule bgzip_tabix:
         vcf_dir + "{vcf}.gz.tbi"
     log:
         vcf_dir + "{vcf}.gz_tbi.log"
-    singulartiy: singularity_image
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};"
@@ -243,7 +243,7 @@ rule bwa_index:
         expand(reference_genome + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome + ".bwa_index.log"
-    singulartiy: singularity_image
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "bwa index -a bwtsw {input} 2> {log};"
@@ -263,7 +263,7 @@ rule samtools_index_fasta:
         reference_genome_index
     log:
         reference_genome + ".faidx.log"
-    singulartiy: singularity_image
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "samtools faidx {input} 2> {log};"
@@ -284,7 +284,7 @@ rule picard_ref_dict:
         genome_dict
     log:
         reference_genome + ".ref_dict.log"
-    singulartiy: singularity_image
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "picard CreateSequenceDictionary "
@@ -308,7 +308,7 @@ rule vep_install:
         directory(vep_dir)
     log:
         vep_dir + "vep_install_cache.log"
-    singulartiy: singularity_image
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "vep_install --SPECIES {params.species} "
