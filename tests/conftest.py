@@ -53,32 +53,6 @@ def conda():
 
 
 @pytest.fixture(scope='session')
-def BALSAMIC_env(tmp_path_factory):
-    """
-    Writes BALSAMIC_env.yaml file.
-    """
-    # create a conda_env directory
-    conda_env_path = tmp_path_factory.mktemp("conda_env")
-
-    # create a yaml file inside conda_env_path
-    conda_packages = {
-        "env_py27": ["python", "strelka", "manta", "tabix"],
-        "env_py36": [
-            "python", "pip", "bcftools", "bwa", "fastqc", "sambamba",
-            "samtools", "tabix", "gatk", "picard", "fgbio", "freebayes",
-            "vardict", "vardict-java", "ensembl-vep", "cnvkit", "pindel",
-            "multiqc", "bedtools", "fastp"
-        ]
-    }
-
-    conda_env_file = conda_env_path / "test_BALSAMIC_env.yaml"
-
-    yaml.dump(conda_packages, open(conda_env_file, 'w'))
-
-    return str(conda_env_file)
-
-
-@pytest.fixture(scope='session')
 def no_write_perm_path(tmp_path_factory):
     """
     A path with no write permission
@@ -314,74 +288,3 @@ def sample_config():
     }
 
     return sample_config
-
-
-#
-#{
-#    "analysis": {
-#        "case_id":
-#        "test_sample",
-#        "analysis_type":
-#        "paired",
-#        "analysis_dir":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/",
-#        "fastq_path":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/analysis/fastq/",
-#        "script":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/scripts/",
-#        "log":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/logs/",
-#        "result":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/analysis",
-#        "config_creation_date":
-#        "2019-09-13 11:15",
-#        "BALSAMIC_version":
-#        "3.0.0",
-#        "dag":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_sample/test_sample.json_BALSAMIC_3.0.0_graph.pdf"
-#    },
-#    "reference": {
-#        "reference_genome":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
-#        "dbsnp":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-#        "1kg_snps_all":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-#        "1kg_snps_high":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
-#        "mills_1kg":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/mills_1kg_index.vcf.gz",
-#        "cosmic":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-#        "vep":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/vep",
-#        "refflat":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/genome/refseq.flat",
-#        "exon_bed":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/genome/refseq.flat.bed"
-#    },
-#    "conda_env_yaml":
-#    "/home/proj/long-term-stage/cancer/BALSAMIC/BALSAMIC_env.yaml",
-#    "rule_directory": "/home/proj/long-term-stage/cancer/BALSAMIC/BALSAMIC/",
-#    "bioinfo_tools": {
-#        "bcftools": "1.9.0",
-#        "fastqc": "0.11.5",
-#        "gatk": "3.8",
-#        "sambamba": "0.6.6",
-#        "strelka": "2.8.4",
-#        "bwa": "0.7.15",
-#        "cutadapt": "1.15",
-#        "samtools": "1.6",
-#        "picard": "2.17.0",
-#        "tabix": "0.2.5",
-#        "manta": "1.3.0"
-#    },
-#    "panel": {
-#        "capture_kit":
-#        "/home/proj/long-term-stage/cancer/BALSAMIC/tests/test_data/references/panel/panel.bed",
-#        "chrom": [
-#            "11", "5", "14", "12", "17", "9", "19", "2", "7", "20", "13", "1",
-#            "22", "6", "10", "4", "15", "18", "8", "16", "3", "21"
-#        ]
-#    }
-#}
