@@ -185,9 +185,7 @@ rule download_cosmicdb:
         conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
         cosmicdb
-    singularity: singularity_image
     run:
-        shell("source activate {params.conda_env};")
         import requests
 
         ## request the download url link
@@ -203,7 +201,6 @@ rule download_cosmicdb:
 
         ## unzip the file for indexing
         shell("gunzip {output}.gz;")
-        shell("source deactivate;")
 
 
 ##########################################################
