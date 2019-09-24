@@ -6,7 +6,7 @@ from click.testing import CliRunner
 from BALSAMIC.commands.base import cli
 
 
-def test_config_reference_write_json(install_config, invoke_cli, tmp_path):
+def test_config_reference_write_json(invoke_cli, tmp_path):
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_dir"
     test_new_dir.mkdir()
@@ -16,7 +16,7 @@ def test_config_reference_write_json(install_config, invoke_cli, tmp_path):
     test_output_reference_pdf = test_new_dir / "generate_ref_worflow_graph.pdf"
 
     result = invoke_cli([
-        'config', 'reference', '-i', install_config, '-c', 'secret_key', '-o',
+        'config', 'reference', '-c', 'secret_key', '-o',
         str(test_new_dir)
     ])
 

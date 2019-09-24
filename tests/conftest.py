@@ -121,25 +121,6 @@ def sample_fastq(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def install_config(BALSAMIC_env, tmp_path_factory):
-    """
-    Fixture for install.json
-    """
-    config_dir = tmp_path_factory.mktemp("config")
-    install_json = {
-        "conda_env_yaml": BALSAMIC_env,
-        "rule_directory": str(Path('BALSAMIC').absolute()) + "/"
-    }
-
-    install_config_file = str(config_dir / "install.json")
-
-    with open(install_config_file, 'w') as install_json_file:
-        json.dump(install_json, install_json_file)
-
-    return install_config_file
-
-
-@pytest.fixture(scope='session')
 def analysis_dir(tmp_path_factory):
     """
     Creates and returns analysis directory
@@ -149,8 +130,7 @@ def analysis_dir(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        install_config):
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -164,7 +144,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
+        'config', 'case', '-p', panel_bed_file, '-t',
         str(tumor), '-n',
         str(normal), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
@@ -175,8 +155,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope='session')
-def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        install_config):
+def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -189,7 +168,7 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'case', '-i', install_config, '-t',
+        'config', 'case', '-t',
         str(tumor), '-n', str(normal), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
@@ -199,8 +178,7 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope='session')
-def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
-                      install_config):
+def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -213,7 +191,7 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
+        'config', 'case', '-p', panel_bed_file, '-t',
         str(tumor), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
@@ -223,8 +201,7 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope='session')
-def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                          install_config):
+def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -235,7 +212,7 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     sample_config_file_name = 'sample.json'
 
     runner = CliRunner()
-    result = runner.invoke(cli, ['config', 'case', '-i', install_config, '-t', str(tumor),
+    result = runner.invoke(cli, ['config', 'case', '-t', str(tumor),
                                  '--case-id', case_name, '--analysis-dir', str(analysis_dir),
                                  '--output-config', sample_config_file_name, '--reference-config',
                                  reference_json])
