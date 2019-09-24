@@ -4,5 +4,4 @@ yapf
 graphviz
 coloredlogs
 psutil
-pytest
 snakemake==5.5.1
