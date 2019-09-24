@@ -29,7 +29,7 @@ def initiate(context, singularity):
     install_json = dict()
      
     install_json["conda_env_yaml"] = balsamic_env.as_posix()
-    install_json["rule_directory"] = rule_directory.as_posix()
+    install_json["rule_directory"] = rule_directory.as_posix() + "/"
 
     install_json["singularity"] = dict()
     install_json["singularity"]["image"] = Path(singularity).absolute().as_posix()
