@@ -84,17 +84,7 @@ source activate ${_env_name}
 echo -e "${_green}Installing BALSAMIC${_nocol}"
 pip install -r requirements.txt --editable .
 
-echo -e "${_green}Writing BALSAMIC/config/install.json ${_env_name}${_nocol}"
-cat > BALSAMIC/config/install.json << EOF
-{
-    "conda_env_yaml": "${_balsamic_envs}",
-    "rule_directory": "${_balsamic_ruledir}"
-}
-EOF
-cat BALSAMIC/config/install.json
-
-echo -e "\n${_green}Install finished. Make sure you set reference.json and cluster.json.${_nocol}"
-echo -e "\n${_green}To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
+echo -e "\n${_green}Install finished. To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
 
 unset _red
 unset _green
