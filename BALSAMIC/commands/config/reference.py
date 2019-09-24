@@ -21,10 +21,6 @@ LOG = logging.getLogger(__name__)
               "--outdir",
               required=True,
               help="output directory for ref files eg: reference")
-@click.option("-i",
-              "--install-config",
-              type=click.Path(),
-              help="install config file.")
 @click.option("-c",
               "--cosmic-key",
               required=True,
@@ -40,17 +36,10 @@ LOG = logging.getLogger(__name__)
               default="generate_ref_worflow_graph",
               show_default=True,
               help="DAG file for overview")
-@click.option("--singularity",
-              is_flag=True,
-              help="To run the workflow on container")
-def reference(outdir, cosmic_key, snakefile, dagfile, singularity,
-              install_config):
+def reference(outdir, cosmic_key, snakefile, dagfile):
     """ Configure workflow for reference generation """
-    if not install_config:
-        try:
-            install_config = get_config("install")
-        except:
-            context.Abort() 
+
+    install_config = get_config("install")
 
     config = dict()
     outdir = os.path.abspath(outdir)
