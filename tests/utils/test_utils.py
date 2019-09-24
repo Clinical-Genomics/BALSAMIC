@@ -270,21 +270,25 @@ def test_get_result_dir(sample_config):
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
 
 
-def test_get_conda_env_found(BALSAMIC_env, tmp_path):
-    # GIVEN a BALSAMIC_env yaml
+def test_get_conda_env_found(tmp_path):
+    # GIVEN a balsamic_env yaml
+    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
+
     # WHEN passing pkg name with this yaml file
-    conda_env = get_conda_env(BALSAMIC_env, 'cnvkit')
+    conda_env = get_conda_env(balsamic_env, 'cnvkit')
 
     # THEN It should return the conda env which has that pkg
     assert conda_env == "env_py36"
 
 
-def test_get_conda_env_not_found(BALSAMIC_env, tmp_path):
-    # GIVEN a BALSAMIC_env yaml
+def test_get_conda_env_not_found(tmp_path):
+    # GIVEN a balsamic_env yaml
+    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
+
     # WHEN passing pkg name with this yaml file
     # THEN It should return the conda env which has that pkg
     with pytest.raises(KeyError):
-        get_conda_env(BALSAMIC_env, 'unknown_package')
+        get_conda_env(balsamic_env, 'unknown_package')
 
 
 def test_capturestdout():
