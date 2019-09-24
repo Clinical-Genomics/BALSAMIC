@@ -36,6 +36,8 @@ rule fastp:
     qc_dir = result_dir + "qc",
     extra = fastp_param,
     conda = get_conda_env(config["conda_env_yaml"],"fastp")
+  benchmark:
+    fastq_dir + "benchmarks/{sample}_fastp.tsv"
   shell:
     "source activate {params.conda}; "
     "fastp "
