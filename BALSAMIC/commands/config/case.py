@@ -193,11 +193,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=False,
               show_default=True,
               help='Trim adapters from reads in fastq')
-@click.option("-i",
-              "--install-config",
-              required=False,
-              type=click.Path(),
-              help="Installation config file.")
 @click.option("-r",
               "--reference-config",
               required=True,
@@ -247,22 +242,17 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 @click.option("--create-dir/--no-create-dir",
               default=True,
               help="Create analysis directiry.")
-@click.option("--singularity-path",
-              default="shub://Clinical-Genomics/BALSAMIC:" + bv,
-              show_default=True,
-              help="Singularity image path")
 @click.pass_context
 def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
-                install_config, reference_config, panel_bed, output_config,
+                reference_config, panel_bed, output_config,
                 normal, tumor, case_id, analysis_dir, overwrite_config,
-                create_dir, fastq_prefix, singularity_path):
+                create_dir, fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
     """
 
-    if not install_config:
-        install_config = get_config("install")
+    install_config = get_config("install")
 
     analysis_type = get_analysis_type(normal, umi)
     sequencing_type = "targeted" if panel_bed else "wgs"
@@ -283,14 +273,6 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     analysis_dir = os.path.abspath(analysis_dir)
     sample_config = get_sample_config(sample_config_path, case_id,
                                       analysis_dir, analysis_type)
-
-    # Add singularity image path
-    sample_config['singularity'] = dict()
-    if urlparse(singularity_path).scheme != "shub":
-        sample_config['singularity']['image'] = os.path.abspath(
-            singularity_path)
-    else:
-        sample_config['singularity']['image'] = singularity_path
 
     output_dir = os.path.join(analysis_dir, case_id)
 
