@@ -15,10 +15,9 @@ def test_config_reference_write_json(invoke_cli, tmp_path):
     test_output_reference_config = test_new_dir / "config.json"
     test_output_reference_pdf = test_new_dir / "generate_ref_worflow_graph.pdf"
 
-    result = invoke_cli([
-        'config', 'reference', '-c', 'secret_key', '-o',
-        str(test_new_dir)
-    ])
+    result = invoke_cli(
+        ['config', 'reference', '-c', 'secret_key', '-o',
+         str(test_new_dir)])
 
     # THEN output config and pdf file generate and command exit code 0
     assert result.exit_code == 0
@@ -38,4 +37,3 @@ def test_config_reference_no_write_perm(tmp_path, invoke_cli,
 
     # THEN it should create test_reference.json and exist with no error
     assert result.exit_code == 1
-

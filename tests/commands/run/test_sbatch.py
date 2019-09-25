@@ -1,5 +1,5 @@
+from BALSAMIC.commands.run.sbatch import SbatchScheduler
 
-from BALSAMIC.commands.run.sbatch import SbatchScheduler 
 
 def test_SbatchScheduler():
     # GIVEN values for sbatch command

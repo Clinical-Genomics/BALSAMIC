@@ -244,9 +244,9 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               help="Create analysis directiry.")
 @click.pass_context
 def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
-                reference_config, panel_bed, output_config,
-                normal, tumor, case_id, analysis_dir, overwrite_config,
-                create_dir, fastq_prefix):
+                reference_config, panel_bed, output_config, normal, tumor,
+                case_id, analysis_dir, overwrite_config, create_dir,
+                fastq_prefix):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.

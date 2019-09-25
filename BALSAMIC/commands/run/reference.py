@@ -83,7 +83,7 @@ def reference(context, snakefile, configfile, run_mode, cluster_config,
     balsamic_run.run_analysis = run_analysis
     balsamic_run.sm_opt = snakemake_opt
     # Always use singularity
-    balsamic_run.use_singularity = True 
+    balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
 

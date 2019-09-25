@@ -91,7 +91,8 @@ class SnakeMake:
         if self.use_singularity:
             self.singularity_arg = " --use-singularity --singularity-args '"
             for bind_path in self.singularity_bind:
-                self.singularity_arg += " --bind {}:{}".format(bind_path, bind_path)
+                self.singularity_arg += " --bind {}:{}".format(
+                    bind_path, bind_path)
             self.singularity_arg += "' "
 
         if self.run_mode == 'slurm':
@@ -228,7 +229,7 @@ def get_sbatchpy():
     return sbatch
 
 
-def get_snakefile(analysis_type, sequencing_type = "targeted"):
+def get_snakefile(analysis_type, sequencing_type="targeted"):
     """
     Return a string path for variant calling snakefile.
     """

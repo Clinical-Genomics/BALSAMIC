@@ -157,7 +157,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
     # Always use singularity
-    balsamic_run.use_singularity = True 
+    balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
 

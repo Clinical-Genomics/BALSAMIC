@@ -7,6 +7,7 @@ from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
+
 @click.command("init", short_help="Run this command after installing BALSAMIC")
 @click.option("--singularity",
               type=click.Path(),
@@ -27,12 +28,13 @@ def initiate(context, singularity):
     rule_directory = Path(__file__).parents[2]
 
     install_json = dict()
-     
+
     install_json["conda_env_yaml"] = balsamic_env.as_posix()
     install_json["rule_directory"] = rule_directory.as_posix() + "/"
 
     install_json["singularity"] = dict()
-    install_json["singularity"]["image"] = Path(singularity).absolute().as_posix()
+    install_json["singularity"]["image"] = Path(
+        singularity).absolute().as_posix()
 
     LOG.info("Writing install_json file to: %s", install_json_file.as_posix())
     with open(install_json_file, 'w') as json_out:

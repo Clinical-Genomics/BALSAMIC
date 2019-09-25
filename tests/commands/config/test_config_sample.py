@@ -237,14 +237,13 @@ def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
 
     # WHEN invoking cli to create config files
     result = invoke_cli([
-        'config', 'case', '-p', test_panel_bed_file, 
-        '-t',
+        'config', 'case', '-p', test_panel_bed_file, '-t',
         str(test_tumor), '-n',
-        str(test_normal), '--case-id', test_case_name , '--analysis-dir',
+        str(test_normal), '--case-id', test_case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', test_sample_config_file_name,
         '--reference-config', test_reference_json
     ])
 
     assert result.exit_code == 0
-    assert Path(analysis_dir / test_case_name /
-                test_sample_config_file_name).exists()
+    assert Path(
+        analysis_dir / test_case_name / test_sample_config_file_name).exists()

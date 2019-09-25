@@ -53,6 +53,7 @@ def test_init(invoke_cli):
     assert result.exit_code == 0
     assert '--singularity' in result.output
 
+
 def test_plugins(invoke_cli):
     # GIVEN want to see config-sample params with help option
     # WHEN asking to show params for config-sample
@@ -68,6 +69,7 @@ def test_plugins_housekeeper(invoke_cli):
 
     # THEN It should throw missiong option error
     assert result.exit_code == 0
+
 
 def test_plugins_scout(invoke_cli):
     # WHEN invoking command with missing options
@@ -146,6 +148,3 @@ def test_run_ref_invalid(invoke_cli):
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
-
-
-

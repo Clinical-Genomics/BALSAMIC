@@ -22,15 +22,20 @@ LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
 
 @click.group()
-@click.option('--loglevel', default='DEBUG', type=click.Choice(LOG_LEVELS),
-              help="Set the level of log output.", show_default=True)
+@click.option('--loglevel',
+              default='DEBUG',
+              type=click.Choice(LOG_LEVELS),
+              help="Set the level of log output.",
+              show_default=True)
 @click.version_option(version=__version__)
 @click.pass_context
 @doc("""BALSAMIC {version}: Bioinformatic Analysis pipeLine for
         SomAtic MutatIons in Cancer""".format(version=__version__))
 def cli(context, loglevel):
     "BALSAMIC"
-    coloredlogs.install(level=loglevel, fmt='[%(hostname)s] %(asctime)s %(levelname)s %(message)s')
+    coloredlogs.install(
+        level=loglevel,
+        fmt='[%(hostname)s] %(asctime)s %(levelname)s %(message)s')
     LOG.info(f"BALSAMIC started with log level {loglevel}.")
 
 

@@ -302,9 +302,7 @@ def test_capturestdout():
 
 def test_get_config():
     # GIVEN the config files name
-    config_files = [
-        "sample", "analysis"
-    ]
+    config_files = ["sample", "analysis"]
     # WHEN passing file names
     for config_file in config_files:
         # THEN return the config files path

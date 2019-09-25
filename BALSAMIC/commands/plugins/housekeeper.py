@@ -52,8 +52,8 @@ def housekeeper(context, sample_config):
     if not os.path.exists(yaml_write_directory):
         os.makedirs(yaml_write_directory)
 
-    yaml_file_name = os.path.join(
-        yaml_write_directory, sample_config['analysis']['case_id'] + ".hk")
+    yaml_file_name = os.path.join(yaml_write_directory,
+                                  sample_config['analysis']['case_id'] + ".hk")
 
     LOG.debug(f"Writing output file {yaml_file_name}.")
     with open(yaml_file_name, 'w') as f:

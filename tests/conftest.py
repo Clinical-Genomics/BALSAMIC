@@ -143,7 +143,8 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir):
     runner = CliRunner()
     result = runner.invoke(cli, [
         'config', 'case', '-t',
-        str(tumor), '-n', str(normal), '--case-id', case_name, '--analysis-dir',
+        str(tumor), '-n',
+        str(normal), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
@@ -186,10 +187,12 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir):
     sample_config_file_name = 'sample.json'
 
     runner = CliRunner()
-    result = runner.invoke(cli, ['config', 'case', '-t', str(tumor),
-                                 '--case-id', case_name, '--analysis-dir', str(analysis_dir),
-                                 '--output-config', sample_config_file_name, '--reference-config',
-                                 reference_json])
+    result = runner.invoke(cli, [
+        'config', 'case', '-t',
+        str(tumor), '--case-id', case_name, '--analysis-dir',
+        str(analysis_dir), '--output-config', sample_config_file_name,
+        '--reference-config', reference_json
+    ])
 
     return str(analysis_dir / case_name / sample_config_file_name)
 

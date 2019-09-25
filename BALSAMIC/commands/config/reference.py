@@ -73,7 +73,9 @@ def reference(outdir, cosmic_key, snakefile, dagfile):
                                 engine="dot")
 
     if graph_obj.render():
-        LOG.info(f'Reference generation workflow configured successfully - {outdir}')
+        LOG.info(
+            f'Reference generation workflow configured successfully - {outdir}'
+        )
     else:
         LOG.error(f'Snakemake DAG graph generation failed - {dagfile_path}')
         click.Abort()
