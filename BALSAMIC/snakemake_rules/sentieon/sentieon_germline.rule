@@ -22,8 +22,9 @@ rule sentieon_DNAscope:
     shell:
     	"""
 export SENTIEON_LICENSE={params.sentieon_lic};
+export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 
-{params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal_table} --algo DNAscope -d {input.dbsnp} {output.vcf}
+{params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} --algo DNAscope -d {input.dbsnp} --pcr_indel_model NONE --model {params.sentieon_ml_dnascope} {output.vcf}
 		"""
 
 

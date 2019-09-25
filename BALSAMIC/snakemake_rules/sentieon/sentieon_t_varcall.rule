@@ -90,7 +90,7 @@ rule sentieon_TNscope_tumor_only:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal} --algo TNscope --tumor_sample {params.tumor} --pon {params.pon} {input.dbsnp} {output.vcf};
+{params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal} --algo TNscope --tumor_sample {params.tumor} {params.pon} --dbsnp {input.dbsnp} {output.vcf};
         """
 
 
@@ -106,11 +106,14 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 #        sentieon_ml_tnscope = SENTIEON_TNSCOPE
 #    log:
 #        vcf_dir + config["analysis"]["case_id"] + ".tnscope.filtered.log",
+#    benchmark: 
+#        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnscope_filter.tsv"
 #    shell:
 #        """
 #export SENTIEON_LICENSE={params.sentieon_lic};
+#export SENTIEON_TNSCOPE={params.sentieon_ml_tnscope};
 #
 #{params.sentieon_exec} driver -r {input.ref} --algo TNModelApply -m {params.sentieon_ml_tnscope} -v {input.tnscope_vcf} {output.tnscope_filtered_vcf}
 #        """
-#
+
 
