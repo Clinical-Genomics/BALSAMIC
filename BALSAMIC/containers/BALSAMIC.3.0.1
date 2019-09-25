@@ -50,6 +50,7 @@ From: centos:latest
     source activate BALSAMIC_py36 
     gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
     picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
+    # TODO: use $CONDA_PREFIX
     picard_destination=/usr/local/miniconda/envs/BALSAMIC_py36/share/
     cp $picard_PATH ${picard_destination}
     ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
