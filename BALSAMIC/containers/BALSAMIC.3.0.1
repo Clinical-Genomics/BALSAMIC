@@ -46,6 +46,14 @@ From: centos:latest
     conda env create  --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36
     conda env create  --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27
 
+    # register gatk3 and add custom picard
+    source activate BALSAMIC_py36 
+    gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
+    picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar
+    picard_destination=/usr/local/miniconda/envs/BALSAMIC_py36/share/
+    cp $picard_PATH ${picard_destination}
+    ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar
+
 %environment
     # The following fixes the error for Click
     # RuntimeError: Click will abort further execution because Python 3 was
