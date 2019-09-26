@@ -111,6 +111,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     logpath = sample_config['analysis']['log']
     scriptpath = sample_config['analysis']['script']
     resultpath = sample_config['analysis']['result']
+    benchmarkpath = sample_config['analysis']['benchmark']
     case_name = sample_config['analysis']['case_id']
     sequencing_type = sample_config['analysis']['sequencing_type']
 
@@ -123,6 +124,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
+    os.makedirs(benchmarkpath, exist_ok=True)
     if not os.path.exists(logpath):
         os.makedirs(logpath, exist_ok=True)
         os.makedirs(scriptpath, exist_ok=True)

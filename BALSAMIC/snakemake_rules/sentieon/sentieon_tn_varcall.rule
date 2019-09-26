@@ -23,7 +23,7 @@ rule sentieon_TN_corealign:
     log:
         vcf_dir + config["analysis"]["case_id"] + ".corealign.log"
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".corealign.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".corealign.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -49,7 +49,7 @@ rule sentieon_TNsnv:
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnsnv.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".tnsnv.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -74,7 +74,7 @@ rule sentieon_TNhaplotyper:
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnhaplotyper.log"
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -103,7 +103,7 @@ rule sentieon_TNscope:
     log: 
         vcf_dir + config["analysis"]["case_id"] + ".tnscope.log"
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnscope.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".tnscope.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -125,7 +125,7 @@ rule sentioen_filter_TNscope:
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnscope.filtered.log",
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnscope_filter.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".tnscope_filter.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};

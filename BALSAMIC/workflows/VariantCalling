@@ -9,6 +9,7 @@ from BALSAMIC.utils.rule import get_vcf
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"

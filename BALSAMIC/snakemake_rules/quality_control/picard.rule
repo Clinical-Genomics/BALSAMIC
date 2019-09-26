@@ -24,6 +24,8 @@ rule MarkDuplicates:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
+  benchmark:
+    benchmark_dir + "{sample}.markduplicates.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -49,6 +51,8 @@ rule CollectHsMetrics:
   params:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
+  benchmark:
+    benchmark_dir + "{sample}.collect_hsmetrics.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -84,6 +88,8 @@ rule CollectAlignmentSummaryMetrics:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     adapter = config["QC"]["adapter"]
+  benchmark:
+    benchmark_dir + "{sample}.collect_alignment_summary.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -105,6 +111,8 @@ rule CollectInsertSizeMetrics:
   params:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard")
+  benchmark:
+    benchmark_dir + "{sample}.collect_insertsize_metrics.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "

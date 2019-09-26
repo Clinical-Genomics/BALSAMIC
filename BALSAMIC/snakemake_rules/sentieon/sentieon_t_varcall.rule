@@ -33,7 +33,7 @@ rule sentieon_TNsnv_tumor_only:
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnsnv.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".tnsnv.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -59,7 +59,7 @@ rule sentieon_TNhaplotyper_tumor_only:
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -85,7 +85,7 @@ rule sentieon_TNscope_tumor_only:
     log: 
         vcf_dir + config["analysis"]["case_id"] + ".tnscope_tumor_only.log"
     benchmark:
-        vcf_dir + "benchmarks/" + config["analysis"]["case_id"] + ".tnscope.tsv"
+        benchmark_dir + config["analysis"]["case_id"] + ".tnscope.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};

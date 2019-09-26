@@ -22,7 +22,7 @@ rule sentieon_align_sort:
     log:
         bam_dir + "{sample}.bam.log"
     benchmark:
-        bam_dir + "benchmarks/{sample}.align_sort.tsv"
+        benchmark_dir + "{sample}.align_sort.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -45,7 +45,7 @@ rule sentieon_dedup:
     log:
         bam_dir + "{sample}.dedup.bam.log"
     benchmark:
-        bam_dir + "benchmarks/{sample}.dedup.tsv"
+        benchmark_dir + "{sample}.dedup.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -71,7 +71,7 @@ rule sentieon_realign:
     log:
         bam_dir + "{sample}.dedup.realign.bam.log"
     benchmark:
-        bam_dir + "benchmarks/{sample}.dedup_realign.tsv"
+        benchmark_dir + "{sample}.dedup_realign.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -98,7 +98,7 @@ rule sentieon_base_calibration:
     log:
         bam_dir + "{sample}.dedup.realign.recal.log"
     benchmark:
-        bam_dir + "benchmarks/{sample}.base_recal.tsv"
+        benchmark_dir + "{sample}.base_recal.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};

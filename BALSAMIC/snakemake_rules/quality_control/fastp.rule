@@ -40,7 +40,7 @@ rule fastp:
     extra = fastp_param,
     conda = get_conda_env(config["conda_env_yaml"],"fastp")
   benchmark:
-    fastq_dir + "benchmarks/{sample}_fastp.tsv"
+    benchmark_dir + "{sample}_fastp.tsv"
   shell:
     "source activate {params.conda}; "
     "fastp "
