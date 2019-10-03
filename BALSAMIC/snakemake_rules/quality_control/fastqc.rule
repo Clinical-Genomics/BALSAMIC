@@ -19,6 +19,8 @@ rule fastqc:
     conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
     fastqc_dir=fastqc_dir
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.fastqc.tsv"
   shell:
     "source activate {params.conda};"
     "fastqc {input.read1} --outdir {params.fastqc_dir};" 

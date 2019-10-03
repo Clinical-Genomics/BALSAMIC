@@ -18,6 +18,8 @@ rule RealignerTargetCreator:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.realign_targetcreator.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -39,6 +41,8 @@ rule IndelRealigner:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.indel_realign.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -60,6 +64,8 @@ rule BaseRecalibrator:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.base_recalibrator.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -87,6 +93,8 @@ rule PreparePopVCF:
     anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
     popcode = "EUR"
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "tumor_prepare_pop_vcf.tsv"
   shell:
     "source activate {params.conda}; "
     "readlink -e {input.bam}; "

@@ -17,6 +17,8 @@ rule vep:
     vep_cache = config["reference"]["vep"]
   threads: 4
   singularity: singularity_image 
+  benchmark:
+    benchmark_dir + "{type}.{mutation}.{sample}.{caller}.vep.tsv"
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "

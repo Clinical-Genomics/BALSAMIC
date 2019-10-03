@@ -21,6 +21,8 @@ rule GATK_contest:
     min_genotype_ratio="0.95",
     popcode = "EUR"
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + config["analysis"]["case_id"] + ".markduplicates.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "

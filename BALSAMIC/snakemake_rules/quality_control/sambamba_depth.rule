@@ -22,6 +22,8 @@ rule sambamba_panel_depth:
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.sambamba_panel_depth.tsv"
   shell:
     "source activate {params.conda}; "
     "covStr=`seq {params.cov_start} {params.cov_step} {params.cov_end} | xargs -n1 echo -n \" --cov-threshold\"`; "
@@ -48,6 +50,8 @@ rule sambamba_exon_depth:
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.sambamba_exon_depth.tsv"
   shell:
     "source activate {params.conda}; "
     "sambamba depth region "

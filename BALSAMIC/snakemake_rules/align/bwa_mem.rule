@@ -19,6 +19,8 @@ rule bwa_mem:
     conda = get_conda_env(config["conda_env_yaml"],"bwa")
   threads: 4
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.bwa_mem.tsv"
   shell:
     "source activate {params.conda}; "
     "bwa mem "
