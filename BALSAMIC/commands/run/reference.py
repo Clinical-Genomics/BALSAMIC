@@ -67,6 +67,12 @@ def reference(context, snakefile, configfile, run_mode, cluster_config,
     with open(configfile, "r") as config_fh:
         config = json.load(config_fh)
 
+    # Singularity bind path
+    bind_path = list()
+    bind_path.append(config['output'])
+    bind_path.append(config['conda_env_yaml'])
+    bind_path.append(config['rule_directory'])
+
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
     balsamic_run.working_dir = config['output']
@@ -76,11 +82,9 @@ def reference(context, snakefile, configfile, run_mode, cluster_config,
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
     balsamic_run.sm_opt = snakemake_opt
-    # balsamic_run.cluster_config = cluster_config
-    # balsamic_run.sbatch_py = get_sbatchpy()
-    # balsamic_run.log_path = logpath
-    # balsamic_run.script_path = scriptpath
-    # balsamic_run.result_path = resultpath
-    # balsamic_run.qos = qos
+    # Always use singularity
+    balsamic_run.use_singularity = True
+    balsamic_run.singularity_bind = bind_path
+    balsamic_run.sm_opt = snakemake_opt
 
     subprocess.run(balsamic_run.build_cmd(), shell=True)

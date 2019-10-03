@@ -56,6 +56,8 @@ def test_snakemake_local():
     snakemake_local.snakefile = "worflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
+    snakemake_local.use_singularity = True
+    snakemake_local.singularity_bind = ["path_1", "path_2"]
     snakemake_local.forceall = True
 
     # WHEN calling the build command
@@ -88,6 +90,8 @@ def test_snakemake_slurm():
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
+    snakemake_slurm.use_singularity = True
+    snakemake_slurm.singularity_bind = ["path_1", "path_2"]
     snakemake_slurm.run_analysis = True
 
     # WHEN calling the build command
@@ -266,21 +270,25 @@ def test_get_result_dir(sample_config):
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
 
 
-def test_get_conda_env_found(BALSAMIC_env, tmp_path):
-    # GIVEN a BALSAMIC_env yaml
+def test_get_conda_env_found(tmp_path):
+    # GIVEN a balsamic_env yaml
+    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
+
     # WHEN passing pkg name with this yaml file
-    conda_env = get_conda_env(BALSAMIC_env, 'cnvkit')
+    conda_env = get_conda_env(balsamic_env, 'cnvkit')
 
     # THEN It should return the conda env which has that pkg
-    assert conda_env == "env_py36"
+    assert conda_env == "BALSAMIC_py36"
 
 
-def test_get_conda_env_not_found(BALSAMIC_env, tmp_path):
-    # GIVEN a BALSAMIC_env yaml
+def test_get_conda_env_not_found(tmp_path):
+    # GIVEN a balsamic_env yaml
+    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
+
     # WHEN passing pkg name with this yaml file
     # THEN It should return the conda env which has that pkg
     with pytest.raises(KeyError):
-        get_conda_env(BALSAMIC_env, 'unknown_package')
+        get_conda_env(balsamic_env, 'unknown_package')
 
 
 def test_capturestdout():
@@ -294,9 +302,7 @@ def test_capturestdout():
 
 def test_get_config():
     # GIVEN the config files name
-    config_files = [
-        "sample", "analysis"
-    ]
+    config_files = ["sample", "analysis"]
     # WHEN passing file names
     for config_file in config_files:
         # THEN return the config files path

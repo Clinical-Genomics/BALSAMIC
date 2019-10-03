@@ -4,7 +4,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
-
+from BALSAMIC import __version__ as bv
 
 
 rule GATK_contest:
@@ -20,6 +20,7 @@ rule GATK_contest:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     min_genotype_ratio="0.95",
     popcode = "EUR"
+  singularity: singularity_image
   benchmark:
     benchmark_dir + config["analysis"]["case_id"] + ".markduplicates.tsv"
   shell:

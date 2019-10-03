@@ -4,6 +4,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC import __version__ as bv
 
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
@@ -17,6 +18,7 @@ rule fastqc:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
     fastqc_dir=fastqc_dir
+  singularity: singularity_image
   benchmark:
     benchmark_dir + "{sample}.fastqc.tsv"
   shell:

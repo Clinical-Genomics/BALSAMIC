@@ -11,7 +11,6 @@ from BALSAMIC.utils.cli import get_sbatchpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -134,6 +133,12 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     if not analysis_type:
         analysis_type = sample_config['analysis']['analysis_type']
 
+    # Singularity bind path
+    bind_path = list()
+    bind_path.append(os.path.commonpath(sample_config['reference'].values()))
+    bind_path.append(sample_config['panel']['capture_kit'])
+    bind_path.append(sample_config['analysis']['analysis_dir'])
+
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
     balsamic_run.case_name = case_name
@@ -155,9 +160,12 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.mail_user = slurm_mail_user
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
+    # Always use singularity
+    balsamic_run.use_singularity = True
+    balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
 
     try:
         subprocess.run(balsamic_run.build_cmd(), shell=True)
     except:
-        raise 
+        raise

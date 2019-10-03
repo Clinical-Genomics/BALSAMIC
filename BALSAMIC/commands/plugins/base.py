@@ -2,7 +2,8 @@
 import click
 
 from BALSAMIC.commands.plugins.housekeeper import housekeeper as housekeeper_command
-from BALSAMIC.commands.plugins.scout import scout as scout_command 
+from BALSAMIC.commands.plugins.scout import scout as scout_command
+
 
 @click.group()
 @click.pass_context
