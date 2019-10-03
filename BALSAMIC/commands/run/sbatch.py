@@ -109,33 +109,33 @@ def submit_job(sbatch_cmd):
         raise
 
 
-def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
-    ''' write a modified sbatch script based on singularity parameters '''
-    if 'bind_path' not in sample_config['singularity']:
-        raise KeyError("bind_path was not found in sample config.")
-
-    if 'main_env' not in sample_config['singularity']:
-        raise KeyError("main_env was not found in sample config.")
-
-    if 'container_path' not in sample_config['singularity']:
-        raise KeyError("container_path was not found sample config.")
-
-    try:
-        bind_path = sample_config['singularity']['bind_path']
-        main_env = sample_config['singularity']['main_env']
-        container_path = sample_config['singularity']['container_path']
-        with open(sbatch_script, 'a') as f:
-            f.write("#!/bin/bash" + "\n")
-            f.write(
-                f"function balsamic-run {{ singularity exec -B {bind_path} --app {main_env} {container_path} $@; }}"
-                + "\n")
-            f.write(f"# Snakemake original script {jobscript}" + "\n")
-            f.write(f"balsamic-run bash {jobscript}" + "\n")
-        sbatch_file = os.path.join(
-            script_dir, sample_config["analysis"]["case_id"] + ".sbatch")
-        return sbatch_file
-    except OSError:
-        raise
+#def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
+#    ''' write a modified sbatch script based on singularity parameters '''
+#    if 'bind_path' not in sample_config['singularity']:
+#        raise KeyError("bind_path was not found in sample config.")
+#
+#    if 'main_env' not in sample_config['singularity']:
+#        raise KeyError("main_env was not found in sample config.")
+#
+#    if 'container_path' not in sample_config['singularity']:
+#        raise KeyError("container_path was not found sample config.")
+#
+#    try:
+#        bind_path = sample_config['singularity']['bind_path']
+#        main_env = sample_config['singularity']['main_env']
+#        container_path = sample_config['singularity']['container_path']
+#        with open(sbatch_script, 'a') as f:
+#            f.write("#!/bin/bash" + "\n")
+#            f.write(
+#                f"function balsamic-run {{ singularity exec -B {bind_path} --app {main_env} {container_path} $@; }}"
+#                + "\n")
+#            f.write(f"# Snakemake original script {jobscript}" + "\n")
+#            f.write(f"balsamic-run bash {jobscript}" + "\n")
+#        sbatch_file = os.path.join(
+#            script_dir, sample_config["analysis"]["case_id"] + ".sbatch")
+#        return sbatch_file
+#    except OSError:
+#        raise
 
 
 def get_parser():
@@ -163,6 +163,7 @@ def get_parser():
 
     return parser
 
+
 def main():
     ''' entry point for sbatch.py '''
     parser = get_parser()
@@ -180,18 +181,18 @@ def main():
 
     sample_config = read_sample_config(input_json=args.sample_config)
 
-    sacct_file = os.path.join(
-        args.log_dir, sample_config["analysis"]["case_id"] + ".sacct")
+    sacct_file = os.path.join(args.log_dir,
+                              sample_config["analysis"]["case_id"] + ".sacct")
 
     balsamic_run_mode = os.getenv("BALSAMIC_STATUS", "conda")
-    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-        sbatch_script = os.path.join(args.script_dir,
-                                     "sbatch." + os.path.basename(jobscript))
-        sbatch_file = singularity_param(sample_config=sample_config,
-                                        script_dir=args.script_dir,
-                                        jobscript=jobscript,
-                                        sbatch_script=sbatch_script)
-        jobscript = sbatch_script
+    #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
+    #        sbatch_script = os.path.join(args.script_dir,
+    #                                     "sbatch." + os.path.basename(jobscript))
+    #        sbatch_file = singularity_param(sample_config=sample_config,
+    #                                        script_dir=args.script_dir,
+    #                                        jobscript=jobscript,
+    #                                        sbatch_script=sbatch_script)
+    #        jobscript = sbatch_script
 
     sbatch_cmd.account = args.slurm_account
     sbatch_cmd.mail_type = mail_type
@@ -211,9 +212,9 @@ def main():
 
     jobid = submit_job(sbatch_cmd=sbatch_cmd.build_cmd())
 
-    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-        write_sbatch_dump(sbatch_file=sbatch_file,
-                          sbatch_cmd=sbatch_cmd.build_cmd())
+    #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
+    #        write_sbatch_dump(sbatch_file=sbatch_file,
+    #                          sbatch_cmd=sbatch_cmd.build_cmd())
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
 

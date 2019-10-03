@@ -100,6 +100,6 @@
         "chrom": ["18", "14", "11", "4", "10", "12", "3", "5", "13", "20", "7", "2",
                   "8", "21", "15", "9", "17", "16", "22", "19", "1", "6"]
     },
-    "conda_env_yaml": "tests/test_data/BALSAMIC_env.yaml",
+    "conda_env_yaml": "BALSAMIC/config/balsamic_env.yaml",
     "rule_directory": "BALSAMIC/"
 }

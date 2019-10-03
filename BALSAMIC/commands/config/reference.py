@@ -5,6 +5,7 @@ import logging
 import click
 import graphviz
 import snakemake
+from pathlib import Path
 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile, get_config
@@ -21,10 +22,6 @@ LOG = logging.getLogger(__name__)
               "--outdir",
               required=True,
               help="output directory for ref files eg: reference")
-@click.option("-i",
-              "--install-config",
-              type=click.Path(),
-              help="install config file.")
 @click.option("-c",
               "--cosmic-key",
               required=True,
@@ -41,16 +38,27 @@ LOG = logging.getLogger(__name__)
               show_default=True,
               help="DAG file for overview")
 @click.option("--singularity",
-              is_flag=True,
-              help="To run the workflow on container")
-def reference(outdir, cosmic_key, snakefile, dagfile, singularity,
-              install_config):
+              type=click.Path(),
+              required=True,
+              help='Download singularity image for BALSAMIC')
+@click.pass_context
+def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
     """ Configure workflow for reference generation """
-    if not install_config:
-        try:
-            install_config = get_config("install")
-        except:
-            context.Abort() 
+
+    config_path = Path(__file__).parents[2] / "config"
+    config_path = config_path.absolute()
+
+    balsamic_env = config_path / "balsamic_env.yaml"
+    rule_directory = Path(__file__).parents[2]
+
+    install_config = dict()
+
+    install_config["conda_env_yaml"] = balsamic_env.as_posix()
+    install_config["rule_directory"] = rule_directory.as_posix() + "/"
+
+    install_config["singularity"] = dict()
+    install_config["singularity"]["image"] = Path(
+        singularity).absolute().as_posix()
 
     config = dict()
     outdir = os.path.abspath(outdir)
@@ -84,7 +92,9 @@ def reference(outdir, cosmic_key, snakefile, dagfile, singularity,
                                 engine="dot")
 
     if graph_obj.render():
-        LOG.info(f'Reference generation workflow configured successfully - {outdir}')
+        LOG.info(
+            f'Reference generation workflow configured successfully - {outdir}'
+        )
     else:
         LOG.error(f'Snakemake DAG graph generation failed - {dagfile_path}')
         click.Abort()

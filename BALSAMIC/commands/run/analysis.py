@@ -11,7 +11,6 @@ from BALSAMIC.utils.cli import get_sbatchpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -20,7 +19,7 @@ LOG = logging.getLogger(__name__)
 @click.option('-a',
               '--analysis-type',
               required=False,
-              type=click.Choice(['qc', 'paired', 'single', 'paired_umi']),
+              type=click.Choice(['qc', 'paired', 'single']),
               help='Type of analysis to run from input config file.\
               By default it will read from config file, but it will override config file \
               if it is set here.')
@@ -111,7 +110,9 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     logpath = sample_config['analysis']['log']
     scriptpath = sample_config['analysis']['script']
     resultpath = sample_config['analysis']['result']
+    benchmarkpath = sample_config['analysis']['benchmark']
     case_name = sample_config['analysis']['case_id']
+    sequencing_type = sample_config['analysis']['sequencing_type']
 
     if run_analysis:
         # if not dry run, then create (new) log/script directory
@@ -119,23 +120,32 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
             if files:
                 logpath = createDir(logpath, [])
                 scriptpath = createDir(scriptpath, [])
+                benchmarkpath = createDir(benchmarkpath, [])
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
+
     if not os.path.exists(logpath):
         os.makedirs(logpath, exist_ok=True)
         os.makedirs(scriptpath, exist_ok=True)
+        os.makedirs(benchmarkpath, exist_ok=True)
 
     if not analysis_type:
         analysis_type = sample_config['analysis']['analysis_type']
 
+    # Singularity bind path
+    bind_path = list()
+    bind_path.append(os.path.commonpath(sample_config['reference'].values()))
+    bind_path.append(sample_config['panel']['capture_kit'])
+    bind_path.append(sample_config['analysis']['analysis_dir'])
+
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
-    balsamic_run.case_name = case_name 
+    balsamic_run.case_name = case_name
     balsamic_run.working_dir = sample_config['analysis']['analysis_dir'] +  \
         case_name + '/BALSAMIC_run/'
     balsamic_run.snakefile = snake_file if snake_file else get_snakefile(
-        analysis_type)
+        analysis_type, sequencing_type)
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
@@ -150,9 +160,12 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.mail_user = slurm_mail_user
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
+    # Always use singularity
+    balsamic_run.use_singularity = True
+    balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
 
     try:
         subprocess.run(balsamic_run.build_cmd(), shell=True)
     except:
-        raise 
+        raise

@@ -5,6 +5,9 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC import __version__ as bv
+
+qc_dir = result_dir + "qc/"
 
 if 'quality_trim' in config['QC'].keys():
     fastp_param = list()
@@ -31,18 +34,22 @@ rule fastp:
   output:
     read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
     read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
+    json_out = qc_dir + "{sample}_fastp.json",
+    html_out = qc_dir + "{sample}_fastp.html"
   params:
     fastq_dir = fastq_dir,
-    qc_dir = result_dir + "qc",
     extra = fastp_param,
     conda = get_conda_env(config["conda_env_yaml"],"fastp")
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}_fastp.tsv"
   shell:
     "source activate {params.conda}; "
     "fastp "
     "--in1 {input.read1} --in2 {input.read2} "
     "--out1 {output.read1} --out2 {output.read2} "
-    "--json {params.qc_dir}/fastp.json "
+    "--json {output.json_out} "
     "--overrepresentation_analysis "
     "{params.extra} "
-    "--html {params.qc_dir}/fastp.html; "
+    "--html {output.html_out} ; "
     "source deactivate;"

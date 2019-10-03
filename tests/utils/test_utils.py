@@ -56,6 +56,8 @@ def test_snakemake_local():
     snakemake_local.snakefile = "worflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
+    snakemake_local.use_singularity = True
+    snakemake_local.singularity_bind = ["path_1", "path_2"]
     snakemake_local.forceall = True
 
     # WHEN calling the build command
@@ -88,6 +90,8 @@ def test_snakemake_slurm():
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
+    snakemake_slurm.use_singularity = True
+    snakemake_slurm.singularity_bind = ["path_1", "path_2"]
     snakemake_slurm.run_analysis = True
 
     # WHEN calling the build command
@@ -157,19 +161,27 @@ def test_get_script_path():
 
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
-    analysis_types = ["paired", "single", "qc", "paired_umi", "single_umi"]
+    workflow = [("paired", "wgs"), ("paired", "targeted"), ("single", "wgs"),
+                ("single", "targeted"), ("qc", ""), ("generate_ref", "")]
 
     # WHEN asking to see snakefile for paired
-    for analysis_type in analysis_types:
-        snakefile = get_snakefile(analysis_type)
+    for analysis_type, sequencing_type in workflow:
+        snakefile = get_snakefile(analysis_type, sequencing_type)
+        pipeline = ''
+
+        if sequencing_type == 'targeted':
+            pipline = "BALSAMIC/workflows/VariantCalling"
+        elif sequencing_type == 'wgs':
+            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon"
+        elif analysis_type == 'qc':
+            pipeline = "BALSAMIC/workflows/Alignment"
+        elif analysis_type == 'generate_ref':
+            pipeline = "BALSAMIC/workflows/GenerateRef"
 
         # THEN it should return the snakefile path
-        assert snakefile.startswith('/')
-        if analysis_type != 'qc':
-            assert "BALSAMIC/workflows/VariantCalling_" + analysis_type in snakefile
-        else:
-            assert "BALSAMIC/workflows/Alignment" in snakefile
         # THEN assert file exists
+        assert snakefile.startswith('/')
+        assert pipeline in snakefile
         assert Path(snakefile).is_file()
 
 
@@ -215,7 +227,7 @@ def test_get_picard_mrkdup(sample_config):
     picard_str = get_picard_mrkdup(sample_config)
 
     # THEN It will return the picard str as rmdup
-    assert "rmdup" == picard_str
+    assert "mrkdup" == picard_str
 
 
 def test_createDir(tmp_path):
@@ -258,21 +270,25 @@ def test_get_result_dir(sample_config):
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
 
 
-def test_get_conda_env_found(BALSAMIC_env, tmp_path):
-    # GIVEN a BALSAMIC_env yaml
+def test_get_conda_env_found(tmp_path):
+    # GIVEN a balsamic_env yaml
+    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
+
     # WHEN passing pkg name with this yaml file
-    conda_env = get_conda_env(BALSAMIC_env, 'cnvkit')
+    conda_env = get_conda_env(balsamic_env, 'cnvkit')
 
     # THEN It should return the conda env which has that pkg
-    assert conda_env == "env_py36"
+    assert conda_env == "BALSAMIC_py36"
 
 
-def test_get_conda_env_not_found(BALSAMIC_env, tmp_path):
-    # GIVEN a BALSAMIC_env yaml
+def test_get_conda_env_not_found(tmp_path):
+    # GIVEN a balsamic_env yaml
+    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
+
     # WHEN passing pkg name with this yaml file
     # THEN It should return the conda env which has that pkg
     with pytest.raises(KeyError):
-        get_conda_env(BALSAMIC_env, 'unknown_package')
+        get_conda_env(balsamic_env, 'unknown_package')
 
 
 def test_capturestdout():
@@ -286,10 +302,7 @@ def test_capturestdout():
 
 def test_get_config():
     # GIVEN the config files name
-    config_files = [
-        "sample", "analysis_paired", "analysis_paired_umi", "analysis_single",
-        "analysis_single_umi"
-    ]
+    config_files = ["sample", "analysis"]
     # WHEN passing file names
     for config_file in config_files:
         # THEN return the config files path

@@ -52,7 +52,7 @@ def get_result_dir(config):
 
 def get_conda_env(yaml_file, pkg):
     """
-    input: BALSAMIC_env.yaml file from BALSAMIC's installation, and a package's name
+    input: balsamic_env 
     output: string of conda env where packge is in
     """
 
@@ -79,7 +79,7 @@ def get_picard_mrkdup(config):
     picard_str = "mrkdup"
 
     if "picard_rmdup" in config["QC"]:
-        if config["QC"]["picard_rmdup"].upper() == "TRUE":
+        if config["QC"]["picard_rmdup"] == True:
             picard_str = "rmdup"
 
     return picard_str

@@ -74,8 +74,7 @@ def create_md5(reference, check_md5):
                 fh.write( get_md5(value) + ' ' + value + '\n')
 
 
-if 'singularity' in config:
-    singularity: config['singularity']
+singularity_image = config['singularity']['image']
 
 ##########################################################
 # Generating Reference files for BALSAMIC pipeline
@@ -160,6 +159,7 @@ rule download_refgene:
     log:
         refgene_sql = genome_dir + "refgene_sql.log",
         refgene_txt = genome_dir + "refgene_txt.log"
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env}; " 
         "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk}); " 
@@ -186,7 +186,6 @@ rule download_cosmicdb:
     output:
         cosmicdb
     run:
-        shell("source activate {params.conda_env};")
         import requests
 
         ## request the download url link
@@ -202,7 +201,6 @@ rule download_cosmicdb:
 
         ## unzip the file for indexing
         shell("gunzip {output}.gz;")
-        shell("source deactivate;")
 
 
 ##########################################################
@@ -221,6 +219,7 @@ rule bgzip_tabix:
         vcf_dir + "{vcf}.gz.tbi"
     log:
         vcf_dir + "{vcf}.gz_tbi.log"
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};"
@@ -241,6 +240,7 @@ rule bwa_index:
         expand(reference_genome + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome + ".bwa_index.log"
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "bwa index -a bwtsw {input} 2> {log};"
@@ -260,6 +260,7 @@ rule samtools_index_fasta:
         reference_genome_index
     log:
         reference_genome + ".faidx.log"
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "samtools faidx {input} 2> {log};"
@@ -280,6 +281,7 @@ rule picard_ref_dict:
         genome_dict
     log:
         reference_genome + ".ref_dict.log"
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "picard CreateSequenceDictionary "
@@ -303,6 +305,7 @@ rule vep_install:
         directory(vep_dir)
     log:
         vep_dir + "vep_install_cache.log"
+    singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
         "vep_install --SPECIES {params.species} "
