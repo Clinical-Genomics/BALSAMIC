@@ -26,6 +26,8 @@ rule manta_tumor_normal:
 		tmpdir = vcf_dir + "manta/",
 		runmode = "local",
 		conda = get_conda_env(config["conda_env_yaml"],"manta")
+	benchmark: 
+		benchmark_dir + config["analysis"]["case_id"] + ".manta.tsv"
 	threads: 4
 	shell:
 		"source activate {params.conda};"
