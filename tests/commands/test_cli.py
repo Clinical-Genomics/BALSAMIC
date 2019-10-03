@@ -45,14 +45,6 @@ def test_sample_missing_opt(invoke_cli):
     assert result.exit_code == 2
 
 
-def test_install(invoke_cli):
-    # WHEN invoking install command with help option
-    result = invoke_cli(['install', '--help'])
-
-    # THEN It should list all the params without error
-    assert result.exit_code == 0
-    assert '--input-conda-yaml' in result.output
-
 def test_plugins(invoke_cli):
     # GIVEN want to see config-sample params with help option
     # WHEN asking to show params for config-sample
@@ -69,31 +61,13 @@ def test_plugins_housekeeper(invoke_cli):
     # THEN It should throw missiong option error
     assert result.exit_code == 0
 
+
 def test_plugins_scout(invoke_cli):
     # WHEN invoking command with missing options
     result = invoke_cli(['plugins', 'scout', '--help'])
 
     # THEN It should throw missiong option error
     assert result.exit_code == 0
-
-
-def test_install_missing_opt(invoke_cli):
-    # WHEN invoking install command with missing option
-    result = invoke_cli(['install'])
-
-    # THEN It should esclate the missing option error
-    assert 'Error: Missing option' in result.output
-    assert result.exit_code == 2
-
-
-def test_install_invalid(invoke_cli):
-    # GIVEN wrong wrong env type, '-t' should have 'P','D','S'.
-    # WHEN invoking command with invalid input
-    result = invoke_cli(['install', '-t', 'foo'])
-
-    # THEN It should throw invalid input error
-    assert result.exit_code == 2
-    assert 'Error: Invalid value' in result.output
 
 
 def test_run(invoke_cli):
@@ -156,6 +130,3 @@ def test_run_ref_invalid(invoke_cli):
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
-
-
-

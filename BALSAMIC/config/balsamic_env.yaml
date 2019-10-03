@@ -1,0 +1,28 @@
+BALSAMIC_py27:
+- python
+- strelka
+- manta
+- bcftools
+- tabix
+BALSAMIC_py36:
+- python
+- pip
+- bcftools
+- bwa
+- fastqc
+- sambamba
+- samtools
+- tabix
+- gatk
+- picard
+- fgbio
+- freebayes
+- vardict
+- ensembl-vep
+- cnvkit
+- cutadapt
+- pindel
+- multiqc
+- bedtools
+- csvkit
+- fastp

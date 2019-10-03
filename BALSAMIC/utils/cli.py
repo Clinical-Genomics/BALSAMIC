@@ -45,6 +45,9 @@ class SnakeMake:
     mail_user       - email to account to send job run status
     forceall        - To add '--forceall' option for snakemake
     run_analysis    - To run pipeline
+    use_singularity - To use singularity
+    singularity_bind- Singularity bind path
+    singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
     """
 
@@ -65,6 +68,9 @@ class SnakeMake:
         self.mail_user = None
         self.forceall = False
         self.run_analysis = False
+        self.use_singularity = True
+        self.singularity_bind = None
+        self.singularity_arg = str()
         self.sm_opt = None
 
     def build_cmd(self):
@@ -81,6 +87,13 @@ class SnakeMake:
 
         if not self.run_analysis:
             dryrun = " --dryrun "
+
+        if self.use_singularity:
+            self.singularity_arg = " --use-singularity --singularity-args '"
+            for bind_path in self.singularity_bind:
+                self.singularity_arg += " --bind {}:{}".format(
+                    bind_path, bind_path)
+            self.singularity_arg += "' "
 
         if self.run_mode == 'slurm':
             sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
@@ -99,7 +112,7 @@ class SnakeMake:
 
             sbatch_cmd += " {dependencies} '"
 
-            cluster_cmd = " --immediate-submit -j 300 " + \
+            cluster_cmd = " --immediate-submit -j 999 " + \
                 " --jobname BALSAMIC." + self.case_name + ".{rulename}.{jobid}.sh" + \
                 " --cluster-config " + self.cluster_config + \
                 " --cluster " + sbatch_cmd
@@ -108,6 +121,7 @@ class SnakeMake:
             " --directory " + self.working_dir + \
             " --snakefile " + self.snakefile + \
             " --configfile " + self.configfile + \
+            self.singularity_arg + \
             " " + forceall + " " + dryrun + \
             " " + cluster_cmd + " " + sm_opt
 
@@ -215,22 +229,18 @@ def get_sbatchpy():
     return sbatch
 
 
-def get_snakefile(analysis_type):
+def get_snakefile(analysis_type, sequencing_type="targeted"):
     """
     Return a string path for variant calling snakefile.
     """
 
     p = Path(__file__).parents[1]
-    if analysis_type == "paired":
-        snakefile = Path(p, 'workflows', 'VariantCalling_paired')
-    elif analysis_type == "single":
-        snakefile = Path(p, 'workflows', 'VariantCalling_single')
-    elif analysis_type == "qc":
+    if analysis_type == "qc":
         snakefile = Path(p, 'workflows', 'Alignment')
-    elif analysis_type == "paired_umi":
-        snakefile = Path(p, 'workflows', 'VariantCalling_paired_umi')
-    elif analysis_type == "single_umi":
-        snakefile = Path(p, 'workflows', 'VariantCalling_single_umi')
+    elif analysis_type in ["single", "paired"]:
+        snakefile = Path(p, 'workflows', 'VariantCalling')
+        if sequencing_type == "wgs":
+            snakefile = Path(p, 'workflows', 'VariantCalling_sentieon')
     elif analysis_type == "generate_ref":
         snakefile = Path(p, 'workflows', 'GenerateRef')
 

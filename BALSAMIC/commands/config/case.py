@@ -4,15 +4,16 @@ import subprocess
 import re
 import json
 import copy
+import shutil
 import glob
 import logging
 import click
 import snakemake
 import graphviz
+from urllib.parse import urlparse
 from datetime import datetime
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
-
 from BALSAMIC.utils.cli import get_package_split
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_config
@@ -77,9 +78,6 @@ def check_exist(path):
 
 def get_analysis_type(normal, umi):
     """ return analysis type """
-    #Temporarily disabling umi workflow
-    #    if umi:
-    #        return "paired_umi" if normal else "single_umi"
 
     return "paired" if normal else "single"
 
@@ -109,6 +107,7 @@ def get_sample_config(sample_config, case_id, analysis_dir, analysis_type):
                                                        'scripts/')
     sample_config["analysis"]["result"] = os.path.join(analysis_dir, case_id,
                                                        'analysis')
+    sample_config["analysis"]["benchmark"] = os.path.join(analysis_dir, case_id, 'benchmarks/')
     sample_config["analysis"]["analysis_type"] = analysis_type
     sample_config["samples"] = {}
 
@@ -117,24 +116,25 @@ def get_sample_config(sample_config, case_id, analysis_dir, analysis_type):
 
 def link_fastq(src_files, des_path):
     """
-    Creating fastq symlinks in given destination
+    Creating fastq copy in given destination
     """
     for src_file in src_files:
         basename = os.path.basename(src_file)
         des_file = os.path.join(des_path, basename)
         try:
-            os.symlink(src_file, des_file)
-        except FileExistsError:
+            shutil.copyfile(Path(src_file).resolve(), des_file)
+        except (SameFileError, OSError) as e:
+            LOG.warning(e)
             LOG.warning(
-                f"Desitination file {des_file} exists. No symbolic link was created."
+                f"Desitination file {des_file} exists. No copy link was created."
             )
 
 
-def get_fastq_path(file, fq_pattern):
+def get_fastq_path(fq_file, fq_pattern):
     # check the fastq if exists
-    file = os.path.abspath(file)
-    if Path(file).exists():
-        file_basename = os.path.basename(file)
+    fq_file = os.path.abspath(fq_file)
+    if Path(fq_file).exists():
+        file_basename = os.path.basename(fq_file)
         try:
             # extracting file prefix
             file_str = file_basename[0:(
@@ -145,16 +145,17 @@ def get_fastq_path(file, fq_pattern):
             )
             raise click.Abort()
     else:
-        LOG.error(f"{file} is not found, update correct file path")
+        LOG.error(f"{fq_file} is not found, update correct file path")
         raise click.Abort()
 
-    return file_str, os.path.split(file)[0]
+    return file_str, os.path.split(fq_file)[0]
 
 
 def configure_fastq(fq_path, sample, fastq_prefix):
     """
     Configure the fastq files for analysis
     """
+
     fq_pattern = re.compile(r"R_[12]" + fastq_prefix + ".fastq.gz$")
     paths = list()
 
@@ -164,9 +165,9 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 
     fq_files = set()
     for path in paths:
-        for file in os.listdir(path):
-            if fq_pattern.search(file):
-                fq_files.add(os.path.join(path, file))
+        for fq_file in os.listdir(path):
+            if fq_pattern.search(fq_file):
+                fq_files.add(os.path.join(path, fq_file))
 
     # create symlink
     link_fastq(fq_files, fq_path)
@@ -193,11 +194,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               default=False,
               show_default=True,
               help='Trim adapters from reads in fastq')
-@click.option("-i",
-              "--install-config",
-              required=False,
-              type=click.Path(),
-              help="Installation config file.")
 @click.option("-r",
               "--reference-config",
               required=True,
@@ -206,7 +202,6 @@ def configure_fastq(fq_path, sample, fastq_prefix):
               help="Reference config file.")
 @click.option("-p",
               "--panel-bed",
-              required=True,
               type=click.Path(),
               help="Panel bed file for variant calling.")
 @click.option(
@@ -248,22 +243,38 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 @click.option("--create-dir/--no-create-dir",
               default=True,
               help="Create analysis directiry.")
+@click.option("--singularity",
+              type=click.Path(),
+              required=True,
+              help='Download singularity image for BALSAMIC')
 @click.pass_context
 def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
-                install_config, reference_config, panel_bed, output_config,
-                normal, tumor, case_id, analysis_dir, overwrite_config,
-                create_dir, fastq_prefix):
+                reference_config, panel_bed, output_config, normal, tumor,
+                case_id, analysis_dir, overwrite_config, create_dir,
+                fastq_prefix, singularity):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
     """
+    config_path = Path(__file__).parents[2] / "config"
+    config_path = config_path.absolute()
 
-    if not install_config:
-        install_config = get_config("install")
+    balsamic_env = config_path / "balsamic_env.yaml"
+    rule_directory = Path(__file__).parents[2]
+
+    install_config = dict()
+
+    install_config["conda_env_yaml"] = balsamic_env.as_posix()
+    install_config["rule_directory"] = rule_directory.as_posix() + "/"
+
+    install_config["singularity"] = dict()
+    install_config["singularity"]["image"] = Path(
+        singularity).absolute().as_posix()
 
     analysis_type = get_analysis_type(normal, umi)
+    sequencing_type = "targeted" if panel_bed else "wgs"
     output_config = get_output_config(output_config, case_id)
-    analysis_config = get_config("analysis_" + analysis_type)
+    analysis_config = get_config("analysis")
 
     LOG.info("Reading analysis config file %s" % analysis_config)
     LOG.info("Reading reference config file %s" % reference_config)
@@ -290,13 +301,13 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     os.makedirs(fq_path, exist_ok=True)
 
     for t in tumor:
-      t = configure_fastq(fq_path, t, fastq_prefix)
+        t = configure_fastq(fq_path, t, fastq_prefix)
 
-      sample_config["samples"][t] = {
-          "file_prefix": t,
-          "type": "tumor",
-          "readpair_suffix": read_prefix,
-      }
+        sample_config["samples"][t] = {
+            "file_prefix": t,
+            "type": "tumor",
+            "readpair_suffix": read_prefix,
+        }
 
     if normal:
         normal = configure_fastq(fq_path, normal, fastq_prefix)
@@ -308,6 +319,7 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
 
     sample_config["analysis"]["fastq_path"] = fq_path + "/"
     sample_config["analysis"]["BALSAMIC_version"] = bv
+    sample_config["analysis"]["sequencing_type"] = sequencing_type
 
     conda_env = glob.glob(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "../..",
@@ -323,11 +335,11 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
                           install_config, bioinfo_config)
 
     if umi:
-        json_out["QC"]["umi_trim"] = str(umi)
+        json_out["QC"]["umi_trim"] = umi
         json_out["QC"]["umi_trim_length"] = str(umi_trim_length)
 
-    json_out["QC"]["quality_trim"] = str(quality_trim)
-    json_out["QC"]["adapter_trim"] = str(adapter_trim)
+    json_out["QC"]["quality_trim"] = quality_trim
+    json_out["QC"]["adapter_trim"] = adapter_trim
 
     dag_image = os.path.join(output_dir,
                              output_config + '_BALSAMIC_' + bv + '_graph')
@@ -343,7 +355,8 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     FormatFile(output_config, in_place=True)
 
     with CaptureStdout() as graph_dot:
-        snakemake.snakemake(snakefile=get_snakefile(analysis_type),
+        snakemake.snakemake(snakefile=get_snakefile(analysis_type,
+                                                    sequencing_type),
                             dryrun=True,
                             configfile=output_config,
                             printrulegraph=True)

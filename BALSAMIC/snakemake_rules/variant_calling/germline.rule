@@ -1,0 +1,106 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__ = "Hassan Foroughi Asl"
+
+import os
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_picard_mrkdup
+from BALSAMIC import __version__ as bv
+
+
+chromlist = config["panel"]["chrom"]
+picarddup = get_picard_mrkdup(config)
+capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
+
+rule haplotypecaller:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+        bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
+    output:
+        vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
+    params:
+        conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    threads: 4
+    singularity: singularity_image
+    shell:
+        "source activate {params.conda};"
+        "gatk3 -T HaplotypeCaller "
+            "-R {input.fa} "
+            "-I {input.bam} "
+            "-L {input.bed} "
+            "| bgzip > {output}; " 
+        "source deactivate; "
+
+rule haplotypecaller_merge:
+    input:
+        expand(vcf_dir + "haplotypecaller/split_vcf/{{sample}}.{chrom}_haplotypecaller.vcf.gz", chrom=chromlist)
+    output:
+        vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
+    params:
+        conda = get_conda_env(config["conda_env_yaml"], "gatk"),
+    singularity: singularity_image
+    shell:
+        "source activate {params.conda}; "
+        "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
+        "tabix -f -p vcf {output}; "
+        "source deactivate;"
+
+
+rule strelka_germline:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+        mantaindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz"
+    output:
+        final = vcf_dir + "SNV.germline.{sample}.strelka_germline.vcf.gz"
+    params:
+        tmpdir = vcf_dir + "strelka_germline_{sample}/",
+        runmode = "local",
+        conda = get_conda_env(config["conda_env_yaml"],"strelka"),
+    threads: 4
+    singularity: singularity_image
+    benchmark:
+        benchmark_dir + "{sample}.strelka_germline.tsv"
+    shell:
+        "source activate {params.conda};"
+        "rm -rf {params.tmpdir}; "
+        "configureStrelkaGermlineWorkflow.py "
+            "--bam={input.bam} "
+            "--referenceFasta={input.fa} "
+            "--indelCandidates {input.mantaindel} "
+            "--exome "
+            "--runDir={params.tmpdir}; "
+        "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
+        "cp {params.tmpdir}/results/variants/variants.vcf.gz {output.final}; " 
+        "tabix -p vcf -f {output.final}; "
+        "source deactivate; "
+
+
+rule manta_germline:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+    output:
+        final = vcf_dir + "SV.germline.{sample}.manta_germline.vcf.gz",
+        candidateindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz" 
+    params:
+        tmpdir = vcf_dir + "manta_germline_{sample}/",
+        runmode = "local",
+        conda = get_conda_env(config["conda_env_yaml"],"manta"),
+    threads: 4
+    singularity: singularity_image
+    benchmark:
+        benchmark_dir + "{sample}.manta_germline.tsv"
+    shell:
+        "source activate {params.conda}; "
+        "rm -rf {params.tmpdir}; "
+        "configManta.py "
+            "--bam={input.bam} "
+            "--referenceFasta={input.fa} "
+            "--runDir={params.tmpdir}; "
+        "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
+        "cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final}; "
+        "tabix -p vcf -f {output.final}; "
+        "source deactivate; "

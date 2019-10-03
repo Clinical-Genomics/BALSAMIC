@@ -28,7 +28,6 @@ def invoke_cli(cli_runner):
 def config_files():
     """ dict: path of the config files """
     return {
-        "install": "BALSAMIC/config/install.json",
         "sample": "BALSAMIC/config/sample.json",
         "reference": "tests/test_data/references/reference.json",
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
@@ -50,32 +49,6 @@ def conda():
         "balsamic-p27": "BALSAMIC/conda/BALSAMIC-py27.yaml",
         "balsamic-py36": "BALSAMIC/conda/BALSAMIC-py36.yaml",
     }
-
-
-@pytest.fixture(scope='session')
-def BALSAMIC_env(tmp_path_factory):
-    """
-    Writes BALSAMIC_env.yaml file.
-    """
-    # create a conda_env directory
-    conda_env_path = tmp_path_factory.mktemp("conda_env")
-
-    # create a yaml file inside conda_env_path
-    conda_packages = {
-        "env_py27": ["python", "strelka", "manta", "tabix"],
-        "env_py36": [
-            "python", "pip", "bcftools", "bwa", "fastqc", "sambamba",
-            "samtools", "tabix", "gatk", "picard", "fgbio", "freebayes",
-            "vardict", "vardict-java", "ensembl-vep", "cnvkit",
-            "pindel", "multiqc", "bedtools", "fastp"
-        ]
-    }
-
-    conda_env_file = conda_env_path / "test_BALSAMIC_env.yaml"
-
-    yaml.dump(conda_packages, open(conda_env_file, 'w'))
-
-    return str(conda_env_file)
 
 
 @pytest.fixture(scope='session')
@@ -121,22 +94,15 @@ def sample_fastq(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def install_config(BALSAMIC_env, tmp_path_factory):
+def singularity_container(tmp_path_factory):
     """
-    Fixture for install.json
+    Create singularity container
     """
-    config_dir = tmp_path_factory.mktemp("config")
-    install_json = {
-        "conda_env_yaml": BALSAMIC_env,
-        "rule_directory": str(Path('BALSAMIC').absolute()) + "/"
-    }
+    
+    container_dir = tmp_path_factory.mktemp("test_container")
+    container_file = container_dir / "singularity_container.simg"
 
-    install_config_file = str(config_dir / "install.json")
-
-    with open(install_config_file, 'w') as install_json_file:
-        json.dump(install_json, install_json_file)
-
-    return install_config_file
+    return str(container_file)
 
 
 @pytest.fixture(scope='session')
@@ -149,8 +115,7 @@ def analysis_dir(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        install_config):
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -164,9 +129,11 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
+        'config', 'case', '-p', panel_bed_file, '-t',
         str(tumor), '-n',
-        str(normal), '--case-id', case_name, '--analysis-dir',
+        str(normal), '--case-id', case_name,
+        '--singularity', singularity_container,  
+        '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
@@ -175,8 +142,33 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope='session')
-def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
-                      install_config):
+def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
+    """
+    invokes balsamic config sample -t xxx -n xxx to create sample config
+    for tumor-normal
+    """
+    case_name = 'sample_tumor_normal'
+    tumor = sample_fastq['tumor']
+    normal = sample_fastq['normal']
+    reference_json = 'tests/test_data/references/reference.json'
+    sample_config_file_name = 'sample.json'
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        'config', 'case', '-t',
+        str(tumor), '-n',
+        str(normal), '--case-id', case_name,
+        '--singularity', singularity_container,  
+        '--analysis-dir',
+        str(analysis_dir), '--output-config', sample_config_file_name,
+        '--reference-config', reference_json
+    ])
+
+    return str(analysis_dir / case_name / sample_config_file_name)
+
+
+@pytest.fixture(scope='session')
+def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -189,9 +181,33 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     result = runner.invoke(cli, [
-        'config', 'case', '-p', panel_bed_file, '-i', install_config, '-t',
-        str(tumor), '--case-id', case_name , '--analysis-dir',
+        'config', 'case', '-p', panel_bed_file, '-t',
+        str(tumor), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
+        '--singularity', singularity_container,  
+        '--reference-config', reference_json
+    ])
+
+    return str(analysis_dir / case_name / sample_config_file_name)
+
+
+@pytest.fixture(scope='session')
+def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_name = 'sample_tumor_only'
+    tumor = sample_fastq['tumor']
+    reference_json = 'tests/test_data/references/reference.json'
+    sample_config_file_name = 'sample.json'
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        'config', 'case', '-t',
+        str(tumor), '--case-id', case_name, '--analysis-dir',
+        str(analysis_dir), '--output-config', sample_config_file_name,
+        '--singularity', singularity_container,  
         '--reference-config', reference_json
     ])
 
@@ -205,72 +221,14 @@ def sample_config():
     """
     sample_config = {
         "QC": {
-            "picard_rmdup": "TRUE",
+            "picard_rmdup": "False",
             "adapter":
             "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-            "min_seq_length": "25"
-        },
-        "vcf": {
-            "manta": {
-                "default": [
-                    "diploidSV.vcf.gz", "somaticSV.vcf.gz",
-                    "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"
-                ],
-                "merged":
-                "manta.vcf.gz",
-                "mutation":
-                "somatic",
-                "type":
-                "SV"
-            },
-            "manta_germline": {
-                "default": [
-                    "diploidSV.vcf.gz", "candidateSV.vcf.gz",
-                    "candidateSmallIndels.vcf.gz"
-                ],
-                "mutation":
-                "germline",
-                "merged":
-                "manta_germline.vcf.gz",
-                "type":
-                "SV"
-            },
-            "strelka_germline": {
-                "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
-                "mutation": "germline",
-                "merged": "strelka_germline.vcf.gz",
-                "type": "SNV"
-            },
-            "strelka": {
-                "default": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
-                "mutation": "somatic",
-                "merged": "strelka.vcf.gz",
-                "type": "SNV"
-            },
-            "mutect": {
-                "default": "mutect.vcf.gz",
-                "mutation": "somatic",
-                "merged": "mutect.vcf.gz",
-                "type": "SNV"
-            },
-            "freebayes": {
-                "default": "freebayes.vcf.gz",
-                "mutation": "germline",
-                "merged": "freebayes.vcf.gz",
-                "type": "SNV"
-            },
-            "haplotypecaller": {
-                "default": "haplotypecaller.vcf.gz",
-                "mutation": "germline",
-                "merged": "haplotypecaller.vcf.gz",
-                "type": "SNV"
-            },
-            "vardict": {
-                "default": "vardict.vcf.gz",
-                "mutation": "somatic",
-                "merged": "vardict.vcf.gz",
-                "type": "SNV"
-            }
+            "min_seq_length": "25",
+            "quality_trim": "True",
+            "adapter_trim": "False",
+            "umi_trim": "True",
+            "umi_trim_length": "5"
         },
         "analysis": {
             "case_id": "id1",
@@ -284,6 +242,56 @@ def sample_config():
             "BALSAMIC_version": "2.9.8",
             "dag":
             "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+        },
+        "vcf": {
+            "manta": {
+                "mutation": "somatic",
+                "type": "SV"
+            },
+            "vardict": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "pindel": {
+                "mutation": "somatic",
+                "type": "SV"
+            },
+            "strelka": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "mutect": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnscope": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnsnv": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnhaplotyper": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "dnascope": {
+                "mutation": "germline",
+                "type": "SNV"
+            },
+            "manta_germline": {
+                "mutation": "germline",
+                "type": "SV"
+            },
+            "haplotypecaller": {
+                "mutation": "germline",
+                "type": "SNV"
+            },
+            "strelka_germline": {
+                "mutation": "germline",
+                "type": "SNV"
+            }
         },
         "samples": {
             "S1_R": {

@@ -4,6 +4,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
@@ -16,6 +17,9 @@ rule RealignerTargetCreator:
     bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.realign_targetcreator.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -36,6 +40,9 @@ rule IndelRealigner:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.indel_realign.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -56,6 +63,9 @@ rule BaseRecalibrator:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{sample}.base_recalibrator.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -82,6 +92,9 @@ rule PreparePopVCF:
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
     anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
     popcode = "EUR"
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + "tumor_prepare_pop_vcf.tsv"
   shell:
     "source activate {params.conda}; "
     "readlink -e {input.bam}; "
