@@ -57,6 +57,8 @@ rule strelka_germline:
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"strelka"),
     threads: 4
+    benchmark:
+        benchmark_dir + "{sample}.strelka_germline.tsv"
     shell:
         "source activate {params.conda};"
         "rm -rf {params.tmpdir}; "
@@ -84,6 +86,8 @@ rule manta_germline:
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"manta"),
     threads: 4
+    benchmark:
+        benchmark_dir + "{sample}.manta_germline.tsv"
     shell:
         "source activate {params.conda}; "
         "rm -rf {params.tmpdir}; "

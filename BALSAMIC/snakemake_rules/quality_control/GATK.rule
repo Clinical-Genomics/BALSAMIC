@@ -16,6 +16,8 @@ rule RealignerTargetCreator:
     bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+  benchmark:
+    benchmark_dir + "{sample}.realign_targetcreator.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -36,6 +38,8 @@ rule IndelRealigner:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+  benchmark:
+    benchmark_dir + "{sample}.indel_realign.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -55,7 +59,9 @@ rule BaseRecalibrator:
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    conda = get_conda_env(config["conda_env_yaml"],"gatk")
+  benchmark:
+    benchmark_dir + "{sample}.base_recalibrator.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "
@@ -82,6 +88,8 @@ rule PreparePopVCF:
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
     anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
     popcode = "EUR"
+  benchmark:
+    benchmark_dir + "tumor_prepare_pop_vcf.tsv"
   shell:
     "source activate {params.conda}; "
     "readlink -e {input.bam}; "

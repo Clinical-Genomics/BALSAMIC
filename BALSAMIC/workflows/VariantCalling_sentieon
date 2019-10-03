@@ -9,11 +9,11 @@ from BALSAMIC.utils.rule import get_vcf
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
+benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
-fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
@@ -25,6 +25,7 @@ try:
     SENTIEON_TNSCOPE = os.environ["SENTIEON_TNSCOPE"]
 except Exception as error:
     print("ERROR: Set Environment variable to run this pipeline.")
+    raise
 
 # rules for pipeline
 quality_check = ["snakemake_rules/quality_control/fastp.rule"]

@@ -20,6 +20,8 @@ rule cnvkit_single:
     name = config["analysis"]["case_id"],
     outdir = cnv_dir,
     conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
+  benchmark:
+    benchmark_dir + config["analysis"]["case_id"] + ".cnvkit_single.tsv"
   shell:
     "source activate {params.conda}; "
     "cnvkit.py target {input.bed} --annotate {input.refflat} --split -o {params.bed}; "
