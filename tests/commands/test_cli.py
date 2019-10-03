@@ -45,15 +45,6 @@ def test_sample_missing_opt(invoke_cli):
     assert result.exit_code == 2
 
 
-def test_init(invoke_cli):
-    # WHEN invoking init command with help option
-    result = invoke_cli(['init', '--help'])
-
-    # THEN It should list all the params without error
-    assert result.exit_code == 0
-    assert '--singularity' in result.output
-
-
 def test_plugins(invoke_cli):
     # GIVEN want to see config-sample params with help option
     # WHEN asking to show params for config-sample
@@ -77,15 +68,6 @@ def test_plugins_scout(invoke_cli):
 
     # THEN It should throw missiong option error
     assert result.exit_code == 0
-
-
-def test_init_missing_opt(invoke_cli):
-    # WHEN invoking init command with missing option
-    result = invoke_cli(['init'])
-
-    # THEN It should esclate the missing option error
-    assert 'Error: Missing option' in result.output
-    assert result.exit_code == 2
 
 
 def test_run(invoke_cli):

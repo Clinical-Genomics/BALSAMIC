@@ -6,7 +6,6 @@ import click
 import coloredlogs
 
 # Subcommands
-from BALSAMIC.commands.initiate.initiate import initiate as init_command
 from BALSAMIC.commands.run.base import run as run_command
 from BALSAMIC.commands.config.base import config as config_command
 from BALSAMIC.commands.plugins.base import plugins as plugins_command
@@ -39,7 +38,6 @@ def cli(context, loglevel):
     LOG.info(f"BALSAMIC started with log level {loglevel}.")
 
 
-cli.add_command(init_command)
 cli.add_command(run_command)
 cli.add_command(config_command)
 cli.add_command(plugins_command)
