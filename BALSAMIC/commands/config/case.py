@@ -242,17 +242,33 @@ def configure_fastq(fq_path, sample, fastq_prefix):
 @click.option("--create-dir/--no-create-dir",
               default=True,
               help="Create analysis directiry.")
+@click.option("--singularity",
+              type=click.Path(),
+              required=True,
+              help='Download singularity image for BALSAMIC')
 @click.pass_context
 def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
                 reference_config, panel_bed, output_config, normal, tumor,
                 case_id, analysis_dir, overwrite_config, create_dir,
-                fastq_prefix):
+                fastq_prefix, singularity):
     """
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
     """
+    config_path = Path(__file__).parents[2] / "config"
+    config_path = config_path.absolute()
 
-    install_config = get_config("install")
+    balsamic_env = config_path / "balsamic_env.yaml"
+    rule_directory = Path(__file__).parents[2]
+
+    install_config = dict()
+
+    install_config["conda_env_yaml"] = balsamic_env.as_posix()
+    install_config["rule_directory"] = rule_directory.as_posix() + "/"
+
+    install_config["singularity"] = dict()
+    install_config["singularity"]["image"] = Path(
+        singularity).absolute().as_posix()
 
     analysis_type = get_analysis_type(normal, umi)
     sequencing_type = "targeted" if panel_bed else "wgs"

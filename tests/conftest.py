@@ -28,7 +28,6 @@ def invoke_cli(cli_runner):
 def config_files():
     """ dict: path of the config files """
     return {
-        "install": "BALSAMIC/config/install.json",
         "sample": "BALSAMIC/config/sample.json",
         "reference": "tests/test_data/references/reference.json",
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
@@ -92,6 +91,18 @@ def sample_fastq(tmp_path_factory):
         "tumor": str(tumor_fastq_R_1.absolute()),
         "normal": str(normal_fastq_R_2.absolute())
     }
+
+
+@pytext.fixture(scope='session'):
+def singularity_container(tmp_path_factory):
+    """
+    Create singularity container
+    """
+    
+    container_dir = tmp_path_factory.mktemp("test_container")
+    container_file = container_dir / "singularity_containeri.simg"
+
+    return str(container_file)
 
 
 @pytest.fixture(scope='session')

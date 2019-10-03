@@ -10,7 +10,6 @@ before_install:
 install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
   - touch BALSAMIC/containers/fake_singularity_image
-  - balsamic init --singularity BALSAMIC/containers/fake_singularity_image
   - cat BALSAMIC/config/install.json
 
 script:
