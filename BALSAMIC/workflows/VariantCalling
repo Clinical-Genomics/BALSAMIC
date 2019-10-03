@@ -5,6 +5,7 @@ import os
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
+from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
 
@@ -18,6 +19,8 @@ fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
+
+singularity_image = config['singularity']['image'] 
 
 # Define set of rules
 qc_rules = [

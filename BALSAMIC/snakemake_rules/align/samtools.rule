@@ -5,7 +5,6 @@ __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
 
-
 rule samtools_sort_index:
   input:
     bam_dir + "{sample}.bam"
@@ -14,6 +13,7 @@ rule samtools_sort_index:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"samtools") 
   threads: 4
+  singularity: singularity_image 
   benchmark:
     benchmark_dir + '{sample}.samtools_sort.tsv'
   shell:

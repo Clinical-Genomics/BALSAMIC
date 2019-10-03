@@ -5,7 +5,6 @@ __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
 
-
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule bwa_mem:
   input:
@@ -19,6 +18,7 @@ rule bwa_mem:
     header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
     conda = get_conda_env(config["conda_env_yaml"],"bwa")
   threads: 4
+  singularity: singularity_image
   benchmark:
     benchmark_dir + "{sample}.bwa_mem.tsv"
   shell:

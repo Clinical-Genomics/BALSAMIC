@@ -6,6 +6,7 @@ __author__ = "Hassan Foroughi Asl"
 import os
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_picard_mrkdup
+from BALSAMIC import __version__ as bv
 
 
 chromlist = config["panel"]["chrom"]
@@ -22,6 +23,7 @@ rule haplotypecaller:
     params:
         conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     threads: 4
+    singularity: singularity_image
     shell:
         "source activate {params.conda};"
         "gatk3 -T HaplotypeCaller "
@@ -38,6 +40,7 @@ rule haplotypecaller_merge:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
         conda = get_conda_env(config["conda_env_yaml"], "gatk"),
+    singularity: singularity_image
     shell:
         "source activate {params.conda}; "
         "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
@@ -57,6 +60,7 @@ rule strelka_germline:
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"strelka"),
     threads: 4
+    singularity: singularity_image
     benchmark:
         benchmark_dir + "{sample}.strelka_germline.tsv"
     shell:
@@ -86,6 +90,7 @@ rule manta_germline:
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"manta"),
     threads: 4
+    singularity: singularity_image
     benchmark:
         benchmark_dir + "{sample}.manta_germline.tsv"
     shell:

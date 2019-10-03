@@ -5,7 +5,6 @@ __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
 
-
 rule vep:
   input:
     vcf = vcf_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
@@ -17,6 +16,7 @@ rule vep:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: 4
+  singularity: singularity_image 
   benchmark:
     benchmark_dir + "{type}.{mutation}.{sample}.{caller}.vep.tsv"
   shell:
