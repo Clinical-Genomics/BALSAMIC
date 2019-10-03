@@ -17,7 +17,7 @@ while getopts ":s:p:v:ch" opt; do
     c) cFlag=true;;
     h)
       echo $"
-USAGE: $0 [-s _condaprefix -t _balsamic_ver -p _condapath -c]
+USAGE: $0 [-s _condaprefix -v _balsamic_ver -p _condapath -c]
   1. Conda naming convention: [P,D,S]_[ENVNAME]_%DATE. P: Production, D: Development, S: Stage
   2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
   
