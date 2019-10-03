@@ -9,6 +9,12 @@ increment the patch number. The rational for versioning, and exact wording is ta
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
 ## [3.1.0] - 2019-10-03
+### Fixed
+- Proper tag retrieval for release
+### Changed
+- BALSAMIC container change to latest and version added to help line
+
+## [3.1.0] - 2019-10-03
 TL;DR:
 - QoL changes to WGS workflow
 - Simplified installation by moving all tools to a container

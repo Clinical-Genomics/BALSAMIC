@@ -3,7 +3,7 @@ BALSAMIC
 ========
 
 Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 3.1.0)
+(**version** = 3.1.1)
 
 .. contents::
 
@@ -23,7 +23,7 @@ Base command
 
   Usage: balsamic [OPTIONS] COMMAND [ARGS]...
 
-    BALSAMIC 3.1.0: Bioinformatic Analysis pipeLine for SomAtic MutatIons in
+    BALSAMIC 3.1.1: Bioinformatic Analysis pipeLine for SomAtic MutatIons in
     Cancer
 
   Options:
