@@ -120,7 +120,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
             if files:
                 logpath = createDir(logpath, [])
                 scriptpath = createDir(scriptpath, [])
-                benchmarkpath = createDir(benchmarkpath, [])
+                sample_config['analysis']['benchmark'] = createDir(benchmarkpath, [])
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)

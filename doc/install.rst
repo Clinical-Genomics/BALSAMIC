@@ -3,7 +3,7 @@ BALSAMIC
 ========
 
 Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 3.1.2)
+(**version** = 3.1.3)
 
 .. contents::
 
