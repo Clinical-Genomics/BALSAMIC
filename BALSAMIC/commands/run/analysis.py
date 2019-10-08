@@ -120,7 +120,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
             if files:
                 logpath = createDir(logpath, [])
                 scriptpath = createDir(scriptpath, [])
-                benchmarkpath = createDir(benchmarkpath, [])
+                sample_config['analysis']['benchmark'] = createDir(benchmarkpath, [])
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
@@ -136,7 +136,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     # Singularity bind path
     bind_path = list()
     bind_path.append(os.path.commonpath(sample_config['reference'].values()))
-    bind_path.append(sample_config['panel']['capture_kit'])
+    if 'panel' in sample_config.keys():
+        bind_path.append(sample_config['panel']['capture_kit'])
     bind_path.append(sample_config['analysis']['analysis_dir'])
 
     # Construct snakemake command to run workflow
