@@ -19,19 +19,19 @@
     },
     "sentieon_align_sort": {
         "time": "24:00:00",
-        "n": "16"
+        "n": "24"
     },
     "sentieon_dedup": {
         "time": "24:00:00",
-        "n": "16"
+        "n": "24"
     },
     "sentieon_realign": {
         "time": "24:00:00",
-        "n": "16"
+        "n": "24"
     },
     "sentieon_base_calibration": {
         "time": "24:00:00",
-        "n": "16"
+        "n": "24"
     },
     "sentieon_corealign": {
         "time": "24:00:00",
@@ -44,5 +44,29 @@
     "sentieon_TNhaplotyper": {
         "time": "24:00:00",
         "n": "16"
+    },
+    "sentieon_DNAscope": {
+        "time": "24:00:00",
+        "n": "24"
+    },
+    "sentieon_TNscope": {
+        "time": "24:00:00",
+        "n": "24"
+    },
+    "sentioen_filter_TNscope": {
+        "time": "24:00:00",
+        "n": "24"
+    },
+    "sentieon_TNsnv_tumor_only": {
+        "time": "24:00:00",
+        "n": "24"
+    },
+    "sentieon_TNhaplotyper_tumor_only": {
+        "time": "24:00:00",
+        "n": "24"
+    },
+    "sentieon_TNscope_tumor_only": {
+        "time": "24:00:00",
+        "n": "24"
     }
 }
