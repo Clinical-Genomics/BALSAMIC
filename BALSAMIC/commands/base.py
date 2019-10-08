@@ -35,7 +35,9 @@ def cli(context, loglevel):
     coloredlogs.install(
         level=loglevel,
         fmt='[%(hostname)s] %(asctime)s %(levelname)s %(message)s')
-    LOG.info(f"BALSAMIC started with log level {loglevel}.")
+    context.obj = {}
+    context.obj['loglevel'] = loglevel
+    # LOG.info(f"BALSAMIC started with log level {loglevel}.")
 
 
 cli.add_command(run_command)
