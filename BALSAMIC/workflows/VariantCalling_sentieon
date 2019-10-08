@@ -37,9 +37,11 @@ preprocessing = ["snakemake_rules/sentieon/sentieon_alignment.rule"]
 if config['analysis']['analysis_type'] == "paired":
     variant_calling = ["snakemake_rules/sentieon/sentieon_tn_varcall.rule", \
                        "snakemake_rules/sentieon/sentieon_germline.rule", \
-                       "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule"]
+                       "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule", \
+                       "snakemake_rules/variant_calling/cnvkit_paired.rule"]
     somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope', 'manta']
     germline_caller = ['dnascope']
+    cnvkit_output = cnv_dir + "cnvkit_paired.done"
 else:
     variant_calling = ["snakemake_rules/sentieon/sentieon_t_varcall.rule", \
                        "snakemake_rules/sentieon/sentieon_germline.rule", \
@@ -65,7 +67,8 @@ rule all:
         expand(bam_dir + "{sample}.dedup.realign.recal.csv", sample=config["samples"]),
         expand(bam_dir + "{sample}.dedup.realign.recal.pdf", sample=config["samples"]),
         expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, germline_caller, config["samples"]))
+        expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, germline_caller, config["samples"])),
+        cnvkit_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
