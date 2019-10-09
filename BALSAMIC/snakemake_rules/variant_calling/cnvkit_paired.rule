@@ -23,7 +23,7 @@ rule cnvkit_paired:
     done = cnv_dir + "cnvkit_paired.done",
     cnn = cnv_dir + config["analysis"]["case_id"] + ".cnn" 
   params:
-    target = config["panel"]["capture_kit"] if "panel" in config.keys() else "None" 
+    target = config["panel"]["capture_kit"] if "panel" in config.keys() else "None", 
     name = config["analysis"]["case_id"],
     outdir = cnv_dir,
     conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
