@@ -44,6 +44,8 @@ rule cnvkit_paired:
       shell(("source activate {params.conda}; "
             "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.outdir}/targets.bed; "
             "cnvkit.py batch {input.bamT} "
+              "--method hybrid "
+              "--drop-low-coverage "
               "--normal {input.bamN} "
               "--targets {params.outdir}/targets.bed "
               "--output-reference {output.cnn} "
