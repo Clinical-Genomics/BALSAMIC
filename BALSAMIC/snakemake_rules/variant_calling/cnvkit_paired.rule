@@ -36,6 +36,7 @@ rule cnvkit_paired:
             "cnvkit.py batch {input.bamT} " 
               "--normal {input.bamN} " 
               "-f {input.fasta} " 
+              "-m wgs "
               "--annotate {input.refflat} " 
               "--output-reference {output.cnn} " 
               "--output-dir {params.outdir}; touch {output}; "))
