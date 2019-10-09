@@ -16,7 +16,6 @@ rule cnvkit_single:
     refflat = config["reference"]["refflat"],
     reffa = config["reference"]["reference_genome"],
     bamT = bam_dir + tumor_bam, 
-    bed = config["panel"]["capture_kit"],
   output:
     done = cnv_dir + "cnvkit_single.done" 
   params:
