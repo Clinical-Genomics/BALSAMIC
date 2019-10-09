@@ -94,3 +94,11 @@ def get_script_path(script_name: str):
     script_path = str(Path(p, 'assets/scripts', script_name))
 
     return script_path
+
+
+def get_threads(cluster_config, rule_name='__default__'):
+    """
+    To retrieve threads from cluster config or return default value of 8
+    """
+
+    return cluster_config[rule_name]['n'] if rule_name in cluster_config else 8
