@@ -35,15 +35,15 @@
     },
     "sentieon_corealign": {
         "time": "24:00:00",
-        "n": "16"
+        "n": "24"
     },
     "sentieon_TNsnv": {
         "time": "24:00:00",
-        "n": "16"
+        "n": "24"
     },
     "sentieon_TNhaplotyper": {
         "time": "24:00:00",
-        "n": "16"
+        "n": "24"
     },
     "sentieon_DNAscope": {
         "time": "24:00:00",
