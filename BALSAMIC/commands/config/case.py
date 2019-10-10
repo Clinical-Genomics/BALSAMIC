@@ -256,6 +256,8 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
     Prepares a config file for balsamic run_analysis. For now it is just treating json as
     dictionary and merging them as it is. So this is just a placeholder for future.
     """
+    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 

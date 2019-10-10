@@ -44,7 +44,8 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
     """ Configure workflow for reference generation """
-
+    
+    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 

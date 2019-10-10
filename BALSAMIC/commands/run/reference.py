@@ -62,6 +62,7 @@ LOG = logging.getLogger(__name__)
 def reference(context, snakefile, configfile, run_mode, cluster_config,
               log_file, run_analysis, qos, force_all, snakemake_opt):
     """ Run generate reference workflow """
+    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     LOG.info("Reference generation workflow started")
 
     with open(configfile, "r") as config_fh:

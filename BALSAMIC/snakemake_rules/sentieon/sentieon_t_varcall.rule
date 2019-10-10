@@ -4,6 +4,7 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_sample_type
+from BALSAMIC.utils.rule import get_threads
 
 
 def get_pon(config):
@@ -29,7 +30,7 @@ rule sentieon_TNsnv_tumor_only:
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_TNsnv_tumor_only')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
     benchmark:
@@ -55,7 +56,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
     benchmark:
@@ -81,7 +82,7 @@ rule sentieon_TNscope_tumor_only:
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     log: 
         vcf_dir + config["analysis"]["case_id"] + ".tnscope_tumor_only.log"
     benchmark:

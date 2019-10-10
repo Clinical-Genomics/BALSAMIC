@@ -1,6 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+from BALSAMIC.utils.rule import get_threads
 
 rule sentieon_DNAscope:
     input:
@@ -14,7 +15,7 @@ rule sentieon_DNAscope:
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
         sentieon_ml_dnascope = SENTIEON_DNASCOPE
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_DNAscope')
     log: 
         vcf_dir + "{sample}.dnascope.log"
     benchmark:
