@@ -5,6 +5,7 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_threads
 from BALSAMIC import __version__ as bv
 
 qc_dir = result_dir + "qc/"
@@ -41,6 +42,7 @@ rule fastp:
     extra = fastp_param,
     conda = get_conda_env(config["conda_env_yaml"],"fastp")
   singularity: singularity_image
+  threads: get_threads(cluster_config, 'fastp')
   benchmark:
     benchmark_dir + "{sample}_fastp.tsv"
   shell:

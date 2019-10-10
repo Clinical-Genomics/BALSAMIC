@@ -24,7 +24,7 @@ def housekeeper(context, sample_config):
     cli for housekeeper sub-command.
     Writes <case_id>.hk in result_directory.
     '''
-
+    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     LOG.debug("Reading input sample config")
     with open(sample_config, 'r') as fn:
         sample_config = json.load(fn)
