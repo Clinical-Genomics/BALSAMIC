@@ -7,22 +7,25 @@ from BALSAMIC.utils.rule import get_conda_env, get_chrom
 from BALSAMIC import __version__ as bv
 
 
+fasta = config["reference"]["reference_genome"]
+refflat = config["reference"]["refflat"]
+
 if config["analysis"]["sequencing_type"] == 'wgs':
     normal_bam = "{normal}.dedup.realign.bam".format(normal = get_sample_type(config["samples"], "normal")[0])
     tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = get_sample_type(config["samples"], "tumor")[0])
-    cnvkit_params = " --method wgs --annotate {input.refflat} "
-    cnvkit_params += " -f {input.fasta} "
+    cnvkit_params = " --method wgs "
+    cnvkit_params += f" -f {fasta} --annotate {refflat} "
+    
 else:
     normal_bam = "normal.merged.bam"
     tumor_bam = "tumor.merged.bam"
     cnvkit_params = " --drop-low-coverage --method hybrid "
-    cnvkit_params += " --targets {params.outdir}/targets.bed "
-    cnvkit_params += " --output-reference {output.cnn} "
+    cnvkit_params += f" --targets {cnv_dir}/targets.bed "
 
 rule cnvkit_paired:
     input:
-        fasta = config["reference"]["reference_genome"],
-        refflat = config["reference"]["refflat"],
+        fasta = fasta, 
+        refflat = refflat, 
         bamN = bam_dir + normal_bam, 
         bamT = bam_dir + tumor_bam, 
     output:
@@ -32,16 +35,17 @@ rule cnvkit_paired:
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config.keys() else "None", 
         name = config["analysis"]["case_id"],
-        outdir = cnv_dir,
+        cnv_dir = cnv_dir,
         conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
     singularity: singularity_image
     benchmark:
         benchmark_dir + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
     shell:
         "source activate {params.conda}; "
-        "[ {params.target} != None ] && cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.outdir}/targets.bed; "
+        "[ {params.target} != None ] && cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
         "cnvkit.py batch {input.bamT} "
             "--normal {input.bamN} " 
             "{params.extra} "
+            "--output-reference {output.cnn} "
             "--scatter --diagram "
-            "--output-dir {params.outdir} && touch {output.done}; "
+            "--output-dir {params.cnv_dir} && touch {output.done}; "
