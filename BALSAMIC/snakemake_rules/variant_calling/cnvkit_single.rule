@@ -38,7 +38,6 @@ rule cnvkit_single:
         "[ {params.target} != None ] && cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.outdir}/targets.bed; "
         "[ {params.target} != None ] && cnvkit.py reference -o {params.refcnn} -f {input.fasta} -t {params.outdir}/targets.bed; "
         "cnvkit.py batch {input.bamT} "
-            "--normal {input.bamN} " 
             "{params.extra} "
             "--scatter --diagram "
             "--output-dir {params.outdir} && touch {output.done}; "
