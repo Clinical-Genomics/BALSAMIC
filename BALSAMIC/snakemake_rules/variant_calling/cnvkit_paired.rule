@@ -6,47 +6,46 @@ __author__ = "Hassan Foroughi Asl"
 from BALSAMIC.utils.rule import get_conda_env, get_chrom
 from BALSAMIC import __version__ as bv
 
-normal_bam = "normal.merged.bam"
-tumor_bam = "tumor.merged.bam"
+
+fasta = config["reference"]["reference_genome"]
+refflat = config["reference"]["refflat"]
 
 if config["analysis"]["sequencing_type"] == 'wgs':
     normal_bam = "{normal}.dedup.realign.bam".format(normal = get_sample_type(config["samples"], "normal")[0])
     tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = get_sample_type(config["samples"], "tumor")[0])
+    cnvkit_params = " --method wgs "
+    cnvkit_params += f" -f {fasta} --annotate {refflat} "
+    
+else:
+    normal_bam = "normal.merged.bam"
+    tumor_bam = "tumor.merged.bam"
+    cnvkit_params = " --drop-low-coverage --method hybrid "
+    cnvkit_params += f" --targets {cnv_dir}/targets.bed "
 
 rule cnvkit_paired:
-  input:
-    fasta = config["reference"]["reference_genome"],
-    refflat = config["reference"]["refflat"],
-    bamN = bam_dir + normal_bam, 
-    bamT = bam_dir + tumor_bam, 
-  output:
-    done = cnv_dir + "cnvkit_paired.done",
-    cnn = cnv_dir + config["analysis"]["case_id"] + ".cnn" 
-  params:
-    target = config["panel"]["capture_kit"] if "panel" in config.keys() else "None", 
-    name = config["analysis"]["case_id"],
-    outdir = cnv_dir,
-    conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
-  singularity: singularity_image
-  benchmark:
-    benchmark_dir + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
-  run:
-    if config["analysis"]["sequencing_type"] == 'wgs':
-      shell(("source activate {params.conda}; " 
-            "cnvkit.py batch {input.bamT} " 
-              "--normal {input.bamN} " 
-              "-f {input.fasta} " 
-              "-m wgs "
-              "--annotate {input.refflat} " 
-              "--output-reference {output.cnn} " 
-              "--output-dir {params.outdir}; touch {output}; "))
-    else:
-      shell(("source activate {params.conda}; "
-            "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.outdir}/targets.bed; "
-            "cnvkit.py batch {input.bamT} "
-              "--method hybrid "
-              "--drop-low-coverage "
-              "--normal {input.bamN} "
-              "--targets {params.outdir}/targets.bed "
-              "--output-reference {output.cnn} "
-              "--output-dir {params.outdir}; touch {output}; "))
+    input:
+        fasta = fasta, 
+        refflat = refflat, 
+        bamN = bam_dir + normal_bam, 
+        bamT = bam_dir + tumor_bam, 
+    output:
+        done = cnv_dir + "cnvkit_paired.done",
+        cnn = cnv_dir + config["analysis"]["case_id"] + ".cnn" 
+    params:
+        extra = cnvkit_params,
+        target = config["panel"]["capture_kit"] if "panel" in config else "None", 
+        name = config["analysis"]["case_id"],
+        cnv_dir = cnv_dir,
+        conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
+    singularity: singularity_image
+    benchmark:
+        benchmark_dir + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
+    shell:
+        "source activate {params.conda}; "
+        "[ {params.target} != None ] && cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
+        "cnvkit.py batch {input.bamT} "
+            "--normal {input.bamN} " 
+            "{params.extra} "
+            "--output-reference {output.cnn} "
+            "--scatter --diagram "
+            "--output-dir {params.cnv_dir} && touch {output.done}; "
