@@ -31,6 +31,7 @@ def config_files():
         "sample": "BALSAMIC/config/sample.json",
         "reference": "tests/test_data/references/reference.json",
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
+        "cluster_json": "BALSAMIC/config/cluster.json",
         "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
         "analysis_single": "BALSAMIC/config/analysis_single.json",
         "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",

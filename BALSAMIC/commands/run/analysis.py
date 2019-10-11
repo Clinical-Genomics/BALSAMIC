@@ -93,6 +93,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
+    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
 
     if run_mode == 'slurm' and not run_analysis:
         LOG.info('Changing run-mode to local on dry-run')

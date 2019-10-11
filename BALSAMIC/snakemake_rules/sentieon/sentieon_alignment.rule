@@ -3,6 +3,7 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_sample_type
+from BALSAMIC.utils.rule import get_threads
 
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
@@ -18,7 +19,7 @@ rule sentieon_align_sort:
         header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_align_sort')
     log:
         bam_dir + "{sample}.bam.log"
     benchmark:
@@ -41,7 +42,7 @@ rule sentieon_dedup:
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_dedup')
     log:
         bam_dir + "{sample}.dedup.bam.log"
     benchmark:
@@ -67,7 +68,7 @@ rule sentieon_realign:
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_realign')
     log:
         bam_dir + "{sample}.dedup.realign.bam.log"
     benchmark:
@@ -94,7 +95,7 @@ rule sentieon_base_calibration:
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
-    threads: 16
+    threads: get_threads(cluster_config, 'sentieon_base_calibration')
     log:
         bam_dir + "{sample}.dedup.realign.recal.log"
     benchmark:

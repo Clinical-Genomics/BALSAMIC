@@ -21,6 +21,7 @@ from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.rule import get_threads
 
 
 def test_get_ref_path(config_files):
@@ -350,3 +351,13 @@ def test_write_json_error(tmp_path, config_files):
         # WHEN passing a invalid dict
         # THEN It will raise the error
         assert write_json(ref_json, output_json)
+
+
+def test_get_threads(config_files):
+    # GIVEN cluster config file and rule name
+    cluster_config = json.load(open(config_files['cluster_json'], 'r'))
+    rule_name = 'sentieon_align_sort'
+
+    # WHEN passing cluster_config and rule_name
+    # THEN It should return threads value '12'
+    assert get_threads(cluster_config, rule_name)
