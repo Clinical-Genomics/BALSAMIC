@@ -14,7 +14,7 @@ rule multiqc:
     fastqc = expand(fastqc_dir + "{mysample}_{read_num}_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
     insertsize = expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]),
     alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
-    hsmetric = expand(bam_dir + "{sample}.sorted.hsmetric", sample=config["samples"]),
+    hsmetric = expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]),
     sambamba = expand(bam_dir + "{sample}.sorted." + picarddup + ".cov.bed", sample=config["samples"]),
     sambambaexon = expand(bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed", sample=config["samples"])
   output:

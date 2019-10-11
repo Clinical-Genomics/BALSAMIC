@@ -35,8 +35,8 @@ rule fastp:
   output:
     read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
     read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
-    json_out = qc_dir + "{sample}_fastp.json",
-    html_out = qc_dir + "{sample}_fastp.html"
+    json_out = fastq_dir + "{sample}_fastp.json",
+    html_out = fastq_dir + "{sample}_fastp.html"
   params:
     fastq_dir = fastq_dir,
     extra = fastp_param,
