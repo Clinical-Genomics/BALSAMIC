@@ -11,6 +11,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ## [3.2.0] - 2019-10-11
 ### Adds:
 - CNVkit to WGS workflow
+- get_thread for runs
 
 ### Changed:
 - Optimized resources for SLURM jobs
