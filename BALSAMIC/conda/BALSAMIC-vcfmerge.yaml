@@ -1,0 +1,16 @@
+channels:
+  - bioconda
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.6 
+  - pip=9.0.3 
+  - pybedtools
+  - bedtools
+  - vt
+  - gatk4
+  - picard
+  - tabix=0.2.5
+  - samtools=1.6
+  - bcftools=1.9
