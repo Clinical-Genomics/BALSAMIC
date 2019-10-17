@@ -43,14 +43,17 @@ rule vardict_merge:
   input:
     expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist) 
   output:
-    vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
+    name = config["analysis"]["case_id"],
   singularity: singularity_image
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort - | bgzip > {output}; " 
-    "tabix -f -p vcf {output}; "
+    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
+    "tabix -f -p vcf {output.vcf}; "
+    "echo \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}" 
     "source deactivate;" 
 
 rule mutect2_tumor_normal:
@@ -88,14 +91,17 @@ rule mutect2_merge:
   input:
     expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist) 
   output:
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
     vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"
   params:
+    name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   singularity: singularity_image
   shell:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
     "tabix -f -p vcf {output}; "
+    "echo \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}" 
     "source deactivate;" 
 
 rule strelka_tumor_normal:
@@ -105,9 +111,11 @@ rule strelka_tumor_normal:
     bamT = bam_dir + "tumor.merged.bam",
     mantaindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz" 
   output:
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.sample_name_map",
     final = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.vcf.gz", 
     default = expand(vcf_dir + "strelka/results/variants/{vcf_file}", vcf_file=["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"])
   params:
+    name = config["analysis"]["case_id"],
     tmpdir = vcf_dir + "strelka/", 
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
@@ -130,4 +138,5 @@ rule strelka_tumor_normal:
         "-O z "
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
+    "echo \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}" 
     "source deactivate; "
