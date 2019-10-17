@@ -3,14 +3,27 @@
 
 from BALSAMIC.utils.rule import get_threads
 
+
+def repeat(param, values):
+	param_values = []
+	
+	for value in values:
+		param_values.append(" ".join(map(str, [param, value])))
+
+	return " ".join(param_values)
+
+
 rule sentieon_wgs_metrics:
 	input:
 		bam = bam_dir + '{sample}.dedup.bam'
 		reference = config["reference"]["genome"]
 	output:
-		result_dir + "{sample}_wgs_metrics.txt"
+		wgs_metrics = result_dir + "qc/{sample}_wgs_metrics.txt"
+		coverage_metrics = result_dir + "qc/{sample}_wgs_metrics.txt"
 	params:
 		min_base_qual = '10'
+		gene_list = config["reference"]["refGene"]
+		cov_threshold = repeat("-T", [50, 100, 150, 200, 250])
 		sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon"
 		sentieon_lic = SENTIEON_LICENSE
 	threads: get_threads(cluster_config, 'sentieon_wgs_metrics')
@@ -20,5 +33,7 @@ rule sentieon_wgs_metrics:
 		"""
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo WgsMetricsAlgo --min_base_qual {params.min_base_qual} {output}
+{params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo WgsMetricsAlgo --min_base_qual {params.min_base_qual} {output.wgs_metrics};
+
+{params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo CoverageMetrics --gene_list {params.gene_list} {params.cov_threshold} {output.coverage_metrics};
 		"""
