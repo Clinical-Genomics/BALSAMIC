@@ -15,17 +15,17 @@ def repeat(param, values):
 
 rule sentieon_wgs_metrics:
 	input:
-		bam = bam_dir + '{sample}.dedup.bam'
-		reference = config["reference"]["genome"]
+		bam = bam_dir + '{sample}.dedup.bam',
+		reference = config["reference"]["reference_genome"]
 	output:
-		wgs_metrics = result_dir + "qc/{sample}_wgs_metrics.txt"
-		coverage_metrics = result_dir + "qc/{sample}_wgs_metrics.txt"
+		wgs_metrics = qc_dir + "{sample}_wgs_metrics.txt",
+		coverage_metrics = qc_dir + "{sample}_coverage"
 	params:
-		min_base_qual = '10'
-		gene_list = config["reference"]["refGene"]
-		cov_threshold = repeat("-T", [50, 100, 150, 200, 250])
-		sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon"
-		sentieon_lic = SENTIEON_LICENSE
+		min_base_qual = '10',
+		gene_list = config["reference"]["refGene"],
+		cov_threshold = repeat("-T", [50, 100, 150, 200, 250]),
+		sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+		sentieon_lic = SENTIEON_LICENSE,
 	threads: get_threads(cluster_config, 'sentieon_wgs_metrics')
 	benchmark: 
 		benchmark_dir + "{sample}_wgs_metrics.tsv"
