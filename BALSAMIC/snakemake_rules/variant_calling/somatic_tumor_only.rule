@@ -46,6 +46,7 @@ rule vardict_merge:
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+    name = config["analysis"]["case_id"],
   singularity: singularity_image
   shell:
     "source activate {params.conda} ; "
