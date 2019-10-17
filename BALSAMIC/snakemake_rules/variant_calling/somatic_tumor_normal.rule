@@ -92,15 +92,15 @@ rule mutect2_merge:
     expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist) 
   output:
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
-    vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"
   params:
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   singularity: singularity_image
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
-    "tabix -f -p vcf {output}; "
+    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
+    "tabix -f -p vcf {output.vcf}; "
     "echo \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}" 
     "source deactivate;" 
 

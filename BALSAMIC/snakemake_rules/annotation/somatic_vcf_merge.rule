@@ -1,0 +1,26 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_threads
+
+rule somatic_snv_indel_vcf_merge:
+  input:
+    name_map = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.sample_name_map", var_caller=somatic_caller_snv),
+    bamN = bam_dir + "normal.merged.bam", 
+    bamT = bam_dir + "tumor.merged.bam",
+  output:
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
+  params:
+    workdir = vcf_dir + "/vcfmerge",
+    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+  threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
+  singularity: singularity_image 
+  benchmark:
+    benchmark_dir + "somatic_snv_inde_vcf_merge.tsv"
+  shell:
+    "source activate {params.conda}; "
+    "mkdir -p {params.workdir}; "
+    "cat {input.name_map} > {params.workdir}/sample_name.map; "
+    "touch {output.vcf}; "
+    "source deactivate; "
