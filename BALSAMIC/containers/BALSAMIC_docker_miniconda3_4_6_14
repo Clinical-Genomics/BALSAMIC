@@ -7,5 +7,4 @@ RUN yum -y update \
     && bash ~/miniconda.sh -b -p /usr/local/miniconda \
     && rm -rf ~/miniconda.sh \
     && conda clean --all --yes \
-    && rpm -e --nodeps curl bzip2 \
     && yum clean all
