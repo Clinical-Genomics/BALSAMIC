@@ -3,13 +3,15 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 
+picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics", "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics", "quality_by_cycle_metrics", "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
+
 
 rule picard_multiple_metrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
         reference = config["reference"]["reference_genome"]
     output:
-        qc_dir + "{sample}.multiple_metrics.done"
+        expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard)
     params:
         output_prefix = qc_dir + "{sample}.multiple_metrics",
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
@@ -22,8 +24,7 @@ rule picard_multiple_metrics:
             " CollectMultipleMetrics "
             " I={input.bam} "
             " O={params.output_prefix} "
-            " R={input.reference} && "
-        "touch {output} "
+            " R={input.reference} "
         "source deactivate; "
 
 
@@ -32,7 +33,7 @@ rule picard_wgs_metrics:
         bam = bam_dir + "{sample}.dedup.bam",
         reference = config["reference"]["reference_genome"]
     output:
-        qc_dir + "{sample}.wgs_metrics.txt"
+        qc_dir + "{sample}_picard_wgs_metrics.txt"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     singularity: singularity_image

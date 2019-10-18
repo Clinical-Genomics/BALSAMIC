@@ -18,7 +18,7 @@ rule sentieon_wgs_metrics:
         bam = bam_dir + '{sample}.dedup.bam',
         reference = config["reference"]["reference_genome"]
     output:
-        wgs_metrics = qc_dir + "{sample}_wgs_metrics.txt",
+        wgs_metrics = qc_dir + "{sample}_sentieon_wgs_metrics.txt",
         coverage_metrics = qc_dir + "{sample}_coverage"
     params:
         min_base_qual = '10',
