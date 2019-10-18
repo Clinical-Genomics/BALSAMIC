@@ -32,7 +32,9 @@ except Exception as error:
     raise
 
 # rules for pipeline
-quality_check = ["snakemake_rules/quality_control/fastp.rule", "snakemake_rules/sentieon/sentieon_qc_metrics.rule"]
+quality_check = ["snakemake_rules/quality_control/fastp.rule", \
+                 "snakemake_rules/sentieon/sentieon_qc_metrics.rule", \
+                 "snakemake_rules/quality_control/picard_wgs.rule"]
 preprocessing = ["snakemake_rules/sentieon/sentieon_alignment.rule"]
 
 if config['analysis']['analysis_type'] == "paired":
@@ -73,6 +75,8 @@ rule all:
         expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, germline_caller, config["samples"])),
         expand(qc_dir + "{sample}_wgs_metrics.txt", sample=config["samples"]),
         expand(qc_dir + "{sample}_coverage", sample=config["samples"]),
+        expand(qc_dir + "{sample}.multiple_metrics.done", sample=config["samples"]),
+        expand(qc_dir + "{sample}.wgs_metrics.txt", sample=config["samples"]),
         cnvkit_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")

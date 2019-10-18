@@ -1,0 +1,49 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+from BALSAMIC.utils.rule import get_conda_env
+
+
+rule picard_multiple_metrics:
+	input:
+		bam = bam_dir + "{sample}.dedup.bam",
+		reference = config["reference"]["reference_genome"]
+	output:
+		qc_dir + "{sample}.multiple_metrics.done"
+	params:
+		output_prefix = qc_dir + "{sample}.multiple_metrics",
+		conda = get_conda_env(config["conda_env_yaml"],"picard"),
+	singularity: singularity_image
+	benchmark:
+		benchmark_dir + "{sample}.picard_collect_multiple_metrics.tsv"
+	shell:
+		"source activate {params.conda};"
+		"java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+		    " CollectMultipleMetrics "
+		    " I={input.bam} "
+		    " O={params.output_prefix} "
+		    " R={input.reference} && "
+		"touch {output} "
+		"source deactivate; "
+
+
+rule picard_wgs_metrics:
+	input:
+		bam = bam_dir + "{sample}.dedup.bam",
+		reference = config["reference"]["reference_genome"]
+	output:
+		qc_dir + "{sample}.wgs_metrics.txt"
+	params:
+		conda = get_conda_env(config["conda_env_yaml"],"picard"),
+	singularity: singularity_image
+	benchmark:
+		benchmark_dir + "{sample}.picard_collect_wgs_metrics.tsv"
+	shell:
+		"source activate {params.conda};"
+		"java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
+		    " CollectWgsMetrics "
+		    " I={input.bam} "
+		    " O={output} "
+		    " R={input.reference}; "
+		"source deactivate; "
+
