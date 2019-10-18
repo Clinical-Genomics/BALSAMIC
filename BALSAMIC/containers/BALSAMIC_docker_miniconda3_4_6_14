@@ -1,5 +1,5 @@
 FROM centos:7.6.1810
-MAINTAINER Conda Development Team <conda@continuum.io>
+MAINTAINER Hassan Foroughi
 
 RUN yum -y update \
     && yum install -y wget bzip2 graphviz git gcc fontconfig \
