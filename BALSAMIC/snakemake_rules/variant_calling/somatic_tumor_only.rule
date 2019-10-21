@@ -54,7 +54,7 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
-    "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {outout.vcf} }} }} }}' > {output.yaml}; "
+    "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule mutect2_tumor_only:
@@ -101,5 +101,5 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
     "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}" 
-    "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {outout.vcf} }} }} }}' > {output.yaml}; "
+    "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
