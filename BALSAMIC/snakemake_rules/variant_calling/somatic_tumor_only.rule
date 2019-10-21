@@ -52,7 +52,7 @@ rule vardict_merge:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
-    "echo \"{params.name}:\\tTUMOR\" > {output.namemap}" 
+    "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}" 
     "source deactivate;" 
 
 rule mutect2_tumor_only:
@@ -97,5 +97,5 @@ rule mutect2_merge:
     "source activate {params.conda} ; " 
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
-    "echo \"TUMOR:\\tTUMOR\" > {output.namemap}" 
+    "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}" 
     "source deactivate;" 
