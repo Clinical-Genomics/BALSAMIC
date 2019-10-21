@@ -55,7 +55,7 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}; " 
-    "echo '{{ vcf: {{ mutect: {{ name: mutect, path: {outout.vcf} }} }} }}' > {output.yaml}; "
+    "echo '{{ vcf: {{ mutect: {{ name: mutect, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule mutect2_tumor_normal:
@@ -105,7 +105,7 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
-    "echo '{{ vcf: {{ mutect: {{ name: mutect2, path: {outout.vcf} }} }} }}' > {output.yaml}; "
+    "echo '{{ vcf: {{ mutect: {{ name: mutect2, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule strelka_tumor_normal:
@@ -144,6 +144,6 @@ rule strelka_tumor_normal:
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
-    "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {outout.vcf} }} }} }}' > {output.yaml}; "
+    "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate; "
 
