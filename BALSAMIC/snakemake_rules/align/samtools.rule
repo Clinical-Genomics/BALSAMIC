@@ -4,6 +4,8 @@
 __author__ = "Hassan Foroughi Asl"
 
 from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_threads
+
 
 rule samtools_sort_index:
   input:
@@ -12,7 +14,7 @@ rule samtools_sort_index:
     bam_dir + "{sample}.sorted.bam"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"samtools") 
-  threads: 4
+  threads: get_threads(cluster_config, "samtools_sort_index")
   singularity: singularity_image 
   benchmark:
     benchmark_dir + '{sample}.samtools_sort.tsv'

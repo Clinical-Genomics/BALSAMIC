@@ -5,6 +5,7 @@ import os
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_chrom
+from BALSAMIC.utils.rule import get_threads
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
@@ -26,6 +27,8 @@ rule vardict_tumor_only:
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'vardict/{bedchrom}.vardict.tsv'
   shell:
     "source activate {params.conda}; "
     "vardict -G {input.fa} -f {params.af} -N {params.name} "
@@ -46,6 +49,8 @@ rule vardict_merge:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + config["analysis"]["case_id"] + ".vardict_merge.tsv"
   shell:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
@@ -64,8 +69,10 @@ rule mutect2_tumor_only:
   params:
     result_dir = vcf_dir + "mutect/",
     conda = get_conda_env(config["conda_env_yaml"],"gatk")
-  threads: 6
+  threads: get_threads(cluster_config, "mutect2_tumor_only")
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "mutect2/{bedchrom}.mutect2_tumor_only.tsv"
   shell:
     "source activate {params.conda};"
     "mkdir -p {params.result_dir}; "
@@ -87,8 +94,10 @@ rule mutect2_merge:
   output: 
     vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
   params: 
-    conda = get_conda_env(config["conda_env_yaml"],"bcftools"), 
+    conda = get_conda_env(config["conda_env_yaml"],"bcftools")
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
   shell:  
     "source activate {params.conda} ; " 
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "  

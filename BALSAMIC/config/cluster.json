@@ -11,11 +11,72 @@
         "time": "00:15:00",
         "n": 1
     },
-    "vardict_paired": {
-        "time": "24:00:00"
+    "RealignerTargetCreator": {
+        "time": "01:00:00"
     },
-    "mutect2_somatic": {
-        "time": "24:00:00"
+    "IndelRealigner": {
+        "time": "03:00:00"
+    },
+    "BaseRecalibrator": {
+        "time": "03:00:00"
+    },
+    "multiqc": {
+        "time": "00:15:00"
+    },
+    "MarkDuplicates": {
+        "time": "00:45:00"
+    },
+    "CollectHsMetrics": {
+        "time": "00:30:00"
+    },
+    "CollectAlignmentSummaryMetrics": {
+        "time": "00:30:00"
+    },
+    "CollectInsertSizeMetrics": {
+        "time": "00:30:00"
+    },
+    "sambamba_panel_depth": {
+        "time": "00:30:00"
+    },
+    "sambamba_exon_depth": {
+        "time": "00:30:00"
+    },
+    "bwa_mem": {
+        "time": "03:00:00",
+        "n": 16
+    },
+    "samtools_sort_index": {
+        "time": "00:15:00",
+        "n": 16
+    },
+    "haplotypecaller": {
+        "time": "01:00:00",
+        "n": 16
+    },
+    "haplotypecaller_merge": {
+        "time": "00:10:00",
+    },
+    "strelka_germline": {
+        "time": "00:30:00",
+        "n": 16
+    },
+    "manta_germline": {
+        "time": "01:00:00",
+        "n": 16
+    },
+    "vardict_tumor_only": {
+        "time": "00:30:00",
+    },
+    "vardict_merge": {
+        "time": "00:10:00"
+    },
+    "mutect2_tumor_only": {
+        "time": "03:00:00",
+        "n": 16
+    },
+    "mutect2_merge": {
+        "time": "00:10:00",
+        "n": 16,
     },
     "sentieon_align_sort": {
         "time": "24:00:00",
