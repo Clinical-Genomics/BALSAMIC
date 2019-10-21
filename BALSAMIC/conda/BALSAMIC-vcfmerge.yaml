@@ -14,3 +14,4 @@ dependencies:
   - tabix=0.2.5
   - samtools=1.6
   - bcftools=1.9
+  - yq=2.71
