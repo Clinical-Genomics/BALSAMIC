@@ -144,6 +144,6 @@ rule strelka_tumor_normal:
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
-    "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.vcf} }} }} }}' > {output.yaml}; "
+    "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.final} }} }} }}' > {output.yaml}; "
     "source deactivate; "
 
