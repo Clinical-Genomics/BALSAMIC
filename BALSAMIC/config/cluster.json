@@ -54,7 +54,7 @@
         "n": 16
     },
     "haplotypecaller_merge": {
-        "time": "00:10:00",
+        "time": "00:10:00"
     },
     "strelka_germline": {
         "time": "00:30:00",
@@ -65,7 +65,7 @@
         "n": 16
     },
     "vardict_tumor_only": {
-        "time": "00:30:00",
+        "time": "00:30:00"
     },
     "vardict_merge": {
         "time": "00:10:00"
@@ -76,7 +76,7 @@
     },
     "mutect2_merge": {
         "time": "00:10:00",
-        "n": 16,
+        "n": 16
     },
     "sentieon_align_sort": {
         "time": "24:00:00",
