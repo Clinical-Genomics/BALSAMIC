@@ -43,6 +43,7 @@ rule vardict_merge:
     expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
   output:
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map",
+    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
@@ -52,7 +53,8 @@ rule vardict_merge:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
-    "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}" 
+    "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
+    "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {outout.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule mutect2_tumor_only:
@@ -89,6 +91,7 @@ rule mutect2_merge:
     expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist)   
   output: 
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
+    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
   params: 
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"), 
@@ -98,4 +101,5 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
     "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}" 
+    "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {outout.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 

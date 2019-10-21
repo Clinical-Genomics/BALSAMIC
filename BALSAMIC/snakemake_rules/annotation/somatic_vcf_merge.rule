@@ -7,6 +7,7 @@ from BALSAMIC.utils.rule import get_threads
 rule somatic_snv_indel_vcf_merge:
   input:
     name_map = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.sample_name_map", var_caller=somatic_caller_snv),
+    varcall_yaml = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.yaml", var_caller=somatic_caller_snv),
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
   output:
@@ -22,5 +23,6 @@ rule somatic_snv_indel_vcf_merge:
     "source activate {params.conda}; "
     "mkdir -p {params.workdir}; "
     "cat {input.name_map} > {params.workdir}/sample_name.map; "
+    "echo '{{ NORMAL: {input.bamN}, TUMRO: {input.bamT} }}' | yq -y ' {{ bam: . }}' | yq -s '{ vcf: map(.vcf) | add} * .[0]'  - {input.varcall_yaml} > {params.workdir}/vcf.yaml; "
     "touch {output.vcf}; "
     "source deactivate; "
