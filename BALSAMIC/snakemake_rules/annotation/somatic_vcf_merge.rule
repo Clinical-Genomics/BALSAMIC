@@ -14,7 +14,7 @@ rule somatic_snv_indel_vcf_merge:
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
   params:
     workdir = vcf_dir + "/vcfmerge",
-    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
   threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
   singularity: singularity_image 
   benchmark:
@@ -23,6 +23,17 @@ rule somatic_snv_indel_vcf_merge:
     "source activate {params.conda}; "
     "mkdir -p {params.workdir}; "
     "cat {input.name_map} > {params.workdir}/sample_name.map; "
-    "echo '{{ NORMAL: {input.bamN}, TUMRO: {input.bamT} }}' | yq -y ' {{ bam: . }}' | yq -s '{ vcf: map(.vcf) | add} * .[0]'  - {input.varcall_yaml} > {params.workdir}/vcf.yaml; "
-    "touch {output.vcf}; "
+    "echo '{{ NORMAL: {input.bamN}, TUMRO: {input.bamT} }}' | "
+      " yq -y ' {{ bam: . }}' | "
+      " yq -s '{{ vcf: map(.vcf) | add }} * .[0]'  - {input.varcall_yaml} "
+      " > {params.workdir}/vcf.yaml; "
+    "vcfmerge --sample-config {params.workdir}/vcf.yaml "
+      " --reference-dict {input.refdict} "
+      " --reference {input.reffasta} "
+      " --sample-names {params.workdir}/sample_name.map "
+      " --aggr-func max "
+      " --output-dir {params.workdir} "
+      " --mapq 10 "
+      " --include-optional "
+      " --output-vcf {output.vcf}; " 
     "source deactivate; "
