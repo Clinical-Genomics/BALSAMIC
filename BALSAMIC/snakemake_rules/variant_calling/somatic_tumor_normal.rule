@@ -53,7 +53,7 @@ rule vardict_merge:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
     "tabix -f -p vcf {output.vcf}; "
-    "echo \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}" 
+    "echo \"{params.name}:\\tTUMOR\n{params.name}-match:\\tNORMAL\" > {output.namemap}" 
     "source deactivate;" 
 
 rule mutect2_tumor_normal:
@@ -101,7 +101,7 @@ rule mutect2_merge:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
-    "echo \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}" 
+    "echo \"TUMOR:\\tTUMOR\nNORMAL:\\tNORMAL\" > {output.namemap}" 
     "source deactivate;" 
 
 rule strelka_tumor_normal:
@@ -138,5 +138,5 @@ rule strelka_tumor_normal:
         "-O z "
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
-    "echo \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}" 
+    "echo \"TUMOR:\\tTUMOR\nNORMAL:\\tNORMAL\" > {output.namemap}" 
     "source deactivate; "
