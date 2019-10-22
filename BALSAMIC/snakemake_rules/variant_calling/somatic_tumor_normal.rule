@@ -147,3 +147,37 @@ rule strelka_tumor_normal:
     "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.final} }} }} }}' > {output.yaml}; "
     "source deactivate; "
 
+rule somatic_snv_indel_vcf_merge:
+  input:
+    name_map = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.sample_name_map", var_caller=somatic_caller_snv),
+    varcall_yaml = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.yaml", var_caller=somatic_caller_snv),
+    refdict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
+    reffasta = config["reference"]["reference_genome"],
+    bamN = bam_dir + "normal.merged.bam", 
+    bamT = bam_dir + "tumor.merged.bam",
+  output:
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
+  params:
+    workdir = vcf_dir + "/vcfmerge",
+    conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
+  threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
+  singularity: singularity_image 
+  benchmark:
+    benchmark_dir + "somatic_snv_inde_vcf_merge.tsv"
+  shell:
+    "source activate {params.conda}; "
+    "mkdir -p {params.workdir}; "
+    "cat {input.name_map} > {params.workdir}/sample_name.map; "
+    "echo '{{ bam: {{ NORMAL: {input.bamN}, TUMOR: {input.bamT} }} }}' | "
+      " yq -s '{{ vcf: map(.vcf) | add }} * .[0]'  - {input.varcall_yaml} "
+      " > {params.workdir}/vcf.yaml; "
+    "vcfmerge --sample-config {params.workdir}/vcf.yaml "
+      " --reference-dict {input.refdict} "
+      " --reference {input.reffasta} "
+      " --sample-names {params.workdir}/sample_name.map "
+      " --aggr-func max "
+      " --output-dir {params.workdir} "
+      " --mapq 10 "
+      " --include-optional "
+      " --output-vcf {output.vcf}; " 
+    "source deactivate; "

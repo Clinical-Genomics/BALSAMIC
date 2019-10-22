@@ -39,8 +39,7 @@ align_rules = [
   ]
 
 annotation_rules = [
-  "snakemake_rules/annotation/vep.rule",
-  "snakemake_rules/annotation/somatic_vcf_merge.rule"
+  "snakemake_rules/annotation/vep.rule"
   ]
 
 variantcalling_rules = [
@@ -63,8 +62,8 @@ if config['analysis']['analysis_type'] == "paired":
 
     somatic_caller_snv = ["mutect", "vardict", "strelka"]
     somatic_caller_sv = ["manta"]
-    somatic_caller = somatic_caller_snv + somatic_caller_sv
-
+    vcf_merge = ["vcfmerge"]
+    
     cnvkit_output = cnv_dir + "cnvkit_paired.done"
 
 else:
@@ -78,11 +77,12 @@ else:
 
     somatic_caller_snv = ["mutect", "vardict"]
     somatic_caller_sv = ["manta"]
-    somatic_caller = somatic_caller_snv + somatic_caller_sv
+    vcf_merge = ["vcfmerge"]
       
     cnvkit_output = cnv_dir + "cnvkit_single.done"
 
-somatic_caller.append("vcfmerge")
+somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge
+
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
 for r in config["rules"]:
