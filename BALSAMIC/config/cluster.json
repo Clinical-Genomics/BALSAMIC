@@ -78,6 +78,39 @@
         "time": "00:10:00",
         "n": 16
     },
+    "manta_tumor_only": {
+        "time": "03:00:00"
+    },
+    "cnvkit_single": {
+        "time": "03:00:00"
+    },
+    "mergeBam_tumor": {
+        "time": "00:30:00"
+    },
+    "mergeBam_tumor_gatk": {
+        "time": "00:30:00"
+    },
+    "mergeBam_normal_gatk": {
+        "time": "00:30:00"  
+    },
+    "mergeBam_normal": {
+        "time": "00:30:00"
+    },
+    "cnvkit_paired": {
+        "time": "06:00:00"
+    },
+    "vardict_tumor_normal": {
+        "time": "05:00:00"
+    },
+    "vardict_merge": {
+        "time": "00:15:00"
+    },
+    "mutect2_tumor_normal": {
+        "time": "06:00:00"
+    },
+    "strelka_tumor_normal": {
+        "time": "03:00:00"
+    },
     "sentieon_align_sort": {
         "time": "24:00:00",
         "n": 24
