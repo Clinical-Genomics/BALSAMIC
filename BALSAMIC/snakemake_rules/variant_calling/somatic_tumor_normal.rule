@@ -55,7 +55,7 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}; " 
-    "echo '{{ vcf: {{ mutect: {{ name: mutect, path: {output.vcf} }} }} }}' > {output.yaml}; "
+    "echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule mutect2_tumor_normal:
