@@ -2,7 +2,7 @@
     "__default__": {
         "name": "BALSAMIC.{rule}.{wildcards}",
         "time": "12:00:00",
-        "n": 16,
+        "n": 8,
         "mail_type": "FAIL",
         "partition": "core"
     },
@@ -42,11 +42,11 @@
         "time": "00:30:00"
     },
     "bwa_mem": {
-        "time": "03:00:00",
+        "time": "06:00:00",
         "n": 16
     },
     "samtools_sort_index": {
-        "time": "00:15:00",
+        "time": "00:30:00",
         "n": 16
     },
     "haplotypecaller": {
@@ -54,10 +54,10 @@
         "n": 16
     },
     "haplotypecaller_merge": {
-        "time": "00:10:00"
+        "time": "00:30:00"
     },
     "strelka_germline": {
-        "time": "00:30:00",
+        "time": "02:00:00",
         "n": 16
     },
     "manta_germline": {
@@ -65,18 +65,17 @@
         "n": 16
     },
     "vardict_tumor_only": {
-        "time": "00:30:00"
+        "time": "02:00:00"
     },
     "vardict_merge": {
-        "time": "00:10:00"
+        "time": "00:30:00"
     },
     "mutect2_tumor_only": {
-        "time": "03:00:00",
+        "time": "06:00:00",
         "n": 16
     },
     "mutect2_merge": {
-        "time": "00:10:00",
-        "n": 16
+        "time": "00:30:00"
     },
     "manta_tumor_only": {
         "time": "03:00:00"
@@ -106,7 +105,8 @@
         "time": "00:15:00"
     },
     "mutect2_tumor_normal": {
-        "time": "06:00:00"
+        "time": "06:00:00",
+        "n": 16
     },
     "strelka_tumor_normal": {
         "time": "03:00:00"

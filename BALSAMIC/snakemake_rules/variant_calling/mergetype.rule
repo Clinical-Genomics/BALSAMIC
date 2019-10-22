@@ -85,6 +85,6 @@ rule mergeBam_tumor_gatk:
     benchmark_dir + "{mysample}.mergebam_tumor_gatk.tsv".format(mysample = tumor_sample)
   shell:
     "source activate {params.conda}; "
-    "picard AddOrReplaceReadGroups {params.picard} INPUT={output.bamT} OUTPUT={output.bamT}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
     "source deactivate; "
