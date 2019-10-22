@@ -1,7 +1,7 @@
 channels:
   - bioconda
-  - defaults
   - conda-forge
+  - defaults
 
 dependencies:
   - python=3.6 
@@ -14,4 +14,4 @@ dependencies:
   - tabix=0.2.5
   - samtools=1.6
   - bcftools=1.9
-  - yq=2.71
+  - yq=2.7.1
