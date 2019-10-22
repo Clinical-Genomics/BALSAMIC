@@ -37,13 +37,8 @@ RUN yum clean all \
     zlib1g-dev \
     zlibc \
     default-jdk \
-    && yum clean all 
+    && yum clean all \
+    && wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
+    && python bootstrap.py -t --download -y -i /opt/fusioncatcher/v1.10/
 
 WORKDIR /opt
-
-######################
-## INSTALLATION
-######################
-
-RUN wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
-    && python bootstrap.py -t --download -y -i /opt/fusioncatcher/v1.10/
