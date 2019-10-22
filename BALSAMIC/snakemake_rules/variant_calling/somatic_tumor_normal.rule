@@ -168,7 +168,7 @@ rule somatic_snv_indel_vcf_merge:
     "source activate {params.conda}; "
     "mkdir -p {params.workdir}; "
     "cat {input.name_map} > {params.workdir}/sample_name.map; "
-    "echo '{{ bam: {{ NORMAL: {input.bamN}, TUMOR: {input.bamT} }} }}' | "
+    "echo '{{bam: {{NORMAL: {input.bamN}, TUMOR: {input.bamT} }} }}' | "
       " yq -s '{{ vcf: map(.vcf) | add }} * .[0]'  - {input.varcall_yaml} "
       " > {params.workdir}/vcf.yaml; "
     "vcfmerge --sample-config {params.workdir}/vcf.yaml "
