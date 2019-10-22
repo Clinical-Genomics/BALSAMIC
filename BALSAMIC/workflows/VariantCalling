@@ -82,7 +82,7 @@ else:
       
     cnvkit_output = cnv_dir + "cnvkit_single.done"
 
-#somatic_caller.append("vcfmerge")
+somatic_caller.append("vcfmerge")
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
 for r in config["rules"]:
