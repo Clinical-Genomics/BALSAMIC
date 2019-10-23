@@ -109,7 +109,8 @@
         "n": 16
     },
     "strelka_tumor_normal": {
-        "time": "03:00:00"
+        "time": "03:00:00",
+        "n": 16
     },
     "sentieon_align_sort": {
         "time": "24:00:00",
