@@ -14,7 +14,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 else:
     tumor_bam = "tumor.merged.bam"
     cnvkit_params = " --drop-low-coverage --method hybrid "
-    cnvkit_params += f" --targets {cnv_dir}/targets.bed "
 
 rule cnvkit_single:
     input:
