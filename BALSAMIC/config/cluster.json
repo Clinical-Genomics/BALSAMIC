@@ -12,34 +12,44 @@
         "n": 1
     },
     "RealignerTargetCreator": {
-        "time": "01:00:00"
+        "time": "01:00:00",
+        "n": 16
     },
     "IndelRealigner": {
-        "time": "03:00:00"
+        "time": "03:00:00",
+        "n": 16
     },
     "BaseRecalibrator": {
-        "time": "03:00:00"
+        "time": "03:00:00",
+        "n": 16
     },
     "multiqc": {
-        "time": "00:15:00"
+        "time": "00:15:00",
+        "n": 8
     },
     "MarkDuplicates": {
-        "time": "00:45:00"
+        "time": "00:45:00",
+        "n": 16
     },
     "CollectHsMetrics": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 16
     },
     "CollectAlignmentSummaryMetrics": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 16
     },
     "CollectInsertSizeMetrics": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 16
     },
     "sambamba_panel_depth": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "sambamba_exon_depth": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "bwa_mem": {
         "time": "06:00:00",
@@ -54,7 +64,8 @@
         "n": 16
     },
     "haplotypecaller_merge": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "strelka_germline": {
         "time": "02:00:00",
@@ -65,44 +76,56 @@
         "n": 16
     },
     "vardict_tumor_only": {
-        "time": "02:00:00"
+        "time": "02:00:00",
+        "n": 16
     },
     "vardict_merge": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "mutect2_tumor_only": {
         "time": "06:00:00",
         "n": 16
     },
     "mutect2_merge": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "manta_tumor_only": {
-        "time": "03:00:00"
+        "time": "03:00:00",
+        "n": 16
     },
     "cnvkit_single": {
-        "time": "03:00:00"
+        "time": "03:00:00",
+        "n": 16
     },
     "mergeBam_tumor": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "mergeBam_tumor_gatk": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "mergeBam_normal_gatk": {
-        "time": "00:30:00"  
+        "time": "00:30:00",
+        "n": 8
     },
     "mergeBam_normal": {
-        "time": "00:30:00"
+        "time": "00:30:00",
+        "n": 8
     },
     "cnvkit_paired": {
-        "time": "06:00:00"
+        "time": "06:00:00",
+        "n": 8
     },
     "vardict_tumor_normal": {
-        "time": "05:00:00"
+        "time": "05:00:00",
+        "n": 8
     },
     "vardict_merge": {
-        "time": "00:15:00"
+        "time": "00:15:00",
+        "n": 8
     },
     "mutect2_tumor_normal": {
         "time": "06:00:00",
