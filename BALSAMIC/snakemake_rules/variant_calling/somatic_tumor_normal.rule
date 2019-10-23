@@ -156,6 +156,7 @@ rule somatic_snv_indel_vcf_merge:
     bamN = bam_dir + "normal.merged.bam", 
     bamT = bam_dir + "tumor.merged.bam",
   output:
+    vcfmerge = vcf_dir + "vcfmerge/SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
   params:
     workdir = vcf_dir + "/vcfmerge",
@@ -179,5 +180,6 @@ rule somatic_snv_indel_vcf_merge:
       " --output-dir {params.workdir} "
       " --mapq 10 "
       " --include-optional "
-      " --output-vcf {output.vcf}; " 
+      " --output-vcf {output.vcfmerge}; " 
+    "cp {output.vcfmerge} {output.vcf}; "
     "source deactivate; "
