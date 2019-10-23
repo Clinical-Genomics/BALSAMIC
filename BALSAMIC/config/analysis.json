@@ -57,6 +57,10 @@
         "strelka_germline": {
             "mutation": "germline",
             "type": "SNV"
+        },
+        "vcfmerge":{
+            "mutation": "somatic",
+            "type": "SNV"
         }
     }
 }

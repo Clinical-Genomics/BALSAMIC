@@ -43,14 +43,19 @@ rule vardict_merge:
   input:
     expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist) 
   output:
-    vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
+    name = config["analysis"]["case_id"],
   singularity: singularity_image
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort - | bgzip > {output}; " 
-    "tabix -f -p vcf {output}; "
+    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
+    "tabix -f -p vcf {output.vcf}; "
+    "echo -e \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}; " 
+    "echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule mutect2_tumor_normal:
@@ -88,14 +93,19 @@ rule mutect2_merge:
   input:
     expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist) 
   output:
-    vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
+    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"
   params:
+    name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   singularity: singularity_image
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
-    "tabix -f -p vcf {output}; "
+    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
+    "tabix -f -p vcf {output.vcf}; "
+    "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
+    "echo '{{ vcf: {{ mutect: {{ name: mutect2, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule strelka_tumor_normal:
@@ -105,9 +115,12 @@ rule strelka_tumor_normal:
     bamT = bam_dir + "tumor.merged.bam",
     mantaindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz" 
   output:
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.sample_name_map",
+    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.yaml",
     final = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.vcf.gz", 
     default = expand(vcf_dir + "strelka/results/variants/{vcf_file}", vcf_file=["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"])
   params:
+    name = config["analysis"]["case_id"],
     tmpdir = vcf_dir + "strelka/", 
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
@@ -130,4 +143,43 @@ rule strelka_tumor_normal:
         "-O z "
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
+    "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
+    "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.final} }} }} }}' > {output.yaml}; "
+    "source deactivate; "
+
+rule somatic_snv_indel_vcf_merge:
+  input:
+    name_map = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.sample_name_map", var_caller=somatic_caller_snv),
+    varcall_yaml = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.yaml", var_caller=somatic_caller_snv),
+    refdict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
+    reffasta = config["reference"]["reference_genome"],
+    bamN = bam_dir + "normal.merged.bam", 
+    bamT = bam_dir + "tumor.merged.bam",
+  output:
+    vcfmerge = vcf_dir + "vcfmerge/SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
+  params:
+    workdir = vcf_dir + "/vcfmerge",
+    conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
+  threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
+  singularity: singularity_image 
+  benchmark:
+    benchmark_dir + "somatic_snv_inde_vcf_merge.tsv"
+  shell:
+    "source activate {params.conda}; "
+    "mkdir -p {params.workdir}; "
+    "cat {input.name_map} > {params.workdir}/sample_name.map; "
+    "echo '{{bam: {{NORMAL: {input.bamN}, TUMOR: {input.bamT} }} }}' | "
+      " yq -s '{{ vcf: map(.vcf) | add }} * .[0]'  - {input.varcall_yaml} "
+      " > {params.workdir}/vcf.yaml; "
+    "vcfmerge --sample-config {params.workdir}/vcf.yaml "
+      " --reference-dict {input.refdict} "
+      " --reference {input.reffasta} "
+      " --sample-names {params.workdir}/sample_name.map "
+      " --aggr-func max "
+      " --output-dir {params.workdir} "
+      " --mapq 10 "
+      " --include-optional "
+      " --output-vcf {output.vcfmerge}; " 
+    "cp {output.vcfmerge} {output.vcf}; "
     "source deactivate; "
