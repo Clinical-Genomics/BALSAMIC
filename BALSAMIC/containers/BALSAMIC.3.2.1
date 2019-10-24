@@ -3,12 +3,12 @@ From: centos:7.6.1810
 
 %help
     Bioinformatic analysis pipeline for somatic mutations in cancer.
-    Version 3.2.3 
+    Version 3.2.1 
 
 %labels
     Maintainer Hassan Foroughi Asl <hassan.foroughi@scilifelab.se>
     Description Core container for BALSAMIC
-    Version 3.2.3 
+    Version 3.2.1 
 
 %post
     yum install -y wget
@@ -43,7 +43,7 @@ From: centos:7.6.1810
     cd /git_repos
     git clone https://github.com/Clinical-Genomics/BALSAMIC
     cd BALSAMIC
-    git checkout tags/v3.2.3
+    git checkout tags/v3.2.1
     conda env create  --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36
     conda env create  --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27
 
