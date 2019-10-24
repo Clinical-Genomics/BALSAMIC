@@ -109,7 +109,7 @@ rule mutect2_merge:
     "source activate {params.conda} ; " 
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
-    "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}" 
+    "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
     "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
@@ -121,6 +121,7 @@ rule somatic_snv_indel_vcf_merge:
     reffasta = config["reference"]["reference_genome"],
     bamT = bam_dir + "tumor.merged.bam",
   output:
+    vcfmerge = vcf_dir + "vcfmerge/SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
   params:
     workdir = vcf_dir + "/vcfmerge",
@@ -145,4 +146,5 @@ rule somatic_snv_indel_vcf_merge:
       " --mapq 10 "
       " --include-optional "
       " --output-vcf {output.vcf}; " 
+    "cp {output.vcfmerge} {output.vcf}; "
     "source deactivate; "
