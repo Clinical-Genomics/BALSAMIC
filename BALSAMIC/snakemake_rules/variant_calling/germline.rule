@@ -6,6 +6,7 @@ __author__ = "Hassan Foroughi Asl"
 import os
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_picard_mrkdup
+from BALSAMIC.utils.rule import get_threads
 from BALSAMIC import __version__ as bv
 
 
@@ -22,8 +23,10 @@ rule haplotypecaller:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
         conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-    threads: 4
+    threads: get_threads(cluster_config, 'haplotypecaller')
     singularity: singularity_image
+    benchmark:
+        benchmark_dir + "haplotypecaller/{sample}.{bedchrom}.haplotypecaller.tsv"
     shell:
         "source activate {params.conda};"
         "gatk3 -T HaplotypeCaller "
@@ -32,6 +35,7 @@ rule haplotypecaller:
             "-L {input.bed} "
             "| bgzip > {output}; " 
         "source deactivate; "
+
 
 rule haplotypecaller_merge:
     input:
@@ -59,7 +63,7 @@ rule strelka_germline:
         tmpdir = vcf_dir + "strelka_germline_{sample}/",
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"strelka"),
-    threads: 4
+    threads: get_threads(cluster_config, "strelka_germline")
     singularity: singularity_image
     benchmark:
         benchmark_dir + "{sample}.strelka_germline.tsv"
@@ -89,7 +93,7 @@ rule manta_germline:
         tmpdir = vcf_dir + "manta_germline_{sample}/",
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"manta"),
-    threads: 4
+    threads: get_threads(cluster_config, "manta_germline")
     singularity: singularity_image
     benchmark:
         benchmark_dir + "{sample}.manta_germline.tsv"

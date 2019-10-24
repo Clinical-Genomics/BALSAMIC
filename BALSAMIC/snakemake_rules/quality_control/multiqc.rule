@@ -3,32 +3,59 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
+qc_dir = result_dir + "qc/"
+picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics", "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics", "quality_by_cycle_metrics", "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
+multiqc_input = []
+
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
+if config["analysis"]["sequencing_type"] == 'wgs':
+    # fastp metrics
+    multiqc_input.extend(expand(qc_dir + "{sample}_fastp.json", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "{sample}_fastp.html", sample=config["samples"]))
+
+    # Picard metrics
+    multiqc_input.extend(expand(qc_dir + "{sample}_picard_wgs_metrics.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard))
+
+    # dir list
+    dir_list = [qc_dir]
+else:
+    # fastqc metrics
+    multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
+
+    # picard metrics
+    multiqc_input.extend(expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]))
+
+    # sambamba metrics
+    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".cov.bed", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed", sample=config["samples"]))
+
+    dir_list = [bam_dir, fastqc_dir]
+
+
 rule multiqc:
-  input:
-    fastqc = expand(fastqc_dir + "{mysample}_{read_num}_fastqc.zip", mysample=config["samples"], read_num=[1, 2]),
-    insertsize = expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]),
-    alignmetric = expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]),
-    hsmetric = expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]),
-    sambamba = expand(bam_dir + "{sample}.sorted." + picarddup + ".cov.bed", sample=config["samples"]),
-    sambambaexon = expand(bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed", sample=config["samples"])
-  output:
-    result_dir + "qc/" + "multiqc_report.html"
-  params:
-    # This is using same environment as gatk
-    dir_list = "\n".join([bam_dir, fastqc_dir]),
-    qc_dir = result_dir + "qc/",
-    conda = get_conda_env(config["conda_env_yaml"],"multiqc"),
-  singularity: singularity_image
-  benchmark:
-    benchmark_dir + config["analysis"]["case_id"] + ".multiqc.tsv"
-  shell:
-    "source activate {params.conda};"
-    "echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list; "
-    "multiqc --outdir {params.qc_dir} --data-format json -l {params.qc_dir}/dir_list; " 
-    "chmod -R 777 {params.qc_dir};"
+    input:
+        multiqc_input
+    output:
+        qc_dir + "multiqc_report.html"
+    params:
+        # This is using same environment as gatk
+        dir_list = "\n".join(dir_list),
+        qc_dir = qc_dir,
+        conda = get_conda_env(config["conda_env_yaml"],"multiqc"),
+    singularity: singularity_image
+    benchmark:
+        benchmark_dir + config["analysis"]["case_id"] + ".multiqc.tsv"
+    shell:
+        "source activate {params.conda};"
+        "echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list; "
+        "multiqc --force --outdir {params.qc_dir} --data-format json -l {params.qc_dir}/dir_list; " 
+        "chmod -R 777 {params.qc_dir};"
