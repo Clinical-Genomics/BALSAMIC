@@ -1,46 +1,47 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
-
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
-picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
+tumor_sample = get_sample_type(config["samples"], "tumor")[0]
 
 rule mergeBam_tumor:
   input:
-    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".bam", mysample=get_sample_type(config["samples"], "tumor"))
+    bamT = bam_dir + "{mysample}.sorted.{picardstr}.bam".format(mysample = tumor_sample,
+                                                                picardstr = picarddup) 
   output:
     bamT = bam_dir + "tumor.merged.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
-    picard=picard_extra_tumor
+    picard = picard_extra_tumor
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
   shell:
     "source activate {params.conda}; "
-    "samtools merge {output.bamT}.tmp {input.bamT}; "
-    "picard AddOrReplaceReadGroups {params.picard} INPUT={output.bamT}.tmp OUTPUT={output.bamT}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "rm {output.bamT}.tmp; "
     "source deactivate; "
+
 
 rule mergeBam_tumor_gatk:
   input:
-    bamT = expand(bam_dir + "{mysample}.sorted." + picarddup + ".ralgn.bsrcl.bam", mysample=get_sample_type(config["samples"], "tumor"))
+    bamT = bam_dir + "{mysample}.sorted.{picardstr}.ralgn.bsrcl.bam".format(mysample = tumor_sample,
+                                                                            picardstr = picarddup)
   output:
     bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
-    picard=picard_extra_tumor
+    picard = picard_extra_tumor
   singularity: singularity_image
+  benchmark:
+    benchmark_dir + "{mysample}.mergebam_tumor_gatk.tsv".format(mysample = tumor_sample)
   shell:
     "source activate {params.conda}; "
-    "samtools merge {output.bamT}.tmp {input.bamT}; "
-    "picard AddOrReplaceReadGroups {params.picard} INPUT={output.bamT}.tmp OUTPUT={output.bamT}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "rm {output.bamT}.tmp; "
     "source deactivate; "

@@ -3,7 +3,8 @@
 
 __author__ = "Hassan Foroughi Asl"
 
-from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
