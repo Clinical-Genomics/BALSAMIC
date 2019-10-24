@@ -3,12 +3,12 @@ From: hassanf/miniconda3_4.6.14:latest
 
 %help
     Bioinformatic analysis pipeline for somatic mutations in cancer.
-    Version 3.2.3 
+    Version 3.3.0 
 
 %labels
     Maintainer Hassan Foroughi Asl <hassan.foroughi@scilifelab.se>
     Description Core container for BALSAMIC
-    Version 3.2.3 
+    Version 3.3.0 
 
 %post
     # create necessary directories
@@ -28,7 +28,7 @@ From: hassanf/miniconda3_4.6.14:latest
     cd /git_repos
     git clone https://github.com/Clinical-Genomics/BALSAMIC
     cd BALSAMIC
-    git checkout tags/v3.2.3
+    git checkout tags/v3.3.0
 
     conda env create  --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27
     conda clean -all -y
