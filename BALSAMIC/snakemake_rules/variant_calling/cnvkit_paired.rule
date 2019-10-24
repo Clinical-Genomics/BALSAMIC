@@ -45,6 +45,6 @@ rule cnvkit_paired:
         "cnvkit.py batch {input.bamT} "
             "--normal {input.bamN} " 
             "{params.extra} "
-            "--output-reference {output.cnn} "
+            "--output-reference {params.cnv_dir}/Reference.cnn "
             "--scatter --diagram "
             "--output-dir {params.cnv_dir} && touch {output.done}; "
