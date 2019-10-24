@@ -40,6 +40,7 @@ reference_json = os.path.join(basedir, "reference.json")
 reference_genome = os.path.join(genome_dir, "human_g1k_v37_decoy.fasta")
 reference_genome_index = os.path.join(genome_dir, "human_g1k_v37_decoy.fasta.fai")
 refseq_bed = os.path.join(genome_dir, "refseq.flat.bed")
+refgene = os.path.join(genome_dir, "refGene.txt")
 refseq_flat = os.path.join(genome_dir, "refseq.flat")
 genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
 
@@ -90,6 +91,7 @@ rule all:
         refgenome_dict = genome_dict,
         refseq_bed = refseq_bed,
         refseq_flat = refseq_flat,
+        refgene = refgene,
         dbsnp_vcf = dbsnp + ".gz",
         th_genome_vcf = vcf_1kg + ".gz",
         tg_high_vcf = hc_vcf_1kg + ".gz",
@@ -118,6 +120,7 @@ rule all:
             "cosmic": input.cosmic_vcf,
             "exon_bed": input.refseq_bed,
             "refflat": input.refseq_flat,
+            "refGene": input.refgene,
             "vep": input.vep
         }
 
@@ -155,6 +158,7 @@ rule download_refgene:
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
         refflat = refseq_flat,
+        refgene = refgene,
         bed = refseq_bed
     log:
         refgene_sql = genome_dir + "refgene_sql.log",
@@ -162,7 +166,8 @@ rule download_refgene:
     singularity: singularity_image
     shell:
         "source activate {params.conda_env}; " 
-        "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk}); " 
+        "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk}); "
+        "wget -O - {params.refgene_txt} | gunzip | sed 's/chr//g' > {output.refgene};"
         "(echo \"$header\"; wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip;) "
         "| csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 "
         "| csvformat -T "

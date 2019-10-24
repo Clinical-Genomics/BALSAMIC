@@ -143,7 +143,6 @@ def test_get_package_split(conda):
     assert isinstance(packages, dict)
     assert "bwa" in packages
     assert "bcftools" in packages
-    assert "cutadapt" in packages
     assert "fastqc" in packages
 
 

@@ -60,8 +60,10 @@ if config['analysis']['analysis_type'] == "paired":
       "snakemake_rules/variant_calling/cnvkit_paired.rule"
       ])
 
-    somatic_caller = ["mutect", "vardict", "strelka", "manta"]
-
+    somatic_caller_snv = ["mutect", "vardict", "strelka"]
+    somatic_caller_sv = ["manta"]
+    vcf_merge = ["vcfmerge"]
+    
     cnvkit_output = cnv_dir + "cnvkit_paired.done"
 
 else:
@@ -73,9 +75,13 @@ else:
       "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule"
       ])
 
-    somatic_caller = ["mutect", "vardict", "manta"]
+    somatic_caller_snv = ["mutect", "vardict"]
+    somatic_caller_sv = ["manta"]
+    vcf_merge = ["vcfmerge"]
       
     cnvkit_output = cnv_dir + "cnvkit_single.done"
+
+somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 

@@ -16,6 +16,7 @@ bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
 result_dir = get_result_dir(config) + "/"
+qc_dir = get_result_dir(config) + "/qc/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
@@ -31,7 +32,10 @@ except Exception as error:
     raise
 
 # rules for pipeline
-quality_check = ["snakemake_rules/quality_control/fastp.rule"]
+quality_check = ["snakemake_rules/quality_control/fastp.rule", \
+                 "snakemake_rules/sentieon/sentieon_qc_metrics.rule", \
+                 "snakemake_rules/quality_control/picard_wgs.rule", \
+                 "snakemake_rules/quality_control/multiqc.rule"]
 preprocessing = ["snakemake_rules/sentieon/sentieon_alignment.rule"]
 
 if config['analysis']['analysis_type'] == "paired":
@@ -70,6 +74,9 @@ rule all:
         expand(bam_dir + "{sample}.dedup.realign.recal.pdf", sample=config["samples"]),
         expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf = get_vcf(config, germline_caller, config["samples"])),
+        expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=config["samples"]),
+        expand(qc_dir + "{sample}_coverage", sample=config["samples"]),
+        expand(qc_dir + "multiqc_report.html"),
         cnvkit_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
