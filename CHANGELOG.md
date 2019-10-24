@@ -8,6 +8,22 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [3.3.0] - 2019-10-24
+somatic vcfmerge release
+
+### Added
+- QC metrics for WGS workflow
+- refGene.txt download to reference.json and reference workflow
+- A new conda environment within container
+- A new base container built via Docker (centos7:miniconda3_4_6_14)
+- VCFmerge package as VCF merge rule (https://github.com/hassanfa/VCFmerge)
+- A container for develop branch
+- Benchmark rules to variant callers
+
+### Changed
+- SLURM resource allocation for various variancalling rules optimized
+- mergetype rule updated and only accepts one single tumor instead of multiple 
+
 ## [3.2.3] - 2019-10-24
 ### Fixed
 - Removed unused output files from cnvkit which caused to fail on targetted analysis
