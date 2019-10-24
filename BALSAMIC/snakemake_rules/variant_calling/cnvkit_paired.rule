@@ -29,8 +29,7 @@ rule cnvkit_paired:
         bamN = bam_dir + normal_bam, 
         bamT = bam_dir + tumor_bam, 
     output:
-        done = cnv_dir + "cnvkit_paired.done",
-        cnn = cnv_dir + config["analysis"]["case_id"] + ".cnn" 
+        done = cnv_dir + "cnvkit_paired.done"
     params:
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
@@ -46,6 +45,6 @@ rule cnvkit_paired:
         "cnvkit.py batch {input.bamT} "
             "--normal {input.bamN} " 
             "{params.extra} "
-            "--output-reference {output.cnn} "
+            "--output-reference {params.cnv_dir}/Reference.cnn "
             "--scatter --diagram "
             "--output-dir {params.cnv_dir} && touch {output.done}; "
