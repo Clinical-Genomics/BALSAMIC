@@ -1,5 +1,5 @@
 Bootstrap: docker 
-From: centos:7.6.1810
+From: hassanf/miniconda3_4.6.14:latest
 
 %help
     Bioinformatic analysis pipeline for somatic mutations in cancer.
@@ -11,27 +11,12 @@ From: centos:7.6.1810
     Version 3.2.3 
 
 %post
-    yum install -y wget
-    yum install -y which
-    yum install -y bzip2
-    yum install -y graphviz
-    yum install -y git
-    yum install -y gcc
-    yum install -y fontconfig
-    # install miniconda
-    if [ ! -d /usr/local/miniconda ]; then
-        wget https://repo.continuum.io/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh\
-           -O ~/miniconda.sh && \
-        bash ~/miniconda.sh -b -p /usr/local/miniconda && \
-        rm ~/miniconda.sh
-    fi
-
     # create necessary directories
     if [ ! -d /git_repos ]; then mkdir /git_repos; fi
     if [ ! -d /conda_envs ]; then mkdir /conda_envs; fi
 
     # set miniconda path
-    export PATH=$PATH:/usr/local/miniconda/bin
+    export PATH=/usr/local/miniconda/bin:$PATH
     
     # Git clone BALSAMIC
     # The following fixes the error for Click
@@ -44,9 +29,13 @@ From: centos:7.6.1810
     git clone https://github.com/Clinical-Genomics/BALSAMIC
     cd BALSAMIC
     git checkout tags/v3.2.3
-    conda env create  --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36
-    conda env create  --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27
 
+    conda env create  --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27
+    conda clean -all -y
+    source deactivate
+
+    conda env create  --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36
+    conda clean -all -y
     # register gatk3 and add custom picard
     source activate BALSAMIC_py36 
     gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar
@@ -59,6 +48,16 @@ From: centos:7.6.1810
     ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6
     ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6.0
 
+    # install vcfmerge
+    # TODO: add vcfmerge submodule
+    conda env create  --file BALSAMIC/conda/BALSAMIC-vcfmerge.yaml -n BALSAMIC_vcfmerge
+    cd /git_repos
+    git clone https://github.com/hassanfa/VCFmerge.git
+    cd VCFmerge
+    source activate BALSAMIC_vcfmerge
+    pip install --no-cache-dir  -r requirements-dev.txt -r requirements.txt -e .
+    conda clean -all -y
+
 %environment
     # The following fixes the error for Click
     # RuntimeError: Click will abort further execution because Python 3 was
@@ -66,7 +65,7 @@ From: centos:7.6.1810
     # https://click.palletsprojects.com/en/7.x/python3/ for mitigation steps.
     export LC_ALL=en_US.utf-8
     export LANG=en_US.utf-8
-    export PATH=$PATH:/usr/local/miniconda/bin
+    export PATH=/usr/local/miniconda/bin:$PATH
 
 %runscript
     exec "$@"
