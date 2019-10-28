@@ -188,13 +188,13 @@ def test_get_snakefile():
 def test_get_chrom(config_files):
     # Given a panel bed file
     bed_file = config_files["panel_bed_file"]
+    actual_chrom = [10,11,16,17,18,19,2,3,4,6,7,9,"X"]
 
     # WHEN passing this bed file
-    chrom = get_chrom(bed_file)
+    test_chrom = get_chrom(bed_file)
 
     # THEN It should return list of chrom presents in that bed file
-    for chr_num in range(1, 21):
-        assert str(chr_num) in chrom
+    assert all([c1 == c2 for c1, c2 in zip(actual_chrom, test_chrom)])
 
 
 def test_get_vcf(sample_config):
