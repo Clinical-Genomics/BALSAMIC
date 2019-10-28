@@ -8,6 +8,11 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [3.3.1] - 2019-10-28
+### Fixed
+- Various links for reference genome is updated with working URL
+- Config reference command now print correct output file
+
 ## [3.3.0] - 2019-10-24
 somatic vcfmerge release
 
