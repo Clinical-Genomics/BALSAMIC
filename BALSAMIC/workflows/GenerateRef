@@ -14,13 +14,13 @@ current_day = date.today()
 
 # LINKS TO REFERENCE FILES
 # ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/
-reference_genome_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/human_g1k_v37.fasta.gz"
-dbsnp_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz"
-hc_vcf_1kg_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg19/1000G_phase1.snps.high_confidence.hg19.sites.vcf.gz"
-mills_1kg_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz"
-known_indel_1kg_url = "ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/1000G_phase1.indels.b37.vcf.gz"
+reference_genome_url = "gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz"
+dbsnp_url = "gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz"
+hc_vcf_1kg_url = "gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz"
+mills_1kg_url = "gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz" 
+known_indel_1kg_url = "gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz" 
 vcf_1kg_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz"
-cosmicdb_url = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v89/VCF/CosmicCodingMuts.vcf.gz"
+cosmicdb_url = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz"
 refgene_txt_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
 refgene_sql_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql"
 
@@ -53,8 +53,12 @@ cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
 # list of reference download link and output file name
-ref_list = [(reference_genome_url, reference_genome), (vcf_1kg_url, vcf_1kg), (dbsnp_url, dbsnp),
-            (hc_vcf_1kg_url,hc_vcf_1kg), (mills_1kg_url, mills_1kg), (known_indel_1kg_url, known_indel_1kg)]
+ref_list = [(reference_genome_url, reference_genome, "gsutil"),
+            (dbsnp_url, dbsnp, "gsutil"),
+            (hc_vcf_1kg_url, hc_vcf_1kg, "gsutil"),
+            (mills_1kg_url, mills_1kg, "gsutil"),
+            (known_indel_1kg_url, known_indel_1kg, "gsutil"),
+            (vcf_1kg_url, vcf_1kg, "wget")]
 
 shell.prefix("set -eo pipefail; ")
 
@@ -144,10 +148,10 @@ rule download_reference:
         expand("{output}", output=[ref[1] for ref in ref_list])
     run:
         for ref in ref_list:
-            try:
+            if ref[2] == "gsutil":
+                shell("gsutil cp -L {ref[1]}.log {ref[0]} - | gunzip > {ref[1]}") 
+            else:
                 shell("wget -a {ref[1]}.log -O - {ref[0]} | gunzip > {ref[1]}")
-            except:
-                shell("echo wget -a {ref[1]}.log -O - {ref[0]} \"\"|\"\" gunzip > {ref[1]}.fail")
 
 rule download_refgene:
     params:
