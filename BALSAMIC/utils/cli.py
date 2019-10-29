@@ -98,17 +98,17 @@ class SnakeMake:
         if self.run_mode == 'slurm':
             sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
                 " --sample-config " + self.configfile + \
-                " --slurm-account " + self.account + \
-                " --slurm-qos " + self.qos + \
+                " --account " + self.account + \
+                " --qos " + self.qos + \
                 " --log-dir " + self.log_path + \
                 " --script-dir " + self.script_path + \
                 " --result-dir " + self.result_path
 
             if self.mail_user:
-                sbatch_cmd += " --slurm-mail-user " + self.mail_user
+                sbatch_cmd += " --mail-user " + self.mail_user
 
             if self.mail_type:
-                sbatch_cmd += " --slurm-mail-type " + self.mail_type
+                sbatch_cmd += " --mail-type " + self.mail_type
 
             sbatch_cmd += " {dependencies} '"
 

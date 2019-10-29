@@ -211,7 +211,7 @@ def get_parser():
     parser.add_argument("--account",
                         required=True,
                         help='cluster account name')
-    parser.add_argument("--priority", default='low', help='cluster job Priority (slurm - QOS)')
+    parser.add_argument("--qos", default='low', help='cluster job Priority (slurm - QOS)')
     parser.add_argument("--mail-type", help='cluster mail type')
     parser.add_argument("--mail-user", help='mail user')
     parser.add_argument("--log-dir", help="Log directory")
