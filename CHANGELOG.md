@@ -9,6 +9,9 @@ increment the patch number. The rational for versioning, and exact wording is ta
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
 ## [X.X.X] - 2019-XX-XX
+### Added
+- Docker image for balsamic as part of ci
+
 ### Changed
 - Test fastq data and test panel bed file with real but dummy data
 
