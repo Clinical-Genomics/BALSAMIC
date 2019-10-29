@@ -88,6 +88,7 @@ def test_snakemake_slurm():
     snakemake_slurm.result_path = "results/"
     snakemake_slurm.qos = "normal"
     snakemake_slurm.account = "development"
+    snakemake_slurm.profile = "slurm"
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )

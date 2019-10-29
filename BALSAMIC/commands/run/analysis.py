@@ -56,6 +56,7 @@ LOG = logging.getLogger(__name__)
               This is raw log output from snakemake.')
 @click.option('-p',
               '--profile',
+              type=click.Choice(["slurm", "qsub"]),
               help="cluster profile to submit jobs")
 @click.option(
     '-r',
