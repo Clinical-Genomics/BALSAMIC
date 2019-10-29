@@ -189,11 +189,9 @@ def test_get_chrom(config_files):
     # Given a panel bed file
     bed_file = config_files["panel_bed_file"]
     actual_chrom = ['10','11','16','17','18','19','2','3','4','6','7','9','X']
-    actual_chrom.sort()
 
     # WHEN passing this bed file
     test_chrom = get_chrom(bed_file)
-    test_chrom.sort()
 
     # THEN It should return list of chrom presents in that bed file
     assert set(actual_chrom) == set(test_chrom)
