@@ -196,7 +196,7 @@ def test_get_chrom(config_files):
     test_chrom.sort()
 
     # THEN It should return list of chrom presents in that bed file
-    assert all([c1 == c2 for c1, c2 in zip(actual_chrom, test_chrom)])
+    assert set(actual_chrom) == set(test_chrom)
 
 
 def test_get_vcf(sample_config):
