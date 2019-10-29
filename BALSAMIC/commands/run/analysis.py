@@ -54,6 +54,9 @@ LOG = logging.getLogger(__name__)
               type=click.Path(),
               help='Log file output for BALSAMIC.\
               This is raw log output from snakemake.')
+@click.option('-p',
+              '--profile',
+              help="cluster profile to submit jobs")
 @click.option(
     '-r',
     '--run-analysis',
@@ -89,7 +92,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, log_file, force_all, snakemake_opt, slurm_mail_type,
-             slurm_mail_user, slurm_account, analysis_type, qos):
+             slurm_mail_user, slurm_account, analysis_type, qos, profile):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
@@ -152,6 +155,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
     balsamic_run.scheduler = get_sbatchpy()
+    balsamic_run.profile = profile
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath
     balsamic_run.result_path = resultpath

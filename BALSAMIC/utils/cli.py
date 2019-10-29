@@ -57,6 +57,7 @@ class SnakeMake:
         self.snakefile = None
         self.configfile = None
         self.run_mode = None
+        self.profile = None
         self.cluster_config = None
         self.scheduler = None
         self.log_path = None
@@ -98,6 +99,7 @@ class SnakeMake:
         if self.run_mode == 'slurm':
             sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
                 " --sample-config " + self.configfile + \
+                " --profile " + self.profile + \
                 " --account " + self.account + \
                 " --qos " + self.qos + \
                 " --log-dir " + self.log_path + \
