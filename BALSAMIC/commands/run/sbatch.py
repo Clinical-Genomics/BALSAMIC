@@ -75,13 +75,14 @@ class QsubScheduler(object):
     def build_cmd(self):
 
         resource_params = ""
+        depend = ""
         qsub_options = list()
+        
+        if self.time:
+            resource_params += " -l \"walltime={},".format(str(self.time))
 
         if self.ntasks:
-            resource_params += " -l procs={} ".format(str(self.ntasks))
-
-        if self.time:
-            resource_params += " -l walltime={} ".format(str(self.time))
+            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
 
         if self.account:
             qsub_options.append(" -A " + str(self.account))
@@ -100,16 +101,18 @@ class QsubScheduler(object):
 
         if self.qos:
             qsub_options.append(" -p " + str(self.qos))
+        
+        if resource_params:
+            qsub_options.append(resource_params)        
 
         if self.dependency:
-            qsub_options.append(" -W \"" + str(self.dependency) + "\"")
+            for jobid in self.dependency:
+                depend = depend + ":" + jobid
+            qsub_options.append(" -W \"depend=afterok" + str(depend) + "\"")
 
         if self.script:
             qsub_options.append(" {} ".format(self.script))
-
-        if resource_params:
-            qsub_options.extend(resource_params)
-
+        
         return "qsub " + " ".join(qsub_options)
 
 
@@ -142,7 +145,7 @@ def write_sbatch_dump(sbatch_file, sbatch_cmd):
         raise
 
 
-def submit_job(sbatch_cmd):
+def submit_job(sbatch_cmd, profile):
     ''' subprocess call for sbatch command '''
     # run sbatch cmd
     try:
@@ -156,10 +159,14 @@ def submit_job(sbatch_cmd):
     # Get jobid
     res = res.stdout.decode()
     try:
-        m = re.search("Submitted batch job (\d+)", res)
-        jobid = m.group(1)
-        print(jobid)
-        return jobid
+        if profile == "slurm":
+            m = re.search("Submitted batch job (\d+)", res)
+            jobid = m.group(1)
+            print(jobid)
+            return jobid
+        elif profile == "qsub":
+            print(res)
+            return str(res)
     except Exception as e:
         print(e)
         raise
@@ -235,6 +242,7 @@ def main():
         scheduler_cmd = SbatchScheduler()
     elif args.profile == 'qsub':
         scheduler_cmd = QsubScheduler()
+        scheduler_cmd.dependency = args.dependencies
 
     if not args.mail_type:
         mail_type = job_properties["cluster"]["mail_type"]
@@ -265,12 +273,13 @@ def main():
     scheduler_cmd.time = job_properties["cluster"]["time"]
     scheduler_cmd.mail_user = args.mail_user
     scheduler_cmd.script = jobscript
+    # scheduler_cmd.dependency = args.dependencies
 
-    if args.dependencies:
+    if args.dependencies and args.profile == "slurm":
         scheduler_cmd.dependency = ','.join(
             ["afterok:%s" % d for d in args.dependencies])
 
-    jobid = submit_job(scheduler_cmd=scheduler_cmd.build_cmd())
+    jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
     #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
     #        write_sbatch_dump(sbatch_file=sbatch_file,
