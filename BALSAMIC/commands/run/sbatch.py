@@ -57,7 +57,7 @@ class SbatchScheduler:
         return 'sbatch' + ' ' + ' '.join(sbatch_options)
 
 
-class QsubScheduler(object):
+class QsubScheduler:
     """docstring for QsubScheduler"""
     def __init__(self):
         self.account = None
@@ -101,9 +101,9 @@ class QsubScheduler(object):
 
         if self.qos:
             qsub_options.append(" -p " + str(self.qos))
-        
+
         if resource_params:
-            qsub_options.append(resource_params)        
+            qsub_options.append(resource_params)
 
         if self.dependency:
             for jobid in self.dependency:
@@ -112,7 +112,7 @@ class QsubScheduler(object):
 
         if self.script:
             qsub_options.append(" {} ".format(self.script))
-        
+
         return "qsub " + " ".join(qsub_options)
 
 
@@ -165,7 +165,6 @@ def submit_job(sbatch_cmd, profile):
             print(jobid)
             return jobid
         elif profile == "qsub":
-            print(res)
             return str(res)
     except Exception as e:
         print(e)
@@ -240,6 +239,8 @@ def main():
 
     if args.profile == 'slurm':
         scheduler_cmd = SbatchScheduler()
+        if args.dependencies:
+            scheduler_cmd.dependency = ','.join(["afterok:%s" % d for d in args.dependencies])
     elif args.profile == 'qsub':
         scheduler_cmd = QsubScheduler()
         scheduler_cmd.dependency = args.dependencies
@@ -273,11 +274,7 @@ def main():
     scheduler_cmd.time = job_properties["cluster"]["time"]
     scheduler_cmd.mail_user = args.mail_user
     scheduler_cmd.script = jobscript
-    # scheduler_cmd.dependency = args.dependencies
 
-    if args.dependencies and args.profile == "slurm":
-        scheduler_cmd.dependency = ','.join(
-            ["afterok:%s" % d for d in args.dependencies])
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 

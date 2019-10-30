@@ -80,7 +80,7 @@ def test_snakemake_slurm():
     snakemake_slurm.working_dir = "/tmp/snakemake"
     snakemake_slurm.snakefile = "worflow/variantCalling_paired"
     snakemake_slurm.configfile = "sample_config.json"
-    snakemake_slurm.run_mode = "slurm"
+    snakemake_slurm.run_mode = "cluster"
     snakemake_slurm.cluster_config = "cluster_config.json"
     snakemake_slurm.scheduler = "sbatch.py"
     snakemake_slurm.log_path = "logs/"
@@ -99,7 +99,7 @@ def test_snakemake_slurm():
     # WHEN calling the build command
     shell_command = snakemake_slurm.build_cmd()
 
-    print(shell_command)
+    # print(shell_command)
     # THEN constructing snakecommand for slurm runner
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command

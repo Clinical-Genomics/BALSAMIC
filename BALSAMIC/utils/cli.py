@@ -96,7 +96,7 @@ class SnakeMake:
                     bind_path, bind_path)
             self.singularity_arg += "' "
 
-        if self.run_mode == 'slurm':
+        if self.run_mode == 'cluster':
             sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
                 " --sample-config " + self.configfile + \
                 " --profile " + self.profile + \
