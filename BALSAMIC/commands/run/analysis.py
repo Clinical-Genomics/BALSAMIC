@@ -82,8 +82,9 @@ LOG = logging.getLogger(__name__)
 @click.option('--snakemake-opt',
               multiple=True,
               help='Pass these options directly to snakemake')
-@click.option('--account', help='cluster account to run jobs, ie: slurm_account')
-@click.option('--mail-user', help='cluster mail user to send out email. ie: slurm_mail_user')
+@click.option('--account', '--slurm-account', '--qsub-account',
+              help='cluster account to run jobs, ie: slurm_account')
+@click.option('--mail-user', help='cluster mail user to send out email. e.g.: slurm_mail_user')
 @click.option('--mail-type',
               type=click.Choice(['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
               help='cluster mail type to send out email. \
@@ -101,8 +102,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
         LOG.info('Changing run-mode to local on dry-run')
         run_mode = 'local'
 
-    if run_mode == 'slurm' and not account:
-        LOG.info('slurm account is required for slurm run mode')
+    if run_mode == 'cluster' and not account:
+        LOG.info('slurm-account, qsub-account, or account is required for slurm run mode')
         raise click.Abort()
 
     sample_config_path = os.path.abspath(sample_config)
