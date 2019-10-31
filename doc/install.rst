@@ -40,7 +40,7 @@ Use ``install.sh`` script, assuming `${CONDA_ENVS_PATH}` is set to the path for 
   ./install.sh -s D -v 3.2.2 -p ${CONDA_ENVS_PATH} -c
 
 `-s` set prefix for conda environment name
-`-v` change the version tag to install, this version will also be used to pull matching container version 
+`-v` change the version tag or branch to append to env name
 `-p` path to conda environment location
 `-c` use conda 4.6.14 to install packages
 
