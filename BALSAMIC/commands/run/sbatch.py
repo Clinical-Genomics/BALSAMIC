@@ -230,7 +230,7 @@ def get_parser():
 
 
 def main():
-    ''' entry point for sbatch.py '''
+    ''' entry point for scheduler.py '''
     parser = get_parser()
     args = parser.parse_args()
 

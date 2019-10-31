@@ -220,15 +220,15 @@ def iterdict(dic):
             yield key, value
 
 
-def get_sbatchpy():
+def get_schedulerpy():
     """
-    Returns a string path for runSbatch.py
+    Returns a string path for scheduler.py
     """
 
     p = Path(__file__).parents[1]
-    sbatch = str(Path(p, 'commands/run/sbatch.py'))
+    scheduler = str(Path(p, 'commands/run/scheduler.py'))
 
-    return sbatch
+    return scheduler
 
 
 def get_snakefile(analysis_type, sequencing_type="targeted"):

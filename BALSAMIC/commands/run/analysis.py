@@ -7,7 +7,7 @@ import click
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import createDir
-from BALSAMIC.utils.cli import get_sbatchpy
+from BALSAMIC.utils.cli import get_schedulerpy 
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
 
@@ -71,7 +71,7 @@ LOG = logging.getLogger(__name__)
               type=click.Choice(['low', 'normal', 'high']),
               show_default=True,
               default="low",
-              help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
+              help='QOS for sbatch jobs. Passed to ' + get_schedulerpy())
 @click.option(
     '-f',
     '--force-all',
@@ -154,7 +154,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
-    balsamic_run.scheduler = get_sbatchpy()
+    balsamic_run.scheduler = get_schedulerpy()
     balsamic_run.profile = profile
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath
