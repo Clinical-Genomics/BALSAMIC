@@ -10,9 +10,11 @@ increment the patch number. The rational for versioning, and exact wording is ta
 
 ## [X.X.X] - 2019-XX-XX
 ### Added
+- `install.sh` now also downloads latest container
 - Docker image for balsamic as part of ci
 
 ### Changed
+- Documentation updated
 - Test fastq data and test panel bed file with real but dummy data
 
 ## [3.3.1] - 2019-10-28
