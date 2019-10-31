@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from BALSAMIC.commands.run.sbatch import SbatchScheduler, QsubScheduler
+from BALSAMIC.commands.run.scheduler import SbatchScheduler, QsubScheduler
 
 
 def test_SbatchScheduler():
