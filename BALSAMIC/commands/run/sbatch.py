@@ -162,10 +162,12 @@ def submit_job(sbatch_cmd, profile):
         if profile == "slurm":
             m = re.search("Submitted batch job (\d+)", res)
             jobid = m.group(1)
-            print(jobid)
-            return jobid
         elif profile == "qsub":
-            return str(res)
+            jobid = str(res)
+        
+        print(jobid)
+        return jobid
+
     except Exception as e:
         print(e)
         raise
