@@ -10,7 +10,7 @@ Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
 1. Prepare reference
 -----
 Frist reference files must be downloaded. Let's assume BALSAMIC is installed and available at `D_BALSAMIC-base_3.3.1`,
-and a COSMIC key is generated via: 
+and a COSMIC key is generated via: https://cancer.sanger.ac.uk/cosmic/help/file_download 
 
 The following commands will create and download reference directory at `./BALSAMIC_reference` (change this path if you
 want it to be created in another location):
