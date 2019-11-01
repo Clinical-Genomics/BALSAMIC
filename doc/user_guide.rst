@@ -47,6 +47,7 @@ Now a config file for a test run must be created. Let's use the test data in `te
     --output-config demo_run_balsamic.json 
 
 Notes:
+
 - If you want to test tumor_only mode, remove the `--normal tests/test_data/fastq/S2_R_1.fastq.gz` line.
 - `--output-config demo_run_balsamic.json` is also optional
 
