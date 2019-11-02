@@ -1,7 +1,36 @@
-#!/usr/bin/env python3
+import subprocess
 
-from BALSAMIC.commands.run.scheduler import SbatchScheduler, QsubScheduler
+from unittest import mock
 
+from BALSAMIC.commands.run.scheduler import SbatchScheduler
+from BALSAMIC.commands.run.scheduler import QsubScheduler
+from BALSAMIC.commands.run.scheduler import submit_job
+
+def test_submit_job_slurm():
+    # GIVEN a jobid
+    test_jobid = '1234'
+    test_return_value = 'Submitted batch job ' + test_jobid
+    
+    # WHEN getting jobid for slurm
+    with mock.patch.object(subprocess, 'run') as mocked:
+        mocked.return_value.stdout = test_return_value.encode('utf-8') 
+        actual_jobid = submit_job(['random_command'], 'slurm') 
+    
+    # THEN output jobid should match 
+    assert actual_jobid == test_jobid
+
+def test_submit_job_qsub():
+    # GIVEN a jobid
+    test_jobid = '1234'
+    test_return_value = test_jobid
+    
+    # WHEN getting jobid for slurm
+    with mock.patch.object(subprocess, 'run') as mocked:
+        mocked.return_value.stdout = test_return_value.encode('utf-8') 
+        actual_jobid = submit_job(['random_command'], 'qsub') 
+    
+    # THEN output jobid should match 
+    assert actual_jobid == test_jobid
 
 def test_SbatchScheduler():
     # GIVEN values for sbatch command
