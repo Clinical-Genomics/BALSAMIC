@@ -14,7 +14,7 @@ from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import createDir
 
 
-def test_scheduler_py(snakemake_job_script, tumor_normal_config, tmpdir, capsys):
+def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, tmpdir, capsys):
     # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
     test_jobid = '999999999999'
     test_return_value = 'Submitted batch job ' + test_jobid
@@ -26,7 +26,45 @@ def test_scheduler_py(snakemake_job_script, tumor_normal_config, tmpdir, capsys)
     # Create directory for log and script
     script_dir = createDir(sample_config['analysis']['script'])
     log_dir = createDir(sample_config['analysis']['log'])
+    
+    # Construct scheduler's cmd
+    scheduler_cmd = [
+        "--sample-config", tumor_normal_config,
+        "--profile", scheduler_profile,
+        "--qos", "low",
+        "--account", "development",
+        "--log-dir", log_dir, 
+        "--script-dir", script_dir, 
+        "--result-dir", sample_config['analysis']['result']]
+    scheduler_cmd.extend(scheduler_args)
+    
+    # WHEN calling scheduler_main with mocked subprocess
+    with mock.patch.object(subprocess, 'run') as mocked:
+        mocked.return_value.stdout = test_return_value.encode('utf-8')
+        scheduler_main(scheduler_cmd)
 
+    # THEN sacct file should be written with the job id(s)
+    with open(log_dir+'/sample_tumor_normal.sacct', 'r') as fin:
+        assert fin.read() == test_jobid + "\n"
+
+    # THEN captured output is job id
+    captured = capsys.readouterr()
+    assert captured.out == test_jobid + "\n"
+
+
+def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, tmpdir, capsys):
+    # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
+    test_jobid = '999999999999'
+    test_return_value = test_jobid
+    scheduler_args = ['1000', '1001', '1002', snakemake_job_script['snakescript']]
+    scheduler_profile = 'qsub'
+    with open(tumor_normal_config, 'r') as input_config:
+        sample_config = json.load(input_config)
+    
+    # Create directory for log and script
+    script_dir = createDir(sample_config['analysis']['script'])
+    log_dir = createDir(sample_config['analysis']['log'])
+    
     # Construct scheduler's cmd
     scheduler_cmd = [
         "--sample-config", tumor_normal_config,
