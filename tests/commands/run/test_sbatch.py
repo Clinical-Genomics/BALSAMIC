@@ -33,8 +33,8 @@ def test_scheduler_py(snakemake_job_script, tumor_normal_config, tmpdir, capsys)
         "--profile", scheduler_profile,
         "--qos", "low",
         "--account", "development",
-        "--log-dir", sample_config['analysis']['log'],
-        "--script-dir", sample_config['analysis']['script'],
+        "--log-dir", log_dir, 
+        "--script-dir", script_dir, 
         "--result-dir", sample_config['analysis']['result']]
     scheduler_cmd.extend(scheduler_args)
     
