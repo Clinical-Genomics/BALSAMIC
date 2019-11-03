@@ -229,10 +229,10 @@ def get_parser():
     return parser
 
 
-def main():
+def main(args=None):
     ''' entry point for scheduler.py '''
     parser = get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     jobscript = args.snakescript
     job_properties = read_job_properties(jobscript)
