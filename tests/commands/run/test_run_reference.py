@@ -20,7 +20,7 @@ def test_run_reference(invoke_cli, tmp_path, singularity_container):
         ['config', 'reference', '-c', 'secret_key', '--singularity', singularity_container, '-o',
          str(test_new_dir)])
 
-    result_run = invoke_cli(['run', 'reference', 'c', test_output_reference_config])
+    result_run = invoke_cli(['run', 'reference', '-c', test_output_reference_config])
     
     # THEN output config, pdf file generation, and reference dry run command exit code 0
     assert result_config.exit_code == 0
