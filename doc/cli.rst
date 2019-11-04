@@ -27,14 +27,17 @@ Base command
     Cancer
 
   Options:
-    --version  Show the version and exit.
-    --help     Show this message and exit.
+    --loglevel [DEBUG|INFO|WARNING|ERROR|CRITICAL]
+                                    Set the level of log output.  [default:
+                                    DEBUG]
+    --version                       Show the version and exit.
+    --help                          Show this message and exit.
 
   Commands:
-    config   create config files required for running the...
-    install  Installs required conda environments
-    report   Report generator for workflow results
+    config   create config files required for running the pipeline.
+    plugins  Additional and helper utilities for third party applications
     run      Run BALSAMIC on a provided config file
+
 
 create config for case analysis
 ~~~~~~~~~~~~~
@@ -71,10 +74,8 @@ create config for case analysis
     --adapter-trim / --no-adapter-trim
                                     Trim adapters from reads in fastq  [default:
                                     False]
-    -i, --install-config PATH       Installation config file.
     -r, --reference-config PATH     Reference config file.  [required]
     -p, --panel-bed PATH            Panel bed file for variant calling.
-                                    [required]
     -o, --output-config TEXT        Output a json config filename ready to be
                                     imported for run-analysis
     -t, --tumor TEXT                Fastq files for tumor sample.
@@ -99,6 +100,8 @@ create config for case analysis
     --overwrite-config / --no-overwrite-config
                                     Overwrite output config file
     --create-dir / --no-create-dir  Create analysis directiry.
+    --singularity PATH              Download singularity image for BALSAMIC
+                                    [required]
     --help                          Show this message and exit.
 
 ::
@@ -108,17 +111,16 @@ create config for case analysis
     Configure workflow for reference generation
 
   Options:
-    -o, --outdir TEXT          output directory for ref files eg: reference
-                               [required]
-    -i, --install-config PATH  install config file.
-    -c, --cosmic-key TEXT      cosmic db authentication key  [required]
-    -s, --snakefile PATH       snakefile for reference generation  [default:
-                               /home/proj/long-term-stage/cancer/BALSAMIC/BALSAM
-                               IC/workflows/GenerateRef]
-    -d, --dagfile TEXT         DAG file for overview  [default:
-                               generate_ref_worflow_graph]
-    --singularity              To run the workflow on container
-    --help                     Show this message and exit.
+    -o, --outdir TEXT      output directory for ref files eg: reference
+                           [required]
+    -c, --cosmic-key TEXT  cosmic db authentication key  [required]
+    -s, --snakefile PATH   snakefile for reference generation  [default: /home/h
+                           assan.foroughi/repos/BALSAMIC/BALSAMIC/workflows/Gene
+                           rateRef]
+    -d, --dagfile TEXT     DAG file for overview  [default:
+                           generate_ref_worflow_graph]
+    --singularity PATH     Download singularity image for BALSAMIC  [required]
+    --help                 Show this message and exit.
 
 run case analysis and reference creation
 ~~~~~~~~~~~~
@@ -143,7 +145,7 @@ run case analysis and reference creation
     Runs BALSAMIC workflow on the provided sample's config file
 
   Options:
-    -a, --analysis-type [qc|paired|single|paired_umi]
+    -a, --analysis-type [qc|paired|single]
                                     Type of analysis to run from input config
                                     file.              By default it will read
                                     from config file, but it will override
@@ -157,19 +159,18 @@ run case analysis and reference creation
                                     used to run the analysis.              But
                                     local runner also available for local
                                     computing  [default: slurm]
-    -c, --cluster-config PATH       SLURM config json file.  [default:
-                                    /home/proj/long-term-stage/cancer/BALSAMIC/B
-                                    ALSAMIC/config/cluster.json]
+    -c, --cluster-config PATH       SLURM config json file.  [default: /home/has
+                                    san.foroughi/repos/BALSAMIC/BALSAMIC/config/
+                                    cluster.json]
     -l, --log-file PATH             Log file output for BALSAMIC.
                                     This is raw log output from snakemake.
     -r, --run-analysis              By default balsamic run_analysis will run in
                                     dry run mode.               Raise thise flag
                                     to make the actual analysis  [default:
                                     False]
-    --qos [low|normal|high]         QOS for sbatch jobs. Passed to
-                                    /home/proj/long-term-stage/cancer/BALSAMIC/B
-                                    ALSAMIC/commands/run/sbatch.py  [default:
-                                    low]
+    --qos [low|normal|high]         QOS for sbatch jobs. Passed to /home/hassan.
+                                    foroughi/repos/BALSAMIC/BALSAMIC/commands/ru
+                                    n/sbatch.py  [default: low]
     -f, --force-all                 Force run all analysis. This is same as
                                     snakemake --forceall  [default: False]
     --snakemake-opt TEXT            Pass these options directly to snakemake
@@ -191,78 +192,18 @@ run case analysis and reference creation
     -s, --snakefile TEXT      snakefile for reference generation
     -c, --configfile TEXT     Config file to run the workflow  [required]
     --run-mode [slurm|local]  Run mode to use.(LOCAL, SLURM for HPC)
-    --cluster-config PATH     SLURM config json file.  [default:
-                              /home/proj/long-term-stage/cancer/BALSAMIC/BALSAMI
-                              C/config/cluster.json]
+    --cluster-config PATH     SLURM config json file.  [default: /home/hassan.fo
+                              roughi/repos/BALSAMIC/BALSAMIC/config/cluster.json
+                              ]
     -l, --log-file PATH       Log file output for BALSAMIC. This is raw log
                               output from snakemake.
     -r, --run-analysis        By default balsamic run_analysis will run in dry
                               run mode.               Raise thise flag to make
                               the actual analysis  [default: False]
-    --qos [low|normal|high]   QOS for sbatch jobs. Passed to /home/proj/long-
-                              term-stage/cancer/BALSAMIC/BALSAMIC/commands/run/s
-                              batch.py  [default: low]
+    --qos [low|normal|high]   QOS for sbatch jobs. Passed to /home/hassan.foroug
+                              hi/repos/BALSAMIC/BALSAMIC/commands/run/sbatch.py
+                              [default: low]
     -f, --force-all           Force run all analysis. This is same as snakemake
                               --forceall  [default: False]
     --snakemake-opt TEXT      Pass these options directly to snakemake
     --help                    Show this message and exit.
-
-
-Misc. internal commands
-~~~~~~~~~
-
-::
-
-    Usage: balsamic install [OPTIONS]
-
-      Installs conda environments from a conda yaml file.
-
-      By default it doesn't overwrite if the environment by the same name
-      exists. If _overwrite_ flag is provided, it tries to remove the enviroment
-      first, and then install it in the path provided.
-
-    Options:
-      -i, --input-conda-yaml PATH     Input conda yaml file.  [required]
-      -s, --env-name-suffix TEXT      Mandatory alphanumeric suffix for
-                                      environment name.  [required]
-      -o, --overwrite-env             Overwite conda enviroment if it exists.
-                                      Default = no. WARNING: The environment with
-                                      matching name will be deleted  [default:
-                                      False]
-      -d, --env-dir-prefix TEXT       Conda enviroment directory. It will be
-                                      ignored if its provided within yaml file.
-                                      Format: /path/env/envname.
-      -p, --packages-output-yaml PATH
-                                      Output a yaml file containing packages
-                                      installed in each input yaml file.
-                                      [required]
-      -t, --env-type [D|P|S]          Environment type. P: Production, D:
-                                      Development, S: Stage. It will be added to
-                                      filename: "[D|P|S]_"+filename+env-name-
-                                      suffix
-      --help                          Show this message and exit.
-
-
-Running variant calling workflow
---------------------------------
-
-In order to run variant calling workflow, first a configuration file
-
-.. code-block:: shell
-
-  balsamic config sample \
-    -p path_to_panel_bedfile \
-    --sample-id sample_id \
-    --normal prefix_to_normal_sample_fastq \
-    --tumor prefix_to_tumor_sample_fastq \
-    --fastq-path fastq_file_directory \
-    --analysis-dir analysis_directory \
-    --analysis-type paired_or_single \
-    --output-config sample_analysis_config_file_name
-
-The final config file is then set as input for ``run`` subcommand.
-
-.. code-block:: shell
-
-  balsamic run \
-    --sample-config sample_analysis_config_file_name -r

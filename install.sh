@@ -21,10 +21,10 @@ USAGE: $0 [-s _condaprefix -v _balsamic_ver -p _condapath -c]
   1. Conda naming convention: [P,D,S]_[ENVNAME]_%DATE. P: Production, D: Development, S: Stage
   2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
   
-  -s _condaprefix  Conda env name prefix. This will be P or D in the help above. 
-  -v _balsamic_ver Balsamic version tag for conda env name 
-  -p _condapath    Conda env path prefix. See point 2 in help above.
-  -c If set it will use Singularity container for conda instead 
+  -s _condaprefix     Conda env name prefix. This will be P or D in the help above. 
+  -v _balsamic_ver    Balsamic version tag to install 
+  -p _condapath       Conda env path prefix. See point 2 in help above.
+  -c                  If set it will use Singularity container for conda instead 
 " >&2
       exit 0
       ;;
@@ -43,6 +43,11 @@ if [[ -z $_condapath  ]]
 then
   echo -e "\n${_red}No conda env path provided. Exiting!${_nocol}"
   exit 1
+fi
+
+if [[ ! -z $vFlag ]]
+then
+  _envsuffix=_${_balsamic_ver}
 fi
 
 # Check if container flag is specified
@@ -70,7 +75,7 @@ then
     }
 fi
 
-_env_name=${_condaprefix}_BALSAMIC-base_${_balsamic_ver}
+_env_name=${_condaprefix}_BALSAMIC-base${_envsuffix}
 _balsamic_envs=${PWD}'/BALSAMIC_env.yaml'
 _balsamic_ruledir=${PWD}'/BALSAMIC/'
 
@@ -83,6 +88,9 @@ source activate ${_env_name}
 
 echo -e "${_green}Installing BALSAMIC${_nocol}"
 pip install -r requirements.txt --editable .
+
+echo -e "${_green}Pulling latest version of container.${_nocol}"
+singularity pull ${PWD}'/BALSAMIC/containers/BALSAMIC_latest.sif' docker://hassanf/balsamic
 
 echo -e "\n${_green}Install finished. To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
 
