@@ -5,7 +5,7 @@ import subprocess
 import logging
 import click
 
-from BALSAMIC.utils.cli import get_sbatchpy
+from BALSAMIC.utils.cli import get_schedulerpy 
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake, get_config
 
 LOG = logging.getLogger(__name__)
@@ -22,8 +22,8 @@ LOG = logging.getLogger(__name__)
               help="Config file to run the workflow")
 @click.option('--run-mode',
               default='local',
-              type=click.Choice(["slurm", "local"]),
-              help="Run mode to use.(LOCAL, SLURM for HPC)")
+              type=click.Choice(["local"]),
+              help="Run mode to use. Only local supported for this.")
 @click.option('--cluster-config',
               show_default=True,
               default=get_config('cluster'),
@@ -43,11 +43,6 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help='By default balsamic run_analysis will run in dry run mode. \
               Raise thise flag to make the actual analysis')
-@click.option('--qos',
-              type=click.Choice(['low', 'normal', 'high']),
-              show_default=True,
-              default="low",
-              help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
 @click.option(
     '-f',
     '--force-all',
@@ -60,7 +55,7 @@ LOG = logging.getLogger(__name__)
               help='Pass these options directly to snakemake')
 @click.pass_context
 def reference(context, snakefile, configfile, run_mode, cluster_config,
-              log_file, run_analysis, qos, force_all, snakemake_opt):
+              log_file, run_analysis, force_all, snakemake_opt):
     """ Run generate reference workflow """
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     LOG.info("Reference generation workflow started")

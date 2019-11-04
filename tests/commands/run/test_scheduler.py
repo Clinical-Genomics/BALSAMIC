@@ -1,0 +1,161 @@
+import subprocess
+import json
+import glob
+
+from unittest import mock
+from pathlib import Path
+from sys import executable
+
+from BALSAMIC.commands.run.scheduler import SbatchScheduler
+from BALSAMIC.commands.run.scheduler import QsubScheduler
+from BALSAMIC.commands.run.scheduler import submit_job
+from BALSAMIC.commands.run.scheduler import main as scheduler_main
+from BALSAMIC.utils.cli import get_schedulerpy
+from BALSAMIC.utils.cli import createDir
+
+
+def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, tmpdir, capsys):
+    # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
+    test_jobid = '999999999999'
+    test_return_value = 'Submitted batch job ' + test_jobid
+    scheduler_args = ['1000', '1001', '1002', snakemake_job_script['snakescript']]
+    scheduler_profile = 'slurm'
+    with open(tumor_normal_config, 'r') as input_config:
+        sample_config = json.load(input_config)
+    
+    # Create directory for log and script
+    script_dir = createDir(sample_config['analysis']['script'])
+    log_dir = createDir(sample_config['analysis']['log'])
+    
+    # Construct scheduler's cmd
+    scheduler_cmd = [
+        "--sample-config", tumor_normal_config,
+        "--profile", scheduler_profile,
+        "--qos", "low",
+        "--account", "development",
+        "--log-dir", log_dir, 
+        "--script-dir", script_dir, 
+        "--result-dir", sample_config['analysis']['result']]
+    scheduler_cmd.extend(scheduler_args)
+    
+    # WHEN calling scheduler_main with mocked subprocess
+    with mock.patch.object(subprocess, 'run') as mocked:
+        mocked.return_value.stdout = test_return_value.encode('utf-8')
+        scheduler_main(scheduler_cmd)
+
+    # THEN sacct file should be written with the job id(s)
+    with open(log_dir+'/sample_tumor_normal.sacct', 'r') as fin:
+        assert fin.read() == test_jobid + "\n"
+
+    # THEN captured output is job id
+    captured = capsys.readouterr()
+    assert captured.out == test_jobid + "\n"
+
+
+def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, tmpdir, capsys):
+    # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
+    test_jobid = '999999999999'
+    test_return_value = test_jobid
+    scheduler_args = ['1000', '1001', '1002', snakemake_job_script['snakescript']]
+    scheduler_profile = 'qsub'
+    with open(tumor_normal_config, 'r') as input_config:
+        sample_config = json.load(input_config)
+    
+    # Create directory for log and script
+    script_dir = createDir(sample_config['analysis']['script'])
+    log_dir = createDir(sample_config['analysis']['log'])
+    
+    # Construct scheduler's cmd
+    scheduler_cmd = [
+        "--sample-config", tumor_normal_config,
+        "--profile", scheduler_profile,
+        "--qos", "low",
+        "--account", "development",
+        "--log-dir", log_dir, 
+        "--script-dir", script_dir, 
+        "--result-dir", sample_config['analysis']['result']]
+    scheduler_cmd.extend(scheduler_args)
+    
+    # WHEN calling scheduler_main with mocked subprocess
+    with mock.patch.object(subprocess, 'run') as mocked:
+        mocked.return_value.stdout = test_return_value.encode('utf-8')
+        scheduler_main(scheduler_cmd)
+
+    # THEN sacct file should be written with the job id(s)
+    with open(log_dir+'/sample_tumor_normal.sacct', 'r') as fin:
+        assert fin.read() == test_jobid + "\n"
+
+    # THEN captured output is job id
+    captured = capsys.readouterr()
+    assert captured.out == test_jobid + "\n"
+
+def test_submit_job_slurm(snakemake_job_script):
+    # GIVEN a jobid
+    test_jobid = '1234'
+    test_return_value = 'Submitted batch job ' + test_jobid
+
+    # WHEN getting jobid for slurm
+    with mock.patch.object(subprocess, 'run') as mocked:
+        mocked.return_value.stdout = test_return_value.encode('utf-8')
+        actual_jobid = submit_job(['random_command'], 'slurm')
+
+    # THEN output jobid should match
+    assert actual_jobid == test_jobid
+
+
+def test_submit_job_qsub(snakemake_job_script):
+    # GIVEN a jobid
+    test_jobid = '1234'
+    test_return_value = test_jobid
+
+    # WHEN getting jobid for slurm
+    with mock.patch.object(subprocess, 'run') as mocked:
+        mocked.return_value.stdout = test_return_value.encode('utf-8')
+        actual_jobid = submit_job(['random_command'], 'qsub')
+
+    # THEN output jobid should match
+    assert actual_jobid == test_jobid
+
+
+def test_SbatchScheduler():
+    # GIVEN values for sbatch command
+    sbatch_cmd = SbatchScheduler()
+    sbatch_cmd.account = "development"
+    sbatch_cmd.dependency = "afterok:12345"
+    sbatch_cmd.error = "test_job.err"
+    sbatch_cmd.output = "test_job.out"
+    sbatch_cmd.mail_type = "FAIL"
+    sbatch_cmd.mail_user = "john.doe@example.com"
+    sbatch_cmd.ntasks = "2"
+    sbatch_cmd.qos = "low"
+    sbatch_cmd.time = "01:00:00"
+    sbatch_cmd.script = "example_script.sh"
+
+    # WHEN sbatch command is built
+    sbatch_cmd = sbatch_cmd.build_cmd()
+
+    # THEN sbatch command string is constructed
+    assert isinstance(sbatch_cmd, str)
+    assert sbatch_cmd == 'sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" --output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" --ntasks "2" --qos "low" --time "01:00:00" example_script.sh'
+
+
+def test_qsub_scheduler():
+    # GIVEN values for qsub command
+    qsub_cmd = QsubScheduler()
+    qsub_cmd.account = "development"
+    qsub_cmd.dependency = ['12345']
+    qsub_cmd.error = "test_job.err"
+    qsub_cmd.output = "test_job.out"
+    qsub_cmd.mail_type = "FAIL"
+    qsub_cmd.mail_user = "john.doe@example.com"
+    qsub_cmd.ntasks = "2"
+    qsub_cmd.qos = "low"
+    qsub_cmd.time = "01:00:00"
+    qsub_cmd.script = "example_script.sh"
+
+    # WHEN qsub command is built
+    qsub_cmd = qsub_cmd.build_cmd()
+
+    # THEN qsub command should be constructed
+    assert isinstance(qsub_cmd, str)
+    assert qsub_cmd == 'qsub  -A development  -e test_job.err  -o test_job.out  -m FAIL  -M john.doe@example.com  -p low  -l "walltime=01:00:00,nodes=1:ppn=2"   -W "depend=afterok:12345"  example_script.sh '

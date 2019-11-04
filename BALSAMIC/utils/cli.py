@@ -57,6 +57,7 @@ class SnakeMake:
         self.snakefile = None
         self.configfile = None
         self.run_mode = None
+        self.profile = None
         self.cluster_config = None
         self.scheduler = None
         self.log_path = None
@@ -95,20 +96,21 @@ class SnakeMake:
                     bind_path, bind_path)
             self.singularity_arg += "' "
 
-        if self.run_mode == 'slurm':
+        if self.run_mode == 'cluster':
             sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
                 " --sample-config " + self.configfile + \
-                " --slurm-account " + self.account + \
-                " --slurm-qos " + self.qos + \
+                " --profile " + self.profile + \
+                " --account " + self.account + \
+                " --qos " + self.qos + \
                 " --log-dir " + self.log_path + \
                 " --script-dir " + self.script_path + \
                 " --result-dir " + self.result_path
 
             if self.mail_user:
-                sbatch_cmd += " --slurm-mail-user " + self.mail_user
+                sbatch_cmd += " --mail-user " + self.mail_user
 
             if self.mail_type:
-                sbatch_cmd += " --slurm-mail-type " + self.mail_type
+                sbatch_cmd += " --mail-type " + self.mail_type
 
             sbatch_cmd += " {dependencies} '"
 
@@ -218,15 +220,15 @@ def iterdict(dic):
             yield key, value
 
 
-def get_sbatchpy():
+def get_schedulerpy():
     """
-    Returns a string path for runSbatch.py
+    Returns a string path for scheduler.py
     """
 
     p = Path(__file__).parents[1]
-    sbatch = str(Path(p, 'commands/run/sbatch.py'))
+    scheduler = str(Path(p, 'commands/run/scheduler.py'))
 
-    return sbatch
+    return scheduler
 
 
 def get_snakefile(analysis_type, sequencing_type="targeted"):
