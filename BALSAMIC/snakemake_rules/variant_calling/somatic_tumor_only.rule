@@ -166,6 +166,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
+        interval = config["panel"]["capture_kit"],
     output:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
     params:
@@ -182,6 +183,6 @@ rule sentieon_TNhaplotyper_tumor_only:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
 
         """
