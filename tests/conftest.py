@@ -114,6 +114,28 @@ def analysis_dir(tmp_path_factory):
     analysis_dir = tmp_path_factory.mktemp('analysis')
     return analysis_dir
 
+@pytest.fixture(scope='session')
+def snakemake_job_script(tmp_path_factory, tumor_normal_config):
+    """
+    Creates a dummy snakemake jobscript
+    """
+    case_name = 'job_submit_test_case'
+    with open(tumor_normal_config, 'r') as input_config:
+        sample_config = json.load(input_config)
+    
+    script_dir = tmp_path_factory.mktemp('snakemake_script')
+    snakemake_script_file = script_dir / 'example_script.sh' 
+    snakemake_script = '''#!/bin/sh
+# properties = {"type": "single", "rule": "all", "local": false, "input": ["dummy_path"], "output": ["dummy_path"], "wildcards": {}, "params": {}, "log": [], "threads": 1, "resources": {}, "jobid": 0, "cluster": {"name": "BALSAMIC.all.", "time": "00:15:00", "n": 1, "mail_type": "END", "partition": "core"}}
+ls -l # dummy command
+'''
+    snakemake_script_file.touch()
+    with open(snakemake_script_file, 'w') as fn:
+        fn.write(snakemake_script)
+
+    return {
+      "snakescript": str(snakemake_script_file)
+      }
 
 @pytest.fixture(scope='session')
 def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):

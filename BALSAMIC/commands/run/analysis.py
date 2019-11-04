@@ -7,7 +7,7 @@ import click
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import createDir
-from BALSAMIC.utils.cli import get_sbatchpy
+from BALSAMIC.utils.cli import get_schedulerpy 
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
 
@@ -39,8 +39,8 @@ LOG = logging.getLogger(__name__)
 @click.option(
     '--run-mode',
     show_default=True,
-    default='slurm',
-    type=click.Choice(["local", "slurm"]),
+    default='cluster',
+    type=click.Choice(["local", "cluster"]),
     help='Run mode to use. By default SLURM will be used to run the analysis.\
               But local runner also available for local computing')
 @click.option('-c',
@@ -48,12 +48,17 @@ LOG = logging.getLogger(__name__)
               show_default=True,
               default=get_config('cluster'),
               type=click.Path(),
-              help='SLURM config json file.')
+              help='cluster config json file. (eg- SLURM, QSUB)')
 @click.option('-l',
               '--log-file',
               type=click.Path(),
               help='Log file output for BALSAMIC.\
               This is raw log output from snakemake.')
+@click.option('-p',
+              '--profile',
+              default="slurm",
+              type=click.Choice(["slurm", "qsub"]),
+              help="cluster profile to submit jobs")
 @click.option(
     '-r',
     '--run-analysis',
@@ -66,7 +71,7 @@ LOG = logging.getLogger(__name__)
               type=click.Choice(['low', 'normal', 'high']),
               show_default=True,
               default="low",
-              help='QOS for sbatch jobs. Passed to ' + get_sbatchpy())
+              help='QOS for sbatch jobs. Passed to ' + get_schedulerpy())
 @click.option(
     '-f',
     '--force-all',
@@ -77,30 +82,28 @@ LOG = logging.getLogger(__name__)
 @click.option('--snakemake-opt',
               multiple=True,
               help='Pass these options directly to snakemake')
-@click.option('--slurm-account', help='SLURM account to run jobs')
-@click.option('--slurm-mail-user', help='SLURM mail user to send out email.')
-@click.option(
-    '--slurm-mail-type',
-    type=click.Choice(
-        ['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
-    help='SLURM mail type to send out email.\
-              This will be applied to all jobs and override snakemake settings.'
-)
+@click.option('--account', '--slurm-account', '--qsub-account',
+              help='cluster account to run jobs, ie: slurm_account')
+@click.option('--mail-user', help='cluster mail user to send out email. e.g.: slurm_mail_user')
+@click.option('--mail-type',
+              type=click.Choice(['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
+              help='cluster mail type to send out email. \
+              This will be applied to all jobs and override snakemake settings.')
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
-             run_analysis, log_file, force_all, snakemake_opt, slurm_mail_type,
-             slurm_mail_user, slurm_account, analysis_type, qos):
+             run_analysis, log_file, force_all, snakemake_opt, mail_type,
+             mail_user, account, analysis_type, qos, profile):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
 
-    if run_mode == 'slurm' and not run_analysis:
+    if run_mode == 'cluster' and not run_analysis:
         LOG.info('Changing run-mode to local on dry-run')
         run_mode = 'local'
 
-    if run_mode == 'slurm' and not slurm_account:
-        LOG.info('slurm account is required for slurm run mode')
+    if run_mode == 'cluster' and not account:
+        LOG.info('slurm-account, qsub-account, or account is required for slurm run mode')
         raise click.Abort()
 
     sample_config_path = os.path.abspath(sample_config)
@@ -151,15 +154,16 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
-    balsamic_run.scheduler = get_sbatchpy()
+    balsamic_run.scheduler = get_schedulerpy()
+    balsamic_run.profile = profile
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath
     balsamic_run.result_path = resultpath
     balsamic_run.qos = qos
-    balsamic_run.account = slurm_account
-    if slurm_mail_type:
-        balsamic_run.mail_type = slurm_mail_type
-    balsamic_run.mail_user = slurm_mail_user
+    balsamic_run.account = account
+    if mail_type:
+        balsamic_run.mail_type = mail_type
+    balsamic_run.mail_user = mail_user
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
     # Always use singularity
@@ -169,5 +173,6 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     try:
         subprocess.run(balsamic_run.build_cmd(), shell=True)
-    except:
+    except Exception as e:
+        print(e)
         raise
