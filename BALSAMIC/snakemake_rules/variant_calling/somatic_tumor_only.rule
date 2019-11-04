@@ -12,6 +12,15 @@ picarddup = get_picard_mrkdup(config)
 chromlist = config["panel"]["chrom"]
 capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
+
+def get_pon(config):
+    """ return pon cli string, complete with file """
+    if "PON" in config["analysis"]:
+        return os.path.abspth(config["analysis"]["PON"])
+    else:
+        return None
+
+
 rule vardict_tumor_only:
   input:
     fa = config["reference"]["reference_genome"],
@@ -148,3 +157,29 @@ rule somatic_snv_indel_vcf_merge:
       " --output-vcf {output.vcf}; " 
     "cp {output.vcfmerge} {output.vcf}; "
     "source deactivate; "
+
+
+rule sentieon_TNhaplotyper_tumor_only:
+    input:
+        bam = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+        ref = config["reference"]["reference_genome"],
+        dbsnp = config["reference"]["dbsnp"],
+        cosmic = config["reference"]["cosmic"],
+    output:
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
+    params:
+        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
+        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+        sentieon_lic = SENTIEON_LICENSE, 
+    threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
+    log:
+        vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
+    benchmark:
+        benchmark_dir + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
+    shell:
+        """
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
+
+        """

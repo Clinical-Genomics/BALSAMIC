@@ -22,6 +22,17 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 singularity_image = config['singularity']['image'] 
 
+
+try:
+    SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
+    SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
+    SENTIEON_DNASCOPE = os.environ["SENTIEON_DNASCOPE"]
+    SENTIEON_TNSCOPE = os.environ["SENTIEON_TNSCOPE"]
+except Exception as error:
+    print("ERROR: Set Environment variable to run this pipeline.")
+    raise
+
+
 # Define set of rules
 qc_rules = [
   "snakemake_rules/quality_control/fastp.rule",
@@ -61,6 +72,7 @@ if config['analysis']['analysis_type'] == "paired":
       ])
 
     somatic_caller_snv = ["mutect", "vardict", "strelka"]
+    sentieon_callers = []
     somatic_caller_sv = ["manta"]
     vcf_merge = ["vcfmerge"]
     
@@ -76,12 +88,13 @@ else:
       ])
 
     somatic_caller_snv = ["mutect", "vardict"]
+    sentieon_callers = ["tnhaplotyper"]
     somatic_caller_sv = ["manta"]
     vcf_merge = ["vcfmerge"]
       
     cnvkit_output = cnv_dir + "cnvkit_single.done"
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge
+somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
