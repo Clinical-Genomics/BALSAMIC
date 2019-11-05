@@ -58,7 +58,7 @@ variantcalling_rules = [
   "snakemake_rules/variant_calling/split_bed.rule"
   ]
 
-germline_caller = ["haplotypecaller", "strelka_germline", "manta_germline"]
+germline_caller = ["haplotypecaller", "strelka_germline", "manta_germline", "dnascope"]
 
 if config['analysis']['analysis_type'] == "paired":
 
