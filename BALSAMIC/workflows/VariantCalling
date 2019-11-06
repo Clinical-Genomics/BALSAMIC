@@ -62,7 +62,7 @@ variantcalling_rules = [
 germline_caller = ["haplotypecaller", "strelka_germline", "manta_germline"]
 
 if sentieon:
-  germline_caller.append('dnascope')
+    germline_caller.append('dnascope')
 
 if config['analysis']['analysis_type'] == "paired":
 
