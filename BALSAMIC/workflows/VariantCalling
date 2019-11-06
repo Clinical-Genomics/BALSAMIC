@@ -22,6 +22,19 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 singularity_image = config['singularity']['image'] 
 
+# Declare sentieon variables 
+sentieon = True
+SENTIEON_LICENSE = ''
+SENTIEON_INSTALL_DIR = ''
+
+try:
+    SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
+    SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
+except Exception as error:
+    sentieon = False
+    print("ERROR: Set Environment variable to run SENTIEON variant callers")
+    
+
 # Define set of rules
 qc_rules = [
   "snakemake_rules/quality_control/fastp.rule",
@@ -31,7 +44,6 @@ qc_rules = [
   "snakemake_rules/quality_control/picard.rule",
   "snakemake_rules/quality_control/sambamba_depth.rule"
   ]
-
 
 align_rules = [
   "snakemake_rules/align/bwa_mem.rule",
@@ -49,6 +61,9 @@ variantcalling_rules = [
 
 germline_caller = ["haplotypecaller", "strelka_germline", "manta_germline"]
 
+if sentieon:
+    germline_caller.append('dnascope')
+
 if config['analysis']['analysis_type'] == "paired":
 
     qc_rules.append("snakemake_rules/quality_control/contest.rule")
@@ -61,6 +76,7 @@ if config['analysis']['analysis_type'] == "paired":
       ])
 
     somatic_caller_snv = ["mutect", "vardict", "strelka"]
+    sentieon_callers = ["tnhaplotyper"] if sentieon else [];
     somatic_caller_sv = ["manta"]
     vcf_merge = ["vcfmerge"]
     
@@ -76,12 +92,13 @@ else:
       ])
 
     somatic_caller_snv = ["mutect", "vardict"]
+    sentieon_callers = ["tnhaplotyper"] if sentieon else [];
     somatic_caller_sv = ["manta"]
     vcf_merge = ["vcfmerge"]
       
     cnvkit_output = cnv_dir + "cnvkit_single.done"
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge
+somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
