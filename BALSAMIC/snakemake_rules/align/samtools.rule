@@ -17,7 +17,7 @@ rule samtools_sort_index:
   threads: get_threads(cluster_config, "samtools_sort_index")
   singularity: singularity_image 
   benchmark:
-    benchmark_dir + '{sample}.samtools_sort.tsv'
+    benchmark_dir + 'samtools_sort_index/' + '{sample}.samtools_sort.tsv'
   shell:
     "source activate {params.conda}; "
     "samtools sort -@ {threads} -o {output} {input}; "
