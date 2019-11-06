@@ -11,6 +11,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ## [x.x.x]
 ### Added
 - dependencies for workflow report
+- sentieon variant callers germline and somatic for wes cases
 
 ### Changed
 - housekeeper file path changed from basename to absolute
