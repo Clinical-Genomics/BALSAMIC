@@ -1,14 +1,14 @@
 import subprocess
 import json
-import glob
+import pytest
 
 from unittest import mock
-from pathlib import Path
-from sys import executable
 
 from BALSAMIC.commands.run.scheduler import SbatchScheduler
 from BALSAMIC.commands.run.scheduler import QsubScheduler
 from BALSAMIC.commands.run.scheduler import submit_job
+from BALSAMIC.commands.run.scheduler import read_sample_config
+from BALSAMIC.commands.run.scheduler import write_sacct_file
 from BALSAMIC.commands.run.scheduler import main as scheduler_main
 from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import createDir
@@ -89,6 +89,7 @@ def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, tmpdir, ca
     captured = capsys.readouterr()
     assert captured.out == test_jobid + "\n"
 
+
 def test_submit_job_slurm(snakemake_job_script):
     # GIVEN a jobid
     test_jobid = '1234'
@@ -159,3 +160,15 @@ def test_qsub_scheduler():
     # THEN qsub command should be constructed
     assert isinstance(qsub_cmd, str)
     assert qsub_cmd == 'qsub  -A development  -e test_job.err  -o test_job.out  -m FAIL  -M john.doe@example.com  -p low  -l "walltime=01:00:00,nodes=1:ppn=2"   -W "depend=afterok:12345"  example_script.sh '
+
+
+def test_read_sample_config_except(config_files):
+    with pytest.raises(Exception):
+        # GIVEN a bed file instead of json file
+        bed_file = config_files['panel_bed_file']
+
+        # WHEN calling read_sample_config
+        # THEN It should raise the exception error
+        assert read_sample_config(bed_file)
+
+
