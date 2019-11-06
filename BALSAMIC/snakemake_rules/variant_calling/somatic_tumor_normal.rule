@@ -220,6 +220,6 @@ rule sentieon_TNhaplotyper:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR --normal_sample NORMAL --dbsnp {input.dbsnp} {output.vcf}
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR --normal_sample NORMAL --dbsnp {input.dbsnp} {output.vcf}
         
         """
