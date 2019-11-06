@@ -90,7 +90,7 @@ echo -e "${_green}Installing BALSAMIC${_nocol}"
 pip install -r requirements.txt --editable .
 
 echo -e "${_green}Pulling latest version of container.${_nocol}"
-singularity pull ${PWD}'/BALSAMIC/containers/BALSAMIC_latest.sif' docker://hassanf/balsamic
+singularity pull --force ${PWD}'/BALSAMIC/containers/BALSAMIC_latest.sif' docker://hassanf/balsamic
 
 echo -e "\n${_green}Install finished. To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
 
