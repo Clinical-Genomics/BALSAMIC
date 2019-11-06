@@ -48,10 +48,9 @@ def housekeeper(context, sample_config):
     for dir_name, file_pattern_list in housekeeper_wildcards.items():
         housekeeper_json[dir_name] = list()
         for file_pattern in file_pattern_list:
-            print(os.path.join(result_dir, dir_name, file_pattern))
             list_of_files = glob.glob(
                 os.path.join(result_dir, dir_name, file_pattern))
-            list_of_files = [os.path.abspath(x) for x in list_of_files]
+            list_of_files = [x for x in list_of_files]
             housekeeper_json[dir_name].extend(list_of_files)
 
     yaml_write_directory = os.path.join(result_dir, 'delivery_report')
