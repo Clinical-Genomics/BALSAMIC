@@ -5,12 +5,21 @@ import os
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_chrom
+from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 chromlist = config["panel"]["chrom"]
 capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
+
+
+def get_pon(config):
+    """ return pon cli string, complete with file """
+    if "PON" in config["analysis"]:
+        return os.path.abspth(config["analysis"]["PON"])
+    else:
+        return None
 
 rule vardict_tumor_only:
   input:
@@ -113,38 +122,67 @@ rule mutect2_merge:
     "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
+
 rule somatic_snv_indel_vcf_merge:
-  input:
-    name_map = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.sample_name_map", var_caller=somatic_caller_snv),
-    varcall_yaml = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.yaml", var_caller=somatic_caller_snv),
-    refdict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
-    reffasta = config["reference"]["reference_genome"],
-    bamT = bam_dir + "tumor.merged.bam",
-  output:
-    vcfmerge = vcf_dir + "vcfmerge/SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
-    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
-  params:
-    workdir = vcf_dir + "/vcfmerge",
-    conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
-  threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
-  singularity: singularity_image 
-  benchmark:
-    benchmark_dir + "somatic_snv_inde_vcf_merge.tsv"
-  shell:
-    "source activate {params.conda}; "
-    "mkdir -p {params.workdir}; "
-    "cat {input.name_map} > {params.workdir}/sample_name.map; "
-    "echo '{{bam: {{TUMOR: {input.bamT} }} }}' | "
-      " yq -s '{{ vcf: map(.vcf) | add }} * .[0]'  - {input.varcall_yaml} "
-      " > {params.workdir}/vcf.yaml; "
-    "vcfmerge --sample-config {params.workdir}/vcf.yaml "
-      " --reference-dict {input.refdict} "
-      " --reference {input.reffasta} "
-      " --sample-names {params.workdir}/sample_name.map "
-      " --aggr-func max "
-      " --output-dir {params.workdir} "
-      " --mapq 10 "
-      " --include-optional "
-      " --output-vcf {output.vcf}; " 
-    "cp {output.vcfmerge} {output.vcf}; "
-    "source deactivate; "
+    input:
+        name_map = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.sample_name_map", var_caller=somatic_caller_snv),
+        varcall_yaml = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.yaml", var_caller=somatic_caller_snv),
+        refdict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
+        reffasta = config["reference"]["reference_genome"],
+        bamT = bam_dir + "tumor.merged.bam",
+    output:
+        vcfmerge = vcf_dir + "vcfmerge/SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
+    params:
+        workdir = vcf_dir + "/vcfmerge",
+        conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
+    threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
+    singularity: singularity_image 
+    benchmark:
+        benchmark_dir + "somatic_snv_inde_vcf_merge.tsv"
+    shell:
+        "source activate {params.conda}; "
+        "mkdir -p {params.workdir}; "
+        "cat {input.name_map} > {params.workdir}/sample_name.map; "
+        "echo '{{bam: {{TUMOR: {input.bamT} }} }}' | "
+          " yq -s '{{ vcf: map(.vcf) | add }} * .[0]'  - {input.varcall_yaml} "
+          " > {params.workdir}/vcf.yaml; "
+        "vcfmerge --sample-config {params.workdir}/vcf.yaml "
+          " --reference-dict {input.refdict} "
+          " --reference {input.reffasta} "
+          " --sample-names {params.workdir}/sample_name.map "
+          " --aggr-func max "
+          " --output-dir {params.workdir} "
+          " --mapq 10 "
+          " --include-optional "
+          " --output-vcf {output.vcf}; " 
+        "cp {output.vcfmerge} {output.vcf}; "
+        "source deactivate; "
+
+
+rule sentieon_TNhaplotyper_tumor_only:
+    input:
+        bam = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+        ref = config["reference"]["reference_genome"],
+        dbsnp = config["reference"]["dbsnp"],
+        cosmic = config["reference"]["cosmic"],
+        interval = config["panel"]["capture_kit"],
+    output:
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
+    params:
+        tumor = get_sample_type(config["samples"], "tumor"),
+        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
+        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
+        sentieon_lic = SENTIEON_LICENSE, 
+    threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
+    log:
+        vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
+    benchmark:
+        benchmark_dir + 'sentieon_TNhaplotyper_tumor_only_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
+    shell:
+        """
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
+
+        """

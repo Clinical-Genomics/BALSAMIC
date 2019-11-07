@@ -18,6 +18,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - scout template for sample location changed from delivery_report to scout
 - rule names added to benchmark files
 
+
 ## [4.0.0] - 2019-11-04
 SGE qsub support release
 

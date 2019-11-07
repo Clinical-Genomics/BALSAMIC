@@ -6,3 +6,5 @@ coloredlogs
 psutil
 snakemake==5.5.1
 gsutil
+jinja2
+networkx
