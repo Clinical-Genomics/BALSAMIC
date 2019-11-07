@@ -44,7 +44,7 @@ rule fastp:
   singularity: singularity_image
   threads: get_threads(cluster_config, 'fastp')
   benchmark:
-    benchmark_dir + "{sample}_fastp.tsv"
+    benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
   shell:
     "source activate {params.conda}; "
     "fastp "

@@ -38,7 +38,7 @@ rule cnvkit_paired:
         conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
     singularity: singularity_image
     benchmark:
-        benchmark_dir + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
+        benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
     shell:
         "source activate {params.conda}; "
         "[ {params.target} != None ] && cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "

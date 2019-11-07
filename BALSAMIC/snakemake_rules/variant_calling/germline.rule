@@ -26,7 +26,7 @@ rule haplotypecaller:
     threads: get_threads(cluster_config, 'haplotypecaller')
     singularity: singularity_image
     benchmark:
-        benchmark_dir + "haplotypecaller/{sample}.{bedchrom}.haplotypecaller.tsv"
+        benchmark_dir + 'haplotypecaller_' + "{sample}.{bedchrom}.haplotypecaller.tsv"
     shell:
         "source activate {params.conda};"
         "gatk3 -T HaplotypeCaller "
@@ -45,6 +45,8 @@ rule haplotypecaller_merge:
     params:
         conda = get_conda_env(config["conda_env_yaml"], "gatk"),
     singularity: singularity_image
+    benchmark:
+        benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.vcf.gz" 
     shell:
         "source activate {params.conda}; "
         "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
@@ -66,7 +68,7 @@ rule strelka_germline:
     threads: get_threads(cluster_config, "strelka_germline")
     singularity: singularity_image
     benchmark:
-        benchmark_dir + "{sample}.strelka_germline.tsv"
+        benchmark_dir + 'strelka_germline_' + "{sample}.strelka_germline.tsv"
     shell:
         "source activate {params.conda};"
         "rm -rf {params.tmpdir}; "
@@ -96,7 +98,7 @@ rule manta_germline:
     threads: get_threads(cluster_config, "manta_germline")
     singularity: singularity_image
     benchmark:
-        benchmark_dir + "{sample}.manta_germline.tsv"
+        benchmark_dir + 'manta_germline_' + "{sample}.manta_germline.tsv"
     shell:
         "source activate {params.conda}; "
         "rm -rf {params.tmpdir}; "
