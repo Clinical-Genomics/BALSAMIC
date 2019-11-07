@@ -6,7 +6,7 @@ from BALSAMIC.utils.rule import get_conda_env
 picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics", "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics", "quality_by_cycle_metrics", "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 
 
-rule picard_multiple_metrics:
+rule CollectMultipleMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
         reference = config["reference"]["reference_genome"]
@@ -17,7 +17,7 @@ rule picard_multiple_metrics:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     singularity: singularity_image
     benchmark:
-        benchmark_dir + "{sample}.picard_collect_multiple_metrics.tsv"
+        benchmark_dir + "CollectMultipleMetrics_" + "{sample}.picard_collect_multiple_metrics.tsv"
     shell:
         "source activate {params.conda};"
         "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -28,7 +28,7 @@ rule picard_multiple_metrics:
         "source deactivate; "
 
 
-rule picard_wgs_metrics:
+rule CollectWgsMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
         reference = config["reference"]["reference_genome"]
@@ -38,7 +38,7 @@ rule picard_wgs_metrics:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     singularity: singularity_image
     benchmark:
-        benchmark_dir + "{sample}.picard_collect_wgs_metrics.tsv"
+        benchmark_dir + "CollectWgsMetrics_" + "{sample}.picard_collect_wgs_metrics.tsv"
     shell:
         "source activate {params.conda};"
         "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "

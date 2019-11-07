@@ -28,7 +28,7 @@ rule sentieon_wgs_metrics:
         sentieon_lic = SENTIEON_LICENSE,
     threads: get_threads(cluster_config, 'sentieon_wgs_metrics')
     benchmark: 
-        benchmark_dir + "{sample}_wgs_metrics.tsv"
+        benchmark_dir + 'sentieon_wgs_metrics_' + "{sample}_wgs_metrics.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};

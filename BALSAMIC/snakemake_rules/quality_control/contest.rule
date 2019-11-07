@@ -22,7 +22,7 @@ rule GATK_contest:
     popcode = "EUR"
   singularity: singularity_image
   benchmark:
-    benchmark_dir + config["analysis"]["case_id"] + ".markduplicates.tsv"
+    benchmark_dir + 'GATK_contest_' + config["analysis"]["case_id"] + ".markduplicates.tsv"
   shell:
     "source activate {params.conda}; "
     "gatk3 "

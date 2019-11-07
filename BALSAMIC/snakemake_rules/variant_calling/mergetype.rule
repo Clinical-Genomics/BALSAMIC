@@ -25,7 +25,7 @@ rule mergeBam_normal_gatk:
     picard = picard_extra_normal
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{mysample}.mergebam_normal_gatk.tsv".format(mysample = normal_sample)
+    benchmark_dir + 'mergeBam_normal_gatk_' + "{mysample}.mergebam_normal_gatk.tsv".format(mysample = normal_sample)
   shell:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
@@ -44,7 +44,7 @@ rule mergeBam_normal:
     picard = picard_extra_normal
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{mysample}.mergebam_normal.tsv".format(mysample = normal_sample)
+    benchmark_dir + 'mergeBam_normal_' + "{mysample}.mergebam_normal.tsv".format(mysample = normal_sample)
   shell:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
@@ -63,7 +63,7 @@ rule mergeBam_tumor:
     picard = picard_extra_tumor
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
+    benchmark_dir + 'mergeBam_tumor_' + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
   shell:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
@@ -82,7 +82,7 @@ rule mergeBam_tumor_gatk:
     picard = picard_extra_tumor
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{mysample}.mergebam_tumor_gatk.tsv".format(mysample = tumor_sample)
+    benchmark_dir + 'mergeBam_tumor_gatk_' + "{mysample}.mergebam_tumor_gatk.tsv".format(mysample = tumor_sample)
   shell:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
