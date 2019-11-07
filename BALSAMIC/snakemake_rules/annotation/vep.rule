@@ -19,7 +19,7 @@ rule vep:
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
   benchmark:
-    benchmark_dir + 'vep/' + "{type}.{mutation}.{sample}.{caller}.vep.tsv"
+    benchmark_dir + 'vep_' + "{type}.{mutation}.{sample}.{caller}.vep.tsv"
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "

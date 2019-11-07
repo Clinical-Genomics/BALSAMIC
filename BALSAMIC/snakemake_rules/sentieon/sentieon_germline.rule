@@ -19,7 +19,7 @@ rule sentieon_DNAscope:
     log: 
         vcf_dir + "{sample}.dnascope.log"
     benchmark:
-        benchmark_dir + "{sample}.dnascope.tsv"
+        benchmark_dir + 'sentieon_DNAscope_' + "{sample}.dnascope.tsv"
     shell:
     	"""
 export SENTIEON_LICENSE={params.sentieon_lic};

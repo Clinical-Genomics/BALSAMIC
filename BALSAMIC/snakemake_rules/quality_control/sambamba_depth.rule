@@ -8,7 +8,7 @@ from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
-rule sambamba_panel_depth:
+rule panel_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["panel"]["capture_kit"]
@@ -23,7 +23,7 @@ rule sambamba_panel_depth:
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{sample}.sambamba_panel_depth.tsv"
+    benchmark_dir + "panel_depth_" + "{sample}.sambamba_panel_depth.tsv"
   shell:
     "source activate {params.conda}; "
     "covStr=`seq {params.cov_start} {params.cov_step} {params.cov_end} | xargs -n1 echo -n \" --cov-threshold\"`; "
@@ -34,7 +34,7 @@ rule sambamba_panel_depth:
         "`echo $covStr` {input.bam} > {output}; "
     "source deactivate; "
 
-rule sambamba_exon_depth:
+rule exon_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["reference"]["exon_bed"]
@@ -51,7 +51,7 @@ rule sambamba_exon_depth:
     conda = get_conda_env(config["conda_env_yaml"],"sambamba")
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{sample}.sambamba_exon_depth.tsv"
+    benchmark_dir + "exon_depth_" + "{sample}.sambamba_exon_depth.tsv"
   shell:
     "source activate {params.conda}; "
     "sambamba depth region "

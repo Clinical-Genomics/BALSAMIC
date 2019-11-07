@@ -21,7 +21,7 @@ rule bwa_mem:
   threads: get_threads(cluster_config, "bwa_mem")
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "bwa_mem/" + "{sample}.bwa_mem.tsv"
+    benchmark_dir + "bwa_mem_" + "{sample}.bwa_mem.tsv"
   shell:
     "source activate {params.conda}; "
     "bwa mem "

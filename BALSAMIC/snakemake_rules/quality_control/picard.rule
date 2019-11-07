@@ -27,7 +27,7 @@ rule MarkDuplicates:
     rm_dup = picard_flag(picarddup)
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{sample}.markduplicates.tsv"
+    benchmark_dir + "MarkDuplicates_" + "{sample}.markduplicates.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -53,7 +53,7 @@ rule CollectHsMetrics:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{sample}.collect_hsmetrics.tsv"
+    benchmark_dir + "CollectHsMetrics_" + "{sample}.collect_hsmetrics.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -83,7 +83,7 @@ rule CollectAlignmentSummaryMetrics:
     adapter = config["QC"]["adapter"]
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{sample}.collect_alignment_summary.tsv"
+    benchmark_dir + "CollectAlignmentSummaryMetrics_" + "{sample}.collect_alignment_summary.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
@@ -107,7 +107,7 @@ rule CollectInsertSizeMetrics:
     conda = get_conda_env(config["conda_env_yaml"],"picard")
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{sample}.collect_insertsize_metrics.tsv"
+    benchmark_dir + "CollectInsertSizeMetrics_" + "{sample}.collect_insertsize_metrics.tsv"
   shell:
     "source activate {params.conda};"
     "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar "
