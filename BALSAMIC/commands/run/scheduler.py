@@ -158,19 +158,15 @@ def submit_job(sbatch_cmd, profile):
 
     # Get jobid
     res = res.stdout.decode()
-    try:
-        if profile == "slurm":
-            m = re.search("Submitted batch job (\d+)", res)
-            jobid = m.group(1)
-        elif profile == "qsub":
-            jobid = str(res)
 
-        print(jobid)
-        return jobid
+    if profile == "slurm":
+        m = re.search("Submitted batch job (\d+)", res)
+        jobid = m.group(1)
+    elif profile == "qsub":
+        jobid = str(res)
 
-    except Exception as e:
-        print(e)
-        raise e
+    print(jobid)
+    return jobid
 
 
 # def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
