@@ -9,6 +9,13 @@ omit =
     BALSAMIC/assets/*
     # Exclude tests directory
     tests/*
+
+exclude_lines = 
+    # Don't complain if non-runnable code isn't run
+    if __name__ == '__main__':
+    main()
+
+
 [report]
 omit =
     # Excluding snakemake rules

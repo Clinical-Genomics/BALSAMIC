@@ -175,4 +175,4 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
         subprocess.run(balsamic_run.build_cmd(), shell=True)
     except Exception as e:
         print(e)
-        raise
+        raise e
