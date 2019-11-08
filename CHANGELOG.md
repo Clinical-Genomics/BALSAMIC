@@ -9,6 +9,15 @@ increment the patch number. The rational for versioning, and exact wording is ta
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
 ## [x.x.x]
+### Added
+- dependencies for workflow report
+- sentieon variant callers germline and somatic for wes cases
+
+### Changed
+- housekeeper file path changed from basename to absolute
+- scout template for sample location changed from delivery_report to scout
+- rule names added to benchmark files
+
 
 ## [4.0.0] - 2019-11-04
 SGE qsub support release

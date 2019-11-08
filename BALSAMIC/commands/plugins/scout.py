@@ -27,7 +27,7 @@ def scout(context, sample_config):
         sample_config = json.load(fn)
 
     result_dir = get_result_dir(sample_config)
-    dst_directory = os.path.join(result_dir, 'delivery_report')
+    dst_directory = os.path.join(result_dir, 'scout')
     if not os.path.exists(dst_directory):
         LOG.debug('Creatiing delivery_report directory')
         os.makedirs(dst_directory)

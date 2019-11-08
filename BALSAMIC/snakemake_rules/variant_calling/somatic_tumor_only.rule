@@ -22,105 +22,106 @@ def get_pon(config):
         return None
 
 rule vardict_tumor_only:
-    input:
-        fa = config["reference"]["reference_genome"],
-        bamT = bam_dir + "tumor.merged.bam",
-        bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
-    output:
-        vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz"
-    params:
-        af = "0.001",
-        max_pval = "0.9",
-        max_mm = "4.5",
-        col_info = "-c 1 -S 2 -E 3 -g 4",
-        name = config["analysis"]["case_id"],
-        conda = get_conda_env(config["conda_env_yaml"],"vardict"),
-    singularity: singularity_image
-    benchmark:
-        benchmark_dir + 'vardict/{bedchrom}.vardict.tsv'
-    shell:
-        "source activate {params.conda}; "
-        "vardict -G {input.fa} -f {params.af} -N {params.name} "
-            "-b {input.bamT} "
-            "{params.col_info} {input.bed} "
-            "| teststrandbias.R "
-            "| var2vcf_valid.pl -P {params.max_pval} "
-            "-m {params.max_mm} -E -f {params.af} -N {params.name} "
-            "| bgzip > {output}; "
-        "tabix -p vcf {output}; "
-        "source deactivate;"
+  input:
+    fa = config["reference"]["reference_genome"],
+    bamT = bam_dir + "tumor.merged.bam",
+    bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
+  output:
+    vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz"
+  params:
+    af = "0.001",
+    max_pval = "0.9",
+    max_mm = "4.5",
+    col_info = "-c 1 -S 2 -E 3 -g 4",
+    name = config["analysis"]["case_id"],
+    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'vardict_tumor_only_' + '{bedchrom}.vardict.tsv'
+  shell:
+    "source activate {params.conda}; "
+    "vardict -G {input.fa} -f {params.af} -N {params.name} "
+        "-b {input.bamT} "
+        "{params.col_info} {input.bed} "
+        "| teststrandbias.R "
+        "| var2vcf_valid.pl -P {params.max_pval} "
+        "-m {params.max_mm} -E -f {params.af} -N {params.name} "
+        "| bgzip > {output}; "
+    "tabix -p vcf {output}; "
+    "source deactivate;"
 
 rule vardict_merge:
-    input:
-        expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
-    output:
-        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map",
-        yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],"vardict"),
-        name = config["analysis"]["case_id"],
-    singularity: singularity_image
-    benchmark:
-        benchmark_dir + config["analysis"]["case_id"] + ".vardict_merge.tsv"
-    shell:
-        "source activate {params.conda} ; "
-        "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
-        "tabix -f -p vcf {output.vcf}; "
-        "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
-        "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml}; "
-        "source deactivate;" 
+  input:
+    expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
+  output:
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map",
+    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+    name = config["analysis"]["case_id"],
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
+  shell:
+    "source activate {params.conda} ; "
+    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
+    "tabix -f -p vcf {output.vcf}; "
+    "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
+    "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml}; "
+    "source deactivate;" 
 
 rule mutect2_tumor_only:
-    input:
-        fa = config["reference"]["reference_genome"],
-        dbsnp = config["reference"]["dbsnp"],
-        cosmic = config["reference"]["cosmic"],
-        bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
-        bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
-    output:
-        vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz"
-    params:
-        result_dir = vcf_dir + "mutect/",
-        conda = get_conda_env(config["conda_env_yaml"],"gatk")
-    threads: get_threads(cluster_config, "mutect2_tumor_only")
-    singularity: singularity_image
-    benchmark:
-        benchmark_dir + "mutect2/{bedchrom}.mutect2_tumor_only.tsv"
-    shell:
-        "source activate {params.conda};"
-        "mkdir -p {params.result_dir}; "
-        "gatk3  -T MuTect2 "
-            "-R {input.fa} "
-            "--cosmic {input.cosmic} "
-            "--dbsnp {input.dbsnp} "
-            "-I:tumor {input.bamT} "
-            "--annotation Coverage --useNewAFCalculator --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
-            "--disable_auto_index_creation_and_locking_when_reading_rods "
-            "-L {input.bed} "
-        " | bgzip > {output}; "
-        "tabix -p vcf {output}; " 
-        "source deactivate; "
+  input:
+    fa = config["reference"]["reference_genome"],
+    dbsnp = config["reference"]["dbsnp"],
+    cosmic = config["reference"]["cosmic"],
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+    bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
+  output:
+    vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz"
+  params:
+    result_dir = vcf_dir + "mutect/",
+    conda = get_conda_env(config["conda_env_yaml"],"gatk")
+  threads: get_threads(cluster_config, "mutect2_tumor_only")
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'mutect2_tumor_only_' + "{bedchrom}.mutect2_tumor_only.tsv"
+  shell:
+    "source activate {params.conda};"
+    "mkdir -p {params.result_dir}; "
+    "gatk3  -T MuTect2 "
+        "-R {input.fa} "
+        "--cosmic {input.cosmic} "
+        "--dbsnp {input.dbsnp} "
+        "-I:tumor {input.bamT} "
+        "--annotation Coverage --useNewAFCalculator --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
+        "--disable_auto_index_creation_and_locking_when_reading_rods "
+        "-L {input.bed} "
+    " | bgzip > {output}; "
+    "tabix -p vcf {output}; " 
+    "source deactivate; "
 
 rule mutect2_merge: 
-    input:  
-        expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist)   
-    output: 
-        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
-        yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
-    params: 
-        conda = get_conda_env(config["conda_env_yaml"],"bcftools")
-    singularity: singularity_image
-    benchmark:
-        benchmark_dir + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
-    shell:  
-        "source activate {params.conda} ; " 
-        "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
-        "tabix -f -p vcf {output.vcf}; "  
-        "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
-        "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
-        "source deactivate;" 
+  input:  
+    expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist)   
+  output: 
+    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
+    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
+    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
+  params: 
+    conda = get_conda_env(config["conda_env_yaml"],"bcftools")
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
+  shell:  
+    "source activate {params.conda} ; " 
+    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
+    "tabix -f -p vcf {output.vcf}; "  
+    "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
+    "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
+    "source deactivate;" 
+
 
 rule somatic_snv_indel_vcf_merge:
     input:
@@ -177,7 +178,7 @@ rule sentieon_TNhaplotyper_tumor_only:
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
     benchmark:
-        benchmark_dir + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
+        benchmark_dir + 'sentieon_TNhaplotyper_tumor_only_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};

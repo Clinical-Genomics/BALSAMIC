@@ -20,7 +20,7 @@ rule fastqc:
     fastqc_dir=fastqc_dir
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{sample}.fastqc.tsv"
+    benchmark_dir + "fastqc_" + "{sample}.fastqc.tsv"
   shell:
     "source activate {params.conda};"
     "fastqc {input.read1} --outdir {params.fastqc_dir};" 

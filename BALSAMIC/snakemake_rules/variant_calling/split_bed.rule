@@ -21,6 +21,8 @@ rule split_bed_by_chrom:
     split_bed_dir = vcf_dir + "split_bed/",
     origin_bed = capture_kit,
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
+  benchmark:
+    benchmark_dir + 'split_bed_by_chrom.tsv'
   shell:
     "chromlist=`cut -f 1 {input.bed} | sort -u`; "
     "for c in $chromlist; do awk -v C=$c '$1==C' {input.bed} > {params.split_bed_dir}$c.{params.origin_bed}; done; "

@@ -24,6 +24,8 @@ rule manta_tumor_only:
       conda = get_conda_env(config["conda_env_yaml"],"manta")
     threads: 4
     singularity: singularity_image
+    benchmark: 
+        benchmark_dir + 'manta_tumor_only_' + config["analysis"]["case_id"] + ".manta.tsv"
     shell:
       "source activate {params.conda};"
       "rm -rf {params.tmpdir}; "

@@ -29,7 +29,7 @@ rule manta_tumor_normal:
         conda = get_conda_env(config["conda_env_yaml"],"manta")
     singularity: singularity_image
     benchmark: 
-        benchmark_dir + config["analysis"]["case_id"] + ".manta.tsv"
+        benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
     threads: 4
     shell:
         "source activate {params.conda};"
