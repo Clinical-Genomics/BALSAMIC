@@ -72,8 +72,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
 
     config = merge_json(config, install_config)
 
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+    os.makedirs(outdir, exist_ok=True)
 
     write_json(config, config_json)
 
