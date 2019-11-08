@@ -2,6 +2,7 @@ import json
 import os
 import pytest
 import sys
+import copy
 from pathlib import Path
 
 from BALSAMIC.utils.cli import SnakeMake
@@ -230,6 +231,16 @@ def test_get_picard_mrkdup(sample_config):
     # THEN It will return the picard str as rmdup
     assert "mrkdup" == picard_str
 
+
+def test_get_picard_mrkdup_rmdup(sample_config):
+    # WHEN passing sample_config
+    sample_config_rmdup = copy.deepcopy(sample_config)
+    sample_config_rmdup["QC"]["picard_rmdup"] = True
+
+    picard_str = get_picard_mrkdup(sample_config_rmdup)
+
+    # THEN It will return the picard str as rmdup
+    assert "rmdup" == picard_str
 
 def test_createDir(tmp_path):
     # GIVEN a directory path
