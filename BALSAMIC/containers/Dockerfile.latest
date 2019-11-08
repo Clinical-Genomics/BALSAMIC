@@ -12,7 +12,7 @@ RUN mkdir -p /git_repos; \
     export PATH=/usr/local/miniconda/bin:$PATH; \
     export LC_ALL=en_US.utf-8; \
     export LANG=en_US.utf-8; \
-    cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout master; \
+    cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout v4.0.1; \
     conda env create --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27 \
     && conda env create --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36 \
     && conda env create --file BALSAMIC/conda/BALSAMIC-vcfmerge.yaml -n BALSAMIC_vcfmerge; \
