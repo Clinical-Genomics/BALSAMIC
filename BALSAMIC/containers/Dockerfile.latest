@@ -2,7 +2,7 @@ FROM hassanf/miniconda3_4.6.14:latest
 
 LABEL maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL description="Bioinformatic analysis pipeline for somatic mutations in cancer"
-LABEL version="4.0.0"
+LABEL version="4.0.1"
 
 # create necessary directories
 # install balsamic and it's environments
