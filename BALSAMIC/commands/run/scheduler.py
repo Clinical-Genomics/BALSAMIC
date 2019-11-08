@@ -122,8 +122,8 @@ def read_sample_config(input_json):
     try:
         with open(input_json) as f:
             return json.load(f)
-    except Exception:
-        raise
+    except Exception as e:
+        raise e
 
 
 def write_sacct_file(sacct_file, job_id):
@@ -131,8 +131,8 @@ def write_sacct_file(sacct_file, job_id):
     try:
         with open(sacct_file, 'a') as f:
             f.write(job_id + "\n")
-    except OSError:
-        raise
+    except FileNotFoundError as e:
+        raise e
 
 
 # def write_sbatch_dump(sbatch_file, sbatch_cmd):
@@ -170,7 +170,7 @@ def submit_job(sbatch_cmd, profile):
 
     except Exception as e:
         print(e)
-        raise
+        raise e
 
 
 # def singularity_param(sample_config, script_dir, jobscript, sbatch_script):

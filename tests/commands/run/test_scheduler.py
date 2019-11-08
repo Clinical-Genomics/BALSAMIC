@@ -9,6 +9,7 @@ from BALSAMIC.commands.run.scheduler import QsubScheduler
 from BALSAMIC.commands.run.scheduler import submit_job
 from BALSAMIC.commands.run.scheduler import read_sample_config
 from BALSAMIC.commands.run.scheduler import write_sacct_file
+from BALSAMIC.commands.run.scheduler import submit_job
 from BALSAMIC.commands.run.scheduler import main as scheduler_main
 from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import createDir
@@ -162,7 +163,7 @@ def test_qsub_scheduler():
     assert qsub_cmd == 'qsub  -A development  -e test_job.err  -o test_job.out  -m FAIL  -M john.doe@example.com  -p low  -l "walltime=01:00:00,nodes=1:ppn=2"   -W "depend=afterok:12345"  example_script.sh '
 
 
-def test_read_sample_config_except(config_files):
+def test_read_sample_config_err(config_files):
     with pytest.raises(Exception):
         # GIVEN a bed file instead of json file
         bed_file = config_files['panel_bed_file']
@@ -172,3 +173,23 @@ def test_read_sample_config_except(config_files):
         assert read_sample_config(bed_file)
 
 
+def test_write_sacct_file_err():
+    with pytest.raises(FileNotFoundError):
+        # GIVEN a non-existing file path and jobid
+        dummy_file_path = "dummy/dummy_fname"
+        dummy_jobid = "12345"
+
+        # WHEN calling write_sacct_file
+        # THEN It should raise the exception
+        assert write_sacct_file(dummy_file_path, dummy_jobid)
+
+
+def test_submit_job_err():
+    with pytest.raises(subprocess.CalledProcessError):
+        # GIVEN a wrong command
+        sbatch_cmd = "SBATCH jobscript.sh"
+        profile = 'slurm'
+
+        # WHEN calling submit_job function
+        # THEN it should return the exit code 1 and raise the subprocess error
+        assert submit_job(sbatch_cmd, profile)
