@@ -167,24 +167,16 @@ def test_link_fastq(sample_config, tmp_path):
     assert len(list(dest_dir.iterdir())) == 4
 
 
-def test_link_fastq_error(sample_config, tmp_path):
+def test_link_fastq_error(sample_config, tmp_path, caplog):
     # GIVEN a invalid fastq files list
-    with pytest.raises(Exception) as e:
-        fastq_src = os.path.join(sample_config['analysis']['analysis_dir'],
-                                 'fastq')
-        fastq_files = [
-            os.path.join(fastq_src, file) for file in os.listdir(fastq_src)
-        ]
-        dest_dir = tmp_path / "output"
-        dest_dir.mkdir()
+    fastq_files = ['tests/test_data/fastq/S1_R_1.fastq.gz']
+    dest_dir = 'tests/test_data/fastq/'
 
-        # WHEN calling link fastq
-        link_fastq(fastq_files, dest_dir)
+    # WHEN calling link fastq
+    link_fastq(fastq_files, dest_dir)
 
-        # THEN It should return exception
-        link_fastq(fastq_files, dest_dir)
-
-        assert e.value
+    # THEN It should return exception
+    assert "No copy link was created" in caplog.text
 
 
 def test_get_fastq_path(sample_fastq):

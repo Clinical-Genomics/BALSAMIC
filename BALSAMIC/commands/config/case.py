@@ -123,7 +123,7 @@ def link_fastq(src_files, des_path):
         des_file = os.path.join(des_path, basename)
         try:
             shutil.copyfile(Path(src_file).resolve(), des_file)
-        except (SameFileError, OSError) as e:
+        except shutil.SameFileError as e:
             LOG.warning(e)
             LOG.warning(
                 f"Desitination file {des_file} exists. No copy link was created."
