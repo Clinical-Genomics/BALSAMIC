@@ -42,8 +42,6 @@ def test_run_analysis_creat_dir(invoke_cli, tumor_only_config, tmp_path):
         tumor_config = json.load(fh)
     log_dir = tumor_config['analysis']['log']
     log_file = os.path.join(log_dir, 'log.file')
-    result = invoke_cli(['run', 'analysis', '-s', tumor_only_config, '-r', '--account',
-                         'development'])
     subprocess.run('touch ' + log_file, shell=True)
 
     with mock.patch.object(subprocess, 'run') as mocked:

@@ -44,7 +44,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
     """ Configure workflow for reference generation """
-    
+
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
@@ -94,7 +94,10 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
                                 format="pdf",
                                 engine="dot")
 
-    graph_pdf = graph_obj.render()
-    LOG.info(
-        f'Reference workflow graph generated successfully - {graph_pdf}'
-    )
+    try:
+        graph_pdf = graph_obj.render()
+        LOG.info(
+            f'Reference workflow graph generated successfully - {graph_pdf}')
+    except:
+        LOG.error(f'Reference workflow graph generation failed')
+        raise click.Abort()
