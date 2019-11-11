@@ -7,7 +7,9 @@ python:
 
 before_install:
   - sudo apt-get install graphviz
+
 install:
+  - sudo apt-get -y install singularity
   - pip install -r requirements-dev.txt -r requirements.txt -e .
 
 script:
