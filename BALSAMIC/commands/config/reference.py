@@ -75,6 +75,9 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
     os.makedirs(outdir, exist_ok=True)
 
     write_json(config, config_json)
+    LOG.info(
+        f'Reference generation workflow configured successfully - {config_json}'
+    )
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(snakefile=snakefile,
@@ -91,10 +94,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
                                 format="pdf",
                                 engine="dot")
 
-    if graph_obj.render():
-        LOG.info(
-            f'Reference generation workflow configured successfully - {config_json}'
-        )
-    else:
-        LOG.error(f'Snakemake DAG graph generation failed - {dagfile_path}')
-        click.Abort()
+    graph_pdf = graph_obj.render()
+    LOG.info(
+        f'Reference workflow graph generated successfully - {graph_pdf}'
+    )
