@@ -8,6 +8,10 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [x.x.x]
+###
+- Increased time for indel realigner and base recalib rules
+
 ## [4.0.1] - 2019-11-08
 ### Added
 - dependencies for workflow report
