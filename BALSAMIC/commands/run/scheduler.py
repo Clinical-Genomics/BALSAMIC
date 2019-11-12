@@ -99,7 +99,7 @@ class QsubScheduler:
 
         if self.mail_type:
 #            qsub_options.append(" -m " + str(self.mail_type))
-            qsub_options.append(" -m s " + str(self.mail_type))
+            qsub_options.append(" -m s ")# + str(self.mail_type))
 
         if self.mail_user:
             qsub_options.append(" -M " + str(self.mail_user))
