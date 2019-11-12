@@ -98,6 +98,6 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
         graph_pdf = graph_obj.render()
         LOG.info(
             f'Reference workflow graph generated successfully - {graph_pdf}')
-    except:
+    except Exception:
         LOG.error(f'Reference workflow graph generation failed')
         raise click.Abort()

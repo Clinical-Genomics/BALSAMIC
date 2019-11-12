@@ -45,13 +45,9 @@ def test_run_analysis_create_dir(invoke_cli, tumor_only_config, tmp_path):
 
     with mock.patch.object(subprocess, 'run') as mocked:
         mocked.return_value.stdout = 1
-        log_file = os.path.join(log_dir, 'log.file')
-        
         result = invoke_cli(['run', 'analysis', '-s', tumor_only_config, '-r', '--account',
                              'development'])
-        
         # THEN it should abort with error
-        #assert os.path.exists(log_dir)
         assert os.path.exists(re.sub('/$', '.1/', log_dir))
 
 

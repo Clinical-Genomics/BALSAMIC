@@ -2,6 +2,8 @@ import os
 import re
 import json
 import pytest
+import graphviz
+from unittest import mock
 from datetime import datetime
 from pathlib import Path
 import click
@@ -241,3 +243,29 @@ def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
     assert result.exit_code == 0
     assert Path(
         analysis_dir / test_case_name / test_sample_config_file_name).exists()
+
+
+def test_config_sample_graphviz_exception(tmp_path, sample_fastq, analysis_dir,
+                                          invoke_cli, singularity_container):
+    # GIVEN input sample tumor and normal
+    test_case_name = 'sample_tumor_normal'
+    test_tumor = sample_fastq['tumor']
+    test_normal = sample_fastq['normal']
+    test_panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    test_reference_json = 'tests/test_data/references/reference.json'
+    test_sample_config_file_name = 'test_sample_tumor_normal.json'
+
+    # WHEN invoking cli to create config files
+    with mock.patch.object(graphviz, 'Source') as mocked:
+        mocked.return_value = None
+        result = invoke_cli([
+            'config', 'case', '-p', test_panel_bed_file, 
+            '-t', str(test_tumor),
+            '-n', str(test_normal),
+            '--singularity', singularity_container,
+            '--case-id', test_case_name, '--analysis-dir',
+            str(analysis_dir), '--output-config', test_sample_config_file_name,
+            '--reference-config', test_reference_json
+        ])
+
+    assert result.exit_code == 1
