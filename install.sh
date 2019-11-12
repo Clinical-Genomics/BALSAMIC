@@ -58,7 +58,7 @@ then
     echo -e "\n${_green}Container for miniconda3 4.6.14 exists.${_nocol}"
   else
     echo -e "\n${_green}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14.${_nocol}"
-    singularity pull ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14
+    singularity pull ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' docker://hassanf/miniconda3_4.6.14 
   fi
   function conda() {
     singularity run --bind ${_condapath} ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' conda "$@"
