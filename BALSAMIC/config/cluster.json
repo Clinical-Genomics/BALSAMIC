@@ -16,11 +16,11 @@
         "n": 10
     },
     "IndelRealigner": {
-        "time": "03:00:00",
+        "time": "07:00:00",
         "n": 10
     },
     "BaseRecalibrator": {
-        "time": "03:00:00",
+        "time": "07:00:00",
         "n": 10
     },
     "multiqc": {
