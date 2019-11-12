@@ -79,16 +79,16 @@ class QsubScheduler:
         qsub_options = list()
         
         # Exclusive node
-        resource_params += " -l \"excl=1\" "
-        if self.time:
-            resource_params += " -l \"walltime={}\" ".format(str(self.time))
+        resource_params += " -l excl=1 "
+#        if self.time:
+#            resource_params += " -l \"walltime={}\" ".format(str(self.time))
 
         if self.ntasks:
 #            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
             resource_params += " -pe mpi {} ".format(str(self.ntasks))
 
         if self.account:
-            #qsub_options.append(" -A " + str(self.account))
+#            qsub_options.append(" -A " + str(self.account))
             qsub_options.append(" -q " + str(self.account))
 
         if self.error:
@@ -98,7 +98,8 @@ class QsubScheduler:
             qsub_options.append(" -o " + str(self.output))
 
         if self.mail_type:
-            qsub_options.append(" -m " + str(self.mail_type))
+#            qsub_options.append(" -m " + str(self.mail_type))
+            qsub_options.append(" -m s " + str(self.mail_type))
 
         if self.mail_user:
             qsub_options.append(" -M " + str(self.mail_user))
@@ -244,10 +245,12 @@ def main(args=None):
     jobscript = os.path.join(args.script_dir, os.path.basename(jobscript))
 
     if args.profile == 'slurm':
+        jobid = '%j'
         scheduler_cmd = SbatchScheduler()
         if args.dependencies:
             scheduler_cmd.dependency = ','.join(["afterok:%s" % d for d in args.dependencies])
     elif args.profile == 'qsub':
+        jobid = '${JOB_ID}'
         scheduler_cmd = QsubScheduler()
         scheduler_cmd.dependency = args.dependencies
 
@@ -272,9 +275,9 @@ def main(args=None):
     scheduler_cmd.account = args.account
     scheduler_cmd.mail_type = mail_type
     scheduler_cmd.error = os.path.join(args.log_dir,
-                                    os.path.basename(jobscript) + "_%j.err")
+                                    os.path.basename(jobscript) + "_" + jobid + ".err")
     scheduler_cmd.output = os.path.join(args.log_dir,
-                                     os.path.basename(jobscript) + "_%j.out")
+                                     os.path.basename(jobscript) + "_" + jobid + ".out")
 
     scheduler_cmd.ntasks = job_properties["cluster"]["n"]
     scheduler_cmd.time = job_properties["cluster"]["time"]
