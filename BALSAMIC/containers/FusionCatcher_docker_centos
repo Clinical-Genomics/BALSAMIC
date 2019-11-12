@@ -6,7 +6,7 @@ LABEL Description="This image is used to run FusionCatcher" Version="1.10"
 
 RUN yum clean all \
     && yum -y update \
-    && yum -y groupinstall "Development Tools" \
+    && yum -y groups install "Development Tools" \
     && yum install -y \
     automake \
     bzip2 \
