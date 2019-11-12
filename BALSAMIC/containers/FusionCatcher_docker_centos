@@ -5,7 +5,6 @@ MAINTAINER Hassan Foroughi hassan.foroughi@scilifelab.se
 LABEL Description="This image is used to run FusionCatcher" Version="1.10"
 
 RUN yum clean all \
-    && yum -y update \
     && yum -y groups install "Development Tools" \
     && yum install -y \
     automake \
@@ -30,6 +29,7 @@ RUN yum clean all \
     python-biopython \
     libtbb-dev \
     && yum clean all \
+    && conda install numpy \
     && wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
     && python bootstrap.py -t --download -y -i /opt/fusioncatcher/v1.10/
 
