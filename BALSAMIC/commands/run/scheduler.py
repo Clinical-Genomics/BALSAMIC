@@ -139,11 +139,11 @@ def write_sacct_file(sacct_file, job_id):
         raise
 
 
-def write_sbatch_dump(sbatch_file, sbatch_cmd):
+def write_scheduler_dump(scheduler_file, cmd):
     ''' writes sbatch dump for debuging purpose '''
     try:
-        with open(sbatch_file, 'a') as f:
-            f.write(sbatch_cmd + "\n")
+        with open(scheduler_file, 'a') as f:
+            f.write(cmd + "\n")
             f.write(sys.executable + "\n")
     except OSError:
         raise
@@ -284,9 +284,9 @@ def main(args=None):
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
+    scheduler_file = os.path.join(args.script_dir, sample_config["analysis"]["case_id"] + ".scheduler_dump")
     #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-    #        write_sbatch_dump(sbatch_file=sbatch_file,
-    #                          sbatch_cmd=sbatch_cmd.build_cmd())
+    write_scheduler_dump(scheduler_file=scheduler_file, cmd=scheduler_cmd.build_cmd())
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
 
