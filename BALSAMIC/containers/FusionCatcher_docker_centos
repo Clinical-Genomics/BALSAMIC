@@ -24,6 +24,11 @@ RUN yum clean all \
     unzip \
     wget \
     default-jdk \
+    python-numpy \
+    python-devel \
+    zlib-devel \
+    python-biopython \
+    libtbb-dev \
     && yum clean all \
     && wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
     && python bootstrap.py -t --download -y -i /opt/fusioncatcher/v1.10/
