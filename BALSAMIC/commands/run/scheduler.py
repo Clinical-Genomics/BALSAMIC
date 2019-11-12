@@ -78,14 +78,18 @@ class QsubScheduler:
         depend = ""
         qsub_options = list()
         
+        # Exclusive node
+        resource_params += " -l \"excl=1\" "
         if self.time:
-            resource_params += " -l \"walltime={},".format(str(self.time))
+            resource_params += " -l \"walltime={}\" ".format(str(self.time))
 
         if self.ntasks:
-            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
+#            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
+            resource_params += " -pe mpi {} ".format(str(self.ntasks))
 
         if self.account:
-            qsub_options.append(" -A " + str(self.account))
+            #qsub_options.append(" -A " + str(self.account))
+            qsub_options.append(" -q " + str(self.account))
 
         if self.error:
             qsub_options.append(" -e " + str(self.error))
@@ -113,7 +117,7 @@ class QsubScheduler:
         if self.script:
             qsub_options.append(" {} ".format(self.script))
 
-        return "qsub " + " ".join(qsub_options)
+        return "qsub -S /bin/bash " + " ".join(qsub_options)
 
 
 def read_sample_config(input_json):
