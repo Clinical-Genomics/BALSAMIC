@@ -3,6 +3,7 @@
 import pytest
 import yaml
 import json
+import os
 
 from pathlib import Path
 from functools import partial
@@ -191,12 +192,13 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, singul
 
 
 @pytest.fixture(scope='session')
-def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
+def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
     """
     case_name = 'sample_tumor_only'
+    analysis_dir = fn = tmpdir_factory.mktemp('analysis', numbered=False)
     tumor = sample_fastq['tumor']
     panel_bed_file = 'tests/test_data/references/panel/panel.bed'
     reference_json = 'tests/test_data/references/reference.json'
@@ -211,7 +213,9 @@ def tumor_only_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_
         '--reference-config', reference_json
     ])
 
-    return str(analysis_dir / case_name / sample_config_file_name)
+    dummy_log = tmpdir_factory.mktemp('analysis/' + case_name + '/logs', numbered=False).join('example_file').write('not_empty')
+
+    return os.path.join(analysis_dir, case_name, sample_config_file_name)
 
 
 @pytest.fixture(scope='session')

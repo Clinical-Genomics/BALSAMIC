@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys
+# import sys
 import os
 import re
 import subprocess
@@ -122,8 +122,8 @@ def read_sample_config(input_json):
     try:
         with open(input_json) as f:
             return json.load(f)
-    except:
-        raise ValueError
+    except Exception as e:
+        raise e
 
 
 def write_sacct_file(sacct_file, job_id):
@@ -131,18 +131,18 @@ def write_sacct_file(sacct_file, job_id):
     try:
         with open(sacct_file, 'a') as f:
             f.write(job_id + "\n")
-    except OSError:
-        raise
+    except FileNotFoundError as e:
+        raise e
 
 
-def write_sbatch_dump(sbatch_file, sbatch_cmd):
-    ''' writes sbatch dump for debuging purpose '''
-    try:
-        with open(sbatch_file, 'a') as f:
-            f.write(sbatch_cmd + "\n")
-            f.write(sys.executable + "\n")
-    except OSError:
-        raise
+# def write_sbatch_dump(sbatch_file, sbatch_cmd):
+#     ''' writes sbatch dump for debuging purpose '''
+#     try:
+#         with open(sbatch_file, 'a') as f:
+#             f.write(sbatch_cmd + "\n")
+#             f.write(sys.executable + "\n")
+#     except OSError:
+#         raise
 
 
 def submit_job(sbatch_cmd, profile):
@@ -158,32 +158,28 @@ def submit_job(sbatch_cmd, profile):
 
     # Get jobid
     res = res.stdout.decode()
-    try:
-        if profile == "slurm":
-            m = re.search("Submitted batch job (\d+)", res)
-            jobid = m.group(1)
-        elif profile == "qsub":
-            jobid = str(res)
-        
-        print(jobid)
-        return jobid
 
-    except Exception as e:
-        print(e)
-        raise
+    if profile == "slurm":
+        m = re.search("Submitted batch job (\d+)", res)
+        jobid = m.group(1)
+    elif profile == "qsub":
+        jobid = str(res)
+
+    print(jobid)
+    return jobid
 
 
-#def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
+# def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
 #    ''' write a modified sbatch script based on singularity parameters '''
 #    if 'bind_path' not in sample_config['singularity']:
 #        raise KeyError("bind_path was not found in sample config.")
-#
+
 #    if 'main_env' not in sample_config['singularity']:
 #        raise KeyError("main_env was not found in sample config.")
-#
+
 #    if 'container_path' not in sample_config['singularity']:
 #        raise KeyError("container_path was not found sample config.")
-#
+
 #    try:
 #        bind_path = sample_config['singularity']['bind_path']
 #        main_env = sample_config['singularity']['main_env']
