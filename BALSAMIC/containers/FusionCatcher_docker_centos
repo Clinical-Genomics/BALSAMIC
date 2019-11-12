@@ -1,4 +1,4 @@
-FROM hassanf/miniconda3_4.6.14:latest
+FROM hassanf/miniconda2_4.6.14:latest
 
 MAINTAINER Hassan Foroughi hassan.foroughi@scilifelab.se 
 
