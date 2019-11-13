@@ -2,11 +2,9 @@ FROM hassanf/miniconda2_4.6.14:latest
 
 MAINTAINER Hassan Foroughi hassan.foroughi@scilifelab.se 
 
-LABEL Description="This image is used to run FusionCatcher" Version="1.10"
+LABEL Description="This image is used to run FusionCatcher" Version="1.20"
 
-RUN yum clean all \
-    && yum -y groups install "Development Tools" \
-    && yum install -y \
+RUN export PATH=/usr/local/miniconda/bin:$PATH && yum install -y \
     automake \
     bzip2 \
     cmake \
@@ -17,20 +15,14 @@ RUN yum clean all \
     ncurses \
     ncurses-devel \
     make \
-    parallel \
     pigz \
     tar \
     unzip \
     wget \
-    default-jdk \
-    python-numpy \
-    python-devel \
     zlib-devel \
-    python-biopython \
-    libtbb-dev \
-    && yum clean all \
-    && conda install numpy \
+    && conda install -y -c conda-forge -c bioconda openpyxl numpy parallel \
     && wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
-    && python bootstrap.py -t --download -y -i /opt/fusioncatcher/v1.10/
+    && python bootstrap.py --help \
+    && python bootstrap.py -t -y -i /opt/fusioncatcher/v1.20/
 
 WORKDIR /opt
