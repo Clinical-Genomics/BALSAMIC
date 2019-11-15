@@ -4,7 +4,8 @@ MAINTAINER Hassan Foroughi hassan.foroughi@scilifelab.se
 
 LABEL Description="This image is used to run FusionCatcher" Version="1.20"
 
-RUN export PATH=/usr/local/miniconda/bin:$PATH && yum install -y \
+RUN yum install -y epel-release \
+    && yum install -y \
     automake \
     bzip2 \
     cmake \
@@ -20,9 +21,13 @@ RUN export PATH=/usr/local/miniconda/bin:$PATH && yum install -y \
     unzip \
     wget \
     zlib-devel \
-    && conda install -y -c conda-forge -c bioconda openpyxl numpy parallel \
+    java-1.8.0-openjdk* \
+    tbb-devel \
+    glibc-devel \
+    python-devel \
+    numpy \
+    python-biopython \
     && wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
-    && python bootstrap.py --help \
     && python bootstrap.py -t -y -i /opt/fusioncatcher/v1.20/
 
-WORKDIR /opt
+ORKDIR /opt
