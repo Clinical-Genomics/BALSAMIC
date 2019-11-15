@@ -30,4 +30,4 @@ RUN yum install -y epel-release \
     && wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
     && python bootstrap.py -t -y -i /opt/fusioncatcher/v1.20/
 
-ORKDIR /opt
+WORKDIR /opt
