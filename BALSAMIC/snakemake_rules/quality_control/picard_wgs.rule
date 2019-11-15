@@ -24,7 +24,7 @@ rule CollectMultipleMetrics:
             " CollectMultipleMetrics "
             " I={input.bam} "
             " O={params.output_prefix} "
-            " R={input.reference} "
+            " R={input.reference}; "
         "source deactivate; "
 
 
