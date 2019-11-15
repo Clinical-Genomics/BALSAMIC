@@ -12,6 +12,10 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ###
 - Increased time for indel realigner and base recalib rules
 
+### Fixed
+- WGS qc rules - updated with correct options
+  (picard - CollectMultipleMetrics, sentieon - CoverageMetrics)
+
 ## [4.0.1] - 2019-11-08
 ### Added
 - dependencies for workflow report
