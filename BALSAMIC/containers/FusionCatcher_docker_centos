@@ -1,4 +1,4 @@
-FROM hassanf/miniconda2_4.6.14:latest
+FROM centos:7.6.1810
 
 MAINTAINER Hassan Foroughi hassan.foroughi@scilifelab.se 
 
@@ -7,6 +7,9 @@ LABEL Description="This image is used to run FusionCatcher" Version="1.20"
 RUN yum install -y epel-release \
     && yum install -y \
     automake \
+    which \
+    git \
+    fontconfig
     bzip2 \
     cmake \
     curl \
@@ -28,6 +31,7 @@ RUN yum install -y epel-release \
     numpy \
     python-biopython \
     && wget --no-check-certificate http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py \
+    && python bootstrap.py --help \
     && python bootstrap.py -t -y -i /opt/fusioncatcher/v1.20/
 
 WORKDIR /opt
