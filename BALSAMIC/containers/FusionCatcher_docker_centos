@@ -9,7 +9,6 @@ RUN yum install -y epel-release \
     automake \
     which \
     git \
-    fontconfig
     bzip2 \
     cmake \
     curl \
