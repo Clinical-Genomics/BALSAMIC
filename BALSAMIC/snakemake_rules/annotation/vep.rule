@@ -15,7 +15,7 @@ rule vep:
   output:
     tab = vep_dir + "{type}.{mutation}.{sample}.{caller}.tsv",
     vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
-    tab = vep_dir + "{type}.{mutation}.{sample}.{caller}.balsamic_stat"
+    stat = vep_dir + "{type}.{mutation}.{sample}.{caller}.balsamic_stat"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     filter_vep_string = "'not COSMIC and not Existing_variation'", 
