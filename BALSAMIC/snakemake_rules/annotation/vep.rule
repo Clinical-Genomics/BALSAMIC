@@ -29,6 +29,7 @@ rule vep:
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
         "--input_file {input.vcf} "
+        "--output_file STDOUT "
         "--fork {threads} "
         "--vcf "
         "--everything "
