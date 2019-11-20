@@ -117,4 +117,4 @@ rule all:
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
-        "date +'%Y-%M-%d T%T %:z' > {output}"
+        "date +'%Y-%m-%d T%T %:z' > {output}"
