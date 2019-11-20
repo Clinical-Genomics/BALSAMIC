@@ -9,12 +9,16 @@ increment the patch number. The rational for versioning, and exact wording is ta
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
 ## [x.x.x]
-###
+### Added
+- VEP now also produces a tab delimited file
+
+### Changed
 - Increased time for indel realigner and base recalib rules
 
 ### Fixed
 - WGS qc rules - updated with correct options
   (picard - CollectMultipleMetrics, sentieon - CoverageMetrics)
+- Log warning if WES workflow cannot find SENTIEON* env variables
 
 ## [4.0.1] - 2019-11-08
 ### Added
