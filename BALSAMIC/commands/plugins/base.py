@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import click
 
-from BALSAMIC.commands.plugins.housekeeper import housekeeper as housekeeper_command
+from BALSAMIC.commands.plugins.deliver import deliver as deliver_command
 from BALSAMIC.commands.plugins.scout import scout as scout_command
 
 
@@ -12,5 +12,5 @@ def plugins(context):
     pass
 
 
-plugins.add_command(housekeeper_command)
+plugins.add_command(deliver_command)
 plugins.add_command(scout_command)

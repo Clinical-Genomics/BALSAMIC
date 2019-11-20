@@ -12,16 +12,16 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command(
-    "housekeeper",
+    "deliver",
     short_help=
     "Creates a YAML file with output from variant caller and alignment.")
 @click.option("--sample-config",
               required=True,
               help="Sample config file. Output of balsamic config sample")
 @click.pass_context
-def housekeeper(context, sample_config):
+def deliver(context, sample_config):
     '''
-    cli for housekeeper sub-command.
+    cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
     '''
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
@@ -35,22 +35,22 @@ def housekeeper(context, sample_config):
         LOG.debug('Creatiing delivery_report directory')
         os.makedirs(dst_directory)
     
-    housekeeper_wildcards = {
+    deliver_wildcards = {
         'bam': ['*merged.bam', '*cov.bed'],
         'vcf': ['*.vcf.gz'],
-        'vep': ['*.vcf.gz'],
+        'vep': ['*.vcf.gz', '*.tsv', '*html'],
         'cnv': ['*pdf', '*cnr','*cns'],
         'qc': ['multiqc*'],
         'scout': ['*scout.yaml']
     }
 
-    housekeeper_json = dict()
-    for dir_name, file_pattern_list in housekeeper_wildcards.items():
-        housekeeper_json[dir_name] = list()
+    deliver_json = dict()
+    for dir_name, file_pattern_list in deliver_wildcards.items():
+        deliver_json[dir_name] = list()
         for file_pattern in file_pattern_list:
             list_of_files = glob.glob(
                 os.path.join(result_dir, dir_name, file_pattern))
-            housekeeper_json[dir_name].extend(list_of_files)
+            deliver_json[dir_name].extend(list_of_files)
 
     yaml_write_directory = os.path.join(result_dir, 'delivery_report')
 
@@ -61,6 +61,6 @@ def housekeeper(context, sample_config):
 
     LOG.debug(f"Writing output file {yaml_file_name}")
     with open(yaml_file_name, 'w') as f:
-        yaml.dump(housekeeper_json, f, default_flow_style=False)
+        yaml.dump(deliver_json, f, default_flow_style=False)
 
-    yaml.dump(housekeeper_json, sys.stdout, default_flow_style=False)
+    yaml.dump(deliver_json, sys.stdout, default_flow_style=False)
