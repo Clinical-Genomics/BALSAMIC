@@ -63,6 +63,13 @@ def deliver(context, sample_config):
 
     LOG.debug(f"Writing output file {yaml_file_name}")
     deliver_json = convert_defaultdict_to_regular_dict(deliver_json)
+    # take the balsamic_stat file
+    balsamic_stat = [s for s in deliver_json['files']['vep'] if s.endswith('balsamic_stat')][0]
+    with open(balsamic_stat, 'r') as f:
+        balsamic_stat = yaml.load(f, Loader=yaml.SafeLoader) 
+
+    deliver_json['meta'] = balsamic_stat
+
     with open(yaml_file_name, 'w') as f:
         yaml.dump(deliver_json, f, default_flow_style=False)
 

@@ -100,7 +100,7 @@ def singularity_container(tmp_path_factory):
     """
     Create singularity container
     """
-    
+
     container_dir = tmp_path_factory.mktemp("test_container")
     container_file = container_dir / "singularity_container.simg"
 
@@ -115,6 +115,7 @@ def analysis_dir(tmp_path_factory):
     analysis_dir = tmp_path_factory.mktemp('analysis')
     return analysis_dir
 
+
 @pytest.fixture(scope='session')
 def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """
@@ -123,9 +124,9 @@ def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     case_name = 'job_submit_test_case'
     with open(tumor_normal_config, 'r') as input_config:
         sample_config = json.load(input_config)
-    
+
     script_dir = tmp_path_factory.mktemp('snakemake_script')
-    snakemake_script_file = script_dir / 'example_script.sh' 
+    snakemake_script_file = script_dir / 'example_script.sh'
     snakemake_script = '''#!/bin/sh
 # properties = {"type": "single", "rule": "all", "local": false, "input": ["dummy_path"], "output": ["dummy_path"], "wildcards": {}, "params": {}, "log": [], "threads": 1, "resources": {}, "jobid": 0, "cluster": {"name": "BALSAMIC.all.", "time": "00:15:00", "n": 1, "mail_type": "END", "partition": "core"}}
 ls -l # dummy command
@@ -134,12 +135,12 @@ ls -l # dummy command
     with open(snakemake_script_file, 'w') as fn:
         fn.write(snakemake_script)
 
-    return {
-      "snakescript": str(snakemake_script_file)
-      }
+    return {"snakescript": str(snakemake_script_file)}
+
 
 @pytest.fixture(scope='session')
-def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
+                        singularity_container):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -155,9 +156,8 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, singularit
     result = runner.invoke(cli, [
         'config', 'case', '-p', panel_bed_file, '-t',
         str(tumor), '-n',
-        str(normal), '--case-id', case_name,
-        '--singularity', singularity_container,  
-        '--analysis-dir',
+        str(normal), '--case-id', case_name, '--singularity',
+        singularity_container, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
@@ -166,7 +166,8 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir, singularit
 
 
 @pytest.fixture(scope='session')
-def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
+def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                            singularity_container):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -181,9 +182,8 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, singul
     result = runner.invoke(cli, [
         'config', 'case', '-t',
         str(tumor), '-n',
-        str(normal), '--case-id', case_name,
-        '--singularity', singularity_container,  
-        '--analysis-dir',
+        str(normal), '--case-id', case_name, '--singularity',
+        singularity_container, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
         '--reference-config', reference_json
     ])
@@ -209,17 +209,23 @@ def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container):
         'config', 'case', '-p', panel_bed_file, '-t',
         str(tumor), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
-        '--singularity', singularity_container,  
-        '--reference-config', reference_json
+        '--singularity', singularity_container, '--reference-config',
+        reference_json
     ])
 
-    dummy_log = tmpdir_factory.mktemp('analysis/' + case_name + '/logs', numbered=False).join('example_file').write('not_empty')
+    dummy_log = tmpdir_factory.mktemp(
+        'analysis/' + case_name + '/logs',
+        numbered=False).join('example_file').write('not_empty')
+    dummy_balsamic_stat = tmpdir_factory.mktemp(
+        'analysis/' + case_name + '/analysis/vep',
+        numbered=False).join('vcf_merge.balsamic_stat').write('not_empty')
 
     return os.path.join(analysis_dir, case_name, sample_config_file_name)
 
 
 @pytest.fixture(scope='session')
-def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, singularity_container):
+def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                          singularity_container):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -234,8 +240,8 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, singular
         'config', 'case', '-t',
         str(tumor), '--case-id', case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', sample_config_file_name,
-        '--singularity', singularity_container,  
-        '--reference-config', reference_json
+        '--singularity', singularity_container, '--reference-config',
+        reference_json
     ])
 
     return str(analysis_dir / case_name / sample_config_file_name)
