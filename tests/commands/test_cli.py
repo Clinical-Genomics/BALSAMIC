@@ -54,9 +54,9 @@ def test_plugins(invoke_cli):
     assert result.exit_code == 0
 
 
-def test_plugins_housekeeper(invoke_cli):
+def test_plugins_deliver(invoke_cli):
     # WHEN invoking command with missing options
-    result = invoke_cli(['plugins', 'housekeeper', '--help'])
+    result = invoke_cli(['plugins', 'deliver', '--help'])
 
     # THEN It should throw missiong option error
     assert result.exit_code == 0

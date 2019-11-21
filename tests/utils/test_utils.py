@@ -3,6 +3,7 @@ import os
 import pytest
 import sys
 import copy
+import collections
 from pathlib import Path
 
 from BALSAMIC.utils.cli import SnakeMake
@@ -15,6 +16,8 @@ from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_ref_path
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_config
+from BALSAMIC.utils.cli import recursive_default_dict
+from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -23,6 +26,31 @@ from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_threads
+
+
+def test_recursive_default_dict():
+    # GIVEN a dictionary
+    test_dict = recursive_default_dict()
+    test_dict['key_1']['key_2'] = 'value_1'
+
+    # WHEN it is recursively creates a default dictionary
+    # THEN the output should be a dicitionary
+    assert isinstance(test_dict, collections.defaultdict)
+    assert 'key_2' in test_dict['key_1']
+
+
+def test_convert_defaultdict_to_regular_dict():
+    # GIVEN a recursively created default dict
+    test_dict = recursive_default_dict()
+    test_dict['key_1']['key_2'] = 'value_1'
+
+    # WHEN converting it back to normal dict
+    test_dict = convert_defaultdict_to_regular_dict(test_dict)
+    
+    # THEN the output type should be dict and not defaultdict
+    assert not isinstance(test_dict, collections.defaultdict)
+    assert isinstance(test_dict, dict)
+    assert 'key_2' in test_dict['key_1']
 
 
 def test_get_ref_path(config_files):
