@@ -36,3 +36,6 @@ there is a proper config file created.
 BALSAMIC is using a development structure similar to GitHub Flow: https://guides.github.com/introduction/flow/ , where
 features branch are merged into master branch. Releases will be managed from master branch. It is then validated,
 verified, and a bumpversion justified.
+
+
+* Logo by: Mikael A.
