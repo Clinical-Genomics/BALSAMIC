@@ -14,6 +14,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 
 ### Changed
 - Increased time for indel realigner and base recalib rules
+- decoupled vep stat from vep main rule
 
 ### Fixed
 - WGS qc rules - updated with correct options
