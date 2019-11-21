@@ -13,9 +13,12 @@ rule vep:
     cosmic = config["reference"]["cosmic"]
   output:
     tab = vep_dir + "{type}.{mutation}.{sample}.{caller}.tsv",
-    vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
+    vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
   params:
+    bed = config["panel"]["capture_kit"] if "panel" in config else "",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    filter_vep_string = "'not COSMIC and not Existing_variation'", 
+    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
@@ -57,4 +60,28 @@ rule vep:
         "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
         "--verbose "
         "--force_overwrite; "
+    "source deactivate; "
+
+rule vep_stat:
+  input:
+    vep = vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
+  output:
+    stat = vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat"
+  params:
+    bed = config["panel"]["capture_kit"] if "panel" in config else "",
+    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    filter_vep_string = "'not COSMIC and not Existing_variation'", 
+    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
+  threads: get_threads(cluster_config, 'vep')
+  singularity: singularity_image 
+  benchmark:
+    benchmark_dir + 'vep_stat_' + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat.tsv" 
+  shell:
+    "source activate {params.conda}; "
+    "if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi; "
+    "bcftools view -f PASS {input.vep} 2> /dev/null "
+        " | bcftools filter -i \"{params.bcftools_filter_string}\" "
+        " | filter_vep --filter {params.filter_vep_string} "
+        " | bcftools +counts "
+        " | awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.stat};"
     "source deactivate; "

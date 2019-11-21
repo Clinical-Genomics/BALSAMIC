@@ -117,6 +117,7 @@ rule all:
         os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
+        vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat",
         cnvkit_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
