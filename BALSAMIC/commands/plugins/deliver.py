@@ -7,6 +7,8 @@ import yaml
 import click
 
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.cli import recursive_default_dict
+from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -38,19 +40,19 @@ def deliver(context, sample_config):
     deliver_wildcards = {
         'bam': ['*merged.bam', '*cov.bed'],
         'vcf': ['*.vcf.gz'],
-        'vep': ['*.vcf.gz', '*.tsv', '*html'],
+        'vep': ['*.vcf.gz', '*.tsv', '*html', '*balsamic_stat'],
         'cnv': ['*pdf', '*cnr','*cns'],
         'qc': ['multiqc*'],
         'scout': ['*scout.yaml']
     }
 
-    deliver_json = dict()
+    deliver_json = recursive_default_dict()
     for dir_name, file_pattern_list in deliver_wildcards.items():
-        deliver_json[dir_name] = list()
+        deliver_json['files'][dir_name] = list()
         for file_pattern in file_pattern_list:
             list_of_files = glob.glob(
                 os.path.join(result_dir, dir_name, file_pattern))
-            deliver_json[dir_name].extend(list_of_files)
+            deliver_json['files'][dir_name].extend(list_of_files)
 
     yaml_write_directory = os.path.join(result_dir, 'delivery_report')
 
@@ -60,6 +62,7 @@ def deliver(context, sample_config):
                                   sample_config['analysis']['case_id'] + ".hk")
 
     LOG.debug(f"Writing output file {yaml_file_name}")
+    deliver_json = convert_defaultdict_to_regular_dict(deliver_json)
     with open(yaml_file_name, 'w') as f:
         yaml.dump(deliver_json, f, default_flow_style=False)
 
