@@ -44,7 +44,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
     """ Configure workflow for reference generation """
-    
+
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
@@ -72,10 +72,12 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
 
     config = merge_json(config, install_config)
 
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+    os.makedirs(outdir, exist_ok=True)
 
     write_json(config, config_json)
+    LOG.info(
+        f'Reference generation workflow configured successfully - {config_json}'
+    )
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(snakefile=snakefile,
@@ -92,10 +94,10 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
                                 format="pdf",
                                 engine="dot")
 
-    if graph_obj.render():
+    try:
+        graph_pdf = graph_obj.render()
         LOG.info(
-            f'Reference generation workflow configured successfully - {config_json}'
-        )
-    else:
-        LOG.error(f'Snakemake DAG graph generation failed - {dagfile_path}')
-        click.Abort()
+            f'Reference workflow graph generated successfully - {graph_pdf}')
+    except Exception:
+        LOG.error(f'Reference workflow graph generation failed')
+        raise click.Abort()

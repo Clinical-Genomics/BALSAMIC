@@ -1,7 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-
-__author__ = "Hassan Foroughi Asl"
+# VEP annotation module. Annotate all VCFs generated through VEP
+# This produces both vcf.gz and tab delimited output.
+# NOTE: Tab delimited output contains only PASSed variants
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
@@ -11,10 +12,13 @@ rule vep:
     vcf = vcf_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
     cosmic = config["reference"]["cosmic"]
   output:
-    vep = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf",
-    vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz"
+    tab = vep_dir + "{type}.{mutation}.{sample}.{caller}.tsv",
+    vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
   params:
+    bed = config["panel"]["capture_kit"] if "panel" in config else "",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    filter_vep_string = "'not COSMIC and not Existing_variation'", 
+    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
@@ -28,7 +32,7 @@ rule vep:
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
         "--input_file {input.vcf} "
-        "--output_file {output.vep} "
+        "--output_file STDOUT "
         "--fork {threads} "
         "--vcf "
         "--everything "
@@ -39,7 +43,45 @@ rule vep:
         "--cache "
         "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
         "--verbose "
-        "--force_overwrite && "
-    "bgzip -f -c {output.vep} > {output.vcf} && "
-    "tabix -f -p vcf {output.vcf};"
+        "--force_overwrite | bgzip > {output.vcf} && tabix -f -p vcf {output.vcf};"
+    "bcftools view -f .,PASS {input.vcf} | vep "
+        "--dir $vep_path "
+        "--dir_cache {params.vep_cache} "
+        "--dir_plugins $vep_path "
+        "--output_file {output.tab} "
+        "--fork {threads} "
+        "--tab "
+        "--everything "
+        "--format vcf "
+        "--offline "
+        "--variant_class "
+        "--merged "
+        "--cache "
+        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
+        "--verbose "
+        "--force_overwrite; "
+    "source deactivate; "
+
+rule vep_stat:
+  input:
+    vep = vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
+  output:
+    stat = vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat"
+  params:
+    bed = config["panel"]["capture_kit"] if "panel" in config else "",
+    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    filter_vep_string = "'not COSMIC and not Existing_variation'", 
+    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
+  threads: get_threads(cluster_config, 'vep')
+  singularity: singularity_image 
+  benchmark:
+    benchmark_dir + 'vep_stat_' + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat.tsv" 
+  shell:
+    "source activate {params.conda}; "
+    "if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi; "
+    "bcftools view -f PASS {input.vep} 2> /dev/null "
+        " | bcftools filter -i \"{params.bcftools_filter_string}\" "
+        " | filter_vep --filter {params.filter_vep_string} "
+        " | bcftools +counts "
+        " | awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.stat};"
     "source deactivate; "

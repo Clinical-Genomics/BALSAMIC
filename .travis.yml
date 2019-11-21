@@ -7,6 +7,7 @@ python:
 
 before_install:
   - sudo apt-get install graphviz
+
 install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
 
