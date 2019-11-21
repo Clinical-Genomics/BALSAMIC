@@ -287,7 +287,7 @@ def main(args=None):
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
-    scheduler_file = os.path.join(args.script_dir, sample_config["analysis"]["case_id"] + ".scheduler_dump")
+    # scheduler_file = os.path.join(args.script_dir, sample_config["analysis"]["case_id"] + ".scheduler_dump")
     #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
     write_scheduler_dump(scheduler_file=scheduler_file, cmd=scheduler_cmd.build_cmd())
 
