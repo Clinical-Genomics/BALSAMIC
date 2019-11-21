@@ -3,6 +3,8 @@ import re
 import json
 import yaml
 import sys
+import collections
+
 from io import StringIO
 from pathlib import Path
 from itertools import chain
@@ -274,3 +276,21 @@ def get_ref_path(input_json):
             ref_json['reference'][k] = os.path.abspath(v)
 
     return ref_json
+
+def recursive_default_dict():
+    '''
+    Recursivly create defaultdict.
+    '''
+    return collections.defaultdict(recursive_default_dict)
+
+
+def convert_defaultdict_to_regular_dict(inputdict: dict):
+    '''
+    Recursively convert defaultdict to dict.
+    '''
+    if isinstance(inputdict, collections.defaultdict):
+        inputdict = {
+            key: convert_defaultdict_to_regular_dict(value)
+            for key, value in inputdict.items()
+        }
+    return inputdict

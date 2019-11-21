@@ -2,12 +2,16 @@
 # coding: utf-8
 
 import os
+import logging
+
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
+
+LOG = logging.getLogger(__name__)
 
 rule_dir = config["rule_directory"]
 benchmark_dir = config["analysis"]["benchmark"]
@@ -32,7 +36,7 @@ try:
     SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
 except Exception as error:
     sentieon = False
-    print("ERROR: Set Environment variable to run SENTIEON variant callers")
+    LOG.warn("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
     
 
 # Define set of rules
@@ -113,8 +117,9 @@ rule all:
         os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
+        vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat",
         cnvkit_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
-        "date +'%Y-%M-%d T%T %:z' > {output}"
+        "date +'%Y-%m-%d T%T %:z' > {output}"

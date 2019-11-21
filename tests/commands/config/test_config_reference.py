@@ -1,9 +1,6 @@
-import pytest
-import glob
+import graphviz
 from pathlib import Path
-from click.testing import CliRunner
-
-from BALSAMIC.commands.base import cli
+from unittest import mock
 
 
 def test_config_reference_write_json(invoke_cli, tmp_path, singularity_container):
@@ -36,4 +33,17 @@ def test_config_reference_no_write_perm(tmp_path, invoke_cli, singularity_contai
          str(test_new_dir)])
 
     # THEN it should create test_reference.json and exist with no error
+    assert result.exit_code == 1
+
+
+def test_config_reference_exception(invoke_cli, tmp_path, singularity_container):
+    # Given test_reference.json
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    with mock.patch.object(graphviz, 'Source') as mocked:
+        mocked.return_value = None
+        result = invoke_cli(['config', 'reference', '-c', 'secret_key', '--singularity',
+                             singularity_container, '-o', str(test_new_dir)])
+
     assert result.exit_code == 1
