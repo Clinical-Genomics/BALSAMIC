@@ -78,14 +78,18 @@ class QsubScheduler:
         depend = ""
         qsub_options = list()
         
-        if self.time:
-            resource_params += " -l \"walltime={},".format(str(self.time))
+        # Exclusive node
+        resource_params += " -l excl=1 "
+#        if self.time:
+#            resource_params += " -l \"walltime={}\" ".format(str(self.time))
 
         if self.ntasks:
-            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
+#            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
+            resource_params += " -pe mpi {} ".format(str(self.ntasks))
 
         if self.account:
-            qsub_options.append(" -A " + str(self.account))
+#            qsub_options.append(" -A " + str(self.account))
+            qsub_options.append(" -q " + str(self.account))
 
         if self.error:
             qsub_options.append(" -e " + str(self.error))
@@ -94,7 +98,8 @@ class QsubScheduler:
             qsub_options.append(" -o " + str(self.output))
 
         if self.mail_type:
-            qsub_options.append(" -m " + str(self.mail_type))
+#            qsub_options.append(" -m " + str(self.mail_type))
+            qsub_options.append(" -m s ")# + str(self.mail_type))
 
         if self.mail_user:
             qsub_options.append(" -M " + str(self.mail_user))
@@ -113,7 +118,7 @@ class QsubScheduler:
         if self.script:
             qsub_options.append(" {} ".format(self.script))
 
-        return "qsub " + " ".join(qsub_options)
+        return "qsub -S /bin/bash " + " ".join(qsub_options)
 
 
 def read_sample_config(input_json):
@@ -135,15 +140,14 @@ def write_sacct_file(sacct_file, job_id):
         raise e
 
 
-# def write_sbatch_dump(sbatch_file, sbatch_cmd):
-#     ''' writes sbatch dump for debuging purpose '''
-#     try:
-#         with open(sbatch_file, 'a') as f:
-#             f.write(sbatch_cmd + "\n")
-#             f.write(sys.executable + "\n")
-#     except OSError:
-#         raise
-
+# def write_scheduler_dump(scheduler_file, cmd):
+#    ''' writes sbatch dump for debuging purpose '''
+#    try:
+#        with open(scheduler_file, 'a') as f:
+#            f.write(cmd + "\n")
+#            f.write(sys.executable + "\n")
+#    except OSError:
+#        raise
 
 def submit_job(sbatch_cmd, profile):
     ''' subprocess call for sbatch command '''
@@ -236,10 +240,12 @@ def main(args=None):
     jobscript = os.path.join(args.script_dir, os.path.basename(jobscript))
 
     if args.profile == 'slurm':
+        jobid = '%j'
         scheduler_cmd = SbatchScheduler()
         if args.dependencies:
             scheduler_cmd.dependency = ','.join(["afterok:%s" % d for d in args.dependencies])
     elif args.profile == 'qsub':
+        jobid = '${JOB_ID}'
         scheduler_cmd = QsubScheduler()
         scheduler_cmd.dependency = args.dependencies
 
@@ -264,9 +270,9 @@ def main(args=None):
     scheduler_cmd.account = args.account
     scheduler_cmd.mail_type = mail_type
     scheduler_cmd.error = os.path.join(args.log_dir,
-                                    os.path.basename(jobscript) + "_%j.err")
+                                    os.path.basename(jobscript) + "_" + jobid + ".err")
     scheduler_cmd.output = os.path.join(args.log_dir,
-                                     os.path.basename(jobscript) + "_%j.out")
+                                     os.path.basename(jobscript) + "_" + jobid + ".out")
 
     scheduler_cmd.ntasks = job_properties["cluster"]["n"]
     scheduler_cmd.time = job_properties["cluster"]["time"]
@@ -276,9 +282,9 @@ def main(args=None):
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
+    # scheduler_file = os.path.join(args.script_dir, sample_config["analysis"]["case_id"] + ".scheduler_dump")
     #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-    #        write_sbatch_dump(sbatch_file=sbatch_file,
-    #                          sbatch_cmd=sbatch_cmd.build_cmd())
+    # write_scheduler_dump(scheduler_file=scheduler_file, cmd=scheduler_cmd.build_cmd())
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
 

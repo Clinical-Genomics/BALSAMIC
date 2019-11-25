@@ -138,7 +138,9 @@ def test_SbatchScheduler():
 
     # THEN sbatch command string is constructed
     assert isinstance(sbatch_cmd, str)
-    assert sbatch_cmd == 'sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" --output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" --ntasks "2" --qos "low" --time "01:00:00" example_script.sh'
+    assert sbatch_cmd == ('sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" '
+                          '--output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" '
+                          '--ntasks "2" --qos "low" --time "01:00:00" example_script.sh')
 
 
 def test_qsub_scheduler():
@@ -160,7 +162,8 @@ def test_qsub_scheduler():
 
     # THEN qsub command should be constructed
     assert isinstance(qsub_cmd, str)
-    assert qsub_cmd == 'qsub  -A development  -e test_job.err  -o test_job.out  -m FAIL  -M john.doe@example.com  -p low  -l "walltime=01:00:00,nodes=1:ppn=2"   -W "depend=afterok:12345"  example_script.sh '
+    assert qsub_cmd == ('qsub -S /bin/bash  -q development  -e test_job.err  -o test_job.out  -m s   -M '
+                        'john.doe@example.com  -p low  -l excl=1  -pe mpi 2   -W "depend=afterok:12345"  example_script.sh ')
 
 
 def test_read_sample_config_err(config_files):
