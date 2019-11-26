@@ -70,7 +70,7 @@ rule vep_stat:
   params:
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
-    filter_vep_string = "'not COSMIC and not Existing_variation'", 
+    filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
@@ -81,7 +81,7 @@ rule vep_stat:
     "if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi; "
     "bcftools view -f PASS {input.vep} 2> /dev/null "
         " | bcftools filter -i \"{params.bcftools_filter_string}\" "
-        " | filter_vep --filter {params.filter_vep_string} "
+        " | filter_vep --ontology --filter {params.filter_vep_string} "
         " | bcftools +counts "
         " | awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.stat};"
     "source deactivate; "
