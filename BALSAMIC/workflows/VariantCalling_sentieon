@@ -25,11 +25,12 @@ singularity_image = config['singularity']['image']
 try:
     SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
     SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
-    SENTIEON_DNASCOPE = os.environ["SENTIEON_DNASCOPE"]
-    SENTIEON_TNSCOPE = os.environ["SENTIEON_TNSCOPE"]
 except Exception as error:
     print("ERROR: Set Environment variable to run this pipeline.")
     raise
+
+SENTIEON_DNASCOPE = rule_dir + 'assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model'
+SENTIEON_TNSCOPE = rule_dir + 'assets/sentieon_models/SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model'
 
 # rules for pipeline
 quality_check = ["snakemake_rules/quality_control/fastp.rule", \
