@@ -54,6 +54,7 @@ rule vardict_merge:
   params:
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
     name = config["analysis"]["case_id"],
+    vcf_filter = models.VARCALL['tumor_normal']['vardict']['filter'] 
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
@@ -110,6 +111,7 @@ rule mutect2_merge:
   params:
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
+    vcf_filter = models.VARCALL['tumor_normal']['mutect2']['filter'] 
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
@@ -137,6 +139,7 @@ rule strelka_tumor_normal:
     tmpdir = vcf_dir + "strelka/", 
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
+    vcf_filter = models.VARCALL['tumor_normal']['strelka']['filter'] 
   threads: get_threads(cluster_config, "strelka_tumor_normal")
   singularity: singularity_image
   benchmark:
