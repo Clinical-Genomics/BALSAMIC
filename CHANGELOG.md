@@ -16,7 +16,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ### Changed
 - Increased time for indel realigner and base recalib rules
 - decoupled vep stat from vep main rule
-- changed qsub command. removed time and account for qsub.
+- changed qsub command to match UGE
 
 ### Fixed
 - WGS qc rules - updated with correct options
