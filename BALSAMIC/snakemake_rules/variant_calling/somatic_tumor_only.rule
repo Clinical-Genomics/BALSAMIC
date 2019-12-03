@@ -40,6 +40,7 @@ rule vardict_tumor_only:
     benchmark_dir + 'vardict_tumor_only_' + '{bedchrom}.vardict.tsv'
   shell:
     "source activate {params.conda}; "
+    "export PERL5LIB=;"
     "vardict -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "
         "{params.col_info} {input.bed} "

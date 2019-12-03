@@ -113,12 +113,13 @@ class QsubScheduler:
         if self.dependency:
             for jobid in self.dependency:
                 depend = depend + ":" + jobid
-            qsub_options.append(" -W \"depend=afterok" + str(depend) + "\"")
+            #qsub_options.append(" -W \"depend=afterok" + str(depend) + "\"")
+            qsub_options.append(" -hold_jid " + ",".join(self.dependency))
 
         if self.script:
             qsub_options.append(" {} ".format(self.script))
 
-        return "qsub -S /bin/bash " + " ".join(qsub_options)
+        return "qsub -V -S /bin/bash " + " ".join(qsub_options)
 
 
 def read_sample_config(input_json):
@@ -167,7 +168,8 @@ def submit_job(sbatch_cmd, profile):
         m = re.search("Submitted batch job (\d+)", res)
         jobid = m.group(1)
     elif profile == "qsub":
-        jobid = str(res)
+        jobid_tmp = str(res).split()[3]
+        jobid = jobid_tmp.strip("\"()\"")
 
     print(jobid)
     return jobid
