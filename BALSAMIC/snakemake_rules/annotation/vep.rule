@@ -27,6 +27,7 @@ rule vep:
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "
+    "export PERL5LIB=;"
     "vep "
         "--dir $vep_path "
         "--dir_cache {params.vep_cache} "
