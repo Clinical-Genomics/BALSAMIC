@@ -62,7 +62,6 @@ rule vardict_merge:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
     name = config["analysis"]["case_id"],
-    vcf_filter = models.VARCALL['tumor_only']['vardict']['filter'] 
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
@@ -71,6 +70,7 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
+    "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
     "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
@@ -116,7 +116,6 @@ rule mutect2_merge:
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
   params: 
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
-    vcf_filter = models.VARCALL['tumor_only']['mutect2']['filter'] 
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
@@ -125,6 +124,7 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
     "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
+    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
     "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
