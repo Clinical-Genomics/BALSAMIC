@@ -54,7 +54,6 @@ rule vardict_merge:
   params:
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
     name = config["analysis"]["case_id"],
-    vcf_filter = models.VARCALL['tumor_normal']['vardict']['filter'] 
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
@@ -63,6 +62,8 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}; " 
+    "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
+    "echo -e \"{params.name}-match\" > {output.namemap}.normal; " 
     "echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
@@ -111,7 +112,6 @@ rule mutect2_merge:
   params:
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
-    vcf_filter = models.VARCALL['tumor_normal']['mutect2']['filter'] 
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
@@ -120,6 +120,8 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
+    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
+    "echo -e \"NORMAL\" > {output.namemap}.normal; " 
     "echo '{{ vcf: {{ mutect: {{ name: mutect2, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
@@ -139,7 +141,6 @@ rule strelka_tumor_normal:
     tmpdir = vcf_dir + "strelka/", 
     runmode = "local",
     conda = get_conda_env(config["conda_env_yaml"],"strelka"),
-    vcf_filter = models.VARCALL['tumor_normal']['strelka']['filter'] 
   threads: get_threads(cluster_config, "strelka_tumor_normal")
   singularity: singularity_image
   benchmark:
@@ -162,6 +163,8 @@ rule strelka_tumor_normal:
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
+    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
+    "echo -e \"NORMAL\" > {output.namemap}.normal; " 
     "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.final} }} }} }}' > {output.yaml}; "
     "source deactivate; "
 
