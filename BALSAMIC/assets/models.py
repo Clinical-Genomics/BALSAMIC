@@ -9,14 +9,17 @@ Contains constants and models for analysis or filtering
 VARCALL = {
     'tumor_only': {
         'vardict': {
-            'filter': 'DP',
-            'exclude_filter': ('INFO/DP<50 && INFO/AF<0.005 && ((MQ < 55.0 && NM > 1.0) ',
-                               '|| (MQ < 60.0 && NM > 2.0)) && INFO/VD<10'),
+            'exclude_filter': 'FMT/AD[@tumor_sample_names:1] < 10 || FMT/DP[@tumor_sample_names] < 100',
+            'exclude_filter_string': 'balsamic_vardict_softfilter',
+            'exclude_filter_mode': '-m "+" -s',
             'post_query_script': None
         },
         'mutect2': {
-            'filter': 'AF>0',
-            'exclude_filter': '',
+            'exclude_filter': ('FMT/AD[@tumor_sample_names:1]<10 || sum(FMT/AD)<100 ',
+                               '|| FMT/AF[@tumor_sample_names]>0.75',
+                               '|| (FMT/QSS[@tumor_sample_names:1]/FMT/AD[@tumor_sample_names:1])<20'),
+            'exclude_filter_string': 'balsamic_mutect2_softfilter',
+            'exclude_filter_mode': '-m "+" -s',
             'post_query_script': None
         }
     },
