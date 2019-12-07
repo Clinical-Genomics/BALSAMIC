@@ -46,6 +46,7 @@ rule CollectHsMetrics:
     fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
     bed = config["panel"]["capture_kit"],
     bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+    fa = config["reference"]["reference_genome"],
   output:
     mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
   params:
@@ -67,6 +68,7 @@ rule CollectHsMetrics:
       "TI={input.bam}.picard.bedintervals "
       "I={input.bam} "
       "O={output.mrkdup} "
+      "R={input.fa} "
       "COVERAGE_CAP=50000 "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
     "source deactivate; "

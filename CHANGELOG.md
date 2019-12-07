@@ -12,6 +12,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ### Added
 - VEP now also produces a tab delimited file
 - CNVkit rules output genemetrics and gene break file
+- Added reference genome to be able to calculate AT/CG dropouts by Picard
 
 ### Changed
 - Increased time for indel realigner and base recalib rules
