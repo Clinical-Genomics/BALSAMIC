@@ -7,7 +7,7 @@ import yaml
 import click
 
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils import plot_cov
+#from BALSAMIC.utils import plot_cov
 
 LOG = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def target_cov_plot(context, sample_config):
 
     for f in cov_files:
         LOG.info("Plotting coverage for %s", f)
-        plot_file = plot_cov.hist(cov_file=f)
+#        plot_file = plot_cov.hist(cov_file=f)
         LOG.info("Coverage plot file: %s", plot_file)
 # TODO: patten for an input region
 # pattern = re.compile("^([1-9]{1,2}):([0-9]+)(\-)([0-9]+)") 

@@ -3,7 +3,7 @@ import click
 
 from BALSAMIC.commands.plugins.deliver import deliver as deliver_command
 from BALSAMIC.commands.plugins.scout import scout as scout_command
-from BALSAMIC.commands.plugins.target_cov_plot import target_cov_plot as target_cov_plot_command
+from BALSAMIC.commands.plugins.cov_plot import target_cov_plot as target_cov_plot_command
 
 
 @click.group()
