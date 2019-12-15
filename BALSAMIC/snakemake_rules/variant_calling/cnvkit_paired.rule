@@ -14,6 +14,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     normal_bam = "{normal}.dedup.realign.bam".format(normal = get_sample_type(config["samples"], "normal")[0])
     tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = get_sample_type(config["samples"], "tumor")[0])
     cnvkit_params = " --method wgs "
+    cnvkit_params += " --target-avg-size 1000 "
     cnvkit_params += f" -f {fasta} --annotate {refflat} "
     
 else:
