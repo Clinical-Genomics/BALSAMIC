@@ -25,7 +25,9 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - WGS qc rules - updated with correct options
   (picard - CollectMultipleMetrics, sentieon - CoverageMetrics)
 - Log warning if WES workflow cannot find SENTIEON* env variables
+- Fixes issue with cnvkit and WGS samples #268
 - Fix #267 coverage issue with long deletions in vardict
+
 
 ## [4.0.1] - 2019-11-08
 ### Added
