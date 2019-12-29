@@ -14,6 +14,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - CNVkit rules output genemetrics and gene break file
 - Added reference genome to be able to calculate AT/CG dropouts by Picard
 - coverage plot plugin part of issue #75
+- callable regions for CNV calling of tumor-only
 
 ### Changed
 - Increased time for indel realigner and base recalib rules
