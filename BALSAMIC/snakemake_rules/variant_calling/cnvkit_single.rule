@@ -6,21 +6,21 @@ from BALSAMIC import __version__ as bv
 
 fasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
-exon_bed = config["reference"]["exon_bed"]
+wgs_calling_interval = config["reference"]["wgs_calling_interval"]
 
 if config["analysis"]["sequencing_type"] == 'wgs':
-    tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = get_sample_type(config["samples"], "tumor")[0])
+    tumor_bam = "{tumor}.dedup.realign".format(tumor = get_sample_type(config["samples"], "tumor")[0])
     cnvkit_params = " --method wgs "
 else:
-    tumor_bam = "tumor.merged.bam"
+    tumor_bam = "tumor.merged"
     cnvkit_params = " --drop-low-coverage --method hybrid "
 
 rule cnvkit_single:
     input:
         fasta = fasta, 
         refflat = refflat, 
-        exon_bed = exon_bed, 
-        bamT = bam_dir + tumor_bam, 
+        wgs_calling_interval = wgs_calling_interval, 
+        bamT = bam_dir + tumor_bam + ".bam", 
     output:
         done = cnv_dir + "cnvkit_single.done"
     params:
@@ -40,7 +40,7 @@ rule cnvkit_single:
         "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
         "cnvkit.py reference -o {params.refcnn} -f {input.fasta} -t {params.cnv_dir}/targets.bed; "
         "else "
-        "cnvkit.py reference -o {params.refcnn} -f {input.fasta} -t {input.exon_bed}; " 
+        "cnvkit.py reference -o {params.refcnn} -f {input.fasta} -t {input.wgs_calling_interval}; " 
         "fi; "
         "cnvkit.py batch {input.bamT} "
             "{params.extra} "
