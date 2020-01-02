@@ -23,6 +23,7 @@ vcf_1kg_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs
 cosmicdb_url = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz"
 refgene_txt_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
 refgene_sql_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql"
+wgs_calling_url = "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list"
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
@@ -42,6 +43,7 @@ reference_genome_index = os.path.join(genome_dir, "human_g1k_v37_decoy.fasta.fai
 refseq_bed = os.path.join(genome_dir, "refseq.flat.bed")
 refgene = os.path.join(genome_dir, "refGene.txt")
 refseq_flat = os.path.join(genome_dir, "refseq.flat")
+wgs_calling_interval =  os.path.join(genome_dir, "wgs_calling_regions.v1")
 genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
 
 dbsnp = os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf")
@@ -53,12 +55,14 @@ cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
 # list of reference download link and output file name
-ref_list = [(reference_genome_url, reference_genome, "gsutil"),
-            (dbsnp_url, dbsnp, "gsutil"),
-            (hc_vcf_1kg_url, hc_vcf_1kg, "gsutil"),
-            (mills_1kg_url, mills_1kg, "gsutil"),
-            (known_indel_1kg_url, known_indel_1kg, "gsutil"),
-            (vcf_1kg_url, vcf_1kg, "wget")]
+ref_list_gzip = [(reference_genome_url, reference_genome, "gsutil"),
+                (dbsnp_url, dbsnp, "gsutil"),
+                (hc_vcf_1kg_url, hc_vcf_1kg, "gsutil"),
+                (mills_1kg_url, mills_1kg, "gsutil"),
+                (known_indel_1kg_url, known_indel_1kg, "gsutil"),
+                (vcf_1kg_url, vcf_1kg, "wget")]
+
+ref_list_flat = [(wgs_calling_url, wgs_calling_interval, "gsutil"),] 
 
 shell.prefix("set -eo pipefail; ")
 
@@ -103,7 +107,8 @@ rule all:
         known_indel_1kg = known_indel_1kg + ".gz",
         cosmic_vcf = cosmicdb + ".gz",
         variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
-        vep = vep_dir
+        vep = vep_dir,
+        wgs_calling = wgs_calling_interval
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = reference_json,
@@ -125,6 +130,7 @@ rule all:
             "exon_bed": input.refseq_bed,
             "refflat": input.refseq_flat,
             "refGene": input.refgene,
+            "wgs_calling_interval": input.wgs_calling,
             "vep": input.vep
         }
 
@@ -142,16 +148,19 @@ rule all:
 ##########################################################
 
 rule download_reference:
-    params:
-        link = ref_list
     output:
-        expand("{output}", output=[ref[1] for ref in ref_list])
+        expand("{output}", output=[ref[1] for ref in ref_list_gzip + ref_list_flat])
     run:
-        for ref in ref_list:
+        for ref in ref_list_gzip:
             if ref[2] == "gsutil":
                 shell("gsutil cp -L {ref[1]}.log {ref[0]} - | gunzip > {ref[1]}") 
             else:
                 shell("wget -a {ref[1]}.log -O - {ref[0]} | gunzip > {ref[1]}")
+        for ref in ref_list_flat:
+            if ref[2] == "gsutil":
+                shell("gsutil cp -L {ref[1]}.log {ref[0]} {ref[1]}") 
+            else:
+                shell("wget -a {ref[1]}.log -O {ref[1]} {ref[0]}")
 
 rule download_refgene:
     params:
