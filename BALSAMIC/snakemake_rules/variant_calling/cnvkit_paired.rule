@@ -11,30 +11,33 @@ fasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
 
 if config["analysis"]["sequencing_type"] == 'wgs':
-    normal_bam = "{normal}.dedup.realign.bam".format(normal = get_sample_type(config["samples"], "normal")[0])
-    tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = get_sample_type(config["samples"], "tumor")[0])
+    normal_bam = "{normal}.dedup.realign".format(normal = get_sample_type(config["samples"], "normal")[0])
+    tumor_bam = "{tumor}.dedup.realign".format(tumor = get_sample_type(config["samples"], "tumor")[0])
     cnvkit_params = " --method wgs "
     cnvkit_params += " --target-avg-size 1000 "
     cnvkit_params += f" -f {fasta} --annotate {refflat} "
     
 else:
-    normal_bam = "normal.merged.bam"
-    tumor_bam = "tumor.merged.bam"
+    normal_bam = "normal.merged"
+    tumor_bam = "tumor.merged"
     cnvkit_params = " --drop-low-coverage --method hybrid "
     cnvkit_params += f" --targets {cnv_dir}/targets.bed "
+    cnvkit_params += " --target-avg-size 50 "
 
 rule cnvkit_paired:
     input:
         fasta = fasta, 
         refflat = refflat, 
-        bamN = bam_dir + normal_bam, 
-        bamT = bam_dir + tumor_bam, 
+        bamN = bam_dir + normal_bam + ".bam", 
+        bamT = bam_dir + tumor_bam + ".bam"
     output:
         done = cnv_dir + "cnvkit_paired.done"
     params:
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
         name = config["analysis"]["case_id"],
+        normal_name = normal_bam,
+        tumor_name = tumor_bam,
         cnv_dir = cnv_dir,
         conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
     singularity: singularity_image
@@ -42,16 +45,18 @@ rule cnvkit_paired:
         benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
     shell:
         "source activate {params.conda}; "
-        "[ {params.target} != None ] && cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
+        "if [ {params.target} != None ]; then "
+        "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
+        "fi; "
         "cnvkit.py batch {input.bamT} "
             "--normal {input.bamN} " 
             "{params.extra} "
             "--output-reference {params.cnv_dir}/Reference.cnn "
             "--scatter --diagram "
             "--output-dir {params.cnv_dir} && touch {output.done}; "
-        "cnvkit.py genemetrics {params.cnv_dir}/tumor.merged.cnr "
-            "-s {params.cnv_dir}/tumor.merged.cns "
-            "-t 0.585 -m 10 --drop-low-coverage -y "
+        "cnvkit.py genemetrics {params.cnv_dir}/{params.tumor_name}.cnr "
+            "-s {params.cnv_dir}/{params.tumor_name}.cns "
+            "--drop-low-coverage -y "
             "--output {params.cnv_dir}/{params.name}.gene_metrics.csv; "
-        "cnvkit.py breaks {params.cnv_dir}/tumor.merged.cnr {params.cnv_dir}/tumor.merged.cns "
+        "cnvkit.py breaks {params.cnv_dir}/{params.tumor_name}.cnr {params.cnv_dir}/{params.tumor_name}.cns "
             "| cut -f1 | sort -u > {params.cnv_dir}/{params.name}.gene_breaks.csv; "

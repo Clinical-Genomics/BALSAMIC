@@ -10,6 +10,7 @@
         "vep": "tests/test_data/references/vep/",
         "refflat": "tests/test_data/references/genome/refseq.flat",
         "refGene": "tests/test_data/references/genome/refGene.txt",
+        "wgs_calling_interval": "tests/test_data/references/genome/wgs_calling_regions.v1",
         "exon_bed": "tests/test_data/references/genome/refseq.flat.bed"
     }
 }

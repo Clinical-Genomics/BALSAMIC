@@ -8,12 +8,13 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
-## [x.x.x]
+## [4.1.0]
 ### Added
 - VEP now also produces a tab delimited file
 - CNVkit rules output genemetrics and gene break file
 - Added reference genome to be able to calculate AT/CG dropouts by Picard
 - coverage plot plugin part of issue #75
+- callable regions for CNV calling of tumor-only
 
 ### Changed
 - Increased time for indel realigner and base recalib rules
