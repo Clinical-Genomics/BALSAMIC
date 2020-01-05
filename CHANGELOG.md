@@ -10,7 +10,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 
 ## [X.X.X]
 ### Changed
-- bed files are slopped 100bp for variant calling
+- bed files are slopped 100bp for variant calling fix #262
 
 ## [4.1.0]
 ### Added
