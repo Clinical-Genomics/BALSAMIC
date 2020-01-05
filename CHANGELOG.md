@@ -8,6 +8,10 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [X.X.X]
+### Changed
+- bed files are slopped 100bp for variant calling
+
 ## [4.1.0]
 ### Added
 - VEP now also produces a tab delimited file
