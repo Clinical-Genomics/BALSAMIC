@@ -24,6 +24,7 @@ cosmicdb_url = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v
 refgene_txt_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
 refgene_sql_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql"
 wgs_calling_url = "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list"
+genome_chrom_size_url = "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes"
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
@@ -45,6 +46,7 @@ refgene = os.path.join(genome_dir, "refGene.txt")
 refseq_flat = os.path.join(genome_dir, "refseq.flat")
 wgs_calling_interval =  os.path.join(genome_dir, "wgs_calling_regions.v1")
 genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
+genome_chrom_size = os.path.join(genome_dir, "hg19.chrom.sizes")
 
 dbsnp = os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf")
 vcf_1kg = os.path.join(vcf_dir, "1k_genome_wgs_p1_v3_all_sites.vcf")
@@ -62,7 +64,8 @@ ref_list_gzip = [(reference_genome_url, reference_genome, "gsutil"),
                 (known_indel_1kg_url, known_indel_1kg, "gsutil"),
                 (vcf_1kg_url, vcf_1kg, "wget")]
 
-ref_list_flat = [(wgs_calling_url, wgs_calling_interval, "gsutil"),] 
+ref_list_flat = [(wgs_calling_url, wgs_calling_interval, "gsutil"),
+                 (genome_chrom_size_url, genome_chrom_size, "wget")] 
 
 shell.prefix("set -eo pipefail; ")
 
@@ -108,7 +111,8 @@ rule all:
         cosmic_vcf = cosmicdb + ".gz",
         variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
         vep = vep_dir,
-        wgs_calling = wgs_calling_interval
+        wgs_calling = wgs_calling_interval,
+        genome_chrom_size = genome_chrom_size
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = reference_json,
@@ -131,6 +135,7 @@ rule all:
             "refflat": input.refseq_flat,
             "refGene": input.refgene,
             "wgs_calling_interval": input.wgs_calling,
+            "genome_chrom_size": input.genome_chrom_size,
             "vep": input.vep
         }
 
