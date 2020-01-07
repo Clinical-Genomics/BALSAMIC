@@ -8,12 +8,18 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
-## [x.x.x]
+## [X.X.X]
+### Changed
+- bed files are slopped 100bp for variant calling fix #262
+
+## [4.1.0]
 ### Added
 - VEP now also produces a tab delimited file
 - CNVkit rules output genemetrics and gene break file
 - filter models added for tumor-only mode
 - Added reference genome to be able to calculate AT/CG dropouts by Picard
+- coverage plot plugin part of issue #75
+- callable regions for CNV calling of tumor-only
 
 ### Changed
 - Increased time for indel realigner and base recalib rules
@@ -25,6 +31,9 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - WGS qc rules - updated with correct options
   (picard - CollectMultipleMetrics, sentieon - CoverageMetrics)
 - Log warning if WES workflow cannot find SENTIEON* env variables
+- Fixes issue with cnvkit and WGS samples #268
+- Fix #267 coverage issue with long deletions in vardict
+
 
 ## [4.0.1] - 2019-11-08
 ### Added
