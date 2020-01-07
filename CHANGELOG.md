@@ -9,6 +9,9 @@ increment the patch number. The rational for versioning, and exact wording is ta
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
 ## [X.X.X]
+### Added
+- filter models added for tumor-only mode
+
 ### Changed
 - bed files are slopped 100bp for variant calling fix #262
 
@@ -16,7 +19,6 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ### Added
 - VEP now also produces a tab delimited file
 - CNVkit rules output genemetrics and gene break file
-- filter models added for tumor-only mode
 - Added reference genome to be able to calculate AT/CG dropouts by Picard
 - coverage plot plugin part of issue #75
 - callable regions for CNV calling of tumor-only
