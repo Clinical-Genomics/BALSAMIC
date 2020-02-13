@@ -44,17 +44,16 @@ if config['analysis']['analysis_type'] == "paired":
                        "snakemake_rules/sentieon/sentieon_germline.rule", \
                        "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule", \
                        "snakemake_rules/variant_calling/cnvkit_paired.rule"]
-    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope', 'manta']
+    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope', 'manta', 'cnvkit']
     germline_caller = ['dnascope']
-    cnvkit_output = cnv_dir + "cnvkit_paired.done"
+
 else:
     variant_calling = ["snakemake_rules/sentieon/sentieon_t_varcall.rule", \
                        "snakemake_rules/sentieon/sentieon_germline.rule", \
                        "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule", \
                        "snakemake_rules/variant_calling/cnvkit_single.rule"]
-    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope', 'manta']
+    somatic_caller = ['tnhaplotyper','tnsnv', 'tnscope', 'manta', 'cnvkit']
     germline_caller = ['dnascope']
-    cnvkit_output = cnv_dir + "cnvkit_single.done"
 
 annotation = ["snakemake_rules/annotation/vep.rule"]
 
@@ -78,7 +77,6 @@ rule all:
         expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=config["samples"]),
         expand(qc_dir + "{sample}_coverage", sample=config["samples"]),
         expand(qc_dir + "multiqc_report.html"),
-        cnvkit_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:

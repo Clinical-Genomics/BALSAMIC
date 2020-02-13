@@ -22,7 +22,7 @@ rule cnvkit_single:
         wgs_calling_interval = wgs_calling_interval, 
         bamT = bam_dir + tumor_bam + ".bam", 
     output:
-        done = cnv_dir + "cnvkit_single.done"
+        vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"
     params:
         extra = cnvkit_params,
         refcnn = cnv_dir + "FlatReference.cnn",
@@ -46,10 +46,16 @@ rule cnvkit_single:
             "{params.extra} "
             " --reference {params.refcnn} "
             " --scatter --diagram "
-            " --output-dir {params.cnv_dir} && touch {output.done}; "
+            " --output-dir {params.cnv_dir}; "
         "cnvkit.py genemetrics {params.cnv_dir}/{params.tumor_name}.cnr "
             "-s {params.cnv_dir}/{params.tumor_name}.cns "
             "--drop-low-coverage -y "
             "--output {params.cnv_dir}/{params.name}.gene_metrics.csv; "
         "cnvkit.py breaks {params.cnv_dir}/{params.tumor_name}.cnr {params.cnv_dir}/{params.tumor_name}.cns "
             "| cut -f1 | sort -u > {params.cnv_dir}/{params.name}.gene_breaks.csv; "
+        "cnvkit.py export vcf {params.cnv_dir}/{params.tumor_name}.cns --cnr {params.cnv_dir}/{params.tumor_name}.cnr "
+            "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR;"
+        "bgzip {params.cnv_dir}/{params.tumor_name}.vcf; "
+        "tabix -p vcf {params.cnv_dir}/{params.tumor_name}.vcf.gz; "
+        "bcftools sort -o {output.vcf} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 
+        "tabix -p vcf {output.vcf}; "
