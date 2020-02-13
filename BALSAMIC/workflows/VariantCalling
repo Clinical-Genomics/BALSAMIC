@@ -99,7 +99,8 @@ else:
     vcf_merge = ["vcfmerge"]
       
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
+#somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
+somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
