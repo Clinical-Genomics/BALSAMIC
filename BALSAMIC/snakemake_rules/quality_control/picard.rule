@@ -18,7 +18,7 @@ rule MarkDuplicates:
   input:
     bam_dir + "{sample}.sorted.bam"
   output:
-    mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     stats = bam_dir + "{sample}.sorted." + picarddup + ".txt"
   params:
     tmpdir=bam_dir,
