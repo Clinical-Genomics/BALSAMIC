@@ -36,7 +36,7 @@ rule MarkDuplicates:
         "VALIDATION_STRINGENCY=SILENT "
         "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 "
         "REMOVE_DUPLICATES={params.rm_dup} "
-        "METRICS_FILE='{outout.stats}'; "
+        "METRICS_FILE='{output.stats}'; "
     "samtools index {output.mrkdup}; "
     "source deactivate; "
 
