@@ -81,11 +81,9 @@ if config['analysis']['analysis_type'] == "paired":
 
     somatic_caller_snv = ["mutect", "vardict", "strelka"]
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
-    somatic_caller_sv = ["manta"]
+    somatic_caller_sv = ["manta", "cnvkit"]
     vcf_merge = ["vcfmerge"]
     
-    cnvkit_output = cnv_dir + "cnvkit_paired.done"
-
 else:
 
     variantcalling_rules.extend([
@@ -97,10 +95,9 @@ else:
 
     somatic_caller_snv = ["mutect", "vardict"]
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
-    somatic_caller_sv = ["manta"]
+    somatic_caller_sv = ["manta", "cnvkit"]
     vcf_merge = ["vcfmerge"]
       
-    cnvkit_output = cnv_dir + "cnvkit_single.done"
 
 somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
 
@@ -110,15 +107,14 @@ for r in config["rules"]:
     include: os.path.join(rule_dir + r)
 
 var_class = ["somatic", "germline"]
-var_type = ["SNV", "SV"]
+var_type = ["CNV", "SNV", "SV"]
 
 rule all:
     input:
         os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-        vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat",
-        cnvkit_output
+        vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat"
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
