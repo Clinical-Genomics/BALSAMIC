@@ -9,6 +9,9 @@ increment the patch number. The rational for versioning, and exact wording is ta
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
 ## [X.X.X]
+### Added
+- CNV output as VCF
+
 ### Changed
 - bed files are slopped 100bp for variant calling fix #262
 
