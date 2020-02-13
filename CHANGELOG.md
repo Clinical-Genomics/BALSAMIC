@@ -14,6 +14,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 
 ### Changed
 - bed files are slopped 100bp for variant calling fix #262
+- disable vcfmerge
 
 ## [4.1.0]
 ### Added
