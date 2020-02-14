@@ -24,10 +24,10 @@ RUN mkdir -p /git_repos; \
     ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar; \
     ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6; \
     ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6.0; \
-    cd /git_repos && git clone https://github.com/hassanfa/VCFmerge.git && cd VCFmerge; \
-    source activate BALSAMIC_vcfmerge \
-    && pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt -e . \
     && conda clean -all -y
+#    cd /git_repos && git clone https://github.com/hassanfa/VCFmerge.git && cd VCFmerge; \
+#    source activate BALSAMIC_vcfmerge \
+#    && pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt -e . \
 
 # The following fixes the error for Click
 # RuntimeError: Click will abort further execution because Python 3 was
