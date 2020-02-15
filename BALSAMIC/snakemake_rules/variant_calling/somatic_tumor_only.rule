@@ -101,7 +101,7 @@ rule mutect2_tumor_only:
         "-L {input.bed} "
     " | bgzip > {output}; "
     "tabix -p vcf {output}; " 
-    "source deactivate; "
+    
 
 rule mutect2_merge: 
   input:  
@@ -158,7 +158,7 @@ rule somatic_snv_indel_vcf_merge:
           " --include-optional "
           " --output-vcf {output.vcf}; " 
         "cp {output.vcfmerge} {output.vcf}; "
-        "source deactivate; "
+        
 
 
 rule sentieon_TNhaplotyper_tumor_only:

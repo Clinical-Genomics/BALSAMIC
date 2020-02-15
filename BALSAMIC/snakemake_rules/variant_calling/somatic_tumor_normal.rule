@@ -96,7 +96,7 @@ rule mutect2_tumor_normal:
         "-L {input.bed} "
     " | bgzip > {output}; "
     "tabix -p vcf {output}; " 
-    "source deactivate; "
+    
 
 rule mutect2_merge:
   input:
@@ -158,7 +158,7 @@ rule strelka_tumor_normal:
     "tabix -f -p vcf {output.final}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
     "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.final} }} }} }}' > {output.yaml}; "
-    "source deactivate; "
+    
 
 
 rule somatic_snv_indel_vcf_merge:
@@ -196,7 +196,7 @@ rule somatic_snv_indel_vcf_merge:
           " --include-optional "
           " --output-vcf {output.vcfmerge}; " 
         "cp {output.vcfmerge} {output.vcf}; "
-        "source deactivate; "
+        
 
 
 rule sentieon_TNhaplotyper:

@@ -42,4 +42,4 @@ rule manta_tumor_normal:
         "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
         "cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final}; "
         "tabix -p vcf -f {output.final}; "
-        "source deactivate; "
+        

@@ -32,7 +32,7 @@ rule panel_depth:
         "--min-base-quality={params.base_qual} "
         "--filter {params.filter_string} "
         "`echo $covStr` {input.bam} > {output}; "
-    "source deactivate; "
+    
 
 rule exon_depth:
   input:
@@ -61,4 +61,4 @@ rule exon_depth:
         "--cov-threshold {params.cov_1} --cov-threshold {params.cov_2} "
         "--cov-threshold {params.cov_3} --cov-threshold {params.cov_4} "
         "--cov-threshold {params.cov_5} {input.bam} > {output}; "
-    "source deactivate; "
+    

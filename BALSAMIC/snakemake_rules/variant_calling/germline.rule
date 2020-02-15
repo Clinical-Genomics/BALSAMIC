@@ -34,7 +34,7 @@ rule haplotypecaller:
             "-I {input.bam} "
             "-L {input.bed} "
             "| bgzip > {output}; " 
-        "source deactivate; "
+        
 
 
 rule haplotypecaller_merge:
@@ -81,7 +81,7 @@ rule strelka_germline:
         "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
         "cp {params.tmpdir}/results/variants/variants.vcf.gz {output.final}; " 
         "tabix -p vcf -f {output.final}; "
-        "source deactivate; "
+        
 
 
 rule manta_germline:
@@ -109,7 +109,7 @@ rule manta_germline:
         "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
         "cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final}; "
         "tabix -p vcf -f {output.final}; "
-        "source deactivate; "
+        
 
 
 rule sentieon_DNAscope:
