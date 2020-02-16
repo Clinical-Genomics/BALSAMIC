@@ -25,7 +25,7 @@ rule CollectMultipleMetrics:
             " I={input.bam} "
             " O={params.output_prefix} "
             " R={input.reference}; "
-        "source deactivate; "
+        
 
 
 rule CollectWgsMetrics:
@@ -46,5 +46,5 @@ rule CollectWgsMetrics:
             " I={input.bam} "
             " O={output} "
             " R={input.reference}; "
-        "source deactivate; "
+        
 

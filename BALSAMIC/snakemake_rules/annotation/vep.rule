@@ -61,7 +61,7 @@ rule vep:
         "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
         "--verbose "
         "--force_overwrite; "
-    "source deactivate; "
+    
 
 rule vep_stat:
   input:
@@ -85,4 +85,4 @@ rule vep_stat:
         " | filter_vep --ontology --filter {params.filter_vep_string} "
         " | bcftools +counts "
         " | awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.stat};"
-    "source deactivate; "
+    

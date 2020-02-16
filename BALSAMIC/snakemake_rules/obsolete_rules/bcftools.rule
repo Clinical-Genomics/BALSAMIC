@@ -29,7 +29,7 @@ rule bcftools_SNV_update_variant_ID:
       "-x 'ID' -I +'%CHROM:%POS:%REF:%ALT' "
     "> {output} ; "
     "tabix -p vcf -f {output}; "
-    "source deactivate; "
+    
 
 var_type = "SV"
 
@@ -51,4 +51,4 @@ rule bcftools_SV_update_variant_ID:
       "-x 'ID' -I +'%CHROM:%POS:%REF:%ALT' "
     "> {output} ; "
     "tabix -p vcf -f {output}; "
-    "source deactivate; "
+    
