@@ -30,7 +30,7 @@ rule mergeBam_normal_gatk:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    "source deactivate; "
+    
 
 
 rule mergeBam_normal:
@@ -49,7 +49,7 @@ rule mergeBam_normal:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    "source deactivate; "
+    
 
 
 rule mergeBam_tumor:
@@ -68,7 +68,7 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "source deactivate; "
+    
 
 
 rule mergeBam_tumor_gatk:
@@ -87,4 +87,4 @@ rule mergeBam_tumor_gatk:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "source deactivate; "
+    

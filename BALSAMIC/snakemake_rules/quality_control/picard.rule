@@ -38,7 +38,7 @@ rule MarkDuplicates:
         "REMOVE_DUPLICATES={params.rm_dup} "
         "METRICS_FILE='{output.stats}'; "
     "samtools index {output.mrkdup}; "
-    "source deactivate; "
+    
 
 rule CollectHsMetrics:
   input:
@@ -70,7 +70,7 @@ rule CollectHsMetrics:
       "R={input.fa} "
       "COVERAGE_CAP=50000 "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
-    "source deactivate; "
+    
 
 rule CollectAlignmentSummaryMetrics:
   input:
@@ -95,7 +95,7 @@ rule CollectAlignmentSummaryMetrics:
       "ADAPTER_SEQUENCE={params.adapter} "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
-    "source deactivate; "
+    
 
 rule CollectInsertSizeMetrics:
   input:
@@ -120,4 +120,4 @@ rule CollectInsertSizeMetrics:
       "INCLUDE_DUPLICATES=TRUE "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
-    "source deactivate; "
+    

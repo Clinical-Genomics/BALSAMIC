@@ -17,6 +17,9 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - disable vcfmerge
 - Picard markduplicate output moved from log to output
 
+### Fixed
+- remove source deactivate from rules to suppress conda warning
+
 ## [4.1.0]
 ### Added
 - VEP now also produces a tab delimited file
