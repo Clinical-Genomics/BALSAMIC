@@ -11,6 +11,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ## [X.X.X]
 ### Added
 - CNV output as VCF
+- vep output for PASSed variants
 
 ### Changed
 - bed files are slopped 100bp for variant calling fix #262
