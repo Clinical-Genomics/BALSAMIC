@@ -63,6 +63,9 @@ rule vep:
         "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
         "--verbose "
         "--force_overwrite; "
+    "tabix -p vcf --force {output.vcf}; "
+    "tabix -p vcf --force {output.vcf_pass}; "
+ 
     
 
 rule vep_stat:
