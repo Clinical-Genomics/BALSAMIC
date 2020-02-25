@@ -7,24 +7,21 @@
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
-rule vep:
+rule vep_somatic:
   input:
-    vcf = vcf_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
+    vcf = vcf_dir + "{type}.somatic.{sample}.{caller}.vcf.gz",
+    header = vcf_dir + "{type}.somatic.{sample}.{caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    tab = vep_dir + "{type}.{mutation}.{sample}.{caller}.tsv",
-    vcf = vep_dir + "{type}.{mutation}.{sample}.{caller}.vcf.gz",
-    vcf_pass = vep_dir + "{type}.{mutation}.{sample}.{caller}.pass.vcf.gz",
+    vcf = vep_dir + "{type}.somatic.{sample}.{caller}.vcf.gz",
+    vcf_pass = vep_dir + "{type}.somatic.{sample}.{caller}.pass.vcf.gz",
   params:
-    bed = config["panel"]["capture_kit"] if "panel" in config else "",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
-    filter_vep_string = "'not COSMIC and not Existing_variation'", 
-    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
   benchmark:
-    benchmark_dir + 'vep_' + "{type}.{mutation}.{sample}.{caller}.vep.tsv"
+    benchmark_dir + 'vep_' + "{type}.somatic.{sample}.{caller}.vep.tsv"
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "
@@ -34,27 +31,14 @@ rule vep:
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
         "--input_file {input.vcf} "
-        "--output_file STDOUT "
+        "--output_file {output.vcf} "
+        "--compress_output bgzip "
         "--fork {threads} "
         "--vcf "
         "--everything "
-        "--format vcf "
-        "--offline "
-        "--variant_class "
-        "--merged "
-        "--cache "
-        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
-        "--verbose "
-        "--force_overwrite | bgzip > {output.vcf} && tabix -f -p vcf {output.vcf};"
-    "bcftools view -f .,PASS {input.vcf} --output-file {output.vcf_pass} --output-type z;"
-    "bcftools view -f .,PASS {input.vcf} | vep "
-        "--dir $vep_path "
-        "--dir_cache {params.vep_cache} "
-        "--dir_plugins $vep_path "
-        "--output_file {output.tab} "
-        "--fork {threads} "
-        "--tab "
-        "--everything "
+        "--allow_non_variant "
+        "--dont_skip "
+        "--buffer_size 10000 "
         "--format vcf "
         "--offline "
         "--variant_class "
@@ -63,9 +47,9 @@ rule vep:
         "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
         "--verbose "
         "--force_overwrite; "
-    "tabix -p vcf --force {output.vcf}; "
-    "tabix -p vcf --force {output.vcf_pass}; "
- 
+    "tabix -p vcf -f {output.vcf}; "
+    "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf}; "
+    "tabix -p vcf -f {output.vcf_pass}; " 
     
 
 rule vep_stat:
