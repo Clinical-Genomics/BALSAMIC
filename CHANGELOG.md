@@ -18,6 +18,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - disable vcfmerge
 - Picard markduplicate output moved from log to output
 - vep upgraded to 99.1
+- removed SVs from vardict
 
 ### Fixed
 - remove source deactivate from rules to suppress conda warning
