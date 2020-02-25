@@ -17,6 +17,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - bed files are slopped 100bp for variant calling fix #262
 - disable vcfmerge
 - Picard markduplicate output moved from log to output
+- vep upgraded to 99.1
 
 ### Fixed
 - remove source deactivate from rules to suppress conda warning

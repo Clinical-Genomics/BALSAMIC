@@ -34,7 +34,7 @@ rule vardict_tumor_normal:
   shell:
     "source activate {params.conda}; "
     "export PERL5LIB=;"
-    "vardict -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
+    "vardict -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b \"{input.bamT}|{input.bamN}\" "
         "{params.col_info} {input.bed} "
         "| testsomatic.R "
