@@ -114,8 +114,7 @@ rule all:
     input:
         os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-        vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat"
+        expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, somatic_caller_snv + sentieon_callers, [config["analysis"]["case_id"]])),
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
