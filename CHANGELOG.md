@@ -23,6 +23,9 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ### Fixed
 - remove source deactivate from rules to suppress conda warning
 
+### Removed
+- Removed annotation for germline caller results 
+
 ## [4.1.0]
 ### Added
 - VEP now also produces a tab delimited file
