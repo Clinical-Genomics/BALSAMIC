@@ -54,9 +54,9 @@ rule vep_somatic:
 
 rule vep_stat:
   input:
-    vep = vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
+    vep = vep_dir + "SNV.somatic.{sample}.{caller}.pass.vcf.gz",
   output:
-    stat = vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat"
+    stat = vep_dir + "SNV.somatic.{sample}.{caller}.pass.balsamic_stat"
   params:
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
@@ -65,11 +65,11 @@ rule vep_stat:
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
   benchmark:
-    benchmark_dir + 'vep_stat_' + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat.tsv" 
+    benchmark_dir + "vep_stat_SNV.somatic.{sample}.{caller}.pass.balsamic_stat.tsv" 
   shell:
     "source activate {params.conda}; "
     "if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi; "
-    "bcftools view -f PASS {input.vep} 2> /dev/null "
+    "bcftools view --type snps -f PASS {input.vep} 2> /dev/null "
         " | bcftools filter -i \"{params.bcftools_filter_string}\" "
         " | filter_vep --ontology --filter {params.filter_vep_string} "
         " | bcftools +counts "
