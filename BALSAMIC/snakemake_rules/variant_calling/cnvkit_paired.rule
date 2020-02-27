@@ -31,7 +31,8 @@ rule cnvkit_paired:
         bamN = bam_dir + normal_bam + ".bam", 
         bamT = bam_dir + tumor_bam + ".bam"
     output:
-        vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"
+        vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz",
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"
     params:
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
@@ -66,3 +67,4 @@ rule cnvkit_paired:
         "tabix -p vcf {params.cnv_dir}/{params.tumor_name}.vcf.gz; "
         "bcftools sort -o {output.vcf} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 
         "tabix -p vcf {output.vcf}; "
+        "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
