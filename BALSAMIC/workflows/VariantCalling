@@ -119,3 +119,19 @@ rule all:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
         "date +'%Y-%m-%d T%T %:z' > {output}"
+
+rule result_deliver:
+    input:
+        multiqc_report=os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
+        multiqc_json=os.path.join(*([result_dir + "qc/" + "multiqc_data/multiqc_data.json"])),
+    output:
+        os.path.join(get_result_dir(config), "delivery_report" + config["analysis"]["case_id"])
+    params:
+        case_name = config["analysis"]["case_id"],
+    shell:
+        """
+echo format,id,path,path_index,step,tag > {output};
+echo html,{params.case_name},{input.multiqc_report},,multiqc,multiqc_report >> {output};
+echo json,{params.case_name},{input.multiqc_json},,multiqc,multiqc_data >> {output};
+echo dir,{params.case_name},$(dirname {input.multiqc_json}),,multiqc,multiqc_data >> {output};
+        """
