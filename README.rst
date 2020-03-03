@@ -20,10 +20,6 @@
 Documentation
 =======
 
-* `Installation <doc/install.rst>`_
-* `CLI Guide <doc/cli.rst>`_
-* `Run BALSAMIC <doc/user_guide.rst>`_
-
 BALSAMIC is basically a wrapper for its core workflow manager. The goal is to have a package with well defined cli to
 make it predictable for user to run somatic calling regaradless of the workflow manger at its core. BALSAMIC
 is using Snakemake as its core.
