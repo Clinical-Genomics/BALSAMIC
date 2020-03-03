@@ -2,7 +2,7 @@
 
     <p align="center">
         <a href="https://github.com/Clinical-Genomics/BALSAMIC">
-            <img  width=480 src="BALSAMIC/assets/balsamic_logo.png">
+            <img  width=480 src="../BALSAMIC/assets/balsamic_logo.png">
         </a>
         <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 4.1.0)</h3>
         <h3 align="center">FastQ to Annotated VCF</h3>
