@@ -115,23 +115,52 @@ rule all:
         os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, somatic_caller_snv + sentieon_callers, [config["analysis"]["case_id"]])),
+        os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery.hk" )
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
         "date +'%Y-%m-%d T%T %:z' > {output}"
 
+def rule_output():
+  '''Returns a list tuples for (rule, output)'''
+  output_files = list()
+  for my_rule in vars(rules).keys():
+      for file_wildcard_list in snakemake.utils.listfiles(str(getattr(rules, my_rule).output)):
+          output_files.append((my_rule, file_wildcard_list[0], file_wildcard_list[1]))
+  return output_files
+
+
 rule result_deliver:
     input:
-        multiqc_report=os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
-        multiqc_json=os.path.join(*([result_dir + "qc/" + "multiqc_data/multiqc_data.json"])),
+        os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
+        os.path.join(*([result_dir + "qc/" + "multiqc_data/multiqc_data.json"])),
     output:
-        os.path.join(get_result_dir(config), "delivery_report" + config["analysis"]["case_id"])
+        os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery.hk" )
     params:
         case_name = config["analysis"]["case_id"],
-    shell:
-        """
-echo format,id,path,path_index,step,tag > {output};
-echo html,{params.case_name},{input.multiqc_report},,multiqc,multiqc_report >> {output};
-echo json,{params.case_name},{input.multiqc_json},,multiqc,multiqc_data >> {output};
-echo dir,{params.case_name},$(dirname {input.multiqc_json}),,multiqc,multiqc_data >> {output};
-        """
+        rule_output = rule_output()
+    run:
+        import yaml
+        import sys
+
+        hk_file = dict()
+        hk_file['files'] = list()
+        output_files = params.rule_output
+        print(output_files)
+        for input_file in input:
+            for output_file in output_files:
+                if input_file == output_file[1]:
+                    hk_file['files'].extend([{'format': output_file[0],
+                                              'id': params.case_name,
+                                              'path': output_file[1],
+                                              'path_index': output_file[1],
+                                              'step': output_file[0],
+                                              'tag': output_file[0]}])
+        yaml.dump(hk_file, sys.stdout)
+#    shell:
+#        """
+#echo format,id,path,path_index,step,tag > {output};
+#echo html,{params.case_name},{input.multiqc_report},,multiqc,multiqc_report >> {output};
+#echo json,{params.case_name},{input.multiqc_json},,multiqc,multiqc_data >> {output};
+#echo dir,{params.case_name},$(dirname {input.multiqc_json}),,multiqc,multiqc_data >> {output};
+#        """
