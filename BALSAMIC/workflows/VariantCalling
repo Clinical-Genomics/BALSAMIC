@@ -23,6 +23,7 @@ fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
+delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image'] 
 
@@ -110,57 +111,79 @@ for r in config["rules"]:
 var_class = ["somatic", "germline"]
 var_type = ["CNV", "SNV", "SV"]
 
+def rule_output(rule_names=[]):
+    '''Returns a list tuples for (rule, output)'''
+    output_files = list()
+    if not rule_names:
+        rule_names = vars(rules).keys()
+    for my_rule in vars(rules).keys():
+        if my_rule in rule_names:
+            for my_file in getattr(rules, my_rule).output:
+                for file_wildcard_list in snakemake.utils.listfiles(my_file):
+                    my_file_name, my_file_extension = os.path.splitext(file_wildcard_list[0])
+                    my_file_full_name = file_wildcard_list[0]
+                    delivery_id = file_wildcard_list[1]
+                    delivery_step = my_rule
+                    output_files.append((my_file_extension, delivery_id, my_file_full_name, 'no_index_found', delivery_step, 'no_tag'))
+    return output_files
+
+
+#rule result_deliver:
+#    input:
+#        [result_dir + "qc/" + "multiqc_report.html"],
+#        [result_dir + "qc/" + "multiqc_data/multiqc_data.json"]
+#    output:
+#        os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery.hk" )
+#    params:
+#        prefix=wildcards#, output: output[0][:-4]
+#        case_name = config["analysis"]["case_id"],
+#        rule_file_tuple = rule_output()
+#    shell:
+#        "echo {params.prefix};"
+#        "touch {output}"
+#        import yaml
+#        import sys
+#        import copy
+#        print(input)
+#
+#        hk_file = dict()
+#        hk_file['files'] = list()
+#        output_files = params.rule_file_tuple
+#        #print(output_files)
+#        #for input_file in input:
+#        for output_file in output_files:
+#            if input_file == output_file[1]:
+#                hk_file['files'].extend([{'format': output_file[0],
+#                                          'id': params.case_name,
+#                                          'path': output_file[1],
+#                                          'path_index': output_file[1],
+#                                          'step': output_file[0],
+#                                          'tag': output_file[0]}])
+#        yaml.dump(hk_file, sys.stdout)
+##    shell:
+##        """
+##echo format,id,path,path_index,step,tag > {output};
+##echo html,{params.case_name},{input.multiqc_report},,multiqc,multiqc_report >> {output};
+##echo json,{params.case_name},{input.multiqc_json},,multiqc,multiqc_data >> {output};
+##echo dir,{params.case_name},$(dirname {input.multiqc_json}),,multiqc,multiqc_data >> {output};
+##        """
+
 rule all:
     input:
-        os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
+        result_dir + "qc/" + "multiqc_report.html",
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, somatic_caller_snv + sentieon_callers, [config["analysis"]["case_id"]])),
-        os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery.hk" )
+        expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
+#        os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery.hk" )
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
+    #params:
+    #    prefix = rule_output
     shell:
+    #    "echo {params.prefix};"
         "date +'%Y-%m-%d T%T %:z' > {output}"
-
-def rule_output():
-  '''Returns a list tuples for (rule, output)'''
-  output_files = list()
-  for my_rule in vars(rules).keys():
-      for file_wildcard_list in snakemake.utils.listfiles(str(getattr(rules, my_rule).output)):
-          output_files.append((my_rule, file_wildcard_list[0], file_wildcard_list[1]))
-  return output_files
-
-
-rule result_deliver:
-    input:
-        os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
-        os.path.join(*([result_dir + "qc/" + "multiqc_data/multiqc_data.json"])),
-    output:
-        os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery.hk" )
-    params:
-        case_name = config["analysis"]["case_id"],
-        rule_output = rule_output()
-    run:
-        import yaml
-        import sys
-
-        hk_file = dict()
-        hk_file['files'] = list()
-        output_files = params.rule_output
-        print(output_files)
-        for input_file in input:
-            for output_file in output_files:
-                if input_file == output_file[1]:
-                    hk_file['files'].extend([{'format': output_file[0],
-                                              'id': params.case_name,
-                                              'path': output_file[1],
-                                              'path_index': output_file[1],
-                                              'step': output_file[0],
-                                              'tag': output_file[0]}])
-        yaml.dump(hk_file, sys.stdout)
 #    shell:
-#        """
-#echo format,id,path,path_index,step,tag > {output};
-#echo html,{params.case_name},{input.multiqc_report},,multiqc,multiqc_report >> {output};
-#echo json,{params.case_name},{input.multiqc_json},,multiqc,multiqc_data >> {output};
-#echo dir,{params.case_name},$(dirname {input.multiqc_json}),,multiqc,multiqc_data >> {output};
-#        """
+#        "date +'%Y-%m-%d T%T %:z' > {output}"
+
+#print(rule_output(rule_names=['mergeBam_tumor', 'multiqc', 'fastp']))
+#rules_to_deliver = config['delivery'].split(",")
+#print(rule_output(rule_names=rules_to_deliver))
