@@ -12,113 +12,185 @@ from yapf.yapflib.yapf_api import FormatFile
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC.utils.cli import recursive_default_dict
-from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command(
     "deliver",
-    short_help=
-    "Creates a YAML file with output from variant caller and alignment.")
-@click.option("--sample-config",
-              required=True,
-              help="Sample config file. Output of balsamic config sample")
+    short_help="Creates a YAML file with output from variant caller and alignment.",
+)
+@click.option(
+    "--sample-config",
+    required=True,
+    help="Sample config file. Output of balsamic config sample",
+)
 @click.pass_context
 def deliver(context, sample_config):
-    '''
+    """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
-    '''
+    """
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     LOG.debug("Reading input sample config")
-    with open(sample_config, 'r') as fn:
+    with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)
 
     result_dir = get_result_dir(sample_config_dict)
-    dst_directory = os.path.join(result_dir, 'delivery_report')
+    dst_directory = os.path.join(result_dir, "delivery_report")
     if not os.path.exists(dst_directory):
-        LOG.debug('Creatiing delivery_report directory')
+        LOG.debug("Creatiing delivery_report directory")
         os.makedirs(dst_directory)
-    
+
     deliver_wildcards = {
-        'bam': ['*merged.bam', '*cov.bed'],
-        'vcf': ['*.vcf.gz'],
-        'vep': ['*.vcf.gz', '*.tsv', '*html', '*balsamic_stat'],
-        'cnv': ['*pdf', '*cnr','*cns'],
-        'qc': ['multiqc*'],
-        'scout': ['*scout.yaml']
+        "bam": ["*merged.bam", "*cov.bed"],
+        "vcf": ["*.vcf.gz"],
+        "vep": ["*.vcf.gz", "*.tsv", "*html", "*balsamic_stat"],
+        "cnv": ["*pdf", "*cnr", "*cns"],
+        "qc": ["multiqc*"],
+        "scout": ["*scout.yaml"],
     }
 
-    deliver_json = recursive_default_dict()
-    for dir_name, file_pattern_list in deliver_wildcards.items():
-        deliver_json['files'][dir_name] = list()
-        for file_pattern in file_pattern_list:
-            list_of_files = glob.glob(
-                os.path.join(result_dir, dir_name, file_pattern))
-            deliver_json['files'][dir_name].extend(list_of_files)
-
-    yaml_write_directory = os.path.join(result_dir, 'delivery_report')
-
+    yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
 
-    yaml_file_name = os.path.join(yaml_write_directory,
-                                  sample_config_dict['analysis']['case_id'] + ".hk")
-
-    LOG.debug(f"Writing output file {yaml_file_name}")
-    deliver_json = convert_defaultdict_to_regular_dict(deliver_json)
-    # take the balsamic_stat file
-    #balsamic_stat = [s for s in deliver_json['files']['vep'] if s.endswith('balsamic_stat')][0]
-    #with open(balsamic_stat, 'r') as f:
-    #    balsamic_stat = yaml.load(f, Loader=yaml.SafeLoader) 
-
-    #deliver_json['meta'] = balsamic_stat
-
-#    with open(yaml_file_name, 'w') as f:
-#        yaml.dump(deliver_json, f, default_flow_style=False)
-
-    #yaml.dump(deliver_json, sys.stdout, default_flow_style=False)
-    analysis_type = sample_config_dict['analysis']['analysis_type']
-    sequencing_type = sample_config_dict['analysis']['sequencing_type']
+    analysis_type = sample_config_dict["analysis"]["analysis_type"]
+    sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
-    delivery_file_name = os.path.join(yaml_write_directory,
-                                  sample_config_dict['analysis']['case_id'] + ".hk")
-    delivery_file_raw = os.path.join(yaml_write_directory,
-                                  sample_config_dict['analysis']['case_id'] + "_delivery_raw.hk")
-    with open(delivery_file_raw, 'r') as fn:
+
+    with CaptureStdout() as run_workflow:
+        snakemake.snakemake(
+            snakefile=snakefile,
+            config={"delivery": "True"},
+            dryrun=True,
+            configfile=sample_config,
+            quiet=True,
+        )
+
+    delivery_file_name = os.path.join(
+        yaml_write_directory, sample_config_dict["analysis"]["case_id"] + ".hk"
+    )
+    delivery_file_raw = os.path.join(
+        yaml_write_directory,
+        sample_config_dict["analysis"]["case_id"] + "_delivery_raw.hk",
+    )
+    with open(delivery_file_raw, "r") as fn:
         delivery_file_raw_dict = json.load(fn)
 
-    snakemake.snakemake(snakefile=snakefile, config={'delivery':'True'}, dryrun=True, summary=True, configfile=sample_config, quiet=True)
+    delivery_file_ready = os.path.join(
+        yaml_write_directory,
+        sample_config_dict["analysis"]["case_id"] + "_delivery_ready.hk",
+    )
+    with open(delivery_file_ready, "r") as fn:
+        delivery_file_ready_dict = json.load(fn)
+
     with CaptureStdout() as summary:
-        snakemake.snakemake(snakefile=snakefile, config={'delivery':'True'}, dryrun=True, summary=True, configfile=sample_config, quiet=True)
-    summary = [i.split('\t') for i in summary]
+        snakemake.snakemake(
+            snakefile=snakefile,
+            config={"delivery": "True"},
+            dryrun=True,
+            summary=True,
+            configfile=sample_config,
+            quiet=True,
+        )
+    summary = [i.split("\t") for i in summary]
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
 
-    output_files_merged = defaultdict(dict)
-    for interm_list in (summary_dict, delivery_file_raw_dict):
-        for item in interm_list:
-            output_files_merged[item['output_file']].update(item)
+    def merge_dict_on_key(dict_1, dict_2, by_key):
+        #    '''Merge two list of dictionaries based on key'''
+        merged_dict = defaultdict(dict)
+        for interm_list in (dict_1, dict_2):
+            for item in interm_list:
+                merged_dict[item[by_key]].update(item)
+        merged_dict_list = merged_dict.values()
+        return merged_dict_list
+
+    output_files_merged_interm = merge_dict_on_key(
+        dict_1=summary_dict, dict_2=delivery_file_raw_dict, by_key="output_file"
+    )
+    output_files_merged = merge_dict_on_key(
+        dict_1=output_files_merged_interm,
+        dict_2=delivery_file_ready_dict,
+        by_key="output_file",
+    )
+
+    def find_file_index(file_path):
+        indexible_files = {
+            ".bam": [".bam.bai", ".bai"],
+            ".cram": [".cram.cai", ".cai"],
+            ".vcf.gz": [".vcf.gz.tbi"],
+            ".vcf": [".vcf.tbi"],
+        }
+
+        file_path_index = set()
+        for file_extension, file_index_extensions in indexible_files.items():
+            if file_path.endswith(file_extension):
+                for file_index_extension in file_index_extensions:
+                    new_file_path = file_path.replace(
+                        file_extension, file_index_extension
+                    )
+                    if os.path.isfile(new_file_path):
+                        file_path_index.add(new_file_path)
+
+        if len(file_path_index) > 2:
+            raise BalsamicError("More than one index found for %s" % file_path)
+
+        file_path_index = ",".join(file_path_index)
+
+        return file_path_index
+
+    def get_file_extension(file_path):
+        file_name, file_extension = os.path.splitext(file_path)
+        return file_extension
 
     delivery_json = dict()
-    delivery_json['files'] = list()
-    for k,v in output_files_merged.items():
-        if 'date' in output_files_merged[k]:
-            delivery_json['files'].append(output_files_merged[k])
-#    output_files_merged = output_files_merged.values()
+    delivery_json["files"] = list()
+    for item in output_files_merged:
+        if "date" in item:
+            interm_dict = item
+            interm_dict["path"] = interm_dict.pop("output_file")
+            if "rulename" in interm_dict:
+                interm_dict["step"] = interm_dict.pop("rulename")
+            else:
+                interm_dict["step"] = "unknown_step"
+            interm_dict["path_index"] = find_file_index(interm_dict["path"])
+            interm_dict["format"] = get_file_extension(interm_dict["path"])
+            if "wildcard_name" in interm_dict:
+                interm_dict["tag"] = ",".join(interm_dict["wildcard_name"])
+                if "sample" in interm_dict["wildcard_name"]:
+                    idx = interm_dict["wildcard_name"].index("sample")
+                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
+                    interm_dict["id_reason"] = "sample" 
+                if "case_name" in interm_dict["wildcard_name"]:
+                    idx = interm_dict["wildcard_name"].index("case_name")
+                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
+                    interm_dict["id_reason"] = "case_name" 
+                if (
+                    "case_name" in interm_dict["wildcard_name"]
+                    and "sample" in interm_dict["wildcard_name"]
+                ):
+                    raise BalsamicError(
+                        "Ambiguous delivery id. Wilcard has both: %s"
+                        % ",".join(interm_dict["wildcard_name"])
+                    )
+            else:
+                interm_dict["tag"] = "unknown_tag"
+
+            delivery_json["files"].append(interm_dict)
+
+    LOG.debug(f"Writing output file {delivery_file_name}")
+
     write_json(delivery_json, delivery_file_name)
-    #yaml.dump([dict(zip(summary[0], value)) for value in summary[1:]], sys.stdout, default_flow_style=False)
+    with open(delivery_file_name+".yaml", 'w') as fn:
+        yaml.dump(delivery_json, fn, default_flow_style=False)
 
-
-
-
-
-
-
-
-
-
-
-
-
+#    for entries in deliveries:
+#        delivery_file = entries[2]
+#        if os.path.isfile(delivery_file):
+#            print(Color(u"[{green}\u2713{/green}]"), entries)
+#        else:
+#            print(Color(u"[{red}\u2717{/red}]"), entries)
+#        break
+# print(dag)
