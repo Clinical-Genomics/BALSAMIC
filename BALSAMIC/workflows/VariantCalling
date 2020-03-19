@@ -140,7 +140,7 @@ if 'delivery' in config:
         for my_rule in rule_names:
             for my_file in getattr(rules, my_rule).output:
                 for file_wildcard_list in snakemake.utils.listfiles(my_file):
-                    output_files.append((file_wildcard_list[0], my_rule, ",".join(list(file_wildcard_list[1]))))
+                    output_files.append((file_wildcard_list[0], my_rule, list(file_wildcard_list[1])))
         
         return output_files
                         
@@ -189,15 +189,7 @@ if 'delivery' in config:
     write_json(output_files_raw, delivery_raw)
     FormatFile(delivery_raw) 
 
-#    for entries in deliveries:
-#        delivery_file = entries[2]
-#        if os.path.isfile(delivery_file):
-#            print(Color(u"[{green}\u2713{/green}]"), entries)
-#        else:
-#            print(Color(u"[{red}\u2717{/red}]"), entries)
-#        break
-    #print(dag)
-  
+ 
             
 rule all:
     input:
