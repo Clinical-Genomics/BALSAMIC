@@ -5,6 +5,7 @@ import glob
 import json
 import yaml
 import click
+import copy
 import snakemake
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
@@ -101,7 +102,6 @@ def deliver(context, sample_config):
     summary = [i.split("\t") for i in summary]
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
 
-
     output_files_merged_interm = merge_dict_on_key(
         dict_1=summary_dict, dict_2=delivery_file_raw_dict, by_key="output_file"
     )
@@ -113,9 +113,10 @@ def deliver(context, sample_config):
 
     delivery_json = dict()
     delivery_json["files"] = list()
+
     for item in output_files_merged:
         if "date" in item:
-            interm_dict = item
+            interm_dict = copy.deepcopy(item)
             interm_dict["path"] = interm_dict.pop("output_file")
             if "rulename" in interm_dict:
                 interm_dict["step"] = interm_dict.pop("rulename")
