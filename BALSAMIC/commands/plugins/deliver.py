@@ -9,6 +9,9 @@ import snakemake
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
 
+from BALSAMIC.utils.cli import merge_dict_on_key
+from BALSAMIC.utils.cli import get_file_extension
+from BALSAMIC.utils.cli import file_path_index 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
@@ -44,14 +47,14 @@ def deliver(context, sample_config):
         LOG.debug("Creatiing delivery_report directory")
         os.makedirs(dst_directory)
 
-    deliver_wildcards = {
-        "bam": ["*merged.bam", "*cov.bed"],
-        "vcf": ["*.vcf.gz"],
-        "vep": ["*.vcf.gz", "*.tsv", "*html", "*balsamic_stat"],
-        "cnv": ["*pdf", "*cnr", "*cns"],
-        "qc": ["multiqc*"],
-        "scout": ["*scout.yaml"],
-    }
+#    deliver_wildcards = {
+#        "bam": ["*merged.bam", "*cov.bed"],
+#        "vcf": ["*.vcf.gz"],
+#        "vep": ["*.vcf.gz", "*.tsv", "*html", "*balsamic_stat"],
+#        "cnv": ["*pdf", "*cnr", "*cns"],
+#        "qc": ["multiqc*"],
+#        "scout": ["*scout.yaml"],
+#    }
 
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
@@ -98,14 +101,6 @@ def deliver(context, sample_config):
     summary = [i.split("\t") for i in summary]
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
 
-    def merge_dict_on_key(dict_1, dict_2, by_key):
-        #    '''Merge two list of dictionaries based on key'''
-        merged_dict = defaultdict(dict)
-        for interm_list in (dict_1, dict_2):
-            for item in interm_list:
-                merged_dict[item[by_key]].update(item)
-        merged_dict_list = merged_dict.values()
-        return merged_dict_list
 
     output_files_merged_interm = merge_dict_on_key(
         dict_1=summary_dict, dict_2=delivery_file_raw_dict, by_key="output_file"
@@ -115,35 +110,6 @@ def deliver(context, sample_config):
         dict_2=delivery_file_ready_dict,
         by_key="output_file",
     )
-
-    def find_file_index(file_path):
-        indexible_files = {
-            ".bam": [".bam.bai", ".bai"],
-            ".cram": [".cram.cai", ".cai"],
-            ".vcf.gz": [".vcf.gz.tbi"],
-            ".vcf": [".vcf.tbi"],
-        }
-
-        file_path_index = set()
-        for file_extension, file_index_extensions in indexible_files.items():
-            if file_path.endswith(file_extension):
-                for file_index_extension in file_index_extensions:
-                    new_file_path = file_path.replace(
-                        file_extension, file_index_extension
-                    )
-                    if os.path.isfile(new_file_path):
-                        file_path_index.add(new_file_path)
-
-        if len(file_path_index) > 2:
-            raise BalsamicError("More than one index found for %s" % file_path)
-
-        file_path_index = ",".join(file_path_index)
-
-        return file_path_index
-
-    def get_file_extension(file_path):
-        file_name, file_extension = os.path.splitext(file_path)
-        return file_extension
 
     delivery_json = dict()
     delivery_json["files"] = list()
