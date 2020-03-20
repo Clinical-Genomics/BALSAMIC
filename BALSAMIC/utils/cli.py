@@ -294,3 +294,45 @@ def convert_defaultdict_to_regular_dict(inputdict: dict):
             for key, value in inputdict.items()
         }
     return inputdict
+
+
+def merge_dict_on_key(dict_1, dict_2, by_key):
+    '''
+    Merge two list of dictionaries based on key
+    '''
+    merged_dict = defaultdict(dict)
+    for interm_list in (dict_1, dict_2):
+        for item in interm_list:
+            merged_dict[item[by_key]].update(item)
+    merged_dict_list = merged_dict.values()
+    return merged_dict_list
+
+
+def find_file_index(file_path):
+    indexible_files = {
+        ".bam": [".bam.bai", ".bai"],
+        ".cram": [".cram.cai", ".cai"],
+        ".vcf.gz": [".vcf.gz.tbi"],
+        ".vcf": [".vcf.tbi"],
+    }
+
+    file_path_index = set()
+    for file_extension, file_index_extensions in indexible_files.items():
+        if file_path.endswith(file_extension):
+            for file_index_extension in file_index_extensions:
+                new_file_path = file_path.replace(
+                    file_extension, file_index_extension
+                )
+                if os.path.isfile(new_file_path):
+                    file_path_index.add(new_file_path)
+
+    if len(file_path_index) > 2:
+        raise BalsamicError("More than one index found for %s" % file_path)
+
+    file_path_index = ",".join(file_path_index)
+
+    return file_path_index
+
+def get_file_extension(file_path):
+    file_name, file_extension = os.path.splitext(file_path)
+    return file_extension
