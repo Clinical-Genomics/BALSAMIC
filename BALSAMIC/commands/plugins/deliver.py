@@ -161,12 +161,20 @@ def deliver(context, sample_config):
                 interm_dict["tag"] = ",".join(interm_dict["wildcard_name"])
                 if "sample" in interm_dict["wildcard_name"]:
                     idx = interm_dict["wildcard_name"].index("sample")
-                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
-                    interm_dict["id_reason"] = "sample" 
+                    if "wildcard_value" in interm_dict:
+                        interm_dict["id"] = interm_dict["wildcard_value"][idx]
+                        interm_dict["id_reason"] = "sample" 
+                    else:
+                        interm_dict["id"] = "unknown_id"
+                        interm_dict["id_reason"] = "wildcard_value_not_found" 
                 if "case_name" in interm_dict["wildcard_name"]:
                     idx = interm_dict["wildcard_name"].index("case_name")
-                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
-                    interm_dict["id_reason"] = "case_name" 
+                    if "wildcard_value" in interm_dict:
+                        interm_dict["id"] = interm_dict["wildcard_value"][idx]
+                        interm_dict["id_reason"] = "case_name" 
+                    else:
+                        interm_dict["id"] = "unknown_id"
+                        interm_dict["id_reason"] = "wildcard_value_not_found" 
                 if (
                     "case_name" in interm_dict["wildcard_name"]
                     and "sample" in interm_dict["wildcard_name"]
