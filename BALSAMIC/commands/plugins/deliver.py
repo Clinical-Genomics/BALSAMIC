@@ -11,7 +11,7 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import merge_dict_on_key
 from BALSAMIC.utils.cli import get_file_extension
-from BALSAMIC.utils.cli import file_path_index 
+from BALSAMIC.utils.cli import find_file_index 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
