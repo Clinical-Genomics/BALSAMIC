@@ -8,7 +8,7 @@ import collections
 from io import StringIO
 from pathlib import Path
 from itertools import chain
-
+from collections import defaultdict
 
 class CaptureStdout(list):
     '''
@@ -325,11 +325,6 @@ def find_file_index(file_path):
                 )
                 if os.path.isfile(new_file_path):
                     file_path_index.add(new_file_path)
-
-    if len(file_path_index) > 2:
-        raise BalsamicError("More than one index found for %s" % file_path)
-
-    file_path_index = ",".join(file_path_index)
 
     return file_path_index
 

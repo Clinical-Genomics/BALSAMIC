@@ -121,7 +121,14 @@ def deliver(context, sample_config):
                 interm_dict["step"] = interm_dict.pop("rulename")
             else:
                 interm_dict["step"] = "unknown_step"
-            interm_dict["path_index"] = find_file_index(interm_dict["path"])
+            
+            file_path_index = find_file_index(interm_dict["path"])
+            if len(file_path_index) > 2:
+                raise BalsamicError("More than one index found for %s" % file_path)
+
+            file_path_index = ",".join(file_path_index)
+            interm_dict["path_index"] = file_path_index 
+
             interm_dict["format"] = get_file_extension(interm_dict["path"])
             if "wildcard_name" in interm_dict:
                 interm_dict["tag"] = ",".join(interm_dict["wildcard_name"])
