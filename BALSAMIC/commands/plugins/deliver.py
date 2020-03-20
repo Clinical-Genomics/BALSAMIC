@@ -124,7 +124,7 @@ def deliver(context, sample_config):
             
             file_path_index = find_file_index(interm_dict["path"])
             if len(file_path_index) > 2:
-                raise BalsamicError("More than one index found for %s" % file_path)
+                raise BalsamicError("More than one index found for %s" % interm_dict["path"])
 
             file_path_index = ",".join(file_path_index)
             interm_dict["path_index"] = file_path_index 
