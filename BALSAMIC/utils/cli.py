@@ -326,8 +326,17 @@ def find_file_index(file_path):
                 if os.path.isfile(new_file_path):
                     file_path_index.add(new_file_path)
 
-    return file_path_index
+    return list(file_path_index)
 
 def get_file_extension(file_path):
-    file_name, file_extension = os.path.splitext(file_path)
+    known_multi_extensions = ['.vcf.gz', '.vcf.gz.tbi', '.vcf.tbi', '.fastq.gz']
+    file_extension = ""
+    for known_ext in known_multi_extensions:
+        if file_path.endswith(known_ext):
+            file_extension = known_ext
+            break
+
+    if not file_extension:
+        file_name, file_extension = os.path.splitext(file_path)
+
     return file_extension
