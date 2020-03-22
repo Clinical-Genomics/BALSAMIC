@@ -10,9 +10,10 @@ import snakemake
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
 
+from BALSAMIC.utils.cli import get_from_two_key
 from BALSAMIC.utils.cli import merge_dict_on_key
 from BALSAMIC.utils.cli import get_file_extension
-from BALSAMIC.utils.cli import find_file_index 
+from BALSAMIC.utils.cli import find_file_index
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
@@ -48,14 +49,14 @@ def deliver(context, sample_config):
         LOG.debug("Creatiing delivery_report directory")
         os.makedirs(dst_directory)
 
-#    deliver_wildcards = {
-#        "bam": ["*merged.bam", "*cov.bed"],
-#        "vcf": ["*.vcf.gz"],
-#        "vep": ["*.vcf.gz", "*.tsv", "*html", "*balsamic_stat"],
-#        "cnv": ["*pdf", "*cnr", "*cns"],
-#        "qc": ["multiqc*"],
-#        "scout": ["*scout.yaml"],
-#    }
+    #    deliver_wildcards = {
+    #        "bam": ["*merged.bam", "*cov.bed"],
+    #        "vcf": ["*.vcf.gz"],
+    #        "vep": ["*.vcf.gz", "*.tsv", "*html", "*balsamic_stat"],
+    #        "cnv": ["*pdf", "*cnr", "*cns"],
+    #        "qc": ["multiqc*"],
+    #        "scout": ["*scout.yaml"],
+    #    }
 
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
@@ -120,44 +121,50 @@ def deliver(context, sample_config):
             interm_dict = copy.deepcopy(item)
             interm_dict["path"] = interm_dict.get("output_file")
             interm_dict["step"] = interm_dict.get("rulename", "unknown")
-            
+
             file_path_index = find_file_index(interm_dict["path"])
             if len(file_path_index) > 1:
                 LOG.warning("More than one index found for %s" % interm_dict["path"])
                 LOG.warning("Taking %s index file" % list(file_path_index)[0])
-            interm_dict["path_index"] = file_path_index[0] if file_path_index else "" 
+            interm_dict["path_index"] = file_path_index[0] if file_path_index else ""
 
             interm_dict["format"] = get_file_extension(interm_dict["path"])
             interm_dict["tag"] = ",".join(interm_dict.get("wildcard_name", ["unknown"]))
+            interm_dict["id"] = "unknown"
 
-            if not "wildcard_value" in interm_dict:
-                interm_dict["id"] = "unknown"
+            delivery_id = list()
+            delivery_id.append(get_from_two_key(
+                interm_dict,
+                from_key="wildcard_name",
+                by_key="wildcard_value",
+                by_value="sample",
+                default=None,
+            ))
 
-            if "wildcard_name" in interm_dict and "wildcard_value" in interm_dict:
-                if "sample" in interm_dict["wildcard_name"]:
-                    idx = interm_dict["wildcard_name"].index("sample")
-                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
+            delivery_id.append(get_from_two_key(
+                interm_dict,
+                from_key="wildcard_name",
+                by_key="wildcard_value",
+                by_value="case_name",
+                default=None,
+            ))
 
-                if "case_name" in interm_dict["wildcard_name"]:
-                    idx = interm_dict["wildcard_name"].index("case_name")
-                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
-
-                if (
-                    "case_name" in interm_dict["wildcard_name"]
-                    and "sample" in interm_dict["wildcard_name"]
-                ):
-                    raise BalsamicError(
-                        "Ambiguous delivery id. Wilcard has both: %s"
-                        % ",".join(interm_dict["wildcard_name"])
-                    )
+            delivery_id=list(filter(None,delivery_id))
+            if len(delivery_id) > 1:
+                LOG.error(f"Ambiguous delivery id. Wilcard has both: {delivery_id}")
+                raise BalsamicError("Delivery file parsing process failed.")
+            
+            if delivery_id:
+                interm_dict["id"] = delivery_id[0]
 
             delivery_json["files"].append(interm_dict)
 
     LOG.debug(f"Writing output file {delivery_file_name}")
 
     write_json(delivery_json, delivery_file_name)
-    with open(delivery_file_name+".yaml", 'w') as fn:
+    with open(delivery_file_name + ".yaml", "w") as fn:
         yaml.dump(delivery_json, fn, default_flow_style=False)
+
 
 #    for entries in deliveries:
 #        delivery_file = entries[2]
