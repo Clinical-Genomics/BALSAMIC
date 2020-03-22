@@ -45,18 +45,8 @@ def deliver(context, sample_config):
 
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
-    if not os.path.exists(dst_directory):
-        LOG.debug("Creatiing delivery_report directory")
-        os.makedirs(dst_directory)
-
-    #    deliver_wildcards = {
-    #        "bam": ["*merged.bam", "*cov.bed"],
-    #        "vcf": ["*.vcf.gz"],
-    #        "vep": ["*.vcf.gz", "*.tsv", "*html", "*balsamic_stat"],
-    #        "cnv": ["*pdf", "*cnr", "*cns"],
-    #        "qc": ["multiqc*"],
-    #        "scout": ["*scout.yaml"],
-    #    }
+    LOG.info("Creatiing delivery_report directory")
+    os.makedirs(dst_directory, exist_ok=True)
 
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
@@ -65,7 +55,7 @@ def deliver(context, sample_config):
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
-    with CaptureStdout() as run_workflow:
+    with CaptureStdout() :
         snakemake.snakemake(
             snakefile=snakefile,
             config={"delivery": "True"},
