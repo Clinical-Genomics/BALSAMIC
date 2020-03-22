@@ -117,38 +117,32 @@ def deliver(context, sample_config):
     for item in output_files_merged:
         if "date" in item:
             interm_dict = copy.deepcopy(item)
-            interm_dict["path"] = interm_dict.pop("output_file")
-            if "rulename" in interm_dict:
-                interm_dict["step"] = interm_dict.pop("rulename")
-            else:
-                interm_dict["step"] = "unknown_step"
+            interm_dict["path"] = interm_dict.get("output_file")
+            interm_dict["step"] = interm_dict.get("rulename", "unknown_step")
             
             file_path_index = find_file_index(interm_dict["path"])
             if len(file_path_index) > 2:
                 raise BalsamicError("More than one index found for %s" % interm_dict["path"])
-
             file_path_index = ",".join(file_path_index)
             interm_dict["path_index"] = file_path_index 
 
             interm_dict["format"] = get_file_extension(interm_dict["path"])
-            if "wildcard_name" in interm_dict:
+            if "wildcard_name" in interm_dict :
                 interm_dict["tag"] = ",".join(interm_dict["wildcard_name"])
-                if "sample" in interm_dict["wildcard_name"]:
-                    idx = interm_dict["wildcard_name"].index("sample")
-                    if "wildcard_value" in interm_dict:
+                if not "wildcard_value" in interm_dict:
+                    interm_dict["id"] = "unknown_id"
+                    interm_dict["id_reason"] = "wildcard_value_not_found" 
+                else: 
+                    if "sample" in interm_dict["wildcard_name"]:
+                        idx = interm_dict["wildcard_name"].index("sample")
                         interm_dict["id"] = interm_dict["wildcard_value"][idx]
                         interm_dict["id_reason"] = "sample" 
-                    else:
-                        interm_dict["id"] = "unknown_id"
-                        interm_dict["id_reason"] = "wildcard_value_not_found" 
-                if "case_name" in interm_dict["wildcard_name"]:
-                    idx = interm_dict["wildcard_name"].index("case_name")
-                    if "wildcard_value" in interm_dict:
+
+                    if "case_name" in interm_dict["wildcard_name"]:
+                        idx = interm_dict["wildcard_name"].index("case_name")
                         interm_dict["id"] = interm_dict["wildcard_value"][idx]
                         interm_dict["id_reason"] = "case_name" 
-                    else:
-                        interm_dict["id"] = "unknown_id"
-                        interm_dict["id_reason"] = "wildcard_value_not_found" 
+
                 if (
                     "case_name" in interm_dict["wildcard_name"]
                     and "sample" in interm_dict["wildcard_name"]
