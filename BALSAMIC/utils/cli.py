@@ -340,3 +340,18 @@ def get_file_extension(file_path):
         file_name, file_extension = os.path.splitext(file_path)
 
     return file_extension
+
+def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
+    '''
+    Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
+    
+    from_key and by_key should both exist
+    '''
+
+    matching_value = default
+    if from_key in input_dict and by_key in input_dict:
+        if by_value in input_dict[from_key]:
+            idx = input_dict[from_key].index(by_value)
+            matching_value = input_dict[by_key][idx]
+
+    return matching_value
