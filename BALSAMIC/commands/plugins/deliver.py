@@ -116,32 +116,31 @@ def deliver(context, sample_config):
 
     for item in output_files_merged:
         if "date" in item:
+            warnings = list()
             interm_dict = copy.deepcopy(item)
             interm_dict["path"] = interm_dict.get("output_file")
-            interm_dict["step"] = interm_dict.get("rulename", "unknown_step")
+            interm_dict["step"] = interm_dict.get("rulename", "unknown")
             
             file_path_index = find_file_index(interm_dict["path"])
-            if len(file_path_index) > 2:
-                raise BalsamicError("More than one index found for %s" % interm_dict["path"])
-            file_path_index = ",".join(file_path_index)
-            interm_dict["path_index"] = file_path_index 
+            if len(file_path_index) > 1:
+                LOG.warning("More than one index found for %s" % interm_dict["path"])
+                LOG.warning("Taking %s index file" % list(file_path_index)[0])
+            interm_dict["path_index"] = file_path_index[0] if file_path_index else "" 
 
             interm_dict["format"] = get_file_extension(interm_dict["path"])
-            if "wildcard_name" in interm_dict :
-                interm_dict["tag"] = ",".join(interm_dict["wildcard_name"])
-                if not "wildcard_value" in interm_dict:
-                    interm_dict["id"] = "unknown_id"
-                    interm_dict["id_reason"] = "wildcard_value_not_found" 
-                else: 
-                    if "sample" in interm_dict["wildcard_name"]:
-                        idx = interm_dict["wildcard_name"].index("sample")
-                        interm_dict["id"] = interm_dict["wildcard_value"][idx]
-                        interm_dict["id_reason"] = "sample" 
+            interm_dict["tag"] = ",".join(interm_dict.get("wildcard_name", ["unknown"]))
 
-                    if "case_name" in interm_dict["wildcard_name"]:
-                        idx = interm_dict["wildcard_name"].index("case_name")
-                        interm_dict["id"] = interm_dict["wildcard_value"][idx]
-                        interm_dict["id_reason"] = "case_name" 
+            if not "wildcard_value" in interm_dict:
+                interm_dict["id"] = "unknown"
+
+            if "wildcard_name" in interm_dict and "wildcard_value" in interm_dict:
+                if "sample" in interm_dict["wildcard_name"]:
+                    idx = interm_dict["wildcard_name"].index("sample")
+                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
+
+                if "case_name" in interm_dict["wildcard_name"]:
+                    idx = interm_dict["wildcard_name"].index("case_name")
+                    interm_dict["id"] = interm_dict["wildcard_value"][idx]
 
                 if (
                     "case_name" in interm_dict["wildcard_name"]
@@ -151,8 +150,6 @@ def deliver(context, sample_config):
                         "Ambiguous delivery id. Wilcard has both: %s"
                         % ",".join(interm_dict["wildcard_name"])
                     )
-            else:
-                interm_dict["tag"] = "unknown_tag"
 
             delivery_json["files"].append(interm_dict)
 
