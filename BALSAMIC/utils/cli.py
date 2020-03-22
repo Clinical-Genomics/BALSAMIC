@@ -349,8 +349,7 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     '''
 
     matching_value = default
-    if from_key in input_dict and by_key in input_dict:
-        if by_value in input_dict[from_key]:
+    if from_key in input_dict and by_key in input_dict and by_value in input_dict[from_key]:
             idx = input_dict[from_key].index(by_value)
             matching_value = input_dict[by_key][idx]
 
