@@ -34,4 +34,12 @@ features branch are merged into master branch. Releases will be managed from mas
 verified, and a bumpversion justified.
 
 
-* Logo by: Mikael A.
+* Logo by: Michael A.
+
+.. toctree::
+   :caption: Getting started
+   :name: getting_started
+   :hidden:
+   :maxdepth: 1
+
+   getting_started/install
