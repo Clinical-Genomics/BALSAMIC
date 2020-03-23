@@ -45,7 +45,8 @@ rule multiqc:
     input:
         multiqc_input
     output:
-        qc_dir + "multiqc_report.html"
+        html = qc_dir + "multiqc_report.html",
+        json = qc_dir + "multiqc_data/multiqc_data.json",
     params:
         # This is using same environment as gatk
         dir_list = "\n".join(dir_list),
