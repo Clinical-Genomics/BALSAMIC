@@ -1,5 +1,7 @@
 Additional utils
 ================
 
-.. automodule:: BALSAMIC.utils
-       :members:
+#.. automodule:: BALSAMIC.utils
+#       :members:
+
+.. autofunction:: BALSAMIC.BALSAMIC
