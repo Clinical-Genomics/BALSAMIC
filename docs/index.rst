@@ -17,25 +17,6 @@
     :align: center
 
 
-Documentation
-=======
-
-BALSAMIC is basically a wrapper for its core workflow manager. The goal is to have a package with well defined cli to
-make it predictable for user to run somatic calling regaradless of the workflow manger at its core. BALSAMIC
-is using Snakemake as its core.
-
-Essentially, one can run the sample using workflows available within this package and standard Snakemake cli given that
-there is a proper config file created.
-
-**Development and branching model**
-
-BALSAMIC is using a development structure similar to GitHub Flow: https://guides.github.com/introduction/flow/ , where
-features branch are merged into master branch. Releases will be managed from master branch. It is then validated,
-verified, and a bumpversion justified.
-
-
-* Logo by: Michael A.
-
 .. toctree::
    :caption: Getting started
    :name: getting_started
