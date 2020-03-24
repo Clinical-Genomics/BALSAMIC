@@ -1,17 +1,14 @@
 ========
-BALSAMIC
+CLI reference
 ========
 
-Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 4.1.0)
+BALSAMIC (**version** = 4.1.0) is using Click. This section covers the CLI reference for BALSAMIC.
 
 .. contents::
 
-BALSAMIC commands
+Short summary
 -----
-After a successfull installation, BALSAMIC is within
-``D_BALSAMIC_${prefix}`` conda environment. Base command, ``balsamic``
-has three subcommands: 1) ``install_env`` which is used for installting
+Base command, ``balsamic`` has three subcommands: 1) ``install_env`` which is used for installting
 conda environemnts 2) ``create_config`` is to create a config file
 necessary for running the analysis. 3) ``run_analysis`` is for running
 the actual workflow.
