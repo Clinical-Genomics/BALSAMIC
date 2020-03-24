@@ -2,7 +2,7 @@
 
     <p align="center">
         <a href="https://github.com/Clinical-Genomics/BALSAMIC">
-            <img  width=480 src="../BALSAMIC/assets/balsamic_logo.png">
+            <img  width=480 src="https://raw.githubusercontent.com/Clinical-Genomics/BALSAMIC/master/BALSAMIC/assets/balsamic_logo.png">
         </a>
         <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 4.1.0)</h3>
         <h3 align="center">FastQ to Annotated VCF</h3>
@@ -34,4 +34,21 @@ features branch are merged into master branch. Releases will be managed from mas
 verified, and a bumpversion justified.
 
 
-* Logo by: Mikael A.
+* Logo by: Michael A.
+
+.. toctree::
+   :caption: Getting started
+   :name: getting_started
+   :hidden:
+   :maxdepth: 1
+
+   getting_started/install
+   
+
+.. toctree::
+   :caption: Tutorial
+   :name: tutorials
+   :hidden:
+   :maxdepth: 1
+
+   executing_balsamic/user_guide
