@@ -45,3 +45,10 @@ verified, and a bumpversion justified.
    getting_started/install
    executing_balsamic/user_guide
 
+.. toctree::
+   :caption: API and CLI reference 
+   :name: api_cli_reference
+   :hidden:
+   :maxdepth: 1
+
+   api_cli_reference/cli_reference
