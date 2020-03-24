@@ -52,3 +52,4 @@ verified, and a bumpversion justified.
    :maxdepth: 1
 
    api_cli_reference/cli_reference
+   api_cli_reference/api_utils
