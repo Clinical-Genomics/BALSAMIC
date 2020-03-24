@@ -43,12 +43,5 @@ verified, and a bumpversion justified.
    :maxdepth: 1
 
    getting_started/install
-   
-
-.. toctree::
-   :caption: Tutorial
-   :name: tutorials
-   :hidden:
-   :maxdepth: 1
-
    executing_balsamic/user_guide
+
