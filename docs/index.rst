@@ -33,5 +33,11 @@
    :maxdepth: 1
 
    api_cli_reference/cli_reference
-   api_cli_reference/api_utils
-   api_cli_reference/BALSAMIC.utils.rst
+   api_cli_reference/modules
+   api_cli_reference/BALSAMIC
+   api_cli_reference/BALSAMIC.commands
+   api_cli_reference/BALSAMIC.commands.run
+   api_cli_reference/BALSAMIC.assets
+   api_cli_reference/BALSAMIC.commands.plugins
+   api_cli_reference/BALSAMIC.commands.config
+   api_cli_reference/BALSAMIC.utils
