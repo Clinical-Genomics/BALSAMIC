@@ -24,7 +24,7 @@
    :maxdepth: 1
 
    getting_started/install
-   executing_balsamic/user_guide
+   getting_started/user_guide
 
 .. toctree::
    :caption: API and CLI reference 
