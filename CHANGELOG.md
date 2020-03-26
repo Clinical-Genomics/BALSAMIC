@@ -19,6 +19,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - Picard markduplicate output moved from log to output
 - vep upgraded to 99.1
 - removed SVs from vardict
+- refactored delivery plugins to produce a file with list of output files from workflow
 
 ### Fixed
 - remove source deactivate from rules to suppress conda warning
