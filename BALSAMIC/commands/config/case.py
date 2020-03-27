@@ -360,7 +360,7 @@ def case_config(context, umi, umi_trim_length, quality_trim, adapter_trim,
         snakemake.snakemake(snakefile=get_snakefile(analysis_type,
                                                     sequencing_type),
                             dryrun=True,
-                            configfile=output_config,
+                            configfiles=[output_config],
                             printrulegraph=True)
 
     graph_title = "_".join(['BALSAMIC', bv, json_out["analysis"]["case_id"]])
