@@ -124,7 +124,7 @@ class SnakeMake:
         sm_cmd = " snakemake --notemp -p " + \
             " --directory " + self.working_dir + \
             " --snakefile " + self.snakefile + \
-            " --configfile " + self.configfile + \
+            " --configfiles " + self.configfile + " " + self.cluster_config + \
             self.singularity_arg + \
             " " + forceall + " " + dryrun + \
             " " + cluster_cmd + " " + sm_opt
