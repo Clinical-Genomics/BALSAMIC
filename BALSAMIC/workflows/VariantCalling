@@ -39,6 +39,10 @@ sentieon = True
 SENTIEON_LICENSE = ''
 SENTIEON_INSTALL_DIR = ''
 
+# explictly check if cluster_config dict has zero keys.
+if len(cluster_config.keys()) == 0:
+    cluster_config = config
+
 try:
     SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
     SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]

@@ -60,7 +60,7 @@ class SnakeMake:
         self.configfile = None
         self.run_mode = None
         self.profile = None
-        self.cluster_config = None
+        self.cluster_config = str() 
         self.scheduler = None
         self.log_path = None
         self.script_path = None
@@ -124,11 +124,11 @@ class SnakeMake:
         sm_cmd = " snakemake --notemp -p " + \
             " --directory " + self.working_dir + \
             " --snakefile " + self.snakefile + \
-            " --configfile " + self.configfile + \
+            " --configfiles " + self.configfile + " " + self.cluster_config + \
             self.singularity_arg + \
             " " + forceall + " " + dryrun + \
             " " + cluster_cmd + " " + sm_opt
-
+        
         return sm_cmd
 
 
