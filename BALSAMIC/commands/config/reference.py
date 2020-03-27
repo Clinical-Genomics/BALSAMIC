@@ -82,7 +82,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity):
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(snakefile=snakefile,
                             dryrun=True,
-                            configfile=config_json,
+                            configfiles=[config_json],
                             printrulegraph=True)
 
     graph_title = "_".join(['BALSAMIC', bv, 'Generate reference'])

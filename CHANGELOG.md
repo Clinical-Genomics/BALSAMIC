@@ -23,6 +23,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 
 ### Fixed
 - remove source deactivate from rules to suppress conda warning
+- fixed a bug where threads were not sent properly to rules
 
 ### Removed
 - Removed annotation for germline caller results 

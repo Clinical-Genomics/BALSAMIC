@@ -60,7 +60,7 @@ def deliver(context, sample_config):
             snakefile=snakefile,
             config={"delivery": "True"},
             dryrun=True,
-            configfile=sample_config,
+            configfiles=[sample_config],
             quiet=True,
         )
 
@@ -87,7 +87,7 @@ def deliver(context, sample_config):
             config={"delivery": "True"},
             dryrun=True,
             summary=True,
-            configfile=sample_config,
+            configfiles=[sample_config],
             quiet=True,
         )
     summary = [i.split("\t") for i in summary]
