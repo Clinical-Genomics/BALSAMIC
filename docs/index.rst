@@ -27,6 +27,16 @@
    getting_started/user_guide
 
 .. toctree::
+   :caption: Resources 
+   :name: resources 
+   :hidden:
+   :maxdepth: 1
+
+   resources/bioinfo_softwares
+
+
+
+.. toctree::
    :caption: API and CLI reference 
    :name: api_cli_reference
    :hidden:
