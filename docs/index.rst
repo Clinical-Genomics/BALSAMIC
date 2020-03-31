@@ -14,7 +14,7 @@
 
 .. image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
     :target: https://coveralls.io/github/Clinical-Genomics/BALSAMIC 
-    :align: center
+    :align: right
 
 
 .. toctree::
