@@ -11,23 +11,23 @@
 
 
 
-:Source code: `GitHub <https://github.com/Clinical-Genomics/BALSAMIC>`
-:Citation: ` `
-:Version: `4.1.0`
-:CI-build status: |travis_status|
-:Code coverage: |code_cov|
-    
+   
 BALSAMIC is basically a wrapper for its core workflow manager. The goal is to have a package with well defined cli to
 make it reproducible for user to run somatic calling regaradless of the workflow manger at its core. Right now, BALSAMIC
 is using Snakemake as its core. So one can run the sample using workflows available within this package and standard
 Snakemake cli given that there is a proper config file created.
 
 
-**Development and branching model**
+Development and branching model
+~~~~~~
 
-BALSAMIC is using a development structure similar to GitHub Flow: https://guides.github.com/introduction/flow/ , where
-features branch are merged into master branch. Releases will be managed from master branch. It is then validated,
-verified, and a bumpversion justified for the release branch.
+:Source code: `GitHub <https://github.com/Clinical-Genomics/BALSAMIC>`
+:Citation: ` `
+:Version: `4.1.0`
+:Development model: Github Flow, release branch
+:CI-build status: |travis_status|
+:Code coverage: |code_cov|
+ 
 
 
 .. toctree::
