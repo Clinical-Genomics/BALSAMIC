@@ -8,13 +8,21 @@
         <h3 align="center">FastQ to Annotated VCF</h3>
     </p>
 
+
+
+
+:Source code: `GitHub <https://github.com/Clinical-Genomics/BALSAMIC>`
+:Citation: ` `
+:Version: `4.1.0`
+:CI-build status:
 .. image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
     :target: https://travis-ci.org/Clinical-Genomics/BALSAMIC
-    :align: right
-
+    :align: left 
+:Code coverage:
 .. image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
     :target: https://coveralls.io/github/Clinical-Genomics/BALSAMIC 
-    :align: right
+    :align: left
+
 
 BALSAMIC is basically a wrapper for its core workflow manager. The goal is to have a package with well defined cli to
 make it reproducible for user to run somatic calling regaradless of the workflow manger at its core. Right now, BALSAMIC
