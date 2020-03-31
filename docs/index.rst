@@ -26,10 +26,8 @@ Development and branching model
    :header-rows: 0
    :stub-columns: 1
 
-   * - 
-     - 
    * - Source code
-     - GitHub <https://github.com/Clinical-Genomics/BALSAMIC>
+     - https://github.com/Clinical-Genomics/BALSAMIC
    * - Version
      - 4.1.0
    * - Development model
