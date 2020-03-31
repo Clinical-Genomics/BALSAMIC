@@ -35,9 +35,9 @@ Development and branching model
    * - Development model
      - Github Flow, release branch
    * - Build status
-     - |travis_status|
+     - |travis_status|_
    * - Code coverage
-     - |code_cov|
+     - |code_cov|_
 
 
 .. toctree::
@@ -69,6 +69,7 @@ Development and branching model
    api_cli_reference/modules
    
 .. |code_cov| image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
+.. _code_cov: https://coveralls.io/github/Clinical-Genomics/BALSAMIC
 
 .. |travis_status| image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
-
+.. _travis_status: https://travis-ci.org/Clinical-Genomics/BALSAMIC
