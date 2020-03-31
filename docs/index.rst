@@ -21,13 +21,23 @@ Snakemake cli given that there is a proper config file created.
 Development and branching model
 ~~~~~~
 
-:Source code: `GitHub <https://github.com/Clinical-Genomics/BALSAMIC>`
-:Citation: ` `
-:Version: `4.1.0`
-:Development model: Github Flow, release branch
-:CI-build status: |travis_status|
-:Code coverage: |code_cov|
- 
+.. list-table:: 
+   :widths: 20 50
+   :header-rows: 0
+   :stub-columns: 1
+
+   * - 
+     - 
+   * - Source code
+     - GitHub <https://github.com/Clinical-Genomics/BALSAMIC>
+   * - Version
+     - 4.1.0
+   * - Development model
+     - Github Flow, release branch
+   * - Build status
+     - |travis_status|
+   * - Code coverage
+     - |code_cov|
 
 
 .. toctree::
