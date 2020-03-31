@@ -16,6 +16,17 @@
     :target: https://coveralls.io/github/Clinical-Genomics/BALSAMIC 
     :align: right
 
+BALSAMIC is basically a wrapper for its core workflow manager. The goal is to have a package with well defined cli to
+make it reproducible for user to run somatic calling regaradless of the workflow manger at its core. Right now, BALSAMIC
+is using Snakemake as its core. So one can run the sample using workflows available within this package and standard
+Snakemake cli given that there is a proper config file created.
+
+**Development and branching model**
+
+BALSAMIC is using a development structure similar to GitHub Flow: https://guides.github.com/introduction/flow/ , where
+features branch are merged into master branch. Releases will be managed from master branch. It is then validated,
+verified, and a bumpversion justified for the release branch.
+
 
 .. toctree::
    :caption: Getting started
@@ -26,6 +37,7 @@
    getting_started/install
    getting_started/user_guide
 
+
 .. toctree::
    :caption: Resources 
    :name: resources 
@@ -33,7 +45,6 @@
    :maxdepth: 1
 
    resources/bioinfo_softwares
-
 
 
 .. toctree::
