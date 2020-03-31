@@ -18,9 +18,6 @@ is using Snakemake as its core. So one can run the sample using workflows availa
 Snakemake cli given that there is a proper config file created.
 
 
-Development and branching model
-~~~~~~
-
 .. list-table:: 
    :widths: 20 50
    :header-rows: 0
