@@ -27,6 +27,8 @@ Snakemake cli given that there is a proper config file created.
      - https://github.com/Clinical-Genomics/BALSAMIC
    * - Version
      - 4.1.0
+   * - Author
+     - Hassan Foroughi Asl
    * - Development model
      - Github Flow, release branch
    * - Build status
@@ -35,6 +37,8 @@ Snakemake cli given that there is a proper config file created.
      - |code_cov_badge|_
    * - Dependencies
      - |snakemake_badge|, |singularity_badge|
+   * - Contributors
+     - Sarath Murugan
 
 
 .. |code_cov_badge| image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
