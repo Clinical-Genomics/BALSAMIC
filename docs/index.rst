@@ -34,7 +34,7 @@ Snakemake cli given that there is a proper config file created.
    * - Code coverage
      - |code_cov_badge|_
    * - Dependencies
-     - |snakemake_badge|
+     - |snakemake_badge|, |singularity_badge|
 
 
 .. toctree::
@@ -72,3 +72,4 @@ Snakemake cli given that there is a proper config file created.
 .. _travis_status_badge: https://travis-ci.org/Clinical-Genomics/BALSAMIC
 
 .. |snakemake_badge| image:: https://img.shields.io/badge/snakemake-%E2%89%A55.12.3-brightgreen.svg 
+.. |singularity_badge| image:: https://img.shields.io/badge/singularity-%E2%89%A53.1.1-brightgreen.svg 
