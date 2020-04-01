@@ -34,7 +34,7 @@ Snakemake cli given that there is a proper config file created.
    * - Code coverage
      - |code_cov_badge|_
    * - Dependencies
-     - |snakemake_badge|_
+     - |snakemake_badge|
 
 
 .. toctree::
