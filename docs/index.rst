@@ -30,9 +30,11 @@ Snakemake cli given that there is a proper config file created.
    * - Development model
      - Github Flow, release branch
    * - Build status
-     - |travis_status|_
+     - |travis_status_badge|_
    * - Code coverage
-     - |code_cov|_
+     - |code_cov_badge|_
+   * - Dependencies
+     - |snakemake_badge|_
 
 
 .. toctree::
@@ -63,8 +65,10 @@ Snakemake cli given that there is a proper config file created.
    api_cli_reference/cli_reference
    api_cli_reference/modules
    
-.. |code_cov| image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
-.. _code_cov: https://coveralls.io/github/Clinical-Genomics/BALSAMIC
+.. |code_cov_badge| image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
+.. _code_cov_badge: https://coveralls.io/github/Clinical-Genomics/BALSAMIC
 
-.. |travis_status| image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
-.. _travis_status: https://travis-ci.org/Clinical-Genomics/BALSAMIC
+.. |travis_status_badge| image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
+.. _travis_status_badge: https://travis-ci.org/Clinical-Genomics/BALSAMIC
+
+.. |snakemake_badge| image:: https://img.shields.io/badge/snakemake-%E2%89%A55.12.3-brightgreen.svg 
