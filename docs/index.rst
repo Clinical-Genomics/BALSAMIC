@@ -43,8 +43,8 @@ Snakemake cli given that there is a proper config file created.
    :hidden:
    :maxdepth: 1
 
-   getting_started/install
-   getting_started/user_guide
+   install
+   user_guide
 
 
 .. toctree::
@@ -53,7 +53,7 @@ Snakemake cli given that there is a proper config file created.
    :hidden:
    :maxdepth: 1
 
-   resources/bioinfo_softwares
+   bioinfo_softwares
 
 
 .. toctree::
@@ -62,8 +62,8 @@ Snakemake cli given that there is a proper config file created.
    :hidden:
    :maxdepth: 1
 
-   api_cli_reference/cli_reference
-   api_cli_reference/modules
+   cli_reference
+   modules
    
 .. |code_cov_badge| image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
 .. _code_cov_badge: https://coveralls.io/github/Clinical-Genomics/BALSAMIC
