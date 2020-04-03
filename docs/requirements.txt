@@ -1,5 +1,6 @@
 sphinx
 sphinxcontrib-napoleon
+sphinx-click
 sphinx-argparse
 sphinx_rtd_theme
 docutils==0.12
