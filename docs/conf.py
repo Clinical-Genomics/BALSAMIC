@@ -32,6 +32,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinxcontrib.napoleon',
+    'sphinx_click.ext',
     'sphinxarg.ext'
 ]
 
