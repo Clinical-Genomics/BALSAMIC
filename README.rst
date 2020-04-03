@@ -36,7 +36,7 @@ Snakemake cli given that there is a proper config file created.
    * - Code coverage
      - |code_cov_badge|_
    * - Documentation
-     - |rtfd_badge|
+     - |rtfd_badge|_
    * - Dependencies
      - |snakemake_badge| |singularity_badge|
    * - Contributors
