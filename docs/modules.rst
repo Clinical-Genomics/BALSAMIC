@@ -5,7 +5,7 @@ BALSAMIC
    :prog: BALSAMIC
    :show-nested:
 
- .. toctree::
+.. toctree::
    :maxdepth: 4
 
    API
