@@ -54,4 +54,4 @@ Snakemake cli given that there is a proper config file created.
 .. |singularity_badge| image:: https://img.shields.io/badge/singularity-%E2%89%A53.1.1-brightgreen.svg
 
 .. |rtfd_badge| image:: https://readthedocs.org/projects/balsamic/badge/?version=latest&style=flat
-.. _rtfd_badge: https://balsamic.readthedocs.io/en/latest/?badge=latest
+.. _rtfd_badge: https://balsamic.readthedocs.io/en/latest
