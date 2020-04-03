@@ -1,7 +1,7 @@
 BALSAMIC
 ========
 
-.. click:: module:parser
+.. click:: BALSAMIC.commands.base:cli
    :prog: BALSAMIC
    :show-nested:
 
