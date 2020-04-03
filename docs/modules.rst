@@ -1,4 +1,4 @@
-BALSAMIC
+API and CLI reference
 ========
 
 .. click:: BALSAMIC.commands.base:cli
