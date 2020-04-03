@@ -8,3 +8,13 @@ recommonmark
 configargparse
 appdirs
 click
+pyyaml
+yapf
+graphviz
+coloredlogs
+psutil
+snakemake==5.12.3
+gsutil
+jinja2
+networkx
+colorclass
