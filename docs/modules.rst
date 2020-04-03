@@ -1,7 +1,7 @@
 BALSAMIC
 ========
 
-.. click:: BALSAMIC.commands.base:cli
+.. click:: commands.base:cli
    :prog: BALSAMIC
    :show-nested:
 
