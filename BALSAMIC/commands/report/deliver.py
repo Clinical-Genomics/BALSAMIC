@@ -7,6 +7,7 @@ import yaml
 import click
 import copy
 import snakemake
+import datetime
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -55,7 +56,20 @@ def deliver(context, sample_config):
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
-    with CaptureStdout() :
+    LOG.info("Creating report file")
+    report_file_name = os.path.join(
+        yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"
+    )
+    with CaptureStdout():
+        snakemake.snakemake(
+            snakefile=snakefile,
+            dryrun=True,
+            quiet=True,
+            report=report_file_name,
+            configfiles=[sample_config],
+        )
+
+    with CaptureStdout():
         snakemake.snakemake(
             snakefile=snakefile,
             config={"delivery": "True"},
@@ -106,6 +120,7 @@ def deliver(context, sample_config):
     delivery_json["files"] = list()
 
     for item in output_files_merged:
+        print(item)
         if "date" in item:
             warnings = list()
             interm_dict = copy.deepcopy(item)
@@ -123,37 +138,52 @@ def deliver(context, sample_config):
             interm_dict["id"] = "unknown"
 
             delivery_id = list()
-            delivery_id.append(get_from_two_key(
-                interm_dict,
-                from_key="wildcard_name",
-                by_key="wildcard_value",
-                by_value="sample",
-                default=None,
-            ))
+            delivery_id.append(
+                get_from_two_key(
+                    interm_dict,
+                    from_key="wildcard_name",
+                    by_key="wildcard_value",
+                    by_value="sample",
+                    default=None,
+                )
+            )
 
-            delivery_id.append(get_from_two_key(
-                interm_dict,
-                from_key="wildcard_name",
-                by_key="wildcard_value",
-                by_value="case_name",
-                default=None,
-            ))
+            delivery_id.append(
+                get_from_two_key(
+                    interm_dict,
+                    from_key="wildcard_name",
+                    by_key="wildcard_value",
+                    by_value="case_name",
+                    default=None,
+                )
+            )
 
-            delivery_id=list(filter(None,delivery_id))
+            delivery_id = list(filter(None, delivery_id))
             if len(delivery_id) > 1:
                 LOG.error(f"Ambiguous delivery id. Wilcard has both: {delivery_id}")
                 raise BalsamicError("Delivery file parsing process failed.")
-            
+
             if delivery_id:
                 interm_dict["id"] = delivery_id[0]
 
             delivery_json["files"].append(interm_dict)
 
-    LOG.debug(f"Writing output file {delivery_file_name}")
-
+    delivery_json["files"].append(
+        {
+            "path": report_file_name,
+            "date": datetime.date.today().isoformat(),
+            "step": "balsamic_delivery",
+            "format": ".html",
+            "tag": "report",
+            "id": sample_config_dict["analysis"]["case_id"],
+        }
+    )
     write_json(delivery_json, delivery_file_name)
     with open(delivery_file_name + ".yaml", "w") as fn:
         yaml.dump(delivery_json, fn, default_flow_style=False)
+
+    LOG.info(f"Housekeeper delivery file {delivery_file_name}")
+    LOG.info(f"Workflow report file {report_file_name}")
 
 
 #    for entries in deliveries:
