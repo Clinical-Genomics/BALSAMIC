@@ -26,7 +26,7 @@ def test_config(invoke_cli):
     assert 'reference' in result.output
 
 
-def test_sample(invoke_cli):
+def test_config_case(invoke_cli):
     # GIVEN want to see config-sample params with help option
     # WHEN asking to show params for config-sample
     result = invoke_cli(['config', 'case', '--help'])
@@ -36,7 +36,7 @@ def test_sample(invoke_cli):
     assert result.exit_code == 0
 
 
-def test_sample_missing_opt(invoke_cli):
+def test_config_case_missing_opt(invoke_cli):
     # WHEN invoking command with missing options
     result = invoke_cli(['config', 'case'])
 
@@ -45,20 +45,20 @@ def test_sample_missing_opt(invoke_cli):
     assert result.exit_code == 2
 
 
+def test_report_deliver(invoke_cli):
+    # WHEN invoking command with missing options
+    result = invoke_cli(['report', 'deliver', '--help'])
+
+    # THEN It should throw missiong option error
+    assert result.exit_code == 0
+
+
 def test_plugins(invoke_cli):
     # GIVEN want to see config-sample params with help option
     # WHEN asking to show params for config-sample
     result = invoke_cli(['plugins', '--help'])
 
     # THEN It should show all params reuired for config-sample
-    assert result.exit_code == 0
-
-
-def test_plugins_deliver(invoke_cli):
-    # WHEN invoking command with missing options
-    result = invoke_cli(['plugins', 'deliver', '--help'])
-
-    # THEN It should throw missiong option error
     assert result.exit_code == 0
 
 
