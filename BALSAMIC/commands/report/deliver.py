@@ -120,7 +120,6 @@ def deliver(context, sample_config):
     delivery_json["files"] = list()
 
     for item in output_files_merged:
-        print(item)
         if "date" in item:
             warnings = list()
             interm_dict = copy.deepcopy(item)
