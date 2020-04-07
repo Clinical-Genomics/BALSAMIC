@@ -53,6 +53,14 @@ def test_report_deliver(invoke_cli):
     assert result.exit_code == 0
 
 
+def test_report_status(invoke_cli):
+    # WHEN invoking command with missing options
+    result = invoke_cli(['report', 'status', '--help'])
+
+    # THEN It should throw missiong option error
+    assert result.exit_code == 0
+
+
 def test_plugins(invoke_cli):
     # GIVEN want to see config-sample params with help option
     # WHEN asking to show params for config-sample
