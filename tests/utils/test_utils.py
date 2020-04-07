@@ -19,6 +19,7 @@ from BALSAMIC.utils.cli import get_config
 from BALSAMIC.utils.cli import recursive_default_dict
 from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
 from BALSAMIC.utils.cli import get_file_status_string
+from BALSAMIC.utils.cli import get_from_two_key
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -436,3 +437,14 @@ def test_get_file_status_string_file_not_exist():
 
     # THEN it should not return empty str
     assert get_file_status_string(str(file_not_exist), condition_str_false)
+
+
+def test_get_from_two_key():
+    # GIVEN a dictionary with two keys that each have list of values
+    input_dict = {"key_1":["key_1_value_1", "key_1_value_2"], "key_2": ["key_2_value_1", "key_2_value_2"]}
+
+    # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
+    result = get_from_two_key(input_dict, from_key="key_1", by_key="key_2", by_value="key_1_value_2", default=None)
+    
+    # THEN retrun value should be key_2_value_2 and not None
+    assert result == "key_2_value_2" 
