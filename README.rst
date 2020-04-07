@@ -35,8 +35,10 @@ Snakemake cli given that there is a proper config file created.
      - |travis_status_badge|_
    * - Code coverage
      - |code_cov_badge|_
+   * - Documentation
+     - |rtfd_badge|_
    * - Dependencies
-     - |snakemake_badge|, |singularity_badge|
+     - |snakemake_badge| |singularity_badge|
    * - Contributors
      - Sarath Murugan
 
@@ -49,4 +51,7 @@ Snakemake cli given that there is a proper config file created.
 
 .. |snakemake_badge| image:: https://img.shields.io/badge/snakemake-%E2%89%A55.12.3-brightgreen.svg 
 
-.. |singularity_badge| image:: https://img.shields.io/badge/singularity-%E2%89%A53.1.1-brightgreen.svg 
+.. |singularity_badge| image:: https://img.shields.io/badge/singularity-%E2%89%A53.1.1-brightgreen.svg
+
+.. |rtfd_badge| image:: https://readthedocs.org/projects/balsamic/badge/?version=latest&style=flat
+.. _rtfd_badge: https://balsamic.readthedocs.io/en/latest
