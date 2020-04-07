@@ -20,6 +20,7 @@ from BALSAMIC.utils.cli import recursive_default_dict
 from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
 from BALSAMIC.utils.cli import get_file_status_string
 from BALSAMIC.utils.cli import get_from_two_key
+from BALSAMIC.utils.cli import find_file_index
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -448,3 +449,25 @@ def test_get_from_two_key():
     
     # THEN retrun value should be key_2_value_2 and not None
     assert result == "key_2_value_2" 
+
+
+def test_find_file_index(tmpdir):
+    # GIVEN an existing bam file and its bai index file
+    bam_dir = tmpdir.mkdir("temporary_path")
+    bam_file = bam_dir.join("file_exists.bam")
+    bam_file.write("dummy_file_content")
+
+    bai_file = bam_dir.join("file_exists.bam.bai")
+    bai_file.write("dummy_file_content")
+
+    bai_file_2= bam_dir.join("file_exists.bai")
+    bai_file_2.write("dummy_file_content")
+
+    # WHEN finding list of bai files
+    result = find_file_index(str(bam_file))
+    
+    # THEN return list bai file(s) as a list
+    assert len(result)==2
+    assert isinstance(result, list)
+    assert str(bai_file) in result
+    assert str(bai_file_2) in result
