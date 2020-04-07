@@ -8,7 +8,6 @@ import click
 import copy
 import snakemake
 from collections import defaultdict
-from colorclass import Color
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import get_from_two_key
@@ -18,6 +17,7 @@ from BALSAMIC.utils.cli import find_file_index
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
+from BALSAMIC.utils.cli import get_file_status_string
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.exc import BalsamicError
 
@@ -67,12 +67,10 @@ def status(context, sample_config, only_missing):
     if not os.path.isfile(os.path.join(result_dir, "analysis_finish")):
         LOG.warning("analysis_finish file is missing. Analysis might be incomplete") 
 
+        
     for entries in summary_dict:
         delivery_file = entries["output_file"]
-        file_status = os.path.isfile(delivery_file)
-
-        if not only_missing and file_status: 
-            print(Color(u"[{green}\u2713{/green}]"), delivery_file)
-
-        if only_missing and not file_status: 
-            print(Color(u"[{red}\u2717{/red}]"), delivery_file)
+  
+        file_stat_str = get_file_status_string(delivery_file, only_missing) 
+        if file_stat_str:
+            click.echo(file_stat_str)

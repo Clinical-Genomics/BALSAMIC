@@ -18,6 +18,7 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_config
 from BALSAMIC.utils.cli import recursive_default_dict
 from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
+from BALSAMIC.utils.cli import get_file_status_string
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -400,3 +401,38 @@ def test_get_threads(config_files):
     # WHEN passing cluster_config and rule_name
     # THEN It should return threads value '12'
     assert get_threads(cluster_config, rule_name)
+
+
+def test_get_file_status_string_file_exists(tmpdir):
+    # GIVEN an existing file and condition_str False
+    file_exist = tmpdir.mkdir("temporary_path").join("file_exists")
+    file_exist.write("dummy_file_content")
+    
+    # WHEN condition_str is True
+    condition_str_true = True 
+
+    # THEN it should return empty str
+    assert not get_file_status_string(str(file_exist), condition_str_true)
+    
+    # WHEN condition_str is False
+    condition_str_false = False
+
+    # THEN it should not return empty str
+    assert get_file_status_string(str(file_exist), condition_str_false)
+
+
+def test_get_file_status_string_file_not_exist():
+    # GIVEN an existing file and condition_str False
+    file_not_exist = "some_random_path/dummy_file"    
+
+    # WHEN condition_str is True
+    condition_str_true = True 
+
+    # THEN it should return empty str
+    assert get_file_status_string(str(file_not_exist), condition_str_true)
+    
+    # WHEN condition_str is False
+    condition_str_false = False
+
+    # THEN it should not return empty str
+    assert get_file_status_string(str(file_not_exist), condition_str_false)

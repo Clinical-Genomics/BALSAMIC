@@ -5,6 +5,7 @@ import yaml
 import sys
 import collections
 
+from colorclass import Color
 from io import StringIO
 from pathlib import Path
 from itertools import chain
@@ -354,3 +355,19 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
             matching_value = input_dict[by_key][idx]
 
     return matching_value
+
+
+def get_file_status_string(file_to_check, conditional_str):
+    """
+      Checks if file exsits. and returns a string with checkmark or redcorss mark
+      if it exists or doesn't exist respectively.
+    """
+    file_status = os.path.isfile(file_to_check)
+
+    return_str = str()
+    if not file_status: 
+        return_str = Color(u"[{red}\u2717{/red}]") + file_to_check
+    elif not conditional_str and file_status: 
+        return_str = Color(u"[{green}\u2713{/green}]") + file_to_check
+    
+    return return_str
