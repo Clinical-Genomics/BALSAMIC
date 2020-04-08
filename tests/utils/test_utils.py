@@ -410,34 +410,22 @@ def test_get_file_status_string_file_exists(tmpdir):
     file_exist = tmpdir.mkdir("temporary_path").join("file_exists")
     file_exist.write("dummy_file_content")
     
-    # WHEN condition_str is True
-    condition_str_true = True 
-
-    # THEN it should return empty str
-    assert not get_file_status_string(str(file_exist), condition_str_true)
-    
-    # WHEN condition_str is False
-    condition_str_false = False
+    # WHEN checking for file string
+    result = get_file_status_string(str(file_exist))
 
     # THEN it should not return empty str
-    assert get_file_status_string(str(file_exist), condition_str_false)
+    assert "Found" in result[0].value_no_colors
 
 
 def test_get_file_status_string_file_not_exist():
     # GIVEN an existing file and condition_str False
-    file_not_exist = "some_random_path/dummy_file"    
+    file_not_exist = "some_random_path/dummy_non_existing_file"    
 
-    # WHEN condition_str is True
-    condition_str_true = True 
-
-    # THEN it should return empty str
-    assert get_file_status_string(str(file_not_exist), condition_str_true)
-    
-    # WHEN condition_str is False
-    condition_str_false = False
+    # WHEN checking for file string
+    result = get_file_status_string(str(file_not_exist))
 
     # THEN it should not return empty str
-    assert get_file_status_string(str(file_not_exist), condition_str_false)
+    assert "missing" in result[0].value_no_colors
 
 
 def test_get_from_two_key():

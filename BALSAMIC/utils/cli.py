@@ -357,17 +357,16 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     return matching_value
 
 
-def get_file_status_string(file_to_check, conditional_str):
+def get_file_status_string(file_to_check):
     """
       Checks if file exsits. and returns a string with checkmark or redcorss mark
       if it exists or doesn't exist respectively.
+      Always assume file doesn't exist, unless proven otherwise.
     """
-    file_status = os.path.isfile(file_to_check)
+    return_str = Color(u"[{red}\u2717{/red}] File missing: ") + file_to_check
 
-    return_str = str()
-    if not file_status: 
-        return_str = Color(u"[{red}\u2717{/red}]") + file_to_check
-    elif not conditional_str and file_status: 
-        return_str = Color(u"[{green}\u2713{/green}]") + file_to_check
+    file_status = os.path.isfile(file_to_check)
+    if file_status: 
+        return_str = Color(u"[{green}\u2713{/green}] Found: ") + file_to_check
     
-    return return_str
+    return return_str, file_status

@@ -66,11 +66,21 @@ def status(context, sample_config, only_missing):
 
     if not os.path.isfile(os.path.join(result_dir, "analysis_finish")):
         LOG.warning("analysis_finish file is missing. Analysis might be incomplete") 
-
         
     for entries in summary_dict:
         delivery_file = entries["output_file"]
   
-        file_stat_str = get_file_status_string(delivery_file, only_missing) 
-        if file_stat_str:
-            click.echo(file_stat_str)
+        existing_files = set()
+        missing_files = set()
+
+        file_status_str, file_status = get_file_status_string(delivery_file) 
+        if file_status and not only_missing:
+            click.echo(file_status_str)
+        
+        if not file_status:
+            click.echo(file_status_str)
+
+        if file_status:
+            existing_files.add(delivery_file)
+        else:
+            missing_files.add(delivery_file)
