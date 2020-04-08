@@ -7,6 +7,7 @@ import yaml
 import click
 import copy
 import snakemake
+from colorclass import Color
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -29,18 +30,22 @@ LOG = logging.getLogger(__name__)
     short_help="Creates a YAML file with output from variant caller and alignment.",
 )
 @click.option(
-    "--sample-config",
+    "-s", "--sample-config",
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
-@click.option("--only-missing", is_flag=True,
+@click.option("-m", "--show-only-missing", is_flag=True,
+    default=False,
     show_default=True,
     help="Only show missing files.")
+@click.option("-p", "--print-files", is_flag=True,
+    default=False,
+    show_default=True,
+    help="Print list of files. Otherwise only final count will be printed.")
 @click.pass_context
-def status(context, sample_config, only_missing):
+def status(context, sample_config, show_only_missing, print_files):
     """
-    cli for deliver sub-command.
-    Writes <case_id>.hk in result_directory.
+    cli for status sub-command.
     """
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
     LOG.debug("Reading input sample config")
@@ -55,7 +60,6 @@ def status(context, sample_config, only_missing):
     with CaptureStdout() as summary:
         snakemake.snakemake(
             snakefile=snakefile,
-            config={"delivery": "True"},
             dryrun=True,
             summary=True,
             configfiles=[sample_config],
@@ -65,22 +69,28 @@ def status(context, sample_config, only_missing):
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
 
     if not os.path.isfile(os.path.join(result_dir, "analysis_finish")):
-        LOG.warning("analysis_finish file is missing. Analysis might be incomplete") 
+        LOG.warning("analysis_finish file is missing. Analysis might be incomplete or running.") 
+
+    existing_files = set()
+    missing_files = set()
         
     for entries in summary_dict:
         delivery_file = entries["output_file"]
-  
-        existing_files = set()
-        missing_files = set()
 
         file_status_str, file_status = get_file_status_string(delivery_file) 
-        if file_status and not only_missing:
+        if file_status and print_files:
             click.echo(file_status_str)
         
-        if not file_status:
+        if not file_status and (show_only_missing or print_files):
             click.echo(file_status_str)
 
         if file_status:
             existing_files.add(delivery_file)
-        else:
+        if not file_status:
             missing_files.add(delivery_file)
+
+    finish_file_count='Finished file count: {}'.format(len(existing_files))
+    missing_file_count='Missing file count: {}'.format(len(missing_files))
+    click.echo(Color('{yellow}Final tally:{/yellow}'))
+    click.echo(Color('{yellow}\t'+finish_file_count+'{/yellow}'))
+    click.echo(Color('{yellow}\t'+missing_file_count+'{/yellow}'))
