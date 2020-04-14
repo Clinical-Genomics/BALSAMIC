@@ -16,11 +16,8 @@ LOG = logging.getLogger(__name__)
     "target-cov-plot",
     short_help=
     "Plots coverage for target regions.")
-@click.option("--input-cov",
-              required=True,
-              help="Sample config file. Output of balsamic config sample")
 @click.pass_context
-def target_cov_plot(context, input_cov):
+def target_cov_plot(context):
     '''
     cli for coverage plot sub-command.
     Creates coverage plots in result_directory.
