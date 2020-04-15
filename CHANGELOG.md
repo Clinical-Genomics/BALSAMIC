@@ -12,6 +12,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ### Added
 - CNV output as VCF
 - vep output for PASSed variants
+- report command with status and delivery subcommands
 
 ### Changed
 - bed files are slopped 100bp for variant calling fix #262
@@ -20,6 +21,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - vep upgraded to 99.1
 - removed SVs from vardict
 - refactored delivery plugins to produce a file with list of output files from workflow
+- updated snakemake to 5.13
 
 ### Fixed
 - remove source deactivate from rules to suppress conda warning
