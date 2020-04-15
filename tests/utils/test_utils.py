@@ -18,6 +18,9 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_config
 from BALSAMIC.utils.cli import recursive_default_dict
 from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
+from BALSAMIC.utils.cli import get_file_status_string
+from BALSAMIC.utils.cli import get_from_two_key
+from BALSAMIC.utils.cli import find_file_index
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -400,3 +403,59 @@ def test_get_threads(config_files):
     # WHEN passing cluster_config and rule_name
     # THEN It should return threads value '12'
     assert get_threads(cluster_config, rule_name)
+
+
+def test_get_file_status_string_file_exists(tmpdir):
+    # GIVEN an existing file and condition_str False
+    file_exist = tmpdir.mkdir("temporary_path").join("file_exists")
+    file_exist.write("dummy_file_content")
+    
+    # WHEN checking for file string
+    result = get_file_status_string(str(file_exist))
+
+    # THEN it should not return empty str
+    assert "Found" in result[0].value_no_colors
+
+
+def test_get_file_status_string_file_not_exist():
+    # GIVEN an existing file and condition_str False
+    file_not_exist = "some_random_path/dummy_non_existing_file"    
+
+    # WHEN checking for file string
+    result = get_file_status_string(str(file_not_exist))
+
+    # THEN it should not return empty str
+    assert "missing" in result[0].value_no_colors
+
+
+def test_get_from_two_key():
+    # GIVEN a dictionary with two keys that each have list of values
+    input_dict = {"key_1":["key_1_value_1", "key_1_value_2"], "key_2": ["key_2_value_1", "key_2_value_2"]}
+
+    # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
+    result = get_from_two_key(input_dict, from_key="key_1", by_key="key_2", by_value="key_1_value_2", default=None)
+    
+    # THEN retrun value should be key_2_value_2 and not None
+    assert result == "key_2_value_2" 
+
+
+def test_find_file_index(tmpdir):
+    # GIVEN an existing bam file and its bai index file
+    bam_dir = tmpdir.mkdir("temporary_path")
+    bam_file = bam_dir.join("file_exists.bam")
+    bam_file.write("dummy_file_content")
+
+    bai_file = bam_dir.join("file_exists.bam.bai")
+    bai_file.write("dummy_file_content")
+
+    bai_file_2= bam_dir.join("file_exists.bai")
+    bai_file_2.write("dummy_file_content")
+
+    # WHEN finding list of bai files
+    result = find_file_index(str(bam_file))
+    
+    # THEN return list bai file(s) as a list
+    assert len(result)==2
+    assert isinstance(result, list)
+    assert str(bai_file) in result
+    assert str(bai_file_2) in result
