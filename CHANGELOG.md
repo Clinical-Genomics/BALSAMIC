@@ -11,23 +11,24 @@ increment the patch number. The rational for versioning, and exact wording is ta
 ## [X.X.X]
 ### Added
 - CNV output as VCF
-- vep output for PASSed variants
-- report command with status and delivery subcommands
+- Vep output for PASSed variants
+- Report command with status and delivery subcommands
 
 ### Changed
-- bed files are slopped 100bp for variant calling fix #262
-- disable vcfmerge
+- Bed files are slopped 100bp for variant calling fix #262
+- Disable vcfmerge
 - Picard markduplicate output moved from log to output
-- vep upgraded to 99.1
-- removed SVs from vardict
-- refactored delivery plugins to produce a file with list of output files from workflow
-- updated snakemake to 5.13
+- Vep upgraded to 99.1
+- Removed SVs from vardict
+- Refactored delivery plugins to produce a file with list of output files from workflow
+- Updated snakemake to 5.13
 
 ### Fixed
-- remove source deactivate from rules to suppress conda warning
-- fixed a bug where threads were not sent properly to rules
+- Fixed a bug where threads were not sent properly to rules
 
 ### Removed
+- Removed source deactivate from rules to suppress conda warning
+- Removed `plugins delivery` subcommand
 - Removed annotation for germline caller results 
 
 ## [4.1.0]
