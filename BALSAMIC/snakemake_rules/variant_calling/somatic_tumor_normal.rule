@@ -91,7 +91,7 @@ rule mutect2_tumor_normal:
         "--dbsnp {input.dbsnp} "
         "-I:normal {input.bamN} "
         "-I:tumor {input.bamT} "
-        "--annotation Coverage --useNewAFCalculator --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
+        "--useNewAFCalculator --annotateNDA  --annotation RMSMappingQuality " 
         "--disable_auto_index_creation_and_locking_when_reading_rods "
         "-L {input.bed} "
     " | bgzip > {output}; "
