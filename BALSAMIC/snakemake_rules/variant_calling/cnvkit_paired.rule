@@ -31,7 +31,8 @@ rule cnvkit_paired:
         bamN = bam_dir + normal_bam + ".bam", 
         bamT = bam_dir + tumor_bam + ".bam"
     output:
-        done = cnv_dir + "cnvkit_paired.done"
+        vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz",
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"
     params:
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
@@ -53,10 +54,17 @@ rule cnvkit_paired:
             "{params.extra} "
             "--output-reference {params.cnv_dir}/Reference.cnn "
             "--scatter --diagram "
-            "--output-dir {params.cnv_dir} && touch {output.done}; "
+            "--output-dir {params.cnv_dir}; "
         "cnvkit.py genemetrics {params.cnv_dir}/{params.tumor_name}.cnr "
             "-s {params.cnv_dir}/{params.tumor_name}.cns "
             "--drop-low-coverage -y "
             "--output {params.cnv_dir}/{params.name}.gene_metrics.csv; "
         "cnvkit.py breaks {params.cnv_dir}/{params.tumor_name}.cnr {params.cnv_dir}/{params.tumor_name}.cns "
             "| cut -f1 | sort -u > {params.cnv_dir}/{params.name}.gene_breaks.csv; "
+        "cnvkit.py export vcf {params.cnv_dir}/{params.tumor_name}.cns --cnr {params.cnv_dir}/{params.tumor_name}.cnr "
+            "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR;"
+        "bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf; "
+        "tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz; "
+        "bcftools sort -o {output.vcf} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 
+        "tabix -p vcf -f {output.vcf}; "
+        "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 

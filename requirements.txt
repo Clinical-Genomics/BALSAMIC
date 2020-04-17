@@ -4,7 +4,8 @@ yapf
 graphviz
 coloredlogs
 psutil
-snakemake==5.5.1
+snakemake==5.13.0
 gsutil
 jinja2
 networkx
+colorclass

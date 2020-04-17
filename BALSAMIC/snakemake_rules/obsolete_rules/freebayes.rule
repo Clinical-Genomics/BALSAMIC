@@ -28,7 +28,7 @@ rule freebayes_germline:
     "freebayes --bam {input.bam} --fasta-reference {input.fa} --targets {input.bed} "
         "--use-duplicate-reads --min-mapping-quality 30 --min-base-quality 20 --min-alternate-fraction 0.01 "
         "--genotype-qualities --use-mapping-quality | bgzip > {output}; "
-    "source deactivate; "
+    
 
 rule freebayes_merge:
   input:

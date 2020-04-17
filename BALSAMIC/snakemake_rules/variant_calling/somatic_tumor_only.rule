@@ -43,7 +43,7 @@ rule vardict_tumor_only:
   shell:
     "source activate {params.conda}; "
     "export PERL5LIB=;"
-    "vardict -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
+    "vardict -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "
         "{params.col_info} {input.bed} "
         "| teststrandbias.R "
@@ -106,7 +106,7 @@ rule mutect2_tumor_only:
         "-L {input.bed} "
     " | bgzip > {output}; "
     "tabix -p vcf {output}; " 
-    "source deactivate; "
+    
 
 rule mutect2_merge: 
   input:  
@@ -164,7 +164,7 @@ rule somatic_snv_indel_vcf_merge:
           " --include-optional "
           " --output-vcf {output.vcf}; " 
         "cp {output.vcfmerge} {output.vcf}; "
-        "source deactivate; "
+        
 
 
 rule sentieon_TNhaplotyper_tumor_only:
@@ -176,6 +176,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         interval = config["panel"]["capture_kit"],
     output:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
+        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
@@ -192,4 +193,5 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
 
+echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
         """

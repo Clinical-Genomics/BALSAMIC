@@ -19,7 +19,7 @@ rule mergeBam_tumor_gatk:
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
-    "source deactivate; "
+    
 
 rule mergeBam_tumor:
   input:
@@ -31,4 +31,4 @@ rule mergeBam_tumor:
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
-    "source deactivate; "
+    

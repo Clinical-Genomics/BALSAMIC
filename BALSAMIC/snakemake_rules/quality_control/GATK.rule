@@ -28,7 +28,7 @@ rule RealignerTargetCreator:
         "-R {input.fa} "
         "--known {input.knownsites} "
         "--out {output}; "
-    "source deactivate; "
+    
 
 rule IndelRealigner:
   input:
@@ -52,7 +52,7 @@ rule IndelRealigner:
         "-known {input.knownsites} "
         "-targetIntervals {input.intervals} "
         "--out {output}; "
-    "source deactivate; "
+    
 
 rule BaseRecalibrator:
   input:
@@ -80,7 +80,7 @@ rule BaseRecalibrator:
         "-I {input.bam} "
         "--out {output}; "
     "samtools index {input.bam}; "
-    "source deactivate; "
+    
 
 rule PreparePopVCF:
   input:
@@ -120,5 +120,5 @@ rule PreparePopVCF:
           "}} "
         "$8=substr(newINFO, 1, length(newINFO)-1); "
         "print; }}' > {output.popvcf}; "
-    "source deactivate; "
+    
 

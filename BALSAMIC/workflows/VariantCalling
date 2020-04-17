@@ -3,7 +3,14 @@
 
 import os
 import logging
+import yaml
+import sys
 
+from collections import defaultdict
+from colorclass import Color
+from yapf.yapflib.yapf_api import FormatFile
+
+from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
@@ -23,6 +30,7 @@ fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
+delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image'] 
 
@@ -30,6 +38,10 @@ singularity_image = config['singularity']['image']
 sentieon = True
 SENTIEON_LICENSE = ''
 SENTIEON_INSTALL_DIR = ''
+
+# explictly check if cluster_config dict has zero keys.
+if len(cluster_config.keys()) == 0:
+    cluster_config = config
 
 try:
     SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
@@ -81,11 +93,9 @@ if config['analysis']['analysis_type'] == "paired":
 
     somatic_caller_snv = ["mutect", "vardict", "strelka"]
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
-    somatic_caller_sv = ["manta"]
+    somatic_caller_sv = ["manta", "cnvkit"]
     vcf_merge = ["vcfmerge"]
     
-    cnvkit_output = cnv_dir + "cnvkit_paired.done"
-
 else:
 
     variantcalling_rules.extend([
@@ -97,12 +107,12 @@ else:
 
     somatic_caller_snv = ["mutect", "vardict"]
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
-    somatic_caller_sv = ["manta"]
+    somatic_caller_sv = ["manta", "cnvkit"]
     vcf_merge = ["vcfmerge"]
       
-    cnvkit_output = cnv_dir + "cnvkit_single.done"
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
+#somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
+somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
@@ -110,15 +120,86 @@ for r in config["rules"]:
     include: os.path.join(rule_dir + r)
 
 var_class = ["somatic", "germline"]
-var_type = ["SNV", "SV"]
+var_type = ["CNV", "SNV", "SV"]
 
+wildcard_dict = { "sample": list(config["samples"].keys()),
+                  "case_name": config["analysis"]["case_id"],
+                  "var_type": var_type,
+                  "var_class": var_class,
+                  "var_caller": somatic_caller,
+                  "bedchrom": config["panel"]["chrom"] if "panel" in config else [], 
+                  "allow_missing": True
+                }
+
+if 'delivery' in config:
+    def get_rule_output(rule_names=[]):
+        '''
+        Returns a all outputs that exists for rule_names
+        set of (file_name, rule_name, wild_card) tuple
+        '''
+        output_files = list()
+        output_files.append(('output_file', 'rulename', 'wildcard_value'))
+        if not rule_names:
+            rule_names = vars(rules).keys()
+        for my_rule in rule_names:
+            for my_file in getattr(rules, my_rule).output:
+                for file_wildcard_list in snakemake.utils.listfiles(my_file):
+                    output_files.append((file_wildcard_list[0], my_rule, list(file_wildcard_list[1])))
+        
+        return output_files
+                        
+        
+    def get_rule_output_raw(rule_names=[], output_file_wildcards={}):
+        '''Returns set of tuples for (rule, output, "") for all possible outputs'''
+        output_files_raw = list()
+        output_files_raw.append(('output_file', 'rulename', 'wildcard_name'))
+        wildcard_sets = set()
+        if not rule_names:
+            rule_names = vars(rules).keys()
+        for my_rule in vars(rules).keys():
+            if my_rule in rule_names:
+                for my_file in getattr(rules, my_rule).output:
+                    pattern = re.compile(r"{([^}\.[!:]+)")
+                    wildcard_subset = dict()
+                    if pattern.findall(my_file):
+
+                        wildcard_sets.update(pattern.findall(my_file))
+                        for w in pattern.findall(my_file):
+                            wildcard_subset[w] = output_file_wildcards[w]
+
+                        for my_file_expanded in snakemake.io.expand(my_file,**output_file_wildcards):
+                            output_files_raw.append((my_file_expanded, my_rule, list(wildcard_subset.keys())))
+                    else:
+                        output_files_raw.append((my_file, my_rule, [])) 
+        return output_files_raw
+
+
+    rules_to_deliver = {'qc':['multiqc', 'fastp'],
+                        'alignment': ['bwa_mem', 'MarkDuplicates'],
+                        'variant_call_tn': ['vardict_merge', 'mutect_merge', 'strelka', 'manta', 'sentieon_TNhaplotyper'],
+                        'variant_call_t': ['vardict_merge', 'mutect_merge', 'manta'],
+                        'annotation': ['vep_somatic']}
+    
+    output_files_ready = get_rule_output()
+    output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
+    delivery_ready = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_ready.hk" )
+    write_json(output_files_ready, delivery_ready)
+    FormatFile(delivery_ready) 
+
+    output_files_raw = get_rule_output_raw(output_file_wildcards = wildcard_dict)
+    output_files_raw = [dict(zip(output_files_raw[0], value)) for value in output_files_raw[1:]]
+
+    delivery_raw = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_raw.hk" )
+    write_json(output_files_raw, delivery_raw)
+    FormatFile(delivery_raw) 
+
+ 
+            
 rule all:
     input:
-        os.path.join(*([result_dir + "qc/" + "multiqc_report.html"])),
+        result_dir + "qc/" + "multiqc_report.html",
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-        vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.balsamic_stat",
-        cnvkit_output
+        expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:

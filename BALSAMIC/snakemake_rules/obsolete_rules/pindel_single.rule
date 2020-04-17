@@ -28,4 +28,4 @@ rule pindel_somatic_single:
     "<( samtools stats {input.bamT} | grep ^SN | cut -f 2- | grep \"insert size average\" | awk \'{{print $NF}}\' ) "
     "<( echo {params.case_id} ) > {params.config}; " 
     "pindel -T {threads} -i {params.config} -f {input.fa} -o {params.tmpdir} && touch {output.final};"
-    "source deactivate; "
+    

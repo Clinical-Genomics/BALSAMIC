@@ -18,8 +18,7 @@ rule MarkDuplicates:
   input:
     bam_dir + "{sample}.sorted.bam"
   output:
-    mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
-  log:
+    mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     stats = bam_dir + "{sample}.sorted." + picarddup + ".txt"
   params:
     tmpdir=bam_dir,
@@ -37,9 +36,9 @@ rule MarkDuplicates:
         "VALIDATION_STRINGENCY=SILENT "
         "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 "
         "REMOVE_DUPLICATES={params.rm_dup} "
-        "METRICS_FILE='{log.stats}'; "
+        "METRICS_FILE='{output.stats}'; "
     "samtools index {output.mrkdup}; "
-    "source deactivate; "
+    
 
 rule CollectHsMetrics:
   input:
@@ -71,7 +70,7 @@ rule CollectHsMetrics:
       "R={input.fa} "
       "COVERAGE_CAP=50000 "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
-    "source deactivate; "
+    
 
 rule CollectAlignmentSummaryMetrics:
   input:
@@ -96,7 +95,7 @@ rule CollectAlignmentSummaryMetrics:
       "ADAPTER_SEQUENCE={params.adapter} "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
-    "source deactivate; "
+    
 
 rule CollectInsertSizeMetrics:
   input:
@@ -121,4 +120,4 @@ rule CollectInsertSizeMetrics:
       "INCLUDE_DUPLICATES=TRUE "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
-    "source deactivate; "
+    

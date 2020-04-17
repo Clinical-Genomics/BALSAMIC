@@ -9,6 +9,9 @@ from datetime import date
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
 
+# explictly check if cluster_config dict has zero keys.
+if len(cluster_config.keys()) == 0:
+    cluster_config = config
 
 current_day = date.today()
 

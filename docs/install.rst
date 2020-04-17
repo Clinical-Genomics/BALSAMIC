@@ -1,14 +1,10 @@
 ========
-BALSAMIC
+Installation
 ========
 
-Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer
-(**version** = 4.1.0)
+This section describes steps to install BALSAMIC (**version** = 4.1.0)
 
 .. contents::
-
-Installation
-=======
 
 Software Requirments
 ~~~~~~~~~~~~~~~~~~~~

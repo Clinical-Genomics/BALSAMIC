@@ -25,7 +25,7 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "source deactivate; "
+    
 
 
 rule mergeBam_tumor_gatk:
@@ -44,4 +44,4 @@ rule mergeBam_tumor_gatk:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "source deactivate; "
+    

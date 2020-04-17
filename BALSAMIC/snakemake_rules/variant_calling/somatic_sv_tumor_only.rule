@@ -18,6 +18,7 @@ rule manta_tumor_only:
     output:
       candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
       final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
+      namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map"
     params:
       tmpdir = vcf_dir + "manta/",
       runmode = "local",
@@ -36,4 +37,5 @@ rule manta_tumor_only:
       "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
       "cp {params.tmpdir}/results/variants/tumorSV.vcf.gz {output.final}; "
       "tabix -p vcf -f {output.final}; "
-      "source deactivate; "
+      "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
+      
