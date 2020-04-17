@@ -27,6 +27,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 - Fixed a bug where threads were not sent properly to rules
 
 ### Removed
+- Removed coverage annotation from mutect2
 - Removed source deactivate from rules to suppress conda warning
 - Removed `plugins delivery` subcommand
 - Removed annotation for germline caller results 
