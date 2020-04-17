@@ -13,7 +13,7 @@ install:
 
 script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
-  - cd tests && bash run_validate.sh
+  - bash run_validate.sh
 
 after_success: coveralls
 
