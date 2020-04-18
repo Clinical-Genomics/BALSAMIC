@@ -33,6 +33,8 @@ Snakemake cli given that there is a proper config file created.
      - Github Flow, release branch
    * - Build status
      - |travis_status_badge|_
+   * - Container status
+     - |docker_newest_release_status|  
    * - Code coverage
      - |code_cov_badge|_
    * - Documentation
@@ -49,9 +51,16 @@ Snakemake cli given that there is a proper config file created.
 .. |travis_status_badge| image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
 .. _travis_status_badge: https://travis-ci.org/Clinical-Genomics/BALSAMIC
 
+.. |docker_newest_release_status| image:: https://img.shields.io/docker/v/hassanf/balsamic 
+.. _docker_newest_release_status: https://hub.docker.com/r/hassanf/balsamic/tags 
+  
+.. |docker_build_type| image:: https://img.shields.io/docker/cloud/automated/hassanf/balsamic
+.. _docker_build_type: https://hub.docker.com/r/hassanf/balsamic
+
 .. |snakemake_badge| image:: https://img.shields.io/badge/snakemake-%E2%89%A55.12.3-brightgreen.svg 
 
 .. |singularity_badge| image:: https://img.shields.io/badge/singularity-%E2%89%A53.1.1-brightgreen.svg
 
 .. |rtfd_badge| image:: https://readthedocs.org/projects/balsamic/badge/?version=latest&style=flat
 .. _rtfd_badge: https://balsamic.readthedocs.io/en/latest
+
