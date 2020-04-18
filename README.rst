@@ -33,8 +33,8 @@ Snakemake cli given that there is a proper config file created.
      - Github Flow, release branch
    * - Build status
      - |travis_status_badge|_
-   * - Container status
-     - |docker_newest_release_status|  
+   * - Container
+     - |docker_newest_release_status|_ |docker_build_type|_ 
    * - Code coverage
      - |code_cov_badge|_
    * - Documentation
