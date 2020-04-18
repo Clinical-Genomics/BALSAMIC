@@ -8,6 +8,10 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+## [4.2.2]
+### Added
+- Add "SENTIEON_TMPDIR" to wgs workflow
+
 ## [4.2.1]
 ### Changed
 - Add docker container pull for correct version of install script
