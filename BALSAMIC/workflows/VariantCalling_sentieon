@@ -34,6 +34,7 @@ except Exception as error:
 
 SENTIEON_DNASCOPE = rule_dir + 'assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model'
 SENTIEON_TNSCOPE = rule_dir + 'assets/sentieon_models/SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model'
+os.environ["SENTIEON_TMPDIR"] = result_dir
 
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
