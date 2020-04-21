@@ -15,6 +15,12 @@ Added
 
 * Added Docker container definition for release and bumpversion
 
+Changed
+^^^^^
+
+
+* Quality of life change to rtfd docs
+
 Fixed
 ^^^^^
 
