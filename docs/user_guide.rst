@@ -1,13 +1,13 @@
-========
+==============
 Short tutorial
-========
+==============
 
 Here a short toturial is provided for BALSAMIC (**version** = 4.2.2). 
 
 .. contents::
 
 Step 1. generate a reference
------
+----------------------------
 
 Frist reference files must be downloaded. Let's assume BALSAMIC is installed and available at `D_BALSAMIC-base_4.2.2`,
 and a COSMIC key is generated via: https://cancer.sanger.ac.uk/cosmic/help/file_download 
@@ -31,7 +31,7 @@ want it to be created in another location):
 A `json` file with reference specificaions is created at: `BALSAMIC_reference/GRCh37/reference.json` 
 
 Step 2. Running a test sample
------
+-----------------------------
 Now a config file for a test run must be created. Let's use the test data in `tests` directory:
 
 ::

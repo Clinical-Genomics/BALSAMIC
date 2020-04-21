@@ -1,5 +1,6 @@
+=====================
 API and CLI reference
-========
+=====================
 
 .. click:: BALSAMIC.commands.base:cli
    :prog: BALSAMIC
@@ -8,4 +9,4 @@ API and CLI reference
 .. toctree::
    :maxdepth: 4
 
-   API
+   BALSAMIC
