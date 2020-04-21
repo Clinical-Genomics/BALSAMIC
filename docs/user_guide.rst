@@ -2,14 +2,14 @@
 Short tutorial
 ==============
 
-Here a short toturial is provided for BALSAMIC (**version** = 4.2.2). 
+Here a short toturial is provided for BALSAMIC (**version** = 4.2.3). 
 
 .. contents::
 
 Step 1. generate a reference
 ----------------------------
 
-Frist reference files must be downloaded. Let's assume BALSAMIC is installed and available at `D_BALSAMIC-base_4.2.2`,
+Frist reference files must be downloaded. Let's assume BALSAMIC is installed and available at `D_BALSAMIC-base_4.2.3`,
 and a COSMIC key is generated via: https://cancer.sanger.ac.uk/cosmic/help/file_download 
 
 The following commands will create and download reference directory at `./BALSAMIC_reference` (change this path if you
