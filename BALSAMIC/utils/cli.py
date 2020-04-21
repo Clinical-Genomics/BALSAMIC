@@ -32,11 +32,10 @@ class SnakeMake:
     To build a snakemake command using cli options
 
     Params:
-    ------
+    
     case_name       - analysis case name
     working_dir     - working directory for snakemake
-    configfile      - sample configuration file (json) output of -
-                      balsamic-config-sample
+    configfile      - sample configuration file (json) output of balsamic-config-sample
     run_mode        - run mode - cluster or local shell run
     cluster_config  - cluster config json file
     scheduler       - slurm command constructor
