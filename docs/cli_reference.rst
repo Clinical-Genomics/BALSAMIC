@@ -1,13 +1,13 @@
-========
+=============
 CLI reference
-========
+=============
 
 BALSAMIC (**version** = 4.2.2) is using Click. This section covers the CLI reference for BALSAMIC.
 
 .. contents::
 
 Short summary
------
+-------------
 Base command, ``balsamic`` has three subcommands: 1) ``install_env`` which is used for installting
 conda environemnts 2) ``create_config`` is to create a config file
 necessary for running the analysis. 3) ``run_analysis`` is for running
@@ -37,7 +37,7 @@ Base command
 
 
 create config for case analysis
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -120,7 +120,7 @@ create config for case analysis
     --help                 Show this message and exit.
 
 run case analysis and reference creation
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 

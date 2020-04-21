@@ -1,6 +1,6 @@
-========
+============
 Installation
-========
+============
 
 This section describes steps to install BALSAMIC (**version** = 4.1.0)
 
@@ -9,13 +9,9 @@ This section describes steps to install BALSAMIC (**version** = 4.1.0)
 Software Requirments
 ~~~~~~~~~~~~~~~~~~~~
 
-- Conda: BALSAMIC requires conda 4.3+ for automated installation. For detailed
-software and python requirments please see ``requirments.txt`` and
-``BALSAMIC/conda/BALSAMIC-base.yaml``
+- Conda: BALSAMIC requires conda 4.3+ for automated installation. For detailed software and python requirments please see ``requirments.txt`` and ``BALSAMIC/conda/BALSAMIC-base.yaml``
 
-- Singularity: BALSAMIC uses singularity to run vairous parts of the workflow. Either a container has to be built
-matching the BALSAMIC version from ``BALSAMIC/containers/BALSAMIC.X.X.X`` or one can pull Singularity container from
-Docker using: ``singularity pull docker://hassanf/balsamic path_to_balsamic_container``
+- Singularity: BALSAMIC uses singularity to run vairous parts of the workflow. Either a container has to be built matching the BALSAMIC version from ``BALSAMIC/containers/BALSAMIC.X.X.X`` or one can pull Singularity container from Docker using: ``singularity pull docker://hassanf/balsamic path_to_balsamic_container``
 
 - Python 3.6
 

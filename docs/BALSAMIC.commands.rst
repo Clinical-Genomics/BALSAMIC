@@ -5,9 +5,11 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    BALSAMIC.commands.config
    BALSAMIC.commands.plugins
+   BALSAMIC.commands.report
    BALSAMIC.commands.run
 
 Submodules
@@ -20,7 +22,6 @@ BALSAMIC.commands.base module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------

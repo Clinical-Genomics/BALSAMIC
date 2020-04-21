@@ -28,3 +28,11 @@
    cli_reference
    modules
  
+.. toctree::
+    :caption: Other Info
+    :name: other_info 
+    :hidden:
+    :maxdepth: 1
+
+    history
+    resources
