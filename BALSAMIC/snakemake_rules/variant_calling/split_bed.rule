@@ -32,6 +32,7 @@ rule split_bed_by_chrom:
         "do "
             "awk -v C=$c '$1==C' {input.bed} "
             " | bedtools slop -b 100 -i - -g {params.split_bed_dir}hg19.chrom.sizes "
+            " | sort -k1,1 -k2,2n "
             " | bedtools merge "
             " > {params.split_bed_dir}$c.{params.origin_bed}; "
         "done; "
