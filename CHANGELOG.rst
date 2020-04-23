@@ -6,6 +6,16 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+[4.2.4]
+------
+
+
+Fixed
+^^^^^
+
+* Fixed sort issue with bedfiles after 100 slop
+
+
 [4.2.3]
 -------
 
