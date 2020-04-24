@@ -39,6 +39,7 @@ rule mergeBam_normal:
                                                                 picardstr = picarddup)
   output:
     bamN = bam_dir + "normal.merged.bam", 
+    cramN = bam_dir + "normal.merged.cram",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_normal
@@ -49,7 +50,8 @@ rule mergeBam_normal:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    
+    "samtools view -c {output.cramN} {output.bamN}; "
+    "samtools index {output.cramN}; "
 
 
 rule mergeBam_tumor:
@@ -58,6 +60,7 @@ rule mergeBam_tumor:
                                                                 picardstr = picarddup)
   output:
     bamT = bam_dir + "tumor.merged.bam",
+    cramT = bam_dir + "tumor.merged.cram",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
@@ -68,6 +71,8 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
+    "samtools view -c {output.cramT} {output.bamT}; "
+    "samtools index {output.cramT}; "
     
 
 
