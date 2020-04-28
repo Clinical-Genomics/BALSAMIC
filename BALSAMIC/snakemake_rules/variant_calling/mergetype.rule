@@ -44,6 +44,7 @@ rule mergeBam_normal:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_normal
+  threads: get_threads(cluster_config, "mergeBam_normal")
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mergeBam_normal_' + "{mysample}.mergebam_normal.tsv".format(mysample = normal_sample)
@@ -51,7 +52,7 @@ rule mergeBam_normal:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    "samtools view -C -o {output.cramN} -T {input.fasta} {output.bamN} ; "
+    "samtools view --threads {threads} -C -o {output.cramN} -T {input.fasta} {output.bamN} ; "
     "samtools index {output.cramN}; "
 
 
@@ -66,6 +67,7 @@ rule mergeBam_tumor:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
+  threads: get_threads(cluster_config, "mergeBam_tumor")
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mergeBam_tumor_' + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
@@ -73,7 +75,7 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "samtools view -C -o {output.cramT} -T {input.fasta} {output.bamT} ; "
+    "samtools view --threads {threads} -C -o {output.cramT} -T {input.fasta} {output.bamT} ; "
     "samtools index {output.cramT}; "
     
 
@@ -87,6 +89,7 @@ rule mergeBam_tumor_gatk:
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
+  threads: get_threads(cluster_config, "samtools_sort_index")
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mergeBam_tumor_gatk_' + "{mysample}.mergebam_tumor_gatk.tsv".format(mysample = tumor_sample)
