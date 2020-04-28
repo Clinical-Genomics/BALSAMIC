@@ -35,6 +35,7 @@ rule mergeBam_normal_gatk:
 
 rule mergeBam_normal:
   input:
+    fasta = config["reference"]["reference_genome"],
     bamN = bam_dir + "{mysample}.sorted.{picardstr}.bam".format(mysample = normal_sample,
                                                                 picardstr = picarddup)
   output:
@@ -50,12 +51,13 @@ rule mergeBam_normal:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    "samtools view -c {output.cramN} {output.bamN}; "
+    "samtools view -C -o {output.cramN} -T {input.fasta} {output.bamN} ; "
     "samtools index {output.cramN}; "
 
 
 rule mergeBam_tumor:
   input:
+    fasta = config["reference"]["reference_genome"],
     bamT = bam_dir + "{mysample}.sorted.{picardstr}.bam".format(mysample = tumor_sample,
                                                                 picardstr = picarddup)
   output:
@@ -71,7 +73,7 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "samtools view -c {output.cramT} {output.bamT}; "
+    "samtools view -C -o {output.cramT} -T {input.fasta} {output.bamT} ; "
     "samtools index {output.cramT}; "
     
 
