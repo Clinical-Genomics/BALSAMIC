@@ -6,6 +6,18 @@ Under-the-hood changes that do not have an impact on how end-users run our proce
 increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
 
+
+[X.X.X]
+------
+
+
+Added
+^^^^^
+
+* Added cram files for targeted sequencing runs fixes #286
+
+
+
 [4.2.4]
 ------
 
@@ -26,7 +38,7 @@ Added
 * Added Docker container definition for release and bumpversion
 
 Changed
-^^^^^
+^^^^^^^
 
 
 * Quality of life change to rtfd docs

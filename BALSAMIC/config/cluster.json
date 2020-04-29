@@ -100,8 +100,8 @@
         "n": 10
     },
     "mergeBam_tumor": {
-        "time": "01:30:00",
-        "n": 8
+        "time": "03:00:00",
+        "n": 16
     },
     "mergeBam_tumor_gatk": {
         "time": "01:30:00",
@@ -112,8 +112,8 @@
         "n": 8
     },
     "mergeBam_normal": {
-        "time": "01:30:00",
-        "n": 8
+        "time": "03:00:00",
+        "n": 16
     },
     "cnvkit_paired": {
         "time": "06:00:00",
