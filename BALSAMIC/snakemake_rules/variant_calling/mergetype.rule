@@ -52,7 +52,7 @@ rule mergeBam_normal:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    "samtools view --threads {threads} -C -o {output.cramN} -T {input.fasta} {output.bamN} ; "
+    "samtools view --threads {threads} -C -o {output.cramN} -T {input.fasta} {output.bamN}; "
     "samtools index {output.cramN}; "
 
 
