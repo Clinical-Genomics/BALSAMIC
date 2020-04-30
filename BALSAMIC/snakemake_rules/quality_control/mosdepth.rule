@@ -1,0 +1,42 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC import __version__ as bv
+
+picarddup = get_picard_mrkdup(config)
+
+rule mosdepth_coverage:
+  input:
+    bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
+    bed = config["panel"]["capture_kit"]
+  output:
+    bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.global.dist.txt",
+    bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.region.dist.txt",
+    bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.summary.txt",
+    bam_dir + "{sample}.sorted." + picarddup + ".per-base.bed.gz",
+    bam_dir + "{sample}.sorted." + picarddup + ".regions.bed.gz"
+  params:
+    mapq='20',
+    samflag='1796',
+    quantize='0:1:50:150:',
+    sample_name='{sample}',
+    conda = get_conda_env(config["conda_env_yaml"],"mosdepth")
+  threads: get_threads(cluster_config, "mosdepth")
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + "panel_depth_" + "{sample}.mosdepth.tsv"
+  shell:
+    "source activate {params.conda}; "
+    "export MOSDEPTH_Q0=NO_COVERAGE;"
+    "export MOSDEPTH_Q1=LOW_COVERAGE;"
+    "export MOSDEPTH_Q2=CALLABLE;"
+    "export MOSDEPTH_Q3=HIGH_COVERAGE;"
+    "mosdepth "
+      "--by {input.bed} "
+      "--mapq {params.mapq} "
+      "--flag {params.samflag} "
+      "--quantize {params.quantize} "
+      "--threads {threads} "
+      "{params.sample_name} "
+      "{input.bam};"

@@ -38,6 +38,8 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
 include:
+  rule_dir + "snakemake_rules/quality_control/mosdepth.rule"
+include:
   rule_dir + "snakemake_rules/quality_control/multiqc.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
