@@ -16,7 +16,10 @@ Added
 
 * Added cram files for targeted sequencing runs fixes #286
 
+Deprecated
+^^^^^^^^^^
 
+* Sambamba coverage and rules will be deprecated
 
 [4.2.4]
 ------

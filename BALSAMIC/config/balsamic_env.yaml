@@ -26,5 +26,6 @@ BALSAMIC_py36:
 - bedtools
 - csvkit
 - fastp
+- mosdepth
 BALSAMIC_vcfmerge:
 - vcfmerge
