@@ -8,7 +8,7 @@ increment the patch number. The rational for versioning, and exact wording is ta
 
 
 [X.X.X]
-------
+-------
 
 
 Added
@@ -22,7 +22,7 @@ Deprecated
 * Sambamba coverage and rules will be deprecated
 
 [4.2.4]
-------
+-------
 
 
 Fixed
