@@ -45,3 +45,4 @@
 
     git_etiquette 
     README
+    semver
