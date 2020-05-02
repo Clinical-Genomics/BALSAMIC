@@ -44,3 +44,4 @@
     :maxdepth: 1
 
     git_etiquette 
+    README

@@ -1,6 +1,8 @@
+=========
+Build Doc
+=========
 
-Build BALSAMIC doc locally
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Following steps explains how to build documents locally.
 
 Create a conda environment:
 
@@ -14,7 +16,7 @@ Install Sphinx and extensions:
 .. code-block::
 
    cd docs
-   pip install -r requirements.txt
+   pip install -r requirements.txt -r ../requirements-dev.txt -r ../requirements.txt 
 
 Build docs:
 
