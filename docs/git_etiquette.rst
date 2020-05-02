@@ -1,5 +1,8 @@
+=============
+Git Etiquette
+=============
 
-BALSAMIC is loosely following a system to standardize the commit messages. And following up from commit messages discussed on https://github.com/Clinical-Genomics/development/pull/97 , the format below is strongly recommended for commit messages:
+It is recommended to loosely follow a system to standardize the commit messages. Following up from commit messages discussed on https://github.com/Clinical-Genomics/development/pull/97 , the format below is recommended for commit messages:
 
 **Subject line**
 ^^^^^^^^^^^^^^^^^^^^
