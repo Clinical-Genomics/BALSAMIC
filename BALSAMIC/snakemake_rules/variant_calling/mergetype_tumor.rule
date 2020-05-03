@@ -11,6 +11,7 @@ tumor_sample = get_sample_type(config["samples"], "tumor")[0]
 
 rule mergeBam_tumor:
   input:
+    fasta = config["reference"]["reference_genome"],
     bamT = bam_dir + "{mysample}.sorted.{picardstr}.bam".format(mysample = tumor_sample,
                                                                 picardstr = picarddup) 
   output:
