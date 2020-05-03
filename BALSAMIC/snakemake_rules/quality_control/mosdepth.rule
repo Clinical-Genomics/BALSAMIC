@@ -11,16 +11,17 @@ rule mosdepth_coverage:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["panel"]["capture_kit"]
   output:
-    bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.global.dist.txt",
-    bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.region.dist.txt",
-    bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.summary.txt",
-    bam_dir + "{sample}.sorted." + picarddup + ".per-base.bed.gz",
-    bam_dir + "{sample}.sorted." + picarddup + ".regions.bed.gz"
+    bam_dir + "{sample}.mosdepth.global.dist.txt",
+    bam_dir + "{sample}.mosdepth.region.dist.txt",
+    bam_dir + "{sample}.mosdepth.summary.txt",
+    bam_dir + "{sample}.per-base.bed.gz",
+    bam_dir + "{sample}.regions.bed.gz"
   params:
     mapq='20',
     samflag='1796',
     quantize='0:1:50:150:',
     sample_name='{sample}',
+    output_dir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"mosdepth")
   threads: get_threads(cluster_config, "mosdepth")
   singularity: singularity_image
@@ -38,5 +39,5 @@ rule mosdepth_coverage:
       "--flag {params.samflag} "
       "--quantize {params.quantize} "
       "--threads {threads} "
-      "{params.sample_name} "
+      "{params.output_dir}/{params.sample_name} "
       "{input.bam};"
