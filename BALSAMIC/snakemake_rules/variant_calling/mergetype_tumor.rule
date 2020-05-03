@@ -15,17 +15,20 @@ rule mergeBam_tumor:
                                                                 picardstr = picarddup) 
   output:
     bamT = bam_dir + "tumor.merged.bam",
+    cramT = bam_dir + "tumor.merged.cram",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
+  threads: get_threads(cluster_config, "mergeBam_tumor")
   singularity: singularity_image
   benchmark:
-    benchmark_dir + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
+    benchmark_dir + 'mergeBam_tumor_' + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
   shell:
-    "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    
+    "samtools view --threads {threads} -C -o {output.cramT} -T {input.fasta} {output.bamT}; "
+    "samtools index {output.cramT}; "
+ 
 
 
 rule mergeBam_tumor_gatk:
