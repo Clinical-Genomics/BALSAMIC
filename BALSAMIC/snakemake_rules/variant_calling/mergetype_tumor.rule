@@ -25,6 +25,7 @@ rule mergeBam_tumor:
   benchmark:
     benchmark_dir + 'mergeBam_tumor_' + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
   shell:
+    "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
     "samtools view --threads {threads} -C -o {output.cramT} -T {input.fasta} {output.bamT}; "
