@@ -22,6 +22,11 @@ Deprecated
 
 * Sambamba coverage and rules will be deprecated
 
+Fixed
+^^^^^
+
+* Fixed latest tag in install script
+
 [4.2.4]
 ------
 
