@@ -5,7 +5,7 @@ Semantic versioning
 
 BALSAMIC is following `Semantic Versioning <https://semver.org/>`_.
 
-Since October 24, 2018 the following changes were added in addition to SemVer to also cover Bioinformatic and data analsyis aspect of it:
+Since October 24, 2018 the following changes were added in addition to SemVer also to cover Bioinformatic and data analysis aspect of it:
 
 - **major**:
 
@@ -30,6 +30,5 @@ Since October 24, 2018 the following changes were added in addition to SemVer to
   - Changes to resource allocation of Scheduler job submission
 
 The rational for versioning is heavily inspired from BACTpipe: DOI: 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
-
 
 
