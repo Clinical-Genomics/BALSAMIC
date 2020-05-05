@@ -39,7 +39,7 @@ else:
     # mosdepth metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.global.dist.txt", sample=config["samples"]))
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.region.dist.txt", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.summary.txt",     sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.summary.txt", sample=config["samples"]))
 
     dir_list = [bam_dir, fastqc_dir]
 
