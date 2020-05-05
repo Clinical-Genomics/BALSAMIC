@@ -52,7 +52,7 @@ rule mergeBam_normal:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    "samtools view --threads {threads} -C -o {output.cramN} -T {input.fasta} {output.bamN}; "
+    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramN} {output.bamN}; "
     "samtools index {output.cramN}; "
 
 
@@ -75,7 +75,7 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "samtools view --threads {threads} -C -o {output.cramT} -T {input.fasta} {output.bamT}; "
+    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramT} {output.bamT}; "
     "samtools index {output.cramT}; "
     
 
