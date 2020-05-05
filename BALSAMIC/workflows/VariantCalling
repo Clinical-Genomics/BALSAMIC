@@ -58,7 +58,8 @@ qc_rules = [
   "snakemake_rules/quality_control/GATK.rule",
   "snakemake_rules/quality_control/multiqc.rule",
   "snakemake_rules/quality_control/picard.rule",
-  "snakemake_rules/quality_control/sambamba_depth.rule"
+  "snakemake_rules/quality_control/sambamba_depth.rule",
+  "snakemake_rules/quality_control/mosdepth.rule"
   ]
 
 align_rules = [
