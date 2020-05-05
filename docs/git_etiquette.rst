@@ -2,7 +2,7 @@
 Git Etiquette
 =============
 
-It is recommended to loosely follow a system to standardize the commit messages. Following up from commit messages discussed on https://github.com/Clinical-Genomics/development/pull/97 , the format below is recommended for commit messages:
+It is recommended to follow a system to standardize the commit messages loosely. Following up from commit messages discussed on https://github.com/Clinical-Genomics/development/pull/97 , the format below is recommended for commit messages:
 
 **Subject line**
 ^^^^^^^^^^^^^^^^^^^^
