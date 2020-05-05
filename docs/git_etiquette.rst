@@ -12,7 +12,7 @@ Subject can include one of the following:
 
 #. **feat**\ : Introducing a new features. This includes but not limited to workflows, SnakeMake rule, cli, and plugins. In other words, anything that is new and fundamental change will also go here. Enhancements and optimizations will go into refactor.
 #. **fix**\ : This is essentially a patch. Included but not limited to: bug fixes, hotfixes, and any patch to address a known issue.
-#. **doc**\ : Any changes to the documentations are part of doc subject line, included but no limited to: docstrings, cli-help, readme, tutorial, documentation, CHANGELOG, and addition of ipython/jupyter notebook in form of tutorial.
+#. **doc**\ : Any changes to the documentation are part of doc subject line, included but not limited to docstrings, cli-help, readme, tutorial, documentation, CHANGELOG, and addition of ipython/jupyter notebook in the form of tutorial.
 #. **test**\ : Any changes to the tests are part of test subject line. This includes adding, removing or updating of the following: unittests, validation/verification dataset, and test related configs.
 #. **refactor**\ : Refactoring refers to a rather broad term. Any style changes, code enhancement, and analysis optimization.
 #. **version**\ : Any changes to .bumpversion config and or change of version will be specified with this. This includes comments within .bumpversion, structure of .bumpversion, etc.
