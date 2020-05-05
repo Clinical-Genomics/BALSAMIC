@@ -1,14 +1,6 @@
-This change log will document the notable changes to this project in this file and it is following `Semantic
-Versioning <https://semver.org/>`_. The version numbering consists of three digits: major.minor.patch. Since October 24,
-2018, the major version is expected to increment following major structural changes to the BALSAMIC workflow. Typically,
-any changes to the user interface (command line arguments etc.), or output files will increment the minor version.
-Under-the-hood changes that do not have an impact on how end-users run our process the output will typically only
-increment the patch number. The rational for versioning, and exact wording is taken from BACTpipe: DOI:
-10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
-
 
 [X.X.X]
-------
+-------
 
 
 Added
@@ -28,7 +20,7 @@ Fixed
 * Fixed latest tag in install script
 
 [4.2.4]
-------
+-------
 
 
 Fixed
