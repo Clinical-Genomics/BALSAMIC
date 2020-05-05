@@ -7,6 +7,7 @@ Added
 ^^^^^
 
 * Added cram files for targeted sequencing runs fixes #286
+* Added `mosdepth` to calculate coverage for whole exome and targeted sequencing
 
 Deprecated
 ^^^^^^^^^^
