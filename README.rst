@@ -4,7 +4,7 @@
         <a href="https://github.com/Clinical-Genomics/BALSAMIC">
             <img  width=480 src="https://raw.githubusercontent.com/Clinical-Genomics/BALSAMIC/master/BALSAMIC/assets/balsamic_logo.png">
         </a>
-        <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 4.1.0)</h3>
+        <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 4.2.4)</h3>
         <h3 align="center">FastQ to Annotated VCF</h3>
     </p>
 
@@ -26,13 +26,19 @@ Snakemake cli given that there is a proper config file created.
    * - Source code
      - https://github.com/Clinical-Genomics/BALSAMIC
    * - Version
-     - 4.1.0
+     - 4.2.4
    * - Author
      - Hassan Foroughi Asl
    * - Development model
      - Github Flow, release branch
    * - Build status
      - |travis_status_badge|_
+   * - Container latest release status
+     - |docker_latest_release_status|_
+   * - Container build type
+     - |docker_build_type|_
+   * - Container master status 
+     - |docker_latest_build_status|_
    * - Code coverage
      - |code_cov_badge|_
    * - Documentation
@@ -40,7 +46,7 @@ Snakemake cli given that there is a proper config file created.
    * - Dependencies
      - |snakemake_badge| |singularity_badge|
    * - Contributors
-     - Sarath Murugan
+     - @imsarath , @keyvanelhami
 
 
 .. |code_cov_badge| image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
@@ -49,9 +55,19 @@ Snakemake cli given that there is a proper config file created.
 .. |travis_status_badge| image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
 .. _travis_status_badge: https://travis-ci.org/Clinical-Genomics/BALSAMIC
 
+.. |docker_latest_build_status| image:: https://img.shields.io/docker/cloud/build/hassanf/balsamic
+.. _docker_latest_build_status: https://hub.docker.com/r/hassanf/balsamic
+
+.. |docker_latest_release_status| image:: https://img.shields.io/docker/v/hassanf/balsamic?sort=semver 
+.. _docker_latest_release_status: https://hub.docker.com/r/hassanf/balsamic/tags 
+  
+.. |docker_build_type| image:: https://img.shields.io/docker/cloud/automated/hassanf/balsamic
+.. _docker_build_type: https://hub.docker.com/r/hassanf/balsamic
+
 .. |snakemake_badge| image:: https://img.shields.io/badge/snakemake-%E2%89%A55.12.3-brightgreen.svg 
 
 .. |singularity_badge| image:: https://img.shields.io/badge/singularity-%E2%89%A53.1.1-brightgreen.svg
 
 .. |rtfd_badge| image:: https://readthedocs.org/projects/balsamic/badge/?version=latest&style=flat
 .. _rtfd_badge: https://balsamic.readthedocs.io/en/latest
+

@@ -89,8 +89,16 @@ source activate ${_env_name}
 echo -e "${_green}Installing BALSAMIC${_nocol}"
 pip install -r requirements.txt --editable .
 
-echo -e "${_green}Pulling latest version of container.${_nocol}"
-singularity pull --force ${PWD}'/BALSAMIC/containers/BALSAMIC_latest.sif' docker://hassanf/balsamic
+if [[ ${_balsamic_ver} =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]
+then
+  echo -e "${_green}Pulling version $vFlag of container.${_nocol}"
+  container_version=release_v${_balsamic_ver} 
+else
+  echo -e "${_green}Pulling latest version of container.${_nocol}"
+  container_version=latest
+fi
+  
+singularity pull --force ${PWD}"/BALSAMIC/containers/BALSAMIC_${container_version}.sif" docker://hassanf/balsamic:${container_version}
 
 echo -e "\n${_green}Install finished. To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
 

@@ -33,7 +33,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinxcontrib.napoleon',
     'sphinx_click.ext',
-    'sphinxarg.ext'
+    'sphinxarg.ext',
+    'recommonmark'
 ]
 
 # The suffix of source filenames.

@@ -20,14 +20,6 @@ BALSAMIC.commands.plugins.cov\_plot module
    :undoc-members:
    :show-inheritance:
 
-BALSAMIC.commands.plugins.deliver module
-----------------------------------------
-
-.. automodule:: BALSAMIC.commands.plugins.deliver
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 BALSAMIC.commands.plugins.scout module
 --------------------------------------
 
