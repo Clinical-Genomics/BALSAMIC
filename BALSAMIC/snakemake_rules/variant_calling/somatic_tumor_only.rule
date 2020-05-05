@@ -2,11 +2,13 @@
 # coding: utf-8
 
 import os
+
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.assets import models
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
@@ -69,9 +71,12 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
+    "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
     "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
+
+        #"--annotation Coverage --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
 rule mutect2_tumor_only:
   input:
     fa = config["reference"]["reference_genome"],
@@ -96,7 +101,7 @@ rule mutect2_tumor_only:
         "--cosmic {input.cosmic} "
         "--dbsnp {input.dbsnp} "
         "-I:tumor {input.bamT} "
-        "--useNewAFCalculator --annotateNDA  --annotation RMSMappingQuality " 
+        "--useNewAFCalculator "
         "--disable_auto_index_creation_and_locking_when_reading_rods "
         "-L {input.bed} "
     " | bgzip > {output}; "
@@ -111,7 +116,7 @@ rule mutect2_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
   params: 
-    conda = get_conda_env(config["conda_env_yaml"],"bcftools")
+    conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
@@ -120,6 +125,7 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
     "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
+    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
     "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
@@ -136,7 +142,7 @@ rule somatic_snv_indel_vcf_merge:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
     params:
         workdir = vcf_dir + "/vcfmerge",
-        conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
+        conda = get_conda_env(config["conda_env_yaml"],"vcfmerge")
     threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
     singularity: singularity_image 
     benchmark:

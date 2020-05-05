@@ -7,6 +7,7 @@ from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.assets import models
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
@@ -62,9 +63,13 @@ rule vardict_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}; " 
+    "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
+    "echo -e \"{params.name}-match\" > {output.namemap}.normal; " 
     "echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
+
+        #"--annotation Coverage --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
 rule mutect2_tumor_normal:
   input:
     fa = config["reference"]["reference_genome"],
@@ -91,7 +96,7 @@ rule mutect2_tumor_normal:
         "--dbsnp {input.dbsnp} "
         "-I:normal {input.bamN} "
         "-I:tumor {input.bamT} "
-        "--useNewAFCalculator --annotateNDA  --annotation RMSMappingQuality " 
+        "--useNewAFCalculator "
         "--disable_auto_index_creation_and_locking_when_reading_rods "
         "-L {input.bed} "
     " | bgzip > {output}; "
@@ -116,6 +121,8 @@ rule mutect2_merge:
     "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
+    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
+    "echo -e \"NORMAL\" > {output.namemap}.normal; " 
     "echo '{{ vcf: {{ mutect: {{ name: mutect2, path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
@@ -157,6 +164,8 @@ rule strelka_tumor_normal:
         "{output.default}; "
     "tabix -f -p vcf {output.final}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
+    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
+    "echo -e \"NORMAL\" > {output.namemap}.normal; " 
     "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.final} }} }} }}' > {output.yaml}; "
     
 
