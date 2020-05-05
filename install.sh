@@ -95,7 +95,7 @@ then
   container_version=release_v${_balsamic_ver} 
 else
   echo -e "${_green}Pulling latest version of container.${_nocol}"
-  container_version=lastet
+  container_version=latest
 fi
   
 singularity pull --force ${PWD}"/BALSAMIC/containers/BALSAMIC_${container_version}.sif" docker://hassanf/balsamic:${container_version}
