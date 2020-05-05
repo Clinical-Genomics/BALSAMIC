@@ -36,3 +36,13 @@
 
     history
     resources
+
+.. toctree::
+    :caption: Development guide
+    :name: development_guide
+    :hidden:
+    :maxdepth: 1
+
+    git_etiquette 
+    README
+    semver

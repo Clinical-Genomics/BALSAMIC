@@ -33,8 +33,12 @@ Snakemake cli given that there is a proper config file created.
      - Github Flow, release branch
    * - Build status
      - |travis_status_badge|_
-   * - Container
-     - |docker_newest_release_status|_ |docker_build_type|_ 
+   * - Container latest release status
+     - |docker_latest_release_status|_
+   * - Container build type
+     - |docker_build_type|_
+   * - Container master status 
+     - |docker_latest_build_status|_
    * - Code coverage
      - |code_cov_badge|_
    * - Documentation
@@ -51,8 +55,11 @@ Snakemake cli given that there is a proper config file created.
 .. |travis_status_badge| image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
 .. _travis_status_badge: https://travis-ci.org/Clinical-Genomics/BALSAMIC
 
-.. |docker_newest_release_status| image:: https://img.shields.io/docker/v/hassanf/balsamic 
-.. _docker_newest_release_status: https://hub.docker.com/r/hassanf/balsamic/tags 
+.. |docker_latest_build_status| image:: https://img.shields.io/docker/cloud/build/hassanf/balsamic
+.. _docker_latest_build_status: https://hub.docker.com/r/hassanf/balsamic
+
+.. |docker_latest_release_status| image:: https://img.shields.io/docker/v/hassanf/balsamic?sort=semver 
+.. _docker_latest_release_status: https://hub.docker.com/r/hassanf/balsamic/tags 
   
 .. |docker_build_type| image:: https://img.shields.io/docker/cloud/automated/hassanf/balsamic
 .. _docker_build_type: https://hub.docker.com/r/hassanf/balsamic
