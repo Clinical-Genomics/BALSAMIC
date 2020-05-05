@@ -13,7 +13,7 @@ Since October 24, 2018 the following changes were added in addition to SemVer al
     callers, aligners, quality trimmers, and/or anything other than QC reporting and rule `all`.
 
   - Addition of annotation softwares or sources, variant callers, aligners, quality trimmers, and/or anything other than QC reporting
-    QC reporting.
+    
 
 - **minor**:
 
@@ -30,4 +30,3 @@ Since October 24, 2018 the following changes were added in addition to SemVer al
   - Changes to resource allocation of Scheduler job submission
 
 The rational for versioning is heavily inspired from BACTpipe: DOI: 10.5281/zenodo.1254248 and https://github.com/ctmrbio/BACTpipe)
-
