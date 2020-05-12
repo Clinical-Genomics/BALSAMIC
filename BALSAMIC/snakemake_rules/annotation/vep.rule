@@ -75,3 +75,45 @@ rule vep_stat:
         " | bcftools +counts "
         " | awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.stat};"
     
+
+rule vep_germline:
+  input:
+    vcf = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
+    header = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.sample_name_map",
+    cosmic = config["reference"]["cosmic"]
+  output:
+    vcf = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
+  params:
+    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    vep_cache = config["reference"]["vep"]
+  threads: get_threads(cluster_config, 'vep')
+  singularity: singularity_image 
+  benchmark:
+    benchmark_dir + 'vep_' + "{var_type}.germline.{sample}.{var_caller}.vep.tsv"
+  shell:
+    "source activate {params.conda}; "
+    "vep_path=$(dirname $(readlink -e $(which vep))); "
+    "export PERL5LIB=;"
+    "vep "
+        "--dir $vep_path "
+        "--dir_cache {params.vep_cache} "
+        "--dir_plugins $vep_path "
+        "--input_file {input.vcf} "
+        "--output_file {output.vcf} "
+        "--compress_output bgzip "
+        "--fork {threads} "
+        "--vcf "
+        "--everything "
+        "--allow_non_variant "
+        "--dont_skip "
+        "--buffer_size 10000 "
+        "--format vcf "
+        "--offline "
+        "--variant_class "
+        "--merged "
+        "--cache "
+        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
+        "--verbose "
+        "--force_overwrite; "
+    "tabix -p vcf -f {output.vcf}; "
+ 
