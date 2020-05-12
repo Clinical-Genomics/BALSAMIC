@@ -79,7 +79,6 @@ rule vep_stat:
 rule vep_germline:
   input:
     vcf = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
-    header = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
     vcf = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
