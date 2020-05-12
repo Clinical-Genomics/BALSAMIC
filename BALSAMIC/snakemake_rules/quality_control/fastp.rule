@@ -21,6 +21,8 @@ if 'quality_trim' in config['QC'].keys():
 
     if not config['QC']['adapter_trim']:
         fastp_param.extend(["--disable_adapter_trimming"])
+    else:
+        fastp_param.extend(["--detect_adapter_for_pe"])
 
     if config['QC']['umi_trim']:
         fastp_param.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
