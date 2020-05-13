@@ -199,6 +199,7 @@ if 'delivery' in config:
 rule all:
     input:
         result_dir + "qc/" + "multiqc_report.html",
+        expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
     output:
