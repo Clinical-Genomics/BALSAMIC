@@ -10,6 +10,7 @@ Added
 * Added `mosdepth` to calculate coverage for whole exome and targeted sequencing
 * Filter models added for tumor-only mode
 * Enabling adapter trim enables pe adapter trim option for fastp
+* Annotate germline variant calls
 
 Deprecated
 ^^^^^^^^^^
