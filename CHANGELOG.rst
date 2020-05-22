@@ -9,6 +9,7 @@ Added
 * Added cram files for targeted sequencing runs fixes #286
 * Added `mosdepth` to calculate coverage for whole exome and targeted sequencing
 * Filter models added for tumor-only mode
+* Enabling adapter trim enables pe adapter trim option for fastp
 * Annotate germline variant calls
 * Baitset name to picard hsmetrics 
 
@@ -21,6 +22,12 @@ Fixed
 ^^^^^
 
 * Fixed latest tag in install script
+
+
+Changed
+^^^^^^^
+
+* Increased run time for various slurm jobs fixes #314
 
 [4.2.4]
 -------
