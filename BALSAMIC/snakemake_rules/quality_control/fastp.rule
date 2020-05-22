@@ -2,32 +2,29 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
-
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 from BALSAMIC import __version__ as bv
 
-qc_dir = result_dir + "qc/"
-
 if 'quality_trim' in config['QC'].keys():
-    fastp_param = list()
+    fastp_param_qc = list()
+    fastp_param_adapter = list()
+    fastp_param_umi = list()
     if config['QC']['quality_trim']:
-        fastp_param.extend(["--trim_tail1", "1", "--n_base_limit", "5",
+        fastp_param_qc.extend(["--trim_tail1", "1", "--n_base_limit", "5",
                             "--length_required", config["QC"]["min_seq_length"],
                             "--low_complexity_filter", "--trim_poly_g"])
     else:
-        fastp_param.extend(["--disable_quality_filtering", "--disable_length_filtering", "--disable_trim_poly_g"])
+        fastp_param_qc.extend(["--disable_quality_filtering", "--disable_length_filtering", "--disable_trim_poly_g"])
 
     if not config['QC']['adapter_trim']:
-        fastp_param.extend(["--disable_adapter_trimming"])
+        fastp_param_adapter.extend(["--disable_adapter_trimming"])
     else:
-        fastp_param.extend(["--detect_adapter_for_pe"])
+        fastp_param_adapter.extend(["--detect_adapter_for_pe"])
 
-    if config['QC']['umi_trim']:
-        fastp_param.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
-
-    fastp_param = " ".join(fastp_param)
+    # UMI trimming will work only if adapter_trim is disabled
+    if config['QC']['umi_trim'] and not config['QC']['adapter_trim']:
+        fastp_param_umi.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
 
 # remove adapter from paired end reads
 rule fastp:
@@ -41,19 +38,25 @@ rule fastp:
     html_out = qc_dir + "{sample}_fastp.html"
   params:
     fastq_dir = fastq_dir,
-    extra = fastp_param,
+    qc = " ".join(fastp_param_qc),
+    umi = " ".join(fastp_param_umi),
+    adapter = " ".join(fastp_param_adapter),
     conda = get_conda_env(config["conda_env_yaml"],"fastp")
   singularity: singularity_image
   threads: get_threads(cluster_config, 'fastp')
   benchmark:
     benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
   shell:
-    "source activate {params.conda}; "
-    "fastp "
-    "--in1 {input.read1} --in2 {input.read2} "
-    "--out1 {output.read1} --out2 {output.read2} "
-    "--json {output.json_out} "
-    "--overrepresentation_analysis "
-    "{params.extra} "
-    "--html {output.html_out} ; "
-    "source deactivate;"
+    """
+source activate {params.conda}; 
+fastp \
+--in1 {input.read1} --in2 {input.read2} \
+--out1 {output.read1} --out2 {output.read2} \
+--json {output.json_out} \
+--html {output.html_out} \
+--thread {threads} \
+--overrepresentation_analysis \
+{params.qc} \
+{params.umi} \
+{params.adapter} \
+    """
