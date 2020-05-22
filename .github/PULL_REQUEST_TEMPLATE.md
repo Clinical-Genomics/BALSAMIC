@@ -1,4 +1,4 @@
-_keep this section if PR is not for release_
+# _keep this section if PR is not for release_
 
 ---
 ### This PR:
@@ -13,7 +13,8 @@ _keep this section if PR is not for release_
 - Installation, unit and integration tests pass
 ---
 
-_keep this section if PR is for release_
+# _keep this section if PR is for release_
+
 ---
 ### Release description:
 
