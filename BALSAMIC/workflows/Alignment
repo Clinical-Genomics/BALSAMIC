@@ -18,6 +18,7 @@ fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
+qc_dir = result_dir + "qc/"
 
 singularity_image = config['singularity']['image'] 
 
