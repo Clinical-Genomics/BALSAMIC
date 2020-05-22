@@ -22,6 +22,12 @@ Fixed
 
 * Fixed latest tag in install script
 
+
+Changed
+^^^^^^^
+
+* Increased run time for various slurm jobs fixes #314
+
 [4.2.4]
 -------
 
