@@ -10,6 +10,7 @@ Added
 * Added `mosdepth` to calculate coverage for whole exome and targeted sequencing
 * Filter models added for tumor-only mode
 * Annotate germline variant calls
+* Baitset name to picard hsmetrics 
 
 Deprecated
 ^^^^^^^^^^
