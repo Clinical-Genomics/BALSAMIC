@@ -11,6 +11,7 @@ Added
 * Filter models added for tumor-only mode
 * Enabling adapter trim enables pe adapter trim option for fastp
 * Annotate germline variant calls
+* Baitset name to picard hsmetrics 
 
 Deprecated
 ^^^^^^^^^^

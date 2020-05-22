@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
-
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 from BALSAMIC import __version__ as bv
 
@@ -51,6 +49,7 @@ rule CollectHsMetrics:
   params:
     tmpdir=bam_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    baitsetname = os.path.basename(config["panel"]["capture_kit"])
   singularity: singularity_image
   benchmark:
     benchmark_dir + "CollectHsMetrics_" + "{sample}.collect_hsmetrics.tsv"
@@ -68,6 +67,7 @@ rule CollectHsMetrics:
       "I={input.bam} "
       "O={output.mrkdup} "
       "R={input.fa} "
+      "BAIT_SET_NAME={params.baitsetname} "
       "COVERAGE_CAP=50000 "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
     
@@ -120,4 +120,3 @@ rule CollectInsertSizeMetrics:
       "INCLUDE_DUPLICATES=TRUE "
       "METRIC_ACCUMULATION_LEVEL=ALL_READS "
       "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
-    
