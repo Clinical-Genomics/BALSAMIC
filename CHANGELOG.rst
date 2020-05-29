@@ -22,6 +22,7 @@ Fixed
 ^^^^^
 
 * Fixed latest tag in install script
+* Fixed lack of naming final annotated VCF TUMOR/NORMAL
 
 
 Changed
