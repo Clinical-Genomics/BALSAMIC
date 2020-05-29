@@ -14,6 +14,7 @@ rule vep_somatic:
     cosmic = config["reference"]["cosmic"]
   output:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
+    tmpvcf = temp(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz"),
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
@@ -26,12 +27,12 @@ rule vep_somatic:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "
     "export PERL5LIB=;"
-    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o {input.vcf}_tmp ;" 
+    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o {input.tmpvcf} ;" 
     "vep "
         "--dir $vep_path "
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
-        "--input_file {input.vcf}_tmp "
+        "--input_file {input.tmpvcf} "
         "--output_file {output.vcf} "
         "--compress_output bgzip "
         "--fork {threads} "
@@ -51,7 +52,6 @@ rule vep_somatic:
     "tabix -p vcf -f {output.vcf}; "
     "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf}; "
     "tabix -p vcf -f {output.vcf_pass}; " 
-    "rm {input.vcf}_tmp; "
     
 
 rule vep_stat:
