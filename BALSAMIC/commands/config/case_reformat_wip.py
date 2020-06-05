@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 from datetime import datetime
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
+import BALSAMIC
 from BALSAMIC.utils.cli import get_package_split
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_config
@@ -101,20 +102,17 @@ def get_sample_config(sample_config, case_id, analysis_dir, analysis_type):
         sample_config = json.load(sample_json)
 
     sample_config["analysis"]["case_id"] = case_id
-    sample_config["analysis"]["config_creation_date"] = datetime.now().strftime(
-        "%Y-%m-%d %H:%M"
-    )
+    sample_config["analysis"]["config_creation_date"] = datetime.now(
+    ).strftime("%Y-%m-%d %H:%M")
     sample_config["analysis"]["analysis_dir"] = analysis_dir + "/"
-    sample_config["analysis"]["log"] = os.path.join(analysis_dir, case_id, "logs/")
-    sample_config["analysis"]["script"] = os.path.join(
-        analysis_dir, case_id, "scripts/"
-    )
-    sample_config["analysis"]["result"] = os.path.join(
-        analysis_dir, case_id, "analysis"
-    )
+    sample_config["analysis"]["log"] = os.path.join(analysis_dir, case_id,
+                                                    "logs/")
+    sample_config["analysis"]["script"] = os.path.join(analysis_dir, case_id,
+                                                       "scripts/")
+    sample_config["analysis"]["result"] = os.path.join(analysis_dir, case_id,
+                                                       "analysis")
     sample_config["analysis"]["benchmark"] = os.path.join(
-        analysis_dir, case_id, "benchmarks/"
-    )
+        analysis_dir, case_id, "benchmarks/")
     sample_config["analysis"]["analysis_type"] = analysis_type
     sample_config["samples"] = {}
 
@@ -144,11 +142,12 @@ def get_fastq_path(fq_file, fq_pattern):
         file_basename = os.path.basename(fq_file)
         try:
             # extracting file prefix
-            file_str = file_basename[
-                0 : (fq_pattern.search(file_basename).span()[0] + 1)
-            ]
+            file_str = file_basename[0:(
+                fq_pattern.search(file_basename).span()[0] + 1)]
         except AttributeError as error:
-            LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
+            LOG.error(
+                f"File name is invalid, fastq file should be sample_R_1.fastq.gz"
+            )
             raise click.Abort()
     else:
         LOG.error(f"{fq_file} is not found, update correct file path")
@@ -218,7 +217,8 @@ def case_config0(
     install_config["rule_directory"] = rule_directory.as_posix() + "/"
 
     install_config["singularity"] = dict()
-    install_config["singularity"]["image"] = Path(singularity).absolute().as_posix()
+    install_config["singularity"]["image"] = Path(
+        singularity).absolute().as_posix()
 
     analysis_type = get_analysis_type(normal, umi)
     sequencing_type = "targeted" if panel_bed else "wgs"
@@ -237,9 +237,8 @@ def case_config0(
     LOG.info("Reading sample config file %s" % sample_config_path)
 
     analysis_dir = os.path.abspath(analysis_dir)
-    sample_config = get_sample_config(
-        sample_config_path, case_id, analysis_dir, analysis_type
-    )
+    sample_config = get_sample_config(sample_config_path, case_id,
+                                      analysis_dir, analysis_type)
 
     output_dir = os.path.join(analysis_dir, case_id)
 
@@ -272,10 +271,8 @@ def case_config0(
     sample_config["analysis"]["sequencing_type"] = sequencing_type
 
     conda_env = glob.glob(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "../..", "conda/*.yaml"
-        )
-    )
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../..",
+                     "conda/*.yaml"))
 
     bioinfo_config = dict()
     bioinfo_config["bioinfo_tools"] = get_package_split(conda_env)
@@ -283,9 +280,8 @@ def case_config0(
     output_config = os.path.join(output_dir, output_config)
     LOG.info("Writing output config file %s" % os.path.abspath(output_config))
 
-    json_out = merge_json(
-        analysis_config, sample_config, reference_json, install_config, bioinfo_config
-    )
+    json_out = merge_json(analysis_config, sample_config, reference_json,
+                          install_config, bioinfo_config)
 
     if umi:
         json_out["QC"]["umi_trim"] = umi
@@ -294,7 +290,8 @@ def case_config0(
     json_out["QC"]["quality_trim"] = quality_trim
     json_out["QC"]["adapter_trim"] = adapter_trim
 
-    dag_image = os.path.join(output_dir, output_config + "_BALSAMIC_" + bv + "_graph")
+    dag_image = os.path.join(output_dir,
+                             output_config + "_BALSAMIC_" + bv + "_graph")
 
     json_out["analysis"]["dag"] = dag_image + ".pdf"
 
@@ -316,11 +313,12 @@ def case_config0(
 
     graph_title = "_".join(["BALSAMIC", bv, json_out["analysis"]["case_id"]])
     graph_dot = "".join(graph_dot).replace(
-        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
-    )
-    graph_obj = graphviz.Source(
-        graph_dot, filename=dag_image, format="pdf", engine="dot"
-    )
+        "snakemake_dag {",
+        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+    graph_obj = graphviz.Source(graph_dot,
+                                filename=dag_image,
+                                format="pdf",
+                                engine="dot")
 
     try:
         graph_pdf = graph_obj.render()
@@ -332,111 +330,240 @@ def case_config0(
         raise click.Abort()
 
 
+
+class CaseConfigAttributes:
+    """Store and return configuration attributes
+    """
+
+    def __init__(self):
+        self.QC = {}
+        self.vcf = {}
+        self.analysis = {}
+        self.samples = {}
+        self.reference = ""
+        self.conda_env_yaml = ""
+        self.rule_directory = ""
+        self.singularity = ""
+        self.bioinfo_tools = {}
+
+
 class CaseConfigAssembler:
+    """Calls functions to construct the JSON config"""
+
     def __init__(self, context):
         self.context = context
-        self.QC = ""
-        self.vcf = ""
-        self.analysis = ""
-        self.samples = ""
-        self.reference = ""
-        self.conda_env_yaml = self.__get_balsamic_env_config_path()
-        self.rule_directory = self.__get_package_root_path()
-        self.singularity = self.__get_singularity_image(context)
-        self.bioinfo_tools = self.__get_bioinfo_tools_list()
+        self.config = CaseConfigAttributes()
 
-    def __get_package_root_path(self):
+    @property
+    def package_root_path(self):
         return f'{os.path.dirname(sys.modules["BALSAMIC"].__file__)}/'
 
-    def __get_balsamic_env_config_path(self):
-        return f"{self.__get_package_root_path()}config/balsamic_env.yaml"
+    @property
+    def conda_env_path(self):
+        return f"{self.package_root_path}conda/"
 
-    def __get_singularity_image(self, context):
-        return {"image": os.path.abspath(context["singularity"])}
+    @property
+    def analysis_json_recipe_path(self):
+        return f"{self.package_root_path}config/analysis.json"
 
-    def __get_conda_env(self):
-        return f"{self.__get_package_root_path()}conda/"
+    @property
+    def sample_json_recipe_path(self):
+        return f"{self.package_root_path}config/sample.json"
 
-    def __get_bioinfo_tools_list(self):
+    @property
+    def config_output_path(self):
+        return f'{self.context["case_id"]}_{datetime.now().strftime("%Y%m%d")}.json'
+
+    @property
+    def analysis_output_path(self):
+        return os.path.abspath(self.context["analysis_dir"])
+
+    @property
+    def case_output_path(self):
+        return f'{self.analysis_output_path}/{self.context["case_id"]}'
+
+    @property
+    def fastq_path(self):
+        return f'{self.case_output_path}/analysis/fastq'
+
+    @property
+    def dag_image_path(self):
+        return f'{self.case_output_path}/{self.config_output_path}_BALSAMIC_{BALSAMIC.__version__}_graph'
+
+    def assemble(self):
+        self.get_bioinfo_tools_list()
+        self.get_sample_config()
+        self.get_analysis_config()
+        self.get_sample_names()
+        self.get_read_reference_json()
+        self.get_balsamic_env_config_path()
+        self.get_singularity_image()
+        self.config.rule_directory = self.package_root_path
+
+
+
+    def get_balsamic_env_config_path(self):
+        self.config.conda_env_yaml = f"{self.package_root_path}config/balsamic_env.yaml"
+
+    def get_singularity_image(self):
+        self.config.singularity = {
+            "image": os.path.abspath(self.context["singularity"])
+        }
+
+    def get_bioinfo_tools_list(self):
         bioinfo_tools = {}
         core_packages = [
-            "bwa",
-            "bcftools",
-            "cutadapt",
-            "fastqc",
-            "gatk",
-            "manta",
-            "picard",
-            "sambamba",
-            "strelka",
-            "samtools",
-            "tabix",
-            "vardic",
+            "bwa", "bcftools", "cutadapt", "fastqc", "gatk", "manta", "picard",
+            "sambamba", "strelka", "samtools", "tabix", "vardic"
         ]
-        conda_env = self.__get_conda_env()
-        for yaml_file in os.listdir(conda_env):
-            with open(conda_env + yaml_file, "r") as f:
-                packages = yaml.safe_load(f)["dependencies"]
-                for p in packages:
-                    try:
-                        name, version = p.split("=")
-                    except ValueError:
-                        name, version = p, ""
-                    finally:
-                        if name in core_packages:
-                            bioinfo_tools[name] = version
 
-        return bioinfo_tools
+        for yaml_file in os.listdir(self.conda_env_path):
+            if yaml_file.endswith(".yaml"):
+                with open(self.conda_env_path + yaml_file, "r") as f:
+                    packages = yaml.safe_load(f)["dependencies"]
+                    for p in packages:
+                        try:
+                            name, version = p.split("=")
+                        except ValueError:
+                            name, version = p, ""
+                        finally:
+                            if name in core_packages:
+                                bioinfo_tools[name] = version
 
-    def __get_analysis_json(self):
+        self.config.bioinfo_tools = bioinfo_tools
+
+
+    def get_sample_config(self):
+        with open(self.sample_json_recipe_path) as sample_json:
+            sample_config = json.load(sample_json)
+            self.config.analysis = sample_config["analysis"]
+
+        self.config.analysis["case_id"] = self.context["case_id"]
+        self.config.analysis["config_creation_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        self.config.analysis["analysis_dir"] = f"{self.analysis_output_path}/"
+        self.config.analysis["log"] = f"{self.case_output_path}/logs"
+        self.config.analysis["script"] = f"{self.case_output_path}/scripts"
+        self.config.analysis["result"] = f"{self.case_output_path}/analysis"
+        self.config.analysis["benchmark"] = f"{self.case_output_path}/benchmarks"
+        self.config.analysis["fastq_path"] = f"{self.fastq_path}/"
+        self.config.analysis["BALSAMIC_version"] = BALSAMIC.__version__
+        self.config.analysis["dag"] = f"{self.dag_image_path}.pdf"
+        self.get_analysis_type()
+        self.get_sequencing_type()
+
+
+    def get_analysis_config(self):
+        with open(self.analysis_json_recipe_path) as analysis_json:
+            analysis_config = json.load(analysis_json)
+            self.config.QC = analysis_config["QC"]
+            self.config.vcf = analysis_config["vcf"]
+
+        if self.context["umi"] and self.context["umi_trim_length"] > 0:
+            self.config.QC["umi_trim"] = self.context["umi"]
+            self.config.QC["umi_trim_length"] = str(self.context["umi_trim_length"])
+        self.config.QC["quality_trim"] = self.context["quality_trim"]
+        self.config.QC["adapter_trim"] = self.context["adapter_trim"]
+
+
+    def get_analysis_type(self):
+        if self.context["normal"]:
+            self.config.analysis["analysis_type"] = "single"
+        else:
+            self.config.analysis["analysis_type"] = "paired"
+
+    def get_sequencing_type(self):
+        if self.context["panel_bed"]:
+            self.config.analysis["sequencing_type"] = "targeted"
+        else:
+            self.config.analysis["sequencing_type"] = "wgs"
+
+    def get_read_reference_json(self):
+        with open(self.context["reference_config"]) as fh:
+            ref_json = json.load(fh)
+            for k, v in ref_json['reference'].items():
+                ref_json['reference'][k] = os.path.abspath(v)
+
+            self.config.reference = ref_json
+
+    def create_output_dir(self):
+        os.makedirs(self.case_output_path, exist_ok=True)
+
+    def create_fastq_symlink_dir(self):
+        os.makedirs(self.fastq_path, exist_ok=True)
+
+    def validate_existing_fastq(self):
+        for sample in [self.context["tumor"] + self.context["normal"]]:
+            if os.path.exists(sample):
+                continue
+            else:
+                LOG.error(f"{sample} is not found, update correct file path")
+                return False
+        return True
+
+    def validate_fastq_pattern(self, sample):
+        fq_pattern = re.compile(r"R_[12]" + self.context["fastq_prefix"] +
+                                ".fastq.gz$")
+        sample_basename = os.path.basename(sample)
+        try:
+            file_str = sample_basename[0:(
+                fq_pattern.search(sample_basename).span()[0] + 1)]
+            return file_str
+
+        except AttributeError:
+            LOG.error(
+                f"File name is invalid, fastq file should be sample_R_1.fastq.gz"
+            )
+            raise click.Abort()
+
+    def get_sample_names(self):
+        for sample in self.context["tumor"]:
+            file_str = self.validate_fastq_pattern(sample)
+            self.config.samples[file_str] = {
+                "file_prefix": file_str,
+                "type": "tumor",
+                "readpair_suffix": ["1", "2"]
+            }
+
+        for sample in self.context["normal"]:
+            file_str = self.validate_fastq_pattern(sample)
+            self.config.samples[file_str] = {
+                "file_prefix": file_str,
+                "type": "normal",
+                "readpair_suffix": ["1", "2"]
+            }
+
+    def copy_fastq_symlink_path(self):
+        for sample in self.context["tumor"] + self.context["normal"]:
+            sample_basename = os.path.basename(sample)
+            sample_abspath = os.path.abspath(sample)
+            sample_dest = f'{self.fastq_path}/{sample_basename}'
+            if sample_abspath == sample_dest:
+                LOG.info("File reference already a copy")
+                continue
+            else:
+                try:
+                    shutil.copyfile(sample_abspath, sample_dest)
+                except shutil.SameFileError as e:
+                    LOG.warning(e)
+                    LOG.warning(
+                        f"Desitination file {sample_dest} exists. No copy link was created."
+                    )
+        
+
+    def return_dict(self):
+        return self.config.__dict__
+
+    def save_config_json(self):
+        """Saves json, and returns the path"""
         pass
 
-    def __get_sample_json(self):
+    def reformat_json(self):
+        """Restructures saved json"""
         pass
 
-    def __get_analysis_type(self):
-        pass
 
-    def __get_sequencing_type(self):
-        pass
-
-    def __read_reference_json(self):
-        pass
-
-    def __get_analysis_dir_path(self):
-        pass
-
-    def __get_reference_config_path(self):
-        pass
-
-    def __get_output_dir_path(self):
-        pass
-
-    def __get_symlink_storage_path(self):
-        pass
-
-    def __get_sample_list(self):
-        pass
-
-    def __set_qc_tags(self):
-        pass
-
-    def __get_dag_image_path(self):
-        pass
-
-    def __format_config(self):
-        pass
-
-    def call(self):
-
-        config_assembly = self.__dict__
-        del config_assembly["context"]
-        print(config_assembly)
-
-        self.__get_package_root_path()
-
-
-@click.command("case", short_help="Create a sample config file from input sample data")
+@click.command("case",
+               short_help="Create a sample config file from input sample data")
 @click.option(
     "--umi/--no-umi",
     default=True,
@@ -473,9 +600,10 @@ class CaseConfigAssembler:
     type=click.Path(),
     help="Reference config file.",
 )
-@click.option(
-    "-p", "--panel-bed", type=click.Path(), help="Panel bed file for variant calling."
-)
+@click.option("-p",
+              "--panel-bed",
+              type=click.Path(),
+              help="Panel bed file for variant calling.")
 @click.option(
     "-t",
     "--tumor",
@@ -503,6 +631,7 @@ class CaseConfigAssembler:
 @click.option(
     "--analysis-dir",
     type=click.Path(),
+    default=".",
     help="Root analysis path to store \
               analysis logs and results. The final path will be analysis-dir/sample-id",
 )
@@ -512,10 +641,18 @@ class CaseConfigAssembler:
     required=True,
     help="Download singularity image for BALSAMIC",
 )
+@click.option("--fastq-prefix",
+              required=False,
+              default="",
+              help="Prefix to fastq file. \
+              The string that comes after readprefix")
 @click.pass_context
 def case_config(context, **args):
     assembler = CaseConfigAssembler(context.params)
-    assembler.call()
+    assembler.assemble()
+    assembler.copy_fastq_symlink_path()
+    print(assembler.config.build_config())
+
 
 
 if __name__ == "__main__":
