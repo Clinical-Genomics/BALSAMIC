@@ -5,6 +5,7 @@ LABEL description="Bioinformatic analysis pipeline for somatic mutations in canc
 LABEL version="4.2.4"
 
 ARG GIT_BRANCH=master
+
 # create necessary directories
 # install balsamic and it's environments
 # symlink libreadline for picard to function properly 
@@ -13,7 +14,6 @@ RUN mkdir -p /git_repos; \
     export LC_ALL=en_US.utf-8; \
     export LANG=en_US.utf-8; \
     cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout ${GIT_BRANCH} && \
-    conda env create --file BALSAMIC/conda/BALSAMIC-py36_2.yaml -n BALSAMIC_py36_2 && \
     conda env create --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27 && \
     conda env create --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36 && \
     source activate BALSAMIC_py36; \
