@@ -1,0 +1,9 @@
+channels:
+  - bioconda
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.6 
+  - pip=9.0.3 
+  - mosdepth=0.2.6
