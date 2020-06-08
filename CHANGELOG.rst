@@ -29,6 +29,7 @@ Changed
 ^^^^^^^
 
 * Increased run time for various slurm jobs fixes #314
+* Enabled SV calls for VarDict tumor-only
 
 [4.2.4]
 -------
