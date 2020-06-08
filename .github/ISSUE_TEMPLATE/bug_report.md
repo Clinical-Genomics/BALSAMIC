@@ -22,7 +22,7 @@ If possible, and using the Snakemake workflows, the name of the affected rules a
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+**Version (please complete the following information):**
 `balsamic --version` output
 
 **Additional context**
