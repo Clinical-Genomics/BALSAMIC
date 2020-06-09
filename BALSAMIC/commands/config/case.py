@@ -1,98 +1,195 @@
 import os
-import subprocess
 import re
 import json
-import copy
 import shutil
-import glob
 import logging
 import click
 import snakemake
 import graphviz
-import pkgutil
 import sys
 import yaml
-
-from urllib.parse import urlparse
-from datetime import datetime
-from pathlib import Path
-from yapf.yapflib.yapf_api import FormatFile
 import BALSAMIC
-from BALSAMIC.utils.cli import get_package_split
-from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.cli import get_config
-from BALSAMIC.utils.cli import get_ref_path
-from BALSAMIC.utils.cli import get_snakefile
+
+from pathlib import Path
+from datetime import datetime
+from yapf.yapflib.yapf_api import FormatFile
 from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC.utils.rule import get_chrom
-from BALSAMIC import __version__ as bv
+from BALSAMIC.utils.errors import ExtensionNotSupportedError
+from BALSAMIC.config.constats import QC, VCF, ANALYSIS, BIOINFO_BASE, CONDA_ENV_PATH, CONDA_ENV_YAML, SUPPORTED_EXTENSIONS, RULE_DIRECTORY
 
 LOG = logging.getLogger(__name__)
 
-class CaseConfigAttributes:
-    """Store and return configuration attributes
+CASE_ID_OPTION = click.Option("--case-id",
+                              required=True,
+                              help="Sample id that is used for reporting, \
+                                    naming the analysis jobs, and analysis path"
+                              )
+UMI_OPTION = click.Option(
+    "--umi/--no-umi",
+    default=True,
+    show_default=True,
+    is_flag=True,
+    help="UMI processing steps for samples with UMI tags")
+UMI_TRIM_LENGTH_OPTION = click.Option("--umi-trim-length",
+                                      default=5,
+                                      show_default=True,
+                                      type=int,
+                                      help="Trim N bases from reads in fastq")
+QUALITY_TRIM_OPTION = click.Option("--quality-trim/--no-quality-trim",
+                                   default=True,
+                                   show_default=True,
+                                   is_flag=True,
+                                   help="Trim low quality reads in fastq")
+ADAPTER_TRIM_OPTION = click.Option("--adapter-trim/--no-adapter-trim",
+                                   default=False,
+                                   show_default=True,
+                                   is_flag=True,
+                                   help="Trim adapters from reads in fastq")
+REFERENCE_CONFIG_OPTION = click.Option("-r",
+                                       "--reference-config",
+                                       required=True,
+                                       type=click.Path(),
+                                       exists=True,
+                                       resolve_path=True,
+                                       help="Reference config file.")
+PANEL_BED_OPTION = click.Option("-p",
+                                "--panel-bed",
+                                type=click.Path(),
+                                required=False,
+                                exists=True,
+                                resolve_path=True,
+                                help="Panel bed file for variant calling.")
+SINGULARITY_OPTION = click.Option(
+    "--singularity",
+    type=click.Path(),
+    required=True,
+    resolve_path=True,
+    exists=True,
+    help="Download singularity image for BALSAMIC")
+FASTQ_PREFIX_OPTION = click.Option(
+    "--fastq-prefix",
+    required=False,
+    default="",
+    help="Prefix to fastq file. The string that comes after readprefix")
+ANALYSIS_DIR_OPTION = click.Option(
+    "--analysis-dir",
+    type=click.Path(),
+    default=".",
+    resolve_path=True,
+    exists=True,
+    help="Root analysis path to store analysis logs and results. \
+                                     The final path will be analysis-dir/sample-id"
+)
+TUMOR_OPTION = click.Option("-t",
+                            "--tumor",
+                            required=True,
+                            multiple=True,
+                            exists=True,
+                            resolve_path=True,
+                            help="Fastq files for tumor sample.")
+NORMAL_OPTION = click.Option("-n",
+                             "--normal",
+                             required=False,
+                             multiple=True,
+                             exists=True,
+                             resolve_path=True,
+                             help="Fastq files for normal sample.")
+
+FILE_FORMAT_OPTION = click.Option("-f", "--format", required=False, type=click.Choice(["fastq", "vcf", "bam"], default="fastq"))
+
+
+
+
+class InputFile:
+
+    """Class for handling input file operations"""
+    def __init__(self, path, sampletype, input_format):
+        self.path = Path(path)
+        self.sampletype = sampletype
+        self.input_format = input_format
+        self.prefix = str()
+
+
+    def verify_exists(self, dst) -> bool:
+        pass
+        
+
+    def create_copy(self, dst) -> None:
+        if self.verify_exists(dst):
+            continue
+        else:
+            shutil.copy()
+
+    def extract_prefix(self) -> None:
+        pass
+
+ 
+
+class CaseConfigIOHandler:
+    """Handle arguments relevant to disc use:
+        ARGS: case_id, analysis_dir, 
+
+        Check input file format
+        Check input files naming convention
+        Create directories
+        Create copy of input files in working directory
+
     """
 
+    def __init__(self, case_id, analysis_dir, files, input_format):
+        self.case_id = case_id
+        self.analysis_dir = analysis_dir
+        self.input_files = files
+
+        self.case_output_dir = Path(self.analysis_dir / self.case_id )
+        self.working_copy_dir = Path(self.analysis_dir / self.case_id / "analysis" / input_format)
+
+
+        def create_output_dirs(self):
+            Path.mkdir(self.working_copy_dir, parents=True, exist_ok=True)
+
+        def create_working_file_copy(self):
+            for sample in self.files:
+                sample.create_copy(self.working_copy_dir)
+
+
+class CaseConfigAttributes:
     def __init__(self):
-        self.QC = {}
-        self.vcf = {}
-        self.analysis = {}
+        self.QC = QC
+        self.vcf = VCF
+        self.analysis = ANALYSIS
+        self.conda_env_yaml = CONDA_ENV_YAML
+        self.rule_directory = RULE_DIRECTORY
+        self.reference = {}
         self.samples = {}
-        self.reference = ""
-        self.conda_env_yaml = ""
-        self.rule_directory = ""
-        self.singularity = ""
-        self.bioinfo_tools = {}
+        self.panel_bed = {}
+        self.singularity = {}
+
+    def to_dict(self) -> dict:
+        return self.__dict__
+
+    def to_json(self, save_path) -> None:
+        pass
+
+
 
 
 class CaseConfigAssembler:
     """Calls functions to construct the JSON config"""
 
-    def __init__(self, context):
-        self.context = context
-        self.config = CaseConfigAttributes()
-        self.assemble_config()
+    def __init__(self, ):
+        self.config_attributes = CaseConfigAttributes()
 
 
-    @property
-    def package_root_path(self):
-        return f'{os.path.dirname(sys.modules["BALSAMIC"].__file__)}'
 
     @property
-    def conda_env_path(self):
-        return f"{self.package_root_path}/conda/"
-
-    @property
-    def analysis_json_recipe_path(self):
-        return f"{self.package_root_path}/config/analysis.json"
-
-    @property
-    def sample_json_recipe_path(self):
-        return f"{self.package_root_path}/config/sample.json"
-
-    @property
-    def config_output_path(self):
+    def config_output_path(self) -> Path:
         return f'{self.case_output_path}/{self.context["case_id"]}_{datetime.now().strftime("%Y%m%d")}.json'
 
-    @property
-    def analysis_output_path(self):
-        return os.path.abspath(self.context["analysis_dir"])
-
-    @property
-    def case_output_path(self):
-        return f'{self.analysis_output_path}/{self.context["case_id"]}'
-
-    @property
-    def fastq_path(self):
-        return f'{self.case_output_path}/analysis/fastq'
 
     @property
     def dag_image_path(self):
         return f'{self.config_output_path}_BALSAMIC_{BALSAMIC.__version__}_graph'
-
-
-    def get_balsamic_env_config_path(self):
-        self.config.conda_env_yaml = f"{self.package_root_path}/config/balsamic_env.yaml"
 
     def get_singularity_image(self):
         self.config.singularity = {
@@ -101,10 +198,6 @@ class CaseConfigAssembler:
 
     def get_bioinfo_tools_list(self):
         bioinfo_tools = {}
-        core_packages = [
-            "bwa", "bcftools", "cutadapt", "fastqc", "gatk", "manta", "picard",
-            "sambamba", "strelka", "samtools", "tabix", "vardic"
-        ]
 
         for yaml_file in os.listdir(self.conda_env_path):
             if yaml_file.endswith(".yaml"):
@@ -130,22 +223,16 @@ class CaseConfigAssembler:
         self.config.analysis["config_creation_date"] = datetime.now().strftime(
             "%Y-%m-%d %H:%M")
         self.config.analysis["analysis_dir"] = f"{self.analysis_output_path}/"
-        self.config.analysis["log"] = f"{self.case_output_path}/logs"
-        self.config.analysis["script"] = f"{self.case_output_path}/scripts"
-        self.config.analysis["result"] = f"{self.case_output_path}/analysis"
+
         self.config.analysis[
             "benchmark"] = f"{self.case_output_path}/benchmarks"
         self.config.analysis["fastq_path"] = f"{self.fastq_path}/"
-        self.config.analysis["BALSAMIC_version"] = BALSAMIC.__version__
+
         self.config.analysis["dag"] = f"{self.dag_image_path}.pdf"
         self.get_analysis_type()
         self.get_sequencing_type()
 
-    def get_analysis_config(self):
-        with open(self.analysis_json_recipe_path) as analysis_json:
-            analysis_config = json.load(analysis_json)
-            self.config.QC = analysis_config["QC"]
-            self.config.vcf = analysis_config["vcf"]
+
 
         if self.context["umi"] and self.context["umi_trim_length"] > 0:
             self.config.QC["umi_trim"] = self.context["umi"]
@@ -153,6 +240,7 @@ class CaseConfigAssembler:
                 self.context["umi_trim_length"])
         self.config.QC["quality_trim"] = self.context["quality_trim"]
         self.config.QC["adapter_trim"] = self.context["adapter_trim"]
+
 
     def get_analysis_type(self):
         if self.context["normal"]:
@@ -174,20 +262,6 @@ class CaseConfigAssembler:
 
             self.config.reference = ref_json
 
-    def create_output_dir(self):
-        os.makedirs(self.case_output_path, exist_ok=True)
-
-    def create_fastq_symlink_dir(self):
-        os.makedirs(self.fastq_path, exist_ok=True)
-
-    def validate_existing_fastq(self):
-        for sample in [self.context["tumor"] + self.context["normal"]]:
-            if os.path.exists(sample):
-                continue
-            else:
-                LOG.error(f"{sample} is not found, update correct file path")
-                return False
-        return True
 
     def validate_fastq_pattern(self, sample):
         fq_pattern = re.compile(r"R_[12]" + self.context["fastq_prefix"] +
@@ -213,27 +287,11 @@ class CaseConfigAssembler:
                 "readpair_suffix": ["1", "2"]
             }
 
-        for sample in self.context["normal"]:
-            file_str = self.validate_fastq_pattern(sample)
-            self.config.samples[file_str] = {
-                "file_prefix": file_str,
-                "type": "normal",
-                "readpair_suffix": ["1", "2"]
-            }
-
-
-    def verify_panel_path(self):
-        if os.path.exists(self.context["panel_bed"]):
-            return True
-        else:
-            click.Abort()
-            return False
-
     def get_panel_path(self):
         self.config.panel["capture_kit"] = os.path.abspath(
             self.context["panel_bed"])
 
-    def get_panel_chrom(self):
+    def get_panel_chrom(self) -> list:
         lines = [
             line.rstrip('\n') for line in open(self.context["panel_bed"], 'r')
         ]
@@ -247,40 +305,7 @@ class CaseConfigAssembler:
                 self.get_panel_path()
                 self.get_panel_chrom()
 
-    def assemble_config(self):
-        self.get_bioinfo_tools_list()
-        self.get_sample_config()
-        self.get_analysis_config()
-        self.get_sample_names()
-        self.get_read_reference_json()
-        self.get_balsamic_env_config_path()
-        self.get_singularity_image()
-        self.config.rule_directory = self.package_root_path
-        self.get_panel_config()
-
-        LOG.info("Creating directories")
-        self.create_output_dir()
-        self.create_fastq_symlink_dir()
-
-
-    def copy_fastq_symlink_path(self):
-        for sample in self.context["tumor"] + self.context["normal"]:
-            sample_basename = os.path.basename(sample)
-            sample_abspath = os.path.abspath(sample)
-            sample_dest = f'{self.fastq_path}/{sample_basename}'
-            if sample_abspath == sample_dest:
-                continue
-            else:
-                try:
-                    shutil.copyfile(sample_abspath, sample_dest)
-                except shutil.SameFileError as e:
-                    LOG.warning(e)
-                    LOG.warning(
-                        f"Desitination file {sample_dest} exists. No copy link was created."
                     )
-
-    def build_config(self):
-        return self.config.__dict__
 
     def save_config_json(self):
         with open(self.config_output_path, "w") as fh:
@@ -323,92 +348,11 @@ class CaseConfigAssembler:
 
 @click.command("case",
                short_help="Create a sample config file from input sample data")
-@click.option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="UMI processing steps for samples with UMI tags",
-)
-@click.option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=int,
-    help="Trim N bases from reads in fastq",
-)
-@click.option(
-    "--quality-trim/--no-quality-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim low quality reads in fastq",
-)
-@click.option(
-    "--adapter-trim/--no-adapter-trim",
-    default=False,
-    show_default=True,
-    is_flag=True,
-    help="Trim adapters from reads in fastq",
-)
-@click.option(
-    "-r",
-    "--reference-config",
-    required=True,
-    show_default=True,
-    type=click.Path(),
-    help="Reference config file.",
-)
-@click.option("-p",
-              "--panel-bed",
-              type=click.Path(),
-              help="Panel bed file for variant calling.")
-@click.option(
-    "-t",
-    "--tumor",
-    required=True,
-    multiple=True,
-    help="Fastq files for tumor sample. \
-              Example: if files are tumor_fqreads_1.fastq.gz tumor_fqreads_2.fastq.gz, \
-              the input should be --tumor tumor_fqreads",
-)
-@click.option(
-    "-n",
-    "--normal",
-    required=False,
-    multiple=True,
-    help="Fastq files for normal sample. \
-              Example: if files are normal_fqreads_1.fastq.gz normal_fqreads_2.fastq.gz, \
-              the input should be --normal normal_fqreads",
-)
-@click.option(
-    "--case-id",
-    required=True,
-    help="Sample id that is used for reporting, \
-              naming the analysis jobs, and analysis path",
-)
-@click.option(
-    "--analysis-dir",
-    type=click.Path(),
-    default=".",
-    help="Root analysis path to store \
-              analysis logs and results. The final path will be analysis-dir/sample-id",
-)
-@click.option(
-    "--singularity",
-    type=click.Path(),
-    required=True,
-    help="Download singularity image for BALSAMIC",
-)
-@click.option("--fastq-prefix",
-              required=False,
-              default="",
-              help="Prefix to fastq file. \
-              The string that comes after readprefix")
 @click.pass_context
 def case_config(context, **args):
 
     assembler = CaseConfigAssembler(context.params)
+    assembler.assemble_config()
     assembler.copy_fastq_symlink_path()
     LOG.info("Saving")
     assembler.save_config_json()
