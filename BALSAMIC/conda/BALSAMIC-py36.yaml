@@ -15,10 +15,11 @@ dependencies:
   - gatk=3.8
   - picard=2.17.0
   - vardict=2019.06.04=pl526_0
-  - ensembl-vep=99.1
+  - ensembl-vep=100.2
   - cnvkit=0.9.4a0
   - multiqc=1.7 
   - bedtools=2.28.0
   - csvkit=1.0.4
   - fastp=0.20.0
   - mosdepth=0.2.6
+  - libiconv
