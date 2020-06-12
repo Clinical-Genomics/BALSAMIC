@@ -22,3 +22,4 @@ dependencies:
   - csvkit=1.0.4
   - fastp=0.20.0
   - mosdepth=0.2.6
+  - libiconv
