@@ -2,7 +2,7 @@
 CLI reference
 =============
 
-BALSAMIC (**version** = 4.2.4) is using Click. This section covers the CLI reference for BALSAMIC.
+BALSAMIC (**version** = 4.3.0) is using Click. This section covers the CLI reference for BALSAMIC.
 
 .. contents::
 
@@ -20,7 +20,7 @@ Base command
 
   Usage: balsamic [OPTIONS] COMMAND [ARGS]...
 
-    BALSAMIC 4.2.4: Bioinformatic Analysis pipeLine for SomAtic MutatIons in
+    BALSAMIC 4.3.0: Bioinformatic Analysis pipeLine for SomAtic MutatIons in
     Cancer
 
   Options:
