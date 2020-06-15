@@ -145,12 +145,12 @@ class CaseConfigIOHandler:
         self.working_copy_dir = Path(self.analysis_dir / self.case_id / "analysis" / input_format)
 
 
-        def create_output_dirs(self):
-            Path.mkdir(self.working_copy_dir, parents=True, exist_ok=True)
+    def create_output_dirs(self):
+        Path.mkdir(self.working_copy_dir, parents=True, exist_ok=True)
 
-        def create_working_file_copy(self):
-            for sample in self.files:
-                sample.create_copy(self.working_copy_dir)
+    def create_working_file_copy(self):
+        for sample in self.files:
+            sample.create_copy(self.working_copy_dir)
 
 
 class CaseConfigAttributes:
