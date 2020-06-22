@@ -6,38 +6,28 @@ Contains constants and models for analysis or filtering
 # 'filter': the most basic filters of them all
 # 'exclude_filter': exclude criteria for variants
 # 'somatic_filter': a more sophisticated filter to filter out possible non somatic filters
-VARCALL = {
+NGS_FILTER = {
     'tumor_only': {
         'vardict': {
-            'exclude_filter': 'FMT/AD[@tumor_sample_names:1] < 10 || FMT/DP[@tumor_sample_names] < 100',
-            'exclude_filter_string': 'balsamic_vardict_softfilter',
-            'exclude_filter_mode': '-m "+" -s',
-            'post_query_script': None
-        },
-        'mutect2': {
-            'exclude_filter': ('FMT/AD[@tumor_sample_names:1]<10 || sum(FMT/AD)<100 ',
-                               '|| FMT/AF[@tumor_sample_names]>0.75',
-                               '|| (FMT/QSS[@tumor_sample_names:1]/FMT/AD[@tumor_sample_names:1])<20'),
-            'exclude_filter_string': 'balsamic_mutect2_softfilter',
-            'exclude_filter_mode': '-m "+" -s',
-            'post_query_script': None
+            'general': {
+                'AD': ['20', 'balsamic_low_tumor_ad'],
+                'MQ': ['50', 'balsamic_low_mq'],
+                'DP': ['100', 'balsamic_low_tumor_dp'],
+                'AF_min': ['0.05', 'balsamic_low_af'],
+                'AF_max': ['1', 'balsamic_af_equal_one']
+            }
         }
     },
     'tumor_normal': {
-        'strelka': {
-            'filter': 'AF>0',
-            'exclude_filter': '',
-            'post_query_script': None
-        },
         'vardict': {
-            'filter': 'AF>0',
-            'exclude_filter': '',
-            'post_query_script': None
-        },
-        'mutect2': {
-            'filter': 'AF>0',
-            'exclude_filter': '',
-            'post_query_script': None
+            'general': {
+                'AD': ['20', 'balsamic_low_tumor_ad'],
+                'MQ': ['50', 'balsamic_low_mq'],
+                'DP': ['100', 'balsamic_low_tumor_dp'],
+                'AF_min': ['0.05', 'balsamic_low_af'],
+                'AF_max': ['1', 'balsamic_af_equal_one']
+                'TN_af_ration': ['5', 'balsamic_low_tn_af_ratio']
+            }
         }
     }
 }
