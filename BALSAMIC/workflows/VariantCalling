@@ -69,7 +69,8 @@ align_rules = [
   ]
 
 annotation_rules = [
-  "snakemake_rules/annotation/vep.rule"
+  "snakemake_rules/annotation/vep.rule",
+  "snakemake_rules/annotation/varcaller_filter.rule"
   ]
 
 variantcalling_rules = [
@@ -202,6 +203,7 @@ rule all:
         result_dir + "qc/" + "multiqc_report.html",
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
         expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+        expand(vep_dir + "{vcf}.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
         expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
