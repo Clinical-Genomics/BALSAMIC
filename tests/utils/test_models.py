@@ -3,7 +3,7 @@ import pytest
 from BALSAMIC.utils.models import (VCFAttributes, VarCallerFilter, VARDICT)
 
 
-def test_VCFAttributes():
+def test_vcfattributes():
     """test VCFAttributes model for correct validation"""
 
     # GIVEN a VCF attribute
@@ -22,7 +22,7 @@ def test_VCFAttributes():
     assert dummy_attribute_built.filter_name == "dummy_filter_name"
 
 
-def test_VarCallerFilter():
+def test_varcallerfilter():
     """test required VarCallerFilters for being set correctly"""
 
     # GIVEN a VarCallerFilter
