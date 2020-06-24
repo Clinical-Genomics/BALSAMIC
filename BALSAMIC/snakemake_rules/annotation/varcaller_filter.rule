@@ -14,11 +14,11 @@ rule ngs_filter_vardict:
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.filtered.pass.vcf.gz",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
-    MQ = [VARDICT.MQ.value, VARDICT.MQ.name],
-    AD = [VARDICT.AD.value, VARDICT.AD.name],
-    DP = [VARDICT.DP.value, VARDICT.DP.name],
-    AF_min = [VARDICT.AF_min.value, VARDICT.AF_min.name],
-    AF_max = [VARDICT.AF_max.value, VARDICT.AF_max.name],
+    MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
+    AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
+    DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],
+    AF_min = [VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
+    AF_max = [VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
   benchmark:
