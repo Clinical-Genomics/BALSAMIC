@@ -50,7 +50,6 @@ try:
 except Exception as error:
     sentieon = False
     LOG.warn("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
-    
 
 # Define set of rules
 qc_rules = [
@@ -69,8 +68,7 @@ align_rules = [
   ]
 
 annotation_rules = [
-  "snakemake_rules/annotation/vep.rule",
-  "snakemake_rules/annotation/varcaller_filter.rule"
+  "snakemake_rules/annotation/vep.rule"
   ]
 
 variantcalling_rules = [
@@ -98,8 +96,10 @@ if config['analysis']['analysis_type'] == "paired":
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
     somatic_caller_sv = ["manta", "cnvkit"]
     vcf_merge = ["vcfmerge"]
-    
+
 else:
+
+    annotation_rules.append("snakemake_rules/annotation/varcaller_filter.rule")
 
     variantcalling_rules.extend([
       "snakemake_rules/variant_calling/cnvkit_single.rule",
@@ -112,6 +112,7 @@ else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
     somatic_caller_sv = ["manta", "cnvkit"]
     vcf_merge = ["vcfmerge"]
+
       
 
 #somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
@@ -121,6 +122,17 @@ config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rul
 
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
+
+
+# Define commong and analysis specific outputs
+common_output = [ result_dir + "qc/" + "multiqc_report.html",
+expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
+expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))]
+
+analysis_specific_output = []
+if config['analysis']['analysis_type'] == "single":
+    analysis_specific_output.extend(expand(vep_dir + "{vcf}.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
 var_class = ["somatic", "germline"]
 var_type = ["CNV", "SNV", "SV"]
@@ -194,17 +206,13 @@ if 'delivery' in config:
 
     delivery_raw = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_raw.hk" )
     write_json(output_files_raw, delivery_raw)
-    FormatFile(delivery_raw) 
+    FormatFile(delivery_raw)
 
  
-            
 rule all:
     input:
-        result_dir + "qc/" + "multiqc_report.html",
-        expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-        expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
-        expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
+        common_output,
+        analysis_specific_output
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
