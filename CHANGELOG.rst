@@ -1,4 +1,18 @@
 
+[X.X.X]
+-------
+
+Added
+^^^^^
+
+* pydantic to validate various models namely variant caller filters
+
+Changed
+^^^^^^^
+
+* Variant caller filters moved into pydantic
+
+
 [4.3.0]
 -------
 
