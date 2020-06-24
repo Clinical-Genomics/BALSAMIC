@@ -55,11 +55,11 @@ class VarCallerFilter(BaseModel):
 
 
 VARDICT = VarCallerFilter(
-    AD=VCFAttributes(value=5, name="balsamic_low_tumor_ad", tag="INFO"),
-    DP=VCFAttributes(value=100, name="balsamic_low_tumor_dp", tag="INFO"),
-    MQ=VCFAttributes(value=50, name="balsamic_low_mq", tag="INFO"),
-    AF_max=VCFAttributes(value=1, name="balsamic_af_one", tag="INFO"),
-    AF_min=VCFAttributes(value=0.02, name="balsamic_low_af", tag="INFO"),
+    AD=VCFAttributes(tag_value=5, filter_name="balsamic_low_tumor_ad", field="INFO"),
+    DP=VCFAttributes(tag_value=100, filter_name="balsamic_low_tumor_dp", field="INFO"),
+    MQ=VCFAttributes(tag_value=50, filter_name="balsamic_low_mq", field="INFO"),
+    AF_max=VCFAttributes(tag_value=1, filter_name="balsamic_af_one", field="INFO"),
+    AF_min=VCFAttributes(tag_value=0.02, filter_name="balsamic_low_af", field="INFO"),
     varcaller_name="VarDict",
     filter_type="general",
     analysis_type="tumor_only",
