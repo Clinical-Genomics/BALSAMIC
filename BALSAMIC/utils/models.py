@@ -47,7 +47,6 @@ class VarCallerFilter(BaseModel):
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: VCFAttributes
-    filter_version: str
     varcaller_name: str
     filter_type: str
     analysis_type: str
