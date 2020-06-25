@@ -20,6 +20,14 @@ BALSAMIC.utils.exc module
    :undoc-members:
    :show-inheritance:
 
+BALSAMIC.utils.models module
+----------------------------
+
+.. automodule:: BALSAMIC.utils.models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 BALSAMIC.utils.rule module
 --------------------------
 
