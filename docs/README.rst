@@ -22,6 +22,7 @@ Build docs:
 
 .. code-block::
 
+   sphinx-apidoc -o source/ ../BALSAMIC
    sphinx-build -T -E -b html -d _build/doctrees-readthedocs -D language=en . _build/html
 
 View docs (\ ``open`` or similar command from your OS):
