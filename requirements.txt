@@ -9,3 +9,4 @@ gsutil
 jinja2
 networkx
 colorclass
+pydantic
