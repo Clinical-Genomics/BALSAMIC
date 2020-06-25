@@ -23,6 +23,7 @@ BALSAMIC.commands.base module
    :undoc-members:
    :show-inheritance:
 
+
 Module contents
 ---------------
 
