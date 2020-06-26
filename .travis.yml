@@ -13,7 +13,7 @@ install:
 
 script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
-  - cp tests/test_data/references/reference.json reference/GRCh37/reference.json 
+  - cp tests/test_data/references/reference.json reference/GRCh37/reference.json
   - ./run_validate.sh -a T -m all -t panel
   - ./run_validate.sh -a TN -m all -t panel
   - ./run_validate.sh -a T -m all -t WGS
