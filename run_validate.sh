@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 set -eo pipefail
 shopt -s expand_aliases
 
@@ -55,12 +54,6 @@ if [[ ${_ngstype} == "panel" ]]; then
 else
   _panel_option=''
 fi
-
-#if [ -z ${a} ] && [ -z ${m} ] && [ -z ${t} ]; then
-#  echo "Missing options"
-#  usage >&2
-#  exit 1
-#fi
 
 if [[ ! -z ${_condaenv} ]]; then
   source activate ${_condaenv}
