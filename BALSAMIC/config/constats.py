@@ -2,10 +2,11 @@ import BALSAMIC
 import sys
 import pydantic
 
-from pydantic import BaseModel, ValidationError, validator
+from pydantic import BaseModel, ValidationError, validator, Field
 from pydantic.types import DirectoryPath, FilePath
 from typing import Optional, List, Dict
 from typing_extensions import Literal
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 CONDA_ENV_PATH = Path(sys.modules["BALSAMIC"].__file__).parent.resolve() / "conda"
@@ -13,7 +14,7 @@ CONDA_ENV_YAML = Path(sys.modules["BALSAMIC"].__file__).parent.resolve() / "conf
 RULE_DIRECTORY = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 
 
-class ConfigQCModel(BaseModel):
+class QCModel(BaseModel):
     picard_rmdup : bool = False
     adapter: str = "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT"
     quality_trim: bool = True
@@ -24,7 +25,7 @@ class ConfigQCModel(BaseModel):
 
 
 
-class ConfigVCFModel(BaseModel):
+class VCFModel(BaseModel):
     tnsnv: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
     manta : Dict[str, str] = {"mutation": "somatic", "type": "SV"}
     pindel: Dict[str, str] = {"mutation": "somatic", "type": "SV"}
@@ -41,22 +42,34 @@ class ConfigVCFModel(BaseModel):
     strelka_germline: Dict[str, str] = {"mutation": "germline", "type": "SNV"}
 
 
-class ConfigAnalysisModel(BaseModel):
+class AnalysisModel(BaseModel):
+
+    """Contains analysis variables
+    REQUIRED FIELDS: 
+    case_id
+    analysis_type
+    sequencing_type,
+    analysis_dir
+    """
+
     case_id: str 
     analysis_type: Literal["single", "paired"]
+    sequencing_type : Literal["targeted", "wgs"]
     analysis_dir: Path
     fastq_path: Path = "analysis_dir/case_id/analysis/fastq_path"
     script: Path = "analysis_dir/case_id/scripts"
     log: Path = "analysis_dir/case_id/logs"
     result: Path = "analysis_dir/case_id/analysis"
     benchmark: Path = "analysis_dir/case_id/benchmarks"
+    dag : Path = 'analysis_dir/case_id.json_BALSAMIC_v.v.v_graph.pdf'
     BALSAMIC_version : str = BALSAMIC.__version__
+    config_creation_date : str = "1999-01-01 00:00"
 
     class Config:
         validate_all = True
 
     @validator("analysis_dir")
-    def dir_always_abspath(cls, value):
+    def dirpath_always_abspath(cls, value):
         if not Path(value).exists():
             raise ValidationError(f'Path does not exist!')
         else:
@@ -82,30 +95,26 @@ class ConfigAnalysisModel(BaseModel):
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs):
         return str(Path(values.get("analysis_dir")) / values.get("case_id") / "benchmarks")
 
+    @validator("dag")
+    def parse_analysis_to_dag_path(cls, value, values, **kwargs):
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") 
+        + f'.json_BALSAMIC_{BALSAMIC.__version__}_graph.pdf')
+
+    @validator("config_creation_date")
+    def datetime_as_string(cls, value):
+        return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
-class ConfigSampleInstanceModel(BaseModel):
+class SampleInstanceModel(BaseModel):
+    """Holds attributes for samples used in analysis"""
     file_prefix : str
-    sample_type : Literal["tumor", "normal"]
+    sample_type : Literal["tumor", "normal"] = Field(alias="type")
     readpair_suffix : List[str] = ["1", "2"]
     
-    class Config:
-        fields = {"sample_type": "type"}
 
 
-
-
-class ConfigSamplesModel(BaseModel):
-    class Config:
-        extra = True
-
-
-class ConfigReferenceModel(BaseModel):
-    pass
-
-
-
-class ConfigBioinfoToolsModel(BaseModel):
+class BioinfoToolsModel(BaseModel):
+    """Holds versions of current bioinformatic tools used in analysis"""
     tabix : str
     bcftools : str
     fastqc : str
@@ -120,17 +129,37 @@ class ConfigBioinfoToolsModel(BaseModel):
     cutadapt : Optional[str]
 
 
+class PanelModel(BaseModel):
+    panel = Optional[Path]
+    chrom = Optional[List[str]]
+
+    @validator("path")
+    def path_as_abspath_str(cls, value):
+        return str(value.resolve())
+
+
 class BalsamicConfigModel(BaseModel):
+    """Concatenates config """
     conda_env_yaml : FilePath = CONDA_ENV_YAML
     rule_directory : DirectoryPath = RULE_DIRECTORY
-    singularity : FilePath 
-    QC : ConfigQCModel
-    vcf : ConfigVCFModel
-    analysis : ConfigAnalysisModel
-    samples : ConfigSamplesModel
-    reference : ConfigReferenceModel
-    bioinfo_tools : ConfigBioinfoToolsModel
+    vcf : VCFModel
+    singularity : FilePath
+    QC : QCModel
+    analysis : AnalysisModel
+    bioinfo_tools : BioinfoToolsModel
+    samples : Dict[str, SampleInstanceModel]
+    reference : Dict[str, Path]
+    panel : PanelModel
 
+    @validator("reference")
+    def abspath_as_str(cls, value):
+        for k, v in value.items():
+            value[k] = str(Path(v).resolve())
+        return value
+
+    @validator("singularity")
+    def transform_path_to_dict(cls, value):
+        return {"image" : str(Path(value).resolve())}
 
 
 
