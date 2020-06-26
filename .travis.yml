@@ -13,6 +13,10 @@ install:
 
 script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
+  - ./run_validate.sh -a T -m all -t panel -c D_BALSAMIC-base_develop
+  - ./run_validate.sh -a TN -m all -t panel -c D_BALSAMIC-base_develop
+  - ./run_validate.sh -a T -m all -t WGS -c D_BALSAMIC-base_develop
+  - ./run_validate.sh -a TN -m all -t WGS -c D_BALSAMIC-base_develop
 
 after_success: coveralls
 
