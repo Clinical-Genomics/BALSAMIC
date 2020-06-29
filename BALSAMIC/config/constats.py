@@ -97,8 +97,7 @@ class AnalysisModel(BaseModel):
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs):
-        return str(Path(values.get("analysis_dir")) / values.get("case_id") 
-        + f'.json_BALSAMIC_{BALSAMIC.__version__}_graph.pdf')
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") / f'{values.get("case_id")}.json_BALSAMIC_{BALSAMIC.__version__}_graph.pdf')
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
@@ -130,26 +129,29 @@ class BioinfoToolsModel(BaseModel):
 
 
 class PanelModel(BaseModel):
-    panel = Optional[Path]
-    chrom = Optional[List[str]]
+    capture_kit : Optional[str]
+    chrom : Optional[List[str]]
 
-    @validator("path")
+    @validator("capture_kit")
     def path_as_abspath_str(cls, value):
-        return str(value.resolve())
+        try:
+            return str(Path(value).resolve())
+        except:
+            return None
 
 
 class BalsamicConfigModel(BaseModel):
     """Concatenates config """
-    conda_env_yaml : FilePath = CONDA_ENV_YAML
-    rule_directory : DirectoryPath = RULE_DIRECTORY
-    vcf : VCFModel
-    singularity : FilePath
     QC : QCModel
+    vcf : VCFModel
     analysis : AnalysisModel
-    bioinfo_tools : BioinfoToolsModel
     samples : Dict[str, SampleInstanceModel]
     reference : Dict[str, Path]
-    panel : PanelModel
+    conda_env_yaml : FilePath = str(CONDA_ENV_YAML)
+    rule_directory : DirectoryPath = str(RULE_DIRECTORY)
+    singularity : FilePath
+    bioinfo_tools : BioinfoToolsModel
+    panel : Optional[PanelModel]
 
     @validator("reference")
     def abspath_as_str(cls, value):

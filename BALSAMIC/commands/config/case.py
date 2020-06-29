@@ -14,111 +14,9 @@ from pathlib import Path
 from datetime import datetime
 from yapf.yapflib.yapf_api import FormatFile
 from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC.utils.errors import ExtensionNotSupportedError
-from BALSAMIC.config.constats import *
+from BALSAMIC.config.constats import QCModel, VCFModel, AnalysisModel, SampleInstanceModel, BioinfoToolsModel, PanelModel, BalsamicConfigModel, CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
 
 LOG = logging.getLogger(__name__)
-
-CASE_COMMAND = click.command(
-    "case",
-    short_help="Create a sample config file from input sample data")
-
-CASE_ID_OPTION = click.Option(
-    "--case-id",
-    required=True,
-    help="Sample id that is used for reporting, \
-    naming the analysis jobs, and analysis path"
-    )
-
-UMI_OPTION = click.Option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="UMI processing steps for samples with UMI tags"
-    )
-UMI_TRIM_LENGTH_OPTION = click.Option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=int,
-    help="Trim N bases from reads in fastq"
-    )
-QUALITY_TRIM_OPTION = click.Option(
-    "--quality-trim/--no-quality-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim low quality reads in fastq"
-    )
-ADAPTER_TRIM_OPTION = click.Option(
-    "--adapter-trim/--no-adapter-trim",
-    default=False,
-    show_default=True,
-    is_flag=True,
-    help="Trim adapters from reads in fastq"
-    )
-REFERENCE_CONFIG_OPTION = click.Option(
-    "-r", "--reference-config",
-    required=True,
-    type=click.Path(),
-    exists=True,
-    resolve_path=True,
-    help="Reference config file."
-    )
-PANEL_BED_OPTION = click.Option(
-    "-p","--panel-bed",
-    type=click.Path(),
-    required=False,
-    exists=True,
-    resolve_path=True,
-    help="Panel bed file for variant calling."
-    )
-SINGULARITY_OPTION = click.Option(
-    "--singularity",
-    type=click.Path(),
-    required=True,
-    resolve_path=True,
-    exists=True,
-    help="Download singularity image for BALSAMIC"
-    )
-FASTQ_PREFIX_OPTION = click.Option(
-    "--fastq-prefix",
-    required=False,
-    default="",
-    help="Prefix to fastq file. The string that comes after readprefix"
-    )
-ANALYSIS_DIR_OPTION = click.Option(
-    "--analysis-dir",
-    type=click.Path(),
-    default=".",
-    resolve_path=True,
-    exists=True,
-    help="Root analysis path to store analysis logs and results. \
-                                     The final path will be analysis-dir/sample-id"
-    )
-TUMOR_OPTION = click.Option(
-    "-t","--tumor",
-    required=True,
-    multiple=True,
-    exists=True,
-    resolve_path=True,
-    help="Fastq files for tumor sample."
-    )
-NORMAL_OPTION = click.Option(
-    "-n","--normal",
-    required=False,
-    multiple=True,
-    exists=True,
-    resolve_path=True,
-    help="Fastq files for normal sample."
-    )
-FORMAT_OPTION = click.Option(
-    "-f", "--format", 
-    required=False, 
-    type=click.Choice(["fastq", "vcf", "bam"]), 
-    default="fastq"
-    )
 
 
 def validate_fastq_pattern(sample):
@@ -140,17 +38,16 @@ def get_panel_chrom(panel_bed) -> list:
     
 def get_bioinfo_tools_list(conda_env_path) -> dict:
     bioinfo_tools = {}
-    for yaml_file in os.listdir(conda_env_path):
-        if yaml_file.endswith(".yaml"):
-            with open(conda_env_path + yaml_file, "r") as f:
-                packages = yaml.safe_load(f)["dependencies"]
-                for p in packages:
-                    try:
-                        name, version = p.split("=")
-                    except ValueError:
-                        name, version = p, ""
-                    finally:
-                        bioinfo_tools[name] = version
+    for yaml_file in Path(conda_env_path).rglob('*.yaml'):
+        with open(yaml_file, "r") as f:
+            packages = yaml.safe_load(f)["dependencies"]
+            for p in packages:
+                try:
+                    name, version = p.split("=")
+                except ValueError:
+                    name, version = p, ""
+                finally:
+                    bioinfo_tools[name] = version
     return bioinfo_tools
 
 
@@ -176,21 +73,97 @@ def get_sample_names(file, sample_type):
         "readpair_suffix": ["1", "2"]}
 
 
-@CASE_COMMAND
-@CASE_ID_OPTION
-@UMI_OPTION
-@UMI_TRIM_LENGTH_OPTION
-@QUALITY_TRIM_OPTION
-@ADAPTER_TRIM_OPTION
-@REFERENCE_CONFIG_OPTION
-@PANEL_BED_OPTION
-@SINGULARITY_OPTION
-@ANALYSIS_DIR_OPTION
-@TUMOR_OPTION
-@NORMAL_OPTION
-@FORMAT_OPTION
+
+@click.command("case",
+    short_help="Create a sample config file from input sample data")
+@click.option(
+    "--case-id",
+    required=True,
+    help="Sample id that is used for reporting, \
+    naming the analysis jobs, and analysis path"
+    )
+@click.option(
+    "--umi/--no-umi",
+    default=True,
+    show_default=True,
+    is_flag=True,
+    help="UMI processing steps for samples with UMI tags"
+    )
+@click.option(
+    "--umi-trim-length",
+    default=5,
+    show_default=True,
+    type=int,
+    help="Trim N bases from reads in fastq"
+    )
+@click.option(
+    "--quality-trim/--no-quality-trim",
+    default=True,
+    show_default=True,
+    is_flag=True,
+    help="Trim low quality reads in fastq"
+    )
+@click.option(
+    "--adapter-trim/--no-adapter-trim",
+    default=False,
+    show_default=True,
+    is_flag=True,
+    help="Trim adapters from reads in fastq"
+    )
+@click.option(
+    "-r", "--reference-config",
+    required=True,
+    type=click.Path(exists=True, resolve_path=True),
+    help="Reference config file."
+    )
+@click.option(
+    "-p","--panel-bed",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Panel bed file for variant calling."
+    )
+@click.option(
+    "--singularity",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help="Download singularity image for BALSAMIC"
+    )
+@click.option(
+    "--fastq-prefix",
+    required=False,
+    default="",
+    help="Prefix to fastq file. The string that comes after readprefix"
+    )
+@click.option(
+    "--analysis-dir",
+    type=click.Path(exists=True, resolve_path=True),
+    default=".",
+    help="Root analysis path to store analysis logs and results. \
+                                     The final path will be analysis-dir/sample-id"
+    )
+@click.option(
+    "-t","--tumor",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    multiple=True,
+    help="Fastq files for tumor sample."
+    )
+@click.option(
+    "-n","--normal",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    multiple=True,
+    help="Fastq files for normal sample."
+    )
+@click.option(
+    "-f", "--format", 
+    required=False, 
+    type=click.Choice(["fastq", "vcf", "bam"]), 
+    default="fastq",
+    show_default=True,
+    )
 @click.pass_context
-def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_trim, reference_config, panel_bed, singularity, analysis_dir, tumor, normal, format):
+def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_trim, fastq_prefix, reference_config, panel_bed, singularity, analysis_dir, tumor, normal, format):
 
     reference_dict = json.load(open(reference_config))["reference"]
     bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
@@ -209,12 +182,23 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_tr
                                                 "sequencing_type" : "targeted" if panel_bed else "wgs",
                                                 },
                                             panel={
-                                                "panel" : panel_bed if panel_bed else None, 
-                                                "chrom" : get_panel_chrom(panel_bed) if panel_bed else None, 
-                                                },
+                                                "capture_kit" : panel_bed, 
+                                                "chrom" : get_panel_chrom(panel_bed), 
+                                                } if panel_bed else None,
                                             bioinfo_tools=bioinfo_tools,
                                             reference=reference_dict,
                                             singularity=singularity,
                                             samples=samples,
+                                            vcf={},
                                             )
-    print(config_collection.dict())
+    print(json.dumps(config_collection.dict(), indent=4))
+    #print(config_collection.dict())
+
+    #Make folders
+    #Create Symlinks
+    #Save json
+    #Create DAG
+    
+
+if __name__ == "__main__":
+    case_config()
