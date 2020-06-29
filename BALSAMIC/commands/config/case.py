@@ -150,8 +150,7 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
                     except ValueError:
                         name, version = p, ""
                     finally:
-                        if name in core_packages:
-                            bioinfo_tools[name] = version
+                        bioinfo_tools[name] = version
     return bioinfo_tools
 
 
@@ -209,13 +208,13 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_tr
                                                 "analysis_type" : "paired" if normal else "single",
                                                 "sequencing_type" : "targeted" if panel_bed else "wgs",
                                                 },
-                                            bioinfo_tools=bioinfo_tools,
-                                            samples=samples,
-                                            reference=reference_dict,
                                             panel={
                                                 "panel" : panel_bed if panel_bed else None, 
                                                 "chrom" : get_panel_chrom(panel_bed) if panel_bed else None, 
                                                 },
-
+                                            bioinfo_tools=bioinfo_tools,
+                                            reference=reference_dict,
                                             singularity=singularity,
+                                            samples=samples,
                                             )
+    print(config_collection.dict())
