@@ -6,8 +6,8 @@ include requirements.txt
 include requirements-dev.txt
 
 # config data
-include BALSAMIC/config *
+recursive-include BALSAMIC/config *
 
 # assests
-include BALSAMIC/assets/scripts *
+recursive-include BALSAMIC/assets/scripts *
 include BALSAMIC/assets/scout_config_template.yaml
