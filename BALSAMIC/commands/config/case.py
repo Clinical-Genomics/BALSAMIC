@@ -1,4 +1,3 @@
-import os
 import re
 import json
 import shutil
@@ -13,15 +12,15 @@ import BALSAMIC
 from pathlib import Path
 from datetime import datetime
 from yapf.yapflib.yapf_api import FormatFile
-from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC.config.constats import QCModel, VCFModel, AnalysisModel, SampleInstanceModel, BioinfoToolsModel, PanelModel, BalsamicConfigModel, CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
+from BALSAMIC.utils.cli import CaptureStdout, get_snakefile
+from BALSAMIC.config.constants import QCModel, VCFModel, AnalysisModel, SampleInstanceModel, BioinfoToolsModel, PanelModel, BalsamicConfigModel, CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
 
 LOG = logging.getLogger(__name__)
 
 
 def validate_fastq_pattern(sample):
     fq_pattern = re.compile(r"R_[12]"+".fastq.gz$")
-    sample_basename = os.path.basename(sample)
+    sample_basename = Path(sample).name
     try:
         file_str = sample_basename[0:(
             fq_pattern.search(sample_basename).span()[0] + 1)]
@@ -45,7 +44,7 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
                 try:
                     name, version = p.split("=")
                 except ValueError:
-                    name, version = p, ""
+                    name, version = p, None
                 finally:
                     bioinfo_tools[name] = version
     return bioinfo_tools
@@ -61,17 +60,36 @@ def get_sample_dict(tumor, normal):
     for sample in tumor:
         key, val = get_sample_names(sample, "tumor")
         samples[key] = val
-
     return samples
     
 
 def get_sample_names(file, sample_type):
     file_str = validate_fastq_pattern(file)
-    return file_str, {
-        "file_prefix": file_str,
-        "type": sample_type,
-        "readpair_suffix": ["1", "2"]}
+    if file_str: 
+        return file_str, {
+            "file_prefix": file_str,
+            "type": sample_type,
+            "readpair_suffix": ["1", "2"]}
 
+def create_fastq_symlink(filename, symlink_dir: Path):
+    parent_dir = Path(filename).parents[0]
+    file_str = validate_fastq_pattern(filename)
+
+    for f in parent_dir.rglob(f'*{file_str}*'):
+        try:
+            Path(symlink_dir / f.name).symlink_to(f)
+        except FileExistsError:
+            LOG.info(f"Path {symlink_dir / f.name} exists, skipping")
+
+
+
+
+def create_working_directories(config_collection_dict):
+    Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]), parents=True, exist_ok=True)
+    Path.mkdir(Path(config_collection_dict["analysis"]["benchmark"]), parents=True, exist_ok=True)
+    Path.mkdir(Path(config_collection_dict["analysis"]["script"]), parents=True, exist_ok=True)
+    Path.mkdir(Path(config_collection_dict["analysis"]["result"]), parents=True, exist_ok=True)
+    Path.mkdir(Path(config_collection_dict["analysis"]["log"]), parents=True, exist_ok=True)
 
 
 @click.command("case",
@@ -129,12 +147,6 @@ def get_sample_names(file, sample_type):
     help="Download singularity image for BALSAMIC"
     )
 @click.option(
-    "--fastq-prefix",
-    required=False,
-    default="",
-    help="Prefix to fastq file. The string that comes after readprefix"
-    )
-@click.option(
     "--analysis-dir",
     type=click.Path(exists=True, resolve_path=True),
     default=".",
@@ -163,7 +175,7 @@ def get_sample_names(file, sample_type):
     show_default=True,
     )
 @click.pass_context
-def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_trim, fastq_prefix, reference_config, panel_bed, singularity, analysis_dir, tumor, normal, format):
+def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_trim, reference_config, panel_bed, singularity, analysis_dir, tumor, normal, format):
 
     reference_dict = json.load(open(reference_config))["reference"]
     bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
@@ -191,13 +203,45 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_tr
                                             samples=samples,
                                             vcf={},
                                             )
-    print(json.dumps(config_collection.dict(), indent=4))
-    #print(config_collection.dict())
 
-    #Make folders
-    #Create Symlinks
-    #Save json
-    #Create DAG
+    config_path = Path(analysis_dir) / case_id / (case_id + ".json")
+    config_collection_dict = config_collection.dict(by_alias=True)
+    print(json.dumps(config_collection_dict, indent=4))
+
+    create_working_directories(config_collection_dict)
+    for filename in tumor + normal:
+        create_fastq_symlink(filename, Path(analysis_dir)/case_id)
+
+    with open(config_path, "w+") as fh:
+        fh.write(json.dumps(config_collection_dict, indent=4))
+
+
+    with CaptureStdout() as graph_dot:
+        snakemake.snakemake(snakefile=get_snakefile(config_collection_dict["analysis"]["analysis_type"],
+                                                    config_collection_dict["analysis"]["sequencing_type"]),
+                            dryrun=True,
+                            configfiles=[config_path],
+                            printrulegraph=True)
+
+    graph_title = "_".join(['BALSAMIC', BALSAMIC.__version__, case_id])
+    graph_dot = "".join(graph_dot).replace(
+        'snakemake_dag {',
+        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+    graph_obj = graphviz.Source(graph_dot,
+                                filename=config_collection_dict["analysis"]["dag"],
+                                format="pdf",
+                                engine="dot")
+
+    try:
+        graph_pdf = graph_obj.render()
+        LOG.info(
+            f'BALSAMIC Workflow has been configured successfully - {config_path}'
+        )
+    except Exception:
+        LOG.error(f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}')
+        raise click.Abort()
+
+
     
 
 if __name__ == "__main__":

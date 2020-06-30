@@ -20,10 +20,17 @@ class QCModel(BaseModel):
     quality_trim: bool = True
     adapter_trim: bool = False
     umi_trim: bool = False
-    min_seq_length: str = "25"
-    umi_trim_length: str = "5"
+    min_seq_length: int = 25
+    umi_trim_length: int = 5
 
+    @validator("min_seq_length", "umi_trim_length")
+    def coerce_int_as_str(cls, value):
+        return str(value)
 
+    class Config:
+        validate_all = True
+
+    
 
 class VCFModel(BaseModel):
     tnsnv: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
@@ -61,7 +68,7 @@ class AnalysisModel(BaseModel):
     log: Path = "analysis_dir/case_id/logs"
     result: Path = "analysis_dir/case_id/analysis"
     benchmark: Path = "analysis_dir/case_id/benchmarks"
-    dag : Path = 'analysis_dir/case_id.json_BALSAMIC_v.v.v_graph.pdf'
+    dag : Path = 'analysis_dir/case_id_BALSAMIC_v.v.v_graph.pdf'
     BALSAMIC_version : str = BALSAMIC.__version__
     config_creation_date : str = "1999-01-01 00:00"
 
@@ -97,7 +104,7 @@ class AnalysisModel(BaseModel):
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs):
-        return str(Path(values.get("analysis_dir")) / values.get("case_id") / f'{values.get("case_id")}.json_BALSAMIC_{BALSAMIC.__version__}_graph.pdf')
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") / f'{values.get("case_id")}_BALSAMIC_{BALSAMIC.__version__}_graph.pdf')
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
@@ -148,7 +155,7 @@ class BalsamicConfigModel(BaseModel):
     samples : Dict[str, SampleInstanceModel]
     reference : Dict[str, Path]
     conda_env_yaml : FilePath = str(CONDA_ENV_YAML)
-    rule_directory : DirectoryPath = str(RULE_DIRECTORY)
+    rule_directory : DirectoryPath = str(RULE_DIRECTORY) + "/"
     singularity : FilePath
     bioinfo_tools : BioinfoToolsModel
     panel : Optional[PanelModel]
