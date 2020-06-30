@@ -11,6 +11,7 @@ Changed
 ^^^^^^^
 
 * Variant caller filters moved into pydantic
+* Install script and setup.py
 
 
 [4.3.0]
