@@ -18,7 +18,7 @@ setup(
     install_requires=install_requires,
     packages=find_packages("BALSAMIC"),
     package_dir={"": "src"},
-    package_data={"assets": ["scripts/*R"], ["config": ["*.json"]},  
+    package_data={"assets": ["scripts/*R"], "config": ["*.json"]},  
     include_package_data=True,
     zip_safe=False,
     entry_points={
