@@ -16,7 +16,9 @@ setup(
     author="Hassan Foroughi Asl",
     author_email='hassan.foroughi@scilifelab.se',
     install_requires=install_requires,
-    packages=find_packages(),
+    packages=find_packages("BALSAMIC"),
+    package_dir={"": "src"},
+    package_data={"assets": ["scripts/*R"], ["config": ["*.json"]},  
     include_package_data=True,
     zip_safe=False,
     entry_points={
