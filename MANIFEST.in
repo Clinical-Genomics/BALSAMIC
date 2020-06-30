@@ -11,3 +11,7 @@ recursive-include BALSAMIC/config *
 # assests
 recursive-include BALSAMIC/assets/scripts *
 include BALSAMIC/assets/scout_config_template.yaml
+
+# SnakeMake assets
+recursive-include BALSAMIC/snakemake_rules *
+recursive-include BALSAMIC/workflows *
