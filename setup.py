@@ -22,7 +22,6 @@ setup(
     author_email='hassan.foroughi@scilifelab.se',
     install_requires=install_requires,
     packages=find_packages(),
-    package_dir={"": "BALSAMIC"},
     package_data={"assets": ["scripts/*R"], "config": ["*.json"]},  
     include_package_data=True,
     zip_safe=False,
