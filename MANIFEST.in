@@ -1,0 +1,13 @@
+# including
+include CHANGELOG.rst
+include LICENSE
+include README.rst
+include requirements.txt
+include requirements-dev.txt
+
+# config data
+include BALSAMIC/config *
+
+# assests
+include BALSAMIC/assets/scripts *
+include BALSAMIC/assets/scout_config_template.yaml
