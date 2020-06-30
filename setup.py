@@ -1,4 +1,3 @@
-from BALSAMIC import __version__
 from setuptools import setup, find_packages
 
 version = __version__
@@ -9,14 +8,19 @@ try:
 except IOError:
     install_requires = []
 
+# Load the package's __version__.py module as a dictionary.
+about = {}
+with open(os.path.join(here, "BALSAMIC", "__version__.py")) as f:
+    exec(f.read(), about)
+
 setup(
     name="BALSAMIC",
-    version=version,
+    version=about["__version__"],
     url="https://github.com/Clinical-Genomics/BALSAMIC",
     author="Hassan Foroughi Asl",
     author_email='hassan.foroughi@scilifelab.se',
     install_requires=install_requires,
-    packages=find_packages("BALSAMIC"),
+    packages=find_packages(),
     package_dir={"": "BALSAMIC"},
     package_data={"assets": ["scripts/*R"], "config": ["*.json"]},  
     include_package_data=True,
