@@ -122,7 +122,7 @@ class AnalysisModel(BaseModel):
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis"""
     file_prefix: str
-    sample_type: Literal["tumor", "normal"] = Field(alias="type")
+    sample_type: str = Field(alias="type")
     readpair_suffix: List[str] = ["1", "2"]
 
 
