@@ -47,7 +47,7 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
     return bioinfo_tools
 
 
-def get_sample_dict(tumor, normal):
+def get_sample_dict(tumor, normal) -> dict:
     samples = {}
     if normal:
         for sample in normal:
@@ -70,15 +70,15 @@ def get_sample_names(file, sample_type):
         }
 
 
-def create_fastq_symlink(filename, symlink_dir: Path):
-    parent_dir = Path(filename).parents[0]
-    file_str = validate_fastq_pattern(filename)
-
-    for f in parent_dir.rglob(f'*{file_str}*.fastq.gz'):
-        try:
-            Path(symlink_dir, f.name).symlink_to(f)
-        except FileExistsError:
-            LOG.info(f"Path {symlink_dir / f.name} exists, skipping")
+def create_fastq_symlink(casefiles, symlink_dir: Path):
+    for filename in casefiles:
+        parent_dir = Path(filename).parents[0]
+        file_str = validate_fastq_pattern(filename)
+        for f in parent_dir.rglob(f'*{file_str}*.fastq.gz'):
+            try:
+                Path(symlink_dir, f.name).symlink_to(f)
+            except FileExistsError:
+                LOG.info(f"Path {symlink_dir / f.name} exists, skipping")
 
 
 def create_working_directories(config_collection_dict):
@@ -228,27 +228,38 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             samples=samples,
             vcf={},
         )
+        config_collection_dict = config_collection.dict(by_alias=True)
+        LOG.info("Config file generated successfully")
     except Exception as e:
         LOG.error(f"Failed to generate config file: {e}")
         click.Abort()
 
-    config_collection_dict = config_collection.dict(by_alias=True)
 
     try:
         create_working_directories(config_collection_dict)
+        LOG.info("Directories created successfully")
     except Exception as e:
         LOG.error(f"Could not create directories: {e}")
         click.Abort()
 
-    for filename in tumor + normal:
+    try:
         create_fastq_symlink(
-            filename,
-            Path(config_collection_dict["analysis"]["fastq_path"]))
+            casefiles=(tumor + normal),
+            symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]))
+        LOG.info(f"Symlinks generated successfully")
+    except Exception as e:
+        LOG.error(f"Could not create symlink, {e}")
+        click.Abort()
 
 
-    config_path = Path(analysis_dir) / case_id / (case_id + ".json")
-    with open(config_path, "w+") as fh:
-        fh.write(json.dumps(config_collection_dict, indent=4))
+    try:
+        config_path = Path(analysis_dir) / case_id / (case_id + ".json")
+        with open(config_path, "w+") as fh:
+            fh.write(json.dumps(config_collection_dict, indent=4))
+        LOG.info(f"Config file generated successfully - {config_path}")
+    except Exception as e:
+        LOG.error(f"Could not save the config {config_path}, {e}")
+        click.Abort()
 
     try:
         generate_graph(config_collection_dict, config_path)

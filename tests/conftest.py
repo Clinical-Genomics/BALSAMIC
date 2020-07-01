@@ -123,9 +123,7 @@ def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """
     Creates a dummy snakemake jobscript
     """
-    with open(tumor_normal_config, 'r') as input_config:
-        sample_config = json.load(input_config)
-
+    
     script_dir = tmp_path_factory.mktemp('snakemake_script')
     snakemake_script_file = script_dir / 'example_script.sh'
     snakemake_script = '''#!/bin/sh
