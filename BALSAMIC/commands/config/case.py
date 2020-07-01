@@ -25,10 +25,8 @@ def validate_fastq_pattern(sample):
         file_str = sample_basename[0:(
             fq_pattern.search(sample_basename).span()[0] + 1)]
         return file_str
-
     except AttributeError:
-        LOG.error(
-            f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
+        raise AttributeError(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
 
 
 def get_panel_chrom(panel_bed) -> list:
@@ -64,12 +62,15 @@ def get_sample_dict(tumor, normal):
     
 
 def get_sample_names(file, sample_type):
-    file_str = validate_fastq_pattern(file)
-    if file_str: 
-        return file_str, {
-            "file_prefix": file_str,
-            "type": sample_type,
-            "readpair_suffix": ["1", "2"]}
+    try:
+        file_str = validate_fastq_pattern(file)
+        if file_str: 
+            return file_str, {
+                "file_prefix": file_str,
+                "type": sample_type,
+                "readpair_suffix": ["1", "2"]}
+    except ValueError:
+        raise
 
 def create_fastq_symlink(filename, symlink_dir: Path):
     parent_dir = Path(filename).parents[0]
@@ -90,6 +91,27 @@ def create_working_directories(config_collection_dict):
     Path.mkdir(Path(config_collection_dict["analysis"]["script"]), parents=True, exist_ok=True)
     Path.mkdir(Path(config_collection_dict["analysis"]["result"]), parents=True, exist_ok=True)
     Path.mkdir(Path(config_collection_dict["analysis"]["log"]), parents=True, exist_ok=True)
+
+
+def generate_graph(config_collection_dict, config_path):
+    with CaptureStdout() as graph_dot:
+        snakemake.snakemake(snakefile=get_snakefile(config_collection_dict["analysis"]["analysis_type"],
+                                                    config_collection_dict["analysis"]["sequencing_type"]),
+                            dryrun=True,
+                            configfiles=[config_path],
+                            printrulegraph=True)
+
+    graph_title = "_".join(['BALSAMIC', BALSAMIC.__version__, config_collection_dict["analysis"]["case_id"]])
+    graph_dot = "".join(graph_dot).replace(
+        'snakemake_dag {',
+        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+    graph_obj = graphviz.Source(graph_dot,
+                                filename=config_collection_dict["analysis"]["dag"],
+                                format="pdf",
+                                engine="dot")
+    graph_obj.render()
+
+    
 
 
 @click.command("case",
@@ -179,69 +201,54 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_tr
 
     reference_dict = json.load(open(reference_config))["reference"]
     bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
-    samples = get_sample_dict(tumor, normal)
-
-    config_collection = BalsamicConfigModel(QC={
-                                                "quality_trim" : quality_trim,
-                                                "adapter_trim" : adapter_trim,
-                                                "umi_trim" : umi,
-                                                "umi_trim_length" : umi_trim_length,
-                                                },
-                                            analysis={
-                                                "case_id": case_id,
-                                                "analysis_dir": analysis_dir,
-                                                "analysis_type" : "paired" if normal else "single",
-                                                "sequencing_type" : "targeted" if panel_bed else "wgs",
-                                                },
-                                            panel={
-                                                "capture_kit" : panel_bed, 
-                                                "chrom" : get_panel_chrom(panel_bed), 
-                                                } if panel_bed else None,
-                                            bioinfo_tools=bioinfo_tools,
-                                            reference=reference_dict,
-                                            singularity=singularity,
-                                            samples=samples,
-                                            vcf={},
-                                            )
-
-    config_path = Path(analysis_dir) / case_id / (case_id + ".json")
-    config_collection_dict = config_collection.dict(by_alias=True)
-    print(json.dumps(config_collection_dict, indent=4))
-
-    create_working_directories(config_collection_dict)
-    for filename in tumor + normal:
-        create_fastq_symlink(filename, Path(analysis_dir)/case_id)
-
-    with open(config_path, "w+") as fh:
-        fh.write(json.dumps(config_collection_dict, indent=4))
-
-
-    with CaptureStdout() as graph_dot:
-        snakemake.snakemake(snakefile=get_snakefile(config_collection_dict["analysis"]["analysis_type"],
-                                                    config_collection_dict["analysis"]["sequencing_type"]),
-                            dryrun=True,
-                            configfiles=[config_path],
-                            printrulegraph=True)
-
-    graph_title = "_".join(['BALSAMIC', BALSAMIC.__version__, case_id])
-    graph_dot = "".join(graph_dot).replace(
-        'snakemake_dag {',
-        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
-    graph_obj = graphviz.Source(graph_dot,
-                                filename=config_collection_dict["analysis"]["dag"],
-                                format="pdf",
-                                engine="dot")
-
     try:
-        graph_pdf = graph_obj.render()
-        LOG.info(
-            f'BALSAMIC Workflow has been configured successfully - {config_path}'
-        )
-    except Exception:
-        LOG.error(f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}')
-        raise click.Abort()
+        samples = get_sample_dict(tumor, normal)
 
+        config_collection = BalsamicConfigModel(QC={
+                                                    "quality_trim" : quality_trim,
+                                                    "adapter_trim" : adapter_trim,
+                                                    "umi_trim" : umi,
+                                                    "umi_trim_length" : umi_trim_length,
+                                                    },
+                                                analysis={
+                                                    "case_id": case_id,
+                                                    "analysis_dir": analysis_dir,
+                                                    "analysis_type" : "paired" if normal else "single",
+                                                    "sequencing_type" : "targeted" if panel_bed else "wgs",
+                                                    },
+                                                panel={
+                                                    "capture_kit" : panel_bed, 
+                                                    "chrom" : get_panel_chrom(panel_bed), 
+                                                    } if panel_bed else None,
+                                                bioinfo_tools=bioinfo_tools,
+                                                reference=reference_dict,
+                                                singularity=singularity,
+                                                samples=samples,
+                                                vcf={},
+                                                )
 
+        config_path = Path(analysis_dir) / case_id / (case_id + ".json")
+        config_collection_dict = config_collection.dict(by_alias=True)
+        print(json.dumps(config_collection_dict, indent=4))
+
+        create_working_directories(config_collection_dict)
+        for filename in tumor + normal:
+            create_fastq_symlink(filename, Path(analysis_dir)/case_id)
+
+        with open(config_path, "w+") as fh:
+            fh.write(json.dumps(config_collection_dict, indent=4))
+
+        try:
+            generate_graph(config_collection_dict, config_path)
+            LOG.info(f'BALSAMIC Workflow has been configured successfully - {config_path}')
+
+        except Exception:
+            LOG.error(f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}')
+            click.Abort()
+
+    except AttributeError:
+        LOG.error(f"File name is invalid, fastq file should be sample_R_1.fastq.gz")
+        click.Abort()
     
 
 if __name__ == "__main__":
