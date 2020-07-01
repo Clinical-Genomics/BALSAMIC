@@ -179,10 +179,11 @@ def generate_graph(config_collection_dict, config_path):
     default="fastq",
     show_default=True,
 )
+@click.option("--output-config", required=False)
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, singularity,
-                analysis_dir, tumor, normal, format):
+                analysis_dir, tumor, normal, format, output_config):
 
     try:
         samples = get_sample_dict(tumor, normal)
@@ -244,6 +245,9 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         create_fastq_symlink(
             filename,
             Path(config_collection_dict["analysis"]["fastq_path"]))
+    
+    if output_config:
+        config_path = Path(analysis_dir) / case_id / output_config
 
     config_path = Path(analysis_dir) / case_id / (case_id + ".json")
     with open(config_path, "w+") as fh:
