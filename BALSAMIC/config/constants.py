@@ -84,23 +84,23 @@ class AnalysisModel(BaseModel):
 
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs):
-        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "logs")
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "logs") + "/"
 
     @validator("fastq_path")
     def parse_analysis_to_fastq_path(cls, value, values, **kwargs):
-        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "analysis" / "fastq")
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "analysis" / "fastq") + "/"
 
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs):
-        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "scripts")
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "scripts")  + "/"
 
     @validator("result")
     def parse_analysis_to_result_path(cls, value, values, **kwargs):
-        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "analysis")
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "analysis")  + "/"
 
     @validator("benchmark")
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs):
-        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "benchmarks")
+        return str(Path(values.get("analysis_dir")) / values.get("case_id") / "benchmarks") + "/"
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs):

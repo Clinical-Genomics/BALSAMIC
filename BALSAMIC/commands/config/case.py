@@ -78,7 +78,7 @@ def create_fastq_symlink(filename, symlink_dir: Path):
 
     for f in parent_dir.rglob(f'*{file_str}*'):
         try:
-            Path(symlink_dir / f.name).symlink_to(f)
+            Path(symlink_dir, f.name).symlink_to(f)
         except FileExistsError:
             LOG.info(f"Path {symlink_dir / f.name} exists, skipping")
 
@@ -86,10 +86,10 @@ def create_fastq_symlink(filename, symlink_dir: Path):
 
 
 def create_working_directories(config_collection_dict):
+    Path.mkdir(Path(config_collection_dict["analysis"]["result"]), parents=True, exist_ok=True)
     Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]), parents=True, exist_ok=True)
     Path.mkdir(Path(config_collection_dict["analysis"]["benchmark"]), parents=True, exist_ok=True)
     Path.mkdir(Path(config_collection_dict["analysis"]["script"]), parents=True, exist_ok=True)
-    Path.mkdir(Path(config_collection_dict["analysis"]["result"]), parents=True, exist_ok=True)
     Path.mkdir(Path(config_collection_dict["analysis"]["log"]), parents=True, exist_ok=True)
 
 
@@ -233,7 +233,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim, quality_tr
 
         create_working_directories(config_collection_dict)
         for filename in tumor + normal:
-            create_fastq_symlink(filename, Path(analysis_dir)/case_id)
+            create_fastq_symlink(filename, Path(config_collection_dict["analysis"]["fastq_path"]))
 
         with open(config_path, "w+") as fh:
             fh.write(json.dumps(config_collection_dict, indent=4))
