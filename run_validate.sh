@@ -66,10 +66,12 @@ _tumor_fastq='tests/test_data/fastq/S1_R_1.fastq.gz'
 _normal_fastq='tests/test_data/fastq/S2_R_1.fastq.gz'
 _analysis_config='run_tests/'${_analysis}_${_ngstype}'/balsamic_config.json'
 
+
 if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
 fi
 
+mkdir $_analysis_dir
 function balsamic_config() {
   balsamic config case \
     -t ${_tumor_fastq} \
