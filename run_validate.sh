@@ -71,7 +71,7 @@ if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
 fi
 
-mkdir $_analysis_dir
+mkdir {$_analysis_dir}
 function balsamic_config() {
   balsamic config case \
     -t ${_tumor_fastq} \
