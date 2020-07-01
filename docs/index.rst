@@ -26,7 +26,8 @@
    :maxdepth: 1
 
    cli_reference
-   modules
+   cli_package
+   source/modules
  
 .. toctree::
     :caption: Other Info

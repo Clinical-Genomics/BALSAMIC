@@ -6,6 +6,8 @@ coloredlogs
 psutil
 snakemake==5.13.0
 gsutil
+six>=1.12.0
 jinja2
 networkx
 colorclass
+pydantic

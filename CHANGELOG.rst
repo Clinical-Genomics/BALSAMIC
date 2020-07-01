@@ -2,6 +2,20 @@
 [X.X.X]
 -------
 
+Added
+^^^^^
+
+* pydantic to validate various models namely variant caller filters
+
+Changed
+^^^^^^^
+
+* Variant caller filters moved into pydantic
+
+
+[4.3.0]
+-------
+
 
 Added
 ^^^^^
@@ -29,6 +43,8 @@ Changed
 ^^^^^^^
 
 * Increased run time for various slurm jobs fixes #314
+* Enabled SV calls for VarDict tumor-only
+* Updated `ensembl-vep` to v100.2
 
 [4.2.4]
 -------

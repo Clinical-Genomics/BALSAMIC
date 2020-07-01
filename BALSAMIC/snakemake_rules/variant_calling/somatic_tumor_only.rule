@@ -8,7 +8,6 @@ from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
-from BALSAMIC.assets import models
 from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
@@ -43,7 +42,7 @@ rule vardict_tumor_only:
   shell:
     "source activate {params.conda}; "
     "export PERL5LIB=;"
-    "vardict -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
+    "vardict -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "
         "{params.col_info} {input.bed} "
         "| teststrandbias.R "

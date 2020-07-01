@@ -2,7 +2,9 @@ FROM hassanf/miniconda3_4.6.14:latest
 
 LABEL maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL description="Bioinformatic analysis pipeline for somatic mutations in cancer"
-LABEL version="4.2.4"
+LABEL version="4.3.0"
+
+ARG GIT_BRANCH=v4.3.0
 
 # create necessary directories
 # install balsamic and it's environments
@@ -11,7 +13,7 @@ RUN mkdir -p /git_repos; \
     export PATH=/usr/local/miniconda/bin:$PATH; \
     export LC_ALL=en_US.utf-8; \
     export LANG=en_US.utf-8; \
-    cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout v4.2.4 && \
+    cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout ${GIT_BRANCH} && \
     conda env create --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27 && \
     conda env create --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36 && \
     source activate BALSAMIC_py36; \
@@ -22,7 +24,7 @@ RUN mkdir -p /git_repos; \
     ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar; \
     ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6; \
     ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6.0; \
-    conda clean -all -y
+    conda clean --all -y
 
 # The following fixes the error for Click
 # RuntimeError: Click will abort further execution because Python 3 was
