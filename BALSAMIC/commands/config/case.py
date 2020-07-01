@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 from yapf.yapflib.yapf_api import FormatFile
 from BALSAMIC.utils.cli import CaptureStdout, get_snakefile
-from BALSAMIC.config.constants import QCModel, VCFModel, AnalysisModel, SampleInstanceModel, BioinfoToolsModel, PanelModel, BalsamicConfigModel, CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
+from BALSAMIC.config.constants import BalsamicConfigModel, CONDA_ENV_PATH
 
 LOG = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def create_fastq_symlink(filename, symlink_dir: Path):
     parent_dir = Path(filename).parents[0]
     file_str = validate_fastq_pattern(filename)
 
-    for f in parent_dir.rglob(f'*{file_str}*'):
+    for f in parent_dir.rglob(f'*{file_str}*.fastq.gz'):
         try:
             Path(symlink_dir, f.name).symlink_to(f)
         except FileExistsError:
@@ -82,19 +82,7 @@ def create_fastq_symlink(filename, symlink_dir: Path):
 
 
 def create_working_directories(config_collection_dict):
-    Path.mkdir(Path(config_collection_dict["analysis"]["result"]),
-               parents=True,
-               exist_ok=True)
     Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
-               parents=True,
-               exist_ok=True)
-    Path.mkdir(Path(config_collection_dict["analysis"]["benchmark"]),
-               parents=True,
-               exist_ok=True)
-    Path.mkdir(Path(config_collection_dict["analysis"]["script"]),
-               parents=True,
-               exist_ok=True)
-    Path.mkdir(Path(config_collection_dict["analysis"]["log"]),
                parents=True,
                exist_ok=True)
 
@@ -200,14 +188,23 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         samples = get_sample_dict(tumor, normal)
     except AttributeError:
         LOG.error(
-            f"File name is invalid, fastq file should be of format [SAMPLE_ID]_R_[1,2].fastq.gz"
-        )
+            f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
         click.Abort()
 
     try:
         reference_dict = json.load(open(reference_config))["reference"]
-        bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
+    except Exception as e:
+        LOG.error(f"Reference config {reference_config} does not follow correct format: {e}")
+        click.Abort()
 
+    try:
+        bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
+    except Exception as e:
+        LOG.error(f"Error generating a list of bioinfo tools: {e}")
+        click.Abort()
+
+
+    try:
         config_collection = BalsamicConfigModel(
             QC={
                 "quality_trim": quality_trim,
@@ -231,37 +228,35 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             samples=samples,
             vcf={},
         )
-        config_path = Path(analysis_dir) / case_id / (case_id + ".json")
-        config_collection_dict = config_collection.dict(by_alias=True)
+    except Exception as e:
+        LOG.error(f"Failed to generate config file: {e}")
+        click.Abort()
 
+    config_collection_dict = config_collection.dict(by_alias=True)
+
+    try:
         create_working_directories(config_collection_dict)
-        for filename in tumor + normal:
-            create_fastq_symlink(
-                filename,
-                Path(config_collection_dict["analysis"]["fastq_path"]))
+    except Exception as e:
+        LOG.error(f"Could not create directories: {e}")
+        click.Abort()
 
-        with open(config_path, "w+") as fh:
-            fh.write(json.dumps(config_collection_dict, indent=4))
+    for filename in tumor + normal:
+        create_fastq_symlink(
+            filename,
+            Path(config_collection_dict["analysis"]["fastq_path"]))
 
+    config_path = Path(analysis_dir) / case_id / (case_id + ".json")
+    with open(config_path, "w+") as fh:
+        fh.write(json.dumps(config_collection_dict, indent=4))
 
+    try:
         generate_graph(config_collection_dict, config_path)
         LOG.info(
-            f'BALSAMIC Workflow has been configured successfully - {config_path}'
-        )
-
+            f'BALSAMIC Workflow has been configured successfully - {config_path}')
     except ValueError as e:
         LOG.error(
             f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',
         )
         click.Abort()
             
-    except Exception as e:
-        LOG.error(e)
-        click.Abort()
 
-
-
-
-
-if __name__ == "__main__":
-    case_config()
