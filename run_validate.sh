@@ -78,8 +78,7 @@ function balsamic_config() {
     --analysis-dir ${_analysis_dir} \
     -r ${_reference} \
     ${_panel_option} \
-    --singularity ${_singularity}\
-    --output-config balsamic_config.json 
+    --singularity ${_singularity} 
 }
 
 balsamic_run() {
