@@ -154,8 +154,8 @@ def generate_graph(config_collection_dict, config_path):
               required=True,
               help="Download singularity image for BALSAMIC")
 @click.option("--analysis-dir",
-              type=click.Path(exists=True, resolve_path=True),
-              default=".",
+              type=click.Path(resolve_path=True),
+              required=True,
               help="Root analysis path to store analysis logs and results. \
                                      The final path will be analysis-dir/sample-id"
               )
