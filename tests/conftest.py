@@ -41,6 +41,7 @@ def config_files():
     }
 
 
+
 @pytest.fixture(scope='session')
 def conda():
     """
@@ -88,10 +89,10 @@ def sample_fastq(tmp_path_factory):
         fastq_file.touch()
 
     return {
-        "fastq_valid": str(fastq_valid.absolute()),
-        "fastq_invalid": str(fastq_invalid.absolute()),
-        "tumor": str(tumor_fastq_R_1.absolute()),
-        "normal": str(normal_fastq_R_2.absolute())
+        "fastq_valid": fastq_valid.absolute().as_posix(),
+        "fastq_invalid": fastq_invalid.absolute().as_posix(),
+        "tumor": tumor_fastq_R_1.absolute().as_posix(),
+        "normal": normal_fastq_R_2.absolute().as_posix()
     }
 
 
@@ -103,8 +104,9 @@ def singularity_container(tmp_path_factory):
 
     container_dir = tmp_path_factory.mktemp("test_container")
     container_file = container_dir / "singularity_container.simg"
+    container_file.touch()
 
-    return str(container_file)
+    return container_file.as_posix()
 
 
 @pytest.fixture(scope='session')
@@ -113,7 +115,7 @@ def analysis_dir(tmp_path_factory):
     Creates and returns analysis directory
     """
     analysis_dir = tmp_path_factory.mktemp('analysis')
-    return analysis_dir
+    return analysis_dir.as_posix()
 
 
 @pytest.fixture(scope='session')
@@ -121,7 +123,6 @@ def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """
     Creates a dummy snakemake jobscript
     """
-    case_name = 'job_submit_test_case'
     with open(tumor_normal_config, 'r') as input_config:
         sample_config = json.load(input_config)
 
@@ -145,24 +146,25 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
     """
-    case_name = 'sample_tumor_normal'
+    case_id = "sample_tumor_normal"
     tumor = sample_fastq['tumor']
     normal = sample_fastq['normal']
     panel_bed_file = 'tests/test_data/references/panel/panel.bed'
     reference_json = 'tests/test_data/references/reference.json'
-    sample_config_file_name = 'sample.json'
 
     runner = CliRunner()
-    result = runner.invoke(cli, [
-        'config', 'case', '-p', panel_bed_file, '-t',
-        str(tumor), '-n',
-        str(normal), '--case-id', case_name, '--singularity',
-        singularity_container, '--analysis-dir',
-        str(analysis_dir), '--output-config', sample_config_file_name,
-        '--reference-config', reference_json
+    runner.invoke(cli, [
+        'config', 'case', 
+        '-p', panel_bed_file, 
+        '-t', tumor, 
+        '-n', normal, 
+        '--case-id', case_id, 
+        '--singularity', singularity_container, 
+        '--analysis-dir', analysis_dir,
+        '--reference-config', reference_json,
     ])
 
-    return str(analysis_dir / case_name / sample_config_file_name)
+    return Path(analysis_dir, case_id, case_id+".json").as_posix()
 
 
 @pytest.fixture(scope='session')
@@ -172,55 +174,49 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
     """
-    case_name = 'sample_tumor_normal'
+    case_id = "sample_tumor_normal_wgs"
     tumor = sample_fastq['tumor']
     normal = sample_fastq['normal']
     reference_json = 'tests/test_data/references/reference.json'
-    sample_config_file_name = 'sample.json'
 
     runner = CliRunner()
-    result = runner.invoke(cli, [
-        'config', 'case', '-t',
-        str(tumor), '-n',
-        str(normal), '--case-id', case_name, '--singularity',
-        singularity_container, '--analysis-dir',
-        str(analysis_dir), '--output-config', sample_config_file_name,
-        '--reference-config', reference_json
+    runner.invoke(cli, [
+        'config', 'case', 
+        '-t', tumor, 
+        '-n', normal, 
+        '--case-id', case_id, 
+        '--singularity', singularity_container, 
+        '--analysis-dir', analysis_dir,
+        '--reference-config', reference_json,
     ])
 
-    return str(analysis_dir / case_name / sample_config_file_name)
+    return Path(analysis_dir, case_id, case_id+".json").as_posix()
 
 
 @pytest.fixture(scope='session')
-def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container):
+def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container, analysis_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
     """
-    case_name = 'sample_tumor_only'
-    analysis_dir = fn = tmpdir_factory.mktemp('analysis', numbered=False)
+    case_id = "sample_tumor_only"
     tumor = sample_fastq['tumor']
     panel_bed_file = 'tests/test_data/references/panel/panel.bed'
     reference_json = 'tests/test_data/references/reference.json'
-    sample_config_file_name = 'sample.json'
+
 
     runner = CliRunner()
-    result = runner.invoke(cli, [
-        'config', 'case', '-p', panel_bed_file, '-t',
-        str(tumor), '--case-id', case_name, '--analysis-dir',
-        str(analysis_dir), '--output-config', sample_config_file_name,
-        '--singularity', singularity_container, '--reference-config',
-        reference_json
+    runner.invoke(cli, [
+        'config', 'case', 
+        '-p', panel_bed_file, 
+        '-t', tumor, 
+        '--case-id', case_id, 
+        '--analysis-dir', analysis_dir, 
+        '--singularity', singularity_container, 
+        '--reference-config', reference_json,
     ])
 
-    dummy_log = tmpdir_factory.mktemp(
-        'analysis/' + case_name + '/logs',
-        numbered=False).join('example_file').write('not_empty')
-    dummy_balsamic_stat = tmpdir_factory.mktemp(
-        'analysis/' + case_name + '/analysis/vep',
-        numbered=False).join('vcf_merge.balsamic_stat').write('not_empty')
-
-    return os.path.join(analysis_dir, case_name, sample_config_file_name)
+    return Path(analysis_dir, case_id, case_id+".json").as_posix()
 
 
 @pytest.fixture(scope='session')
@@ -230,21 +226,21 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
     """
-    case_name = 'sample_tumor_only'
+    case_id = "sample_tumor_only_wgs"
     tumor = sample_fastq['tumor']
     reference_json = 'tests/test_data/references/reference.json'
-    sample_config_file_name = 'sample.json'
 
     runner = CliRunner()
-    result = runner.invoke(cli, [
-        'config', 'case', '-t',
-        str(tumor), '--case-id', case_name, '--analysis-dir',
-        str(analysis_dir), '--output-config', sample_config_file_name,
-        '--singularity', singularity_container, '--reference-config',
-        reference_json
+    runner.invoke(cli, [
+        'config', 'case', 
+        '-t', tumor, 
+        '--case-id', case_id,
+        '--analysis-dir', analysis_dir, 
+        '--singularity', singularity_container, 
+        '--reference-config', reference_json,
     ])
 
-    return str(analysis_dir / case_name / sample_config_file_name)
+    return Path(analysis_dir, case_id, case_id+".json").as_posix()
 
 
 @pytest.fixture(scope='session')
