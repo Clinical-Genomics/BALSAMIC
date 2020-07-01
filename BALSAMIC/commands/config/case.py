@@ -221,7 +221,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             panel={
                 "capture_kit": panel_bed,
                 "chrom": get_panel_chrom(panel_bed),
-            } if panel_bed else None,
+            } if panel_bed else {},
             bioinfo_tools=bioinfo_tools,
             reference=reference_dict,
             singularity=singularity,
