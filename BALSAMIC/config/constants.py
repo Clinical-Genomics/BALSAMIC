@@ -5,7 +5,7 @@ import pydantic
 from pydantic import BaseModel, ValidationError, validator, Field
 from pydantic.types import DirectoryPath, FilePath
 from typing import Optional, List, Dict
-from typing_extensions import Literal
+
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
@@ -61,8 +61,8 @@ class AnalysisModel(BaseModel):
     """
 
     case_id: str
-    analysis_type: Literal["single", "paired"]
-    sequencing_type: Literal["targeted", "wgs"]
+    analysis_type: str
+    sequencing_type: str
     analysis_dir: Path
     fastq_path: Path = "analysis_dir/case_id/analysis/fastq_path"
     script: Path = "analysis_dir/case_id/scripts"
