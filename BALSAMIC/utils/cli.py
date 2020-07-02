@@ -99,7 +99,7 @@ class SnakeMake:
             self.singularity_arg += "' "
 
         if self.run_mode == 'cluster':
-            sbatch_cmd = " 'python3 {} ".format(self.scheduler) + \
+            sbatch_cmd = " '{} {} ".format(sys.executable, self.scheduler) + \
                 " --sample-config " + self.configfile + \
                 " --profile " + self.profile + \
                 " --account " + self.account + \
