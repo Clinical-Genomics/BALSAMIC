@@ -370,7 +370,7 @@ def get_file_status_string(file_to_check):
     
     return return_str, file_status
 
-    def merge_json(*args):
+def merge_json(*args):
     """
     Take a list of json files and merges them together
     Input: list of json file
