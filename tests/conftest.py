@@ -114,7 +114,7 @@ def analysis_dir(tmp_path_factory):
     """
     Creates and returns analysis directory
     """
-    analysis_dir = tmp_path_factory.mktemp('analysis')
+    analysis_dir = tmp_path_factory.mktemp('analysis', numbered=False)
     return analysis_dir.as_posix()
 
 
@@ -244,15 +244,14 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 @pytest.fixture(scope="session")
 def tumor_only_case_name(tmpdir_factory, tumor_only_config, analysis_dir):
     case_name = Path(tumor_only_config).name.split(".")[0]
-    try:
-        dummy_log = tmpdir_factory.mktemp(
-            analysis_dir + "/" + case_name + '/logs',
-            numbered=False).join('example_file').write('not_empty')
-        dummy_balsamic_stat = tmpdir_factory.mktemp(
-            analysis_dir + "/" + case_name + '/analysis/vep',
-            numbered=False).join('vcf_merge.balsamic_stat').write('not_empty')
-    except FileExistsError:
-        pass
+
+    dummy_log = tmpdir_factory.mktemp(
+       Path(analysis_dir, case_name,'logs'), numbered=False
+        ).join('example_file').write('not_empty')
+    dummy_balsamic_stat = tmpdir_factory.mktemp(Path(
+         analysis_dir, case_name, "analysis", "vep"), numbered=False
+    ).join('vcf_merge.balsamic_stat').write('not_empty')
+
     return case_name
 
 
