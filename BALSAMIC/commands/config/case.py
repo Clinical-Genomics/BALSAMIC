@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 from yapf.yapflib.yapf_api import FormatFile
 from BALSAMIC.utils.cli import CaptureStdout, get_snakefile
-from BALSAMIC.config.constants import BalsamicConfigModel, CONDA_ENV_PATH
+from BALSAMIC.utils.constants import BalsamicConfigModel, CONDA_ENV_PATH
 
 LOG = logging.getLogger(__name__)
 

@@ -241,6 +241,7 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     return Path(analysis_dir, case_id, case_id+".json").as_posix()
 
 
+
 @pytest.fixture(scope='session')
 def sample_config():
     """

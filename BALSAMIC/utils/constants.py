@@ -77,10 +77,7 @@ class AnalysisModel(BaseModel):
 
     @validator("analysis_dir")
     def dirpath_always_abspath(cls, value) -> str:
-        if not Path(value).exists():
-            raise ValidationError(f'Path does not exist!')
-        else:
-            return Path(value).resolve().as_posix()
+        return Path(value).resolve().as_posix()
 
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:

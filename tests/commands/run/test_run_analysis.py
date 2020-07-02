@@ -37,9 +37,17 @@ def test_run_analysis_click_abort(invoke_cli, tumor_only_config, tumor_normal_co
     assert result.exit_code == 1
 
 
-def test_run_analysis_create_dir(invoke_cli, tumor_only_config, tmp_path):
+def test_run_analysis_create_dir(tmpdir_factory, invoke_cli, tumor_only_config, analysis_dir, tmp_path):
     # GIVEN a tumor-only config file
     # WHEN running analysis
+    case_name = Path(tumor_only_config).name.split(".")[0]
+    dummy_log = tmpdir_factory.mktemp(
+        analysis_dir + "/" + case_name + '/logs',
+        numbered=False).join('example_file').write('not_empty')
+    dummy_balsamic_stat = tmpdir_factory.mktemp(
+        analysis_dir + "/" + case_name + '/analysis/vep',
+        numbered=False).join('vcf_merge.balsamic_stat').write('not_empty')
+
     with open(tumor_only_config) as fh:
         tumor_config = json.load(fh)
     log_dir = tumor_config['analysis']['log']
@@ -49,7 +57,7 @@ def test_run_analysis_create_dir(invoke_cli, tumor_only_config, tmp_path):
         invoke_cli(['run', 'analysis', '-s', tumor_only_config, '-r', '--account',
                              'development'])
         # THEN it should abort with error
-        assert Path(log_dir).exists()
+        assert Path(re.sub('/$', '.1/', log_dir)).exists()
 
 
 # def test_run_analysis_exception(invoke_cli, tumor_only_config):
