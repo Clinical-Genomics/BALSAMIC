@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import os
 import logging
 import subprocess
@@ -172,7 +173,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.sm_opt = snakemake_opt
 
     try:
-        subprocess.run(balsamic_run.build_cmd(), shell=True)#, check=True)
+        cmd=sys.executable + " -m  " + balsamic_run.build_cmd()
+        subprocess.run(cmd, shell=True)#, check=True)
     except Exception as e:
         print(e)
         raise click.Abort()
