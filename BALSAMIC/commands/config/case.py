@@ -127,14 +127,11 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
     config_collection_dict = config_collection.dict(by_alias=True)
     LOG.info("Config file generated successfully")
 
-    try:
-        Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
-               parents=True,
-               exist_ok=True)
-        LOG.info("Directories created successfully")
-    except Exception as e:
-        LOG.error(f"Could not create directories: {e}")
-        raise click.Abort()
+
+    Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
+            parents=True,
+            exist_ok=True)
+    LOG.info("Directories created successfully")
 
 
     create_fastq_symlink(
