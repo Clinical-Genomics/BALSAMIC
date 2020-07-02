@@ -44,8 +44,8 @@ def test_run_analysis_create_dir(invoke_cli, tumor_only_config):
     with open(tumor_only_config) as fh:
         tumor_config = json.load(fh)
     log_dir = tumor_config['analysis']['log']
-    Path(log_dir).mkdir()
-    Path(log_dir, "logfile.log").touch()
+    Path(log_dir).mkdir(exist_ok=True)
+    Path(log_dir, "logfile.log").touch(exist_ok=True)
 
     with mock.patch.object(subprocess, 'run') as mocked:
         mocked.return_value.stdout = 1
