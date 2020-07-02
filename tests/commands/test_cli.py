@@ -1,9 +1,9 @@
 import pytest
 import glob
+import BALSAMIC
+
 from pathlib import Path
 from click.testing import CliRunner
-
-import BALSAMIC
 from BALSAMIC.commands.base import cli
 
 
@@ -141,34 +141,4 @@ def test_run_ref_invalid(invoke_cli):
 
 
 
-from BALSAMIC.utils.cli import validate_fastq_pattern
 
-def test_tumor_only_config_bad_filename(tmp_path_factory, analysis_dir,
-                          singularity_container):
-
-    #GIVEN existing fastq file with wrong naming convention
-    faulty_fastq_dir = tmp_path_factory.mktemp("error_fastq")
-    Path(faulty_fastq_dir / "error.fastq.gz").touch()
-
-    case_id = "faulty_tumor"
-    tumor = Path(faulty_fastq_dir / "error.fastq.gz").as_posix()
-    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
-    reference_json = 'tests/test_data/references/reference.json'
-
-    # Invoke CLI command using file as argument
-    runner = CliRunner()
-    result = runner.invoke(cli, [
-        'config', 'case', 
-        '-t', tumor, 
-        "-p", panel_bed_file,
-        '--case-id', case_id,
-        '--analysis-dir', analysis_dir, 
-        '--singularity', singularity_container, 
-        '--reference-config', reference_json,
-    ])
-
-    # THEN run should abort
-    assert result.exit_code == 1
-
-
-    

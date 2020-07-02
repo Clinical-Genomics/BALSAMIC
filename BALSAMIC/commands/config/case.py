@@ -98,11 +98,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         )
         raise click.Abort()
 
-    try:
-        bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
-    except Exception as e:
-        LOG.error(f"Error generating a list of bioinfo tools: {e}")
-        raise click.Abort()
+    bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
 
     try:
         config_collection = BalsamicConfigModel(

@@ -41,7 +41,6 @@ def config_files():
     }
 
 
-
 @pytest.fixture(scope='session')
 def conda():
     """
@@ -123,7 +122,7 @@ def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """
     Creates a dummy snakemake jobscript
     """
-    
+
     script_dir = tmp_path_factory.mktemp('snakemake_script')
     snakemake_script_file = script_dir / 'example_script.sh'
     snakemake_script = '''#!/bin/sh
@@ -152,17 +151,25 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     runner.invoke(cli, [
-        'config', 'case', 
-        '-p', panel_bed_file, 
-        '-t', tumor, 
-        '-n', normal, 
-        '--case-id', case_id, 
-        '--singularity', singularity_container, 
-        '--analysis-dir', analysis_dir,
-        '--reference-config', reference_json,
+        'config',
+        'case',
+        '-p',
+        panel_bed_file,
+        '-t',
+        tumor,
+        '-n',
+        normal,
+        '--case-id',
+        case_id,
+        '--singularity',
+        singularity_container,
+        '--analysis-dir',
+        analysis_dir,
+        '--reference-config',
+        reference_json,
     ])
 
-    return Path(analysis_dir, case_id, case_id+".json").as_posix()
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope='session')
@@ -179,20 +186,28 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     runner.invoke(cli, [
-        'config', 'case', 
-        '-t', tumor, 
-        '-n', normal, 
-        '--case-id', case_id, 
-        '--singularity', singularity_container, 
-        '--analysis-dir', analysis_dir,
-        '--reference-config', reference_json,
+        'config',
+        'case',
+        '-t',
+        tumor,
+        '-n',
+        normal,
+        '--case-id',
+        case_id,
+        '--singularity',
+        singularity_container,
+        '--analysis-dir',
+        analysis_dir,
+        '--reference-config',
+        reference_json,
     ])
 
-    return Path(analysis_dir, case_id, case_id+".json").as_posix()
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope='session')
-def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container, analysis_dir):
+def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
+                      analysis_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -202,19 +217,25 @@ def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container, analy
     panel_bed_file = 'tests/test_data/references/panel/panel.bed'
     reference_json = 'tests/test_data/references/reference.json'
 
-
     runner = CliRunner()
     runner.invoke(cli, [
-        'config', 'case', 
-        '-p', panel_bed_file, 
-        '-t', tumor, 
-        '--case-id', case_id, 
-        '--analysis-dir', analysis_dir, 
-        '--singularity', singularity_container, 
-        '--reference-config', reference_json,
+        'config',
+        'case',
+        '-p',
+        panel_bed_file,
+        '-t',
+        tumor,
+        '--case-id',
+        case_id,
+        '--analysis-dir',
+        analysis_dir,
+        '--singularity',
+        singularity_container,
+        '--reference-config',
+        reference_json,
     ])
 
-    return Path(analysis_dir, case_id, case_id+".json").as_posix()
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope='session')
@@ -230,16 +251,21 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     runner = CliRunner()
     runner.invoke(cli, [
-        'config', 'case', 
-        '-t', tumor, 
-        '--case-id', case_id,
-        '--analysis-dir', analysis_dir, 
-        '--singularity', singularity_container, 
-        '--reference-config', reference_json,
+        'config',
+        'case',
+        '-t',
+        tumor,
+        '--case-id',
+        case_id,
+        '--analysis-dir',
+        analysis_dir,
+        '--singularity',
+        singularity_container,
+        '--reference-config',
+        reference_json,
     ])
 
-    return Path(analysis_dir, case_id, case_id+".json").as_posix()
-
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope='session')
@@ -336,8 +362,3 @@ def sample_config():
     }
 
     return sample_config
-
-
-
-
-
