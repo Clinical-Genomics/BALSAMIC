@@ -101,35 +101,31 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
 
     bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
 
-    try:
-        config_collection = BalsamicConfigModel(
-            QC={
-                "quality_trim": quality_trim,
-                "adapter_trim": adapter_trim,
-                "umi_trim": umi,
-                "umi_trim_length": umi_trim_length,
-            },
-            analysis={
-                "case_id": case_id,
-                "analysis_dir": analysis_dir,
-                "analysis_type": "paired" if normal else "single",
-                "sequencing_type": "targeted" if panel_bed else "wgs",
-            },
-            panel={
-                "capture_kit": panel_bed,
-                "chrom": get_panel_chrom(panel_bed),
-            } if panel_bed else {},
-            bioinfo_tools=bioinfo_tools,
-            reference=reference_dict,
-            singularity=singularity,
-            samples=samples,
-            vcf={},
-        )
-        config_collection_dict = config_collection.dict(by_alias=True)
-        LOG.info("Config file generated successfully")
-    except Exception as e:
-        LOG.error(f"Failed to generate config file: {e}")
-        raise click.Abort()
+    config_collection = BalsamicConfigModel(
+        QC={
+            "quality_trim": quality_trim,
+            "adapter_trim": adapter_trim,
+            "umi_trim": umi,
+            "umi_trim_length": umi_trim_length,
+        },
+        analysis={
+            "case_id": case_id,
+            "analysis_dir": analysis_dir,
+            "analysis_type": "paired" if normal else "single",
+            "sequencing_type": "targeted" if panel_bed else "wgs",
+        },
+        panel={
+            "capture_kit": panel_bed,
+            "chrom": get_panel_chrom(panel_bed),
+        } if panel_bed else {},
+        bioinfo_tools=bioinfo_tools,
+        reference=reference_dict,
+        singularity=singularity,
+        samples=samples,
+        vcf={},
+    )
+    config_collection_dict = config_collection.dict(by_alias=True)
+    LOG.info("Config file generated successfully")
 
     try:
         Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
