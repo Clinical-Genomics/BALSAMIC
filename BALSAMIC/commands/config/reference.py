@@ -7,32 +7,14 @@ import graphviz
 import snakemake
 from pathlib import Path
 
-from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import write_json, merge_json
 from BALSAMIC.utils.cli import get_snakefile, get_config
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC import __version__ as bv
 
 LOG = logging.getLogger(__name__)
 
-def merge_json(*args):
-    """
-    Take a list of json files and merges them together
-    Input: list of json file
-    Output: dictionary of merged json
-    """
 
-    json_out = dict()
-    for json_file in args:
-        try:
-            if isinstance(json_file, dict):
-                json_out = {**json_out, **json_file}
-            else:
-                with open(json_file) as fn:
-                    json_out = {**json_out, **json.load(fn)}
-        except OSError as error:
-            raise error
-
-    return json_out
 
 
 @click.command("reference",

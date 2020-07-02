@@ -369,3 +369,23 @@ def get_file_status_string(file_to_check):
         return_str = Color(u"[{green}\u2713{/green}] Found: ") + file_to_check
     
     return return_str, file_status
+
+    def merge_json(*args):
+    """
+    Take a list of json files and merges them together
+    Input: list of json file
+    Output: dictionary of merged json
+    """
+
+    json_out = dict()
+    for json_file in args:
+        try:
+            if isinstance(json_file, dict):
+                json_out = {**json_out, **json_file}
+            else:
+                with open(json_file) as fn:
+                    json_out = {**json_out, **json.load(fn)}
+        except OSError as error:
+            raise error
+
+    return json_out
