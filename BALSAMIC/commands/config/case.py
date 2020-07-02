@@ -1,118 +1,14 @@
 import re
 import json
-import shutil
 import logging
 import click
-import snakemake
-import graphviz
-import sys
-import yaml
 import BALSAMIC
 
 from pathlib import Path
-from datetime import datetime
-from yapf.yapflib.yapf_api import FormatFile
-from BALSAMIC.utils.cli import CaptureStdout, get_snakefile
+from BALSAMIC.utils.cli import CaptureStdout, get_snakefile, get_sample_dict, get_panel_chrom, get_bioinfo_tools_list, create_fastq_symlink, generate_graph
 from BALSAMIC.utils.constants import BalsamicConfigModel, CONDA_ENV_PATH
 
 LOG = logging.getLogger(__name__)
-
-
-def validate_fastq_pattern(sample):
-    fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
-    sample_basename = Path(sample).name
-
-    file_str = sample_basename[0:(
-        fq_pattern.search(sample_basename).span()[0] + 1)]
-    return file_str
-
-
-def get_panel_chrom(panel_bed) -> list:
-    lines = [line.rstrip('\n') for line in open(panel_bed, 'r')]
-    return {s.split('\t')[0] for s in lines}
-
-
-def get_bioinfo_tools_list(conda_env_path) -> dict:
-    bioinfo_tools = {}
-    for yaml_file in Path(conda_env_path).rglob('*.yaml'):
-        with open(yaml_file, "r") as f:
-            packages = yaml.safe_load(f)["dependencies"]
-            for p in packages:
-                try:
-                    name, version = p.split("=")
-                except ValueError:
-                    name, version = p, None
-                finally:
-                    bioinfo_tools[name] = version
-    return bioinfo_tools
-
-
-def get_sample_dict(tumor, normal) -> dict:
-    samples = {}
-    if normal:
-        for sample in normal:
-            key, val = get_sample_names(sample, "normal")
-            samples[key] = val
-
-    for sample in tumor:
-        key, val = get_sample_names(sample, "tumor")
-        samples[key] = val
-    return samples
-
-
-def get_sample_names(file, sample_type):
-    file_str = validate_fastq_pattern(file)
-    if file_str:
-        return file_str, {
-            "file_prefix": file_str,
-            "type": sample_type,
-            "readpair_suffix": ["1", "2"]
-        }
-
-
-def create_fastq_symlink(casefiles, symlink_dir: Path):
-    for filename in casefiles:
-        parent_dir = Path(filename).parents[0]
-        file_str = validate_fastq_pattern(filename)
-        for f in parent_dir.rglob(f'*{file_str}*.fastq.gz'):
-            try:
-                LOG.info(
-                    f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
-                Path(symlink_dir, f.name).symlink_to(f)
-            except FileExistsError:
-                LOG.info(f"File {symlink_dir / f.name} exists, skipping")
-
-
-def create_working_directories(config_collection_dict):
-    Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
-               parents=True,
-               exist_ok=True)
-
-
-def generate_graph(config_collection_dict, config_path):
-    with CaptureStdout() as graph_dot:
-        snakemake.snakemake(snakefile=get_snakefile(
-            analysis_type=config_collection_dict["analysis"]["analysis_type"],
-            sequencing_type=config_collection_dict["analysis"]
-            ["sequencing_type"]),
-                            dryrun=True,
-                            configfiles=[config_path],
-                            printrulegraph=True)
-
-    graph_title = "_".join([
-        'BALSAMIC', BALSAMIC.__version__,
-        config_collection_dict["analysis"]["case_id"]
-    ])
-    graph_dot = "".join(graph_dot).replace(
-        'snakemake_dag {',
-        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
-    graph_obj = graphviz.Source(
-        graph_dot,
-        filename=".".join(
-            config_collection_dict["analysis"]["dag"].split(".")[:-1]),
-        format="pdf",
-        engine="dot")
-    graph_obj.render(cleanup=True)
 
 
 @click.command("case",
@@ -239,7 +135,9 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         raise click.Abort()
 
     try:
-        create_working_directories(config_collection_dict)
+        Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
+               parents=True,
+               exist_ok=True)
         LOG.info("Directories created successfully")
     except Exception as e:
         LOG.error(f"Could not create directories: {e}")
