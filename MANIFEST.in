@@ -1,0 +1,17 @@
+# including
+include CHANGELOG.rst
+include LICENSE
+include README.rst
+include requirements.txt
+include requirements-dev.txt
+
+# config data
+recursive-include BALSAMIC/config *
+
+# assests
+recursive-include BALSAMIC/assets/scripts *
+include BALSAMIC/assets/scout_config_template.yaml
+
+# SnakeMake assets
+recursive-include BALSAMIC/snakemake_rules *
+recursive-include BALSAMIC/workflows *
