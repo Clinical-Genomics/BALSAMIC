@@ -192,7 +192,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         LOG.error(
             f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz"
         )
-        click.Abort()
+        raise click.Abort()
 
     try:
         reference_dict = json.load(open(reference_config))["reference"]
@@ -200,13 +200,13 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         LOG.error(
             f"Reference config {reference_config} does not follow correct format: {e}"
         )
-        click.Abort()
+        raise click.Abort()
 
     try:
         bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
     except Exception as e:
         LOG.error(f"Error generating a list of bioinfo tools: {e}")
-        click.Abort()
+        raise click.Abort()
 
     try:
         config_collection = BalsamicConfigModel(
@@ -236,14 +236,14 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         LOG.info("Config file generated successfully")
     except Exception as e:
         LOG.error(f"Failed to generate config file: {e}")
-        click.Abort()
+        raise click.Abort()
 
     try:
         create_working_directories(config_collection_dict)
         LOG.info("Directories created successfully")
     except Exception as e:
         LOG.error(f"Could not create directories: {e}")
-        click.Abort()
+        raise click.Abort()
 
     try:
         create_fastq_symlink(
@@ -252,7 +252,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         LOG.info(f"Symlinks generated successfully")
     except Exception as e:
         LOG.error(f"Could not create symlink, {e}")
-        click.Abort()
+        raise click.Abort()
 
     try:
         config_path = Path(analysis_dir) / case_id / (case_id + ".json")
@@ -261,7 +261,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         LOG.info(f"Config file saved successfully - {config_path}")
     except Exception as e:
         LOG.error(f"Could not save config file {config_path}, {e}")
-        click.Abort()
+        raise click.Abort()
 
     try:
         generate_graph(config_collection_dict, config_path)
@@ -270,4 +270,4 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         LOG.error(
             f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',
         )
-        click.Abort()
+        raise click.Abort()
