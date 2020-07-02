@@ -241,6 +241,17 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     return Path(analysis_dir, case_id, case_id+".json").as_posix()
 
 
+@pytest.fixture(scope="session")
+def tumor_only_case_name(tmpdir_factory, tumor_only_config, analysis_dir):
+    case_name = Path(tumor_only_config).name.split(".")[0]
+    dummy_log = tmpdir_factory.mktemp(
+        analysis_dir + "/" + case_name + '/logs',
+        numbered=False).join('example_file').write('not_empty')
+    dummy_balsamic_stat = tmpdir_factory.mktemp(
+        analysis_dir + "/" + case_name + '/analysis/vep',
+        numbered=False).join('vcf_merge.balsamic_stat').write('not_empty')
+    return case_name
+
 
 @pytest.fixture(scope='session')
 def sample_config():
