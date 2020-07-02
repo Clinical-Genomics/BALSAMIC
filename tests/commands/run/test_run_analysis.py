@@ -37,10 +37,9 @@ def test_run_analysis_click_abort(invoke_cli, tumor_only_config, tumor_normal_co
     assert result.exit_code == 1
 
 
-def test_run_analysis_create_dir(invoke_cli, tumor_only_config, tumor_only_case_name):
+def test_run_analysis_create_dir(invoke_cli, tumor_only_config):
     # GIVEN a tumor-only config file
     # WHEN running analysis
-    case_name = tumor_only_case_name
 
     with open(tumor_only_config) as fh:
         tumor_config = json.load(fh)

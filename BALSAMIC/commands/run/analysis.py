@@ -148,8 +148,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
     balsamic_run.case_name = case_name
-    balsamic_run.working_dir = sample_config['analysis']['analysis_dir'] + "/" + \
-        case_name + '/BALSAMIC_run/'
+    balsamic_run.working_dir = sample_config['analysis']['analysis_dir'] + '/' \
+        + case_name + '/BALSAMIC_run/'
     balsamic_run.snakefile = snake_file if snake_file else get_snakefile(
         analysis_type, sequencing_type)
     balsamic_run.configfile = sample_config_path
