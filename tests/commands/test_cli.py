@@ -138,7 +138,3 @@ def test_run_ref_invalid(invoke_cli):
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
-
-
-
-

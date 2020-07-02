@@ -1,7 +1,6 @@
 '''
 Contains constants and models for analysis or filtering
 '''
-import BALSAMIC
 import sys
 
 from pydantic import BaseModel, ValidationError, validator, Field
@@ -12,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 
 from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
+from BALSAMIC import __version__ as BALSAMIC_version
 
 
 class VCFAttributes(BaseModel):
@@ -63,11 +63,20 @@ class VarCallerFilter(BaseModel):
 
 
 VARDICT = VarCallerFilter(
-    AD=VCFAttributes(tag_value=5, filter_name="balsamic_low_tumor_ad", field="INFO"),
-    DP=VCFAttributes(tag_value=100, filter_name="balsamic_low_tumor_dp", field="INFO"),
-    MQ=VCFAttributes(tag_value=50, filter_name="balsamic_low_mq", field="INFO"),
-    AF_max=VCFAttributes(tag_value=1, filter_name="balsamic_af_one", field="INFO"),
-    AF_min=VCFAttributes(tag_value=0.02, filter_name="balsamic_low_af", field="INFO"),
+    AD=VCFAttributes(tag_value=5,
+                     filter_name="balsamic_low_tumor_ad",
+                     field="INFO"),
+    DP=VCFAttributes(tag_value=100,
+                     filter_name="balsamic_low_tumor_dp",
+                     field="INFO"),
+    MQ=VCFAttributes(tag_value=50, filter_name="balsamic_low_mq",
+                     field="INFO"),
+    AF_max=VCFAttributes(tag_value=1,
+                         filter_name="balsamic_af_one",
+                         field="INFO"),
+    AF_min=VCFAttributes(tag_value=0.02,
+                         filter_name="balsamic_low_af",
+                         field="INFO"),
     varcaller_name="VarDict",
     filter_type="general",
     analysis_type="tumor_only",
@@ -131,7 +140,7 @@ class AnalysisModel(BaseModel):
     result: Optional[DirectoryPath]
     benchmark: Optional[DirectoryPath]
     dag: Optional[FilePath]
-    BALSAMIC_version: str = BALSAMIC.__version__
+    BALSAMIC_version: str = BALSAMIC_version
     config_creation_date: Optional[str]
 
     class Config:
@@ -170,7 +179,7 @@ class AnalysisModel(BaseModel):
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return Path(values.get("analysis_dir"), values.get("case_id"),
                     values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{BALSAMIC.__version__}_graph.pdf'
+                    ) + f'_BALSAMIC_{BALSAMIC_version}_graph.pdf'
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
@@ -213,14 +222,14 @@ class PanelModel(BaseModel):
 
 class BalsamicConfigModel(BaseModel):
     """Summarizes config models in preparation for export """
-	
+
     QC: QCModel
     vcf: VCFModel
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
-    conda_env_yaml: FilePath = str(CONDA_ENV_YAML)
-    rule_directory: DirectoryPath = str(RULE_DIRECTORY)
+    conda_env_yaml: FilePath = CONDA_ENV_YAML
+    rule_directory: DirectoryPath = RULE_DIRECTORY
     singularity: FilePath
     bioinfo_tools: BioinfoToolsModel
     panel: Optional[PanelModel]
@@ -228,9 +237,9 @@ class BalsamicConfigModel(BaseModel):
     @validator("reference")
     def abspath_as_str(cls, value):
         for k, v in value.items():
-            value[k] = str(Path(v).resolve())
+            value[k] = Path(v).resolve().as_posix()
         return value
 
     @validator("singularity")
     def transform_path_to_dict(cls, value):
-        return {"image": str(Path(value).resolve())}
+        return {"image": Path(value).resolve().as_posix()}

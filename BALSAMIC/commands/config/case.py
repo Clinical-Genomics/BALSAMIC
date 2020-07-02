@@ -140,23 +140,18 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         LOG.error(f"Could not create directories: {e}")
         raise click.Abort()
 
-    try:
-        create_fastq_symlink(
-            casefiles=(tumor + normal),
-            symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]))
-        LOG.info(f"Symlinks generated successfully")
-    except Exception as e:
-        LOG.error(f"Could not create symlink, {e}")
-        raise click.Abort()
 
-    try:
-        config_path = Path(analysis_dir) / case_id / (case_id + ".json")
-        with open(config_path, "w+") as fh:
-            fh.write(json.dumps(config_collection_dict, indent=4))
-        LOG.info(f"Config file saved successfully - {config_path}")
-    except Exception as e:
-        LOG.error(f"Could not save config file {config_path}, {e}")
-        raise click.Abort()
+    create_fastq_symlink(
+        casefiles=(tumor + normal),
+        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]))
+    LOG.info(f"Symlinks generated successfully")
+
+
+    config_path = Path(analysis_dir) / case_id / (case_id + ".json")
+    with open(config_path, "w+") as fh:
+        fh.write(json.dumps(config_collection_dict, indent=4))
+    LOG.info(f"Config file saved successfully - {config_path}")
+
 
     try:
         generate_graph(config_collection_dict, config_path)
