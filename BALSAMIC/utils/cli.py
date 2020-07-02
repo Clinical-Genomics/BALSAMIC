@@ -10,8 +10,6 @@ import shutil
 import logging
 import click
 import graphviz
-import sys
-import yaml
 
 
 from pathlib import Path

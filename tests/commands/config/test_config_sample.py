@@ -5,10 +5,18 @@ import pytest
 from unittest import mock
 import click
 
+from pathlib import Path
 
-# Given standard run fixtures, execute command and verify dag graph exists
-# Given invalid, existing fastq,  -> invoke cli > error
-# Given an empty reference config -> invoke command > error
-# Given analysis dir without write permissions -> invoke command > error
+
+
+def test_dag_graph_success(tumor_normal_wgs_config, tumor_only_config, tumor_normal_config, tumor_only_wgs_config):
+    # WHEN creating config using standard CLI input
+    # THEN DAG graph should be created successfully
+    assert Path(json.load(open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(open(tumor_normal_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
+
+
 
 
