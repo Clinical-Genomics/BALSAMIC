@@ -144,10 +144,7 @@ class PanelModel(BaseModel):
 
     @validator("capture_kit")
     def path_as_abspath_str(cls, value):
-        try:
-            return str(Path(value).resolve())
-        except:
-            return None
+        return str(Path(value).resolve())
 
 
 class BalsamicConfigModel(BaseModel):
