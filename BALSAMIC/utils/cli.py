@@ -401,6 +401,9 @@ def merge_json(*args):
     return json_out
 
 def validate_fastq_pattern(sample):
+    """Finds the correct filename prefix from file path, and returns it.
+    An error is raised if sample name has invalid pattern """
+
     fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
     sample_basename = Path(sample).name
 
@@ -410,11 +413,16 @@ def validate_fastq_pattern(sample):
 
 
 def get_panel_chrom(panel_bed) -> list:
+    """Returns a set of chromosomes present in PANEL BED"""
+
     lines = [line.rstrip('\n') for line in open(panel_bed, 'r')]
     return {s.split('\t')[0] for s in lines}
 
 
 def get_bioinfo_tools_list(conda_env_path) -> dict:
+    """Parses the names and versions of bioinfo tools 
+    used by BALSAMIC from config YAML into a dict """
+    
     bioinfo_tools = {}
     for yaml_file in Path(conda_env_path).rglob('*.yaml'):
         with open(yaml_file, "r") as f:
@@ -430,6 +438,7 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
 
 
 def get_sample_dict(tumor, normal) -> dict:
+    """Concatenates sample dicts for all provided files"""
     samples = {}
     if normal:
         for sample in normal:
@@ -443,6 +452,7 @@ def get_sample_dict(tumor, normal) -> dict:
 
 
 def get_sample_names(file, sample_type):
+    """Creates a dict with sample prefix, sample type, and readpair suffix"""
     file_str = validate_fastq_pattern(file)
     if file_str:
         return file_str, {
@@ -453,6 +463,10 @@ def get_sample_names(file, sample_type):
 
 
 def create_fastq_symlink(casefiles, symlink_dir: Path):
+    """Creates symlinks for provided files in analysis/fastq directory.
+    Identifies file prefix pattern, and also creates symlinks for the 
+    second read file, if needed"""
+
     for filename in casefiles:
         parent_dir = Path(filename).parents[0]
         file_str = validate_fastq_pattern(filename)
@@ -466,6 +480,8 @@ def create_fastq_symlink(casefiles, symlink_dir: Path):
 
 
 def generate_graph(config_collection_dict, config_path):
+    """Generate DAG graph using snakemake stdout output"""
+
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(snakefile=get_snakefile(
             analysis_type=config_collection_dict["analysis"]["analysis_type"],
