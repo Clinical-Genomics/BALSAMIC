@@ -6,7 +6,8 @@ import BALSAMIC
 
 from pathlib import Path
 from BALSAMIC.utils.cli import CaptureStdout, get_snakefile, get_sample_dict, get_panel_chrom, get_bioinfo_tools_list, create_fastq_symlink, generate_graph
-from BALSAMIC.utils.constants import BalsamicConfigModel, CONDA_ENV_PATH
+from BALSAMIC.utils.models import BalsamicConfigModel
+from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
 
 LOG = logging.getLogger(__name__)
 

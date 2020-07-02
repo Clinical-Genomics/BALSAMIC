@@ -17,7 +17,7 @@ from colorclass import Color
 from io import StringIO
 from itertools import chain
 from collections import defaultdict
-from BALSAMIC.utils.constants import BalsamicConfigModel, CONDA_ENV_PATH
+from BALSAMIC.utils.constants import CONDA_ENV_PATH
 
 LOG = logging.getLogger(__name__)
 
