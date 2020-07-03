@@ -12,6 +12,7 @@ Changed
 
 * Variant caller filters moved into pydantic
 * Install script and setup.py
+* refactored install script with more log output and added a conda env suffix option
 
 
 [4.3.0]
