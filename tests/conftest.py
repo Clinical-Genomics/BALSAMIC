@@ -63,7 +63,7 @@ def no_write_perm_path(tmp_path_factory):
 
     Path(bad_perm_path).chmod(0o444)
 
-    return str(bad_perm_path)
+    return bad_perm_path.as_posix()
 
 
 @pytest.fixture(scope='session')

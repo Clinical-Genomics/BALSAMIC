@@ -58,8 +58,8 @@ def test_tumor_only_config_bad_filename(tmp_path_factory, analysis_dir,
     assert result.exit_code == 1
 
 
-def test_tumor_only_config_bad_reference(tmpdir_factory, sample_fastq,
-                                         singularity_container, analysis_dir):
+def test_tumor_only_config_bad_reference(sample_fastq, singularity_container,
+                                         analysis_dir):
     # GIVEN CLI arguments including a bad reference config
     faulty_reference_json = 'tests/test_data/references/error_reference.json'
     Path(faulty_reference_json).touch()
@@ -80,6 +80,35 @@ def test_tumor_only_config_bad_reference(tmpdir_factory, sample_fastq,
         case_id,
         '--analysis-dir',
         analysis_dir,
+        '--singularity',
+        singularity_container,
+        '--reference-config',
+        reference_json,
+    ])
+    # THEN program exits before completion
+    assert result.exit_code == 1
+
+
+def test_run_without_permissions(no_write_perm_path, sample_fastq,
+                                 singularity_container):
+    # GIVEN CLI arguments including an analysis_dir without write permissions
+    case_id = "sample_tumor_only"
+    tumor = sample_fastq['tumor']
+    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    reference_json = 'tests/test_data/references/reference.json'
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        'config',
+        'case',
+        '-p',
+        panel_bed_file,
+        '-t',
+        tumor,
+        '--case-id',
+        case_id,
+        '--analysis-dir',
+        no_write_perm_path,
         '--singularity',
         singularity_container,
         '--reference-config',
