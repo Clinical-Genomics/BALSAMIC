@@ -9,7 +9,6 @@ from click.testing import CliRunner
 from BALSAMIC.commands.base import cli
 
 
-
 def test_cli(invoke_cli):
     # GIVEN I want to see version of the program
     # WHEN I am asking to see version
@@ -141,5 +140,3 @@ def test_run_ref_invalid(invoke_cli):
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
-
-
