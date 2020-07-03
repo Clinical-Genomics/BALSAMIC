@@ -9,11 +9,10 @@ _yellow=${_log}'\033[1;33m';
 _nocol='\033[0m';
 _condaprefix=D
 
-while getopts ":s:v:b:e:p:ch" opt; do
+while getopts ":s:v:e:p:ch" opt; do
   case $opt in
     s) sFlag=true;_condaprefix=${OPTARG};;
     v) vFlag=true;_balsamic_ver=${OPTARG};;
-    b) bFlag=true;_balsamic_branch=${OPTARG};;
     e) eFlag=true;_envsuffix=${OPTARG};;
     p) pFlag=true;_condapath=${OPTARG};;
     c) cFlag=true;;
@@ -97,7 +96,7 @@ echo -e "${_green}Activating ${_env_name}${_nocol}"
 source activate ${_env_name}
 
 echo -e "${_green}Installing BALSAMIC from origin.${_nocol}"
-echo pip install -U git+https://github.com/Clinical-Genomics/BALSAMIC@${_balsamic_ver}
+pip install -U git+https://github.com/Clinical-Genomics/BALSAMIC@${_balsamic_ver}
 
 # Pull Docker container
 if [[ ${_balsamic_ver} =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]
@@ -113,7 +112,7 @@ fi
 _container_path=${PWD}"/BALSAMIC/containers/BALSAMIC_${container_version}.sif"
 _docker_path=docker://hassanf/balsamic:${container_version}
 echo -e "${_green}Grabbing container: ${_container_path} ${_nocol}"
-echo singularity pull --force ${_container_path} ${_docker_path}
+singularity pull --force ${_container_path} ${_docker_path}
 
 echo -e "\n${_green}Install finished. To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
 
