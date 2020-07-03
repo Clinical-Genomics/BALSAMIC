@@ -2,6 +2,7 @@ import pytest
 import glob
 import BALSAMIC
 import json
+import logging
 
 from pathlib import Path
 from click.testing import CliRunner
@@ -208,14 +209,17 @@ def test_get_panel_chrom():
     assert len(get_panel_chrom(panel_bed_file)) > 0
 
 
-def test_create_fastq_symlink(tmpdir_factory):
-    #GIVEN a list of 2 valid input fastq files from test directory containing 4 files
+def test_create_fastq_symlink(tmpdir_factory, caplog):
+    #GIVEN a list of valid input fastq files from test directory containing 4 files
     symlink_from_path = tmpdir_factory.mktemp("symlink_from")
     symlink_to_path = tmpdir_factory.mktemp("symlink_to")
     filenames = ["tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz", "normal_R_2.fastq.gz"]
+    successful_log = "skipping"
     casefiles = [Path(symlink_from_path,x) for x in filenames]
     for casefile in casefiles:
         casefile.touch()
     #THEN destination should have 4 files
-    create_fastq_symlink(casefiles=casefiles[:2], symlink_dir=symlink_to_path)
-    assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
+    with caplog.at_level(logging.INFO):
+        create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
+        assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
+        assert successful_log in caplog.text

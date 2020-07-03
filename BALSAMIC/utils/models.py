@@ -1,17 +1,13 @@
-'''
-Contains constants and models for analysis or filtering
-'''
-import sys
+from pathlib import Path
+from datetime import datetime
 
 from pydantic import BaseModel, ValidationError, validator, Field
 from pydantic.types import DirectoryPath, FilePath
 from typing import Optional, List, Dict
 
-from datetime import datetime
-from pathlib import Path
-
 from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
 from BALSAMIC import __version__ as BALSAMIC_version
+
 
 
 class VCFAttributes(BaseModel):
@@ -84,8 +80,17 @@ VARDICT = VarCallerFilter(
 
 
 class QCModel(BaseModel):
-    """Contains settings for quality control and pre-processing"""
-
+    """Contains settings for quality control and pre-processing
+        Fields:
+            picard_rmdup : Field(bool); whether duplicate removal is to be applied in the workflow
+            adapter : Field(str(AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT)); adapter sequence to trim
+            quality_trim : Field(bool); whether quality trimming it to be performed in the workflow
+            adapter_trim : Field(bool); whether adapter trimming is to be performed in the workflow
+            umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
+            min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
+            umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+    
+    """
     picard_rmdup: bool = False
     adapter: str = "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT"
     quality_trim: bool = True
@@ -122,13 +127,28 @@ class VCFModel(BaseModel):
 
 
 class AnalysisModel(BaseModel):
-    """Contains analysis variables
-    REQUIRED FIELDS: 
-    case_id
-    analysis_type
-    sequencing_type,
-    analysis_dir
-    """
+    """Pydantic model containing workflow variables
+
+    Fields:
+        case_id : Field(required); string case identifier
+        analysis_type : Field(required); string literal [single, paired]
+            single : if only tumor samples are provided
+            paired : if both tumor and normal samples are provided
+        sequencing_type : Field(required); string literal [targeted, wgs]
+            targeted : if capture kit was used to enrich specific genomic regions
+            wgs : if whole genome sequencing was performed
+        analysis_dir : Field(required); existing path where to save files
+
+        fastq_path : Field(optional); Path where fastq files will be stored
+        script : Field(optional); Path where snakemake scripts will be stored
+        log : Field(optional); Path where logs will be saved
+        result : Field(optional); Path where BALSAMIC output will be stored
+        benchmark : Field(optional); Path where benchmark report will be stored
+        dag : Field(optional); Path where DAG graph of workflow will be stored
+
+        BALSAMIC_version  : Field(optional); Current version of BALSAMIC
+        config_creation_date  : Field(optional); Timestamp when config was created
+        """
 
     case_id: str
     analysis_type: str
@@ -187,7 +207,14 @@ class AnalysisModel(BaseModel):
 
 
 class SampleInstanceModel(BaseModel):
-    """Holds attributes for samples used in analysis"""
+    """Holds attributes for samples used in analysis
+    
+        Fields:
+            file_prefix : Field(str); basename of sample pair
+            sample_type : Field(str; alias=type); type of sample [tumor, normal]
+            readpair_suffix : Field(List); currently always set to [1, 2]
+        """
+
     file_prefix: str
     sample_type: str = Field(alias="type")
     readpair_suffix: List[str] = ["1", "2"]
@@ -195,43 +222,61 @@ class SampleInstanceModel(BaseModel):
 
 class BioinfoToolsModel(BaseModel):
     """Holds versions of current bioinformatic tools used in analysis"""
-    tabix: str
-    bcftools: str
-    fastqc: str
-    manta: str
-    picard: str
-    bwa: str
-    strelka: str
-    gatk: str
-    samtools: str
-    sambamba: str
+    tabix: Optional[str]
+    bcftools: Optional[str]
+    fastqc: Optional[str]
+    manta: Optional[str]
+    picard: Optional[str]
+    bwa: Optional[str]
+    strelka: Optional[str]
+    gatk: Optional[str]
+    samtools: Optional[str]
+    sambamba: Optional[str]
     vardic: Optional[str]
     cutadapt: Optional[str]
 
 
 class PanelModel(BaseModel):
-    """Holds attributes of PANEL BED file if provided"""
+    """Holds attributes of PANEL BED file if provided
+        Fields:
+            capture_kit : Field(str(Path)); string representation of path to PANEL BED file
+            chrom : Field(list(str)); list of chromosomes in PANEL BED
+    """
 
     capture_kit: Optional[str]
     chrom: Optional[List[str]]
 
     @validator("capture_kit")
     def path_as_abspath_str(cls, value):
-        return str(Path(value).resolve())
+        return Path(value).resolve().as_posix()
 
 
 class BalsamicConfigModel(BaseModel):
-    """Summarizes config models in preparation for export """
+    """Summarizes config models in preparation for export 
+    
+    Fields:
+        QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
+        vcf : Field(VCFmodel); variables relevand for variant calling pipeline
+        samples : Field(Dict); dictionary containing samples submitted for analysis
+        reference : Field(Dict); dictionary containign paths to reference genome files
+        panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
+        bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
+        singularity : Field(Path); path to singularity container of BALSAMIC
+
+        conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
+        rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+
+    """
 
     QC: QCModel
     vcf: VCFModel
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
-    conda_env_yaml: FilePath = CONDA_ENV_YAML
-    rule_directory: DirectoryPath = RULE_DIRECTORY
     singularity: FilePath
     bioinfo_tools: BioinfoToolsModel
+    conda_env_yaml: FilePath = CONDA_ENV_YAML
+    rule_directory: DirectoryPath = RULE_DIRECTORY
     panel: Optional[PanelModel]
 
     @validator("reference")
