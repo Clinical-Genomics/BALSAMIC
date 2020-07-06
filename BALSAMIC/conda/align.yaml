@@ -13,7 +13,7 @@ dependencies:
   - tabix=0.2.5
   - gatk=3.8
   - picard=2.17.0
-  - multiqc=1.9
+  - multiqc=1.7
   - fastp=0.20.0
   - mosdepth=0.2.7
   - csvkit=1.0.4
