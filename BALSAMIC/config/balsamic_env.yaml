@@ -1,31 +1,33 @@
-BALSAMIC_py27:
-- python
-- strelka
-- manta
-- bcftools
-- tabix
-BALSAMIC_py36:
-- python
-- pip
-- bcftools
-- bwa
-- fastqc
-- sambamba
-- samtools
-- tabix
-- gatk
-- picard
-- fgbio
-- freebayes
-- vardict
-- ensembl-vep
-- cnvkit
-- cutadapt
-- pindel
-- multiqc
-- bedtools
-- csvkit
-- fastp
-- mosdepth
-BALSAMIC_vcfmerge:
-- vcfmerge
+align:
+  - bedtools
+  - bwa
+  - fastqc
+  - samtools
+  - tabix
+  - gatk
+  - picard
+  - multiqc
+  - fastp
+  - csvkit
+  - libiconv
+annotate:
+  - python
+  - pip
+  - ensembl-vep
+coverage:
+  - sambamba
+  - mosdepth
+varcall_py36:
+  - bcftools
+  - tabix
+  - gatk
+  - vardict
+  - cnvkit
+  - libiconv
+varcall_py27:
+  - python
+  - strelka
+  - manta
+  - bcftools
+  - tabix
+  - samtools
