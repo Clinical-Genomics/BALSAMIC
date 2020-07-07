@@ -145,7 +145,7 @@ def test_snakemake_slurm():
 
 def test_get_packages(conda):
     # GIVEN a conda yaml file
-    balsamic_yaml = conda['balsamic-base']
+    balsamic_yaml = conda['balsamic']
 
     # WHEN passing conda yaml file to get_packages
     packages = get_packages(balsamic_yaml)
