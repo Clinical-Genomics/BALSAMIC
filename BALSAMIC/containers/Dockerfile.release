@@ -27,6 +27,7 @@ RUN mkdir -p /git_repos; \
     picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar && \
     picard_destination=/usr/local/miniconda/envs/align_qc/share/ && \
     cp $picard_PATH ${picard_destination} && \
+    ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar ${picard_destination}/picard-2.18.11.jar; \
     ln -s /usr/local/miniconda/envs/align_qc/lib/libreadline.so.7.0 /usr/local/miniconda/envs/align_qc/lib/libreadline.so.6 && \
     ln -s /usr/local/miniconda/envs/align_qc/lib/libreadline.so.7.0 /usr/local/miniconda/envs/align_qc/lib/libreadline.so.6.0 && \
     conda clean --all -y
