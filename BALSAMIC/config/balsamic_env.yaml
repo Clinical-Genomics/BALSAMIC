@@ -31,3 +31,5 @@ varcall_py27:
   - bcftools
   - tabix
   - samtools
+vcf_merge:
+  - vcfmerge
