@@ -145,7 +145,7 @@ def test_snakemake_slurm():
 
 def test_get_packages(conda):
     # GIVEN a conda yaml file
-    balsamic_yaml = conda['balsamic-base']
+    balsamic_yaml = conda['balsamic']
 
     # WHEN passing conda yaml file to get_packages
     packages = get_packages(balsamic_yaml)
@@ -321,7 +321,7 @@ def test_get_conda_env_found(tmp_path):
     conda_env = get_conda_env(balsamic_env, 'cnvkit')
 
     # THEN It should return the conda env which has that pkg
-    assert conda_env == "BALSAMIC_py36"
+    assert conda_env == "varcall_py36"
 
 
 def test_get_conda_env_not_found(tmp_path):
