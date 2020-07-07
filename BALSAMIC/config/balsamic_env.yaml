@@ -1,4 +1,4 @@
-align:
+align_qc:
   - bedtools
   - bwa
   - fastqc
@@ -14,7 +14,7 @@ annotate:
   - python
   - pip
   - ensembl-vep
-coverage:
+coverage_qc:
   - sambamba
   - mosdepth
 varcall_py36:
