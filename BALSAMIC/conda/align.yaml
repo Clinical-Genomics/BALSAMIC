@@ -9,7 +9,6 @@ dependencies:
   - fastqc=0.11.5
   - samtools=1.9
   - tabix=0.2.5
-  - gatk=3.8
   - picard=2.17.0
   - multiqc=1.9
   - fastp=0.20.0
