@@ -19,7 +19,7 @@ rule S_1_convert_Fastq_to_unaligned_bam:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar FastqToSam \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar FastqToSam \
 O={output} \
 F1={input.fq1} \
 F2={input.fq2} \
@@ -62,7 +62,7 @@ rule S_3_mark_illumina_adapter:
     shell:
         """
 source activate {params.conda}; 
-#java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MarkIlluminaAdapters \
+#java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar MarkIlluminaAdapters \
 #I={input} \
 #O={output.bam} \
 #M={output.txt}
@@ -90,12 +90,12 @@ rule S_4_align_the_reads:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar SamToFastq \
  I={input.unaligned} \
  F=/dev/stdout \
  INTERLEAVE=true \
 | bwa mem -K 1000000 -p -t 8 {input.fa} /dev/stdin \
-| java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+| java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar MergeBamAlignment \
 UNMAPPED={input.unaligned} \
 ALIGNED=/dev/stdin \
 O={output} \
@@ -168,7 +168,7 @@ rule S_6_map_duplex_consensus_reads:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar SamToFastq \
 VALIDATION_STRINGENCY=SILENT \
 INPUT={input.unaligned} \
 F=/dev/stdout \
@@ -176,7 +176,7 @@ INTERLEAVE=true \
 INCLUDE_NON_PF_READS=true \
 CREATE_INDEX=true \
 | bwa mem -K 1000000 -p -t 8 {input.fa} /dev/stdin \
-| java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+| java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar MergeBamAlignment \
 VALIDATION_STRINGENCY=SILENT \
 UNMAPPED={input.unaligned} \
 ALIGNED=/dev/stdin \
