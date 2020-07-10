@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
-
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
@@ -11,7 +9,7 @@ rule samtools_sort_index:
   input:
     bam_dir + "{sample}.bam"
   output:
-    bam_dir + "{sample}.sorted.bam"
+    temp(bam_dir + "{sample}.sorted.bam")
   params:
     conda = get_conda_env(config["conda_env_yaml"],"samtools") 
   threads: get_threads(cluster_config, "samtools_sort_index")
