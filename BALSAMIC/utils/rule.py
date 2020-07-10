@@ -58,10 +58,10 @@ def get_conda_env(yaml_file, pkg):
     output: string of conda env where packge is in
     """
 
-    with open(yaml_file, 'r') as yaml_file:
-        yaml_in = yaml.safe_load(yaml_file)
+    with open(yaml_file, 'r') as file_in:
+        yaml_in = yaml.safe_load(file_in)
 
-    conda_env_found = set()
+    conda_env_found = None
 
     for conda_env, pkgs in yaml_in.items():
         if pkg in pkgs:
