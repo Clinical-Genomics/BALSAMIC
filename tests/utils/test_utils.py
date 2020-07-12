@@ -21,6 +21,7 @@ from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
 from BALSAMIC.utils.cli import get_file_status_string
 from BALSAMIC.utils.cli import get_from_two_key
 from BALSAMIC.utils.cli import find_file_index
+from BALSAMIC.utils.cli import singularity
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC.utils.rule import get_sample_type
@@ -459,3 +460,18 @@ def test_find_file_index(tmpdir):
     assert isinstance(result, list)
     assert str(bai_file) in result
     assert str(bai_file_2) in result
+
+
+def test_singularity_shellcmd(singularity_container):
+    """test singularity shell cmd
+    """
+
+    # GIVEN a dummy command
+    dummy_command='ls /tmp'
+    correct_shellcmd='exec --bind /tmp/path1 --bind /tmp/path2 ls /tmp'
+
+    # WHEN building singularity command
+    shellcmd=singularity(sif=singularity_container, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
+
+    # THEN successfully return a correct singularity cmd
+    assert correct_shellcmd in shellcmd
