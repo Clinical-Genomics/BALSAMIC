@@ -106,6 +106,7 @@ def singularity_container(tmp_path_factory):
 
     container_dir = tmp_path_factory.mktemp("test_container")
     container_file = container_dir / "singularity_container.simg"
+    container_file.touch()
 
     return str(container_file)
 

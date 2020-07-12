@@ -4,12 +4,15 @@ import json
 import yaml
 import sys
 import collections
+import shutil
 
 from colorclass import Color
 from io import StringIO
 from pathlib import Path
 from itertools import chain
 from collections import defaultdict
+
+from BALSAMIC.utils.exc import BalsamicError 
 
 class CaptureStdout(list):
     '''
@@ -371,7 +374,7 @@ def get_file_status_string(file_to_check):
     return return_str, file_status
 
 
-def singularity(sif_path: str, cmd: str, bind_path: list) -> str:
+def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
     """Run within container
 
     Excutes input command string via Singularity container image
@@ -390,12 +393,15 @@ def singularity(sif_path: str, cmd: str, bind_path: list) -> str:
 
     singularity_cmd = shutil.which("singularity")
     if not singularity_cmd:
-        raise BalsamicError("singularity command doesn't exist")
+        raise BalsamicError("singularity command does not exist")
+
+    if not Path(sif_path).is_file():
+        raise BalsamicError("container file does not exist")
 
     singularity_bind_path = ""
     for bind_path in bind_paths:
-        singularity_bind_path += '--bind {}'.format(bind_path)
+        singularity_bind_path += '--bind {} '.format(bind_path)
 
-    shellcmd='{} exec {} {}'.format(singularity_cmd, singularity_bind_path, cmd)
+    shellcmd='singularity exec {} {}'.format(singularity_bind_path, cmd)
 
-    return shellcmd
+    return ' '.join(shellcmd.split())

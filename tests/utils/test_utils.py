@@ -4,8 +4,12 @@ import pytest
 import sys
 import copy
 import collections
+import shutil
+from unittest import mock
+
 from pathlib import Path
 
+from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import iterdict
@@ -470,8 +474,44 @@ def test_singularity_shellcmd(singularity_container):
     dummy_command='ls /tmp'
     correct_shellcmd='exec --bind /tmp/path1 --bind /tmp/path2 ls /tmp'
 
-    # WHEN building singularity command
-    shellcmd=singularity(sif=singularity_container, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
+    with mock.patch.object(shutil, 'which') as mocked:
+        mocked.return_value = "/my_home/binary_path/singularity"
+        
+        # WHEN building singularity command
+        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
 
-    # THEN successfully return a correct singularity cmd
-    assert correct_shellcmd in shellcmd
+        # THEN successfully return a correct singularity cmd
+        assert correct_shellcmd in shellcmd
+
+
+def test_singularity_shellcmd_sif_not_exist():
+    """test singularity shell cmd with non-existing file
+    """
+
+    # GIVEN a dummy command
+    dummy_command='ls /tmp'
+    dummy_sif_path='/some_path/my_sif_path_3.1415/container.sif'
+    error_msg = "container file does not exist"
+
+    # WHEN building singularity command
+    # THEN successfully get error that container doesn't exist 
+    with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
+        mocked.return_value = "/my_home/binary_path/singularity"
+
+        shellcmd=singularity(sif_path=dummy_sif_path, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
+
+
+def test_singularity_shellcmd_cmd_not_exist(singularity_container):
+    """test singularity shell cmd with nonexisting singularity command
+    """
+
+    # GIVEN a dummy command
+    dummy_command='ls /tmp'
+    error_msg = "singularity command does not exist"
+
+    # WHEN building singularity command
+    # THEN successfully get error if singualrity command doesn't exist 
+    with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
+        mocked.return_value = None
+ 
+        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
