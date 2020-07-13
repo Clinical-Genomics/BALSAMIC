@@ -90,7 +90,7 @@ def test_iterdict(config_files):
 def test_snakemake_local():
     # GIVEN required params
     snakemake_local = SnakeMake()
-    snakemake_local.working_dir = "/tmp/snakemake"
+    snakemake_local.working_dir = "this_path/snakemake"
     snakemake_local.snakefile = "worflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
@@ -105,7 +105,7 @@ def test_snakemake_local():
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
-    assert "/tmp/snakemake" in shell_command
+    assert "this_path/snakemake" in shell_command
     assert "--dryrun" in shell_command
     assert "--forceall" in shell_command
 
@@ -114,7 +114,7 @@ def test_snakemake_slurm():
     # GIVEN required params
     snakemake_slurm = SnakeMake()
     snakemake_slurm.case_name = "test_case"
-    snakemake_slurm.working_dir = "/tmp/snakemake"
+    snakemake_slurm.working_dir = "this_path/snakemake"
     snakemake_slurm.snakefile = "worflow/variantCalling_paired"
     snakemake_slurm.configfile = "sample_config.json"
     snakemake_slurm.run_mode = "cluster"
@@ -141,7 +141,7 @@ def test_snakemake_slurm():
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
-    assert "/tmp/snakemake" in shell_command
+    assert "this_path/snakemake" in shell_command
     assert "--dryrun" not in shell_command
     assert "sbatch.py" in shell_command
     assert "test_case" in shell_command
@@ -163,7 +163,7 @@ def test_get_packages(conda):
 def test_get_pacakges_error(conda):
     with pytest.raises(Exception, match=r"No such file or directory"):
         # GIVEN a wrong path for config yaml file
-        invalid_yaml = "/tmp/balsamic.yaml"
+        invalid_yaml = "this_path/balsamic.yaml"
 
         # WHEN passing this invalid path into get_packages
         # THEN It shoud raise the file not found error
@@ -390,7 +390,7 @@ def test_write_json(tmp_path, config_files):
 def test_write_json_error(tmp_path, config_files):
     with pytest.raises(Exception, match=r"Is a directory"):
         # GIVEN a invalid dict
-        ref_json = {"path": "/tmp", "reference": ""}
+        ref_json = {"path": "this_path", "reference": ""}
         tmp = tmp_path / "tmp"
         tmp.mkdir()
         output_json = tmp / "/"
@@ -471,14 +471,14 @@ def test_singularity_shellcmd(singularity_container):
     """
 
     # GIVEN a dummy command
-    dummy_command='ls /tmp'
-    correct_shellcmd='exec --bind /tmp/path1 --bind /tmp/path2 ls /tmp'
+    dummy_command='ls this_path'
+    correct_shellcmd='exec --bind this_path/path1 --bind this_path/path2 ls this_path'
 
     with mock.patch.object(shutil, 'which') as mocked:
         mocked.return_value = "/my_home/binary_path/singularity"
         
         # WHEN building singularity command
-        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
+        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
 
         # THEN successfully return a correct singularity cmd
         assert correct_shellcmd in shellcmd
@@ -489,7 +489,7 @@ def test_singularity_shellcmd_sif_not_exist():
     """
 
     # GIVEN a dummy command
-    dummy_command='ls /tmp'
+    dummy_command='ls this_path'
     dummy_sif_path='/some_path/my_sif_path_3.1415/container.sif'
     error_msg = "container file does not exist"
 
@@ -498,7 +498,7 @@ def test_singularity_shellcmd_sif_not_exist():
     with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
         mocked.return_value = "/my_home/binary_path/singularity"
 
-        shellcmd=singularity(sif_path=dummy_sif_path, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
+        shellcmd=singularity(sif_path=dummy_sif_path, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
 
 
 def test_singularity_shellcmd_cmd_not_exist(singularity_container):
@@ -506,7 +506,7 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
     """
 
     # GIVEN a dummy command
-    dummy_command='ls /tmp'
+    dummy_command='ls this_path'
     error_msg = "singularity command does not exist"
 
     # WHEN building singularity command
@@ -514,4 +514,4 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
     with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
         mocked.return_value = None
  
-        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['/tmp/path1', '/tmp/path2'])
+        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
