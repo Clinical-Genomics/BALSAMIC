@@ -327,10 +327,12 @@ def test_get_conda_env_found(tmp_path):
 def test_get_conda_env_not_found(tmp_path):
     # GIVEN a balsamic_env yaml
     balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
+    bioinfo_tool = "unknown_package"
+    error_msg = f"Installed package {bioinfo_tool} was not found in {balsamic_env}"
 
     # WHEN passing pkg name with this yaml file
     # THEN It should return the conda env which has that pkg
-    with pytest.raises(KeyError):
+    with pytest.raises(KeyError, match=error_msg):
         get_conda_env(balsamic_env, 'unknown_package')
 
 

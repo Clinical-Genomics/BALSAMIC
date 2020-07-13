@@ -90,7 +90,7 @@ _balsamic_envs=${PWD}'/BALSAMIC_env.yaml'
 _balsamic_ruledir=${PWD}'/BALSAMIC/'
 
 echo -e "${_green}Creating conda env ${_env_name}${_nocol}"
-conda env create --file BALSAMIC/conda/BALSAMIC-base.yaml --quiet --prefix ${_condapath}/${_env_name} --force
+conda env create --file BALSAMIC/conda/balsamic.yaml --quiet --prefix ${_condapath}/${_env_name} --force
 
 echo -e "${_green}Activating ${_env_name}${_nocol}"
 source activate ${_env_name}
