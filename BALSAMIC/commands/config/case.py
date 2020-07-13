@@ -101,7 +101,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
 
     bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
 
-    config_collection = BalsamicConfigModel(
+    config_collection_dict = BalsamicConfigModel(
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
@@ -123,8 +123,8 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         singularity=singularity,
         samples=samples,
         vcf={},
-    )
-    config_collection_dict = config_collection.dict(by_alias=True)
+    ).dict(by_alias=True)
+    
     LOG.info("Config file generated successfully")
 
     Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
