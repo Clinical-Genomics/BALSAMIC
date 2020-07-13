@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##fileDate=20200713
+##source=NA
+##reference=NA
+##contig=<ID=20,length=NA,assembly=NA,md5=NA,species="Homo sapiens",taxonomy=x>
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene_name">
+##INFO=<ID=AA,Number=1,Type=String,Description="Aminoacid mutation">
+##INFO=<ID=VARIANT_TYPE,Number=1,Type=String,Description="Type of mutation">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Average Allele frequency fraction">
+##INFO=<ID=AA_HGVS,Number=1,Type=Flag,Description="AA_HGVS">
+##INFO=<ID=COSMIC,Number=1,Type=String,Description="Genomic Mutation Identifier">
+##INFO=<ID=LEGACY_ID,Number=1,Type=String,Description="Legacy Mutation Identifier">
+##INFO=<ID=CDS,Number=1,Type=String,Description="CDS mutation">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO

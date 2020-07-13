@@ -1,0 +1,20 @@
+##fileformat=VCFv4.1
+##source=COSMICv90
+##reference=GRCh37
+##fileDate=20190828
+##comment="Missing nucleotide details indicate ambiguity during curation process"
+##comment="URL stub for ID field (use numeric portion of ID)='http://grch37-cancer.sanger.ac.uk/cosmic/mutation/overview?id='"
+##comment="REF and ALT sequences are both forward strand
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene name">
+##INFO=<ID=STRAND,Number=1,Type=String,Description="Gene strand">
+##INFO=<ID=GENOMIC_ID,Number=1,Type=String,Description="Genomic Mutation ID">
+##INFO=<ID=LEGACY_ID,Number=1,Type=String,Description="Legacy Mutation ID">
+##INFO=<ID=CDS,Number=1,Type=String,Description="CDS annotation">
+##INFO=<ID=AA,Number=1,Type=String,Description="Peptide annotation">
+##INFO=<ID=CNT,Number=1,Type=Integer,Description="How many samples have this mutation">
+##INFO=<ID=SNP,Number=0,Type=Flag,Description="classified as SNP">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	69224	COSV58737130	A	C	.	.	GENE=OR4F5;STRAND=+;LEGACY_ID=COSM3677745;CDS=c.134A>C;AA=p.D45A;CNT=1
+1	69230	COSV58737076	A	C	.	.	GENE=OR4F5;STRAND=+;LEGACY_ID=COSM3677746;CDS=c.140A>C;AA=p.H47P;CNT=1
+1	69236	COSV58737142	A	C	.	.	GENE=OR4F5;STRAND=+;LEGACY_ID=COSM3677747;CDS=c.146A>C;AA=p.H49P;CNT=1
+1	69270	COSV58736820	A	G	.	.	GENE=OR4F5;STRAND=+;LEGACY_ID=COSM5424184;SNP;CDS=c.180A>G;AA=p.S60=;CNT=1
