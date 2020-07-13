@@ -3,16 +3,11 @@ align_qc:
   - bwa
   - fastqc
   - samtools
-  - tabix
-  - gatk
   - picard
   - multiqc
   - fastp
   - csvkit
-  - libiconv
 annotate:
-  - python
-  - pip
   - ensembl-vep
 coverage_qc:
   - sambamba
@@ -25,11 +20,7 @@ varcall_py36:
   - cnvkit
   - libiconv
 varcall_py27:
-  - python
   - strelka
   - manta
-  - bcftools
-  - tabix
-  - samtools
 vcf_merge:
   - vcfmerge
