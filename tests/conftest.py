@@ -53,6 +53,16 @@ def conda():
     }
 
 
+@pytest.fixture(scope="session")
+def panel_bed_file():
+    return 'tests/test_data/references/panel/panel.bed'
+
+
+@pytest.fixture(scope="session")
+def reference_json():
+    return 'tests/test_data/references/reference.json'
+
+
 @pytest.fixture(scope='session')
 def no_write_perm_path(tmp_path_factory):
     """
@@ -138,7 +148,7 @@ ls -l # dummy command
 
 @pytest.fixture(scope='session')
 def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        singularity_container):
+                        singularity_container, reference_json, panel_bed_file):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -146,8 +156,6 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
     case_id = "sample_tumor_normal"
     tumor = sample_fastq['tumor']
     normal = sample_fastq['normal']
-    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
-    reference_json = 'tests/test_data/references/reference.json'
 
     runner = CliRunner()
     runner.invoke(cli, [
@@ -174,7 +182,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 @pytest.fixture(scope='session')
 def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                            singularity_container):
+                            singularity_container, reference_json):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -182,7 +190,6 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     case_id = "sample_tumor_normal_wgs"
     tumor = sample_fastq['tumor']
     normal = sample_fastq['normal']
-    reference_json = 'tests/test_data/references/reference.json'
 
     runner = CliRunner()
     runner.invoke(cli, [
@@ -207,15 +214,13 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 @pytest.fixture(scope='session')
 def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
-                      analysis_dir):
+                      analysis_dir, reference_json, panel_bed_file):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
     """
     case_id = "sample_tumor_only"
     tumor = sample_fastq['tumor']
-    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
-    reference_json = 'tests/test_data/references/reference.json'
 
     runner = CliRunner()
     runner.invoke(cli, [
@@ -240,14 +245,13 @@ def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
 
 @pytest.fixture(scope='session')
 def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                          singularity_container):
+                          singularity_container, reference_json):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
     """
     case_id = "sample_tumor_only_wgs"
     tumor = sample_fastq['tumor']
-    reference_json = 'tests/test_data/references/reference.json'
 
     runner = CliRunner()
     runner.invoke(cli, [
@@ -362,3 +366,5 @@ def sample_config():
     }
 
     return sample_config
+
+

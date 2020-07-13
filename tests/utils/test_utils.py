@@ -8,33 +8,19 @@ import logging
 
 from pathlib import Path
 
-from BALSAMIC.utils.cli import SnakeMake
-from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC.utils.cli import iterdict
-from BALSAMIC.utils.cli import get_packages
-from BALSAMIC.utils.cli import get_package_split
-from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.cli import createDir
-from BALSAMIC.utils.cli import get_ref_path
-from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.cli import get_config
-from BALSAMIC.utils.cli import recursive_default_dict
-from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
-from BALSAMIC.utils.cli import get_file_status_string
-from BALSAMIC.utils.cli import get_from_two_key
-from BALSAMIC.utils.cli import find_file_index
-from BALSAMIC.utils.rule import get_chrom
-from BALSAMIC.utils.rule import get_vcf
-from BALSAMIC.utils.rule import get_sample_type
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_picard_mrkdup
-from BALSAMIC.utils.rule import get_script_path
-from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.rule import get_threads
-from BALSAMIC.utils.cli import (merge_json, validate_fastq_pattern,
-                                get_panel_chrom, get_bioinfo_tools_list,
-                                get_sample_dict, get_sample_names,
-                                create_fastq_symlink)
+from BALSAMIC.utils.cli import (
+    SnakeMake, CaptureStdout, iterdict,
+    get_snakefile, createDir, write_json, get_config,
+    recursive_default_dict, convert_defaultdict_to_regular_dict,
+    get_file_status_string, get_from_two_key, find_file_index, 
+    merge_json, validate_fastq_pattern,
+    get_panel_chrom, get_bioinfo_tools_list,
+    get_sample_dict, get_sample_names,
+    create_fastq_symlink)
+
+from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
+                                 get_conda_env, get_picard_mrkdup,
+                                 get_script_path, get_result_dir, get_threads)
 
 
 def test_recursive_default_dict():
@@ -55,24 +41,11 @@ def test_convert_defaultdict_to_regular_dict():
 
     # WHEN converting it back to normal dict
     test_dict = convert_defaultdict_to_regular_dict(test_dict)
-    
+
     # THEN the output type should be dict and not defaultdict
     assert not isinstance(test_dict, collections.defaultdict)
     assert isinstance(test_dict, dict)
     assert 'key_2' in test_dict['key_1']
-
-
-def test_get_ref_path(config_files):
-    # GIVEN a sample json file path
-    test_ref = config_files['test_reference']
-
-    # WHEN giving a path for json file,
-    test_ref_json = get_ref_path(test_ref)
-
-    # THEN It will read the file and return a dict with updated absolute path
-    assert isinstance(test_ref_json, dict)
-    for ref, ref_path in test_ref_json['reference'].items():
-        assert Path(ref_path).exists()
 
 
 def test_iterdict(config_files):
@@ -149,42 +122,6 @@ def test_snakemake_slurm():
     assert "containers" in shell_command
 
 
-def test_get_packages(conda):
-    # GIVEN a conda yaml file
-    balsamic_yaml = conda['balsamic-base']
-
-    # WHEN passing conda yaml file to get_packages
-    packages = get_packages(balsamic_yaml)
-
-    # THEN It should return all tools(packages) in that yaml file
-    assert any("pip=9" in tool for tool in packages)
-    assert any("python=3" in tool for tool in packages)
-
-
-def test_get_pacakges_error(conda):
-    with pytest.raises(Exception, match=r"No such file or directory"):
-        # GIVEN a wrong path for config yaml file
-        invalid_yaml = "/tmp/balsamic.yaml"
-
-        # WHEN passing this invalid path into get_packages
-        # THEN It shoud raise the file not found error
-        assert get_packages(invalid_yaml)
-
-
-def test_get_package_split(conda):
-    # GIVEN a list of conda config yaml file paths
-    yamls = conda.values()
-
-    # WHEN giving this list of yamls to get_packaged split
-    packages = get_package_split(yamls)
-
-    # THEN It should return a dictionary with tools information
-    assert isinstance(packages, dict)
-    assert "bwa" in packages
-    assert "bcftools" in packages
-    assert "fastqc" in packages
-
-
 def test_get_script_path():
     # GIVEN list of scripts
     custom_scripts = ["refseq_sql.awk"]
@@ -209,7 +146,7 @@ def test_get_snakefile():
         pipeline = ''
 
         if sequencing_type == 'targeted':
-            pipline = "BALSAMIC/workflows/VariantCalling"
+            pipeline = "BALSAMIC/workflows/VariantCalling"
         elif sequencing_type == 'wgs':
             pipeline = "BALSAMIC/workflows/VariantCalling_sentieon"
         elif analysis_type == 'qc':
@@ -227,7 +164,9 @@ def test_get_snakefile():
 def test_get_chrom(config_files):
     # Given a panel bed file
     bed_file = config_files["panel_bed_file"]
-    actual_chrom = ['10','11','16','17','18','19','2','3','4','6','7','9','X']
+    actual_chrom = [
+        '10', '11', '16', '17', '18', '19', '2', '3', '4', '6', '7', '9', 'X'
+    ]
 
     # WHEN passing this bed file
     test_chrom = get_chrom(bed_file)
@@ -278,6 +217,7 @@ def test_get_picard_mrkdup_rmdup(sample_config):
 
     # THEN It will return the picard str as rmdup
     assert "rmdup" == picard_str
+
 
 def test_createDir(tmp_path):
     # GIVEN a directory path
@@ -415,7 +355,7 @@ def test_get_file_status_string_file_exists(tmpdir):
     # GIVEN an existing file and condition_str False
     file_exist = tmpdir.mkdir("temporary_path").join("file_exists")
     file_exist.write("dummy_file_content")
-    
+
     # WHEN checking for file string
     result = get_file_status_string(str(file_exist))
 
@@ -425,7 +365,7 @@ def test_get_file_status_string_file_exists(tmpdir):
 
 def test_get_file_status_string_file_not_exist():
     # GIVEN an existing file and condition_str False
-    file_not_exist = "some_random_path/dummy_non_existing_file"    
+    file_not_exist = "some_random_path/dummy_non_existing_file"
 
     # WHEN checking for file string
     result = get_file_status_string(str(file_not_exist))
@@ -436,13 +376,20 @@ def test_get_file_status_string_file_not_exist():
 
 def test_get_from_two_key():
     # GIVEN a dictionary with two keys that each have list of values
-    input_dict = {"key_1":["key_1_value_1", "key_1_value_2"], "key_2": ["key_2_value_1", "key_2_value_2"]}
+    input_dict = {
+        "key_1": ["key_1_value_1", "key_1_value_2"],
+        "key_2": ["key_2_value_1", "key_2_value_2"]
+    }
 
     # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
-    result = get_from_two_key(input_dict, from_key="key_1", by_key="key_2", by_value="key_1_value_2", default=None)
-    
+    result = get_from_two_key(input_dict,
+                              from_key="key_1",
+                              by_key="key_2",
+                              by_value="key_1_value_2",
+                              default=None)
+
     # THEN retrun value should be key_2_value_2 and not None
-    assert result == "key_2_value_2" 
+    assert result == "key_2_value_2"
 
 
 def test_find_file_index(tmpdir):
@@ -454,14 +401,14 @@ def test_find_file_index(tmpdir):
     bai_file = bam_dir.join("file_exists.bam.bai")
     bai_file.write("dummy_file_content")
 
-    bai_file_2= bam_dir.join("file_exists.bai")
+    bai_file_2 = bam_dir.join("file_exists.bai")
     bai_file_2.write("dummy_file_content")
 
     # WHEN finding list of bai files
     result = find_file_index(str(bam_file))
-    
+
     # THEN return list bai file(s) as a list
-    assert len(result)==2
+    assert len(result) == 2
     assert isinstance(result, list)
     assert str(bai_file) in result
     assert str(bai_file_2) in result
@@ -502,21 +449,21 @@ def test_validate_fastq_pattern():
     assert validate_fastq_pattern(fastq_path_r2) == "dummy_normal_R"
 
     with pytest.raises(AttributeError) as excinfo:
-        #GIVEN a path to a file with incorrect fastq file prefix    
+        #GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_1 = "/home/analysis/dummy_tumor.fastq.gz"
         validate_fastq_pattern(bad_fastq_path_1)
         #THEN AttributeError is raised
     assert excinfo.value
 
     with pytest.raises(AttributeError) as excinfo:
-        #GIVEN a path to a file with incorrect fastq file prefix   
+        #GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_2 = "/home/analysis/dummy_tumor_R3.fastq.gz"
         validate_fastq_pattern(bad_fastq_path_2)
         #THEN AttributeError is raised
     assert excinfo.value
 
     with pytest.raises(AttributeError) as excinfo:
-        #GIVEN a path to a file with incorrect fastq file prefix   
+        #GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_3 = "/home/analysis/dummy_tumor_R_2.bam"
         validate_fastq_pattern(bad_fastq_path_3)
         #THEN AttributeError is raised
@@ -534,14 +481,17 @@ def test_create_fastq_symlink(tmpdir_factory, caplog):
     #GIVEN a list of valid input fastq files from test directory containing 4 files
     symlink_from_path = tmpdir_factory.mktemp("symlink_from")
     symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-    filenames = ["tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz", "normal_R_2.fastq.gz"]
+    filenames = [
+        "tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz",
+        "normal_R_2.fastq.gz"
+    ]
     successful_log = "skipping"
-    casefiles = [Path(symlink_from_path,x) for x in filenames]
+    casefiles = [Path(symlink_from_path, x) for x in filenames]
     for casefile in casefiles:
         casefile.touch()
     with caplog.at_level(logging.INFO):
         create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
         #THEN destination should have 4 files
         assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
-        #THEN exception triggers log message containign "skipping"
+        #THEN exception triggers log message containing "skipping"
         assert successful_log in caplog.text

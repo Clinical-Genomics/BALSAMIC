@@ -177,21 +177,6 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def get_packages(yaml_file):
-    '''
-    return packages found in a conda yaml file
-
-    input: conda yaml file path
-    output: list of packages
-    '''
-    try:
-        with open(yaml_file, 'r') as f:
-            pkgs = yaml.safe_load(f)['dependencies']
-    except OSError as error:
-        raise error
-
-    return (pkgs)
-
 
 def write_json(json_out, output_config):
 
@@ -200,27 +185,6 @@ def write_json(json_out, output_config):
             json.dump(json_out, fn, indent=4)
     except OSError as error:
         raise error
-
-
-def get_package_split(condas):
-    '''
-    Get a list of conda env files, and extract pacakges
-
-    input: conda env files
-    output: dict of packages and their version
-    '''
-
-    pkgs = [
-        "bwa", "bcftools", "cutadapt", "fastqc", "gatk", "manta", "picard",
-        "sambamba", "strelka", "samtools", "tabix", "vardic"
-    ]
-
-    pkgs = dict(
-        [[y.split("=")[0], y.split("=")[1]]
-         for y in set(chain.from_iterable([get_packages(s) for s in condas]))
-         if y.split("=")[0] in pkgs])
-
-    return (pkgs)
 
 
 def iterdict(dic):
@@ -273,19 +237,6 @@ def get_config(config_name):
     else:
         raise FileNotFoundError(f'Config for {config_name} was not found.')
 
-
-def get_ref_path(input_json):
-    """
-    Set full path to reference files
-    Input: reference config file
-    Return: json file with abspath
-    """
-    with open(input_json) as fh:
-        ref_json = json.load(fh)
-        for k, v in ref_json['reference'].items():
-            ref_json['reference'][k] = os.path.abspath(v)
-
-    return ref_json
 
 def recursive_default_dict():
     '''
@@ -347,7 +298,7 @@ def get_file_extension(file_path):
             break
 
     if not file_extension:
-        file_name, file_extension = os.path.splitext(file_path)
+        _, file_extension = os.path.splitext(file_path)
 
     return file_extension
 
@@ -397,8 +348,8 @@ def merge_json(*args):
                     json_out = {**json_out, **json.load(fn)}
         except OSError as error:
             raise error
-
     return json_out
+
 
 def validate_fastq_pattern(sample):
     """Finds the correct filename prefix from file path, and returns it.
