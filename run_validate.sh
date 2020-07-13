@@ -71,11 +71,16 @@ if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
 fi
 
+if [[ ${_analysis} == "TN" ]]; then
+  _normal_option="-n ${_normal_fastq}"
+else
+  _normal_option=" "
+fi
 
 function balsamic_config() {
   balsamic config case \
     -t ${_tumor_fastq} \
-    -n ${_normal_fastq} \
+    ${_normal_option} \
     --case-id ${_analysis}_${_ngstype} \
     --analysis-dir ${_analysis_dir} \
     -r ${_reference} \

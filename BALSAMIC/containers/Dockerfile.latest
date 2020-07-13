@@ -1,4 +1,4 @@
-FROM hassanf/miniconda3_4.6.14:latest
+FROM hassanf/miniconda3:version-4.6.14
 
 LABEL maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL description="Bioinformatic analysis pipeline for somatic mutations in cancer"
@@ -13,17 +13,25 @@ RUN mkdir -p /git_repos; \
     export PATH=/usr/local/miniconda/bin:$PATH; \
     export LC_ALL=en_US.utf-8; \
     export LANG=en_US.utf-8; \
+    conda clean -iy; \
     cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout ${GIT_BRANCH} && \
-    conda env create --file BALSAMIC/conda/BALSAMIC-py36.yaml -n BALSAMIC_py36 && \
-    conda env create --file BALSAMIC/conda/BALSAMIC-py27.yaml -n BALSAMIC_py27 && \
-    source activate BALSAMIC_py36; \
-    gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar; \
-    picard_PATH=BALSAMIC/assets/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar; \
-    picard_destination=/usr/local/miniconda/envs/BALSAMIC_py36/share/; \
-    cp $picard_PATH ${picard_destination}; \
-    ln -s ${picard_destination}/picard-2.18.11-3-gc6e797f-SNAPSHOT-all.jar  ${picard_destination}/picard-2.18.11.jar; \
-    ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6; \
-    ln -s /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/BALSAMIC_py36/lib/libreadline.so.6.0; \
+    conda env create --file BALSAMIC/conda/varcall_py36.yaml -n varcall_py36 && \
+    conda env create --file BALSAMIC/conda/annotate.yaml -n annotate && \
+    conda env create --file BALSAMIC/conda/align.yaml -n align_qc && \
+    conda env create --file BALSAMIC/conda/coverage.yaml -n coverage_qc && \
+    conda env create --file BALSAMIC/conda/varcall_py27.yaml -n varcall_py27 && \
+    source activate varcall_py36 && \
+    gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar && \
+    ln -s /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.6 && \
+    ln -s /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.6.0 && \
+    source deactivate && source activate align_qc && \
+    picard_jar=picard-2.23.2-201-g922891d-SNAPSHOT-all.jar && \
+    picard_PATH=BALSAMIC/assets/${picard_jar} && \
+    picard_destination=/usr/local/miniconda/envs/align_qc/share/ && \
+    cp $picard_PATH ${picard_destination} && \
+    ln -s ${picard_destination}/${picard_jar} ${picard_destination}/picard.jar; \
+    ln -s /usr/local/miniconda/envs/align_qc/lib/libreadline.so.7.0 /usr/local/miniconda/envs/align_qc/lib/libreadline.so.6 && \
+    ln -s /usr/local/miniconda/envs/align_qc/lib/libreadline.so.7.0 /usr/local/miniconda/envs/align_qc/lib/libreadline.so.6.0 && \
     conda clean --all -y
 
 # The following fixes the error for Click
@@ -33,3 +41,4 @@ RUN mkdir -p /git_repos; \
 ENV LC_ALL=en_US.utf-8
 ENV LANG=en_US.utf-8
 ENV PATH="/usr/local/miniconda/bin:${PATH}"
+

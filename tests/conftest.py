@@ -47,9 +47,12 @@ def conda():
     conda env config file paths
     """
     return {
-        "balsamic-base": "BALSAMIC/conda/BALSAMIC-base.yaml",
-        "balsamic-p27": "BALSAMIC/conda/BALSAMIC-py27.yaml",
-        "balsamic-py36": "BALSAMIC/conda/BALSAMIC-py36.yaml",
+        "balsamic": "BALSAMIC/conda/balsamic.yaml",
+        "varcall_py27": "BALSAMIC/conda/varcall_py27.yaml",
+        "varcall_py36": "BALSAMIC/conda/varcall_py36.yaml",
+        "align_qc": "BALSAMIC/conda/align.yaml",
+        "annotate": "BALSAMIC/conda/annotate.yaml",
+        "coverage": "BALSAMIC/conda/coverage.yaml",
     }
 
 
