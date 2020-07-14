@@ -60,12 +60,14 @@ if [[ ! -z ${_condaenv} ]]; then
 fi
 
 _analysis_dir='run_tests/'
-_singularity='BALSAMIC/containers/singularity/BALSAMIC.latest'
+_singularity='BALSAMIC/containers/BALSAMIC_latest.sif'
 _reference='reference/GRCh37/reference.json'
 _tumor_fastq='tests/test_data/fastq/S1_R_1.fastq.gz'
 _normal_fastq='tests/test_data/fastq/S2_R_1.fastq.gz'
 _analysis_config='run_tests/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
 
+# Make sure _analysis_dir exists
+mkdir -p ${_analysis_dir}
 
 if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
