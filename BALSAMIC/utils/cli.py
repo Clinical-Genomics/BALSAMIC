@@ -402,9 +402,9 @@ def get_sample_dict(tumor, normal) -> dict:
     return samples
 
 
-def get_sample_names(file, sample_type):
+def get_sample_names(filename, sample_type):
     """Creates a dict with sample prefix, sample type, and readpair suffix"""
-    file_str = validate_fastq_pattern(file)
+    file_str = validate_fastq_pattern(filename)
     if file_str:
         return file_str, {
             "file_prefix": file_str,
@@ -458,7 +458,7 @@ def generate_graph(config_collection_dict, config_path):
     graph_obj.render(cleanup=True)
 
 
-def get_fastq_bind_path(fastq_path):
+def get_fastq_bind_path(fastq_path: Path) -> list():
     """Takes a path with symlinked fastq files. 
     Returns unique paths to parent directories for singulatiry bind
     """

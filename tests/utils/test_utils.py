@@ -16,7 +16,7 @@ from BALSAMIC.utils.cli import (
     merge_json, validate_fastq_pattern,
     get_panel_chrom, get_bioinfo_tools_list,
     get_sample_dict, get_sample_names,
-    create_fastq_symlink)
+    create_fastq_symlink, get_fastq_bind_path)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_conda_env, get_picard_mrkdup,
@@ -497,3 +497,21 @@ def test_create_fastq_symlink(tmpdir_factory, caplog):
         assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
         #THEN exception triggers log message containing "skipping"
         assert successful_log in caplog.text
+
+
+def test_get_fastq_bind_path(tmpdir_factory):
+    #GIVEN a list of valid input fastq filenames and test directories
+    filenames = [
+        "tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz",
+        "normal_R_2.fastq.gz"
+    ]
+    #WHEN files are created, and symlinks are made in symlink directory
+    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
+    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
+    casefiles = [Path(symlink_from_path, x) for x in filenames]
+    for casefile in casefiles:
+        casefile.touch()
+    create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
+    #THEN function returns list containing the original parent path!
+    assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
+
