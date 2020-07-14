@@ -456,3 +456,15 @@ def generate_graph(config_collection_dict, config_path):
         format="pdf",
         engine="dot")
     graph_obj.render(cleanup=True)
+
+
+def get_fastq_bind_path(fastq_path):
+    """Takes a path with symlinked fastq files. 
+    Returns unique paths to parent directories for singulatiry bind
+    """
+    parents = set()
+    for fastq_file_path in Path(fastq_path).iterdir():
+        parents.add(Path(fastq_file_path).resolve().parent)
+    return list(parents)
+
+
