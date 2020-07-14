@@ -1,4 +1,12 @@
 
+[X.X.X]
+-------
+
+Changed
+^^^^^^^
+
+* reduce analysis directory's storage
+
 [4.4.0]
 -------
 
@@ -14,7 +22,6 @@ Changed
 * Install script and setup.py
 * refactored install script with more log output and added a conda env suffix option
 * refactored docker container and decoupled various parts of the workflow
-* reduce analysis directory's storage
 
 
 [4.3.0]
