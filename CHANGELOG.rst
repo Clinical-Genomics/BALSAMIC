@@ -1,5 +1,5 @@
 
-[4.4.0]
+[X.X.X]
 -------
 
 Added
@@ -9,8 +9,8 @@ Added
 
 
 Changed
-
 ^^^^^^^
+
 * Fastq files are no longer being copied as part of creation of the case config file.
   A symlink is now created at the destination path instead
 * Config structure is no longer contained in a collestion of JSON files. 
@@ -39,7 +39,7 @@ Refactored
 
 
 
-[X.X.X]
+[4.4.0]
 -------
 
 Added
