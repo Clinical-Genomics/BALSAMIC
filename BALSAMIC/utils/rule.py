@@ -52,11 +52,15 @@ def get_result_dir(config):
 
 def get_conda_env(yaml_file, pkg):
     """
+    Retrieve conda environment for package from a predefined yaml file
+
     input: balsamic_env 
     output: string of conda env where packge is in
     """
 
-    yaml_in = yaml.safe_load(open(yaml_file))
+    with open(yaml_file, 'r') as file_in:
+        yaml_in = yaml.safe_load(file_in)
+
     conda_env_found = None
 
     for conda_env, pkgs in yaml_in.items():

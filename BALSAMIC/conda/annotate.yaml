@@ -4,6 +4,5 @@ channels:
   - conda-forge
 
 dependencies:
-  - python=3.6
-  - pip=9.0.3
   - ensembl-vep=100.2
+  - bcftools>=1.10
