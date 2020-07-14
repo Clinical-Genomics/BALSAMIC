@@ -464,7 +464,7 @@ def get_fastq_bind_path(fastq_path):
     """
     parents = set()
     for fastq_file_path in Path(fastq_path).iterdir():
-        parents.add(Path(fastq_file_path).resolve().parent)
+        parents.add(Path(fastq_file_path).resolve().parent.as_posix())
     return list(parents)
 
 
