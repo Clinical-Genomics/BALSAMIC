@@ -231,11 +231,10 @@ def test_config_sample_tumor_normal(tmp_path, sample_fastq, analysis_dir,
 
     # WHEN invoking cli to create config files
     result = invoke_cli([
-        'config', 'case', '-p', test_panel_bed_file, 
-        '-t', str(test_tumor),
-        '-n', str(test_normal),
-        '--singularity', singularity_container,
-        '--case-id', test_case_name, '--analysis-dir',
+        'config', 'case', '-p', test_panel_bed_file, '-t',
+        str(test_tumor), '-n',
+        str(test_normal), '--singularity', singularity_container, '--case-id',
+        test_case_name, '--analysis-dir',
         str(analysis_dir), '--output-config', test_sample_config_file_name,
         '--reference-config', test_reference_json
     ])
@@ -259,10 +258,9 @@ def test_config_sample_graphviz_exception(tmp_path, sample_fastq, analysis_dir,
     with mock.patch.object(graphviz, 'Source') as mocked:
         mocked.return_value = None
         result = invoke_cli([
-            'config', 'case', '-p', test_panel_bed_file, 
-            '-t', str(test_tumor),
-            '-n', str(test_normal),
-            '--singularity', singularity_container,
+            'config', 'case', '-p', test_panel_bed_file, '-t',
+            str(test_tumor), '-n',
+            str(test_normal), '--singularity', singularity_container,
             '--case-id', test_case_name, '--analysis-dir',
             str(analysis_dir), '--output-config', test_sample_config_file_name,
             '--reference-config', test_reference_json

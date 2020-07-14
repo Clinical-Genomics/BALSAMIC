@@ -8,7 +8,7 @@ import click
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import createDir
-from BALSAMIC.utils.cli import get_schedulerpy 
+from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config
 
@@ -83,13 +83,20 @@ LOG = logging.getLogger(__name__)
 @click.option('--snakemake-opt',
               multiple=True,
               help='Pass these options directly to snakemake')
-@click.option('--account', '--slurm-account', '--qsub-account',
+@click.option('--account',
+              '--slurm-account',
+              '--qsub-account',
               help='cluster account to run jobs, ie: slurm_account')
-@click.option('--mail-user', help='cluster mail user to send out email. e.g.: slurm_mail_user')
-@click.option('--mail-type',
-              type=click.Choice(['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
-              help='cluster mail type to send out email. \
-              This will be applied to all jobs and override snakemake settings.')
+@click.option(
+    '--mail-user',
+    help='cluster mail user to send out email. e.g.: slurm_mail_user')
+@click.option(
+    '--mail-type',
+    type=click.Choice(
+        ['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
+    help='cluster mail type to send out email. \
+              This will be applied to all jobs and override snakemake settings.'
+)
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, log_file, force_all, snakemake_opt, mail_type,
@@ -104,7 +111,9 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
         run_mode = 'local'
 
     if run_mode == 'cluster' and not account:
-        LOG.info('slurm-account, qsub-account, or account is required for slurm run mode')
+        LOG.info(
+            'slurm-account, qsub-account, or account is required for slurm run mode'
+        )
         raise click.Abort()
 
     sample_config_path = os.path.abspath(sample_config)
@@ -125,7 +134,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
             if files:
                 logpath = createDir(logpath, [])
                 scriptpath = createDir(scriptpath, [])
-                sample_config['analysis']['benchmark'] = createDir(benchmarkpath, [])
+                sample_config['analysis']['benchmark'] = createDir(
+                    benchmarkpath, [])
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
@@ -173,8 +183,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.sm_opt = snakemake_opt
 
     try:
-        cmd=sys.executable + " -m  " + balsamic_run.build_cmd()
-        subprocess.run(cmd, shell=True)#, check=True)
+        cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
+        subprocess.run(cmd, shell=True)  #, check=True)
     except Exception as e:
         print(e)
         raise click.Abort()

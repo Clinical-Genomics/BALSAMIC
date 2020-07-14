@@ -11,6 +11,7 @@ from pathlib import Path
 from itertools import chain
 from collections import defaultdict
 
+
 class CaptureStdout(list):
     '''
     Captures stdout.
@@ -60,7 +61,7 @@ class SnakeMake:
         self.configfile = None
         self.run_mode = None
         self.profile = None
-        self.cluster_config = str() 
+        self.cluster_config = str()
         self.scheduler = None
         self.log_path = None
         self.script_path = None
@@ -128,7 +129,7 @@ class SnakeMake:
             self.singularity_arg + \
             " " + forceall + " " + dryrun + \
             " " + cluster_cmd + " " + sm_opt
-        
+
         return sm_cmd
 
 
@@ -277,6 +278,7 @@ def get_ref_path(input_json):
 
     return ref_json
 
+
 def recursive_default_dict():
     '''
     Recursivly create defaultdict.
@@ -320,16 +322,18 @@ def find_file_index(file_path):
     for file_extension, file_index_extensions in indexible_files.items():
         if file_path.endswith(file_extension):
             for file_index_extension in file_index_extensions:
-                new_file_path = file_path.replace(
-                    file_extension, file_index_extension
-                )
+                new_file_path = file_path.replace(file_extension,
+                                                  file_index_extension)
                 if os.path.isfile(new_file_path):
                     file_path_index.add(new_file_path)
 
     return list(file_path_index)
 
+
 def get_file_extension(file_path):
-    known_multi_extensions = ['.vcf.gz', '.vcf.gz.tbi', '.vcf.tbi', '.fastq.gz']
+    known_multi_extensions = [
+        '.vcf.gz', '.vcf.gz.tbi', '.vcf.tbi', '.fastq.gz'
+    ]
     file_extension = ""
     for known_ext in known_multi_extensions:
         if file_path.endswith(known_ext):
@@ -341,6 +345,7 @@ def get_file_extension(file_path):
 
     return file_extension
 
+
 def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     '''
     Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
@@ -349,9 +354,10 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     '''
 
     matching_value = default
-    if from_key in input_dict and by_key in input_dict and by_value in input_dict[from_key]:
-            idx = input_dict[from_key].index(by_value)
-            matching_value = input_dict[by_key][idx]
+    if from_key in input_dict and by_key in input_dict and by_value in input_dict[
+            from_key]:
+        idx = input_dict[from_key].index(by_value)
+        matching_value = input_dict[by_key][idx]
 
     return matching_value
 
@@ -365,7 +371,7 @@ def get_file_status_string(file_to_check):
     return_str = Color(u"[{red}\u2717{/red}] File missing: ") + file_to_check
 
     file_status = os.path.isfile(file_to_check)
-    if file_status: 
+    if file_status:
         return_str = Color(u"[{green}\u2713{/green}] Found: ") + file_to_check
-    
+
     return return_str, file_status

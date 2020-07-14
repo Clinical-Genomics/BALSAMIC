@@ -49,7 +49,7 @@ def test_convert_defaultdict_to_regular_dict():
 
     # WHEN converting it back to normal dict
     test_dict = convert_defaultdict_to_regular_dict(test_dict)
-    
+
     # THEN the output type should be dict and not defaultdict
     assert not isinstance(test_dict, collections.defaultdict)
     assert isinstance(test_dict, dict)
@@ -221,7 +221,9 @@ def test_get_snakefile():
 def test_get_chrom(config_files):
     # Given a panel bed file
     bed_file = config_files["panel_bed_file"]
-    actual_chrom = ['10','11','16','17','18','19','2','3','4','6','7','9','X']
+    actual_chrom = [
+        '10', '11', '16', '17', '18', '19', '2', '3', '4', '6', '7', '9', 'X'
+    ]
 
     # WHEN passing this bed file
     test_chrom = get_chrom(bed_file)
@@ -272,6 +274,7 @@ def test_get_picard_mrkdup_rmdup(sample_config):
 
     # THEN It will return the picard str as rmdup
     assert "rmdup" == picard_str
+
 
 def test_createDir(tmp_path):
     # GIVEN a directory path
@@ -411,7 +414,7 @@ def test_get_file_status_string_file_exists(tmpdir):
     # GIVEN an existing file and condition_str False
     file_exist = tmpdir.mkdir("temporary_path").join("file_exists")
     file_exist.write("dummy_file_content")
-    
+
     # WHEN checking for file string
     result = get_file_status_string(str(file_exist))
 
@@ -421,7 +424,7 @@ def test_get_file_status_string_file_exists(tmpdir):
 
 def test_get_file_status_string_file_not_exist():
     # GIVEN an existing file and condition_str False
-    file_not_exist = "some_random_path/dummy_non_existing_file"    
+    file_not_exist = "some_random_path/dummy_non_existing_file"
 
     # WHEN checking for file string
     result = get_file_status_string(str(file_not_exist))
@@ -432,13 +435,20 @@ def test_get_file_status_string_file_not_exist():
 
 def test_get_from_two_key():
     # GIVEN a dictionary with two keys that each have list of values
-    input_dict = {"key_1":["key_1_value_1", "key_1_value_2"], "key_2": ["key_2_value_1", "key_2_value_2"]}
+    input_dict = {
+        "key_1": ["key_1_value_1", "key_1_value_2"],
+        "key_2": ["key_2_value_1", "key_2_value_2"]
+    }
 
     # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
-    result = get_from_two_key(input_dict, from_key="key_1", by_key="key_2", by_value="key_1_value_2", default=None)
-    
+    result = get_from_two_key(input_dict,
+                              from_key="key_1",
+                              by_key="key_2",
+                              by_value="key_1_value_2",
+                              default=None)
+
     # THEN retrun value should be key_2_value_2 and not None
-    assert result == "key_2_value_2" 
+    assert result == "key_2_value_2"
 
 
 def test_find_file_index(tmpdir):
@@ -450,14 +460,14 @@ def test_find_file_index(tmpdir):
     bai_file = bam_dir.join("file_exists.bam.bai")
     bai_file.write("dummy_file_content")
 
-    bai_file_2= bam_dir.join("file_exists.bai")
+    bai_file_2 = bam_dir.join("file_exists.bai")
     bai_file_2.write("dummy_file_content")
 
     # WHEN finding list of bai files
     result = find_file_index(str(bam_file))
-    
+
     # THEN return list bai file(s) as a list
-    assert len(result)==2
+    assert len(result) == 2
     assert isinstance(result, list)
     assert str(bai_file) in result
     assert str(bai_file_2) in result
