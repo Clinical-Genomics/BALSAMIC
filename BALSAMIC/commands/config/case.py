@@ -59,7 +59,8 @@ LOG = logging.getLogger(__name__)
               type=click.Path(exists=True, resolve_path=True),
               required=True,
               help="Root analysis path to store analysis logs and results. \
-                                     The final path will be analysis-dir/sample-id")
+                                     The final path will be analysis-dir/sample-id"
+              )
 @click.option("-t",
               "--tumor",
               type=click.Path(exists=True, resolve_path=True),
@@ -72,16 +73,10 @@ LOG = logging.getLogger(__name__)
               required=False,
               multiple=True,
               help="Fastq files for normal sample.")
-@click.option("-f",
-              "--format",
-              required=False,
-              type=click.Choice(["fastq", "vcf", "bam"]),
-              default="fastq",
-              show_default=True)
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, singularity,
-                analysis_dir, tumor, normal, format):
+                analysis_dir, tumor, normal):
 
     try:
         samples = get_sample_dict(tumor, normal)
@@ -124,7 +119,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         samples=samples,
         vcf={},
     ).dict(by_alias=True)
-    
+
     LOG.info("Config file generated successfully")
 
     Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
