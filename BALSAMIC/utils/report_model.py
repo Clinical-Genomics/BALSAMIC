@@ -29,10 +29,47 @@ class BalsamicOutputFile(BaseModel):
         default=[],
         description="Additional tags to be associated with the file"
         )
-    case_id: str =Field(
+    case_id: str = Field(
         alias="id",
         description="case_id associated with analysis"
         )
     status: str = Field(
         description="Completion status"
         )
+
+
+
+
+class BalsamicPairedReport(BaseModel):
+    """Placeholder!
+    Define required files for paired sample case in
+    BALSAMIC analysis"""
+
+    fastq_tumor_r1: BalsamicOutputFile
+    fastq_tumor_r2: BalsamicOutputFile
+    fastq_normal_r1: BalsamicOutputFile
+    fastq_normal_r2: BalsamicOutputFile
+
+    html_multiqc: BalsamicOutputFile
+    json_multiqc : BalsamicOutputFile
+
+    bam_tumor: BalsamicOutputFile
+    bam_normal: BalsamicOutputFile
+
+    bam_bai_tumor: BalsamicOutputFile
+    bam_bai_normal: BalsamicOutputFile
+
+    bed_tumor: BalsamicOutputFile
+    bed_normal: BalsamicOutputFile
+
+    vcf_1: BalsamicOutputFile
+    vcf_2: BalsamicOutputFile
+    vcf_n: BalsamicOutputFile
+
+
+
+
+
+    
+
+
