@@ -18,6 +18,6 @@ after_success: coveralls
 
 env:
   - SENTIEON_LICENSE="/path/to/sentieon_license" SENTIEON_INSTALL_DIR="/path/to/sentieon_install_dir"
-  
+
 notification:
   - email: false
