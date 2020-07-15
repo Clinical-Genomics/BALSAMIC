@@ -137,4 +137,3 @@ def test_sample_instance_model():
     with pytest.raises(ValueError) as excinfo:
         SampleInstanceModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
-
