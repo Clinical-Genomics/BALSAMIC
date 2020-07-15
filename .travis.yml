@@ -10,7 +10,7 @@ before_install:
 
 install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
-  - pip install pygraphviz
+  - pip install pygraphviz pygments
 
 script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
