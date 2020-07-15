@@ -4,31 +4,28 @@ import pytest
 import sys
 import copy
 import collections
+
+import shutil
+from unittest import mock
+import logging
+
 from pathlib import Path
 
-from BALSAMIC.utils.cli import SnakeMake
-from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC.utils.cli import iterdict
-from BALSAMIC.utils.cli import get_packages
-from BALSAMIC.utils.cli import get_package_split
-from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.cli import createDir
-from BALSAMIC.utils.cli import get_ref_path
-from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.cli import get_config
-from BALSAMIC.utils.cli import recursive_default_dict
-from BALSAMIC.utils.cli import convert_defaultdict_to_regular_dict
-from BALSAMIC.utils.cli import get_file_status_string
-from BALSAMIC.utils.cli import get_from_two_key
-from BALSAMIC.utils.cli import find_file_index
-from BALSAMIC.utils.rule import get_chrom
-from BALSAMIC.utils.rule import get_vcf
-from BALSAMIC.utils.rule import get_sample_type
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_picard_mrkdup
-from BALSAMIC.utils.rule import get_script_path
-from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.exc import BalsamicError
+
+from BALSAMIC.utils.cli import (
+    SnakeMake, CaptureStdout, iterdict,
+    get_snakefile, createDir, write_json, get_config,
+    recursive_default_dict, convert_defaultdict_to_regular_dict,
+    get_file_status_string, get_from_two_key, find_file_index, 
+    merge_json, validate_fastq_pattern,
+    get_panel_chrom, get_bioinfo_tools_list,
+    get_sample_dict, get_sample_names,
+    create_fastq_symlink, get_fastq_bind_path, singularity)
+
+from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
+                                 get_conda_env, get_picard_mrkdup,
+                                 get_script_path, get_result_dir, get_threads)
 
 
 def test_recursive_default_dict():
@@ -56,19 +53,6 @@ def test_convert_defaultdict_to_regular_dict():
     assert 'key_2' in test_dict['key_1']
 
 
-def test_get_ref_path(config_files):
-    # GIVEN a sample json file path
-    test_ref = config_files['test_reference']
-
-    # WHEN giving a path for json file,
-    test_ref_json = get_ref_path(test_ref)
-
-    # THEN It will read the file and return a dict with updated absolute path
-    assert isinstance(test_ref_json, dict)
-    for ref, ref_path in test_ref_json['reference'].items():
-        assert Path(ref_path).exists()
-
-
 def test_iterdict(config_files):
     """ GIVEN a dict for iteration """
     test_dict = json.load(open(config_files['test_reference'], 'r'))
@@ -85,7 +69,7 @@ def test_iterdict(config_files):
 def test_snakemake_local():
     # GIVEN required params
     snakemake_local = SnakeMake()
-    snakemake_local.working_dir = "/tmp/snakemake"
+    snakemake_local.working_dir = "this_path/snakemake"
     snakemake_local.snakefile = "worflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
@@ -100,7 +84,7 @@ def test_snakemake_local():
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
-    assert "/tmp/snakemake" in shell_command
+    assert "this_path/snakemake" in shell_command
     assert "--dryrun" in shell_command
     assert "--forceall" in shell_command
 
@@ -109,7 +93,7 @@ def test_snakemake_slurm():
     # GIVEN required params
     snakemake_slurm = SnakeMake()
     snakemake_slurm.case_name = "test_case"
-    snakemake_slurm.working_dir = "/tmp/snakemake"
+    snakemake_slurm.working_dir = "this_path/snakemake"
     snakemake_slurm.snakefile = "worflow/variantCalling_paired"
     snakemake_slurm.configfile = "sample_config.json"
     snakemake_slurm.run_mode = "cluster"
@@ -136,47 +120,11 @@ def test_snakemake_slurm():
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
-    assert "/tmp/snakemake" in shell_command
+    assert "this_path/snakemake" in shell_command
     assert "--dryrun" not in shell_command
     assert "sbatch.py" in shell_command
     assert "test_case" in shell_command
     assert "containers" in shell_command
-
-
-def test_get_packages(conda):
-    # GIVEN a conda yaml file
-    balsamic_yaml = conda['balsamic']
-
-    # WHEN passing conda yaml file to get_packages
-    packages = get_packages(balsamic_yaml)
-
-    # THEN It should return all tools(packages) in that yaml file
-    assert any("pip=9" in tool for tool in packages)
-    assert any("python=3" in tool for tool in packages)
-
-
-def test_get_pacakges_error(conda):
-    with pytest.raises(Exception, match=r"No such file or directory"):
-        # GIVEN a wrong path for config yaml file
-        invalid_yaml = "/tmp/balsamic.yaml"
-
-        # WHEN passing this invalid path into get_packages
-        # THEN It shoud raise the file not found error
-        assert get_packages(invalid_yaml)
-
-
-def test_get_package_split(conda):
-    # GIVEN a list of conda config yaml file paths
-    yamls = conda.values()
-
-    # WHEN giving this list of yamls to get_packaged split
-    packages = get_package_split(yamls)
-
-    # THEN It should return a dictionary with tools information
-    assert isinstance(packages, dict)
-    assert "bwa" in packages
-    assert "bcftools" in packages
-    assert "fastqc" in packages
 
 
 def test_get_script_path():
@@ -203,7 +151,7 @@ def test_get_snakefile():
         pipeline = ''
 
         if sequencing_type == 'targeted':
-            pipline = "BALSAMIC/workflows/VariantCalling"
+            pipeline = "BALSAMIC/workflows/VariantCalling"
         elif sequencing_type == 'wgs':
             pipeline = "BALSAMIC/workflows/VariantCalling_sentieon"
         elif analysis_type == 'qc':
@@ -390,7 +338,7 @@ def test_write_json(tmp_path, config_files):
 def test_write_json_error(tmp_path, config_files):
     with pytest.raises(Exception, match=r"Is a directory"):
         # GIVEN a invalid dict
-        ref_json = {"path": "/tmp", "reference": ""}
+        ref_json = {"path": "this_path", "reference": ""}
         tmp = tmp_path / "tmp"
         tmp.mkdir()
         output_json = tmp / "/"
@@ -471,3 +419,155 @@ def test_find_file_index(tmpdir):
     assert isinstance(result, list)
     assert str(bai_file) in result
     assert str(bai_file_2) in result
+
+
+def test_singularity_shellcmd(singularity_container):
+    """test singularity shell cmd
+    """
+
+    # GIVEN a dummy command
+    dummy_command='ls this_path'
+    correct_shellcmd='exec --bind this_path/path1 --bind this_path/path2 ls this_path'
+
+    with mock.patch.object(shutil, 'which') as mocked:
+        mocked.return_value = "/my_home/binary_path/singularity"
+        
+        # WHEN building singularity command
+        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
+
+        # THEN successfully return a correct singularity cmd
+        assert correct_shellcmd in shellcmd
+
+
+def test_singularity_shellcmd_sif_not_exist():
+    """test singularity shell cmd with non-existing file
+    """
+
+    # GIVEN a dummy command
+    dummy_command='ls this_path'
+    dummy_sif_path='/some_path/my_sif_path_3.1415/container.sif'
+    error_msg = "container file does not exist"
+
+    # WHEN building singularity command
+    # THEN successfully get error that container doesn't exist 
+    with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
+        mocked.return_value = "/my_home/binary_path/singularity"
+
+        shellcmd=singularity(sif_path=dummy_sif_path, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
+
+
+def test_singularity_shellcmd_cmd_not_exist(singularity_container):
+    """test singularity shell cmd with nonexisting singularity command
+    """
+
+    # GIVEN a dummy command
+    dummy_command='ls this_path'
+    error_msg = "singularity command does not exist"
+
+    # WHEN building singularity command
+    # THEN successfully get error if singualrity command doesn't exist 
+    with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
+        mocked.return_value = None
+ 
+        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
+
+  
+  
+def test_merge_json(config_files):
+    # GIVEN a dict and json file
+    ref_dict = json.load(open(config_files['reference'], 'r'))
+
+    json_file = config_files['sample']
+
+    # WHEN passing dict and json file to merge
+    merge_dict = merge_json(ref_dict, json_file)
+
+    # THEN It will merge both the data and return dict
+    assert isinstance(merge_dict, dict)
+    assert "samples" in merge_dict
+    assert "reference" in merge_dict
+
+
+def test_merge_json_error(config_files):
+    with pytest.raises(Exception, match=r"No such file or directory"):
+        # GIVEN a dict and invalid json file path
+        ref_dict = json.load(open(config_files['reference'], 'r'))
+        json_file = 'reference.json'
+
+        # WHEN passing python dict and invalid json path
+        # THEN it should throw OSError as FileNotFoundError
+        assert merge_json(ref_dict, json_file)
+
+
+def test_validate_fastq_pattern():
+    #GIVEN a path to a file with correct fastq file prefix
+    fastq_path_r1 = "/home/analysis/dummy_tumor_R_1.fastq.gz"
+    fastq_path_r2 = "/home/analysis/dummy_normal_R_2.fastq.gz"
+    #THEN it should return the correct prefix
+    assert validate_fastq_pattern(fastq_path_r1) == "dummy_tumor_R"
+    assert validate_fastq_pattern(fastq_path_r2) == "dummy_normal_R"
+
+    with pytest.raises(AttributeError) as excinfo:
+        #GIVEN a path to a file with incorrect fastq file prefix
+        bad_fastq_path_1 = "/home/analysis/dummy_tumor.fastq.gz"
+        validate_fastq_pattern(bad_fastq_path_1)
+        #THEN AttributeError is raised
+    assert excinfo.value
+
+    with pytest.raises(AttributeError) as excinfo:
+        #GIVEN a path to a file with incorrect fastq file prefix
+        bad_fastq_path_2 = "/home/analysis/dummy_tumor_R3.fastq.gz"
+        validate_fastq_pattern(bad_fastq_path_2)
+        #THEN AttributeError is raised
+    assert excinfo.value
+
+    with pytest.raises(AttributeError) as excinfo:
+        #GIVEN a path to a file with incorrect fastq file prefix
+        bad_fastq_path_3 = "/home/analysis/dummy_tumor_R_2.bam"
+        validate_fastq_pattern(bad_fastq_path_3)
+        #THEN AttributeError is raised
+    assert excinfo.value
+
+
+def test_get_panel_chrom():
+    #GIVEN a valid PANEL BED file
+    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
+    #THEN it should return a set containing multiple unique chromosomes
+    assert len(get_panel_chrom(panel_bed_file)) > 0
+
+
+def test_create_fastq_symlink(tmpdir_factory, caplog):
+    #GIVEN a list of valid input fastq files from test directory containing 4 files
+    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
+    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
+    filenames = [
+        "tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz",
+        "normal_R_2.fastq.gz"
+    ]
+    successful_log = "skipping"
+    casefiles = [Path(symlink_from_path, x) for x in filenames]
+    for casefile in casefiles:
+        casefile.touch()
+    with caplog.at_level(logging.INFO):
+        create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
+        #THEN destination should have 4 files
+        assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
+        #THEN exception triggers log message containing "skipping"
+        assert successful_log in caplog.text
+
+
+def test_get_fastq_bind_path(tmpdir_factory):
+    #GIVEN a list of valid input fastq filenames and test directories
+    filenames = [
+        "tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz",
+        "normal_R_2.fastq.gz"
+    ]
+    #WHEN files are created, and symlinks are made in symlink directory
+    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
+    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
+    casefiles = [Path(symlink_from_path, x) for x in filenames]
+    for casefile in casefiles:
+        casefile.touch()
+    create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
+    #THEN function returns list containing the original parent path!
+    assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]

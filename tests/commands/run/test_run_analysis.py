@@ -6,6 +6,7 @@ import click
 import pytest
 import glob
 from unittest import mock
+from pathlib import Path
 
 
 def test_run_analysis_tumor_normal_dry_run(invoke_cli, tumor_normal_config):
@@ -38,28 +39,19 @@ def test_run_analysis_click_abort(invoke_cli, tumor_only_config,
     assert result.exit_code == 1
 
 
-def test_run_analysis_create_dir(invoke_cli, tumor_only_config, tmp_path):
+def test_run_analysis_create_dir(invoke_cli, tumor_only_config):
     # GIVEN a tumor-only config file
     # WHEN running analysis
+
     with open(tumor_only_config) as fh:
         tumor_config = json.load(fh)
     log_dir = tumor_config['analysis']['log']
+    Path(log_dir).mkdir(exist_ok=True)
+    Path(log_dir, "logfile.log").touch(exist_ok=True)
 
     with mock.patch.object(subprocess, 'run') as mocked:
         mocked.return_value.stdout = 1
-        result = invoke_cli([
-            'run', 'analysis', '-s', tumor_only_config, '-r', '--account',
-            'development'
-        ])
+        invoke_cli(['run', 'analysis', '-s', tumor_only_config, '-r', '--account',
+                             'development'])
         # THEN it should abort with error
-        assert os.path.exists(re.sub('/$', '.1/', log_dir))
-
-
-# def test_run_analysis_exception(invoke_cli, tumor_only_config):
-#     # GIVEN a tumor-only config file
-#     # WHEN running analysis with dummy option
-#     with mock.patch.object(subprocess, 'run') as mocked:
-#         result = invoke_cli(['run', 'analysis', '-s', tumor_only_config, '-r', '--account',
-#                              'development', '--snakemake-opt', '--dummy'])
-#     # THEN It should abort the analysis with exit_code 1
-#     assert result.exit_code == 1
+        assert Path(re.sub('/$', '.1/', log_dir)).exists()
