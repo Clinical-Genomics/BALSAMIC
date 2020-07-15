@@ -100,7 +100,7 @@ class VarcallerAttribute(BaseModel):
             raise ValueError(f"{value} not a valid argument!")
         return value
 
-    @validator("type", check_fields=False)
+    @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value)-> str:
         valid_mutation_type_fields = ["SNV", "SV", "CNV"]
         if value not in valid_mutation_type_fields:
@@ -293,7 +293,7 @@ class BalsamicConfigModel(BaseModel):
     vcf: VCFModel
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
-    reference: Dict[str, FilePath]
+    reference: Dict[str, Path]
     singularity: FilePath
     bioinfo_tools: BioinfoToolsModel
     conda_env_yaml: FilePath = CONDA_ENV_YAML
