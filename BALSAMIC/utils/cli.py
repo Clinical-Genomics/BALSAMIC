@@ -11,7 +11,6 @@ import logging
 import click
 import graphviz
 
-
 from pathlib import Path
 from colorclass import Color
 from io import StringIO
@@ -20,6 +19,8 @@ from collections import defaultdict
 from BALSAMIC.utils.constants import CONDA_ENV_PATH
 
 LOG = logging.getLogger(__name__)
+
+from BALSAMIC.utils.exc import BalsamicError 
 
 class CaptureStdout(list):
     '''
@@ -331,6 +332,40 @@ def get_file_status_string(file_to_check):
     
     return return_str, file_status
 
+
+def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
+    """Run within container
+
+    Excutes input command string via Singularity container image
+
+    Args:
+        sif_path: Path to singularity image file (sif)
+        cmd: A string for series of commands to run
+        bind_path: a path to bind within container
+
+    Returns:
+        A sanitized Singularity cmd
+
+    Raises:
+        BalsamicError: An error occured while creating cmd
+    """
+
+    singularity_cmd = shutil.which("singularity")
+    if not singularity_cmd:
+        raise BalsamicError("singularity command does not exist")
+
+    if not Path(sif_path).is_file():
+        raise BalsamicError("container file does not exist")
+
+    singularity_bind_path = ""
+    for bind_path in bind_paths:
+        singularity_bind_path += '--bind {} '.format(bind_path)
+
+    shellcmd='singularity exec {} {}'.format(singularity_bind_path, cmd)
+
+    return ' '.join(shellcmd.split())
+
+  
 def merge_json(*args):
     """
     Take a list of json files and merges them together
@@ -466,5 +501,3 @@ def get_fastq_bind_path(fastq_path: Path) -> list():
     for fastq_file_path in Path(fastq_path).iterdir():
         parents.add(Path(fastq_file_path).resolve().parent.as_posix())
     return list(parents)
-
-
