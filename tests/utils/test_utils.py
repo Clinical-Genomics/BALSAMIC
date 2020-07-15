@@ -425,7 +425,9 @@ def test_singularity_shellcmd(singularity_container):
 
     # GIVEN a dummy command
     dummy_command = 'ls this_path'
-    correct_shellcmd = 'exec --bind this_path/path1 --bind this_path/path2 ls this_path'
+    dummy_path_1 = 'this_path/path1'
+    dummy_path_2 = 'this_path/path2'
+    correct_shellcmd = 'exec --bind {} --bind {} ls this_path'.format(dummy_path_1, dummy_path_2)
 
     with mock.patch.object(shutil, 'which') as mocked:
         mocked.return_value = "/my_home/binary_path/singularity"
@@ -434,7 +436,7 @@ def test_singularity_shellcmd(singularity_container):
         shellcmd = singularity(
             sif_path=singularity_container,
             cmd=dummy_command,
-            bind_paths=['this_path/path1', 'this_path/path2'])
+            bind_paths=[dummy_path_1, dummy_path_2])
 
         # THEN successfully return a correct singularity cmd
         assert correct_shellcmd in shellcmd
@@ -447,6 +449,8 @@ def test_singularity_shellcmd_sif_not_exist():
     # GIVEN a dummy command
     dummy_command = 'ls this_path'
     dummy_sif_path = '/some_path/my_sif_path_3.1415/container.sif'
+    dummy_path_1 = 'this_path/path1'
+    dummy_path_2 = 'this_path/path2'
     error_msg = "container file does not exist"
 
     # WHEN building singularity command
@@ -456,10 +460,10 @@ def test_singularity_shellcmd_sif_not_exist():
                                                              match=error_msg):
         mocked.return_value = "/my_home/binary_path/singularity"
 
-        shellcmd = singularity(
+        singularity(
             sif_path=dummy_sif_path,
             cmd=dummy_command,
-            bind_paths=['this_path/path1', 'this_path/path2'])
+            bind_paths=[dummy_path_1, dummy_path_2])
 
 
 def test_singularity_shellcmd_cmd_not_exist(singularity_container):
@@ -477,7 +481,7 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
                                                              match=error_msg):
         mocked.return_value = None
 
-        shellcmd = singularity(
+        singularity(
             sif_path=singularity_container,
             cmd=dummy_command,
             bind_paths=['this_path/path1', 'this_path/path2'])
