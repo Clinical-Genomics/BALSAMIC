@@ -473,6 +473,8 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
     # GIVEN a dummy command
     dummy_command = 'ls this_path'
     error_msg = "singularity command does not exist"
+    dummy_path_1 = 'this_path/path1'
+    dummy_path_2 = 'this_path/path2'
 
     # WHEN building singularity command
     # THEN successfully get error if singualrity command doesn't exist
@@ -484,7 +486,7 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
         singularity(
             sif_path=singularity_container,
             cmd=dummy_command,
-            bind_paths=['this_path/path1', 'this_path/path2'])
+            bind_paths=[dummy_path_1, dummy_path_2])
 
 
 def test_merge_json(config_files):
