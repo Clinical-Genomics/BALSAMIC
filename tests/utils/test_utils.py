@@ -14,14 +14,12 @@ from pathlib import Path
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (
-    SnakeMake, CaptureStdout, iterdict,
-    get_snakefile, createDir, write_json, get_config,
-    recursive_default_dict, convert_defaultdict_to_regular_dict,
-    get_file_status_string, get_from_two_key, find_file_index, 
-    merge_json, validate_fastq_pattern,
-    get_panel_chrom, get_bioinfo_tools_list,
-    get_sample_dict, get_sample_names,
-    create_fastq_symlink, get_fastq_bind_path, singularity)
+    SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
+    get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
+    get_file_status_string, get_from_two_key, find_file_index, merge_json,
+    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
+    get_sample_dict, get_sample_names, create_fastq_symlink,
+    get_fastq_bind_path, singularity)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_conda_env, get_picard_mrkdup,
@@ -426,14 +424,17 @@ def test_singularity_shellcmd(singularity_container):
     """
 
     # GIVEN a dummy command
-    dummy_command='ls this_path'
-    correct_shellcmd='exec --bind this_path/path1 --bind this_path/path2 ls this_path'
+    dummy_command = 'ls this_path'
+    correct_shellcmd = 'exec --bind this_path/path1 --bind this_path/path2 ls this_path'
 
     with mock.patch.object(shutil, 'which') as mocked:
         mocked.return_value = "/my_home/binary_path/singularity"
-        
+
         # WHEN building singularity command
-        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
+        shellcmd = singularity(
+            sif_path=singularity_container,
+            cmd=dummy_command,
+            bind_paths=['this_path/path1', 'this_path/path2'])
 
         # THEN successfully return a correct singularity cmd
         assert correct_shellcmd in shellcmd
@@ -444,16 +445,21 @@ def test_singularity_shellcmd_sif_not_exist():
     """
 
     # GIVEN a dummy command
-    dummy_command='ls this_path'
-    dummy_sif_path='/some_path/my_sif_path_3.1415/container.sif'
+    dummy_command = 'ls this_path'
+    dummy_sif_path = '/some_path/my_sif_path_3.1415/container.sif'
     error_msg = "container file does not exist"
 
     # WHEN building singularity command
-    # THEN successfully get error that container doesn't exist 
-    with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
+    # THEN successfully get error that container doesn't exist
+    with mock.patch.object(shutil,
+                           'which') as mocked, pytest.raises(BalsamicError,
+                                                             match=error_msg):
         mocked.return_value = "/my_home/binary_path/singularity"
 
-        shellcmd=singularity(sif_path=dummy_sif_path, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
+        shellcmd = singularity(
+            sif_path=dummy_sif_path,
+            cmd=dummy_command,
+            bind_paths=['this_path/path1', 'this_path/path2'])
 
 
 def test_singularity_shellcmd_cmd_not_exist(singularity_container):
@@ -461,18 +467,22 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
     """
 
     # GIVEN a dummy command
-    dummy_command='ls this_path'
+    dummy_command = 'ls this_path'
     error_msg = "singularity command does not exist"
 
     # WHEN building singularity command
-    # THEN successfully get error if singualrity command doesn't exist 
-    with mock.patch.object(shutil, 'which') as mocked, pytest.raises(BalsamicError, match=error_msg):
+    # THEN successfully get error if singualrity command doesn't exist
+    with mock.patch.object(shutil,
+                           'which') as mocked, pytest.raises(BalsamicError,
+                                                             match=error_msg):
         mocked.return_value = None
- 
-        shellcmd=singularity(sif_path=singularity_container, cmd=dummy_command, bind_paths=['this_path/path1', 'this_path/path2'])
 
-  
-  
+        shellcmd = singularity(
+            sif_path=singularity_container,
+            cmd=dummy_command,
+            bind_paths=['this_path/path1', 'this_path/path2'])
+
+
 def test_merge_json(config_files):
     # GIVEN a dict and json file
     ref_dict = json.load(open(config_files['reference'], 'r'))
