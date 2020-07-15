@@ -10,7 +10,8 @@ import click
 from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_schedulerpy 
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
-from BALSAMIC.utils.cli import get_config
+from BALSAMIC.utils.cli import get_config, get_fastq_bind_path
+from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -144,12 +145,14 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     if 'panel' in sample_config.keys():
         bind_path.append(sample_config['panel']['capture_kit'])
     bind_path.append(sample_config['analysis']['analysis_dir'])
+    bind_path += get_fastq_bind_path(sample_config["analysis"]["fastq_path"])
+
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
     balsamic_run.case_name = case_name
-    balsamic_run.working_dir = sample_config['analysis']['analysis_dir'] +  \
-        case_name + '/BALSAMIC_run/'
+    balsamic_run.working_dir = Path(sample_config['analysis']['analysis_dir'], 
+        case_name, 'BALSAMIC_run').as_posix() + "/"
     balsamic_run.snakefile = snake_file if snake_file else get_snakefile(
         analysis_type, sequencing_type)
     balsamic_run.configfile = sample_config_path

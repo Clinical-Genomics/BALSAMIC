@@ -1,15 +1,25 @@
 import os
-import re
 import json
 import yaml
 import sys
 import collections
+import BALSAMIC
+import snakemake
+import re
+import shutil
+import logging
+import click
+import graphviz
 
+
+from pathlib import Path
 from colorclass import Color
 from io import StringIO
-from pathlib import Path
 from itertools import chain
 from collections import defaultdict
+from BALSAMIC.utils.constants import CONDA_ENV_PATH
+
+LOG = logging.getLogger(__name__)
 
 class CaptureStdout(list):
     '''
@@ -167,21 +177,6 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def get_packages(yaml_file):
-    '''
-    return packages found in a conda yaml file
-
-    input: conda yaml file path
-    output: list of packages
-    '''
-    try:
-        with open(yaml_file, 'r') as f:
-            pkgs = yaml.safe_load(f)['dependencies']
-    except OSError as error:
-        raise error
-
-    return (pkgs)
-
 
 def write_json(json_out, output_config):
 
@@ -190,27 +185,6 @@ def write_json(json_out, output_config):
             json.dump(json_out, fn, indent=4)
     except OSError as error:
         raise error
-
-
-def get_package_split(condas):
-    '''
-    Get a list of conda env files, and extract pacakges
-
-    input: conda env files
-    output: dict of packages and their version
-    '''
-
-    pkgs = [
-        "bwa", "bcftools", "cutadapt", "fastqc", "gatk", "manta", "picard",
-        "sambamba", "strelka", "samtools", "tabix", "vardic"
-    ]
-
-    pkgs = dict(
-        [[y.split("=")[0], y.split("=")[1]]
-         for y in set(chain.from_iterable([get_packages(s) for s in condas]))
-         if y.split("=")[0] in pkgs])
-
-    return (pkgs)
 
 
 def iterdict(dic):
@@ -263,19 +237,6 @@ def get_config(config_name):
     else:
         raise FileNotFoundError(f'Config for {config_name} was not found.')
 
-
-def get_ref_path(input_json):
-    """
-    Set full path to reference files
-    Input: reference config file
-    Return: json file with abspath
-    """
-    with open(input_json) as fh:
-        ref_json = json.load(fh)
-        for k, v in ref_json['reference'].items():
-            ref_json['reference'][k] = os.path.abspath(v)
-
-    return ref_json
 
 def recursive_default_dict():
     '''
@@ -337,7 +298,7 @@ def get_file_extension(file_path):
             break
 
     if not file_extension:
-        file_name, file_extension = os.path.splitext(file_path)
+        _, file_extension = os.path.splitext(file_path)
 
     return file_extension
 
@@ -369,3 +330,141 @@ def get_file_status_string(file_to_check):
         return_str = Color(u"[{green}\u2713{/green}] Found: ") + file_to_check
     
     return return_str, file_status
+
+def merge_json(*args):
+    """
+    Take a list of json files and merges them together
+    Input: list of json file
+    Output: dictionary of merged json
+    """
+
+    json_out = dict()
+    for json_file in args:
+        try:
+            if isinstance(json_file, dict):
+                json_out = {**json_out, **json_file}
+            else:
+                with open(json_file) as fn:
+                    json_out = {**json_out, **json.load(fn)}
+        except OSError as error:
+            raise error
+    return json_out
+
+
+def validate_fastq_pattern(sample):
+    """Finds the correct filename prefix from file path, and returns it.
+    An error is raised if sample name has invalid pattern """
+
+    fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
+    sample_basename = Path(sample).name
+
+    file_str = sample_basename[0:(
+        fq_pattern.search(sample_basename).span()[0] + 1)]
+    return file_str
+
+
+def get_panel_chrom(panel_bed) -> list:
+    """Returns a set of chromosomes present in PANEL BED"""
+
+    lines = [line.rstrip('\n') for line in open(panel_bed, 'r')]
+    return {s.split('\t')[0] for s in lines}
+
+
+def get_bioinfo_tools_list(conda_env_path) -> dict:
+    """Parses the names and versions of bioinfo tools 
+    used by BALSAMIC from config YAML into a dict """
+    
+    bioinfo_tools = {}
+    for yaml_file in Path(conda_env_path).rglob('*.yaml'):
+        with open(yaml_file, "r") as f:
+            packages = yaml.safe_load(f).get("dependencies")
+            for p in packages:
+                try:
+                    name, version = p.split("=")
+                except ValueError:
+                    name, version = p, None
+                finally:
+                    bioinfo_tools[name] = version
+    return bioinfo_tools
+
+
+def get_sample_dict(tumor, normal) -> dict:
+    """Concatenates sample dicts for all provided files"""
+    samples = {}
+    if normal:
+        for sample in normal:
+            key, val = get_sample_names(sample, "normal")
+            samples[key] = val
+
+    for sample in tumor:
+        key, val = get_sample_names(sample, "tumor")
+        samples[key] = val
+    return samples
+
+
+def get_sample_names(filename, sample_type):
+    """Creates a dict with sample prefix, sample type, and readpair suffix"""
+    file_str = validate_fastq_pattern(filename)
+    if file_str:
+        return file_str, {
+            "file_prefix": file_str,
+            "type": sample_type,
+            "readpair_suffix": ["1", "2"]
+        }
+
+
+def create_fastq_symlink(casefiles, symlink_dir: Path):
+    """Creates symlinks for provided files in analysis/fastq directory.
+    Identifies file prefix pattern, and also creates symlinks for the 
+    second read file, if needed"""
+
+    for filename in casefiles:
+        parent_dir = Path(filename).parents[0]
+        file_str = validate_fastq_pattern(filename)
+        for f in parent_dir.rglob(f'*{file_str}*.fastq.gz'):
+            try:
+                LOG.info(
+                    f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
+                Path(symlink_dir, f.name).symlink_to(f)
+            except FileExistsError:
+                LOG.info(f"File {symlink_dir / f.name} exists, skipping")
+
+
+def generate_graph(config_collection_dict, config_path):
+    """Generate DAG graph using snakemake stdout output"""
+
+    with CaptureStdout() as graph_dot:
+        snakemake.snakemake(snakefile=get_snakefile(
+            analysis_type=config_collection_dict["analysis"]["analysis_type"],
+            sequencing_type=config_collection_dict["analysis"]
+            ["sequencing_type"]),
+                            dryrun=True,
+                            configfiles=[config_path],
+                            printrulegraph=True)
+
+    graph_title = "_".join([
+        'BALSAMIC', BALSAMIC.__version__,
+        config_collection_dict["analysis"]["case_id"]
+    ])
+    graph_dot = "".join(graph_dot).replace(
+        'snakemake_dag {',
+        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+    graph_obj = graphviz.Source(
+        graph_dot,
+        filename=".".join(
+            config_collection_dict["analysis"]["dag"].split(".")[:-1]),
+        format="pdf",
+        engine="dot")
+    graph_obj.render(cleanup=True)
+
+
+def get_fastq_bind_path(fastq_path: Path) -> list():
+    """Takes a path with symlinked fastq files. 
+    Returns unique paths to parent directories for singulatiry bind
+    """
+    parents = set()
+    for fastq_file_path in Path(fastq_path).iterdir():
+        parents.add(Path(fastq_file_path).resolve().parent.as_posix())
+    return list(parents)
+
+
