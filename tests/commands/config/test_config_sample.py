@@ -9,13 +9,6 @@ from unittest import mock
 from click.testing import CliRunner
 from BALSAMIC.commands.base import cli
 
-from BALSAMIC.commands.config.case import merge_json, \
-    set_panel_bed, get_output_config, get_sample_config, get_analysis_type, \
-    check_exist
-from BALSAMIC.commands.config.case import configure_fastq, link_fastq
-from BALSAMIC.commands.config.case import get_fastq_path
-
-
 def test_dag_graph_success(
     tumor_normal_wgs_config,
     tumor_only_config,
