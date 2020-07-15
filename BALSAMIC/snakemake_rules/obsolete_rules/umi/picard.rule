@@ -25,7 +25,7 @@ rule picard_FastqToSam_umi:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar FastqToSam \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar FastqToSam \
 O={output} \
 F1={input.fq1} \
 F2={input.fq2} \
@@ -47,7 +47,7 @@ rule picard_MarkIlluminaAdaptersi_umi:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MarkIlluminaAdapters \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar MarkIlluminaAdapters \
 I={input} \
 O={output.bam} \
 M={output.txt}
@@ -64,7 +64,7 @@ rule picard_SamToFastq_umi:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar SamToFastq \
  I={input} \
  CLIPPING_ATTRIBUTE=XT \
  CLIPPING_ACTION=X \
@@ -87,7 +87,7 @@ rule picard_MergeBamAlignment_mrkadp_umi:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar MergeBamAlignment \
 UNMAPPED={input.unaligned} \
 ALIGNED={input.aligned} \
 O={output} \
@@ -112,7 +112,7 @@ rule picard_SamToFastq_cnsalg_umi:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar SamToFastq \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar SamToFastq \
 VALIDATION_STRINGENCY=SILENT \
 INPUT={input} \
 F={output} \
@@ -134,7 +134,7 @@ rule picard_MergeBamAlignment_cnsalg_umi:
     shell:
         """
 source activate {params.conda}; 
-java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard-2.18.11.jar MergeBamAlignment \
+java -Djava.io.tmpdir={params.tmpdir} -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar MergeBamAlignment \
 VALIDATION_STRINGENCY=SILENT \
 UNMAPPED={input.unaligned} \
 ALIGNED={input.aligned} \
