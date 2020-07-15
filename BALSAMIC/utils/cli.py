@@ -20,7 +20,8 @@ from BALSAMIC.utils.constants import CONDA_ENV_PATH
 
 LOG = logging.getLogger(__name__)
 
-from BALSAMIC.utils.exc import BalsamicError 
+from BALSAMIC.utils.exc import BalsamicError
+
 
 
 class CaptureStdout(list):
@@ -173,7 +174,6 @@ def createDir(path, interm_path=[]):
     else:
         os.makedirs(os.path.abspath(path), exist_ok=True)
         return os.path.abspath(path)
-
 
 
 def write_json(json_out, output_config):
@@ -362,11 +362,11 @@ def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
     for bind_path in bind_paths:
         singularity_bind_path += '--bind {} '.format(bind_path)
 
-    shellcmd='singularity exec {} {}'.format(singularity_bind_path, cmd)
+    shellcmd = 'singularity exec {} {}'.format(singularity_bind_path, cmd)
 
     return ' '.join(shellcmd.split())
 
-  
+
 def merge_json(*args):
     """
     Take a list of json files and merges them together
@@ -409,7 +409,7 @@ def get_panel_chrom(panel_bed) -> list:
 def get_bioinfo_tools_list(conda_env_path) -> dict:
     """Parses the names and versions of bioinfo tools 
     used by BALSAMIC from config YAML into a dict """
-    
+
     bioinfo_tools = {}
     for yaml_file in Path(conda_env_path).rglob('*.yaml'):
         with open(yaml_file, "r") as f:

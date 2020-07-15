@@ -28,7 +28,8 @@ LOG = logging.getLogger(__name__)
 
 @click.command(
     "deliver",
-    short_help="Creates a YAML file with output from variant caller and alignment.",
+    short_help=
+    "Creates a YAML file with output from variant caller and alignment.",
 )
 @click.option(
     "--sample-config",
@@ -77,6 +78,7 @@ def deliver(context, sample_config):
     cmd=sys.executable + " -m  " + report.build_cmd()
     subprocess.check_output(cmd.split(), shell=False)
 
+
     with CaptureStdout():
         snakemake.snakemake(
             snakefile=snakefile,
@@ -87,8 +89,8 @@ def deliver(context, sample_config):
         )
 
     delivery_file_name = os.path.join(
-        yaml_write_directory, sample_config_dict["analysis"]["case_id"] + ".hk"
-    )
+        yaml_write_directory,
+        sample_config_dict["analysis"]["case_id"] + ".hk")
     delivery_file_raw = os.path.join(
         yaml_write_directory,
         sample_config_dict["analysis"]["case_id"] + "_delivery_raw.hk",
@@ -116,8 +118,9 @@ def deliver(context, sample_config):
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
 
     output_files_merged_interm = merge_dict_on_key(
-        dict_1=summary_dict, dict_2=delivery_file_raw_dict, by_key="output_file"
-    )
+        dict_1=summary_dict,
+        dict_2=delivery_file_raw_dict,
+        by_key="output_file")
     output_files_merged = merge_dict_on_key(
         dict_1=output_files_merged_interm,
         dict_2=delivery_file_ready_dict,
@@ -136,12 +139,15 @@ def deliver(context, sample_config):
 
             file_path_index = find_file_index(interm_dict["path"])
             if len(file_path_index) > 1:
-                LOG.warning("More than one index found for %s" % interm_dict["path"])
+                LOG.warning(
+                    "More than one index found for %s" % interm_dict["path"])
                 LOG.warning("Taking %s index file" % list(file_path_index)[0])
-            interm_dict["path_index"] = file_path_index[0] if file_path_index else ""
+            interm_dict[
+                "path_index"] = file_path_index[0] if file_path_index else ""
 
             interm_dict["format"] = get_file_extension(interm_dict["path"])
-            interm_dict["tag"] = ",".join(interm_dict.get("wildcard_name", ["unknown"]))
+            interm_dict["tag"] = ",".join(
+                interm_dict.get("wildcard_name", ["unknown"]))
             interm_dict["id"] = "unknown"
 
             delivery_id = list()
@@ -152,8 +158,7 @@ def deliver(context, sample_config):
                     by_key="wildcard_value",
                     by_value="sample",
                     default=None,
-                )
-            )
+                ))
 
             delivery_id.append(
                 get_from_two_key(
@@ -162,12 +167,12 @@ def deliver(context, sample_config):
                     by_key="wildcard_value",
                     by_value="case_name",
                     default=None,
-                )
-            )
+                ))
 
             delivery_id = list(filter(None, delivery_id))
             if len(delivery_id) > 1:
-                LOG.error(f"Ambiguous delivery id. Wilcard has both: {delivery_id}")
+                LOG.error(
+                    f"Ambiguous delivery id. Wilcard has both: {delivery_id}")
                 raise BalsamicError("Delivery file parsing process failed.")
 
             if delivery_id:
@@ -175,29 +180,23 @@ def deliver(context, sample_config):
 
             delivery_json["files"].append(interm_dict)
 
-    delivery_json["files"].append(
-        {
-            "path": report_file_name,
-            "date": datetime.date.today().isoformat(),
-            "step": "balsamic_delivery",
-            "format": ".html",
-            "tag": "report",
-            "id": sample_config_dict["analysis"]["case_id"],
-        }
-    )
+    delivery_json["files"].append({
+        "path":
+        report_file_name,
+        "date":
+        datetime.date.today().isoformat(),
+        "step":
+        "balsamic_delivery",
+        "format":
+        ".html",
+        "tag":
+        "report",
+        "id":
+        sample_config_dict["analysis"]["case_id"],
+    })
     write_json(delivery_json, delivery_file_name)
     with open(delivery_file_name + ".yaml", "w") as fn:
         yaml.dump(delivery_json, fn, default_flow_style=False)
 
     LOG.info(f"Housekeeper delivery file {delivery_file_name}")
     LOG.info(f"Workflow report file {report_file_name}")
-
-
-#    for entries in deliveries:
-#        delivery_file = entries[2]
-#        if os.path.isfile(delivery_file):
-#            print(Color(u"[{green}\u2713{/green}]"), entries)
-#        else:
-#            print(Color(u"[{red}\u2717{/red}]"), entries)
-#        break
-# print(dag)

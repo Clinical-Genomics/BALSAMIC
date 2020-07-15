@@ -97,12 +97,12 @@ def sample_fastq(tmp_path_factory):
     normal_fastq_R_2 = fastq_dir / "normal_R_2.fastq.gz"
 
     for fastq_file in (
-        fastq_valid,
-        fastq_invalid,
-        tumor_fastq_R_1,
-        tumor_fastq_R_2,
-        normal_fastq_R_1,
-        normal_fastq_R_2,
+            fastq_valid,
+            fastq_invalid,
+            tumor_fastq_R_1,
+            tumor_fastq_R_2,
+            normal_fastq_R_1,
+            normal_fastq_R_2,
     ):
         fastq_file.touch()
 
@@ -199,9 +199,8 @@ def tumor_normal_config(
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_wgs_config(
-    tmp_path_factory, sample_fastq, analysis_dir, singularity_container, reference_json
-):
+def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                            singularity_container, reference_json):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -275,9 +274,8 @@ def tumor_only_config(
 
 
 @pytest.fixture(scope="session")
-def tumor_only_wgs_config(
-    tmp_path_factory, sample_fastq, analysis_dir, singularity_container, reference_json
-):
+def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                          singularity_container, reference_json):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -315,7 +313,8 @@ def sample_config():
     sample_config = {
         "QC": {
             "picard_rmdup": "False",
-            "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+            "adapter":
+            "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
             "min_seq_length": "25",
             "quality_trim": "True",
             "adapter_trim": "False",
@@ -323,30 +322,76 @@ def sample_config():
             "umi_trim_length": "5",
         },
         "analysis": {
-            "case_id": "id1",
-            "analysis_type": "paired",
-            "analysis_dir": "tests/test_data/",
-            "fastq_path": "tests/test_data/id1/fastq/",
-            "script": "tests/test_data/id1/scripts/",
-            "log": "tests/test_data/id1/logs/",
-            "result": "tests/test_data/id1/analysis/",
-            "config_creation_date": "yyyy-mm-dd xx",
-            "BALSAMIC_version": "2.9.8",
-            "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
+            "case_id":
+            "id1",
+            "analysis_type":
+            "paired",
+            "analysis_dir":
+            "tests/test_data/",
+            "fastq_path":
+            "tests/test_data/id1/fastq/",
+            "script":
+            "tests/test_data/id1/scripts/",
+            "log":
+            "tests/test_data/id1/logs/",
+            "result":
+            "tests/test_data/id1/analysis/",
+            "config_creation_date":
+            "yyyy-mm-dd xx",
+            "BALSAMIC_version":
+            "2.9.8",
+            "dag":
+            "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
         },
         "vcf": {
-            "manta": {"mutation": "somatic", "type": "SV"},
-            "vardict": {"mutation": "somatic", "type": "SNV"},
-            "pindel": {"mutation": "somatic", "type": "SV"},
-            "strelka": {"mutation": "somatic", "type": "SNV"},
-            "mutect": {"mutation": "somatic", "type": "SNV"},
-            "tnscope": {"mutation": "somatic", "type": "SNV"},
-            "tnsnv": {"mutation": "somatic", "type": "SNV"},
-            "tnhaplotyper": {"mutation": "somatic", "type": "SNV"},
-            "dnascope": {"mutation": "germline", "type": "SNV"},
-            "manta_germline": {"mutation": "germline", "type": "SV"},
-            "haplotypecaller": {"mutation": "germline", "type": "SNV"},
-            "strelka_germline": {"mutation": "germline", "type": "SNV"},
+            "manta": {
+                "mutation": "somatic",
+                "type": "SV"
+            },
+            "vardict": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "pindel": {
+                "mutation": "somatic",
+                "type": "SV"
+            },
+            "strelka": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "mutect": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnscope": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnsnv": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "tnhaplotyper": {
+                "mutation": "somatic",
+                "type": "SNV"
+            },
+            "dnascope": {
+                "mutation": "germline",
+                "type": "SNV"
+            },
+            "manta_germline": {
+                "mutation": "germline",
+                "type": "SV"
+            },
+            "haplotypecaller": {
+                "mutation": "germline",
+                "type": "SNV"
+            },
+            "strelka_germline": {
+                "mutation": "germline",
+                "type": "SNV"
+            },
         },
         "samples": {
             "S1_R": {
