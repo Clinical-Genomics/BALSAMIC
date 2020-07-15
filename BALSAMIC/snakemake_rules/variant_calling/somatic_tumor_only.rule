@@ -28,7 +28,7 @@ rule vardict_tumor_only:
     bamT = bam_dir + "tumor.merged.bam",
     bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
   output:
-    vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz"
+    temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
   params:
     af = "0.001",
     max_pval = "0.9",
@@ -84,7 +84,7 @@ rule mutect2_tumor_only:
     bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
     bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
   output:
-    vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz"
+    temp(vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz")
   params:
     result_dir = vcf_dir + "mutect/",
     conda = get_conda_env(config["conda_env_yaml"],"gatk")
