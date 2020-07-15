@@ -21,9 +21,9 @@ def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, tmpdir,
     test_jobid = '999999999999'
     test_return_value = 'Submitted batch job ' + test_jobid
     scheduler_args = [
-        '1000', '1001', '1002', snakemake_job_script['snakescript']
+        '9000', '9001', '9002', snakemake_job_script['snakescript']
     ]
-    scheduler_profile = 'slurm'
+    scheduler_profile_slurm = 'slurm'
     with open(tumor_normal_config, 'r') as input_config:
         sample_config = json.load(input_config)
 
@@ -33,7 +33,7 @@ def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, tmpdir,
 
     # Construct scheduler's cmd
     scheduler_cmd = [
-        "--sample-config", tumor_normal_config, "--profile", scheduler_profile,
+        "--sample-config", tumor_normal_config, "--profile", scheduler_profile_slurm,
         "--qos", "low", "--account", "development", "--log-dir", log_dir,
         "--script-dir", script_dir, "--result-dir",
         sample_config['analysis']['result']
@@ -62,7 +62,7 @@ def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, tmpdir,
     scheduler_args = [
         '1000', '1001', '1002', snakemake_job_script['snakescript']
     ]
-    scheduler_profile = 'qsub'
+    scheduler_profile_qsub = 'qsub'
     with open(tumor_normal_config, 'r') as input_config:
         sample_config = json.load(input_config)
 
@@ -72,7 +72,7 @@ def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, tmpdir,
 
     # Construct scheduler's cmd
     scheduler_cmd = [
-        "--sample-config", tumor_normal_config, "--profile", scheduler_profile,
+        "--sample-config", tumor_normal_config, "--profile", scheduler_profile_qsub,
         "--qos", "low", "--account", "development", "--log-dir", log_dir,
         "--script-dir", script_dir, "--result-dir",
         sample_config['analysis']['result']
