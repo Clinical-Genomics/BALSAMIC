@@ -15,8 +15,6 @@ from BALSAMIC import __version__ as bv
 LOG = logging.getLogger(__name__)
 
 
-
-
 @click.command("reference",
                short_help="config workflow for generate reference")
 @click.option("-o",
