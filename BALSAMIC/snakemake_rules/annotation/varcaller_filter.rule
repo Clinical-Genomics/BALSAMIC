@@ -7,6 +7,8 @@ from BALSAMIC.utils.rule import get_threads
 from BALSAMIC.utils.models import VarCallerFilter
 from BALSAMIC.utils.constants import VARDICT_SETTINGS
 
+VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+
 rule ngs_filter_vardict:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.vcf.gz",
@@ -15,7 +17,6 @@ rule ngs_filter_vardict:
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.filtered.pass.vcf.gz",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
-    VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
     MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
     AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
     DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],
