@@ -73,16 +73,10 @@ LOG = logging.getLogger(__name__)
               required=False,
               multiple=True,
               help="Fastq files for normal sample.")
-@click.option("-f",
-              "--format",
-              required=False,
-              type=click.Choice(["fastq", "vcf", "bam"]),
-              default="fastq",
-              show_default=True)
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, singularity,
-                analysis_dir, tumor, normal, format):
+                analysis_dir, tumor, normal):
 
     try:
         samples = get_sample_dict(tumor, normal)
