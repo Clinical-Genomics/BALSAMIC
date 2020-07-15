@@ -11,6 +11,8 @@ import logging
 
 from pathlib import Path
 
+from BALSAMIC.utils.exc import BalsamicError
+
 from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict,
     get_snakefile, createDir, write_json, get_config,
