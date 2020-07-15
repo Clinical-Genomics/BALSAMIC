@@ -130,7 +130,7 @@ class SnakeMake:
             sbatch_cmd += " {dependencies} '"
 
             cluster_cmd = " --immediate-submit -j 999 " \
-                          "--jobname BALSAMIC.{}.{rulename}.{jobid}.sh " \
+                          "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh " \
                           "--cluster-config {} --cluster {} ".format(self.case_name, self.cluster_config, sbatch_cmd)
 
         sm_cmd = " snakemake --notemp -p " \
