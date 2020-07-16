@@ -62,8 +62,7 @@ def deliver(context, sample_config, analysis_type):
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
 
-    if not analysis_type:
-        analysis_type = sample_config_dict['analysis']['analysis_type']
+    analysis_type = analysis_type if analysis_type else sample_config_dict['analysis']['analysis_type']
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
