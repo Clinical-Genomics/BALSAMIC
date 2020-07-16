@@ -181,7 +181,7 @@ class AnalysisModel(BaseModel):
     result: Optional[DirectoryPath]
     benchmark: Optional[DirectoryPath]
     dag: Optional[FilePath]
-    BALSAMIC_version: str = BALSAMIC_version
+    BALSAMIC_version: str = BALSAMIC_VERSION
     config_creation_date: Optional[str]
 
     class Config:
@@ -234,7 +234,7 @@ class AnalysisModel(BaseModel):
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return Path(values.get("analysis_dir"), values.get("case_id"),
                     values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{BALSAMIC_version}_graph.pdf'
+                    ) + f'_BALSAMIC_{BALSAMIC_VERSION}_graph.pdf'
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
