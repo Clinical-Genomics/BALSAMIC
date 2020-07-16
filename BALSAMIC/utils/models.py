@@ -5,8 +5,7 @@ from pydantic import BaseModel, ValidationError, validator, Field
 from pydantic.types import DirectoryPath, FilePath
 from typing import Optional, List, Dict
 
-from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY
-from BALSAMIC import __version__ as BALSAMIC_version
+from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY, BALSAMIC_VERSION
 
 
 class VCFAttributes(BaseModel):
@@ -57,37 +56,21 @@ class VarCallerFilter(BaseModel):
     description: str
 
 
-VARDICT = VarCallerFilter(
-    AD=VCFAttributes(tag_value=5,
-                     filter_name="balsamic_low_tumor_ad",
-                     field="INFO"),
-    DP=VCFAttributes(tag_value=100,
-                     filter_name="balsamic_low_tumor_dp",
-                     field="INFO"),
-    MQ=VCFAttributes(tag_value=50, filter_name="balsamic_low_mq",
-                     field="INFO"),
-    AF_max=VCFAttributes(tag_value=1,
-                         filter_name="balsamic_af_one",
-                         field="INFO"),
-    AF_min=VCFAttributes(tag_value=0.02,
-                         filter_name="balsamic_low_af",
-                         field="INFO"),
-    varcaller_name="VarDict",
-    filter_type="general",
-    analysis_type="tumor_only",
-    description="General purpose filters used for filtering VarDict")
-
-
 class QCModel(BaseModel):
     """Contains settings for quality control and pre-processing
-        Attributes:
-            picard_rmdup : Field(bool); whether duplicate removal is to be applied in the workflow
-            adapter : Field(str(AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT)); adapter sequence to trim
-            quality_trim : Field(bool); whether quality trimming it to be performed in the workflow
-            adapter_trim : Field(bool); whether adapter trimming is to be performed in the workflow
-            umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
-            min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
-            umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+    Attributes:
+        picard_rmdup : Field(bool); whether duplicate removal is to be applied in the workflow
+        adapter : Field(str(AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT)); adapter sequence to trim
+        quality_trim : Field(bool); whether quality trimming it to be performed in the workflow
+        adapter_trim : Field(bool); whether adapter trimming is to be performed in the workflow
+        umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
+        min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
+        umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+
+    Raises:
+        ValueError: 
+            When the input in min_seq_length and umi_trim_length cannot 
+            be interpreted as integer and coerced to string
     
     """
     picard_rmdup: bool = False
@@ -102,51 +85,86 @@ class QCModel(BaseModel):
     def coerce_int_as_str(cls, value):
         return str(value)
 
+
     class Config:
         validate_all = True
 
 
+class VarcallerAttribute(BaseModel):
+    """Holds variables for variant caller software
+    Attributes:
+        mutation: 
+        mutation_type:
+        
+    Raises:
+        ValueError:
+            When a variable other than [somatic, germline] is passed in mutation field
+            When a variable other than [SNV, CNV, SV] is passed in mutation_type field
+            
+    """
+    mutation: str
+    mutation_type: str = Field(alias="type")
+
+    @validator("mutation", check_fields=False)
+    def mutation_literal(cls, value)->str:
+        valid_mutation_fields = ["somatic", "germline"]
+        if value not in valid_mutation_fields:
+            raise ValueError(f"{value} not a valid argument!")
+        return value
+
+    @validator("mutation_type", check_fields=False)
+    def mutation_type_literal(cls, value)-> str:
+        valid_mutation_type_fields = ["SNV", "SV", "CNV"]
+        if value not in valid_mutation_type_fields:
+            raise ValueError(f"{value} not a valid argument!")
+        return value
+
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
-    tnsnv: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
-    manta: Dict[str, str] = {"mutation": "somatic", "type": "SV"}
-    pindel: Dict[str, str] = {"mutation": "somatic", "type": "SV"}
-    cnvkit: Dict[str, str] = {"mutation": "somatic", "type": "CNV"}
-    mutect: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
-    vardict: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
-    strelka: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
-    tnscope: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
-    vcfmerge: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
-    dnascope: Dict[str, str] = {"mutation": "germline", "type": "SNV"}
-    tnhaplotyper: Dict[str, str] = {"mutation": "somatic", "type": "SNV"}
-    manta_germline: Dict[str, str] = {"mutation": "germline", "type": "SV"}
-    haplotypecaller: Dict[str, str] = {"mutation": "germline", "type": "SNV"}
-    strelka_germline: Dict[str, str] = {"mutation": "germline", "type": "SNV"}
-
+    tnsnv: VarcallerAttribute
+    manta: VarcallerAttribute
+    pindel: VarcallerAttribute
+    cnvkit: VarcallerAttribute
+    mutect: VarcallerAttribute
+    vardict: VarcallerAttribute
+    strelka: VarcallerAttribute
+    tnscope: VarcallerAttribute
+    vcfmerge: VarcallerAttribute
+    dnascope: VarcallerAttribute
+    tnhaplotyper: VarcallerAttribute
+    manta_germline: VarcallerAttribute
+    haplotypecaller: VarcallerAttribute
+    strelka_germline: VarcallerAttribute
 
 class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
 
-        Attributes:
-            case_id : Field(required); string case identifier
-            analysis_type : Field(required); string literal [single, paired]
-                single : if only tumor samples are provided
-                paired : if both tumor and normal samples are provided
-            sequencing_type : Field(required); string literal [targeted, wgs]
-                targeted : if capture kit was used to enrich specific genomic regions
-                wgs : if whole genome sequencing was performed
-            analysis_dir : Field(required); existing path where to save files
+    Attributes:
+    
+        case_id : Field(required); string case identifier
+        analysis_type : Field(required); string literal [single, paired]
+            single : if only tumor samples are provided
+            paired : if both tumor and normal samples are provided
+        sequencing_type : Field(required); string literal [targeted, wgs]
+            targeted : if capture kit was used to enrich specific genomic regions
+            wgs : if whole genome sequencing was performed
+        analysis_dir : Field(required); existing path where to save files
 
-            fastq_path : Field(optional); Path where fastq files will be stored
-            script : Field(optional); Path where snakemake scripts will be stored
-            log : Field(optional); Path where logs will be saved
-            result : Field(optional); Path where BALSAMIC output will be stored
-            benchmark : Field(optional); Path where benchmark report will be stored
-            dag : Field(optional); Path where DAG graph of workflow will be stored
+        fastq_path : Field(optional); Path where fastq files will be stored
+        script : Field(optional); Path where snakemake scripts will be stored
+        log : Field(optional); Path where logs will be saved
+        result : Field(optional); Path where BALSAMIC output will be stored
+        benchmark : Field(optional); Path where benchmark report will be stored
+        dag : Field(optional); Path where DAG graph of workflow will be stored
 
-            BALSAMIC_version  : Field(optional); Current version of BALSAMIC
-            config_creation_date  : Field(optional); Timestamp when config was created
+        BALSAMIC_version  : Field(optional); Current version of BALSAMIC
+        config_creation_date  : Field(optional); Timestamp when config was created
+
+    Raises:
+        ValueError:
+            When analysis_type is set to any value other than [single, paired, qc]
+            When sequencing_type is set to any value other than [wgs, targeted]
     """
 
     case_id: str
@@ -159,11 +177,25 @@ class AnalysisModel(BaseModel):
     result: Optional[DirectoryPath]
     benchmark: Optional[DirectoryPath]
     dag: Optional[FilePath]
-    BALSAMIC_version: str = BALSAMIC_version
+    BALSAMIC_version: str = BALSAMIC_VERSION
     config_creation_date: Optional[str]
 
     class Config:
         validate_all = True
+
+    @validator("analysis_type")
+    def analysis_type_literal(cls, value) -> str:
+        balsamic_analysis_types = ["single", "paired", "qc"]
+        if value not in balsamic_analysis_types:
+            raise ValueError(f"Provided analysis type ({value}) not supported in BALSAMIC!")
+        return value
+
+    @validator("sequencing_type")
+    def sequencing_type_literal(cls, value)->str:
+        balsamic_sequencing_types = ["wgs", "targeted"]
+        if value not in balsamic_sequencing_types:
+            raise ValueError(f"Provided sequencing type ({value}) not supported in BALSAMIC!")
+        return value
 
     @validator("analysis_dir")
     def dirpath_always_abspath(cls, value) -> str:
@@ -198,7 +230,7 @@ class AnalysisModel(BaseModel):
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return Path(values.get("analysis_dir"), values.get("case_id"),
                     values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{BALSAMIC_version}_graph.pdf'
+                    ) + f'_BALSAMIC_{BALSAMIC_VERSION}_graph.pdf'
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
@@ -208,15 +240,27 @@ class AnalysisModel(BaseModel):
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis
     
-        Attributes:
-            file_prefix : Field(str); basename of sample pair
-            sample_type : Field(str; alias=type); type of sample [tumor, normal]
-            readpair_suffix : Field(List); currently always set to [1, 2]
+    Attributes:
+        file_prefix : Field(str); basename of sample pair
+        sample_type : Field(str; alias=type); type of sample [tumor, normal]
+        readpair_suffix : Field(List); currently always set to [1, 2]
+    
+    Raises:
+        ValueError:
+            When sample_type is set ot any value other than [tumor, normal]
+
         """
 
     file_prefix: str
     sample_type: str = Field(alias="type")
     readpair_suffix: List[str] = ["1", "2"]
+
+    @validator("sample_type")
+    def sample_type_literal(cls, value):
+        balsamic_sample_types = ["tumor", "normal"]
+        if value not in balsamic_sample_types:
+            raise ValueError(f"Provided sample type ({value}) not supported in BALSAMIC!")
+        return value
 
 
 class BioinfoToolsModel(BaseModel):
@@ -237,12 +281,17 @@ class BioinfoToolsModel(BaseModel):
 
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided
-        Attributes:
-            capture_kit : Field(str(Path)); string representation of path to PANEL BED file
-            chrom : Field(list(str)); list of chromosomes in PANEL BED
+    Attributes:
+        capture_kit : Field(str(Path)); string representation of path to PANEL BED file
+        chrom : Field(list(str)); list of chromosomes in PANEL BED
+
+    Raises:
+        ValueError:
+            When capture_kit argument is set, but is not a valid path
+
     """
 
-    capture_kit: Optional[str]
+    capture_kit: Optional[FilePath]
     chrom: Optional[List[str]]
 
     @validator("capture_kit")
@@ -253,17 +302,17 @@ class PanelModel(BaseModel):
 class BalsamicConfigModel(BaseModel):
     """Summarizes config models in preparation for export 
     
-        Attributes:
-            QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
-            vcf : Field(VCFmodel); variables relevand for variant calling pipeline
-            samples : Field(Dict); dictionary containing samples submitted for analysis
-            reference : Field(Dict); dictionary containign paths to reference genome files
-            panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
-            bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
-            singularity : Field(Path); path to singularity container of BALSAMIC
+    Attributes:
+        QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
+        vcf : Field(VCFmodel); variables relevand for variant calling pipeline
+        samples : Field(Dict); dictionary containing samples submitted for analysis
+        reference : Field(Dict); dictionary containign paths to reference genome files
+        panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
+        bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
+        singularity : Field(Path); path to singularity container of BALSAMIC
 
-            conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
-            rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+        conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
+        rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
 
     """
 
