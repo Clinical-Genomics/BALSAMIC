@@ -6,10 +6,11 @@ python:
   - '3.6'
 
 before_install:
-  - sudo apt-get install graphviz
+  - sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
 
 install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
+  - pip install pygraphviz pygments
 
 script:
   - py.test --cov=BALSAMIC -rsxv tests/* 

@@ -35,7 +35,7 @@ Refactored
   Models for config fields can be found at BALSAMIC/utils/models.py
   Context aborts and logging now contained in pilot function
   Tests created to support new architecture
-
+* Reduce analysis directory's storage
 
 
 

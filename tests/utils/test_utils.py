@@ -4,19 +4,22 @@ import pytest
 import sys
 import copy
 import collections
+
+import shutil
+from unittest import mock
 import logging
 
 from pathlib import Path
 
+from BALSAMIC.utils.exc import BalsamicError
+
 from BALSAMIC.utils.cli import (
-    SnakeMake, CaptureStdout, iterdict,
-    get_snakefile, createDir, write_json, get_config,
-    recursive_default_dict, convert_defaultdict_to_regular_dict,
-    get_file_status_string, get_from_two_key, find_file_index, 
-    merge_json, validate_fastq_pattern,
-    get_panel_chrom, get_bioinfo_tools_list,
-    get_sample_dict, get_sample_names,
-    create_fastq_symlink, get_fastq_bind_path)
+    SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
+    get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
+    get_file_status_string, get_from_two_key, find_file_index, merge_json,
+    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
+    get_sample_dict, get_sample_names, create_fastq_symlink,
+    get_fastq_bind_path, singularity)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_conda_env, get_picard_mrkdup,
@@ -64,7 +67,7 @@ def test_iterdict(config_files):
 def test_snakemake_local():
     # GIVEN required params
     snakemake_local = SnakeMake()
-    snakemake_local.working_dir = "/tmp/snakemake"
+    snakemake_local.working_dir = "this_path/snakemake"
     snakemake_local.snakefile = "worflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
@@ -79,7 +82,7 @@ def test_snakemake_local():
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
-    assert "/tmp/snakemake" in shell_command
+    assert "this_path/snakemake" in shell_command
     assert "--dryrun" in shell_command
     assert "--forceall" in shell_command
 
@@ -88,7 +91,7 @@ def test_snakemake_slurm():
     # GIVEN required params
     snakemake_slurm = SnakeMake()
     snakemake_slurm.case_name = "test_case"
-    snakemake_slurm.working_dir = "/tmp/snakemake"
+    snakemake_slurm.working_dir = "this_path/snakemake"
     snakemake_slurm.snakefile = "worflow/variantCalling_paired"
     snakemake_slurm.configfile = "sample_config.json"
     snakemake_slurm.run_mode = "cluster"
@@ -115,7 +118,7 @@ def test_snakemake_slurm():
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
-    assert "/tmp/snakemake" in shell_command
+    assert "this_path/snakemake" in shell_command
     assert "--dryrun" not in shell_command
     assert "sbatch.py" in shell_command
     assert "test_case" in shell_command
@@ -333,7 +336,7 @@ def test_write_json(tmp_path, config_files):
 def test_write_json_error(tmp_path, config_files):
     with pytest.raises(Exception, match=r"Is a directory"):
         # GIVEN a invalid dict
-        ref_json = {"path": "/tmp", "reference": ""}
+        ref_json = {"path": "this_path", "reference": ""}
         tmp = tmp_path / "tmp"
         tmp.mkdir()
         output_json = tmp / "/"
@@ -414,6 +417,74 @@ def test_find_file_index(tmpdir):
     assert isinstance(result, list)
     assert str(bai_file) in result
     assert str(bai_file_2) in result
+
+
+def test_singularity_shellcmd(singularity_container):
+    """test singularity shell cmd
+    """
+
+    # GIVEN a dummy command
+    dummy_command = 'ls this_path'
+    dummy_path_1 = 'this_path/path1'
+    dummy_path_2 = 'this_path/path2'
+    correct_shellcmd = 'exec --bind {} --bind {} ls this_path'.format(
+        dummy_path_1, dummy_path_2)
+
+    with mock.patch.object(shutil, 'which') as mocked:
+        mocked.return_value = "/my_home/binary_path/singularity"
+
+        # WHEN building singularity command
+        shellcmd = singularity(sif_path=singularity_container,
+                               cmd=dummy_command,
+                               bind_paths=[dummy_path_1, dummy_path_2])
+
+        # THEN successfully return a correct singularity cmd
+        assert correct_shellcmd in shellcmd
+
+
+def test_singularity_shellcmd_sif_not_exist():
+    """test singularity shell cmd with non-existing file
+    """
+
+    # GIVEN a dummy command
+    dummy_command = 'ls this_path'
+    dummy_sif_path = '/some_path/my_sif_path_3.1415/container.sif'
+    dummy_path_1 = 'this_path/path1'
+    dummy_path_2 = 'this_path/path2'
+    error_msg = "container file does not exist"
+
+    # WHEN building singularity command
+    # THEN successfully get error that container doesn't exist
+    with mock.patch.object(shutil,
+                           'which') as mocked, pytest.raises(BalsamicError,
+                                                             match=error_msg):
+        mocked.return_value = "/my_home/binary_path/singularity"
+
+        singularity(sif_path=dummy_sif_path,
+                    cmd=dummy_command,
+                    bind_paths=[dummy_path_1, dummy_path_2])
+
+
+def test_singularity_shellcmd_cmd_not_exist(singularity_container):
+    """test singularity shell cmd with nonexisting singularity command
+    """
+
+    # GIVEN a dummy command
+    dummy_command = 'ls this_path'
+    error_msg = "singularity command does not exist"
+    dummy_path_1 = 'this_path/path1'
+    dummy_path_2 = 'this_path/path2'
+
+    # WHEN building singularity command
+    # THEN successfully get error if singualrity command doesn't exist
+    with mock.patch.object(shutil,
+                           'which') as mocked, pytest.raises(BalsamicError,
+                                                             match=error_msg):
+        mocked.return_value = None
+
+        singularity(sif_path=singularity_container,
+                    cmd=dummy_command,
+                    bind_paths=[dummy_path_1, dummy_path_2])
 
 
 def test_merge_json(config_files):
@@ -514,4 +585,3 @@ def test_get_fastq_bind_path(tmpdir_factory):
     create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
     #THEN function returns list containing the original parent path!
     assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
-
