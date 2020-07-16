@@ -36,8 +36,15 @@ LOG = logging.getLogger(__name__)
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
+@click.option('-a',
+              '--analysis-type',
+              required=False,
+              type=click.Choice(['qc', 'paired', 'single']),
+              help='Type of analysis to run from input config file.\
+              By default it will read from config file, but it will override config file \
+              if it is set here.')
 @click.pass_context
-def deliver(context, sample_config):
+def deliver(context, sample_config, analysis_type):
     """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
@@ -55,7 +62,7 @@ def deliver(context, sample_config):
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
 
-    analysis_type = sample_config_dict["analysis"]["analysis_type"]
+    analysis_type = analysis_type if analysis_type else sample_config_dict['analysis']['analysis_type']
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
