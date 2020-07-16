@@ -110,7 +110,7 @@ def get_threads(cluster_config, rule_name='__default__'):
     return cluster_config[rule_name]['n'] if rule_name in cluster_config else 8
 
 
-def get_rule_output(rules, rule_names=[]):
+def get_rule_output(rules):
     """get list of existing output files from a given workflow
 
     Args:
@@ -121,12 +121,8 @@ def get_rule_output(rules, rule_names=[]):
     Returns:
         output_files: list of tuples (file_name, rule_name, wildcard) for rule_names
     """
-#    with open('/home/hassan.foroughi/repos/BALSAMIC/run_tests/TN_panel/get_rule_output.log', 'w') as f:
-#        print(rules, file = f)
     output_files = list()
     output_files.append(('output_file', 'rulename', 'wildcard_value'))
-    if not rule_names:
-        rule_names = vars(rules).keys()
     for my_rule in rule_names:
         for my_file in getattr(rules, my_rule).output:
             for file_wildcard_list in snakemake.utils.listfiles(my_file):
@@ -135,12 +131,10 @@ def get_rule_output(rules, rule_names=[]):
     return output_files
 
 
-def get_rule_output_raw(rules, rule_names=[], output_file_wildcards={}):
+def get_rule_output_raw(rules, output_file_wildcards={}):
     """get list of all possible output files from a given workflow
 
     Args:
-        rule_names: a list of rule names in the workflow. If no rules are given,
-          then it will get all rules from the workflow.
         rules: snakemake rules object
         output_file_wildcards: a dictionary with wildcards as keys and values as list of wildcard values 
     
@@ -151,8 +145,6 @@ def get_rule_output_raw(rules, rule_names=[], output_file_wildcards={}):
     output_files_raw = list()
     output_files_raw.append(('output_file', 'rulename', 'wildcard_name'))
     wildcard_sets = set()
-    if not rule_names:
-        rule_names = vars(rules).keys()
     for my_rule in vars(rules).keys():
         if my_rule in rule_names:
             for my_file in getattr(rules, my_rule).output:
