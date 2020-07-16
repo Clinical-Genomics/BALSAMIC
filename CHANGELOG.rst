@@ -6,7 +6,8 @@ Added
 ^^^^^
 * Models to build config case JSON. The models and descriptions of their contents can now be found
   in BALSAMIC/utils/models.py
-
+* Added analysis_type to `report deliver` command
+* Added report and delivery capability to Alignment workflow
 
 Changed
 ^^^^^^^
@@ -15,8 +16,6 @@ Changed
   A symlink is now created at the destination path instead
 * Config structure is no longer contained in a collestion of JSON files. 
   The config models are now built using Pydantic and are contained in BALSAMIC/utils/models.py
-
-
 
 Removed
 ^^^^^^^
@@ -36,6 +35,10 @@ Refactored
   Context aborts and logging now contained in pilot function
   Tests created to support new architecture
 * Reduce analysis directory's storage
+
+Fixed
+^^^^^
+* Report generation warnings supressed by adding workdirectory
 
 
 
