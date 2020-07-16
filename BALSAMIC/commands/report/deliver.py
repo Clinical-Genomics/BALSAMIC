@@ -8,6 +8,7 @@ import click
 import copy
 import snakemake
 import datetime
+import subprocess
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -18,6 +19,7 @@ from BALSAMIC.utils.cli import find_file_index
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
+from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.exc import BalsamicError
 
@@ -57,18 +59,25 @@ def deliver(context, sample_config):
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
-    LOG.info("Creating report file")
     report_file_name = os.path.join(
-        yaml_write_directory,
-        sample_config_dict["analysis"]["case_id"] + "_report.html")
-    with CaptureStdout():
-        snakemake.snakemake(
-            snakefile=snakefile,
-            dryrun=True,
-            quiet=True,
-            report=report_file_name,
-            configfiles=[sample_config],
-        )
+        yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"
+    )
+    LOG.info("Creating report file {}".format(report_file_name))
+
+    # write report.html file
+    report = SnakeMake()
+    report.case_name = sample_config_dict['analysis']['case_id']
+    report.working_dir = sample_config_dict['analysis']['analysis_dir'] +  \
+        sample_config_dict['analysis']['case_id'] + '/BALSAMIC_run/'
+    report.report = report_file_name
+    report.configfile = sample_config
+    report.snakefile = snakefile 
+    report.run_mode = 'local'
+    report.use_singularity = False
+    report.run_analysis = True
+    cmd=sys.executable + " -m  " + report.build_cmd()
+    subprocess.check_output(cmd.split(), shell=False)
+
 
     with CaptureStdout():
         snakemake.snakemake(
@@ -191,13 +200,3 @@ def deliver(context, sample_config):
 
     LOG.info(f"Housekeeper delivery file {delivery_file_name}")
     LOG.info(f"Workflow report file {report_file_name}")
-
-
-#    for entries in deliveries:
-#        delivery_file = entries[2]
-#        if os.path.isfile(delivery_file):
-#            print(Color(u"[{green}\u2713{/green}]"), entries)
-#        else:
-#            print(Color(u"[{red}\u2717{/red}]"), entries)
-#        break
-# print(dag)
