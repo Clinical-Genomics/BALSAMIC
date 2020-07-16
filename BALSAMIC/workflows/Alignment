@@ -50,11 +50,6 @@ include:
   rule_dir + "snakemake_rules/quality_control/GATK.rule"
 
 
-#                      "var_type": ["CNV", "SNV", "SV"],
-#                      "var_class": ["somatic", "germline"],
-#                      "var_caller": somatic_caller,
-#                      "bedchrom": config["panel"]["chrom"] if "panel" in config else [], 
-
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
                       "case_name": config["analysis"]["case_id"],
