@@ -22,7 +22,7 @@ RULE_DIRECTORY = Path(
     sys.modules["BALSAMIC"].__file__).parent.resolve().as_posix() + "/"
 
 #BALSMIC version
-BALSAMIC_version = BALSAMIC.__version__
+BALSAMIC_VERSION = BALSAMIC.__version__
 
 #Configuration of VCF settings
 VCF_DICT = {

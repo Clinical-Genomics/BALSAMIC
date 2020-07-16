@@ -5,7 +5,7 @@ from pydantic import BaseModel, ValidationError, validator, Field
 from pydantic.types import DirectoryPath, FilePath
 from typing import Optional, List, Dict
 
-from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY, BALSAMIC_version
+from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY, BALSAMIC_VERSION
 
 
 class VCFAttributes(BaseModel):
@@ -58,14 +58,19 @@ class VarCallerFilter(BaseModel):
 
 class QCModel(BaseModel):
     """Contains settings for quality control and pre-processing
-        Attributes:
-            picard_rmdup : Field(bool); whether duplicate removal is to be applied in the workflow
-            adapter : Field(str(AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT)); adapter sequence to trim
-            quality_trim : Field(bool); whether quality trimming it to be performed in the workflow
-            adapter_trim : Field(bool); whether adapter trimming is to be performed in the workflow
-            umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
-            min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
-            umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+    Attributes:
+        picard_rmdup : Field(bool); whether duplicate removal is to be applied in the workflow
+        adapter : Field(str(AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT)); adapter sequence to trim
+        quality_trim : Field(bool); whether quality trimming it to be performed in the workflow
+        adapter_trim : Field(bool); whether adapter trimming is to be performed in the workflow
+        umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
+        min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
+        umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+
+    Raises:
+        ValueError: 
+            When the input in min_seq_length and umi_trim_length cannot 
+            be interpreted as integer and coerced to string
     
     """
     picard_rmdup: bool = False
@@ -90,6 +95,17 @@ class QCModel(BaseModel):
 
 
 class VarcallerAttribute(BaseModel):
+    """Holds variables for variant caller software
+    Attributes:
+        mutation: 
+        mutation_type:
+        
+    Raises:
+        ValueError:
+            When a variable other than [somatic, germline] is passed in mutation field
+            When a variable other than [SNV, CNV, SV] is passed in mutation_type field
+            
+    """
     mutation: str
     mutation_type: str = Field(alias="type")
 
@@ -148,6 +164,11 @@ class AnalysisModel(BaseModel):
 
         BALSAMIC_version  : Field(optional); Current version of BALSAMIC
         config_creation_date  : Field(optional); Timestamp when config was created
+
+    Raises:
+        ValueError:
+            When analysis_type is set to any value other than [single, paired, qc]
+            When sequencing_type is set to any value other than [wgs, targeted]
     """
 
     case_id: str
@@ -223,10 +244,15 @@ class AnalysisModel(BaseModel):
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis
     
-        Attributes:
-            file_prefix : Field(str); basename of sample pair
-            sample_type : Field(str; alias=type); type of sample [tumor, normal]
-            readpair_suffix : Field(List); currently always set to [1, 2]
+    Attributes:
+        file_prefix : Field(str); basename of sample pair
+        sample_type : Field(str; alias=type); type of sample [tumor, normal]
+        readpair_suffix : Field(List); currently always set to [1, 2]
+    
+    Raises:
+        ValueError:
+            When sample_type is set ot any value other than [tumor, normal]
+
         """
 
     file_prefix: str
@@ -262,6 +288,11 @@ class PanelModel(BaseModel):
     Attributes:
         capture_kit : Field(str(Path)); string representation of path to PANEL BED file
         chrom : Field(list(str)); list of chromosomes in PANEL BED
+
+    Raises:
+        ValueError:
+            When capture_kit argument is set, but is not a valid path
+
     """
 
     capture_kit: Optional[FilePath]
