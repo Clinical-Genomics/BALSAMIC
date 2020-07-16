@@ -10,7 +10,7 @@ from BALSAMIC.utils.cli import (CaptureStdout, get_snakefile, get_sample_dict,
                                 get_panel_chrom, get_bioinfo_tools_list,
                                 create_fastq_symlink, generate_graph)
 from BALSAMIC.utils.constants import (CONDA_ENV_PATH, CONDA_ENV_YAML,
-                                      RULE_DIRECTORY)
+                                      RULE_DIRECTORY, VCF_DICT)
 
 LOG = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         reference=reference_dict,
         singularity=singularity,
         samples=samples,
-        vcf={},
+        vcf=VCF_DICT,
     ).dict(by_alias=True)
 
     LOG.info("Config file generated successfully")
