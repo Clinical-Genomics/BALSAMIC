@@ -70,15 +70,7 @@ def test_qc_model():
         "min_seq_length": 25,
         "umi_trim_length": 5}
     assert QCModel.parse_obj(valid_args)
-    #GIVEN invalid input arguments
-    invalid_args = {
-        "umi_trim": True,
-        "min_seq_length": "not number",
-        "umi_trim_length": "but string"}
-    #THEN should trigger ValueError
-    with pytest.raises(ValueError) as excinfo:
-        QCModel.parse_obj(invalid_args)
-        assert "Invalid" in excinfo.value
+
 
 def test_varcaller_attribute():
     #GIVEN valid input arguments

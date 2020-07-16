@@ -83,11 +83,7 @@ class QCModel(BaseModel):
 
     @validator("min_seq_length", "umi_trim_length")
     def coerce_int_as_str(cls, value):
-        try:
-            value = str(value)
-            return value
-        except Exception:
-            raise ValueError("Invalid datatype!")
+        return str(value)
 
 
     class Config:
