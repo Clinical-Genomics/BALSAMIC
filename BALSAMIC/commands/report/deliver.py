@@ -74,8 +74,8 @@ def deliver(context, sample_config, analysis_type):
     # write report.html file
     report = SnakeMake()
     report.case_name = sample_config_dict['analysis']['case_id']
-    report.working_dir = sample_config_dict['analysis']['analysis_dir'] +  \
-        sample_config_dict['analysis']['case_id'] + '/BALSAMIC_run/'
+    report.working_dir = os.path.join(sample_config_dict['analysis']['analysis_dir'] , \
+        sample_config_dict['analysis']['case_id'], 'BALSAMIC_run')
     report.report = report_file_name
     report.configfile = sample_config
     report.snakefile = snakefile 
