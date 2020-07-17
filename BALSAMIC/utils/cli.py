@@ -324,7 +324,7 @@ def get_file_extension(file_path):
     if not file_extension:
         _, file_extension = os.path.splitext(file_path)
 
-    return file_extension
+    return file_extension[1:]
 
 
 def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
