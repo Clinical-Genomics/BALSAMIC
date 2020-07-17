@@ -152,7 +152,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     # Singularity bind path
     bind_path = list()
     bind_path += os.path.commonpath(sample_config['reference'].values())
-    bind_path += sample_config.get('panel').get('capture_kit') if sample_config.get('panel') else ""
+    bind_path += (sample_config.get('panel').get('capture_kit') if sample_config.get('panel')) or ""
     bind_path += sample_config['analysis']['analysis_dir']
     bind_path += get_fastq_bind_path(sample_config["analysis"]["fastq_path"])
 
