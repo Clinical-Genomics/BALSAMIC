@@ -151,10 +151,9 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     # Singularity bind path
     bind_path = list()
-    bind_path.append(os.path.commonpath(sample_config['reference'].values()))
-    if 'panel' in sample_config.keys():
-        bind_path.append(sample_config['panel']['capture_kit'])
-    bind_path.append(sample_config['analysis']['analysis_dir'])
+    bind_path += os.path.commonpath(sample_config['reference'].values())
+    bind_path += sample_config['panel']['capture_kit'] or ""
+    bind_path += sample_config['analysis']['analysis_dir']
     bind_path += get_fastq_bind_path(sample_config["analysis"]["fastq_path"])
 
     # Construct snakemake command to run workflow
