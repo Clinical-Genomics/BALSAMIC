@@ -275,7 +275,7 @@ class BioinfoToolsModel(BaseModel):
     gatk: Optional[str]
     samtools: Optional[str]
     sambamba: Optional[str]
-    vardic: Optional[str]
+    vardict: Optional[str]
     cutadapt: Optional[str]
 
 

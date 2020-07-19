@@ -141,7 +141,7 @@ if 'delivery' in config:
                       "case_name": config["analysis"]["case_id"],
                       "var_type": ["CNV", "SNV", "SV"],
                       "var_class": ["somatic", "germline"],
-                      "var_caller": somatic_caller,
+                      "var_caller": somatic_caller + germline_caller,
                       "bedchrom": config["panel"]["chrom"] if "panel" in config else [], 
                       "allow_missing": True
                     }
