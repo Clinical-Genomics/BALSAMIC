@@ -153,28 +153,21 @@ def deliver(context, sample_config, analysis_type):
                 "path_index"] = file_path_index[0] if file_path_index else ""
 
             interm_dict["format"] = get_file_extension(interm_dict["path"])
-            interm_dict["tag"] = ",".join(
-                interm_dict.get("wildcard_name", ["unknown"]))
+            tags = set(interm_dict.get("wildcard_name", ["unknown"]) + interm_dict.get("wildcard_value", ["unknown"]))
+            interm_dict["tag"] = ",".join(tags)
             interm_dict["id"] = "unknown"
 
             delivery_id = list()
-            delivery_id.append(
-                get_from_two_key(
-                    interm_dict,
-                    from_key="wildcard_name",
-                    by_key="wildcard_value",
-                    by_value="sample",
-                    default=None,
-                ))
-
-            delivery_id.append(
-                get_from_two_key(
-                    interm_dict,
-                    from_key="wildcard_name",
-                    by_key="wildcard_value",
-                    by_value="case_name",
-                    default=None,
-                ))
+            
+            for by_value in ["sample", "case_name"]:
+                delivery_id.append(
+                    get_from_two_key(
+                        interm_dict,
+                        from_key="wildcard_name",
+                        by_key="wildcard_value",
+                        by_value=by_value,
+                        default=None,
+                    ))
 
             delivery_id = list(filter(None, delivery_id))
             if len(delivery_id) > 1:
