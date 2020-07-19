@@ -151,11 +151,11 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     # Singularity bind path
     bind_path = list()
-#    bind_path += os.path.commonpath(sample_config['reference'].values())
+    bind_path.append(os.path.commonpath(sample_config['reference'].values()))
     if 'panel' in sample_config:
         bind_path.append(sample_config.get('panel').get('capture_kit'))
     bind_path.append(sample_config['analysis']['analysis_dir'])
-    bind_path += list(get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
+    bind_path.extend(get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
@@ -186,8 +186,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     try:
         cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
-        print(cmd)
-#        subprocess.run(cmd, shell=True)  #, check=True)
+        subprocess.run(cmd, shell=True)  #, check=True)
     except Exception as e:
         print(e)
         raise click.Abort()
