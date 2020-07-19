@@ -94,7 +94,16 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         )
         raise click.Abort()
 
-    bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
+    optional_values = {'bioinfo_tools': get_bioinfo_tools_list(CONDA_ENV_PATH)}
+
+    if panel_bed:
+        panel_info = {
+            'panel': {
+                "capture_kit": panel_bed,
+                "chrom": get_panel_chrom(panel_bed),
+            }
+        }
+        optional_values = {**panel_info, **optional_values}
 
     config_collection_dict = BalsamicConfigModel(
         QC={
@@ -109,16 +118,12 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
-        panel={
-            "capture_kit": panel_bed,
-            "chrom": get_panel_chrom(panel_bed),
-        } if panel_bed else {},
-        bioinfo_tools=bioinfo_tools,
         reference=reference_dict,
         singularity=singularity,
         samples=samples,
         vcf=VCF_DICT,
-    ).dict(by_alias=True)
+        **optional_values,
+    ).dict(by_alias=True, exclude_none=True)
 
     LOG.info("Config file generated successfully")
 
