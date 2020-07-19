@@ -322,9 +322,9 @@ class BalsamicConfigModel(BaseModel):
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: FilePath
-    bioinfo_tools: BioinfoToolsModel
     conda_env_yaml: FilePath = CONDA_ENV_YAML
     rule_directory: DirectoryPath = RULE_DIRECTORY
+    bioinfo_tools: Optional[BioinfoToolsModel]
     panel: Optional[PanelModel]
 
     @validator("reference")
