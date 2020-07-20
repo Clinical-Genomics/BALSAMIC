@@ -22,7 +22,10 @@ setup(
     author_email='hassan.foroughi@scilifelab.se',
     install_requires=install_requires,
     packages=find_packages(),
-    package_data={"assets": ["scripts/*R", "sentieon_models/*model"], "config": ["*.json"]},  
+    package_data={
+        "assets": ["scripts/*R", "sentieon_models/*model"],
+        "config": ["*.json"]
+    },
     include_package_data=True,
     zip_safe=False,
     entry_points={

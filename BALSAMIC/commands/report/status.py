@@ -27,18 +27,25 @@ LOG = logging.getLogger(__name__)
 
 @click.command(
     "status",
-    short_help="Creates a YAML file with output from variant caller and alignment.",
+    short_help=
+    "Creates a YAML file with output from variant caller and alignment.",
 )
 @click.option(
-    "-s", "--sample-config",
+    "-s",
+    "--sample-config",
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
-@click.option("-m", "--show-only-missing", is_flag=True,
-    default=False,
-    show_default=True,
-    help="Only show missing files.")
-@click.option("-p", "--print-files", is_flag=True,
+@click.option("-m",
+              "--show-only-missing",
+              is_flag=True,
+              default=False,
+              show_default=True,
+              help="Only show missing files.")
+@click.option(
+    "-p",
+    "--print-files",
+    is_flag=True,
     default=False,
     show_default=True,
     help="Print list of files. Otherwise only final count will be printed.")
@@ -69,18 +76,20 @@ def status(context, sample_config, show_only_missing, print_files):
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
 
     if not os.path.isfile(os.path.join(result_dir, "analysis_finish")):
-        LOG.warning("analysis_finish file is missing. Analysis might be incomplete or running.") 
+        LOG.warning(
+            "analysis_finish file is missing. Analysis might be incomplete or running."
+        )
 
     existing_files = set()
     missing_files = set()
-        
+
     for entries in summary_dict:
         delivery_file = entries["output_file"]
 
-        file_status_str, file_status = get_file_status_string(delivery_file) 
+        file_status_str, file_status = get_file_status_string(delivery_file)
         if file_status and print_files:
             click.echo(file_status_str)
-        
+
         if not file_status and (show_only_missing or print_files):
             click.echo(file_status_str)
 
@@ -89,8 +98,8 @@ def status(context, sample_config, show_only_missing, print_files):
         if not file_status:
             missing_files.add(delivery_file)
 
-    finish_file_count='Finished file count: {}'.format(len(existing_files))
-    missing_file_count='Missing file count: {}'.format(len(missing_files))
+    finish_file_count = 'Finished file count: {}'.format(len(existing_files))
+    missing_file_count = 'Missing file count: {}'.format(len(missing_files))
     click.echo(Color('{yellow}Final tally:{/yellow}'))
-    click.echo(Color('{yellow}\t'+finish_file_count+'{/yellow}'))
-    click.echo(Color('{yellow}\t'+missing_file_count+'{/yellow}'))
+    click.echo(Color('{yellow}\t' + finish_file_count + '{/yellow}'))
+    click.echo(Color('{yellow}\t' + missing_file_count + '{/yellow}'))
