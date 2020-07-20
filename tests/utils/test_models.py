@@ -1,6 +1,15 @@
 import pytest
 
-from BALSAMIC.utils.models import (VCFAttributes, VarCallerFilter, VARDICT)
+from BALSAMIC.utils.models import (
+    VCFAttributes, 
+    VarCallerFilter, 
+    QCModel, 
+    VarcallerAttribute,
+    VCFModel,
+    AnalysisModel,
+    SampleInstanceModel,
+    BioinfoToolsModel
+    )
 
 
 def test_vcfattributes():
@@ -50,3 +59,73 @@ def test_varcallerfilter():
     assert dummy_varcaller_filter.AD.tag_value == 5.0
     assert dummy_varcaller_filter.DP.tag_value == 100.0
     assert dummy_varcaller_filter.analysis_type == "dummy_tumor_only"
+
+
+
+def test_qc_model():
+    #GIVEN valid input arguments
+    #THEN we can successully create a config dict
+    valid_args = {
+        "umi_trim": True,
+        "min_seq_length": 25,
+        "umi_trim_length": 5}
+    assert QCModel.parse_obj(valid_args)
+
+
+def test_varcaller_attribute():
+    #GIVEN valid input arguments
+    valid_args={
+            "mutation": "somatic",
+            "type": "SNV"}
+    #THEN we can successully create a config dict
+    assert VarcallerAttribute.parse_obj(valid_args)
+    #GIVEN invalid input arguments
+    invalid_args={
+            "mutation": "strange",
+            "type": "unacceptable"}
+    #THEN should trigger ValueError
+    with pytest.raises(ValueError) as excinfo:
+        VarcallerAttribute.parse_obj(invalid_args)
+        assert "not a valid argument" in excinfo.value
+
+def test_analysis_model():
+    #GIVEN valid input arguments
+    valid_args = {
+        "case_id": "case_id",
+        "analysis_type": "paired",
+        "sequencing_type": "targeted",
+        "analysis_dir": "tests/test_data"
+        }
+    #THEN we can successully create a config dict
+    assert AnalysisModel.parse_obj(valid_args)
+
+    #GIVEN invalid input arguments
+    invalid_args = {
+        "case_id": "case_id",
+        "analysis_type": "odd",
+        "sequencing_type": "wrong",
+        "analysis_dir": "tests/test_data"
+        }
+    #THEN should trigger ValueError
+    with pytest.raises(ValueError) as excinfo:
+        AnalysisModel.parse_obj(invalid_args)
+        assert "not supported" in excinfo.value
+
+def test_sample_instance_model():
+    #GIVEN valid input arguments
+    valid_args = {
+        "file_prefix": "S2_R",
+        "type": "normal",
+        }
+    #THEN we can successully create a config dict
+    assert SampleInstanceModel.parse_obj(valid_args)
+
+    #GIVEN invalid input arguments
+    invalid_args = {
+        "file_prefix": "S2_R",
+        "type": "fungal",
+        }
+    #THEN should trigger ValueError
+    with pytest.raises(ValueError) as excinfo:
+        SampleInstanceModel.parse_obj(invalid_args)
+        assert "not supported" in excinfo.value
