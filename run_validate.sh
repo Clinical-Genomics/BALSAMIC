@@ -64,13 +64,6 @@ if [[ ! -z ${_condaenv} ]]; then
   source activate ${_condaenv}
 fi
 
-_cluster_config='BALSAMIC/config/cluster_minimal.json'
-_singularity='BALSAMIC/containers/BALSAMIC_latest.sif'
-_reference='reference/GRCh37/reference.json'
-_tumor_fastq='tests/test_data/fastq/S1_R_1.fastq.gz'
-_normal_fastq='tests/test_data/fastq/S2_R_1.fastq.gz'
-_analysis_config='run_tests/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
-
 if [[ -z ${_analysis_dir} ]]; then
   _analysis_dir='run_tests/'
   echo "analysis dir set to " "${_analysis_dir}"
@@ -78,6 +71,13 @@ fi
 
 # Make sure _analysis_dir exists
 mkdir -p ${_analysis_dir}
+
+_cluster_config='BALSAMIC/config/cluster_minimal.json'
+_singularity='BALSAMIC/containers/BALSAMIC_latest.sif'
+_reference='reference/GRCh37/reference.json'
+_tumor_fastq='tests/test_data/fastq/S1_R_1.fastq.gz'
+_normal_fastq='tests/test_data/fastq/S2_R_1.fastq.gz'
+_analysis_config=${_analysis_dir}'/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
 
 if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
