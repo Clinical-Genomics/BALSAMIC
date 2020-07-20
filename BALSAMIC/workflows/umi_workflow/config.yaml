@@ -1,0 +1,27 @@
+# vim: syntax=python tabstop=4 expandtab
+# # coding: utf-8
+
+base_dir:
+    "/home/proj/long-term-stage/cancer/UMI_analysis_runs_APJ/ACC5611A1-A9"
+
+fastq_path:
+    "/home/proj/production/cancer/cases/"
+references:
+    genomefa: "/home/proj/stage/cancer/reference/GRCh37/genome/human_g1k_v37_decoy.fasta"
+    targetPanel: "/home/proj/stage/cancer/reference/target_capture_bed/production/balsamic/gicfdna_3.1_hg19_design.bed"
+    mills_indels: "/home/proj/stage/cancer/reference/GRCh37/variants/mills_1kg_index.vcf.gz"
+    1G_indels: "/home/proj/stage/cancer/reference/GRCh37/variants/1kg_known_indels_b37.vcf.gz.gz"
+    dbsnp: "/home/proj/stage/cancer/reference/GRCh37/variants/dbsnp_grch37_b138.vcf.gz"
+
+background_snvs:
+    "/home/proj/long-term-stage/cancer/UMI_analysis_runs_APJ/SeraCare_VCFs/SeraCare_16variants_pos.txt"
+
+
+singularity_img:
+    "/home/proj/long-term-stage/cancer/UMI_analysis_runs_APJ/balsamic_release_v4.3.0.sif"
+
+vep_cache:
+    "/home/proj/production/cancer/reference/GRCh37/vep"
+
+case_ID:
+    'fairsalmon'
