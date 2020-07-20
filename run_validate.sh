@@ -64,6 +64,7 @@ if [[ ! -z ${_condaenv} ]]; then
   source activate ${_condaenv}
 fi
 
+_cluster_config='BALSAMIC/config/cluster_minimal.json'
 _singularity='BALSAMIC/containers/BALSAMIC_latest.sif'
 _reference='reference/GRCh37/reference.json'
 _tumor_fastq='tests/test_data/fastq/S1_R_1.fastq.gz'
@@ -102,6 +103,7 @@ function balsamic_config() {
 balsamic_run() {
   balsamic run analysis \
     -s ${_analysis_config} \
+    -c ${_cluster_config} \
     --account development ${_run_analysis}
 }
 
