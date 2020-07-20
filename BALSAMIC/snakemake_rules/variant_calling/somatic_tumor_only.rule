@@ -42,7 +42,7 @@ rule vardict_tumor_only:
   shell:
     "source activate {params.conda}; "
     "export PERL5LIB=;"
-    "vardict -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
+    "vardict-java -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "
         "{params.col_info} {input.bed} "
         "| teststrandbias.R "
