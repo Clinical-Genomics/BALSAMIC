@@ -1,5 +1,5 @@
 
-[X.X.X]
+[4.5.0]
 -------
 
 Added
@@ -8,6 +8,7 @@ Added
   in BALSAMIC/utils/models.py
 * Added analysis_type to `report deliver` command
 * Added report and delivery capability to Alignment workflow
+* run_validate.sh now has -d to handle path to analysis_dir (for internal use only) #361
 
 Changed
 ^^^^^^^
@@ -39,7 +40,9 @@ Refactored
 Fixed
 ^^^^^
 * Report generation warnings supressed by adding workdirectory
-
+* Missing tag name for germline annotated calls #356
+* Bind path is not added as None if analysis type is wgs #357
+* Changes vardict to vardict-java #361
 
 
 [4.4.0]
