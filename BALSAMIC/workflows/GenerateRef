@@ -4,10 +4,50 @@
 
 import os
 import hashlib
+
 from datetime import date
+
+from pydantic import BaseModel, ValidationError, validator, Field, AnyUrl
+from pydantic.types import DirectoryPath, FilePath
+from typing import Optional, List, Dict
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
+
+VALID_REF_FORMAT = ["fasta", "vcf","text", "gtf", "gff"]
+VALID_GENOME_VER = ["hg19", "hg38"]
+
+class ReferenceUrlsModel(BaseModel):
+    """Defines a basemodel for reference urls
+    
+    This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
+
+    Attributes:
+      url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
+      file_type: describes file type. Accepted values are VALID_REF_FORMAT constant 
+      gzip: gzip status. Binary: True or False
+      genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant 
+
+    Raises:
+      ValidationError: When it can't validate values matching above attributes
+      
+    """
+    
+    url: AnyUrl
+    file_type: str
+    gzip: bool=True
+    genome_version: str
+    
+    @validator("file_type")
+    def check_file_type(cls, value)-> str:
+        assert value in VALID_REF_FORMAT, f"{value} not a valid reference file formatr."
+        return value
+
+
+    @validator("genome_version")
+    def check_genome_ver(cls, value)-> str:
+        assert value in VALID_GENOME_VER, f"{value} not a valid genome version."
+        return value
 
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -16,18 +56,17 @@ if len(cluster_config.keys()) == 0:
 current_day = date.today()
 
 # LINKS TO REFERENCE FILES
-# ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/
-reference_genome_url = "gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz"
-dbsnp_url = "gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz"
-hc_vcf_1kg_url = "gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz"
-mills_1kg_url = "gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz" 
-known_indel_1kg_url = "gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz" 
-vcf_1kg_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz"
-cosmicdb_url = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz"
-refgene_txt_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
-refgene_sql_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql"
-wgs_calling_url = "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list"
-genome_chrom_size_url = "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes"
+reference_genome_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz", file_type="fasta", gzip=True, genome_version="hg19")
+dbsnp_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz", file_type="fasta", gzip=True, genome_version="hg19")
+hc_vcf_1kg_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
+mills_1kg_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
+known_indel_1kg_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz",  file_type="vcf", gzip=True, genome_version="hg19")
+vcf_1kg_url = ReferenceUrlsModel(url="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
+cosmicdb_url = ReferenceUrlsModel(url="https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
+refgene_txt_url = ReferenceUrlsModel(url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz", file_type="text", gzip=True, genome_version="hg19")
+refgene_sql_url = ReferenceUrlsModel(url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql", file_type="text", gzip=True, genome_version="hg19")
+wgs_calling_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list", file_type="text", gzip=True, genome_version="hg19")
+genome_chrom_size_url = ReferenceUrlsModel(url="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes", file_type="text", gzip=True, genome_version="hg19")
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
@@ -60,15 +99,15 @@ cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
 # list of reference download link and output file name
-ref_list_gzip = [(reference_genome_url, reference_genome, "gsutil"),
-                (dbsnp_url, dbsnp, "gsutil"),
-                (hc_vcf_1kg_url, hc_vcf_1kg, "gsutil"),
-                (mills_1kg_url, mills_1kg, "gsutil"),
-                (known_indel_1kg_url, known_indel_1kg, "gsutil"),
-                (vcf_1kg_url, vcf_1kg, "wget")]
+ref_list_gzip = [(reference_genome_url.url, reference_genome, "gsutil"),
+                (dbsnp_url.url, dbsnp, "gsutil"),
+                (hc_vcf_1kg_url.url, hc_vcf_1kg, "gsutil"),
+                (mills_1kg_url.url, mills_1kg, "gsutil"),
+                (known_indel_1kg_url.url, known_indel_1kg, "gsutil"),
+                (vcf_1kg_url.url, vcf_1kg, "wget")]
 
-ref_list_flat = [(wgs_calling_url, wgs_calling_interval, "gsutil"),
-                 (genome_chrom_size_url, genome_chrom_size, "wget")] 
+ref_list_flat = [(wgs_calling_url.url, wgs_calling_interval, "gsutil"),
+                 (genome_chrom_size_url.url, genome_chrom_size, "wget")] 
 
 shell.prefix("set -eo pipefail; ")
 
@@ -172,8 +211,8 @@ rule download_reference:
 
 rule download_refgene:
     params:
-        refgene_txt = refgene_txt_url,
-        refgene_sql = refgene_sql_url,
+        refgene_txt = refgene_txt_url.url,
+        refgene_sql = refgene_sql_url.url,
         refgene_sql_awk = get_script_path('refseq_sql.awk'), 
         bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
@@ -206,7 +245,7 @@ rule download_refgene:
 
 rule download_cosmicdb:
     params:
-        cosmic_db = cosmicdb_url,
+        cosmic_db = cosmicdb_url.url,
         cosmicdb_key = cosmicdb_key,
         conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
