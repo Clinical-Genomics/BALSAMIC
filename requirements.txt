@@ -2,6 +2,7 @@ click
 pyyaml
 yapf
 graphviz
+pygments
 coloredlogs
 psutil
 snakemake==5.13.0
