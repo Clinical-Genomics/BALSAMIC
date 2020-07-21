@@ -78,17 +78,17 @@ def collect_vcf_info(variant):
 @click.option('-i',
               '--input_file',
               required=True,
-              type=click.STRING,
+              type=click.Path(exists=True),
               help='tab-seperated reference text file')
 @click.option('-r',
               '--reference_file',
               required=True,
-              type=click.STRING,
+              type=click.Path(exists=True),
               help='cosmic database file')
 @click.option('-o',
               '--output_file',
               required=True,
-              type=click.STRING,
+              type=click.Path(exists=True),
               help='Output file name')
 def createvcf(input_file, reference_file, output_file):
     """ Filter input variants from reference VCF """
@@ -125,17 +125,17 @@ def createvcf(input_file, reference_file, output_file):
 @click.option('-f1',
               '--input_file1',
               required=True,
-              type=click.STRING,
+              type=click.Path(exists=True),
               help='Reference VCF file')
 @click.option('-f2',
               '--input_file2',
               required=True,
-              type=click.STRING,
+              type=click.Path(exists=True),
               help='VEP annotated VCF file')
 @click.option('-o',
               '--output_file',
               required=True,
-              type=click.STRING,
+              type=click.Path(exists=True),
               help='Output file name')
 def comparevcf(input_file1, input_file2, output_file):
     """ Compare two VCF files (truthset vs validate set) """
@@ -146,6 +146,3 @@ def comparevcf(input_file1, input_file2, output_file):
     if output_file:
         pass
 
-
-if __name__ == '__main__':
-    vcfutils()
