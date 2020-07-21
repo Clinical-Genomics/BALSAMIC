@@ -1,8 +1,12 @@
 ---
 name: Report failed analysis
 about: Troubleshooting errors in Balsamic
+title: "[ Failed Analysis ]"
+labels: Bug
+assignees: ''
 
 ---
+
 **Case or sample information**
 Internal sample id or case id: (only anonymized ids are allowed)
 Amount read-pairs:
