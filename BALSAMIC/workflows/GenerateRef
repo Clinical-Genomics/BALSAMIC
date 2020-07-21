@@ -37,17 +37,25 @@ class ReferenceUrlsModel(BaseModel):
     file_type: str
     gzip: bool=True
     genome_version: str
+    output_file: Optional[str]
     
     @validator("file_type")
     def check_file_type(cls, value)-> str:
         assert value in VALID_REF_FORMAT, f"{value} not a valid reference file formatr."
         return value
 
-
     @validator("genome_version")
     def check_genome_ver(cls, value)-> str:
         assert value in VALID_GENOME_VER, f"{value} not a valid genome version."
         return value
+
+    @property
+    def url_type(self):
+        if self.url.scheme == "gs":
+            get_type = "gsutil"
+        else:
+            get_type = "wget"
+        return get_type
 
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -55,59 +63,121 @@ if len(cluster_config.keys()) == 0:
 
 current_day = date.today()
 
-# LINKS TO REFERENCE FILES
-reference_genome_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz", file_type="fasta", gzip=True, genome_version="hg19")
-dbsnp_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz", file_type="fasta", gzip=True, genome_version="hg19")
-hc_vcf_1kg_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
-mills_1kg_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
-known_indel_1kg_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz",  file_type="vcf", gzip=True, genome_version="hg19")
-vcf_1kg_url = ReferenceUrlsModel(url="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
-cosmicdb_url = ReferenceUrlsModel(url="https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz", file_type="vcf", gzip=True, genome_version="hg19")
-refgene_txt_url = ReferenceUrlsModel(url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz", file_type="text", gzip=True, genome_version="hg19")
-refgene_sql_url = ReferenceUrlsModel(url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql", file_type="text", gzip=True, genome_version="hg19")
-wgs_calling_url = ReferenceUrlsModel(url="gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list", file_type="text", gzip=True, genome_version="hg19")
-genome_chrom_size_url = ReferenceUrlsModel(url="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes", file_type="text", gzip=True, genome_version="hg19")
+# backward compatible genome version extraction from config
+if 'genome_version' in config:
+    genome_ver = config['genome_version']
+else:
+    genome_ver = 'hg19'
+
+# essential path reference files
+basedir = os.path.join(config['output'], genome_ver)
+genome_dir = os.path.join(basedir, "genome")
+vcf_dir = os.path.join(basedir, "variants")
+vep_dir = os.path.join(basedir, "vep")
+cosmicdb_key = config['cosmic_key'] 
+
+# intialize reference files 
+reference_genome_url = ReferenceUrlsModel(
+    url="gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz",
+    file_type="fasta",
+    gzip=True,
+    genome_version=genome_ver,
+    output_file=os.path.join(genome_dir, "human_g1k_v37.fasta"),
+)
+dbsnp_url = ReferenceUrlsModel(
+    url="gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz",
+    file_type="fasta",
+    gzip=True,
+    genome_version=genome_ver,
+    output_file=os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf"),
+)
+hc_vcf_1kg_url = ReferenceUrlsModel(
+    url="gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz",
+    file_type="vcf",
+    gzip=True,
+    output_file = os.path.join(vcf_dir, "1kg_phase1_snps_high_confidence_b37.vcf"),
+    genome_version=genome_ver,
+)
+mills_1kg_url = ReferenceUrlsModel(
+    url="gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz",
+    file_type="vcf",
+    gzip=True,
+    output_file=os.path.join(vcf_dir, "mills_1kg_index.vcf"),
+    genome_version=genome_ver,
+)
+known_indel_1kg_url = ReferenceUrlsModel(
+    url="gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz",
+    file_type="vcf",
+    gzip=True,
+    output_file = os.path.join(vcf_dir, "1kg_known_indels_b37.vcf.gz"),
+    genome_version=genome_ver,
+)
+vcf_1kg_url = ReferenceUrlsModel(
+    url="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+    file_type="vcf",
+    gzip=True,
+    output_file = os.path.join(vcf_dir, "1k_genome_wgs_p1_v3_all_sites.vcf"),
+    genome_version=genome_ver,
+)
+cosmicdb_url = ReferenceUrlsModel(
+    url="https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
+    file_type="vcf",
+    gzip=True,
+    genome_version=genome_ver,
+)
+refgene_txt_url = ReferenceUrlsModel(
+    url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
+    file_type="text",
+    gzip=True,
+    genome_version=genome_ver,
+)
+refgene_sql_url = ReferenceUrlsModel(
+    url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
+    file_type="text",
+    gzip=True,
+    genome_version=genome_ver,
+)
+wgs_calling_url = ReferenceUrlsModel(
+    url="gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
+    file_type="text",
+    gzip=True,
+    genome_version=genome_ver,
+)
+genome_chrom_size_url = ReferenceUrlsModel(
+    url="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
+    file_type="text",
+    gzip=True,
+    genome_version=genome_ver,
+)
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
        '1kg_phase1_snps_high_confidence_b37.vcf', 'mills_1kg_index.vcf', 'cosmic_coding_muts_v89.vcf']
 
-basedir = os.path.join(config['output'], 'GRCh37')
-genome_dir = basedir + "/genome/"
-vcf_dir = basedir + "/variants/"
-vep_dir = basedir + "/vep/"
-cosmicdb_key = config['cosmic_key'] 
 
 # OUTPUT FILE NAMES
 reference_json = os.path.join(basedir, "reference.json")
 
-reference_genome = os.path.join(genome_dir, "human_g1k_v37_decoy.fasta")
-reference_genome_index = os.path.join(genome_dir, "human_g1k_v37_decoy.fasta.fai")
-refseq_bed = os.path.join(genome_dir, "refseq.flat.bed")
 refgene = os.path.join(genome_dir, "refGene.txt")
 refseq_flat = os.path.join(genome_dir, "refseq.flat")
+refseq_bed = refseq_flat + ".bed"
 wgs_calling_interval =  os.path.join(genome_dir, "wgs_calling_regions.v1")
 genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
 genome_chrom_size = os.path.join(genome_dir, "hg19.chrom.sizes")
 
-dbsnp = os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf")
-vcf_1kg = os.path.join(vcf_dir, "1k_genome_wgs_p1_v3_all_sites.vcf")
-hc_vcf_1kg = os.path.join(vcf_dir, "1kg_phase1_snps_high_confidence_b37.vcf")
-known_indel_1kg = os.path.join(vcf_dir, "1kg_known_indels_b37.vcf.gz")
-mills_1kg = os.path.join(vcf_dir, "mills_1kg_index.vcf")
 cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
 # list of reference download link and output file name
-ref_list_gzip = [(reference_genome_url.url, reference_genome, "gsutil"),
-                (dbsnp_url.url, dbsnp, "gsutil"),
-                (hc_vcf_1kg_url.url, hc_vcf_1kg, "gsutil"),
-                (mills_1kg_url.url, mills_1kg, "gsutil"),
-                (known_indel_1kg_url.url, known_indel_1kg, "gsutil"),
-                (vcf_1kg_url.url, vcf_1kg, "wget")]
+ref_list_gzip = [(reference_genome_url.url, reference_genome_url.output_file, reference_genome_url.url_type),
+                (dbsnp_url.url, dbsnp_url.output_file, dbsnp_url.url_type),
+                (hc_vcf_1kg_url.url, hc_vcf_1kg_url.output_file, hc_vcf_1kg_url.url_type),
+                (mills_1kg_url.url, mills_1kg_url.output_file, mills_1kg_url.url_type),
+                (known_indel_1kg_url.url, known_indel_1kg_url.output_file, known_indel_1kg_url.url_type),
+                (vcf_1kg_url.url, vcf_1kg_url.output_file, vcf_1kg_url.url_type)]
 
-ref_list_flat = [(wgs_calling_url.url, wgs_calling_interval, "gsutil"),
-                 (genome_chrom_size_url.url, genome_chrom_size, "wget")] 
+ref_list_flat = [(wgs_calling_url.url, wgs_calling_interval, wgs_calling_url.url_type),
+                 (genome_chrom_size_url.url, genome_chrom_size, genome_chrom_size_url.url_type)] 
 
 shell.prefix("set -eo pipefail; ")
 
@@ -138,20 +208,20 @@ singularity_image = config['singularity']['image']
 
 rule all:
     input:
-        reference_genome = reference_genome,
-        bwa_index = expand(reference_genome + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
-        refgenome_fai = reference_genome_index,
+        reference_genome = reference_genome_url.output_file,
+        bwa_index = expand(reference_genome_url.output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
+        refgenome_fai = reference_genome_url.output_file + ".fai",
         refgenome_dict = genome_dict,
         refseq_bed = refseq_bed,
         refseq_flat = refseq_flat,
         refgene = refgene,
-        dbsnp_vcf = dbsnp + ".gz",
-        th_genome_vcf = vcf_1kg + ".gz",
-        tg_high_vcf = hc_vcf_1kg + ".gz",
-        mills_1kg = mills_1kg + ".gz",
-        known_indel_1kg = known_indel_1kg + ".gz",
+        dbsnp_vcf = dbsnp_url.output_file + ".gz",
+        th_genome_vcf = vcf_1kg_url.output_file + ".gz",
+        tg_high_vcf = hc_vcf_1kg_url.output_file+ ".gz",
+        mills_1kg = mills_1kg_url.output_file + ".gz",
+        known_indel_1kg = known_indel_1kg_url.output_file + ".gz",
         cosmic_vcf = cosmicdb + ".gz",
-        variants_idx = expand( vcf_dir + "{vcf}.gz.tbi", vcf=VCF),
+        variants_idx = expand( os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=VCF),
         vep = vep_dir,
         wgs_calling = wgs_calling_interval,
         genome_chrom_size = genome_chrom_size
@@ -221,8 +291,8 @@ rule download_refgene:
         refgene = refgene,
         bed = refseq_bed
     log:
-        refgene_sql = genome_dir + "refgene_sql.log",
-        refgene_txt = genome_dir + "refgene_txt.log"
+        refgene_sql = os.path.join(genome_dir, "refgene_sql.log"),
+        refgene_txt = os.path.join(genome_dir, "refgene_txt.log")
     singularity: singularity_image
     shell:
         "source activate {params.conda_env}; " 
@@ -275,15 +345,15 @@ rule download_cosmicdb:
 
 rule bgzip_tabix:
     input: 
-        vcf_dir + "{vcf}"
+        os.path.join(vcf_dir, "{vcf}")
     params:
         type = 'vcf',
         conda_env = get_conda_env(config["conda_env_yaml"], "tabix")    
     output:
-        vcf_dir + "{vcf}.gz",
-        vcf_dir + "{vcf}.gz.tbi"
+        os.path.join(vcf_dir, "{vcf}.gz"),
+        os.path.join(vcf_dir, "{vcf}.gz.tbi")
     log:
-        vcf_dir + "{vcf}.gz_tbi.log"
+        os.path.join(vcf_dir, "{vcf}.gz_tbi.log")
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
@@ -298,13 +368,13 @@ rule bgzip_tabix:
 
 rule bwa_index:
     input:
-        reference_genome
+        reference_genome_url.output_file
     params:
         conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
-        expand(reference_genome + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
+        expand(reference_genome_url.output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
-        reference_genome + ".bwa_index.log"
+        reference_genome_url.output_file + ".bwa_index.log"
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
@@ -318,13 +388,13 @@ rule bwa_index:
 
 rule samtools_index_fasta:
     input:
-        reference_genome
+        reference_genome_url.output_file
     params:
         conda_env = get_conda_env(config["conda_env_yaml"], "samtools")
     output:
-        reference_genome_index
+        reference_genome_url.output_file + ".fai"
     log:
-        reference_genome + ".faidx.log"
+        reference_genome_url.output_file + ".faidx.log"
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
@@ -339,13 +409,13 @@ rule samtools_index_fasta:
 
 rule picard_ref_dict:
     input:
-        reference_genome
+        reference_genome_url.output_file
     params:
         conda_env = get_conda_env(config["conda_env_yaml"], "picard")
     output:
         genome_dict
     log:
-        reference_genome + ".ref_dict.log"
+        reference_genome_url.output_file + ".ref_dict.log"
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
@@ -369,7 +439,7 @@ rule vep_install:
     output:
         directory(vep_dir)
     log:
-        vep_dir + "vep_install_cache.log"
+        os.path.join(vep_dir, "vep_install_cache.log")
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
