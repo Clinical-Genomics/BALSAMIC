@@ -1,7 +1,7 @@
 {
     "__default__": {
         "name": "BALSAMIC.{rule}.{wildcards}",
-        "time": "01:30:00",
+        "time": "03:00:00",
         "n": 6,
         "mail_type": "FAIL",
         "partition": "core"

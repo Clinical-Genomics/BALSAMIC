@@ -1,9 +1,11 @@
 import pytest
 import glob
+import BALSAMIC
+import json
+import logging
+
 from pathlib import Path
 from click.testing import CliRunner
-
-import BALSAMIC
 from BALSAMIC.commands.base import cli
 
 
