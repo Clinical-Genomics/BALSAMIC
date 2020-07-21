@@ -3,16 +3,16 @@ name: Report failed analysis
 about: Troubleshooting errors in Balsamic
 case-id:
 lims-id:
-labels:
-assignees:
+Amount read-pairs:
+Sequence type (WES, TGA, WGS):
 
 ---
 
 **Error message**
-Copy either the error message from the e-mail or copy the line(s) in the error log showing the error message(s).
+Copy either the error message from the e-mail or copy **only the relevant** line(s) in the error log showing the error message(s). Please do not paste the whole error text.
 
 **Link to the error message**
-Copy the path for the error file in Hasta which includes the error message(s).
+Copy the path for the error file in Hasta which includes the error message(s). In order to get path to the file, run the following command on Hasta: `ejobinfoprint jobid` (replace job id with actual job id).
 
 **Reason for failure**
 Provide any theories regarding why the error message arises.
