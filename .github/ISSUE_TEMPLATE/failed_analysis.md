@@ -1,10 +1,6 @@
 ---
 name: Report failed analysis
 about: Troubleshooting errors in Balsamic
-case-id:
-lims-id:
-Amount read-pairs:
-Sequence type (WES, TGA, WGS):
 
 ---
 **Case or sample information**
