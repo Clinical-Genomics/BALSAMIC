@@ -16,12 +16,13 @@ USAGE: [ -a <T|TN> -c _condaenv -m <run|config|all> -t <panel|WGS> -r ]
   -c Conda environment where BALSAMIC is installed. If not specified, it will use current environment.
   -m [required] config: only create config file, run: create config file and start analysis
   -t [required] panel: target sequencing workflow (also includes WES), WGS: whole genome sequencing workflow
+  -d Analysis dir path, if it doesn't exist it will be created
   -r Flag. Set to submit jobs instead of running in dry mode
   -h Show this help and exit
 " 
 }
 
-while getopts ":a:m:c:t:r" opt; do
+while getopts ":a:m:c:t:d:r" opt; do
   case ${opt} in
     a)
       _analysis=${OPTARG}
@@ -42,6 +43,10 @@ while getopts ":a:m:c:t:r" opt; do
       echo "workflow set to " "${OPTARG}"
       [[ $_ngstype == 'panel' || $_ngstype == 'WGS' ]] || ( usage >&2; exit 1)
       ;;
+    d)
+      _analysis_dir=${OPTARG}
+      echo "analysis dir set to " "${OPTARG}"
+      ;;
     r)
       rFlag=true;
       ;;
@@ -59,15 +64,20 @@ if [[ ! -z ${_condaenv} ]]; then
   source activate ${_condaenv}
 fi
 
-_analysis_dir='run_tests/'
+if [[ -z ${_analysis_dir} ]]; then
+  _analysis_dir='run_tests/'
+  echo "analysis dir set to " "${_analysis_dir}"
+fi
+
+# Make sure _analysis_dir exists
+mkdir -p ${_analysis_dir}
+
+_cluster_config='BALSAMIC/config/cluster_minimal.json'
 _singularity='BALSAMIC/containers/BALSAMIC_latest.sif'
 _reference='reference/GRCh37/reference.json'
 _tumor_fastq='tests/test_data/fastq/S1_R_1.fastq.gz'
 _normal_fastq='tests/test_data/fastq/S2_R_1.fastq.gz'
-_analysis_config='run_tests/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
-
-# Make sure _analysis_dir exists
-mkdir -p ${_analysis_dir}
+_analysis_config=${_analysis_dir}'/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
 
 if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
@@ -93,6 +103,7 @@ function balsamic_config() {
 balsamic_run() {
   balsamic run analysis \
     -s ${_analysis_config} \
+    -c ${_cluster_config} \
     --account development ${_run_analysis}
 }
 
