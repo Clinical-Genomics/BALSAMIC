@@ -7,7 +7,10 @@ Amount read-pairs:
 Sequence type (WES, TGA, WGS):
 
 ---
-
+**Case or sample information**
+Internal sample id or case id: (only anonymized ids are allowed)
+Amount read-pairs:
+Sequence type (WES, TGA, WGS):
 **Error message**
 Copy either the error message from the e-mail or copy **only the relevant** line(s) in the error log showing the error message(s). Please do not paste the whole error text.
 
