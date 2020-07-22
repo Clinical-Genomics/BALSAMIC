@@ -143,4 +143,3 @@ def comparevcf(input_file1, input_file2, output_file):
         pass
     if output_file:
         pass
-
