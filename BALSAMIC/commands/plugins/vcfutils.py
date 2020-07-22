@@ -32,7 +32,6 @@ def readinput(text_file):
                 lines[header.index('Variant_type')],
                 lines[header.index('AA_HGVS')]
             ])
-    input_file.close()
     return input_info
 
 
@@ -114,7 +113,6 @@ def createvcf(input_file, reference_file, output_file):
                 if info not in filtered_variants:
                     filtered_variants.append(info)
                     vcf_output.write(info + '\n')
-    vcf_output.close()
     end_time = datetime.now()
     click.echo("VCF file created. Total Runtime:" +
                '{}'.format(end_time - start_time))
