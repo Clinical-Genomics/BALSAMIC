@@ -38,6 +38,7 @@ class ReferenceUrlsModel(BaseModel):
     gzip: bool=True
     genome_version: str
     output_file: Optional[str]
+    secret: Optional[str]
     
     @validator("file_type")
     def check_file_type(cls, value)-> str:
@@ -56,6 +57,18 @@ class ReferenceUrlsModel(BaseModel):
         else:
             get_type = "wget"
         return get_type
+
+    @property
+    def write_md5(self):
+        hash_md5 = hashlib.md5()
+        with open(str(self.output_file), 'rb') as fh:
+            for chunk in iter(lambda: fh.read(4096), b""):
+                hash_md5.update(chunk)
+
+        with open(str(self.output_file+".md5"), 'w') as fh:
+            fh.write('{} {}\n'.format(self.output_file, hash_md5.hexdigest()))
+
+        return hash_md5.hexdigest()
 
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -123,12 +136,15 @@ cosmicdb_url = ReferenceUrlsModel(
     url="https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
     file_type="vcf",
     gzip=True,
+    output_file=os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf"),
     genome_version=genome_ver,
+    secret=config['cosmic_key']
 )
 refgene_txt_url = ReferenceUrlsModel(
     url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
     file_type="text",
     gzip=True,
+    output_file=os.path.join(genome_dir, "refGene.txt"),
     genome_version=genome_ver,
 )
 refgene_sql_url = ReferenceUrlsModel(
@@ -140,13 +156,15 @@ refgene_sql_url = ReferenceUrlsModel(
 wgs_calling_url = ReferenceUrlsModel(
     url="gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
     file_type="text",
-    gzip=True,
+    gzip=False,
+    output_file=os.path.join(genome_dir, "wgs_calling_regions.v1"),
     genome_version=genome_ver,
 )
 genome_chrom_size_url = ReferenceUrlsModel(
     url="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
     file_type="text",
-    gzip=True,
+    gzip=False,
+    output_file=os.path.join(genome_dir, "hg19.chrom.sizes"),
     genome_version=genome_ver,
 )
 
@@ -155,29 +173,8 @@ VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
        '1kg_phase1_snps_high_confidence_b37.vcf', 'mills_1kg_index.vcf', 'cosmic_coding_muts_v89.vcf']
 
 
-# OUTPUT FILE NAMES
-reference_json = os.path.join(basedir, "reference.json")
-
-refgene = os.path.join(genome_dir, "refGene.txt")
-refseq_flat = os.path.join(genome_dir, "refseq.flat")
-refseq_bed = refseq_flat + ".bed"
-wgs_calling_interval =  os.path.join(genome_dir, "wgs_calling_regions.v1")
-genome_dict = os.path.join(genome_dir, "human_g1k_v37_decoy.dict")
-genome_chrom_size = os.path.join(genome_dir, "hg19.chrom.sizes")
-
-cosmicdb = os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf")
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
-# list of reference download link and output file name
-ref_list_gzip = [(reference_genome_url.url, reference_genome_url.output_file, reference_genome_url.url_type),
-                (dbsnp_url.url, dbsnp_url.output_file, dbsnp_url.url_type),
-                (hc_vcf_1kg_url.url, hc_vcf_1kg_url.output_file, hc_vcf_1kg_url.url_type),
-                (mills_1kg_url.url, mills_1kg_url.output_file, mills_1kg_url.url_type),
-                (known_indel_1kg_url.url, known_indel_1kg_url.output_file, known_indel_1kg_url.url_type),
-                (vcf_1kg_url.url, vcf_1kg_url.output_file, vcf_1kg_url.url_type)]
-
-ref_list_flat = [(wgs_calling_url.url, wgs_calling_interval, wgs_calling_url.url_type),
-                 (genome_chrom_size_url.url, genome_chrom_size, genome_chrom_size_url.url_type)] 
 
 shell.prefix("set -eo pipefail; ")
 
@@ -211,26 +208,26 @@ rule all:
         reference_genome = reference_genome_url.output_file,
         bwa_index = expand(reference_genome_url.output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
         refgenome_fai = reference_genome_url.output_file + ".fai",
-        refgenome_dict = genome_dict,
-        refseq_bed = refseq_bed,
-        refseq_flat = refseq_flat,
-        refgene = refgene,
+        refgenome_dict = reference_genome_url.output_file.replace("fasta","dict"),
+        refseq_bed = refgene_txt_url.output_file.replace("txt", "flat") + ".bed",
+        refseq_flat = refgene_txt_url.output_file.replace("txt", "flat"),
+        refgene = refgene_txt_url.output_file,
         dbsnp_vcf = dbsnp_url.output_file + ".gz",
         th_genome_vcf = vcf_1kg_url.output_file + ".gz",
         tg_high_vcf = hc_vcf_1kg_url.output_file+ ".gz",
         mills_1kg = mills_1kg_url.output_file + ".gz",
         known_indel_1kg = known_indel_1kg_url.output_file + ".gz",
-        cosmic_vcf = cosmicdb + ".gz",
+        cosmic_vcf = cosmicdb_url.output_file + ".gz",
         variants_idx = expand( os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=VCF),
-        vep = vep_dir,
-        wgs_calling = wgs_calling_interval,
-        genome_chrom_size = genome_chrom_size
+        vep = directory(vep_dir),
+        wgs_calling = wgs_calling_url.output_file,
+        genome_chrom_size = genome_chrom_size_url.output_file 
     output:
         finished = os.path.join(basedir,"reference.finished"),
-        reference_json = reference_json,
+        reference_json = os.path.join(basedir, "reference.json"),
         check_md5 = check_md5
     log:
-        reference_json + ".log"
+        os.path.join(basedir, "reference.json.log")
     run:
         import json
 
@@ -263,22 +260,36 @@ rule all:
 # Download the reference genome, variant db 
 #                       - .fasta, dbsnp.vcf, 1kg.vcf, refFlat
 ##########################################################
+reference_data = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url, mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
+wgs_calling_url, genome_chrom_size_url, cosmicdb_url]
 
 rule download_reference:
     output:
-        expand("{output}", output=[ref[1] for ref in ref_list_gzip + ref_list_flat])
+        expand("{output}", output=[ref.output_file for ref in reference_data])
     run:
-        for ref in ref_list_gzip:
-            if ref[2] == "gsutil":
-                shell("gsutil cp -L {ref[1]}.log {ref[0]} - | gunzip > {ref[1]}") 
-            else:
-                shell("wget -a {ref[1]}.log -O - {ref[0]} | gunzip > {ref[1]}")
-        for ref in ref_list_flat:
-            if ref[2] == "gsutil":
-                shell("gsutil cp -L {ref[1]}.log {ref[0]} {ref[1]}") 
-            else:
-                shell("wget -a {ref[1]}.log -O {ref[1]} {ref[0]}")
+        import requests
 
+        for ref in reference_data:
+            print(ref.dict())
+            if ref.url_type == "gsutil":
+                cmd = "gsutil cp -L {}.log {} -".format(ref.output_file, ref.url)
+            else:
+                cmd = "wget -a {}.log -O - {}".format(ref.output_file, ref.url)
+
+            if ref.secret:
+                response = requests.get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret })
+                download_url = response.json()["url"]
+                cmd = "curl -o - '{}'".format(download_url)
+            
+            if ref.gzip:
+                cmd += " | gunzip "
+
+            cmd += " > {}".format(ref.output_file)
+            shell(cmd)
+            ref.write_md5
+
+
+            
 rule download_refgene:
     params:
         refgene_txt = refgene_txt_url.url,
@@ -287,9 +298,9 @@ rule download_refgene:
         bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
-        refflat = refseq_flat,
-        refgene = refgene,
-        bed = refseq_bed
+        refflat = refgene_txt_url.output_file.replace("txt", "flat"),
+        refgene = refgene_txt_url.output_file,
+        bed = refgene_txt_url.output_file.replace("txt", "flat") + ".bed"
     log:
         refgene_sql = os.path.join(genome_dir, "refgene_sql.log"),
         refgene_txt = os.path.join(genome_dir, "refgene_txt.log")
@@ -307,36 +318,6 @@ rule download_refgene:
         "| awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' "
         "| cut -f 1-11 > {output.refflat}; "
         "source deactivate; "
-
-##########################################################
-# Download cosmic data using basic authentication 
-#
-##########################################################
-
-rule download_cosmicdb:
-    params:
-        cosmic_db = cosmicdb_url.url,
-        cosmicdb_key = cosmicdb_key,
-        conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
-    output:
-        cosmicdb
-    run:
-        import requests
-
-        ## request the download url link
-        response = requests.get(params.cosmic_db, headers={'Authorization': 'Basic %s' % params.cosmicdb_key })
-        download_url = response.json()["url"]
-
-        ## request the download file 
-        vcf = requests.get(download_url)
-
-        ## write the file 
-        with open(str(output)+'.gz', "wb") as fh:
-          fh.write(vcf.content)
-
-        ## unzip the file for indexing
-        shell("gunzip {output}.gz;")
-
 
 ##########################################################
 # Bgzipping and tabix the vcf files
@@ -413,7 +394,7 @@ rule picard_ref_dict:
     params:
         conda_env = get_conda_env(config["conda_env_yaml"], "picard")
     output:
-        genome_dict
+        reference_genome_url.output_file.replace("fasta","dict")
     log:
         reference_genome_url.output_file + ".ref_dict.log"
     singularity: singularity_image
