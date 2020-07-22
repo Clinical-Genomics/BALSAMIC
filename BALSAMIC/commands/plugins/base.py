@@ -11,8 +11,6 @@ def plugins(context):
     ''' Additional and helper utilities for third party applications '''
     pass
 
-
 plugins.add_command(scout_command)
 plugins.add_command(target_cov_plot_command)
 plugins.add_command(vcfutils_command)
-
