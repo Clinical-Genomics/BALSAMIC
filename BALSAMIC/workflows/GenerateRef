@@ -10,6 +10,7 @@ from datetime import date
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.models import ReferenceUrlsModel, ReferenceMeta
+from BALSAMIC.utils.constants import REFERENCE_FILES 
 
 
 # explictly check if cluster_config dict has zero keys.
@@ -32,8 +33,7 @@ vep_dir = os.path.join(basedir, "vep")
 cosmicdb_key = config['cosmic_key'] 
 
 # intialize reference files 
-from BALSAMIC.utils.constants import REFERENCE_FILES 
-
+REFERENCE_FILES['hg19']['basedir'] = basedir
 reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES['hg19'])
 
 reference_genome_url = reference_file_model.reference_genome
@@ -171,9 +171,9 @@ rule download_reference:
                 cmd += " | gunzip "
 
             cmd += " > {}".format(output_file)
-            print(ref.json())
-#            shell(cmd)
-#            ref.write_md5
+#            print(ref.json())
+            shell(cmd)
+            ref.write_md5
 
 
             
