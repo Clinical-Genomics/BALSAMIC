@@ -15,8 +15,8 @@ rule vep_somatic:
   output:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
-    vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz_summary.html",
   params:
+    tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
@@ -26,13 +26,14 @@ rule vep_somatic:
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "
+    "tmpvcf={params.tmpvcf} "
     "export PERL5LIB=;"
-    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o tmp.{output.vcf} ;" 
+    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o $tmpvcf ;" 
     "vep "
         "--dir $vep_path "
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
-        "--input_file tmp.{output.vcf} "
+        "--input_file $tmpvcf "
         "--output_file {output.vcf} "
         "--compress_output bgzip "
         "--fork {threads} "
@@ -51,7 +52,8 @@ rule vep_somatic:
         "--force_overwrite; "
     "tabix -p vcf -f {output.vcf}; "
     "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf}; "
-    "tabix -p vcf -f {output.vcf_pass}; " 
+    "tabix -p vcf -f {output.vcf_pass}; "
+    "rm $tmpvcf " 
     
 
 rule vep_stat:
@@ -84,7 +86,6 @@ rule vep_germline:
     cosmic = config["reference"]["cosmic"]
   output:
     vcf = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
-    vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
@@ -118,4 +119,3 @@ rule vep_germline:
         "--verbose "
         "--force_overwrite; "
     "tabix -p vcf -f {output.vcf}; "
- 

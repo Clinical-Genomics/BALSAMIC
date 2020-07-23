@@ -56,7 +56,7 @@ rule cnvkit_single:
             " --scatter --diagram "
             " --output-dir {params.cnv_dir}; "
         "cnvkit.py genemetrics {output.tumor_cnr} "
-            "-s {output.tumor_cns}"
+            "-s {output.tumor_cns} "
             "--drop-low-coverage -y "
             "--output {output.gene_metrics_csv}; "
         "cnvkit.py breaks {output.tumor_cnr} {output.tumor_cns} "

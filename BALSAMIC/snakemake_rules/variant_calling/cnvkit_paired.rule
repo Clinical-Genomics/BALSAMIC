@@ -68,7 +68,7 @@ rule cnvkit_paired:
         "cnvkit.py breaks {output.tumor_cnr} {output.tumor_cns} "
             "| cut -f1 | sort -u > {output.gene_breaks_csv}; "
         "cnvkit.py export vcf {output.tumor_cns} --cnr {output.tumor_cnr} "
-            "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR;"
+            "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR; "
         "bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf; "
         "tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz; "
         "bcftools sort -o {output.vcf} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 
