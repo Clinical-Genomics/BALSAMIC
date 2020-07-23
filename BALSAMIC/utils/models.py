@@ -408,7 +408,8 @@ class ReferenceMeta(BaseModel):
     """Defines a basemodel for all reference file
     """
 
-    reference_genome: ReferenceUrlsModel 
+    basedir: str = ""
+    reference_genome: ReferenceUrlsModel
     dbsnp: ReferenceUrlsModel
     hc_vcf_1kg: ReferenceUrlsModel
     mills_1kg: ReferenceUrlsModel
@@ -419,3 +420,15 @@ class ReferenceMeta(BaseModel):
     cosmicdb: ReferenceUrlsModel
     refgene_txt: ReferenceUrlsModel
     refgene_sql: ReferenceUrlsModel
+
+
+    @validator('*', pre=True)
+    def validate_path(cls, value, values, **kwargs):
+        if isinstance(value, str):
+            return value
+        else:
+            if "output_path" in value:
+                value["output_path"] = Path(values["basedir"], value["output_path"]).as_posix()
+                return ReferenceUrlsModel.parse_obj(value)
+            else:
+                return value
