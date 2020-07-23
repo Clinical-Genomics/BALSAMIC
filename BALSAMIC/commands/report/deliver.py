@@ -34,6 +34,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.option(
     "--sample-config",
+    "-s",
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
