@@ -1,3 +1,5 @@
+import os
+
 from pathlib import Path
 from datetime import datetime
 
@@ -344,7 +346,6 @@ class BalsamicConfigModel(BaseModel):
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
 
-
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
     
@@ -366,6 +367,7 @@ class ReferenceUrlsModel(BaseModel):
     gzip: bool = True
     genome_version: str
     output_file: Optional[str]
+    output_path: Optional[str]
     secret: Optional[str]
 
     @validator("file_type")
@@ -377,6 +379,12 @@ class ReferenceUrlsModel(BaseModel):
     def check_genome_ver(cls, value) -> str:
         assert value in VALID_GENOME_VER, f"{value} not a valid genome version."
         return value
+
+    @property
+    def get_output_file(self):
+        output_file_path = os.path.join(self.output_path, self.output_file)
+        return output_file_path
+    
 
     @property
     def url_type(self):
@@ -395,3 +403,19 @@ class ReferenceUrlsModel(BaseModel):
 
         with open(str(self.output_file + ".md5"), 'w') as fh:
             fh.write('{} {}\n'.format(self.output_file, hash_md5.hexdigest()))
+
+class ReferenceMeta(BaseModel):
+    """Defines a basemodel for all reference file
+    """
+
+    reference_genome: ReferenceUrlsModel 
+    dbsnp: ReferenceUrlsModel
+    hc_vcf_1kg: ReferenceUrlsModel
+    mills_1kg: ReferenceUrlsModel
+    known_indel_1kg: ReferenceUrlsModel
+    vcf_1kg: ReferenceUrlsModel
+    wgs_calling: ReferenceUrlsModel
+    genome_chrom_size: ReferenceUrlsModel
+    cosmicdb: ReferenceUrlsModel
+    refgene_txt: ReferenceUrlsModel
+    refgene_sql: ReferenceUrlsModel
