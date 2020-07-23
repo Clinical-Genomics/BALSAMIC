@@ -9,7 +9,7 @@ from datetime import date
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
-from BALSAMIC.utils.models import ReferenceUrlsModel
+from BALSAMIC.utils.models import ReferenceUrlsModel, ReferenceMeta
 
 
 # explictly check if cluster_config dict has zero keys.
@@ -32,83 +32,25 @@ vep_dir = os.path.join(basedir, "vep")
 cosmicdb_key = config['cosmic_key'] 
 
 # intialize reference files 
-reference_genome_url = ReferenceUrlsModel(
-    url="gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz",
-    file_type="fasta",
-    gzip=True,
-    genome_version=genome_ver,
-    output_file=os.path.join(genome_dir, "human_g1k_v37.fasta"),
-)
-dbsnp_url = ReferenceUrlsModel(
-    url="gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz",
-    file_type="fasta",
-    gzip=True,
-    genome_version=genome_ver,
-    output_file=os.path.join(vcf_dir, "dbsnp_grch37_b138.vcf"),
-)
-hc_vcf_1kg_url = ReferenceUrlsModel(
-    url="gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz",
-    file_type="vcf",
-    gzip=True,
-    output_file = os.path.join(vcf_dir, "1kg_phase1_snps_high_confidence_b37.vcf"),
-    genome_version=genome_ver,
-)
-mills_1kg_url = ReferenceUrlsModel(
-    url="gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz",
-    file_type="vcf",
-    gzip=True,
-    output_file=os.path.join(vcf_dir, "mills_1kg_index.vcf"),
-    genome_version=genome_ver,
-)
-known_indel_1kg_url = ReferenceUrlsModel(
-    url="gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz",
-    file_type="vcf",
-    gzip=True,
-    output_file = os.path.join(vcf_dir, "1kg_known_indels_b37.vcf.gz"),
-    genome_version=genome_ver,
-)
-vcf_1kg_url = ReferenceUrlsModel(
-    url="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
-    file_type="vcf",
-    gzip=True,
-    output_file = os.path.join(vcf_dir, "1k_genome_wgs_p1_v3_all_sites.vcf"),
-    genome_version=genome_ver,
-)
-cosmicdb_url = ReferenceUrlsModel(
-    url="https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
-    file_type="vcf",
-    gzip=True,
-    output_file=os.path.join(vcf_dir, "cosmic_coding_muts_v89.vcf"),
-    genome_version=genome_ver,
-    secret=config['cosmic_key']
-)
-refgene_txt_url = ReferenceUrlsModel(
-    url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
-    file_type="text",
-    gzip=True,
-    output_file=os.path.join(genome_dir, "refGene.txt"),
-    genome_version=genome_ver,
-)
-refgene_sql_url = ReferenceUrlsModel(
-    url="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
-    file_type="text",
-    gzip=True,
-    genome_version=genome_ver,
-)
-wgs_calling_url = ReferenceUrlsModel(
-    url="gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
-    file_type="text",
-    gzip=False,
-    output_file=os.path.join(genome_dir, "wgs_calling_regions.v1"),
-    genome_version=genome_ver,
-)
-genome_chrom_size_url = ReferenceUrlsModel(
-    url="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
-    file_type="text",
-    gzip=False,
-    output_file=os.path.join(genome_dir, "hg19.chrom.sizes"),
-    genome_version=genome_ver,
-)
+from BALSAMIC.utils.constants import REFERENCE_FILES 
+
+reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES['hg19'])
+
+reference_genome_url = reference_file_model.reference_genome
+dbsnp_url = reference_file_model.dbsnp 
+hc_vcf_1kg_url = reference_file_model.hc_vcf_1kg
+mills_1kg_url = reference_file_model.mills_1kg
+known_indel_1kg_url = reference_file_model.known_indel_1kg
+vcf_1kg_url = reference_file_model.vcf_1kg
+cosmicdb_url = reference_file_model.cosmicdb
+
+cosmicdb_url.secret=config['cosmic_key']
+
+wgs_calling_url = reference_file_model.wgs_calling
+genome_chrom_size_url = reference_file_model.genome_chrom_size
+
+refgene_txt_url = reference_file_model.refgene_txt 
+refgene_sql_url = reference_file_model.refgene_sql
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
@@ -147,23 +89,23 @@ singularity_image = config['singularity']['image']
 
 rule all:
     input:
-        reference_genome = reference_genome_url.output_file,
-        bwa_index = expand(reference_genome_url.output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
-        refgenome_fai = reference_genome_url.output_file + ".fai",
-        refgenome_dict = reference_genome_url.output_file.replace("fasta","dict"),
-        refseq_bed = refgene_txt_url.output_file.replace("txt", "flat") + ".bed",
-        refseq_flat = refgene_txt_url.output_file.replace("txt", "flat"),
-        refgene = refgene_txt_url.output_file,
-        dbsnp_vcf = dbsnp_url.output_file + ".gz",
-        th_genome_vcf = vcf_1kg_url.output_file + ".gz",
-        tg_high_vcf = hc_vcf_1kg_url.output_file+ ".gz",
-        mills_1kg = mills_1kg_url.output_file + ".gz",
-        known_indel_1kg = known_indel_1kg_url.output_file + ".gz",
-        cosmic_vcf = cosmicdb_url.output_file + ".gz",
+        reference_genome = reference_genome_url.get_output_file,
+        bwa_index = expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
+        refgenome_fai = reference_genome_url.get_output_file + ".fai",
+        refgenome_dict = reference_genome_url.get_output_file.replace("fasta","dict"),
+        refseq_bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
+        refseq_flat = refgene_txt_url.get_output_file.replace("txt", "flat"),
+        refgene = refgene_txt_url.get_output_file,
+        dbsnp_vcf = dbsnp_url.get_output_file + ".gz",
+        th_genome_vcf = vcf_1kg_url.get_output_file + ".gz",
+        tg_high_vcf = hc_vcf_1kg_url.get_output_file+ ".gz",
+        mills_1kg = mills_1kg_url.get_output_file + ".gz",
+        known_indel_1kg = known_indel_1kg_url.get_output_file + ".gz",
+        cosmic_vcf = cosmicdb_url.get_output_file + ".gz",
         variants_idx = expand( os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=VCF),
         vep = directory(vep_dir),
-        wgs_calling = wgs_calling_url.output_file,
-        genome_chrom_size = genome_chrom_size_url.output_file 
+        wgs_calling = wgs_calling_url.get_output_file,
+        genome_chrom_size = genome_chrom_size_url.get_output_file 
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -207,15 +149,18 @@ wgs_calling_url, genome_chrom_size_url, cosmicdb_url]
 
 rule download_reference:
     output:
-        expand("{output}", output=[ref.output_file for ref in reference_data])
+        expand("{output}", output=[ref.get_output_file for ref in reference_data])
     run:
         import requests
 
         for ref in reference_data:
+            output_file = os.path.join(basedir, ref.get_output_file)
+            log_file = output_file + ".log"
+
             if ref.url_type == "gsutil":
-                cmd = "gsutil cp -L {}.log {} -".format(ref.output_file, ref.url)
+                cmd = "gsutil cp -L {}.log {} -".format(log_file, ref.url)
             else:
-                cmd = "wget -a {}.log -O - {}".format(ref.output_file, ref.url)
+                cmd = "wget -a {}.log -O - {}".format(log_file, ref.url)
 
             if ref.secret:
                 response = requests.get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret })
@@ -225,9 +170,10 @@ rule download_reference:
             if ref.gzip:
                 cmd += " | gunzip "
 
-            cmd += " > {}".format(ref.output_file)
-            shell(cmd)
-            ref.write_md5
+            cmd += " > {}".format(output_file)
+            print(ref.json())
+#            shell(cmd)
+#            ref.write_md5
 
 
             
@@ -239,12 +185,12 @@ rule download_refgene:
         bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
-        refflat = refgene_txt_url.output_file.replace("txt", "flat"),
-        refgene = refgene_txt_url.output_file,
-        bed = refgene_txt_url.output_file.replace("txt", "flat") + ".bed"
+        refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
+        refgene = refgene_txt_url.get_output_file,
+        bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed"
     log:
-        refgene_sql = os.path.join(genome_dir, "refgene_sql.log"),
-        refgene_txt = os.path.join(genome_dir, "refgene_txt.log")
+        refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
+        refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
     singularity: singularity_image
     shell:
         "source activate {params.conda_env}; " 
@@ -290,13 +236,13 @@ rule bgzip_tabix:
 
 rule bwa_index:
     input:
-        reference_genome_url.output_file
+        reference_genome_url.get_output_file
     params:
         conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
     output:
-        expand(reference_genome_url.output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
+        expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
-        reference_genome_url.output_file + ".bwa_index.log"
+        reference_genome_url.get_output_file + ".bwa_index.log"
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
@@ -310,13 +256,13 @@ rule bwa_index:
 
 rule samtools_index_fasta:
     input:
-        reference_genome_url.output_file
+        reference_genome_url.get_output_file
     params:
         conda_env = get_conda_env(config["conda_env_yaml"], "samtools")
     output:
-        reference_genome_url.output_file + ".fai"
+        reference_genome_url.get_output_file + ".fai"
     log:
-        reference_genome_url.output_file + ".faidx.log"
+        reference_genome_url.get_output_file + ".faidx.log"
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
@@ -331,13 +277,13 @@ rule samtools_index_fasta:
 
 rule picard_ref_dict:
     input:
-        reference_genome_url.output_file
+        reference_genome_url.get_output_file
     params:
         conda_env = get_conda_env(config["conda_env_yaml"], "picard")
     output:
-        reference_genome_url.output_file.replace("fasta","dict")
+        reference_genome_url.get_output_file.replace("fasta","dict")
     log:
-        reference_genome_url.output_file + ".ref_dict.log"
+        reference_genome_url.get_output_file + ".ref_dict.log"
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
