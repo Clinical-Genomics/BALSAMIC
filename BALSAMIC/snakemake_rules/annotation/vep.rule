@@ -26,7 +26,7 @@ rule vep_somatic:
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "
-    "tmpvcf={params.tmpvcf} "
+    "tmpvcf={params.tmpvcf}; "
     "export PERL5LIB=;"
     "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o $tmpvcf ;" 
     "vep "
