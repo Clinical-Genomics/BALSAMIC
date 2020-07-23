@@ -1,11 +1,13 @@
 from pathlib import Path
 from datetime import datetime
 
-from pydantic import BaseModel, ValidationError, validator, Field
+from pydantic import (BaseModel, ValidationError, validator, Field, AnyUrl)
 from pydantic.types import DirectoryPath, FilePath
 from typing import Optional, List, Dict
 
-from BALSAMIC.utils.constants import CONDA_ENV_PATH, CONDA_ENV_YAML, RULE_DIRECTORY, BALSAMIC_VERSION
+from BALSAMIC.utils.constants import (CONDA_ENV_PATH, CONDA_ENV_YAML,
+                                      RULE_DIRECTORY, BALSAMIC_VERSION,
+                                      VALID_GENOME_VER, VALID_REF_FORMAT)
 
 
 class VCFAttributes(BaseModel):
@@ -85,7 +87,6 @@ class QCModel(BaseModel):
     def coerce_int_as_str(cls, value):
         return str(value)
 
-
     class Config:
         validate_all = True
 
@@ -106,18 +107,19 @@ class VarcallerAttribute(BaseModel):
     mutation_type: str = Field(alias="type")
 
     @validator("mutation", check_fields=False)
-    def mutation_literal(cls, value)->str:
+    def mutation_literal(cls, value) -> str:
         valid_mutation_fields = ["somatic", "germline"]
         if value not in valid_mutation_fields:
             raise ValueError(f"{value} not a valid argument!")
         return value
 
     @validator("mutation_type", check_fields=False)
-    def mutation_type_literal(cls, value)-> str:
+    def mutation_type_literal(cls, value) -> str:
         valid_mutation_type_fields = ["SNV", "SV", "CNV"]
         if value not in valid_mutation_type_fields:
             raise ValueError(f"{value} not a valid argument!")
         return value
+
 
 class VCFModel(BaseModel):
     """Contains VCF config"""
@@ -136,6 +138,7 @@ class VCFModel(BaseModel):
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
     strelka_germline: VarcallerAttribute
+
 
 class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
@@ -187,14 +190,17 @@ class AnalysisModel(BaseModel):
     def analysis_type_literal(cls, value) -> str:
         balsamic_analysis_types = ["single", "paired", "qc"]
         if value not in balsamic_analysis_types:
-            raise ValueError(f"Provided analysis type ({value}) not supported in BALSAMIC!")
+            raise ValueError(
+                f"Provided analysis type ({value}) not supported in BALSAMIC!")
         return value
 
     @validator("sequencing_type")
-    def sequencing_type_literal(cls, value)->str:
+    def sequencing_type_literal(cls, value) -> str:
         balsamic_sequencing_types = ["wgs", "targeted"]
         if value not in balsamic_sequencing_types:
-            raise ValueError(f"Provided sequencing type ({value}) not supported in BALSAMIC!")
+            raise ValueError(
+                f"Provided sequencing type ({value}) not supported in BALSAMIC!"
+            )
         return value
 
     @validator("analysis_dir")
@@ -259,7 +265,8 @@ class SampleInstanceModel(BaseModel):
     def sample_type_literal(cls, value):
         balsamic_sample_types = ["tumor", "normal"]
         if value not in balsamic_sample_types:
-            raise ValueError(f"Provided sample type ({value}) not supported in BALSAMIC!")
+            raise ValueError(
+                f"Provided sample type ({value}) not supported in BALSAMIC!")
         return value
 
 
@@ -336,3 +343,55 @@ class BalsamicConfigModel(BaseModel):
     @validator("singularity")
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
+
+
+class ReferenceUrlsModel(BaseModel):
+    """Defines a basemodel for reference urls
+    
+    This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
+
+    Attributes:
+      url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
+      file_type: describes file type. Accepted values are VALID_REF_FORMAT constant 
+      gzip: gzip status. Binary: True or False
+      genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant 
+
+    Raises:
+      ValidationError: When it can't validate values matching above attributes
+      
+    """
+
+    url: AnyUrl
+    file_type: str
+    gzip: bool = True
+    genome_version: str
+    output_file: Optional[str]
+    secret: Optional[str]
+
+    @validator("file_type")
+    def check_file_type(cls, value) -> str:
+        assert value in VALID_REF_FORMAT, f"{value} not a valid reference file formatr."
+        return value
+
+    @validator("genome_version")
+    def check_genome_ver(cls, value) -> str:
+        assert value in VALID_GENOME_VER, f"{value} not a valid genome version."
+        return value
+
+    @property
+    def url_type(self):
+        if self.url.scheme == "gs":
+            get_type = "gsutil"
+        else:
+            get_type = "wget"
+        return get_type
+
+    @property
+    def write_md5(self):
+        hash_md5 = hashlib.md5()
+        with open(str(self.output_file), 'rb') as fh:
+            for chunk in iter(lambda: fh.read(4096), b""):
+                hash_md5.update(chunk)
+
+        with open(str(self.output_file + ".md5"), 'w') as fh:
+            fh.write('{} {}\n'.format(self.output_file, hash_md5.hexdigest()))

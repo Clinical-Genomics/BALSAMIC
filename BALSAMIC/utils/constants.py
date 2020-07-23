@@ -74,3 +74,7 @@ VARDICT_SETTINGS = {
     "analysis_type" : "tumor_only",
     "description" : "General purpose filters used for filtering VarDict"
 }
+
+#reference related constants.
+VALID_REF_FORMAT = ["fasta", "vcf","text", "gtf", "gff"]
+VALID_GENOME_VER = ["hg19", "hg38"]
