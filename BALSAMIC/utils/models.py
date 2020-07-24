@@ -347,6 +347,7 @@ class BalsamicConfigModel(BaseModel):
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
 
+
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
     
@@ -388,7 +389,6 @@ class ReferenceUrlsModel(BaseModel):
         """return output file full path"""
         output_file_path = Path(self.output_path, self.output_file).as_posix()
         return output_file_path
-    
 
     @property
     def write_md5(self):
@@ -403,7 +403,9 @@ class ReferenceUrlsModel(BaseModel):
                 hash_md5.update(chunk)
 
         with open(output_file.as_posix() + ".md5", 'w') as fh:
-            fh.write('{} {}\n'.format(output_file.as_posix(), hash_md5.hexdigest()))
+            fh.write('{} {}\n'.format(output_file.as_posix(),
+                                      hash_md5.hexdigest()))
+
 
 class ReferenceMeta(BaseModel):
     """Defines a basemodel for all reference file
@@ -438,7 +440,6 @@ class ReferenceMeta(BaseModel):
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
 
-
     @validator('*', pre=True)
     def validate_path(cls, value, values, **kwargs):
         """validate and append path in ReferenceUrlsModel fields with basedir"""
@@ -446,7 +447,8 @@ class ReferenceMeta(BaseModel):
             output_value = value
         else:
             if "output_path" in value:
-                value["output_path"] = Path(values["basedir"], value["output_path"]).as_posix()
+                value["output_path"] = Path(values["basedir"],
+                                            value["output_path"]).as_posix()
                 output_value = ReferenceUrlsModel.parse_obj(value)
             else:
                 output_value = value

@@ -4,17 +4,11 @@ import pytest
 from pathlib import Path
 from pydantic import ValidationError
 
-from BALSAMIC.utils.models import (
-    VCFAttributes, 
-    VarCallerFilter, 
-    QCModel, 
-    VarcallerAttribute,
-    VCFModel,
-    AnalysisModel,
-    SampleInstanceModel,
-    BioinfoToolsModel,
-    ReferenceUrlsModel,
-    ReferenceMeta)
+from BALSAMIC.utils.models import (VCFAttributes, VarCallerFilter, QCModel,
+                                   VarcallerAttribute, VCFModel, AnalysisModel,
+                                   SampleInstanceModel, BioinfoToolsModel,
+                                   ReferenceUrlsModel, ReferenceMeta)
+
 
 def test_referenceurlsmodel_build_model():
     """test ReferenceUrlsModel for correctly building the model"""
@@ -24,14 +18,14 @@ def test_referenceurlsmodel_build_model():
     actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
 
     dummy_reference = {
-            "url": "gs://domain/file_name",
-            "file_type": "fasta",
-            "gzip": True,
-            "genome_version": "hg19",
-            "output_file": dummy_output_file,
-            "output_path": dummy_output_path,
-        }
-    
+        "url": "gs://domain/file_name",
+        "file_type": "fasta",
+        "gzip": True,
+        "genome_version": "hg19",
+        "output_file": dummy_output_file,
+        "output_path": dummy_output_path,
+    }
+
     #WHEN building the model
     built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
 
@@ -48,17 +42,17 @@ def test_referenceurlsmodel_validate_file_type():
     actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
 
     dummy_reference = {
-            "url": "gs://domain/file_name",
-            "file_type": "wrong_type",
-            "gzip": True,
-            "genome_version": "hg19",
-            "output_file": dummy_output_file,
-            "output_path": dummy_output_path,
-        }
-    
+        "url": "gs://domain/file_name",
+        "file_type": "wrong_type",
+        "gzip": True,
+        "genome_version": "hg19",
+        "output_file": dummy_output_file,
+        "output_path": dummy_output_path,
+    }
+
     #WHEN building the model
 
-    #THEN model raise error on validation 
+    #THEN model raise error on validation
     with pytest.raises(ValidationError) as excinfo:
         built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
 
@@ -70,21 +64,21 @@ def test_referenceurlsmodel_write_md5(tmp_path_factory):
     dummy_output_path = tmp_path_factory.mktemp("some_path")
     Path(dummy_output_path, dummy_output_file).write_bytes(os.urandom(8196))
 
-    actual_md5_file = Path(dummy_output_path, dummy_output_file+".md5")
+    actual_md5_file = Path(dummy_output_path, dummy_output_file + ".md5")
 
     dummy_reference = {
-            "url": "gs://domain/file_name",
-            "file_type": "fasta",
-            "gzip": True,
-            "genome_version": "hg19",
-            "output_file": dummy_output_file,
-            "output_path": dummy_output_path.as_posix(),
-        }
-    
+        "url": "gs://domain/file_name",
+        "file_type": "fasta",
+        "gzip": True,
+        "genome_version": "hg19",
+        "output_file": dummy_output_file,
+        "output_path": dummy_output_path.as_posix(),
+    }
+
     #WHEN building the model
     built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
-    
-    #THEN when md5 of the file should exist 
+
+    #THEN when md5 of the file should exist
     built_model.write_md5
     assert actual_md5_file.is_file()
 
@@ -95,21 +89,21 @@ def test_referenceurlsmodel_write_md5_no_output_file(tmp_path_factory):
     dummy_output_file = "some_random_file"
     dummy_output_path = tmp_path_factory.mktemp("some_path")
 
-    actual_md5_file = Path(dummy_output_path, dummy_output_file+".md5")
+    actual_md5_file = Path(dummy_output_path, dummy_output_file + ".md5")
 
     dummy_reference = {
-            "url": "gs://domain/file_name",
-            "file_type": "fasta",
-            "gzip": True,
-            "genome_version": "hg19",
-            "output_file": dummy_output_file,
-            "output_path": dummy_output_path.as_posix(),
-        }
-    
+        "url": "gs://domain/file_name",
+        "file_type": "fasta",
+        "gzip": True,
+        "genome_version": "hg19",
+        "output_file": dummy_output_file,
+        "output_path": dummy_output_path.as_posix(),
+    }
+
     #WHEN building the model
     built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
 
-    #THEN when md5 of the file should exist 
+    #THEN when md5 of the file should exist
     with pytest.raises(FileNotFoundError) as excinfo:
         built_model.write_md5
 
@@ -122,19 +116,20 @@ def test_referenceurlsmodel_validate_genome_version():
     actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
 
     dummy_reference = {
-            "url": "gs://domain/file_name",
-            "file_type": "fasta",
-            "gzip": True,
-            "genome_version": "wrong_genome",
-            "output_file": dummy_output_file,
-            "output_path": dummy_output_path,
-        }
-    
+        "url": "gs://domain/file_name",
+        "file_type": "fasta",
+        "gzip": True,
+        "genome_version": "wrong_genome",
+        "output_file": dummy_output_file,
+        "output_path": dummy_output_path,
+    }
+
     #WHEN building the model
 
-    #THEN model raise error on validation 
+    #THEN model raise error on validation
     with pytest.raises(ValidationError) as excinfo:
         built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+
 
 def test_vcfattributes():
     """test VCFAttributes model for correct validation"""
@@ -185,32 +180,25 @@ def test_varcallerfilter():
     assert dummy_varcaller_filter.analysis_type == "dummy_tumor_only"
 
 
-
 def test_qc_model():
     #GIVEN valid input arguments
     #THEN we can successully create a config dict
-    valid_args = {
-        "umi_trim": True,
-        "min_seq_length": 25,
-        "umi_trim_length": 5}
+    valid_args = {"umi_trim": True, "min_seq_length": 25, "umi_trim_length": 5}
     assert QCModel.parse_obj(valid_args)
 
 
 def test_varcaller_attribute():
     #GIVEN valid input arguments
-    valid_args={
-            "mutation": "somatic",
-            "type": "SNV"}
+    valid_args = {"mutation": "somatic", "type": "SNV"}
     #THEN we can successully create a config dict
     assert VarcallerAttribute.parse_obj(valid_args)
     #GIVEN invalid input arguments
-    invalid_args={
-            "mutation": "strange",
-            "type": "unacceptable"}
+    invalid_args = {"mutation": "strange", "type": "unacceptable"}
     #THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
         VarcallerAttribute.parse_obj(invalid_args)
         assert "not a valid argument" in excinfo.value
+
 
 def test_analysis_model():
     #GIVEN valid input arguments
@@ -219,7 +207,7 @@ def test_analysis_model():
         "analysis_type": "paired",
         "sequencing_type": "targeted",
         "analysis_dir": "tests/test_data"
-        }
+    }
     #THEN we can successully create a config dict
     assert AnalysisModel.parse_obj(valid_args)
 
@@ -229,18 +217,19 @@ def test_analysis_model():
         "analysis_type": "odd",
         "sequencing_type": "wrong",
         "analysis_dir": "tests/test_data"
-        }
+    }
     #THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
         AnalysisModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
+
 
 def test_sample_instance_model():
     #GIVEN valid input arguments
     valid_args = {
         "file_prefix": "S2_R",
         "type": "normal",
-        }
+    }
     #THEN we can successully create a config dict
     assert SampleInstanceModel.parse_obj(valid_args)
 
@@ -248,7 +237,7 @@ def test_sample_instance_model():
     invalid_args = {
         "file_prefix": "S2_R",
         "type": "fungal",
-        }
+    }
     #THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
         SampleInstanceModel.parse_obj(invalid_args)

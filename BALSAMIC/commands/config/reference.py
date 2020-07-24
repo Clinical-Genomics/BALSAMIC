@@ -40,13 +40,15 @@ LOG = logging.getLogger(__name__)
               type=click.Path(),
               required=True,
               help='Download singularity image for BALSAMIC')
-@click.option("-g", "--genome-version",
+@click.option("-g",
+              "--genome-version",
               default="hg19",
               type=click.Choice(["hg19", "hg38"]),
               help=("Genome version to prepare reference. Path to genome"
-"will be <outdir>/genome_version"))
+                    "will be <outdir>/genome_version"))
 @click.pass_context
-def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity, genome_version):
+def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
+              genome_version):
     """ Configure workflow for reference generation """
 
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
