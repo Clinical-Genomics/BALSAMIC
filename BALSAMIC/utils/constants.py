@@ -215,6 +215,8 @@ REFERENCE_FILES = {
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
+            "output_file": "refGene.sql",
+            "output_path": "genome",
         },
     }
 }
