@@ -43,14 +43,13 @@ mills_1kg_url = reference_file_model.mills_1kg
 known_indel_1kg_url = reference_file_model.known_indel_1kg
 vcf_1kg_url = reference_file_model.vcf_1kg
 cosmicdb_url = reference_file_model.cosmicdb
-
-cosmicdb_url.secret=config['cosmic_key']
-
 wgs_calling_url = reference_file_model.wgs_calling
 genome_chrom_size_url = reference_file_model.genome_chrom_size
-
 refgene_txt_url = reference_file_model.refgene_txt 
 refgene_sql_url = reference_file_model.refgene_sql
+
+# add secrets from config to items that need them
+cosmicdb_url.secret=config['cosmic_key']
 
 # VCF files list for wildcards
 VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
@@ -145,7 +144,7 @@ rule all:
 #                       - .fasta, dbsnp.vcf, 1kg.vcf, refFlat
 ##########################################################
 reference_data = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url, mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
-wgs_calling_url, genome_chrom_size_url, cosmicdb_url]
+wgs_calling_url, genome_chrom_size_url, cosmicdb_url, refgene_txt_url, refgene_sql_url]
 
 rule download_reference:
     output:
@@ -157,7 +156,7 @@ rule download_reference:
             output_file = ref.get_output_file
             log_file = output_file + ".log"
 
-            if ref.url_type == "gsutil":
+            if ref.scheme == "gs":
                 cmd = "gsutil cp -L {}.log {} -".format(log_file, ref.url)
             else:
                 cmd = "wget -a {}.log -O - {}".format(log_file, ref.url)
