@@ -1,5 +1,8 @@
 import pytest
 
+from pathlib import Path
+from pydantic import ValidationError
+
 from BALSAMIC.utils.models import (
     VCFAttributes, 
     VarCallerFilter, 
@@ -8,9 +11,129 @@ from BALSAMIC.utils.models import (
     VCFModel,
     AnalysisModel,
     SampleInstanceModel,
-    BioinfoToolsModel
-    )
+    BioinfoToolsModel,
+    ReferenceUrlsModel,
+    ReferenceMeta)
 
+def test_referenceurlsmodel_build_model():
+    """test ReferenceUrlsModel for correctly building the model"""
+    #GIVEN a reference model
+    dummy_output_file = "some_random_file"
+    dummy_output_path = "some_path"
+    actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
+
+    dummy_reference = {
+            "url": "gs://domain/file_name",
+            "file_type": "fasta",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": dummy_output_file,
+            "output_path": dummy_output_path,
+        }
+    
+    #WHEN building the model
+    built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+
+    #THEN model should have correct attributes
+    assert built_model.url.scheme == "gs"
+    assert built_model.get_output_file == actual_path
+
+
+def test_referenceurlsmodel_validate_file_type():
+    """test ReferenceUrlsModel for validating file type"""
+    #GIVEN a reference model
+    dummy_output_file = "some_random_file"
+    dummy_output_path = "some_path"
+    actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
+
+    dummy_reference = {
+            "url": "gs://domain/file_name",
+            "file_type": "wrong_type",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": dummy_output_file,
+            "output_path": dummy_output_path,
+        }
+    
+    #WHEN building the model
+
+    #THEN model raise error on validation 
+    with pytest.raises(ValidationError) as excinfo:
+        built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+
+
+def test_referenceurlsmodel_write_md5(tmp_path_factory):
+    """test ReferenceUrlsModel for writing md5 of the output file"""
+    #GIVEN a reference model
+    dummy_output_file = "some_random_file"
+    dummy_output_path = tmp_path_factory.mktemp("some_path")
+    Path(dummy_output_path, dummy_output_file).touch()
+
+    actual_md5_file = Path(dummy_output_path, dummy_output_file+".md5")
+
+    dummy_reference = {
+            "url": "gs://domain/file_name",
+            "file_type": "fasta",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": dummy_output_file,
+            "output_path": dummy_output_path.as_posix(),
+        }
+    
+    #WHEN building the model
+    built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+
+    #THEN when md5 of the file should exist 
+    built_model.write_md5
+    assert actual_md5_file.is_file()
+
+
+def test_referenceurlsmodel_write_md5_no_output_file(tmp_path_factory):
+    """test ReferenceUrlsModel for failing to write md5 if outputfile doesn't exist"""
+    #GIVEN a reference model
+    dummy_output_file = "some_random_file"
+    dummy_output_path = tmp_path_factory.mktemp("some_path")
+
+    actual_md5_file = Path(dummy_output_path, dummy_output_file+".md5")
+
+    dummy_reference = {
+            "url": "gs://domain/file_name",
+            "file_type": "fasta",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": dummy_output_file,
+            "output_path": dummy_output_path.as_posix(),
+        }
+    
+    #WHEN building the model
+    built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+
+    #THEN when md5 of the file should exist 
+    with pytest.raises(FileNotFoundError) as excinfo:
+        built_model.write_md5
+
+
+def test_referenceurlsmodel_validate_genome_version():
+    """test ReferenceUrlsModel for validating genome version """
+    #GIVEN a reference model
+    dummy_output_file = "some_random_file"
+    dummy_output_path = "some_path"
+    actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
+
+    dummy_reference = {
+            "url": "gs://domain/file_name",
+            "file_type": "fasta",
+            "gzip": True,
+            "genome_version": "wrong_genome",
+            "output_file": dummy_output_file,
+            "output_path": dummy_output_path,
+        }
+    
+    #WHEN building the model
+
+    #THEN model raise error on validation 
+    with pytest.raises(ValidationError) as excinfo:
+        built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
 
 def test_vcfattributes():
     """test VCFAttributes model for correct validation"""

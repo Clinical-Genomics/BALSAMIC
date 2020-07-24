@@ -386,7 +386,7 @@ class ReferenceUrlsModel(BaseModel):
     @property
     def get_output_file(self):
         """return output file full path"""
-        output_file_path = os.path.join(self.output_path, self.output_file)
+        output_file_path = Path(self.output_path, self.output_file).as_posix()
         return output_file_path
     
 
@@ -394,13 +394,16 @@ class ReferenceUrlsModel(BaseModel):
     def write_md5(self):
         """calculate md5 for first 4kb of file and write to file_name.md5"""
         hash_md5 = hashlib.md5()
-        output_file = Path(self.output_path, self.output_file).as_posix()
-        with open(output_file, 'rb') as fh:
+        output_file = Path(self.output_path, self.output_file)
+        if not output_file.is_file():
+            raise FileNotFoundError(f"{output_file.as_posix()} does not exist")
+
+        with open(output_file.as_posix(), 'rb') as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 hash_md5.update(chunk)
 
-        with open(output_file + ".md5", 'w') as fh:
-            fh.write('{} {}\n'.format(output_file, hash_md5.hexdigest()))
+        with open(output_file.as_posix() + ".md5", 'w') as fh:
+            fh.write('{} {}\n'.format(output_file.as_posix(), hash_md5.hexdigest()))
 
 class ReferenceMeta(BaseModel):
     """Defines a basemodel for all reference file
