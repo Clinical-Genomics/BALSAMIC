@@ -154,7 +154,7 @@ rule download_reference:
         import requests
 
         for ref in reference_data:
-            output_file = os.path.join(basedir, ref.get_output_file)
+            output_file = ref.get_output_file
             log_file = output_file + ".log"
 
             if ref.url_type == "gsutil":
@@ -171,7 +171,6 @@ rule download_reference:
                 cmd += " | gunzip "
 
             cmd += " > {}".format(output_file)
-#            print(ref.json())
             shell(cmd)
             ref.write_md5
 
