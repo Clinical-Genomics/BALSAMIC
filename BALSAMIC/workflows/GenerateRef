@@ -175,17 +175,15 @@ rule download_reference:
             ref.write_md5
 
 
-            
-rule download_refgene:
+rule prepare_refgene:
+    input:
+        refgene_txt = refgene_txt_url.get_output_file,
+        refgene_sql = refgene_sql_url.get_output_file
     params:
-        refgene_txt = refgene_txt_url.url,
-        refgene_sql = refgene_sql_url.url,
         refgene_sql_awk = get_script_path('refseq_sql.awk'), 
-        bed_header="chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2",
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
         refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
-        refgene = refgene_txt_url.get_output_file,
         bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed"
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
@@ -193,16 +191,15 @@ rule download_refgene:
     singularity: singularity_image
     shell:
         "source activate {params.conda_env}; " 
-        "header=$(wget -a {log.refgene_sql} -O - {params.refgene_sql} | awk -f {params.refgene_sql_awk}); "
-        "wget -O - {params.refgene_txt} | gunzip | sed 's/chr//g' > {output.refgene};"
-        "(echo \"$header\"; wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip;) "
+        "header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql}); "
+        "(echo \"$header\"; cat {input.refgene_txt};) "
         "| csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 "
         "| csvformat -T "
         "| bedtools expand -c 2,3 "
         "| awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed}; "
-        "(wget -a {log.refgene_txt} -O - {params.refgene_txt} | gunzip) "
-        "| awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' "
+        "awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt}"
         "| cut -f 1-11 > {output.refflat}; "
+        "sed -i 's/chr//g' {input.refgene_txt}; " 
         "source deactivate; "
 
 ##########################################################
