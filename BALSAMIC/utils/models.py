@@ -427,10 +427,12 @@ class ReferenceMeta(BaseModel):
     @validator('*', pre=True)
     def validate_path(cls, value, values, **kwargs):
         if isinstance(value, str):
-            return value
+            output_value = value
         else:
             if "output_path" in value:
                 value["output_path"] = Path(values["basedir"], value["output_path"]).as_posix()
-                return ReferenceUrlsModel.parse_obj(value)
+                output_value = ReferenceUrlsModel.parse_obj(value)
             else:
-                return value
+                output_value = value
+
+        return output_value
