@@ -1,4 +1,5 @@
 import os
+import hashlib
 
 from pathlib import Path
 from datetime import datetime
@@ -397,12 +398,13 @@ class ReferenceUrlsModel(BaseModel):
     @property
     def write_md5(self):
         hash_md5 = hashlib.md5()
-        with open(str(self.output_file), 'rb') as fh:
+        output_file = Path(self.output_path, self.output_file).as_posix()
+        with open(output_file, 'rb') as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 hash_md5.update(chunk)
 
-        with open(str(self.output_file + ".md5"), 'w') as fh:
-            fh.write('{} {}\n'.format(self.output_file, hash_md5.hexdigest()))
+        with open(output_file + ".md5", 'w') as fh:
+            fh.write('{} {}\n'.format(output_file, hash_md5.hexdigest()))
 
 class ReferenceMeta(BaseModel):
     """Defines a basemodel for all reference file
