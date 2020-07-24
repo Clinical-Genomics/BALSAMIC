@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from pathlib import Path
@@ -67,7 +68,7 @@ def test_referenceurlsmodel_write_md5(tmp_path_factory):
     #GIVEN a reference model
     dummy_output_file = "some_random_file"
     dummy_output_path = tmp_path_factory.mktemp("some_path")
-    Path(dummy_output_path, dummy_output_file).touch()
+    Path(dummy_output_path, dummy_output_file).write_bytes(os.urandom(8196))
 
     actual_md5_file = Path(dummy_output_path, dummy_output_file+".md5")
 
@@ -82,7 +83,7 @@ def test_referenceurlsmodel_write_md5(tmp_path_factory):
     
     #WHEN building the model
     built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
-
+    
     #THEN when md5 of the file should exist 
     built_model.write_md5
     assert actual_md5_file.is_file()
