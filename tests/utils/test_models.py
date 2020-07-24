@@ -86,6 +86,7 @@ def test_referenceurlsmodel_validate_file_type():
     #THEN model raise error on validation
     with pytest.raises(ValidationError) as excinfo:
         built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+        assert "not a valid reference file format" in excinfo.value
 
 
 def test_referenceurlsmodel_write_md5(tmp_path_factory):
@@ -137,6 +138,8 @@ def test_referenceurlsmodel_write_md5_no_output_file(tmp_path_factory):
     #THEN when md5 of the file should exist
     with pytest.raises(FileNotFoundError) as excinfo:
         built_model.write_md5
+        assert "file does not exist" in excinfo.value
+      
 
 
 def test_referenceurlsmodel_validate_genome_version():
@@ -160,6 +163,7 @@ def test_referenceurlsmodel_validate_genome_version():
     #THEN model raise error on validation
     with pytest.raises(ValidationError) as excinfo:
         built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+        assert "not a valid genome version" in excinfo.value
 
 
 def test_vcfattributes():

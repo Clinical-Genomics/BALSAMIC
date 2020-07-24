@@ -375,7 +375,7 @@ class ReferenceUrlsModel(BaseModel):
     @validator("file_type")
     def check_file_type(cls, value) -> str:
         """Validate file format according to constants"""
-        assert value in VALID_REF_FORMAT, f"{value} not a valid reference file formatr."
+        assert value in VALID_REF_FORMAT, f"{value} not a valid reference file format."
         return value
 
     @validator("genome_version")
@@ -396,7 +396,7 @@ class ReferenceUrlsModel(BaseModel):
         hash_md5 = hashlib.md5()
         output_file = Path(self.output_path, self.output_file)
         if not output_file.is_file():
-            raise FileNotFoundError(f"{output_file.as_posix()} does not exist")
+            raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
 
         with open(output_file.as_posix(), 'rb') as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
