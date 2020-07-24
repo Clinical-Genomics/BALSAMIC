@@ -10,6 +10,37 @@ from BALSAMIC.utils.models import (VCFAttributes, VarCallerFilter, QCModel,
                                    ReferenceUrlsModel, ReferenceMeta)
 
 
+def test_referencemeta():
+    """test ReferenceMeta for correctly building model"""
+    #GIVEN a reference model
+    reference_files = {
+        "basedir": "basedir",
+        "reference_genome": {
+            "url": "gs://some_path/b37/human_g1k_v37.fasta.gz",
+            "file_type": "fasta",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": "genome.fa",
+            "output_path": "genome",
+        },
+        "dbsnp": {
+            "url": "gs://some_path/b37/dbsnp_138.b37.vcf.gz",
+            "file_type": "fasta",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": "dbsnp.vcf"
+        }
+    }
+
+    #WHEN build the model
+    build_model = ReferenceMeta.parse_obj(reference_files)
+
+    #THEN model should have correct attributes
+    assert build_model.reference_genome.genome_version == "hg19"
+    assert build_model.dbsnp.genome_version == "hg19"
+    assert build_model.reference_genome.get_output_file == "basedir/genome/genome.fa"
+
+
 def test_referenceurlsmodel_build_model():
     """test ReferenceUrlsModel for correctly building the model"""
     #GIVEN a reference model
