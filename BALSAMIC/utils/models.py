@@ -373,30 +373,26 @@ class ReferenceUrlsModel(BaseModel):
 
     @validator("file_type")
     def check_file_type(cls, value) -> str:
+        """Validate file format according to constants"""
         assert value in VALID_REF_FORMAT, f"{value} not a valid reference file formatr."
         return value
 
     @validator("genome_version")
     def check_genome_ver(cls, value) -> str:
+        """Validate genome version according constants"""
         assert value in VALID_GENOME_VER, f"{value} not a valid genome version."
         return value
 
     @property
     def get_output_file(self):
+        """return output file full path"""
         output_file_path = os.path.join(self.output_path, self.output_file)
         return output_file_path
     
 
     @property
-    def url_type(self):
-        if self.url.scheme == "gs":
-            get_type = "gsutil"
-        else:
-            get_type = "wget"
-        return get_type
-
-    @property
     def write_md5(self):
+        """calculate md5 for first 4kb of file and write to file_name.md5"""
         hash_md5 = hashlib.md5()
         output_file = Path(self.output_path, self.output_file).as_posix()
         with open(output_file, 'rb') as fh:
@@ -408,24 +404,41 @@ class ReferenceUrlsModel(BaseModel):
 
 class ReferenceMeta(BaseModel):
     """Defines a basemodel for all reference file
+
+    This class defines a meta for various reference files. Only reference_genome is mandatory.
+
+    Attributes:
+      basedir: str for basedirectory which will be appended to all ReferenceUrlsModel fields
+      reference_genome: ReferenceUrlsModel. Required field for reference genome fasta file
+      dbsnp: ReferenceUrlsModel. Optional field for dbSNP vcf file
+      hc_vcf_1kg: ReferenceUrlsModel. Optional field for high confidence 1000Genome vcf
+      mills_1kg: ReferenceUrlsModel. Optional field for Mills' high confidence indels vcf
+      known_indel_1kg: ReferenceUrlsModel. Optional field for 1000Genome known indel vcf
+      vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
+      wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
+      genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
+      cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
+      refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
+      refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
     """
 
     basedir: str = ""
     reference_genome: ReferenceUrlsModel
-    dbsnp: ReferenceUrlsModel
-    hc_vcf_1kg: ReferenceUrlsModel
-    mills_1kg: ReferenceUrlsModel
-    known_indel_1kg: ReferenceUrlsModel
-    vcf_1kg: ReferenceUrlsModel
-    wgs_calling: ReferenceUrlsModel
-    genome_chrom_size: ReferenceUrlsModel
-    cosmicdb: ReferenceUrlsModel
-    refgene_txt: ReferenceUrlsModel
-    refgene_sql: ReferenceUrlsModel
+    dbsnp: Optional[ReferenceUrlsModel]
+    hc_vcf_1kg: Optional[ReferenceUrlsModel]
+    mills_1kg: Optional[ReferenceUrlsModel]
+    known_indel_1kg: Optional[ReferenceUrlsModel]
+    vcf_1kg: Optional[ReferenceUrlsModel]
+    wgs_calling: Optional[ReferenceUrlsModel]
+    genome_chrom_size: Optional[ReferenceUrlsModel]
+    cosmicdb: Optional[ReferenceUrlsModel]
+    refgene_txt: Optional[ReferenceUrlsModel]
+    refgene_sql: Optional[ReferenceUrlsModel]
 
 
     @validator('*', pre=True)
     def validate_path(cls, value, values, **kwargs):
+        """validate and append path in ReferenceUrlsModel fields with basedir"""
         if isinstance(value, str):
             output_value = value
         else:
