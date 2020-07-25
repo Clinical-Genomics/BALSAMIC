@@ -139,7 +139,6 @@ def test_referenceurlsmodel_write_md5_no_output_file(tmp_path_factory):
     with pytest.raises(FileNotFoundError) as excinfo:
         built_model.write_md5
         assert "file does not exist" in excinfo.value
-      
 
 
 def test_referenceurlsmodel_validate_genome_version():
