@@ -87,7 +87,7 @@ rule vep_germline:
     cosmic = config["reference"]["cosmic"]
   output:
     vcf = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
-    vcf_summary = vep_dir + "{var_type}.germline.{case_name}.{var_caller}.vcf.gz_summary.html",
+    vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
