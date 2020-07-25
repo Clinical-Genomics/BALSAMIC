@@ -65,8 +65,7 @@ qc_rules = [
   ]
 
 align_rules = [
-  "snakemake_rules/align/bwa_mem.rule",
-  "snakemake_rules/align/samtools.rule"
+  "snakemake_rules/align/bwa_mem.rule"
   ]
 
 annotation_rules = [
