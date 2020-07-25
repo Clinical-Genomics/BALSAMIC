@@ -11,6 +11,7 @@ import datetime
 import subprocess
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
+from pathlib import Path
 
 from BALSAMIC.utils.cli import get_from_two_key
 from BALSAMIC.utils.cli import merge_dict_on_key
@@ -33,6 +34,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.option(
     "--sample-config",
+    "-s",
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
@@ -180,6 +182,7 @@ def deliver(context, sample_config, analysis_type):
 
             delivery_json["files"].append(interm_dict)
 
+    # Add Housekeeper file to report
     delivery_json["files"].append({
         "path":
         report_file_name,
@@ -188,12 +191,44 @@ def deliver(context, sample_config, analysis_type):
         "step":
         "balsamic_delivery",
         "format":
-        ".html",
+        "html",
         "tag":
         "report",
         "id":
         sample_config_dict["analysis"]["case_id"],
     })
+    # Add CASE_ID.JSON to report
+    delivery_json["files"].append({
+        "path":
+        Path(sample_config).resolve().as_posix(),
+        "date":
+        datetime.date.today().isoformat(),
+        "step":
+        "case_config",
+        "format":
+        "json",
+        "tag":
+        "config",
+        "id":
+        sample_config_dict["analysis"]["case_id"],
+    })
+    # Add DAG Graph to report
+    delivery_json["files"].append({
+        "path":
+        sample_config_dict["analysis"]["dag"],
+        "date":
+        datetime.date.today().isoformat(),
+        "step":
+        "case_config",
+        "format":
+        "pdf",
+        "tag":
+        "dag",
+        "id":
+        sample_config_dict["analysis"]["case_id"],
+    })
+
+
     write_json(delivery_json, delivery_file_name)
     with open(delivery_file_name + ".yaml", "w") as fn:
         yaml.dump(delivery_json, fn, default_flow_style=False)
