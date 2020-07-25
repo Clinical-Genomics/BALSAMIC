@@ -37,8 +37,6 @@ include:
 include:
   rule_dir + "snakemake_rules/quality_control/fastqc.rule"
 include:
-  rule_dir + "snakemake_rules/align/samtools.rule"
-include:
   rule_dir + "snakemake_rules/quality_control/picard.rule"
 include:
   rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"

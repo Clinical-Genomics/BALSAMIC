@@ -12,7 +12,7 @@ rule bwa_mem:
     read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
     refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
   output:
-    bamout = temp(bam_dir + "{sample}.bam")
+    bamout = temp(bam_dir + "{sample}.sorted.bam")
   params:
     header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
     conda = get_conda_env(config["conda_env_yaml"],"bwa")
@@ -28,5 +28,5 @@ rule bwa_mem:
         "-M "
         "-v 1 "
         "{input.fa} {input.read1} {input.read2} "
-        "| samtools view -Sb - > {output.bamout}; "
-    "source deactivate;"
+        "| samtools sort --threads {threads} --output-fmt BAM -o {output.bamout} - ;"
+    "samtools index -@ {threads} {output.bamout}; "
