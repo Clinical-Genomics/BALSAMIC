@@ -55,6 +55,7 @@ rule multiqc:
         json = qc_dir + "multiqc_data/multiqc_data.json",
     params:
         # This is using same environment as gatk
+        housekeeper_id = {"scope": ["case"], "tags": ["qc"]},
         dir_list = "\n".join(dir_list),
         qc_dir = qc_dir,
         conda = get_conda_env(config["conda_env_yaml"],"multiqc"),

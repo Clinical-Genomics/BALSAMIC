@@ -110,10 +110,11 @@ def get_threads(cluster_config, rule_name='__default__'):
     return cluster_config[rule_name]['n'] if rule_name in cluster_config else 8
 
 
-def get_rule_output(rules):
+def get_rule_output(rules, rule_names: list, output_file_wildcards={}):
     """get list of existing output files from a given workflow
 
     Args:
+        output_file_wildcards: a dictionary with wildcards as keys and values as list of wildcard values 
         rule_names: a list of rule names in the workflow. If no rules are given,
           then it will get all rules from the workflow.
         rules: snakemake rules object
@@ -121,13 +122,35 @@ def get_rule_output(rules):
     Returns:
         output_files: list of tuples (file_name, rule_name, wildcard) for rules
     """
+    from BALSAMIC.utils.cli import find_file_index,get_file_extension
     output_files = list()
-    output_files.append(('output_file', 'rulename', 'wildcard_value'))
-    rule_names = vars(rules).keys()
+    output_files.append(('path', 'path_index', 'step', 'tag', 'id', 'format'))
+    if not rule_names:
+        rule_names = vars(rules).keys()
+    rule_names = list(set(rule_names) & set(vars(rules).keys()))
     for my_rule in rule_names:
+        delivery_id = getattr(rules, my_rule).params.housekeeper_id
+        #delivery_id = snakemake.io.expand(delivery_id,**output_file_wildcards)
         for my_file in getattr(rules, my_rule).output:
+#            pattern = re.compile(r"{([^}\.[!:]+)")
+#            wildcard_sets = set()
+#            if pattern.findall(my_file):
+#                wildcard_sets.update(pattern.findall(my_file))
+#            print(wildcard_sets)
             for file_wildcard_list in snakemake.utils.listfiles(my_file):
-                output_files.append((file_wildcard_list[0], my_rule, list(file_wildcard_list[1])))
+#                print(file_wildcard_list)
+                file_to_store = file_wildcard_list[0]
+                tags = list(file_wildcard_list[1]) 
+                tags.extend(delivery_id["tags"])
+                file_path_index = find_file_index(file_to_store)
+                file_format = get_file_extension(my_file)
+                if len(file_path_index) > 1:
+                    LOG.warning("More than one index found for %s" % file_path_index)
+                    LOG.warning("Taking %s index file" % file_path_index[0])
+                
+                file_path_index = file_path_index[0] if file_path_index else ""
+
+                output_files.append((file_to_store, file_path_index, my_rule, ",".join(tags), ",".join(delivery_id["scope"]), file_format))
     
     return output_files
 
