@@ -10,7 +10,7 @@ from BALSAMIC.utils.cli import (CaptureStdout, get_snakefile, get_sample_dict,
                                 get_panel_chrom, get_bioinfo_tools_list,
                                 create_fastq_symlink, generate_graph)
 from BALSAMIC.utils.constants import (CONDA_ENV_PATH, CONDA_ENV_YAML,
-                                      RULE_DIRECTORY)
+                                      RULE_DIRECTORY, VCF_DICT)
 
 LOG = logging.getLogger(__name__)
 
@@ -59,7 +59,8 @@ LOG = logging.getLogger(__name__)
               type=click.Path(exists=True, resolve_path=True),
               required=True,
               help="Root analysis path to store analysis logs and results. \
-                                     The final path will be analysis-dir/sample-id")
+                                     The final path will be analysis-dir/sample-id"
+              )
 @click.option("-t",
               "--tumor",
               type=click.Path(exists=True, resolve_path=True),
@@ -72,16 +73,10 @@ LOG = logging.getLogger(__name__)
               required=False,
               multiple=True,
               help="Fastq files for normal sample.")
-@click.option("-f",
-              "--format",
-              required=False,
-              type=click.Choice(["fastq", "vcf", "bam"]),
-              default="fastq",
-              show_default=True)
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, singularity,
-                analysis_dir, tumor, normal, format):
+                analysis_dir, tumor, normal):
 
     try:
         samples = get_sample_dict(tumor, normal)
@@ -99,8 +94,6 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         )
         raise click.Abort()
 
-    bioinfo_tools = get_bioinfo_tools_list(CONDA_ENV_PATH)
-
     config_collection_dict = BalsamicConfigModel(
         QC={
             "quality_trim": quality_trim,
@@ -114,17 +107,17 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
-        panel={
-            "capture_kit": panel_bed,
-            "chrom": get_panel_chrom(panel_bed),
-        } if panel_bed else {},
-        bioinfo_tools=bioinfo_tools,
         reference=reference_dict,
         singularity=singularity,
         samples=samples,
-        vcf={},
-    ).dict(by_alias=True)
-    
+        vcf=VCF_DICT,
+        bioinfo_tools=get_bioinfo_tools_list(CONDA_ENV_PATH),
+        panel={
+            "capture_kit": panel_bed,
+            "chrom": get_panel_chrom(panel_bed),
+        } if panel_bed else None,
+    ).dict(by_alias=True, exclude_none=True)
+
     LOG.info("Config file generated successfully")
 
     Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),

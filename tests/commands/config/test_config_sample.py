@@ -18,10 +18,13 @@ def test_dag_graph_success(
 ):
     # WHEN creating config using standard CLI input
     # THEN DAG graph should be created successfully
-    assert Path(json.load(open(tumor_normal_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(
+        open(tumor_normal_config))["analysis"]["dag"]).exists()
     assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
-    assert Path(json.load(open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
-    assert Path(json.load(open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(
+        open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(
+        open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
 
 
 def test_tumor_only_config_bad_filename(
@@ -65,9 +68,8 @@ def test_tumor_only_config_bad_filename(
     assert result.exit_code == 1
 
 
-def test_tumor_only_config_bad_reference(
-    sample_fastq, singularity_container, analysis_dir, panel_bed_file
-):
+def test_tumor_only_config_bad_reference(sample_fastq, singularity_container,
+                                         analysis_dir, panel_bed_file):
     # GIVEN CLI arguments including a bad reference config
     faulty_reference_json = "tests/test_data/references/error_reference.json"
     Path(faulty_reference_json).touch()

@@ -20,12 +20,13 @@ from BALSAMIC.utils.constants import CONDA_ENV_PATH
 
 LOG = logging.getLogger(__name__)
 
-from BALSAMIC.utils.exc import BalsamicError 
+from BALSAMIC.utils.exc import BalsamicError
+
 
 class CaptureStdout(list):
-    '''
+    """
     Captures stdout.
-    '''
+    """
 
     def __enter__(self):
         self._stdout = sys.stdout
@@ -65,81 +66,101 @@ class SnakeMake:
     """
 
     def __init__(self):
-        self.case_name = None
-        self.working_dir = None
-        self.snakefile = None
-        self.configfile = None
-        self.run_mode = None
-        self.profile = None
-        self.cluster_config = str() 
-        self.scheduler = None
-        self.log_path = None
-        self.script_path = None
-        self.result_path = None
-        self.qos = None
-        self.account = None
-        self.mail_type = None
-        self.mail_user = None
+        self.case_name = str()
+        self.working_dir = str()
+        self.snakefile = str()
+        self.configfile = str()
+        self.run_mode = str()
+        self.profile = str()
+        self.cluster_config = str()
+        self.scheduler = str()
+        self.log_path = str()
+        self.script_path = str()
+        self.result_path = str()
+        self.qos = str()
+        self.account = str()
+        self.mail_type = str()
+        self.mail_user = str()
         self.forceall = False
         self.run_analysis = False
+        self.report = str()
         self.use_singularity = True
-        self.singularity_bind = None
+        self.singularity_bind = str()
         self.singularity_arg = str()
-        self.sm_opt = None
+        self.sm_opt = str()
 
     def build_cmd(self):
-        forceall = ''
-        sm_opt = ''
-        cluster_cmd = ''
-        dryrun = ''
+        forceall = str()
+        sm_opt = str()
+        cluster_cmd = str()
+        dryrun = str()
+        report = str()
 
         if self.forceall:
-            forceall = " --forceall "
+            forceall = "--forceall"
+
+        if self.report:
+            report = "--report {}".format(self.report)
 
         if self.sm_opt:
             sm_opt = " ".join(self.sm_opt)
 
         if not self.run_analysis:
-            dryrun = " --dryrun "
+            dryrun = "--dryrun"
 
         if self.use_singularity:
-            self.singularity_arg = " --use-singularity --singularity-args '"
+            self.singularity_arg = "--use-singularity --singularity-args '"
             for bind_path in self.singularity_bind:
                 self.singularity_arg += " --bind {}:{}".format(
                     bind_path, bind_path)
             self.singularity_arg += "' "
 
-        if self.run_mode == 'cluster':
-            sbatch_cmd = " '{} {} ".format(sys.executable, self.scheduler) + \
-                " --sample-config " + self.configfile + \
-                " --profile " + self.profile + \
-                " --account " + self.account + \
-                " --qos " + self.qos + \
-                " --log-dir " + self.log_path + \
-                " --script-dir " + self.script_path + \
-                " --result-dir " + self.result_path
+        if self.run_mode == "cluster":
+            sbatch_cmd = (" '{} {} "
+                          " --sample-config {} --profile {} "
+                          " --account {} --qos {} "
+                          " --log-dir {} --script-dir {} "
+                          " --result-dir {} ".format(
+                              sys.executable,
+                              self.scheduler,
+                              self.configfile,
+                              self.profile,
+                              self.account,
+                              self.qos,
+                              self.log_path,
+                              self.script_path,
+                              self.result_path,
+                          ))
 
             if self.mail_user:
-                sbatch_cmd += " --mail-user " + self.mail_user
+                sbatch_cmd += " --mail-user {} ".format(self.mail_user)
 
             if self.mail_type:
-                sbatch_cmd += " --mail-type " + self.mail_type
+                sbatch_cmd += " --mail-type {} ".format(self.mail_type)
 
             sbatch_cmd += " {dependencies} '"
 
-            cluster_cmd = " --immediate-submit -j 999 " + \
-                " --jobname BALSAMIC." + self.case_name + ".{rulename}.{jobid}.sh" + \
-                " --cluster-config " + self.cluster_config + \
-                " --cluster " + sbatch_cmd
+            cluster_cmd = (" --immediate-submit -j 999 "
+                           "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
+                           "--cluster-config {} --cluster {} ".format(
+                               self.case_name, self.cluster_config,
+                               sbatch_cmd))
 
-        sm_cmd = " snakemake --notemp -p " + \
-            " --directory " + self.working_dir + \
-            " --snakefile " + self.snakefile + \
-            " --configfiles " + self.configfile + " " + self.cluster_config + \
-            self.singularity_arg + \
-            " " + forceall + " " + dryrun + \
-            " " + cluster_cmd + " " + sm_opt
-        
+        sm_cmd = (" snakemake --notemp -p "
+                  " --directory {} --snakefile {} --configfiles {} "
+                  " {} {} {} {} {} {} {} ".format(
+                      self.working_dir,
+                      self.snakefile,
+                      self.configfile,
+                      self.cluster_config,
+                      self.singularity_arg,
+                      forceall,
+                      dryrun,
+                      cluster_cmd,
+                      report,
+                      sm_opt,
+                  ))
+
         return sm_cmd
 
 
@@ -156,10 +177,10 @@ def add_doc(docstring):
 
 
 def createDir(path, interm_path=[]):
-    '''
+    """
     Creates directories by recursively checking if it exists,
     otherwise increments the number
-    '''
+    """
     if os.path.isdir(os.path.abspath(path)):
         basepath = os.path.basename(os.path.abspath(path))
         basepath_number = 0
@@ -167,16 +188,16 @@ def createDir(path, interm_path=[]):
             basepath_number = int(basepath.split(".")[1])
         basepath_string = basepath.split(".")[0]
         basepath_number += 1
-        path = os.path.join(os.path.dirname(os.path.abspath(path)),
-                            ".".join([basepath_string,
-                                      str(basepath_number)]))
+        path = os.path.join(
+            os.path.dirname(os.path.abspath(path)),
+            ".".join([basepath_string, str(basepath_number)]),
+        )
         interm_path.append(path)
         createDir(path, interm_path)
         return os.path.abspath(interm_path[-1])
     else:
         os.makedirs(os.path.abspath(path), exist_ok=True)
         return os.path.abspath(path)
-
 
 
 def write_json(json_out, output_config):
@@ -203,7 +224,7 @@ def get_schedulerpy():
     """
 
     p = Path(__file__).parents[1]
-    scheduler = str(Path(p, 'commands/run/scheduler.py'))
+    scheduler = str(Path(p, "commands/run/scheduler.py"))
 
     return scheduler
 
@@ -215,13 +236,13 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
 
     p = Path(__file__).parents[1]
     if analysis_type == "qc":
-        snakefile = Path(p, 'workflows', 'Alignment')
+        snakefile = Path(p, "workflows", "Alignment")
     elif analysis_type in ["single", "paired"]:
-        snakefile = Path(p, 'workflows', 'VariantCalling')
+        snakefile = Path(p, "workflows", "VariantCalling")
         if sequencing_type == "wgs":
-            snakefile = Path(p, 'workflows', 'VariantCalling_sentieon')
+            snakefile = Path(p, "workflows", "VariantCalling_sentieon")
     elif analysis_type == "generate_ref":
-        snakefile = Path(p, 'workflows', 'GenerateRef')
+        snakefile = Path(p, "workflows", "GenerateRef")
 
     return str(snakefile)
 
@@ -232,24 +253,24 @@ def get_config(config_name):
     """
 
     p = Path(__file__).parents[1]
-    config_file = str(Path(p, 'config', config_name + ".json"))
+    config_file = str(Path(p, "config", config_name + ".json"))
     if Path(config_file).exists():
         return config_file
     else:
-        raise FileNotFoundError(f'Config for {config_name} was not found.')
+        raise FileNotFoundError(f"Config for {config_name} was not found.")
 
 
 def recursive_default_dict():
-    '''
+    """
     Recursivly create defaultdict.
-    '''
+    """
     return collections.defaultdict(recursive_default_dict)
 
 
 def convert_defaultdict_to_regular_dict(inputdict: dict):
-    '''
+    """
     Recursively convert defaultdict to dict.
-    '''
+    """
     if isinstance(inputdict, collections.defaultdict):
         inputdict = {
             key: convert_defaultdict_to_regular_dict(value)
@@ -259,9 +280,9 @@ def convert_defaultdict_to_regular_dict(inputdict: dict):
 
 
 def merge_dict_on_key(dict_1, dict_2, by_key):
-    '''
+    """
     Merge two list of dictionaries based on key
-    '''
+    """
     merged_dict = defaultdict(dict)
     for interm_list in (dict_1, dict_2):
         for item in interm_list:
@@ -282,16 +303,18 @@ def find_file_index(file_path):
     for file_extension, file_index_extensions in indexible_files.items():
         if file_path.endswith(file_extension):
             for file_index_extension in file_index_extensions:
-                new_file_path = file_path.replace(
-                    file_extension, file_index_extension
-                )
+                new_file_path = file_path.replace(file_extension,
+                                                  file_index_extension)
                 if os.path.isfile(new_file_path):
                     file_path_index.add(new_file_path)
 
     return list(file_path_index)
 
+
 def get_file_extension(file_path):
-    known_multi_extensions = ['.vcf.gz', '.vcf.gz.tbi', '.vcf.tbi', '.fastq.gz']
+    known_multi_extensions = [
+        ".vcf.gz", ".vcf.gz.tbi", ".vcf.tbi", ".fastq.gz"
+    ]
     file_extension = ""
     for known_ext in known_multi_extensions:
         if file_path.endswith(known_ext):
@@ -301,19 +324,21 @@ def get_file_extension(file_path):
     if not file_extension:
         _, file_extension = os.path.splitext(file_path)
 
-    return file_extension
+    return file_extension[1:]
+
 
 def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
-    '''
+    """
     Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
     
     from_key and by_key should both exist
-    '''
+    """
 
     matching_value = default
-    if from_key in input_dict and by_key in input_dict and by_value in input_dict[from_key]:
-            idx = input_dict[from_key].index(by_value)
-            matching_value = input_dict[by_key][idx]
+    if (from_key in input_dict and by_key in input_dict
+            and by_value in input_dict[from_key]):
+        idx = input_dict[from_key].index(by_value)
+        matching_value = input_dict[by_key][idx]
 
     return matching_value
 
@@ -324,12 +349,12 @@ def get_file_status_string(file_to_check):
       if it exists or doesn't exist respectively.
       Always assume file doesn't exist, unless proven otherwise.
     """
-    return_str = Color(u"[{red}\u2717{/red}] File missing: ") + file_to_check
+    return_str = Color("[{red}\u2717{/red}] File missing: ") + file_to_check
 
     file_status = os.path.isfile(file_to_check)
-    if file_status: 
-        return_str = Color(u"[{green}\u2713{/green}] Found: ") + file_to_check
-    
+    if file_status:
+        return_str = Color("[{green}\u2713{/green}] Found: ") + file_to_check
+
     return return_str, file_status
 
 
@@ -359,13 +384,13 @@ def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
 
     singularity_bind_path = ""
     for bind_path in bind_paths:
-        singularity_bind_path += '--bind {} '.format(bind_path)
+        singularity_bind_path += "--bind {} ".format(bind_path)
 
-    shellcmd='singularity exec {} {}'.format(singularity_bind_path, cmd)
+    shellcmd = "singularity exec {} {}".format(singularity_bind_path, cmd)
 
-    return ' '.join(shellcmd.split())
+    return " ".join(shellcmd.split())
 
-  
+
 def merge_json(*args):
     """
     Take a list of json files and merges them together
@@ -401,16 +426,16 @@ def validate_fastq_pattern(sample):
 def get_panel_chrom(panel_bed) -> list:
     """Returns a set of chromosomes present in PANEL BED"""
 
-    lines = [line.rstrip('\n') for line in open(panel_bed, 'r')]
-    return {s.split('\t')[0] for s in lines}
+    lines = [line.rstrip("\n") for line in open(panel_bed, "r")]
+    return {s.split("\t")[0] for s in lines}
 
 
 def get_bioinfo_tools_list(conda_env_path) -> dict:
     """Parses the names and versions of bioinfo tools 
     used by BALSAMIC from config YAML into a dict """
-    
+
     bioinfo_tools = {}
-    for yaml_file in Path(conda_env_path).rglob('*.yaml'):
+    for yaml_file in Path(conda_env_path).rglob("*.yaml"):
         with open(yaml_file, "r") as f:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
@@ -441,11 +466,14 @@ def get_sample_names(filename, sample_type):
     """Creates a dict with sample prefix, sample type, and readpair suffix"""
     file_str = validate_fastq_pattern(filename)
     if file_str:
-        return file_str, {
-            "file_prefix": file_str,
-            "type": sample_type,
-            "readpair_suffix": ["1", "2"]
-        }
+        return (
+            file_str,
+            {
+                "file_prefix": file_str,
+                "type": sample_type,
+                "readpair_suffix": ["1", "2"],
+            },
+        )
 
 
 def create_fastq_symlink(casefiles, symlink_dir: Path):
@@ -456,7 +484,7 @@ def create_fastq_symlink(casefiles, symlink_dir: Path):
     for filename in casefiles:
         parent_dir = Path(filename).parents[0]
         file_str = validate_fastq_pattern(filename)
-        for f in parent_dir.rglob(f'*{file_str}*.fastq.gz'):
+        for f in parent_dir.rglob(f"*{file_str}*.fastq.gz"):
             try:
                 LOG.info(
                     f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
@@ -469,27 +497,33 @@ def generate_graph(config_collection_dict, config_path):
     """Generate DAG graph using snakemake stdout output"""
 
     with CaptureStdout() as graph_dot:
-        snakemake.snakemake(snakefile=get_snakefile(
-            analysis_type=config_collection_dict["analysis"]["analysis_type"],
-            sequencing_type=config_collection_dict["analysis"]
-            ["sequencing_type"]),
-                            dryrun=True,
-                            configfiles=[config_path],
-                            printrulegraph=True)
+        snakemake.snakemake(
+            snakefile=get_snakefile(
+                analysis_type=config_collection_dict["analysis"]
+                ["analysis_type"],
+                sequencing_type=config_collection_dict["analysis"]
+                ["sequencing_type"],
+            ),
+            dryrun=True,
+            configfiles=[config_path],
+            printrulegraph=True,
+        )
 
     graph_title = "_".join([
-        'BALSAMIC', BALSAMIC.__version__,
-        config_collection_dict["analysis"]["case_id"]
+        "BALSAMIC",
+        BALSAMIC.__version__,
+        config_collection_dict["analysis"]["case_id"],
     ])
     graph_dot = "".join(graph_dot).replace(
-        'snakemake_dag {',
+        "snakemake_dag {",
         'BALSAMIC { label="' + graph_title + '";labelloc="t";')
     graph_obj = graphviz.Source(
         graph_dot,
         filename=".".join(
             config_collection_dict["analysis"]["dag"].split(".")[:-1]),
         format="pdf",
-        engine="dot")
+        engine="dot",
+    )
     graph_obj.render(cleanup=True)
 
 

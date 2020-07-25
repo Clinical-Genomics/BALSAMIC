@@ -1,39 +1,17 @@
-# _keep this section if PR is not for release_
-
----
 ### This PR:
 
-- fixes/adds/updates
+(If this is a release PR, no need to add following. Leave this part empty)
+(Use the following lines to create a PR text body. Make sure to remove all non-relevant one after you're done)
+(Repeat each field as many times as necessary)
 
-### How to test:
+Added: for new features.
+Changed: for changes in existing functionality.
+Deprecated: for soon-to-be removed features.
+Removed: for now removed features.
+Fixed: for any bug fixes.
+Security: in case of vulnerabilities.
 
-- Automatic and continuous test pass
-
-### Expected outcome:
-- Installation, unit and integration tests pass
----
-
-# _keep this section if PR is for release_
-
----
-### Release description:
-
-
-### Changelog for this release
-
-
-### How to test:
-
-- [ ] Verify all workflows
-- [ ] All tests pass
-
-### Version bump
-
-- [ ] Major
-- [ ] Minor
-- [ ] Patch
----
-
-### Review:
+### Review and tests: 
+- [ ] Tests pass
 - [ ] Code review
 - [ ] New code is executed and covered by tests, and test approve

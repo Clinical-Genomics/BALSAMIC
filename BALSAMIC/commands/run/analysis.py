@@ -8,7 +8,7 @@ import click
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import createDir
-from BALSAMIC.utils.cli import get_schedulerpy 
+from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config, get_fastq_bind_path
 from pathlib import Path
@@ -84,13 +84,20 @@ LOG = logging.getLogger(__name__)
 @click.option('--snakemake-opt',
               multiple=True,
               help='Pass these options directly to snakemake')
-@click.option('--account', '--slurm-account', '--qsub-account',
+@click.option('--account',
+              '--slurm-account',
+              '--qsub-account',
               help='cluster account to run jobs, ie: slurm_account')
-@click.option('--mail-user', help='cluster mail user to send out email. e.g.: slurm_mail_user')
-@click.option('--mail-type',
-              type=click.Choice(['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
-              help='cluster mail type to send out email. \
-              This will be applied to all jobs and override snakemake settings.')
+@click.option(
+    '--mail-user',
+    help='cluster mail user to send out email. e.g.: slurm_mail_user')
+@click.option(
+    '--mail-type',
+    type=click.Choice(
+        ['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
+    help='cluster mail type to send out email. \
+              This will be applied to all jobs and override snakemake settings.'
+)
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, log_file, force_all, snakemake_opt, mail_type,
@@ -105,7 +112,9 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
         run_mode = 'local'
 
     if run_mode == 'cluster' and not account:
-        LOG.info('slurm-account, qsub-account, or account is required for slurm run mode')
+        LOG.info(
+            'slurm-account, qsub-account, or account is required for slurm run mode'
+        )
         raise click.Abort()
 
     sample_config_path = os.path.abspath(sample_config)
@@ -126,7 +135,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
             if files:
                 logpath = createDir(logpath, [])
                 scriptpath = createDir(scriptpath, [])
-                sample_config['analysis']['benchmark'] = createDir(benchmarkpath, [])
+                sample_config['analysis']['benchmark'] = createDir(
+                    benchmarkpath, [])
 
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
@@ -142,17 +152,16 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     # Singularity bind path
     bind_path = list()
     bind_path.append(os.path.commonpath(sample_config['reference'].values()))
-    if 'panel' in sample_config.keys():
-        bind_path.append(sample_config['panel']['capture_kit'])
+    if 'panel' in sample_config:
+        bind_path.append(sample_config.get('panel').get('capture_kit'))
     bind_path.append(sample_config['analysis']['analysis_dir'])
-    bind_path += get_fastq_bind_path(sample_config["analysis"]["fastq_path"])
-
+    bind_path.extend(get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
     balsamic_run.case_name = case_name
-    balsamic_run.working_dir = Path(sample_config['analysis']['analysis_dir'], 
-        case_name, 'BALSAMIC_run').as_posix() + "/"
+    balsamic_run.working_dir = Path(sample_config['analysis']['analysis_dir'],
+                                    case_name, 'BALSAMIC_run').as_posix() + "/"
     balsamic_run.snakefile = snake_file if snake_file else get_snakefile(
         analysis_type, sequencing_type)
     balsamic_run.configfile = sample_config_path
@@ -176,8 +185,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.sm_opt = snakemake_opt
 
     try:
-        cmd=sys.executable + " -m  " + balsamic_run.build_cmd()
-        subprocess.run(cmd, shell=True)#, check=True)
+        cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
+        subprocess.run(cmd, shell=True)  #, check=True)
     except Exception as e:
         print(e)
         raise click.Abort()
