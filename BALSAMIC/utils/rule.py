@@ -110,7 +110,7 @@ def get_threads(cluster_config, rule_name='__default__'):
     return cluster_config[rule_name]['n'] if rule_name in cluster_config else 8
 
 
-def get_rule_output(rules, rule_name)
+def get_rule_output(rules, rule_name):
     """get list of existing output files from a given workflow
 
     Args:
