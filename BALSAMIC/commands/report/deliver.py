@@ -56,6 +56,7 @@ def deliver(context, sample_config, analysis_type):
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)
 
+    case_name = sample_config_dict['analysis']['case_id']
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
     LOG.info("Creatiing delivery_report directory")
@@ -75,7 +76,7 @@ def deliver(context, sample_config, analysis_type):
 
     # write report.html file
     report = SnakeMake()
-    report.case_name = sample_config_dict['analysis']['case_id']
+    report.case_name = case_name 
     report.working_dir = os.path.join(sample_config_dict['analysis']['analysis_dir'] , \
         sample_config_dict['analysis']['case_id'], 'BALSAMIC_run')
     report.report = report_file_name
@@ -97,11 +98,11 @@ def deliver(context, sample_config, analysis_type):
 
     delivery_file_name = os.path.join(
         yaml_write_directory,
-        sample_config_dict["analysis"]["case_id"] + ".hk")
+        case_name + ".hk")
 
     delivery_file_ready = os.path.join(
         yaml_write_directory,
-        sample_config_dict["analysis"]["case_id"] + "_delivery_ready.hk",
+        case_name + "_delivery_ready.hk",
     )
     with open(delivery_file_ready, "r") as fn:
         delivery_file_ready_dict = json.load(fn)
@@ -120,7 +121,7 @@ def deliver(context, sample_config, analysis_type):
         "tag":
         "report",
         "id":
-        sample_config_dict["analysis"]["case_id"],
+        case_name,
     })
     # Add CASE_ID.JSON to report
     delivery_json["files"].append({
@@ -133,7 +134,7 @@ def deliver(context, sample_config, analysis_type):
         "tag":
         "config",
         "id":
-        sample_config_dict["analysis"]["case_id"],
+        case_name,
     })
     # Add DAG Graph to report
     delivery_json["files"].append({
@@ -146,7 +147,7 @@ def deliver(context, sample_config, analysis_type):
         "tag":
         "dag",
         "id":
-        sample_config_dict["analysis"]["case_id"],
+        case_name,
     })
 
     delivery_json["files"].extend(delivery_file_ready_dict)
