@@ -12,7 +12,6 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output 
-from BALSAMIC.utils.rule import get_rule_output_raw 
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf

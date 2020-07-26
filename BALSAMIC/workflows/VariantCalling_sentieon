@@ -7,7 +7,6 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output
-from BALSAMIC.utils.rule import get_rule_output_raw
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
@@ -74,6 +73,7 @@ pipeline = quality_check + preprocessing + variant_calling + annotation
 for rule in pipeline:
     include: os.path.join(rule_dir, rule)
 
+
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
                       "case_name": config["analysis"]["case_id"],
@@ -84,18 +84,16 @@ if 'delivery' in config:
                       "allow_missing": True
                     }
 
-    output_files_ready = get_rule_output(rules=rules)
+    if 'rules_to_deliver' in config:
+        rules_to_deliver = config['rules_to_deliver'].split(",")
+    else:
+        rules_to_deliver = ['vep_somatic']
+    output_files_ready = get_rule_output(rules=rules, rule_names=rules_to_deliver, output_file_wildcards = wildcard_dict)
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
+
     delivery_ready = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_ready.hk" )
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready) 
-
-    output_files_raw = get_rule_output_raw(rules=rules, output_file_wildcards = wildcard_dict)
-    output_files_raw = [dict(zip(output_files_raw[0], value)) for value in output_files_raw[1:]]
-
-    delivery_raw = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_raw.hk" )
-    write_json(output_files_raw, delivery_raw)
-    FormatFile(delivery_raw) 
 
 rule all:
     input:
