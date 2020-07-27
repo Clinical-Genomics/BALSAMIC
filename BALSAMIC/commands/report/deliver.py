@@ -85,8 +85,10 @@ def deliver(context, sample_config, analysis_type):
     report.run_mode = 'local'
     report.use_singularity = False
     report.run_analysis = True
+    report.sm_opt = ["--quiet"] 
     cmd=sys.executable + " -m  " + report.build_cmd()
     subprocess.check_output(cmd.split(), shell=False)
+    LOG.info(f"Workflow report file {report_file_name}")
 
     snakemake.snakemake(
         snakefile=snakefile,
@@ -157,4 +159,3 @@ def deliver(context, sample_config, analysis_type):
         yaml.dump(delivery_json, fn, default_flow_style=False)
 
     LOG.info(f"Housekeeper delivery file {delivery_file_name}")
-    LOG.info(f"Workflow report file {report_file_name}")

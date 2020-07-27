@@ -3,6 +3,8 @@ import re
 import yaml
 from pathlib import Path
 import snakemake
+from BALSAMIC.utils.cli import get_file_extension
+from BALSAMIC.utils.cli import find_file_index
 
 
 def get_chrom(panelfile):
@@ -110,7 +112,7 @@ def get_threads(cluster_config, rule_name='__default__'):
     return cluster_config[rule_name]['n'] if rule_name in cluster_config else 8
 
 
-def get_rule_output(rules, rule_name):
+def get_rule_output(rules, rule_name, output_file_wildcards):
     """get list of existing output files from a given workflow
 
     Args:
@@ -118,16 +120,58 @@ def get_rule_output(rules, rule_name):
         rules: snakemake rules object
     
     Returns:
-        output_files: list of tuples (file_name, rule_name, wildcard) for rules
+        output_files: list of tuples (file, file_index, rule_name, tags, id, file_extension) for rules
     """
     output_files = list()
-    delivery_id = getattr(rules, rule_name).params.housekeeper_id
+    housekeeper = getattr(rules, rule_name).params.housekeeper_id
+    temp_files = getattr(rules, rule_name).rule.temp_output
     for my_file in getattr(rules, rule_name).output:
+
         for file_wildcard_list in snakemake.utils.listfiles(my_file):
             file_to_store = file_wildcard_list[0]
-            tags = list(file_wildcard_list[1]) 
-            tags.extend(delivery_id["tags"])
-            
-            output_files.append((file_to_store, "", rule_name, ",".join(tags), ",".join(delivery_id["scope"]), ""))
+            file_extension = get_file_extension(file_to_store)
+            file_to_store_index = find_file_index(file_to_store)
+            tags = list(file_wildcard_list[1])
+
+            delivery_id = get_delivery_id(
+                id_candidate=housekeeper["id"],
+                file_to_store=file_to_store,
+                tags=tags,
+                output_file_wildcards=output_file_wildcards)
+
+            # Do not store file if it is a temp() output
+            if file_to_store in temp_files:
+                continue
+
+            tags.extend(housekeeper["tags"])
+
+            output_files.append((file_to_store, file_to_store_index, rule_name,
+                                 ",".join(tags), delivery_id, file_extension))
 
     return output_files
+
+
+def get_delivery_id(id_candidate: str, file_to_store: str, tags: list,
+                    output_file_wildcards: dict):
+    """resolve delivery id from file_to_store, tags, and output_file_wildcards
+  
+    This function will get a filename, a list of tags, and an id_candidate. id_candidate should be form of a fstring.
+
+    Args:
+        id_candidate: a fstring format string. e.g. "{case_name}"
+        file_to_store: a filename to search a resolved id
+        tags: a list of tags with a resolve id in it
+        output_file_wildcards: a dictionary of wildcards. Keys are wildcard names, and values are list of wildcard values
+    
+    Returns:
+        delivery_id: a resolved id string. If it can't be resolved, it'll return the id_candidate value
+    """
+
+    delivery_id = id_candidate
+    for resolved_id in snakemake.io.expand(id_candidate,
+                                           **output_file_wildcards):
+        if resolved_id in file_to_store and resolved_id in tags:
+            delivery_id = resolved_id
+            break
+
+    return delivery_id
