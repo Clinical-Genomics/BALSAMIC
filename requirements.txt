@@ -13,5 +13,5 @@ networkx
 colorclass
 pydantic
 cyvcf2==0.20.1
-libcrypto
-libssl
+libcrypto==1.1.1+11
+libssl==1.1.1+11
