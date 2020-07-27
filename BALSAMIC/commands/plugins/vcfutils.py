@@ -117,29 +117,3 @@ def createvcf(input_file, reference_file, output_file):
     click.echo("VCF file created. Total Runtime:" +
                '{}'.format(end_time - start_time))
     return filtered_variants
-
-
-@vcfutils.command()
-@click.option('-f1',
-              '--input_file1',
-              required=True,
-              type=click.Path(exists=True),
-              help='Reference VCF file')
-@click.option('-f2',
-              '--input_file2',
-              required=True,
-              type=click.Path(exists=True),
-              help='VEP annotated VCF file')
-@click.option('-o',
-              '--output_file',
-              required=True,
-              type=click.Path(exists=True),
-              help='Output file name')
-def comparevcf(input_file1, input_file2, output_file):
-    """ Compare two VCF files (truthset vs validate set) """
-    if input_file1:
-        pass
-    if input_file2:
-        pass
-    if output_file:
-        pass
