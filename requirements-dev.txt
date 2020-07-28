@@ -2,7 +2,3 @@ pytest>=3.7.1
 pytest-cov==2.8.1
 coveralls==2.0.0
 pylint
-pygraphviz
-pygments
-cyvcf2<0.10.0
-cython
