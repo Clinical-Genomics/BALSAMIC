@@ -146,7 +146,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
     delivery_json["files"].append({
         "path": report_file_name,
         "step": "balsamic_delivery",
-        "format": "html",
+        "format": get_file_extension(report_file_name),
         "tag": "report",
         "id": case_name,
     })
@@ -156,8 +156,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
         Path(sample_config).resolve().as_posix(),
         "step":
         "case_config",
-        "format":
-        "json",
+        "format": get_file_extension(sample_config),
         "tag":
         "config",
         "id":
@@ -167,7 +166,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
     delivery_json["files"].append({
         "path": sample_config_dict["analysis"]["dag"],
         "step": "case_config",
-        "format": "pdf",
+        "format": get_file_extension(sample_config_dict["analysis"]["dag"]),
         "tag": "dag",
         "id": case_name,
     })
