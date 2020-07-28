@@ -126,7 +126,6 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
     housekeeper = getattr(rules, rule_name).params.housekeeper_id
     temp_files = getattr(rules, rule_name).rule.temp_output
     for my_file in getattr(rules, rule_name).output:
-
         for file_wildcard_list in snakemake.utils.listfiles(my_file):
             file_to_store = file_wildcard_list[0]
             file_extension = get_file_extension(file_to_store)
