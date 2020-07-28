@@ -12,6 +12,3 @@ jinja2
 networkx
 colorclass
 pydantic
-cyvcf2==0.20.1
-ctypescrypto==0.5
-pyOpenSSL==19.1.0
