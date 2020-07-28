@@ -10,7 +10,7 @@ before_install:
 
 install:
   - pip install cython
-  - pip install pygraphviz pygments cyvcf2<0.10.0
+  - pip install pygraphviz pygments 'cyvcf2<0.10.0'
   - pip install -r requirements-dev.txt -r requirements.txt -e .
 
 script:
