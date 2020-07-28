@@ -19,11 +19,24 @@ from BALSAMIC.utils.cli import (
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
     get_sample_dict, get_sample_names, create_fastq_symlink,
-    get_fastq_bind_path, singularity)
+    get_fastq_bind_path, singularity, get_file_extension)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_conda_env, get_picard_mrkdup,
                                  get_script_path, get_result_dir, get_threads)
+
+
+def test_get_file_extension_known_ext():
+    # GIVEN a dummy file string with a known string
+    dummy_file = "hassan.fastq.gz"
+    actual_extension = "fastq.gz"
+    
+    # WHEN extracting the extension
+    file_extension = get_file_extension(dummy_file)
+
+    # THEN assert extension is correctly extracted 
+    assert file_extension == actual_extension
+
 
 
 def test_recursive_default_dict():
