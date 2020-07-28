@@ -7,4 +7,5 @@ dependencies:
   - python=3.6 
   - pip=9.0.3
   - pygraphviz
+  - htslib=1.9 
   - cyvcf2=0.11.6
