@@ -6,11 +6,11 @@ python:
   - '3.6'
 
 before_install:
-  - sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
+  - sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config libcrypto libssl
 
 install:
   - pip install -r requirements-dev.txt -r requirements.txt -e .
-  - pip install pygraphviz pygments cyvcf2
+  - pip install pygraphviz pygments htslib cyvcf2
 
 script:
   - py.test --cov=BALSAMIC -rsxv tests/* 
