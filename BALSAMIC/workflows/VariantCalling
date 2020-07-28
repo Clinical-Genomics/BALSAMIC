@@ -121,6 +121,8 @@ somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
+
+
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
 
@@ -128,12 +130,12 @@ for r in config["rules"]:
 # Define commong and analysis specific outputs
 common_output = [ result_dir + "qc/" + "multiqc_report.html",
 expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+expand(vep_dir + "{vcf}.{filters}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]), filters = ["all", "pass"]),
 expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))]
 
 analysis_specific_output = []
 if config['analysis']['analysis_type'] == "single":
-    analysis_specific_output.extend(expand(vep_dir + "{vcf}.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+    analysis_specific_output.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
 
 if 'delivery' in config:
