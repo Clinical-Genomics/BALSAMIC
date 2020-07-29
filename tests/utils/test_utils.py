@@ -21,35 +21,39 @@ from BALSAMIC.utils.cli import (
     get_sample_dict, get_sample_names, create_fastq_symlink,
     get_fastq_bind_path, singularity, get_file_extension)
 
-from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
-                                 get_conda_env, get_picard_mrkdup,
-                                 get_script_path, get_result_dir, get_threads, get_delivery_id)
+from BALSAMIC.utils.rule import (
+    get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
+    get_script_path, get_result_dir, get_threads, get_delivery_id)
+
 
 def test_get_delivery_id():
     # GIVEN a delivery id, a dummy file string, list of tags, and a snakemake wildcard_dict
     delivery_id_to_check = '{case_name}'
     tags = ['angry_bird', 'tag_2']
     dummy_file_string = 'some_file_angry_bird_with_result.txt'
-    wildcard_dict = {'case_name': 'angry_bird', "allow_missing":True}
+    wildcard_dict = {'case_name': 'angry_bird', "allow_missing": True}
     actual_delivery_id = 'angry_bird'
-    
+
     # WHEN getting the correct delivery_id
-    delivery_id_candidate = get_delivery_id(id_candidate=delivery_id_to_check, file_to_store=dummy_file_string, tags=tags, output_file_wildcards=wildcard_dict)
-  
+    delivery_id_candidate = get_delivery_id(
+        id_candidate=delivery_id_to_check,
+        file_to_store=dummy_file_string,
+        tags=tags,
+        output_file_wildcards=wildcard_dict)
+
     # THEN correct delivery_id should be extracted
-    assert delivery_id_candidate==actual_delivery_id
-    
+    assert delivery_id_candidate == actual_delivery_id
 
 
 def test_get_file_extension_get_any_ext():
-    # GIVEN a dummy file string 
+    # GIVEN a dummy file string
     dummy_file = "hassan.txt"
     actual_extension = "txt"
-    
+
     # WHEN extracting the extension
     file_extension = get_file_extension(dummy_file)
 
-    # THEN assert extension is correctly extracted 
+    # THEN assert extension is correctly extracted
     assert file_extension == actual_extension
 
 
@@ -57,13 +61,12 @@ def test_get_file_extension_known_ext():
     # GIVEN a dummy file string with a known string
     dummy_file = "hassan.fastq.gz"
     actual_extension = "fastq.gz"
-    
+
     # WHEN extracting the extension
     file_extension = get_file_extension(dummy_file)
 
-    # THEN assert extension is correctly extracted 
+    # THEN assert extension is correctly extracted
     assert file_extension == actual_extension
-
 
 
 def test_recursive_default_dict():

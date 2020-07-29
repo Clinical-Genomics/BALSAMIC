@@ -63,7 +63,8 @@ LOG = logging.getLogger(__name__)
         'options. or r: reset current rules to delivery to only the ones specified'
     ))
 @click.pass_context
-def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mode):
+def deliver(context, sample_config, analysis_type, rules_to_deliver,
+            delivery_mode):
     """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
@@ -74,16 +75,16 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
         sample_config_dict = json.load(fn)
 
     default_rules_to_deliver = [
-            "fastp", "multiqc", "vep_somatic", "vep_germline", "vep_stat",
-            "ngs_filter_vardict"
-        ]
+        "fastp", "multiqc", "vep_somatic", "vep_germline", "vep_stat",
+        "ngs_filter_vardict"
+    ]
 
     if not rules_to_deliver:
         rules_to_deliver = default_rules_to_deliver
- 
+
     if delivery_mode == 'a':
         rules_to_deliver.extend(default_rules_to_deliver)
-    
+
     case_name = sample_config_dict['analysis']['case_id']
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
@@ -144,11 +145,16 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
 
     # Add Housekeeper file to report
     delivery_json["files"].append({
-        "path": report_file_name,
-        "step": "balsamic_delivery",
-        "format": get_file_extension(report_file_name),
-        "tag": "report",
-        "id": case_name,
+        "path":
+        report_file_name,
+        "step":
+        "balsamic_delivery",
+        "format":
+        get_file_extension(report_file_name),
+        "tag":
+        "report",
+        "id":
+        case_name,
     })
     # Add CASE_ID.JSON to report
     delivery_json["files"].append({
@@ -156,7 +162,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
         Path(sample_config).resolve().as_posix(),
         "step":
         "case_config",
-        "format": get_file_extension(sample_config),
+        "format":
+        get_file_extension(sample_config),
         "tag":
         "config",
         "id":
@@ -164,11 +171,16 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
     })
     # Add DAG Graph to report
     delivery_json["files"].append({
-        "path": sample_config_dict["analysis"]["dag"],
-        "step": "case_config",
-        "format": get_file_extension(sample_config_dict["analysis"]["dag"]),
-        "tag": "dag",
-        "id": case_name,
+        "path":
+        sample_config_dict["analysis"]["dag"],
+        "step":
+        "case_config",
+        "format":
+        get_file_extension(sample_config_dict["analysis"]["dag"]),
+        "tag":
+        "dag",
+        "id":
+        case_name,
     })
 
     delivery_json["files"].extend(delivery_file_ready_dict)
