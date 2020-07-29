@@ -18,6 +18,7 @@ def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):
 
     # THEN it should run without any error
     assert result.exit_code == 0
+    assert actual_delivery_report.is_file()
 
 
 def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers):
