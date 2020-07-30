@@ -76,7 +76,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
 
     default_rules_to_deliver = [
         "fastp", "multiqc", "vep_somatic", "vep_germline", "vep_stat",
-        "ngs_filter_vardict"
+        "ngs_filter_vardict", 
     ]
 
     if not rules_to_deliver:
@@ -144,6 +144,29 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     delivery_json = dict()
     delivery_json["files"] = list()
 
+    cleaned_up_delivery = list()
+    for delivery_item in delivery_file_ready_dict:
+        new_delivery_item_dict = dict()
+
+        # If an entry has a path_index, then add it as an individual item
+        if not delivery_item["path_index"]:
+            new_delivery_item_dict = delivery_item
+            new_delivery_item_dict["path_index"] = ""
+            cleaned_up_delivery.append(new_delivery_item_dict)
+            continue
+        
+        for path_index in delivery_item["path_index"]:
+            new_delivery_item_dict["path"] = path_index
+            new_delivery_item_dict["path_index"] = "" 
+            new_delivery_item_dict["step"] = delivery_item["step"]
+            new_delivery_item_dict["format"] = get_file_extension(path_index)
+            new_delivery_item_dict["tag"] = delivery_item["tag"] + ",index"
+            new_delivery_item_dict["id"] = delivery_item["id"]
+        
+        cleaned_up_delivery.append(new_delivery_item_dict)
+ 
+    delivery_json["files"].extend(cleaned_up_delivery)
+    
     # Add Housekeeper file to report
     delivery_json["files"].append({
         "path":
@@ -183,8 +206,6 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "id":
         case_name,
     })
-
-    delivery_json["files"].extend(delivery_file_ready_dict)
 
     write_json(delivery_json, delivery_file_name)
     with open(delivery_file_name + ".yaml", "w") as fn:
