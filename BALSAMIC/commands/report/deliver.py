@@ -76,7 +76,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
 
     default_rules_to_deliver = [
         "fastp", "multiqc", "vep_somatic", "vep_germline", "vep_stat",
-        "ngs_filter_vardict", 
+        "ngs_filter_vardict", "mergeBam_tumor", "mergeBam_normal" 
     ]
 
     if not rules_to_deliver:
