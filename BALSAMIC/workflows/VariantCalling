@@ -9,7 +9,6 @@ import sys
 from collections import defaultdict
 from colorclass import Color
 from yapf.yapflib.yapf_api import FormatFile
-from snakemake.logging import logger
 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output 

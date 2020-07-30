@@ -2,10 +2,9 @@
 # coding: utf-8
 
 import os
+import logging
 
 from yapf.yapflib.yapf_api import FormatFile
-
-from snakemake.logging import logger
 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output
@@ -15,6 +14,8 @@ from BALSAMIC.utils.rule import get_vcf
 from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
+
+LOG = logging.getLogger(__name__)
 
 rule_dir = config["rule_directory"]
 benchmark_dir = config["analysis"]["benchmark"]
@@ -96,11 +97,11 @@ if 'delivery' in config:
         try:
             housekeeper_id = getattr(rules, my_rule).params.housekeeper_id
         except (ValueError, AttributeError, RuleException, WorkflowError) as e:
-            logger.error("Cannot deliver step (rule) {}: {}".format(my_rule,e))
+            LOG.warning("Cannot deliver step (rule) {}: {}".format(my_rule,e))
             continue
 
-        logger.info("Delivering step (rule) {}.".format(my_rule))
-        output_files_ready.append(get_rule_output(rules=rules, rule_name=my_rule))
+        LOG.info("Delivering step (rule) {}.".format(my_rule))
+        output_files_ready.extend(get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict))
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
     delivery_ready = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_ready.hk" )
