@@ -82,6 +82,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     if not rules_to_deliver:
         rules_to_deliver = default_rules_to_deliver
 
+    rules_to_deliver = list(rules_to_deliver)
     if delivery_mode == 'a':
         rules_to_deliver.extend(default_rules_to_deliver)
 
