@@ -21,22 +21,7 @@ def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):
     assert actual_delivery_report.is_file()
 
 
-def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers):
-    # GIVEN a tumor-normal config file
-    helpers.read_config(tumor_normal_config)
-    actual_delivery_report = Path(helpers.delivery_dir,
-                                  helpers.case_id + ".hk")
-
-    # WHEN running analysis
-    result = invoke_cli(
-        ['report', 'deliver', '--sample-config', tumor_normal_config])
-
-    # THEN it should run without any error
-    assert result.exit_code == 0
-    assert actual_delivery_report.is_file()
-
-
-def test_deliver_tumor_normal_panel_specific_rule(
+def test_deliver_tumor_normal_panel(
         invoke_cli, tumor_normal_config, helpers):
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_normal_config)
@@ -69,8 +54,7 @@ def test_deliver_tumor_normal_panel_specific_rule(
 
     # WHEN running analysis
     result = invoke_cli([
-        'report', 'deliver', '--sample-config', tumor_normal_config,
-        '--rules-to-deliver', 'cnvkit_paired', '--delivery-mode', 'r'
+        'report', 'deliver', '--sample-config', tumor_normal_config
     ])
 
     # THEN it should run without any error
