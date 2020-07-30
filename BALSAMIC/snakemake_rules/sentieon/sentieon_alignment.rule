@@ -40,6 +40,7 @@ rule sentieon_dedup:
         score = bam_dir + "{sample}.dedup.score",
         metrics = bam_dir + "{sample}.dedup.metrics"
     params:
+        housekeeper_id = {"id": "{sample}", "tags": ["scout","aligned-map"]},
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
     threads: get_threads(cluster_config, 'sentieon_dedup')

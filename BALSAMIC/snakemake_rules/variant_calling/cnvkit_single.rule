@@ -23,8 +23,8 @@ rule cnvkit_single:
         wgs_calling_interval = wgs_calling_interval, 
         bamT = bam_dir + tumor_bam + ".bam", 
     output:
-        vcf = vcf_dir + "CNV.somatic." + case_id + ".cnvkit.vcf.gz",
-        namemap = vcf_dir + "CNV.somatic." + case_id + ".cnvkit.sample_name_map",
+        vcf = temp(vcf_dir + "CNV.somatic." + case_id + ".cnvkit.vcf.gz"),
+        namemap = temp(vcf_dir + "CNV.somatic." + case_id + ".cnvkit.sample_name_map"),
         tumor_cns = cnv_dir + tumor_bam + ".cns",
         tumor_cnr = cnv_dir + tumor_bam + ".cnr",
         tumor_scatter = cnv_dir + tumor_bam + "-scatter.png",
@@ -32,6 +32,7 @@ rule cnvkit_single:
         gene_breaks_csv = cnv_dir + case_id + ".gene_breaks.csv",
         gene_metrics_csv = cnv_dir + case_id + ".gene_metrics.csv",
     params:
+        housekeeper_id = {"id": case_id, "tags": ["somatic", "varcall"]},
         extra = cnvkit_params,
         refcnn = cnv_dir + "FlatReference.cnn",
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 

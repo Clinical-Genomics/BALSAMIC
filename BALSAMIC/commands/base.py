@@ -33,9 +33,31 @@ LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
         SomAtic MutatIons in Cancer""".format(version=__version__))
 def cli(context, loglevel):
     "BALSAMIC"
+    coloredlogs.DEFAULT_FIELD_STYLES = {
+        'asctime': {
+            'color': 'green'
+        },
+        'hostname': {
+            'color': 'magenta'
+        },
+        'levelname': {
+            'color': 'yellow',
+            'bold': True
+        },
+        'programname': {
+            'color': 'cyan'
+        },
+        'name': {
+            'color': 'blue'
+        }
+    }
     coloredlogs.install(
         level=loglevel,
-        fmt='[%(hostname)s] %(asctime)s %(levelname)s %(message)s')
+        fmt=
+        '%(programname)s %(hostname)s %(asctime)s %(name)s pid:%(process)d [%(levelname)s] %(message)s'
+    )
+    LOG.info("Running BALSAMIC version %s", __version__)
+
     context.obj = {}
     context.obj['loglevel'] = loglevel
     # LOG.info(f"BALSAMIC started with log level {loglevel}.")
