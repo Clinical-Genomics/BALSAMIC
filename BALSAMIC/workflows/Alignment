@@ -62,7 +62,7 @@ if 'delivery' in config:
 
     output_files_ready = [('path', 'path_index', 'step', 'tag', 'id', 'format')]
     
-    for my_rule in rules_to_deliver:
+    for my_rule in set(rules_to_deliver):
         try:
             housekeeper_id = getattr(rules, my_rule).params.housekeeper_id
         except (ValueError, AttributeError, RuleException, WorkflowError) as e:
