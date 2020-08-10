@@ -158,7 +158,6 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
                 new_delivery_item_dict["id"] = delivery_item["id"]
                 cleaned_up_delivery.append(new_delivery_item_dict)
         cleaned_up_delivery.append(delivery_item)
-        continue
     delivery_json["files"].extend(cleaned_up_delivery)
     
     # Add Housekeeper file to report
