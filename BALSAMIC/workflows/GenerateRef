@@ -4,6 +4,7 @@
 
 import os
 import hashlib
+import logging
 
 from datetime import date
 
@@ -12,6 +13,7 @@ from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.models import ReferenceUrlsModel, ReferenceMeta
 from BALSAMIC.utils.constants import REFERENCE_FILES 
 
+LOG = logging.getLogger(__name__)
 
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -162,8 +164,12 @@ rule download_reference:
                 cmd = "wget -a {}.log -O - {}".format(log_file, ref.url)
 
             if ref.secret:
-                response = requests.get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret })
-                download_url = response.json()["url"]
+                try:
+                    response = requests.get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret })
+                    download_url = response.json()["url"]
+                except:
+                    LOG.error("Unable to download {}".format(ref.url))
+                    raise
                 cmd = "curl -o - '{}'".format(download_url)
             
             if ref.gzip:
