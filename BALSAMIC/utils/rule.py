@@ -138,6 +138,13 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
                 tags=tags,
                 output_file_wildcards=output_file_wildcards)
 
+            # Return empty string if delivery_id is not resolved. 
+            # This can happen when wildcard from one rule tries to match with a file
+            # from another rule. example: vep_somatic might pick up ngs_filter_vardict files 
+            pattern = re.compile(r"{([^}\.[!:]+)")
+            if pattern.findall(delivery_id):
+                continue
+
             # Do not store file if it is a temp() output
             if file_to_store in temp_files:
                 continue
