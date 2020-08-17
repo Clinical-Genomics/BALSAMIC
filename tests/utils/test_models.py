@@ -157,11 +157,12 @@ def test_referenceurlsmodel_validate_genome_version():
         "output_path": dummy_output_path,
     }
 
-    #WHEN building the model
 
-    #THEN model raise error on validation
     with pytest.raises(ValidationError) as excinfo:
+        #WHEN building the model
         built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+
+        #THEN model raise error on validation
         assert "not a valid genome version" in excinfo.value
 
 
