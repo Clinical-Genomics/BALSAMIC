@@ -34,9 +34,10 @@ rule fastp:
   output:
     read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
     read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
-    json_out = qc_dir + "{sample}_fastp.json",
-    html_out = qc_dir + "{sample}_fastp.html"
+    json_out = qc_dir + "fastp/{sample}_fastp.json",
+    html_out = qc_dir + "fastp/{sample}_fastp.html"
   params:
+    housekeeper_id = {"id": "{sample}", "tags": ["qc"]},
     fastq_dir = fastq_dir,
     qc = " ".join(fastp_param_qc),
     umi = " ".join(fastp_param_umi),

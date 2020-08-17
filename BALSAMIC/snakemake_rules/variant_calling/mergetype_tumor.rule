@@ -8,6 +8,7 @@ from BALSAMIC import __version__ as bv
 picarddup = get_picard_mrkdup(config)
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+case_id = config["analysis"]["case_id"]
 
 rule mergeBam_tumor:
   input:
@@ -18,6 +19,7 @@ rule mergeBam_tumor:
     bamT = bam_dir + "tumor.merged.bam",
     cramT = bam_dir + "tumor.merged.cram",
   params:
+    housekeeper_id = {"id": case_id, "tags": ["scout","aligned-map","tumor"]},
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "mergeBam_tumor")

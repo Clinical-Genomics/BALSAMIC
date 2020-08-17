@@ -13,6 +13,7 @@ picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RG
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 normal_sample = get_sample_type(config["samples"], "normal")[0]
 tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+case_id = config["analysis"]["case_id"]
 
 rule mergeBam_normal_gatk:
   input:
@@ -42,6 +43,7 @@ rule mergeBam_normal:
     bamN = bam_dir + "normal.merged.bam", 
     cramN = bam_dir + "normal.merged.cram",
   params:
+    housekeeper_id = {"id": case_id, "tags": ["scout","aligned-map","normal"]},
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_normal
   threads: get_threads(cluster_config, "mergeBam_normal")
@@ -65,6 +67,7 @@ rule mergeBam_tumor:
     bamT = bam_dir + "tumor.merged.bam",
     cramT = bam_dir + "tumor.merged.cram",
   params:
+    housekeeper_id = {"id": case_id, "tags": ["scout","aligned-map","tumor"]},
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "mergeBam_tumor")
