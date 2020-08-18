@@ -37,10 +37,10 @@ rule cnvkit_paired:
         tumor_cnr = cnv_dir + tumor_bam + ".cnr",
         tumor_scatter = cnv_dir + tumor_bam + "-scatter.png",
         tumor_diagram = cnv_dir + tumor_bam + "-diagram.pdf",
-        gene_breaks_csv = cnv_dir + case_id + ".gene_breaks.csv",
-        gene_metrics_csv = cnv_dir + case_id + ".gene_metrics.csv",
+        gene_breaks_csv = cnv_dir + case_id + ".gene_breaks",
+        gene_metrics_csv = cnv_dir + case_id + ".gene_metrics",
     params:
-        housekeeper_id = {"id": case_id, "tags": ["somatic", "varcall"]},
+        housekeeper_id = {"id": case_id, "tags": ["cnv"]},
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
         name = case_id,
