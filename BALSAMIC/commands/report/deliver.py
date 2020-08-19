@@ -169,7 +169,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "format":
         get_file_extension(report_file_name),
         "tag":
-        "report",
+        "balsamic-report",
         "id":
         case_name,
     })
@@ -182,7 +182,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "format":
         get_file_extension(sample_config),
         "tag":
-        "config",
+        "balsamic-config",
         "id":
         case_name,
     })
@@ -195,7 +195,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "format":
         get_file_extension(sample_config_dict["analysis"]["dag"]),
         "tag":
-        "dag",
+        "balsamic-dag",
         "id":
         case_name,
     })
