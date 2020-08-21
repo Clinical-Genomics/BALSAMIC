@@ -1,6 +1,6 @@
 channels:
-  - conda-forge
   - bioconda
+  - conda-forge
   - defaults
 
 dependencies:
@@ -8,5 +8,5 @@ dependencies:
   - strelka=2.8.4
   - manta=1.3.0
   - bcftools>=1.10
-  - tabix=0.2.6
+  - tabix>=0.2.5
   - samtools>=1.9

@@ -1,11 +1,11 @@
 channels:
   - bioconda
-  - defaults
   - conda-forge
+  - defaults
 
 dependencies:
   - bcftools>=1.10
-  - tabix=0.2.6
+  - tabix>=0.2.5
   - gatk=3.8
   - samtools>=1.9
   - vardict=2019.06.04=pl526_0
