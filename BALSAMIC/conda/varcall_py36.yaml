@@ -9,5 +9,5 @@ dependencies:
   - gatk=3.8
   - samtools=1.10
   - vardict=2019.06.04=pl526_0
-  - cnvkit=0.9.7
+  - cnvkit=0.9.4a0
   - libiconv
