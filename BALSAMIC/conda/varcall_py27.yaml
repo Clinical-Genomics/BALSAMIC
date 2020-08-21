@@ -7,6 +7,6 @@ dependencies:
   - python=2.7
   - strelka=2.8.4
   - manta=1.3.0
-  - bcftools>=1.10
+  - bcftools>=1.9
   - tabix>=0.2.5
   - samtools>=1.9
