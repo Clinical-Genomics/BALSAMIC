@@ -4,7 +4,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - bcftools=1.10.2
+  - bcftools>=1.10
   - tabix=0.2.6
   - gatk=3.8
   - samtools=1.10
