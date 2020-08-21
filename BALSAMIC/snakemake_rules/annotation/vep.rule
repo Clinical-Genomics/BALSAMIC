@@ -15,7 +15,7 @@ rule vep_somatic:
     vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": ["annotation", "somatic"]},
+    housekeeper_id = {"id": "{case_name}", "tags": ["annotated-vcf-somatic"]},
     tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
@@ -62,7 +62,7 @@ rule vep_stat:
   output:
     stat = vep_dir + "SNV.somatic.{case_name}.{var_caller}.pass.balsamic_stat"
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": ["stat", "tmb","somatic"]},
+    housekeeper_id = {"id": "{case_name}", "tags": ["stat-tmb-somatic"]},
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
@@ -89,7 +89,7 @@ rule vep_germline:
     vcf = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   params:
-    housekeeper_id = {"id": "{sample}", "tags": ["annotation", "germline"]},
+    housekeeper_id = {"id": "{sample}", "tags": ["annotated-vcf-germline"]},
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')

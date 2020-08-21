@@ -37,7 +37,7 @@ rule fastp:
     json_out = qc_dir + "fastp/{sample}_fastp.json",
     html_out = qc_dir + "fastp/{sample}_fastp.html"
   params:
-    housekeeper_id = {"id": "{sample}", "tags": ["qc"]},
+    housekeeper_id = {"id": "{sample}", "tags": ["quality-trimmed-fastq"]},
     fastq_dir = fastq_dir,
     qc = " ".join(fastp_param_qc),
     umi = " ".join(fastp_param_umi),
