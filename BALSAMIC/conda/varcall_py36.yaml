@@ -5,9 +5,9 @@ channels:
 
 dependencies:
   - python=3.6
-  - bcftools=1.9
-  - tabix=0.2.5
-  - samtools=1.6
+  - bcftools=1.10.2
+  - tabix=0.2.6
+  - samtools=1.10
   - gatk=3.8
   - vardict=2019.06.04=pl526_0
   - libiconv
