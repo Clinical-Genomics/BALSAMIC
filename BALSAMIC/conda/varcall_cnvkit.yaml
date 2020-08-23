@@ -1,10 +1,11 @@
 channels:
-  - conda-forge
   - bioconda
+  - conda-forge
   - defaults
 
 dependencies:
   - python=3.6
+  - biopython>=1.76
   - bcftools
   - tabix
-  - cnvkit=0.9.4a0
+  - cnvkit=0.9.6
