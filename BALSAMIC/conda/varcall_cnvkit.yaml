@@ -1,11 +1,13 @@
 channels:
   - bioconda
   - defaults
+  - r
 
 dependencies:
   - python=3.6
   - pip=9.0.3
   - bcftools
   - tabix
+  - r-base=3.6.1
   - pip:
     - cnvkit==0.9.7
