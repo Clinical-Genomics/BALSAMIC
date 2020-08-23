@@ -1,11 +1,19 @@
 channels:
   - bioconda
-  - conda-forge
   - defaults
 
 dependencies:
   - python=3.6
-  - biopython>=1.76
+  - pip=9.0.3
   - bcftools
   - tabix
-  - cnvkit=0.9.6
+  - cnvkit=0.9.4a0
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - reportlab
+  - biopython
+  - pyfaidx
+  - pysam
+  - pyvcf
