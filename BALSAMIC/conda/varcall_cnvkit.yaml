@@ -9,5 +9,4 @@ dependencies:
   - bcftools
   - tabix
   - r-base=3.6.1
-  - pip:
-    - cnvkit==0.9.7
+  - cnvkit=0.9.7
