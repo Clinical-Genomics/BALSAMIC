@@ -7,5 +7,4 @@ dependencies:
   - python=3.6
   - bcftools
   - tabix
-  - samtools
   - cnvkit=0.9.4a0
