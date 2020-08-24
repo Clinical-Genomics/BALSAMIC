@@ -17,6 +17,7 @@ Changed
 * VEP rules have "all" and "pass" as output #376
 * Downloaded reference structure changed #371
 * genome/refseq.flat renamed to genome/refGene.flat #371
+* reverted CNVKit to version 0.9.4 #390
 
 Fixed
 ^^^^^
