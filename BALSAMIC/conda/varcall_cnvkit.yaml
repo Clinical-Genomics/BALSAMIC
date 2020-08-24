@@ -10,4 +10,7 @@ dependencies:
   - bcftools
   - tabix
   - r-base=3.6.1
-  - cnvkit=0.9.7
+  - bioconductor-dnacopy
+  - pip:
+      - cnvkit==0.9.4
+      - biopython==1.76
