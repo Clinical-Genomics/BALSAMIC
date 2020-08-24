@@ -313,7 +313,7 @@ def test_get_conda_env_found(tmp_path):
     conda_env = get_conda_env(balsamic_env, 'cnvkit')
 
     # THEN It should return the conda env which has that pkg
-    assert conda_env == "varcall_py36"
+    assert conda_env == "varcall_cnvkit"
 
 
 def test_get_conda_env_not_found(tmp_path):
