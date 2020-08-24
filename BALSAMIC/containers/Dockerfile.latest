@@ -15,6 +15,7 @@ RUN mkdir -p /git_repos; \
     export LANG=en_US.utf-8; \
     conda clean -iy; \
     cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout ${GIT_BRANCH} && \
+    conda env create --file BALSAMIC/conda/varcall_cnvkit.yaml -n varcall_cnvkit && \
     conda env create --file BALSAMIC/conda/varcall_py36.yaml -n varcall_py36 && \
     conda env create --file BALSAMIC/conda/annotate.yaml -n annotate && \
     conda env create --file BALSAMIC/conda/align.yaml -n align_qc && \

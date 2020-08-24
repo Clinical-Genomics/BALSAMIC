@@ -13,6 +13,8 @@ from pathlib import Path
 
 from BALSAMIC.utils.exc import BalsamicError
 
+from BALSAMIC.utils.constants import CONDA_ENV_PATH
+
 from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
     get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
@@ -25,6 +27,16 @@ from BALSAMIC.utils.rule import (
     get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
     get_script_path, get_result_dir, get_threads, get_delivery_id)
 
+def test_get_bioinfo_tools_list():
+    # GIVEN a path for conda env files
+    conda_env_path=CONDA_ENV_PATH
+
+    # WHEN getting dictionary of bioinformatic tools and their version
+    bioinfo_tools_dict = get_bioinfo_tools_list(conda_env_path)
+
+    # THEN assert it is a dictionary and versions are correct
+    assert isinstance(bioinfo_tools_dict, dict) 
+    assert bioinfo_tools_dict["cnvkit"] == "0.9.4"
 
 def test_get_delivery_id():
     # GIVEN a delivery id, a dummy file string, list of tags, and a snakemake wildcard_dict
@@ -313,7 +325,7 @@ def test_get_conda_env_found(tmp_path):
     conda_env = get_conda_env(balsamic_env, 'cnvkit')
 
     # THEN It should return the conda env which has that pkg
-    assert conda_env == "varcall_py36"
+    assert conda_env == "varcall_cnvkit"
 
 
 def test_get_conda_env_not_found(tmp_path):
