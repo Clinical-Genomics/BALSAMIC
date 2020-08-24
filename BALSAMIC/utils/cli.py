@@ -440,11 +440,14 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
                 try:
-                    name, version = p.split("=")
+                    if "pip" in p:
+                        for pip_package in p:
+                            name, version = pip_package.split("==")
+                            bioinfo_tools[name] = version
+                    else:
+                        name, version = p.split("==")
                 except ValueError:
                     name, version = p, None
-                finally:
-                    bioinfo_tools[name] = version
     return bioinfo_tools
 
 
