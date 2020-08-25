@@ -9,18 +9,45 @@ This section describes steps to install BALSAMIC (**version** = 4.1.0)
 Software Requirments
 ~~~~~~~~~~~~~~~~~~~~
 
-- Conda: BALSAMIC requires conda 4.3+ for automated installation. For detailed software and python requirments please see ``requirments.txt`` and ``BALSAMIC/conda/BALSAMIC-base.yaml``
+- Conda >=version 4.5.0: For detailed software and python requirments please see ``requirments.txt`` and ``BALSAMIC/conda/balsamic.yaml``
 
-- Singularity: BALSAMIC uses singularity to run vairous parts of the workflow. Either a container has to be built matching the BALSAMIC version from ``BALSAMIC/containers/BALSAMIC.X.X.X`` or one can pull Singularity container from Docker using: ``singularity pull docker://hassanf/balsamic path_to_balsamic_container``
+- Singularity >=version 3.0.0: BALSAMIC uses singularity to run vairous parts of the workflow. Either a container has to
+  be built matching the BALSAMIC version from ``BALSAMIC/containers/Dockerfile.latest`` or one can pull Singularity
+container from Docker using: ``singularity pull path_container_file docker://hassanf/balsamic:tag`` 
 
 - Python 3.6
 
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~
 
-1. Create a conda environment using ``BALSAMIC/conda/BALSAMIC-base.yaml`` 
+1. Create a conda environment using ``BALSAMIC/conda/balsamic.yaml``:
+
+::
+
+conda env create --file BALSAMIC/conda/balsamic.yaml 
+
+
+You can also set conda environment prefix via: `--prefix`
+ 
 2. Install BALSAMIC using ``pip`` within the newly created environment: ``pip install -r requirements.txt -e .``
-3. Pull container using Singularity: ``singularity pull docker://hassanf/balsamic path_to_balsamic_container``
+
+3. Pull container using Singularity: ``singularity pull path_container_file docker://hassanf/balsamic``
+
+
+Example:
+If you'd like to install release 5.0.0 the instruction will look like below:
+
+::
+
+# Create a conda env: balsamic_base
+conda env create --file BALSAMIC/conda/balsamic.yaml --quiet --force --prefx balsamic_base
+
+# Activate conda environment
+source activate balsamic_base
+
+# Pull container for release_v5.0.0
+singularity pull balsamic_release_v5.0.0 docker://hassanf/balsamic:release_v5.0.0
+
 
 Automatic Installation
 ~~~~~~~~~~~~~~~~~~~~~~
