@@ -24,54 +24,58 @@ Manual Installation
 
 ::
 
-conda env create --file BALSAMIC/conda/balsamic.yaml 
+    conda env create --file BALSAMIC/conda/balsamic.yaml -n name_of_environment 
 
 
-You can also set conda environment prefix via: `--prefix`
+You can also set conda environment prefix via ``--prefix`` option. Consult conda documentation for further instructions.
  
 2. Install BALSAMIC using ``pip`` within the newly created environment: ``pip install -r requirements.txt -e .``
 
 3. Pull container using Singularity: ``singularity pull path_container_file docker://hassanf/balsamic``
 
 
-Example:
 If you'd like to install release 5.0.0 the instruction will look like below:
 
 ::
 
-# Create a conda env: balsamic_base
-conda env create --file BALSAMIC/conda/balsamic.yaml --quiet --force --prefx balsamic_base
+    # Checkout a specific tag or branch. If you'd like to install latest changes, use master branch
+    git checkout v5.0.0
 
-# Activate conda environment
-source activate balsamic_base
+    # Create a conda env: balsamic_base
+    conda env create --file BALSAMIC/conda/balsamic.yaml --name balsamic_base
 
-# Pull container for release_v5.0.0
-singularity pull balsamic_release_v5.0.0 docker://hassanf/balsamic:release_v5.0.0
+    # Activate conda environment
+    source activate balsamic_base
+
+    # If you don't want to install in editable mode, remove `-e`
+    pip install -r requirements.txt -e .
+
+    # Pull container for release_v5.0.0
+    singularity pull balsamic_release_v5.0.0 docker://hassanf/balsamic:release_v5.0.0
 
 
 Automatic Installation
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~3
+
+NOTE: The following instructions are for internal use only.  
 
 Use ``install.sh`` script, assuming `${CONDA_ENVS_PATH}` is set to the path for conda environment:
 
 ::
   
-  ./install.sh -s D -v 3.2.2 -p ${CONDA_ENVS_PATH} -c
+  ./install.sh -s S -p path_to_conda_env_location -P path_to_container_store_location -c
 
-`-s` set prefix for conda environment name
-`-v` change the version tag or branch to append to env name
-`-p` path to conda environment location
-`-c` use conda 4.6.14 to install packages
-
-In above example, the final conda environment will be named: `D_BALSAMIC-base_3.2.2`
+In above example, the final conda environment will be named: `S_BALSAMIC`
 
 ::
 
-  USAGE: ./install.sh [-s _condaprefix -v _balsamic_ver -p _condapath -c]
-    1. Conda naming convention: [P,D,S]_[ENVNAME]_[balsamic_version_tag]. P: Production, D: Development, S: Stage
-    2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
-    
-    -s _condaprefix  Conda env name prefix. This will be P or D in the help above
-    -v _balsamic_ver Balsamic version tag or branch to install 
-    -p _condapath    Conda env path prefix. See point 2 in help above
-    -c If set it will use Singularity container instead of local available conda
+    USAGE: ../install.sh [-s _condaprefix -v _balsamic_ver -p _condapath -c]
+      1. Conda naming convention: [P,D,S]_[ENVNAME]_%DATE. P: Production, D: Development, S: Stage
+      2. Conda environment prefix: Path to conda env. e.g. /home/user/conda_env/
+      
+      -s _condaprefix     Conda env name prefix. This will be P or D in the help above
+      -v _balsamic_ver    Balsamic version tag to install (4.0.0+), or it could be the branch name
+      -e _envsuffix       Balsamic conda env suffix. This will be added to the conda env name
+      -p _condapath       Conda env path prefix. See point 2 in help above
+      -P _containerpath   Container path to store container files. Default set to current directory
+      -c                  If set it will use Singularity container for conda instead 
