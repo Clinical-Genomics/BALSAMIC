@@ -25,10 +25,10 @@ want it to be created in another location):
       --singularity BALSAMIC/containers/BALSAMIC_latest.sif
 
   # This might couple of hours
-  balsamic run reference --configfile reference/config.json --run-analysis
+  balsamic run reference --configfile reference/config.json --run-analysis --snakemake-opt "--cores 1"
   
 
-A `json` file with reference specificaions is created at: `BALSAMIC_reference/GRCh37/reference.json` 
+A `json` file with reference specificaions is created at: `BALSAMIC_reference/hg19/reference.json` 
 
 Step 2. Running a test sample
 -----------------------------
