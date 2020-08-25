@@ -25,6 +25,7 @@ Fixed
 * Wildcard resolve for deliveries of vep_germline #374
 * Missing index file from deliverables #383
 * Ambiguous deliveries in vep_somatic and ngs_filters #387
+* Updated documentation to match with installation #391
 
 Removed
 ^^^^^^^
