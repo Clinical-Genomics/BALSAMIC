@@ -1,0 +1,59 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+shell.prefix('set -eo pipefail;')
+
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_sample_type
+from BALSAMIC.utils.rule import get_threads
+
+# Extract umi tags using the defined read structure. 
+rule sentieon_umi_extract:
+    input:
+        read1 = fastq_dir + "{sample}_1.fastq.gz",
+        read2 = fastq_dir + "{sample}_2.fastq.gz"
+    output:
+        ds_umi = umi_dir + '{sample}_umiextract.fastq.gz'
+    params:
+        sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
+        sentieon_lic = SENTIEON_LICENSE,
+        ds_params= ['-d', '3M2S+T,3M2S+T'],
+        sample_id = '{sample}'
+    log: 
+        log_dir + '{sample}_umiextract.log'
+    benchmark: 
+        benchmark_dir + '{sample}_umiextract.tsv'
+    message: 
+        "UMI tag extraction using Sentieon for sample {params.sample_id}"
+    threads: 
+        get_threads(cluster_config, 'sentieon_umi_extract')
+    shell:
+        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
+        "{params.sentieon_exec} umi extract {params.ds_params} {input.read1} {input.read2} -o {output.ds_umi} &> {log} \n"
+
+
+
+# Align the UMI-extracted reads
+rule sentieon_umi_align:
+    input:
+        ref_fa = config['reference']['reference_genome'],
+        fastq_umi = umi_dir + '{sample}_umiextract.fastq.gz'
+    output:
+        align_umi = temp(umi_dir + '{sample}_umialign.sam')
+    params:
+        sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
+        sentieon_lic = SENTIEON_LICENSE,
+        sheader = "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        ip_bases = '1000000',
+        sample_id = '{sample}'
+    threads: 
+        get_threads(cluster_config, 'sentieon_umi_align')
+    log: 
+        log_dir + '{sample}_umialign.log'
+    benchmark:
+        benchmark_dir + '{sample}_umialign.benchmark'
+    message: 
+        "Aligning of UMI extracted reads with bwa mem, sorting for sample {params.sample_id}"
+    shell:
+        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
+        "{params.sentieon_exec} bwa mem -R {params.sheader} -K {params.ip_bases} -p -t {threads} -C {input.ref_fa} {input.fastq_umi} > {output.align_umi} 2> {log}\n"

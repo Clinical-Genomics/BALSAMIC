@@ -1,0 +1,36 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+shell.prefix('set -eo pipefail;')
+
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_sample_type
+from BALSAMIC.utils.rule import get_threads
+
+# Annotate vcf files with VEP 
+rule vep_somatic:
+    input:
+        vcf = vcf_dir + '{sample}_{var_caller}.vcf.gz',
+    output:
+        vep = vcf_dir + '{sample}_{var_caller}_vep.vcf.gz',
+    params:
+        conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+        vep_cache = config["reference"]["vep"],
+        default_options = '--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite',
+        sample_id = '{sample}',
+        var_caller = '{var_caller}'
+    threads: get_threads(cluster_config, 'vep_somatic')
+    singularity: singularity_image
+    log:
+        log_dir + '{sample}_{var_caller}_vep.log'
+    benchmark:
+        benchmark_dir + '{sample}_{var_caller}_vep.tsv'
+    message:
+        'Annotating {params.var_caller} VCF file with VEP for sample {params.sample_id}'
+    shell:
+        "source activate {params.conda}\n"
+        "vep_path=$(dirname $(readlink -e $(which vep)))\n"
+        "export PERL5LIB=\n"
+        "vep --dir $vep_path --dir_cache {params.vep_cache} --dir_plugins $vep_path --input_file {input.vcf} --output_file {output.vep} --fork {threads} {params.default_options}\n"
+        "tabix -p vcf -f {output.vep}\n"
+        "source deactivate"

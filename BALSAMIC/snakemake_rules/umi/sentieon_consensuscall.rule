@@ -1,0 +1,59 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+shell.prefix('set -eo pipefail;')
+
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_sample_type
+from BALSAMIC.utils.rule import get_threads
+
+
+# UMI-consensus calling
+rule sentieon_umi_consensus_call:
+    input:
+        sam_consensus = umi_dir + '{sample}_umialign.sam',
+    output:
+        fastq_consensus = umi_dir + '{sample}_consensuscall.fastq.gz',
+    params:
+        sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
+        sentieon_lic = SENTIEON_LICENSE,
+        tag = 'XR',
+        ip_format = 'SAM',
+        sample_id = '{sample}'
+    threads: 
+        get_threads(cluster_config, 'sentieon_umi_consensus_call')
+    log: 
+        log_dir + '{sample}_consensuscall.log'
+    benchmark : 
+        benchmark_dir + '{sample}_consensuscall.tsv'
+    message: 
+        "Consensus molecule creation for sample {params.sample_id}"
+    shell:
+        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
+        "{params.sentieon_exec} umi consensus -t {threads} -i {input.sam_consensus} -o {output.fastq_consensus} --input_format {params.ip_format} --umi_tag {params.tag} --read_name_prefix 'UMI-' &> {log}\n"
+
+# Alignment of consensus reads
+rule sentieon_umi_consensus_align:
+    input:
+        ref_fa = config["reference"]["reference_genome"],
+        fq_consensus = umi_dir + '{sample}_consensuscall.fastq.gz',
+    output:
+        align_consensus = umi_dir + '{sample}_consensusalign.bam',
+    params:
+        sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
+        sentieon_lic = SENTIEON_LICENSE,
+        sheader = "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        ip_bases = '1000000',
+        sample_id = '{sample}'
+    threads: 
+        get_threads(cluster_config, 'sentieon_umi_consensus_align')
+    log: 
+        log_dir + '{sample}_consensusalign.log'
+    benchmark : 
+        benchmark_dir + '{sample}_consensusalign.tsv'
+    message:
+         "Mapping of consensus reads with the bwa mem, sorting for sample {params.sample_id}"
+    shell:
+        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
+        "{params.sentieon_exec} bwa mem -R {params.sheader} -t {threads} -K {params.ip_bases} -p -C {input.ref_fa} {input.fq_consensus} | {params.sentieon_exec} util sort -r {input.ref_fa} --sam2bam -o {output.align_consensus} -i - 2> {log}\n"
+
