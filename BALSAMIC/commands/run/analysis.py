@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 @click.option('-a',
               '--analysis-type',
               required=False,
-              type=click.Choice(['qc', 'paired', 'single']),
+              type=click.Choice(['qc', 'paired', 'single','umi']),
               help='Type of analysis to run from input config file.\
               By default it will read from config file, but it will override config file \
               if it is set here.')
