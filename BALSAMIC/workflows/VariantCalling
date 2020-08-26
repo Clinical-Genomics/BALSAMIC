@@ -31,7 +31,6 @@ result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 qc_dir = result_dir + "qc/"
-umi_dir = get_result_dir(config) + "/umi/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image'] 
@@ -79,7 +78,6 @@ variantcalling_rules = [
 
 germline_caller = ["haplotypecaller", "strelka_germline", "manta_germline"]
 
-umi_rules = ["snakemake_rules/sentieon/sentieon_umicall.rule"]
 
 if sentieon:
     germline_caller.append('dnascope')
@@ -121,21 +119,17 @@ else:
 #somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
 somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 
-config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules + umi_rules
+config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
 
 
 # Define commong and analysis specific outputs
-#common_output = [ result_dir + "qc/" + "multiqc_report.html",
-#expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-#expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
-#expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])), expand(umi_dir + "{sample}_umiextract_ds.fastq.gz", sample=config["samples"])]
-
-
-# test-purpose
-common_output = [expand(umi_dir + "{sample}_TNscope.vcf.gz", sample=config["samples"])]
+common_output = [ result_dir + "qc/" + "multiqc_report.html",
+expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
+expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))]
 
 
 
