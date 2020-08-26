@@ -1,0 +1,69 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+import os
+from BALSAMIC.utils.rule import get_vcf
+from BALSAMIC.utils.rule import get_result_dir
+
+shell.prefix("set -eo pipefail; ")
+
+rule_dir = config["rule_directory"]
+fastq_dir = get_result_dir(config) + "/fastq/"
+benchmark_dir = config["analysis"]["benchmark"]
+umi_dir = get_result_dir(config) + "/umi/"
+vcf_dir = get_result_dir(config) + "/vcf/"
+log_dir =  config["analysis"]["log"]
+
+
+singularity_image = config['singularity']['image']
+
+# Declare sentieon variables
+sentieon = True
+SENTIEON_LICENSE = ''
+SENTIEON_INSTALL_DIR = ''
+
+
+# explictly check if cluster_config dict has zero keys.
+if len(cluster_config.keys()) == 0:
+    cluster_config = config
+
+try:
+    SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
+    SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
+except Exception as error:
+    sentieon = False
+    LOG.warn("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
+
+
+# Define umiworkflow rules
+
+umi_call = [
+    "snakemake_rules/umi/sentieon_umiextract.rule",
+    "snakemake_rules/umi/sentieon_consensuscall.rule"
+]
+
+variant_call = [
+    "snakemake_rules/umi/sentieon_varcall_tnscope.rule",
+    "snakemake_rules/umi/varcall_vardict.rule"
+]
+
+annotate_vcf = ["snakemake_rules/umi/annotate_vep.rule"]
+
+
+# Define outputs
+analysis_output = [expand(vcf_dir + "{sample}_{var_caller}.vcf.gz", sample=config["samples"],var_caller=['TNscope','vardict']), expand(vcf_dir + "{sample}_{var_caller}_vep.vcf.gz",sample=config["samples"],var_caller=['TNscope','vardict'])]
+
+config["rules"] = umi_call + variant_call + annotate_vcf
+
+for r in config["rules"]:
+    include: os.path.join(rule_dir + r)
+
+rule all:
+    input:
+        analysis_output
+    output:
+        os.path.join(get_result_dir(config), "analysis_finish")
+    shell:
+        "date +'%Y-%M-%d T%T %:z' > {output}"
+
+
