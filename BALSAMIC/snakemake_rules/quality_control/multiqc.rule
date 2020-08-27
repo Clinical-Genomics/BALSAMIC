@@ -22,6 +22,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
     # dir list
     dir_list = [qc_dir]
+
 else:
     # fastqc metrics
     multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
@@ -44,6 +45,7 @@ else:
     multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.region.dist.txt", sample=config["samples"]))
     multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.summary.txt", sample=config["samples"]))
 
+    # dir list
     dir_list = [bam_dir, fastqc_dir]
 
 
@@ -54,7 +56,7 @@ rule multiqc:
         html = qc_dir + "multiqc_report.html",
         json = qc_dir + "multiqc_data/multiqc_data.json",
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": ["multiqc"]},
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "multiqc"},
         dir_list = "\n".join(dir_list),
         qc_dir = qc_dir,
         conda = get_conda_env(config["conda_env_yaml"],"multiqc"),
