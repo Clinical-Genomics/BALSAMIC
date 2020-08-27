@@ -3,6 +3,7 @@
 # coding: utf-8
 
 import os
+
 from yapf.yapflib.yapf_api import FormatFile
 from snakemake.logging import logger
 from BALSAMIC.utils.cli import write_json

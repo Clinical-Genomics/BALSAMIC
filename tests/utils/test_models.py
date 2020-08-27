@@ -258,6 +258,7 @@ def test_analysis_model():
         AnalysisModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
 
+
 def test_sample_instance_model():
     #GIVEN valid input arguments
     valid_args = {
