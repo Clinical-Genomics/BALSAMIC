@@ -123,19 +123,33 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
         output_files: list of tuples (file, file_index, rule_name, tags, id, file_extension) for rules
     """
     output_files = list()
+    # Extract housekeeper tags from rule's params value
     housekeeper = getattr(rules, rule_name).params.housekeeper_id
+
+    # Get temp_output files
     temp_files = getattr(rules, rule_name).rule.temp_output
-    for my_file in getattr(rules, rule_name).output:
-        for file_wildcard_list in snakemake.utils.listfiles(my_file):
+
+    # Get list of named output from rule. e.g. output.vcf
+    output_file_names = list(getattr(rules, rule_name).output._names.keys())
+
+    for output_name in output_file_names:
+        output_file = getattr(rules, rule_name).output[output_name]
+        for file_wildcard_list in snakemake.utils.listfiles(output_file):
             file_to_store = file_wildcard_list[0]
+            # Do not store file if it is a temp() output
+            if file_to_store in temp_files:
+                continue
+
             file_extension = get_file_extension(file_to_store)
             file_to_store_index = find_file_index(file_to_store)
-            tags = list(file_wildcard_list[1])
+
+            base_tags = list(file_wildcard_list[1])
+            base_tags.append(output_name)
 
             delivery_id = get_delivery_id(
                 id_candidate=housekeeper["id"],
                 file_to_store=file_to_store,
-                tags=tags,
+                tags=base_tags,
                 output_file_wildcards=output_file_wildcards)
 
             # Return empty string if delivery_id is not resolved. 
@@ -145,14 +159,25 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             if pattern.findall(delivery_id):
                 continue
 
-            # Do not store file if it is a temp() output
-            if file_to_store in temp_files:
-                continue
+            # Create a composit tag from housekeeper tag and named output
+            composit_tag = "-".join([housekeeper["tags"], output_name])
+            file_tags = base_tags + [composit_tag]
 
-            tags.extend(housekeeper["tags"])
+            # replace all instsances of "_" with "-", since housekeeper doesn't like _
+            file_tags = [t.replace("_","-") for t in file_tags]
 
             output_files.append((file_to_store, file_to_store_index, rule_name,
-                                 ",".join(tags), delivery_id, file_extension))
+                                 ",".join(file_tags), delivery_id, file_extension))
+
+            if file_to_store_index:
+                for file_index in file_to_store_index:
+                    # Create a composit tag from housekeeper tag and named output
+                    composit_tag = "-".join([housekeeper["tags"], output_name, "index"])
+                    file_index_tags = base_tags + [composit_tag]
+
+                    # replace all instsances of "_" with "-", since housekeeper doesn't like _
+                    file_index_tags = [t.replace("_","-") for t in file_index_tags]
+                    output_files.append((file_index, str(), rule_name, ",".join(file_index_tags), delivery_id, get_file_extension(file_index)))
 
     return output_files
 
