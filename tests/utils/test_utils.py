@@ -13,17 +13,72 @@ from pathlib import Path
 
 from BALSAMIC.utils.exc import BalsamicError
 
+from BALSAMIC.utils.constants import CONDA_ENV_PATH
+
 from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
     get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
     get_sample_dict, get_sample_names, create_fastq_symlink,
-    get_fastq_bind_path, singularity)
+    get_fastq_bind_path, singularity, get_file_extension)
 
-from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
-                                 get_conda_env, get_picard_mrkdup,
-                                 get_script_path, get_result_dir, get_threads)
+from BALSAMIC.utils.rule import (
+    get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
+    get_script_path, get_result_dir, get_threads, get_delivery_id)
+
+def test_get_bioinfo_tools_list():
+    # GIVEN a path for conda env files
+    conda_env_path=CONDA_ENV_PATH
+
+    # WHEN getting dictionary of bioinformatic tools and their version
+    bioinfo_tools_dict = get_bioinfo_tools_list(conda_env_path)
+
+    # THEN assert it is a dictionary and versions are correct
+    assert isinstance(bioinfo_tools_dict, dict) 
+    assert bioinfo_tools_dict["cnvkit"] == "0.9.4"
+
+def test_get_delivery_id():
+    # GIVEN a delivery id, a dummy file string, list of tags, and a snakemake wildcard_dict
+    delivery_id_to_check = '{case_name}'
+    tags = ['angry_bird', 'tag_2']
+    dummy_file_string = 'some_file_angry_bird_with_result.txt'
+    wildcard_dict = {'case_name': 'angry_bird', "allow_missing": True}
+    actual_delivery_id = 'angry_bird'
+
+    # WHEN getting the correct delivery_id
+    delivery_id_candidate = get_delivery_id(
+        id_candidate=delivery_id_to_check,
+        file_to_store=dummy_file_string,
+        tags=tags,
+        output_file_wildcards=wildcard_dict)
+
+    # THEN correct delivery_id should be extracted
+    assert delivery_id_candidate == actual_delivery_id
+
+
+def test_get_file_extension_get_any_ext():
+    # GIVEN a dummy file string
+    dummy_file = "hassan.txt"
+    actual_extension = "txt"
+
+    # WHEN extracting the extension
+    file_extension = get_file_extension(dummy_file)
+
+    # THEN assert extension is correctly extracted
+    assert file_extension == actual_extension
+
+
+def test_get_file_extension_known_ext():
+    # GIVEN a dummy file string with a known string
+    dummy_file = "hassan.fastq.gz"
+    actual_extension = "fastq.gz"
+
+    # WHEN extracting the extension
+    file_extension = get_file_extension(dummy_file)
+
+    # THEN assert extension is correctly extracted
+    assert file_extension == actual_extension
 
 
 def test_recursive_default_dict():
@@ -156,6 +211,8 @@ def test_get_snakefile():
             pipeline = "BALSAMIC/workflows/Alignment"
         elif analysis_type == 'generate_ref':
             pipeline = "BALSAMIC/workflows/GenerateRef"
+	elif analysis_type == 'umi':
+	    pipeline = "BALSAMIC/workflows/UMIworkflow"
 
         # THEN it should return the snakefile path
         # THEN assert file exists
@@ -270,7 +327,7 @@ def test_get_conda_env_found(tmp_path):
     conda_env = get_conda_env(balsamic_env, 'cnvkit')
 
     # THEN It should return the conda env which has that pkg
-    assert conda_env == "varcall_py36"
+    assert conda_env == "varcall_cnvkit"
 
 
 def test_get_conda_env_not_found(tmp_path):

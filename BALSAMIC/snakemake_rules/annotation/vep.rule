@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 # VEP annotation module. Annotate all VCFs generated through VEP
-# This produces both vcf.gz and tab delimited output.
-# NOTE: Tab delimited output contains only PASSed variants
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
@@ -13,10 +11,12 @@ rule vep_somatic:
     header = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
-    tmpvcf = temp(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz"),
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
   params:
+    housekeeper_id = {"id": "{case_name}", "tags": ["annotated-vcf-somatic"]},
+    tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
@@ -26,13 +26,15 @@ rule vep_somatic:
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "
+    "tmpvcf={params.tmpvcf}; "
     "export PERL5LIB=;"
-    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o {output.tmpvcf} ;" 
+    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o $tmpvcf ;" 
     "vep "
         "--dir $vep_path "
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
         "--input_file {output.tmpvcf} "
+        "--input_file $tmpvcf "
         "--output_file {output.vcf} "
         "--compress_output bgzip "
         "--fork {threads} "
@@ -51,7 +53,8 @@ rule vep_somatic:
         "--force_overwrite; "
     "tabix -p vcf -f {output.vcf}; "
     "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf}; "
-    "tabix -p vcf -f {output.vcf_pass}; " 
+    "tabix -p vcf -f {output.vcf_pass}; "
+    "rm $tmpvcf " 
     
 
 rule vep_stat:
@@ -60,6 +63,7 @@ rule vep_stat:
   output:
     stat = vep_dir + "SNV.somatic.{case_name}.{var_caller}.pass.balsamic_stat"
   params:
+    housekeeper_id = {"id": "{case_name}", "tags": ["stat-tmb-somatic"]},
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
@@ -84,7 +88,9 @@ rule vep_germline:
     cosmic = config["reference"]["cosmic"]
   output:
     vcf = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
+    vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   params:
+    housekeeper_id = {"id": "{sample}", "tags": ["annotated-vcf-germline"]},
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
@@ -117,4 +123,3 @@ rule vep_germline:
         "--verbose "
         "--force_overwrite; "
     "tabix -p vcf -f {output.vcf}; "
- 

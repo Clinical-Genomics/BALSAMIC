@@ -17,10 +17,11 @@ varcall_py36:
   - tabix
   - gatk
   - vardict
-  - cnvkit
   - libiconv
 varcall_py27:
   - strelka
   - manta
+varcall_cnvkit:
+  - cnvkit
 vcf_merge:
   - vcfmerge

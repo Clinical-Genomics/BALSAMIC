@@ -296,7 +296,7 @@ def merge_dict_on_key(dict_1, dict_2, by_key):
 def find_file_index(file_path):
     indexible_files = {
         ".bam": [".bam.bai", ".bai"],
-        ".cram": [".cram.cai", ".cai"],
+        ".cram": [".cram.crai", ".crai"],
         ".vcf.gz": [".vcf.gz.tbi"],
         ".vcf": [".vcf.tbi"],
     }
@@ -441,12 +441,24 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
         with open(yaml_file, "r") as f:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
-                try:
-                    name, version = p.split("=")
-                except ValueError:
-                    name, version = p, None
-                finally:
-                    bioinfo_tools[name] = version
+                if isinstance(p, dict): 
+                    for pip_package in p["pip"]:
+                        name, version = pip_package.split("==")
+                        if name in bioinfo_tools:
+                            bioinfo_tools[name] = ",".join(set([bioinfo_tools[name], version]))
+                        else:
+                            bioinfo_tools[name] = version
+                else:
+                    try:
+                        name = p.split("=")[0]
+                        version = "=".join(p.split("=")[1:])
+                    except ValueError:
+                        name, version = p, None
+                    finally:
+                        if name in bioinfo_tools:
+                            bioinfo_tools[name] = ",".join(set([bioinfo_tools[name], version]))
+                        else:
+                            bioinfo_tools[name] = version
     return bioinfo_tools
 
 

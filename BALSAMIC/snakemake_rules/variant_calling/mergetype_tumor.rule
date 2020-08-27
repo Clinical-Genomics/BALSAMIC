@@ -8,16 +8,18 @@ from BALSAMIC import __version__ as bv
 picarddup = get_picard_mrkdup(config)
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+case_id = config["analysis"]["case_id"]
+
 
 rule mergeBam_tumor:
   input:
     fasta = config["reference"]["reference_genome"],
     bamT = bam_dir + "{mysample}.sorted.{picardstr}.bam".format(mysample = tumor_sample,
-                                                                picardstr = picarddup) 
+                                                                picardstr = picarddup)
   output:
     bamT = bam_dir + "tumor.merged.bam",
-    cramT = bam_dir + "tumor.merged.cram",
   params:
+    housekeeper_id = {"id": tumor_sample, "tags": ["scout","bam","tumor"]},
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "mergeBam_tumor")
@@ -28,9 +30,26 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramT} {output.bamT}; "
+
+
+rule bamtocram_tumor:
+  input:
+    fasta = config["reference"]["reference_genome"],
+    bamT = bam_dir + "tumor.merged.bam",
+  output:
+    cramT = bam_dir + "tumor.merged.cram",
+  params:
+    housekeeper_id = {"id": tumor_sample, "tags": ["scout","cram","tumor"]},
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    picard = picard_extra_tumor
+  threads: get_threads(cluster_config, "mergeBam_tumor")
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'bamtocram_tumor_' + "{mysample}.bamtocram_tumor.tsv".format(mysample = tumor_sample)
+  shell:
+    "source activate {params.conda}; "
+    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramT} {input.bamT}; "
     "samtools index {output.cramT}; "
- 
 
 
 rule mergeBam_tumor_gatk:

@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
-
+from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
 
 
@@ -196,6 +196,12 @@ def tumor_normal_config(
     )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
+
+@pytest.fixture(name="helpers")
+def fixture_config_helpers():
+    """Helper fixture for case config files"""
+    return ConfigHelper()
 
 
 @pytest.fixture(scope="session")
