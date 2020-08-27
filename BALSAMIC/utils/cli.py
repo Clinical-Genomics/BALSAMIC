@@ -23,7 +23,6 @@ LOG = logging.getLogger(__name__)
 from BALSAMIC.utils.exc import BalsamicError
 
 
-
 class CaptureStdout(list):
     """
     Captures stdout.
@@ -67,23 +66,6 @@ class SnakeMake:
     """
 
     def __init__(self):
-<<<<<<< HEAD
-        self.case_name = None
-        self.working_dir = None
-        self.snakefile = None
-        self.configfile = None
-        self.run_mode = None
-        self.profile = None
-        self.cluster_config = str()
-        self.scheduler = None
-        self.log_path = None
-        self.script_path = None
-        self.result_path = None
-        self.qos = None
-        self.account = None
-        self.mail_type = None
-        self.mail_user = None
-=======
         self.case_name = str()
         self.working_dir = str()
         self.snakefile = str()
@@ -99,7 +81,6 @@ class SnakeMake:
         self.account = str()
         self.mail_type = str()
         self.mail_user = str()
->>>>>>> b9dc9924c2ebe024febebb24f0ce64935f08fc6e
         self.forceall = False
         self.run_analysis = False
         self.report = str()
@@ -159,20 +140,6 @@ class SnakeMake:
 
             sbatch_cmd += " {dependencies} '"
 
-<<<<<<< HEAD
-            cluster_cmd = " --immediate-submit -j 999 " + \
-                " --jobname BALSAMIC." + self.case_name + ".{rulename}.{jobid}.sh" + \
-                " --cluster-config " + self.cluster_config + \
-                " --cluster " + sbatch_cmd
-
-        sm_cmd = " snakemake --notemp -p " + \
-            " --directory " + self.working_dir + \
-            " --snakefile " + self.snakefile + \
-            " --configfiles " + self.configfile + " " + self.cluster_config + \
-            self.singularity_arg + \
-            " " + forceall + " " + dryrun + \
-            " " + cluster_cmd + " " + sm_opt
-=======
             cluster_cmd = (" --immediate-submit -j 999 "
                            "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
                            "--cluster-config {} --cluster {} ".format(
@@ -193,7 +160,6 @@ class SnakeMake:
                       report,
                       sm_opt,
                   ))
->>>>>>> b9dc9924c2ebe024febebb24f0ce64935f08fc6e
 
         return sm_cmd
 
@@ -276,14 +242,10 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
         if sequencing_type == "wgs":
             snakefile = Path(p, "workflows", "VariantCalling_sentieon")
     elif analysis_type == "generate_ref":
-<<<<<<< HEAD
         snakefile = Path(p, 'workflows', 'GenerateRef')
     elif analysis_type == "umi":
         snakefile = Path(p, 'workflows', 'UMIworkflow')
-=======
-        snakefile = Path(p, "workflows", "GenerateRef")
 
->>>>>>> b9dc9924c2ebe024febebb24f0ce64935f08fc6e
     return str(snakefile)
 
 
@@ -298,7 +260,6 @@ def get_config(config_name):
         return config_file
     else:
         raise FileNotFoundError(f"Config for {config_name} was not found.")
-
 
 
 def recursive_default_dict():
@@ -354,11 +315,7 @@ def find_file_index(file_path):
 
 def get_file_extension(file_path):
     known_multi_extensions = [
-<<<<<<< HEAD
-        '.vcf.gz', '.vcf.gz.tbi', '.vcf.tbi', '.fastq.gz'
-=======
         ".vcf.gz", ".vcf.gz.tbi", ".vcf.tbi", ".fastq.gz"
->>>>>>> b9dc9924c2ebe024febebb24f0ce64935f08fc6e
     ]
     file_extension = ""
     for known_ext in known_multi_extensions:
@@ -372,7 +329,6 @@ def get_file_extension(file_path):
     return file_extension[1:]
 
 
-
 def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     """
     Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
@@ -381,13 +337,8 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     """
 
     matching_value = default
-<<<<<<< HEAD
-    if from_key in input_dict and by_key in input_dict and by_value in input_dict[
-            from_key]:
-=======
     if (from_key in input_dict and by_key in input_dict
             and by_value in input_dict[from_key]):
->>>>>>> b9dc9924c2ebe024febebb24f0ce64935f08fc6e
         idx = input_dict[from_key].index(by_value)
         matching_value = input_dict[by_key][idx]
 
@@ -404,11 +355,7 @@ def get_file_status_string(file_to_check):
 
     file_status = os.path.isfile(file_to_check)
     if file_status:
-<<<<<<< HEAD
-        return_str = Color(u"[{green}\u2713{/green}] Found: ") + file_to_check
-=======
         return_str = Color("[{green}\u2713{/green}] Found: ") + file_to_check
->>>>>>> b9dc9924c2ebe024febebb24f0ce64935f08fc6e
 
     return return_str, file_status
 
