@@ -33,7 +33,6 @@ rule vep_somatic:
         "--dir $vep_path "
         "--dir_cache {params.vep_cache} "
         "--dir_plugins $vep_path "
-        "--input_file {output.tmpvcf} "
         "--input_file $tmpvcf "
         "--output_file {output.vcf} "
         "--compress_output bgzip "

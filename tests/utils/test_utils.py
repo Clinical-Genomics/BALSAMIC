@@ -27,16 +27,18 @@ from BALSAMIC.utils.rule import (
     get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
     get_script_path, get_result_dir, get_threads, get_delivery_id)
 
+
 def test_get_bioinfo_tools_list():
     # GIVEN a path for conda env files
-    conda_env_path=CONDA_ENV_PATH
+    conda_env_path = CONDA_ENV_PATH
 
     # WHEN getting dictionary of bioinformatic tools and their version
     bioinfo_tools_dict = get_bioinfo_tools_list(conda_env_path)
 
     # THEN assert it is a dictionary and versions are correct
-    assert isinstance(bioinfo_tools_dict, dict) 
+    assert isinstance(bioinfo_tools_dict, dict)
     assert bioinfo_tools_dict["cnvkit"] == "0.9.4"
+
 
 def test_get_delivery_id():
     # GIVEN a delivery id, a dummy file string, list of tags, and a snakemake wildcard_dict
@@ -211,8 +213,8 @@ def test_get_snakefile():
             pipeline = "BALSAMIC/workflows/Alignment"
         elif analysis_type == 'generate_ref':
             pipeline = "BALSAMIC/workflows/GenerateRef"
-	elif analysis_type == 'umi':
-	    pipeline = "BALSAMIC/workflows/UMIworkflow"
+        elif analysis_type == 'umi':
+            pipeline = "BALSAMIC/workflows/UMIworkflow"
 
         # THEN it should return the snakefile path
         # THEN assert file exists

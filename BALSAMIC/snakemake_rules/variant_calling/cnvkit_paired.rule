@@ -50,7 +50,6 @@ rule cnvkit_paired:
         conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
     singularity: singularity_image
     benchmark:
-        benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
         benchmark_dir + "cnvkit_paired_" + case_id + ".cnvkit_paired.tsv"
     shell:
         "source activate {params.conda}; "

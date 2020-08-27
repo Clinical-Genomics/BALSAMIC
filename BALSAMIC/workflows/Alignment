@@ -3,11 +3,13 @@
 # coding: utf-8
 
 import os
+from yapf.yapflib.yapf_api import FormatFile
 from snakemake.logging import logger
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output 
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC import __version__ as bv
+
 
 shell.prefix("set -eo pipefail; ")
 
@@ -73,6 +75,7 @@ if 'delivery' in config:
     delivery_ready = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_ready.hk" )
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready) 
+
 
 rule all:
   input:

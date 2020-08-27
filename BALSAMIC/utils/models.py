@@ -123,6 +123,7 @@ class VarcallerAttribute(BaseModel):
             raise ValueError(f"{value} not a valid argument!")
         return value
 
+
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
@@ -140,6 +141,7 @@ class VCFModel(BaseModel):
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
     strelka_germline: VarcallerAttribute
+
 
 class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
@@ -344,6 +346,7 @@ class BalsamicConfigModel(BaseModel):
     @validator("singularity")
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
+
 
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
