@@ -1,5 +1,39 @@
 
-[X.X.X]
+[5.0.0]
+-------
+
+Added
+^^^^^
+* Config.json and DAG draph included in Housekeeper report #372
+* New output names added to cnvkit_single and cnvkit_paired #372
+* New output names added to vep.rule #372
+* Delivery option to CLI and what to delivery with delivery params in rules that are needed to be delivered #376
+* Reference data model with validation #371
+* Added container path to install script #388
+
+Changed
+^^^^^^^
+* Delivery file format simplified #376
+* VEP rules have "all" and "pass" as output #376
+* Downloaded reference structure changed #371
+* genome/refseq.flat renamed to genome/refGene.flat #371
+* reverted CNVKit to version 0.9.4 #390
+
+Fixed
+^^^^^
+* Missing pygments to requirements.txt to fix travis CI #364
+* Wildcard resolve for deliveries of vep_germline #374
+* Missing index file from deliverables #383
+* Ambiguous deliveries in vep_somatic and ngs_filters #387
+* Updated documentation to match with installation #391
+
+Removed
+^^^^^^^
+* Temp files removed from list of outputs in vep.rule #372
+* samtools.rule and merged it with bwa_mem #375
+
+
+[4.5.0]
 -------
 
 Added
@@ -8,6 +42,7 @@ Added
   in BALSAMIC/utils/models.py
 * Added analysis_type to `report deliver` command
 * Added report and delivery capability to Alignment workflow
+* run_validate.sh now has -d to handle path to analysis_dir (for internal use only) #361
 
 Changed
 ^^^^^^^
@@ -39,7 +74,9 @@ Refactored
 Fixed
 ^^^^^
 * Report generation warnings supressed by adding workdirectory
-
+* Missing tag name for germline annotated calls #356
+* Bind path is not added as None if analysis type is wgs #357
+* Changes vardict to vardict-java #361
 
 
 [4.4.0]

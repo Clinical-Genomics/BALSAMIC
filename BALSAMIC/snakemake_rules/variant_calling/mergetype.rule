@@ -13,6 +13,7 @@ picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RG
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 normal_sample = get_sample_type(config["samples"], "normal")[0]
 tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+case_id = config["analysis"]["case_id"]
 
 rule mergeBam_normal_gatk:
   input:
@@ -32,7 +33,6 @@ rule mergeBam_normal_gatk:
     "samtools index {output.bamN}; "
     
 
-
 rule mergeBam_normal:
   input:
     fasta = config["reference"]["reference_genome"],
@@ -40,8 +40,8 @@ rule mergeBam_normal:
                                                                 picardstr = picarddup)
   output:
     bamN = bam_dir + "normal.merged.bam", 
-    cramN = bam_dir + "normal.merged.cram",
   params:
+    housekeeper_id = {"id": normal_sample, "tags": ["bam", "normal"]},
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_normal
   threads: get_threads(cluster_config, "mergeBam_normal")
@@ -52,7 +52,24 @@ rule mergeBam_normal:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
     "samtools index {output.bamN}; "
-    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramN} {output.bamN}; "
+
+
+rule bamtocram_normal:
+  input:
+    fasta = config["reference"]["reference_genome"],
+    bamN = bam_dir + "normal.merged.bam", 
+  output:
+    cramN = bam_dir + "normal.merged.cram",
+  params:
+    housekeeper_id = {"id": normal_sample, "tags": ["cram", "normal"]},
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+  threads: get_threads(cluster_config, "mergeBam_normal")
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'bamtocram_normal_' + "{mysample}.bamtocram_normal.tsv".format(mysample = normal_sample)
+  shell:
+    "source activate {params.conda}; "
+    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramN} {input.bamN}; "
     "samtools index {output.cramN}; "
 
 
@@ -63,8 +80,8 @@ rule mergeBam_tumor:
                                                                 picardstr = picarddup)
   output:
     bamT = bam_dir + "tumor.merged.bam",
-    cramT = bam_dir + "tumor.merged.cram",
   params:
+    housekeeper_id = {"id": tumor_sample, "tags": ["bam", "tumor"]},
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "mergeBam_tumor")
@@ -75,10 +92,27 @@ rule mergeBam_tumor:
     "source activate {params.conda}; "
     "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
     "samtools index {output.bamT}; "
-    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramT} {output.bamT}; "
-    "samtools index {output.cramT}; "
-    
 
+
+rule bamtocram_tumor:
+  input:
+    fasta = config["reference"]["reference_genome"],
+    bamT = bam_dir + "tumor.merged.bam",
+  output:
+    cramT = bam_dir + "tumor.merged.cram",
+  params:
+    housekeeper_id = {"id": tumor_sample, "tags": ["cram", "tumor"]},
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    picard = picard_extra_tumor
+  threads: get_threads(cluster_config, "mergeBam_tumor")
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'bamtocram_tumor_' + "{mysample}.bamtocram_tumor.tsv".format(mysample = tumor_sample)
+  shell:
+    "source activate {params.conda}; "
+    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cramT} {input.bamT}; "
+    "samtools index {output.cramT}; "
+ 
 
 rule mergeBam_tumor_gatk:
   input:

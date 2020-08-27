@@ -9,6 +9,7 @@ from BALSAMIC import __version__ as bv
 
 fasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
+case_id = config["analysis"]["case_id"]
 
 if config["analysis"]["sequencing_type"] == 'wgs':
     normal_bam = "{normal}.dedup.realign".format(normal = get_sample_type(config["samples"], "normal")[0])
@@ -16,7 +17,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     cnvkit_params = " --method wgs "
     cnvkit_params += " --target-avg-size 1000 "
     cnvkit_params += f" -f {fasta} --annotate {refflat} "
-    
 else:
     normal_bam = "normal.merged"
     tumor_bam = "tumor.merged"
@@ -31,19 +31,26 @@ rule cnvkit_paired:
         bamN = bam_dir + normal_bam + ".bam", 
         bamT = bam_dir + tumor_bam + ".bam"
     output:
-        vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz",
-        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"
+        vcf = temp(vcf_dir + "CNV.somatic." + case_id + ".cnvkit.vcf.gz"),
+        namemap = temp(vcf_dir + "CNV.somatic." + case_id + ".cnvkit.sample_name_map"),
+        tumor_cns = cnv_dir + tumor_bam + ".cns",
+        tumor_cnr = cnv_dir + tumor_bam + ".cnr",
+        tumor_scatter = cnv_dir + tumor_bam + "-scatter.pdf",
+        tumor_diagram = cnv_dir + tumor_bam + "-diagram.pdf",
+        gene_breaks_csv = cnv_dir + case_id + ".gene_breaks",
+        gene_metrics_csv = cnv_dir + case_id + ".gene_metrics",
     params:
+        housekeeper_id = {"id": case_id, "tags": ["cnv"]},
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
-        name = config["analysis"]["case_id"],
+        name = case_id,
         normal_name = normal_bam,
         tumor_name = tumor_bam,
         cnv_dir = cnv_dir,
         conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
     singularity: singularity_image
     benchmark:
-        benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
+        benchmark_dir + "cnvkit_paired_" + case_id + ".cnvkit_paired.tsv"
     shell:
         "source activate {params.conda}; "
         "if [ {params.target} != None ]; then "
@@ -55,14 +62,14 @@ rule cnvkit_paired:
             "--output-reference {params.cnv_dir}/Reference.cnn "
             "--scatter --diagram "
             "--output-dir {params.cnv_dir}; "
-        "cnvkit.py genemetrics {params.cnv_dir}/{params.tumor_name}.cnr "
-            "-s {params.cnv_dir}/{params.tumor_name}.cns "
+        "cnvkit.py genemetrics {output.tumor_cnr} "
+            "-s {output.tumor_cns} "
             "--drop-low-coverage -y "
-            "--output {params.cnv_dir}/{params.name}.gene_metrics.csv; "
-        "cnvkit.py breaks {params.cnv_dir}/{params.tumor_name}.cnr {params.cnv_dir}/{params.tumor_name}.cns "
-            "| cut -f1 | sort -u > {params.cnv_dir}/{params.name}.gene_breaks.csv; "
-        "cnvkit.py export vcf {params.cnv_dir}/{params.tumor_name}.cns --cnr {params.cnv_dir}/{params.tumor_name}.cnr "
-            "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR;"
+            "--output {output.gene_metrics_csv}; "
+        "cnvkit.py breaks {output.tumor_cnr} {output.tumor_cns} "
+            "| cut -f1 | sort -u > {output.gene_breaks_csv}; "
+        "cnvkit.py export vcf {output.tumor_cns} --cnr {output.tumor_cnr} "
+            "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR; "
         "bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf; "
         "tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz; "
         "bcftools sort -o {output.vcf} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 

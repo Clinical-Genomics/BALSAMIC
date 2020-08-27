@@ -11,6 +11,7 @@ import datetime
 import subprocess
 from collections import defaultdict
 from yapf.yapflib.yapf_api import FormatFile
+from pathlib import Path
 
 from BALSAMIC.utils.cli import get_from_two_key
 from BALSAMIC.utils.cli import merge_dict_on_key
@@ -33,18 +34,37 @@ LOG = logging.getLogger(__name__)
 )
 @click.option(
     "--sample-config",
+    "-s",
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
-@click.option('-a',
-              '--analysis-type',
-              required=False,
-              type=click.Choice(['qc', 'paired', 'single']),
-              help='Type of analysis to run from input config file.\
-              By default it will read from config file, but it will override config file \
-              if it is set here.')
+@click.option(
+    '-a',
+    '--analysis-type',
+    required=False,
+    type=click.Choice(['qc', 'paired', 'single']),
+    help=(
+        'Type of analysis to run from input config file.'
+        'By default it will read from config file, but it will override config file'
+        'if it is set here.'))
+@click.option('-r',
+              '--rules-to-deliver',
+              multiple=True,
+              help=('Specify a rule to deliver. Delivery '
+                    'mode selected via --delivery-mode option'))
+@click.option(
+    '-m',
+    '--delivery-mode',
+    type=click.Choice(['a', 'r']),
+    default='a',
+    show_default=True,
+    help=(
+        'a: append rules-to-deliver to current delivery '
+        'options. or r: reset current rules to delivery to only the ones specified'
+    ))
 @click.pass_context
-def deliver(context, sample_config, analysis_type):
+def deliver(context, sample_config, analysis_type, rules_to_deliver,
+            delivery_mode):
     """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
@@ -54,6 +74,19 @@ def deliver(context, sample_config, analysis_type):
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)
 
+    default_rules_to_deliver = [
+        "fastp", "multiqc", "vep_somatic", "vep_germline", "vep_stat",
+        "ngs_filter_vardict", "mergeBam_tumor", "mergeBam_normal", "cnvkit_paired", "cnvkit_single", "sentieon_dedup" 
+    ]
+
+    if not rules_to_deliver:
+        rules_to_deliver = default_rules_to_deliver
+
+    rules_to_deliver = list(rules_to_deliver)
+    if delivery_mode == 'a':
+        rules_to_deliver.extend(default_rules_to_deliver)
+
+    case_name = sample_config_dict['analysis']['case_id']
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
     LOG.info("Creatiing delivery_report directory")
@@ -62,141 +95,113 @@ def deliver(context, sample_config, analysis_type):
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
 
-    analysis_type = analysis_type if analysis_type else sample_config_dict['analysis']['analysis_type']
+    analysis_type = analysis_type if analysis_type else sample_config_dict[
+        'analysis']['analysis_type']
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
     report_file_name = os.path.join(
-        yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"
-    )
+        yaml_write_directory,
+        sample_config_dict["analysis"]["case_id"] + "_report.html")
     LOG.info("Creating report file {}".format(report_file_name))
 
     # write report.html file
     report = SnakeMake()
-    report.case_name = sample_config_dict['analysis']['case_id']
+    report.case_name = case_name
     report.working_dir = os.path.join(sample_config_dict['analysis']['analysis_dir'] , \
         sample_config_dict['analysis']['case_id'], 'BALSAMIC_run')
     report.report = report_file_name
     report.configfile = sample_config
-    report.snakefile = snakefile 
+    report.snakefile = snakefile
     report.run_mode = 'local'
     report.use_singularity = False
     report.run_analysis = True
-    cmd=sys.executable + " -m  " + report.build_cmd()
+    report.sm_opt = ["--quiet"]
+    cmd = sys.executable + " -m  " + report.build_cmd()
     subprocess.check_output(cmd.split(), shell=False)
+    LOG.info(f"Workflow report file {report_file_name}")
 
-
-    with CaptureStdout():
-        snakemake.snakemake(
-            snakefile=snakefile,
-            config={"delivery": "True"},
-            dryrun=True,
-            configfiles=[sample_config],
-            quiet=True,
-        )
-
-    delivery_file_name = os.path.join(
-        yaml_write_directory,
-        sample_config_dict["analysis"]["case_id"] + ".hk")
-    delivery_file_raw = os.path.join(
-        yaml_write_directory,
-        sample_config_dict["analysis"]["case_id"] + "_delivery_raw.hk",
+    snakemake.snakemake(
+        snakefile=snakefile,
+        config={
+            "delivery": "True",
+            "rules_to_deliver": ",".join(rules_to_deliver)
+        },
+        dryrun=True,
+        configfiles=[sample_config],
+        quiet=True,
     )
-    with open(delivery_file_raw, "r") as fn:
-        delivery_file_raw_dict = json.load(fn)
+
+    delivery_file_name = os.path.join(yaml_write_directory, case_name + ".hk")
 
     delivery_file_ready = os.path.join(
         yaml_write_directory,
-        sample_config_dict["analysis"]["case_id"] + "_delivery_ready.hk",
+        case_name + "_delivery_ready.hk",
     )
     with open(delivery_file_ready, "r") as fn:
         delivery_file_ready_dict = json.load(fn)
 
-    with CaptureStdout() as summary:
-        snakemake.snakemake(
-            snakefile=snakefile,
-            config={"delivery": "True"},
-            dryrun=True,
-            summary=True,
-            configfiles=[sample_config],
-            quiet=True,
-        )
-    summary = [i.split("\t") for i in summary]
-    summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
-
-    output_files_merged_interm = merge_dict_on_key(
-        dict_1=summary_dict,
-        dict_2=delivery_file_raw_dict,
-        by_key="output_file")
-    output_files_merged = merge_dict_on_key(
-        dict_1=output_files_merged_interm,
-        dict_2=delivery_file_ready_dict,
-        by_key="output_file",
-    )
-
     delivery_json = dict()
     delivery_json["files"] = list()
 
-    for item in output_files_merged:
-        if "date" in item:
-            warnings = list()
-            interm_dict = copy.deepcopy(item)
-            interm_dict["path"] = interm_dict.get("output_file")
-            interm_dict["step"] = interm_dict.get("rulename", "unknown")
-
-            file_path_index = find_file_index(interm_dict["path"])
-            if len(file_path_index) > 1:
-                LOG.warning(
-                    "More than one index found for %s" % interm_dict["path"])
-                LOG.warning("Taking %s index file" % list(file_path_index)[0])
-            interm_dict[
-                "path_index"] = file_path_index[0] if file_path_index else ""
-
-            interm_dict["format"] = get_file_extension(interm_dict["path"])
-            tags = set(interm_dict.get("wildcard_name", ["unknown"]) + interm_dict.get("wildcard_value", ["unknown"]))
-            interm_dict["tag"] = ",".join(tags)
-            interm_dict["id"] = "unknown"
-
-            delivery_id = list()
-            
-            for by_value in ["sample", "case_name"]:
-                delivery_id.append(
-                    get_from_two_key(
-                        interm_dict,
-                        from_key="wildcard_name",
-                        by_key="wildcard_value",
-                        by_value=by_value,
-                        default=None,
-                    ))
-
-            delivery_id = list(filter(None, delivery_id))
-            if len(delivery_id) > 1:
-                LOG.error(
-                    f"Ambiguous delivery id. Wilcard has both: {delivery_id}")
-                raise BalsamicError("Delivery file parsing process failed.")
-
-            if delivery_id:
-                interm_dict["id"] = delivery_id[0]
-
-            delivery_json["files"].append(interm_dict)
-
+    cleaned_up_delivery = list()
+    for delivery_item in delivery_file_ready_dict:
+        # If an entry has a path_index, then add it as an individual item
+        if delivery_item["path_index"]:
+            for path_index in delivery_item["path_index"]:
+                new_delivery_item_dict = dict()
+                new_delivery_item_dict["path"] = path_index
+                new_delivery_item_dict["path_index"] = "" 
+                new_delivery_item_dict["step"] = delivery_item["step"]
+                new_delivery_item_dict["format"] = get_file_extension(path_index)
+                new_delivery_item_dict["tag"] = delivery_item["tag"] + ",index"
+                new_delivery_item_dict["id"] = delivery_item["id"]
+                cleaned_up_delivery.append(new_delivery_item_dict)
+        cleaned_up_delivery.append(delivery_item)
+    delivery_json["files"].extend(cleaned_up_delivery)
+    
+    # Add Housekeeper file to report
     delivery_json["files"].append({
         "path":
         report_file_name,
-        "date":
-        datetime.date.today().isoformat(),
         "step":
         "balsamic_delivery",
         "format":
-        ".html",
+        get_file_extension(report_file_name),
         "tag":
-        "report",
+        "balsamic-report",
         "id":
-        sample_config_dict["analysis"]["case_id"],
+        case_name,
     })
+    # Add CASE_ID.JSON to report
+    delivery_json["files"].append({
+        "path":
+        Path(sample_config).resolve().as_posix(),
+        "step":
+        "case_config",
+        "format":
+        get_file_extension(sample_config),
+        "tag":
+        "balsamic-config",
+        "id":
+        case_name,
+    })
+    # Add DAG Graph to report
+    delivery_json["files"].append({
+        "path":
+        sample_config_dict["analysis"]["dag"],
+        "step":
+        "case_config",
+        "format":
+        get_file_extension(sample_config_dict["analysis"]["dag"]),
+        "tag":
+        "balsamic-dag",
+        "id":
+        case_name,
+    })
+
     write_json(delivery_json, delivery_file_name)
     with open(delivery_file_name + ".yaml", "w") as fn:
         yaml.dump(delivery_json, fn, default_flow_style=False)
 
     LOG.info(f"Housekeeper delivery file {delivery_file_name}")
-    LOG.info(f"Workflow report file {report_file_name}")
