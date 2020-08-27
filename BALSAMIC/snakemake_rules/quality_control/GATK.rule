@@ -37,7 +37,7 @@ rule IndelRealigner:
     knownsites = config["reference"]["1kg_snps_high"], 
     intervals = bam_dir + "{sample}" + ".sorted." + picarddup + ".intervals",
   output:
-    bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam",
+    temp(bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam"),
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
