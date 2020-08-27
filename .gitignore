@@ -31,4 +31,5 @@ BALSAMIC/workflows/VariantCalling_testing
 build/
 dist/
 demo/
+demo/demo_run_balsamic/*
 BALSAMIC_reference/
