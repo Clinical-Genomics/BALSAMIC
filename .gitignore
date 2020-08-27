@@ -30,3 +30,5 @@ BALSAMIC/config/install.json
 BALSAMIC/workflows/VariantCalling_testing
 build/
 dist/
+demo/
+BALSAMIC_reference/
