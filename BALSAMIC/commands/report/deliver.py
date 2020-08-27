@@ -118,7 +118,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     report.run_analysis = True
     report.sm_opt = ["--quiet"]
     cmd = sys.executable + " -m  " + report.build_cmd()
-    #subprocess.check_output(cmd.split(), shell=False)
+    subprocess.check_output(cmd.split(), shell=False)
     LOG.info(f"Workflow report file {report_file_name}")
 
     snakemake.snakemake(
