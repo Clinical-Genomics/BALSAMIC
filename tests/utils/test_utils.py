@@ -198,7 +198,8 @@ def test_get_script_path():
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
     workflow = [("paired", "wgs"), ("paired", "targeted"), ("single", "wgs"),
-                ("single", "targeted"), ("qc", ""), ("generate_ref", "")]
+                ("single", "targeted"), ("qc", ""), ("generate_ref", ""),
+		("umi","")]
 
     # WHEN asking to see snakefile for paired
     for analysis_type, sequencing_type in workflow:
