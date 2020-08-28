@@ -2,11 +2,13 @@ from datetime import date
 
 from BALSAMIC.commands.plugins.vcfutils import vcfheader
 from BALSAMIC.commands.plugins.vcfutils import collect_vcf_info
+from BALSAMIC.commands.plugins.vcfutils import collect_ref_info
+
 import re
 
 def test_vcfheader_return_string():
     """test vcfheader for properly returning a VCF header"""
-    #GIVEN current datatime
+    #GIVEN current datetime
     current_time = date.today().strftime("%Y%m%d")
     valid_date_in_vcf = "##fileDate=" + current_time
 
@@ -26,5 +28,21 @@ def test_ensids_return_string():
     #WHEN substitute the ensembl_ids
     ens_id = collect_vcf_info(valid_ens_id)
 
-    #THEN it should return a valid matchi
+    #THEN it should return a valid matching
     assert valid_ens_id in ens_id
+
+
+def test_refinfo_return_list():
+    """ test if the input file is a tab-delimited text file """
+    #GIVEN the variant info fiels in input file
+    valid_variant = "0.00119999998;SNP;p.Glu17Lys"
+    allele_freq, variant_type, aa_hgvs = valid_variant.split(';')
+    valid_info_variant = "VARIANT_TYPE=SNP;AA_HGVS=p.Glu17Lys;AF=1e-05"   
+ 
+    #WHEN calling the ref file
+    info = collect_ref_info(valid_variant)
+
+    #THEN it should return a list of info fields
+    assert valid_info_variant in info
+ 
+
