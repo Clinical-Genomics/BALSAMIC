@@ -13,6 +13,8 @@ benchmark_dir = config["analysis"]["benchmark"]
 umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 log_dir =  config["analysis"]["log"]
+table_dir = get_result_dir(config) + "/tables/"
+plot_dir = get_result_dir(config) + "/plots/"
 
 
 singularity_image = config['singularity']['image']
@@ -49,11 +51,16 @@ variant_call = [
 
 annotate_vcf = ["snakemake_rules/umi/annotate_vep.rule"]
 
+generate_plots = ["snakemake_rules/umi/generate_AF_tables.rules"]
+
+# Define wildcards
+SAMPLES = config["samples"]
+VAR_CALLER = ['TNscope','vardict']
 
 # Define outputs
-analysis_output = [expand(vcf_dir + "{sample}_{var_caller}.vcf.gz", sample=config["samples"],var_caller=['TNscope','vardict']), expand(vcf_dir + "{sample}_{var_caller}_vep.vcf.gz",sample=config["samples"],var_caller=['TNscope','vardict'])]
+analysis_output = [expand(vcf_dir + "{sample}_{var_caller}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER),expand(vcf_dir + "{sample}_{var_caller}_vep.vcf.gz",sample=SAMPLES, var_caller=VAR_CALLER),expand(table_dir + "{sample}_{var_caller}_AFtable.txt",sample=SAMPLES, var_caller=VAR_CALLER)]
 
-config["rules"] = umi_call + variant_call + annotate_vcf
+config["rules"] = umi_call + variant_call + annotate_vcf + generate_plots
 
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
@@ -64,6 +71,4 @@ rule all:
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
-        "date +'%Y-%M-%d T%T %:z' > {output}"
-
-
+        "date +'%Y-%m-%d T%T %:z' > {output}"
