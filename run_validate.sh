@@ -72,7 +72,7 @@ fi
 # Make sure _analysis_dir exists
 mkdir -p ${_analysis_dir}
 
-_cluster_config='BALSAMIC/config/cluster_minimal.json'
+_cluster_config='BALSAMIC/config/cluster.json'
 _singularity='BALSAMIC/containers/BALSAMIC_latest.sif'
 _reference='reference/GRCh37/reference.json'
 _tumor_fastq='tests/test_data/fastq/S1_R_1.fastq.gz'
