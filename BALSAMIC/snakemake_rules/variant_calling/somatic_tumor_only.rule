@@ -68,7 +68,8 @@ rule vardict_merge:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf}; "
+    "rand_str=$(openssl rand -hex 5); "
+    "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir}/${{rand_str}} - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
     "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
@@ -76,7 +77,6 @@ rule vardict_merge:
     "source deactivate;" 
 
 
-        #"--annotation Coverage --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
 rule mutect2_tumor_only:
   input:
     fa = config["reference"]["reference_genome"],
@@ -97,7 +97,8 @@ rule mutect2_tumor_only:
   shell:
     "source activate {params.conda};"
     "mkdir -p {params.result_dir}; "
-    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar -T MuTect2 "
+    "rand_str=$(openssl rand -hex 5); "
+    "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar -T MuTect2 "
         "-R {input.fa} "
         "--cosmic {input.cosmic} "
         "--dbsnp {input.dbsnp} "
@@ -124,7 +125,8 @@ rule mutect2_merge:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
   shell:  
     "source activate {params.conda} ; " 
-    "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf}; "  
+    "rand_str=$(openssl rand -hex 5); "
+    "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir}/${{rand_str}} - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
     "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
     "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
@@ -194,7 +196,8 @@ rule sentieon_TNhaplotyper_tumor_only:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-export SENTIEON_TMPDIR={params.tmpdir};
+rand_str=$(openssl rand -hex 5);
+export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
 

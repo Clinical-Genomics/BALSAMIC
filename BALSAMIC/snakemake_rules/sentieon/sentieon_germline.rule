@@ -25,7 +25,9 @@ rule sentieon_DNAscope:
     	"""
 export SENTIEON_LICENSE={params.sentieon_lic};
 export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
-export SENTIEON_TMPDIR={params.tmpdir};
+
+rand_str=$(openssl rand -hex 5);
+export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal_table} --algo DNAscope -d {input.dbsnp} {output.vcf}
 		"""

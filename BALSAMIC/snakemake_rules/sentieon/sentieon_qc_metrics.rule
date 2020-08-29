@@ -34,7 +34,8 @@ rule sentieon_wgs_metrics:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-export SENTIEON_TMPDIR={params.tmpdir};
+rand_str=$(openssl rand -hex 5);
+export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
 
 {params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo WgsMetricsAlgo --min_base_qual {params.min_base_qual} {output.wgs_metrics};
 

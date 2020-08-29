@@ -27,7 +27,8 @@ rule split_bed_by_chrom:
     singularity: singularity_image
     shell:
         "source activate {params.conda}; "
-        "export TMPDIR={params.tmpdir}; "
+        "rand_str=$(openssl rand -hex 5); "
+        "export TMPDIR={params.tmpdir}/${{rand_str}}; "
         "chromlist=`cut -f 1 {input.bed} | sort -u`; "
         "sed 's/^chr//g;/_/d' {input.chrom} | sort -k1,1 > {params.split_bed_dir}hg19.chrom.sizes; "
         "for c in $chromlist; "

@@ -21,7 +21,8 @@ rule CollectMultipleMetrics:
         benchmark_dir + "CollectMultipleMetrics_" + "{sample}.picard_collect_multiple_metrics.tsv"
     shell:
         "source activate {params.conda};"
-        "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
+        "rand_str=$(openssl rand -hex 5); "
+        "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
             " CollectMultipleMetrics "
             " I={input.bam} "
             " O={params.output_prefix} "
@@ -43,7 +44,8 @@ rule CollectWgsMetrics:
         benchmark_dir + "CollectWgsMetrics_" + "{sample}.picard_collect_wgs_metrics.tsv"
     shell:
         "source activate {params.conda};"
-        "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
+        "rand_str=$(openssl rand -hex 5); "
+        "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
             " CollectWgsMetrics "
             " I={input.bam} "
             " O={output} "
