@@ -25,5 +25,6 @@ rule fastqc:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
+    "mkdir {params.tmpdir}/${{rand_str}}; "
     "fastqc {input.read1} --dir {params.tmpdir}/${{rand_str}} --outdir {params.fastqc_dir};" 
     "fastqc {input.read2} --dir {params.tmpdir}/${{rand_str}} --outdir {params.fastqc_dir};"

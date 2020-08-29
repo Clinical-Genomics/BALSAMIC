@@ -30,6 +30,7 @@ rule vardict_tumor_only:
   output:
     temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
   params:
+    tmpdir = os.path.abspath(vcf_dir),
     af = "0.001",
     max_pval = "0.9",
     max_mm = "4.5",
@@ -42,6 +43,9 @@ rule vardict_tumor_only:
   shell:
     "source activate {params.conda}; "
     "export PERL5LIB=;"
+    "rand_str=$(openssl rand -hex 5); "
+    "mkdir {params.tmpdir}/${{rand_str}}; "
+    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}/${{rand_str}}\" \"-Xms768m\" \"-Xmx8g\"'; "
     "vardict-java -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "
         "{params.col_info} {input.bed} "
@@ -60,7 +64,7 @@ rule vardict_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
   params:
-    tmpdir = vcf_dir,
+    tmpdir = os.path.abspath(vcf_dir),
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
     name = config["analysis"]["case_id"],
   singularity: singularity_image
@@ -87,8 +91,7 @@ rule mutect2_tumor_only:
   output:
     temp(vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz")
   params:
-    tmpdir = vcf_dir + "mutect/",
-    result_dir = vcf_dir + "mutect/",
+    tmpdir = os.path.abspath(os.path.join(vcf_dir, "mutect")),
     conda = get_conda_env(config["conda_env_yaml"],"gatk")
   threads: get_threads(cluster_config, "mutect2_tumor_only")
   singularity: singularity_image
@@ -96,7 +99,7 @@ rule mutect2_tumor_only:
     benchmark_dir + 'mutect2_tumor_only_' + "{bedchrom}.mutect2_tumor_only.tsv"
   shell:
     "source activate {params.conda};"
-    "mkdir -p {params.result_dir}; "
+    "mkdir -p {params.tmpdir}; "
     "rand_str=$(openssl rand -hex 5); "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar -T MuTect2 "
         "-R {input.fa} "
@@ -118,7 +121,7 @@ rule mutect2_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
   params: 
-    tmpdir = vcf_dir,
+    tmpdir = os.path.abspath(vcf_dir), 
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   singularity: singularity_image
   benchmark:
@@ -182,7 +185,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
-        tmpdir = vcf_dir,
+        tmpdir = os.path.abspath(vcf_dir), 
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
@@ -197,6 +200,7 @@ rule sentieon_TNhaplotyper_tumor_only:
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 rand_str=$(openssl rand -hex 5);
+mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 

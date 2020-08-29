@@ -16,7 +16,7 @@ rule RealignerTargetCreator:
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
-    tmpdir = bam_dir,
+    tmpdir = os.path.abspath(bam_dir),
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
   benchmark:
