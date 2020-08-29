@@ -15,6 +15,9 @@ from BALSAMIC.utils.constants import REFERENCE_FILES
 
 LOG = logging.getLogger(__name__)
 
+# Set temporary dir environment variable
+os.environ['TMPDIR'] = get_result_dir(config)
+
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config

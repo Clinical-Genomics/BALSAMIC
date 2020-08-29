@@ -21,6 +21,7 @@ rule sentieon_wgs_metrics:
         wgs_metrics = qc_dir + "{sample}_sentieon_wgs_metrics.txt",
         coverage_metrics = qc_dir + "{sample}_coverage"
     params:
+        tmpdir = bam_dir,
         min_base_qual = '10',
         gene_list = config["reference"]["refGene"],
         cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
@@ -32,6 +33,8 @@ rule sentieon_wgs_metrics:
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
+
+export SENTIEON_TMPDIR={params.tmpdir};
 
 {params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo WgsMetricsAlgo --min_base_qual {params.min_base_qual} {output.wgs_metrics};
 

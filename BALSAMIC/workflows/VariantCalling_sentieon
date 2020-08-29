@@ -30,6 +30,9 @@ vep_dir = get_result_dir(config) + "/vep/"
 
 singularity_image = config['singularity']['image'] 
 
+# Set temporary dir environment variable
+os.environ['TMPDIR'] = get_result_dir(config)
+
 try:
     SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
     SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]

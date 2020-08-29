@@ -36,6 +36,9 @@ delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image'] 
 
+# Set temporary dir environment variable
+os.environ['TMPDIR'] = get_result_dir(config)
+
 # Declare sentieon variables 
 sentieon = True
 SENTIEON_LICENSE = ''

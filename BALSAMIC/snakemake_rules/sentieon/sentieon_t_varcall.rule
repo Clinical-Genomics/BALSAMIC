@@ -27,6 +27,7 @@ rule sentieon_TNsnv_tumor_only:
         stats = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.call_stats",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnsnv.sample_name_map",
     params:
+        tmpdir = bam_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
@@ -39,6 +40,8 @@ rule sentieon_TNsnv_tumor_only:
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
+
+export SENTIEON_TMPDIR={params.tmpdir};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -q {input.recal_data_table} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
 
@@ -56,6 +59,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
+        tmpdir = bam_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
@@ -68,6 +72,8 @@ rule sentieon_TNhaplotyper_tumor_only:
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
+
+export SENTIEON_TMPDIR={params.tmpdir};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {input.recal_data_table} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
 
@@ -85,6 +91,7 @@ rule sentieon_TNscope_tumor_only:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     params:
+        tmpdir = bam_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
@@ -97,6 +104,8 @@ rule sentieon_TNscope_tumor_only:
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
+
+export SENTIEON_TMPDIR={params.tmpdir};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal} --algo TNscope --tumor_sample {params.tumor} {params.pon} --dbsnp {input.dbsnp} {output.vcf};
 

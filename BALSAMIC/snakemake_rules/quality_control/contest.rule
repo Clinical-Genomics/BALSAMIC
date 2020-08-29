@@ -18,6 +18,7 @@ rule GATK_contest:
     T_vs_N = bam_dir + "tumor_normal.contest", 
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    tmpdir = bam_dir,
     min_genotype_ratio="0.95",
     popcode = "EUR"
   singularity: singularity_image
@@ -25,7 +26,7 @@ rule GATK_contest:
     benchmark_dir + 'GATK_contest_' + config["analysis"]["case_id"] + ".markduplicates.tsv"
   shell:
     "source activate {params.conda}; "
-    "gatk3 "
+    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T ContEst "
         "-R {input.fa} "
         "-I:eval {input.bamN} "
@@ -34,7 +35,7 @@ rule GATK_contest:
         "--population {params.popcode} "
         "--min_genotype_ratio {params.min_genotype_ratio} "
         "-o {output.N_vs_T}; " 
-    "gatk3 "
+    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T ContEst "
         "-R {input.fa} "
         "-I:eval {input.bamT} "

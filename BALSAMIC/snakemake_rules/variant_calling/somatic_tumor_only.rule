@@ -60,6 +60,7 @@ rule vardict_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
   params:
+    tmpdir = vcf_dir,
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
     name = config["analysis"]["case_id"],
   singularity: singularity_image
@@ -67,7 +68,7 @@ rule vardict_merge:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
+    "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
     "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
@@ -86,6 +87,7 @@ rule mutect2_tumor_only:
   output:
     temp(vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz")
   params:
+    tmpdir = vcf_dir + "mutect/",
     result_dir = vcf_dir + "mutect/",
     conda = get_conda_env(config["conda_env_yaml"],"gatk")
   threads: get_threads(cluster_config, "mutect2_tumor_only")
@@ -95,7 +97,7 @@ rule mutect2_tumor_only:
   shell:
     "source activate {params.conda};"
     "mkdir -p {params.result_dir}; "
-    "gatk3  -T MuTect2 "
+    "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar -T MuTect2 "
         "-R {input.fa} "
         "--cosmic {input.cosmic} "
         "--dbsnp {input.dbsnp} "
@@ -115,13 +117,14 @@ rule mutect2_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
   params: 
+    tmpdir = vcf_dir,
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
   shell:  
     "source activate {params.conda} ; " 
-    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "  
+    "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf}; "  
     "tabix -f -p vcf {output.vcf}; "  
     "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
     "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
@@ -177,6 +180,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
+        tmpdir = vcf_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
@@ -189,6 +193,8 @@ rule sentieon_TNhaplotyper_tumor_only:
     shell:
         """
 export SENTIEON_LICENSE={params.sentieon_lic};
+
+export SENTIEON_TMPDIR={params.tmpdir};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
 

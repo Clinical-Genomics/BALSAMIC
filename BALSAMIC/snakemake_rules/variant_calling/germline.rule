@@ -22,6 +22,7 @@ rule haplotypecaller:
     output:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
+        tmpdir = vcf_dir,
         conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     threads: get_threads(cluster_config, 'haplotypecaller')
     singularity: singularity_image
@@ -29,7 +30,7 @@ rule haplotypecaller:
         benchmark_dir + 'haplotypecaller_' + "{sample}.{bedchrom}.haplotypecaller.tsv"
     shell:
         "source activate {params.conda};"
-        "gatk3 -T HaplotypeCaller "
+        "java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
             "-R {input.fa} "
             "-I {input.bam} "
             "-L {input.bed} "
@@ -43,13 +44,14 @@ rule haplotypecaller_merge:
     output:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
+        tmpdir = vcf_dir,
         conda = get_conda_env(config["conda_env_yaml"], "gatk"),
     singularity: singularity_image
     benchmark:
         benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.vcf.gz" 
     shell:
         "source activate {params.conda}; "
-        "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
+        "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output}; "
         "tabix -f -p vcf {output}; "
 
 
