@@ -19,7 +19,7 @@ rule sentieon_wgs_metrics:
         reference = config["reference"]["reference_genome"]
     output:
         wgs_metrics = qc_dir + "{sample}_sentieon_wgs_metrics.txt",
-        coverage_metrics = qc_dir + "{sample}_coverage"
+        coverage_metrics = qc_dir + "{sample}_coverage.gz"
     params:
         tmpdir = os.path.abspath(bam_dir),
         min_base_qual = '10',
@@ -39,5 +39,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo WgsMetricsAlgo --min_base_qual {params.min_base_qual} {output.wgs_metrics};
 
-{params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo CoverageMetrics --gene_list {params.gene_list} {params.cov_threshold} {output.coverage_metrics};
+{params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo CoverageMetrics --gene_list {params.gene_list} {params.cov_threshold} {output.coverage_metrics}_tmp;
+
+gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics};
+rm {output.coverage_metrics}_tmp;
         """

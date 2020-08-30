@@ -122,7 +122,7 @@ rule all:
         expand(bam_dir + "{sample}.dedup.realign.recal.pdf", sample=config["samples"]),
         expand(vep_dir + "{vcf}.{filters}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]), filters = ["all", "pass"]),
         expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=config["samples"]),
-        expand(qc_dir + "{sample}_coverage", sample=config["samples"]),
+        expand(qc_dir + "{sample}_coverage.gz", sample=config["samples"]),
         expand(qc_dir + "multiqc_report.html"),
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
