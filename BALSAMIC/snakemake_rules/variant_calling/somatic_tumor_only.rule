@@ -45,6 +45,7 @@ rule vardict_tumor_only:
     "export PERL5LIB=;"
     "rand_str=$(openssl rand -hex 5); "
     "mkdir {params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}/${{rand_str}}\" \"-Xms768m\" \"-Xmx8g\"'; "
     "vardict-java -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "

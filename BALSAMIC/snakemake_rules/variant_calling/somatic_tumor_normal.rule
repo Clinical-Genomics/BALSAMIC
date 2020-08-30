@@ -22,6 +22,7 @@ rule vardict_tumor_normal:
   output:
     temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
   params:
+    tmpdir = os.path.abspath(vcf_dir),
     af = "0.005",
     max_pval = "0.9",
     max_mm = "4.5",
@@ -34,6 +35,10 @@ rule vardict_tumor_normal:
   shell:
     "source activate {params.conda}; "
     "export PERL5LIB=;"
+    "rand_str=$(openssl rand -hex 5); "
+    "mkdir {params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
+    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}/${{rand_str}}\" \"-Xms768m\" \"-Xmx8g\"'; "
     "vardict-java -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b \"{input.bamT}|{input.bamN}\" "
         "{params.col_info} {input.bed} "

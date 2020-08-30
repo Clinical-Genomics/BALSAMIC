@@ -13,7 +13,7 @@ rule CollectMultipleMetrics:
     output:
         expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard)
     params:
-        tmpdir = bam_dir,
+        tmpdir = os.path.abspath(bam_dir),
         output_prefix = qc_dir + "{sample}.multiple_metrics",
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     singularity: singularity_image
@@ -37,7 +37,7 @@ rule CollectWgsMetrics:
     output:
         qc_dir + "{sample}_picard_wgs_metrics.txt"
     params:
-        tmpdir = bam_dir,
+        tmpdir = os.path.abspath(bam_dir),
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     singularity: singularity_image
     benchmark:
