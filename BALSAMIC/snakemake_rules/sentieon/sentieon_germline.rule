@@ -23,12 +23,11 @@ rule sentieon_DNAscope:
         benchmark_dir + 'sentieon_DNAscope_' + "{sample}.dnascope.tsv"
     shell:
     	"""
-export SENTIEON_LICENSE={params.sentieon_lic};
-export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
-
 rand_str=$(openssl rand -hex 5);
 mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+export SENTIEON_LICENSE={params.sentieon_lic};
+export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal_table} --algo DNAscope -d {input.dbsnp} {output.vcf}
 		"""

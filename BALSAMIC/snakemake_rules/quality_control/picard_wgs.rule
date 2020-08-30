@@ -22,6 +22,7 @@ rule CollectMultipleMetrics:
     shell:
         "source activate {params.conda};"
         "rand_str=$(openssl rand -hex 5); "
+        "export TMPDIR={params.tmpdir}/${{rand_str}}; "
         "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
             " CollectMultipleMetrics "
             " I={input.bam} "
@@ -45,6 +46,7 @@ rule CollectWgsMetrics:
     shell:
         "source activate {params.conda};"
         "rand_str=$(openssl rand -hex 5); "
+        "export TMPDIR={params.tmpdir}/${{rand_str}}; "
         "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
             " CollectWgsMetrics "
             " I={input.bam} "

@@ -229,7 +229,7 @@ rule sentieon_TNhaplotyper:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
-        tmpdir = vcf_dir,
+        tmpdir = os.path.abspath(vcf_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
@@ -241,10 +241,10 @@ rule sentieon_TNhaplotyper:
         benchmark_dir + 'sentieon_TNhaplotyper_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
-export SENTIEON_LICENSE={params.sentieon_lic};
-
 rand_str=$(openssl rand -hex 5);
+mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR --normal_sample NORMAL --dbsnp {input.dbsnp} {output.vcf}
         

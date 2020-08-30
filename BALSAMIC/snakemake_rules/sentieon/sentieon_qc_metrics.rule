@@ -32,11 +32,10 @@ rule sentieon_wgs_metrics:
         benchmark_dir + 'sentieon_wgs_metrics_' + "{sample}_wgs_metrics.tsv"
     shell:
         """
-export SENTIEON_LICENSE={params.sentieon_lic};
-
 rand_str=$(openssl rand -hex 5);
 mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -i {input.bam} -r {input.reference} --algo WgsMetricsAlgo --min_base_qual {params.min_base_qual} {output.wgs_metrics};
 

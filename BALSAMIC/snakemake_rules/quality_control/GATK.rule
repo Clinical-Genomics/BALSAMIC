@@ -24,6 +24,7 @@ rule RealignerTargetCreator:
   shell:
     "source activate {params.conda}; "
     "rand_str=$(openssl rand -hex 5); "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T RealignerTargetCreator "
         "-I {input.bam} "
@@ -49,6 +50,7 @@ rule IndelRealigner:
   shell:
     "source activate {params.conda}; "
     "rand_str=$(openssl rand -hex 5); "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T IndelRealigner "
         "-I {input.bam} "
@@ -74,6 +76,7 @@ rule BaseRecalibrator:
   shell:
     "source activate {params.conda}; "
     "rand_str=$(openssl rand -hex 5); "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T BaseRecalibrator "
         "-R {input.fa} "

@@ -198,11 +198,10 @@ rule sentieon_TNhaplotyper_tumor_only:
         benchmark_dir + 'sentieon_TNhaplotyper_tumor_only_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
-export SENTIEON_LICENSE={params.sentieon_lic};
-
 rand_str=$(openssl rand -hex 5);
 mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
 

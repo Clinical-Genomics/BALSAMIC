@@ -27,11 +27,10 @@ rule sentieon_align_sort:
         benchmark_dir + 'sentieon_align_sort_' + "{sample}.align_sort.tsv"
     shell:
         """
-export SENTIEON_LICENSE={params.sentieon_lic};
-
 rand_str=$(openssl rand -hex 5);
 mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem -M -R {params.header} -t {threads} -K 50000000 {input.ref} {input.read1} {input.read2} | {params.sentieon_exec} util sort -o {output.bamout} -t {threads} --block_size 3G --sam2bam -i -
         """
@@ -56,11 +55,10 @@ rule sentieon_dedup:
         benchmark_dir + 'sentieon_dedup_' + "{sample}.dedup.tsv"
     shell:
         """
-export SENTIEON_LICENSE={params.sentieon_lic};
-
 rand_str=$(openssl rand -hex 5);
 mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.score};
 
@@ -119,11 +117,10 @@ rule sentieon_base_calibration:
         benchmark_dir + 'sentieon_base_calibration_' + "{sample}.base_recal.tsv"
     shell:
         """
-export SENTIEON_LICENSE={params.sentieon_lic};
-
 rand_str=$(openssl rand -hex 5);
 mkdir {params.tmpdir}/${{rand_str}};
 export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.indel_1kg} {output.recal_data_table};
 

@@ -28,6 +28,7 @@ rule MarkDuplicates:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
         "MarkDuplicates "
         "INPUT={input} "
@@ -57,6 +58,7 @@ rule CollectHsMetrics:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
       "BedToIntervalList "
       "I={input.bed} "
@@ -90,6 +92,7 @@ rule CollectAlignmentSummaryMetrics:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
       "CollectAlignmentSummaryMetrics "
       "R={input.fa} "
@@ -115,6 +118,7 @@ rule CollectInsertSizeMetrics:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
+    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
     "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
       "CollectInsertSizeMetrics "
       "I={input.bam} "
