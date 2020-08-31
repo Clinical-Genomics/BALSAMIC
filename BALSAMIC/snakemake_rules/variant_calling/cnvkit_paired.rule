@@ -41,6 +41,7 @@ rule cnvkit_paired:
         gene_metrics = cnv_dir + case_id + ".gene_metrics",
     params:
         housekeeper_id = {"id": case_id, "tags": "cnv"},
+        tmpdir = tmp_dir,
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
         name = case_id,
@@ -53,6 +54,9 @@ rule cnvkit_paired:
         benchmark_dir + "cnvkit_paired_" + case_id + ".cnvkit_paired.tsv"
     shell:
         "source activate {params.conda}; "
+        "rand_str=$(openssl rand -hex 5); "
+        "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "export TMPDIR=${{tmpdir}}; "
         "if [ {params.target} != None ]; then "
         "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
         "fi; "
@@ -72,6 +76,6 @@ rule cnvkit_paired:
             "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR; "
         "bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf; "
         "tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz; "
-        "bcftools sort -o {output.vcf} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 
+        "bcftools sort -o {output.vcf} --temp-dir ${{tmpdir}} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 
         "tabix -p vcf -f {output.vcf}; "
         "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 

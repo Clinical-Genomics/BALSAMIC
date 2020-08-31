@@ -16,13 +16,17 @@ rule RealignerTargetCreator:
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".intervals",
   params:
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
   benchmark:
     benchmark_dir + "RealignerTargetCreator_" + "{sample}.realign_targetcreator.tsv"
   shell:
     "source activate {params.conda}; "
-    "gatk3 "
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T RealignerTargetCreator "
         "-I {input.bam} "
         "-R {input.fa} "
@@ -39,13 +43,17 @@ rule IndelRealigner:
   output:
     temp(bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam"),
   params:
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
   benchmark:
     benchmark_dir + "IndelRealigner_" + "{sample}.indel_realign.tsv"
   shell:
     "source activate {params.conda}; "
-    "gatk3 "
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T IndelRealigner "
         "-I {input.bam} "
         "-R {input.fa} "
@@ -62,19 +70,24 @@ rule BaseRecalibrator:
   output:
     bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
   params:
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
   singularity: singularity_image
   benchmark:
     benchmark_dir + "BaseRecalibrator_" + "{sample}.base_recalibrator.tsv"
   shell:
     "source activate {params.conda}; "
-    "gatk3 "
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir -p ${{tmpdir}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T BaseRecalibrator "
         "-R {input.fa} "
         "--knownSites {input.knownsites} " 
         "-I {input.bam} "
         "--out {output}.bsrcl_list; "
-    "gatk3 "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T PrintReads "
         "-R {input.fa} "
         "-I {input.bam} "
