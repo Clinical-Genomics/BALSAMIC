@@ -3,8 +3,21 @@ from datetime import date
 from BALSAMIC.commands.plugins.vcfutils import vcfheader
 from BALSAMIC.commands.plugins.vcfutils import collect_vcf_info
 from BALSAMIC.commands.plugins.vcfutils import collect_ref_info
+from BALSAMIC.commands.plugins.vcfutils import readinput
+from BALSAMIC.commands.plugins.vcfutils import createvcf
+
 
 import re
+
+def input_file():
+    return "tests/test_data/vcf_tables/test_input.txt"
+
+def vcf_output():
+    return "tests/test_data/vcf_tables/test_createVCF_output.vcf.gz"
+
+def reference_file():
+    return "tests/test_data/vcf_tables/test_reference.vcf.gz"
+
 
 def test_vcfheader_return_string():
     """test vcfheader for properly returning a VCF header"""
