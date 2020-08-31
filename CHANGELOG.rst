@@ -1,4 +1,18 @@
 
+[5.0.1]
+------
+
+Added
+^^^^^
+* Temp directory for various rules and workflow wide temp directory #396
+
+Changed
+^^^^^^^
+* Refactored tags for housekeeper delivery to make them unique #395
+* Increased core requirements for mutect2 #396
+* GATK3.8 related utils run via jar file instead of gatk3 #396
+
+
 [5.0.0]
 -------
 
