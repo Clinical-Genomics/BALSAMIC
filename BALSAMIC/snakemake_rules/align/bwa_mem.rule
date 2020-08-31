@@ -24,7 +24,7 @@ rule bwa_mem:
   shell:
     "source activate {params.conda}; "
     "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}"
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
     "bwa mem "
         "-t {threads} "
         "-R  {params.header_1} "

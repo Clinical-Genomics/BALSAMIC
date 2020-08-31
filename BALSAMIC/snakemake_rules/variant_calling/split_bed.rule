@@ -28,7 +28,7 @@ rule split_bed_by_chrom:
     shell:
         "source activate {params.conda}; "
         "tmpdir={params.tmpdir}/${{rand_str}}; "
-        "mkdir ${{tmpdir}}; " 
+        "mkdir -p ${{tmpdir}}; "
         "export TMPDIR=${{tmpdir}}; "
         "chromlist=`cut -f 1 {input.bed} | sort -u`; "
         "sed 's/^chr//g;/_/d' {input.chrom} | sort -k1,1 > {params.split_bed_dir}hg19.chrom.sizes; "
