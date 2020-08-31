@@ -48,6 +48,7 @@ rule cnvkit_single:
         "source activate {params.conda}; "
         "rand_str=$(openssl rand -hex 5); "
         "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "mkdir -p ${{tmpdir}}; "
         "export TMPDIR=${{tmpdir}}; "
         "if [ {params.target} != None ]; then "
         "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "

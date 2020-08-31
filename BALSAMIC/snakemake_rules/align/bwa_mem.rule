@@ -25,6 +25,8 @@ rule bwa_mem:
     "source activate {params.conda}; "
     "rand_str=$(openssl rand -hex 5); "
     "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir -p ${{tmpdir}}; "
+    "export TMPDIR=${{tmpdir}}; "
     "bwa mem "
         "-t {threads} "
         "-R  {params.header_1} "
