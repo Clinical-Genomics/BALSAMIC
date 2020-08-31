@@ -13,7 +13,7 @@ rule CollectMultipleMetrics:
     output:
         expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard)
     params:
-        tmpdir = os.path.abspath(bam_dir),
+        tmpdir = tmp_dir,
         output_prefix = qc_dir + "{sample}.multiple_metrics",
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     singularity: singularity_image
@@ -22,8 +22,9 @@ rule CollectMultipleMetrics:
     shell:
         "source activate {params.conda};"
         "rand_str=$(openssl rand -hex 5); "
-        "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-        "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
+        "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "export TMPDIR=${{tmpdir}}; "
+        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
             " CollectMultipleMetrics "
             " I={input.bam} "
             " O={params.output_prefix} "
@@ -38,7 +39,7 @@ rule CollectWgsMetrics:
     output:
         qc_dir + "{sample}_picard_wgs_metrics.txt"
     params:
-        tmpdir = os.path.abspath(bam_dir),
+        tmpdir = tmp_dir,
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
     singularity: singularity_image
     benchmark:
@@ -46,8 +47,9 @@ rule CollectWgsMetrics:
     shell:
         "source activate {params.conda};"
         "rand_str=$(openssl rand -hex 5); "
-        "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-        "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/share/picard.jar "
+        "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "export TMPDIR=${{tmpdir}}; "
+        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
             " CollectWgsMetrics "
             " I={input.bam} "
             " O={output} "

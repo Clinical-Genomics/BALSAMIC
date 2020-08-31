@@ -21,6 +21,10 @@ shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
 
+# Set temporary dir environment variable
+os.environ['TMPDIR'] = get_result_dir(config)
+
+tmp_dir = os.path.join(get_result_dir(config), "tmp") 
 rule_dir = config["rule_directory"]
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
@@ -35,9 +39,6 @@ qc_dir = result_dir + "qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image'] 
-
-# Set temporary dir environment variable
-os.environ['TMPDIR'] = get_result_dir(config)
 
 # Declare sentieon variables 
 sentieon = True

@@ -14,6 +14,10 @@ from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
 
+# Set temporary dir environment variable
+os.environ['TMPDIR'] = get_result_dir(config)
+
+tmp_dir = os.path.join(get_result_dir(config), "tmp") 
 rule_dir = config["rule_directory"]
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
@@ -27,9 +31,6 @@ vep_dir = get_result_dir(config) + "/vep/"
 qc_dir = result_dir + "qc/"
 
 singularity_image = config['singularity']['image'] 
-
-# Set temporary dir environment variable
-os.environ['TMPDIR'] = get_result_dir(config)
 
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:

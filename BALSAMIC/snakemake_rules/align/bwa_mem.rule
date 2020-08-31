@@ -15,7 +15,7 @@ rule bwa_mem:
     bamout = temp(bam_dir + "{sample}.sorted.bam")
   params:
     header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-    tmpdir = get_result_dir(config),
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"bwa")
   threads: get_threads(cluster_config, "bwa_mem")
   singularity: singularity_image
@@ -24,11 +24,12 @@ rule bwa_mem:
   shell:
     "source activate {params.conda}; "
     "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}"
     "bwa mem "
         "-t {threads} "
         "-R  {params.header_1} "
         "-M "
         "-v 1 "
         "{input.fa} {input.read1} {input.read2} "
-        "| samtools sort -T {params.tmpdir}/${{rand_str}} --threads {threads} --output-fmt BAM -o {output.bamout} - ;"
+        "| samtools sort -T ${{tmpdir}} --threads {threads} --output-fmt BAM -o {output.bamout} - ;"
     "samtools index -@ {threads} {output.bamout}; "

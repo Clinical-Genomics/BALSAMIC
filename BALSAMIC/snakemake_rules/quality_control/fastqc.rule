@@ -17,7 +17,7 @@ rule fastqc:
     read2 = fastqc_dir + "{sample}_2_fastqc.zip"
   params:
     conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
-    tmpdir = fastqc_dir,
+    tmpdir = tmp_dir,
     fastqc_dir = fastqc_dir
   singularity: singularity_image
   benchmark:
@@ -25,6 +25,7 @@ rule fastqc:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
-    "mkdir {params.tmpdir}/${{rand_str}}; "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir ${{tmpdir}}; "
     "fastqc {input.read1} --dir {params.tmpdir}/${{rand_str}} --outdir {params.fastqc_dir};" 
     "fastqc {input.read2} --dir {params.tmpdir}/${{rand_str}} --outdir {params.fastqc_dir};"

@@ -22,7 +22,7 @@ rule haplotypecaller:
     output:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
-        tmpdir = os.path.abspath(vcf_dir),
+        tmpdir = tmp_dir,
         conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     threads: get_threads(cluster_config, 'haplotypecaller')
     singularity: singularity_image
@@ -31,7 +31,10 @@ rule haplotypecaller:
     shell:
         "source activate {params.conda}; "
         "rand_str=$(openssl rand -hex 5); "
-        "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
+        "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "mkdir -p ${{tmpdir}}; "
+        "export TMPDIR=${{tmpdir}}; "
+        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
             "-T HaplotypeCaller "
             "-R {input.fa} "
             "-I {input.bam} "
@@ -46,7 +49,7 @@ rule haplotypecaller_merge:
     output:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
-        tmpdir = os.path.abspath(vcf_dir),
+        tmpdir = tmp_dir,
         conda = get_conda_env(config["conda_env_yaml"], "gatk"),
     singularity: singularity_image
     benchmark:
@@ -54,8 +57,12 @@ rule haplotypecaller_merge:
     shell:
         "source activate {params.conda}; "
         "rand_str=$(openssl rand -hex 5); "
-        "bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir}/${{rand_str}} - | bgzip > {output}; "
+        "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "mkdir -p ${{tmpdir}}; "
+        "export TMPDIR=${{tmpdir}}; "
+        "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output}; "
         "tabix -f -p vcf {output}; "
+
 
 
 rule strelka_germline:
@@ -125,7 +132,7 @@ rule sentieon_DNAscope:
     output:
         vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
-        tmpdir = os.path.abspath(vcf_dir),
+        tmpdir = tmp_dir,
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE
     threads: get_threads(cluster_config, 'sentieon_DNAscope')
@@ -135,11 +142,12 @@ rule sentieon_DNAscope:
         benchmark_dir + "{sample}.dnascope.tsv"
     shell:
         """
+rand_str=$(openssl rand -hex 5);
+tmpdir={params.tmpdir}/${{rand_str}};
+mkdir ${{tmpdir}};
+export TMPDIR=${{tmpdir}};
+export SENTIEON_TMPDIR=${{tmpdir}};
 export SENTIEON_LICENSE={params.sentieon_lic};
-
-rand_str=$(openssl rand -hex 5); 
-mkdir -p {params.tmpdir}/${{rand_str}};
-export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} --interval {input.interval} --algo DNAscope -d {input.dbsnp} {output.vcf}
         """

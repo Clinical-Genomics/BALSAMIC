@@ -12,7 +12,7 @@ rule sentieon_DNAscope:
     output:
         vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
-        tmpdir = os.path.abspath(bam_dir),
+        tmpdir = tmp_dir,
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE, 
         sentieon_ml_dnascope = SENTIEON_DNASCOPE
@@ -24,8 +24,10 @@ rule sentieon_DNAscope:
     shell:
     	"""
 rand_str=$(openssl rand -hex 5);
-mkdir {params.tmpdir}/${{rand_str}};
-export SENTIEON_TMPDIR={params.tmpdir}/${{rand_str}};
+tmpdir={params.tmpdir}/${{rand_str}};
+mkdir ${{tmpdir}};
+export TMPDIR=${{tmpdir}};
+export SENTIEON_TMPDIR=${{tmpdir}};
 export SENTIEON_LICENSE={params.sentieon_lic};
 export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 

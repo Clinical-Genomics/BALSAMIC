@@ -18,7 +18,7 @@ rule GATK_contest:
     T_vs_N = bam_dir + "tumor_normal.contest", 
   params:
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-    tmpdir = os.path.abspath(bam_dir),
+    tmpdir = tmp_dir,
     min_genotype_ratio="0.95",
     popcode = "EUR"
   singularity: singularity_image
@@ -27,8 +27,9 @@ rule GATK_contest:
   shell:
     "source activate {params.conda}; "
     "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
     "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-    "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T ContEst "
         "-R {input.fa} "
         "-I:eval {input.bamN} "
@@ -37,9 +38,7 @@ rule GATK_contest:
         "--population {params.popcode} "
         "--min_genotype_ratio {params.min_genotype_ratio} "
         "-o {output.N_vs_T}; " 
-    "rand_str=$(openssl rand -hex 5); "
-    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-    "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T ContEst "
         "-R {input.fa} "
         "-I:eval {input.bamT} "

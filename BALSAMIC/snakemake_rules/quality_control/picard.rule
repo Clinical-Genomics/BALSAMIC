@@ -19,7 +19,7 @@ rule MarkDuplicates:
     mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     stats = bam_dir + "{sample}.sorted." + picarddup + ".txt"
   params:
-    tmpdir = os.path.abspath(bam_dir),
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
   singularity: singularity_image
@@ -28,8 +28,9 @@ rule MarkDuplicates:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
-    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-    "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
         "MarkDuplicates "
         "INPUT={input} "
         "OUTPUT={output.mrkdup} "
@@ -49,7 +50,7 @@ rule CollectHsMetrics:
   output:
     mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
   params:
-    tmpdir = os.path.abspath(bam_dir),
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     baitsetname = os.path.basename(config["panel"]["capture_kit"])
   singularity: singularity_image
@@ -58,13 +59,14 @@ rule CollectHsMetrics:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
-    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-    "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
       "BedToIntervalList "
       "I={input.bed} "
       "O={input.bam}.picard.bedintervals "
       "SD={input.fadict}; "
-    "java -jar -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
       "CollectHsMetrics "
       "BI={input.bam}.picard.bedintervals "
       "TI={input.bam}.picard.bedintervals "
@@ -83,7 +85,7 @@ rule CollectAlignmentSummaryMetrics:
   output:
     bam_dir + "{sample}.sorted.alignmetric"
   params:
-    tmpdir = os.path.abspath(bam_dir),
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     adapter = config["QC"]["adapter"]
   singularity: singularity_image
@@ -92,8 +94,9 @@ rule CollectAlignmentSummaryMetrics:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
-    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-    "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
       "CollectAlignmentSummaryMetrics "
       "R={input.fa} "
       "I={input.bam} "
@@ -110,7 +113,7 @@ rule CollectInsertSizeMetrics:
     pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
     txt = bam_dir + "{sample}.sorted.insertsizemetric"
   params:
-    tmpdir=os.path.abspath(bam_dir),
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"picard")
   singularity: singularity_image
   benchmark:
@@ -118,8 +121,9 @@ rule CollectInsertSizeMetrics:
   shell:
     "source activate {params.conda};"
     "rand_str=$(openssl rand -hex 5); "
-    "export TMPDIR={params.tmpdir}/${{rand_str}}; "
-    "java -jar -Djava.io.tmpdir={params.tmpdir}/${{rand_str}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
       "CollectInsertSizeMetrics "
       "I={input.bam} "
       "H={output.pdf} "
