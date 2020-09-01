@@ -11,11 +11,12 @@ VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 
 rule ngs_filter_vardict:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.filtered.vcf.gz",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.filtered.pass.vcf.gz",
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
   params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
     AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],

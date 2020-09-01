@@ -12,7 +12,6 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output 
-from BALSAMIC.utils.rule import get_rule_output_raw 
 from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
@@ -22,6 +21,10 @@ shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
 
+# Set temporary dir environment variable
+os.environ['TMPDIR'] = get_result_dir(config)
+
+tmp_dir = os.path.join(get_result_dir(config), "tmp") 
 rule_dir = config["rule_directory"]
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
@@ -65,8 +68,7 @@ qc_rules = [
   ]
 
 align_rules = [
-  "snakemake_rules/align/bwa_mem.rule",
-  "snakemake_rules/align/samtools.rule"
+  "snakemake_rules/align/bwa_mem.rule"
   ]
 
 annotation_rules = [
@@ -122,6 +124,8 @@ somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
+
+
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
 
@@ -129,12 +133,13 @@ for r in config["rules"]:
 # Define commong and analysis specific outputs
 common_output = [ result_dir + "qc/" + "multiqc_report.html",
 expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
-expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])),
+expand(vep_dir + "{vcf}.{filters}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]), filters = ["all", "pass"]),
 expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))]
 
 analysis_specific_output = []
 if config['analysis']['analysis_type'] == "single":
-    analysis_specific_output.extend(expand(vep_dir + "{vcf}.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+    analysis_specific_output.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+
 
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
@@ -146,19 +151,28 @@ if 'delivery' in config:
                       "allow_missing": True
                     }
 
-    output_files_ready = get_rule_output(rules=rules)
+
+    if 'rules_to_deliver' in config:
+        rules_to_deliver = config['rules_to_deliver'].split(",")
+    else:
+        rules_to_deliver = ['multiqc']
+
+    output_files_ready = [('path', 'path_index', 'step', 'tag', 'id', 'format')]
+    
+    for my_rule in set(rules_to_deliver):
+        try:
+            housekeeper_id = getattr(rules, my_rule).params.housekeeper_id
+        except (ValueError, AttributeError, RuleException, WorkflowError) as e:
+            LOG.warning("Cannot deliver step (rule) {}: {}".format(my_rule,e))
+            continue
+
+        LOG.info("Delivering step (rule) {}.".format(my_rule))
+        output_files_ready.extend(get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict))
+
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
     delivery_ready = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_ready.hk" )
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready) 
-
-    output_files_raw = get_rule_output_raw(rules=rules, output_file_wildcards = wildcard_dict)
-    output_files_raw = [dict(zip(output_files_raw[0], value)) for value in output_files_raw[1:]]
-
-    delivery_raw = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_raw.hk" )
-    write_json(output_files_raw, delivery_raw)
-    FormatFile(delivery_raw)
-
  
 rule all:
     input:

@@ -12,9 +12,10 @@ rule bwa_mem:
     read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
     refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
   output:
-    bamout = temp(bam_dir + "{sample}.bam")
+    bamout = temp(bam_dir + "{sample}.sorted.bam")
   params:
     header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"bwa")
   threads: get_threads(cluster_config, "bwa_mem")
   singularity: singularity_image
@@ -22,11 +23,15 @@ rule bwa_mem:
     benchmark_dir + "bwa_mem_" + "{sample}.bwa_mem.tsv"
   shell:
     "source activate {params.conda}; "
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir -p ${{tmpdir}}; "
+    "export TMPDIR=${{tmpdir}}; "
     "bwa mem "
         "-t {threads} "
         "-R  {params.header_1} "
         "-M "
         "-v 1 "
         "{input.fa} {input.read1} {input.read2} "
-        "| samtools view -Sb - > {output.bamout}; "
-    "source deactivate;"
+        "| samtools sort -T ${{tmpdir}} --threads {threads} --output-fmt BAM -o {output.bamout} - ;"
+    "samtools index -@ {threads} {output.bamout}; "
