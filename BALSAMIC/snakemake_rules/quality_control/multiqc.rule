@@ -13,8 +13,8 @@ multiqc_input = []
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "{sample}_fastp.json", sample=config["samples"]))
-    multiqc_input.extend(expand(qc_dir + "{sample}_fastp.html", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=config["samples"]))
 
     # Picard metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_picard_wgs_metrics.txt", sample=config["samples"]))
@@ -22,9 +22,14 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
     # dir list
     dir_list = [qc_dir]
+
 else:
     # fastqc metrics
     multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
+
+    # fastp metrics
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=config["samples"]))
 
     # picard metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]))
@@ -36,10 +41,11 @@ else:
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed", sample=config["samples"]))
     
     # mosdepth metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.global.dist.txt", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.region.dist.txt", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".mosdepth.summary.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.global.dist.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.region.dist.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.summary.txt", sample=config["samples"]))
 
+    # dir list
     dir_list = [bam_dir, fastqc_dir]
 
 
@@ -50,7 +56,7 @@ rule multiqc:
         html = qc_dir + "multiqc_report.html",
         json = qc_dir + "multiqc_data/multiqc_data.json",
     params:
-        # This is using same environment as gatk
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "multiqc"},
         dir_list = "\n".join(dir_list),
         qc_dir = qc_dir,
         conda = get_conda_env(config["conda_env_yaml"],"multiqc"),

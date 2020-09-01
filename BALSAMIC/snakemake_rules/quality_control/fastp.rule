@@ -34,9 +34,11 @@ rule fastp:
   output:
     read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
     read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
-    json_out = qc_dir + "{sample}_fastp.json",
-    html_out = qc_dir + "{sample}_fastp.html"
+    json = qc_dir + "fastp/{sample}_fastp.json",
+    html = qc_dir + "fastp/{sample}_fastp.html"
   params:
+    housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
+    tmpdir = tmp_dir,
     fastq_dir = fastq_dir,
     qc = " ".join(fastp_param_qc),
     umi = " ".join(fastp_param_umi),
@@ -49,11 +51,12 @@ rule fastp:
   shell:
     """
 source activate {params.conda}; 
+export TMPDIR={params.tmpdir}; 
 fastp \
 --in1 {input.read1} --in2 {input.read2} \
 --out1 {output.read1} --out2 {output.read2} \
---json {output.json_out} \
---html {output.html_out} \
+--json {output.json} \
+--html {output.html} \
 --thread {threads} \
 --overrepresentation_analysis \
 {params.qc} \
