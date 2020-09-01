@@ -11,9 +11,9 @@ import re
 import pytest
 
 
-def test_readinput_return_list(input_file):
+def test_readinput_return_dict(input_file):
     """ test input file for properly returning the required fields """
-    #GIVEN input file path
+    #GIVEN input file with required fields
     valid_input_info = {
         'COSV62571334:AKT1:p.E17K': '0.118;SNP;p.Glu17Lys',
         'COSV51765161:EGFR:p.L858R': '0.106;SNP;p.Leu858Arg',
@@ -55,13 +55,13 @@ def test_ensids_return_string():
 
 
 def test_refinfo_return_list():
-    """ test fields in reference file """
-    #GIVEN the variant info fiels in input file
+    """ test fields in a reference file """
+    #GIVEN the variant info fields in input file
     valid_variant = "0.00119999998;SNP;p.Glu17Lys"
     allele_freq, variant_type, aa_hgvs = valid_variant.split(';')
     valid_info_variant = "VARIANT_TYPE=SNP;AA_HGVS=p.Glu17Lys;AF=1e-05"
 
-    #WHEN calling the ref file
+    #WHEN calling the reference file
     info = collect_ref_info(valid_variant)
 
     #THEN it should return a list of info fields
@@ -69,8 +69,19 @@ def test_refinfo_return_list():
 
 
 def test_createvcf(input_file, reference_file, output_file):
-    """ test createvcf """
+    """ test createvcf function """
+    # GIVEN the required files
+    #WHEN calling the creatvcf()
     runner = CliRunner()
     result = runner.invoke(
         createvcf, ["-i", input_file, "-r", reference_file, "-o", output_file])
-    assert result.exit_code == 0, "all files exits"
+    #THEN it should exit code
+    assert result.exit_code == 0, "all files exists"
+    
+    
+
+def test_createvcf_filtervariants():
+     info = ['aa']
+     filtered_variants =['cc','bb']
+     if info not in filtered_variants:
+         assert info !=filtered_variants, "tests failed"
