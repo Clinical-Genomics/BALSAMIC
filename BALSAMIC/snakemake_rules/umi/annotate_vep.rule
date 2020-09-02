@@ -1,18 +1,16 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-shell.prefix('set -eo pipefail;')
 
 from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
 
 # Annotate vcf files with VEP 
 rule vep_somatic:
     input:
-        vcf = vcf_dir + '{sample}_{var_caller}.vcf.gz',
+        vcf = vcf_dir + '{sample}_{var_caller}_umi.vcf.gz',
     output:
-        vep = vcf_dir + '{sample}_{var_caller}_vep.vcf.gz',
+        vep = vcf_dir + '{sample}_{var_caller}_vep_umi.vcf.gz',
     params:
         conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
         vep_cache = config["reference"]["vep"],
