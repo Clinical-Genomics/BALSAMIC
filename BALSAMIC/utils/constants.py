@@ -81,6 +81,35 @@ VCF_DICT = {
     },
 }
 
+#Minimum required QC-values from HS metrics to be able to pass analysis
+HSMETRICS_QC_CHECK = {
+    "MEAN_TARGET_COVERAGE": {
+        "gi_cfdna_3.1": 500,
+        "gmck_solid_4.1": 500,
+        "exome_refseq_9.1": 100,
+        "gms_myeloid_5.2": 1000,
+        "lymphoma_6.1": 1000,
+        "gms_lymphoid_7.1": 1000,
+        "wgs": 30,
+    },
+    "FOLD_80_BASE_PENALTY": {
+        "gi_cfdna_3.1": 1.5,
+        "gmck_solid_4.1": 1.7,
+        "exome_refseq_9.1": 1.8,
+        "gms_myeloid_5.2": 1.5,
+        "lymphoma_6.1": 1.5,
+        "gms_lymphoid_7.1": 1.5,
+    },
+    "PCT_OFF_BAIT": {
+        "gi_cfdna_3.1": 0.35,
+        "gmck_solid_4.1": 0.3,
+        "exome_refseq_9.1": 0.25,
+        "gms_myeloid_5.2": 0.4,
+        "lymphoma_6.1": 0.35,
+        "gms_lymphoid_7.1": 0.35,
+    }
+}
+
 #Configuration of VARDICT settings
 VARDICT_SETTINGS = {
     "AD": {
