@@ -13,7 +13,7 @@ rule calculate_AF:
     output:
         AF = table_dir + '{sample}_{var_caller}_umi_AFtable.txt'
     params:
-        validated_set= '/home/ashwini.jeggari/data_files/hapmapsnps_v2.txt',
+        validated_set= config["panel"]["capture_kit"],
         sample_id = '{sample}'
     threads: get_threads(cluster_config, 'calculate_AF')
     log:

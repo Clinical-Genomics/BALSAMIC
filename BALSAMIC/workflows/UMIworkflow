@@ -12,6 +12,7 @@ fastq_dir = get_result_dir(config) + "/fastq/"
 benchmark_dir = config["analysis"]["benchmark"]
 umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
+vep_dir = get_result_dir(config) + "/vep/"
 log_dir =  config["analysis"]["log"]
 table_dir = get_result_dir(config) + "/tables/"
 plot_dir = get_result_dir(config) + "/plots/"
@@ -58,7 +59,7 @@ SAMPLES = config["samples"]
 VAR_CALLER = ['TNscope','vardict']
 
 # Define outputs
-analysis_output = [expand(vcf_dir + "{sample}_{var_caller}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER),expand(vcf_dir + "{sample}_{var_caller}_vep.vcf.gz",sample=SAMPLES, var_caller=VAR_CALLER),expand(table_dir + "{sample}_{var_caller}_AFtable.txt",sample=SAMPLES, var_caller=VAR_CALLER)]
+analysis_output = [expand(vcf_dir + "{sample}_{var_caller}_umi.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER),expand(vcf_dir + "{sample}_{var_caller}_vep_umi.vcf.gz",sample=SAMPLES, var_caller=VAR_CALLER),expand(table_dir + "{sample}_{var_caller}_umi_AFtable.txt",sample=SAMPLES, var_caller=VAR_CALLER)]
 
 config["rules"] = umi_call + variant_call + annotate_vcf + generate_plots
 
