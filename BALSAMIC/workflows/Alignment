@@ -14,41 +14,37 @@ from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
 
-rule_dir = config["rule_directory"]
-benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
-bam_dir = get_result_dir(config) + "/bam/"
-cnv_dir = get_result_dir(config) + "/cnv/"
-cutadapt_dir = get_result_dir(config) + "/cutadapt/"
-fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
+fastq_dir = result_dir + "fastq/"
+bam_dir = result_dir +" bam/"
+cnv_dir = result_dir + "cnv/"
+cutadapt_dir = result_dir + "cutadapt/"
+fastqc_dir = result_dir + "fastqc/"
+vcf_dir = result_dir + "vcf/"
+vep_dir = result_dir + "vep/"
 qc_dir = result_dir + "qc/"
-
-singularity_image = config['singularity']['image'] 
+benchmark_dir = config["analysis"]["benchmark"]
+singularity_image = config['singularity']['image']
 
 # explictly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-include:
-  rule_dir + "snakemake_rules/align/bwa_mem.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/fastp.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/fastqc.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/picard.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/mosdepth.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/multiqc.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/GATK.rule"
+rules = [
+  "snakemake_rules/align/bwa_mem.rule",
+  "snakemake_rules/quality_control/fastp.rule",
+  "snakemake_rules/quality_control/fastqc.rule",
+  "snakemake_rules/quality_control/picard.rule",
+  "snakemake_rules/quality_control/sambamba_depth.rule",
+  "snakemake_rules/quality_control/mosdepth.rule",
+  "snakemake_rules/quality_control/multiqc.rule",
+  "snakemake_rules/quality_control/GATK.rule",
+]
 
+for rule in rules:
+  include: rule
+
+  
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
                       "case_name": config["analysis"]["case_id"],

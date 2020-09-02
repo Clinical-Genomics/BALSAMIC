@@ -1,3 +1,4 @@
+#!python
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
@@ -74,7 +75,7 @@ pipeline = quality_check + preprocessing + variant_calling + annotation
 
 
 for rule in pipeline:
-    include: os.path.join(rule_dir, rule)
+    include: rule
 
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
