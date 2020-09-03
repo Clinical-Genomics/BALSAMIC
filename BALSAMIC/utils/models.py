@@ -320,7 +320,7 @@ class BalsamicConfigModel(BaseModel):
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
         singularity : Field(Path); path to singularity container of BALSAMIC
-
+        background_variants: Field(Path); path to BACKGROUND VARIANTS for UMI
         conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
 
@@ -332,6 +332,7 @@ class BalsamicConfigModel(BaseModel):
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: FilePath
+    background_variants: FilePath
     conda_env_yaml: FilePath = CONDA_ENV_YAML
     rule_directory: DirectoryPath = RULE_DIRECTORY
     bioinfo_tools: Optional[BioinfoToolsModel]
@@ -346,7 +347,10 @@ class BalsamicConfigModel(BaseModel):
     @validator("singularity")
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
-
+    
+    @validator("background_variants")
+    def fl_abspath_as_str(cls,value):
+         return Path(value).resolve().as_posix()
 
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
