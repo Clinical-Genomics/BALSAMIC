@@ -7,14 +7,16 @@ _red=${_log}'\033[0;31m';
 _green=${_log}'\033[0;32m';
 _yellow=${_log}'\033[1;33m';
 _nocol='\033[0m';
+random_seed=$(openssl rand -hex 5)
 _condaprefix=D
 
-while getopts ":s:v:e:p:ch" opt; do
+while getopts ":s:v:e:p:P:ch" opt; do
   case $opt in
     s) sFlag=true;_condaprefix=${OPTARG};;
     v) vFlag=true;_balsamic_ver=${OPTARG};;
     e) eFlag=true;_envsuffix=${OPTARG};;
     p) pFlag=true;_condapath=${OPTARG};;
+    P) PFlag=true;_container_path=${OPTARG};;
     c) cFlag=true;;
     h)
       echo $"
@@ -26,6 +28,7 @@ USAGE: $0 [-s _condaprefix -v _balsamic_ver -p _condapath -c]
   -v _balsamic_ver    Balsamic version tag to install (4.0.0+), or it could be the branch name
   -e _envsuffix       Balsamic conda env suffix. This will be added to the conda env name
   -p _condapath       Conda env path prefix. See point 2 in help above
+  -P _containerpath   Container path to store container files. Default set to current directory
   -c                  If set it will use Singularity container for conda instead 
 " >&2
       exit 0
@@ -47,6 +50,15 @@ then
   exit 1
 fi
 
+if [[ -z $_container_path ]]
+then
+  echo -e "\n${_yellow}Setting container down path to ${PWD} ${_nocol}"
+  _container_path=${PWD}
+else
+  mkdir -p ${_container_path}
+fi
+
+
 if [[ -z $_balsamic_ver ]]
 then
   echo -e "\n${_yellow}WARNING: No version or branch is set, master branch will be used.${_nocol}"
@@ -61,16 +73,16 @@ fi
 # Check if container flag is specified
 if [[ $cFlag ]]
 then
-  current_conda_sif=${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif'
+  current_conda_sif=${_container_path}/BALSAMIC_miniconda3_4_6_14.sif
   if [[ -f ${current_conda_sif} ]];
   then
     echo -e "\n${_green}Container for miniconda3 4.6.14 exists: ${current_conda_sif} ${_nocol}"
   else
-    echo -e "\n${_green}Pulling a miniconda3 4.6.14 from shub://Clinical-Genomics/BALSAMIC:miniconda3_4_6_14.${_nocol}"
-    singularity pull ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' docker://hassanf/miniconda3_4.6.14 
+    echo -e "\n${_green}Pulling a miniconda3 4.6.14 from docker://hassanf/miniconda3_4.6.14 ${_nocol}"
+    singularity pull ${current_conda_sif} docker://hassanf/miniconda3_4.6.14 
   fi
   function conda() {
-    singularity run --bind ${_condapath} ${PWD}'/BALSAMIC/containers/BALSAMIC_miniconda3_4_6_14.sif' conda "$@"
+    singularity run --bind ${_condapath} ${current_conda_sif} conda "$@"
   }
 fi
 
@@ -86,11 +98,19 @@ fi
 
 # Create conda environment
 _env_name=${_condaprefix}_BALSAMIC${_envsuffix}
-_balsamic_envs=${PWD}'/BALSAMIC_env.yaml'
-_balsamic_ruledir=${PWD}'/BALSAMIC/'
+
+if [[ -f BALSAMIC/conda/balsamic.yaml ]]; then
+  echo -e "${_green}found balsamic.yaml${_nocol}"
+  _balsamic_yaml='BALSAMIC/conda/balsamic.yaml'
+else
+  echo -e "${_yellow}balsamic.yaml not found. Attemtping to download and save to /tmp/balsamic_conda.yaml ${_nocol}"
+  _balsamic_yaml=/tmp/balsamic_${random_seed}.yaml
+  wget -O ${_balsamic_yaml} https://raw.githubusercontent.com/Clinical-Genomics/BALSAMIC/${_balsamic_ver}/BALSAMIC/conda/balsamic.yaml
+  [ -f ${_balsamic_yaml} ] || (echo -e "${_red}Download failed. Exiting.${_nocol}"; exit 1)
+fi
 
 echo -e "${_green}Creating conda env ${_env_name}${_nocol}"
-conda env create --file BALSAMIC/conda/balsamic.yaml --quiet --prefix ${_condapath}/${_env_name} --force
+conda env create --file ${_balsamic_yaml} --quiet --prefix ${_condapath}/${_env_name} --force
 
 echo -e "${_green}Activating ${_env_name}${_nocol}"
 source activate ${_env_name}
@@ -109,12 +129,14 @@ else
 fi
 
 
-_container_path=${PWD}"/BALSAMIC/containers/BALSAMIC_${container_version}.sif"
+_container_file=${_container_path}/BALSAMIC_${container_version}.sif
 _docker_path=docker://hassanf/balsamic:${container_version}
-echo -e "${_green}Grabbing container: ${_container_path} ${_nocol}"
-singularity pull --force ${_container_path} ${_docker_path}
+echo -e "${_green}Downloading container to ${_container_file}} ${_nocol}"
+singularity pull --force ${_container_file} ${_docker_path}
 
-echo -e "\n${_green}Install finished. To start working with BALSAMIC, run: source activate ${_env_name}.${_nocol}"
+echo -e "\n${_green}Install finished. To start working with BALSAMIC, run: source activate ${_env_name} ${_nocol}"
+
+echo -e "\n${_green}Cleaning up temporary files. ${_nocol}"
 
 unset _red
 unset _green
