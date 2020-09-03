@@ -4,7 +4,7 @@ LABEL maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se"
 LABEL description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 LABEL version="5.0.1"
 
-ARG GIT_BRANCH=v5.0.1
+ARG GIT_BRANCH=5.0.1
 
 # create necessary directories
 # install balsamic and it's environments
@@ -15,16 +15,8 @@ RUN mkdir -p /git_repos; \
     export LANG=en_US.utf-8; \
     conda clean -iy; \
     cd /git_repos && git clone https://github.com/Clinical-Genomics/BALSAMIC && cd BALSAMIC && git checkout ${GIT_BRANCH} && \
-    conda env create --file BALSAMIC/conda/varcall_py36.yaml -n varcall_py36 && \
-    conda env create --file BALSAMIC/conda/annotate.yaml -n annotate && \
     conda env create --file BALSAMIC/conda/align.yaml -n align_qc && \
-    conda env create --file BALSAMIC/conda/coverage.yaml -n coverage_qc && \
-    conda env create --file BALSAMIC/conda/varcall_py27.yaml -n varcall_py27 && \
-    source activate varcall_py36 && \
-    gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar && \
-    ln -s /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.6 && \
-    ln -s /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.6.0 && \
-    source deactivate && source activate align_qc && \
+    source activate align_qc && \
     picard_jar=picard-2.23.2-201-g922891d-SNAPSHOT-all.jar && \
     picard_PATH=BALSAMIC/assets/${picard_jar} && \
     picard_destination=/usr/local/miniconda/envs/align_qc/share/ && \
@@ -32,7 +24,18 @@ RUN mkdir -p /git_repos; \
     ln -s ${picard_destination}/${picard_jar} ${picard_destination}/picard.jar; \
     ln -s /usr/local/miniconda/envs/align_qc/lib/libreadline.so.7.0 /usr/local/miniconda/envs/align_qc/lib/libreadline.so.6 && \
     ln -s /usr/local/miniconda/envs/align_qc/lib/libreadline.so.7.0 /usr/local/miniconda/envs/align_qc/lib/libreadline.so.6.0 && \
-    conda clean --all -y
+    source deactivate && \
+    conda env create --file BALSAMIC/conda/annotate.yaml -n annotate && \
+    conda env create --file BALSAMIC/conda/coverage.yaml -n coverage_qc && \
+    conda env create --file BALSAMIC/conda/varcall_py27.yaml -n varcall_py27 && \
+    conda env create --file BALSAMIC/conda/varcall_py36.yaml -n varcall_py36 && \
+    source activate varcall_py36 && \
+    gatk3-register BALSAMIC/assets/GenomeAnalysisTK.jar && \
+    ln -s /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.6 && \
+    ln -s /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.7.0 /usr/local/miniconda/envs/varcall_py36/lib/libreadline.so.6.0 && \
+    source deactivate && \
+    conda env create --file BALSAMIC/conda/varcall_cnvkit.yaml -n varcall_cnvkit && \
+    conda clean --index-cache --lock --tarballs -y
 
 # The following fixes the error for Click
 # RuntimeError: Click will abort further execution because Python 3 was
