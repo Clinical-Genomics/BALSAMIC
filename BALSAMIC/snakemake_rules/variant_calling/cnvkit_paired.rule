@@ -33,14 +33,14 @@ rule cnvkit_paired:
     output:
         vcf = temp(vcf_dir + "CNV.somatic." + case_id + ".cnvkit.vcf.gz"),
         namemap = temp(vcf_dir + "CNV.somatic." + case_id + ".cnvkit.sample_name_map"),
-        tumor_cns = cnv_dir + tumor_bam + ".cns",
-        tumor_cnr = cnv_dir + tumor_bam + ".cnr",
-        tumor_scatter = cnv_dir + tumor_bam + "-scatter.pdf",
-        tumor_diagram = cnv_dir + tumor_bam + "-diagram.pdf",
-        gene_breaks_csv = cnv_dir + case_id + ".gene_breaks",
-        gene_metrics_csv = cnv_dir + case_id + ".gene_metrics",
+        cns = cnv_dir + tumor_bam + ".cns",
+        cnr = cnv_dir + tumor_bam + ".cnr",
+        scatter = cnv_dir + tumor_bam + "-scatter.pdf",
+        diagram = cnv_dir + tumor_bam + "-diagram.pdf",
+        gene_breaks = cnv_dir + case_id + ".gene_breaks",
+        gene_metrics = cnv_dir + case_id + ".gene_metrics",
     params:
-        housekeeper_id = {"id": case_id, "tags": ["cnv"]},
+        housekeeper_id = {"id": case_id, "tags": "cnv"},
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
         name = case_id,
@@ -62,13 +62,13 @@ rule cnvkit_paired:
             "--output-reference {params.cnv_dir}/Reference.cnn "
             "--scatter --diagram "
             "--output-dir {params.cnv_dir}; "
-        "cnvkit.py genemetrics {output.tumor_cnr} "
-            "-s {output.tumor_cns} "
+        "cnvkit.py genemetrics {output.cnr} "
+            "-s {output.cns} "
             "--drop-low-coverage -y "
-            "--output {output.gene_metrics_csv}; "
-        "cnvkit.py breaks {output.tumor_cnr} {output.tumor_cns} "
-            "| cut -f1 | sort -u > {output.gene_breaks_csv}; "
-        "cnvkit.py export vcf {output.tumor_cns} --cnr {output.tumor_cnr} "
+            "--output {output.gene_metrics}; "
+        "cnvkit.py breaks {output.cnr} {output.cns} "
+            "| cut -f1 | sort -u > {output.gene_breaks}; "
+        "cnvkit.py export vcf {output.cns} --cnr {output.cnr} "
             "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR; "
         "bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf; "
         "tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz; "

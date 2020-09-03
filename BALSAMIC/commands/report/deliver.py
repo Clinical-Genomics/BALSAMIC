@@ -142,23 +142,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         delivery_file_ready_dict = json.load(fn)
 
     delivery_json = dict()
-    delivery_json["files"] = list()
-
-    cleaned_up_delivery = list()
-    for delivery_item in delivery_file_ready_dict:
-        # If an entry has a path_index, then add it as an individual item
-        if delivery_item["path_index"]:
-            for path_index in delivery_item["path_index"]:
-                new_delivery_item_dict = dict()
-                new_delivery_item_dict["path"] = path_index
-                new_delivery_item_dict["path_index"] = "" 
-                new_delivery_item_dict["step"] = delivery_item["step"]
-                new_delivery_item_dict["format"] = get_file_extension(path_index)
-                new_delivery_item_dict["tag"] = delivery_item["tag"] + ",index"
-                new_delivery_item_dict["id"] = delivery_item["id"]
-                cleaned_up_delivery.append(new_delivery_item_dict)
-        cleaned_up_delivery.append(delivery_item)
-    delivery_json["files"].extend(cleaned_up_delivery)
+    delivery_json["files"] = delivery_file_ready_dict 
     
     # Add Housekeeper file to report
     delivery_json["files"].append({
