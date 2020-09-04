@@ -8,8 +8,11 @@ from BALSAMIC.utils.rule import get_threads
 rule vep_somatic:
     input:
         vcf = vcf_dir + '{sample}_{var_caller}_umi.vcf.gz',
+        cosmic = config["reference"]["cosmic"]
     output:
-        vep = vep_dir + '{sample}_{var_caller}_vep_umi.vcf.gz',
+        vep_all = vep_dir + '{sample}_{var_caller}_umi_all.vcf.gz',
+        vcf_summary = vep_dir + '{sample}_{var_caller}_all.vcf.gz_summary.html',
+        vcf_pass = vep_dir + '{sample}_{var_caller}_umi_all.pass.vcf.gz'
     params:
         conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
         vep_cache = config["reference"]["vep"],
@@ -28,6 +31,32 @@ rule vep_somatic:
         "source activate {params.conda}\n"
         "vep_path=$(dirname $(readlink -e $(which vep)))\n"
         "export PERL5LIB=\n"
-        "vep --dir $vep_path --dir_cache {params.vep_cache} --dir_plugins $vep_path --input_file {input.vcf} --output_file {output.vep} --fork {threads} {params.default_options}\n"
+        "vep "
+        "--dir $vep_path "
+        "--dir_cache {params.vep_cache} "
+        "--dir_plugins $vep_path "
+        "--input_file {input.vcf} "
+        "--output_file {output.vcf_all} "
+        "--compress_output bgzip "
+        "--fork {threads} "
+        "--vcf "
+        "--everything "
+        "--allow_non_variant "
+        "--dont_skip "
+        "--buffer_size 10000 "
+        "--format vcf "
+        "--offline "
+        "--variant_class "
+        "--merged "
+        "--cache "
+        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
+        "--verbose "
+        "--force_overwrite; "
+        "tabix -p vcf -f {output.vcf_all}; "
+        "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all}; "
+        "tabix -p vcf -f {output.vcf_pass}; "
+
+
+"vep --dir $vep_path --dir_cache {params.vep_cache} --dir_plugins $vep_path --input_file {input.vcf} --output_file {output.vep} --fork {threads} {params.default_options}\n"
         "tabix -p vcf -f {output.vep}\n"
         "source deactivate"
