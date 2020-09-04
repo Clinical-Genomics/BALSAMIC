@@ -17,7 +17,7 @@ capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 rule haplotypecaller:
     input:
         fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bsrcl.bam",
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
@@ -125,7 +125,7 @@ rule manta_germline:
 
 rule sentieon_DNAscope:
     input:
-        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+        bam = bam_dir + "{sample}.sorted." + picarddup + ".bsrcl.bam",
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         interval = config["panel"]["capture_kit"]

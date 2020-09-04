@@ -35,42 +35,13 @@ rule RealignerTargetCreator:
         "--out {output}; "
     
 
-rule IndelRealigner:
+rule BaseRecalibrator:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     fa = config["reference"]["reference_genome"],
     knownsites = config["reference"]["1kg_snps_high"], 
-    intervals = bam_dir + "{sample}" + ".sorted." + picarddup + ".intervals",
   output:
-    temp(bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bam"),
-  params:
-    tmpdir = tmp_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
-  singularity: singularity_image
-  benchmark:
-    benchmark_dir + "IndelRealigner_" + "{sample}.indel_realign.tsv"
-  shell:
-    "source activate {params.conda}; "
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
-        "-T IndelRealigner "
-        "-I {input.bam} "
-        "-R {input.fa} "
-        "-known {input.knownsites} "
-        "-targetIntervals {input.intervals} "
-        "--out {output}; "
-    
-
-rule BaseRecalibrator:
-  input:
-    bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".ralgn.bam",
-    fa = config["reference"]["reference_genome"],
-    knownsites = config["reference"]["1kg_snps_high"], 
-  output:
-    bam_dir + "{sample}.sorted." + picarddup + ".ralgn.bsrcl.bam",
+    bam_dir + "{sample}.sorted." + picarddup + ".bsrcl.bam",
   params:
     tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"],"gatk"),

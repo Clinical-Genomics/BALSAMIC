@@ -91,7 +91,7 @@ rule mutect2_tumor_only:
     fa = config["reference"]["reference_genome"],
     dbsnp = config["reference"]["dbsnp"],
     cosmic = config["reference"]["cosmic"],
-    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
     bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
   output:
     temp(vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz")
@@ -187,7 +187,7 @@ rule somatic_snv_indel_vcf_merge:
 
 rule sentieon_TNhaplotyper_tumor_only:
     input:
-        bam = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+        bam = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
