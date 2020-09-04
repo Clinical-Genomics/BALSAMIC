@@ -2,7 +2,7 @@ FROM hassanf/miniconda3:version-4.6.14
 
 LABEL maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL description="Bioinformatic analysis pipeline for somatic mutations in cancer"
-LABEL version="5.0.1"
+LABEL version="5.1.0"
 
 ARG GIT_BRANCH=master
 
