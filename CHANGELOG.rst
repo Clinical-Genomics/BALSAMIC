@@ -1,6 +1,24 @@
 
+[5.1.0]
+-------
+
+Fixed
+^^^^^
+* Vardict-java version fixed. This is due to bad dependency and releases available on conda. Anaconda is not yet update
+with vardict 1.8, but vardict-java 1.8 is there. This causes various random breaks with Vardict's TSV output.
+
+Changed
+^^^^^^^
+* Refactored Docker files a bit, preparation for decoupling
+
+
+Removed
+^^^^^^^
+* In preparation for GATK4, IndelRealigner is removed 
+
+
 [5.0.1]
-------
+-------
 
 Added
 ^^^^^
