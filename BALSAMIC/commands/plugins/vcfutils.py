@@ -87,7 +87,7 @@ def collect_vcf_info(variant):
 @click.option('-o',
               '--output_file',
               required=True,
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Output file name')
 def createvcf(input_file, reference_file, output_file):
     """ Filter input variants from reference VCF """
