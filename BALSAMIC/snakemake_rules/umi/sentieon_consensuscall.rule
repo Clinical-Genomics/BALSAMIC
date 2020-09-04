@@ -3,16 +3,15 @@
 
 
 from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
 
 
 # UMI-consensus calling
 rule sentieon_umi_consensus_call:
     input:
-        sam_consensus = umi_dir + '{sample}_umialign.sam',
+        sam_consensus = umi_dir + '{sample}.umialign.sam',
     output:
-        fastq_consensus = umi_dir + '{sample}_consensuscall.fastq.gz',
+        fastq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz',
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
         sentieon_lic = SENTIEON_LICENSE,
@@ -22,9 +21,9 @@ rule sentieon_umi_consensus_call:
     threads: 
         get_threads(cluster_config, 'sentieon_umi_consensus_call')
     log: 
-        log_dir + '{sample}_consensuscall.log'
+        log_dir + '{sample}.consensuscall.log'
     benchmark : 
-        benchmark_dir + '{sample}_consensuscall.tsv'
+        benchmark_dir + '{sample}.consensuscall.tsv'
     message: 
         "Consensus molecule creation for sample {params.sample_id}"
     shell:
@@ -35,9 +34,9 @@ rule sentieon_umi_consensus_call:
 rule sentieon_umi_consensus_align:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fq_consensus = umi_dir + '{sample}_consensuscall.fastq.gz',
+        fq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz',
     output:
-        align_consensus = umi_dir + '{sample}_consensusalign.bam',
+        align_consensus = umi_dir + '{sample}.consensusalign.bam',
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
         sentieon_lic = SENTIEON_LICENSE,
@@ -47,9 +46,9 @@ rule sentieon_umi_consensus_align:
     threads: 
         get_threads(cluster_config, 'sentieon_umi_consensus_align')
     log: 
-        log_dir + '{sample}_consensusalign.log'
+        log_dir + '{sample}.consensusalign.log'
     benchmark : 
-        benchmark_dir + '{sample}_consensusalign.tsv'
+        benchmark_dir + '{sample}.consensusalign.tsv'
     message:
          "Mapping of consensus reads with the bwa mem, sorting for sample {params.sample_id}"
     shell:

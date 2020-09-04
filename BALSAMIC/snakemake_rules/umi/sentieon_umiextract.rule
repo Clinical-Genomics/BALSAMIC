@@ -3,7 +3,6 @@
 
 
 from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
 
 # Extract umi tags using the defined read structure. 
@@ -12,16 +11,16 @@ rule sentieon_umi_extract:
         read1 = fastq_dir + "{sample}_1.fastq.gz",
         read2 = fastq_dir + "{sample}_2.fastq.gz"
     output:
-        ds_umi = umi_dir + '{sample}_umiextract.fastq.gz'
+        ds_umi = umi_dir + '{sample}.umiextract.fastq.gz'
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
         sentieon_lic = SENTIEON_LICENSE,
         ds_params= ['-d', '3M2S+T,3M2S+T'],
         sample_id = '{sample}'
     log: 
-        log_dir + '{sample}_umiextract.log'
+        log_dir + '{sample}.umiextract.log'
     benchmark: 
-        benchmark_dir + '{sample}_umiextract.tsv'
+        benchmark_dir + '{sample}.umiextract.tsv'
     message: 
         "UMI tag extraction using Sentieon for sample {params.sample_id}"
     threads: 
@@ -36,9 +35,9 @@ rule sentieon_umi_extract:
 rule sentieon_umi_align:
     input:
         ref_fa = config['reference']['reference_genome'],
-        fastq_umi = umi_dir + '{sample}_umiextract.fastq.gz'
+        fastq_umi = umi_dir + '{sample}.umiextract.fastq.gz'
     output:
-        align_umi = temp(umi_dir + '{sample}_umialign.sam')
+        align_umi = temp(umi_dir + '{sample}.umialign.sam')
     params:
         sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
         sentieon_lic = SENTIEON_LICENSE,
@@ -48,9 +47,9 @@ rule sentieon_umi_align:
     threads: 
         get_threads(cluster_config, 'sentieon_umi_align')
     log: 
-        log_dir + '{sample}_umialign.log'
+        log_dir + '{sample}.umialign.log'
     benchmark:
-        benchmark_dir + '{sample}_umialign.benchmark'
+        benchmark_dir + '{sample}.umialign.benchmark'
     message: 
         "Aligning of UMI extracted reads with bwa mem, sorting for sample {params.sample_id}"
     shell:

@@ -9,17 +9,17 @@ from BALSAMIC.utils.rule import get_threads
 # Generate tables for AF scatterplots
 rule calculate_AF:
     input:
-        vcf = vcf_dir + '{sample}_{var_caller}_umi.vcf.gz'
+        vcf = vcf_dir + '{sample}.{var_caller}.umi.vcf.gz'
     output:
-        AF = table_dir + '{sample}_{var_caller}_umi_AFtable.txt'
+        AF = table_dir + '{sample}.{var_caller}.umi.AFtable.txt'
     params:
         validated_set= config["background_variants"],
         sample_id = '{sample}'
     threads: get_threads(cluster_config, 'calculate_AF')
     log:
-        log_dir + '{sample}_AFcalculate_{var_caller}.log'
+        log_dir + '{sample}.{var_caller}.AFcalculate.log'
     benchmark: 
-        benchmark_dir + '{sample}_AFcalculate_{var_caller}.benchmark'
+        benchmark_dir + '{sample}.{var_caller}.AFcalculate.tsv'
     message: "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
     shell:
         "bcftools query --regions-file {params.validated_set} "
