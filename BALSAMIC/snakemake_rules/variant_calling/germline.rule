@@ -17,19 +17,25 @@ capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 rule haplotypecaller:
     input:
         fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bsrcl.bam",
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
+        tmpdir = tmp_dir,
         conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     threads: get_threads(cluster_config, 'haplotypecaller')
     singularity: singularity_image
     benchmark:
         benchmark_dir + 'haplotypecaller_' + "{sample}.{bedchrom}.haplotypecaller.tsv"
     shell:
-        "source activate {params.conda};"
-        "gatk3 -T HaplotypeCaller "
+        "source activate {params.conda}; "
+        "rand_str=$(openssl rand -hex 5); "
+        "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "mkdir -p ${{tmpdir}}; "
+        "export TMPDIR=${{tmpdir}}; "
+        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
+            "-T HaplotypeCaller "
             "-R {input.fa} "
             "-I {input.bam} "
             "-L {input.bed} "
@@ -43,14 +49,20 @@ rule haplotypecaller_merge:
     output:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
+        tmpdir = tmp_dir,
         conda = get_conda_env(config["conda_env_yaml"], "gatk"),
     singularity: singularity_image
     benchmark:
         benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.vcf.gz" 
     shell:
         "source activate {params.conda}; "
-        "bcftools concat {input} | bcftools sort - | bgzip > {output}; "
+        "rand_str=$(openssl rand -hex 5); "
+        "tmpdir={params.tmpdir}/${{rand_str}}; "
+        "mkdir -p ${{tmpdir}}; "
+        "export TMPDIR=${{tmpdir}}; "
+        "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output}; "
         "tabix -f -p vcf {output}; "
+
 
 
 rule strelka_germline:
@@ -113,13 +125,14 @@ rule manta_germline:
 
 rule sentieon_DNAscope:
     input:
-        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+        bam = bam_dir + "{sample}.sorted." + picarddup + ".bsrcl.bam",
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         interval = config["panel"]["capture_kit"]
     output:
         vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
+        tmpdir = tmp_dir,
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
         sentieon_lic = SENTIEON_LICENSE
     threads: get_threads(cluster_config, 'sentieon_DNAscope')
@@ -129,6 +142,11 @@ rule sentieon_DNAscope:
         benchmark_dir + "{sample}.dnascope.tsv"
     shell:
         """
+rand_str=$(openssl rand -hex 5);
+tmpdir={params.tmpdir}/${{rand_str}};
+mkdir -p ${{tmpdir}};
+export TMPDIR=${{tmpdir}};
+export SENTIEON_TMPDIR=${{tmpdir}};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} --interval {input.interval} --algo DNAscope -d {input.dbsnp} {output.vcf}

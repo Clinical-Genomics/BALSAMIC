@@ -2,12 +2,13 @@
 Short tutorial
 ==============
 
-Here a short toturial is provided for BALSAMIC (**version** = 5.0.0). 
+Here a short toturial is provided for BALSAMIC (**version** = 5.1.0). 
 
 .. contents::
 
 Step 1. generate a reference
 ----------------------------
+
 
 First reference files must be downloaded. Let's assume BALSAMIC is installed and available at `D_BALSAMIC-base_5.0.0`,
 and a COSMIC key is generated via: https://cancer.sanger.ac.uk/cosmic/help/file_download 
