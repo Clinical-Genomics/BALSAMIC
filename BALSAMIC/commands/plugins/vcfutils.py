@@ -51,7 +51,7 @@ def vcfheader():
 ##INFO=<ID=COSMIC,Number=1,Type=String,Description=\"Genomic Mutation Identifier\">
 ##INFO=<ID=LEGACY_ID,Number=1,Type=String,Description=\"Legacy Mutation Identifier\">
 ##INFO=<ID=CDS,Number=1,Type=String,Description=\"CDS mutation\">
-#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO""")
+#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n""")
     return vcf_header
 
 
