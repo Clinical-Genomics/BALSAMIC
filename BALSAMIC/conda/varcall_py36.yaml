@@ -10,4 +10,5 @@ dependencies:
   - samtools=1.10
   - gatk=3.8
   - vardict=2019.06.04=pl526_0
+  - vardict-java=1.7
   - libiconv
