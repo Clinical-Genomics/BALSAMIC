@@ -30,3 +30,7 @@ BALSAMIC/config/install.json
 BALSAMIC/workflows/VariantCalling_testing
 build/
 dist/
+demo/demo_run_balsamic/.*
+BALSAMIC_reference/
+BALSAMIC/workflows/umi_workflow
+BALSAMIC/workflows/umi_workflow/.*
