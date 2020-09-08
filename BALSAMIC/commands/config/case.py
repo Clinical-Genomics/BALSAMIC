@@ -51,6 +51,11 @@ LOG = logging.getLogger(__name__)
               type=click.Path(exists=True, resolve_path=True),
               required=False,
               help="Panel bed file for variant calling.")
+@click.option("-b",
+              "--background-variants",
+              type=click.Path(exists=True, resolve_path=True),
+              required=False,
+              help="Background set of valid variants for UMI")
 @click.option("--singularity",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
@@ -75,8 +80,7 @@ LOG = logging.getLogger(__name__)
               help="Fastq files for normal sample.")
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
-                quality_trim, reference_config, panel_bed, singularity,
-                analysis_dir, tumor, normal):
+                quality_trim, reference_config, panel_bed,background_variants, singularity, analysis_dir, tumor, normal):
 
     try:
         samples = get_sample_dict(tumor, normal)
@@ -109,6 +113,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         },
         reference=reference_dict,
         singularity=singularity,
+        background_variants=background_variants,
         samples=samples,
         vcf=VCF_DICT,
         bioinfo_tools=get_bioinfo_tools_list(CONDA_ENV_PATH),
@@ -117,7 +122,6 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "chrom": get_panel_chrom(panel_bed),
         } if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)
-
     LOG.info("Config file generated successfully")
 
     Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),

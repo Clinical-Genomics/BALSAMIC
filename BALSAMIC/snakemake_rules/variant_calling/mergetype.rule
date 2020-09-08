@@ -18,10 +18,10 @@ case_id = config["analysis"]["case_id"]
 
 rule mergeBam_normal_gatk:
   input:
-    bamN = bam_dir + "{mysample}.sorted.{picardstr}.ralgn.bsrcl.bam".format(mysample = normal_sample,
+    bamN = bam_dir + "{mysample}.sorted.{picardstr}.bsrcl.bam".format(mysample = normal_sample,
                                                                             picardstr = picarddup)
   output:
-    bamN = bam_dir + "normal.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+    bamN = bam_dir + "normal.sorted." + picarddup + ".bsrcl.merged.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_normal
@@ -84,10 +84,10 @@ rule mergeBam_tumor:
 
 rule mergeBam_tumor_gatk:
   input:
-    bamT = bam_dir + "{mysample}.sorted.{picardstr}.ralgn.bsrcl.bam".format(mysample = tumor_sample,
+    bamT = bam_dir + "{mysample}.sorted.{picardstr}.bsrcl.bam".format(mysample = tumor_sample,
                                                                             picardstr = picarddup) 
   output:
-    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
   params:
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     picard = picard_extra_tumor
