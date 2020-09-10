@@ -10,6 +10,7 @@ from datetime import date
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
+from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceUrlsModel, ReferenceMeta
 from BALSAMIC.utils.constants import REFERENCE_FILES 
 
@@ -38,18 +39,7 @@ cosmicdb_key = config['cosmic_key']
 os.environ['TMPDIR'] = basedir 
 
 # VCF files list for wildcards
-def get_reference_vcf(reference_files_dict: dict) -> list:
-    """ Returns list of VCF files from reference files
-    input: dict. Each key is a dictionary matching an element of reference files 
-    returns: list. list of vcf files that need to be stored
-    """
-    ref_vcf_list = []
-    for reference_key, reference_item in reference_files_dict.items():
-        if reference_item['file_type'] == 'vcf':
-            ref_vcf_list.append(reference_item['output_file'])
-    return ref_vcf_list
-    
-VCF = get_reference_vcf(REFERENCE_FILES[genome_ver])
+VCF = get_reference_output_files(REFERENCE_FILES[genome_ver], 'vcf')
 
 # intialize reference files 
 REFERENCE_FILES[genome_ver]['basedir'] = basedir

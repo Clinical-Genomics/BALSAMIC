@@ -206,3 +206,21 @@ def get_delivery_id(id_candidate: str, file_to_store: str, tags: list,
             break
 
     return delivery_id
+
+
+def get_reference_output_files(reference_files_dict: dict, file_type: str) -> list:
+    """ Returns list of files matching a file_type from reference files
+
+    Args:
+        reference_files_dict: A validated dict model from reference
+        file_type: a file type string, e.g. vcf, fasta
+  
+    Returns:
+        ref_vcf_list: list of file_type files that are found in reference_files_dict 
+    """
+    ref_vcf_list = []
+    for reference_key, reference_item in reference_files_dict.items():
+        if reference_item['file_type'] == file_type:
+            ref_vcf_list.append(reference_item['output_file'])
+    return ref_vcf_list
+    
