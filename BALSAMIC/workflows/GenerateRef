@@ -10,6 +10,7 @@ from datetime import date
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
+from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceUrlsModel, ReferenceMeta
 from BALSAMIC.utils.constants import REFERENCE_FILES 
 
@@ -37,9 +38,12 @@ cosmicdb_key = config['cosmic_key']
 # Set temporary dir environment variable
 os.environ['TMPDIR'] = basedir 
 
+# VCF files list for wildcards
+VCF = get_reference_output_files(REFERENCE_FILES[genome_ver], 'vcf')
+
 # intialize reference files 
-REFERENCE_FILES['hg19']['basedir'] = basedir
-reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES['hg19'])
+REFERENCE_FILES[genome_ver]['basedir'] = basedir
+reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES[genome_ver])
 
 reference_genome_url = reference_file_model.reference_genome
 dbsnp_url = reference_file_model.dbsnp 
@@ -56,16 +60,9 @@ refgene_sql_url = reference_file_model.refgene_sql
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
 
-# VCF files list for wildcards
-VCF = ['dbsnp_grch37_b138.vcf', '1k_genome_wgs_p1_v3_all_sites.vcf',
-       '1kg_phase1_snps_high_confidence_b37.vcf', 'mills_1kg_index.vcf', 'cosmic_coding_muts_v89.vcf']
-
-
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
-
 shell.prefix("set -eo pipefail; ")
-
 
 def get_md5(filename):
     hash_md5 = hashlib.md5()
