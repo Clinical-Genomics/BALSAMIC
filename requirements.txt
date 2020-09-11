@@ -12,3 +12,5 @@ jinja2
 networkx
 colorclass
 pydantic
+cython==0.29.21
+cyvcf2==0.20.5
