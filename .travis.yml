@@ -9,6 +9,7 @@ before_install:
   - sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
 
 install:
+  - easy_install distribute
   - pip install pygraphviz pygments
   - pip install -r requirements-dev.txt -r requirements.txt -e .
 
