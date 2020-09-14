@@ -220,15 +220,15 @@ def test_get_snakefile():
         pipeline = ''
 
         if sequencing_type == 'targeted':
-            pipeline = "BALSAMIC/workflows/VariantCalling"
+            pipeline = "BALSAMIC/workflows/VariantCalling.smk"
         elif sequencing_type == 'wgs':
-            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon"
+            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon.smk"
         elif analysis_type == 'qc':
             pipeline = "BALSAMIC/workflows/Alignment"
         elif analysis_type == 'generate_ref':
             pipeline = "BALSAMIC/workflows/GenerateRef"
         elif analysis_type == 'umi':
-            pipeline = "BALSAMIC/workflows/UMIworkflow"
+            pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
 
         # THEN it should return the snakefile path
         # THEN assert file exists
