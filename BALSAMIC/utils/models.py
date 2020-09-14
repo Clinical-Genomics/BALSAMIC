@@ -1,14 +1,12 @@
-import os
 import hashlib
-
-from pathlib import Path
 from datetime import datetime
-
-from pydantic import (BaseModel, ValidationError, validator, Field, AnyUrl)
-from pydantic.types import DirectoryPath, FilePath
+from pathlib import Path
 from typing import Optional, List, Dict
 
-from BALSAMIC.utils.constants import (CONDA_ENV_PATH, CONDA_ENV_YAML,
+from pydantic import (BaseModel, validator, Field, AnyUrl)
+from pydantic.types import DirectoryPath, FilePath
+
+from BALSAMIC.utils.constants import (CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS, MUTATION_TYPE,
                                       RULE_DIRECTORY, BALSAMIC_VERSION,
                                       VALID_GENOME_VER, VALID_REF_FORMAT)
 
@@ -111,14 +109,14 @@ class VarcallerAttribute(BaseModel):
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
-        valid_mutation_fields = ["somatic", "germline"]
+        valid_mutation_fields = MUTATION_CLASS
         if value not in valid_mutation_fields:
             raise ValueError(f"{value} not a valid argument!")
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
-        valid_mutation_type_fields = ["SNV", "SV", "CNV"]
+        valid_mutation_type_fields = MUTATION_TYPE
         if value not in valid_mutation_type_fields:
             raise ValueError(f"{value} not a valid argument!")
         return value
@@ -191,7 +189,7 @@ class AnalysisModel(BaseModel):
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
-        balsamic_analysis_types = ["single", "paired", "qc"]
+        balsamic_analysis_types = ANALYSIS_TYPES
         if value not in balsamic_analysis_types:
             raise ValueError(
                 f"Provided analysis type ({value}) not supported in BALSAMIC!")

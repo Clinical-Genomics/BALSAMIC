@@ -24,17 +24,21 @@ RULE_DIRECTORY = (
 # BALSMIC version
 BALSAMIC_VERSION = BALSAMIC.__version__
 
+# Analysis related constants
+MUTATION_CLASS = ["somatic", "germline"]
+MUTATION_TYPE = ["SNV", "SV", "CNV"]
+ANALYSIS_TYPES = ["paired", "single", "umi", "qc"]
+WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN"]
+
 # Configuration of VCF settings
 VCF_DICT = {
     "tnsnv": {"mutation": "somatic", "type": "SNV", "analysis_type": ["paired", "single"]},
     "manta": {"mutation": "somatic", "type": "SV", "analysis_type": ["paired", "single"]},
-    "pindel": {"mutation": "somatic", "type": "SV"},
     "cnvkit": {"mutation": "somatic", "type": "CNV", "analysis_type": ["paired", "single"]},
     "mutect": {"mutation": "somatic", "type": "SNV", "analysis_type": ["paired", "single"]},
     "vardict": {"mutation": "somatic", "type": "SNV", "analysis_type": ["paired", "single"]},
     "strelka": {"mutation": "somatic", "type": "SNV", "analysis_type": ["paired", "single"]},
     "tnscope": {"mutation": "somatic", "type": "SNV", "analysis_type": ["paired", "single"]},
-    "vcfmerge": {"mutation": "somatic", "type": "SNV"},
     "tnhaplotyper": {"mutation": "somatic", "type": "SNV", "analysis_type": ["paired", "single"]},
     "dnascope": {"mutation": "germline", "type": "SNV"},
     "manta_germline": {"mutation": "germline", "type": "SV"},
