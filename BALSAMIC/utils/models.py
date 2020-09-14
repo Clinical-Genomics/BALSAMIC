@@ -106,29 +106,29 @@ class VarcallerAttribute(BaseModel):
             
     """
     mutation: str
-    mutation_type: str
+    mutation_type: str = Field(alias="type")
     analysis_type: Optional[str]
     workflow_solution: Optional[str]
 
-    @validator("workflow_solution")
+    @validator("workflow_solution", check_fields=False)
     def workflow_solution_literal(cls, value) -> str:
         " Validate workflow solution "
         assert value in WORKFLOW_SOLUTION, f"{value} is not valid workflow solution."
         return value
 
-    @validator("analysis_type")
+    @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
         " Validate analysis types "
         assert value in ANALYSIS_TYPES, f"{value} is not a valid analysis type."
         return value
 
-    @validator("mutation")
+    @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
         " Validate mutation class "
         assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
         return value
 
-    @validator("mutation_type")
+    @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
         " Validate mutation type "
         assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
