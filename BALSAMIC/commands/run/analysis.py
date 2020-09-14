@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 @click.option('-a',
               '--analysis-type',
               required=False,
-              type=ANALYSIS_TYPES,
+              type=click.Choice(ANALYSIS_TYPES),
               help='Type of analysis to run from input config file.\
               By default it will read from config file, but it will override config file \
               if it is set here.')
@@ -156,7 +156,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     if 'panel' in sample_config:
         bind_path.append(sample_config.get('panel').get('capture_kit'))
     bind_path.append(sample_config['analysis']['analysis_dir'])
-    bind_path.extend(get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
+    bind_path.extend(
+        get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
