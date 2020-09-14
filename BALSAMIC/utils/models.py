@@ -107,8 +107,8 @@ class VarcallerAttribute(BaseModel):
     """
     mutation: str
     mutation_type: str = Field(alias="type")
-    analysis_type: Optional[str]
-    workflow_solution: Optional[str]
+    analysis_type: Optional[list]
+    workflow_solution: Optional[list]
 
     @validator("workflow_solution", check_fields=False)
     def workflow_solution_literal(cls, value) -> str:
