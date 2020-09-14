@@ -11,6 +11,7 @@ from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config, get_fastq_bind_path
+from BALSAMIC.utils.constants import ANALYSIS_TYPES
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ LOG = logging.getLogger(__name__)
 @click.option('-a',
               '--analysis-type',
               required=False,
-              type=click.Choice(['qc', 'paired', 'single','umi']),
+              type=ANALYSIS_TYPES,
               help='Type of analysis to run from input config file.\
               By default it will read from config file, but it will override config file \
               if it is set here.')
