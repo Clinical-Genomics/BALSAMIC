@@ -127,13 +127,11 @@ class VCFModel(BaseModel):
 
     tnsnv: VarcallerAttribute
     manta: VarcallerAttribute
-    pindel: VarcallerAttribute
     cnvkit: VarcallerAttribute
     mutect: VarcallerAttribute
     vardict: VarcallerAttribute
     strelka: VarcallerAttribute
     tnscope: VarcallerAttribute
-    vcfmerge: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnhaplotyper: VarcallerAttribute
     manta_germline: VarcallerAttribute
