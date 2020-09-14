@@ -6,9 +6,10 @@ from typing import Optional, List, Dict
 from pydantic import (BaseModel, validator, Field, AnyUrl)
 from pydantic.types import DirectoryPath, FilePath
 
-from BALSAMIC.utils.constants import (CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS, MUTATION_TYPE,
-                                      RULE_DIRECTORY, BALSAMIC_VERSION,
-                                      VALID_GENOME_VER, VALID_REF_FORMAT)
+from BALSAMIC.utils.constants import (
+    CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
+    MUTATION_TYPE, RULE_DIRECTORY, BALSAMIC_VERSION, VALID_GENOME_VER,
+    VALID_REF_FORMAT)
 
 
 class VCFAttributes(BaseModel):
@@ -106,6 +107,22 @@ class VarcallerAttribute(BaseModel):
     """
     mutation: str
     mutation_type: str = Field(alias="type")
+    analysis_type: Optional[str] = Field(alias="type")
+    workflow_solution: Optional[str] = Field(alias="type")
+
+    @validator("workflow_solution", check_fields=False)
+    def workflow_solution_literal(cls, value) -> str:
+        valid_workflow_solutions = WORKFLOW_SOLUTION
+        if value not in valid_workflow_solutions:
+            raise ValueError(f"{value} not a valid argument!")
+        return value
+
+    @validator("analysis_type", check_fields=False)
+    def annotation_type_literal(cls, value) -> str:
+        valid_analysis_types = ANALYSIS_TYPES
+        if value not in valid_analysis_types:
+            raise ValueError(f"{value} not a valid argument!")
+        return value
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
@@ -343,12 +360,13 @@ class BalsamicConfigModel(BaseModel):
     @validator("singularity")
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
-    
+
     @validator("background_variants")
-    def fl_abspath_as_str(cls,value):
-        if value:     
+    def fl_abspath_as_str(cls, value):
+        if value:
             return Path(value).resolve().as_posix()
         return None
+
 
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
@@ -398,7 +416,8 @@ class ReferenceUrlsModel(BaseModel):
         hash_md5 = hashlib.md5()
         output_file = Path(self.output_path, self.output_file)
         if not output_file.is_file():
-            raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
+            raise FileNotFoundError(
+                f"{output_file.as_posix()} file does not exist")
 
         with open(output_file.as_posix(), 'rb') as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
