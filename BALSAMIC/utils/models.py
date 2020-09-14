@@ -114,28 +114,28 @@ class VarcallerAttribute(BaseModel):
     def workflow_solution_literal(cls, value) -> str:
         valid_workflow_solutions = WORKFLOW_SOLUTION
         if value not in valid_workflow_solutions:
-            raise ValueError(f"{value} not a valid argument!")
+            raise ValueError(f"{value} is not valid workflow solution!")
         return value
 
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
         valid_analysis_types = ANALYSIS_TYPES
         if value not in valid_analysis_types:
-            raise ValueError(f"{value} not a valid argument!")
+            raise ValueError(f"{value} is not a valid analysis type!")
         return value
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
         valid_mutation_fields = MUTATION_CLASS
         if value not in valid_mutation_fields:
-            raise ValueError(f"{value} not a valid argument!")
+            raise ValueError(f"{value} is not a valid mutation type!")
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
         valid_mutation_type_fields = MUTATION_TYPE
         if value not in valid_mutation_type_fields:
-            raise ValueError(f"{value} not a valid argument!")
+            raise ValueError(f"{value} is not not a valid mutation class!")
         return value
 
 
