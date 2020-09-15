@@ -97,9 +97,8 @@ if config['analysis']['analysis_type'] == "paired":
       ])
 
     somatic_caller_snv = ["mutect", "vardict", "strelka"]
-    sentieon_callers = ["tnhaplotyper"] if sentieon else [];
+    sentieon_callers = ["tnhaplotyper"] if sentieon else []
     somatic_caller_sv = ["manta", "cnvkit"]
-    vcf_merge = ["vcfmerge"]
 
 else:
 
@@ -115,22 +114,17 @@ else:
     somatic_caller_snv = ["mutect", "vardict"]
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
     somatic_caller_sv = ["manta", "cnvkit"]
-    vcf_merge = ["vcfmerge"]
 
-      
 
-#somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
 somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
-
-
 
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
 
 
-# Define commong and analysis specific outputs
+# Define common and analysis specific outputs
 common_output = [ result_dir + "qc/" + "multiqc_report.html",
 expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
 expand(vep_dir + "{vcf}.{filters}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]), filters = ["all", "pass"]),
