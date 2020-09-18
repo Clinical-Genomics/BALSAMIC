@@ -33,25 +33,25 @@ VCF_DICT = {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC", "Sentieon"]
+        "workflow_solution": ["Sentieon"]
     },
     "tnscope": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC", "Sentieon"]
+        "workflow_solution": ["Sentieon"]
     },
     "tnhaplotyper": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC", "Sentieon"]
+        "workflow_solution": ["Sentieon"]
     },
     "dnascope": {
         "mutation": "germline",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC", "Sentieon"]
+        "workflow_solution": ["Sentieon"]
     },
     "manta": {
         "mutation": "somatic",
@@ -80,7 +80,7 @@ VCF_DICT = {
     "strelka": {
         "mutation": "somatic",
         "type": "SNV",
-        "analysis_type": ["paired", "single"],
+        "analysis_type": ["paired"],
         "workflow_solution": ["BALSAMIC"]
     },
     "manta_germline": {
