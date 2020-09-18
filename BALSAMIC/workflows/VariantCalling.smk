@@ -107,8 +107,11 @@ else:
       ])
 
     somatic_caller_snv = get_variant_callers(config=config, analysis_type="single", workflow_solution="BALSAMIC", mutation_type="SNV", mutation_class="somatic")
-    sentieon_callers = ["tnhaplotyper"] if sentieon else [];
+    sentieon_callers = ["tnhaplotyper"] if sentieon else []
     somatic_caller_sv = ["manta", "cnvkit"]
+
+if "disable_variant_caller" in config:
+    somatic_caller_snv.remove(config["disable_variant_caller"])
 
 somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 

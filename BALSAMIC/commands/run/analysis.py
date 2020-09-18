@@ -11,7 +11,7 @@ from BALSAMIC.utils.cli import createDir
 from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake
 from BALSAMIC.utils.cli import get_config, get_fastq_bind_path
-from BALSAMIC.utils.constants import ANALYSIS_TYPES
+from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -52,11 +52,6 @@ LOG = logging.getLogger(__name__)
               default=get_config('cluster'),
               type=click.Path(),
               help='cluster config json file. (eg- SLURM, QSUB)')
-@click.option('-l',
-              '--log-file',
-              type=click.Path(),
-              help='Log file output for BALSAMIC.\
-              This is raw log output from snakemake.')
 @click.option('-p',
               '--profile',
               default="slurm",
@@ -99,10 +94,13 @@ LOG = logging.getLogger(__name__)
     help='cluster mail type to send out email. \
               This will be applied to all jobs and override snakemake settings.'
 )
+@click.option('--disable-variant-caller',
+              type=click.Choice(list(VCF_DICT.key())),
+              help='Run workflow with selected variant caller disable.')
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
-             run_analysis, log_file, force_all, snakemake_opt, mail_type,
-             mail_user, account, analysis_type, qos, profile):
+             run_analysis, force_all, snakemake_opt, mail_type, mail_user,
+             account, analysis_type, qos, profile, disable_variant_caller):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
@@ -185,6 +183,9 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
+
+    if disable_variant_caller:
+        balsamic_run.disable_variant_caller = disable_variant_caller
 
     try:
         cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
