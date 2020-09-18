@@ -41,6 +41,7 @@ def test_get_reference_output_files():
     assert 'Homo_sapiens_assembly38.fasta' in fasta_files
     
 
+
 def test_get_bioinfo_tools_list():
     # GIVEN a path for conda env files
     conda_env_path = CONDA_ENV_PATH
