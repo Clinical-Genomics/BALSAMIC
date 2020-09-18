@@ -14,6 +14,7 @@ from pathlib import Path
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.constants import CONDA_ENV_PATH
+from BALSAMIC.utils.constants import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
@@ -25,7 +26,20 @@ from BALSAMIC.utils.cli import (
 
 from BALSAMIC.utils.rule import (
     get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
-    get_script_path, get_result_dir, get_threads, get_delivery_id)
+    get_script_path, get_result_dir, get_threads, get_delivery_id, get_reference_output_files)
+
+
+def test_get_reference_output_files():
+    # GIVEN a reference genome version 
+    genome_ver = 'hg38'
+    file_type = 'fasta'
+
+    # WHEN getting list of valid types
+    fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver], file_type)
+
+    # THEN it should return list of file
+    assert 'Homo_sapiens_assembly38.fasta' in fasta_files
+    
 
 
 def test_get_bioinfo_tools_list():

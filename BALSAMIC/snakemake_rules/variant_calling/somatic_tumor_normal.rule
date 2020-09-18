@@ -22,6 +22,7 @@ rule vardict_tumor_normal:
   output:
     temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
   params:
+    tmpdir = tmp_dir,
     af = "0.005",
     max_pval = "0.9",
     max_mm = "4.5",
@@ -34,6 +35,11 @@ rule vardict_tumor_normal:
   shell:
     "source activate {params.conda}; "
     "export PERL5LIB=;"
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir -p ${{tmpdir}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xms768m\" \"-Xmx8g\"'; "
     "vardict-java -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b \"{input.bamT}|{input.bamN}\" "
         "{params.col_info} {input.bed} "
@@ -52,6 +58,7 @@ rule vardict_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
+    tmpdir = tmp_dir,
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
     name = config["analysis"]["case_id"],
   singularity: singularity_image
@@ -59,7 +66,11 @@ rule vardict_merge:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; " 
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir -p ${{tmpdir}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output.vcf}; " 
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}; " 
     "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
@@ -68,18 +79,18 @@ rule vardict_merge:
     "source deactivate;" 
 
 
-        #"--annotation Coverage --annotation VariantType --annotateNDA  --annotation RMSMappingQuality " 
 rule mutect2_tumor_normal:
   input:
     fa = config["reference"]["reference_genome"],
     dbsnp = config["reference"]["dbsnp"],
     cosmic = config["reference"]["cosmic"],
-    bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
-    bamN = bam_dir + "normal.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+    bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
+    bamN = bam_dir + "normal.sorted." + picarddup + ".bsrcl.merged.bam",
     bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
   output:
     temp(vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz")
   params:
+    tmpdir = tmp_dir,
     result_dir = vcf_dir + "mutect/",
     conda = get_conda_env(config["conda_env_yaml"],"gatk")
   threads: get_threads(cluster_config, "mutect2_tumor_normal")
@@ -88,8 +99,13 @@ rule mutect2_tumor_normal:
     benchmark_dir + 'mutect2_tumor_normal_' + "{bedchrom}.mutect2_tumor_normal.tsv"
   shell:
     "source activate {params.conda};"
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir -p ${{tmpdir}}; "
+    "export TMPDIR=${{tmpdir}}; "
     "mkdir -p {params.result_dir}; "
-    "gatk3  -T MuTect2 "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
+        "-T MuTect2 "
         "-R {input.fa} "
         "--cosmic {input.cosmic} "
         "--dbsnp {input.dbsnp} "
@@ -110,6 +126,7 @@ rule mutect2_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
     vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"
   params:
+    tmpdir = tmp_dir,
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
   singularity: singularity_image
@@ -117,7 +134,11 @@ rule mutect2_merge:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
   shell:
     "source activate {params.conda} ; "
-    "bcftools concat {input} | bcftools sort - | bgzip > {output.vcf}; "
+    "rand_str=$(openssl rand -hex 5); "
+    "tmpdir={params.tmpdir}/${{rand_str}}; "
+    "mkdir -p ${{tmpdir}}; "
+    "export TMPDIR=${{tmpdir}}; "
+    "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output.vcf}; "
     "tabix -f -p vcf {output.vcf}; "
     "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
     "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
@@ -209,8 +230,8 @@ rule somatic_snv_indel_vcf_merge:
 
 rule sentieon_TNhaplotyper:
     input:
-        bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
-        bamN = bam_dir + "normal.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
+        bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
+        bamN = bam_dir + "normal.sorted." + picarddup + ".bsrcl.merged.bam",
         interval = config["panel"]["capture_kit"],
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
@@ -218,6 +239,7 @@ rule sentieon_TNhaplotyper:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
+        tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
@@ -229,9 +251,15 @@ rule sentieon_TNhaplotyper:
         benchmark_dir + 'sentieon_TNhaplotyper_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
+rand_str=$(openssl rand -hex 5);
+tmpdir={params.tmpdir}/${{rand_str}}; 
+mkdir -p ${{tmpdir}}; 
+export TMPDIR=${{tmpdir}}; 
+export SENTIEON_TMPDIR=${{tmpdir}};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR --normal_sample NORMAL --dbsnp {input.dbsnp} {output.vcf}
         
 echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; 
         """
+

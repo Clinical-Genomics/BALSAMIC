@@ -54,4 +54,8 @@ rule sentieon_umi_align:
         "Aligning of UMI extracted reads with bwa mem, sorting for sample {params.sample_id}"
     shell:
         "export SENTIEON_LICENSE={params.sentieon_lic}\n"
+<<<<<<< HEAD
         "{params.sentieon_exec} bwa mem -R {params.sheader} -K {params.ip_bases} -p -t {threads} -C {input.ref_fa} {input.fastq_umi} |{params.sentieon_exec} util sort -r {input.ref_fa} --sam2bam -o {output.align_umi} -i - 2> {log}\n"
+=======
+        "{params.sentieon_exec} bwa mem -R {params.sheader} -K {params.ip_bases} -p -t {threads} -C {input.ref_fa} {input.fastq_umi} > {output.align_umi} 2> {log}\n"
+>>>>>>> c8b98d1b166bdaf2b02e568c0a7d308dfe766959

@@ -1,4 +1,36 @@
 
+[5.1.0]
+-------
+
+Fixed
+^^^^^
+* Vardict-java version fixed. This is due to bad dependency and releases available on conda. Anaconda is not yet update
+with vardict 1.8, but vardict-java 1.8 is there. This causes various random breaks with Vardict's TSV output. #403
+
+Changed
+^^^^^^^
+* Refactored Docker files a bit, preparation for decoupling #403
+
+
+Removed
+^^^^^^^
+* In preparation for GATK4, IndelRealigner is removed #404 
+
+
+[5.0.1]
+-------
+
+Added
+^^^^^
+* Temp directory for various rules and workflow wide temp directory #396
+
+Changed
+^^^^^^^
+* Refactored tags for housekeeper delivery to make them unique #395
+* Increased core requirements for mutect2 #396
+* GATK3.8 related utils run via jar file instead of gatk3 #396
+
+
 [5.0.0]
 -------
 
