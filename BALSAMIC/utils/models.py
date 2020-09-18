@@ -113,13 +113,15 @@ class VarcallerAttribute(BaseModel):
     @validator("workflow_solution", check_fields=False)
     def workflow_solution_literal(cls, value) -> str:
         " Validate workflow solution "
-        assert set(value).issubset(set(WORKFLOW_SOLUTION)), f"{value} is not valid workflow solution."
+        assert set(value).issubset(
+            set(WORKFLOW_SOLUTION)), f"{value} is not valid workflow solution."
         return value
 
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
         " Validate analysis types "
-        assert set(value).issubset(set(ANALYSIS_TYPES)), f"{value} is not a valid analysis type."
+        assert set(value).issubset(
+            set(ANALYSIS_TYPES)), f"{value} is not a valid analysis type."
         return value
 
     @validator("mutation", check_fields=False)
