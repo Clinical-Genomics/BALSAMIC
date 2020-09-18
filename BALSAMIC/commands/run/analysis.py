@@ -95,7 +95,7 @@ LOG = logging.getLogger(__name__)
               This will be applied to all jobs and override snakemake settings.'
 )
 @click.option('--disable-variant-caller',
-              type=click.Choice(list(VCF_DICT.key())),
+              type=click.Choice(list(VCF_DICT.keys())),
               help='Run workflow with selected variant caller disable.')
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
