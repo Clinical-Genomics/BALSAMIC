@@ -35,8 +35,8 @@ def get_vcf(config, var_caller, sample):
     return vcf
 
 
-def get_varcaller(config, mutation_type: str, mutation_class: str,
-                  analysis_type: str, workflow_solution: str):
+def get_variant_callers(config, mutation_type: str, mutation_class: str,
+                        analysis_type: str, workflow_solution: str):
     """ Get list of variant callers for a given list of input
 
     Args:

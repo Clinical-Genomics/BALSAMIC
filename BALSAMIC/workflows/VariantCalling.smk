@@ -3,19 +3,14 @@
 
 import os
 import logging
-import yaml
-import sys
 
-from collections import defaultdict
-from colorclass import Color
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.rule import get_rule_output 
-from BALSAMIC.utils.rule import get_chrom
+from BALSAMIC.utils.rule import get_variant_callers
+from BALSAMIC.utils.rule import get_rule_output
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
-from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
 
@@ -115,14 +110,12 @@ else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else [];
     somatic_caller_sv = ["manta", "cnvkit"]
 
-
 somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
-
 
 # Define common and analysis specific outputs
 common_output = [ result_dir + "qc/" + "multiqc_report.html",
