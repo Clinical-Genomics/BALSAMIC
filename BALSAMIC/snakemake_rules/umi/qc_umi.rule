@@ -67,8 +67,7 @@ rule mean_family_depth:
         bam = umi_dir + '{sample}.{step}.bam'
     output:
         temp_fl = qc_dir + '{sample}.{step}.temp.fl',
-        totalsum = qc_dir + '{sample}.{step}.reads_per_umi',
-        meandepth = qc_dir + '{sample}.meandepth'
+        totalsum = qc_dir + '{sample}.{step}.reads_per_umi'
     params:
         conda = get_conda_env(config["conda_env_yaml"],"samtools"),
         name = '{sample}_{step}'
@@ -81,4 +80,3 @@ rule mean_family_depth:
         "source activate {params.conda}\n"
         "samtools view {input.bam} | grep 'RX:Z:' | sed 's/.*RX:Z:\([ACGT-].*\).*/\\1/' | cut -f1 | grep -v 'N' | sort | uniq -c | sed -e 's/  */\\t/g' | cut -f2,3 > {output.temp_fl}\n"
         "awk -F'\\t' '{{sum+=$1;}} END{{printf(\"{params.name}_meandepth: \"sum/NR)}}' {output.temp_fl} > {output.totalsum}\n"
-        "cat {output.totalsum} >> {output.meandepth}"
