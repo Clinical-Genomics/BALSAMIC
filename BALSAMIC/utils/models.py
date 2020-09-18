@@ -96,9 +96,11 @@ class QCModel(BaseModel):
 class VarcallerAttribute(BaseModel):
     """Holds variables for variant caller software
     Attributes:
-        mutation: 
-        mutation_type:
-        
+        mutation: str of mutation class
+        mutation_type: str of mutation type
+        analysis_type: list of str for analysis types
+        workflow_solution: list of str for workflows
+
     Raises:
         ValueError:
             When a variable other than [somatic, germline] is passed in mutation field
