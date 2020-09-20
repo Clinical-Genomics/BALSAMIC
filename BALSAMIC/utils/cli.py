@@ -154,7 +154,7 @@ class SnakeMake:
 
         sm_cmd = (" snakemake --notemp -p "
                   " --directory {} --snakefile {} --configfiles {} "
-                  " {} {} {} {} {} {} {} ".format(
+                  " {} {} {} {} {} {} {} {}".format(
                       self.working_dir,
                       self.snakefile,
                       self.configfile,
