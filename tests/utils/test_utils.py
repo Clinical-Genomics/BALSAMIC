@@ -29,16 +29,12 @@ from BALSAMIC.utils.rule import (
     get_delivery_id, get_reference_output_files)
 
 
-def test_get_variant_callers_wrong_input(tumor_normal_config):
-    # GIVEN a wrong workflow name
-    wrong_workflow = "MIP"
+def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
+    # GIVEN a wrong analysis_type
     wrong_analysis_type = "cohort"
-    wrong_mutation_class = "mosaic"
-    wrong_mutation_type = "INDEL"
     workflow = "BALSAMIC"
     mutation_type = "SNV"
     mutation_class = "germline"
-    analysis_type = "paired"
 
     # WHEN getting list of variant callers
     # THEN capture error
@@ -49,18 +45,49 @@ def test_get_variant_callers_wrong_input(tumor_normal_config):
                                    mutation_type=mutation_type,
                                    mutation_class=mutation_class)
 
+
+def test_get_variant_callers_wrong_workflow(tumor_normal_config):
+    # GIVEN a wrong workflow name
+    wrong_workflow = "MIP"
+    mutation_type = "SNV"
+    mutation_class = "germline"
+    analysis_type = "paired"
+
+    with pytest.raises(WorkflowRunError):
         assert get_variant_callers(config=tumor_normal_config,
                                    analysis_type=analysis_type,
                                    workflow_solution=wrong_workflow,
                                    mutation_type=mutation_type,
                                    mutation_class=mutation_class)
 
+
+def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
+    # GIVEN a wrong workflow name
+    workflow = "BALSAMIC"
+    wrong_mutation_type = "INDEL"
+    mutation_class = "germline"
+    analysis_type = "paired"
+
+    # WHEN getting list of variant callers
+    # THEN capture error
+    with pytest.raises(WorkflowRunError):
         assert get_variant_callers(config=tumor_normal_config,
                                    analysis_type=analysis_type,
                                    workflow_solution=workflow,
                                    mutation_type=wrong_mutation_type,
                                    mutation_class=mutation_class)
 
+
+def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
+    # GIVEN a wrong workflow name
+    workflow = "BALSAMIC"
+    mutation_type = "SNV"
+    wrong_mutation_class = "mosaic"
+    analysis_type = "paired"
+
+    # WHEN getting list of variant callers
+    # THEN capture error
+    with pytest.raises(WorkflowRunError):
         assert get_variant_callers(config=tumor_normal_config,
                                    analysis_type=analysis_type,
                                    workflow_solution=workflow,
