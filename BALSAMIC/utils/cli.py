@@ -112,7 +112,7 @@ class SnakeMake:
             dryrun = "--dryrun"
 
         if self.disable_variant_caller:
-            snakemake_config_key_value = f'--config disable_variant_caller={self.disable_variant_caller}'
+            snakemake_config_key_value = f' --config disable_variant_caller={self.disable_variant_caller} '
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args '"
