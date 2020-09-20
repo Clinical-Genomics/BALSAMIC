@@ -110,10 +110,9 @@ else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     somatic_caller_sv = ["manta", "cnvkit"]
 
-if "disable_variant_caller" in config:
-    somatic_caller_snv.remove(config["disable_variant_caller"])
-
 somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
+if "disable_variant_caller" in config:
+    somatic_caller.remove(config["disable_variant_caller"])
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
 
