@@ -25,7 +25,7 @@ if 'quality_trim' in config['QC'].keys():
         fastp_param_umi.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
 
 # Double path to hard trim adapter and UMIs
-rule fastp_hard_trim:
+rule fastp:
     input:
         read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
         read2=config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
@@ -45,6 +45,7 @@ rule fastp_hard_trim:
         qc = " ".join(fastp_param_qc),
         umi = " ".join(fastp_param_umi),
         adapter = " ".join(fastp_param_adapter),
+        minimum_length = config["QC"]["min_seq_length"],
         conda = get_conda_env(config["conda_env_yaml"],"fastp")
     singularity: singularity_image
     threads: get_threads(cluster_config, 'fastp')
@@ -57,8 +58,10 @@ source activate {params.conda};
 export TMPDIR={params.tmpdir};
 fastp \
 --thread {threads} \
---in1 {input.read1} --in2 {input.read2} \
---out1 {output.read1_interm} --out2 {output.read2_interm} \
+--in1 {input.read1} \
+--in2 {input.read2} \
+--out1 {output.read1_interm} \
+--out2 {output.read2_interm} \
 --json {output.json_out_interm} \
 --html {output.html_out_interm} \
 --overrepresentation_analysis \
@@ -66,10 +69,16 @@ fastp \
 {params.adapter};
 fastp \
 --thread {threads} \
---in1 {output.read1_interm} --in2 {output.read2_interm} \
---out1 {output.read1} --out2 {output.read2} \
+--in1 {output.read1_interm} \
+--in2 {output.read2_interm} \
+--out1 {output.read1} \
+--out2 {output.read2} \
 --json {output.json} \
 --html {output.html} \
---length_required 25 \
+--disable_adapter_trimming \
+--disable_quality_filtering \
+--disable_length_filtering \
+--disable_trim_poly_g \
+--length_required {params.minimum_length} \
 {params.umi};
         """
