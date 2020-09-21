@@ -16,11 +16,7 @@ vep_dir = get_result_dir(config) + "/vep/"
 log_dir =  config["analysis"]["log"]
 table_dir = get_result_dir(config) + "/tables/"
 plot_dir = get_result_dir(config) + "/plots/"
-<<<<<<< HEAD
 qc_dir = get_result_dir(config) + "/qc/"
-=======
-
->>>>>>> c8b98d1b166bdaf2b02e568c0a7d308dfe766959
 
 singularity_image = config['singularity']['image']
 
