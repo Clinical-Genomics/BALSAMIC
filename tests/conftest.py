@@ -157,12 +157,12 @@ ls -l # dummy command
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(
-    tmp_path_factory,
-    sample_fastq,
-    analysis_dir,
-    singularity_container,
-    reference_json,
-    panel_bed_file,
+        tmp_path_factory,
+        sample_fastq,
+        analysis_dir,
+        singularity_container,
+        reference_json,
+        panel_bed_file,
 ):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
@@ -241,12 +241,12 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 @pytest.fixture(scope="session")
 def tumor_only_config(
-    tmpdir_factory,
-    sample_fastq,
-    singularity_container,
-    analysis_dir,
-    reference_json,
-    panel_bed_file,
+        tmpdir_factory,
+        sample_fastq,
+        singularity_container,
+        analysis_dir,
+        reference_json,
+        panel_bed_file,
 ):
     """
     invokes balsamic config sample -t xxx to create sample config
