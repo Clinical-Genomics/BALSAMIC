@@ -4,15 +4,25 @@
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
-# Below filters will always happen in this rule
-fastp_param_qc = ["--trim_tail1", "1", "--n_base_limit", "5",
-                  "--length_required", config["QC"]["min_seq_length"],
-                  "--low_complexity_filter", "--trim_poly_g"]
+if 'quality_trim' in config['QC'].keys():
+    fastp_param_qc = list()
+    fastp_param_adapter = list()
+    fastp_param_umi = list()
+    if config['QC']['quality_trim']:
+        fastp_param_qc.extend(["--trim_tail1", "1", "--n_base_limit", "5",
+                            "--length_required", config["QC"]["min_seq_length"],
+                            "--low_complexity_filter", "--trim_poly_g"])
+    else:
+        fastp_param_qc.extend(["--disable_quality_filtering", "--disable_length_filtering", "--disable_trim_poly_g"])
 
-fastp_param_adapter = ["--detect_adapter_for_pe"]
+    if not config['QC']['adapter_trim']:
+        fastp_param_adapter.extend(["--disable_adapter_trimming"])
+    else:
+        fastp_param_adapter.extend(["--detect_adapter_for_pe"])
 
-fastp_param_umi = ["--umi","--umi_loc per_read","--umi_len",
-                   config['QC']['umi_trim_length'],"--umi_prefix","UMI"]
+    # UMI trimming will work only if adapter_trim is disabled
+    if config['QC']['umi_trim']:
+        fastp_param_umi.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
 
 # Double path to hard trim adapter and UMIs
 rule fastp_hard_trim:
