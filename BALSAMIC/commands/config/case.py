@@ -122,6 +122,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         samples=samples,
         vcf=VCF_DICT,
         bioinfo_tools=get_bioinfo_tools_list(CONDA_ENV_PATH),
+        entry_point=entry_point,
         panel={
             "capture_kit": panel_bed,
             "chrom": get_panel_chrom(panel_bed),
