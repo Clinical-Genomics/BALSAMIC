@@ -206,7 +206,7 @@ class AnalysisModel(BaseModel):
     @validator("entry_point")
     def entry_point_validator(cls, value) -> str:
         "Validates entry point value"
-        assert value in ENTRY_POINT, f"{value} is not a valid entry point."
+        assert value in ENTRY_POINTS, f"{value} is not a valid entry point."
         return value
 
     @validator("analysis_type")
