@@ -35,7 +35,8 @@ singularity_image = config['singularity']['image']
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-pre_align = ["snakemake_rules/quality_control/fastp.rule",
+# Use fastp_hard_trim for QC purpose
+pre_align = ["snakemake_rules/quality_control/fastp_hard_trim.rule",
              "snakemake_rules/quality_control/fastqc.rule"]
 
 align_qc = ["snakemake_rules/align/bwa_mem.rule",

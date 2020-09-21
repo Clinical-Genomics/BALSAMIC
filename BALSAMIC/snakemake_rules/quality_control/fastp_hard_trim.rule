@@ -1,0 +1,65 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_threads
+
+# Below filters will always happen in this rule
+fastp_param_qc = ["--trim_tail1", "1", "--n_base_limit", "5",
+                  "--length_required", config["QC"]["min_seq_length"],
+                  "--low_complexity_filter", "--trim_poly_g"]
+
+fastp_param_adapter = ["--detect_adapter_for_pe"]
+
+fastp_param_umi = ["--umi","--umi_loc per_read","--umi_len",
+                   config['QC']['umi_trim_length'],"--umi_prefix","UMI"]
+
+# Double path to hard trim adapter and UMIs
+rule fastp_hard_trim:
+    input:
+        read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
+        read2=config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
+    output:
+        read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
+        read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
+        json = qc_dir + "fastp/{sample}_fastp.json",
+        html = qc_dir + "fastp/{sample}_fastp.html",
+        read1_interm = temp(fastq_dir + "{sample}_1.interm.fastq.gz"),
+        read2_interm = temp(fastq_dir + "{sample}_2.interm.fastq.gz"),
+        json_out_interm = temp(fastq_dir + "{sample}_interm_fastp.json"),
+        html_out_interm = temp(fastq_dir + "{sample}_interm_fastp.html"),
+    params:
+        housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
+        tmpdir = tmp_dir,
+        fastq_dir = fastq_dir,
+        qc = " ".join(fastp_param_qc),
+        umi = " ".join(fastp_param_umi),
+        adapter = " ".join(fastp_param_adapter),
+        conda = get_conda_env(config["conda_env_yaml"],"fastp")
+    singularity: singularity_image
+    threads: get_threads(cluster_config, 'fastp')
+    benchmark:
+        benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
+    shell:
+        """
+source activate {params.conda};
+source activate {params.conda};
+export TMPDIR={params.tmpdir};
+fastp \
+--thread {threads} \
+--in1 {input.read1} --in2 {input.read2} \
+--out1 {output.read1_interm} --out2 {output.read2_interm} \
+--json {output.json_out_interm} \
+--html {output.html_out_interm} \
+--overrepresentation_analysis \
+{params.qc} \
+{params.adapter};
+fastp \
+--thread {threads} \
+--in1 {output.read1_interm} --in2 {output.read2_interm} \
+--out1 {output.read1} --out2 {output.read2} \
+--json {output.json} \
+--html {output.html} \
+--length_required 25 \
+{params.umi};
+        """
