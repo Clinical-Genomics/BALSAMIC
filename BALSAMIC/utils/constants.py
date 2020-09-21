@@ -21,6 +21,9 @@ RULE_DIRECTORY = (
 # BALSAMIC version
 BALSAMIC_VERSION = BALSAMIC.__version__
 
+# Workflow entry points
+ENTRY_POINTS = ["FastQ", "BAM", "VCF"]
+
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
