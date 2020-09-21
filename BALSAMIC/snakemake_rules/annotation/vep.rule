@@ -36,36 +36,38 @@ rule vep_somatic:
   singularity: singularity_image 
   benchmark: benchmark_file
   shell:
-    "source activate {params.conda}; "
-    "vep_path=$(dirname $(readlink -e $(which vep))); "
-    "tmpvcf={params.tmpvcf}; "
-    "export PERL5LIB=;"
-    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o $tmpvcf ;" 
-    "vep "
-        "--dir $vep_path "
-        "--dir_cache {params.vep_cache} "
-        "--dir_plugins $vep_path "
-        "--input_file $tmpvcf "
-        "--output_file {output.vcf_all} "
-        "--compress_output bgzip "
-        "--fork {threads} "
-        "--vcf "
-        "--everything "
-        "--allow_non_variant "
-        "--dont_skip "
-        "--buffer_size 10000 "
-        "--format vcf "
-        "--offline "
-        "--variant_class "
-        "--merged "
-        "--cache "
-        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
-        "--verbose "
-        "--force_overwrite; "
-    "tabix -p vcf -f {output.vcf_all}; "
-    "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all}; "
-    "tabix -p vcf -f {output.vcf_pass}; "
-    "rm $tmpvcf " 
+    """
+source activate {params.conda};
+vep_path=$(dirname $(readlink -e $(which vep))); 
+tmpvcf={params.tmpvcf}; 
+export PERL5LIB=;
+bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o $tmpvcf ; 
+vep \ 
+--dir $vep_path \ 
+--dir_cache {params.vep_cache} \ 
+--dir_plugins $vep_path \ 
+--input_file $tmpvcf \ 
+--output_file {output.vcf_all} \ 
+--compress_output bgzip \ 
+--fork {threads} \ 
+--vcf \ 
+--everything \ 
+--allow_non_variant \ 
+--dont_skip \ 
+--buffer_size 10000 \ 
+--format vcf \ 
+--offline \ 
+--variant_class \ 
+--merged \ 
+--cache \ 
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \ 
+--verbose \ 
+--force_overwrite; 
+tabix -p vcf -f {output.vcf_all}; 
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all}; 
+tabix -p vcf -f {output.vcf_pass}; 
+rm $tmpvcf 
+    """
     
 
 rule vep_stat:
