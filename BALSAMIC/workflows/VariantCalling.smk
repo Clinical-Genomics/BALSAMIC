@@ -91,7 +91,8 @@ if config['analysis']['analysis_type'] == "paired":
       "snakemake_rules/variant_calling/cnvkit_paired.rule"
       ])
 
-    somatic_caller_snv = get_variant_callers(config=config, analysis_type="paired", workflow_solution="BALSAMIC", mutation_type="SNV", mutation_class="somatic")
+    somatic_caller_snv = get_variant_callers(config=config, analysis_type="paired", workflow_solution="BALSAMIC",
+                                             mutation_type="SNV", mutation_class="somatic")
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     somatic_caller_sv = ["manta", "cnvkit"]
 
@@ -106,7 +107,8 @@ else:
       "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule"
       ])
 
-    somatic_caller_snv = get_variant_callers(config=config, analysis_type="single", workflow_solution="BALSAMIC", mutation_type="SNV", mutation_class="somatic")
+    somatic_caller_snv = get_variant_callers(config=config, analysis_type="single", workflow_solution="BALSAMIC",
+                                             mutation_type="SNV", mutation_class="somatic")
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     somatic_caller_sv = ["manta", "cnvkit"]
 
@@ -127,8 +129,8 @@ expand(vep_dir + "{vcf}.pass.balsamic_stat", vcf=get_vcf(config, ["vardict"], [c
 
 analysis_specific_output = []
 if config['analysis']['analysis_type'] == "single":
-    analysis_specific_output.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz", vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
-
+    analysis_specific_output.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
+                                           vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
