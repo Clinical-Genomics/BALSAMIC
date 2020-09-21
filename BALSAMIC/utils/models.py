@@ -198,9 +198,16 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = BALSAMIC_VERSION
     config_creation_date: Optional[str]
+    entry_point: str
 
     class Config:
         validate_all = True
+
+    @validator("entry_point")
+    def entry_point_validator(cls, value) -> str:
+        "Validates entry point value"
+        assert value in ENTRY_POINT, f"{value} is not a valid entry point."
+        return value
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:

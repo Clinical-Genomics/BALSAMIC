@@ -6,11 +6,10 @@ import BALSAMIC
 
 from pathlib import Path
 from BALSAMIC.utils.models import BalsamicConfigModel
-from BALSAMIC.utils.cli import (CaptureStdout, get_snakefile, get_sample_dict,
-                                get_panel_chrom, get_bioinfo_tools_list,
-                                create_fastq_symlink, generate_graph)
-from BALSAMIC.utils.constants import (CONDA_ENV_PATH, CONDA_ENV_YAML,
-                                      RULE_DIRECTORY, VCF_DICT)
+from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
+                                get_bioinfo_tools_list, create_fastq_symlink,
+                                generate_graph)
+from BALSAMIC.utils.constants import (CONDA_ENV_PATH, ENTRY_POINTS, VCF_DICT)
 
 LOG = logging.getLogger(__name__)
 
@@ -78,10 +77,15 @@ LOG = logging.getLogger(__name__)
               required=False,
               multiple=True,
               help="Fastq files for normal sample.")
+@click.option("--entry-point",
+              type=click.Choice(ENTRY_POINTS),
+              required=False,
+              default="FastQ",
+              help="Define entry point for case analysis config.")
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, background_variants,
-                singularity, analysis_dir, tumor, normal):
+                singularity, analysis_dir, tumor, normal, entry_point):
 
     try:
         samples = get_sample_dict(tumor, normal)
