@@ -24,7 +24,7 @@ if 'quality_trim' in config['QC'].keys():
     if config['QC']['umi_trim']:
         fastp_param_umi.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
 
-# Double path to hard trim adapter and UMIs
+# Double pass to hard trim adapter and UMIs
 rule fastp:
     input:
         read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
@@ -53,7 +53,6 @@ rule fastp:
         benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
     shell:
         """
-source activate {params.conda};
 source activate {params.conda};
 export TMPDIR={params.tmpdir};
 fastp \
