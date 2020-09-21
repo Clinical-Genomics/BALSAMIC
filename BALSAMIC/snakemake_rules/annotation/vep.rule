@@ -5,24 +5,36 @@
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
+vep_input = {}
+vep_output = {}
+# For sake of backward compatibility check for entry_point key
+if "entry_point" in config:
+    if config["entry_point"] == "FastQ":
+        vep_input["vcf"] = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz"
+        vep_input["header"] = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.sample_name_map"
+        vep_output["vcf_all"] = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz"
+        vep_output["vcf_summary"] = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html"
+        vep_output["vcf_pass"] = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz"
+        tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz"
+        benchmark_file = benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
+
 rule vep_somatic:
   input:
-    vcf = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
-    header = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.sample_name_map",
+    vcf = vep_input.get("vcf"),
+    header = vep_input.get("header"),
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
-    vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
+    vcf_all = vep_output.get("vcf_all"),
+    vcf_summary = vep_output.get("vcf_summary"),
+    vcf_pass = vep_output.get("vcf_pass"),
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
-    tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "annotated-somatic"},
+    tmpvcf = tmpvcf,
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
   singularity: singularity_image 
-  benchmark:
-    benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
+  benchmark: benchmark_file
   shell:
     "source activate {params.conda}; "
     "vep_path=$(dirname $(readlink -e $(which vep))); "
