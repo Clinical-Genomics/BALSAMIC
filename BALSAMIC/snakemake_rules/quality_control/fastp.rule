@@ -13,7 +13,9 @@ if 'quality_trim' in config['QC'].keys():
                             "--length_required", config["QC"]["min_seq_length"],
                             "--low_complexity_filter", "--trim_poly_g"])
     else:
-        fastp_param_qc.extend(["--disable_quality_filtering", "--disable_length_filtering", "--disable_trim_poly_g"])
+        fastp_param_qc.extend(["--disable_quality_filtering",
+                               "--disable_length_filtering",
+                               "--disable_trim_poly_g"])
 
     if not config['QC']['adapter_trim']:
         fastp_param_adapter.extend(["--disable_adapter_trimming"])
@@ -22,7 +24,9 @@ if 'quality_trim' in config['QC'].keys():
 
     # UMI trimming will work only if adapter_trim is disabled
     if config['QC']['umi_trim']:
-        fastp_param_umi.extend(["--umi","--umi_loc per_read","--umi_len", config['QC']['umi_trim_length'],"--umi_prefix","UMI"])
+        fastp_param_umi.extend(["--umi","--umi_loc per_read",
+                                "--umi_len", config['QC']['umi_trim_length'],
+                                "--umi_prefix","UMI"])
 
 # Double pass to hard trim adapter and UMIs
 rule fastp:
