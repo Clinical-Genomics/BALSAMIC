@@ -11,7 +11,7 @@ import logging
 
 from pathlib import Path
 
-from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
 from BALSAMIC.utils.constants import CONDA_ENV_PATH
 from BALSAMIC.utils.constants import REFERENCE_FILES
@@ -21,25 +21,92 @@ from BALSAMIC.utils.cli import (
     get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
-    get_sample_dict, get_sample_names, create_fastq_symlink,
-    get_fastq_bind_path, singularity, get_file_extension)
+    create_fastq_symlink, get_fastq_bind_path, singularity, get_file_extension)
 
 from BALSAMIC.utils.rule import (
     get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
-    get_script_path, get_result_dir, get_threads, get_delivery_id, get_reference_output_files)
+    get_variant_callers, get_script_path, get_result_dir, get_threads,
+    get_delivery_id, get_reference_output_files)
+
+
+def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
+    # GIVEN a wrong analysis_type
+    wrong_analysis_type = "cohort"
+    workflow = "BALSAMIC"
+    mutation_type = "SNV"
+    mutation_class = "germline"
+
+    # WHEN getting list of variant callers
+    # THEN capture error
+    with pytest.raises(WorkflowRunError):
+        assert get_variant_callers(config=tumor_normal_config,
+                                   analysis_type=wrong_analysis_type,
+                                   workflow_solution=workflow,
+                                   mutation_type=mutation_type,
+                                   mutation_class=mutation_class)
+
+
+def test_get_variant_callers_wrong_workflow(tumor_normal_config):
+    # GIVEN a wrong workflow name
+    wrong_workflow = "MIP"
+    mutation_type = "SNV"
+    mutation_class = "germline"
+    analysis_type = "paired"
+
+    with pytest.raises(WorkflowRunError):
+        assert get_variant_callers(config=tumor_normal_config,
+                                   analysis_type=analysis_type,
+                                   workflow_solution=wrong_workflow,
+                                   mutation_type=mutation_type,
+                                   mutation_class=mutation_class)
+
+
+def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
+    # GIVEN a wrong workflow name
+    workflow = "BALSAMIC"
+    wrong_mutation_type = "INDEL"
+    mutation_class = "germline"
+    analysis_type = "paired"
+
+    # WHEN getting list of variant callers
+    # THEN capture error
+    with pytest.raises(WorkflowRunError):
+        assert get_variant_callers(config=tumor_normal_config,
+                                   analysis_type=analysis_type,
+                                   workflow_solution=workflow,
+                                   mutation_type=wrong_mutation_type,
+                                   mutation_class=mutation_class)
+
+
+def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
+    # GIVEN a wrong workflow name
+    workflow = "BALSAMIC"
+    mutation_type = "SNV"
+    wrong_mutation_class = "mosaic"
+    analysis_type = "paired"
+
+    # WHEN getting list of variant callers
+    # THEN capture error
+    with pytest.raises(WorkflowRunError):
+        assert get_variant_callers(config=tumor_normal_config,
+                                   analysis_type=analysis_type,
+                                   workflow_solution=workflow,
+                                   mutation_type=mutation_type,
+                                   mutation_class=wrong_mutation_class)
 
 
 def test_get_reference_output_files():
-    # GIVEN a reference genome version 
+    # GIVEN a reference genome version
     genome_ver = 'hg38'
     file_type = 'fasta'
 
     # WHEN getting list of valid types
-    fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver], file_type)
+    fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver],
+                                             file_type)
 
     # THEN it should return list of file
     assert 'Homo_sapiens_assembly38.fasta' in fasta_files
-    
+
 
 def test_get_bioinfo_tools_list():
     # GIVEN a path for conda env files
@@ -212,7 +279,7 @@ def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
     workflow = [("paired", "wgs"), ("paired", "targeted"), ("single", "wgs"),
                 ("single", "targeted"), ("qc", ""), ("generate_ref", ""),
-		("umi","")]
+                ("umi", "")]
 
     # WHEN asking to see snakefile for paired
     for analysis_type, sequencing_type in workflow:
@@ -220,15 +287,15 @@ def test_get_snakefile():
         pipeline = ''
 
         if sequencing_type == 'targeted':
-            pipeline = "BALSAMIC/workflows/VariantCalling"
+            pipeline = "BALSAMIC/workflows/VariantCalling.smk"
         elif sequencing_type == 'wgs':
-            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon"
+            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon.smk"
         elif analysis_type == 'qc':
             pipeline = "BALSAMIC/workflows/Alignment"
         elif analysis_type == 'generate_ref':
             pipeline = "BALSAMIC/workflows/GenerateRef"
         elif analysis_type == 'umi':
-            pipeline = "BALSAMIC/workflows/UMIworkflow"
+            pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
 
         # THEN it should return the snakefile path
         # THEN assert file exists

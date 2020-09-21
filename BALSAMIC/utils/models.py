@@ -1,16 +1,15 @@
-import os
 import hashlib
-
-from pathlib import Path
 from datetime import datetime
-
-from pydantic import (BaseModel, ValidationError, validator, Field, AnyUrl)
-from pydantic.types import DirectoryPath, FilePath
+from pathlib import Path
 from typing import Optional, List, Dict
 
-from BALSAMIC.utils.constants import (CONDA_ENV_PATH, CONDA_ENV_YAML,
-                                      RULE_DIRECTORY, BALSAMIC_VERSION,
-                                      VALID_GENOME_VER, VALID_REF_FORMAT)
+from pydantic import (BaseModel, validator, Field, AnyUrl)
+from pydantic.types import DirectoryPath, FilePath
+
+from BALSAMIC.utils.constants import (
+    CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
+    MUTATION_TYPE, RULE_DIRECTORY, BALSAMIC_VERSION, VALID_GENOME_VER,
+    VALID_REF_FORMAT)
 
 
 class VCFAttributes(BaseModel):
@@ -97,9 +96,11 @@ class QCModel(BaseModel):
 class VarcallerAttribute(BaseModel):
     """Holds variables for variant caller software
     Attributes:
-        mutation: 
-        mutation_type:
-        
+        mutation: str of mutation class
+        mutation_type: str of mutation type
+        analysis_type: list of str for analysis types
+        workflow_solution: list of str for workflows
+
     Raises:
         ValueError:
             When a variable other than [somatic, germline] is passed in mutation field
@@ -108,19 +109,33 @@ class VarcallerAttribute(BaseModel):
     """
     mutation: str
     mutation_type: str = Field(alias="type")
+    analysis_type: Optional[list]
+    workflow_solution: Optional[list]
+
+    @validator("workflow_solution", check_fields=False)
+    def workflow_solution_literal(cls, value) -> str:
+        " Validate workflow solution "
+        assert set(value).issubset(
+            set(WORKFLOW_SOLUTION)), f"{value} is not valid workflow solution."
+        return value
+
+    @validator("analysis_type", check_fields=False)
+    def annotation_type_literal(cls, value) -> str:
+        " Validate analysis types "
+        assert set(value).issubset(
+            set(ANALYSIS_TYPES)), f"{value} is not a valid analysis type."
+        return value
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
-        valid_mutation_fields = ["somatic", "germline"]
-        if value not in valid_mutation_fields:
-            raise ValueError(f"{value} not a valid argument!")
+        " Validate mutation class "
+        assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
-        valid_mutation_type_fields = ["SNV", "SV", "CNV"]
-        if value not in valid_mutation_type_fields:
-            raise ValueError(f"{value} not a valid argument!")
+        " Validate mutation type "
+        assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
         return value
 
 
@@ -129,13 +144,11 @@ class VCFModel(BaseModel):
 
     tnsnv: VarcallerAttribute
     manta: VarcallerAttribute
-    pindel: VarcallerAttribute
     cnvkit: VarcallerAttribute
     mutect: VarcallerAttribute
     vardict: VarcallerAttribute
     strelka: VarcallerAttribute
     tnscope: VarcallerAttribute
-    vcfmerge: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnhaplotyper: VarcallerAttribute
     manta_germline: VarcallerAttribute
@@ -191,7 +204,7 @@ class AnalysisModel(BaseModel):
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
-        balsamic_analysis_types = ["single", "paired", "qc"]
+        balsamic_analysis_types = ANALYSIS_TYPES
         if value not in balsamic_analysis_types:
             raise ValueError(
                 f"Provided analysis type ({value}) not supported in BALSAMIC!")
@@ -347,12 +360,13 @@ class BalsamicConfigModel(BaseModel):
     @validator("singularity")
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
-    
+
     @validator("background_variants")
-    def fl_abspath_as_str(cls,value):
-        if value:     
+    def fl_abspath_as_str(cls, value):
+        if value:
             return Path(value).resolve().as_posix()
         return None
+
 
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
@@ -402,7 +416,8 @@ class ReferenceUrlsModel(BaseModel):
         hash_md5 = hashlib.md5()
         output_file = Path(self.output_path, self.output_file)
         if not output_file.is_file():
-            raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
+            raise FileNotFoundError(
+                f"{output_file.as_posix()} file does not exist")
 
         with open(output_file.as_posix(), 'rb') as fh:
             for chunk in iter(lambda: fh.read(4096), b""):

@@ -63,6 +63,7 @@ class SnakeMake:
     singularity_bind- Singularity bind path
     singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
+    disable_variant_caller - Disable variant caller
     """
 
     def __init__(self):
@@ -88,6 +89,7 @@ class SnakeMake:
         self.singularity_bind = str()
         self.singularity_arg = str()
         self.sm_opt = str()
+        self.disable_variant_caller = str()
 
     def build_cmd(self):
         forceall = str()
@@ -95,6 +97,7 @@ class SnakeMake:
         cluster_cmd = str()
         dryrun = str()
         report = str()
+        snakemake_config_key_value = str()
 
         if self.forceall:
             forceall = "--forceall"
@@ -107,6 +110,9 @@ class SnakeMake:
 
         if not self.run_analysis:
             dryrun = "--dryrun"
+
+        if self.disable_variant_caller:
+            snakemake_config_key_value = f' --config disable_variant_caller={self.disable_variant_caller} '
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args '"
@@ -148,7 +154,7 @@ class SnakeMake:
 
         sm_cmd = (" snakemake --notemp -p "
                   " --directory {} --snakefile {} --configfiles {} "
-                  " {} {} {} {} {} {} {} ".format(
+                  " {} {} {} {} {} {} {} {}".format(
                       self.working_dir,
                       self.snakefile,
                       self.configfile,
@@ -158,6 +164,7 @@ class SnakeMake:
                       dryrun,
                       cluster_cmd,
                       report,
+                      snakemake_config_key_value,
                       sm_opt,
                   ))
 
@@ -238,13 +245,13 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     if analysis_type == "qc":
         snakefile = Path(p, "workflows", "Alignment")
     elif analysis_type in ["single", "paired"]:
-        snakefile = Path(p, "workflows", "VariantCalling")
+        snakefile = Path(p, "workflows", "VariantCalling.smk")
         if sequencing_type == "wgs":
-            snakefile = Path(p, "workflows", "VariantCalling_sentieon")
+            snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
     elif analysis_type == "generate_ref":
         snakefile = Path(p, 'workflows', 'GenerateRef')
     elif analysis_type == "umi":
-        snakefile = Path(p, 'workflows', 'UMIworkflow')
+        snakefile = Path(p, 'workflows', 'UMIworkflow.smk')
 
     return str(snakefile)
 
@@ -441,11 +448,12 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
         with open(yaml_file, "r") as f:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
-                if isinstance(p, dict): 
+                if isinstance(p, dict):
                     for pip_package in p["pip"]:
                         name, version = pip_package.split("==")
                         if name in bioinfo_tools:
-                            bioinfo_tools[name] = ",".join(set([bioinfo_tools[name], version]))
+                            bioinfo_tools[name] = ",".join(
+                                set([bioinfo_tools[name], version]))
                         else:
                             bioinfo_tools[name] = version
                 else:
@@ -456,7 +464,8 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
                         name, version = p, None
                     finally:
                         if name in bioinfo_tools:
-                            bioinfo_tools[name] = ",".join(set([bioinfo_tools[name], version]))
+                            bioinfo_tools[name] = ",".join(
+                                set([bioinfo_tools[name], version]))
                         else:
                             bioinfo_tools[name] = version
     return bioinfo_tools

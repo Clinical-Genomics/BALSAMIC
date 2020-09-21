@@ -3,19 +3,14 @@
 
 import os
 import logging
-import yaml
-import sys
 
-from collections import defaultdict
-from colorclass import Color
 from yapf.yapflib.yapf_api import FormatFile
 
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.rule import get_rule_output 
-from BALSAMIC.utils.rule import get_chrom
+from BALSAMIC.utils.rule import get_variant_callers
+from BALSAMIC.utils.rule import get_rule_output
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
-from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
 
@@ -96,10 +91,9 @@ if config['analysis']['analysis_type'] == "paired":
       "snakemake_rules/variant_calling/cnvkit_paired.rule"
       ])
 
-    somatic_caller_snv = ["mutect", "vardict", "strelka"]
-    sentieon_callers = ["tnhaplotyper"] if sentieon else [];
+    somatic_caller_snv = get_variant_callers(config=config, analysis_type="paired", workflow_solution="BALSAMIC", mutation_type="SNV", mutation_class="somatic")
+    sentieon_callers = ["tnhaplotyper"] if sentieon else []
     somatic_caller_sv = ["manta", "cnvkit"]
-    vcf_merge = ["vcfmerge"]
 
 else:
 
@@ -112,25 +106,20 @@ else:
       "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule"
       ])
 
-    somatic_caller_snv = ["mutect", "vardict"]
-    sentieon_callers = ["tnhaplotyper"] if sentieon else [];
+    somatic_caller_snv = get_variant_callers(config=config, analysis_type="single", workflow_solution="BALSAMIC", mutation_type="SNV", mutation_class="somatic")
+    sentieon_callers = ["tnhaplotyper"] if sentieon else []
     somatic_caller_sv = ["manta", "cnvkit"]
-    vcf_merge = ["vcfmerge"]
 
-      
-
-#somatic_caller = somatic_caller_snv + somatic_caller_sv + vcf_merge + sentieon_callers
 somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
+if "disable_variant_caller" in config:
+    somatic_caller.remove(config["disable_variant_caller"])
 
 config["rules"] = align_rules + qc_rules + variantcalling_rules + annotation_rules
-
-
 
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
 
-
-# Define commong and analysis specific outputs
+# Define common and analysis specific outputs
 common_output = [ result_dir + "qc/" + "multiqc_report.html",
 expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, config["samples"])),
 expand(vep_dir + "{vcf}.{filters}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]), filters = ["all", "pass"]),
