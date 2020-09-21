@@ -72,7 +72,9 @@ if 'delivery' in config:
             continue
 
         LOG.info("Delivering step (rule) {}.".format(my_rule))
-        output_files_ready.extend(get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict))
+        output_files_ready.extend(get_rule_output(rules=rules,
+                                                  rule_name=my_rule,
+                                                  output_file_wildcards=wildcard_dict))
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
     delivery_ready = os.path.join(get_result_dir(config),
