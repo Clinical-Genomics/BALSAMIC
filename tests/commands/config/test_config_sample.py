@@ -11,10 +11,10 @@ from BALSAMIC.commands.base import cli
 
 
 def test_dag_graph_success(
-    tumor_normal_wgs_config,
-    tumor_only_config,
-    tumor_normal_config,
-    tumor_only_wgs_config,
+        tumor_normal_wgs_config,
+        tumor_only_config,
+        tumor_normal_config,
+        tumor_only_wgs_config,
 ):
     # WHEN creating config using standard CLI input
     # THEN DAG graph should be created successfully
@@ -28,11 +28,11 @@ def test_dag_graph_success(
 
 
 def test_tumor_only_config_bad_filename(
-    tmp_path_factory,
-    analysis_dir,
-    singularity_container,
-    panel_bed_file,
-    reference_json,
+        tmp_path_factory,
+        analysis_dir,
+        singularity_container,
+        panel_bed_file,
+        reference_json,
 ):
 
     # GIVEN existing fastq file with wrong naming convention
@@ -102,11 +102,11 @@ def test_tumor_only_config_bad_reference(sample_fastq, singularity_container,
 
 
 def test_run_without_permissions(
-    no_write_perm_path,
-    sample_fastq,
-    singularity_container,
-    panel_bed_file,
-    reference_json,
+        no_write_perm_path,
+        sample_fastq,
+        singularity_container,
+        panel_bed_file,
+        reference_json,
 ):
     # GIVEN CLI arguments including an analysis_dir without write permissions
     case_id = "sample_tumor_only"
