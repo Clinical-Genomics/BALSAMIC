@@ -1,16 +1,15 @@
-#!python
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
 import os
+import logging
 
 from yapf.yapflib.yapf_api import FormatFile
-from snakemake.logging import logger
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output 
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC import __version__ as bv
 
+LOG = logging.getLogger(__name__)
 
 shell.prefix("set -eo pipefail; ")
 
@@ -36,22 +35,20 @@ singularity_image = config['singularity']['image']
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-include:
-  rule_dir + "snakemake_rules/align/bwa_mem.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/fastp.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/fastqc.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/picard.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/sambamba_depth.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/mosdepth.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/multiqc.rule"
-include:
-  rule_dir + "snakemake_rules/quality_control/GATK.rule"
+pre_align = ["snakemake_rules/quality_control/fastp.rule",
+             "snakemake_rules/quality_control/fastqc.rule"]
+
+align_qc = ["snakemake_rules/align/bwa_mem.rule",
+            "snakemake_rules/quality_control/picard.rule",
+            "snakemake_rules/quality_control/sambamba_depth.rule",
+            "snakemake_rules/quality_control/mosdepth.rule",
+            "snakemake_rules/quality_control/multiqc.rule",
+            "snakemake_rules/quality_control/GATK.rule"]
+
+config["rules"] = pre_align + align_qc
+
+for r in config["rules"]:
+    include: os.path.join(rule_dir + r)
 
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
@@ -77,7 +74,9 @@ if 'delivery' in config:
         output_files_ready.extend(get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict))
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
-    delivery_ready = os.path.join(get_result_dir(config), "delivery_report", config["analysis"]["case_id"] + "_delivery_ready.hk" )
+    delivery_ready = os.path.join(get_result_dir(config),
+                                  "delivery_report",
+                                  config["analysis"]["case_id"] + "_delivery_ready.hk" )
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready) 
 
