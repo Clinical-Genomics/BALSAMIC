@@ -76,7 +76,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
 
     default_rules_to_deliver = [
         "fastp", "multiqc", "vep_somatic", "vep_germline", "vep_stat",
-        "ngs_filter_vardict", "mergeBam_tumor", "mergeBam_normal", "cnvkit_paired", "cnvkit_single", "sentieon_dedup" 
+        "ngs_filter_vardict", "mergeBam_tumor", "mergeBam_normal",
+        "cnvkit_paired", "cnvkit_single", "sentieon_dedup"
     ]
 
     if not rules_to_deliver:
@@ -142,8 +143,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         delivery_file_ready_dict = json.load(fn)
 
     delivery_json = dict()
-    delivery_json["files"] = delivery_file_ready_dict 
-    
+    delivery_json["files"] = delivery_file_ready_dict
+
     # Add Housekeeper file to report
     delivery_json["files"].append({
         "path":
