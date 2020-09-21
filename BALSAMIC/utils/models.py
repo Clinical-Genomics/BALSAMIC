@@ -198,16 +198,9 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = BALSAMIC_VERSION
     config_creation_date: Optional[str]
-    entry_point: str
 
     class Config:
         validate_all = True
-
-    @validator("entry_point")
-    def entry_point_validator(cls, value) -> str:
-        "Validates entry point value"
-        assert value in ENTRY_POINTS, f"{value} is not a valid entry point."
-        return value
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
@@ -343,6 +336,7 @@ class BalsamicConfigModel(BaseModel):
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+        entry_point: str; variable to control entry point for analysis
 
     """
 
@@ -357,6 +351,13 @@ class BalsamicConfigModel(BaseModel):
     rule_directory: DirectoryPath = RULE_DIRECTORY
     bioinfo_tools: Optional[BioinfoToolsModel]
     panel: Optional[PanelModel]
+    entry_point: str
+
+    @validator("entry_point")
+    def entry_point_validator(cls, value) -> str:
+        "Validates entry point value"
+        assert value in ENTRY_POINTS, f"{value} is not a valid entry point."
+        return value
 
     @validator("reference")
     def abspath_as_str(cls, value):
