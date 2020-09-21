@@ -9,7 +9,7 @@ from pydantic.types import DirectoryPath, FilePath
 from BALSAMIC.utils.constants import (
     CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
     MUTATION_TYPE, RULE_DIRECTORY, BALSAMIC_VERSION, VALID_GENOME_VER,
-    VALID_REF_FORMAT)
+    VALID_REF_FORMAT, ENTRY_POINTS)
 
 
 class VCFAttributes(BaseModel):
