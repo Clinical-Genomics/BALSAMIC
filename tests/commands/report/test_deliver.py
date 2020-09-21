@@ -21,8 +21,7 @@ def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):
     assert actual_delivery_report.is_file()
 
 
-def test_deliver_tumor_normal_panel(
-        invoke_cli, tumor_normal_config, helpers):
+def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers):
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_normal_config)
 
@@ -38,10 +37,12 @@ def test_deliver_tumor_normal_panel(
     vep_result_dir = Path(helpers.result_dir, "vep")
     vep_result_dir.mkdir(parents=True, exist_ok=True)
     touch_vcf_delivery_file = Path(
-        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz")
+        vep_result_dir,
+        "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz")
     touch_vcf_delivery_file.touch()
     touch_vcf_delivery_file_index = Path(
-        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz.tbi")
+        vep_result_dir,
+        "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz.tbi")
     touch_vcf_delivery_file_index.touch()
 
     # Temporary files to be ignored by delivery
@@ -51,11 +52,9 @@ def test_deliver_tumor_normal_panel(
         vcf_result_dir, "CNV.somatic." + helpers.case_id + ".cnvkit.vcf.gz")
     touch_temp_no_delivery_file.touch()
 
-
     # WHEN running analysis
-    result = invoke_cli([
-        'report', 'deliver', '--sample-config', tumor_normal_config
-    ])
+    result = invoke_cli(
+        ['report', 'deliver', '--sample-config', tumor_normal_config])
 
     # THEN it should run without any error
     assert result.exit_code == 0

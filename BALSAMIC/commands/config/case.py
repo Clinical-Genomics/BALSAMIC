@@ -80,7 +80,8 @@ LOG = logging.getLogger(__name__)
               help="Fastq files for normal sample.")
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
-                quality_trim, reference_config, panel_bed,background_variants, singularity, analysis_dir, tumor, normal):
+                quality_trim, reference_config, panel_bed, background_variants,
+                singularity, analysis_dir, tumor, normal):
 
     try:
         samples = get_sample_dict(tumor, normal)
