@@ -29,9 +29,9 @@ rule sentieon_TNsnv_tumor_only:
     params:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
-        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNsnv_tumor_only')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
@@ -64,9 +64,9 @@ rule sentieon_TNhaplotyper_tumor_only:
     params:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
-        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
@@ -99,9 +99,9 @@ rule sentieon_TNscope_tumor_only:
     params:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
-        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     log: 
         vcf_dir + config["analysis"]["case_id"] + ".tnscope_tumor_only.log"

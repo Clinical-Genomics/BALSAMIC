@@ -14,8 +14,8 @@ rule sentieon_umi_tnscope:
     output:
          vcf = vcf_dir + '{sample}.TNscope.umi.vcf.gz',
     params:
-        sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
-        sentieon_lic = SENTIEON_LICENSE,
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
         algo = 'TNscope',
         tAF = '0.0005',
         TL = '0.5',
