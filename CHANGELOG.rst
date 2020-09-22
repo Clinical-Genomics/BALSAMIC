@@ -18,7 +18,7 @@ Changed
 * Fastp trimming is now a two-pass trimming and adapter trimming is always enabled. This might affect coverage slightly PR #422
 * All containers start with a clean environment #425
 * All Sentieon environment variables are now added to config when workflow executes #425
-* Branching model changed to gitflow
+* Branching model will be changed to gitflow
 
 [5.1.0]
 -------
