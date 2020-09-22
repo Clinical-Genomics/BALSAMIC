@@ -38,11 +38,11 @@ rule fastp:
         read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html",
-        read1_interm = temp(fastq_dir + "{sample}_1.interm.fastq.gz"),
-        read2_interm = temp(fastq_dir + "{sample}_2.interm.fastq.gz"),
-        json_out_interm = temp(fastq_dir + "{sample}_interm_fastp.json"),
-        html_out_interm = temp(fastq_dir + "{sample}_interm_fastp.html"),
     params:
+        read1_interm = fastq_dir + "{sample}_1.interm.fastq.gz",
+        read2_interm = fastq_dir + "{sample}_2.interm.fastq.gz",
+        json_out_interm = fastq_dir + "{sample}_interm_fastp.json",
+        html_out_interm = fastq_dir + "{sample}_interm_fastp.html",
         housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
         tmpdir = tmp_dir,
         fastq_dir = fastq_dir,
@@ -63,17 +63,17 @@ fastp \
 --thread {threads} \
 --in1 {input.read1} \
 --in2 {input.read2} \
---out1 {output.read1_interm} \
---out2 {output.read2_interm} \
---json {output.json_out_interm} \
---html {output.html_out_interm} \
+--out1 {params.read1_interm} \
+--out2 {params.read2_interm} \
+--json {params.json_out_interm} \
+--html {params.html_out_interm} \
 --overrepresentation_analysis \
 {params.qc} \
 {params.adapter};
 fastp \
 --thread {threads} \
---in1 {output.read1_interm} \
---in2 {output.read2_interm} \
+--in1 {params.read1_interm} \
+--in2 {params.read2_interm} \
 --out1 {output.read1} \
 --out2 {output.read2} \
 --json {output.json} \
@@ -84,4 +84,8 @@ fastp \
 --disable_trim_poly_g \
 --length_required {params.minimum_length} \
 {params.umi};
+rm {params.read1_interm};
+rm {params.read2_interm};
+rm {params.json_out_interm};
+rm {params.html_out_interm};
         """
