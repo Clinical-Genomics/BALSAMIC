@@ -1,16 +1,14 @@
-import re
 import json
 import logging
-import click
-import BALSAMIC
-
 from pathlib import Path
+
+import click
+
+from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
+                                get_bioinfo_tools_list, create_fastq_symlink,
+                                generate_graph)
+from BALSAMIC.utils.constants import (CONDA_ENV_PATH, VCF_DICT)
 from BALSAMIC.utils.models import BalsamicConfigModel
-from BALSAMIC.utils.cli import (CaptureStdout, get_snakefile, get_sample_dict,
-                                get_panel_chrom, get_bioinfo_tools_list,
-                                create_fastq_symlink, generate_graph)
-from BALSAMIC.utils.constants import (CONDA_ENV_PATH, CONDA_ENV_YAML,
-                                      RULE_DIRECTORY, VCF_DICT)
 
 LOG = logging.getLogger(__name__)
 
@@ -37,7 +35,7 @@ LOG = logging.getLogger(__name__)
               is_flag=True,
               help="Trim low quality reads in fastq")
 @click.option("--adapter-trim/--no-adapter-trim",
-              default=False,
+              default=True,
               show_default=True,
               is_flag=True,
               help="Trim adapters from reads in fastq")
