@@ -4,6 +4,7 @@
 
 Added
 ^^^^^
+* UMI workflow using Sentieon tools. Analysis run available via `balsamic run analysis --help` command. PR #359
 * VCFutils to create VCF from flat text file. This is for internal purpose to generate validation VCF. PR #349
 * Download option for hg38 (not validated) PR #407
 * Option to disable variant callers for WES runs. PR #417
