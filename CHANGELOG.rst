@@ -1,16 +1,34 @@
 
+[6.0.0]
+-------
+
+Added
+^^^^^
+* VCFutils to create VCF from flat text file. This is for internal purpose to generate validation VCF. PR #349
+* Download option for hg38 (not validated) PR #407
+* Option to disable variant callers for WES runs. PR #417
+
+Fixed
+^^^^^
+* Missing cyvcf2 dependency, and changed conda environment for base environment PR #413
+
+Changed
+^^^^^^^
+* COSMIC db for hg19 updated to v90 PR #407
+* Fastp trimming is now a two-pass trimming and adapter trimming is always enabled. This might affect coverage slightly PR #422
+* All containers start with a clean environment #425
+* All Sentieon environment variables are now added to config when workflow executes #425
+
 [5.1.0]
 -------
 
 Fixed
 ^^^^^
-* Vardict-java version fixed. This is due to bad dependency and releases available on conda. Anaconda is not yet update
-with vardict 1.8, but vardict-java 1.8 is there. This causes various random breaks with Vardict's TSV output. #403
+* Vardict-java version fixed. This is due to bad dependency and releases available on conda. Anaconda is not yet update with vardict 1.8, but vardict-java 1.8 is there. This causes various random breaks with Vardict's TSV output. #403
 
 Changed
 ^^^^^^^
 * Refactored Docker files a bit, preparation for decoupling #403
-
 
 Removed
 ^^^^^^^
