@@ -13,8 +13,8 @@ rule sentieon_umi_extract:
     output:
         ds_umi = umi_dir + '{sample}.umiextract.fastq.gz'
     params:
-        sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
-        sentieon_lic = SENTIEON_LICENSE,
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
         ds_params= ['-d', '3M2S+T,3M2S+T'],
         sample_id = '{sample}'
     log: 
@@ -39,8 +39,8 @@ rule sentieon_umi_align:
     output:
         align_umi = temp(umi_dir + '{sample}.umialign.sam')
     params:
-        sentieon_exec = SENTIEON_INSTALL_DIR + 'bin/sentieon',
-        sentieon_lic = SENTIEON_LICENSE,
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
         sheader = "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         ip_bases = '1000000',
         sample_id = '{sample}'
