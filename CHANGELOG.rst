@@ -12,6 +12,7 @@ Added
 Fixed
 ^^^^^
 * Missing cyvcf2 dependency, and changed conda environment for base environment PR #413
+* Missing numpy dependency PR #426
 
 Changed
 ^^^^^^^
