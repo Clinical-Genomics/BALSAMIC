@@ -12,4 +12,5 @@ jinja2
 networkx
 colorclass
 pydantic
+numpy
 cyvcf2<0.10.0
