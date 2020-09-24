@@ -464,7 +464,7 @@ def validate_input_pattern(filename, file_type="fastq"):
     An error is raised if sample name has invalid pattern """
 
     fq_pattern = re.compile(r"R_[12]" + "." + file_type + ".gz$")
-    sample_basename = Path(sample).name
+    sample_basename = Path(filename).name
 
     file_str = sample_basename[0:(
         fq_pattern.search(sample_basename).span()[0] + 1)]
