@@ -18,8 +18,8 @@ rule sentieon_align_sort:
     params:
         tmpdir = tmp_dir,
         header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_align_sort')
     log:
         bam_dir + "{sample}.bam.log"
@@ -48,8 +48,8 @@ rule sentieon_dedup:
     params:
         tmpdir = tmp_dir,
         housekeeper_id = {"id": "{sample}", "tags": "scout"},
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_dedup')
     log:
         bam_dir + "{sample}.dedup.bam.log"
@@ -80,8 +80,8 @@ rule sentieon_realign:
         bam = bam_dir + "{sample}.dedup.realign.bam",
     params:
         tmpdir = tmp_dir,
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_realign')
     log:
         bam_dir + "{sample}.dedup.realign.bam.log"
@@ -113,8 +113,8 @@ rule sentieon_base_calibration:
         qual_recal_plot = bam_dir + "{sample}.dedup.realign.recal.pdf",
     params:
         tmpdir = tmp_dir,
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_base_calibration')
     log:
         bam_dir + "{sample}.dedup.realign.recal.log"

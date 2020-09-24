@@ -1,18 +1,16 @@
-import re
 import json
 import logging
-import click
-import BALSAMIC
-
 from pathlib import Path
-from BALSAMIC.utils.models import BalsamicConfigModel
+
+import click
+
 from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
                                 get_bioinfo_tools_list, create_fastq_symlink,
                                 generate_graph)
 from BALSAMIC.utils.constants import (CONDA_ENV_PATH, ENTRY_POINTS, VCF_DICT)
+from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
-
 
 @click.command("case",
                short_help="Create a sample config file from input sample data")
@@ -36,7 +34,7 @@ LOG = logging.getLogger(__name__)
               is_flag=True,
               help="Trim low quality reads in fastq")
 @click.option("--adapter-trim/--no-adapter-trim",
-              default=False,
+              default=True,
               show_default=True,
               is_flag=True,
               help="Trim adapters from reads in fastq")

@@ -6,13 +6,12 @@ import subprocess
 import json
 import click
 
-# CLI commands and decorators
-from BALSAMIC.utils.cli import createDir
-from BALSAMIC.utils.cli import get_schedulerpy
-from BALSAMIC.utils.cli import get_snakefile, SnakeMake
-from BALSAMIC.utils.cli import get_config, get_fastq_bind_path
-from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT
 from pathlib import Path
+
+# CLI commands and decorators
+from BALSAMIC.utils.cli import (createDir, get_schedulerpy, get_snakefile,
+                                SnakeMake, get_config, get_fastq_bind_path)
+from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT
 
 LOG = logging.getLogger(__name__)
 

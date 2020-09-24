@@ -115,7 +115,7 @@ class SnakeMake:
             snakemake_config_key_value = f' --config disable_variant_caller={self.disable_variant_caller} '
 
         if self.use_singularity:
-            self.singularity_arg = "--use-singularity --singularity-args '"
+            self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
             for bind_path in self.singularity_bind:
                 self.singularity_arg += " --bind {}:{}".format(
                     bind_path, bind_path)
@@ -243,7 +243,7 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
 
     p = Path(__file__).parents[1]
     if analysis_type == "qc":
-        snakefile = Path(p, "workflows", "Alignment")
+        snakefile = Path(p, "workflows", "Alignment.smk")
     elif analysis_type in ["single", "paired"]:
         snakefile = Path(p, "workflows", "VariantCalling.smk")
         if sequencing_type == "wgs":

@@ -20,8 +20,8 @@ rule sentieon_TN_corealign:
         bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam"
     params:
         tmpdir = tmp_dir,
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TN_corealign')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".corealign.log"
@@ -54,8 +54,8 @@ rule sentieon_TNsnv:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNsnv')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
@@ -88,8 +88,8 @@ rule sentieon_TNhaplotyper:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNhaplotyper')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnhaplotyper.log"
@@ -125,9 +125,9 @@ rule sentieon_TNscope:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
-        variant_setting = "--min_init_normal_lod 0.5 --min_normal_lod 1.0 --min_init_tumor_lod 1.0 --min_tumor_lod 8"
+        variant_setting = "--min_init_normal_lod 0.5 --min_normal_lod 1.0 --min_init_tumor_lod 1.0 --min_tumor_lod 8",
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNscope')
     log: 
         vcf_dir + config["analysis"]["case_id"] + ".tnscope.log"
@@ -156,9 +156,9 @@ rule sentioen_filter_TNscope:
         tnscope_filtered_vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     params:
         tmpdir = tmp_dir,
-        sentieon_exec = SENTIEON_INSTALL_DIR + "/bin/sentieon",
-        sentieon_lic = SENTIEON_LICENSE, 
-        sentieon_ml_tnscope = SENTIEON_TNSCOPE
+        sentieon_ml_tnscope = SENTIEON_TNSCOPE,
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_filter_TNscope')
     log:
         vcf_dir + config["analysis"]["case_id"] + ".tnscope.filtered.log",

@@ -45,8 +45,8 @@ if len(cluster_config.keys()) == 0:
     cluster_config = config
 
 try:
-    SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
-    SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
+    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
 except Exception as error:
     sentieon = False
     LOG.warn("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
