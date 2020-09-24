@@ -476,11 +476,11 @@ def get_sample_dict(tumor, normal) -> dict:
     samples = {}
     if normal:
         for sample in normal:
-            key, val = get_sample_names(sample, "normal")
+            key, val = get_sample_names(sample, "normal", file_type="FastQ")
             samples[key] = val
 
     for sample in tumor:
-        key, val = get_sample_names(sample, "tumor")
+        key, val = get_sample_names(sample, "tumor", file_type="FastQ")
         samples[key] = val
     return samples
 
