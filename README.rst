@@ -30,7 +30,7 @@ Snakemake cli given that there is a proper config file created.
    * - Author
      - Hassan Foroughi Asl
    * - Development model
-     - Github Flow, release branch
+     - Gitflow
    * - Build status
      - |travis_status_badge|_
    * - Container latest release status
