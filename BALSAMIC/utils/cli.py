@@ -420,18 +420,6 @@ def merge_json(*args):
     return json_out
 
 
-def validate_fastq_pattern(sample):
-    """Finds the correct filename prefix from file path, and returns it.
-    An error is raised if sample name has invalid pattern """
-
-    fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
-    sample_basename = Path(sample).name
-
-    file_str = sample_basename[0:(
-        fq_pattern.search(sample_basename).span()[0] + 1)]
-    return file_str
-
-
 def get_panel_chrom(panel_bed) -> list:
     """Returns a set of chromosomes present in PANEL BED"""
 
@@ -471,6 +459,18 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
     return bioinfo_tools
 
 
+def validate_input_pattern(filename, file_type="fastq"):
+    """Finds the correct filename prefix from file path, and returns it.
+    An error is raised if sample name has invalid pattern """
+
+    fq_pattern = re.compile(r"R_[12]" + "." + file_type + ".gz$")
+    sample_basename = Path(sample).name
+
+    file_str = sample_basename[0:(
+        fq_pattern.search(sample_basename).span()[0] + 1)]
+    return file_str
+
+
 def get_sample_dict(tumor, normal) -> dict:
     """Concatenates sample dicts for all provided files"""
     samples = {}
@@ -485,9 +485,9 @@ def get_sample_dict(tumor, normal) -> dict:
     return samples
 
 
-def get_sample_names(filename, sample_type):
+def get_sample_names(filename, sample_type, file_type="FastQ"):
     """Creates a dict with sample prefix, sample type, and readpair suffix"""
-    file_str = validate_fastq_pattern(filename)
+    file_str = validate_input_pattern(filename=filename, file_type=file_type)
     if file_str:
         return (
             file_str,
@@ -506,7 +506,7 @@ def create_fastq_symlink(casefiles, symlink_dir: Path):
 
     for filename in casefiles:
         parent_dir = Path(filename).parents[0]
-        file_str = validate_fastq_pattern(filename)
+        file_str = validate_input_pattern(filename)
         for f in parent_dir.rglob(f"*{file_str}*.fastq.gz"):
             try:
                 LOG.info(

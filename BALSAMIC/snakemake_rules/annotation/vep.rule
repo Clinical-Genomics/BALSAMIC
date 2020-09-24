@@ -17,6 +17,14 @@ if "entry_point" in config:
         vep_output["vcf_pass"] = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz"
         tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz"
         benchmark_file = benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
+    if config["entry_point"] == "VCF":
+        vep_input["vcf"] = vcf_dir + get_entry_point_input("VCF")
+        vep_input["header"] = vcf_dir + get_entry_point_input("VCF")
+        vep_output["vcf_all"] = vep_dir + construct_vep_output("all")
+        vep_output["vcf_summary"] = vep_dir + construct_vep_output("all") + "_summary.html"
+        vep_output["vcf_pass"] = vep_dir + construct_vep_output("pass")
+        tmpvcf = vep_dir + construct_vep_output("tmp")
+        benchmark_file = benchmark_dir + 'vep_' + get_entry_point_input("VCF") + ".tsv"
 
 rule vep_somatic:
   input:

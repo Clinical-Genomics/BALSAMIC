@@ -20,7 +20,7 @@ from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
     get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
-    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
+    validate_input_pattern, get_panel_chrom, get_bioinfo_tools_list,
     create_fastq_symlink, get_fastq_bind_path, singularity, get_file_extension)
 
 from BALSAMIC.utils.rule import (
@@ -658,27 +658,27 @@ def test_validate_fastq_pattern():
     fastq_path_r1 = "/home/analysis/dummy_tumor_R_1.fastq.gz"
     fastq_path_r2 = "/home/analysis/dummy_normal_R_2.fastq.gz"
     #THEN it should return the correct prefix
-    assert validate_fastq_pattern(fastq_path_r1) == "dummy_tumor_R"
-    assert validate_fastq_pattern(fastq_path_r2) == "dummy_normal_R"
+    assert validate_input_pattern(fastq_path_r1) == "dummy_tumor_R"
+    assert validate_input_pattern(fastq_path_r2) == "dummy_normal_R"
 
     with pytest.raises(AttributeError) as excinfo:
         #GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_1 = "/home/analysis/dummy_tumor.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_1)
+        validate_input_pattern(bad_fastq_path_1)
         #THEN AttributeError is raised
     assert excinfo.value
 
     with pytest.raises(AttributeError) as excinfo:
         #GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_2 = "/home/analysis/dummy_tumor_R3.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_2)
+        validate_input_pattern(bad_fastq_path_2)
         #THEN AttributeError is raised
     assert excinfo.value
 
     with pytest.raises(AttributeError) as excinfo:
         #GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_3 = "/home/analysis/dummy_tumor_R_2.bam"
-        validate_fastq_pattern(bad_fastq_path_3)
+        validate_input_pattern(bad_fastq_path_3)
         #THEN AttributeError is raised
     assert excinfo.value
 

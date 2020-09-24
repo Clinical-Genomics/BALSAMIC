@@ -259,7 +259,7 @@ class AnalysisModel(BaseModel):
         return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
-class SampleInstanceModel(BaseModel):
+class FastqInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis
     
     Attributes:
@@ -343,7 +343,7 @@ class BalsamicConfigModel(BaseModel):
     QC: QCModel
     vcf: VCFModel
     analysis: AnalysisModel
-    samples: Dict[str, SampleInstanceModel]
+    samples: Dict[str, FastqInstanceModel]
     reference: Dict[str, Path]
     singularity: FilePath
     background_variants: Optional[FilePath]

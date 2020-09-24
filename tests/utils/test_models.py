@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from BALSAMIC.utils.models import (VCFAttributes, VarCallerFilter, QCModel,
                                    VarcallerAttribute, VCFModel, AnalysisModel,
-                                   SampleInstanceModel, BioinfoToolsModel,
+                                   FastqInstanceModel, BioinfoToolsModel,
                                    ReferenceUrlsModel, ReferenceMeta)
 
 
@@ -265,7 +265,7 @@ def test_sample_instance_model():
         "type": "normal",
     }
     #THEN we can successully create a config dict
-    assert SampleInstanceModel.parse_obj(valid_args)
+    assert FastqInstanceModel.parse_obj(valid_args)
 
     #GIVEN invalid input arguments
     invalid_args = {
@@ -274,5 +274,5 @@ def test_sample_instance_model():
     }
     #THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
-        SampleInstanceModel.parse_obj(invalid_args)
+        FastqInstanceModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
