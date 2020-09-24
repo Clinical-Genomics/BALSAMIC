@@ -464,10 +464,10 @@ def validate_input_pattern(filename, file_type="fastq"):
     An error is raised if sample name has invalid pattern """
 
     fq_pattern = re.compile(r"R_[12]" + "." + file_type + ".gz$")
-    sample_basename = Path(filename).name
+    file_basename = Path(filename).name
 
-    file_str = sample_basename[0:(
-        fq_pattern.search(sample_basename).span()[0] + 1)]
+    file_str = file_basename[0:(
+        fq_pattern.search(file_basename).span()[0] + 1)]
     return file_str
 
 
@@ -476,16 +476,16 @@ def get_sample_dict(tumor, normal) -> dict:
     samples = {}
     if normal:
         for sample in normal:
-            key, val = get_sample_names(sample, "normal", file_type="FastQ")
+            key, val = get_sample_names(sample, "normal", file_type="fastq")
             samples[key] = val
 
     for sample in tumor:
-        key, val = get_sample_names(sample, "tumor", file_type="FastQ")
+        key, val = get_sample_names(sample, "tumor", file_type="fastq")
         samples[key] = val
     return samples
 
 
-def get_sample_names(filename, sample_type, file_type="FastQ"):
+def get_sample_names(filename, sample_type, file_type="fastq"):
     """Creates a dict with sample prefix, sample type, and readpair suffix"""
     file_str = validate_input_pattern(filename=filename, file_type=file_type)
     if file_str:
