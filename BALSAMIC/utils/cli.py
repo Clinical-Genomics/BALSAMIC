@@ -466,8 +466,8 @@ def validate_input_pattern(filename, file_type="fastq"):
     fq_pattern = re.compile(r"R_[12]" + "." + file_type + ".gz$")
     file_basename = Path(filename).name
 
-    file_str = file_basename[0:(
-        fq_pattern.search(file_basename).span()[0] + 1)]
+    file_str = file_basename[0:(fq_pattern.search(file_basename).span()[0] +
+                                1)]
     return file_str
 
 
