@@ -2,7 +2,7 @@
 name: Report failed analysis
 about: Troubleshooting errors in Balsamic
 title: "[ Failed Analysis ]"
-labels: Bug
+labels: Bug, Failed Analysis
 assignees: ''
 
 ---
