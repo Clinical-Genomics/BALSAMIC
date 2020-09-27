@@ -117,10 +117,6 @@ if "disable_variant_caller" in config:
 
 config["rules"] = align_rules + qc_rules
 
-
-for r in config["rules"]:
-    include: os.path.join(rule_dir + r)
-
 # Define common and analysis specific outputs
 quality_control_results = [ result_dir + "qc/" + "multiqc_report.html" ]
 
@@ -177,6 +173,9 @@ if 'delivery' in config:
                                   config["analysis"]["case_id"] + "_delivery_ready.hk" )
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
+
+for r in config["rules"]:
+    include: os.path.join(rule_dir + r)
 
 rule all:
     input:
