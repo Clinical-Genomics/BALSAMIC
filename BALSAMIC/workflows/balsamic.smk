@@ -121,7 +121,7 @@ config["rules"] = align_rules + qc_rules
 quality_control_results = [ result_dir + "qc/" + "multiqc_report.html" ]
 
 analysis_specific_results = []
-if config['analysis']["analysis_type"] in ["paried", "single"]:
+if config['analysis']["analysis_type"] in ["paired", "single"]:
     config["rules"] = config["rules"] + variantcalling_rules + annotation_rules
     analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                         vcf=get_vcf(config, germline_caller, config["samples"])),
