@@ -141,7 +141,7 @@ if 'delivery' in config:
                       "allow_missing": True
                     }
 
-    if config['analysis']["analysis_type"] in ["paried", "single"]:
+    if config['analysis']["analysis_type"] in ["paired", "single"]:
         wildcard_dict.update({"var_type": ["CNV", "SNV", "SV"],
                               "var_class": ["somatic", "germline"],
                               "var_caller": somatic_caller + germline_caller,
