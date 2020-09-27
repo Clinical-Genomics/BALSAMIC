@@ -242,12 +242,10 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     """
 
     p = Path(__file__).parents[1]
-    if analysis_type == "qc":
-        snakefile = Path(p, "workflows", "Alignment.smk")
-    elif analysis_type in ["single", "paired"]:
-        snakefile = Path(p, "workflows", "VariantCalling.smk")
-        if sequencing_type == "wgs":
-            snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
+    snakefile = Path(p, "workflows", "balsamic.smk")
+    if analysis_type in ["single", "paired", "qc"
+                         ] and sequencing_type == "wgs":
+        snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
     elif analysis_type == "generate_ref":
         snakefile = Path(p, 'workflows', 'GenerateRef')
     elif analysis_type == "umi":
