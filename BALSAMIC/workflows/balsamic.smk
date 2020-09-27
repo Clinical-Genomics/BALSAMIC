@@ -6,6 +6,7 @@ import logging
 
 from yapf.yapflib.yapf_api import FormatFile
 
+from snakemake.exceptions import RuleException, WorkflowError
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_variant_callers
 from BALSAMIC.utils.rule import get_rule_output
