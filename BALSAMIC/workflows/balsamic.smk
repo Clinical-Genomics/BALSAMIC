@@ -101,10 +101,9 @@ else:
     if sentieon:
         germline_caller.append("dnascope")
 
-
+somatic_caller_sv = ['manta', 'cnvkit']
 if config["analysis"]["sequence_type"] == "wgs":
     somatic_caller_snv = ['tnhaplotyper','tnsnv', 'tnscope']
-    somatic_caller_sv = ['manta', 'cnvkit']
     if config['analysis']['analysis_type'] == "paired":
         variant_calling = ["snakemake_rules/sentieon/sentieon_tn_varcall.rule",
                            "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
@@ -115,7 +114,6 @@ if config["analysis"]["sequence_type"] == "wgs":
                            "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
                            "snakemake_rules/variant_calling/cnvkit_single.rule"]
 else:
-    somatic_caller_sv = ["manta", "cnvkit"]
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     if config['analysis']['analysis_type'] == "paired":
 
