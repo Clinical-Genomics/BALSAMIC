@@ -20,6 +20,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     multiqc_input.extend(expand(qc_dir + "{sample}_picard_wgs_metrics.txt", sample=config["samples"]))
     multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard))
 
+    # Sentieon metrics
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=config["samples"]))
     # dir list
     dir_list = [qc_dir]
 
