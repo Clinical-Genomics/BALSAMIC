@@ -135,6 +135,9 @@ if config['analysis']['analysis_type'] == "single":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
+for r in config["rules"]:
+    include: os.path.join(rule_dir + r)
+
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
                       "case_name": config["analysis"]["case_id"],
@@ -173,9 +176,6 @@ if 'delivery' in config:
                                   config["analysis"]["case_id"] + "_delivery_ready.hk" )
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
-
-for r in config["rules"]:
-    include: os.path.join(rule_dir + r)
 
 rule all:
     input:
