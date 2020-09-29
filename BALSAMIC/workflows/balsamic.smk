@@ -152,7 +152,7 @@ else:
 
         somatic_caller_snv = somatic_caller_snv + sentieon_callers
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
+somatic_caller = somatic_caller_snv + somatic_caller_sv
 if "disable_variant_caller" in config:
     somatic_caller.remove(config["disable_variant_caller"])
 
