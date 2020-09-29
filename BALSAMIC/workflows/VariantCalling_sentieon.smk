@@ -9,9 +9,7 @@ from yapf.yapflib.yapf_api import FormatFile
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import get_rule_output
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
-from BALSAMIC import __version__ as bv
 
 shell.prefix("set -eo pipefail; ")
 
@@ -35,10 +33,10 @@ vep_dir = get_result_dir(config) + "/vep/"
 singularity_image = config['singularity']['image'] 
 
 try:
-    SENTIEON_LICENSE = os.environ["SENTIEON_LICENSE"]
-    SENTIEON_INSTALL_DIR = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
+    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
 except Exception as error:
-    print("ERROR: Set Environment variable to run this pipeline.")
+    LOG.error("ERROR: Set SENTIEON_LICENSE and SENTIEON_INSTALL_DIR environment variable to run this pipeline.")
     raise
 
 SENTIEON_DNASCOPE = rule_dir + 'assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model'

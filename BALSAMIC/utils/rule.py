@@ -5,6 +5,9 @@ from pathlib import Path
 import snakemake
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import find_file_index
+from BALSAMIC.utils.constants import (MUTATION_TYPE, MUTATION_CLASS,
+                                      WORKFLOW_SOLUTION, ANALYSIS_TYPES)
+from BALSAMIC.utils.exc import WorkflowRunError
 
 
 def get_chrom(panelfile):
@@ -30,6 +33,51 @@ def get_vcf(config, var_caller, sample):
             vcf.append(config["vcf"][v]["type"] + "." +
                        config["vcf"][v]["mutation"] + "." + s + "." + v)
     return vcf
+
+
+def get_variant_callers(config, mutation_type: str, mutation_class: str,
+                        analysis_type: str, workflow_solution: str):
+    """ Get list of variant callers for a given list of input
+
+    Args:
+        config: A validated dictionary of case_config
+        mutation_type: A mutation type string, e.g. SNV
+        mutation_class: A mutation class string, e.g. somatic
+        analysis_type: A analysis type string, e.g. paired
+        workflow_solution: A workflow type string, e.g. BALSAMIC
+
+    Returns:
+        A list variant caller names extracted from config
+
+    Raises:
+        WorkflowRunError if mutation_type, mutation_class, analysis_type, or workflow_solution do not have valid value
+    """
+    valid_variant_callers = set()
+    if mutation_type not in MUTATION_TYPE:
+        raise WorkflowRunError(
+            f"{mutation_type} is not a valid mutation type.")
+
+    if workflow_solution not in WORKFLOW_SOLUTION:
+        raise WorkflowRunError(
+            f"{workflow_solution} is not a valid workflow solution.")
+
+    if analysis_type not in ANALYSIS_TYPES:
+        raise WorkflowRunError(
+            f"{analysis_type} is not a valid analysis type.")
+
+    if mutation_class not in MUTATION_CLASS:
+        raise WorkflowRunError(
+            f"{mutation_class} is not a valid mutation class.")
+
+    for variant_caller_name, variant_caller_params in config["vcf"].items():
+        if mutation_type in variant_caller_params.get(
+                "type") and mutation_class in variant_caller_params.get(
+                    "mutation") and analysis_type in variant_caller_params.get(
+                        "analysis_type"
+                    ) and workflow_solution in variant_caller_params.get(
+                        "workflow_solution"):
+            valid_variant_callers.add(variant_caller_name)
+    return list(valid_variant_callers)
 
 
 def get_sample_type(sample, bio_type):
@@ -152,9 +200,9 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
                 tags=base_tags,
                 output_file_wildcards=output_file_wildcards)
 
-            # Return empty string if delivery_id is not resolved. 
+            # Return empty string if delivery_id is not resolved.
             # This can happen when wildcard from one rule tries to match with a file
-            # from another rule. example: vep_somatic might pick up ngs_filter_vardict files 
+            # from another rule. example: vep_somatic might pick up ngs_filter_vardict files
             pattern = re.compile(r"{([^}\.[!:]+)")
             if pattern.findall(delivery_id):
                 continue
@@ -164,20 +212,27 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             file_tags = base_tags + [composit_tag]
 
             # replace all instsances of "_" with "-", since housekeeper doesn't like _
-            file_tags = [t.replace("_","-") for t in file_tags]
+            file_tags = [t.replace("_", "-") for t in file_tags]
 
-            output_files.append((file_to_store, file_to_store_index, rule_name,
-                                 ",".join(file_tags), delivery_id, file_extension))
+            output_files.append(
+                (file_to_store, file_to_store_index, rule_name,
+                 ",".join(file_tags), delivery_id, file_extension))
 
             if file_to_store_index:
                 for file_index in file_to_store_index:
                     # Create a composit tag from housekeeper tag and named output
-                    composit_tag = "-".join([housekeeper["tags"], output_name, "index"])
+                    composit_tag = "-".join(
+                        [housekeeper["tags"], output_name, "index"])
                     file_index_tags = base_tags + [composit_tag]
 
                     # replace all instsances of "_" with "-", since housekeeper doesn't like _
-                    file_index_tags = [t.replace("_","-") for t in file_index_tags]
-                    output_files.append((file_index, str(), rule_name, ",".join(file_index_tags), delivery_id, get_file_extension(file_index)))
+                    file_index_tags = [
+                        t.replace("_", "-") for t in file_index_tags
+                    ]
+                    output_files.append(
+                        (file_index, str(), rule_name,
+                         ",".join(file_index_tags), delivery_id,
+                         get_file_extension(file_index)))
 
     return output_files
 
@@ -208,7 +263,8 @@ def get_delivery_id(id_candidate: str, file_to_store: str, tags: list,
     return delivery_id
 
 
-def get_reference_output_files(reference_files_dict: dict, file_type: str) -> list:
+def get_reference_output_files(reference_files_dict: dict,
+                               file_type: str) -> list:
     """ Returns list of files matching a file_type from reference files
 
     Args:
@@ -223,4 +279,3 @@ def get_reference_output_files(reference_files_dict: dict, file_type: str) -> li
         if reference_item['file_type'] == file_type:
             ref_vcf_list.append(reference_item['output_file'])
     return ref_vcf_list
-    

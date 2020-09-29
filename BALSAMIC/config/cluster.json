@@ -11,6 +11,10 @@
         "time": "00:15:00",
         "n": 1
     },
+    "fastp": {
+        "time": "10:00:00",
+        "n": 12
+    },
     "RealignerTargetCreator": {
         "time": "10:00:00",
         "n": 10
