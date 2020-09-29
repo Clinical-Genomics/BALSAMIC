@@ -52,7 +52,7 @@ except KeyError as error:
     sentieon = False
     LOG.warning("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
 
-if config["analysis"]["sequence_type"] == "wgs" and not sentieon:
+if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
     LOG.error("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
     raise BalsamicError
 
@@ -61,7 +61,7 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # Define set of rules
-if config["analysis"]["sequence_type"] is not "wgs":
+if config["analysis"]["sequencing_type"] is not "wgs":
     qc_rules = [
       "snakemake_rules/quality_control/fastp.rule",
       "snakemake_rules/quality_control/fastqc.rule",
@@ -76,7 +76,7 @@ if config["analysis"]["sequence_type"] is not "wgs":
       "snakemake_rules/align/bwa_mem.rule"
       ]
 
-if config["analysis"]["sequence_type"] == "wgs":
+if config["analysis"]["sequencing_type"] == "wgs":
     qc_rules = ["snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/sentieon/sentieon_qc_metrics.rule",
                 "snakemake_rules/quality_control/picard_wgs.rule",
@@ -88,7 +88,7 @@ annotation_rules = [
   "snakemake_rules/annotation/vep.rule"
   ]
 
-if config["analysis"]["sequence_type"] == "wgs":
+if config["analysis"]["sequencing_type"] == "wgs":
     variantcalling_rules = ["snakemake_rules/sentieon/sentieon_germline.rule"]
     germline_caller = ["dnascope"]
 else:
@@ -102,7 +102,7 @@ else:
         germline_caller.append("dnascope")
 
 somatic_caller_sv = ['manta', 'cnvkit']
-if config["analysis"]["sequence_type"] == "wgs":
+if config["analysis"]["sequencing_type"] == "wgs":
     somatic_caller_snv = ['tnhaplotyper','tnsnv', 'tnscope']
     if config['analysis']['analysis_type'] == "paired":
         variant_calling = ["snakemake_rules/sentieon/sentieon_tn_varcall.rule",
