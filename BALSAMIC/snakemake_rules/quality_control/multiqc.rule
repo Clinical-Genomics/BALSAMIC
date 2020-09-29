@@ -12,6 +12,9 @@ multiqc_input = []
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':
+    # fastqc metrics
+    multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
+
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=config["samples"]))
     multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=config["samples"]))
