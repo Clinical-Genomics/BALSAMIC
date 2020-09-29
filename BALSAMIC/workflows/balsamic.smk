@@ -4,6 +4,8 @@
 import os
 import logging
 
+from pathlib import Path
+
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
@@ -13,14 +15,13 @@ from BALSAMIC.utils.rule import get_variant_callers
 from BALSAMIC.utils.rule import get_rule_output
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
-from BALSAMIC.utils.constants import SENTIEON_DNASCOPE,SENTIEON_TNSCOPE
+from BALSAMIC.utils.constants import SENTIEON_DNASCOPE,SENTIEON_TNSCOPE, RULE_DIRECTORY
 
 shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
 
 tmp_dir = os.path.join(get_result_dir(config), "tmp")
-rule_dir = config["rule_directory"]
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
@@ -180,7 +181,7 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
 for r in config["rules"]:
-    include: os.path.join(rule_dir, r)
+    include: Path(RULE_DIRECTORY, r).as_posix()
 
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
