@@ -333,7 +333,7 @@ class BalsamicConfigModel(BaseModel):
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
         SENTIEON_INSTALL_DIR:Field(str); Prefix to sentieon installation directory
-	SENTIEON_LICENSE:Field(str); sentieon license number
+        SENTIEON_LICENSE:Field(str); sentieon license number
 	singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found

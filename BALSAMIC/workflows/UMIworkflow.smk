@@ -64,9 +64,6 @@ VAR_CALLER = ['TNscope','vardict']
 STEPS = ['umialign','consensusalign']
 
 # Define outputs
-analysis_output = [expand(vcf_dir + "{sample}.{var_caller}.umi.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER), expand(vep_dir + "{sample}.{var_caller}.umi.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=['all','pass']), expand(table_dir + "{sample}.{var_caller}.umi.AFtable.txt", sample=SAMPLES, var_caller=VAR_CALLER)]
-
-
 analysis_output = [ expand(vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, step = STEPS),
 expand(vep_dir + "{sample}.{var_caller}.umi.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=['all','pass']),
 expand(qc_dir + '{sample}.{step}.umimetrics', sample=SAMPLES, step=STEPS),
