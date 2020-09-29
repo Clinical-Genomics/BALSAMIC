@@ -132,6 +132,7 @@ else:
                                                  mutation_type="SNV",
                                                  mutation_class="somatic")
 
+        somatic_caller_snv = somatic_caller_snv + sentieon_callers
     else:
 
         annotation_rules.append("snakemake_rules/annotation/varcaller_filter.rule")
@@ -148,6 +149,8 @@ else:
                                                  workflow_solution="BALSAMIC",
                                                  mutation_type="SNV",
                                                  mutation_class="somatic")
+
+        somatic_caller_snv = somatic_caller_snv + sentieon_callers
 
 somatic_caller = somatic_caller_snv + somatic_caller_sv + sentieon_callers
 if "disable_variant_caller" in config:
