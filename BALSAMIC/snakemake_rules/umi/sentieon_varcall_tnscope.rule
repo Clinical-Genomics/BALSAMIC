@@ -22,7 +22,7 @@ rule sentieon_umi_tnscope:
         detect = 'sv',
         error_rate = '5',
         prune_factor = '3',
-        sample_id = '{sample}.{step}'
+        sample_id = '{sample}'
     threads: get_threads(cluster_config, 'sentieon_umi_tnscope')
     log: 
         log_dir + '{sample}.{step}.varcall.TNscope.log'

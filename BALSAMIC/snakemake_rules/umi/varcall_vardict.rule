@@ -13,13 +13,13 @@ rule vardict:
     output:
          vardict = vcf_dir + '{sample}.vardict.{step}.vcf.gz',
     params:
-        conda = get_conda_env(config["conda_env_yaml"],'vardict_tumor_only'),
+        conda = get_conda_env(config["conda_env_yaml"],'vardict'),
         af = "0.0005",
         sample_id = '{sample}.{step}',
         vardict = "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0",
         var2vcf = '-E'
     singularity: singularity_image
-    threads: get_threads(cluster_config, 'vardict')
+    threads: get_threads(cluster_config, 'vardict_tumor_only')
     log:
         log_dir + '{sample}.{step}.varcall.vardict.log'
     benchmark:
