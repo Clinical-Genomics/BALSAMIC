@@ -3,7 +3,7 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
-from BALSAMIC.utils.umiPlots import get_densityplot
+from BALSAMIC.utils.umiplots import get_densityplot
 
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
 rule picard_umiaware:
@@ -113,5 +113,5 @@ rule density_Plots:
     threads:
         get_threads(cluster_config, 'density_Plots')
     run:
-        get_densityplot(input.table1, input.table2, output.AF_plot):1
+        get_densityplot(input.table1, input.table2, output.AF_plot)
 
