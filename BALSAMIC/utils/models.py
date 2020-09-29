@@ -332,7 +332,9 @@ class BalsamicConfigModel(BaseModel):
         reference : Field(Dict); dictionary containign paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
-        singularity : Field(Path); path to singularity container of BALSAMIC
+        SENTIEON_INSTALL_DIR:Field(str); Prefix to sentieon installation directory
+	SENTIEON_LICENSE:Field(str); sentieon license number
+	singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
@@ -345,6 +347,8 @@ class BalsamicConfigModel(BaseModel):
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: FilePath
+    SENTIEON_INSTALL_DIR: Optional[str]
+    SENTIEON_LICENSE:Optional[str]
     background_variants: Optional[FilePath]
     conda_env_yaml: FilePath = CONDA_ENV_YAML
     rule_directory: DirectoryPath = RULE_DIRECTORY
