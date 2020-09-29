@@ -19,7 +19,7 @@ rule vep_umi:
         default_options = '--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite',
         sample_id = '{sample}.consensusalign',
         var_caller = '{var_caller}'
-    threads: get_threads(cluster_config, 'vep_somatic')
+    threads: get_threads(cluster_config, 'vep_umi')
     singularity: singularity_image
     log:
         log_dir + '{sample}.consensusalign.{var_caller}_vep.log'

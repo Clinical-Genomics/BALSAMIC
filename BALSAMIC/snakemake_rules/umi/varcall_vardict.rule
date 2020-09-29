@@ -13,7 +13,7 @@ rule vardict:
     output:
          vardict = vcf_dir + '{sample}.vardict.{step}.vcf.gz',
     params:
-        conda = get_conda_env(config["conda_env_yaml"],'vardict'),
+        conda = get_conda_env(config["conda_env_yaml"],'vardict_tumor_only'),
         af = "0.0005",
         sample_id = '{sample}.{step}',
         vardict = "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0",

@@ -27,7 +27,9 @@ rule picard_umiaware:
         get_threads(cluster_config, 'picard_umiaware')
     shell:
         "source activate {params.conda}\n"
-        "picard UmiAwareMarkDuplicatesWithMateCigar I={input.bam} O={output.bam} M={output.duplicates} UMI_METRICS={output.umimetrics}\n"
+        "picard UmiAwareMarkDuplicatesWithMateCigar "
+            "I={input.bam} O={output.bam} M={output.duplicates} "
+            "UMI_METRICS={output.umimetrics} &> {log}\n"
 
 
 ## CollectHSmetrics - median target coverage-required
@@ -43,7 +45,7 @@ rule CollectHsMetrics_umi:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = '{sample}_{step}'
-    threads: get_threads(cluster_config, 'CollectHsMetrics_umi')
+    threads: get_threads(cluster_config, 'CollectHsMetrics')
     singularity: singularity_image
     benchmark:
         benchmark_dir + "{sample}.{step}.collect_hsmetrics.tsv"
@@ -52,7 +54,7 @@ rule CollectHsMetrics_umi:
     shell:
         "source activate {params.conda}\n"
         "picard BedToIntervalList I={input.bed} O={input.bam}.picard.bedintervals SD={input.fadict}\n"
-        "picard CollectHsMetrics BI={input.bam}.picard.bedintervals TI={input.bam}.picard.bedintervals I={input.bam} O={output.mrkdup} "
+        "picard CollectHsMetrics BI={input.bam}.picard.bedintervals TI={input.bam}.picard.bedintervals I={input.bam} O={output.mrkdup} &> {log}"
 
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
 rule mean_family_depth:
@@ -89,6 +91,8 @@ rule noise_AF:
         sample_id = '{sample}'
     threads:
         get_threads(cluster_config, 'noise_AF')
+    benchmark: 
+        benchmark_dir + "{sample}.noiseAF.tsv"
     message: "calculate noise AF values for {params.sample_id}"
     shell:
         "bcftools query -f \"%CHROM:%POS:REF->%ALT\\t[%AF]\\n\" {input.umiextract} > {output.umiextractAF}\n"
