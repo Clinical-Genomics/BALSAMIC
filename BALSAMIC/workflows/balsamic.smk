@@ -105,14 +105,14 @@ somatic_caller_sv = ['manta', 'cnvkit']
 if config["analysis"]["sequencing_type"] == "wgs":
     somatic_caller_snv = ['tnhaplotyper','tnsnv', 'tnscope']
     if config['analysis']['analysis_type'] == "paired":
-        variant_calling = ["snakemake_rules/sentieon/sentieon_tn_varcall.rule",
+        variantcalling_rules.extend(["snakemake_rules/sentieon/sentieon_tn_varcall.rule",
                            "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-                           "snakemake_rules/variant_calling/cnvkit_paired.rule"]
+                           "snakemake_rules/variant_calling/cnvkit_paired.rule"])
 
     else:
-        variant_calling = ["snakemake_rules/sentieon/sentieon_t_varcall.rule",
+        variantcalling_rules.extend(["snakemake_rules/sentieon/sentieon_t_varcall.rule",
                            "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
-                           "snakemake_rules/variant_calling/cnvkit_single.rule"]
+                           "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     if config['analysis']['analysis_type'] == "paired":
