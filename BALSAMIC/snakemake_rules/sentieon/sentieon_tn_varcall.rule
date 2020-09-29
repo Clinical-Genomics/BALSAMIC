@@ -156,7 +156,7 @@ rule sentioen_filter_TNscope:
         tnscope_filtered_vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     params:
         tmpdir = tmp_dir,
-        sentieon_ml_tnscope = SENTIEON_TNSCOPE,
+        sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_filter_TNscope')

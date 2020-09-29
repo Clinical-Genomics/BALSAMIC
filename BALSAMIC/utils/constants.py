@@ -4,22 +4,31 @@ from pathlib import Path
 
 import BALSAMIC
 
+# BALSAMIC base dir
+BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
+
 # Path to conda folder containing YAML files with verions of software usen un BALSAMIC workflow
-CONDA_ENV_PATH = Path(
-    Path(sys.modules["BALSAMIC"].__file__).parent.resolve() /
-    "conda").as_posix()
+CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "conda").as_posix()
 
 # Path to config YAML file to be accessed by Snakemake
 CONDA_ENV_YAML = Path(
-    Path(sys.modules["BALSAMIC"].__file__).parent.resolve() / "config" /
-    "balsamic_env.yaml").as_posix()
+    BALSAMIC_BASE_DIR / "config" / "balsamic_env.yaml").as_posix()
 
 # Path to rule files to be accessed by Snakemake
-RULE_DIRECTORY = (
-    Path(sys.modules["BALSAMIC"].__file__).parent.resolve().as_posix() + "/")
+RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
 
 # BALSAMIC version
 BALSAMIC_VERSION = BALSAMIC.__version__
+
+# Sentieon specific
+SENTIEON_DNASCOPE = Path(
+    BALSAMIC_BASE_DIR /
+    'assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model'
+).as_posix()
+SENTIEON_TNSCOPE = Path(
+    BALSAMIC_BASE_DIR /
+    'assets/sentieon_models/SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model'
+)
 
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]

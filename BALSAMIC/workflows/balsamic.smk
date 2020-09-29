@@ -13,6 +13,7 @@ from BALSAMIC.utils.rule import get_variant_callers
 from BALSAMIC.utils.rule import get_rule_output
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.rule import get_vcf
+from BALSAMIC.utils.constants import SENTIEON_DNASCOPE,SENTIEON_TNSCOPE
 
 shell.prefix("set -eo pipefail; ")
 
@@ -38,8 +39,6 @@ singularity_image = config['singularity']['image']
 sentieon = True
 SENTIEON_LICENSE = ''
 SENTIEON_INSTALL_DIR = ''
-SENTIEON_DNASCOPE = rule_dir + 'assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model'
-SENTIEON_TNSCOPE = rule_dir + 'assets/sentieon_models/SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model'
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -48,6 +47,8 @@ if len(cluster_config.keys()) == 0:
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
     config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
+    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
 except KeyError as error:
     sentieon = False
     LOG.warning("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
@@ -61,28 +62,28 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # Define set of rules
-if config["analysis"]["sequencing_type"] != "wgs":
-    qc_rules = [
-      "snakemake_rules/quality_control/fastp.rule",
-      "snakemake_rules/quality_control/fastqc.rule",
-      "snakemake_rules/quality_control/GATK.rule",
-      "snakemake_rules/quality_control/multiqc.rule",
-      "snakemake_rules/quality_control/picard.rule",
-      "snakemake_rules/quality_control/sambamba_depth.rule",
-      "snakemake_rules/quality_control/mosdepth.rule"
-      ]
-
-    align_rules = [
-      "snakemake_rules/align/bwa_mem.rule"
-      ]
 
 if config["analysis"]["sequencing_type"] == "wgs":
     qc_rules = ["snakemake_rules/quality_control/fastp.rule",
-                "snakemake_rules/sentieon/sentieon_qc_metrics.rule",
+                "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
                 "snakemake_rules/quality_control/picard_wgs.rule",
                 "snakemake_rules/quality_control/multiqc.rule"]
 
-    align_rules = ["snakemake_rules/sentieon/sentieon_alignment.rule"]
+    align_rules = ["snakemake_rules/align/sentieon_alignment.rule"]
+else:
+    qc_rules = [
+        "snakemake_rules/quality_control/fastp.rule",
+        "snakemake_rules/quality_control/fastqc.rule",
+        "snakemake_rules/quality_control/GATK.rule",
+        "snakemake_rules/quality_control/multiqc.rule",
+        "snakemake_rules/quality_control/picard.rule",
+        "snakemake_rules/quality_control/sambamba_depth.rule",
+        "snakemake_rules/quality_control/mosdepth.rule"
+    ]
+
+    align_rules = [
+        "snakemake_rules/align/bwa_mem.rule"
+    ]
 
 annotation_rules = [
   "snakemake_rules/annotation/vep.rule"
@@ -179,7 +180,7 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
 for r in config["rules"]:
-    include: os.path.join(rule_dir + r)
+    include: os.path.join(rule_dir, r)
 
 if 'delivery' in config:
     wildcard_dict = { "sample": list(config["samples"].keys()),
