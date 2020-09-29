@@ -89,7 +89,7 @@ annotation_rules = [
 ]
 
 if config["analysis"]["sequencing_type"] == "wgs" :
-    variantcalling_rules = ["snakemake_rules/sentieon/sentieon_germline.rule"]
+    variantcalling_rules = ["snakemake_rules/variant_calling/sentieon_germline.rule"]
     germline_caller = ["dnascope"]
 else :
     variantcalling_rules = [
@@ -105,12 +105,12 @@ somatic_caller_sv = ['manta', 'cnvkit']
 if config["analysis"]["sequencing_type"] == "wgs" :
     somatic_caller_snv = ['tnhaplotyper', 'tnsnv', 'tnscope']
     if config['analysis']['analysis_type'] == "paired" :
-        variantcalling_rules.extend(["snakemake_rules/sentieon/sentieon_tn_varcall.rule",
+        variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
                                      "snakemake_rules/variant_calling/cnvkit_paired.rule"])
 
     else :
-        variantcalling_rules.extend(["snakemake_rules/sentieon/sentieon_t_varcall.rule",
+        variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else :
