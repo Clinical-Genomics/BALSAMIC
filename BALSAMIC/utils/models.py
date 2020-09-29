@@ -347,7 +347,6 @@ class BalsamicConfigModel(BaseModel):
     singularity: FilePath
     background_variants: Optional[FilePath]
     conda_env_yaml: FilePath = CONDA_ENV_YAML
-    rule_directory: DirectoryPath = RULE_DIRECTORY
     bioinfo_tools: Optional[BioinfoToolsModel]
     panel: Optional[PanelModel]
 
