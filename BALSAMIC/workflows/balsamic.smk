@@ -61,7 +61,7 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # Define set of rules
-if config["analysis"]["sequencing_type"] is not "wgs":
+if config["analysis"]["sequencing_type"] != "wgs":
     qc_rules = [
       "snakemake_rules/quality_control/fastp.rule",
       "snakemake_rules/quality_control/fastqc.rule",
@@ -172,7 +172,7 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
                                  expand(vep_dir + "{vcf}.pass.balsamic_stat",
                                         vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))]
 
-if config['analysis']['analysis_type'] == "single":
+if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs"::
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
