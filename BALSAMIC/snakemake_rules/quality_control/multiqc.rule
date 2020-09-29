@@ -7,7 +7,10 @@ from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
-picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics", "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics", "quality_by_cycle_metrics", "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
+picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics",
+                           "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics",
+                           "quality_by_cycle_metrics",
+                           "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 multiqc_input = []
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
@@ -26,6 +29,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=config["samples"]))
     multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=config["samples"]))
+
     # dir list
     dir_list = [qc_dir]
 
