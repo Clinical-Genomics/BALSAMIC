@@ -283,18 +283,6 @@ def convert_defaultdict_to_regular_dict(inputdict: dict):
     return inputdict
 
 
-def merge_dict_on_key(dict_1, dict_2, by_key):
-    """
-    Merge two list of dictionaries based on key
-    """
-    merged_dict = defaultdict(dict)
-    for interm_list in (dict_1, dict_2):
-        for item in interm_list:
-            merged_dict[item[by_key]].update(item)
-    merged_dict_list = merged_dict.values()
-    return merged_dict_list
-
-
 def find_file_index(file_path):
     indexible_files = {
         ".bam": [".bam.bai", ".bai"],
