@@ -41,14 +41,14 @@ rule CollectHsMetrics_umi:
         bam = umi_dir + '{sample}.{step}.bam',
         fa = config["reference"]["reference_genome"]
     output:
-        mrkdup = qc_dir + '{sample}.{step}.collect_hsmetric'
+        mrkdup = qc_dir + '{sample}.{step}.collect_hsmetric_umi'
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = '{sample}_{step}'
     threads: get_threads(cluster_config, 'CollectHsMetrics')
     benchmark:
-        benchmark_dir + "{sample}.{step}.collect_hsmetrics.tsv"
+        benchmark_dir + "{sample}.{step}.collect_hsmetrics_umi.tsv"
     message:
         "Collect HSmetrics for {params.sample_id}"
     shell:
