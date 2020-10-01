@@ -149,7 +149,7 @@ rule all:
 #                       - .fasta, dbsnp.vcf, 1kg.vcf, refFlat
 ##########################################################
 reference_data = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url, mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
-wgs_calling_url, genome_chrom_size_url, cosmicdb_url, refgene_txt_url, refgene_sql_url]
+wgs_calling_url, genome_chrom_size_url, gnomad_url, cosmicdb_url, refgene_txt_url, refgene_sql_url]
 
 rule download_reference:
     output:
