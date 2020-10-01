@@ -305,7 +305,7 @@ rule picard_ref_dict:
 rule vep_install:
     params:
         species = "homo_sapiens_merged",
-        assembly = "GRCh37",
+        assembly = "GRCh37" if genome_ver == 'hg19' else "GRCh38",
         plugins = "all",
         conda_env = get_conda_env(config["conda_env_yaml"], "ensembl-vep")
     output:
