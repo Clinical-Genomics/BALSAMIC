@@ -249,7 +249,7 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
         if sequencing_type == "wgs":
             snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
     elif analysis_type == "generate_ref":
-        snakefile = Path(p, 'workflows', 'GenerateRef')
+        snakefile = Path(p, 'workflows', 'GenerateRef.smk')
     elif analysis_type == "umi":
         snakefile = Path(p, 'workflows', 'UMIworkflow.smk')
 

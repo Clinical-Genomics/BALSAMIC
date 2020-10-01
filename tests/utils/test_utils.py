@@ -293,7 +293,7 @@ def test_get_snakefile():
         elif analysis_type == 'qc':
             pipeline = "BALSAMIC/workflows/Alignment.smk"
         elif analysis_type == 'generate_ref':
-            pipeline = "BALSAMIC/workflows/GenerateRef"
+            pipeline = "BALSAMIC/workflows/GenerateRef.smk"
         elif analysis_type == 'umi':
             pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
 

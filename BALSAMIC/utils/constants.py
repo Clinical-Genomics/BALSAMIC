@@ -297,6 +297,15 @@ REFERENCE_FILES = {
             "output_file": "1k_genome_wgs_p1_v3_all_sites.vcf",
             "output_path": "variants",
         },
+        "genomad": {
+            "url":
+            "https://storage.googleapis.com/gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "file_type": "vcf",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf",
+            "output_path": "variants",
+        },
         "cosmicdb": {
             "url":
             "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
