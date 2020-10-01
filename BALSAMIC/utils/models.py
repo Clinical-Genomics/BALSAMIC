@@ -443,6 +443,7 @@ class ReferenceMeta(BaseModel):
       vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
       wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
       genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
+      gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
       cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
       refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
       refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
@@ -457,6 +458,7 @@ class ReferenceMeta(BaseModel):
     vcf_1kg: Optional[ReferenceUrlsModel]
     wgs_calling: Optional[ReferenceUrlsModel]
     genome_chrom_size: Optional[ReferenceUrlsModel]
+    gnomad_variant: Optional[ReferenceUrlsModel]
     cosmicdb: Optional[ReferenceUrlsModel]
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]

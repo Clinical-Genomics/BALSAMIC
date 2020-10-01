@@ -198,6 +198,15 @@ REFERENCE_FILES = {
             "1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
             "output_path": "variants",
         },
+        "gnomad_variant": {
+            "url":
+            "https://storage.googleapis.com/gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz",
+            "file_type": "vcf",
+            "gzip": True,
+            "genome_version": "hg38",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf",
+            "output_path": "variants",
+        },
         "cosmicdb": {
             "url":
             "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v92/VCF/CosmicCodingMuts.vcf.gz",
@@ -297,7 +306,7 @@ REFERENCE_FILES = {
             "output_file": "1k_genome_wgs_p1_v3_all_sites.vcf",
             "output_path": "variants",
         },
-        "genomad": {
+        "gnomad_variant": {
             "url":
             "https://storage.googleapis.com/gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz",
             "file_type": "vcf",

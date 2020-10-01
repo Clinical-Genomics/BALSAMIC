@@ -51,6 +51,7 @@ hc_vcf_1kg_url = reference_file_model.hc_vcf_1kg
 mills_1kg_url = reference_file_model.mills_1kg
 known_indel_1kg_url = reference_file_model.known_indel_1kg
 vcf_1kg_url = reference_file_model.vcf_1kg
+gnomad_url = reference_file_model.gnomad_variant
 cosmicdb_url = reference_file_model.cosmicdb
 wgs_calling_url = reference_file_model.wgs_calling
 genome_chrom_size_url = reference_file_model.genome_chrom_size
@@ -102,6 +103,7 @@ rule all:
         tg_high_vcf = hc_vcf_1kg_url.get_output_file+ ".gz",
         mills_1kg = mills_1kg_url.get_output_file + ".gz",
         known_indel_1kg = known_indel_1kg_url.get_output_file + ".gz",
+        gnomad_variant_vcf = gnomad_url.get_output_file + ".gz",
         cosmic_vcf = cosmicdb_url.get_output_file + ".gz",
         variants_idx = expand( os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=VCF),
         vep = directory(vep_dir),
@@ -124,6 +126,7 @@ rule all:
             "1kg_snps_high": input.tg_high_vcf,
             "1kg_known_indel": input.known_indel_1kg,
             "mills_1kg": input.mills_1kg,
+            "gnomad_variant": input.gnomad_variant_vcf,
             "cosmic": input.cosmic_vcf,
             "exon_bed": input.refseq_bed,
             "refflat": input.refseq_flat,
