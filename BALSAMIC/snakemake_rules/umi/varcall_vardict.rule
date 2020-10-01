@@ -11,8 +11,7 @@ rule vardict:
         ref_fa = config['reference']['reference_genome'],
         bed = config['panel']['capture_kit']
     output:
-         temp_fl = temp(vcf_dir + '{sample}.vardict.{step}.vcf'),
-         vardict = vcf_dir + '{sample}.vardict.{step}.vcf.gz'
+         vardict = vcf_dir + '{sample}.vardict.{step}.vcf.gz',
     params:
         conda = get_conda_env(config["conda_env_yaml"],'vardict'),
         af = "0.0005",
@@ -29,7 +28,6 @@ rule vardict:
         'Variant calling using Vardict for sample {params.sample_id}'
     shell:
         "source activate {params.conda}\n"
-        "vardict -th {threads} -G {input.ref_fa} -f {params.af} -N {params.sample_id} -b {input.bam} {params.vardict} {input.bed} | teststrandbias.R | var2vcf_valid.pl {params.var2vcf} -f {params.af} -N {params.sample_id} > {output.temp_fl} 2> {log} \n"
-        "bzip {output.temp_fl}\n"
-        "tabix -p vcf {output.vardict} &>> {log}\n"
+        "vardict -G {input.ref_fa} -f {params.af} -N {params.sample_id} -b {input.bam} {params.vardict} {input.bed} | teststrandbias.R | var2vcf_valid.pl {params.var2vcf} -f {params.af} -N {params.sample_id} | bgzip > {output.vardict} 2> {log}\n"
+        "tabix -p vcf {output.vardict}\n"
         "source deactivate"

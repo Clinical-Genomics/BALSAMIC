@@ -60,7 +60,7 @@ qc = ["snakemake_rules/umi/qc_umi.rule"]
 
 # Define wildcards
 SAMPLES = config["samples"]
-VAR_CALLER = ['TNscope']#,'vardict']
+VAR_CALLER = ['TNscope','vardict']
 STEPS = ['umialign','consensusalign']
 
 # Define outputs

@@ -345,6 +345,8 @@ class BalsamicConfigModel(BaseModel):
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: FilePath
+    SENTIEON_INSTALL_DIR: Optional[str]
+    SENTIEON_LICENSE:Optional[str]
     background_variants: Optional[FilePath]
     conda_env_yaml: FilePath = CONDA_ENV_YAML
     rule_directory: DirectoryPath = RULE_DIRECTORY

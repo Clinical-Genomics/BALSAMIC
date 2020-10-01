@@ -32,6 +32,7 @@ rule picard_umiaware:
             "UMI_METRICS={output.umimetrics} &> {log}\n"
         "source deactivate\n" 
 
+
 ## CollectHSmetrics - median target coverage-required
 rule CollectHsMetrics_umi:
     input:
@@ -53,7 +54,7 @@ rule CollectHsMetrics_umi:
     shell:
         "source activate {params.conda}\n"
         "picard BedToIntervalList I={input.bed} O={input.bam}.picard.bedintervals SD={input.fadict}\n"
-        "picard CollectHsMetrics BI={input.bam}.picard.bedintervals TI={input.bam}.picard.bedintervals I={input.bam} O={output.mrkdup}\n"
+        "picard CollectHsMetrics BI={input.bam}.picard.bedintervals TI={input.bam}.picard.bedintervals I={input.bam} O={output.mrkdup} &> {log}\n"
         "source deactivate\n"
 
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
