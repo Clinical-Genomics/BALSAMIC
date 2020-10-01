@@ -15,7 +15,7 @@ rule sentieon_DNAscope:
         tmpdir = tmp_dir,
         sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sentieon_ml_dnascope = SENTIEON_DNASCOPE
+        sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"]
     threads: get_threads(cluster_config, 'sentieon_DNAscope')
     log: 
         vcf_dir + "{sample}.dnascope.log"

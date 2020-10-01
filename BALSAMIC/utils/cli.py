@@ -242,13 +242,8 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     """
 
     p = Path(__file__).parents[1]
-    if analysis_type == "qc":
-        snakefile = Path(p, "workflows", "Alignment.smk")
-    elif analysis_type in ["single", "paired"]:
-        snakefile = Path(p, "workflows", "VariantCalling.smk")
-        if sequencing_type == "wgs":
-            snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
-    elif analysis_type == "generate_ref":
+    snakefile = Path(p, "workflows", "balsamic.smk")
+    if analysis_type == "generate_ref":
         snakefile = Path(p, 'workflows', 'GenerateRef')
     elif analysis_type == "umi":
         snakefile = Path(p, 'workflows', 'UMIworkflow.smk')
@@ -286,18 +281,6 @@ def convert_defaultdict_to_regular_dict(inputdict: dict):
             for key, value in inputdict.items()
         }
     return inputdict
-
-
-def merge_dict_on_key(dict_1, dict_2, by_key):
-    """
-    Merge two list of dictionaries based on key
-    """
-    merged_dict = defaultdict(dict)
-    for interm_list in (dict_1, dict_2):
-        for item in interm_list:
-            merged_dict[item[by_key]].update(item)
-    merged_dict_list = merged_dict.values()
-    return merged_dict_list
 
 
 def find_file_index(file_path):
