@@ -7,27 +7,29 @@ from BALSAMIC.utils.rule import get_threads
 # Variant-calling using vardict
 rule vardict:
     input:
-        bam = umi_dir + '{sample}.consensusalign.bam',
+        bam = umi_dir + '{sample}.{step}.bam',
         ref_fa = config['reference']['reference_genome'],
         bed = config['panel']['capture_kit']
     output:
-         vardict = vcf_dir + '{sample}.vardict.umi.vcf.gz',
+         temp_fl = temp(vcf_dir + '{sample}.vardict.{step}.vcf'),
+         vardict = vcf_dir + '{sample}.vardict.{step}.vcf.gz'
     params:
         conda = get_conda_env(config["conda_env_yaml"],'vardict'),
         af = "0.0005",
-        sample_id = '{sample}',
+        sample_id = '{sample}.{step}',
         vardict = "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0",
         var2vcf = '-E'
     singularity: singularity_image
-    threads: get_threads(cluster_config, 'vardict')
+    threads: get_threads(cluster_config, 'vardict_tumor_only')
     log:
-        log_dir + '{sample}.varcall.vardict.log'
+        log_dir + '{sample}.{step}.varcall.vardict.log'
     benchmark:
-        benchmark_dir + '{sample}.varcall.vardict.tsv'
+        benchmark_dir + '{sample}.{step}.varcall.vardict.tsv'
     message:
         'Variant calling using Vardict for sample {params.sample_id}'
     shell:
         "source activate {params.conda}\n"
-        "vardict -G {input.ref_fa} -f {params.af} -N {params.sample_id} -b {input.bam} {params.vardict} {input.bed} | teststrandbias.R | var2vcf_valid.pl {params.var2vcf} -f {params.af} -N {params.sample_id} | bgzip > {output.vardict}\n"
-        "tabix -p vcf {output.vardict}\n"
+        "vardict -th {threads} -G {input.ref_fa} -f {params.af} -N {params.sample_id} -b {input.bam} {params.vardict} {input.bed} | teststrandbias.R | var2vcf_valid.pl {params.var2vcf} -f {params.af} -N {params.sample_id} > {output.temp_fl} 2> {log} \n"
+        "bzip {output.temp_fl}\n"
+        "tabix -p vcf {output.vardict} &>> {log}\n"
         "source deactivate"

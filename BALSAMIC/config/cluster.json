@@ -194,5 +194,25 @@
     "sentieon_TNscope_tumor_only": {
         "time": "24:00:00",
         "n": 24
+    },
+    "sentieon_umi_align": {
+        "time": "24:00:00",
+	"n": 24
+    },
+    "sentieon_umi_consensus_call": {
+	"time": "12:00:00",
+	"n": 24
+    },
+    "sentieon_umi_consensus_align": {
+	"time": "24:00:00",
+	"n": 24
+    },
+    "sentieon_umi_tnscope": {
+        "time": "24:00:00",
+	"n": 24
+    },
+    "picard_umiaware": {
+	"time": "04:00:00",
+	"n": 12
     }
 }
