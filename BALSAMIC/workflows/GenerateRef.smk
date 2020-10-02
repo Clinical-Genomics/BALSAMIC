@@ -155,7 +155,7 @@ rule download_reference:
     output:
         expand("{output}", output=[ref.get_output_file for ref in reference_data])
     run:
-        import requests
+        from requests import get
 
         for ref in reference_data:
             output_file = ref.get_output_file
@@ -168,7 +168,7 @@ rule download_reference:
 
             if ref.secret:
                 try:
-                    response = requests.get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret })
+                    response = get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret})
                     download_url = response.json()["url"]
                 except:
                     LOG.error("Unable to download {}".format(ref.url))
