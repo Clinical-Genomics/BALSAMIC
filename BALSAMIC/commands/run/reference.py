@@ -11,7 +11,7 @@ from BALSAMIC.utils.cli import get_snakefile, SnakeMake, get_config
 LOG = logging.getLogger(__name__)
 
 
-@click.command('reference', short_help="Run the GenerateRef workflow")
+@click.command('reference', short_help="Run the GenerateRef.smk workflow")
 @click.option('-s',
               "--snakefile",
               default=get_snakefile('generate_ref'),

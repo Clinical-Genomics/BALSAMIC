@@ -244,7 +244,7 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
     if analysis_type == "generate_ref":
-        snakefile = Path(p, 'workflows', 'GenerateRef')
+        snakefile = Path(p, 'workflows', 'GenerateRef.smk')
     elif analysis_type == "umi":
         snakefile = Path(p, 'workflows', 'UMIworkflow.smk')
 
