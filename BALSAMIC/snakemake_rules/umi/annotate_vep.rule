@@ -55,3 +55,4 @@ rule vep_umi:
         "tabix -p vcf -f {output.vcf_all}; "
         "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all}; "
         "tabix -p vcf -f {output.vcf_pass}; "
+        "source deactivate "

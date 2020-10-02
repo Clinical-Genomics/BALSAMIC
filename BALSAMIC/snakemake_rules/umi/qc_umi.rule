@@ -1,6 +1,9 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
@@ -47,6 +50,8 @@ rule CollectHsMetrics_umi:
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = '{sample}_{step}'
     threads: get_threads(cluster_config, 'CollectHsMetrics')
+    log:
+        log_dir + '{sample}.{step}.collect_hsmetrics_umi.log'
     benchmark:
         benchmark_dir + "{sample}.{step}.collect_hsmetrics_umi.tsv"
     message:
@@ -62,7 +67,7 @@ rule mean_family_depth:
     input:
         bam = umi_dir + '{sample}.{step}.bam'
     output:
-        temp_fl = qc_dir + '{sample}.{step}.temp.fl',
+        temp_fl = temp (qc_dir + '{sample}.{step}.temp.fl'),
         totalsum = qc_dir + '{sample}.{step}.mean_family_depth'
     params:
         conda = get_conda_env(config["conda_env_yaml"],"samtools"),
@@ -75,7 +80,7 @@ rule mean_family_depth:
         "Calculating mean family depth for {params.sample_id}"
     shell:
         "source activate {params.conda}\n"
-        "samtools view -@ {threads} {input.bam} | grep 'RX:Z:' | sed 's/.*RX:Z:\([ACGT-].*\).*/\\1/' | cut -f1 | grep -v 'N' | sort | uniq -c | sed -e 's/  */\\t/g' | cut -f2,3 > {output.temp_fl}\n"
+        "samtools view -@ {threads} {input.bam} | grep 'RX:Z:' | sed 's/.*RX:Z:\\([ACGT-].*\\).*/\\1/' | cut -f1 | grep -v 'N' | sort | uniq -c | sed -e 's/  */\\t/g' | cut -f2,3 > {output.temp_fl}\n"
         "awk -F'\\t' '{{sum+=$1;}} END{{printf(\"{params.sample_id}_meandepth: \"sum/NR)}}' {output.temp_fl} > {output.totalsum}\n"
         "source deactivate"
 
@@ -85,26 +90,29 @@ rule noise_AF:
         umiextract = vcf_dir + '{sample}.TNscope.umialign.vcf.gz',
         consensuscall = vcf_dir + '{sample}.TNscope.consensusalign.vcf.gz'
     output:
-        umiextractAF = table_dir + '{sample}.TNscope.umialign.AF.txt',
-        consensuscallAF = table_dir + '{sample}.TNscope.consensusalign.AF.txt',
-        noiseAF = table_dir + '{sample}.TNscope.noiseAF.txt'
+        umiextractAF = temp (qc_dir + '{sample}.TNscope.umialign.AF.txt'),
+        consensuscallAF = temp (qc_dir + '{sample}.TNscope.consensusalign.AF.txt'),
+        noiseAF = qc_dir + '{sample}.TNscope.noiseAF'
     params:
+        conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
         sample_id = '{sample}'
     threads:
         get_threads(cluster_config, 'noise_AF')
     benchmark: 
-        benchmark_dir + "{sample}.noiseAF.tsv"
+        benchmark_dir + '{sample}.noiseAF.tsv'
     message: "calculate noise AF values for {params.sample_id}"
     shell:
+        "source activate {params.conda}\n"
         "bcftools query -f \"%CHROM:%POS:REF->%ALT\\t[%AF]\\n\" {input.umiextract} > {output.umiextractAF}\n"
         "bcftools query -f \"%CHROM:%POS:%REF->%ALT\\t[%AF]\\n\" {input.consensuscall} >  {output.consensuscallAF}\n"
-        "awk '{{if (FILENAME~/umialign.AF.txt/) {{sum1+=$2}} else {{sum2+=$2}}; if (FNR == 1 && NR != 1){{f1_nr = NR-1}}}} END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' {output.umiextractAF} {output.consensuscallAF} > {output.noiseAF}"
+        "awk '{{if (FILENAME~/umialign.AF.txt/) {{sum1+=$2}} else {{sum2+=$2}}; if (FNR == 1 && NR != 1){{f1_nr = NR-1}}}} END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' {output.umiextractAF} {output.consensuscallAF} > {output.noiseAF}\n"
+        "source deactivate"
 
 # Plot the TNscope calculated AFs befor and after consensuscall
 rule density_Plots:
     input:
-        table1 = table_dir + '{sample}.TNscope.umialign.AF.txt',
-        table2 = table_dir + '{sample}.TNscope.consensusalign.AF.txt'
+        table1 = qc_dir + '{sample}.TNscope.umialign.AF.txt',
+        table2 = qc_dir + '{sample}.TNscope.consensusalign.AF.txt'
     output:
         AF_plot = plot_dir + '{sample}.TNscope.AFplot.pdf'
     params:

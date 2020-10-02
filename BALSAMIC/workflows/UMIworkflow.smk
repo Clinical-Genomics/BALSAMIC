@@ -17,11 +17,11 @@ umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 log_dir =  config["analysis"]["log"]
-table_dir = get_result_dir(config) + "/tables/"
+#table_dir = get_result_dir(config) + "/tables/"
 plot_dir = get_result_dir(config) + "/plots/"
 qc_dir = get_result_dir(config) + "/qc/"
 
-singularity_image = config['singularity']['image']
+singularity_image = config["singularity"]["image"]
 
 # Declare sentieon variables
 sentieon = True
@@ -60,16 +60,16 @@ qc = ["snakemake_rules/umi/qc_umi.rule"]
 
 # Define wildcards
 SAMPLES = config["samples"]
-VAR_CALLER = ['TNscope','vardict']
-STEPS = ['umialign','consensusalign']
+VAR_CALLER = ["TNscope","vardict"]
+STEPS = ["umialign","consensusalign"]
 
 # Define outputs
 analysis_output = [ expand(vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, step = STEPS),
-expand(vep_dir + "{sample}.{var_caller}.umi.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=['all','pass']),
-expand(qc_dir + '{sample}.{step}.umimetrics', sample=SAMPLES, step=STEPS),
-expand(qc_dir + '{sample}.{step}.collect_hsmetric', sample=SAMPLES, step=STEPS),
-expand(qc_dir + '{sample}.{step}.mean_family_depth', sample=SAMPLES, step = STEPS),
-expand(table_dir + "{sample}.TNscope.noiseAF.txt", sample=SAMPLES),
+expand(vep_dir + "{sample}.{var_caller}.umi.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=["all","pass"]),
+expand(qc_dir + "{sample}.{step}.umimetrics", sample=SAMPLES, step=STEPS),
+expand(qc_dir + "{sample}.{step}.collect_hsmetric_umi", sample=SAMPLES, step=STEPS),
+expand(qc_dir + "{sample}.{step}.mean_family_depth", sample=SAMPLES, step = STEPS),
+expand(qc_dir + "{sample}.TNscope.noiseAF", sample=SAMPLES),
 expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES) ]
 
 
