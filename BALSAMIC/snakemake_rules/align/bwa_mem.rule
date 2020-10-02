@@ -1,37 +1,40 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+from pathlib import Path
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule bwa_mem:
-  input:
-    fa = config["reference"]["reference_genome"],
-    read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
-    read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
-    refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
-  output:
-    bamout = temp(bam_dir + "{sample}.sorted.bam")
-  params:
-    header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-    tmpdir = tmp_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"bwa")
-  threads: get_threads(cluster_config, "bwa_mem")
-  singularity: singularity_image
-  benchmark:
-    benchmark_dir + "bwa_mem_" + "{sample}.bwa_mem.tsv"
-  shell:
-    "source activate {params.conda}; "
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "bwa mem "
-        "-t {threads} "
-        "-R  {params.header_1} "
-        "-M "
-        "-v 1 "
-        "{input.fa} {input.read1} {input.read2} "
-        "| samtools sort -T ${{tmpdir}} --threads {threads} --output-fmt BAM -o {output.bamout} - ;"
-    "samtools index -@ {threads} {output.bamout}; "
+    input:
+        fa = config["reference"]["reference_genome"],
+        read1 = Path(fastq_dir / "{sample}_1.fp.fastq.gz").as_posix(),
+        read2 = Path(fastq_dir / "{sample}_2.fp.fastq.gz").as_posix(),
+        refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
+    output:
+        bamout = temp(Path(bam_dir / "{sample}.sorted.bam").as_posix())
+    params:
+        bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+        tmpdir = Path(tmp_dir).as_posix(),
+        conda = get_conda_env(config["conda_env_yaml"],"bwa")
+    threads: get_threads(cluster_config, "bwa_mem")
+    singularity: singularity_image
+    benchmark:
+        Path(benchmark_dir / "bwa_mem_{sample}.bwa_mem.tsv").as_posix()
+    shell:
+        """
+source activate {params.conda};
+rand_str=$(openssl rand -hex 5); 
+tmpdir={params.tmpdir}/${{rand_str}}; 
+mkdir -p ${{tmpdir}}; 
+export TMPDIR=${{tmpdir}}; 
+bwa mem \
+-t {threads} \
+-R {params.bam_header}  \
+-M \
+-v 1 \
+{input.fa} {input.read1} {input.read2}  \
+| samtools sort -T ${{tmpdir}} --threads {threads} --output-fmt BAM -o {output.bamout} - ;
+samtools index -@ {threads} {output.bamout};
+        """
