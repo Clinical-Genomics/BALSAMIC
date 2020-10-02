@@ -5,9 +5,9 @@ from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
 # Annotate vcf files with VEP 
-rule vep_somatic:
+rule vep_umi:
     input:
-        vcf = vcf_dir + '{sample}.{var_caller}.umi.vcf.gz',
+        vcf = vcf_dir + '{sample}.{var_caller}.consensusalign.vcf.gz',
         cosmic = config["reference"]["cosmic"]
     output:
         vcf_all = vep_dir + '{sample}.{var_caller}.umi.all.vcf.gz',
@@ -17,14 +17,14 @@ rule vep_somatic:
         conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
         vep_cache = config["reference"]["vep"],
         default_options = '--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite',
-        sample_id = '{sample}',
+        sample_id = '{sample}.consensusalign',
         var_caller = '{var_caller}'
-    threads: get_threads(cluster_config, 'vep_somatic')
+    threads: get_threads(cluster_config, 'vep_umi')
     singularity: singularity_image
     log:
-        log_dir + '{sample}_{var_caller}_vep.log'
+        log_dir + '{sample}.consensusalign.{var_caller}_vep.log'
     benchmark:
-        benchmark_dir + '{sample}_{var_caller}_vep.tsv'
+        benchmark_dir + '{sample}.consensusalign.{var_caller}_vep.tsv'
     message:
         'Annotating {params.var_caller} VCF file with VEP for sample {params.sample_id}'
     shell:
@@ -55,3 +55,4 @@ rule vep_somatic:
         "tabix -p vcf -f {output.vcf_all}; "
         "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all}; "
         "tabix -p vcf -f {output.vcf_pass}; "
+        "source deactivate "

@@ -9,14 +9,14 @@ from BALSAMIC.utils.rule import get_threads
 # UMI-consensus calling
 rule sentieon_umi_consensus_call:
     input:
-        sam_consensus = umi_dir + '{sample}.umialign.sam',
+        sam_consensus = umi_dir + '{sample}.umialign.bam',
     output:
         fastq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz',
     params:
         sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
         sentieon_lic = config["SENTIEON_LICENSE"],
         tag = 'XR',
-        ip_format = 'SAM',
+        ip_format = 'BAM',
         sample_id = '{sample}'
     threads: 
         get_threads(cluster_config, 'sentieon_umi_consensus_call')
