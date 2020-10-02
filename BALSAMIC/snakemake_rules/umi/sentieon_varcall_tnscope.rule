@@ -7,12 +7,12 @@ from BALSAMIC.utils.rule import get_threads
 # Variant-calling using TNscope
 rule sentieon_umi_tnscope:
     input:
-        bam =  umi_dir + '{sample}.consensusalign.bam',
+        bam =  umi_dir + '{sample}.{step}.bam',
         ref_fa = config['reference']['reference_genome'],
         bed = config['panel']['capture_kit'],
         dbsnp = config['reference']['dbsnp']
     output:
-         vcf = vcf_dir + '{sample}.TNscope.umi.vcf.gz',
+         vcf = vcf_dir + '{sample}.TNscope.{step}.vcf.gz',
     params:
         sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -25,9 +25,9 @@ rule sentieon_umi_tnscope:
         sample_id = '{sample}'
     threads: get_threads(cluster_config, 'sentieon_umi_tnscope')
     log: 
-        log_dir + '{sample}.varcall.TNscope.log'
+        log_dir + '{sample}.{step}.varcall.TNscope.log'
     benchmark : 
-        benchmark_dir + '{sample}.varcall.TNscope.tsv'
+        benchmark_dir + '{sample}.{step}.varcall.TNscope.tsv'
     message: "Calling SNVs using TNscope for sample {params.sample_id}"
     shell:
         "export SENTIEON_LICENSE={params.sentieon_lic}\n"
