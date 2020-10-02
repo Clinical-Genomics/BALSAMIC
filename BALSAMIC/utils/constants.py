@@ -209,7 +209,7 @@ REFERENCE_FILES = {
         },
         "gnomad_variant": {
             "url":
-            "https://storage.googleapis.com/gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz",
+            "gs://gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
@@ -317,7 +317,7 @@ REFERENCE_FILES = {
         },
         "gnomad_variant": {
             "url":
-            "https://storage.googleapis.com/gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.exome_calling_intervals.sites.vcf.bgz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
