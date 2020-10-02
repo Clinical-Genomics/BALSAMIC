@@ -12,14 +12,14 @@ qc_list = ['MEAN_TARGET_COVERAGE', 'FOLD_80_BASE_PENALTY', 'PCT_OFF_BAIT']
 
 def read_hs_metrics(hs_metrics_file: str):
 
-    '''
+    '''Reads the HS metrics (json-format) and returns it as a DataFrame
+
     Args:
         hs_metrics_file: A string path to the file
 
     Returns:
         metrics_df: DataFrame
 
-    Reads the HS metrics (json-format) and returns it as a DataFrame
     '''
     with open(hs_metrics_file) as f:
         metrics_df = pd.read_json(hs_metrics_file)
@@ -28,14 +28,14 @@ def read_hs_metrics(hs_metrics_file: str):
 
 def read_qc_table(qc_table_file: str):
 
-    '''
+    '''Reads the QC-table (json-format) and returns it as a DataFrame
+
     Args:
         qc_table_file: A string path to the file
 
     Returns:
         qc_df: Dataframe
 
-    Reads the QC-table (json-format) and returns it as a DataFrame
     '''
     with open(qc_table_file) as f:
         qc_df = pd.read_json(qc_table_file)
@@ -44,14 +44,14 @@ def read_qc_table(qc_table_file: str):
 
 def get_bait_name(input_df):
 
-    '''
+    '''Extracts the bait name from HS metrics DataFrame
+
     Args:
         input_df: HS metrics as DataFrame
 
     Returns:
         bait_name: string
 
-    Extracts the bait name from HS metrics DataFrame
     '''
     #"str.split" splits the bait name into a list with two elements.
     #exapnd = True will create new col in df with each element in the list as a value
@@ -67,7 +67,8 @@ def get_bait_name(input_df):
 
 def get_qc_criteria(input_df, bait: str):
 
-    '''
+    ''' Creates a new DataFrame with the QC criteria for only the deired bait set
+
     Args:
         input_df: qc table as DataFrame
         bait: desired bait as string
@@ -75,7 +76,6 @@ def get_qc_criteria(input_df, bait: str):
     Returns:
         qc_df: DataFrame
 
-    Creates a new DataFrame with the QC criteria for only the deired bait set
     '''
     qc_df = pd.DataFrame(data=input_df[bait])
     return qc_df
@@ -83,7 +83,12 @@ def get_qc_criteria(input_df, bait: str):
 
 def check_qc_criteria(input_qc_df, input_hsmetrics_df):
 
-    '''
+    ''' This function can be devided in different parts:
+        1) Merging intersected values for the df with the desired QC criteria and bait set, with the HS Metrics df
+        2) Creating new columns with the QC-differences from the QC criteria
+        3) Setting QC flags
+        4) Extract the columns with the QC flag as a new DataFrame
+        
     Args:
         input_qc_df: DataFrame
         input_hsmetrics_df: DataFrame
@@ -91,11 +96,6 @@ def check_qc_criteria(input_qc_df, input_hsmetrics_df):
     Returns:
         qc_check_df: DataFrame
 
-    This function can be devided in different parts:
-    1) Merging intersected values for the df with the desired QC criteria and bait set, with the HS Metrics df
-    2) Creating new columns with the QC-differences from the QC criteria
-    3) Setting QC flags
-    4) Extract the columns with the QC flag as a new DataFrame
     '''
 
     #merge the two df by col (axis = 1) for those rows that are shared (intersected) by passing join='inner'
