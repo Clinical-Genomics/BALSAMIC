@@ -34,7 +34,7 @@ def read_qc_table(qc_table_file: str):
         qc_table_file: A string path to the file
 
     Returns:
-        qc_df: Dataframe
+        qc_df: DataFrame
 
     '''
     with open(qc_table_file) as f:
@@ -42,7 +42,7 @@ def read_qc_table(qc_table_file: str):
     return qc_df
 
 
-def get_bait_name(input_df):
+def get_bait_name(input_df: pd.DataFrame) -> pd.DataFrame:
 
     '''Extracts the bait name from HS metrics DataFrame
 
@@ -81,14 +81,14 @@ def get_qc_criteria(input_df, bait: str):
     return qc_df
 
 
-def check_qc_criteria(input_qc_df, input_hsmetrics_df):
+def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFrame) -> pd.DataFrame:
 
     ''' This function can be devided in different parts:
         1) Merging intersected values for the df with the desired QC criteria and bait set, with the HS Metrics df
         2) Creating new columns with the QC-differences from the QC criteria
         3) Setting QC flags
         4) Extract the columns with the QC flag as a new DataFrame
-        
+
     Args:
         input_qc_df: DataFrame
         input_hsmetrics_df: DataFrame
