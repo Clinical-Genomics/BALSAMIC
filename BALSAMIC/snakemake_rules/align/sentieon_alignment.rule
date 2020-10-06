@@ -10,11 +10,11 @@ from BALSAMIC.utils.rule import get_threads
 rule sentieon_align_sort:
     input:
         ref = config["reference"]["reference_genome"],
-        read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
-        read2 = fastq_dir  + "{sample}_2.fp.fastq.gz",
+        read1 = Path(fastq_dir, "{sample}_1.fp.fastq.gz").as_posix(),
+        read2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = bam_dir + "{sample}.bam"
+        bamout = Path(bam_dir, "{sample}.bam").as_posix
     params:
         tmpdir = tmp_dir,
         header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
@@ -22,9 +22,9 @@ rule sentieon_align_sort:
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_align_sort')
     log:
-        bam_dir + "{sample}.bam.log"
+        Path(bam_dir, "{sample}.bam.log").as_posix()
     benchmark:
-        benchmark_dir + 'sentieon_align_sort_' + "{sample}.align_sort.tsv"
+        Path(benchmark_dir, "sentieon_align_sort_{sample}.align_sort.tsv").as_posix()
     shell:
         """
 rand_str=$(openssl rand -hex 5);
@@ -40,11 +40,11 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_dedup:
     input:
-        bam = bam_dir + "{sample}.bam",
+        bam = Path(bam_dir, "{sample}.bam").as_posix(),
     output:
-        bam = bam_dir + "{sample}.dedup.bam",
-        score = bam_dir + "{sample}.dedup.score",
-        metrics = bam_dir + "{sample}.dedup.metrics"
+        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
+        score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
+        metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
     params:
         tmpdir = tmp_dir,
         housekeeper_id = {"id": "{sample}", "tags": "scout"},
@@ -52,9 +52,9 @@ rule sentieon_dedup:
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_dedup')
     log:
-        bam_dir + "{sample}.dedup.bam.log"
+        Path(bam_dir, "{sample}.dedup.bam.log").as_posix()
     benchmark:
-        benchmark_dir + 'sentieon_dedup_' + "{sample}.dedup.tsv"
+        Path(benchmark_dir, "sentieon_dedup_{sample}.dedup.tsv").as_posix()
     shell:
         """
 rand_str=$(openssl rand -hex 5);
@@ -75,18 +75,18 @@ rule sentieon_realign:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
-        bam = bam_dir + "{sample}.dedup.bam",
+        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix()
     output:
-        bam = bam_dir + "{sample}.dedup.realign.bam",
+        bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix(),
     params:
         tmpdir = tmp_dir,
         sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_realign')
     log:
-        bam_dir + "{sample}.dedup.realign.bam.log"
+        Path(bam_dir, "{sample}.dedup.realign.bam.log").as_posix()
     benchmark:
-        benchmark_dir + 'sentieon_realign_' + "{sample}.dedup_realign.tsv"
+        Path(benchmark_dir + "sentieon_realign_{sample}.dedup_realign.tsv").as_posix()
     shell:
         """
 rand_str=$(openssl rand -hex 5);
@@ -106,7 +106,7 @@ rule sentieon_base_calibration:
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
         dbsnp = config["reference"]["dbsnp"],
-        bam = bam_dir + "{sample}.dedup.realign.bam",
+        bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix()
     output:
         recal_data_table = bam_dir + "{sample}.dedup.realign.recal_data.table",
         qual_recal = bam_dir + "{sample}.dedup.realign.recal.csv",
@@ -117,9 +117,9 @@ rule sentieon_base_calibration:
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_base_calibration')
     log:
-        bam_dir + "{sample}.dedup.realign.recal.log"
+        Path(bam_dir, "{sample}.dedup.realign.recal.log").as_posix()
     benchmark:
-        benchmark_dir + 'sentieon_base_calibration_' + "{sample}.base_recal.tsv"
+        Path(benchmark_dir, "sentieon_base_calibration_{sample}.base_recal.tsv").as_posix()
     shell:
         """
 rand_str=$(openssl rand -hex 5);
