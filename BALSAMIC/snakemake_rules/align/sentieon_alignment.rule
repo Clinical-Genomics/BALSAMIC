@@ -13,7 +13,7 @@ rule sentieon_align_sort:
         read2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = Path(bam_dir, "{sample}.bam").as_posix
+        bamout = Path(bam_dir, "{sample}.bam").as_posix()
     params:
         tmpdir = tmp_dir,
         header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
