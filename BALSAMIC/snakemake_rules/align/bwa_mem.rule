@@ -9,11 +9,11 @@ from BALSAMIC.utils.rule import get_threads
 rule bwa_mem:
     input:
         fa = config["reference"]["reference_genome"],
-        read1 = Path(fastq_dir / "{sample}_1.fp.fastq.gz").as_posix(),
-        read2 = Path(fastq_dir / "{sample}_2.fp.fastq.gz").as_posix(),
+        read1 = Path(fastq_dir, "{sample}_1.fp.fastq.gz").as_posix(),
+        read2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = temp(Path(bam_dir / "{sample}.sorted.bam").as_posix())
+        bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
         tmpdir = Path(tmp_dir).as_posix(),
@@ -21,7 +21,7 @@ rule bwa_mem:
     threads: get_threads(cluster_config, "bwa_mem")
     singularity: singularity_image
     benchmark:
-        Path(benchmark_dir / "bwa_mem_{sample}.bwa_mem.tsv").as_posix()
+        Path(benchmark_dir, "bwa_mem_{sample}.bwa_mem.tsv").as_posix()
     shell:
         """
 source activate {params.conda};
