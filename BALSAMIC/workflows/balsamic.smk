@@ -153,8 +153,15 @@ else:
         somatic_caller_snv = somatic_caller_snv + sentieon_callers
 
 somatic_caller = somatic_caller_snv + somatic_caller_sv
+
+# Remove variant callers from list of callers
 if "disable_variant_caller" in config:
-    somatic_caller.remove(config["disable_variant_caller"])
+    variant_callers_to_remove = config["disable_variant_caller"].split(",")
+    for var_caller in variant_callers_to_remove:
+        if var_caller in somatic_caller:
+            somatic_caller.remove(var_caller)
+        if var_caller in germline_caller:
+            germline_caller.remove(var_caller)
 
 config["rules"] = align_rules + qc_rules
 

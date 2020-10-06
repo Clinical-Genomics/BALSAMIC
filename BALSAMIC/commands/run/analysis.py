@@ -93,9 +93,12 @@ LOG = logging.getLogger(__name__)
     help='cluster mail type to send out email. \
               This will be applied to all jobs and override snakemake settings.'
 )
-@click.option('--disable-variant-caller',
-              type=click.Choice(list(VCF_DICT.keys())),
-              help='Run workflow with selected variant caller disable.')
+@click.option(
+    '--disable-variant-caller',
+    help=
+    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
+    f'values are: {list(VCF_DICT.keys())}',
+)
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, force_all, snakemake_opt, mail_type, mail_user,
