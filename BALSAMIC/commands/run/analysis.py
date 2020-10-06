@@ -97,7 +97,7 @@ LOG = logging.getLogger(__name__)
     '--disable-variant-caller',
     help=
     f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
-    f'valules are: {list(VCF_DICT.keys())}',
+    f'values are: {list(VCF_DICT.keys())}',
 )
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
