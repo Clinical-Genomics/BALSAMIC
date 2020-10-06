@@ -13,7 +13,7 @@ rule sentieon_umi_consensus_call:
     output:
         fastq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz',
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tag = 'XR',
         ip_format = 'BAM',
@@ -38,7 +38,7 @@ rule sentieon_umi_consensus_align:
     output:
         align_consensus = umi_dir + '{sample}.consensusalign.bam',
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sheader = "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         ip_bases = '1000000',
