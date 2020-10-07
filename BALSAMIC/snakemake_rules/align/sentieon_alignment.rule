@@ -90,7 +90,7 @@ rule sentieon_realign:
     log:
         Path(bam_dir, "{sample}.dedup.realign.bam.log").as_posix()
     benchmark:
-        Path(benchmark_dir + "sentieon_realign_{sample}.dedup_realign.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_realign_{sample}.dedup_realign.tsv").as_posix()
     shell:
         """
 rand_str=$(openssl rand -hex 5);
