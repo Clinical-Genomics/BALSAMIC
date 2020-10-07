@@ -112,9 +112,9 @@ rule sentieon_base_calibration:
         dbsnp = config["reference"]["dbsnp"],
         bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix()
     output:
-        recal_data_table = bam_dir + "{sample}.dedup.realign.recal_data.table",
-        qual_recal = bam_dir + "{sample}.dedup.realign.recal.csv",
-        qual_recal_plot = bam_dir + "{sample}.dedup.realign.recal.pdf",
+        recal_data_table = Path(bam_dir, "{sample}.dedup.realign.recal_data.table").as_posix(),
+        qual_recal = Path(bam_dir, "{sample}.dedup.realign.recal.csv").as_posix(),
+        qual_recal_plot = Path(bam_dir, "{sample}.dedup.realign.recal.pdf").as_posix(),
     params:
         tmpdir = tmp_dir,
         sentieon_exec = config["SENTIEON_EXEC"],

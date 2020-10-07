@@ -3,7 +3,16 @@
 
 from pathlib import Path
 from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_threads
+
+picarddup = get_picard_mrkdup(config)
+
+def picard_flag(picarddup):
+    if picarddup == "mrkdup":
+        return "FALSE"
+    else:
+        return "TRUE"
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule bwa_mem:
@@ -34,7 +43,38 @@ bwa mem \
 -R {params.bam_header}  \
 -M \
 -v 1 \
-{input.fa} {input.read1} {input.read2}  \
+{input.fa} {input.read1} {input.read2} \
 | samtools sort -T ${{tmpdir}} --threads {threads} --output-fmt BAM -o {output.bamout} - ;
 samtools index -@ {threads} {output.bamout};
         """
+
+rule MarkDuplicates:
+  input:
+    Path(bam_dir, "{sample}.sorted.bam").as_posix()
+  output:
+    mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
+    stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
+  params:
+    tmpdir = tmp_dir,
+    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    rm_dup = picard_flag(picarddup)
+  singularity: singularity_image
+  benchmark:
+    Path(benchmark_dir, "MarkDuplicates_{sample}.markduplicates.tsv").as_posix()
+  shell:
+    """
+source activate {params.conda};
+rand_str=$(openssl rand -hex 5);
+tmpdir={params.tmpdir}/${{rand_str}};
+mkdir -p ${{tmpdir}};
+export TMPDIR=${{tmpdir}};
+java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar \
+MarkDuplicates \
+INPUT={input} \
+OUTPUT={output.mrkdup} \
+VALIDATION_STRINGENCY=SILENT \
+MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
+REMOVE_DUPLICATES={params.rm_dup}; 
+METRICS_FILE='{output.stats}';
+samtools index {output.mrkdup};
+    """
