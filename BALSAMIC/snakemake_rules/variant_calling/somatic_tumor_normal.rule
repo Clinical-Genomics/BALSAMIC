@@ -242,7 +242,7 @@ rule sentieon_TNhaplotyper:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNhaplotyper')
     log:

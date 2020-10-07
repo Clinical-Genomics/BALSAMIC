@@ -13,7 +13,7 @@ rule sentieon_DNAscope:
         vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
         tmpdir = tmp_dir,
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"]
     threads: get_threads(cluster_config, 'sentieon_DNAscope')

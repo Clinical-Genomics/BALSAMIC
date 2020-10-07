@@ -44,7 +44,7 @@ if len(cluster_config.keys()) == 0:
 
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
 except KeyError as error:

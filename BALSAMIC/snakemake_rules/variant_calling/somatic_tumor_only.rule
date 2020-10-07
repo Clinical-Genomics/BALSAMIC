@@ -199,7 +199,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         tmpdir = tmp_dir, 
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
     log:
