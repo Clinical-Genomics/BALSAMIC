@@ -74,7 +74,7 @@ INPUT={input} \
 OUTPUT={output.mrkdup} \
 VALIDATION_STRINGENCY=SILENT \
 MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
-REMOVE_DUPLICATES={params.rm_dup}; 
+REMOVE_DUPLICATES={params.rm_dup} \ 
 METRICS_FILE='{output.stats}';
 samtools index {output.mrkdup};
     """
