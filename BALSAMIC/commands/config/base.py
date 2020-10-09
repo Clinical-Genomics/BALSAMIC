@@ -2,7 +2,7 @@
 import click
 
 from BALSAMIC.commands.config.case import case_config as case_command
-from BALSAMIC.commands.config.reference import reference as reference_command
+from BALSAMIC.commands.init.reference import reference as reference_command
 
 
 @click.group()
