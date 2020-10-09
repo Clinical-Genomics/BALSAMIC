@@ -1,9 +1,4 @@
-#! /usr/bin/python
-
 import pytest
-import yaml
-import json
-import os
 
 from pathlib import Path
 from functools import partial

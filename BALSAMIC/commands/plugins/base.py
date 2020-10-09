@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import click
 
 from BALSAMIC.commands.plugins.scout import scout as scout_command

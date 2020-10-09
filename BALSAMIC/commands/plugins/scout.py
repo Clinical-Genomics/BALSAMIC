@@ -1,11 +1,8 @@
 import os
 import logging
-import glob
 import json
 import yaml
 import click
-import shutil
-import sys
 import datetime
 
 from BALSAMIC.utils.rule import get_result_dir

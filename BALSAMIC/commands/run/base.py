@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 import click
 
 from BALSAMIC.commands.run.analysis import analysis as run_analysis_cmd
