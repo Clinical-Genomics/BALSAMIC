@@ -2,7 +2,6 @@
 # coding: utf-8
 
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
-from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 

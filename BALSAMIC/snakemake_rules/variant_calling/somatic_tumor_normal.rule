@@ -4,10 +4,8 @@
 import os
 from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_chrom
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
-from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 chromlist = config["panel"]["chrom"]
