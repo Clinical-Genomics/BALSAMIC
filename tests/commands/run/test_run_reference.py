@@ -1,12 +1,3 @@
-import pytest
-import glob
-from pathlib import Path
-from click.testing import CliRunner
-
-import BALSAMIC
-from BALSAMIC.commands.base import cli
-
-
 def test_run_reference(invoke_cli, tmp_path, singularity_container):
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_dir_with_run"

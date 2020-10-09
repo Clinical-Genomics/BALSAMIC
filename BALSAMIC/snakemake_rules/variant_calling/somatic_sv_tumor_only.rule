@@ -3,7 +3,6 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_sample_type
-from BALSAMIC import __version__ as bv
 
 tumor_bam = "tumor.merged.bam"
 

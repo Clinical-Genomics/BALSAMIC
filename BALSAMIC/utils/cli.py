@@ -8,19 +8,14 @@ import snakemake
 import re
 import shutil
 import logging
-import click
 import graphviz
 
 from pathlib import Path
 from colorclass import Color
 from io import StringIO
-from itertools import chain
-from collections import defaultdict
-from BALSAMIC.utils.constants import CONDA_ENV_PATH
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
-
-from BALSAMIC.utils.exc import BalsamicError
 
 
 class CaptureStdout(list):

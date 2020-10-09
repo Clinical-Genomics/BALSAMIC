@@ -1,9 +1,3 @@
-import pytest
-
-import BALSAMIC
-from BALSAMIC.commands.base import cli
-
-
 def test_scout_tumor_normal(invoke_cli, tumor_normal_config):
     # GIVEN a tumor-normal config file
     # WHEN running analysis

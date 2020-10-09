@@ -4,10 +4,9 @@ import pytest
 from pathlib import Path
 from pydantic import ValidationError
 
-from BALSAMIC.utils.models import (VCFAttributes, VarCallerFilter, QCModel,
-                                   VarcallerAttribute, VCFModel, AnalysisModel,
-                                   SampleInstanceModel, BioinfoToolsModel,
-                                   ReferenceUrlsModel, ReferenceMeta)
+from BALSAMIC.utils.models import (
+    VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
+    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta)
 
 
 def test_referencemeta():

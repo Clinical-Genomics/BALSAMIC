@@ -1,11 +1,7 @@
 import os
-import sys
 import logging
-import glob
 import json
-import yaml
 import click
-import copy
 import snakemake
 from colorclass import Color
 

@@ -6,17 +6,14 @@ from unittest import mock
 
 from BALSAMIC.commands.run.scheduler import SbatchScheduler
 from BALSAMIC.commands.run.scheduler import QsubScheduler
-from BALSAMIC.commands.run.scheduler import submit_job
 from BALSAMIC.commands.run.scheduler import read_sample_config
 from BALSAMIC.commands.run.scheduler import write_sacct_file
 from BALSAMIC.commands.run.scheduler import submit_job
 from BALSAMIC.commands.run.scheduler import main as scheduler_main
-from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import createDir
 
 
-def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, tmpdir,
-                            capsys):
+def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, capsys):
     # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
     test_jobid = '999999999999'
     test_return_value = 'Submitted batch job ' + test_jobid
@@ -54,8 +51,7 @@ def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, tmpdir,
     assert captured.out == test_jobid + "\n"
 
 
-def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, tmpdir,
-                           capsys):
+def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, capsys):
     # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
     test_jobname = 'script.sh'
     test_return_value = f'Your job 31415 ("{test_jobname}") has been submitted'

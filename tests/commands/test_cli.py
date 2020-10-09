@@ -1,12 +1,4 @@
-import pytest
-import glob
 import BALSAMIC
-import json
-import logging
-
-from pathlib import Path
-from click.testing import CliRunner
-from BALSAMIC.commands.base import cli
 
 
 def test_cli(invoke_cli):

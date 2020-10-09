@@ -1,11 +1,8 @@
-#! /usr/bin/env python
-
 import json
 import subprocess
 import logging
 import click
 
-from BALSAMIC.utils.cli import get_schedulerpy
 from BALSAMIC.utils.cli import get_snakefile, SnakeMake, get_config
 
 LOG = logging.getLogger(__name__)

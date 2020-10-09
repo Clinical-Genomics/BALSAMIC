@@ -2,8 +2,6 @@
 import sys
 from pathlib import Path
 
-import BALSAMIC
-
 # BALSAMIC base dir
 BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 
@@ -16,9 +14,6 @@ CONDA_ENV_YAML = Path(
 
 # Path to rule files to be accessed by Snakemake
 RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
-
-# BALSAMIC version
-BALSAMIC_VERSION = BALSAMIC.__version__
 
 # Sentieon specific
 SENTIEON_DNASCOPE = Path(

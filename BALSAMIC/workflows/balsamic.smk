@@ -9,10 +9,7 @@ from yapf.yapflib.yapf_api import FormatFile
 from snakemake.exceptions import RuleException, WorkflowError
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.rule import get_variant_callers
-from BALSAMIC.utils.rule import get_rule_output
-from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.rule import get_vcf
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf)
 from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY
 
 shell.prefix("set -eo pipefail; ")

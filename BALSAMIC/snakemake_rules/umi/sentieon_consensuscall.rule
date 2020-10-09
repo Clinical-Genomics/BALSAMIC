@@ -2,7 +2,6 @@
 # coding: utf-8
 
 
-from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
 

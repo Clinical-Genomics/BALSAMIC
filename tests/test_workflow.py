@@ -1,6 +1,3 @@
-#! /usr/bin/env python3
-# syntax=python tabstop=4 expandtab
-
 import snakemake
 
 from BALSAMIC.utils.cli import get_snakefile

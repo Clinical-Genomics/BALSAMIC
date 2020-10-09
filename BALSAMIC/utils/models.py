@@ -6,10 +6,11 @@ from typing import Optional, List, Dict
 from pydantic import (BaseModel, validator, Field, AnyUrl)
 from pydantic.types import DirectoryPath, FilePath
 
+from BALSAMIC import __version__ as balsamic_version
+
 from BALSAMIC.utils.constants import (
     CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
-    MUTATION_TYPE, RULE_DIRECTORY, BALSAMIC_VERSION, VALID_GENOME_VER,
-    VALID_REF_FORMAT)
+    MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT)
 
 
 class VCFAttributes(BaseModel):
@@ -196,7 +197,7 @@ class AnalysisModel(BaseModel):
     result: Optional[DirectoryPath]
     benchmark: Optional[DirectoryPath]
     dag: Optional[FilePath]
-    BALSAMIC_version: str = BALSAMIC_VERSION
+    BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
 
     class Config:
@@ -252,7 +253,7 @@ class AnalysisModel(BaseModel):
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return Path(values.get("analysis_dir"), values.get("case_id"),
                     values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{BALSAMIC_VERSION}_graph.pdf'
+                    ) + f'_BALSAMIC_{balsamic_version}_graph.pdf'
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
