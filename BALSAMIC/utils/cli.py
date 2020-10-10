@@ -161,13 +161,13 @@ class SnakeMake:
                       self.configfile,
                       self.cluster_config,
                       self.singularity_arg,
+                      quiet_mode,
                       forceall,
                       dryrun,
                       cluster_cmd,
                       report,
                       snakemake_config_key_value,
                       sm_opt,
-                      quiet_mode,
                   ))
 
         return sm_cmd
