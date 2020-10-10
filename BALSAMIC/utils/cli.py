@@ -153,23 +153,12 @@ class SnakeMake:
                                self.case_name, self.cluster_config,
                                sbatch_cmd))
 
-        sm_cmd = (" snakemake --notemp -p "
-                  " --directory {} --snakefile {} --configfiles {} "
-                  " {} {} {} {} {} {} {} {} {}".format(
-                      self.working_dir,
-                      self.snakefile,
-                      self.configfile,
-                      self.cluster_config,
-                      self.singularity_arg,
-                      quiet_mode,
-                      forceall,
-                      dryrun,
-                      cluster_cmd,
-                      report,
-                      snakemake_config_key_value,
-                      sm_opt,
-                  ))
-
+        sm_cmd = (
+            f" snakemake --notemp -p "
+            " --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
+            " {self.cluster_config} {self.singularity_arg} {quiet_mode} "
+            " {forceall} {dryrun} {cluster_cmd} "
+            " {report} {snakemake_config_key_value} {sm_opt}")
         return sm_cmd
 
 
