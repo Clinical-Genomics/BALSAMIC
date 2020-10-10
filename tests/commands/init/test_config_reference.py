@@ -14,7 +14,7 @@ def test_init_reference_write_json(invoke_cli, tmp_path,
     test_output_reference_pdf = test_new_dir / "generate_ref_worflow_graph.pdf"
 
     result = invoke_cli([
-        'config', 'reference', '-c', 'secret_key', '--singularity',
+        'init', 'reference', '-c', 'secret_key', '--singularity',
         singularity_container, '-o',
         str(test_new_dir)
     ])
@@ -25,14 +25,14 @@ def test_init_reference_write_json(invoke_cli, tmp_path,
     assert Path(test_output_reference_config).exists()
 
 
-def test_config_reference_no_write_perm(
+def test_init_reference_no_write_perm(
         tmp_path, invoke_cli, singularity_container, no_write_perm_path):
     # Given a path with no write permission
     test_new_dir = str(no_write_perm_path)
 
     # WHEN invoking config sample
     result = invoke_cli([
-        'config', 'reference', '-c', 'secret_key', '--singularity',
+        'init', 'reference', '-c', 'secret_key', '--singularity',
         singularity_container, '-o',
         str(test_new_dir)
     ])
@@ -50,7 +50,7 @@ def test_config_reference_exception(invoke_cli, tmp_path,
     with mock.patch.object(graphviz, 'Source') as mocked:
         mocked.return_value = None
         result = invoke_cli([
-            'config', 'reference', '-c', 'secret_key', '--singularity',
+            'init', 'reference', '-c', 'secret_key', '--singularity',
             singularity_container, '-o',
             str(test_new_dir)
         ])
@@ -69,12 +69,3 @@ def test_init_reference(invoke_cli):
     assert "--cluster-config" in result.output
     assert "--run-analysis" in result.output
     assert result.exit_code == 0
-
-
-def test_run_ref_invalid(invoke_cli):
-    # WHEN invoking run reference command with invalid param
-    result = invoke_cli(['run', 'reference', '--run-mode', 'foo'])
-
-    # THEN It should throw invalid value error
-    assert result.exit_code == 2
-    assert 'Error: Invalid value' in result.output
