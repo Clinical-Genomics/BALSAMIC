@@ -5,6 +5,7 @@ import logging
 import click
 import graphviz
 import snakemake
+import subprocess
 from pathlib import Path
 
 from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
@@ -50,8 +51,8 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     default=False,
     is_flag=True,
-    help='By default balsamic run_analysis will run in dry run mode. \
-              Raise thise flag to make the actual analysis')
+    help=("By default balsamic run_analysis will run in dry run mode."
+          "Raise thise flag to make the actual analysis"))
 @click.option(
     '-f',
     '--force-all',
