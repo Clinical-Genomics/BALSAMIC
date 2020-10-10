@@ -17,7 +17,6 @@ def test_config(invoke_cli):
 
     # THEN It should show config options in result
     assert 'case' in result.output
-    assert 'reference' in result.output
 
 
 def test_config_case(invoke_cli):
