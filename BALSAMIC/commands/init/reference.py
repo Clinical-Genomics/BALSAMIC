@@ -63,9 +63,15 @@ LOG = logging.getLogger(__name__)
 @click.option('--snakemake-opt',
               multiple=True,
               help='Pass these options directly to snakemake')
+@click.option('-q',
+              '--quiet',
+              default=False,
+              is_flag=True,
+              help=('Instruct snakemake to be quiet!'
+                    'No output will be printed'))
 @click.pass_context
 def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
-              genome_version, run_analysis, force_all, snakemake_opt):
+              genome_version, run_analysis, force_all, quiet, snakemake_opt):
     """ Configure workflow for reference generation """
 
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
@@ -144,6 +150,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
     balsamic_run.run_mode = "local"
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
+    balsamic_run.quiet = quiet
     balsamic_run.sm_opt = list(snakemake_opt).extend(["--cores", "1"])
 
     # Always use singularity

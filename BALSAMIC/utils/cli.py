@@ -56,6 +56,7 @@ class SnakeMake:
     run_analysis    - To run pipeline
     use_singularity - To use singularity
     singularity_bind- Singularity bind path
+    quiet           - Queit mode for snakemake
     singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller
@@ -79,6 +80,7 @@ class SnakeMake:
         self.mail_user = str()
         self.forceall = False
         self.run_analysis = False
+        self.quiet = False
         self.report = str()
         self.use_singularity = True
         self.singularity_bind = str()
@@ -100,8 +102,11 @@ class SnakeMake:
         if self.report:
             report = "--report {}".format(self.report)
 
+        if self.quiet:
+            sm_opt += " --quiet "
+
         if self.sm_opt:
-            sm_opt = " ".join(self.sm_opt)
+            sm_opt += " ".join(self.sm_opt)
 
         if not self.run_analysis:
             dryrun = "--dryrun"
