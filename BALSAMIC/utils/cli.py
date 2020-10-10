@@ -155,10 +155,10 @@ class SnakeMake:
 
         sm_cmd = (
             f" snakemake --notemp -p "
-            " --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
-            " {self.cluster_config} {self.singularity_arg} {quiet_mode} "
-            " {forceall} {dryrun} {cluster_cmd} "
-            " {report} {snakemake_config_key_value} {sm_opt}")
+            f" --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
+            f" {self.cluster_config} {self.singularity_arg} {quiet_mode} "
+            f" {forceall} {dryrun} {cluster_cmd} "
+            f" {report} {snakemake_config_key_value} {sm_opt}")
         return sm_cmd
 
 
