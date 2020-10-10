@@ -153,7 +153,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
     balsamic_run.quiet = quiet
-    balsamic_run.sm_opt = list(snakemake_opt).extend(["--cores", "1"])
+    balsamic_run.sm_opt = list(snakemake_opt) + ["--cores", "1"]
 
     # Always use singularity
     balsamic_run.use_singularity = True
