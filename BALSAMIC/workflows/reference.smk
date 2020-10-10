@@ -135,7 +135,7 @@ rule all:
             "refGene": input.refgene,
             "wgs_calling_interval": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
-            "vep": input.vep
+            "vep": input.vep,
             "genome": params.genome_ver
         }
 
