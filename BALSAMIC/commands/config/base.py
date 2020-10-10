@@ -2,7 +2,6 @@
 import click
 
 from BALSAMIC.commands.config.case import case_config as case_command
-from BALSAMIC.commands.init.reference import reference as reference_command
 
 
 @click.group()
@@ -13,4 +12,3 @@ def config(context):
 
 
 config.add_command(case_command)
-config.add_command(reference_command)

@@ -41,8 +41,7 @@ def test_init_reference_no_write_perm(
     assert result.exit_code == 1
 
 
-def test_config_reference_exception(invoke_cli, tmp_path,
-                                    singularity_container):
+def test_init_reference_exception(invoke_cli, tmp_path, singularity_container):
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_dir"
     test_new_dir.mkdir()
@@ -64,8 +63,6 @@ def test_init_reference(invoke_cli):
 
     # THEN It should show the help message with all params
     assert "--snakefile" in result.output
-    assert "--configfile" in result.output
-    assert "--run-mode" in result.output
-    assert "--cluster-config" in result.output
-    assert "--run-analysis" in result.output
+    assert "--cosmic-key" in result.output
+    assert "--singularity" in result.output
     assert result.exit_code == 0
