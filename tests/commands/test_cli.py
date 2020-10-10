@@ -110,25 +110,3 @@ def test_run_analysis_invalid(invoke_cli):
     # THEN It should throw invalid value error
     assert result.exit_code == 2
     assert 'Error: Invalid value' in result.output
-
-
-def test_run_reference(invoke_cli):
-    # WHEN invoking run reference command
-    result = invoke_cli(['run', 'reference', '--help'])
-
-    # THEN It should show the help message with all params
-    assert "--snakefile" in result.output
-    assert "--configfile" in result.output
-    assert "--run-mode" in result.output
-    assert "--cluster-config" in result.output
-    assert "--run-analysis" in result.output
-    assert result.exit_code == 0
-
-
-def test_run_ref_invalid(invoke_cli):
-    # WHEN invoking run reference command with invalid param
-    result = invoke_cli(['run', 'reference', '--run-mode', 'foo'])
-
-    # THEN It should throw invalid value error
-    assert result.exit_code == 2
-    assert 'Error: Invalid value' in result.output

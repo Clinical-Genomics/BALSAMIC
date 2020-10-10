@@ -3,8 +3,8 @@ from pathlib import Path
 from unittest import mock
 
 
-def test_config_reference_write_json(invoke_cli, tmp_path,
-                                     singularity_container):
+def test_init_reference_write_json(invoke_cli, tmp_path,
+                                   singularity_container):
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_dir"
     test_new_dir.mkdir()
@@ -56,3 +56,25 @@ def test_config_reference_exception(invoke_cli, tmp_path,
         ])
 
     assert result.exit_code == 1
+
+
+def test_init_reference(invoke_cli):
+    # WHEN invoking run reference command
+    result = invoke_cli(['init', 'reference', '--help'])
+
+    # THEN It should show the help message with all params
+    assert "--snakefile" in result.output
+    assert "--configfile" in result.output
+    assert "--run-mode" in result.output
+    assert "--cluster-config" in result.output
+    assert "--run-analysis" in result.output
+    assert result.exit_code == 0
+
+
+def test_run_ref_invalid(invoke_cli):
+    # WHEN invoking run reference command with invalid param
+    result = invoke_cli(['run', 'reference', '--run-mode', 'foo'])
+
+    # THEN It should throw invalid value error
+    assert result.exit_code == 2
+    assert 'Error: Invalid value' in result.output

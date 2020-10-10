@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
                short_help="config workflow for generate reference")
 @click.option("-o",
               "--outdir",
+              "--out-dir",
               required=True,
               help="output directory for ref files eg: reference")
 @click.option("-c",
