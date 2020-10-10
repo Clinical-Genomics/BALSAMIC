@@ -156,6 +156,5 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
     # Always use singularity
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
-    balsamic_run.sm_opt = snakemake_opt
 
     subprocess.run(balsamic_run.build_cmd(), shell=True)

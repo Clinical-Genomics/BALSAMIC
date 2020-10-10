@@ -90,6 +90,7 @@ class SnakeMake:
 
     def build_cmd(self):
         forceall = str()
+        quiet_mode = str()
         sm_opt = str()
         cluster_cmd = str()
         dryrun = str()
@@ -103,10 +104,10 @@ class SnakeMake:
             report = "--report {}".format(self.report)
 
         if self.quiet:
-            sm_opt += " --quiet "
+            quiet_mode = " --quiet "
 
         if self.sm_opt:
-            sm_opt += " ".join(self.sm_opt)
+            sm_opt = " ".join(self.sm_opt)
 
         if not self.run_analysis:
             dryrun = "--dryrun"
@@ -154,7 +155,7 @@ class SnakeMake:
 
         sm_cmd = (" snakemake --notemp -p "
                   " --directory {} --snakefile {} --configfiles {} "
-                  " {} {} {} {} {} {} {} {}".format(
+                  " {} {} {} {} {} {} {} {} {}".format(
                       self.working_dir,
                       self.snakefile,
                       self.configfile,
@@ -166,6 +167,7 @@ class SnakeMake:
                       report,
                       snakemake_config_key_value,
                       sm_opt,
+                      quiet_mode,
                   ))
 
         return sm_cmd
