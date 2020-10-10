@@ -18,7 +18,8 @@ LOG = logging.getLogger(__name__)
               "--outdir",
               "--out-dir",
               required=True,
-              help="output directory for ref files eg: reference")
+              help=("Output directory for ref files."
+                    "This path will be used as base path for files"))
 @click.option("-c",
               "--cosmic-key",
               required=True,
@@ -84,7 +85,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
         singularity).absolute().as_posix()
 
     config = dict()
-    outdir = os.path.abspath(outdir)
+    outdir = os.path.join(os.path.abspath(outdir), bv, genome_version)
     config_json = os.path.join(outdir, "config.json")
     dagfile_path = os.path.join(outdir, dagfile)
 
