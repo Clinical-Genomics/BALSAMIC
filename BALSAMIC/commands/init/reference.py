@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 
 from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
-from BALSAMIC import __version__ as bv
+from BALSAMIC import __version__ as balsamic_version
 
 LOG = logging.getLogger(__name__)
 
@@ -91,7 +91,8 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
         singularity).absolute().as_posix()
 
     config = dict()
-    outdir = os.path.join(os.path.abspath(outdir), bv, genome_version)
+    outdir = os.path.join(os.path.abspath(outdir), balsamic_version,
+                          genome_version)
     config_json = os.path.join(outdir, "config.json")
     dagfile_path = os.path.join(outdir, dagfile)
 
@@ -116,7 +117,8 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
                             configfiles=[config_json],
                             printrulegraph=True)
 
-    graph_title = "_".join(['BALSAMIC', bv, 'Generate reference'])
+    graph_title = "_".join(
+        ['BALSAMIC', balsamic_version, 'Generate reference'])
     graph_dot = "".join(graph_dot).replace(
         'snakemake_dag {',
         'BALSAMIC { label="' + graph_title + '";labelloc="t";')

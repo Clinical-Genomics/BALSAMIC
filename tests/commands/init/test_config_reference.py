@@ -1,7 +1,7 @@
 import graphviz
 from pathlib import Path
 from unittest import mock
-from BALSAMIC.__version__ import __version__ as bv
+from BALSAMIC import __version__ as balsamic_version
 
 
 def test_init_reference_write_json(invoke_cli, tmp_path,
@@ -12,8 +12,8 @@ def test_init_reference_write_json(invoke_cli, tmp_path,
     test_new_dir.mkdir()
 
     # WHEN creating config.json in reference dir
-    test_output_reference_config = test_new_dir / bv / test_genome_version / "config.json"
-    test_output_reference_pdf = test_new_dir / bv / test_genome_version / "generate_ref_worflow_graph.pdf"
+    test_output_reference_config = test_new_dir / balsamic_version / test_genome_version / "config.json"
+    test_output_reference_pdf = test_new_dir / balsamic_version / test_genome_version / "generate_ref_worflow_graph.pdf"
 
     result = invoke_cli([
         'init', 'reference', '-c', 'secret_key', '--singularity',
