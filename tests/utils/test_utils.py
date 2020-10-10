@@ -288,7 +288,7 @@ def test_get_snakefile():
         if sequencing_type in ['targeted', 'wgs', 'qc']:
             pipeline = "BALSAMIC/workflows/balsamic.smk"
         elif analysis_type == 'generate_ref':
-            pipeline = "BALSAMIC/workflows/GenerateRef.smk"
+            pipeline = "BALSAMIC/workflows/reference.smk"
         elif analysis_type == 'umi':
             pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
 
