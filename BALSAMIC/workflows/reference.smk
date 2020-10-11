@@ -29,7 +29,7 @@ else:
     genome_ver = 'hg19'
 
 # essential path reference files
-basedir = os.path.join(config['output'], genome_ver)
+basedir = os.path.join(config['output'])
 genome_dir = os.path.join(basedir, "genome")
 vcf_dir = os.path.join(basedir, "variants")
 vep_dir = os.path.join(basedir, "vep")
