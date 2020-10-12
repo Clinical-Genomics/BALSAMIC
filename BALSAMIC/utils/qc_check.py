@@ -1,12 +1,10 @@
 #! /usr/bin/python
-
+import click
 import pandas as pd
 import re
 import numpy as np
 import os
-#hs_metrics_path = '/Users/keyvan.elhami/Downloads/multiqc_picard_HsMetrics.json'
-#qc_table = '/Users/keyvan.elhami/Downloads/qc_table4.json'
-#csv_output = '/Users/keyvan.elhami/Downloads/output_csv'
+
 normal_sample='neatlyfastraven'
 tumor_sample='easilyusefulorca'
 
@@ -78,7 +76,12 @@ def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
         qc_df: DataFrame
 
     '''
-    qc_df = pd.DataFrame(data=input_df[bait])
+    #Copy the desired columns
+    qc_df = input_df[[bait, "METRIC_CRITERIA"]].copy()
+
+    #Changing the column with the bait name
+    qc_df = qc_df.rename(columns={bait: bait + "_criteria"})
+
     return qc_df
 
 
@@ -98,10 +101,12 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
         qc_check_df: DataFrame
 
     '''
-
+#    print (input_qc_df)
+    #print ("----------")
+    #print (input_hsmetrics_df)
     #1) Merge the two df by col (axis = 1) for those rows that are shared (intersected) by passing join='inner'
     merged_df = pd.concat([input_hsmetrics_df, input_qc_df], axis = 1, join='inner')
-
+    #print (merged_df)
     column_header = list(merged_df.columns)
 
     #2) Adding new col with the calculated difference in the qc values
@@ -158,7 +163,7 @@ def failed_qc(input_df: pd.DataFrame) -> pd.DataFrame:
             print ("QC failed")
             return
 
-def output_file(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
+def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
     ''' Outputs the QC parameters as csv-file
 
@@ -171,7 +176,7 @@ def output_file(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
     '''
 
-    output_df = input_df.to_csv(path, sep = '\t')
+    output_df = input_df.to_csv(output_path, sep = '\t')
 
     return output_df
 
@@ -181,7 +186,7 @@ def output_file(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 @click.option('--output', type = click.Path(), required = True, help = 'name and path for the output csv-file' )
 
 #The HS metrics and qc table provided in the command line will execute the main function.
-def main(hs_metrics, qc_table):
+def main(hs_metrics, qc_table, output):
 
     #Read the HS metrics and qc table and convert to df
     hs_metrics_df = read_hs_metrics(hs_metrics)
@@ -192,7 +197,12 @@ def main(hs_metrics, qc_table):
     qc_criteria_df = get_qc_criteria(qc_table_df, bait_set)
 
     #Create a df with qc-flag for each criteria for each sample
-    check_qc_criteria(qc_criteria_df, hs_metrics_df)
+    extract_criteria = check_qc_criteria(qc_criteria_df, hs_metrics_df)
+
+    #Check if qc failed
+    qc_output = failed_qc(extract_criteria)
+
+    write_output(extract_criteria, output)
 
 
 if __name__ == '__main__':
