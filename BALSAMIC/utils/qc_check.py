@@ -4,9 +4,9 @@ import pandas as pd
 import re
 import numpy as np
 import os
-hs_metrics_path = '/Users/keyvan.elhami/Downloads/multiqc_picard_HsMetrics.json'
-qc_table = '/Users/keyvan.elhami/Downloads/qc_table4.json'
-csv_output = '/Users/keyvan.elhami/Downloads/output_csv'
+#hs_metrics_path = '/Users/keyvan.elhami/Downloads/multiqc_picard_HsMetrics.json'
+#qc_table = '/Users/keyvan.elhami/Downloads/qc_table4.json'
+#csv_output = '/Users/keyvan.elhami/Downloads/output_csv'
 normal_sample='neatlyfastraven'
 tumor_sample='easilyusefulorca'
 
@@ -158,7 +158,7 @@ def failed_qc(input_df: pd.DataFrame) -> pd.DataFrame:
             print ("QC failed")
             return
 
-def output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
+def output_file(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
     ''' Outputs the QC parameters as csv-file
 
@@ -178,6 +178,7 @@ def output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 @click.command()
 @click.option('--hs_metrics', type = click.Path(exists=True), required = True, help = 'path to HS metrics for desired case')
 @click.option('--qc_table', type = click.Path(exists=True), required = True, help = 'path to qc table with criteria' )
+@click.option('--output', type = click.Path(), required = True, help = 'name and path for the output csv-file' )
 
 #The HS metrics and qc table provided in the command line will execute the main function.
 def main(hs_metrics, qc_table):
