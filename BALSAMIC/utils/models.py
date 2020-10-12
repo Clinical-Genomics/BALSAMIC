@@ -44,6 +44,7 @@ class VarCallerFilter(BaseModel):
       AF_max: VCFAttributes (optional); maximum allelic fraction
       MQ: VCFAttributes (optional); minimum mapping quality
       DP: VCFAttributes (optional); minimum read depth
+      AF_ratio: VCFAttributes (optional); AF_tumor/AF_normal ratio
       varcaller_name: str (required); variant caller name
       filter_type: str (required); filter name for variant caller
       analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
@@ -55,6 +56,7 @@ class VarCallerFilter(BaseModel):
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: VCFAttributes
+    AF_ratio: Optional[VCFAttributes]
     varcaller_name: str
     filter_type: str
     analysis_type: str

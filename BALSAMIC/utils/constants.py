@@ -108,7 +108,7 @@ VCF_DICT = {
 }
 
 # Configuration of VARDICT settings
-VARDICT_SETTINGS = {
+VARDICT_FILTERS = {
     "AD": {
         "tag_value": 5,
         "filter_name": "balsamic_low_tumor_ad",
@@ -134,9 +134,14 @@ VARDICT_SETTINGS = {
         "filter_name": "balsamic_low_af",
         "field": "INFO"
     },
+    "AF_ratio": {
+        "tag_value": 5,
+        "filter_name": "balsamic_high_normal_af",
+        "field": "INFO"
+    },
     "varcaller_name": "VarDict",
     "filter_type": "general",
-    "analysis_type": "tumor_only",
+    "analysis_type": "tumor_only,tumor_normal",
     "description": "General purpose filters used for filtering VarDict",
 }
 

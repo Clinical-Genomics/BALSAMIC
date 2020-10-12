@@ -5,9 +5,9 @@
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 from BALSAMIC.utils.models import VarCallerFilter
-from BALSAMIC.utils.constants import VARDICT_SETTINGS
+from BALSAMIC.utils.constants import VARDICT_FILTERS
 
-VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+VARDICT = VarCallerFilter.parse_obj(VARDICT_FILTERS)
 
 rule ngs_filter_vardict:
   input:
