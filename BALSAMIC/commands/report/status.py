@@ -65,7 +65,7 @@ def status(context, sample_config, show_only_missing, print_files,
             snakefile=snakefile,
             dryrun=True,
             summary=True,
-            config=f'disable_variant_caller={disable_variant_caller}',
+            config={"disable_variant_caller": disable_variant_caller},
             configfiles=[sample_config],
             quiet=True,
         )
