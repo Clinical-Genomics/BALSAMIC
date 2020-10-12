@@ -5,7 +5,8 @@ import re
 import numpy as np
 import os
 hs_metrics_path = '/Users/keyvan.elhami/Downloads/multiqc_picard_HsMetrics.json'
-qc_table =   '/Users/keyvan.elhami/Downloads/qc_table4.json'
+qc_table = '/Users/keyvan.elhami/Downloads/qc_table4.json'
+csv_output = '/Users/keyvan.elhami/Downloads/output_csv'
 normal_sample='neatlyfastraven'
 tumor_sample='easilyusefulorca'
 
@@ -156,6 +157,23 @@ def failed_qc(input_df: pd.DataFrame) -> pd.DataFrame:
         if boolean_check[n] == True:
             print ("QC failed")
             return
+
+def output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
+
+    ''' Outputs the QC parameters as csv-file
+
+    Args:
+        input_df: DataFrame with qc parameters and qc differences
+        output_path: String with the desired output path
+
+    Returns:
+        CSV-file
+
+    '''
+
+    output_df = input_df.to_csv(path, sep = '\t')
+
+    return output_df
 
 @click.command()
 @click.option('--hs_metrics', type = click.Path(exists=True), required = True, help = 'path to HS metrics for desired case')
