@@ -4,10 +4,10 @@ import pandas as pd
 import re
 import numpy as np
 import os
-import click
-
-
-qc_list = ['MEAN_TARGET_COVERAGE', 'FOLD_80_BASE_PENALTY', 'PCT_OFF_BAIT']
+hs_metrics_path = '/Users/keyvan.elhami/Downloads/multiqc_picard_HsMetrics.json'
+qc_table =   '/Users/keyvan.elhami/Downloads/qc_table4.json'
+normal_sample='neatlyfastraven'
+tumor_sample='easilyusefulorca'
 
 
 def read_hs_metrics(hs_metrics_file: str):
@@ -65,7 +65,7 @@ def get_bait_name(input_df: pd.DataFrame) -> pd.DataFrame:
     return str(bait_name[0])
 
 
-def get_qc_criteria(input_df, bait: str):
+def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
 
     ''' Creates a new DataFrame with the QC criteria for only the deired bait set
 
@@ -98,41 +98,36 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
 
     '''
 
-    #merge the two df by col (axis = 1) for those rows that are shared (intersected) by passing join='inner'
-    merged_df = pd.concat([input_qc_df, input_hsmetrics_df], axis = 1, join='inner')
+    #1) Merge the two df by col (axis = 1) for those rows that are shared (intersected) by passing join='inner'
+    merged_df = pd.concat([input_hsmetrics_df, input_qc_df], axis = 1, join='inner')
 
-    normal_sample='neatlyfastraven'
-    tumor_sample='easilyusefulorca'
     column_header = list(merged_df.columns)
 
-    #Adding new col with the calculated difference in the qc values
-    merged_df['qc_diff_' + normal_sample] = merged_df[column_header[0]] - merged_df[column_header[1]]
-    merged_df['qc_diff_' + tumor_sample] = merged_df[column_header[0]] - merged_df[column_header[2]]
+    #2) Adding new col with the calculated difference in the qc values
+    merged_df['qc_diff_' + normal_sample] = merged_df[column_header[2]] - merged_df[column_header[0]]
+    merged_df['qc_diff_' + tumor_sample] = merged_df[column_header[2]] - merged_df[column_header[1]]
 
-    #Getting the mean cov value
-    normal_meanCov = merged_df.loc['MEAN_TARGET_COVERAGE', 'qc_diff_' + normal_sample]
-    tumor_meanCov = merged_df.loc['MEAN_TARGET_COVERAGE', 'qc_diff_' + tumor_sample]
+    #3) Desired conditions for normal and tumor sample to pass. Two different conditions are required
+    #since the conditions are different for the samples and should not overwrite each other.
+    conditions_normal = [
+        (merged_df['qc_diff_' + normal_sample] <= 0) & (merged_df['METRIC_CRITERIA'] == 'gt'),
+        (merged_df['qc_diff_' + normal_sample] >= 0) & (merged_df['METRIC_CRITERIA'] == 'lt')]
 
-    #If mean cov qc difference is negative, change it to a pos value and vice versa.
-    #This is required since the remaining qc-values needs to be positive to pass.
-    if normal_meanCov < 0:
-        merged_df.set_value('MEAN_TARGET_COVERAGE', 'qc_diff_' + normal_sample, abs(normal_meanCov))
-    else:
-        merged_df.set_value('MEAN_TARGET_COVERAGE', 'qc_diff_' + normal_sample, normal_meanCov * -1)
+    conditions_tumor = [
+        (merged_df['qc_diff_' + tumor_sample] <= 0) & (merged_df['METRIC_CRITERIA'] == 'gt'),
+        (merged_df['qc_diff_' + tumor_sample] >= 0) & (merged_df['METRIC_CRITERIA'] == 'lt')]
 
-    if tumor_meanCov < 0:
-        merged_df.set_value('MEAN_TARGET_COVERAGE', 'qc_diff_' + tumor_sample, abs(tumor_meanCov))
-    else:
-        merged_df.set_value('MEAN_TARGET_COVERAGE', 'qc_diff_' + normal_sample, normal_meanCov * -1)
+    #If above conditions are "True", set them as "pass"
+    set_qc=['Pass', 'Pass']
 
-    #Setting qc flag Fail or Pass as a new column
-    merged_df['qc_check_' + normal_sample] = np.where(merged_df['qc_diff_' + normal_sample] >= 0, 'Pass', 'Fail')
-    merged_df['qc_check_' + tumor_sample] = np.where(merged_df['qc_diff_' + tumor_sample] >= 0, 'Pass', 'Fail')
+    #Adding new column with qc flag.
+    merged_df['qc_check_' + normal_sample] = np.select(conditions_normal, set_qc, default ="Fail")
+    merged_df['qc_check_' + tumor_sample] = np.select(conditions_tumor, set_qc, default ="Fail")
 
-    #create a new df and copy the desired columns (separated by ',').
-    qc_check_df = merged_df[['qc_check_' + normal_sample, 'qc_check_' + tumor_sample]].copy()
+    #4) create a new df and copy the desired columns (separated by ',').
+    qc_check_df = merged_df[['qc_check_' + normal_sample, 'qc_diff_' + normal_sample,
+                             'qc_check_' + tumor_sample, 'qc_diff_' + tumor_sample]].copy()
 
-    print (qc_check_df)
     return qc_check_df
 
 @click.command()
