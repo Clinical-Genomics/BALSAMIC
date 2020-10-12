@@ -130,6 +130,33 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
 
     return qc_check_df
 
+def failed_qc(input_df: pd.DataFrame) -> pd.DataFrame:
+
+    ''' Outputs if the QC failed
+
+    Args:
+        input_df: DataFrame with qc parameters and qc differences
+
+    Returns:
+        String
+
+    '''
+
+    #copy the columns with qc criteria
+    copy_qc_df = input_df[['qc_check_' + normal_sample,'qc_check_' + tumor_sample]].copy()
+
+    #Creating df which set "True" for "Fail" values and "False" for "Pass" values
+    qc_boolean = copy_qc_df.isin(["Fail"])
+
+    #Create a Series to check whether any element is set as True by .any() and convert to list with .tolist()
+    boolean_check = qc_boolean.any().tolist()
+
+    #Loop trough the list to check for True booleans which indicates for failed qc criteria.
+    for n in range(len(boolean_check)):
+        if boolean_check[n] == True:
+            print ("QC failed")
+            return
+
 @click.command()
 @click.option('--hs_metrics', type = click.Path(exists=True), required = True, help = 'path to HS metrics for desired case')
 @click.option('--qc_table', type = click.Path(exists=True), required = True, help = 'path to qc table with criteria' )
