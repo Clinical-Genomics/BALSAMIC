@@ -9,7 +9,6 @@ from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import get_file_status_string
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.constants import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 
@@ -38,15 +37,8 @@ LOG = logging.getLogger(__name__)
     default=False,
     show_default=True,
     help="Print list of files. Otherwise only final count will be printed.")
-@click.option(
-    '--disable-variant-caller',
-    help=
-    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
-    f'values are: {list(VCF_DICT.keys())}',
-)
 @click.pass_context
-def status(context, sample_config, show_only_missing, print_files,
-           disable_variant_caller):
+def status(context, sample_config, show_only_missing, print_files):
     """
     cli for status sub-command.
     """
@@ -65,7 +57,6 @@ def status(context, sample_config, show_only_missing, print_files,
             snakefile=snakefile,
             dryrun=True,
             summary=True,
-            config={"disable_variant_caller": disable_variant_caller},
             configfiles=[sample_config],
             quiet=True,
         )
