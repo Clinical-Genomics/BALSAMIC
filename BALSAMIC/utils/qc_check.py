@@ -8,7 +8,6 @@ import os
 normal_sample='neatlyfastraven'
 tumor_sample='easilyusefulorca'
 
-
 def read_hs_metrics(hs_metrics_file: str):
 
     '''Reads the HS metrics (json-format) and returns it as a DataFrame
@@ -25,6 +24,7 @@ def read_hs_metrics(hs_metrics_file: str):
     return metrics_df
 
 
+
 def read_qc_table(qc_table_file: str):
 
     '''Reads the QC-table (json-format) and returns it as a DataFrame
@@ -39,6 +39,7 @@ def read_qc_table(qc_table_file: str):
     with open(qc_table_file) as f:
         qc_df = pd.read_json(qc_table_file)
     return qc_df
+
 
 
 def get_bait_name(input_df: pd.DataFrame) -> pd.DataFrame:
@@ -64,6 +65,7 @@ def get_bait_name(input_df: pd.DataFrame) -> pd.DataFrame:
     return str(bait_name[0])
 
 
+
 def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
 
     ''' Creates a new DataFrame with the QC criteria for only the deired bait set
@@ -83,6 +85,7 @@ def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
     qc_df = qc_df.rename(columns={bait: bait + "_criteria"})
 
     return qc_df
+
 
 
 def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFrame) -> pd.DataFrame:
@@ -134,6 +137,8 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
 
     return qc_check_df
 
+
+
 def failed_qc(input_df: pd.DataFrame) -> pd.DataFrame:
 
     ''' Outputs if the QC failed
@@ -161,6 +166,8 @@ def failed_qc(input_df: pd.DataFrame) -> pd.DataFrame:
             print ("QC failed")
             return
 
+
+
 def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
     ''' Outputs the QC parameters as csv-file
@@ -178,10 +185,14 @@ def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
     return output_df
 
+
+
 @click.command()
 @click.option('--hs_metrics', type = click.Path(exists=True), required = True, help = 'path to HS metrics for desired case')
 @click.option('--qc_table', type = click.Path(exists=True), required = True, help = 'path to qc table with criteria' )
 @click.option('--output', type = click.Path(), required = True, help = 'name and path for the output csv-file' )
+
+
 
 #The HS metrics and qc table provided in the command line will execute the main function.
 def main(hs_metrics, qc_table, output):
@@ -201,6 +212,7 @@ def main(hs_metrics, qc_table, output):
     qc_output = failed_qc(extract_criteria)
 
     write_output(extract_criteria, output)
+
 
 
 if __name__ == '__main__':
