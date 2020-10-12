@@ -1,16 +1,16 @@
 {
-    "__default__": {
-        "name": "BALSAMIC.{rule}.{wildcards}",
-        "time": "12:00:00",
-        "n": 8,
-        "mail_type": "FAIL",
-        "partition": "core"
-    },
-    "all": {
-        "mail_type": "END",
-        "time": "00:15:00",
-        "n": 1
-    },
+	"__default__": {
+		"name": "BALSAMIC.{rule}.{wildcards}",
+		"time": "12:00:00",
+		"n": 8,
+		"mail_type": "FAIL",
+		"partition": "core"
+	},
+	"all": {
+		"mail_type": "END",
+		"time": "00:15:00",
+		"n": 1
+	},
 	"BaseRecalibrator": {
 		"time": "15:00:00",
 		"n": 10
@@ -50,10 +50,6 @@
 	"cnvkit_single": {
 		"time": "08:00:00",
 		"n": 10
-	},
-	"fastp": {
-		"time": "10:00:00",
-		"n": 12
 	},
 	"haplotypecaller": {
 		"time": "03:00:00",
@@ -101,10 +97,6 @@
 	},
 	"mutect2_tumor_only": {
 		"time": "24:00:00",
-		"n": 12
-	},
-	"picard_umiaware": {
-		"time": "04:00:00",
 		"n": 12
 	},
 	"sambamba_exon_depth": {
@@ -167,22 +159,6 @@
 		"time": "24:00:00",
 		"n": 24
 	},
-	"sentieon_umi_align": {
-		"time": "24:00:00",
-		"n": 24
-	},
-	"sentieon_umi_consensus_align": {
-		"time": "24:00:00",
-		"n": 24
-	},
-	"sentieon_umi_consensus_call": {
-		"time": "12:00:00",
-		"n": 24
-	},
-	"sentieon_umi_tnscope": {
-		"time": "24:00:00",
-		"n": 24
-	},
 	"sentioen_filter_TNscope": {
 		"time": "24:00:00",
 		"n": 24
@@ -201,14 +177,14 @@
 	},
 	"vardict_merge": {
 		"time": "01:30:00",
-		"n": 8
+		"n": 5
 	},
 	"vardict_tumor_normal": {
-		"time": "14:00:00",
+		"time": "12:00:00",
 		"n": 10
 	},
 	"vardict_tumor_only": {
-		"time": "14:00:00",
+		"time": "10:00:00",
 		"n": 10
 	}
 }
