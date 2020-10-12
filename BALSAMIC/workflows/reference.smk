@@ -167,9 +167,9 @@ rule download_reference:
             log_file = output_file + ".log"
 
             if ref.url.scheme == "gs":
-                cmd = "gsutil cp -L {}.log {} -".format(log_file, ref.url)
+                cmd = "gsutil cp -L {} {} -".format(log_file, ref.url)
             else:
-                cmd = "wget -a {}.log -O - {}".format(log_file, ref.url)
+                cmd = "wget -a {} -O - {}".format(log_file, ref.url)
 
             if ref.secret:
                 try:
