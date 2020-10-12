@@ -35,6 +35,7 @@ rule vardict_tumor_only:
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+  threads: get_threads(cluster_config, "vardict_tumor_only")
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'vardict_tumor_only_' + '{bedchrom}.vardict.tsv'
@@ -48,6 +49,7 @@ rule vardict_tumor_only:
     "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xmx32G\"'; "
     "vardict-java -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "
+        " -th {threads} "
         "{params.col_info} {input.bed} "
         "| teststrandbias.R "
         "| var2vcf_valid.pl -P {params.max_pval} "

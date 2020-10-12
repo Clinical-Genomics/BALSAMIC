@@ -27,6 +27,7 @@ rule vardict_tumor_normal:
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
+  threads: get_threads(cluster_config, "vardict_tumor_normal")
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'vardict_tumor_normal_' + "{bedchrom}.vardict_tumor_normal.tsv"
@@ -40,6 +41,7 @@ rule vardict_tumor_normal:
     "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xmx32G\"'; "
     "vardict-java -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b \"{input.bamT}|{input.bamN}\" "
+        " -th {threads} "
         "{params.col_info} {input.bed} "
         "| testsomatic.R "
         "| var2vcf_paired.pl -P {params.max_pval} "
