@@ -1,16 +1,14 @@
-#! /usr/bin/env python
-
 import os
 import logging
+import subprocess
+from pathlib import Path
+
 import click
 import graphviz
 import snakemake
-from pathlib import Path
 
-from BALSAMIC.utils.cli import write_json, merge_json
-from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.cli import CaptureStdout
-from BALSAMIC import __version__ as bv
+from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
+from BALSAMIC import __version__ as balsamic_version
 
 LOG = logging.getLogger(__name__)
 
@@ -19,8 +17,10 @@ LOG = logging.getLogger(__name__)
                short_help="config workflow for generate reference")
 @click.option("-o",
               "--outdir",
+              "--out-dir",
               required=True,
-              help="output directory for ref files eg: reference")
+              help=("Output directory for ref files."
+                    "This path will be used as base path for files"))
 @click.option("-c",
               "--cosmic-key",
               required=True,
@@ -46,12 +46,36 @@ LOG = logging.getLogger(__name__)
               type=click.Choice(["hg19", "hg38"]),
               help=("Genome version to prepare reference. Path to genome"
                     "will be <outdir>/genome_version"))
+@click.option(
+    '-r',
+    '--run-analysis',
+    show_default=True,
+    default=False,
+    is_flag=True,
+    help=("By default balsamic run_analysis will run in dry run mode."
+          "Raise this flag to make the actual analysis"))
+@click.option(
+    '-f',
+    '--force-all',
+    show_default=True,
+    default=False,
+    is_flag=True,
+    help='Force run all analysis. This is same as snakemake --forceall')
+@click.option('--snakemake-opt',
+              multiple=True,
+              help='Pass these options directly to snakemake')
+@click.option('-q',
+              '--quiet',
+              default=False,
+              is_flag=True,
+              help=('Instruct snakemake to be quiet!'
+                    'No output will be printed'))
 @click.pass_context
 def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
-              genome_version):
+              genome_version, run_analysis, force_all, quiet, snakemake_opt):
     """ Configure workflow for reference generation """
 
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    LOG.info("BALSAMIC started with log level %s." % context.obj['loglevel'])
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 
@@ -68,7 +92,8 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
         singularity).absolute().as_posix()
 
     config = dict()
-    outdir = os.path.abspath(outdir)
+    outdir = os.path.join(os.path.abspath(outdir), balsamic_version,
+                          genome_version)
     config_json = os.path.join(outdir, "config.json")
     dagfile_path = os.path.join(outdir, dagfile)
 
@@ -83,9 +108,8 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
     os.makedirs(outdir, exist_ok=True)
 
     write_json(config, config_json)
-    LOG.info(
-        f'Reference generation workflow configured successfully - {config_json}'
-    )
+    LOG.info('Reference generation workflow configured successfully - %s' %
+             config_json)
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(snakefile=snakefile,
@@ -93,7 +117,8 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
                             configfiles=[config_json],
                             printrulegraph=True)
 
-    graph_title = "_".join(['BALSAMIC', bv, 'Generate reference'])
+    graph_title = "_".join(
+        ['BALSAMIC', balsamic_version, 'Generate reference'])
     graph_dot = "".join(graph_dot).replace(
         'snakemake_dag {',
         'BALSAMIC { label="' + graph_title + '";labelloc="t";')
@@ -104,8 +129,34 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
 
     try:
         graph_pdf = graph_obj.render()
-        LOG.info(
-            f'Reference workflow graph generated successfully - {graph_pdf}')
+        LOG.info('Reference workflow graph generated successfully - %s ' %
+                 graph_pdf)
     except Exception:
-        LOG.error(f'Reference workflow graph generation failed')
+        LOG.error('Reference workflow graph generation failed')
         raise click.Abort()
+
+    LOG.info("BALSAMIC started with log level %s" % context.obj['loglevel'])
+    LOG.info("Reference generation workflow started")
+
+    # Singularity bind path
+    bind_path = list()
+    bind_path.append(config['output'])
+    bind_path.append(config['conda_env_yaml'])
+    bind_path.append(config['rule_directory'])
+
+    # Construct snakemake command to run workflow
+    balsamic_run = SnakeMake()
+    balsamic_run.working_dir = config['output']
+    balsamic_run.snakefile = snakefile
+    balsamic_run.configfile = config_json
+    balsamic_run.run_mode = "local"
+    balsamic_run.forceall = force_all
+    balsamic_run.run_analysis = run_analysis
+    balsamic_run.quiet = quiet
+    balsamic_run.sm_opt = list(snakemake_opt) + ["--cores", "1"]
+
+    # Always use singularity
+    balsamic_run.use_singularity = True
+    balsamic_run.singularity_bind = bind_path
+
+    subprocess.run(balsamic_run.build_cmd(), shell=True)

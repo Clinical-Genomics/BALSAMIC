@@ -1,7 +1,6 @@
 import click
 
 from BALSAMIC.commands.run.analysis import analysis as run_analysis_cmd
-from BALSAMIC.commands.run.reference import reference as run_reference_cmd
 
 
 @click.group()
@@ -12,4 +11,3 @@ def run(context):
 
 
 run.add_command(run_analysis_cmd)
-run.add_command(run_reference_cmd)

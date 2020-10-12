@@ -29,7 +29,7 @@ else:
     genome_ver = 'hg19'
 
 # essential path reference files
-basedir = os.path.join(config['output'], genome_ver)
+basedir = os.path.join(config['output'])
 genome_dir = os.path.join(basedir, "genome")
 vcf_dir = os.path.join(basedir, "variants")
 vep_dir = os.path.join(basedir, "vep")
@@ -115,6 +115,8 @@ rule all:
         check_md5 = check_md5
     log:
         os.path.join(basedir, "reference.json.log")
+    params:
+        genome_ver = genome_ver
     run:
         import json
 
@@ -133,7 +135,8 @@ rule all:
             "refGene": input.refgene,
             "wgs_calling_interval": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
-            "vep": input.vep
+            "vep": input.vep,
+            "genome": params.genome_ver
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -148,8 +151,10 @@ rule all:
 # Download the reference genome, variant db 
 #                       - .fasta, dbsnp.vcf, 1kg.vcf, refFlat
 ##########################################################
-reference_data = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url, mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
-wgs_calling_url, genome_chrom_size_url, gnomad_url, cosmicdb_url, refgene_txt_url, refgene_sql_url]
+reference_data = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
+                  mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
+                  wgs_calling_url, genome_chrom_size_url, gnomad_url,
+                  cosmicdb_url, refgene_txt_url, refgene_sql_url]
 
 rule download_reference:
     output:
@@ -162,9 +167,9 @@ rule download_reference:
             log_file = output_file + ".log"
 
             if ref.url.scheme == "gs":
-                cmd = "gsutil cp -L {}.log {} -".format(log_file, ref.url)
+                cmd = "gsutil cp -L {} {} -".format(log_file, ref.url)
             else:
-                cmd = "wget -a {}.log -O - {}".format(log_file, ref.url)
+                cmd = "wget -a {} -O - {}".format(log_file, ref.url)
 
             if ref.secret:
                 try:

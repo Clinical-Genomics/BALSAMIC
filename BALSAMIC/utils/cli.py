@@ -1,18 +1,19 @@
 import os
 import json
-import yaml
-import sys
-import collections
-import BALSAMIC
-import snakemake
-import re
 import shutil
 import logging
-import graphviz
-
+import sys
+import collections
+import re
 from pathlib import Path
-from colorclass import Color
 from io import StringIO
+
+import yaml
+import snakemake
+import graphviz
+from colorclass import Color
+
+import BALSAMIC
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -39,7 +40,6 @@ class SnakeMake:
     To build a snakemake command using cli options
 
     Params:
-    
     case_name       - analysis case name
     working_dir     - working directory for snakemake
     configfile      - sample configuration file (json) output of balsamic-config-sample
@@ -56,6 +56,7 @@ class SnakeMake:
     run_analysis    - To run pipeline
     use_singularity - To use singularity
     singularity_bind- Singularity bind path
+    quiet           - Quiet mode for snakemake
     singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller
@@ -79,6 +80,7 @@ class SnakeMake:
         self.mail_user = str()
         self.forceall = False
         self.run_analysis = False
+        self.quiet = False
         self.report = str()
         self.use_singularity = True
         self.singularity_bind = str()
@@ -88,6 +90,7 @@ class SnakeMake:
 
     def build_cmd(self):
         forceall = str()
+        quiet_mode = str()
         sm_opt = str()
         cluster_cmd = str()
         dryrun = str()
@@ -99,6 +102,9 @@ class SnakeMake:
 
         if self.report:
             report = "--report {}".format(self.report)
+
+        if self.quiet:
+            quiet_mode = " --quiet "
 
         if self.sm_opt:
             sm_opt = " ".join(self.sm_opt)
@@ -147,22 +153,12 @@ class SnakeMake:
                                self.case_name, self.cluster_config,
                                sbatch_cmd))
 
-        sm_cmd = (" snakemake --notemp -p "
-                  " --directory {} --snakefile {} --configfiles {} "
-                  " {} {} {} {} {} {} {} {}".format(
-                      self.working_dir,
-                      self.snakefile,
-                      self.configfile,
-                      self.cluster_config,
-                      self.singularity_arg,
-                      forceall,
-                      dryrun,
-                      cluster_cmd,
-                      report,
-                      snakemake_config_key_value,
-                      sm_opt,
-                  ))
-
+        sm_cmd = (
+            f" snakemake --notemp -p "
+            f" --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
+            f" {self.cluster_config} {self.singularity_arg} {quiet_mode} "
+            f" {forceall} {dryrun} {cluster_cmd} "
+            f" {report} {snakemake_config_key_value} {sm_opt}")
         return sm_cmd
 
 
@@ -239,7 +235,7 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
     if analysis_type == "generate_ref":
-        snakefile = Path(p, 'workflows', 'GenerateRef.smk')
+        snakefile = Path(p, 'workflows', 'reference.smk')
     elif analysis_type == "umi":
         snakefile = Path(p, 'workflows', 'UMIworkflow.smk')
 
