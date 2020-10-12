@@ -1,18 +1,19 @@
 import os
 import json
-import yaml
-import sys
-import collections
-import BALSAMIC
-import snakemake
-import re
 import shutil
 import logging
-import graphviz
-
+import sys
+import collections
+import re
 from pathlib import Path
-from colorclass import Color
 from io import StringIO
+
+import yaml
+import snakemake
+import graphviz
+from colorclass import Color
+
+import BALSAMIC
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -39,7 +40,6 @@ class SnakeMake:
     To build a snakemake command using cli options
 
     Params:
-    
     case_name       - analysis case name
     working_dir     - working directory for snakemake
     configfile      - sample configuration file (json) output of balsamic-config-sample
@@ -56,7 +56,7 @@ class SnakeMake:
     run_analysis    - To run pipeline
     use_singularity - To use singularity
     singularity_bind- Singularity bind path
-    quiet           - Queit mode for snakemake
+    quiet           - Quiet mode for snakemake
     singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller

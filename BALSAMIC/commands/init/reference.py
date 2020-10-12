@@ -1,10 +1,11 @@
 import os
 import logging
+import subprocess
+from pathlib import Path
+
 import click
 import graphviz
 import snakemake
-import subprocess
-from pathlib import Path
 
 from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
 from BALSAMIC import __version__ as balsamic_version
@@ -52,7 +53,7 @@ LOG = logging.getLogger(__name__)
     default=False,
     is_flag=True,
     help=("By default balsamic run_analysis will run in dry run mode."
-          "Raise thise flag to make the actual analysis"))
+          "Raise this flag to make the actual analysis"))
 @click.option(
     '-f',
     '--force-all',
@@ -74,7 +75,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
               genome_version, run_analysis, force_all, quiet, snakemake_opt):
     """ Configure workflow for reference generation """
 
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    LOG.info("BALSAMIC started with log level %s." % context.obj['loglevel'])
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 
@@ -107,9 +108,8 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
     os.makedirs(outdir, exist_ok=True)
 
     write_json(config, config_json)
-    LOG.info(
-        f'Reference generation workflow configured successfully - {config_json}'
-    )
+    LOG.info('Reference generation workflow configured successfully - %s' %
+             config_json)
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(snakefile=snakefile,
@@ -129,13 +129,13 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
 
     try:
         graph_pdf = graph_obj.render()
-        LOG.info(
-            f'Reference workflow graph generated successfully - {graph_pdf}')
+        LOG.info('Reference workflow graph generated successfully - %s ' %
+                 graph_pdf)
     except Exception:
-        LOG.error(f'Reference workflow graph generation failed')
+        LOG.error('Reference workflow graph generation failed')
         raise click.Abort()
 
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    LOG.info("BALSAMIC started with log level %s" % context.obj['loglevel'])
     LOG.info("Reference generation workflow started")
 
     # Singularity bind path
