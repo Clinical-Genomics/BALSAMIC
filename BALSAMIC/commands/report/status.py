@@ -9,6 +9,7 @@ from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import get_file_status_string
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.constants import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 

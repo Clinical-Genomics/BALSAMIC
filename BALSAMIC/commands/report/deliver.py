@@ -13,6 +13,7 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.constants import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 
