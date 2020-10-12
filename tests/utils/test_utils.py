@@ -242,6 +242,7 @@ def test_snakemake_slurm():
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
+    snakemake_slurm.quiet = True
     snakemake_slurm.use_singularity = True
     snakemake_slurm.singularity_bind = ["path_1", "path_2"]
     snakemake_slurm.run_analysis = True
@@ -249,7 +250,6 @@ def test_snakemake_slurm():
     # WHEN calling the build command
     shell_command = snakemake_slurm.build_cmd()
 
-    # print(shell_command)
     # THEN constructing snakecommand for slurm runner
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
@@ -259,6 +259,7 @@ def test_snakemake_slurm():
     assert "sbatch.py" in shell_command
     assert "test_case" in shell_command
     assert "containers" in shell_command
+    assert "--quiet" in shell_command
 
 
 def test_get_script_path():
