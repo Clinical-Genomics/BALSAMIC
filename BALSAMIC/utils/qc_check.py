@@ -101,9 +101,7 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
         qc_check_df: DataFrame
 
     '''
-#    print (input_qc_df)
-    #print ("----------")
-    #print (input_hsmetrics_df)
+
     #1) Merge the two df by col (axis = 1) for those rows that are shared (intersected) by passing join='inner'
     merged_df = pd.concat([input_hsmetrics_df, input_qc_df], axis = 1, join='inner')
     #print (merged_df)
