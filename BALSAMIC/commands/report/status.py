@@ -37,8 +37,15 @@ LOG = logging.getLogger(__name__)
     default=False,
     show_default=True,
     help="Print list of files. Otherwise only final count will be printed.")
+@click.option(
+    '--disable-variant-caller',
+    help=
+    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
+    f'values are: {list(VCF_DICT.keys())}',
+)
 @click.pass_context
-def status(context, sample_config, show_only_missing, print_files):
+def status(context, sample_config, show_only_missing, print_files,
+           disable_variant_caller):
     """
     cli for status sub-command.
     """
@@ -57,6 +64,7 @@ def status(context, sample_config, show_only_missing, print_files):
             snakefile=snakefile,
             dryrun=True,
             summary=True,
+            config=f'disable_variant_caller={disable_variant_caller}',
             configfiles=[sample_config],
             quiet=True,
         )
