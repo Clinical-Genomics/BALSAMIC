@@ -105,6 +105,7 @@ rule all:
         mills_1kg = mills_1kg_url.get_output_file + ".gz",
         known_indel_1kg = known_indel_1kg_url.get_output_file + ".gz",
         gnomad_variant_vcf = gnomad_url.get_output_file,
+        gnomad_variant_index = gnomad_tbi_url.get_output_file,
         cosmic_vcf = cosmicdb_url.get_output_file + ".gz",
         variants_idx = expand( os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=VCF),
         vep = directory(vep_dir),
