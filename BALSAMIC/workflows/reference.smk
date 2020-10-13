@@ -52,6 +52,7 @@ mills_1kg_url = reference_file_model.mills_1kg
 known_indel_1kg_url = reference_file_model.known_indel_1kg
 vcf_1kg_url = reference_file_model.vcf_1kg
 gnomad_url = reference_file_model.gnomad_variant
+gnomad_tbi_url = reference_file_model.gnomad_variant_index
 cosmicdb_url = reference_file_model.cosmicdb
 wgs_calling_url = reference_file_model.wgs_calling
 genome_chrom_size_url = reference_file_model.genome_chrom_size
@@ -153,7 +154,8 @@ rule all:
 ##########################################################
 reference_data = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                   mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
-                  wgs_calling_url, genome_chrom_size_url, gnomad_url,
+                  wgs_calling_url, genome_chrom_size_url,
+                  gnomad_url, gnomad_tbi_url,
                   cosmicdb_url, refgene_txt_url, refgene_sql_url]
 
 rule download_reference:
