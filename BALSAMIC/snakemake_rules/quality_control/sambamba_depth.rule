@@ -5,7 +5,7 @@ from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
 picarddup = get_picard_mrkdup(config)
 
-rule panel_depth:
+rule sambamba_panel_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["panel"]["capture_kit"]
@@ -31,7 +31,7 @@ rule panel_depth:
         "`echo $covStr` {input.bam} > {output}; "
     
 
-rule exon_depth:
+rule sambamba_exon_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["reference"]["exon_bed"]

@@ -35,6 +35,7 @@ rule vardict_tumor_only:
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["case_id"],
     conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+  threads: get_threads(cluster_config, "vardict_tumor_only")
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'vardict_tumor_only_' + '{bedchrom}.vardict.tsv'
@@ -45,9 +46,10 @@ rule vardict_tumor_only:
     "tmpdir={params.tmpdir}/${{rand_str}}; "
     "mkdir -p ${{tmpdir}}; "
     "export TMPDIR=${{tmpdir}}; "
-    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xms768m\" \"-Xmx8g\"'; "
+    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xmx32G\"'; "
     "vardict-java -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
         "-b {input.bamT} "
+        " -th {threads} "
         "{params.col_info} {input.bed} "
         "| teststrandbias.R "
         "| var2vcf_valid.pl -P {params.max_pval} "
@@ -106,7 +108,7 @@ rule mutect2_tumor_only:
     "tmpdir={params.tmpdir}/${{rand_str}}; "
     "mkdir -p ${{tmpdir}}; "
     "export TMPDIR=${{tmpdir}}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
+    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
         "-T MuTect2 "
         "-R {input.fa} "
         "--cosmic {input.cosmic} "
