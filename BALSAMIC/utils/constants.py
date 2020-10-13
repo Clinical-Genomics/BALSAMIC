@@ -206,9 +206,18 @@ REFERENCE_FILES = {
             "url":
             "gs://gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz",
             "file_type": "vcf",
-            "gzip": True,
+            "gzip": False,
             "genome_version": "hg38",
-            "output_file": "gnomad.genomes.r2.1.1.sites.vcf",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "output_path": "variants",
+        },
+        "gnomad_variant_index": {
+            "url":
+            "gs://gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz.tbi",
+            "file_type": "vcf",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
             "output_path": "variants",
         },
         "cosmicdb": {
@@ -312,11 +321,20 @@ REFERENCE_FILES = {
         },
         "gnomad_variant": {
             "url":
-            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.exome_calling_intervals.sites.vcf.bgz",
+            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz",
             "file_type": "vcf",
-            "gzip": True,
+            "gzip": False,
             "genome_version": "hg19",
-            "output_file": "gnomad.genomes.r2.1.1.sites.vcf",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "output_path": "variants",
+        },
+        "gnomad_variant_index": {
+            "url":
+            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
+            "file_type": "vcf",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
             "output_path": "variants",
         },
         "cosmicdb": {

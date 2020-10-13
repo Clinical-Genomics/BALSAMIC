@@ -222,13 +222,13 @@ rule prepare_refgene:
 
 rule bgzip_tabix:
     input: 
-        os.path.join(vcf_dir, "{vcf}")
+        os.path.join(vcf_dir, "{vcf}.vcf")
     params:
         type = 'vcf',
         conda_env = get_conda_env(config["conda_env_yaml"], "tabix")    
     output:
-        os.path.join(vcf_dir, "{vcf}.gz"),
-        os.path.join(vcf_dir, "{vcf}.gz.tbi")
+        os.path.join(vcf_dir, "{vcf}.vcf.gz"),
+        os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
     log:
         os.path.join(vcf_dir, "{vcf}.gz_tbi.log")
     singularity: singularity_image
