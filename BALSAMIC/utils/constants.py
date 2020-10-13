@@ -307,7 +307,7 @@ REFERENCE_FILES = {
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
-            "output_file": "1kg_known_indels_b37.vcf.gz",
+            "output_file": "1kg_known_indels_b37.vcf",
             "output_path": "variants",
         },
         "vcf_1kg": {
