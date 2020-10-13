@@ -104,43 +104,46 @@ VCF_DICT = {
 }
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
-HSMETRICS_QC_CHECK = {
-    'gi_cfdna_3.1': {
-        "MEAN_TARGET_COVERAGE": 500,
-        "FOLD_80_BASE_PENALTY": 1.5,
-        "PCT_OFF_BAIT": 0.35,
-    },
-    "gmck_solid_4.1": {
-        "MEAN_TARGET_COVERAGE": 500,
-        "FOLD_80_BASE_PENALTY": 1.7,
-        "PCT_OFF_BAIT": 0.3,
-
-    },
-    "gms_myeloid_5.2": {
-        "MEAN_TARGET_COVERAGE": 1000,
-        "FOLD_80_BASE_PENALTY": 1.5,
-        "PCT_OFF_BAIT": 0.4,
-
-    },
-    "lymphoma_6.1": {
-        "MEAN_TARGET_COVERAGE": 1000,
-        "FOLD_80_BASE_PENALTY": 1.5,
-        "PCT_OFF_BAIT": 0.35,
-    },
-    "gms_lymphoid_7.1": {
-        "MEAN_TARGET_COVERAGE": 1000,
-        "FOLD_80_BASE_PENALTY": 1.5,
-        "PCT_OFF_BAIT": 0.35,
-    },
-    "exome_refseq_9.1": {
-        "MEAN_TARGET_COVERAGE": 100,
-        "FOLD_80_BASE_PENALTY": 1.8,
-        "PCT_OFF_BAIT": 0.25,
-    },
-    "wgs": {
-        "MEAN_TARGET_COVERAGE": 30,
-    },
-
+HSMETRICS_QC_CHECK =
+{
+   "gicfdna_3.1":{
+      "MEAN_TARGET_COVERAGE":500,
+      "FOLD_80_BASE_PENALTY":1.5,
+      "PCT_OFF_BAIT":0.35
+   },
+   "gmcksolid_4.1":{
+      "MEAN_TARGET_COVERAGE":500,
+      "FOLD_80_BASE_PENALTY":1.7,
+      "PCT_OFF_BAIT":0.3
+   },
+   "gmsmyeloid_5.2":{
+      "MEAN_TARGET_COVERAGE":1000,
+      "FOLD_80_BASE_PENALTY":1.5,
+      "PCT_OFF_BAIT":0.4
+   },
+   "lymphoma_6.1":{
+      "MEAN_TARGET_COVERAGE":1000,
+      "FOLD_80_BASE_PENALTY":1.5,
+      "PCT_OFF_BAIT":0.35
+   },
+   "gmslymphoid_7.1":{
+      "MEAN_TARGET_COVERAGE":1000,
+      "FOLD_80_BASE_PENALTY":1.5,
+      "PCT_OFF_BAIT":0.35
+   },
+   "exomerefseq_9.1":{
+      "MEAN_TARGET_COVERAGE":100,
+      "FOLD_80_BASE_PENALTY":1.8,
+      "PCT_OFF_BAIT":0.25
+   },
+   "wgs":{
+      "MEAN_TARGET_COVERAGE":30
+   },
+   "METRIC_CRITERIA":{
+      "MEAN_TARGET_COVERAGE":"gt",
+      "FOLD_80_BASE_PENALTY":"lt",
+      "PCT_OFF_BAIT":"lt"
+   }
 }
 
 # Configuration of VARDICT settings
