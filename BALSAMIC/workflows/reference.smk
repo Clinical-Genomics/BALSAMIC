@@ -104,7 +104,7 @@ rule all:
         tg_high_vcf = hc_vcf_1kg_url.get_output_file+ ".gz",
         mills_1kg = mills_1kg_url.get_output_file + ".gz",
         known_indel_1kg = known_indel_1kg_url.get_output_file + ".gz",
-        gnomad_variant_vcf = gnomad_url.get_output_file + ".gz",
+        gnomad_variant_vcf = gnomad_url.get_output_file,
         cosmic_vcf = cosmicdb_url.get_output_file + ".gz",
         variants_idx = expand( os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=VCF),
         vep = directory(vep_dir),
@@ -232,7 +232,7 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf.gz"),
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
     log:
-        os.path.join(vcf_dir, "{vcf}.gz_tbi.log")
+        os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
     singularity: singularity_image
     shell:
         "source activate {params.conda_env};"
