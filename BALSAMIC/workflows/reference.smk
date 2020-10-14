@@ -1,4 +1,3 @@
-#! python
 # syntax=python tabstop=4 expandtab
 # coding: utf-8
 
@@ -83,13 +82,11 @@ def create_md5(reference, check_md5):
             if os.path.isfile(value):
                 fh.write( get_md5(value) + ' ' + value + '\n')
 
-
 singularity_image = config['singularity']['image']
 
 ##########################################################
 # Generating Reference files for BALSAMIC pipeline
 # Writing reference json file 
-#
 ##########################################################
 
 rule all:
@@ -153,21 +150,20 @@ rule all:
 
 ##########################################################
 # Download the reference genome, variant db 
-#                       - .fasta, dbsnp.vcf, 1kg.vcf, refFlat
 ##########################################################
-reference_data = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
-                  mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
-                  wgs_calling_url, genome_chrom_size_url,
-                  gnomad_url, gnomad_tbi_url,
-                  cosmicdb_url, refgene_txt_url, refgene_sql_url]
+download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
+                    mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
+                    wgs_calling_url, genome_chrom_size_url,
+                    gnomad_url, gnomad_tbi_url,
+                    cosmicdb_url, refgene_txt_url, refgene_sql_url]
 
 rule download_reference:
     output:
-        expand("{output}", output=[ref.get_output_file for ref in reference_data])
+        expand("{output}", output=[ref.get_output_file for ref in download_content])
     run:
         import requests
 
-        for ref in reference_data:
+        for ref in download_content:
             output_file = ref.get_output_file
             log_file = output_file + ".log"
 
@@ -198,7 +194,7 @@ rule prepare_refgene:
         refgene_txt = refgene_txt_url.get_output_file,
         refgene_sql = refgene_sql_url.get_output_file
     params:
-        refgene_sql_awk = get_script_path('refseq_sql.awk'), 
+        refgene_sql_awk = get_script_path('refseq_sql.awk'),
         conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
     output:
         refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
@@ -208,21 +204,22 @@ rule prepare_refgene:
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
     singularity: singularity_image
     shell:
-        "source activate {params.conda_env}; " 
-        "header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql}); "
-        "(echo \"$header\"; cat {input.refgene_txt};) "
-        "| csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 "
-        "| csvformat -T "
-        "| bedtools expand -c 2,3 "
-        "| awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed}; "
-        "awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt}"
-        "| cut -f 1-11 > {output.refflat}; "
-        "sed -i 's/chr//g' {input.refgene_txt}; " 
-        "source deactivate; "
+        """
+source activate {params.conda_env};
+header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
+(echo \"$header\"; cat {input.refgene_txt};) \
+| csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 \
+| csvformat -T \
+| bedtools expand -c 2,3 \
+| awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed};
+
+awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt} \
+| cut -f 1-11 > {output.refflat};
+sed -i 's/chr//g' {input.refgene_txt};
+        """
 
 ##########################################################
-# Bgzipping and tabix the vcf files
-# 
+# bgzip and tabix the vcf files that are vcf
 ##########################################################
 
 rule bgzip_tabix:
@@ -238,14 +235,14 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
     singularity: singularity_image
     shell:
-        "source activate {params.conda_env};"
-        "bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};"
-        "source deactivate;"
+        """
+source activate {params.conda_env};
+bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
+        """
 
 
 ##########################################################
 # Create BWA Index for reference genome
-#
 ##########################################################
 
 rule bwa_index:
@@ -259,13 +256,13 @@ rule bwa_index:
         reference_genome_url.get_output_file + ".bwa_index.log"
     singularity: singularity_image
     shell:
-        "source activate {params.conda_env};"
-        "bwa index -a bwtsw {input} 2> {log};"
-        "source deactivate;"
+        """
+source activate {params.conda_env};
+bwa index -a bwtsw {input} 2> {log};
+        """
 
 ##########################################################
 # Create index for fasta file - .fai
-# 
 ##########################################################
 
 rule samtools_index_fasta:
@@ -279,9 +276,10 @@ rule samtools_index_fasta:
         reference_genome_url.get_output_file + ".faidx.log"
     singularity: singularity_image
     shell:
-        "source activate {params.conda_env};"
-        "samtools faidx {input} 2> {log};"
-        "source deactivate;"
+        """
+source activate {params.conda_env};
+samtools faidx {input} 2> {log};
+        """
 
 
 ##########################################################
@@ -300,11 +298,10 @@ rule picard_ref_dict:
         reference_genome_url.get_output_file + ".ref_dict.log"
     singularity: singularity_image
     shell:
-        "source activate {params.conda_env};"
-        "picard CreateSequenceDictionary "
-          " REFERENCE={input} " 
-          " OUTPUT={output} 2> {log};"
-        "source deactivate;"
+        """
+source activate {params.conda_env};
+picard CreateSequenceDictionary REFERENCE={input} OUTPUT={output} 2> {log};
+        """
 
 
 ##########################################################
@@ -324,12 +321,13 @@ rule vep_install:
         os.path.join(vep_dir, "vep_install_cache.log")
     singularity: singularity_image
     shell:
-        "source activate {params.conda_env};"
-        "vep_install --SPECIES {params.species} "
-          " --AUTO cfp "
-          " --ASSEMBLY {params.assembly} "
-          " --CACHEDIR {output} "
-          " --PLUGINS {params.plugins} "
-          " --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log}; "
-          "source deactivate;"
+        """
+source activate {params.conda_env};
+vep_install --SPECIES {params.species} \
+--AUTO cfp \
+--ASSEMBLY {params.assembly} \
+--CACHEDIR {output} \
+--PLUGINS {params.plugins} \
+--NO_HTSLIB --CONVERT --NO_UPDATE 2> {log}; 
+        """
 
