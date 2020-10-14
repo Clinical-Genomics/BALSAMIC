@@ -459,6 +459,7 @@ class ReferenceMeta(BaseModel):
     wgs_calling: Optional[ReferenceUrlsModel]
     genome_chrom_size: Optional[ReferenceUrlsModel]
     gnomad_variant: Optional[ReferenceUrlsModel]
+    gnomad_variant_index: Optional[ReferenceUrlsModel]
     cosmicdb: Optional[ReferenceUrlsModel]
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
