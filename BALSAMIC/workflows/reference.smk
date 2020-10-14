@@ -38,10 +38,7 @@ cosmicdb_key = config['cosmic_key']
 # Set temporary dir environment variable
 os.environ['TMPDIR'] = basedir 
 
-# VCF files list for wildcards
-VCF = get_reference_output_files(REFERENCE_FILES[genome_ver], 'vcf')
-
-# intialize reference files 
+# intialize reference files
 REFERENCE_FILES[genome_ver]['basedir'] = basedir
 reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES[genome_ver])
 
@@ -107,7 +104,10 @@ rule all:
         gnomad_variant_vcf = gnomad_url.get_output_file,
         gnomad_variant_index = gnomad_tbi_url.get_output_file,
         cosmic_vcf = cosmicdb_url.get_output_file + ".gz",
-        variants_idx = expand( os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=VCF),
+        variants_idx = expand(os.path.join(vcf_dir,"{vcf}.gz.tbi"),
+                              vcf=get_reference_output_files(REFERENCE_FILES[genome_ver],
+                                                             file_type='vcf',
+                                                             gzip = True)),
         vep = directory(vep_dir),
         wgs_calling = wgs_calling_url.get_output_file,
         genome_chrom_size = genome_chrom_size_url.get_output_file 
