@@ -154,7 +154,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "Homo_sapiens_assembly38.fasta",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "dbsnp": {
             "url":
@@ -163,7 +163,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "Homo_sapiens_assembly38.dbsnp138.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "hc_vcf_1kg": {
             "url":
@@ -172,7 +172,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "1000G_phase1.snps.high_confidence.hg38.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "mills_1kg": {
             "url":
@@ -181,7 +181,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "Mills_and_1000G_gold_standard.indels.hg38.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "known_indel_1kg": {
             "url":
@@ -190,7 +190,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "Homo_sapiens_assembly38.known_indels.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "vcf_1kg": {
             "url":
@@ -200,7 +200,7 @@ REFERENCE_FILES = {
             "genome_version": "hg38",
             "output_file":
             "1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "gnomad_variant": {
             "url":
@@ -209,7 +209,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "gnomad_variant_index": {
             "url":
@@ -218,7 +218,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "cosmicdb": {
             "url":
@@ -227,7 +227,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "cosmic_coding_muts_v92.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "wgs_calling": {
             "url":
@@ -236,7 +236,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "wgs_calling_regions.v1",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "genome_chrom_size": {
             "url":
@@ -245,7 +245,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "hg38.chrom.sizes",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_txt": {
             "url":
@@ -254,7 +254,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "refGene.txt",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_sql": {
             "url":
@@ -263,7 +263,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "refGene.sql",
-            "output_path": "genome",
+            "output_path": "genome"
         },
     },
     "hg19": {
@@ -273,7 +273,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "human_g1k_v37.fasta",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "dbsnp": {
             "url": "gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz",
@@ -281,7 +281,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "dbsnp_grch37_b138.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "hc_vcf_1kg": {
             "url":
@@ -290,7 +290,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "1kg_phase1_snps_high_confidence_b37.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "mills_1kg": {
             "url":
@@ -299,7 +299,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "mills_1kg_index.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "known_indel_1kg": {
             "url":
@@ -308,7 +308,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "1kg_known_indels_b37.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "vcf_1kg": {
             "url":
@@ -317,7 +317,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "1k_genome_wgs_p1_v3_all_sites.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "gnomad_variant": {
             "url":
@@ -326,7 +326,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "gnomad_variant_index": {
             "url":
@@ -335,7 +335,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "cosmicdb": {
             "url":
@@ -344,7 +344,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "cosmic_coding_muts_v90.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "wgs_calling": {
             "url":
@@ -353,7 +353,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "wgs_calling_regions.v1",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "genome_chrom_size": {
             "url":
@@ -362,7 +362,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "hg19.chrom.sizes",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_txt": {
             "url":
@@ -371,7 +371,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "refGene.txt",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_sql": {
             "url":
@@ -380,7 +380,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "refGene.sql",
-            "output_path": "genome",
-        },
-    },
+            "output_path": "genome"
+        }
+    }
 }
