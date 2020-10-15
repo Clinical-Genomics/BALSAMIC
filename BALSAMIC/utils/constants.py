@@ -104,8 +104,7 @@ VCF_DICT = {
 }
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
-HSMETRICS_QC_CHECK =
-{
+HSMETRICS_QC_CHECK = {
    "gicfdna_3.1":{
       "MEAN_TARGET_COVERAGE":500,
       "FOLD_80_BASE_PENALTY":1.5,
