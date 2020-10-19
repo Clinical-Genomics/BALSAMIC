@@ -39,16 +39,16 @@ class VarCallerFilter(BaseModel):
     This class handles attributes and filter for variant callers
 
     Attributes:
-      AD: VCFAttributes (required); minimum allelic depth
-      AF_min: VCFAttributes (optional); minimum allelic fraction
-      AF_max: VCFAttributes (optional); maximum allelic fraction
-      MQ: VCFAttributes (optional); minimum mapping quality
-      DP: VCFAttributes; minimum read depth
-      pop_freq: VCFAttributes (optional); maximum gnomad_af
-      varcaller_name: str (required); variant caller name
-      filter_type: str (required); filter name for variant caller
-      analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
-      description: str (required); comment section for description
+        AD: VCFAttributes (required); minimum allelic depth
+        AF_min: VCFAttributes (optional); minimum allelic fraction
+        AF_max: VCFAttributes (optional); maximum allelic fraction
+        MQ: VCFAttributes (optional); minimum mapping quality
+        DP: VCFAttributes; minimum read depth
+        pop_freq: VCFAttributes (optional); maximum gnomad_af
+        varcaller_name: str (required); variant caller name
+        filter_type: str (required); filter name for variant caller
+        analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
+        description: str (required); comment section for description
     """
 
     AD: VCFAttributes
@@ -75,8 +75,8 @@ class QCModel(BaseModel):
         umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
 
     Raises:
-        ValueError: 
-            When the input in min_seq_length and umi_trim_length cannot 
+        ValueError:
+            When the input in min_seq_length and umi_trim_length cannot
             be interpreted as integer and coerced to string
     
     """
