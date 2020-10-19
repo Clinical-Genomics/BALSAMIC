@@ -138,6 +138,11 @@ VARDICT_SETTINGS = {
         "filter_name": "balsamic_low_af",
         "field": "INFO"
     },
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO"
+    },
     "varcaller_name": "VarDict",
     "filter_type": "general",
     "analysis_type": "tumor_only",
