@@ -4,6 +4,7 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.constants import VCFANNO_TOML
 
 rule vep_somatic:
   input:
@@ -17,6 +18,8 @@ rule vep_somatic:
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
+    vcfanno_toml = VCFANNO_TOML,
     conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
@@ -29,7 +32,9 @@ source activate {params.conda};
 vep_path=$(dirname $(readlink -e $(which vep)));
 tmpvcf={params.tmpvcf};
 export PERL5LIB=;
-bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o $tmpvcf ; 
+vcfanno --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
+| bcftools reheader --threads {threads} -s {input.header} \
+| bcftools view -O z -o $tmpvcf ;
 vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
