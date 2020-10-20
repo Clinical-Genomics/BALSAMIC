@@ -31,9 +31,6 @@ def container(context, container_version, out_dir, force):
     """
     Pull container(s) for BALSAMIC according to matching version
     """
-    # Check if version is not matching v[0-9].[0-9].[0-9] or master or develop
-
-    # regex if pattern
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
         docker_image_name = "release_v" + container_version
