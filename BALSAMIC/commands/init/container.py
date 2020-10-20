@@ -64,19 +64,20 @@ def container(context, container_version, out_dir, force, dry):
         cmd = [
             "singularity",
             "pull",
-            "{}",
+            f"{force_arg}",
             "--name",
-            "{}".format(force_arg, image_name),
+            f"{image_name}",
             container_stub_url,
         ]
         if dry:
             LOG.info("Dry run mode, The following command will run: {}".format(
                 " ".join(cmd)))
-        subprocess.check_output(
-            cmd,
-            cwd=out_dir,
-            stderr=subprocess.STDOUT,
-        )
+        else:
+            subprocess.check_output(
+                cmd,
+                cwd=out_dir,
+                stderr=subprocess.STDOUT,
+            )
     except subprocess.CalledProcessError as e:
         raise BalsamicError("Failed to pull singularity image "
                             "from {}:\n{}".format(container_stub_url,
