@@ -1,14 +1,10 @@
-import os
+import re
 import logging
 import subprocess
-from pathlib import Path
-
 import click
-import graphviz
-import snakemake
 
-from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
@@ -16,12 +12,11 @@ LOG = logging.getLogger(__name__)
 @click.command("container",
                short_help="Download matching version for container")
 @click.option("-o",
-              "--outdir",
               "--out-dir",
               required=True,
               help="Output directory for container files.")
 @click.option("-v",
-              "--balsamic-version",
+              "--container-version",
               default=balsamic_version,
               help="Container for BALSAMIC version to download")
 @click.option('-f',
@@ -31,5 +26,41 @@ LOG = logging.getLogger(__name__)
               is_flag=True,
               help="Force re-downloading all containers")
 @click.pass_context
-def container(context, outdir, force):
-    pass
+def container(context, container_version, out_dir, force):
+    """
+    Pull container(s) for BALSAMIC according to matching version
+    """
+    # Check if version is not matching v[0-9].[0-9].[0-9] or master or develop
+
+    # regex if pattern
+    pattern = re.compile(r"^v(\d+\.)?(\d+\.)?(\*|\d+)$")
+    if pattern.findall(container_version):
+        image_name = "release_" + container_version
+    else:
+        image_name = container_version
+
+    container_stub_url = "docker://hassanf/balsamic:" + image_name
+
+    # Set container name
+    "BALSAMIC_{}".format(image_name)
+
+    # Pull container
+    LOG.info("Pulling singularity image {}.".format(container_stub_url))
+
+
+#    try:
+#        subprocess.check_output(
+#            [
+#                "singularity",
+#                "pull",
+#                "--name",
+#                "{}.simg".format("BALSAMIC_{}".format(image_name)),
+#                container_stub_url,
+#            ],
+#            cwd=out_dir,
+#            stderr=subprocess.STDOUT,
+#        )
+#    except subprocess.CalledProcessError as e:
+#        raise BalsamicError("Failed to pull singularity image "
+#                            "from {}:\n{}".format(container_stub_url,
+#                                                  e.stdout.decode()))
