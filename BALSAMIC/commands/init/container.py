@@ -45,7 +45,7 @@ def container(context, container_version, out_dir, force, dry):
 
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
-        docker_image_name = "release_v" + container_version
+        docker_image_name = "release_v{}".format(container_version)
     else:
         docker_image_name = container_version
 
