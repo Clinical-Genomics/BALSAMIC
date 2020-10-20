@@ -15,6 +15,10 @@ CONDA_ENV_YAML = Path(
 # Path to rule files to be accessed by Snakemake
 RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
 
+# Path to vcfanno toml files
+VCFANNO_TOML = Path(
+    BALSAMIC_BASE_DIR / "assets" / "vcfanno" / "vcfanno.toml").as_posix()
+
 # Sentieon specific
 SENTIEON_DNASCOPE = Path(
     BALSAMIC_BASE_DIR /
@@ -132,6 +136,11 @@ VARDICT_SETTINGS = {
     "AF_min": {
         "tag_value": 0.02,
         "filter_name": "balsamic_low_af",
+        "field": "INFO"
+    },
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
         "field": "INFO"
     },
     "varcaller_name": "VarDict",

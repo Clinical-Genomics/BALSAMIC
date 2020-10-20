@@ -198,6 +198,11 @@ def test_varcallerfilter():
             "filter_name": "dummy_depth",
             "field": "INFO"
         },
+        "pop_freq": {
+            "tag_value": 0.005,
+            "filter_name": "dummy_pop_freq",
+            "field": "INFO"
+        },
         "varcaller_name": "dummy_varcaller",
         "filter_type": "dummy_ffpe_filter",
         "analysis_type": "dummy_tumor_only",
