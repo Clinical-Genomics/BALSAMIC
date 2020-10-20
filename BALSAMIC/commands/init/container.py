@@ -72,6 +72,7 @@ def container(context, container_version, out_dir, force, dry):
                 " ".join(cmd)))
         else:
             subprocess.check_output(cmd, cwd=out_dir, stderr=subprocess.STDOUT)
+
     except subprocess.CalledProcessError as e:
         raise BalsamicError("Failed to pull singularity image "
                             "from {}:\n{}".format(container_stub_url,
