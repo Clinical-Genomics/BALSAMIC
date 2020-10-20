@@ -32,6 +32,7 @@ def container(context, container_version, out_dir, force):
     """
     Pull container(s) for BALSAMIC according to matching version
     """
+    LOG.info("BALSAMIC started with log level %s" % context.obj['loglevel'])
     # resolve out_dir to absolute path
     out_dir = Path(out_dir).resolve()
 
@@ -50,14 +51,17 @@ def container(context, container_version, out_dir, force):
     image_name = Path(out_dir,
                       "BALSAMIC_{}.sif".format(docker_image_name)).as_posix()
     LOG.info("Image will be downloaded to {}".format(image_name))
+    LOG.info("This process can take some time...")
 
     try:
+        force_arg = "--force" if force else str()
         subprocess.check_output(
             [
                 "singularity",
                 "pull",
+                "{}",
                 "--name",
-                "{}".format(image_name),
+                "{}".format(force_arg, image_name),
                 container_stub_url,
             ],
             cwd=out_dir,
