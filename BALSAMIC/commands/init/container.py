@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 @click.option("-v",
               "--container-version",
               show_default=True,
-              default="v{}".format(balsamic_version),
+              default=balsamic_version,
               help="Container for BALSAMIC version to download")
 @click.option('-f',
               '--force',
@@ -37,7 +37,7 @@ def container(context, container_version, out_dir, force):
 
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
-        docker_image_name = "release_" + container_version
+        docker_image_name = "release_v" + container_version
     else:
         docker_image_name = container_version
 
