@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.constants import BALSAMIC_DOCKER_PATH
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -48,7 +49,8 @@ def container(context, container_version, out_dir, force, dry):
     else:
         docker_image_name = container_version
 
-    container_stub_url = "docker://hassanf/balsamic:" + docker_image_name
+    container_stub_url = "{}:{}".format(BALSAMIC_DOCKER_PATH,
+                                        docker_image_name)
 
     # Pull container
     LOG.info("Pulling singularity image {}.".format(container_stub_url))

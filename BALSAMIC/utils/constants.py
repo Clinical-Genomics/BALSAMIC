@@ -2,6 +2,9 @@
 import sys
 from pathlib import Path
 
+# DOCKER hub path
+BALSAMIC_DOCKER_PATH = "docker://hassanf/balsamic"
+
 # BALSAMIC base dir
 BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 
