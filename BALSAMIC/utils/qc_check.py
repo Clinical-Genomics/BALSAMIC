@@ -2,6 +2,7 @@
 import click
 import pandas as pd
 import numpy as np
+from constants import HSMETRICS_QC_CHECK
 
 normal_sample = 'neatlyfastraven'
 tumor_sample = 'easilyusefulorca'
@@ -32,8 +33,7 @@ def read_qc_table(qc_table_file: str):
         qc_df: DataFrame
 
     """
-    with open(qc_table_file):
-        qc_df = pd.read_json(qc_table_file)
+    qc_df = pd.DataFrame.from_dict(qc_table_file)
     return qc_df
 
 
@@ -174,13 +174,12 @@ def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
 @click.command()
 @click.option('--hs_metrics', type=click.Path(exists=True), required=True, help='path to HS metrics for desired case')
-@click.option('--qc_table', type=click.Path(exists=True), required=True, help='path to qc table with criteria')
 @click.option('--output', type=click.Path(), required=True, help='name and path for the output csv-file')
 # The HS metrics and qc table provided in the command line will execute the main function.
-def main(hs_metrics, qc_table, output):
+def main(hs_metrics, output):
     # Read the HS metrics and qc table and convert to df
     hs_metrics_df = read_hs_metrics(hs_metrics)
-    qc_table_df = read_qc_table(qc_table)
+    qc_table_df = read_qc_table(HSMETRICS_QC_CHECK)
 
     # Extract the bait name and create a new df with the desired qc criteria
     bait_set = get_bait_name(hs_metrics_df)
