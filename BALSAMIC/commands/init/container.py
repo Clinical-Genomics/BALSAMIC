@@ -34,19 +34,19 @@ def container(context, container_version, out_dir, force):
     # Check if version is not matching v[0-9].[0-9].[0-9] or master or develop
 
     # regex if pattern
-    pattern = re.compile(r"^v(\d+\.)?(\d+\.)?(\*|\d+)$")
+    pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
-        image_name = "release_" + container_version
+        docker_image_name = "release_v" + container_version
     else:
-        image_name = container_version
+        docker_image_name = container_version
 
-    container_stub_url = "docker://hassanf/balsamic:" + image_name
-
-    # Set container name
-    "BALSAMIC_{}".format(image_name)
+    container_stub_url = "docker://hassanf/balsamic:" + docker_image_name
 
     # Pull container
     LOG.info("Pulling singularity image {}.".format(container_stub_url))
+
+    # Set container name
+    LOG.info("BALSAMIC_{}.simg".format(docker_image_name))
 
 
 #    try:
