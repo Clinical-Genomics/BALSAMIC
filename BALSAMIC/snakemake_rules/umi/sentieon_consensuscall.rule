@@ -3,6 +3,7 @@
 
 
 from BALSAMIC.utils.rule import get_conda_env
+from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_threads
 
 
@@ -55,3 +56,21 @@ rule sentieon_umi_consensus_align:
         "export SENTIEON_LICENSE={params.sentieon_lic}\n"
         "{params.sentieon_exec} bwa mem -R {params.sheader} -t {threads} -K {params.ip_bases} -p -C {input.ref_fa} {input.fq_consensus} | {params.sentieon_exec} util sort -r {input.ref_fa} --sam2bam -o {output.align_consensus} -i - 2> {log}\n"
 
+
+# Filter consensus called reads based on 'XZ' filtering
+
+rule sentieon_consensus_filter:
+    input:
+        umi_dir + '{sample}.consensusalign.bam'
+    output:
+        umi_dir + '{sample}.consensusfiltered.bam'
+    params:
+        consensusfilter_script = get_script_path('FilterDuplexUMIconsensus.sh'),
+        minreads = '4,2,2',
+        sample_id = '{sample}'
+    benchmark:
+        benchmark_dir + '{sample}.consensusfiltered.tsv'
+    message:
+        "Filtering consensus reads for sample {params.sample_id}"
+    shell:
+        "bash {params.consensusfilter_script} {input} {output} {params.minreads}\n"
