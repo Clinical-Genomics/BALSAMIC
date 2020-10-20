@@ -33,7 +33,7 @@ def container(context, container_version, out_dir, force):
     Pull container(s) for BALSAMIC according to matching version
     """
     # resolve out_dir to absolute path
-    out_dir = Path(out_dir).resolve
+    out_dir = Path(out_dir).resolve()
 
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
