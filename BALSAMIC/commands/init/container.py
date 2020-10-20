@@ -49,7 +49,7 @@ def container(context, container_version, out_dir, force):
     # Set container name
     image_name = "BALSAMIC_{}.sif".format(docker_image_name)
     LOG.info("Image will be downloaded to {}".format(
-        Path(out_dir / image_name).as_posix()))
+        Path(out_dir, image_name).as_posix()))
 
 
 #    try:
