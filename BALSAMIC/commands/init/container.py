@@ -1,6 +1,7 @@
 import re
 import logging
 import subprocess
+from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
@@ -31,6 +32,9 @@ def container(context, container_version, out_dir, force):
     """
     Pull container(s) for BALSAMIC according to matching version
     """
+    # resolve out_dir to absolute path
+    out_dir = Path(out_dir).resolve
+
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
         docker_image_name = "release_" + container_version
@@ -43,7 +47,9 @@ def container(context, container_version, out_dir, force):
     LOG.info("Pulling singularity image {}.".format(container_stub_url))
 
     # Set container name
-    LOG.info("BALSAMIC_{}.sif".format(docker_image_name))
+    image_name = "BALSAMIC_{}.sif".format(docker_image_name)
+    LOG.info("Image will be downloaded to {}".format(
+        Path(out_dir / image_name).as_posix()))
 
 
 #    try:
