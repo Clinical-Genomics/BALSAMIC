@@ -47,24 +47,23 @@ def container(context, container_version, out_dir, force):
     LOG.info("Pulling singularity image {}.".format(container_stub_url))
 
     # Set container name
-    image_name = "BALSAMIC_{}.sif".format(docker_image_name)
-    LOG.info("Image will be downloaded to {}".format(
-        Path(out_dir, image_name).as_posix()))
+    image_name = Path(out_dir,
+                      "BALSAMIC_{}.sif".format(docker_image_name)).as_posix()
+    LOG.info("Image will be downloaded to {}".format(image_name))
 
-
-#    try:
-#        subprocess.check_output(
-#            [
-#                "singularity",
-#                "pull",
-#                "--name",
-#                "{}.simg".format("BALSAMIC_{}".format(image_name)),
-#                container_stub_url,
-#            ],
-#            cwd=out_dir,
-#            stderr=subprocess.STDOUT,
-#        )
-#    except subprocess.CalledProcessError as e:
-#        raise BalsamicError("Failed to pull singularity image "
-#                            "from {}:\n{}".format(container_stub_url,
-#                                                  e.stdout.decode()))
+    try:
+        subprocess.check_output(
+            [
+                "singularity",
+                "pull",
+                "--name",
+                "{}".format(image_name),
+                container_stub_url,
+            ],
+            cwd=out_dir,
+            stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as e:
+        raise BalsamicError("Failed to pull singularity image "
+                            "from {}:\n{}".format(container_stub_url,
+                                                  e.stdout.decode()))
