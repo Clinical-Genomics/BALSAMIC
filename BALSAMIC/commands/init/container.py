@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 @click.option("-v",
               "--container-version",
               show_default=True,
-              default=balsamic_version,
+              default="v{}".format(balsamic_version),
               help="Container for BALSAMIC version to download")
 @click.option('-f',
               '--force',
@@ -33,7 +33,7 @@ def container(context, container_version, out_dir, force):
     """
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
-        docker_image_name = "release_v" + container_version
+        docker_image_name = "release_" + container_version
     else:
         docker_image_name = container_version
 
@@ -43,7 +43,7 @@ def container(context, container_version, out_dir, force):
     LOG.info("Pulling singularity image {}.".format(container_stub_url))
 
     # Set container name
-    LOG.info("BALSAMIC_{}.simg".format(docker_image_name))
+    LOG.info("BALSAMIC_{}.sif".format(docker_image_name))
 
 
 #    try:
