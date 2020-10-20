@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
               help="Output directory for container files.")
 @click.option("-v",
               "--container-version",
+              show_default=True,
               default=balsamic_version,
               help="Container for BALSAMIC version to download")
 @click.option('-f',
