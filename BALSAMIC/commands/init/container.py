@@ -53,13 +53,13 @@ def container(context, container_version, out_dir, force, dry):
                                         docker_image_name)
 
     # Pull container
-    LOG.info("Pulling singularity image {}.".format(container_stub_url))
+    LOG.info("Singularity image source: {}".format(container_stub_url))
 
     # Set container name
     image_name = Path(out_dir,
                       "BALSAMIC_{}.sif".format(docker_image_name)).as_posix()
     LOG.info("Image will be downloaded to {}".format(image_name))
-    LOG.info("This process can take some time...")
+    LOG.info("Starting download. This process can take some time...")
 
     try:
         cmd = ["singularity", "pull", "--name", f"{image_name}"]
