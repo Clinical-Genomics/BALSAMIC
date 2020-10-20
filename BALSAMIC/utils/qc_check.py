@@ -23,17 +23,17 @@ def read_hs_metrics(hs_metrics_file: str):
     return metrics_df
 
 
-def read_qc_table(qc_table_file: str):
+def read_qc_table(qc_table: dict):
     """Reads the QC-table (json-format) and returns it as a DataFrame
 
     Args:
-        qc_table_file: A string path to the file
+        qc_table: Dictionary imported from constants
 
     Returns:
         qc_df: DataFrame
 
     """
-    qc_df = pd.DataFrame.from_dict(qc_table_file)
+    qc_df = pd.DataFrame.from_dict(qc_table)
     return qc_df
 
 
