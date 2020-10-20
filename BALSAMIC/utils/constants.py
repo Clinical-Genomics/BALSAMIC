@@ -16,7 +16,7 @@ CONDA_ENV_YAML = Path(
 
 # Path to rule files to be accessed by Snakemake
 RULE_DIRECTORY = (
-    Path(sys.modules["BALSAMIC"].__file__).parent.resolve().as_posix() + "/")
+        Path(sys.modules["BALSAMIC"].__file__).parent.resolve().as_posix() + "/")
 
 # BALSAMIC version
 BALSAMIC_VERSION = BALSAMIC.__version__
@@ -105,44 +105,44 @@ VCF_DICT = {
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
 HSMETRICS_QC_CHECK = {
-   "gicfdna_3.1":{
-      "MEAN_TARGET_COVERAGE":500,
-      "FOLD_80_BASE_PENALTY":1.5,
-      "PCT_OFF_BAIT":0.35
-   },
-   "gmcksolid_4.1":{
-      "MEAN_TARGET_COVERAGE":500,
-      "FOLD_80_BASE_PENALTY":1.7,
-      "PCT_OFF_BAIT":0.3
-   },
-   "gmsmyeloid_5.2":{
-      "MEAN_TARGET_COVERAGE":1000,
-      "FOLD_80_BASE_PENALTY":1.5,
-      "PCT_OFF_BAIT":0.4
-   },
-   "lymphoma_6.1":{
-      "MEAN_TARGET_COVERAGE":1000,
-      "FOLD_80_BASE_PENALTY":1.5,
-      "PCT_OFF_BAIT":0.35
-   },
-   "gmslymphoid_7.1":{
-      "MEAN_TARGET_COVERAGE":1000,
-      "FOLD_80_BASE_PENALTY":1.5,
-      "PCT_OFF_BAIT":0.35
-   },
-   "exomerefseq_9.1":{
-      "MEAN_TARGET_COVERAGE":100,
-      "FOLD_80_BASE_PENALTY":1.8,
-      "PCT_OFF_BAIT":0.25
-   },
-   "wgs":{
-      "MEAN_TARGET_COVERAGE":30
-   },
-   "METRIC_CRITERIA":{
-      "MEAN_TARGET_COVERAGE":"gt",
-      "FOLD_80_BASE_PENALTY":"lt",
-      "PCT_OFF_BAIT":"lt"
-   }
+    "gicfdna_3.1": {
+        "MEAN_TARGET_COVERAGE": 500,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "gmcksolid_4.1": {
+        "MEAN_TARGET_COVERAGE": 500,
+        "FOLD_80_BASE_PENALTY": 1.7,
+        "PCT_OFF_BAIT": 0.3
+    },
+    "gmsmyeloid_5.2": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.4
+    },
+    "lymphoma_6.1": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "gmslymphoid_7.1": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "exomerefseq_9.1": {
+        "MEAN_TARGET_COVERAGE": 100,
+        "FOLD_80_BASE_PENALTY": 1.8,
+        "PCT_OFF_BAIT": 0.25
+    },
+    "wgs": {
+        "MEAN_TARGET_COVERAGE": 30
+    },
+    "METRIC_CRITERIA": {
+        "MEAN_TARGET_COVERAGE": "gt",
+        "FOLD_80_BASE_PENALTY": "lt",
+        "PCT_OFF_BAIT": "lt"
+    }
 }
 
 # Configuration of VARDICT settings
@@ -188,7 +188,7 @@ REFERENCE_FILES = {
     "hg38": {
         "reference_genome": {
             "url":
-            "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta",
+                "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta",
             "file_type": "fasta",
             "gzip": False,
             "genome_version": "hg38",
@@ -197,7 +197,7 @@ REFERENCE_FILES = {
         },
         "dbsnp": {
             "url":
-            "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf",
+                "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf",
             "file_type": "vcf",
             "gzip": False,
             "genome_version": "hg38",
@@ -206,7 +206,7 @@ REFERENCE_FILES = {
         },
         "hc_vcf_1kg": {
             "url":
-            "gs://genomics-public-data/resources/broad/hg38/v0/1000G_phase1.snps.high_confidence.hg38.vcf.gz",
+                "gs://genomics-public-data/resources/broad/hg38/v0/1000G_phase1.snps.high_confidence.hg38.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
@@ -215,7 +215,7 @@ REFERENCE_FILES = {
         },
         "mills_1kg": {
             "url":
-            "gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
+                "gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
@@ -224,7 +224,7 @@ REFERENCE_FILES = {
         },
         "known_indel_1kg": {
             "url":
-            "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz",
+                "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
@@ -233,17 +233,17 @@ REFERENCE_FILES = {
         },
         "vcf_1kg": {
             "url":
-            "gs://genomics-public-data/resources/broad/hg38/v0/1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
+                "gs://genomics-public-data/resources/broad/hg38/v0/1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
             "file_type": "vcf",
             "gzip": False,
             "genome_version": "hg38",
             "output_file":
-            "1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
+                "1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
             "output_path": "variants",
         },
         "cosmicdb": {
             "url":
-            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v92/VCF/CosmicCodingMuts.vcf.gz",
+                "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v92/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
@@ -252,7 +252,7 @@ REFERENCE_FILES = {
         },
         "wgs_calling": {
             "url":
-            "gs://genomics-public-data/resources/broad/hg38/v0/wgs_calling_regions.hg38.interval_list",
+                "gs://genomics-public-data/resources/broad/hg38/v0/wgs_calling_regions.hg38.interval_list",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
@@ -261,7 +261,7 @@ REFERENCE_FILES = {
         },
         "genome_chrom_size": {
             "url":
-            "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+                "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
@@ -270,7 +270,7 @@ REFERENCE_FILES = {
         },
         "refgene_txt": {
             "url":
-            "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.txt.gz",
+                "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.txt.gz",
             "file_type": "text",
             "gzip": True,
             "genome_version": "hg38",
@@ -279,7 +279,7 @@ REFERENCE_FILES = {
         },
         "refgene_sql": {
             "url":
-            "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.sql",
+                "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.sql",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
@@ -306,7 +306,7 @@ REFERENCE_FILES = {
         },
         "hc_vcf_1kg": {
             "url":
-            "gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz",
+                "gs://gatk-legacy-bundles/b37/1000G_phase1.snps.high_confidence.b37.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
@@ -315,7 +315,7 @@ REFERENCE_FILES = {
         },
         "mills_1kg": {
             "url":
-            "gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz",
+                "gs://gatk-legacy-bundles/b37/Mills_and_1000G_gold_standard.indels.b37.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
@@ -324,7 +324,7 @@ REFERENCE_FILES = {
         },
         "known_indel_1kg": {
             "url":
-            "gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz",
+                "gs://gatk-legacy-bundles/b37/1000G_phase1.indels.b37.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
@@ -333,7 +333,7 @@ REFERENCE_FILES = {
         },
         "vcf_1kg": {
             "url":
-            "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+                "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
@@ -342,7 +342,7 @@ REFERENCE_FILES = {
         },
         "cosmicdb": {
             "url":
-            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
+                "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
@@ -351,7 +351,7 @@ REFERENCE_FILES = {
         },
         "wgs_calling": {
             "url":
-            "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
+                "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
@@ -360,7 +360,7 @@ REFERENCE_FILES = {
         },
         "genome_chrom_size": {
             "url":
-            "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
+                "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
@@ -369,7 +369,7 @@ REFERENCE_FILES = {
         },
         "refgene_txt": {
             "url":
-            "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
+                "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
             "file_type": "text",
             "gzip": True,
             "genome_version": "hg19",
@@ -378,7 +378,7 @@ REFERENCE_FILES = {
         },
         "refgene_sql": {
             "url":
-            "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
+                "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
