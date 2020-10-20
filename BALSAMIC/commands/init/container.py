@@ -12,6 +12,12 @@ LOG = logging.getLogger(__name__)
 
 @click.command("container",
                short_help="Download matching version for container")
+@click.option("-d",
+              "--dry",
+              show_default=True,
+              default=False,
+              is_flag=True,
+              help="Dry run mode.")
 @click.option("-o",
               "--out-dir",
               required=True,
@@ -28,7 +34,7 @@ LOG = logging.getLogger(__name__)
               is_flag=True,
               help="Force re-downloading all containers")
 @click.pass_context
-def container(context, container_version, out_dir, force):
+def container(context, container_version, out_dir, force, dry):
     """
     Pull container(s) for BALSAMIC according to matching version
     """
@@ -55,15 +61,19 @@ def container(context, container_version, out_dir, force):
 
     try:
         force_arg = "--force" if force else str()
+        cmd = [
+            "singularity",
+            "pull",
+            "{}",
+            "--name",
+            "{}".format(force_arg, image_name),
+            container_stub_url,
+        ]
+        if dry:
+            LOG.info("Dry run mode, The following command will run: {}".format(
+                " ".join(cmd)))
         subprocess.check_output(
-            [
-                "singularity",
-                "pull",
-                "{}",
-                "--name",
-                "{}".format(force_arg, image_name),
-                container_stub_url,
-            ],
+            cmd,
             cwd=out_dir,
             stderr=subprocess.STDOUT,
         )
