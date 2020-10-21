@@ -197,7 +197,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     if run_analysis:
         jobid_file = os.path.join(
             logpath, sample_config["analysis"]["case_id"] + ".sacct")
-        jobid_dump = os.path.join(resultpath, account + "_jobids.yaml")
+        jobid_dump = os.path.join(resultpath, profile + "_jobids.yaml")
         with open(jobid_file, "r") as jobid_in, open(jobid_dump,
                                                      "w") as jobid_out:
             jobid_list = jobid_in.read().splitlines()
