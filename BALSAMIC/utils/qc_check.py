@@ -2,6 +2,8 @@
 import click
 import pandas as pd
 import numpy as np
+import json
+import os
 from constants import HSMETRICS_QC_CHECK
 
 normal_sample = 'neatlyfastraven'
@@ -37,26 +39,24 @@ def read_qc_table(qc_table: dict):
     return qc_df
 
 
-def get_bait_name(input_df: pd.DataFrame) -> pd.DataFrame:
-    """Extracts the bait name from HS metrics DataFrame
+def get_bait_name(input_config: str):
+    """get the bait name from case config
 
     Args:
-        input_df: HS metrics as DataFrame
+        input_config: Path to config
 
     Returns:
-        bait_name: string
+        bait: string
 
     """
-    # "str.split" splits the bait name into a list with two elements.
-    # expand = True will create new col in df with each element in the list as a value
-    bait_set = input_df.loc['BAIT_SET'].str.split('_hg19_design.bed', expand=True)
 
-    # dropping the last empty column which has 1 (int) as col name
-    dropped_col_df = bait_set.drop(columns=1)
+    with open(input_config) as f:
+        case_config = json.load(f)
 
-    # get the bed name and return it as a string
-    bait_name = list(dropped_col_df.iloc[1])
-    return str(bait_name[0])
+        # Read the config file and return the bait name from the json file
+        bait = os.path.basename(case_config["panel"]["capture_kit"])
+
+        return bait
 
 
 def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
@@ -175,14 +175,15 @@ def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 @click.command()
 @click.option('--hs_metrics', type=click.Path(exists=True), required=True, help='path to HS metrics for desired case')
 @click.option('--output', type=click.Path(), required=True, help='name and path for the output csv-file')
+@click.option('--config', type=click.Path(), required=True, help='path for the config-file')
 # The HS metrics and qc table provided in the command line will execute the main function.
-def main(hs_metrics, output):
+def main(hs_metrics, output, config):
     # Read the HS metrics and qc table and convert to df
     hs_metrics_df = read_hs_metrics(hs_metrics)
     qc_table_df = read_qc_table(HSMETRICS_QC_CHECK)
 
     # Extract the bait name and create a new df with the desired qc criteria
-    bait_set = get_bait_name(hs_metrics_df)
+    bait_set = get_bait_name(config)
     qc_criteria_df = get_qc_criteria(qc_table_df, bait_set)
 
     # Create a df with qc-flag for each criteria for each sample
