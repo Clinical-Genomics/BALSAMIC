@@ -344,3 +344,13 @@ REFERENCE_FILES = {
         },
     },
 }
+
+umiworkflow_params = {
+    "consensuscall": {
+        "align_format": 'BAM',
+        "filter_minreads": '3,1,1',
+        "tag": 'XR',
+        "align_header": "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        "align_intbases": 1000000
+    }
+}

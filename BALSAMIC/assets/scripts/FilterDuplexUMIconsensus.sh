@@ -17,7 +17,12 @@ min_reads=$3
 # the second value to one single-strand consensus, 
 # and the last value to the other single-strand consensus.
 
-sentieon='/home/proj/bin/sentieon/sentieon-genomics-201911/bin/sentieon'
+if [[ -z "$SENTIEON_INSTALL_DIR" ]]; then
+    echo "ERROR: Missing SENTIEON_INSTALL_DIR as environment variable in your terminal" >&2
+    exit 1
+fi
+
+sentieon=$SENTIEON_INSTALL_DIR'/bin/sentieon'
 
 samtools view -h $input_bam | \
 awk -v MinR=$min_reads -v OFS="\t" ' 

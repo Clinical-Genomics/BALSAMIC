@@ -199,11 +199,11 @@
         "time": "24:00:00",
 	"n": 24
     },
-    "sentieon_umi_consensus_call": {
+    "sentieon_consensuscall_umi": {
 	"time": "12:00:00",
 	"n": 24
     },
-    "sentieon_umi_consensus_align": {
+    "sentieon_consensusalign_umi": {
 	"time": "24:00:00",
 	"n": 24
     },

@@ -475,3 +475,18 @@ class ReferenceMeta(BaseModel):
                 output_value = value
 
         return output_value
+
+
+class UMIworkflowParams(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow """
+    align_format: str
+    filter_minreads: str = ['3,1,1']
+    tag: str = ['XR', 'XZ']
+    align_header: str
+    align_intbases: int
+    
+class UMIworkflowConfig(BaseModel):
+    """Contains related rule attributes that defined in utils/constants"""
+
+    consensuscall: UMIworkflowParams
+
