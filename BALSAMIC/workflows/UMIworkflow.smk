@@ -17,7 +17,7 @@ umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 log_dir =  config["analysis"]["log"]
-#table_dir = get_result_dir(config) + "/tables/"
+table_dir = get_result_dir(config) + "/tables/"
 plot_dir = get_result_dir(config) + "/plots/"
 qc_dir = get_result_dir(config) + "/qc/"
 
@@ -56,12 +56,13 @@ annotate_vcf = ["snakemake_rules/umi/annotate_vep.rule"]
 
 qc = ["snakemake_rules/umi/qc_umi.rule"]
 
-#generate_plots = ["snakemake_rules/umi/generate_AF_tables.rules"]
+generate_tables = ["snakemake_rules/umi/generate_AF_tables.rule"]
 
 # Define wildcards
 SAMPLES = config["samples"]
 VAR_CALLER = ["TNscope","vardict"]
-STEPS = ["umialign","consensusalign"]
+#STEPS = ["umialign","consensusfiltered"]
+STEPS = ["consensusfiltered"]
 
 # Define outputs
 analysis_output = [ expand(vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, step = STEPS),
@@ -69,12 +70,12 @@ expand(vep_dir + "{sample}.{var_caller}.umi.{filler}.vcf.gz", sample=SAMPLES, va
 expand(qc_dir + "{sample}.{step}.umimetrics", sample=SAMPLES, step=STEPS),
 expand(qc_dir + "{sample}.{step}.collect_hsmetric_umi", sample=SAMPLES, step=STEPS),
 expand(qc_dir + "{sample}.{step}.mean_family_depth", sample=SAMPLES, step = STEPS),
-expand(qc_dir + "{sample}.TNscope.noiseAF", sample=SAMPLES),
-expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES) ]
+#expand(qc_dir + "{sample}.TNscope.noiseAF", sample=SAMPLES),
+#expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES),
+expand(table_dir + "{sample}.{varcaller}.consensusfiltered.AFtable.txt", sample=SAMPLES, varcaller=VAR_CALLER) ]
 
 
-config["rules"] = umi_call + variant_call + annotate_vcf + qc
-
+config["rules"] = umi_call + variant_call + annotate_vcf + generate_tables + qc
 
 for r in config["rules"]:
     include: os.path.join(rule_dir + r)
