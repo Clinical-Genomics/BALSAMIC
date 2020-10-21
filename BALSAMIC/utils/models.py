@@ -6,10 +6,11 @@ from typing import Optional, List, Dict
 from pydantic import (BaseModel, validator, Field, AnyUrl)
 from pydantic.types import DirectoryPath, FilePath
 
+from BALSAMIC import __version__ as balsamic_version
+
 from BALSAMIC.utils.constants import (
     CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
-    MUTATION_TYPE, RULE_DIRECTORY, BALSAMIC_VERSION, VALID_GENOME_VER,
-    VALID_REF_FORMAT)
+    MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT)
 
 
 class VCFAttributes(BaseModel):
@@ -38,15 +39,16 @@ class VarCallerFilter(BaseModel):
     This class handles attributes and filter for variant callers
 
     Attributes:
-      AD: VCFAttributes (required); minimum allelic depth
-      AF_min: VCFAttributes (optional); minimum allelic fraction
-      AF_max: VCFAttributes (optional); maximum allelic fraction
-      MQ: VCFAttributes (optional); minimum mapping quality
-      DP: VCFAttributes (optional); minimum read depth
-      varcaller_name: str (required); variant caller name
-      filter_type: str (required); filter name for variant caller
-      analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
-      description: str (required); comment section for description
+        AD: VCFAttributes (required); minimum allelic depth
+        AF_min: VCFAttributes (optional); minimum allelic fraction
+        AF_max: VCFAttributes (optional); maximum allelic fraction
+        MQ: VCFAttributes (optional); minimum mapping quality
+        DP: VCFAttributes; minimum read depth
+        pop_freq: VCFAttributes (optional); maximum gnomad_af
+        varcaller_name: str (required); variant caller name
+        filter_type: str (required); filter name for variant caller
+        analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
+        description: str (required); comment section for description
     """
 
     AD: VCFAttributes
@@ -54,6 +56,7 @@ class VarCallerFilter(BaseModel):
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: VCFAttributes
+    pop_freq: VCFAttributes
     varcaller_name: str
     filter_type: str
     analysis_type: str
@@ -72,8 +75,8 @@ class QCModel(BaseModel):
         umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
 
     Raises:
-        ValueError: 
-            When the input in min_seq_length and umi_trim_length cannot 
+        ValueError:
+            When the input in min_seq_length and umi_trim_length cannot
             be interpreted as integer and coerced to string
     
     """
@@ -196,7 +199,7 @@ class AnalysisModel(BaseModel):
     result: Optional[DirectoryPath]
     benchmark: Optional[DirectoryPath]
     dag: Optional[FilePath]
-    BALSAMIC_version: str = BALSAMIC_VERSION
+    BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
 
     class Config:
@@ -252,7 +255,7 @@ class AnalysisModel(BaseModel):
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return Path(values.get("analysis_dir"), values.get("case_id"),
                     values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{BALSAMIC_VERSION}_graph.pdf'
+                    ) + f'_BALSAMIC_{balsamic_version}_graph.pdf'
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
@@ -347,7 +350,6 @@ class BalsamicConfigModel(BaseModel):
     singularity: FilePath
     background_variants: Optional[FilePath]
     conda_env_yaml: FilePath = CONDA_ENV_YAML
-    rule_directory: DirectoryPath = RULE_DIRECTORY
     bioinfo_tools: Optional[BioinfoToolsModel]
     panel: Optional[PanelModel]
 
@@ -443,6 +445,7 @@ class ReferenceMeta(BaseModel):
       vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
       wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
       genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
+      gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
       cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
       refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
       refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
@@ -457,6 +460,8 @@ class ReferenceMeta(BaseModel):
     vcf_1kg: Optional[ReferenceUrlsModel]
     wgs_calling: Optional[ReferenceUrlsModel]
     genome_chrom_size: Optional[ReferenceUrlsModel]
+    gnomad_variant: Optional[ReferenceUrlsModel]
+    gnomad_variant_index: Optional[ReferenceUrlsModel]
     cosmicdb: Optional[ReferenceUrlsModel]
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
@@ -484,7 +489,7 @@ class UMIworkflowParams(BaseModel):
     tag: str = ['XR', 'XZ']
     align_header: str
     align_intbases: int
-    
+
 class UMIworkflowConfig(BaseModel):
     """Contains related rule attributes that defined in utils/constants"""
 

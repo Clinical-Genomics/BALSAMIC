@@ -26,7 +26,6 @@ rule sentieon_umi_extract:
     threads: 
         get_threads(cluster_config, 'sentieon_umi_extract')
     shell:
-        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
         "{params.sentieon_exec} umi extract {params.ds_params} {input.read1} {input.read2} -o {output.ds_umi} &> {log} \n"
 
 
@@ -53,6 +52,5 @@ rule sentieon_umi_align:
     message: 
         "Aligning of UMI extracted reads with bwa mem, sorting for sample {params.sample_id}"
     shell:
-        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
         "{params.sentieon_exec} bwa mem -R {params.sheader} -K {params.ip_bases} -p -t {threads} -C {input.ref_fa} {input.fastq_umi} |{params.sentieon_exec} util sort -r {input.ref_fa} --sam2bam -o {output.align_umi} -i - 2> {log}\n"
 
