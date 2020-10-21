@@ -1,4 +1,11 @@
 
+[6.0.1]
+-------
+
+Added
+^^^^^
+* A secondary path for latest jobids submitted to cluster (slurm and qsub) PR #465
+
 [6.0.0]
 -------
 
