@@ -55,7 +55,7 @@ def container(context, container_version, out_dir, force, dry):
     # Pull container
     LOG.info("Singularity image source: {}".format(container_stub_url))
 
-    # Set container name
+    # Set container name according to above docker image name
     image_name = Path(out_dir,
                       "BALSAMIC_{}.sif".format(docker_image_name)).as_posix()
     LOG.info("Image will be downloaded to {}".format(image_name))
