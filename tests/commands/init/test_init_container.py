@@ -1,6 +1,8 @@
 import subprocess
+import logging
 from unittest import mock
 
+import click
 import pytest
 
 from BALSAMIC.utils.exc import BalsamicError
@@ -59,8 +61,7 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
     dummy_tag = "cool_new_feature"
 
     # WHEN calling scheduler_main with mocked subprocess
-    with mock.patch.object(subprocess, 'run') as mocked:
-        mocked.return_value.exit_code = 0
+    with mock.patch.object(subprocess, 'check_output') as mocked:
         # WHEN creating config.json in reference dir
         result = invoke_cli([
             'init', 'container', '--force', '--container-version', dummy_tag,
@@ -69,25 +70,22 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
         ])
 
         # THEN output config and pdf file generate and command exit code 0
-        assert result.exit_code == 0
+        assert result.exit_code == 0 
 
 
-def test_init_container_capture_failed_download(invoke_cli, tmp_path):
+def test_init_container_capture_failed_download(invoke_cli, tmp_path, caplog):
     # Given a dummy path
     test_new_dir = tmp_path / "test_container_dir"
     test_new_dir.mkdir()
-    dummy_tag = "cool_new_feature"
+    dummy_tag = "some_tag_that_does_not_exist_ngrtf123jsds3wqe2"
 
     # WHEN calling scheduler_main with mocked subprocess
-    with mock.patch.object(subprocess,
-                           'run') as mocked, pytest.raises(BalsamicError):
-        mocked.return_value.exit_code = 1
+    with caplog.at_level(logging.ERROR):
         # WHEN creating config.json in reference dir
         result = invoke_cli([
-            'init', 'container', '--force', '--container-version', dummy_tag,
+            'init', 'container', '--container-version', dummy_tag, 
             '--out-dir',
             str(test_new_dir)
         ])
-
-        # THEN output config and pdf file generate and command exit code 0
-        assert result.exit_code == 1
+      
+        assert "Failed to pull singularity image" in caplog.text 
