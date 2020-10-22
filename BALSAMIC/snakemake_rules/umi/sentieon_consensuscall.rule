@@ -19,7 +19,7 @@ rule sentieon_consensuscall_umi:
     benchmark:
         Path(benchmark_dir + 'sentieon_consensuscall_umi_{sample}.tsv').as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tag = paramsumi.consensuscall.tag, 
         ip_format = paramsumi.consensuscall.align_format,
@@ -81,16 +81,19 @@ rule sentieon_consensusfilter_umi:
         umi_dir + '{sample}.consensusfiltered.bam'
     benchmark:
         Path(benchmark_dir + 'sentieon_consensusfilter_umi_{sample}.tsv').as_posix()
+    singularity:
+        singularity_image
     params:
         consensusfilter_script = get_script_path('FilterDuplexUMIconsensus.sh'),
         minreads = paramsumi.consensuscall.filter_minreads,
         sample_id = '{sample}',
         conda = get_conda_env(config["conda_env_yaml"],"samtools")
+    threads:
+        get_threads(cluster_config, 'sentieon_consensusfilter_umi')
     message:
         "Filtering consensus reads based on XZ tag for sample {params.sample_id}"
     shell:
         """
-#source activate {params.conda};
-
+source activate {params.conda};
 bash {params.consensusfilter_script} {input} {output} {params.minreads};
         """

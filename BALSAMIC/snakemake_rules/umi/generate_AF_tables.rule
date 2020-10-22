@@ -12,21 +12,25 @@ rule calculate_AF:
         vcf = vcf_dir + '{sample}.{var_caller}.consensusfiltered.vcf.gz'
     output:
         AF = table_dir + '{sample}.{var_caller}.consensusfiltered.AFtable.txt'
+    benchmark:
+        benchmark_dir + '{sample}.{var_caller}.AFcalculate.tsv'
+    singularity:
+        singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
         validated_set= config["background_variants"],
-        sample_id = '{sample}'
+        sample_id = '{sample}',
+        vcf_columns = '\"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\\n\"';
     threads: get_threads(cluster_config, 'calculate_AF')
-    log:
-        log_dir + '{sample}.{var_caller}.AFcalculate.log'
-    benchmark: 
-        benchmark_dir + '{sample}.{var_caller}.AFcalculate.tsv'
     message: "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
     shell:
-        #"source activate {params.conda}\n"
-        "bcftools query --regions-file {params.validated_set} "
-        "-f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\\n\" "
-        "{input.vcf} | "
-        "awk -v file={params.sample_id} "
-        "\'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$8/($7+$8)\"\\t\"file}}\' "
-        "> {output.AF}\n"
+        """
+source activate {params.conda};
+
+bcftools query \
+--regions-file {params.validated_set} \
+-f {params.vcf_columns} \
+{input.vcf} | \
+awk -v file={params.sample_id} \
+\'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$8/($7+$8)\"\\t\"file}}\' \
+> {output.AF};
