@@ -19,8 +19,7 @@ rule calculate_AF:
     params:
         conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
         validated_set= config["background_variants"],
-        sample_id = '{sample}',
-        vcf_columns = '\"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\\n\"';
+        sample_id = '{sample}'
     threads: get_threads(cluster_config, 'calculate_AF')
     message: "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
     shell:
@@ -29,8 +28,9 @@ source activate {params.conda};
 
 bcftools query \
 --regions-file {params.validated_set} \
--f {params.vcf_columns} \
+-f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\" \
 {input.vcf} | \
 awk -v file={params.sample_id} \
 \'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$8/($7+$8)\"\\t\"file}}\' \
 > {output.AF};
+        """

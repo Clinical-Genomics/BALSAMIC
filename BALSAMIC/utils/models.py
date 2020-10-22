@@ -485,8 +485,8 @@ class ReferenceMeta(BaseModel):
 class UMIworkflowParams(BaseModel):
     """This class defines the params settings used as constants in UMI workflow """
     align_format: str
-    filter_minreads: str = ['3,1,1']
-    tag: str = ['XR', 'XZ']
+    filter_minreads: str = '3,1,1'
+    tag: str = 'XR'
     align_header: str
     align_intbases: int
 
