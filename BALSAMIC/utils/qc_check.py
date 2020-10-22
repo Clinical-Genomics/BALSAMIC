@@ -5,9 +5,7 @@ import numpy as np
 import json
 import os
 from constants import HSMETRICS_QC_CHECK
-
-normal_sample = 'neatlyfastraven'
-tumor_sample = 'easilyusefulorca'
+from BALSAMIC.utils.rule import get_sample_type
 
 
 def read_hs_metrics(hs_metrics_file: str):
@@ -58,6 +56,15 @@ def get_bait_name(input_config: str):
 
         return bait
 
+def get_sample_name(input_bed):
+    with open (input_bed) as f:
+        load_config = json.load(f)
+
+        # get_sample_type returns a list, extracting the sample name with [0]
+        normal = get_sample_type(load_config["samples"], "normal")[0]
+        tumor = get_sample_type(load_config["samples"], "tumor")[0]
+
+    return normal, tumor
 
 def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
     """ Creates a new DataFrame with the QC criteria for only the desired bait set
@@ -79,7 +86,7 @@ def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
     return qc_df
 
 
-def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFrame) -> pd.DataFrame:
+def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFrame, normal_sample, tumor_sample) -> pd.DataFrame:
     """ This function can be divided in different parts:
         1) Merging intersected values for the df with the desired QC criteria and bait set, with the HS Metrics df
         2) Creating new columns with the QC-differences from the QC criteria
@@ -128,7 +135,7 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
     return qc_check_df
 
 
-def failed_qc(input_df: pd.DataFrame) -> pd.DataFrame:
+def failed_qc(input_df: pd.DataFrame, normal_sample, tumor_sample) -> pd.DataFrame:
     """ Outputs if the QC failed
 
     Args:
@@ -184,13 +191,14 @@ def main(hs_metrics, output, config):
 
     # Extract the bait name and create a new df with the desired qc criteria
     bait_set = get_bait_name(config)
+    sample_names = get_sample_name(config)
     qc_criteria_df = get_qc_criteria(qc_table_df, bait_set)
 
     # Create a df with qc-flag for each criteria for each sample
-    extract_criteria = check_qc_criteria(qc_criteria_df, hs_metrics_df)
+    extract_criteria = check_qc_criteria(qc_criteria_df, hs_metrics_df, sample_names[0], sample_names[1])
 
     # Check if qc failed
-    failed_qc(extract_criteria)
+    failed_qc(extract_criteria, sample_names[0], sample_names[1])
 
     write_output(extract_criteria, output)
 
