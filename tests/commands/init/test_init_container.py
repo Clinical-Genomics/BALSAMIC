@@ -70,7 +70,7 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
         ])
 
         # THEN output config and pdf file generate and command exit code 0
-        assert result.exit_code == 0 
+        assert result.exit_code == 0
 
 
 def test_init_container_capture_failed_download(invoke_cli, tmp_path, caplog):
@@ -83,9 +83,8 @@ def test_init_container_capture_failed_download(invoke_cli, tmp_path, caplog):
     with caplog.at_level(logging.ERROR):
         # WHEN creating config.json in reference dir
         result = invoke_cli([
-            'init', 'container', '--container-version', dummy_tag, 
-            '--out-dir',
+            'init', 'container', '--container-version', dummy_tag, '--out-dir',
             str(test_new_dir)
         ])
-      
-        assert "Failed to pull singularity image" in caplog.text 
+
+        assert "Failed to pull singularity image" in caplog.text

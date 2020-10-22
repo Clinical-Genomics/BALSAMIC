@@ -75,5 +75,5 @@ def container(context, container_version, out_dir, force, dry):
 
     except:
         LOG.error("Failed to pull singularity image "
-                            "from {}".format(container_stub_url)) 
+                  "from {}".format(container_stub_url))
         raise click.Abort()
