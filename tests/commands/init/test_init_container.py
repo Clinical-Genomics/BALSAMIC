@@ -72,7 +72,9 @@ def test_init_container_capture_failed_download(invoke_cli, tmp_path, caplog):
     test_new_dir.mkdir()
     dummy_tag = "some_tag_that_does_not_exist_ngrtf123jsds3wqe2"
 
-    with caplog.at_level(logging.ERROR):
+    with mock.patch.object(subprocess, 'check_output') as mocked, caplog.at_level(logging.ERROR):
+        mocked.side_effect = 1
+
         # WHEN pulling a wrong container tag
         result = invoke_cli([
             'init', 'container', '--container-version', dummy_tag, '--out-dir',
