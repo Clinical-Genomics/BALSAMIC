@@ -17,13 +17,6 @@ min_reads=$3
 # the second value to one single-strand consensus, 
 # and the last value to the other single-strand consensus.
 
-if [ -z "$SENTIEON_INSTALL_DIR" ] ; then
-    echo "ERROR: Missing SENTIEON_INSTALL_DIR as environment variable in your terminal" >&2
-    exit 1
-fi
-
-sentieon=$SENTIEON_INSTALL_DIR'/bin/sentieon'
-
 samtools view -h $input_bam | \
 awk -v MinR=$min_reads -v OFS="\t" ' 
 function min(b) {
@@ -55,5 +48,4 @@ BEGIN {split(MinR,tmp,",");
 END {print "["strftime("Time = %m/%d/%Y %H:%M:%S", systime())"]  Done. Processed "reads" reads.  "reads2" reads passed the filter."> "/dev/stderr" } ' | \
 
 samtools view -bh - > $output_bam
-
-$sentieon util index $output_bam
+samtools index $output_bam
