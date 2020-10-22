@@ -1,10 +1,8 @@
-#! /usr/bin/python
-import click
 import pandas as pd
 import numpy as np
 import json
 import os
-from constants import HSMETRICS_QC_CHECK
+from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 from BALSAMIC.utils.rule import get_sample_type
 
 
@@ -47,14 +45,13 @@ def get_bait_name(input_config: str):
         bait: string
 
     """
-
     with open(input_config) as f:
         case_config = json.load(f)
 
         # Read the config file and return the bait name from the json file
         bait = os.path.basename(case_config["panel"]["capture_kit"])
 
-        return bait
+    return bait
 
 
 def get_sample_name(input_config: str):
@@ -118,7 +115,6 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
 
     # 1) Merge the two df by col (axis = 1) for those rows that are shared (intersected) by passing join='inner'
     merged_df = pd.concat([input_hsmetrics_df, input_qc_df], axis=1, join='inner')
-    # print (merged_df)
     column_header = list(merged_df.columns)
 
     # 2) Adding new col with the calculated difference in the qc values
@@ -195,12 +191,19 @@ def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
     return output_df
 
 
-@click.command()
-@click.option('--hs_metrics', type=click.Path(exists=True), required=True, help='path to HS metrics for desired case')
-@click.option('--output', type=click.Path(), required=True, help='name and path for the output csv-file')
-@click.option('--config', type=click.Path(), required=True, help='path for the config-file')
-# The HS metrics and qc table provided in the command line will execute the main function.
-def main(hs_metrics, output, config):
+
+def get_qc_check(hs_metrics, output, config):
+    """ Runs all above functions to provide the desired outputs
+
+    Args:
+        hs_metrics: Path to hs_metrics file
+        output: Path for output csv-file
+        config: Path to case config
+
+    Returns:
+        CSV-file and prints if the QC-failed
+
+    """
     # Read the HS metrics and qc table and convert to df
     hs_metrics_df = read_hs_metrics(hs_metrics)
     qc_table_df = read_qc_table(HSMETRICS_QC_CHECK)
@@ -218,6 +221,3 @@ def main(hs_metrics, output, config):
 
     write_output(extract_criteria, output)
 
-
-if __name__ == '__main__':
-    main()
