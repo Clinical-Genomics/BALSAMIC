@@ -159,7 +159,7 @@
 		"time": "24:00:00",
 		"n": 24
 	},
-	"sentioen_filter_TNscope": {
+	"sentieon_filter_TNscope": {
 		"time": "24:00:00",
 		"n": 24
 	},
@@ -195,11 +195,11 @@
 		"time": "24:00:00",
 		"n": 24
 	},
-	"sentieon_consensusalign_umi":{
+	"sentieon_consensusalign_umi": {
 		"time": "24:00:00",
 		"n": 24
 	},
-	"sentieon_consensusfilter_umi":{
+	"sentieon_consensusfilter_umi": {
 		"time": "4:00:00",
 		"n": 10
 	}
