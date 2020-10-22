@@ -38,7 +38,7 @@ def read_qc_table(qc_table: dict):
 
 
 def get_bait_name(input_config: str):
-    """get the bait name from case config
+    """Get the bait name from case config
 
     Args:
         input_config: Path to config
@@ -56,8 +56,18 @@ def get_bait_name(input_config: str):
 
         return bait
 
-def get_sample_name(input_bed):
-    with open (input_bed) as f:
+
+def get_sample_name(input_config: str):
+    """ Get the sample names from the config file
+
+    Args:
+        input_config: Path to config
+
+    Returns:
+        tumor, normal: string
+
+    """
+    with open(input_config) as f:
         load_config = json.load(f)
 
         # get_sample_type returns a list, extracting the sample name with [0]
@@ -65,6 +75,7 @@ def get_sample_name(input_bed):
         tumor = get_sample_type(load_config["samples"], "tumor")[0]
 
     return normal, tumor
+
 
 def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
     """ Creates a new DataFrame with the QC criteria for only the desired bait set
@@ -86,7 +97,8 @@ def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
     return qc_df
 
 
-def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFrame, normal_sample, tumor_sample) -> pd.DataFrame:
+def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFrame,
+                      normal_sample: str, tumor_sample: str) -> pd.DataFrame:
     """ This function can be divided in different parts:
         1) Merging intersected values for the df with the desired QC criteria and bait set, with the HS Metrics df
         2) Creating new columns with the QC-differences from the QC criteria
@@ -96,6 +108,8 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
     Args:
         input_qc_df: DataFrame
         input_hsmetrics_df: DataFrame
+        normal_sample: String
+        tumor_sample: String
 
     Returns:
         qc_check_df: DataFrame
@@ -135,11 +149,13 @@ def check_qc_criteria(input_qc_df: pd.DataFrame, input_hsmetrics_df: pd.DataFram
     return qc_check_df
 
 
-def failed_qc(input_df: pd.DataFrame, normal_sample, tumor_sample) -> pd.DataFrame:
+def failed_qc(input_df: pd.DataFrame, normal_sample: str, tumor_sample: str) -> pd.DataFrame:
     """ Outputs if the QC failed
 
     Args:
         input_df: DataFrame with qc parameters and qc differences
+        normal_sample: String
+        tumor_sample: String
 
     Returns:
         String
