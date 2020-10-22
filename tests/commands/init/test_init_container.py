@@ -1,6 +1,10 @@
 import subprocess
 from unittest import mock
 
+import pytest
+
+from BALSAMIC.utils.exc import BalsamicError
+
 
 def test_init_container(invoke_cli, tmp_path):
     # Given a dummy path
@@ -66,3 +70,24 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
 
         # THEN output config and pdf file generate and command exit code 0
         assert result.exit_code == 0
+
+
+def test_init_container_capture_failed_download(invoke_cli, tmp_path):
+    # Given a dummy path
+    test_new_dir = tmp_path / "test_container_dir"
+    test_new_dir.mkdir()
+    dummy_tag = "cool_new_feature"
+
+    # WHEN calling scheduler_main with mocked subprocess
+    with mock.patch.object(subprocess,
+                           'run') as mocked, pytest.raises(BalsamicError):
+        mocked.return_value.exit_code = 1
+        # WHEN creating config.json in reference dir
+        result = invoke_cli([
+            'init', 'container', '--force', '--container-version', dummy_tag,
+            '--out-dir',
+            str(test_new_dir)
+        ])
+
+        # THEN output config and pdf file generate and command exit code 0
+        assert result.exit_code == 1
