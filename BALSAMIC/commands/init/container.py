@@ -61,21 +61,19 @@ def container(context, container_version, out_dir, force, dry):
     LOG.info("Image will be downloaded to {}".format(image_name))
     LOG.info("Starting download. This process can take some time...")
 
+    cmd = ["singularity", "pull", "--name", f"{image_name}"]
+    if force:
+        cmd.append("--force")
+    cmd.append(container_stub_url)
+
     try:
-        cmd = ["singularity", "pull", "--name", f"{image_name}"]
-
-        if force:
-            cmd.append("--force")
-
-        cmd.append(container_stub_url)
-
         if dry:
             LOG.info("Dry run mode, The following command will run: {}".format(
                 " ".join(cmd)))
         else:
             subprocess.check_output(cmd, cwd=out_dir, stderr=subprocess.STDOUT)
 
-    except subprocess.CalledProcessError as e:
-        raise BalsamicError("Failed to pull singularity image "
-                            "from {}:\n{}".format(container_stub_url,
-                                                  e.stdout.decode()))
+    except:
+        LOG.error("Failed to pull singularity image "
+                            "from {}".format(container_stub_url)) 
+        raise click.Abort()
