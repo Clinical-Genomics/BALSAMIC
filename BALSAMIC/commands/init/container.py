@@ -73,7 +73,7 @@ def container(context, container_version, out_dir, force, dry):
         else:
             subprocess.check_output(cmd, cwd=out_dir, stderr=subprocess.STDOUT)
 
-    except:
+    except subprocess.CalledProcessError as e:
         LOG.error("Failed to pull singularity image "
-                  "from {}".format(container_stub_url))
+                  "from {}\n{}".format(container_stub_url, e))
         raise click.Abort()

@@ -55,7 +55,8 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
     test_new_dir.mkdir()
 
     with mock.patch.object(subprocess, 'check_output') as mocked:
-        mock.return_value = 0
+        mocked.return_value = 0
+
         # WHEN pulling a container in a non dry-run mode
         result = invoke_cli(
             ['init', 'container', '--out-dir',
