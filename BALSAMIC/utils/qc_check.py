@@ -191,7 +191,6 @@ def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
     return output_df
 
 
-
 def get_qc_check(hs_metrics, output, config):
     """ Runs all above functions to provide the desired outputs
 
@@ -220,4 +219,3 @@ def get_qc_check(hs_metrics, output, config):
     failed_qc(extract_criteria, sample_names[0], sample_names[1])
 
     write_output(extract_criteria, output)
-
