@@ -135,7 +135,6 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
         LOG.error('Reference workflow graph generation failed')
         raise click.Abort()
 
-    LOG.info("BALSAMIC started with log level %s" % context.obj['loglevel'])
     LOG.info("Reference generation workflow started")
 
     # Singularity bind path

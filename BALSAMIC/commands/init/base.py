@@ -1,6 +1,7 @@
 import click
 
 from BALSAMIC.commands.init.reference import reference as reference_command
+from BALSAMIC.commands.init.container import container as container_command
 
 
 @click.group("init")
@@ -11,3 +12,4 @@ def initialize(context):
 
 
 initialize.add_command(reference_command)
+initialize.add_command(container_command)
