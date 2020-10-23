@@ -3,6 +3,7 @@ import os
 import logging
 import subprocess
 import json
+import yaml
 import click
 
 from pathlib import Path
@@ -190,7 +191,17 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     try:
         cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
-        subprocess.run(cmd, shell=True)  #, check=True)
+        subprocess.run(cmd, shell=True)
     except Exception as e:
         print(e)
         raise click.Abort()
+
+    if run_analysis:
+        jobid_file = os.path.join(
+            logpath, sample_config["analysis"]["case_id"] + ".sacct")
+        jobid_dump = os.path.join(resultpath, profile + "_jobids.yaml")
+        with open(jobid_file, "r") as jobid_in, open(jobid_dump,
+                                                     "w") as jobid_out:
+            jobid_list = jobid_in.read().splitlines()
+            yaml.dump({sample_config['analysis']['case_id']: jobid_list},
+                      jobid_out)
