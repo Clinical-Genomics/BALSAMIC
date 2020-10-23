@@ -7,9 +7,6 @@ from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
 
-picarddup = get_picard_mrkdup(config)
-chromlist = config["panel"]["chrom"]
-capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 rule vardict_tumor_normal:
   input:

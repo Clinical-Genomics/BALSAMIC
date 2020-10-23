@@ -2,12 +2,10 @@
 # coding: utf-8
 
 from BALSAMIC.utils.rule import get_sample_type
-from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
+from BALSAMIC.utils.rule import get_conda_env
 
-picarddup = get_picard_mrkdup(config)
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 tumor_sample = get_sample_type(config["samples"], "tumor")[0]
-case_id = config["analysis"]["case_id"]
 
 
 rule mergeBam_tumor:

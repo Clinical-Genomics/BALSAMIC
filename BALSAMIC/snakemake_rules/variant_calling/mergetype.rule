@@ -4,14 +4,8 @@
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
 
-picarddup = get_picard_mrkdup(config)
-
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
-normal_sample = get_sample_type(config["samples"], "normal")[0]
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
-case_id = config["analysis"]["case_id"]
-
 
 rule mergeBam_normal_gatk:
   input:
@@ -82,7 +76,7 @@ rule mergeBam_tumor:
 rule mergeBam_tumor_gatk:
   input:
     bamT = bam_dir + "{mysample}.sorted.{picardstr}.bsrcl.bam".format(mysample = tumor_sample,
-                                                                            picardstr = picarddup) 
+                                                                      picardstr = picarddup)
   output:
     bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
   params:

@@ -3,10 +3,8 @@
 
 from pathlib import Path
 from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_picard_mrkdup
 from BALSAMIC.utils.rule import get_threads
 
-picarddup = get_picard_mrkdup(config)
 
 def picard_flag(picarddup):
     if picarddup == "mrkdup":
