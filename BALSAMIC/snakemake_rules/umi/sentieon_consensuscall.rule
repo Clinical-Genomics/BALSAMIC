@@ -84,7 +84,7 @@ rule sentieon_consensusfilter_umi:
     singularity:
         singularity_image
     params:
-        consensusfilter_script = get_script_path('FilterDuplexUMIconsensus.sh'),
+        consensusfilter_script = get_script_path('FilterDuplexUMIconsensus.awk'),
         minreads = paramsumi.consensuscall.filter_minreads,
         sample_id = '{sample}',
         conda = get_conda_env(config["conda_env_yaml"],"samtools")
@@ -95,5 +95,10 @@ rule sentieon_consensusfilter_umi:
     shell:
         """
 source activate {params.conda};
-bash {params.consensusfilter_script} {input} {output} {params.minreads};
+
+samtools view -h {input} | \
+awk -v MinR={params.minreads} -v OFS=\'\t\' -f {params.consensusfilter_script} | \
+samtools view -bh - > {output};
+
+samtools index {output};
         """

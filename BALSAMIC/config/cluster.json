@@ -188,15 +188,15 @@
 		"n": 10
 	},
 	"sentieon_umi_align": {
-		"time": "24:00:00",
+		"time": "8:00:00",
 		"n": 24
 	},
 	"sentieon_consensuscall_umi": {
-		"time": "24:00:00",
+		"time": "6:00:00",
 		"n": 24
 	},
 	"sentieon_consensusalign_umi": {
-		"time": "24:00:00",
+		"time": "8:00:00",
 		"n": 24
 	},
 	"sentieon_consensusfilter_umi": {
