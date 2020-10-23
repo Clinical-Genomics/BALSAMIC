@@ -3,6 +3,9 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 
+fasta = config["reference"]["reference_genome"]
+refflat = config["reference"]["refflat"]
+
 if config["analysis"]["sequencing_type"] == 'wgs':
     normal_bam = "{normal}.dedup.realign".format(normal = get_sample_type(config["samples"], "normal")[0])
     tumor_bam = "{tumor}.dedup.realign".format(tumor = get_sample_type(config["samples"], "tumor")[0])
