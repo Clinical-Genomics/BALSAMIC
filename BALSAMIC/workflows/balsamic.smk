@@ -34,7 +34,8 @@ singularity_image = config['singularity']['image']
 # rule related variables
 picarddup = get_picard_mrkdup(config)
 VARDICT= VarCallerFilter.parse_obj(VARDICT_SETTINGS)
-capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
+if config["analysis"]["sequencing_type"] != "wgs":
+    capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 if config['analysis']['analysis_type'] == "paired":
     normal_sample = get_sample_type(config["samples"], "normal")[0]
 tumor_sample = get_sample_type(config["samples"], "tumor")[0]
