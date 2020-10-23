@@ -287,11 +287,12 @@ def test_umiworkflowparams():
     """ test UMIworkflowParams model for correct validation """
 
     # GIVEN a UMI workflow params
+    group_size = "6,3,3"
     test_umirule_params = {
-        "align_format":'BAM',
-        "filter_minreads": '6,3,3',
-	"tag": 'UMItag',
-        "align_header": 'test_header_name',
+        "align_format": "BAM",
+        "filter_minreads": group_size,
+	"tag": "UMItag",
+        "align_header": "test_header_name",
 	"align_intbases": 100
     }
 
@@ -299,10 +300,10 @@ def test_umiworkflowparams():
     test_umirule_params_built = UMIworkflowParams(**test_umirule_params)
 	
     # THEN assert values 
-    assert test_umirule_params_built.align_format == 'BAM'
-    assert test_umirule_params_built.align_header == 'test_header_name'
-    assert test_umirule_params_built.filter_minreads == '6,3,3'
-    assert test_umirule_params_built.tag == 'UMItag'
+    assert test_umirule_params_built.align_format == "BAM"
+    assert test_umirule_params_built.align_header == "test_header_name"
+    assert test_umirule_params_built.filter_minreads == group_size
+    assert test_umirule_params_built.tag == "UMItag"
     assert test_umirule_params_built.align_intbases == 100
 
 def test_umiworkflowconfig():
@@ -311,10 +312,10 @@ def test_umiworkflowconfig():
     # GIVEN a UMIworkflowConfig
     test_ruleconfig = {
         "consensuscall": {
-	    "align_format": 'BAM',
-            "align_header": 'test_header_name',
-            "filter_minreads": '6,3,3',
-             "tag": 'UMItag',
+	    "align_format": "BAM",
+            "align_header": "test_header_name",
+            "filter_minreads": "6,3,3",
+             "tag": "UMItag",
 	    "align_intbases": 100
 	}
     }
