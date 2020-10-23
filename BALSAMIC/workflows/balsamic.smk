@@ -9,7 +9,7 @@ from yapf.yapflib.yapf_api import FormatFile
 from snakemake.exceptions import RuleException, WorkflowError
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup)
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup, get_sample_type)
 from BALSAMIC.utils.models import VarCallerFilter
 from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, VARDICT_SETTINGS
 
