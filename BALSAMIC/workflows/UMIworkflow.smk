@@ -5,12 +5,13 @@ import os
 import logging
 
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.constants import RULE_DIRECTORY
+
 
 LOG = logging.getLogger(__name__)
 
 shell.prefix("set -eo pipefail; ")
 
-rule_dir = config["rule_directory"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 benchmark_dir = config["analysis"]["benchmark"]
 umi_dir = get_result_dir(config) + "/umi/"
@@ -78,7 +79,7 @@ expand(table_dir + "{sample}.{varcaller}.consensusfiltered.AFtable.txt", sample=
 config["rules"] = umi_call + variant_call + annotate_vcf + generate_tables + qc
 
 for r in config["rules"]:
-    include: os.path.join(rule_dir + r)
+    include: Path(RULE_DIRECTORY, r).as_posix()
 
 rule all:
     input:
