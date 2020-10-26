@@ -13,7 +13,7 @@ rule sentieon_umi_tnscope:
     output:
          vcf = vcf_dir + '{sample}.TNscope.{step}.vcf.gz',
     params:
-        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         algo = 'TNscope',
         tAF = '0.0005',
@@ -29,5 +29,4 @@ rule sentieon_umi_tnscope:
         benchmark_dir + '{sample}.{step}.varcall.TNscope.tsv'
     message: "Calling SNVs using TNscope for sample {params.sample_id}"
     shell:
-        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
         "{params.sentieon_exec} driver -t {threads} -r {input.ref_fa} -i {input.bam} --algo {params.algo} --tumor_sample {params.sample_id} --dbsnp {input.dbsnp} --min_tumor_allele_frac {params.tAF} --filter_t_alt_frac {params.tAF} --min_init_tumor_lod {params.TL} --disable_detector {params.detect} --max_error_per_read {params.error_rate} --pcr_indel_model NONE --prune_factor {params.prune_factor} {output.vcf}  &> {log}\n"

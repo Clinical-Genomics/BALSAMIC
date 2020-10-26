@@ -6,7 +6,8 @@ from pydantic import ValidationError
 
 from BALSAMIC.utils.models import (
     VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
-    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta)
+    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, UMIworkflowParams,
+    UMIworkflowConfig)
 
 
 def test_referencemeta():
@@ -280,3 +281,52 @@ def test_sample_instance_model():
     with pytest.raises(ValueError) as excinfo:
         SampleInstanceModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
+
+
+def test_umiworkflowparams():
+    """ test UMIworkflowParams model for correct validation """
+
+    # GIVEN a UMI workflow params
+    group_size = "6,3,3"
+    test_umirule_params = {
+        "align_format": "BAM",
+        "filter_minreads": group_size,
+	"tag": "UMItag",
+        "align_header": "test_header_name",
+	"align_intbases": 100
+    }
+
+    # WHEN building the model
+    test_umirule_params_built = UMIworkflowParams(**test_umirule_params)
+	
+    # THEN assert values 
+    assert test_umirule_params_built.align_format == "BAM"
+    assert test_umirule_params_built.align_header == "test_header_name"
+    assert test_umirule_params_built.filter_minreads == group_size
+    assert test_umirule_params_built.tag == "UMItag"
+    assert test_umirule_params_built.align_intbases == 100
+
+def test_umiworkflowconfig():
+    """ test UMIworkflowConfig to have proper json format """
+
+    # GIVEN a UMIworkflowConfig
+    group_size = "3,1,1"
+    test_ruleconfig = {
+        "consensuscall": {
+	    "align_format": "BAM",
+            "align_header": "test_header_name",
+            "filter_minreads": group_size,
+             "tag": "UMItag",
+	    "align_intbases": 100
+	}
+    }
+
+    # WHEN building the model
+    umiworkflowconfig_rules_built = UMIworkflowConfig(**test_ruleconfig)
+       
+    # THEN assert values
+    assert umiworkflowconfig_rules_built.consensuscall.align_format == "BAM"
+    assert umiworkflowconfig_rules_built.consensuscall.align_header == "test_header_name"
+    assert umiworkflowconfig_rules_built.consensuscall.filter_minreads == group_size 
+    assert umiworkflowconfig_rules_built.consensuscall.tag == "UMItag"
+    assert umiworkflowconfig_rules_built.consensuscall.align_intbases == 100

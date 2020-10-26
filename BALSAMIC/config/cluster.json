@@ -159,7 +159,7 @@
 		"time": "24:00:00",
 		"n": 24
 	},
-	"sentioen_filter_TNscope": {
+	"sentieon_filter_TNscope": {
 		"time": "24:00:00",
 		"n": 24
 	},
@@ -185,6 +185,22 @@
 	},
 	"vardict_tumor_only": {
 		"time": "10:00:00",
+		"n": 10
+	},
+	"sentieon_umi_align": {
+		"time": "8:00:00",
+		"n": 24
+	},
+	"sentieon_consensuscall_umi": {
+		"time": "6:00:00",
+		"n": 24
+	},
+	"sentieon_consensusalign_umi": {
+		"time": "8:00:00",
+		"n": 24
+	},
+	"sentieon_consensusfilter_umi": {
+		"time": "4:00:00",
 		"n": 10
 	}
 }

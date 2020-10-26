@@ -480,3 +480,35 @@ class ReferenceMeta(BaseModel):
                 output_value = value
 
         return output_value
+
+
+class UMIworkflowParams(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow.
+    
+    Attributes:
+        align_format: str (required); output alignment format. eg. 'BAM'  
+	align_header: str (required); header line appended to the aligned BAM output
+	align_intbases: int; input bases in each batch regardless of threads, for reproducibility.
+    	filter_minreads: str (required); settings to filter consensus tags based on group size.
+        tag: str; Logic UMI tag
+    """
+
+    align_format: str
+    filter_minreads: str = '3,1,1'
+    tag: str = 'XR'
+    align_header: str
+    align_intbases: int
+
+
+class UMIworkflowConfig(BaseModel):
+    """ Defines set of rules in UMI workflow.
+ 
+    Handles attributes for corresponding rules.
+	
+    Attributes:
+	consensuscall: params defined in the rule sentieon_consensuscall
+
+    """
+    
+    consensuscall: UMIworkflowParams
+
