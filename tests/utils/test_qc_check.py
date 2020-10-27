@@ -1,5 +1,6 @@
 from BALSAMIC.utils.qc_check import read_hs_metrics
 from BALSAMIC.utils.qc_check import read_qc_table
+from BALSAMIC.utils.qc_check import get_bait_name
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 
 
@@ -30,3 +31,14 @@ def test_read_qc_table():
     bol_list = df.any().tolist()
     for n in range(len(bol_list)):
         assert bol_list[n], "No values exists"
+
+
+def test_bed_name_format():
+    # GIVEN the file exists
+    config_file = "tests/test_data/qc_files/config_paired.json"
+
+    # WHEN reading the file
+    bed = get_bait_name(config_file)
+
+    # THEN check if bed is string format
+    assert isinstance(bed, str), "bed is not in string format"
