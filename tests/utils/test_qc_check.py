@@ -1,6 +1,5 @@
-from BALSAMIC.utils.qc_check import read_hs_metrics
-from BALSAMIC.utils.qc_check import read_qc_table
-from BALSAMIC.utils.qc_check import get_bait_name
+from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table
+from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 
 
@@ -33,7 +32,7 @@ def test_read_qc_table():
         assert bol_list[n], "No values exists"
 
 
-def test_bed_name_format():
+def test_get_bait_name():
     # GIVEN the file exists
     config_file = "tests/test_data/qc_files/config_paired.json"
 
@@ -42,3 +41,14 @@ def test_bed_name_format():
 
     # THEN check if bed is string format
     assert isinstance(bed, str), "bed is not in string format"
+
+
+def test_get_sample_name():
+    # GIVEN the file exists
+    config_file = "tests/test_data/qc_files/config_paired.json"
+
+    # WHEN reading the file
+    sample_name = get_sample_name(config_file)
+
+    # THEN check if file name exsists
+    assert sample_name[0], "sample name doesn't exist"
