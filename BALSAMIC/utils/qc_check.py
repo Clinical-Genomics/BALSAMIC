@@ -46,10 +46,10 @@ def get_bait_name(input_config: str):
 
     """
     with open(input_config) as f:
-        case_config = json.load(f)
+        load_config = json.load(f)
 
         # Read the config file and return the bait name from the json file
-        bait = os.path.basename(case_config["panel"]["capture_kit"])
+        bait = os.path.basename(load_config["panel"]["capture_kit"])
 
     return bait
 
