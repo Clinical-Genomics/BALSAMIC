@@ -1,5 +1,5 @@
 from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table
-from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name
+from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name, get_qc_criteria
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 
 
@@ -52,3 +52,16 @@ def test_get_sample_name():
 
     # THEN check if file name exsists
     assert sample_name[0], "sample name doesn't exist"
+
+
+def test_get_qc_criteria():
+    # GIVEN following df and bed
+    df_qc = read_qc_table(HSMETRICS_QC_CHECK)
+    bed = "gmcksolid_4.1_hg19_design.bed"
+
+    # WHEN reading the function
+    criteria_df = get_qc_criteria(df_qc, bed)
+
+    # THEN check if df has two columns
+    nr_of_columns = list(criteria_df.columns)
+    assert len(nr_of_columns) == 2, "number of columns != 2"
