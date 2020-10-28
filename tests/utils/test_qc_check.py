@@ -64,7 +64,8 @@ def test_check_qc_criteria_output_csv_and_qc():
     config_file = "tests/test_data/qc_files/config_paired.json"
     hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
     output_path = "tests/test_data/qc_files/output.csv"
-    qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK), get_bait_name(config_file))
+    qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK),
+                                     get_bait_name(config_file))
     hs_metrics_df = read_hs_metrics(hs_metrics)
     sample_names = get_sample_name(config_file)
 
