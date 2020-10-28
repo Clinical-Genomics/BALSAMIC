@@ -186,8 +186,9 @@ def failed_qc(input_df: pd.DataFrame, normal_sample: str,
     # Loop trough the list to check for True booleans which indicates for failed qc criteria.
     for n in range(len(boolean_check)):
         if boolean_check[n]:
-            print("QC failed")
-            return
+            qc = "QC failed"
+            return qc
+
 
 
 def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
