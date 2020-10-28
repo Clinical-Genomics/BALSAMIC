@@ -1,4 +1,4 @@
-from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table
+from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table, check_qc_criteria
 from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name, get_qc_criteria
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 
@@ -65,3 +65,19 @@ def test_get_qc_criteria():
     # THEN check if df has two columns
     nr_of_columns = list(criteria_df.columns)
     assert len(nr_of_columns) == 2, "number of columns != 2"
+
+def test_check_qc_criteria():
+    # GIVEN following variables
+    config_file = "tests/test_data/qc_files/config_paired.json"
+    hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
+    qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK), get_bait_name(config_file))
+    hs_metrics_df = read_hs_metrics(hs_metrics)
+    sample_names = get_sample_name(config_file)
+
+    # WHEN reading the function
+    extract_criteria = check_qc_criteria(qc_criteria_df, hs_metrics_df,
+                                         sample_names[0], sample_names[1])
+
+    # THEN check if the output df has 3 indexes
+    nr_of_indexes = list(extract_criteria.index)
+    assert len(nr_of_indexes) == 3, "number of indexes != 3"
