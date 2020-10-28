@@ -190,7 +190,6 @@ def failed_qc(input_df: pd.DataFrame, normal_sample: str,
             return qc
 
 
-
 def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
     """ Outputs the QC parameters as csv-file
 
