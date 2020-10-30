@@ -7,8 +7,8 @@ from pydantic import ValidationError
 from BALSAMIC.utils.models import (
     VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
     SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, UMIworkflowConfig,
-    UMIworkflowParams_common, UMIworkflowParams_umiextract, UMIworkflowParams_consensuscall,
-    UMIworkflowParams_tnscope, UMIworkflowParams_vardict)
+    UMIParamsCommon, UMIParamsUMIextract, UMIParamsConsensuscall,
+    UMIParamsTNscope, UMIParamsVardict)
 
 
 def test_referencemeta():
@@ -284,8 +284,8 @@ def test_sample_instance_model():
         assert "not supported" in excinfo.value
 
 
-def test_umiworkflowparams_common():
-    """ test UMIworkflowParams_common model for correct validation """
+def test_umiparams_common():
+    """ test UMIParamsCommon model for correct validation """
         
     # GIVEN a UMI workflow common params
     test_commonparams = {
@@ -294,29 +294,29 @@ def test_umiworkflowparams_common():
         "filter_tumor_af": 0.01
     }    
     # WHEN building the model
-    test_commonparams_built = UMIworkflowParams_common(**test_commonparams)
+    test_commonparams_built = UMIParamsCommon(**test_commonparams)
     # THEN assert values
     assert test_commonparams_built.align_header == "test_header_name"
     assert test_commonparams_built.filter_tumor_af == 0.01
     assert test_commonparams_built.align_intbases == 100
 
 
-def test_umiworkflowparams_umiextract():
-    """ test UMIworkflowParams_umiextract model for correct validation """
+def test_umiparams_umiextract():
+    """ test UMIParamsUMIextract model for correct validation """
     # GIVEN umiextract params
     test_umiextractparams = {
         "read_structure": "['mode', 'r1,r2']"
     }
 
     # WHEN building the model
-    test_umiextractparams_built = UMIworkflowParams_umiextract(**test_umiextractparams)
+    test_umiextractparams_built = UMIParamsUMIextract(**test_umiextractparams)
 
     # THEN assert values
     assert test_umiextractparams_built.read_structure == "['mode', 'r1,r2']"
 
 
-def test_umiworkflowparams_consensuscall():
-    """ test UMIworkflowParams_consensuscall model for correct validation """
+def test_umiparams_consensuscall():
+    """ test UMIParamsConsensuscall model for correct validation """
 
     #GIVEN consensuscall params
     test_consensuscall = {
@@ -324,17 +324,18 @@ def test_umiworkflowparams_consensuscall():
     	"filter_minreads":"6,3,3",
     	"tag":"XZ"
     }
-
+    
     #WHEN building the model
-    test_consensuscall_built = UMIworkflowParams_consensuscall(**test_consensuscall)
+    test_consensuscall_built = UMIParamsConsensuscall(**test_consensuscall)
 	
     #THEN assert values
     assert test_consensuscall_built.align_format == "BAM"
     assert test_consensuscall_built.filter_minreads == "6,3,3" 
     assert test_consensuscall_built.tag == "XZ"
 
-def test_umiworkflowparams_tnscope():
-    """ test UMIworkflowParams_tnscope model for correct validation """
+
+def test_umiparams_tnscope():
+    """ test UMIParamsTNscope model for correct validation """
 
     #GIVEN tnscope params
     test_tnscope_params = {
@@ -346,7 +347,7 @@ def test_umiworkflowparams_tnscope():
     }
     
     #WHEN building the model
-    test_tnscope_params_built = UMIworkflowParams_tnscope(**test_tnscope_params)
+    test_tnscope_params_built = UMIParamsTNscope(**test_tnscope_params)
 
     #THEN assert values
     assert test_tnscope_params_built.algo == "algoname"
@@ -355,8 +356,8 @@ def test_umiworkflowparams_tnscope():
     assert test_tnscope_params_built.prunefactor == 3
     assert test_tnscope_params_built.disable_detect == "abc"
 
-def test_umiworkflowparams_vardict():
-    """ test UMIworkflowParams_vardict model for correct validation"""
+def test_umiparams_vardict():
+    """ test UMIParamsVardict model for correct validation"""
 
     #GIVEN vardict params
     test_umivardict={ 
@@ -364,7 +365,7 @@ def test_umiworkflowparams_vardict():
     }
 
     #WHEN building the model
-    test_umivardict_built = UMIworkflowParams_vardict(**test_umivardict)
+    test_umivardict_built = UMIParamsVardict(**test_umivardict)
 
     #THEN assert values
     assert test_umivardict_built.vardict_filters == "-a 1 -b 2 -c 5"

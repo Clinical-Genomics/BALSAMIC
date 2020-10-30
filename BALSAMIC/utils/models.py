@@ -482,7 +482,7 @@ class ReferenceMeta(BaseModel):
         return output_value
 
 
-class UMIworkflowParams_common(BaseModel):
+class UMIParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.
 
     Attributes:
@@ -497,7 +497,7 @@ class UMIworkflowParams_common(BaseModel):
     filter_tumor_af: float
 
 
-class UMIworkflowParams_umiextract(BaseModel):
+class UMIParamsUMIextract(BaseModel):
     """This class defines the params settings used as constants in UMI workflow-rule umextract.
 
     Attributes:
@@ -507,7 +507,7 @@ class UMIworkflowParams_umiextract(BaseModel):
     read_structure: str = "-d, 'rs1,rs2'"
 
 
-class UMIworkflowParams_consensuscall(BaseModel):
+class UMIParamsConsensuscall(BaseModel):
     """This class defines the params settings used as constants in UMI workflow-rule consensuscall.
 
     Attributes:
@@ -520,7 +520,7 @@ class UMIworkflowParams_consensuscall(BaseModel):
     filter_minreads: str = '3,1,1'
     tag: str = 'XR'
 
-class UMIworkflowParams_tnscope(BaseModel):
+class UMIParamsTNscope(BaseModel):
     """This class defines the params settings used as constants in UMI workflow- rule tnscope.
 
     Attributes:
@@ -539,7 +539,7 @@ class UMIworkflowParams_tnscope(BaseModel):
     disable_detect: str
 
 
-class UMIworkflowParams_vardict(BaseModel):
+class UMIParamsVardict(BaseModel):
     """This class defines the params settings used as constants in UMIworkflow-rule vardict.
 
     Attributes:
@@ -559,9 +559,9 @@ class UMIworkflowConfig(BaseModel):
 	tnscope: params defined in the rule sentieon_tnscope_umi
     	vardict: params defined in the rule vardict_umi
     """
-    common: UMIworkflowParams_common
-    umiextract: UMIworkflowParams_umiextract
-    consensuscall: UMIworkflowParams_consensuscall
-    tnscope: UMIworkflowParams_tnscope
-    vardict: UMIworkflowParams_vardict
+    common: UMIParamsCommon
+    umiextract: UMIParamsUMIextract
+    consensuscall: UMIParamsConsensuscall
+    tnscope: UMIParamsTNscope
+    vardict: UMIParamsVardict
 
