@@ -187,7 +187,7 @@
 		"time": "10:00:00",
 		"n": 10
 	},
-	"sentieon_umi_align": {
+	"sentieon_umialign": {
 		"time": "8:00:00",
 		"n": 24
 	},
@@ -202,5 +202,17 @@
 	"sentieon_consensusfilter_umi": {
 		"time": "4:00:00",
 		"n": 10
+	},
+	"sentieon_tnscope_umi": {
+		"time": "4:00:00",
+		"n": 12
+	},
+	"vep_umi": {
+		"time":"4:00:00",
+		"n": 10
+	},
+	"picard_umiaware":{
+		"time": "4:00:00",
+		"n": 12
 	}
 }
