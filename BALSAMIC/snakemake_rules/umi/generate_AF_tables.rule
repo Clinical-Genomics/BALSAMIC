@@ -9,19 +9,21 @@ from BALSAMIC.utils.rule import get_threads
 # Generate tables for AF scatterplots
 rule generate_backgroundAF_table:
     input:
-        vcf = vcf_dir + '{sample}.{var_caller}.consensusfiltered.vcf.gz'
+        vcf = vcf_dir + "{sample}.{var_caller}.consensusfiltered.vcf.gz"
     output:
-        AF = table_dir + '{sample}.{var_caller}.consensusfiltered.AFtable.txt'
+        AF = table_dir + "{sample}.{var_caller}.consensusfiltered.AFtable.txt"
     benchmark:
-        Path(benchmark_dir + 'generate_backgroundAF_table_{sample}_{var_caller}.tsv').as_posix()
+        Path(benchmark_dir + "generate_backgroundAF_table_{sample}_{var_caller}.tsv").as_posix()
     singularity:
         singularity_image
     params:
-        conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
         validated_set= config["background_variants"],
-        sample_id = '{sample}'
-    threads: get_threads(cluster_config, 'generate_backgroundAF_table')
-    message: "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
+        conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
+        sample_id = "{sample}"
+    threads: 
+        get_threads(cluster_config, "generate_backgroundAF_table")
+    message: 
+        "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
     shell:
         """
 source activate {params.conda};

@@ -4,122 +4,171 @@
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
 
-singularity: singularity_image
-
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
 rule picard_umiaware:
     input:
-        bam = umi_dir + '{sample}.{step}.bam'
+        bam = umi_dir + "{sample}.{step}.bam"
     output:
-        bam = qc_dir + '{sample}.{step}.picard.umiaware.bam',
-        duplicates = qc_dir + '{sample}.{step}.duplicatemetrics',
-        umimetrics = qc_dir + '{sample}.{step}.umimetrics'
+        bam = qc_dir + "{sample}.{step}.picard.umiaware.bam",
+        duplicates = qc_dir + "{sample}.{step}.duplicatemetrics",
+        umimetrics = qc_dir + "{sample}.{step}.umimetrics"
+    benchmark:
+        Path(benchmark_dir + "picard_umiaware_{sample}_{step}.tsv").as_posix()
+    singularity: 
+        singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
-        sample_id = '{sample}_{step}'
-    log:
-        log_dir + '{sample}.{step}.picard_umiaware.log'
-    benchmark:
-        benchmark_dir + '{sample}.{step}.picard_umiaware.tsv'
+        sample_id = "{sample}_{step}"
+    threads:
+        get_threads(cluster_config, "picard_umiaware")
     message:
         "Picard Umiaware mark dups for sample {params.sample_id}"
-    threads:
-        get_threads(cluster_config, 'picard_umiaware')
     shell:
-        "source activate {params.conda}\n"
-        "picard UmiAwareMarkDuplicatesWithMateCigar "
-            "I={input.bam} O={output.bam} M={output.duplicates} "
-            "UMI_METRICS={output.umimetrics} &> {log}\n"
-        "source deactivate\n" 
+        """
+source activate {params.conda};
 
+picard UmiAwareMarkDuplicatesWithMateCigar \
+I={input.bam} \
+O={output.bam} \
+M={output.duplicates} \
+UMI_METRICS={output.umimetrics};
+        """
 
 ## CollectHSmetrics - median target coverage-required
-rule CollectHsMetrics_umi:
+rule picard_collecthsmetrics_umi:
     input:
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
         bed = config["panel"]["capture_kit"],
-        bam = umi_dir + '{sample}.{step}.bam',
+        bam = umi_dir + "{sample}.{step}.bam",
         fa = config["reference"]["reference_genome"]
     output:
-        mrkdup = qc_dir + '{sample}.{step}.collect_hsmetric_umi'
+        mrkdup = qc_dir + "{sample}.{step}.collect_hsmetric_umi"
+    benchmark:
+        Path(benchmark_dir + "picard_collecthsmetrics_umi_{sample}_{step}.tsv").as_posix()
+    singularity:
+        singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"picard"),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
-        sample_id = '{sample}_{step}'
-    threads: get_threads(cluster_config, 'CollectHsMetrics')
-    log:
-        log_dir + '{sample}.{step}.collect_hsmetrics_umi.log'
-    benchmark:
-        benchmark_dir + "{sample}.{step}.collect_hsmetrics_umi.tsv"
+        sample_id = "{sample}_{step}"
+    threads: 
+        get_threads(cluster_config, "CollectHsMetrics")
     message:
-        "Collect HSmetrics for {params.sample_id}"
+        "Collect HSmetrics using Picardtools for {params.sample_id}"
     shell:
-        "source activate {params.conda}\n"
-        "picard BedToIntervalList I={input.bed} O={input.bam}.picard.bedintervals SD={input.fadict}\n"
-        "picard CollectHsMetrics BI={input.bam}.picard.bedintervals TI={input.bam}.picard.bedintervals I={input.bam} O={output.mrkdup} &> {log}\n"
-        "source deactivate\n"
+        """
+source activate {params.conda};
+
+picard BedToIntervalList \
+I={input.bed} \
+O={input.bam}.picard.bedintervals \
+SD={input.fadict};
+
+picard CollectHsMetrics \
+BI={input.bam}.picard.bedintervals \
+TI={input.bam}.picard.bedintervals \
+I={input.bam} \
+O={output.mrkdup};
+        """
 
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
-rule mean_family_depth:
+rule calculate_meanfamilydepth_umi:
     input:
-        bam = umi_dir + '{sample}.{step}.bam'
+        bam = umi_dir + "{sample}.{step}.bam"
     output:
-        temp_fl = temp (qc_dir + '{sample}.{step}.temp.fl'),
-        totalsum = qc_dir + '{sample}.{step}.mean_family_depth'
+        temp_fl = temp (qc_dir + "{sample}.{step}.temp.fl"),
+        totalsum = qc_dir + "{sample}.{step}.mean_family_depth"
+    benchmark:
+        Path(benchmark_dir + "calculate_meanfamilydepth_umi_{sample}_{step}.tsv").as_posix()
+    singularity:
+        singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"samtools"),
-        sample_id = '{sample}_{step}'
-    benchmark:
-        benchmark_dir + "{sample}.{step}.meanfamilydepth.tsv"
+        sample_id = "{sample}_{step}"
     threads:
-        get_threads(cluster_config, 'mean_family_depth')
+        get_threads(cluster_config, "calculate_meanfamilydepth_umi")
     message:
         "Calculating mean family depth for {params.sample_id}"
     shell:
-        "source activate {params.conda}\n"
-        "samtools view -@ {threads} {input.bam} | grep 'RX:Z:' | sed 's/.*RX:Z:\\([ACGT-].*\\).*/\\1/' | cut -f1 | grep -v 'N' | sort | uniq -c | sed -e 's/  */\\t/g' | cut -f2,3 > {output.temp_fl}\n"
-        "awk -F'\\t' '{{sum+=$1;}} END{{printf(\"{params.sample_id}_meandepth: \"sum/NR)}}' {output.temp_fl} > {output.totalsum}\n"
-        "source deactivate"
+        """
+source activate {params.conda};
+
+samtools view -@ {threads} {input.bam} | \
+grep 'RX:Z:' | \
+sed 's/.*RX:Z:\\([ACGT-].*\\).*/\\1/' | \
+cut -f1 | \
+grep -v 'N' | \
+sort | uniq -c | \
+sed -e 's/  */\\t/g' | \
+cut -f2,3 > {output.temp_fl};
+
+awk -F'\\t' \
+'{{sum+=$1;}} \
+END{{printf(\"{params.sample_id}_meandepth: \"sum/NR)}}' \
+{output.temp_fl} > \
+{output.totalsum}
+        """
 
 ## Noise AF = TotalAF_with_UMI/TotalAF_without_UMI - considering TNscope values
-rule noise_AF:
+rule calculate_noiseAF_umi:
     input:
-        umiextract = vcf_dir + '{sample}.TNscope.umialign.vcf.gz',
-        consensuscall = vcf_dir + '{sample}.TNscope.consensusalign.vcf.gz'
+        umiextract = vcf_dir + "{sample}.TNscope.umialign.vcf.gz",
+        consensuscall = vcf_dir + "{sample}.TNscope.consensusalign.vcf.gz"
     output:
-        umiextractAF = temp (qc_dir + '{sample}.TNscope.umialign.AF.txt'),
-        consensuscallAF = temp (qc_dir + '{sample}.TNscope.consensusalign.AF.txt'),
-        noiseAF = qc_dir + '{sample}.TNscope.noiseAF'
+        umiextractAF = temp (qc_dir + "{sample}.TNscope.umialign.AF.txt"),
+        consensuscallAF = temp (qc_dir + "{sample}.TNscope.consensusalign.AF.txt"),
+        noiseAF = qc_dir + "{sample}.TNscope.noiseAF"
+    benchmark:
+        Path(benchmark_dir + "calculate_noiseAF_umi_{sample}.tsv").as_posix()
+    singularity:
+        singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
-        sample_id = '{sample}'
+        sample_id = "{sample}"
     threads:
-        get_threads(cluster_config, 'noise_AF')
-    benchmark: 
-        benchmark_dir + '{sample}.noiseAF.tsv'
-    message: "calculate noise AF values for {params.sample_id}"
+        get_threads(cluster_config, "calculate_noiseAF_umi")
+    message: 
+        "Calculate noise AF values for {params.sample_id}"
     shell:
-        "source activate {params.conda}\n"
-        "bcftools query -f \"%CHROM:%POS:REF->%ALT\\t[%AF]\\n\" {input.umiextract} > {output.umiextractAF}\n"
-        "bcftools query -f \"%CHROM:%POS:%REF->%ALT\\t[%AF]\\n\" {input.consensuscall} >  {output.consensuscallAF}\n"
-        "awk '{{if (FILENAME~/umialign.AF.txt/) {{sum1+=$2}} else {{sum2+=$2}}; if (FNR == 1 && NR != 1){{f1_nr = NR-1}}}} END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' {output.umiextractAF} {output.consensuscallAF} > {output.noiseAF}\n"
-        "source deactivate"
+        """
+source activate {params.conda};
+
+bcftools query \
+-f \"%CHROM:%POS:REF->%ALT\\t[%AF]\\n\" \
+{input.umiextract} > \
+{output.umiextractAF};
+
+bcftools query \
+-f \"%CHROM:%POS:%REF->%ALT\\t[%AF]\\n\" \
+{input.consensuscall} > \
+{output.consensuscallAF};
+
+awk '{{if (FILENAME~/umialign.AF.txt/) \
+{{sum1+=$2}} \
+else {{sum2+=$2}}; \
+if (FNR == 1 && NR != 1) {{f1_nr = NR-1}}}} \
+END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' \
+{output.umiextractAF} \
+{output.consensuscallAF} > \
+{output.noiseAF}
+        """
+
 
 # Plot the TNscope calculated AFs befor and after consensuscall
-rule density_Plots:
+rule generate_densityPlots_umi:
     input:
-        table1 = qc_dir + '{sample}.TNscope.umialign.AF.txt',
-        table2 = qc_dir + '{sample}.TNscope.consensusalign.AF.txt'
+        table1 = qc_dir + "{sample}.TNscope.umialign.AF.txt",
+        table2 = qc_dir + "{sample}.TNscope.consensusalign.AF.txt"
     output:
-        AF_plot = plot_dir + '{sample}.TNscope.AFplot.pdf'
-    params:
-        sample_id = '{sample}'
+        AF_plot = plot_dir + "{sample}.TNscope.AFplot.pdf"
     benchmark:
-        benchmark_dir + '{sample}.densityPlots.tsv'
+        Path(benchmark_dir + "generate_densityPlots_umi_{sample}.tsv").as_posix()
+    params:
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "generate_densityPlots_umi")
     message:
         "Density AF plots for sample {params.sample_id}"
-    threads:
-        get_threads(cluster_config, 'density_Plots')
     run:
         import matplotlib.pyplot as plt
         import pandas as pd
