@@ -482,23 +482,70 @@ class ReferenceMeta(BaseModel):
         return output_value
 
 
-class UMIworkflowParams(BaseModel):
-    """This class defines the params settings used as constants in UMI workflow.
-    
+class UMIworkflowParams_common(BaseModel):
+    """This class defines the common params settings used as constants across various rules in UMI workflow.
+
     Attributes:
-        align_format: str (required); output alignment format. eg. 'BAM'  
-	align_header: str (required); header line appended to the aligned BAM output
-	align_intbases: int; input bases in each batch regardless of threads, for reproducibility.
-    	filter_minreads: str (required); settings to filter consensus tags based on group size.
+        align_format: str (required); output alignment format. eg. 'BAM'
+        align_header: str (required); header line appended to the aligned BAM output
+        align_intbases: int; input bases in each batch regardless of threads, for reproducibility
+        filter_tumor_af: float (required); settings to filter minimum allelic frequency
+    """
+
+    align_header: str
+    align_intbases: int
+    filter_tumor_af: float
+
+
+class UMIworkflowParams_umiextract(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow-rule umextract.
+
+    Attributes:
+        read_structure: str (required); settings to define UMI read structure
+    """
+
+    read_structure: str = "-d, 'rs1,rs2'"
+
+
+class UMIworkflowParams_consensuscall(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow-rule consensuscall.
+
+    Attributes:
+        align_format: str (required); output alignment format. eg. 'BAM'
+	filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
-    align_format: str
+    align_format: str = 'BAM'
     filter_minreads: str = '3,1,1'
     tag: str = 'XR'
-    align_header: str
-    align_intbases: int
 
+class UMIworkflowParams_tnscope(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow- rule tnscope.
+
+    Attributes:
+        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
+        disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
+        filter_tumor_af: float (required); minimum allelic frequency to detect
+        min_tumorLOD: float (required); Minimum tumorLOD value
+        error_rate: int (required); allow error-rate to consider in calling
+        prunefactor: int (required); pruning factor in the kmer graph
+    """
+
+    algo: str
+    min_tumorLOD: float
+    error_rate: int
+    prunefactor: int
+    disable_detect: str
+
+
+class UMIworkflowParams_vardict(BaseModel):
+    """This class defines the params settings used as constants in UMIworkflow-rule vardict.
+
+    Attributes:
+        vardict_filters: str (required); set of filters to apply for variant-calling using vardict
+    """
+    vardict_filters: str
 
 class UMIworkflowConfig(BaseModel):
     """ Defines set of rules in UMI workflow.
@@ -506,9 +553,15 @@ class UMIworkflowConfig(BaseModel):
     Handles attributes for corresponding rules.
 	
     Attributes:
+	common: global params defined across all rules in UMI workflow
+	umiextract: params defined in the rule sentieon_umiextract
 	consensuscall: params defined in the rule sentieon_consensuscall
-
+	tnscope: params defined in the rule sentieon_tnscope_umi
+    	vardict: params defined in the rule vardict_umi
     """
-    
-    consensuscall: UMIworkflowParams
+    common: UMIworkflowParams_common
+    umiextract: UMIworkflowParams_umiextract
+    consensuscall: UMIworkflowParams_consensuscall
+    tnscope: UMIworkflowParams_tnscope
+    vardict: UMIworkflowParams_vardict
 
