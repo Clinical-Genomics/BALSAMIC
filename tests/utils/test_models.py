@@ -370,3 +370,17 @@ def test_umiparams_vardict():
     #THEN assert values
     assert test_umivardict_built.vardict_filters == "-a 1 -b 2 -c 5"
 
+
+def test_umiparams_vep():
+    """ test UMIParamsVEP model for correct validation"""
+
+    #GIVEN vardict params
+    test_umivep={
+        "vep_filters": "all defaults params"
+    }
+
+    #WHEN building the model
+    test_umivep_built = UMIParamsVEP(**test_umivep)
+
+    #THEN assert values
+    assert test_umivep_built.vep_filters == "all default params"

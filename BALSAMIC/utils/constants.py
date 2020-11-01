@@ -420,5 +420,8 @@ umiworkflow_params = {
     },
     "vardict": {
         "vardict_filters": "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0"
+    },
+    "vep": {
+	"vep_filters": "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     }
 }

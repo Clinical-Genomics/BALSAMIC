@@ -538,7 +538,6 @@ class UMIParamsTNscope(BaseModel):
     prunefactor: int
     disable_detect: str
 
-
 class UMIParamsVardict(BaseModel):
     """This class defines the params settings used as constants in UMIworkflow-rule vardict.
 
@@ -546,6 +545,14 @@ class UMIParamsVardict(BaseModel):
         vardict_filters: str (required); set of filters to apply for variant-calling using vardict
     """
     vardict_filters: str
+
+class UMIParamsVEP(BaseModel):
+    """This class defines the params settings used as constants in UMIworkflow-rule vep.
+
+    Attributes:
+        vep_filters: str (required); set of filters to apply for variant-calling using vardict
+    """
+    vep_filters: str
 
 class UMIworkflowConfig(BaseModel):
     """ Defines set of rules in UMI workflow.
@@ -558,10 +565,11 @@ class UMIworkflowConfig(BaseModel):
 	consensuscall: params defined in the rule sentieon_consensuscall
 	tnscope: params defined in the rule sentieon_tnscope_umi
     	vardict: params defined in the rule vardict_umi
+	vep: params defined in the rule vep_umi
     """
     common: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     consensuscall: UMIParamsConsensuscall
     tnscope: UMIParamsTNscope
     vardict: UMIParamsVardict
-
+    vep: UMIParamsVEP
