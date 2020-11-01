@@ -3,6 +3,10 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.models import UMIworkflowConfig
+from BALSAMIC.utils.constants import umiworkflow_params
+
+params_umi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 
 # Annotate vcf files with VEP 
 rule vep_umi:
@@ -20,9 +24,9 @@ rule vep_umi:
     params:
         vep_cache = config["reference"]["vep"],
         conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
-        default_options = "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite",
         sample_id = "{sample}.{step}",
-        var_caller = "{var_caller}"
+        var_caller = "{var_caller}",
+        default_options = paramsumi.vep.vep_filters
     threads: 
         get_threads(cluster_config, "vep_umi")
     message:
