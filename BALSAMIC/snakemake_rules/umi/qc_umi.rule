@@ -72,23 +72,23 @@ O={output.mrkdup};
         """
 
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
-rule calculate_meanfamilydepth_umi:
+rule samtools_calculatemeanfamilydepth_umi:
     input:
         bam = umi_dir + "{sample}.{step}.bam"
     output:
         temp_fl = temp (qc_dir + "{sample}.{step}.temp.fl"),
         totalsum = qc_dir + "{sample}.{step}.mean_family_depth"
     benchmark:
-        Path(benchmark_dir + "calculate_meanfamilydepth_umi_{sample}_{step}.tsv").as_posix()
+        Path(benchmark_dir + "samtools_calculatemeanfamilydepth_umi_{sample}_{step}.tsv").as_posix()
     singularity:
         singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"samtools"),
         sample_id = "{sample}_{step}"
     threads:
-        get_threads(cluster_config, "calculate_meanfamilydepth_umi")
+        get_threads(cluster_config, "samtools_calculatemeanfamilydepth_umi")
     message:
-        "Calculating mean family depth for {params.sample_id}"
+        "Calculating mean family depth using samtools and awk for {params.sample_id}"
     shell:
         """
 source activate {params.conda};
@@ -110,7 +110,7 @@ END{{printf(\"{params.sample_id}_meandepth: \"sum/NR)}}' \
         """
 
 ## Noise AF = TotalAF_with_UMI/TotalAF_without_UMI - considering TNscope values
-rule calculate_noiseAF_umi:
+rule bcftools_calculatenoiseAF_umi:
     input:
         umiextract = vcf_dir + "{sample}.TNscope.umialign.vcf.gz",
         consensuscall = vcf_dir + "{sample}.TNscope.consensusalign.vcf.gz"
@@ -119,14 +119,14 @@ rule calculate_noiseAF_umi:
         consensuscallAF = temp (qc_dir + "{sample}.TNscope.consensusalign.AF.txt"),
         noiseAF = qc_dir + "{sample}.TNscope.noiseAF"
     benchmark:
-        Path(benchmark_dir + "calculate_noiseAF_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "bcftools_calculatenoiseAF_umi_{sample}.tsv").as_posix()
     singularity:
         singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
         sample_id = "{sample}"
     threads:
-        get_threads(cluster_config, "calculate_noiseAF_umi")
+        get_threads(cluster_config, "bcftools_calculatenoiseAF_umi")
     message: 
         "Calculate noise AF values for {params.sample_id}"
     shell:
@@ -155,18 +155,18 @@ END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' \
 
 
 # Plot the TNscope calculated AFs befor and after consensuscall
-rule generate_densityPlots_umi:
+rule seaborn_densityplot_umi:
     input:
         table1 = qc_dir + "{sample}.TNscope.umialign.AF.txt",
         table2 = qc_dir + "{sample}.TNscope.consensusalign.AF.txt"
     output:
         AF_plot = plot_dir + "{sample}.TNscope.AFplot.pdf"
     benchmark:
-        Path(benchmark_dir + "generate_densityPlots_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "seaborn_densityplot_umi_{sample}.tsv").as_posix()
     params:
         sample_id = "{sample}"
     threads:
-        get_threads(cluster_config, "generate_densityPlots_umi")
+        get_threads(cluster_config, "seaborn_densityplot_umi")
     message:
         "Density AF plots for sample {params.sample_id}"
     run:

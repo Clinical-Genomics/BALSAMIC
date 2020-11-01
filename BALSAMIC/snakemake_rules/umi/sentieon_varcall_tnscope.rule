@@ -21,10 +21,10 @@ rule sentieon_tnscope_umi:
     params:
         sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        tAF = paramsumi.common.filter_tumor_af,
+        tumor_af = paramsumi.common.filter_tumor_af,
         algo = paramsumi.tnscope.algo,
-        detect = paramsumi.tnscope.disable_detect,
-        TL = config["tumorlod"], #paramsumi.tnscope.min_tumorLOD,
+        disable_detect = paramsumi.tnscope.disable_detect,
+        tumor_lod = config["tumorlod"], #paramsumi.tnscope.min_tumorLOD,
         error_rate = paramsumi.tnscope.error_rate,
         prune_factor = paramsumi.tnscope.prunefactor,
         sample_id = "{sample}"
@@ -41,10 +41,10 @@ rule sentieon_tnscope_umi:
 --algo {params.algo} \
 --tumor_sample {params.sample_id} \
 --dbsnp {input.dbsnp} \
---min_tumor_allele_frac {params.tAF} \
---filter_t_alt_frac {params.tAF} \
---min_init_tumor_lod {params.TL} \
---disable_detector {params.detect} \
+--min_tumor_allele_frac {params.tumor_af} \
+--filter_t_alt_frac {params.tumor_af} \
+--min_init_tumor_lod {params.tumor_lod} \
+--disable_detector {params.disable_detect} \
 --max_error_per_read {params.error_rate} \
 --pcr_indel_model NONE \
 --prune_factor {params.prune_factor} \
