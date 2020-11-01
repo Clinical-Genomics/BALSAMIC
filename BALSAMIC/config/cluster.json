@@ -214,5 +214,17 @@
 	"picard_umiaware":{
 		"time": "4:00:00",
 		"n": 12
+	},
+	"bcftools_generatebackgroundaf_table":{
+		"time": "2:00:00",
+		"n": 8
+	},
+	"samtools_calculatemeanfamilydepth_umi":{
+		"time": "2:00:00",
+		"n": 8
+	},
+	"bcftools_calculatenoiseAF_umi":{
+		"time": "2:00:00",
+		"n": 8
 	}
 }
