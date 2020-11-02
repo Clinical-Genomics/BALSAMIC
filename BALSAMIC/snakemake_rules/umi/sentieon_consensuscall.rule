@@ -13,19 +13,19 @@ paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 # UMI-consensus calling
 rule sentieon_consensuscall_umi:
     input:
-        sam_consensus = umi_dir + '{sample}.umialign.bam'
+        sam_consensus = umi_dir + "{sample}.umialign.bam"
     output:
-        fastq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz'
+        fastq_consensus = umi_dir + "{sample}.consensuscall.fastq.gz"
     benchmark:
-        Path(benchmark_dir + 'sentieon_consensuscall_umi_{sample}.tsv').as_posix()
+        Path(benchmark_dir + "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tag = paramsumi.consensuscall.tag, 
         ip_format = paramsumi.consensuscall.align_format,
-        sample_id = '{sample}'
+        sample_id = "{sample}"
     threads: 
-        get_threads(cluster_config, 'sentieon_consensuscall_umi')
+        get_threads(cluster_config, "sentieon_consensuscall_umi")
     message: 
         "Consensus molecule creation using sentieon for sample {params.sample_id}"
     shell:
@@ -40,22 +40,22 @@ rule sentieon_consensuscall_umi:
         """
 
 # Alignment of consensus reads
-rule sentieon_consensusalign_umi:
+rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz'
+        fq_consensus = umi_dir + "{sample}.consensuscall.fastq.gz"
     output:
-        align_consensus = umi_dir + '{sample}.consensusalign.bam'
+        align_consensus = umi_dir + "{sample}.consensusalign.bam"
     benchmark:
-        Path(benchmark_dir + 'sentieon_consensusalign_umi_{sample}.tsv').as_posix()
+        Path(benchmark_dir + "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sheader = paramsumi.consensuscall.align_header,
-        ip_bases = paramsumi.consensuscall.align_intbases,
-        sample_id = '{sample}'
+        sheader = paramsumi.common.align_header,
+        ip_bases = paramsumi.common.align_intbases,
+        sample_id = "{sample}"
     threads: 
-        get_threads(cluster_config, 'sentieon_consensusalign_umi')
+        get_threads(cluster_config, "sentieon_bwa_umiconsensus")
     message:
          "Mapping of consensus reads with the sentieon bwa mem, sorting for sample {params.sample_id}"
     shell:
@@ -76,20 +76,20 @@ rule sentieon_consensusalign_umi:
 # Filter consensus called reads based on 'XZ' filtering
 rule sentieon_consensusfilter_umi:
     input:
-        umi_dir + '{sample}.consensusalign.bam'
+        umi_dir + "{sample}.consensusalign.bam"
     output:
-        umi_dir + '{sample}.consensusfiltered.bam'
+        umi_dir + "{sample}.consensusfiltered.bam"
     benchmark:
-        Path(benchmark_dir + 'sentieon_consensusfilter_umi_{sample}.tsv').as_posix()
+        Path(benchmark_dir + "sentieon_consensusfilter_umi_{sample}.tsv").as_posix()
     singularity:
         singularity_image
     params:
-        consensusfilter_script = get_script_path('FilterDuplexUMIconsensus.awk'),
+        consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = paramsumi.consensuscall.filter_minreads,
-        sample_id = '{sample}',
+        sample_id = "{sample}",
         conda = get_conda_env(config["conda_env_yaml"],"samtools")
     threads:
-        get_threads(cluster_config, 'sentieon_consensusfilter_umi')
+        get_threads(cluster_config, "sentieon_consensusfilter_umi")
     message:
         "Filtering consensus reads based on XZ tag for sample {params.sample_id}"
     shell:
@@ -97,7 +97,7 @@ rule sentieon_consensusfilter_umi:
 source activate {params.conda};
 
 samtools view -h {input} | \
-awk -v MinR={params.minreads} -v OFS=\'\t\' -f {params.consensusfilter_script} | \
+awk -v MinR={params.minreads} -v OFS=\'\\t\' -f {params.consensusfilter_script} | \
 samtools view -bh - > {output};
 
 samtools index {output};
