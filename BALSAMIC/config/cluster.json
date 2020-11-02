@@ -44,11 +44,11 @@
 		"n": 16
 	},
 	"cnvkit_paired": {
-		"time": "08:00:00",
+		"time": "10:00:00",
 		"n": 10
 	},
 	"cnvkit_single": {
-		"time": "08:00:00",
+		"time": "10:00:00",
 		"n": 10
 	},
 	"haplotypecaller": {
