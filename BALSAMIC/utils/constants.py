@@ -396,3 +396,32 @@ REFERENCE_FILES = {
         }
     }
 }
+
+umiworkflow_params = {
+    "common": {
+        "align_header": "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        "align_intbases": 1000000,
+        "filter_tumor_af": 0.0005
+	},
+    "consensuscall": {
+        "align_format": "BAM",
+        "filter_minreads": "3,1,1",
+        "tag": "XR"
+    },
+    "umiextract": {
+        "read_structure": "-d '3M2S+T,3M2S+T'"
+    },
+    "tnscope": {
+        "algo": "TNscope",
+        "min_tumorLOD": 0.5,
+        "error_rate": 5,
+        "prunefactor": 3,
+        "disable_detect": "sv"
+    },
+    "vardict": {
+        "vardict_filters": "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0"
+    },
+    "vep": {
+	"vep_filters": "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
+    }
+}

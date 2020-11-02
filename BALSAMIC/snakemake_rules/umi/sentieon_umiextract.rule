@@ -1,56 +1,68 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
+from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.models import UMIworkflowConfig
+from BALSAMIC.utils.constants import umiworkflow_params
+
+paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
+
 
 # Extract umi tags using the defined read structure. 
-rule sentieon_umi_extract:
+rule sentieon_umiextract:
     input:
         read1 = fastq_dir + "{sample}_1.fastq.gz",
         read2 = fastq_dir + "{sample}_2.fastq.gz"
     output:
-        ds_umi = umi_dir + '{sample}.umiextract.fastq.gz'
+        ds_umi = umi_dir + "{sample}.umiextract.fastq.gz"
+    benchmark:
+        Path(benchmark_dir + "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        ds_params= ['-d', '3M2S+T,3M2S+T'],
-        sample_id = '{sample}'
-    log: 
-        log_dir + '{sample}.umiextract.log'
-    benchmark: 
-        benchmark_dir + '{sample}.umiextract.tsv'
+        ds_params= paramsumi.umiextract.read_structure,
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "sentieon_umiextract")
     message: 
-        "UMI tag extraction using Sentieon for sample {params.sample_id}"
-    threads: 
-        get_threads(cluster_config, 'sentieon_umi_extract')
+        "UMI tag extraction using sentieon for sample {params.sample_id}"
     shell:
-        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
-        "{params.sentieon_exec} umi extract {params.ds_params} {input.read1} {input.read2} -o {output.ds_umi} &> {log} \n"
-
-
+        """
+{params.sentieon_exec} umi extract \
+{params.ds_params} {input.read1} {input.read2} \
+-o {output.ds_umi};
+        """
 
 # Align the UMI-extracted reads
-rule sentieon_umi_align:
+rule sentieon_bwa_umiextract:
     input:
-        ref_fa = config['reference']['reference_genome'],
-        fastq_umi = umi_dir + '{sample}.umiextract.fastq.gz'
+        ref_fa = config["reference"]["reference_genome"],
+        fastq_umi = umi_dir + "{sample}.umiextract.fastq.gz"
     output:
-        align_umi = temp(umi_dir + '{sample}.umialign.bam')
-    params:
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        sheader = "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
-        ip_bases = '1000000',
-        sample_id = '{sample}'
-    threads: 
-        get_threads(cluster_config, 'sentieon_umi_align')
-    log: 
-        log_dir + '{sample}.umialign.log'
+        align_umi = temp(umi_dir + "{sample}.umialign.bam")
     benchmark:
-        benchmark_dir + '{sample}.umialign.benchmark'
+        Path(benchmark_dir + "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
+    params:
+        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        sheader = paramsumi.common.align_header,
+        ip_bases = paramsumi.common.align_intbases,
+        sample_id = "{sample}"
+    threads: 
+        get_threads(cluster_config, "sentieon_bwa_umiextract")
     message: 
-        "Aligning of UMI extracted reads with bwa mem, sorting for sample {params.sample_id}"
+        "Aligning of UMI extracted reads with sentieon bwa mem, sorting for sample {params.sample_id}"
     shell:
-        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
-        "{params.sentieon_exec} bwa mem -R {params.sheader} -K {params.ip_bases} -p -t {threads} -C {input.ref_fa} {input.fastq_umi} |{params.sentieon_exec} util sort -r {input.ref_fa} --sam2bam -o {output.align_umi} -i - 2> {log}\n"
-
+        """
+{params.sentieon_exec} bwa mem \
+-R {params.sheader} \
+-K {params.ip_bases} \
+-p -t {threads} \
+-C {input.ref_fa} {input.fastq_umi} | \
+{params.sentieon_exec} util sort \
+-r {input.ref_fa} \
+--sam2bam \
+-o {output.align_umi} -i - ;
+       """
