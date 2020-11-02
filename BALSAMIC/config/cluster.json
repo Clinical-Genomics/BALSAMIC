@@ -187,7 +187,7 @@
 		"time": "10:00:00",
 		"n": 10
 	},
-	"sentieon_umialign": {
+	"sentieon_bwa_umiextract": {
 		"time": "8:00:00",
 		"n": 24
 	},
@@ -195,7 +195,7 @@
 		"time": "6:00:00",
 		"n": 24
 	},
-	"sentieon_consensusalign_umi": {
+	"sentieon_bwa_umiconsensus": {
 		"time": "8:00:00",
 		"n": 24
 	},
@@ -211,19 +211,19 @@
 		"time":"4:00:00",
 		"n": 10
 	},
-	"picard_umiaware":{
+	"picard_umiaware": {
 		"time": "4:00:00",
 		"n": 12
 	},
-	"bcftools_generatebackgroundaf_table":{
+	"bcftools_generatebackgroundaf_table": {
 		"time": "2:00:00",
 		"n": 8
 	},
-	"samtools_calculatemeanfamilydepth_umi":{
+	"samtools_view_calculatemeanfamilydepth_umi": {
 		"time": "2:00:00",
 		"n": 8
 	},
-	"bcftools_calculatenoiseAF_umi":{
+	"bcftools_query_calculatenoiseAF_umi": { 
 		"time": "2:00:00",
 		"n": 8
 	}

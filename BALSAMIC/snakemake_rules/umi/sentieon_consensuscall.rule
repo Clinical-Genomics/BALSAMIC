@@ -40,14 +40,14 @@ rule sentieon_consensuscall_umi:
         """
 
 # Alignment of consensus reads
-rule sentieon_consensusalign_umi:
+rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
         fq_consensus = umi_dir + "{sample}.consensuscall.fastq.gz"
     output:
         align_consensus = umi_dir + "{sample}.consensusalign.bam"
     benchmark:
-        Path(benchmark_dir + "sentieon_consensusalign_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -55,7 +55,7 @@ rule sentieon_consensusalign_umi:
         ip_bases = paramsumi.common.align_intbases,
         sample_id = "{sample}"
     threads: 
-        get_threads(cluster_config, "sentieon_consensusalign_umi")
+        get_threads(cluster_config, "sentieon_bwa_umiconsensus")
     message:
          "Mapping of consensus reads with the sentieon bwa mem, sorting for sample {params.sample_id}"
     shell:

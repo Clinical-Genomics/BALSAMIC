@@ -72,21 +72,21 @@ O={output.mrkdup};
         """
 
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
-rule samtools_calculatemeanfamilydepth_umi:
+rule samtools_view_calculatemeanfamilydepth_umi:
     input:
         bam = umi_dir + "{sample}.{step}.bam"
     output:
         temp_fl = temp (qc_dir + "{sample}.{step}.temp.fl"),
         totalsum = qc_dir + "{sample}.{step}.mean_family_depth"
     benchmark:
-        Path(benchmark_dir + "samtools_calculatemeanfamilydepth_umi_{sample}_{step}.tsv").as_posix()
+        Path(benchmark_dir + "samtools_view_calculatemeanfamilydepth_umi_{sample}_{step}.tsv").as_posix()
     singularity:
         singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"samtools"),
         sample_id = "{sample}_{step}"
     threads:
-        get_threads(cluster_config, "samtools_calculatemeanfamilydepth_umi")
+        get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
     message:
         "Calculating mean family depth using samtools and awk for {params.sample_id}"
     shell:
@@ -110,7 +110,7 @@ END{{printf(\"{params.sample_id}_meandepth: \"sum/NR)}}' \
         """
 
 ## Noise AF = TotalAF_with_UMI/TotalAF_without_UMI - considering TNscope values
-rule bcftools_calculatenoiseAF_umi:
+rule bcftools_query_calculatenoiseAF_umi:
     input:
         umiextract = vcf_dir + "{sample}.TNscope.umialign.vcf.gz",
         consensuscall = vcf_dir + "{sample}.TNscope.consensusalign.vcf.gz"
@@ -119,14 +119,14 @@ rule bcftools_calculatenoiseAF_umi:
         consensuscallAF = temp (qc_dir + "{sample}.TNscope.consensusalign.AF.txt"),
         noiseAF = qc_dir + "{sample}.TNscope.noiseAF"
     benchmark:
-        Path(benchmark_dir + "bcftools_calculatenoiseAF_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "bcftools_query_calculatenoiseAF_umi_{sample}.tsv").as_posix()
     singularity:
         singularity_image
     params:
         conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
         sample_id = "{sample}"
     threads:
-        get_threads(cluster_config, "bcftools_calculatenoiseAF_umi")
+        get_threads(cluster_config, "bcftools_query_calculatenoiseAF_umi")
     message: 
         "Calculate noise AF values for {params.sample_id}"
     shell:

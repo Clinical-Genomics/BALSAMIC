@@ -36,14 +36,14 @@ rule sentieon_umiextract:
         """
 
 # Align the UMI-extracted reads
-rule sentieon_umialign:
+rule sentieon_bwa_umiextract:
     input:
         ref_fa = config["reference"]["reference_genome"],
         fastq_umi = umi_dir + "{sample}.umiextract.fastq.gz"
     output:
         align_umi = temp(umi_dir + "{sample}.umialign.bam")
     benchmark:
-        Path(benchmark_dir + "sentieon_umialign_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_INSTALL_DIR"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -51,7 +51,7 @@ rule sentieon_umialign:
         ip_bases = paramsumi.common.align_intbases,
         sample_id = "{sample}"
     threads: 
-        get_threads(cluster_config, "sentieon_umialign")
+        get_threads(cluster_config, "sentieon_bwa_umiextract")
     message: 
         "Aligning of UMI extracted reads with sentieon bwa mem, sorting for sample {params.sample_id}"
     shell:
