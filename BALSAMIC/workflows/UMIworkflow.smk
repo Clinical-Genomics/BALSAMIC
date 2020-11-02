@@ -69,7 +69,7 @@ expand(qc_dir + "{sample}.{step}.umimetrics", sample=SAMPLES, step=STEPS),
 expand(qc_dir + "{sample}.{step}.collect_hsmetric_umi", sample=SAMPLES, step=STEPS),
 expand(qc_dir + "{sample}.{step}.mean_family_depth", sample=SAMPLES, step = STEPS),
 expand(qc_dir + "{sample}.TNscope.noiseAF", sample=SAMPLES),
-#expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES),
+expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES),
 expand(table_dir + "{sample}.{varcaller}.consensusfiltered.AFtable.txt", sample=SAMPLES, varcaller=VAR_CALLER) ]
 
 config["rules"] = umi_call + variant_call + annotate_vcf + generate_tables + qc
