@@ -8,7 +8,7 @@ from BALSAMIC.utils.models import (
     VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
     SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, UMIworkflowConfig,
     UMIParamsCommon, UMIParamsUMIextract, UMIParamsConsensuscall,
-    UMIParamsTNscope, UMIParamsVardict)
+    UMIParamsTNscope, UMIParamsVardict, UMIParamsVEP)
 
 
 def test_referencemeta():
@@ -383,4 +383,4 @@ def test_umiparams_vep():
     test_umivep_built = UMIParamsVEP(**test_umivep)
 
     #THEN assert values
-    assert test_umivep_built.vep_filters == "all default params"
+    assert test_umivep_built.vep_filters == "all defaults params"
