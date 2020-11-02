@@ -520,6 +520,7 @@ class UMIParamsConsensuscall(BaseModel):
     filter_minreads: str = '3,1,1'
     tag: str = 'XR'
 
+
 class UMIParamsTNscope(BaseModel):
     """This class defines the params settings used as constants in UMI workflow- rule tnscope.
 
@@ -538,6 +539,7 @@ class UMIParamsTNscope(BaseModel):
     prunefactor: int
     disable_detect: str
 
+
 class UMIParamsVardict(BaseModel):
     """This class defines the params settings used as constants in UMIworkflow-rule vardict.
 
@@ -546,6 +548,7 @@ class UMIParamsVardict(BaseModel):
     """
     vardict_filters: str
 
+
 class UMIParamsVEP(BaseModel):
     """This class defines the params settings used as constants in UMIworkflow-rule vep.
 
@@ -553,6 +556,7 @@ class UMIParamsVEP(BaseModel):
         vep_filters: str (required); set of filters to apply for variant-calling using vardict
     """
     vep_filters: str
+
 
 class UMIworkflowConfig(BaseModel):
     """ Defines set of rules in UMI workflow.
