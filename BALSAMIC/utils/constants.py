@@ -2,24 +2,35 @@
 import sys
 from pathlib import Path
 
-import BALSAMIC
+# DOCKER hub path
+BALSAMIC_DOCKER_PATH = "docker://hassanf/balsamic"
+
+# BALSAMIC base dir
+BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 
 # Path to conda folder containing YAML files with verions of software usen un BALSAMIC workflow
-CONDA_ENV_PATH = Path(
-    Path(sys.modules["BALSAMIC"].__file__).parent.resolve() /
-    "conda").as_posix()
+CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "conda").as_posix()
 
 # Path to config YAML file to be accessed by Snakemake
 CONDA_ENV_YAML = Path(
-    Path(sys.modules["BALSAMIC"].__file__).parent.resolve() / "config" /
-    "balsamic_env.yaml").as_posix()
+    BALSAMIC_BASE_DIR / "config" / "balsamic_env.yaml").as_posix()
 
 # Path to rule files to be accessed by Snakemake
-RULE_DIRECTORY = (
-    Path(sys.modules["BALSAMIC"].__file__).parent.resolve().as_posix() + "/")
+RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
 
-# BALSAMIC version
-BALSAMIC_VERSION = BALSAMIC.__version__
+# Path to vcfanno toml files
+VCFANNO_TOML = Path(
+    BALSAMIC_BASE_DIR / "assets" / "vcfanno" / "vcfanno.toml").as_posix()
+
+# Sentieon specific
+SENTIEON_DNASCOPE = Path(
+    BALSAMIC_BASE_DIR /
+    'assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model'
+).as_posix()
+SENTIEON_TNSCOPE = Path(
+    BALSAMIC_BASE_DIR /
+    'assets/sentieon_models/SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model'
+)
 
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]
@@ -173,6 +184,11 @@ VARDICT_SETTINGS = {
         "filter_name": "balsamic_low_af",
         "field": "INFO"
     },
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO"
+    },
     "varcaller_name": "VarDict",
     "filter_type": "general",
     "analysis_type": "tumor_only",
@@ -193,7 +209,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "Homo_sapiens_assembly38.fasta",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "dbsnp": {
             "url":
@@ -202,7 +218,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "Homo_sapiens_assembly38.dbsnp138.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "hc_vcf_1kg": {
             "url":
@@ -211,7 +227,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "1000G_phase1.snps.high_confidence.hg38.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "mills_1kg": {
             "url":
@@ -220,7 +236,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "Mills_and_1000G_gold_standard.indels.hg38.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "known_indel_1kg": {
             "url":
@@ -229,7 +245,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "Homo_sapiens_assembly38.known_indels.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "vcf_1kg": {
             "url":
@@ -239,7 +255,25 @@ REFERENCE_FILES = {
             "genome_version": "hg38",
             "output_file":
             "1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
+        },
+        "gnomad_variant": {
+            "url":
+            "gs://gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz",
+            "file_type": "vcf",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "output_path": "variants"
+        },
+        "gnomad_variant_index": {
+            "url":
+            "gs://gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz.tbi",
+            "file_type": "vcf",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
+            "output_path": "variants"
         },
         "cosmicdb": {
             "url":
@@ -248,7 +282,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "cosmic_coding_muts_v92.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "wgs_calling": {
             "url":
@@ -257,7 +291,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "wgs_calling_regions.v1",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "genome_chrom_size": {
             "url":
@@ -266,7 +300,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "hg38.chrom.sizes",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_txt": {
             "url":
@@ -275,7 +309,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg38",
             "output_file": "refGene.txt",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_sql": {
             "url":
@@ -284,7 +318,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg38",
             "output_file": "refGene.sql",
-            "output_path": "genome",
+            "output_path": "genome"
         },
     },
     "hg19": {
@@ -294,7 +328,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "human_g1k_v37.fasta",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "dbsnp": {
             "url": "gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz",
@@ -302,7 +336,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "dbsnp_grch37_b138.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "hc_vcf_1kg": {
             "url":
@@ -311,7 +345,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "1kg_phase1_snps_high_confidence_b37.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "mills_1kg": {
             "url":
@@ -320,7 +354,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "mills_1kg_index.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "known_indel_1kg": {
             "url":
@@ -328,8 +362,8 @@ REFERENCE_FILES = {
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
-            "output_file": "1kg_known_indels_b37.vcf.gz",
-            "output_path": "variants",
+            "output_file": "1kg_known_indels_b37.vcf",
+            "output_path": "variants"
         },
         "vcf_1kg": {
             "url":
@@ -338,7 +372,25 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "1k_genome_wgs_p1_v3_all_sites.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
+        },
+        "gnomad_variant": {
+            "url":
+            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "file_type": "vcf",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "output_path": "variants"
+        },
+        "gnomad_variant_index": {
+            "url":
+            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
+            "file_type": "vcf",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
+            "output_path": "variants"
         },
         "cosmicdb": {
             "url":
@@ -347,7 +399,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "cosmic_coding_muts_v90.vcf",
-            "output_path": "variants",
+            "output_path": "variants"
         },
         "wgs_calling": {
             "url":
@@ -356,7 +408,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "wgs_calling_regions.v1",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "genome_chrom_size": {
             "url":
@@ -365,7 +417,7 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "hg19.chrom.sizes",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_txt": {
             "url":
@@ -374,7 +426,7 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "refGene.txt",
-            "output_path": "genome",
+            "output_path": "genome"
         },
         "refgene_sql": {
             "url":
@@ -383,7 +435,38 @@ REFERENCE_FILES = {
             "gzip": False,
             "genome_version": "hg19",
             "output_file": "refGene.sql",
-            "output_path": "genome",
-        },
+            "output_path": "genome"
+        }
+    }
+}
+
+umiworkflow_params = {
+    "common": {
+        "align_header":
+        "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        "align_intbases": 1000000,
+        "filter_tumor_af": 0.0005
     },
+    "consensuscall": {
+        "align_format": "BAM",
+        "filter_minreads": "3,1,1",
+        "tag": "XR"
+    },
+    "umiextract": {
+        "read_structure": "-d '3M2S+T,3M2S+T'"
+    },
+    "tnscope": {
+        "algo": "TNscope",
+        "min_tumorLOD": 0.5,
+        "error_rate": 5,
+        "prunefactor": 3,
+        "disable_detect": "sv"
+    },
+    "vardict": {
+        "vardict_filters": "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0"
+    },
+    "vep": {
+        "vep_filters":
+        "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
+    }
 }

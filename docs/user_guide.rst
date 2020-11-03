@@ -2,7 +2,7 @@
 Short tutorial
 ==============
 
-Here a short toturial is provided for BALSAMIC (**version** = 6.0.0). 
+Here a short toturial is provided for BALSAMIC (**version** = 6.0.1). 
 
 .. contents::
 
@@ -17,19 +17,22 @@ The following commands will create and download reference directory at `./BALSAM
 want it to be created in another location):
 
 ::
-  
-  cd BALSAMIC
-  
-  balsamic config reference \
-      --cosmic-key ${COSMIC_KEY} \
-      --outdir ./BALSAMIC_reference \
-      --singularity BALSAMIC/containers/BALSAMIC_latest.sif
 
-  # This might couple of hours
-  balsamic run reference --configfile reference/config.json --run-analysis --snakemake-opt "--cores 1"
+  # Given:
+  # 1. COSMIC key is in variable $COSMIC_KEY
+  # 2. reference directory is in variable: $reference_path
+  # 3. BALSAMIC container file path is in $BALSAMIC_container
+
+  balsamic init reference \
+    --cosmic-key ${COSMIC_KEY} \
+    --outdir ${reference_path} \
+    --genome-version hg19 \
+    --singularity ${BALSAMIC_container} \
+    --quiet \
+    --run-analysis
   
 
-A `json` file with reference specificaions is created at: `BALSAMIC_reference/hg19/reference.json` 
+A `json` file with reference specifications is created at: `${reference_path}/BALSAMIC_version/hg19/reference.json`
 
 Step 2. Running a test sample
 -----------------------------
@@ -43,8 +46,8 @@ Now a config file for a test run must be created. Let's use the test data in `te
     --case-id demo_run_balsamic \
     --analysis-dir demo/ \
     --panel-bed tests/test_data/references/panel/panel.bed \
-    --reference-config BALSAMIC_reference/GRCh37/reference.json \
-    --singularity BALSAMIC/containers/BALSAMIC_latest.sif \
+    --reference-config ${reference_path}/BALSAMIC_version/hg19/reference.json \
+    --singularity ${BALSAMIC_container} \
     --output-config demo_run_balsamic.json 
 
 Notes:

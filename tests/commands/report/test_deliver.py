@@ -1,9 +1,4 @@
-import pytest
-
 from pathlib import Path
-
-import BALSAMIC
-from BALSAMIC.commands.base import cli
 
 
 def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):

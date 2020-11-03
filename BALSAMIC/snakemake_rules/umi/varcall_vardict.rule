@@ -3,31 +3,48 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.models import UMIworkflowConfig
+from BALSAMIC.utils.constants import umiworkflow_params
+
+paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 
 # Variant-calling using vardict
-rule vardict:
+rule vardict_umi:
     input:
-        bam = umi_dir + '{sample}.consensusalign.bam',
-        ref_fa = config['reference']['reference_genome'],
-        bed = config['panel']['capture_kit']
+        bam = umi_dir + "{sample}.{step}.bam",
+        ref_fa = config["reference"]["reference_genome"],
+        bed = config["panel"]["capture_kit"]
     output:
-         vardict = vcf_dir + '{sample}.vardict.umi.vcf.gz',
-    params:
-        conda = get_conda_env(config["conda_env_yaml"],'vardict'),
-        af = "0.0005",
-        sample_id = '{sample}',
-        vardict = "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0",
-        var2vcf = '-E'
-    singularity: singularity_image
-    threads: get_threads(cluster_config, 'vardict')
-    log:
-        log_dir + '{sample}.varcall.vardict.log'
+        vardict = vcf_dir + "{sample}.vardict.{step}.vcf.gz",
     benchmark:
-        benchmark_dir + '{sample}.varcall.vardict.tsv'
+        Path(benchmark_dir + "vardict_{sample}_{step}.tsv").as_posix()
+    singularity: 
+        singularity_image
+    params:
+        conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+        sample_id = "{sample}.{step}",
+        af = paramsumi.common.filter_tumor_af, 
+        vardict = paramsumi.vardict.vardict_filters
+    threads: 
+        get_threads(cluster_config, "vardict_tumor_only")
     message:
-        'Variant calling using Vardict for sample {params.sample_id}'
+        "Variant calling using Vardict for sample {params.sample_id}"
     shell:
-        "source activate {params.conda}\n"
-        "vardict -G {input.ref_fa} -f {params.af} -N {params.sample_id} -b {input.bam} {params.vardict} {input.bed} | teststrandbias.R | var2vcf_valid.pl {params.var2vcf} -f {params.af} -N {params.sample_id} | bgzip > {output.vardict}\n"
-        "tabix -p vcf {output.vardict}\n"
-        "source deactivate"
+        """
+source activate {params.conda};
+
+vardict \
+-G {input.ref_fa} \
+-f {params.af} \
+-N {params.sample_id} \
+-b {input.bam} \
+{params.vardict} \
+{input.bed} | \
+teststrandbias.R | \
+var2vcf_valid.pl -E \
+-f {params.af} \
+-N {params.sample_id} | \
+bgzip > {output.vardict};
+
+tabix -p vcf {output.vardict}
+        """

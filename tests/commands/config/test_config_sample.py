@@ -1,11 +1,6 @@
-import os
-import re
 import json
-import pytest
-import click
 
 from pathlib import Path
-from unittest import mock
 from click.testing import CliRunner
 from BALSAMIC.commands.base import cli
 

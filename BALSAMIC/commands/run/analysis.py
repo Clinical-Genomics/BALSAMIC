@@ -1,9 +1,9 @@
-#!/usr/bin/env python
 import sys
 import os
 import logging
 import subprocess
 import json
+import yaml
 import click
 
 from pathlib import Path
@@ -93,9 +93,12 @@ LOG = logging.getLogger(__name__)
     help='cluster mail type to send out email. \
               This will be applied to all jobs and override snakemake settings.'
 )
-@click.option('--disable-variant-caller',
-              type=click.Choice(list(VCF_DICT.keys())),
-              help='Run workflow with selected variant caller disable.')
+@click.option(
+    '--disable-variant-caller',
+    help=
+    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
+    f'values are: {list(VCF_DICT.keys())}',
+)
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, force_all, snakemake_opt, mail_type, mail_user,
@@ -188,7 +191,17 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     try:
         cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
-        subprocess.run(cmd, shell=True)  #, check=True)
+        subprocess.run(cmd, shell=True)
     except Exception as e:
         print(e)
         raise click.Abort()
+
+    if run_analysis:
+        jobid_file = os.path.join(
+            logpath, sample_config["analysis"]["case_id"] + ".sacct")
+        jobid_dump = os.path.join(resultpath, profile + "_jobids.yaml")
+        with open(jobid_file, "r") as jobid_in, open(jobid_dump,
+                                                     "w") as jobid_out:
+            jobid_list = jobid_in.read().splitlines()
+            yaml.dump({sample_config['analysis']['case_id']: jobid_list},
+                      jobid_out)

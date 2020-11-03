@@ -3,7 +3,6 @@
 
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
-from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])

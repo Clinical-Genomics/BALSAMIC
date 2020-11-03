@@ -5,23 +5,22 @@ import os
 import logging
 
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.constants import RULE_DIRECTORY
 
 LOG = logging.getLogger(__name__)
 
 shell.prefix("set -eo pipefail; ")
 
-rule_dir = config["rule_directory"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 benchmark_dir = config["analysis"]["benchmark"]
 umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
-log_dir =  config["analysis"]["log"]
 table_dir = get_result_dir(config) + "/tables/"
 plot_dir = get_result_dir(config) + "/plots/"
+qc_dir = get_result_dir(config) + "/qc/"
 
-
-singularity_image = config['singularity']['image']
+singularity_image = config["singularity"]["image"]
 
 # Declare sentieon variables
 sentieon = True
@@ -41,7 +40,6 @@ except Exception as error:
     raise
 
 # Define umiworkflow rules
-
 umi_call = [
     "snakemake_rules/umi/sentieon_umiextract.rule",
     "snakemake_rules/umi/sentieon_consensuscall.rule"
@@ -54,19 +52,30 @@ variant_call = [
 
 annotate_vcf = ["snakemake_rules/umi/annotate_vep.rule"]
 
-generate_plots = ["snakemake_rules/umi/generate_AF_tables.rules"]
+qc = ["snakemake_rules/umi/qc_umi.rule"]
+
+generate_tables = ["snakemake_rules/umi/generate_AF_tables.rule"]
 
 # Define wildcards
 SAMPLES = config["samples"]
-VAR_CALLER = ['TNscope','vardict']
+VAR_CALLER = ["TNscope","vardict"]
+STEPS = ["umialign","consensusfiltered"]
+#STEPS = ["consensusfiltered"]
 
 # Define outputs
-analysis_output = [expand(vcf_dir + "{sample}.{var_caller}.umi.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER), expand(vep_dir + "{sample}.{var_caller}.umi.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=['all','pass']), expand(table_dir + "{sample}.{var_caller}.umi.AFtable.txt", sample=SAMPLES, var_caller=VAR_CALLER)]
+analysis_output = [ expand(vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, step = STEPS),
+expand(vep_dir + "{sample}.{var_caller}.{step}.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=["all","pass"], step=STEPS),
+expand(qc_dir + "{sample}.{step}.umimetrics", sample=SAMPLES, step=STEPS),
+expand(qc_dir + "{sample}.{step}.collect_hsmetric_umi", sample=SAMPLES, step=STEPS),
+expand(qc_dir + "{sample}.{step}.mean_family_depth", sample=SAMPLES, step = STEPS),
+expand(qc_dir + "{sample}.TNscope.noiseAF", sample=SAMPLES),
+expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES),
+expand(table_dir + "{sample}.{varcaller}.consensusfiltered.AFtable.txt", sample=SAMPLES, varcaller=VAR_CALLER) ]
 
-config["rules"] = umi_call + variant_call + annotate_vcf + generate_plots
+config["rules"] = umi_call + variant_call + annotate_vcf + generate_tables + qc
 
 for r in config["rules"]:
-    include: os.path.join(rule_dir + r)
+    include: Path(RULE_DIRECTORY, r).as_posix()
 
 rule all:
     input:

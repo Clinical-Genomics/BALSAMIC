@@ -4,10 +4,11 @@ import pytest
 from pathlib import Path
 from pydantic import ValidationError
 
-from BALSAMIC.utils.models import (VCFAttributes, VarCallerFilter, QCModel,
-                                   VarcallerAttribute, VCFModel, AnalysisModel,
-                                   SampleInstanceModel, BioinfoToolsModel,
-                                   ReferenceUrlsModel, ReferenceMeta)
+from BALSAMIC.utils.models import (
+    VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
+    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, UMIworkflowConfig,
+    UMIParamsCommon, UMIParamsUMIextract, UMIParamsConsensuscall,
+    UMIParamsTNscope, UMIParamsVardict, UMIParamsVEP)
 
 
 def test_referencemeta():
@@ -199,6 +200,11 @@ def test_varcallerfilter():
             "filter_name": "dummy_depth",
             "field": "INFO"
         },
+        "pop_freq": {
+            "tag_value": 0.005,
+            "filter_name": "dummy_pop_freq",
+            "field": "INFO"
+        },
         "varcaller_name": "dummy_varcaller",
         "filter_type": "dummy_ffpe_filter",
         "analysis_type": "dummy_tumor_only",
@@ -276,3 +282,100 @@ def test_sample_instance_model():
     with pytest.raises(ValueError) as excinfo:
         SampleInstanceModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
+
+
+def test_umiparams_common():
+    """ test UMIParamsCommon model for correct validation """
+
+    # GIVEN a UMI workflow common params
+    test_commonparams = {
+        "align_header": "test_header_name",
+        "align_intbases": 100,
+        "filter_tumor_af": 0.01
+    }
+    # WHEN building the model
+    test_commonparams_built = UMIParamsCommon(**test_commonparams)
+    # THEN assert values
+    assert test_commonparams_built.align_header == "test_header_name"
+    assert test_commonparams_built.filter_tumor_af == 0.01
+    assert test_commonparams_built.align_intbases == 100
+
+
+def test_umiparams_umiextract():
+    """ test UMIParamsUMIextract model for correct validation """
+    # GIVEN umiextract params
+    test_umiextractparams = {"read_structure": "['mode', 'r1,r2']"}
+
+    # WHEN building the model
+    test_umiextractparams_built = UMIParamsUMIextract(**test_umiextractparams)
+
+    # THEN assert values
+    assert test_umiextractparams_built.read_structure == "['mode', 'r1,r2']"
+
+
+def test_umiparams_consensuscall():
+    """ test UMIParamsConsensuscall model for correct validation """
+
+    #GIVEN consensuscall params
+    test_consensuscall = {
+        "align_format": "BAM",
+        "filter_minreads": "6,3,3",
+        "tag": "XZ"
+    }
+
+    #WHEN building the model
+    test_consensuscall_built = UMIParamsConsensuscall(**test_consensuscall)
+
+    #THEN assert values
+    assert test_consensuscall_built.align_format == "BAM"
+    assert test_consensuscall_built.filter_minreads == "6,3,3"
+    assert test_consensuscall_built.tag == "XZ"
+
+
+def test_umiparams_tnscope():
+    """ test UMIParamsTNscope model for correct validation """
+
+    #GIVEN tnscope params
+    test_tnscope_params = {
+        "algo": "algoname",
+        "min_tumorLOD": 6,
+        "error_rate": 5,
+        "prunefactor": 3,
+        "disable_detect": "abc"
+    }
+
+    #WHEN building the model
+    test_tnscope_params_built = UMIParamsTNscope(**test_tnscope_params)
+
+    #THEN assert values
+    assert test_tnscope_params_built.algo == "algoname"
+    assert test_tnscope_params_built.min_tumorLOD == 6
+    assert test_tnscope_params_built.error_rate == 5
+    assert test_tnscope_params_built.prunefactor == 3
+    assert test_tnscope_params_built.disable_detect == "abc"
+
+
+def test_umiparams_vardict():
+    """ test UMIParamsVardict model for correct validation"""
+
+    #GIVEN vardict params
+    test_umivardict = {"vardict_filters": "-a 1 -b 2 -c 5"}
+
+    #WHEN building the model
+    test_umivardict_built = UMIParamsVardict(**test_umivardict)
+
+    #THEN assert values
+    assert test_umivardict_built.vardict_filters == "-a 1 -b 2 -c 5"
+
+
+def test_umiparams_vep():
+    """ test UMIParamsVEP model for correct validation"""
+
+    #GIVEN vardict params
+    test_umivep = {"vep_filters": "all defaults params"}
+
+    #WHEN building the model
+    test_umivep_built = UMIParamsVEP(**test_umivep)
+
+    #THEN assert values
+    assert test_umivep_built.vep_filters == "all defaults params"

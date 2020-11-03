@@ -1,5 +1,4 @@
 import json
-import os
 import pytest
 import sys
 import copy
@@ -243,6 +242,7 @@ def test_snakemake_slurm():
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
+    snakemake_slurm.quiet = True
     snakemake_slurm.use_singularity = True
     snakemake_slurm.singularity_bind = ["path_1", "path_2"]
     snakemake_slurm.run_analysis = True
@@ -250,7 +250,6 @@ def test_snakemake_slurm():
     # WHEN calling the build command
     shell_command = snakemake_slurm.build_cmd()
 
-    # print(shell_command)
     # THEN constructing snakecommand for slurm runner
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
@@ -260,6 +259,7 @@ def test_snakemake_slurm():
     assert "sbatch.py" in shell_command
     assert "test_case" in shell_command
     assert "containers" in shell_command
+    assert "--quiet" in shell_command
 
 
 def test_get_script_path():
@@ -286,14 +286,10 @@ def test_get_snakefile():
         snakefile = get_snakefile(analysis_type, sequencing_type)
         pipeline = ''
 
-        if sequencing_type == 'targeted':
-            pipeline = "BALSAMIC/workflows/VariantCalling.smk"
-        elif sequencing_type == 'wgs':
-            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon.smk"
-        elif analysis_type == 'qc':
-            pipeline = "BALSAMIC/workflows/Alignment.smk"
+        if sequencing_type in ['targeted', 'wgs', 'qc']:
+            pipeline = "BALSAMIC/workflows/balsamic.smk"
         elif analysis_type == 'generate_ref':
-            pipeline = "BALSAMIC/workflows/GenerateRef"
+            pipeline = "BALSAMIC/workflows/reference.smk"
         elif analysis_type == 'umi':
             pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
 

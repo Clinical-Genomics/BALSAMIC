@@ -9,7 +9,6 @@ from click.testing import CliRunner
 from pathlib import Path
 
 import re
-import pytest
 
 
 def test_readinput_return_dict(input_file):

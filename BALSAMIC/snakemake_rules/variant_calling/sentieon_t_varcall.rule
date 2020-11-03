@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-
-from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_sample_type
 from BALSAMIC.utils.rule import get_threads
 
@@ -30,7 +28,7 @@ rule sentieon_TNsnv_tumor_only:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNsnv_tumor_only')
     log:
@@ -65,7 +63,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
     log:
@@ -100,7 +98,7 @@ rule sentieon_TNscope_tumor_only:
         tmpdir = tmp_dir,
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     log: 

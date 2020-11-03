@@ -3,15 +3,20 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_picard_mrkdup
-from BALSAMIC import __version__ as bv
 
 picarddup = get_picard_mrkdup(config)
 
-picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics", "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics", "quality_by_cycle_metrics", "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
+picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics",
+                           "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics",
+                           "quality_by_cycle_metrics",
+                           "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 multiqc_input = []
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':
+    # fastqc metrics
+    multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
+
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=config["samples"]))
     multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=config["samples"]))
@@ -19,6 +24,10 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     # Picard metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_picard_wgs_metrics.txt", sample=config["samples"]))
     multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard))
+
+    # Sentieon metrics
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=config["samples"]))
 
     # dir list
     dir_list = [qc_dir]
