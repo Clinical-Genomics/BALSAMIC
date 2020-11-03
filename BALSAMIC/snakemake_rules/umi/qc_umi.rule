@@ -3,6 +3,7 @@
 
 from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.workflowscripts import get_densityplot
 
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
 rule picard_umiaware:
@@ -134,7 +135,7 @@ rule bcftools_query_calculatenoiseAF_umi:
 source activate {params.conda};
 
 bcftools query \
--f \"%CHROM:%POS:REF->%ALT\\t[%AF]\\n\" \
+-f \"%CHROM:%POS:%REF->%ALT\\t[%AF]\\n\" \
 {input.umiextract} > \
 {output.umiextractAF};
 
@@ -153,8 +154,7 @@ END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' \
 {output.noiseAF}
         """
 
-
-# Plot the TNscope calculated AFs befor and after consensuscall
+# Plot the TNscope calculated AFs before and after consensuscall
 rule seaborn_densityplot_umi:
     input:
         table1 = qc_dir + "{sample}.TNscope.umialign.AF.txt",
@@ -170,17 +170,4 @@ rule seaborn_densityplot_umi:
     message:
         "Density AF plots for sample {params.sample_id}"
     run:
-        import matplotlib.pyplot as plt
-        import pandas as pd
-        import seaborn as sns
-        umi= pd.read_csv(input.table1, sep='\t', header=None)
-        umi.columns = ['id', 'AF']
-        umi['method'] = 'umiextract'
-        con = pd.read_csv(input.table2, sep='\t', header=None)
-        con.columns = ['id', 'AF']
-        con['method'] = 'consensuscall'
-        sns.kdeplot(umi['AF'], color='r', shade=True, Label=set(umi['method']))
-        sns.kdeplot(con['AF'], color='b', shade=True, Label=set(con['method']))
-        plt.xlabel('Allelic Frequency (AF)')
-        plt.ylabel('Probability Density')
-        return (plt.savefig(output.AF_plot))
+        get_densityplot(input.table1, input.table2, "umiextracted", "consensuscalled", output.AF_plot)
