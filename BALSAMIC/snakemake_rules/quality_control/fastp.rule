@@ -46,7 +46,7 @@ rule fastp:
         housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
         tmpdir = tmp_dir,
         fastq_dir = fastq_dir,
-        qc = " ".join(fastp_param_qc) if config["analysis"]["sequencing_type"] == "wgs" else str(),
+        qc = " ".join(fastp_param_qc) if config["analysis"]["sequencing_type"] != "wgs" else str(),
         umi = " ".join(fastp_param_umi),
         adapter = " ".join(fastp_param_adapter),
         minimum_length = config["QC"]["min_seq_length"],
@@ -70,7 +70,7 @@ fastp \
 --overrepresentation_analysis \
 {params.qc} \
 {params.adapter};
-if [ -z {params.qc} ]
+if [ -z "{params.qc}" ]
 then 
     fastp \
     --thread {threads} \
