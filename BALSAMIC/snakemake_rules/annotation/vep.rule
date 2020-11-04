@@ -2,10 +2,6 @@
 # coding: utf-8
 # VEP annotation module. Annotate all VCFs generated through VEP
 
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_threads
-from BALSAMIC.utils.constants import VCFANNO_TOML
-
 rule vep_somatic:
   input:
     vcf = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",

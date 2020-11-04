@@ -7,10 +7,14 @@ from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
+
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf)
-from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
+                                 get_vcf, get_picard_mrkdup, get_sample_type,
+                                 get_conda_env, get_threads)
+from BALSAMIC.utils.models import VarCallerFilter
+from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, VARDICT_SETTINGS, VCFANNO_TOML
 
 shell.prefix("set -eo pipefail; ")
 
@@ -29,6 +33,16 @@ qc_dir = result_dir + "qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image']
+
+# rule related variables
+picarddup = get_picard_mrkdup(config)
+VARDICT= VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+if config["analysis"]["sequencing_type"] != "wgs":
+    capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
+if config['analysis']['analysis_type'] == "paired":
+    normal_sample = get_sample_type(config["samples"], "normal")[0]
+tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+case_id = config["analysis"]["case_id"]
 
 # Declare sentieon variables
 sentieon = True
@@ -70,6 +84,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
 
     align_rules = ["snakemake_rules/align/sentieon_alignment.rule"]
 else:
+    chromlist = config["panel"]["chrom"]
     qc_rules.extend([
         "snakemake_rules/quality_control/GATK.rule",
         "snakemake_rules/quality_control/picard.rule",
