@@ -755,8 +755,10 @@ def test_get_densityplot():
     
     # WHEN invoking function out_file is created
     test_result = get_densityplot(test_file1, test_file2, name1, name2, out_file)
+    test_result_name = Path(test_result).name
 
     # THEN check for filepaths
     assert Path(test_file1).exists()
     assert Path(test_file2).exists()
     assert Path(out_file).exists()
+    assert test_result_name == "dummy_plot.pdf"
