@@ -29,6 +29,7 @@ from BALSAMIC.utils.rule import (
 
 from BALSAMIC.utils.workflowscripts import get_file_contents, get_densityplot
 
+
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
     # GIVEN a wrong analysis_type
     wrong_analysis_type = "cohort"
@@ -727,14 +728,15 @@ def test_get_fastq_bind_path(tmpdir_factory):
 def test_get_file_contents():
     #GIVEN a test input file
     test_file = 'tests/test_data/densityplots/dummy_file1.txt'
-    
+
     # WHEN invoking function
-    test_file_built = get_file_contents(test_file,'umi')
+    test_file_built = get_file_contents(test_file, 'umi')
     column_names = ['id', 'AF', 'method']
 
     # THEN check column names and no. of column matches
     assert all(test_file_built.columns == column_names)
     assert len(test_file_built.columns) == 3
+
 
 def test_get_wrongfile_contents():
     #GIVEN a test input file
@@ -742,19 +744,21 @@ def test_get_wrongfile_contents():
 
     # WHEN invoking function
     with pytest.raises(ValueError):
-        test_wrongfile_built = get_file_contents(test_wrongfile,'umi')
-        assert len(test_wrongfile_built.columns)!=3
+        test_wrongfile_built = get_file_contents(test_wrongfile, 'umi')
+        assert len(test_wrongfile_built.columns) != 3
+
 
 def test_get_densityplot():
     #GIVEN prefix names, input and files
-    test_file1= 'tests/test_data/densityplots/dummy_file1.txt'
-    test_file2= 'tests/test_data/densityplots/dummy_file2.txt'
+    test_file1 = 'tests/test_data/densityplots/dummy_file1.txt'
+    test_file2 = 'tests/test_data/densityplots/dummy_file2.txt'
     name1 = 'testnam1'
     name2 = 'testnam2'
-    out_file='tests/test_data/densityplots/dummy_plot.pdf'
-    
+    out_file = 'tests/test_data/densityplots/dummy_plot.pdf'
+
     # WHEN invoking function out_file is created
-    test_result = get_densityplot(test_file1, test_file2, name1, name2, out_file)
+    test_result = get_densityplot(test_file1, test_file2, name1, name2,
+                                  out_file)
     test_result_name = Path(test_result).name
 
     # THEN check for filepaths
