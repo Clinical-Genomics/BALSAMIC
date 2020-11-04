@@ -46,7 +46,7 @@ rule fastp:
         housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
         tmpdir = tmp_dir,
         fastq_dir = fastq_dir,
-        qc = " ".join(fastp_param_qc) if config["analysis"]["sequencing_type"] != "wgs" else str(),
+        qc = " ".join(fastp_param_qc),
         umi = " ".join(fastp_param_umi),
         adapter = " ".join(fastp_param_adapter),
         minimum_length = config["QC"]["min_seq_length"],
@@ -59,6 +59,7 @@ rule fastp:
         """
 source activate {params.conda};
 export TMPDIR={params.tmpdir};
+
 fastp \
 --thread {threads} \
 --in1 {input.read1} \
@@ -70,6 +71,7 @@ fastp \
 --overrepresentation_analysis \
 {params.qc} \
 {params.adapter};
+
 fastp \
 --thread {threads} \
 --in1 {params.read1_interm} \
@@ -90,4 +92,3 @@ rm {params.read2_interm};
 rm {params.json_out_interm};
 rm {params.html_out_interm};
         """
-
