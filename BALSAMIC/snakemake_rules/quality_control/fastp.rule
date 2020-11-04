@@ -35,6 +35,9 @@ rule fastp:
         read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html",
+    benchmark:
+             benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
+    singularity: singularity_image
     params:
         read1_interm = fastq_dir + "{sample}_1.interm.fastq.gz",
         read2_interm = fastq_dir + "{sample}_2.interm.fastq.gz",
@@ -47,15 +50,16 @@ rule fastp:
         umi = " ".join(fastp_param_umi),
         adapter = " ".join(fastp_param_adapter),
         minimum_length = config["QC"]["min_seq_length"],
+        sample_name = "{sample}",
         conda = get_conda_env(config["conda_env_yaml"],"fastp")
-    singularity: singularity_image
     threads: get_threads(cluster_config, 'fastp')
-    benchmark:
-        benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
+    message:
+        "Quality control and trimming input fastq for {params.sample_name}"
     shell:
         """
 source activate {params.conda};
 export TMPDIR={params.tmpdir};
+
 fastp \
 --thread {threads} \
 --in1 {input.read1} \
@@ -67,6 +71,7 @@ fastp \
 --overrepresentation_analysis \
 {params.qc} \
 {params.adapter};
+
 fastp \
 --thread {threads} \
 --in1 {params.read1_interm} \
@@ -81,6 +86,7 @@ fastp \
 --disable_trim_poly_g \
 --length_required {params.minimum_length} \
 {params.umi};
+
 rm {params.read1_interm};
 rm {params.read2_interm};
 rm {params.json_out_interm};
