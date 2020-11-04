@@ -2,9 +2,6 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_threads
-
 rule ngs_filter_vardict:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.vcf.gz",
