@@ -14,7 +14,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_vcf, get_picard_mrkdup, get_sample_type,
                                  get_conda_env, get_threads)
 from BALSAMIC.utils.models import VarCallerFilter
-from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, VARDICT_SETTINGS
+from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, VARDICT_SETTINGS, VCFANNO_TOML
 
 shell.prefix("set -eo pipefail; ")
 
