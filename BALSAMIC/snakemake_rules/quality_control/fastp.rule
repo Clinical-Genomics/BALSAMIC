@@ -70,29 +70,24 @@ fastp \
 --overrepresentation_analysis \
 {params.qc} \
 {params.adapter};
-if [ -z "{params.qc}" ]
-then 
-    cp {params.read1_interm} {output.read1}
-    cp {params.read2_interm} {output.read2}
-else
-    fastp \
-    --thread {threads} \
-    --in1 {params.read1_interm} \
-    --in2 {params.read2_interm} \
-    --out1 {output.read1} \
-    --out2 {output.read2} \
-    --json {output.json} \
-    --html {output.html} \
-    --disable_adapter_trimming \
-    --disable_quality_filtering \
-    --disable_length_filtering \
-    --disable_trim_poly_g \
-    --length_required {params.minimum_length} \
-    {params.umi};
-fi
+fastp \
+--thread {threads} \
+--in1 {params.read1_interm} \
+--in2 {params.read2_interm} \
+--out1 {output.read1} \
+--out2 {output.read2} \
+--json {output.json} \
+--html {output.html} \
+--disable_adapter_trimming \
+--disable_quality_filtering \
+--disable_length_filtering \
+--disable_trim_poly_g \
+--length_required {params.minimum_length} \
+{params.umi};
 
 rm {params.read1_interm};
 rm {params.read2_interm};
 rm {params.json_out_interm};
 rm {params.html_out_interm};
         """
+

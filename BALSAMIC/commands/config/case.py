@@ -23,7 +23,8 @@ LOG = logging.getLogger(__name__)
               default=True,
               show_default=True,
               is_flag=True,
-              help="UMI processing steps for samples with UMI tags")
+              help=("UMI processing steps for samples with UMI tags."
+                    "For WGS cases, UMI is always disabled."))
 @click.option("--umi-trim-length",
               default=5,
               show_default=True,
@@ -101,7 +102,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
-            "umi_trim": umi,
+            "umi_trim": umi if panel_bed else False,
             "umi_trim_length": umi_trim_length,
         },
         analysis={
