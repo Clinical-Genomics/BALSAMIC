@@ -35,6 +35,9 @@ rule fastp:
         read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html",
+    benchmark:
+             benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
+    singularity: singularity_image
     params:
         read1_interm = fastq_dir + "{sample}_1.interm.fastq.gz",
         read2_interm = fastq_dir + "{sample}_2.interm.fastq.gz",
@@ -43,15 +46,14 @@ rule fastp:
         housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
         tmpdir = tmp_dir,
         fastq_dir = fastq_dir,
-        qc = " ".join(fastp_param_qc),
+        qc = " ".join(fastp_param_qc) if config["analysis"]["sequencing_type"] == "wgs" else str(),
         umi = " ".join(fastp_param_umi),
         adapter = " ".join(fastp_param_adapter),
         minimum_length = config["QC"]["min_seq_length"],
         conda = get_conda_env(config["conda_env_yaml"],"fastp")
-    singularity: singularity_image
     threads: get_threads(cluster_config, 'fastp')
-    benchmark:
-        benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
+    message:
+        "Quality control and trimming input fastq for {sample}"
     shell:
         """
 source activate {params.conda};
@@ -67,20 +69,27 @@ fastp \
 --overrepresentation_analysis \
 {params.qc} \
 {params.adapter};
-fastp \
---thread {threads} \
---in1 {params.read1_interm} \
---in2 {params.read2_interm} \
---out1 {output.read1} \
---out2 {output.read2} \
---json {output.json} \
---html {output.html} \
---disable_adapter_trimming \
---disable_quality_filtering \
---disable_length_filtering \
---disable_trim_poly_g \
---length_required {params.minimum_length} \
-{params.umi};
+if [ -z {params.qc} ]
+then 
+    fastp \
+    --thread {threads} \
+    --in1 {params.read1_interm} \
+    --in2 {params.read2_interm} \
+    --out1 {output.read1} \
+    --out2 {output.read2} \
+    --json {output.json} \
+    --html {output.html} \
+    --disable_adapter_trimming \
+    --disable_quality_filtering \
+    --disable_length_filtering \
+    --disable_trim_poly_g \
+    --length_required {params.minimum_length} \
+    {params.umi};
+else
+    cp {params.read1_interm} {output.read1}
+    cp {params.read2_interm} {output.read2}
+fi
+
 rm {params.read1_interm};
 rm {params.read2_interm};
 rm {params.json_out_interm};
