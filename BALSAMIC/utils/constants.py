@@ -399,10 +399,11 @@ REFERENCE_FILES = {
 
 umiworkflow_params = {
     "common": {
-        "align_header": "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        "align_header":
+        "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         "align_intbases": 1000000,
         "filter_tumor_af": 0.0005
-	},
+    },
     "consensuscall": {
         "align_format": "BAM",
         "filter_minreads": "3,1,1",
@@ -422,6 +423,7 @@ umiworkflow_params = {
         "vardict_filters": "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0"
     },
     "vep": {
-	"vep_filters": "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
+        "vep_filters":
+        "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     }
 }
