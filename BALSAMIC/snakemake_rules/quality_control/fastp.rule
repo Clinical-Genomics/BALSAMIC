@@ -72,6 +72,9 @@ fastp \
 {params.adapter};
 if [ -z "{params.qc}" ]
 then 
+    cp {params.read1_interm} {output.read1}
+    cp {params.read2_interm} {output.read2}
+else
     fastp \
     --thread {threads} \
     --in1 {params.read1_interm} \
@@ -86,9 +89,6 @@ then
     --disable_trim_poly_g \
     --length_required {params.minimum_length} \
     {params.umi};
-else
-    cp {params.read1_interm} {output.read1}
-    cp {params.read2_interm} {output.read2}
 fi
 
 rm {params.read1_interm};
