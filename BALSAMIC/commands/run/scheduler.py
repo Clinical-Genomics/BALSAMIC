@@ -294,6 +294,8 @@ def main(args=None):
     scheduler_cmd.time = job_properties["cluster"]["time"]
     scheduler_cmd.mail_user = args.mail_user
     scheduler_cmd.script = jobscript
+    if "partition" in job_properties["cluster"]:
+        scheduler_cmd.partition = job_properties["cluster"]["partition"]
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
