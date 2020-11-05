@@ -8,7 +8,7 @@ rule dragen_align_call_tumor_only:
         read2 = Path(fastq_dir, "{mysample}_2.fp.fastq.gz".format(mysample=tumor_sample)).as_posix(),
     output:
         bam = Path(bam_dir, "dragen", config["analysis"]["case_id"] + ".bam").as_posix(),
-        vcf = Path(vcf_dir, "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()
+        vcf = Path(vcf_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()
     benchmark:
         Path(benchmark_dir, "dragen_align_call_tumor_only" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
