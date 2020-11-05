@@ -140,7 +140,7 @@ def test_SbatchScheduler():
     assert sbatch_cmd == (
         'sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" '
         '--output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" '
-        '--ntasks "2" --qos "low" --time "01:00:00" --partition dummy_partition example_script.sh'
+        '--ntasks "2" --qos "low" --time "01:00:00" --partition "dummy_partition" example_script.sh'
     )
 
 
