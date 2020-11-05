@@ -40,8 +40,16 @@ class SbatchScheduler:
         sbatch_options = list()
 
         job_attributes = [
-            'account', 'dependency', 'error', 'output', 'mail_type',
-            'mail_user', 'ntasks', 'qos', 'time'
+            'account',
+            'dependency',
+            'error',
+            'output',
+            'mail_type',
+            'mail_user',
+            'ntasks',
+            'qos',
+            'time',
+            'partition',
         ]
 
         for attribute in job_attributes:
