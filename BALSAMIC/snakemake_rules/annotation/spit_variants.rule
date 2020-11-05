@@ -1,0 +1,33 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+# VEP annotation module. Annotate all VCFs generated through VEP
+
+rule veo_somatic_snv:
+  input:
+    vcf = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
+    header = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.sample_name_map",
+    cosmic = config["reference"]["cosmic"]
+  output:
+    vcf_snv_indel = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf_snv_snv_indel_summary = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
+    vcf_snv_indel_pass = vep_dir + "SNV.somatic.{case_name}.{var_caller}.pass.vcf.gz",
+    vcf_sv = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf_sv_summary = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
+    vcf_sv_pass = vep_dir + "SNV.somatic.{case_name}.{var_caller}.pass.vcf.gz",
+  params:
+    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
+    tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
+    vcfanno_toml = VCFANNO_TOML,
+    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    vep_cache = config["reference"]["vep"]
+  threads: get_threads(cluster_config, 'vep')
+  singularity: singularity_image
+  benchmark:
+    benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
+  shell:
+    """
+source activate {params.conda};
+vep_path=$(dirname $(readlink -e $(which vep)));
+tmpvcf={params.tmpvcf};
+    """
