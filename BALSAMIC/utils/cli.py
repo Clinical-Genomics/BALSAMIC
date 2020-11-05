@@ -60,6 +60,7 @@ class SnakeMake:
     singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller
+    dragen          - enable/disable dragen suite
     """
 
     def __init__(self):
@@ -87,6 +88,7 @@ class SnakeMake:
         self.singularity_arg = str()
         self.sm_opt = str()
         self.disable_variant_caller = str()
+        self.dragen = False
 
     def build_cmd(self):
         forceall = str()
@@ -95,7 +97,7 @@ class SnakeMake:
         cluster_cmd = str()
         dryrun = str()
         report = str()
-        snakemake_config_key_value = str()
+        snakemake_config_key_value = list()
 
         if self.forceall:
             forceall = "--forceall"
@@ -113,7 +115,15 @@ class SnakeMake:
             dryrun = "--dryrun"
 
         if self.disable_variant_caller:
-            snakemake_config_key_value = f' --config disable_variant_caller={self.disable_variant_caller} '
+            snakemake_config_key_value.append(
+                f'disable_variant_caller={self.disable_variant_caller}')
+
+        if self.dragen:
+            snakemake_config_key_value.append('dragen=True')
+
+        if snakemake_config_key_value:
+            snakemake_config_key_value = "--config {}".format(
+                " ".join(snakemake_config_key_value))
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "

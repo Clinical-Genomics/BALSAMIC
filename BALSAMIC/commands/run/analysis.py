@@ -22,60 +22,64 @@ LOG = logging.getLogger(__name__)
               '--analysis-type',
               required=False,
               type=click.Choice(ANALYSIS_TYPES),
-              help='Type of analysis to run from input config file.\
-              By default it will read from config file, but it will override config file \
-              if it is set here.')
-@click.option(
-    '-S',
-    '--snake-file',
-    type=click.Path(),
-    show_default=True,
-    help='Input for a custom snakefile. WARNING: This is for internal testing,\
-              and should not be used. Providing a snakefile supersedes analysis_type option.'
-)
+              help=('Type of analysis to run from input config file.'
+                    'By default it will read from config file, but it'
+                    'will override config file if it is set here.'))
+@click.option('-S',
+              '--snake-file',
+              type=click.Path(),
+              show_default=True,
+              help=('Input for a custom snakefile. WARNING: '
+                    'This is for internal testing, and should '
+                    'not be used. Providing a snakefile supersedes'
+                    'analysis_type option.'))
 @click.option('-s',
               '--sample-config',
               required=True,
               type=click.Path(),
               help='Sample json config file.')
-@click.option(
-    '--run-mode',
-    show_default=True,
-    default='cluster',
-    type=click.Choice(["local", "cluster"]),
-    help='Run mode to use. By default SLURM will be used to run the analysis.\
-              But local runner also available for local computing')
+@click.option('--run-mode',
+              show_default=True,
+              default='cluster',
+              type=click.Choice(["local", "cluster"]),
+              help=('Run mode to use. By default SLURM will be used to '
+                    'run the analysis. But local runner also available '
+                    'for local computing'))
 @click.option('-c',
               '--cluster-config',
               show_default=True,
               default=get_config('cluster'),
               type=click.Path(),
               help='cluster config json file. (eg- SLURM, QSUB)')
+@click.option('--dragen',
+              is_flag=True,
+              default=False,
+              help="Enable dragen variant caller")
 @click.option('-p',
               '--profile',
               default="slurm",
               type=click.Choice(["slurm", "qsub"]),
               help="cluster profile to submit jobs")
-@click.option(
-    '-r',
-    '--run-analysis',
-    show_default=True,
-    default=False,
-    is_flag=True,
-    help='By default balsamic run_analysis will run in dry run mode. \
-              Raise thise flag to make the actual analysis')
+@click.option('-r',
+              '--run-analysis',
+              show_default=True,
+              default=False,
+              is_flag=True,
+              help=('By default balsamic run_analysis will run in '
+                    'dry run mode. Raise thise flag to make the '
+                    'actual analysis'))
 @click.option('--qos',
               type=click.Choice(['low', 'normal', 'high']),
               show_default=True,
               default="low",
               help='QOS for sbatch jobs. Passed to ' + get_schedulerpy())
-@click.option(
-    '-f',
-    '--force-all',
-    show_default=True,
-    default=False,
-    is_flag=True,
-    help='Force run all analysis. This is same as snakemake --forceall')
+@click.option('-f',
+              '--force-all',
+              show_default=True,
+              default=False,
+              is_flag=True,
+              help=('Force run all analysis. This is same as '
+                    'snakemake --forceall'))
 @click.option('--snakemake-opt',
               multiple=True,
               help='Pass these options directly to snakemake')
@@ -86,23 +90,27 @@ LOG = logging.getLogger(__name__)
 @click.option(
     '--mail-user',
     help='cluster mail user to send out email. e.g.: slurm_mail_user')
-@click.option(
-    '--mail-type',
-    type=click.Choice(
-        ['NONE', 'BEGIN', 'END', 'FAIL', 'REQUEUE', 'ALL', 'TIME_LIMIT']),
-    help='cluster mail type to send out email. \
-              This will be applied to all jobs and override snakemake settings.'
-)
-@click.option(
-    '--disable-variant-caller',
-    help=
-    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
-    f'values are: {list(VCF_DICT.keys())}',
-)
+@click.option('--mail-type',
+              type=click.Choice([
+                  'NONE',
+                  'BEGIN',
+                  'END',
+                  'FAIL',
+                  'REQUEUE',
+                  'ALL',
+                  'TIME_LIMIT',
+              ]),
+              help=('cluster mail type to send out email. This will '
+                    'be applied to all jobs and override snakemake settings.'))
+@click.option('--disable-variant-caller',
+              help=(f'Run workflow with selected variant caller(s) disable.'
+                    f'Use comma to remove multiple variant callers. Valid '
+                    f'values are: {list(VCF_DICT.keys())}'))
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, force_all, snakemake_opt, mail_type, mail_user,
-             account, analysis_type, qos, profile, disable_variant_caller):
+             account, analysis_type, qos, profile, disable_variant_caller,
+             dregen):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
@@ -189,6 +197,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     if disable_variant_caller:
         balsamic_run.disable_variant_caller = disable_variant_caller
 
+    if dragen:
+        balsamic_run.dragen = dragen
     try:
         cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
         subprocess.run(cmd, shell=True)
