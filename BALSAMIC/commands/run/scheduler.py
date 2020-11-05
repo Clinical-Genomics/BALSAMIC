@@ -31,6 +31,7 @@ class SbatchScheduler:
         self.mail_user = None
         self.ntasks = None
         self.output = None
+        self.partition = None
         self.qos = None
         self.script = None
         self.time = None
