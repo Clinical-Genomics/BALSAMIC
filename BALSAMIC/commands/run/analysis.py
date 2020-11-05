@@ -110,7 +110,7 @@ LOG = logging.getLogger(__name__)
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, force_all, snakemake_opt, mail_type, mail_user,
              account, analysis_type, qos, profile, disable_variant_caller,
-             dregen):
+             dragen):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
