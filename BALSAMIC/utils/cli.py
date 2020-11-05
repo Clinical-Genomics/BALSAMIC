@@ -122,8 +122,7 @@ class SnakeMake:
             snakemake_config_key_value.append('dragen=True')
 
         if snakemake_config_key_value:
-            snakemake_config_key_value = "--config {}".format(
-                " ".join(snakemake_config_key_value))
+            snakemake_config_key_value.append("--config")
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
@@ -162,6 +161,9 @@ class SnakeMake:
                            "--cluster-config {} --cluster {} ".format(
                                self.case_name, self.cluster_config,
                                sbatch_cmd))
+
+        # Merge snakmake config key value list
+        snakemake_config_key_value = " ".join(snakemake_config_key_value)
 
         sm_cmd = (
             f" snakemake --notemp -p "
