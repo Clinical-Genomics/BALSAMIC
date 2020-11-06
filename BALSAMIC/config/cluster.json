@@ -54,7 +54,7 @@
 	"dragen_align_call_tumor_only": {
 		"time": "10:00:00",
 		"n": 24,
-		"partition": "cg-dragen"
+		"partition": "dragen"
 	},
 	"haplotypecaller": {
 		"time": "03:00:00",
