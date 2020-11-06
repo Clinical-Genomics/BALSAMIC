@@ -45,5 +45,6 @@
     :maxdepth: 1
 
     git_etiquette 
+    snakemake_etiquette
     README
     semver
