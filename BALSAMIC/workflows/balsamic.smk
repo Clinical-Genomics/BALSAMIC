@@ -124,6 +124,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
     else:
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
+                                     "snakemake_rules/dragen_suite/dragen_dna.rule",
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
