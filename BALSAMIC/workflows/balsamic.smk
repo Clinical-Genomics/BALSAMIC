@@ -200,8 +200,8 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
-        analysis_specific_results.extend([Path(bam_dir, "dragen", config["analysis"]["case_id"] + ".bam").as_posix(),
-                                          Path(vcf_dir, "dragen", "SNV.somatic." + config["analysis"][
+        analysis_specific_results.extend([Path(result_dir, "dragen", config["analysis"]["case_id"] + ".bam").as_posix(),
+                                          Path(result_dir, "dragen", "SNV.somatic." + config["analysis"][
                                               "case_id"] + ".dragen.vcf.gz").as_posix()])
 
 for r in config["rules"]:
