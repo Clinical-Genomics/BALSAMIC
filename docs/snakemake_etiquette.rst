@@ -42,7 +42,7 @@ The bioinformatics core analysis in BALSAMIC is defined by set of rules written 
 **Descriptions**
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**rulename**: Rule name briefly should outline the program and functions utilized inside the rule. The word length shouldnt exceed more than 3 or 4 words. Make sure rule names are updated within ``config/cluster.json`` and it is all lowercase. Examples: `picard_collecthsmetrics_umi`, `bcftools_query_calculateAFtable_umi`
+**rulename**: Rule name briefly should outline the program and functions utilized inside the rule. Each word is seperated by a underscore ``_``. First word is the bioinformatic tool or script's name. The following words describe subcommand within that bioinformatic tool and then followed by workflow specific description. The word length shouldn't exceed more than 3 or 4 words. Make sure rule names are updated within ``config/cluster.json`` and it is all lowercase. Examples: `picard_collecthsmetrics_umi`, `bcftools_query_calculateAFtable_umi`
 
 **input**: 
 
@@ -93,3 +93,9 @@ Similarly ``awk`` or ``R`` external scripts can be saved in ``assets/scripts/*aw
   -v OFS=\'\\t\' -f {params.consensusfilter_script} | \
   samtools view -bh - > {output}
        """
+
+**References**
+~~~~~~~~~~~~~~~
+
+https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html
+
