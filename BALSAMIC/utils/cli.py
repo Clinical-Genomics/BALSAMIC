@@ -122,7 +122,7 @@ class SnakeMake:
             snakemake_config_key_value.append('dragen=True')
 
         if snakemake_config_key_value:
-            snakemake_config_key_value.append("--config")
+            snakemake_config_key_value.insert(0, "--config")
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
