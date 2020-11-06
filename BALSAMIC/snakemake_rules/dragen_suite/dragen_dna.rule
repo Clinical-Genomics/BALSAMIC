@@ -12,8 +12,8 @@ rule dragen_align_call_tumor_only:
     benchmark:
         Path(benchmark_dir, "dragen_align_call_tumor_only" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        tmpdir = "/staging/",
-        output_dir = vcf_dir,
+        output_dir = Path(result_dir, "dragen").as_posix(),
+        tmp_reference_dir = Path(result_dir, "dragen", "reference").as_posix(),
         sample_name = tumor_sample,
         output_file_prefix = "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz"
     threads:
@@ -32,8 +32,21 @@ ulimit -u 16384
 echo "Setting PATH"
 export PATH=$PATH:/opt/edico/bin/
 
+echo "preparing reference and loading it to memory"
+mkdir -p {params.tmp_reference_dir}
+
+# Build reference
+dragen --build-hash-table true \
+  --ht-reference /staging/human/reference/hg19/hg19.fa \
+  --output-directory {params.tmp_reference_dir} \
+  --ht-alt-liftover /opt/edico/liftover/hg19_alt_liftover.sam 
+
+# Make sure reference loads properly
+dragen -l -r {params.tmp_reference_dir} 
+
 echo "will run the following DRAGEN command"
-echo dragen -f \
+mkdir -p {params.output_dir} 
+dragen -f \
 -r {input.ref} \
 --tumor-fastq1 {input.read1} \
 --tumor-fastq2 {input.read2} \
