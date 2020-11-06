@@ -3,7 +3,7 @@
 
 rule dragen_align_call_tumor_only:
     input:
-        ref = config["reference"]["reference_genome"],
+        reference = config["reference"]["reference_genome"],
         read1 = Path(fastq_dir, "{mysample}_1.fp.fastq.gz".format(mysample=tumor_sample)).as_posix(),
         read2 = Path(fastq_dir, "{mysample}_2.fp.fastq.gz".format(mysample=tumor_sample)).as_posix(),
     output:
@@ -37,9 +37,8 @@ mkdir -p {params.tmp_reference_dir}
 
 # Build reference
 dragen --build-hash-table true \
-  --ht-reference /staging/human/reference/hg19/hg19.fa \
-  --output-directory {params.tmp_reference_dir} \
-  --ht-alt-liftover /opt/edico/liftover/hg19_alt_liftover.sam 
+  --ht-reference {input.reference} \
+  --output-directory {params.tmp_reference_dir} #--ht-alt-liftover /opt/edico/liftover/hg19_alt_liftover.sam 
 
 # Make sure reference loads properly
 dragen -l -r {params.tmp_reference_dir} 
@@ -47,7 +46,7 @@ dragen -l -r {params.tmp_reference_dir}
 echo "will run the following DRAGEN command"
 mkdir -p {params.output_dir} 
 dragen -f \
--r {input.ref} \
+-r {params.tmp_reference_dir} \
 --tumor-fastq1 {input.read1} \
 --tumor-fastq2 {input.read2} \
 --enable-variant-caller true \
