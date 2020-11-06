@@ -39,6 +39,8 @@ The bioinformatics core analysis in BALSAMIC is defined by set of rules written 
         <--option-3> <value_3>;
             """
 
+**Descriptions**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **rulename**: Rule name briefly should outline the program and functions utilized inside the rule. The word length shouldnt exceed more than 3 or 4 words. Make sure rule names are updated within ``config/cluster.json`` and it is all lowercase. Examples: `picard_collecthsmetrics_umi`, `bcftools_query_calculateAFtable_umi`
 
@@ -50,7 +52,7 @@ The bioinformatics core analysis in BALSAMIC is defined by set of rules written 
 
 **singularity**: Make sure the singularity image does contain a conda environment with required bioinformatics tools.
 
-**params**: If the defined parameter is a threshold or globally used constant; add it to ``utils/constants.py``
+**params**: If the defined parameter is a threshold or globally used constant; add it to ``utils/constants.py``. Respective class models need to be updated in ``utils/models.py``. 
 
 **threads**: Make sure for each rule, the correct number of threads are assigned in ``config/cluster.json``.
 
@@ -58,12 +60,9 @@ The bioinformatics core analysis in BALSAMIC is defined by set of rules written 
 
 **shell (run)**: Code inside the `shell/run` command should be left idented. Shell lines no longer than 100 characters. Break the long commands with ``\`` and followed by a new line. 
 
-`Example:`
+Example:
 
 ::
-
-    java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar \
-    MarkDuplicates {input.named_input_1} {output.named_output_1}
 
     java -jar \
     -Djava.io.tmpdir=${{tmpdir}} \
@@ -71,5 +70,26 @@ The bioinformatics core analysis in BALSAMIC is defined by set of rules written 
     $CONDA_PREFIX/share/picard.jar \
     MarkDuplicates \
     {input.named_input_1} \
-    {output.named_output_1};`
+    {output.named_output_1};
 
+
+External python scripts can be saved as modules in ``utils/*.py`` and can use them as definitions in rules as:
+
+:: 
+
+  from BALSAMIC.utils.workflowscripts import get_densityplot
+  get_densityplot(args1, args2, args3)
+
+Similarly ``awk`` or ``R`` external scripts can be saved in ``assets/scripts/*awk`` and can be invoked using `get_script_path` as: 
+
+::
+  
+  params: 
+      consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk")
+  shell:
+       """
+  samtools view -h {input} | \
+  awk -v MinR={params.minreads} \
+  -v OFS=\'\\t\' -f {params.consensusfilter_script} | \
+  samtools view -bh - > {output}
+       """
