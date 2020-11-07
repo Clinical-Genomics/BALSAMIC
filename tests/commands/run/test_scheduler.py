@@ -4,12 +4,12 @@ import pytest
 
 from unittest import mock
 
-from BALSAMIC.commands.run.scheduler import SbatchScheduler
-from BALSAMIC.commands.run.scheduler import QsubScheduler
-from BALSAMIC.commands.run.scheduler import read_sample_config
-from BALSAMIC.commands.run.scheduler import write_sacct_file
-from BALSAMIC.commands.run.scheduler import submit_job
-from BALSAMIC.commands.run.scheduler import main as scheduler_main
+from BALSAMIC.utils.scheduler import SbatchScheduler
+from BALSAMIC.utils.scheduler import QsubScheduler
+from BALSAMIC.utils.scheduler import read_sample_config
+from BALSAMIC.utils.scheduler import write_sacct_file
+from BALSAMIC.utils.scheduler import submit_job
+from BALSAMIC.utils.scheduler import main as scheduler_main
 from BALSAMIC.utils.cli import createDir
 
 

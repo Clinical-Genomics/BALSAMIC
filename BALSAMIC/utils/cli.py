@@ -222,7 +222,7 @@ def get_schedulerpy():
     """
 
     p = Path(__file__).parents[1]
-    scheduler = str(Path(p, "commands/run/scheduler.py"))
+    scheduler = str(Path(p, "utils", "scheduler.py"))
 
     return scheduler
 
