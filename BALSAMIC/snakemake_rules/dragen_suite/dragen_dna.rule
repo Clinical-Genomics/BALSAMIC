@@ -7,15 +7,15 @@ rule dragen_align_call_tumor_only:
         read1 = Path(fastq_dir, "{mysample}_1.fp.fastq.gz".format(mysample=tumor_sample)).as_posix(),
         read2 = Path(fastq_dir, "{mysample}_2.fp.fastq.gz".format(mysample=tumor_sample)).as_posix(),
     output:
-        bam = Path(result_dir, "dragen", config["analysis"]["case_id"] + ".bam").as_posix(),
+        bam = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".bam").as_posix(),
         vcf = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()
     benchmark:
         Path(benchmark_dir, "dragen_align_call_tumor_only" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        output_dir = Path(result_dir, "dragen").as_posix(),
+        dragen_result_dir = Path(result_dir, "dragen", "result").as_posix(),
         tmp_reference_dir = Path(result_dir, "dragen", "reference").as_posix(),
         sample_name = tumor_sample,
-        output_file_prefix = "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz"
+        output_file_prefix = "SNV.somatic." + config["analysis"]["case_id"] + ".dragen"
     threads:
         get_threads(cluster_config, "dragen_align_call_tumor_only")
     message:
@@ -44,7 +44,7 @@ dragen --build-hash-table true \
 dragen -l -r {params.tmp_reference_dir} 
 
 echo "will run the following DRAGEN command"
-mkdir -p {params.output_dir} 
+mkdir -p {params.dragen_result_dir} 
 dragen -f \
 -r {params.tmp_reference_dir} \
 --tumor-fastq1 {input.read1} \
@@ -53,8 +53,14 @@ dragen -f \
 --RGID-tumor {params.sample_name} \
 --RGSM-tumor {params.sample_name} \
 --RGPL-tumor ILLUMINAi \
---output-directory {params.output_dir} \
+--output-directory {params.dragen_result_dir} \
 --output-file-prefix {params.output_file_prefix} \
 --enable-duplicate-marking true \
---enable-map-align-output true
+--enable-map-align-output true \
+--vc-enable-homologous-mapping-filter True \
+--vc-enable-clustered-events-filter True \
+--vc-clustered-events-threshold 3 \
+--vc-enable-triallelic-filter True \
+--vc-enable-multi-event-alt-allele-in-normal-filter True \
+--vc-enable-af-filter True
          """
