@@ -226,16 +226,6 @@ def main(args=None):
     sacct_file = os.path.join(args.log_dir,
                               sample_config["analysis"]["case_id"] + ".sacct")
 
-    balsamic_run_mode = os.getenv("BALSAMIC_STATUS", "conda")
-    #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-    #        sbatch_script = os.path.join(args.script_dir,
-    #                                     "sbatch." + os.path.basename(jobscript))
-    #        sbatch_file = singularity_param(sample_config=sample_config,
-    #                                        script_dir=args.script_dir,
-    #                                        jobscript=jobscript,
-    #                                        sbatch_script=sbatch_script)
-    #        jobscript = sbatch_script
-
     scheduler_cmd.account = args.account
     scheduler_cmd.mail_type = mail_type
     scheduler_cmd.error = os.path.join(
@@ -253,10 +243,6 @@ def main(args=None):
         scheduler_cmd.partition = job_properties["cluster"]["partition"]
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
-
-    # scheduler_file = os.path.join(args.script_dir, sample_config["analysis"]["case_id"] + ".scheduler_dump")
-    #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-    # write_scheduler_dump(scheduler_file=scheduler_file, cmd=scheduler_cmd.build_cmd())
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
 
