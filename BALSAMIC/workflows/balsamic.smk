@@ -72,7 +72,7 @@ try:
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
 except KeyError as error:
     sentieon = False
-    LOG.warning("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC"
+    LOG.warning("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
                 "to run SENTIEON variant callers")
 
 if not Path(config["SENTIEON_EXEC"]).exists():
@@ -80,7 +80,7 @@ if not Path(config["SENTIEON_EXEC"]).exists():
     raise BalsamicError
     
 if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
-    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC"
+    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
               "to run SENTIEON variant callers")
     raise BalsamicError
 
