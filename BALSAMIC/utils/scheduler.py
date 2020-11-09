@@ -8,7 +8,7 @@ from snakemake.utils import read_job_properties
 
 
 class SbatchScheduler:
-    '''
+    """
     Builds sbatch command. Commands map to SLURM sbatch options.
     Params:
     ------
@@ -21,7 +21,7 @@ class SbatchScheduler:
     output          - -o/--output
     qos             - -q/--qos
     time            - -t/--time
-    '''
+    """
 
     def __init__(self):
         self.account = None
@@ -36,8 +36,8 @@ class SbatchScheduler:
         self.time = None
 
     def build_cmd(self):
-        ''' builds sbatch command matching its options '''
-        sbatch_options = list()
+        """ builds sbatch command matching its options """
+        sbatch = ['sbatch']
 
         job_attributes = [
             'account', 'dependency', 'error', 'output', 'mail_type',
@@ -47,12 +47,12 @@ class SbatchScheduler:
         for attribute in job_attributes:
             if getattr(self, attribute):
                 attribute_value = getattr(self, attribute)
-                sbatch_options.append('--{} \"{}\"'.format(
-                    attribute.replace("_", "-"), attribute_value))
+                sbatch.append('--{} \"{}\"'.format(attribute.replace("_", "-"),
+                                                   attribute_value))
 
-        sbatch_options.append(self.script)
+        sbatch.append(self.script)
 
-        return 'sbatch' + ' ' + ' '.join(sbatch_options)
+        return ' '.join(sbatch)
 
 
 class QsubScheduler:
