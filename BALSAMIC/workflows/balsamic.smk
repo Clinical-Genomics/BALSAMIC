@@ -64,12 +64,9 @@ if len(cluster_config.keys()) == 0:
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
     if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.getenv("SENTIEON_EXEC")
+        config["SENTIEON_EXEC"] = os.environ("SENTIEON_EXEC")
     else:
         config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
-
-    # Fail early if Sentieon executable does not exist
-    assert Path(config["SENTIEON_EXEC"]).exists()
 
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
@@ -78,6 +75,10 @@ except KeyError as error:
     LOG.warning("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC"
                 "to run SENTIEON variant callers")
 
+if not Path(config["SENTIEON_EXEC"]).exists():
+    LOG.error("Senteion exectuable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
+    raise BalsamicError
+    
 if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC"
               "to run SENTIEON variant callers")
