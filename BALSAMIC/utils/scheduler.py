@@ -88,15 +88,11 @@ class QsubScheduler:
 
         # Exclusive node
         resource_params += " -l excl=1 "
-        #        if self.time:
-        #            resource_params += " -l \"walltime={}\" ".format(str(self.time))
 
         if self.ntasks:
-            #            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
             resource_params += " -pe mpi {} ".format(str(self.ntasks))
 
         if self.account:
-            #            qsub_options.append(" -A " + str(self.account))
             qsub_options.append(" -q " + str(self.account))
 
         if self.error:
@@ -106,8 +102,7 @@ class QsubScheduler:
             qsub_options.append(" -o " + str(self.output))
 
         if self.mail_type:
-            #            qsub_options.append(" -m " + str(self.mail_type))
-            qsub_options.append(" -m s ")  # + str(self.mail_type))
+            qsub_options.append(" -m s ")
 
         if self.mail_user:
             qsub_options.append(" -M " + str(self.mail_user))
@@ -121,7 +116,6 @@ class QsubScheduler:
         if self.dependency:
             for jobid in self.dependency:
                 depend = depend + ":" + jobid
-            #qsub_options.append(" -W \"depend=afterok" + str(depend) + "\"")
             qsub_options.append(" -hold_jid " + ",".join(self.dependency))
 
         if self.script:
@@ -149,16 +143,6 @@ def write_sacct_file(sacct_file, job_id):
         raise e
 
 
-# def write_scheduler_dump(scheduler_file, cmd):
-#    ''' writes sbatch dump for debuging purpose '''
-#    try:
-#        with open(scheduler_file, 'a') as f:
-#            f.write(cmd + "\n")
-#            f.write(sys.executable + "\n")
-#    except OSError:
-#        raise
-
-
 def submit_job(sbatch_cmd, profile):
     ''' subprocess call for sbatch command '''
     # run sbatch cmd
@@ -182,35 +166,6 @@ def submit_job(sbatch_cmd, profile):
 
     print(jobid)
     return jobid
-
-
-# def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
-#    ''' write a modified sbatch script based on singularity parameters '''
-#    if 'bind_path' not in sample_config['singularity']:
-#        raise KeyError("bind_path was not found in sample config.")
-
-#    if 'main_env' not in sample_config['singularity']:
-#        raise KeyError("main_env was not found in sample config.")
-
-#    if 'container_path' not in sample_config['singularity']:
-#        raise KeyError("container_path was not found sample config.")
-
-#    try:
-#        bind_path = sample_config['singularity']['bind_path']
-#        main_env = sample_config['singularity']['main_env']
-#        container_path = sample_config['singularity']['container_path']
-#        with open(sbatch_script, 'a') as f:
-#            f.write("#!/bin/bash" + "\n")
-#            f.write(
-#                f"function balsamic-run {{ singularity exec -B {bind_path} --app {main_env} {container_path} $@; }}"
-#                + "\n")
-#            f.write(f"# Snakemake original script {jobscript}" + "\n")
-#            f.write(f"balsamic-run bash {jobscript}" + "\n")
-#        sbatch_file = os.path.join(
-#            script_dir, sample_config["analysis"]["case_id"] + ".sbatch")
-#        return sbatch_file
-#    except OSError:
-#        raise
 
 
 def get_parser():
