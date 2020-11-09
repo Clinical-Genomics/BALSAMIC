@@ -130,6 +130,7 @@ def test_SbatchScheduler():
     sbatch_cmd.qos = "low"
     sbatch_cmd.time = "01:00:00"
     sbatch_cmd.script = "example_script.sh"
+    sbatch_cmd.partition = "dummy_partition"
 
     # WHEN sbatch command is built
     sbatch_cmd = sbatch_cmd.build_cmd()
@@ -139,7 +140,8 @@ def test_SbatchScheduler():
     assert sbatch_cmd == (
         'sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" '
         '--output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" '
-        '--ntasks "2" --qos "low" --time "01:00:00" example_script.sh')
+        '--ntasks "2" --qos "low" --time "01:00:00" --partition "dummy_partition" example_script.sh'
+    )
 
 
 def test_qsub_scheduler():
