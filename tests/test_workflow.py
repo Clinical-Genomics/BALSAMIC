@@ -3,6 +3,8 @@ import snakemake
 
 from BALSAMIC.utils.cli import get_snakefile
 
+MOCKED_OS_ENVIRON = 'os.environ'
+
 
 def test_workflow_tumor_normal(tumor_normal_config, sentieon_install_dir,
                                sentieon_license):
@@ -14,7 +16,7 @@ def test_workflow_tumor_normal(tumor_normal_config, sentieon_install_dir,
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
@@ -33,7 +35,7 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir,
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
@@ -51,7 +53,7 @@ def test_workflow_qc(tumor_normal_config, tumor_only_config,
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
@@ -71,7 +73,7 @@ def test_workflow_sentieon(tumor_normal_wgs_config, tumor_only_wgs_config,
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
