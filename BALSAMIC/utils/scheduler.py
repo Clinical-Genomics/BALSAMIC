@@ -155,6 +155,7 @@ def submit_job(sbatch_cmd, profile):
                              shell=True,
                              stdout=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
+        logging.exception("Failed to submit {}".format(sbatch_cmd))
         raise e
 
     # Get jobid
