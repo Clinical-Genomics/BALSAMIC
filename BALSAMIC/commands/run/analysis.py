@@ -99,10 +99,17 @@ LOG = logging.getLogger(__name__)
     f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
     f'values are: {list(VCF_DICT.keys())}',
 )
+@click.option('-q',
+              '--quiet',
+              default=False,
+              is_flag=True,
+              help=('Instruct snakemake to be quiet!'
+                    'No output will be printed'))
 @click.pass_context
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, force_all, snakemake_opt, mail_type, mail_user,
-             account, analysis_type, qos, profile, disable_variant_caller):
+             account, analysis_type, qos, profile, disable_variant_caller,
+             quiet):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
@@ -181,6 +188,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.mail_user = mail_user
     balsamic_run.forceall = force_all
     balsamic_run.run_analysis = run_analysis
+    balsamic_run.quiet = quiet
     # Always use singularity
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
