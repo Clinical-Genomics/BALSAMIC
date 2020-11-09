@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 import subprocess
 import json
 import argparse
@@ -131,6 +132,7 @@ def read_sample_config(input_json):
         with open(input_json) as f:
             return json.load(f)
     except Exception as e:
+        logging.exception("Can not load {} file".format(input_json))
         raise e
 
 
@@ -140,6 +142,7 @@ def write_sacct_file(sacct_file, job_id):
         with open(sacct_file, 'a') as f:
             f.write(job_id + "\n")
     except FileNotFoundError as e:
+        logging.exception("Can not write {} file".format(sacct_file))
         raise e
 
 
