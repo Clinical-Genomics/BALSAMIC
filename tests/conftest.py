@@ -9,6 +9,8 @@ from click.testing import CliRunner
 from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
 
+MOCKED_OS_ENVIRON = 'os.environ'
+
 
 @pytest.fixture
 def cli_runner():
@@ -191,7 +193,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
     normal = sample_fastq["normal"]
 
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
@@ -240,7 +242,7 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     normal = sample_fastq["normal"]
 
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
@@ -280,7 +282,7 @@ def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
     tumor = sample_fastq["tumor"]
 
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
@@ -320,7 +322,7 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     tumor = sample_fastq["tumor"]
 
     with mock.patch.dict(
-            'os.environ', {
+            MOCKED_OS_ENVIRON, {
                 'SENTIEON_LICENSE': sentieon_license,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
