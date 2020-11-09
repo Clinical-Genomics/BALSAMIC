@@ -1,4 +1,7 @@
+import os
 import json
+
+from unittest import mock
 
 from pathlib import Path
 from click.testing import CliRunner
@@ -11,7 +14,7 @@ def test_dag_graph_success(
         tumor_normal_config,
         tumor_only_wgs_config,
 ):
-    # WHEN creating config using standard CLI input
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
     # THEN DAG graph should be created successfully
     assert Path(json.load(
         open(tumor_normal_config))["analysis"]["dag"]).exists()
