@@ -179,14 +179,9 @@ ls -l # dummy command
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_config(
-        tmp_path_factory,
-        sample_fastq,
-        analysis_dir,
-        singularity_container,
-        reference_json,
-        panel_bed_file, sentieon_license, sentieon_install_dir
-):
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
+                        singularity_container, reference_json, panel_bed_file,
+                        sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -195,7 +190,11 @@ def tumor_normal_config(
     tumor = sample_fastq["tumor"]
     normal = sample_fastq["normal"]
 
-    with mock.patch.dict('os.environ', {'SENTIEON_LICENSE':sentieon_license, 'SENTIEON_INSTALL_DIR':sentieon_install_dir}):
+    with mock.patch.dict(
+            'os.environ', {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -230,7 +229,8 @@ def fixture_config_helpers():
 
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                            singularity_container, reference_json, sentieon_license, sentieon_install_dir):
+                            singularity_container, reference_json,
+                            sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -239,7 +239,11 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     tumor = sample_fastq["tumor"]
     normal = sample_fastq["normal"]
 
-    with mock.patch.dict('os.environ', {'SENTIEON_LICENSE':sentieon_license, 'SENTIEON_INSTALL_DIR':sentieon_install_dir}):
+    with mock.patch.dict(
+            'os.environ', {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -265,14 +269,9 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope="session")
-def tumor_only_config(
-        tmpdir_factory,
-        sample_fastq,
-        singularity_container,
-        analysis_dir,
-        reference_json,
-        panel_bed_file, sentieon_license, sentieon_install_dir
-):
+def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
+                      analysis_dir, reference_json, panel_bed_file,
+                      sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -280,7 +279,11 @@ def tumor_only_config(
     case_id = "sample_tumor_only"
     tumor = sample_fastq["tumor"]
 
-    with mock.patch.dict('os.environ', {'SENTIEON_LICENSE':sentieon_license, 'SENTIEON_INSTALL_DIR':sentieon_install_dir}):
+    with mock.patch.dict(
+            'os.environ', {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -307,7 +310,8 @@ def tumor_only_config(
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                          singularity_container, reference_json, sentieon_license, sentieon_install_dir):
+                          singularity_container, reference_json,
+                          sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -315,7 +319,11 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     case_id = "sample_tumor_only_wgs"
     tumor = sample_fastq["tumor"]
 
-    with mock.patch.dict('os.environ', {'SENTIEON_LICENSE':sentieon_license, 'SENTIEON_INSTALL_DIR':sentieon_install_dir}):
+    with mock.patch.dict(
+            'os.environ', {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
         runner = CliRunner()
         runner.invoke(
             cli,
