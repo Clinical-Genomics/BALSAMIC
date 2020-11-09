@@ -140,6 +140,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
     else:
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
+                                     "snakemake_rules/dragen_suite/dragen_dna.rule",
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
@@ -212,6 +213,11 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
 if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
+    if "dragen" in config:
+        analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
+                                          Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()])
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()

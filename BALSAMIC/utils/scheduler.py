@@ -31,6 +31,7 @@ class SbatchScheduler:
         self.mail_user = None
         self.ntasks = None
         self.output = None
+        self.partition = None
         self.qos = None
         self.script = None
         self.time = None
@@ -40,8 +41,16 @@ class SbatchScheduler:
         sbatch = ['sbatch']
 
         job_attributes = [
-            'account', 'dependency', 'error', 'output', 'mail_type',
-            'mail_user', 'ntasks', 'qos', 'time'
+            'account',
+            'dependency',
+            'error',
+            'output',
+            'mail_type',
+            'mail_user',
+            'ntasks',
+            'qos',
+            'time',
+            'partition',
         ]
 
         for attribute in job_attributes:
@@ -285,6 +294,8 @@ def main(args=None):
     scheduler_cmd.time = job_properties["cluster"]["time"]
     scheduler_cmd.mail_user = args.mail_user
     scheduler_cmd.script = jobscript
+    if "partition" in job_properties["cluster"]:
+        scheduler_cmd.partition = job_properties["cluster"]["partition"]
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 

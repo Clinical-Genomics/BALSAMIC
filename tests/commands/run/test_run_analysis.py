@@ -5,6 +5,16 @@ from unittest import mock
 from pathlib import Path
 
 
+def test_run_analysis_dragen(invoke_cli, tumor_only_wgs_config):
+    # GIVEN a WGS config file
+    # WHEN running analysis
+    result = invoke_cli(
+        ['run', 'analysis', '-s', tumor_only_wgs_config, '--dragen'])
+
+    # THEN it should run without any error
+    assert result.exit_code == 0
+
+
 def test_run_analysis_disable_variant_caller(invoke_cli, tumor_only_config):
     # GIVEN a tumor-only config file and variant caller to disable
     disabled_varcaller = "mutect"
