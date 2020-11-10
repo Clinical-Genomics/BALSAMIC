@@ -11,7 +11,7 @@ from pathlib import Path
 # CLI commands and decorators
 from BALSAMIC.utils.cli import (createDir, get_schedulerpy, get_snakefile,
                                 SnakeMake, get_config, get_fastq_bind_path)
-from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT
+from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT, BALSAMIC_SCRIPTS
 
 LOG = logging.getLogger(__name__)
 
@@ -163,6 +163,9 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     bind_path.append(os.path.commonpath(sample_config['reference'].values()))
     if 'panel' in sample_config:
         bind_path.append(sample_config.get('panel').get('capture_kit'))
+    if 'background_variants' in sample_config:
+	bind_path.append(sample_config.get('background_variants'))
+    bind_path.append(BALSAMIC_SCRIPTS)
     bind_path.append(sample_config['analysis']['analysis_dir'])
     bind_path.extend(
         get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
