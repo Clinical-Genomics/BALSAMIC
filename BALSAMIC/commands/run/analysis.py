@@ -164,7 +164,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     if 'panel' in sample_config:
         bind_path.append(sample_config.get('panel').get('capture_kit'))
     if 'background_variants' in sample_config:
-	bind_path.append(sample_config.get('background_variants'))
+        bind_path.append(sample_config.get('background_variants'))
     bind_path.append(BALSAMIC_SCRIPTS)
     bind_path.append(sample_config['analysis']['analysis_dir'])
     bind_path.extend(

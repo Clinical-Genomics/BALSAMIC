@@ -10,7 +10,7 @@ BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 
 # BALSAMIC scripts dir
 BALSAMIC_SCRIPTS = Path(BALSAMIC_BASE_DIR, "assets/scripts").as_posix()
- 
+
 # Path to conda folder containing YAML files with verions of software usen un BALSAMIC workflow
 CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "conda").as_posix()
 
