@@ -78,3 +78,14 @@ def test_run_analysis_create_dir(invoke_cli, tumor_only_config):
         ])
         # THEN it should abort with error
         assert Path(re.sub('/$', '.1/', log_dir)).exists()
+
+
+def test_run_analysis_umi(invoke_cli, tumor_only_umi_config):
+    # GIVEN a tumor-only config file
+    # WHEN running analysis
+
+    result = invoke_cli(
+        ['run', 'analysis', '-s', tumor_only_umi_config, '-a', 'umi'])
+
+    # THEN it should run without any error
+    assert result.exit_code == 0

@@ -57,3 +57,17 @@ def test_workflow_sentieon(tumor_normal_wgs_config, tumor_only_wgs_config):
         assert snakemake.snakemake(snakefile,
                                    configfiles=[config],
                                    dryrun=True)
+
+
+def test_umiworkflow_tumor_only(tumor_only_umi_config):
+    # GIVEN a sample config dict and snakefile
+    workflow = 'umi'
+    snakefile = get_snakefile(workflow)
+    config_json = tumor_only_umi_config
+    config_tumorlod = "tests/test_data/references/tumorlod.json"
+
+    # WHEN invoking snakemake module with dryrun option
+    # THEN it should return true
+    assert snakemake.snakemake(snakefile,
+                               configfiles=[config_json, config_tumorlod],
+                               dryrun=True)

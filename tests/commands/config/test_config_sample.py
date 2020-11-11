@@ -6,10 +6,11 @@ from BALSAMIC.commands.base import cli
 
 
 def test_dag_graph_success(
-        tumor_normal_wgs_config,
-        tumor_only_config,
-        tumor_normal_config,
-        tumor_only_wgs_config,
+    tumor_normal_wgs_config,
+    tumor_only_config,
+    tumor_normal_config,
+    tumor_only_wgs_config,
+    tumor_only_umi_config
 ):
     # WHEN creating config using standard CLI input
     # THEN DAG graph should be created successfully
@@ -20,14 +21,15 @@ def test_dag_graph_success(
         open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
     assert Path(json.load(
         open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
-
+    assert Path(json.load(
+        open(tumor_only_umi_config))["analysis"]["dag"]).exists()
 
 def test_tumor_only_config_bad_filename(
-        tmp_path_factory,
-        analysis_dir,
-        singularity_container,
-        panel_bed_file,
-        reference_json,
+    tmp_path_factory,
+    analysis_dir,
+    singularity_container,
+    panel_bed_file,
+    reference_json,
 ):
 
     # GIVEN existing fastq file with wrong naming convention
@@ -97,11 +99,11 @@ def test_tumor_only_config_bad_reference(sample_fastq, singularity_container,
 
 
 def test_run_without_permissions(
-        no_write_perm_path,
-        sample_fastq,
-        singularity_container,
-        panel_bed_file,
-        reference_json,
+    no_write_perm_path,
+    sample_fastq,
+    singularity_container,
+    panel_bed_file,
+    reference_json,
 ):
     # GIVEN CLI arguments including an analysis_dir without write permissions
     case_id = "sample_tumor_only"
@@ -129,3 +131,44 @@ def test_run_without_permissions(
     )
     # THEN program exits before completion
     assert result.exit_code == 1
+
+
+def test_tumor_only_umi_config_background_file(
+    sample_fastq, 
+    singularity_container, 
+    analysis_dir, 
+    reference_json,
+    panel_bed_file 
+):
+    
+    # GIVEN CLI arguments including a background variant file
+    case_id = "sample_umi_tumor_only"
+    tumor = sample_fastq["tumor"]
+    background_file = "tests/test_data/references/panel/background_variants.txt"
+    background_variant_file = background_file 
+ 
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "config", 
+	    "case", 
+            "-p", 
+            panel_bed_file, 
+            "-t",
+            tumor, 
+            "--case-id",
+            case_id, 
+            "--analysis-dir", 
+            analysis_dir, 
+            "--singularity",
+            singularity_container, 
+            "--reference-config", 
+            reference_json,
+            "--background-variants", 
+            background_variant_file
+        ],
+    )
+    # THEN program exits and checks for filepath
+    assert result.exit_code == 0
+    assert Path(background_variant_file).exists()
