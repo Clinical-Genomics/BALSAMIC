@@ -40,8 +40,6 @@ def config_files():
         "BALSAMIC/config/analysis_single_umi.json",
         "panel_bed_file":
         "tests/test_data/references/panel/panel.bed",
-        "test_reference":
-        "tests/test_data/references/reference.json",
         "background_variant_file":
         "tests/test_data/references/panel/background_variants.txt"
     }
