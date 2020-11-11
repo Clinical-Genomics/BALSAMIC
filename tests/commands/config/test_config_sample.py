@@ -145,8 +145,9 @@ def test_tumor_only_umi_config_background_file(
     # GIVEN CLI arguments including a background variant file
     case_id = "sample_umi_tumor_only"
     tumor = sample_fastq["tumor"]
-    background_variant_file = "tests/test_data/references/panel/background_variants.txt"
-
+    background_file = "tests/test_data/references/panel/background_variants.txt"
+    background_variant_file = background_file 
+ 
     runner = CliRunner()
     result = runner.invoke(
         cli,
