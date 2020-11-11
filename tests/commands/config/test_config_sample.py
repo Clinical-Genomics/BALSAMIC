@@ -138,8 +138,7 @@ def test_tumor_only_umi_config_background_file(
     singularity_container, 
     analysis_dir, 
     reference_json,
-    panel_bed_file, 
-    background_variant_file
+    panel_bed_file 
 ):
     
     # GIVEN CLI arguments including a background variant file
