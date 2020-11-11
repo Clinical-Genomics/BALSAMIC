@@ -9,11 +9,11 @@ from BALSAMIC.utils.rule import get_threads
 # Generate tables for AF scatterplots
 rule bcftools_query_generatebackgroundaf_umitable:
     input:
-        vcf = vcf_dir + "{sample}.{var_caller}.consensusfiltered.vcf.gz"
+        vcf = vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz"
     output:
-        AF = table_dir + "{sample}.{var_caller}.consensusfiltered.AFtable.txt"
+        AF = table_dir + "{sample}.{var_caller}.{step}.AFtable.txt"
     benchmark:
-        Path(benchmark_dir + "bcftools_query_generatebackgroundaf_umitable_{sample}_{var_caller}.tsv").as_posix()
+        Path(benchmark_dir + "bcftools_query_generatebackgroundaf_umitable_{sample}_{var_caller}_{step}.tsv").as_posix()
     singularity:
         singularity_image
     params:
@@ -27,10 +27,9 @@ rule bcftools_query_generatebackgroundaf_umitable:
     shell:
         """
 source activate {params.conda};
-
 bcftools query \
 --regions-file {params.validated_set} \
--f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\" \
+-f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\n\" \
 {input.vcf} | \
 awk -v file={params.sample_id} \
 \'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$8/($7+$8)\"\\t\"file}}\' \
