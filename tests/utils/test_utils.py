@@ -191,7 +191,7 @@ def test_convert_defaultdict_to_regular_dict():
 
 def test_iterdict(config_files):
     """ GIVEN a dict for iteration """
-    test_dict = json.load(open(config_files['test_reference'], 'r'))
+    test_dict = json.load(open(config_files['reference'], 'r'))
 
     # WHEN passing dict to this function
     dict_gen = iterdict(test_dict)
