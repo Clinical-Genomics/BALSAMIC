@@ -10,6 +10,7 @@ def test_dag_graph_success(
     tumor_only_config,
     tumor_normal_config,
     tumor_only_wgs_config,
+    tumor_only_umi_config
 ):
     # WHEN creating config using standard CLI input
     # THEN DAG graph should be created successfully
@@ -20,7 +21,8 @@ def test_dag_graph_success(
         open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
     assert Path(json.load(
         open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
-
+    assert Path(json.load(
+        open(tumor_only_umi_config))["analysis"]["dag"]).exists()
 
 def test_tumor_only_config_bad_filename(
     tmp_path_factory,
@@ -132,12 +134,13 @@ def test_run_without_permissions(
 
 
 def test_tumor_only_umi_config_background_file(
-        sample_fastq, 
-	singularity_container, 
-	analysis_dir, 
-	reference_json,
-        panel_bed_file, 
-	background_variant_file):
+    sample_fastq, 
+    singularity_container, 
+    analysis_dir, 
+    reference_json,
+    panel_bed_file, 
+    background_variant_file
+):
     
     # GIVEN CLI arguments including a background variant file
     case_id = "sample_umi_tumor_only"
