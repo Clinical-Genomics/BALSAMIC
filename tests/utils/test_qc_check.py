@@ -19,10 +19,7 @@ def test_read_hs_metrics():
 
 def test_read_qc_table():
     # GIVEN the file exist
-    try:
-        open("/BALSAMIC/utils/constants.py")
-    except IOError:
-        print("File doesn't exist")
+    from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 
     # WHEN reading the file
     df = read_qc_table(HSMETRICS_QC_CHECK)
@@ -35,7 +32,7 @@ def test_read_qc_table():
 
 def test_get_bait_and_sample_name():
     # GIVEN the file exists
-    config_file = "tests/test_data/qc_files/config_paired.json"
+    config_file = "tests/test_data/qc_files/case_config_tumor_normal.json"
 
     # WHEN reading the file
     bed = get_bait_name(config_file)
@@ -61,7 +58,7 @@ def test_get_qc_criteria():
 
 def test_check_qc_criteria_output_csv_and_qc():
     # GIVEN following variables
-    config_file = "tests/test_data/qc_files/config_paired.json"
+    config_file = "tests/test_data/qc_files/case_config_tumor_normal.json"
     hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
     output_path = "tests/test_data/qc_files/output.csv"
     qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK),
