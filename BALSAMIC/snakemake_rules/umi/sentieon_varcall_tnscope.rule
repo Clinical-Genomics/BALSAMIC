@@ -19,7 +19,7 @@ rule sentieon_tnscope_umi:
     benchmark:
         Path(benchmark_dir + "sentieon_tnscope_{sample}_{step}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tumor_af = paramsumi.common.filter_tumor_af,
         algo = paramsumi.tnscope.algo,

@@ -19,7 +19,7 @@ rule sentieon_consensuscall_umi:
     benchmark:
         Path(benchmark_dir + "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tag = paramsumi.consensuscall.tag, 
         ip_format = paramsumi.consensuscall.align_format,
@@ -49,7 +49,7 @@ rule sentieon_bwa_umiconsensus:
     benchmark:
         Path(benchmark_dir + "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sheader = paramsumi.common.align_header,
         ip_bases = paramsumi.common.align_intbases,
