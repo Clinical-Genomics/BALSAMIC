@@ -30,13 +30,11 @@ def test_read_qc_table():
         assert bol_list[n], "No values exists"
 
 
-def test_get_bait_and_sample_name():
+def test_get_bait_and_sample_name(tumor_normal_config):
     # GIVEN the file exists
-    config_file = "tests/test_data/qc_files/case_config_tumor_normal.json"
-
     # WHEN reading the file
-    bed = get_bait_name(config_file)
-    sample_name = get_sample_name(config_file)
+    bed = get_bait_name(tumor_normal_config)
+    sample_name = get_sample_name(tumor_normal_config)
 
     # THEN check if bed is string format and if sample name exists
     assert isinstance(bed, str), "bed is not in string format"
@@ -56,7 +54,7 @@ def test_get_qc_criteria():
     assert len(nr_of_columns) == 2, "number of columns != 2"
 
 
-def test_check_qc_criteria_output_csv_and_qc():
+def test_check_qc_criteria_output_csv_and_qc(tmp_path):
     # GIVEN following variables
     config_file = "tests/test_data/qc_files/case_config_tumor_normal.json"
     hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
