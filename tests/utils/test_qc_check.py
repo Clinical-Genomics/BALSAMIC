@@ -63,13 +63,15 @@ def test_check_qc_criteria_output_csv_and_qc(tmp_path, tumor_normal_config):
     test_new_dir = tmp_path / "check_qc_results"
     test_new_dir.mkdir()
     output_path = test_new_dir / "output.csv"
-    new_config_json_file = Path(test_new_dir / "new_config_tumor_normal.json").as_posix()
+    new_config_json_file = Path(
+        test_new_dir / "new_config_tumor_normal.json").as_posix()
 
     with open(tumor_normal_config, 'r') as f:
         new_config_json = json.load(f)
-    new_config_json["panel"]["capture_kit"] = "dummy_path/to/capture_kit/gmcksolid_4.1_hg19_design.bed"
+    new_config_json["panel"][
+        "capture_kit"] = "dummy_path/to/capture_kit/gmcksolid_4.1_hg19_design.bed"
     write_json(new_config_json, new_config_json_file)
-    
+
     hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
 
     qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK),
