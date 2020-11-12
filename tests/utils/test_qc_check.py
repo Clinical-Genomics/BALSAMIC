@@ -1,8 +1,7 @@
 from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table, check_qc_criteria, write_output
 from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name, get_qc_criteria, failed_qc
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
-import os
-from pathlib import Path
+
 
 def test_read_hs_metrics():
     # GIVEN the file exist
@@ -61,7 +60,7 @@ def test_check_qc_criteria_output_csv_and_qc(tmp_path):
 
     test_new_dir = tmp_path / "check_qc_results"
     test_new_dir.mkdir()
-    output_path = Path(test_new_dir / "output.csv")
+    output_path = test_new_dir / "output.csv"
     qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK),
                                      get_bait_name(config_file))
     hs_metrics_df = read_hs_metrics(hs_metrics)
