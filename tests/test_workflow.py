@@ -86,7 +86,7 @@ def test_workflow_sentieon(tumor_normal_wgs_config, tumor_only_wgs_config,
                                        dryrun=True)
 
 
-def test_umiworkflow_tumor_only(tumor_only_umi_config):
+def test_umiworkflow_tumor_only(tumor_only_umi_config, sentieon_install_dir, sentieon_license):
     # GIVEN a sample config dict and snakefile
     workflow = 'umi'
     snakefile = get_snakefile(workflow)

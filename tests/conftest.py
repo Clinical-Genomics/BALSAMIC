@@ -373,28 +373,33 @@ def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
     case_id = "sample_tumor_only_umi"
     tumor = sample_fastq["tumor"]
 
-    runner = CliRunner()
-    runner.invoke(
-        cli,
-        [
-            "config",
-            "case",
-            "-p",
-            panel_bed_file,
-            "--background-variants",
-            background_variant_file,
-            "-t",
-            tumor,
-            "--case-id",
-            case_id,
-            "--analysis-dir",
-            analysis_dir,
-            "--singularity",
-            singularity_container,
-            "--reference-config",
-            reference_json,
-        ],
-    )
+    with mock.patch.dict(
+            MOCKED_OS_ENVIRON, {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "--background-variants",
+                background_variant_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--singularity",
+                singularity_container,
+                "--reference-config",
+                reference_json,
+            ],
+        )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
