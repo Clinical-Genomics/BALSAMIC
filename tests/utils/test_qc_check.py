@@ -2,7 +2,7 @@ from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table, check_qc_cri
 from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name, get_qc_criteria, failed_qc
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 import os
-
+from pathlib import Path
 
 def test_read_hs_metrics():
     # GIVEN the file exist
@@ -58,7 +58,10 @@ def test_check_qc_criteria_output_csv_and_qc(tmp_path):
     # GIVEN following variables
     config_file = "tests/test_data/qc_files/case_config_tumor_normal.json"
     hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
-    output_path = "tests/test_data/qc_files/output.csv"
+
+    test_new_dir = tmp_path / "check_qc_results"
+    test_new_dir.mkdir()
+    output_path = Path(test_new_dir / "output.csv")
     qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK),
                                      get_bait_name(config_file))
     hs_metrics_df = read_hs_metrics(hs_metrics)
@@ -72,6 +75,6 @@ def test_check_qc_criteria_output_csv_and_qc(tmp_path):
 
     # THEN check if the output df has 3 indexes, if csv-file exists and if qc check is string
     nr_of_indexes = list(extract_criteria.index)
-    assert len(nr_of_indexes) == 3, "number of indexes != 3"
-    assert os.path.isfile(output_path), "File doesn't exists"
+    assert len(nr_of_indexes) == 3
+    assert output_path.exists(), "File doesn't exists"
     assert isinstance(qc_check, str), "qc_check not string"
