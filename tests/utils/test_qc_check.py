@@ -1,3 +1,8 @@
+import json
+
+from pathlib import Path
+
+from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table, check_qc_criteria, write_output
 from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name, get_qc_criteria, failed_qc
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
@@ -53,18 +58,24 @@ def test_get_qc_criteria():
     assert len(nr_of_columns) == 2, "number of columns != 2"
 
 
-def test_check_qc_criteria_output_csv_and_qc(tmp_path):
-    # GIVEN following variables
-    config_file = "tests/test_data/qc_files/case_config_tumor_normal.json"
-    hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
-
+def test_check_qc_criteria_output_csv_and_qc(tmp_path, tumor_normal_config):
+    # GIVEN following an output_path, an hs_metrics file, and a config_json with a matching bed name
     test_new_dir = tmp_path / "check_qc_results"
     test_new_dir.mkdir()
     output_path = test_new_dir / "output.csv"
+    new_config_json_file = Path(test_new_dir / "new_config_tumor_normal.json").as_posix()
+
+    with open(tumor_normal_config, 'r') as f:
+        new_config_json = json.load(f)
+    new_config_json["panel"]["capture_kit"] = "dummy_path/to/capture_kit/gmcksolid_4.1_hg19_design.bed"
+    write_json(new_config_json, new_config_json_file)
+    
+    hs_metrics = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
+
     qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK),
-                                     get_bait_name(config_file))
+                                     get_bait_name(new_config_json_file))
     hs_metrics_df = read_hs_metrics(hs_metrics)
-    sample_names = get_sample_name(config_file)
+    sample_names = get_sample_name(new_config_json_file)
 
     # WHEN calling the functions
     extract_criteria = check_qc_criteria(qc_criteria_df, hs_metrics_df,
