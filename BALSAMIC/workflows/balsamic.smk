@@ -64,7 +64,7 @@ if len(cluster_config.keys()) == 0:
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
     if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ("SENTIEON_EXEC")
+        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
     else:
         config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 
