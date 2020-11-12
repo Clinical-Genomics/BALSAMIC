@@ -17,7 +17,7 @@ def test_read_hs_metrics():
 
 
 def test_read_qc_table():
-    # GIVEN the file exist addudadsada
+    # GIVEN the file exist
     from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 
     # WHEN reading the file
