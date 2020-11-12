@@ -34,7 +34,7 @@ if len(cluster_config.keys()) == 0:
 
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 except Exception as error:
     LOG.error("ERROR: Set SENTIEON_LICENSE and SENTIEON_INSTALL_DIR environment variable to run this pipeline.")
     raise
@@ -59,20 +59,20 @@ generate_tables = ["snakemake_rules/umi/generate_AF_tables.rule"]
 # Define wildcards
 SAMPLES = config["samples"]
 VAR_CALLER = ["TNscope","vardict"]
-STEPS = ["umialign","consensusfiltered"]
-#STEPS = ["consensusfiltered"]
+ALL_STEPS = ["consensusalign","consensusfiltered", "umialign"]
+FILTERED_STEPS = ["consensusalign","consensusfiltered"]
 
 # Define outputs
-analysis_output = [ expand(vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, step = STEPS),
-expand(vep_dir + "{sample}.{var_caller}.{step}.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=["all","pass"], step=STEPS),
-expand(qc_dir + "{sample}.{step}.umimetrics", sample=SAMPLES, step=STEPS),
-expand(qc_dir + "{sample}.{step}.collect_hsmetric_umi", sample=SAMPLES, step=STEPS),
-expand(qc_dir + "{sample}.{step}.mean_family_depth", sample=SAMPLES, step = STEPS),
+analysis_output = [ expand(vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, step = ALL_STEPS),
+expand(vep_dir + "{sample}.{var_caller}.{step}.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=["all","pass"], step= FILTERED_STEPS),
+expand(qc_dir + "{sample}.{step}.umimetrics", sample=SAMPLES, step=FILTERED_STEPS),
+expand(qc_dir + "{sample}.{step}.collect_hsmetric_umi", sample=SAMPLES, step=FILTERED_STEPS),
+expand(qc_dir + "{sample}.{step}.mean_family_depth", sample=SAMPLES, step = ALL_STEPS),
 expand(qc_dir + "{sample}.TNscope.noiseAF", sample=SAMPLES),
 expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES),
-expand(table_dir + "{sample}.{varcaller}.consensusfiltered.AFtable.txt", sample=SAMPLES, varcaller=VAR_CALLER) ]
+expand(table_dir + "{sample}.{varcaller}.{step}.AFtable.txt", sample=SAMPLES, varcaller=VAR_CALLER, step= FILTERED_STEPS) ]
 
-config["rules"] = umi_call + variant_call + annotate_vcf + generate_tables + qc
+config["rules"] = umi_call + variant_call + generate_tables + annotate_vcf + qc
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()

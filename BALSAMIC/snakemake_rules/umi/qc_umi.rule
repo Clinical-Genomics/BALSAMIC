@@ -114,10 +114,10 @@ END{{printf(\"{params.sample_id}_meandepth: \"sum/NR)}}' \
 rule bcftools_query_calculatenoiseAF_umi:
     input:
         umiextract = vcf_dir + "{sample}.TNscope.umialign.vcf.gz",
-        consensuscall = vcf_dir + "{sample}.TNscope.consensusalign.vcf.gz"
+        consensuscall = vcf_dir + "{sample}.TNscope.consensusfiltered.vcf.gz"
     output:
         umiextractAF = temp (qc_dir + "{sample}.TNscope.umialign.AF.txt"),
-        consensuscallAF = temp (qc_dir + "{sample}.TNscope.consensusalign.AF.txt"),
+        consensuscallAF = temp (qc_dir + "{sample}.TNscope.consensusfiltered.AF.txt"),
         noiseAF = qc_dir + "{sample}.TNscope.noiseAF"
     benchmark:
         Path(benchmark_dir + "bcftools_query_calculatenoiseAF_umi_{sample}.tsv").as_posix()
@@ -158,7 +158,7 @@ END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' \
 rule seaborn_densityplot_umi:
     input:
         table1 = qc_dir + "{sample}.TNscope.umialign.AF.txt",
-        table2 = qc_dir + "{sample}.TNscope.consensusalign.AF.txt"
+        table2 = qc_dir + "{sample}.TNscope.consensusfiltered.AF.txt"
     output:
         AF_plot = plot_dir + "{sample}.TNscope.AFplot.pdf"
     benchmark:
@@ -170,4 +170,4 @@ rule seaborn_densityplot_umi:
     message:
         "Density AF plots for sample {params.sample_id}"
     run:
-        get_densityplot(input.table1, input.table2, "umiextracted", "consensuscalled", output.AF_plot)
+        get_densityplot(input.table1, input.table2, "umiextracted", "consensuscallfiltered", output.AF_plot)

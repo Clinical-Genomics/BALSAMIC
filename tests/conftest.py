@@ -29,15 +29,24 @@ def invoke_cli(cli_runner):
 def config_files():
     """ dict: path of the config files """
     return {
-        "sample": "BALSAMIC/config/sample.json",
-        "reference": "tests/test_data/references/reference.json",
-        "analysis_paired": "BALSAMIC/config/analysis_paired.json",
-        "cluster_json": "BALSAMIC/config/cluster.json",
-        "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
-        "analysis_single": "BALSAMIC/config/analysis_single.json",
-        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
-        "panel_bed_file": "tests/test_data/references/panel/panel.bed",
-        "test_reference": "tests/test_data/references/reference.json",
+        "sample":
+        "BALSAMIC/config/sample.json",
+        "reference":
+        "tests/test_data/references/reference.json",
+        "analysis_paired":
+        "BALSAMIC/config/analysis_paired.json",
+        "cluster_json":
+        "BALSAMIC/config/cluster.json",
+        "analysis_paired_umi":
+        "BALSAMIC/config/analysis_paired_umi.json",
+        "analysis_single":
+        "BALSAMIC/config/analysis_single.json",
+        "analysis_single_umi":
+        "BALSAMIC/config/analysis_single_umi.json",
+        "panel_bed_file":
+        "tests/test_data/references/panel/panel.bed",
+        "background_variant_file":
+        "tests/test_data/references/panel/background_variants.txt"
     }
 
 
@@ -59,6 +68,11 @@ def conda():
 @pytest.fixture(scope="session")
 def panel_bed_file():
     return "tests/test_data/references/panel/panel.bed"
+
+
+@pytest.fixture(scope="session")
+def background_variant_file():
+    return "tests/test_data/references/panel/background_variants.txt"
 
 
 @pytest.fixture(scope="session")
@@ -344,6 +358,43 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
                 reference_json,
             ],
         )
+
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
+                          analysis_dir, reference_json, panel_bed_file,
+                          background_variant_file):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only with background variant file for umi workflow
+    """
+    case_id = "sample_tumor_only_umi"
+    tumor = sample_fastq["tumor"]
+
+    runner = CliRunner()
+    runner.invoke(
+        cli,
+        [
+            "config",
+            "case",
+            "-p",
+            panel_bed_file,
+            "--background-variants",
+            background_variant_file,
+            "-t",
+            tumor,
+            "--case-id",
+            case_id,
+            "--analysis-dir",
+            analysis_dir,
+            "--singularity",
+            singularity_container,
+            "--reference-config",
+            reference_json,
+        ],
+    )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
