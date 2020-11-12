@@ -20,7 +20,7 @@ rule sentieon_umiextract:
     benchmark:
         Path(benchmark_dir + "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         ds_params= paramsumi.umiextract.read_structure,
         sample_id = "{sample}"
@@ -45,7 +45,7 @@ rule sentieon_bwa_umiextract:
     benchmark:
         Path(benchmark_dir + "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sheader = paramsumi.common.align_header,
         ip_bases = paramsumi.common.align_intbases,
