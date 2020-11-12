@@ -7,10 +7,14 @@ from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
+
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf)
-from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
+                                 get_vcf, get_picard_mrkdup, get_sample_type,
+                                 get_conda_env, get_threads)
+from BALSAMIC.utils.models import VarCallerFilter
+from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, VARDICT_SETTINGS, VCFANNO_TOML
 
 shell.prefix("set -eo pipefail; ")
 
@@ -30,6 +34,24 @@ delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image']
 
+# picarddup flag
+picarddup = get_picard_mrkdup(config)
+
+# VarDict filter settings
+VARDICT= VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+
+# Capture kit name
+if config["analysis"]["sequencing_type"] != "wgs":
+    capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
+
+# Sample names for tumor or normal
+tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+if config['analysis']['analysis_type'] == "paired":
+    normal_sample = get_sample_type(config["samples"], "normal")[0]
+
+# Set case id/name
+case_id = config["analysis"]["case_id"]
+
 # Declare sentieon variables
 sentieon = True
 SENTIEON_LICENSE = ''
@@ -41,15 +63,25 @@ if len(cluster_config.keys()) == 0:
 
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+    if os.getenv("SENTIEON_EXEC") is not None:
+        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
+    else:
+        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
 except KeyError as error:
     sentieon = False
-    LOG.warning("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
+    LOG.warning("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+                "to run SENTIEON variant callers")
 
+if not Path(config["SENTIEON_EXEC"]).exists():
+    LOG.error("Senteion exectuable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
+    raise BalsamicError
+    
 if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
-    LOG.error("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
+    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+              "to run SENTIEON variant callers")
     raise BalsamicError
 
 # Set temporary dir environment variable
@@ -57,7 +89,6 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # Define set of rules
-
 qc_rules = [
     "snakemake_rules/quality_control/fastp.rule",
     "snakemake_rules/quality_control/fastqc.rule",
@@ -70,6 +101,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
 
     align_rules = ["snakemake_rules/align/sentieon_alignment.rule"]
 else:
+    chromlist = config["panel"]["chrom"]
     qc_rules.extend([
         "snakemake_rules/quality_control/GATK.rule",
         "snakemake_rules/quality_control/picard.rule",
@@ -109,6 +141,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
     else:
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
+                                     "snakemake_rules/dragen_suite/dragen_dna.rule",
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
@@ -181,6 +214,11 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
 if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
+    if "dragen" in config:
+        analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
+                                          Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()])
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()

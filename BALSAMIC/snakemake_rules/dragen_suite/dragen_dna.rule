@@ -1,0 +1,66 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+rule dragen_align_call_tumor_only:
+    input:
+        reference = config["reference"]["reference_genome"],
+        read1 = Path(fastq_dir, "{mysample}_1.fp.fastq.gz".format(mysample=tumor_sample)).as_posix(),
+        read2 = Path(fastq_dir, "{mysample}_2.fp.fastq.gz".format(mysample=tumor_sample)).as_posix(),
+    output:
+        bam = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
+        vcf = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()
+    benchmark:
+        Path(benchmark_dir, "dragen_align_call_tumor_only" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    params:
+        dragen_result_dir = Path(result_dir, "dragen", "result").as_posix(),
+        tmp_reference_dir = Path(result_dir, "dragen", "reference").as_posix(),
+        sample_name = tumor_sample,
+        output_file_prefix = "SNV.somatic." + config["analysis"]["case_id"] + ".dragen"
+    threads:
+        get_threads(cluster_config, "dragen_align_call_tumor_only")
+    message:
+        "DRAGEN align and variant call for {params.sample_name}"
+    shell:
+         """
+echo "Running DRAGEN"
+echo "Host: " $HOSTNAME
+
+echo "Setting ulimit"
+ulimit -n 65535
+ulimit -u 16384
+
+echo "Setting PATH"
+export PATH=$PATH:/opt/edico/bin/
+
+echo "preparing reference and loading it to memory"
+mkdir -p {params.tmp_reference_dir}
+
+# Build reference
+dragen --build-hash-table true \
+  --ht-reference {input.reference} \
+  --output-directory {params.tmp_reference_dir} #--ht-alt-liftover /opt/edico/liftover/hg19_alt_liftover.sam 
+
+# Make sure reference loads properly
+dragen -l -r {params.tmp_reference_dir} 
+
+echo "will run the following DRAGEN command"
+mkdir -p {params.dragen_result_dir} 
+dragen -f \
+-r {params.tmp_reference_dir} \
+--tumor-fastq1 {input.read1} \
+--tumor-fastq2 {input.read2} \
+--enable-variant-caller true \
+--RGID-tumor {params.sample_name} \
+--RGSM-tumor {params.sample_name} \
+--RGPL-tumor ILLUMINAi \
+--output-directory {params.dragen_result_dir} \
+--output-file-prefix {params.output_file_prefix} \
+--enable-duplicate-marking true \
+--enable-map-align-output true \
+--vc-enable-homologous-mapping-filter True \
+--vc-enable-clustered-events-filter True \
+--vc-clustered-events-threshold 3 \
+--vc-enable-triallelic-filter True \
+--vc-enable-multi-event-alt-allele-in-normal-filter True \
+--vc-enable-af-filter True
+         """

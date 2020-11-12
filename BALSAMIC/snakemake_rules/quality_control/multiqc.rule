@@ -1,19 +1,14 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_picard_mrkdup
-
-picarddup = get_picard_mrkdup(config)
-
-picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics",
-                           "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics",
-                           "quality_by_cycle_metrics",
-                           "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 multiqc_input = []
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':
+    picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics",
+                               "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics",
+                               "quality_by_cycle_metrics",
+                               "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
     # fastqc metrics
     multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
 

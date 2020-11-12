@@ -39,15 +39,16 @@ class VarCallerFilter(BaseModel):
     This class handles attributes and filter for variant callers
 
     Attributes:
-      AD: VCFAttributes (required); minimum allelic depth
-      AF_min: VCFAttributes (optional); minimum allelic fraction
-      AF_max: VCFAttributes (optional); maximum allelic fraction
-      MQ: VCFAttributes (optional); minimum mapping quality
-      DP: VCFAttributes (optional); minimum read depth
-      varcaller_name: str (required); variant caller name
-      filter_type: str (required); filter name for variant caller
-      analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
-      description: str (required); comment section for description
+        AD: VCFAttributes (required); minimum allelic depth
+        AF_min: VCFAttributes (optional); minimum allelic fraction
+        AF_max: VCFAttributes (optional); maximum allelic fraction
+        MQ: VCFAttributes (optional); minimum mapping quality
+        DP: VCFAttributes; minimum read depth
+        pop_freq: VCFAttributes (optional); maximum gnomad_af
+        varcaller_name: str (required); variant caller name
+        filter_type: str (required); filter name for variant caller
+        analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
+        description: str (required); comment section for description
     """
 
     AD: VCFAttributes
@@ -55,6 +56,7 @@ class VarCallerFilter(BaseModel):
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: VCFAttributes
+    pop_freq: VCFAttributes
     varcaller_name: str
     filter_type: str
     analysis_type: str
@@ -73,8 +75,8 @@ class QCModel(BaseModel):
         umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
 
     Raises:
-        ValueError: 
-            When the input in min_seq_length and umi_trim_length cannot 
+        ValueError:
+            When the input in min_seq_length and umi_trim_length cannot
             be interpreted as integer and coerced to string
     
     """
@@ -459,6 +461,7 @@ class ReferenceMeta(BaseModel):
     wgs_calling: Optional[ReferenceUrlsModel]
     genome_chrom_size: Optional[ReferenceUrlsModel]
     gnomad_variant: Optional[ReferenceUrlsModel]
+    gnomad_variant_index: Optional[ReferenceUrlsModel]
     cosmicdb: Optional[ReferenceUrlsModel]
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
@@ -477,3 +480,100 @@ class ReferenceMeta(BaseModel):
                 output_value = value
 
         return output_value
+
+
+class UMIParamsCommon(BaseModel):
+    """This class defines the common params settings used as constants across various rules in UMI workflow.
+
+    Attributes:
+        align_format: str (required); output alignment format. eg. 'BAM'
+        align_header: str (required); header line appended to the aligned BAM output
+        align_intbases: int; input bases in each batch regardless of threads, for reproducibility
+        filter_tumor_af: float (required); settings to filter minimum allelic frequency
+    """
+
+    align_header: str
+    align_intbases: int
+    filter_tumor_af: float
+
+
+class UMIParamsUMIextract(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow-rule umextract.
+
+    Attributes:
+        read_structure: str (required); settings to define UMI read structure
+    """
+
+    read_structure: str = "-d, 'rs1,rs2'"
+
+
+class UMIParamsConsensuscall(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow-rule consensuscall.
+
+    Attributes:
+        align_format: str (required); output alignment format. eg. 'BAM'
+	filter_minreads: str (required); settings to filter consensus tags based on group size
+        tag: str; Logic UMI tag
+    """
+
+    align_format: str = 'BAM'
+    filter_minreads: str = '3,1,1'
+    tag: str = 'XR'
+
+
+class UMIParamsTNscope(BaseModel):
+    """This class defines the params settings used as constants in UMI workflow- rule tnscope.
+
+    Attributes:
+        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
+        disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
+        filter_tumor_af: float (required); minimum allelic frequency to detect
+        min_tumorLOD: float (required); Minimum tumorLOD value
+        error_rate: int (required); allow error-rate to consider in calling
+        prunefactor: int (required); pruning factor in the kmer graph
+    """
+
+    algo: str
+    min_tumorLOD: float
+    error_rate: int
+    prunefactor: int
+    disable_detect: str
+
+
+class UMIParamsVardict(BaseModel):
+    """This class defines the params settings used as constants in UMIworkflow-rule vardict.
+
+    Attributes:
+        vardict_filters: str (required); set of filters to apply for variant-calling using vardict
+    """
+    vardict_filters: str
+
+
+class UMIParamsVEP(BaseModel):
+    """This class defines the params settings used as constants in UMIworkflow-rule vep.
+
+    Attributes:
+        vep_filters: str (required); set of filters to apply for variant-calling using vardict
+    """
+    vep_filters: str
+
+
+class UMIworkflowConfig(BaseModel):
+    """ Defines set of rules in UMI workflow.
+ 
+    Handles attributes for corresponding rules.
+	
+    Attributes:
+	common: global params defined across all rules in UMI workflow
+	umiextract: params defined in the rule sentieon_umiextract
+	consensuscall: params defined in the rule sentieon_consensuscall
+	tnscope: params defined in the rule sentieon_tnscope_umi
+    	vardict: params defined in the rule vardict_umi
+	vep: params defined in the rule vep_umi
+    """
+    common: UMIParamsCommon
+    umiextract: UMIParamsUMIextract
+    consensuscall: UMIParamsConsensuscall
+    tnscope: UMIParamsTNscope
+    vardict: UMIParamsVardict
+    vep: UMIParamsVEP

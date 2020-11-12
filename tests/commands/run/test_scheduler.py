@@ -4,12 +4,12 @@ import pytest
 
 from unittest import mock
 
-from BALSAMIC.commands.run.scheduler import SbatchScheduler
-from BALSAMIC.commands.run.scheduler import QsubScheduler
-from BALSAMIC.commands.run.scheduler import read_sample_config
-from BALSAMIC.commands.run.scheduler import write_sacct_file
-from BALSAMIC.commands.run.scheduler import submit_job
-from BALSAMIC.commands.run.scheduler import main as scheduler_main
+from BALSAMIC.utils.scheduler import SbatchScheduler
+from BALSAMIC.utils.scheduler import QsubScheduler
+from BALSAMIC.utils.scheduler import read_sample_config
+from BALSAMIC.utils.scheduler import write_sacct_file
+from BALSAMIC.utils.scheduler import submit_job
+from BALSAMIC.utils.scheduler import main as scheduler_main
 from BALSAMIC.utils.cli import createDir
 
 
@@ -130,6 +130,7 @@ def test_SbatchScheduler():
     sbatch_cmd.qos = "low"
     sbatch_cmd.time = "01:00:00"
     sbatch_cmd.script = "example_script.sh"
+    sbatch_cmd.partition = "dummy_partition"
 
     # WHEN sbatch command is built
     sbatch_cmd = sbatch_cmd.build_cmd()
@@ -139,7 +140,8 @@ def test_SbatchScheduler():
     assert sbatch_cmd == (
         'sbatch --account "development" --dependency "afterok:12345" --error "test_job.err" '
         '--output "test_job.out" --mail-type "FAIL" --mail-user "john.doe@example.com" '
-        '--ntasks "2" --qos "low" --time "01:00:00" example_script.sh')
+        '--ntasks "2" --qos "low" --time "01:00:00" --partition "dummy_partition" example_script.sh'
+    )
 
 
 def test_qsub_scheduler():
