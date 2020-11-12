@@ -365,7 +365,8 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 @pytest.fixture(scope="session")
 def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
                           analysis_dir, reference_json, panel_bed_file,
-                          background_variant_file):
+                          background_variant_file, sentieon_license,
+                          sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only with background variant file for umi workflow
