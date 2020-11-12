@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 import subprocess
 import json
 import argparse
@@ -8,7 +9,7 @@ from snakemake.utils import read_job_properties
 
 
 class SbatchScheduler:
-    '''
+    """
     Builds sbatch command. Commands map to SLURM sbatch options.
     Params:
     ------
@@ -21,7 +22,7 @@ class SbatchScheduler:
     output          - -o/--output
     qos             - -q/--qos
     time            - -t/--time
-    '''
+    """
 
     def __init__(self):
         self.account = None
@@ -37,8 +38,8 @@ class SbatchScheduler:
         self.time = None
 
     def build_cmd(self):
-        ''' builds sbatch command matching its options '''
-        sbatch_options = list()
+        """ builds sbatch command matching its options """
+        sbatch = ['sbatch']
 
         job_attributes = [
             'account',
@@ -56,12 +57,12 @@ class SbatchScheduler:
         for attribute in job_attributes:
             if getattr(self, attribute):
                 attribute_value = getattr(self, attribute)
-                sbatch_options.append('--{} \"{}\"'.format(
-                    attribute.replace("_", "-"), attribute_value))
+                sbatch.append('--{} \"{}\"'.format(attribute.replace("_", "-"),
+                                                   attribute_value))
 
-        sbatch_options.append(self.script)
+        sbatch.append(self.script)
 
-        return 'sbatch' + ' ' + ' '.join(sbatch_options)
+        return ' '.join(sbatch)
 
 
 class QsubScheduler:
@@ -88,15 +89,11 @@ class QsubScheduler:
 
         # Exclusive node
         resource_params += " -l excl=1 "
-        #        if self.time:
-        #            resource_params += " -l \"walltime={}\" ".format(str(self.time))
 
         if self.ntasks:
-            #            resource_params += "nodes=1:ppn={}\" ".format(str(self.ntasks))
             resource_params += " -pe mpi {} ".format(str(self.ntasks))
 
         if self.account:
-            #            qsub_options.append(" -A " + str(self.account))
             qsub_options.append(" -q " + str(self.account))
 
         if self.error:
@@ -106,8 +103,7 @@ class QsubScheduler:
             qsub_options.append(" -o " + str(self.output))
 
         if self.mail_type:
-            #            qsub_options.append(" -m " + str(self.mail_type))
-            qsub_options.append(" -m s ")  # + str(self.mail_type))
+            qsub_options.append(" -m s ")
 
         if self.mail_user:
             qsub_options.append(" -M " + str(self.mail_user))
@@ -121,7 +117,6 @@ class QsubScheduler:
         if self.dependency:
             for jobid in self.dependency:
                 depend = depend + ":" + jobid
-            #qsub_options.append(" -W \"depend=afterok" + str(depend) + "\"")
             qsub_options.append(" -hold_jid " + ",".join(self.dependency))
 
         if self.script:
@@ -137,6 +132,7 @@ def read_sample_config(input_json):
         with open(input_json) as f:
             return json.load(f)
     except Exception as e:
+        logging.exception("Can not load {} file".format(input_json))
         raise e
 
 
@@ -146,17 +142,8 @@ def write_sacct_file(sacct_file, job_id):
         with open(sacct_file, 'a') as f:
             f.write(job_id + "\n")
     except FileNotFoundError as e:
+        logging.exception("Can not write {} file".format(sacct_file))
         raise e
-
-
-# def write_scheduler_dump(scheduler_file, cmd):
-#    ''' writes sbatch dump for debuging purpose '''
-#    try:
-#        with open(scheduler_file, 'a') as f:
-#            f.write(cmd + "\n")
-#            f.write(sys.executable + "\n")
-#    except OSError:
-#        raise
 
 
 def submit_job(sbatch_cmd, profile):
@@ -168,6 +155,7 @@ def submit_job(sbatch_cmd, profile):
                              shell=True,
                              stdout=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
+        logging.exception("Failed to submit {}".format(sbatch_cmd))
         raise e
 
     # Get jobid
@@ -182,35 +170,6 @@ def submit_job(sbatch_cmd, profile):
 
     print(jobid)
     return jobid
-
-
-# def singularity_param(sample_config, script_dir, jobscript, sbatch_script):
-#    ''' write a modified sbatch script based on singularity parameters '''
-#    if 'bind_path' not in sample_config['singularity']:
-#        raise KeyError("bind_path was not found in sample config.")
-
-#    if 'main_env' not in sample_config['singularity']:
-#        raise KeyError("main_env was not found in sample config.")
-
-#    if 'container_path' not in sample_config['singularity']:
-#        raise KeyError("container_path was not found sample config.")
-
-#    try:
-#        bind_path = sample_config['singularity']['bind_path']
-#        main_env = sample_config['singularity']['main_env']
-#        container_path = sample_config['singularity']['container_path']
-#        with open(sbatch_script, 'a') as f:
-#            f.write("#!/bin/bash" + "\n")
-#            f.write(
-#                f"function balsamic-run {{ singularity exec -B {bind_path} --app {main_env} {container_path} $@; }}"
-#                + "\n")
-#            f.write(f"# Snakemake original script {jobscript}" + "\n")
-#            f.write(f"balsamic-run bash {jobscript}" + "\n")
-#        sbatch_file = os.path.join(
-#            script_dir, sample_config["analysis"]["case_id"] + ".sbatch")
-#        return sbatch_file
-#    except OSError:
-#        raise
 
 
 def get_parser():
@@ -271,16 +230,6 @@ def main(args=None):
     sacct_file = os.path.join(args.log_dir,
                               sample_config["analysis"]["case_id"] + ".sacct")
 
-    balsamic_run_mode = os.getenv("BALSAMIC_STATUS", "conda")
-    #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-    #        sbatch_script = os.path.join(args.script_dir,
-    #                                     "sbatch." + os.path.basename(jobscript))
-    #        sbatch_file = singularity_param(sample_config=sample_config,
-    #                                        script_dir=args.script_dir,
-    #                                        jobscript=jobscript,
-    #                                        sbatch_script=sbatch_script)
-    #        jobscript = sbatch_script
-
     scheduler_cmd.account = args.account
     scheduler_cmd.mail_type = mail_type
     scheduler_cmd.error = os.path.join(
@@ -298,10 +247,6 @@ def main(args=None):
         scheduler_cmd.partition = job_properties["cluster"]["partition"]
 
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
-
-    # scheduler_file = os.path.join(args.script_dir, sample_config["analysis"]["case_id"] + ".scheduler_dump")
-    #    if balsamic_run_mode == 'container' and 'singularity' in sample_config:
-    # write_scheduler_dump(scheduler_file=scheduler_file, cmd=scheduler_cmd.build_cmd())
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
 

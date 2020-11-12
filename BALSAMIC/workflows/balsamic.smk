@@ -34,14 +34,22 @@ delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image']
 
-# rule related variables
+# picarddup flag
 picarddup = get_picard_mrkdup(config)
+
+# VarDict filter settings
 VARDICT= VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+
+# Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
+
+# Sample names for tumor or normal
+tumor_sample = get_sample_type(config["samples"], "tumor")[0]
 if config['analysis']['analysis_type'] == "paired":
     normal_sample = get_sample_type(config["samples"], "normal")[0]
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+
+# Set case id/name
 case_id = config["analysis"]["case_id"]
 
 # Declare sentieon variables
@@ -55,15 +63,25 @@ if len(cluster_config.keys()) == 0:
 
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+    if os.getenv("SENTIEON_EXEC") is not None:
+        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
+    else:
+        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
 except KeyError as error:
     sentieon = False
-    LOG.warning("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
+    LOG.warning("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+                "to run SENTIEON variant callers")
 
+if not Path(config["SENTIEON_EXEC"]).exists():
+    LOG.error("Senteion exectuable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
+    raise BalsamicError
+    
 if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
-    LOG.error("Set environment variables SENTIEON_LICENSE and SENTIEON_INSTALL_DIR to run SENTIEON variant callers")
+    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+              "to run SENTIEON variant callers")
     raise BalsamicError
 
 # Set temporary dir environment variable
@@ -71,7 +89,6 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # Define set of rules
-
 qc_rules = [
     "snakemake_rules/quality_control/fastp.rule",
     "snakemake_rules/quality_control/fastqc.rule",

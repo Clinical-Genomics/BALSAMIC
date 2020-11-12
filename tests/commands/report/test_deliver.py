@@ -1,22 +1,30 @@
 from pathlib import Path
+from unittest import mock
 
 
-def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):
+def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers,
+                                  sentieon_install_dir, sentieon_license):
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_only_config)
     actual_delivery_report = Path(helpers.delivery_dir,
                                   helpers.case_id + ".hk")
 
-    # WHEN running analysis
-    result = invoke_cli(
-        ['report', 'deliver', '--sample-config', tumor_only_config])
+    with mock.patch.dict(
+            'os.environ', {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        # WHEN running analysis
+        result = invoke_cli(
+            ['report', 'deliver', '--sample-config', tumor_only_config])
 
-    # THEN it should run without any error
-    assert result.exit_code == 0
-    assert actual_delivery_report.is_file()
+        # THEN it should run without any error
+        assert result.exit_code == 0
+        assert actual_delivery_report.is_file()
 
 
-def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers):
+def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers,
+                                    sentieon_install_dir, sentieon_license):
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_normal_config)
 
@@ -47,10 +55,15 @@ def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers):
         vcf_result_dir, "CNV.somatic." + helpers.case_id + ".cnvkit.vcf.gz")
     touch_temp_no_delivery_file.touch()
 
-    # WHEN running analysis
-    result = invoke_cli(
-        ['report', 'deliver', '--sample-config', tumor_normal_config])
+    with mock.patch.dict(
+            'os.environ', {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        # WHEN running analysis
+        result = invoke_cli(
+            ['report', 'deliver', '--sample-config', tumor_normal_config])
 
-    # THEN it should run without any error
-    assert result.exit_code == 0
-    assert actual_delivery_report.is_file()
+        # THEN it should run without any error
+        assert result.exit_code == 0
+        assert actual_delivery_report.is_file()
