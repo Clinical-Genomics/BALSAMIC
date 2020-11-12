@@ -96,10 +96,10 @@ def test_umiworkflow_tumor_only(tumor_only_umi_config):
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
-        MOCKED_OS_ENVIRON, {
-            'SENTIEON_LICENSE': sentieon_license,
-            'SENTIEON_INSTALL_DIR': sentieon_install_dir
-        }):
+            MOCKED_OS_ENVIRON, {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
         assert snakemake.snakemake(snakefile,
                                    configfiles=[config_json, config_tumorlod],
                                    dryrun=True)
