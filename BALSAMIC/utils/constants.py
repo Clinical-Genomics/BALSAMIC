@@ -117,7 +117,50 @@ VCF_DICT = {
     }
 }
 
+# Minimum required QC-values from HS metrics to be able to pass analysis
+HSMETRICS_QC_CHECK = {
+    "gicfdna_3.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 500,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "gmcksolid_4.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 500,
+        "FOLD_80_BASE_PENALTY": 1.7,
+        "PCT_OFF_BAIT": 0.3
+    },
+    "gmsmyeloid_5.2_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.4
+    },
+    "lymphoma_6.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "gmslymphoid_7.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "twistexomerefseq_9.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 100,
+        "FOLD_80_BASE_PENALTY": 1.8,
+        "PCT_OFF_BAIT": 0.25
+    },
+    "wgs": {
+        "MEAN_TARGET_COVERAGE": 30
+    },
+    "METRIC_CRITERIA": {
+        "MEAN_TARGET_COVERAGE": "gt",
+        "FOLD_80_BASE_PENALTY": "lt",
+        "PCT_OFF_BAIT": "lt"
+    }
+}
+
 # Configuration of VARDICT settings
+
 VARDICT_SETTINGS = {
     "AD": {
         "tag_value": 5,
