@@ -13,6 +13,7 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.constants import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 
@@ -52,9 +53,15 @@ LOG = logging.getLogger(__name__)
         'a: append rules-to-deliver to current delivery '
         'options. or r: reset current rules to delivery to only the ones specified'
     ))
+@click.option(
+    '--disable-variant-caller',
+    help=
+    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
+    f'values are: {list(VCF_DICT.keys())}',
+)
 @click.pass_context
 def deliver(context, sample_config, analysis_type, rules_to_deliver,
-            delivery_mode):
+            delivery_mode, disable_variant_caller):
     """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
@@ -99,7 +106,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     # write report.html file
     report = SnakeMake()
     report.case_name = case_name
-    report.working_dir = os.path.join(sample_config_dict['analysis']['analysis_dir'] , \
+    report.working_dir = os.path.join(
+        sample_config_dict['analysis']['analysis_dir'],
         sample_config_dict['analysis']['case_id'], 'BALSAMIC_run')
     report.report = report_file_name
     report.configfile = sample_config
@@ -108,6 +116,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     report.use_singularity = False
     report.run_analysis = True
     report.sm_opt = ["--quiet"]
+    if disable_variant_caller:
+        report.disable_variant_caller = disable_variant_caller
     cmd = sys.executable + " -m  " + report.build_cmd()
     subprocess.check_output(cmd.split(), shell=False)
     LOG.info(f"Workflow report file {report_file_name}")

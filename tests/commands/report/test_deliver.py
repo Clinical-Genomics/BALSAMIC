@@ -61,8 +61,10 @@ def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
         # WHEN running analysis
-        result = invoke_cli(
-            ['report', 'deliver', '--sample-config', tumor_normal_config])
+        result = invoke_cli([
+            'report', 'deliver', '--disable-variant-caller', 'mutect',
+            '--sample-config', tumor_normal_config
+        ])
 
         # THEN it should run without any error
         assert result.exit_code == 0
