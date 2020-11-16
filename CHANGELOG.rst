@@ -5,13 +5,13 @@
 Added
 ^^^^^
 
-* Document for Snakemake rule grammar
+* Document for Snakemake rule grammar PR #489
 
 
 Fixed
 ^^^^^
 
-* removed ``gatk3-register`` command from Dockerfile(s)
+* removed ``gatk3-register`` command from Dockerfile(s) PR #508
 
 
 [6.0.1]
