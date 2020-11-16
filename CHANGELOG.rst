@@ -1,4 +1,12 @@
 
+[6.0.2]
+-------
+
+Added
+^^^^^
+
+* Document for Snakemake rule grammar
+
 [6.0.1]
 -------
 
