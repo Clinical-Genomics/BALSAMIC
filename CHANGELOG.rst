@@ -7,6 +7,13 @@ Added
 
 * Document for Snakemake rule grammar
 
+
+Fixed
+^^^^^
+
+* removed ``gatk3-register`` command from Dockerfile(s)
+
+
 [6.0.1]
 -------
 
