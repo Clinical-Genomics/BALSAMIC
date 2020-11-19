@@ -1,0 +1,23 @@
+name: build an push docker containers
+
+# Tigger building and testing container only on pull requests
+on:
+  pull_request:
+    paths:
+      - "*"
+
+jobs:
+  build:
+    name: Docker image build and push
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: true
+      matrix: 
+        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Branch name
+        run: echo running on branch ${GITHUB_REF##*/}
+      - name: Build
+        run: echo creating Docker container ${GITHUB_REF##*/}-${{ matrix.container-name }}
