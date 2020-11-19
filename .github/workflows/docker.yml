@@ -2,6 +2,9 @@ name: build an push docker containers
 
 # Tigger building and testing container only on pull requests
 on:
+  push:
+    paths:
+      - "*"
   pull_request:
     paths:
       - "*"
