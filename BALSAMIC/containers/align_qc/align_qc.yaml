@@ -9,7 +9,7 @@ dependencies:
   - fastqc=0.11.5
   - samtools=1.9
   - tabix=0.2.5
-  - picard=2.23.2
+  - picard=2.23.8
   - r-base
   - multiqc=1.9
   - fastp=0.20.0
