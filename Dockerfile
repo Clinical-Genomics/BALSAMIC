@@ -16,4 +16,4 @@ ARG CONTAINER_NAME
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml ./${CONTAINER_NAME}.yaml
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.sh ./${CONTAINER_NAME}.sh
 
-RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME} && conda clean -tipsy 
+RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME} && conda clean --all --yes 
