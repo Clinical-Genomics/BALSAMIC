@@ -12,5 +12,5 @@ dependencies:
   - r-base=3.6.1
   - bioconductor-dnacopy=1.60.0
   - pip:
-      - cnvkit==0.9.4
-      - biopython==1.76
+      - --user cnvkit==0.9.4
+      - --user biopython==1.76
