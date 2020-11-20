@@ -19,4 +19,4 @@ jobs:
       - name: Build container
         run: |
           echo creating Docker container ${GITHUB_REF##*/}-${{ matrix.container-name }}
-          docker build --build-arg CONTAINER_NAME=${{ matrix.container-name }} -t clinicalgenomics/balsamic:${GITHUB_REF##*/}-${{ matrix.container-name }} . 
+          docker build --build-arg CONTAINER_NAME=${{ matrix.container-name }} -t clinicalgenomics/balsamic:${GITHUB_REF##*/}-${{ matrix.container-name }} BALSAMIC/containers 
