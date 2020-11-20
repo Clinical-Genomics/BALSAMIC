@@ -17,4 +17,6 @@ jobs:
       - name: Branch name
         run: echo running on branch ${GITHUB_REF##*/}
       - name: Build container
-        run: echo creating Docker container ${GITHUB_REF##*/}-${{ matrix.container-name }}
+        run: |
+          echo creating Docker container ${GITHUB_REF##*/}-${{ matrix.container-name }}
+          docker build --build-arg CONTAINER_NAME=${{ matrix.container-name }} -t clinicalgenomics/balsamic:${GITHUB_REF##*/}-${{ matrix.container-name }} BALSAMIC/container/${{ matrix.container-name }}
