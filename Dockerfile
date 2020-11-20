@@ -13,7 +13,7 @@ ENV PATH="/opt/conda/bin/:${PATH}"
 ARG CONTAINER_NAME
 
 # Copy all project files
-COPY ${CONTAINER_NAME}.yaml ./${CONTAINER_NAME}.yaml
-COPY ${CONTAINER_NAME}.sh ./${CONTAINER_NAME}.sh
+COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml ./${CONTAINER_NAME}.yaml
+COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.sh ./${CONTAINER_NAME}.sh
 
 RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME} && conda clean --index-cache --lock --tarballs -y 
