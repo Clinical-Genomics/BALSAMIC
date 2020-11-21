@@ -1,0 +1,41 @@
+name: build an push docker containers
+
+# Tigger building and testing container only on pull requests
+on:
+  push:
+    branches-ignore:
+      - master
+      - develop
+    tags-ignore:
+      - "**"
+
+jobs:
+  main:
+    name: Docker image build push 
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false 
+      matrix: 
+        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36]
+    steps:
+      - name: Git checkout
+        id: git_checkout
+        uses: actions/checkout@v2
+      - name: Get branch name
+        id: get_branch_name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+      - name: Login to DockerHub
+        id: docker_login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build only 
+        id: docker_build_only
+        uses: docker/build-push-action@v2
+        with:
+          push: false 
+          tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} 
+          build-args:
+            CONTAINER_NAME=${{ matrix.container-name }}
