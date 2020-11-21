@@ -24,11 +24,13 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
 
       # Conda env create
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: setup conda
+        id: setup_conda
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: balsamic
           environment-file: BALSAMIC/conda/balsamic.yaml
-          python-version: 3.6
+          python-version: ${{ matrix.python-version }} 
           auto-activate-base: false
 
       # Install BALSAMIC
@@ -36,8 +38,9 @@ jobs:
         id: install_balsamic
         shell: bash
         run: |
-          pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt
-          pip install -e .
+          which python
+          python -m pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt
+          python -m pip install -e .
 
       # Run PyTest
       - name: Run PyTest
