@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false 
       matrix: 
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6]
 
     steps:
       # Checkout BALSAMIC
@@ -23,11 +23,16 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
 
-      # Install ubuntu dependencies
-      - name: Install dependencies
-        id: install_dep
-        shell: bash
-        run: sudo apt-get install graphviz libgraphviz-dev pkg-config
+      # Conda env create
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: balsamic
+          environment-file: BALSAMIC/conda/balsamic.yaml
+          python-version: 3.6
+          auto-activate-base: false
+          run: |
+            conda info
+            conda list
 
       # Install python dependencies
       - name: Install Python dependencies
