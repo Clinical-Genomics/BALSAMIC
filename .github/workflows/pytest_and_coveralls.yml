@@ -47,8 +47,6 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate balsamic
-          which balsamic
-          balsamic --help
           py.test --cov=BALSAMIC -rsxv tests/*
 
       # Run Coveralls
