@@ -47,11 +47,18 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate balsamic
-          py.test --cov=BALSAMIC -rsxv tests/*
+          py.test --cov-report=xml --cov=BALSAMIC -rsxv tests/*
 
-      # Run Coveralls
-      - name: Run Coveralls
-        id: coveralls
-        uses: coverallsapp/github-action@v1.1.2
+      # Run Codecov 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          directory: ./coverage/reports/
+          flags: unittests
+          env_vars: OS,PYTHON
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          path_to_write_report: ./coverage/codecov_report.gz
+          verbose: true
