@@ -35,9 +35,9 @@ jobs:
       # Install BALSAMIC
       - name: Install BALSAMIC
         id: install_balsamic
-        shell: bash
+        shell: bash -l {0}
         run: |
-          source activate balsamic
+          conda activate balsamic
           which python
           python -m pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt
           python -m pip install -e .
@@ -45,7 +45,7 @@ jobs:
       # Run PyTest
       - name: Run PyTest
         id: pytest
-        shell: bash
+        shell: bash -l {0}
         run: |
           py.test --cov=BALSAMIC -rsxv tests/*
 
