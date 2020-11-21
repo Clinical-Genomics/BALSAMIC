@@ -37,6 +37,7 @@ jobs:
         id: install_balsamic
         shell: bash
         run: |
+          conda activate balsamic
           which python
           python -m pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt
           python -m pip install -e .
