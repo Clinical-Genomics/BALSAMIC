@@ -8,6 +8,9 @@ on:
       - develop
     tags-ignore:
       - "**"
+    paths:
+      - 'BALSAMIC/containers/**'
+
 
 jobs:
   main:
