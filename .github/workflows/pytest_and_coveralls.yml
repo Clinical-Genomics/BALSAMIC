@@ -31,7 +31,6 @@ jobs:
           activate-environment: balsamic
           environment-file: BALSAMIC/conda/balsamic.yaml
           python-version: ${{ matrix.python-version }} 
-          auto-activate-base: false
 
       # Install BALSAMIC
       - name: Install BALSAMIC
