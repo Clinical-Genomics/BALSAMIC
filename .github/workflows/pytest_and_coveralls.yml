@@ -34,14 +34,6 @@ jobs:
             conda info
             conda list
 
-      # Install python dependencies
-      - name: Install Python dependencies
-        id: install_pip_dep
-        shell: bash
-        run: |
-          pip install --no-cache-dir --user cython
-          pip install --no-cache-dir --user pygraphviz pygments
-
       # Install BALSAMIC
       - name: Install BALSAMIC
         id: install_balsamic
