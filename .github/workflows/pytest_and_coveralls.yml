@@ -30,9 +30,6 @@ jobs:
           environment-file: BALSAMIC/conda/balsamic.yaml
           python-version: 3.6
           auto-activate-base: false
-        run: |
-          conda info
-          conda list
 
       # Install BALSAMIC
       - name: Install BALSAMIC
