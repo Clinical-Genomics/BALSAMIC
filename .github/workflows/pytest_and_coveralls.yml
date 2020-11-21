@@ -38,8 +38,8 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate balsamic
-          python -m pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt
-          python -m pip install -e .
+          pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt
+          pip install -e .
 
       # Run PyTest
       - name: Run PyTest
@@ -47,6 +47,8 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate balsamic
+          which balsamic
+          balsamic --help
           py.test --cov=BALSAMIC -rsxv tests/*
 
       # Run Coveralls
