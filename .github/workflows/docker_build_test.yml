@@ -3,9 +3,11 @@ name: build an push docker containers
 # Tigger building and testing container only on pull requests
 on:
   push:
-    branches:
-      - '!master'
-      - '!develop'
+    branches-ignore:
+      - master
+      - develop
+    tags-ignore:
+      - "**"
 
 jobs:
   main:
