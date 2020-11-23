@@ -267,5 +267,8 @@ rule all:
         quality_control_results + analysis_specific_results
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
-    shell:
-        "date +'%Y-%m-%d T%T %:z' > {output}"
+    run:
+        import datetime
+
+        with open(output, mode='w') as finish_file:
+            finish_file.write('%s\n' datetime.datetime.now())
