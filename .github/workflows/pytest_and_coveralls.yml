@@ -1,0 +1,59 @@
+name: PyTest and Coveralls
+
+on: ["push", "pull_request"]
+
+jobs:
+  pytest_coveralls:
+    name: run PyTest
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false 
+      matrix: 
+        python-version: [3.6]
+
+    steps:
+      # Checkout BALSAMIC
+      - name: Git checkout
+        id: git_checkout
+        uses: actions/checkout@v2
+
+      # Get branch name
+      - name: Get branch name
+        id: get_branch_name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+
+      # Conda env create
+      - name: setup conda
+        id: setup_conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: balsamic
+          environment-file: BALSAMIC/conda/balsamic.yaml
+          python-version: ${{ matrix.python-version }} 
+
+      # Install BALSAMIC
+      - name: Install BALSAMIC
+        id: install_balsamic
+        shell: bash -l {0}
+        run: |
+          conda activate balsamic
+          pip install --no-cache-dir -r requirements-dev.txt -r requirements.txt
+          pip install -e .
+
+      # Run PyTest
+      - name: Run PyTest
+        id: pytest
+        shell: bash -l {0}
+        run: |
+          conda activate balsamic
+          py.test --cov-report=xml --cov=BALSAMIC -rsxv tests/*
+
+      # Run Codecov 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          fail_ci_if_error: true

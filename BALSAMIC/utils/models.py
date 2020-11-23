@@ -148,15 +148,12 @@ class VCFModel(BaseModel):
     tnsnv: VarcallerAttribute
     manta: VarcallerAttribute
     cnvkit: VarcallerAttribute
-    mutect: VarcallerAttribute
     vardict: VarcallerAttribute
-    strelka: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnhaplotyper: VarcallerAttribute
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
-    strelka_germline: VarcallerAttribute
 
 
 class AnalysisModel(BaseModel):

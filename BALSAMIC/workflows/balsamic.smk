@@ -125,7 +125,18 @@ else:
         "snakemake_rules/variant_calling/germline.rule",
         "snakemake_rules/variant_calling/split_bed.rule"
     ]
-    germline_caller = ["haplotypecaller", "strelka_germline", "manta_germline"]
+
+    germline_caller_SNV = get_variant_callers(config=config, analysis_type="paired",
+                                              workflow_solution="BALSAMIC",
+                                              mutation_type="SNV",
+                                              mutation_class="germline")
+    germline_caller_SV = get_variant_callers(config=config, analysis_type="paired",
+                                             workflow_solution="BALSAMIC",
+                                             mutation_type="SV",
+                                             mutation_class="germline")
+
+    germline_caller = germline_caller_SNV + germline_caller_SV
+
 
     if sentieon:
         germline_caller.append("dnascope")
