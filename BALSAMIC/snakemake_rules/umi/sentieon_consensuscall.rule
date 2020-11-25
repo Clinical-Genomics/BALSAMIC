@@ -1,29 +1,20 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_script_path
-from BALSAMIC.utils.rule import get_threads
-from BALSAMIC.utils.models import UMIworkflowConfig
-from BALSAMIC.utils.constants import umiworkflow_params
-
-paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
-
 # UMI-consensus calling
 rule sentieon_consensuscall_umi:
     input:
-        sam_consensus = umi_dir + "{sample}.umialign.bam"
+        sam_consensus = umi_dir + "{case_name}.umialign.bam"
     output:
-        fastq_consensus = umi_dir + "{sample}.consensuscall.fastq.gz"
+        fastq_consensus = temp(umi_dir + "{case_name}.consensuscall.fastq.gz")
     benchmark:
-        Path(benchmark_dir + "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_consensuscall_umi_{case_name}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tag = paramsumi.consensuscall.tag, 
         ip_format = paramsumi.consensuscall.align_format,
-        sample_id = "{sample}"
+        sample_id = '{case_name}'
     threads: 
         get_threads(cluster_config, "sentieon_consensuscall_umi")
     message: 
@@ -43,17 +34,17 @@ rule sentieon_consensuscall_umi:
 rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fq_consensus = umi_dir + "{sample}.consensuscall.fastq.gz"
+        fq_consensus = umi_dir + "{case_name}.consensuscall.fastq.gz"
     output:
-        align_consensus = umi_dir + "{sample}.consensusalign.bam"
+        align_consensus = umi_dir + "{case_name}.consensusaligned.bam"
     benchmark:
-        Path(benchmark_dir + "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_bwa_umiconsensus_{case_name}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sheader = paramsumi.common.align_header,
         ip_bases = paramsumi.common.align_intbases,
-        sample_id = "{sample}"
+        sample_id = "{case_name}"
     threads: 
         get_threads(cluster_config, "sentieon_bwa_umiconsensus")
     message:
@@ -76,17 +67,17 @@ rule sentieon_bwa_umiconsensus:
 # Filter consensus called reads based on 'XZ' filtering
 rule sentieon_consensusfilter_umi:
     input:
-        umi_dir + "{sample}.consensusalign.bam"
+        umi_dir + "{case_name}.consensusaligned.bam"
     output:
-        umi_dir + "{sample}.consensusfiltered.bam"
+        umi_dir + "{case_name}.consensusfiltered.bam"
     benchmark:
-        Path(benchmark_dir + "sentieon_consensusfilter_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_consensusfilter_umi_{case_name}.tsv").as_posix()
     singularity:
         singularity_image
     params:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = paramsumi.consensuscall.filter_minreads,
-        sample_id = "{sample}",
+        sample_id = '{case_name}',
         conda = get_conda_env(config["conda_env_yaml"],"samtools")
     threads:
         get_threads(cluster_config, "sentieon_consensusfilter_umi")
