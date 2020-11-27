@@ -24,7 +24,7 @@ rule sentieon_TN_corealign:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
@@ -56,7 +56,7 @@ rule sentieon_TNsnv:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
@@ -88,7 +88,7 @@ rule sentieon_TNhaplotyper:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
@@ -124,7 +124,7 @@ rule sentieon_TNscope:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
@@ -153,7 +153,7 @@ rule sentioen_filter_TNscope:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 export SENTIEON_TNSCOPE={params.sentieon_ml_tnscope}

@@ -34,7 +34,7 @@ rule sentieon_TNsnv_tumor_only:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
@@ -67,7 +67,7 @@ rule sentieon_TNhaplotyper_tumor_only:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
@@ -100,7 +100,7 @@ rule sentieon_TNscope_tumor_only:
     shell:
         """
 mkdir -p {params.tmpdir};
-export TMPDIR={parms.tmpdir};
+export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
