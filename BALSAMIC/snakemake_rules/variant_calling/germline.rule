@@ -16,15 +16,17 @@ rule haplotypecaller:
     benchmark:
         benchmark_dir + 'haplotypecaller_' + "{sample}.{bedchrom}.haplotypecaller.tsv"
     shell:
-        "source activate {params.conda}; "
-        "mkdir -p {params.tmpdir}; "
-        "export TMPDIR={params.tmpdir}; "
-        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
-            "-T HaplotypeCaller "
-            "-R {input.fa} "
-            "-I {input.bam} "
-            "-L {input.bed} "
-            "| bgzip > {output}; " 
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+-T HaplotypeCaller \
+-R {input.fa} \
+-I {input.bam} \
+-L {input.bed} \
+| bgzip > {output}; 
+        """
         
 
 
@@ -40,11 +42,13 @@ rule haplotypecaller_merge:
     benchmark:
         benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.vcf.gz" 
     shell:
-        "source activate {params.conda}; "
-        "mkdir -p {params.tmpdir}; "
-        "export TMPDIR={params.tmpdir}; "
-        "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output}; "
-        "tabix -f -p vcf {output}; "
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output};
+tabix -f -p vcf {output};
+        """
 
 
 rule manta_germline:
@@ -63,16 +67,17 @@ rule manta_germline:
     benchmark:
         benchmark_dir + 'manta_germline_' + "{sample}.manta_germline.tsv"
     shell:
-        "source activate {params.conda}; "
-        "rm -rf {params.tmpdir}; "
-        "configManta.py "
-            "--bam={input.bam} "
-            "--referenceFasta={input.fa} "
-            "--runDir={params.tmpdir}; "
-        "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-        "cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final}; "
-        "tabix -p vcf -f {output.final}; "
-        
+        """
+source activate {params.conda};
+rm -rf {params.tmpdir};
+configManta.py \
+--bam={input.bam} \
+--referenceFasta={input.fa} \
+--runDir={params.tmpdir};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
+tabix -p vcf -f {output.final};
+        """
 
 
 rule sentieon_DNAscope:
