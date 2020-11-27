@@ -19,9 +19,7 @@ benchmark_dir = config["analysis"]["benchmark"]
 umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
-table_dir = get_result_dir(config) + "/tables/"
-plot_dir = get_result_dir(config) + "/plots/"
-qc_dir = get_result_dir(config) + "/qc/"
+umi_qc_dir = get_result_dir(config) + "/qc/"
 
 singularity_image = config["singularity"]["image"]
 
@@ -73,12 +71,12 @@ NEW_CASE_NAME = expand("{case_nm}.{step}", case_nm = CASE_NAME, step=FILTERED_ST
 # Define outputs
 analysis_output = [ expand(vcf_dir + "SNV.somatic.{case_name}.{step}.{var_caller}.vcf.gz", case_name=CASE_NAME, step =FILTERED_STEPS, var_caller=VAR_CALLER), 
 expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.{filters}.vcf.gz", var_type= "SNV", case_name=NEW_CASE_NAME, var_caller= VAR_CALLER, filters=["all", "pass"]),
-expand(qc_dir + "{case_name}.{step}.umimetrics", case_name=CASE_NAME, step=FILTERED_STEPS),
-expand(qc_dir + "{case_name}.{step}.collect_hsmetric_umi", case_name=CASE_NAME, step=FILTERED_STEPS),
-expand(qc_dir + "{case_name}.{step}.mean_family_depth", case_name=CASE_NAME, step = FILTERED_STEPS),
-expand(qc_dir + "{case_name}.{var_caller}.noiseAF", case_name=CASE_NAME, var_caller=['TNscope.umi']),
-expand(plot_dir + "{case_name}.{var_caller}.AFplot.pdf", case_name=CASE_NAME, var_caller=['TNscope.umi']),
-expand(table_dir + "{case_name}.{step}.{varcaller}.AFtable.txt", case_name=CASE_NAME, varcaller=VAR_CALLER, step= FILTERED_STEPS) ] 
+expand(umi_qc_dir + "{case_name}.{step}.umi.metrics", case_name=CASE_NAME, step=FILTERED_STEPS),
+expand(umi_qc_dir + "{case_name}.{step}.umi.collect_hsmetric", case_name=CASE_NAME, step=FILTERED_STEPS),
+expand(umi_qc_dir + "{case_name}.{step}.umi.mean_family_depth", case_name=CASE_NAME, step = FILTERED_STEPS),
+expand(umi_qc_dir + "{case_name}.{var_caller}.noiseAF", case_name=CASE_NAME, var_caller=['TNscope.umi']),
+expand(umi_qc_dir + "{case_name}.{var_caller}.AFplot.pdf", case_name=CASE_NAME, var_caller=['TNscope.umi']),
+expand(umi_qc_dir + "{case_name}.{step}.{varcaller}.AFtable.txt", case_name=CASE_NAME, varcaller=VAR_CALLER, step= FILTERED_STEPS) ] 
 
 config["rules"] = umi_call + variant_call + generate_tables + annotate_vcf + qc
 
