@@ -10,7 +10,7 @@ rule vardict_tumor_normal:
   output:
     temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
   params:
-    tmpdir = tmp_dir,
+    tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="vardict_tumor_normal_{sample}"),
     af = "0.005",
     max_pval = "0.9",
     max_mm = "4.5",
@@ -22,23 +22,21 @@ rule vardict_tumor_normal:
   benchmark:
     benchmark_dir + 'vardict_tumor_normal_' + "{bedchrom}.vardict_tumor_normal.tsv"
   shell:
-    "source activate {params.conda}; "
-    "export PERL5LIB=;"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xmx32G\"'; "
-    "vardict-java -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
-        "-b \"{input.bamT}|{input.bamN}\" "
-        " -th {threads} "
-        "{params.col_info} {input.bed} "
-        "| testsomatic.R "
-        "| var2vcf_paired.pl -P {params.max_pval} "
-        "-m {params.max_mm} -M -f {params.af} -N {params.name} "
-        "| bgzip > {output}; "
-    "tabix -p vcf {output}; "
-    "source deactivate;"
+    """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx32G\"';
+vardict-java -U -u -I 600 -G {input.fa} -f {params.af} -N {params.name} \
+-b \"{input.bamT}|{input.bamN}\" \
+-th {threads} \
+{params.col_info} {input.bed} \
+| testsomatic.R \
+| var2vcf_paired.pl -P {params.max_pval} \
+-m {params.max_mm} -M -f {params.af} -N {params.name} \
+| bgzip > {output};
+tabix -p vcf {output};
+    """
 
 rule vardict_merge:
   input:
@@ -48,174 +46,23 @@ rule vardict_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
-    tmpdir = tmp_dir,
+    tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="vardict_merge"+config["analysis"]["case_id"]),
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
     name = config["analysis"]["case_id"],
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
   shell:
-    "source activate {params.conda} ; "
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output.vcf}; " 
-    "tabix -f -p vcf {output.vcf}; "
-    "echo -e \"{params.name}\\tTUMOR\n{params.name}-match\\tNORMAL\" > {output.namemap}; " 
-    "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
-    "echo -e \"{params.name}-match\" > {output.namemap}.normal; " 
-    "echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml}; "
-    "source deactivate;" 
-
-
-rule mutect2_tumor_normal:
-  input:
-    fa = config["reference"]["reference_genome"],
-    dbsnp = config["reference"]["dbsnp"],
-    cosmic = config["reference"]["cosmic"],
-    bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
-    bamN = bam_dir + "normal.sorted." + picarddup + ".bsrcl.merged.bam",
-    bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
-  output:
-    temp(vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz")
-  params:
-    tmpdir = tmp_dir,
-    result_dir = vcf_dir + "mutect/",
-    conda = get_conda_env(config["conda_env_yaml"],"gatk")
-  threads: get_threads(cluster_config, "mutect2_tumor_normal")
-  singularity: singularity_image
-  benchmark:
-    benchmark_dir + 'mutect2_tumor_normal_' + "{bedchrom}.mutect2_tumor_normal.tsv"
-  shell:
-    "source activate {params.conda};"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "mkdir -p {params.result_dir}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
-        "-T MuTect2 "
-        "-R {input.fa} "
-        "--cosmic {input.cosmic} "
-        "--dbsnp {input.dbsnp} "
-        "-I:normal {input.bamN} "
-        "-I:tumor {input.bamT} "
-        "--useNewAFCalculator "
-        "--disable_auto_index_creation_and_locking_when_reading_rods "
-        "-L {input.bed} "
-    " | bgzip > {output}; "
-    "tabix -p vcf {output}; " 
-    
-
-rule mutect2_merge:
-  input:
-    expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist) 
-  output:
-    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
-    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
-    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"
-  params:
-    tmpdir = tmp_dir,
-    name = config["analysis"]["case_id"],
-    conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
-  singularity: singularity_image
-  benchmark:
-    benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
-  shell:
-    "source activate {params.conda} ; "
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output.vcf}; "
-    "tabix -f -p vcf {output.vcf}; "
-    "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
-    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
-    "echo -e \"NORMAL\" > {output.namemap}.normal; " 
-    "echo '{{ vcf: {{ mutect: {{ name: mutect2, path: {output.vcf} }} }} }}' > {output.yaml}; "
-    "source deactivate;" 
-
-rule strelka_tumor_normal:
-  input:
-    fa = config["reference"]["reference_genome"],
-    bamN = bam_dir + "normal.merged.bam", 
-    bamT = bam_dir + "tumor.merged.bam",
-    mantaindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz" 
-  output:
-    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.sample_name_map",
-    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.yaml",
-    final = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".strelka.vcf.gz", 
-    default = expand(vcf_dir + "strelka/results/variants/{vcf_file}", vcf_file=["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"])
-  params:
-    name = config["analysis"]["case_id"],
-    tmpdir = vcf_dir + "strelka/", 
-    runmode = "local",
-    conda = get_conda_env(config["conda_env_yaml"],"strelka"),
-  threads: get_threads(cluster_config, "strelka_tumor_normal")
-  singularity: singularity_image
-  benchmark:
-    benchmark_dir + 'strelka_tumor_normal_' + config["analysis"]["case_id"] + ".strelka_tumor_normal.tsv"
-  shell:
-    "source activate {params.conda};"
-    "rm -rf {params.tmpdir}; "
-    "configureStrelkaSomaticWorkflow.py "
-        "--normalBam={input.bamN} "
-        "--tumorBam={input.bamT} "
-        "--referenceFasta={input.fa} "
-        "--indelCandidates {input.mantaindel} "
-        "--outputCallableRegions "
-        "--exome "
-        "--runDir={params.tmpdir}; "
-    "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-    "bcftools concat -a "
-        "-o {output.final} "
-        "-O z "
-        "{output.default}; "
-    "tabix -f -p vcf {output.final}; "
-    "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
-    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
-    "echo -e \"NORMAL\" > {output.namemap}.normal; " 
-    "echo '{{ vcf: {{ strelka: {{ name: strelka , path: {output.final} }} }} }}' > {output.yaml}; "
-    
-
-
-rule somatic_snv_indel_vcf_merge:
-    input:
-        name_map = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.sample_name_map", var_caller=somatic_caller_snv),
-        varcall_yaml = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{var_caller}.yaml", var_caller=somatic_caller_snv),
-        refdict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
-        reffasta = config["reference"]["reference_genome"],
-        bamN = bam_dir + "normal.merged.bam", 
-        bamT = bam_dir + "tumor.merged.bam",
-    output:
-        vcfmerge = vcf_dir + "vcfmerge/SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz",
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
-    params:
-        workdir = vcf_dir + "/vcfmerge",
-        conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
-    threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
-    singularity: singularity_image 
-    benchmark:
-        benchmark_dir + "somatic_snv_inde_vcf_merge.tsv"
-    shell:
-        "source activate {params.conda}; "
-        "mkdir -p {params.workdir}; "
-        "cat {input.name_map} > {params.workdir}/sample_name.map; "
-        "echo '{{bam: {{NORMAL: {input.bamN}, TUMOR: {input.bamT} }} }}' | "
-          " yq -s '{{ vcf: map(.vcf) | add }} * .[0]'  - {input.varcall_yaml} "
-          " > {params.workdir}/vcf.yaml; "
-        "vcfmerge --sample-config {params.workdir}/vcf.yaml "
-          " --reference-dict {input.refdict} "
-          " --reference {input.reffasta} "
-          " --sample-names {params.workdir}/sample_name.map "
-          " --aggr-func max "
-          " --output-dir {params.workdir} "
-          " --mapq 10 "
-          " --include-optional "
-          " --output-vcf {output.vcfmerge}; " 
-        "cp {output.vcfmerge} {output.vcf}; "
-        
+    """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf}; 
+tabix -f -p vcf {output.vcf};
+echo -e \"{params.name}\\tTUMOR\\n{params.name}-match\\tNORMAL\" > {output.namemap}; 
+echo -e \"{params.name}\" > {output.namemap}.tumor;
+echo -e \"{params.name}-match\" > {output.namemap}.normal; 
+echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml}; "
+    """
 
 
 rule sentieon_TNhaplotyper:
@@ -229,7 +76,7 @@ rule sentieon_TNhaplotyper:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="sentieon_TNhaplotyper"+config["analysis"]["case_id"]),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -241,11 +88,9 @@ rule sentieon_TNhaplotyper:
         benchmark_dir + 'sentieon_TNhaplotyper_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}}; 
-mkdir -p ${{tmpdir}}; 
-export TMPDIR=${{tmpdir}}; 
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir}; 
+export TMPDIR={params.tmpdir}; 
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR --normal_sample NORMAL --dbsnp {input.dbsnp} {output.vcf}

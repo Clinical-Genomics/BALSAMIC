@@ -3,6 +3,8 @@
 
 import os
 import logging
+import tempfile
+
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -20,7 +22,7 @@ shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
 
-tmp_dir = os.path.join(get_result_dir(config), "tmp")
+tmp_dir = tempfile.mkstemp(prefix=os.path.join(get_result_dir(config), "tmp"))
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"

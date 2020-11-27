@@ -19,7 +19,7 @@ rule manta_tumor_normal:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
     params:
-        tmpdir = vcf_dir + "manta/",
+        tmpdir = tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="manta_tumor_normal"+config["analysis"]["case_id"]),
         runmode = "local",
         conda = get_conda_env(config["conda_env_yaml"],"manta")
     singularity: singularity_image

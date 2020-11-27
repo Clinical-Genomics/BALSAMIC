@@ -34,7 +34,7 @@ rule cnvkit_paired:
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="cnvkit_paired_"+config["analysis"]["case_id"]),
         extra = cnvkit_params,
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 
         name = config["analysis"]["case_id"],
@@ -47,10 +47,8 @@ rule cnvkit_paired:
         benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
     shell:
         "source activate {params.conda}; "
-        "rand_str=$(openssl rand -hex 5); "
-        "tmpdir={params.tmpdir}/${{rand_str}}; "
-        "mkdir -p ${{tmpdir}}; "
-        "export TMPDIR=${{tmpdir}}; "
+        "mkdir -p {params.tmpdir}; "
+        "export TMPDIR={params.tmpdir}; "
         "if [ {params.target} != None ]; then "
         "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
         "fi; "
