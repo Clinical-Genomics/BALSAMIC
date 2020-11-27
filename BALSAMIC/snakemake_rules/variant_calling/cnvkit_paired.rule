@@ -17,57 +17,78 @@ else:
     cnvkit_params += f" --targets {cnv_dir}/targets.bed "
     cnvkit_params += " --target-avg-size 50 "
 
-rule cnvkit_paired:
+rule cnvkit_batch_paired:
     input:
         fasta = config["reference"]["reference_genome"],
+        bamN = bam_dir + normal_bam + ".bam",
+        bamT = bam_dir + tumor_bam + ".bam",
         refflat = config["reference"]["refflat"],
-        bamN = bam_dir + normal_bam + ".bam", 
-        bamT = bam_dir + tumor_bam + ".bam"
     output:
-        vcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"),
-        namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"),
-        cns = cnv_dir + tumor_bam + ".cns",
         cnr = cnv_dir + tumor_bam + ".cnr",
-        scatter = cnv_dir + tumor_bam + "-scatter.pdf",
+        cns = cnv_dir + tumor_bam + ".cns",
         diagram = cnv_dir + tumor_bam + "-diagram.pdf",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
+        namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"),
+        scatter = cnv_dir + tumor_bam + "-scatter.pdf",
+        vcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"),
+    benchmark:
+        benchmark_dir + "cnvkit_batch_paired_" + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        singularity_image
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="cnvkit_paired_" + config["analysis"]["case_id"]),
-        extra = cnvkit_params,
-        target = config["panel"]["capture_kit"] if "panel" in config else "None", 
-        name = config["analysis"]["case_id"],
-        normal_name = normal_bam,
-        tumor_name = tumor_bam,
         cnv_dir = cnv_dir,
         conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
-    singularity: singularity_image
-    benchmark:
-        benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".cnvkit_paired.tsv"
+        extra = cnvkit_params,
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
+        name = config["analysis"]["case_id"],
+        normal_name = normal_bam,
+        target = config["panel"]["capture_kit"] if "panel" in config else "None",
+        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="cnvkit_batch_paired_" + config["analysis"]["case_id"]),
+        tumor_name = tumor_bam,
     shell:
-        "source activate {params.conda}; "
-        "mkdir -p {params.tmpdir}; "
-        "export TMPDIR={params.tmpdir}; "
-        "if [ {params.target} != None ]; then "
-        "cnvkit.py target {params.target} --annotate {input.refflat} --split -o {params.cnv_dir}/targets.bed; "
-        "fi; "
-        "cnvkit.py batch {input.bamT} "
-            "--normal {input.bamN} " 
-            "{params.extra} "
-            "--output-reference {params.cnv_dir}/Reference.cnn "
-            "--scatter --diagram "
-            "--output-dir {params.cnv_dir}; "
-        "cnvkit.py genemetrics {output.cnr} "
-            "-s {output.cns} "
-            "--drop-low-coverage -y "
-            "--output {output.gene_metrics}; "
-        "cnvkit.py breaks {output.cnr} {output.cns} "
-            "| cut -f1 | sort -u > {output.gene_breaks}; "
-        "cnvkit.py export vcf {output.cns} --cnr {output.cnr} "
-            "-o {params.cnv_dir}/{params.tumor_name}.vcf --sample-id TUMOR; "
-        "bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf; "
-        "tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz; "
-        "bcftools sort -o {output.vcf} --temp-dir ${{tmpdir}} -O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; " 
-        "tabix -p vcf -f {output.vcf}; "
-        "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+if [ {params.target} != None ]; then
+cnvkit.py target {params.target} \
+--annotate {input.refflat} \
+--split \
+-o {params.cnv_dir}/targets.bed;
+fi;
+
+cnvkit.py batch {input.bamT} \
+--normal {input.bamN} \
+{params.extra} \
+--output-reference {params.cnv_dir}/Reference.cnn \
+--scatter --diagram \
+--output-dir {params.cnv_dir};
+
+cnvkit.py genemetrics {output.cnr} \
+-s {output.cns} \
+--drop-low-coverage -y \
+--output {output.gene_metrics};
+
+cnvkit.py breaks {output.cnr} {output.cns} \
+| cut  -f1 | sort -u > {output.gene_breaks};
+
+cnvkit.py export vcf {output.cns} \
+--cnr {output.cnr} \
+-o {params.cnv_dir}/{params.tumor_name}.vcf \
+--sample-id TUMOR;
+
+bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf;
+
+tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz;
+
+bcftools sort \
+-o {output.vcf} \
+--temp-dir {params.tmpdir} \
+-O z {params.cnv_dir}/{params.tumor_name}.vcf.gz;
+
+tabix -p vcf -f {output.vcf};
+
+echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
+        """
