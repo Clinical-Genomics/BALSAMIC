@@ -42,7 +42,7 @@ rule haplotypecaller_merge:
     shell:
         "source activate {params.conda}; "
         "mkdir -p {params.tmpdir}; "
-        "export TMPDIR={parmams.tmpdir}; "
+        "export TMPDIR={params.tmpdir}; "
         "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output}; "
         "tabix -f -p vcf {output}; "
 
