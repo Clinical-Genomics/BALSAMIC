@@ -13,7 +13,7 @@ rule sentieon_TN_corealign:
     output:
         bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam"
     params:
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="sentieon_TN_corealign"+config["analysis"]["case_id"]),
+        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="sentieon_TN_corealign" + config["analysis"]["case_id"]),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TN_corealign')
@@ -160,4 +160,3 @@ export SENTIEON_TNSCOPE={params.sentieon_ml_tnscope}
 
 {params.sentieon_exec} driver -r {input.ref} --algo TNModelApply -m {params.sentieon_ml_tnscope} -v {input.tnscope_vcf} {output.tnscope_filtered_vcf}
         """
-
