@@ -4,11 +4,11 @@
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
 rule picard_umiaware:
     input:
-        bam = umi_dir + "{case_name}.{step}.bam"
+        bam = umi_dir + "{case_name}.{step}.umi.bam"
     output:
-        bam = qc_dir + "{case_name}.{step}.picard.umiaware.bam",
-        duplicates = qc_dir + "{case_name}.{step}.duplicatemetrics",
-        umimetrics = qc_dir + "{case_name}.{step}.umimetrics"
+        bam = umi_qc_dir + "{case_name}.{step}.picard.umiaware.bam",
+        duplicates = umi_qc_dir + "{case_name}.{step}.umi.duplicatemetrics",
+        umimetrics = umi_qc_dir + "{case_name}.{step}.umi.metrics"
     benchmark:
         Path(benchmark_dir + "picard_umiaware_{case_name}_{step}.tsv").as_posix()
     singularity: 
@@ -36,10 +36,10 @@ rule picard_collecthsmetrics_umi:
     input:
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
         bed = config["panel"]["capture_kit"],
-        bam = umi_dir + "{case_name}.{step}.bam",
+        bam = umi_dir + "{case_name}.{step}.umi.bam",
         fa = config["reference"]["reference_genome"]
     output:
-        mrkdup = qc_dir + "{case_name}.{step}.collect_hsmetric_umi"
+        mrkdup = umi_qc_dir + "{case_name}.{step}.umi.collect_hsmetric"
     benchmark:
         Path(benchmark_dir + "picard_collecthsmetrics_umi_{case_name}_{step}.tsv").as_posix()
     singularity:
@@ -71,10 +71,10 @@ O={output.mrkdup};
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
 rule samtools_view_calculatemeanfamilydepth_umi:
     input:
-        bam = umi_dir + "{case_name}.{step}.bam"
+        bam = umi_dir + "{case_name}.{step}.umi.bam"
     output:
-        temp_fl = temp (qc_dir + "{case_name}.{step}.temp.fl"),
-        totalsum = qc_dir + "{case_name}.{step}.mean_family_depth"
+        temp_fl = temp (umi_qc_dir + "{case_name}.{step}.umi.temp.fl"),
+        totalsum = umi_qc_dir + "{case_name}.{step}.umi.mean_family_depth"
     benchmark:
         Path(benchmark_dir + "samtools_view_calculatemeanfamilydepth_umi_{case_name}_{step}.tsv").as_posix()
     singularity:
@@ -112,9 +112,9 @@ rule bcftools_query_calculatenoiseAF_umi:
         umiextract = vcf_dir + "SNV.somatic.{case_name}.consensusaligned.TNscope.umi.vcf.gz",
         consensuscall = vcf_dir + "SNV.somatic.{case_name}.consensusfiltered.TNscope.umi.vcf.gz"
     output:
-        umiextractAF = temp (qc_dir + "{case_name}.TNscope.umi.consensusaligned.AF.txt"),
-        consensuscallAF = temp (qc_dir + "{case_name}.TNscope.umi.consensusfiltered.AF.txt"),
-        noiseAF = qc_dir + "{case_name}.TNscope.umi.noiseAF"
+        umiextractAF = temp (umi_qc_dir + "{case_name}.TNscope.umi.consensusaligned.AF.txt"),
+        consensuscallAF = temp (umi_qc_dir + "{case_name}.TNscope.umi.consensusfiltered.AF.txt"),
+        noiseAF = umi_qc_dir + "{case_name}.TNscope.umi.noiseAF"
     benchmark:
         Path(benchmark_dir + "bcftools_query_calculatenoiseAF_umi_{case_name}.tsv").as_posix()
     singularity:
@@ -153,10 +153,10 @@ END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' \
 # Plot the TNscope calculated AFs before and after consensuscall
 rule seaborn_densityplot_umi:
     input:
-        table1 = qc_dir + "{case_name}.TNscope.umi.consensusaligned.AF.txt",
-        table2 = qc_dir + "{case_name}.TNscope.umi.consensusfiltered.AF.txt"
+        table1 = umi_qc_dir + "{case_name}.TNscope.umi.consensusaligned.AF.txt",
+        table2 = umi_qc_dir + "{case_name}.TNscope.umi.consensusfiltered.AF.txt"
     output:
-        AF_plot = plot_dir + "{case_name}.TNscope.umi.AFplot.pdf"
+        AF_plot = umi_qc_dir  + "{case_name}.TNscope.umi.AFplot.pdf"
     benchmark:
         Path(benchmark_dir + "seaborn_densityplot_umi_{case_name}.tsv").as_posix()
     params:

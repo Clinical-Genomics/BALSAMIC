@@ -6,7 +6,7 @@ rule bcftools_query_generatebackgroundaf_umitable:
     input:
         vcf = vcf_dir + "SNV.somatic.{case_name}.{step}.{var_caller}.vcf.gz"
     output:
-        AF = table_dir + "{case_name}.{step}.{var_caller}.AFtable.txt"
+        AF = umi_qc_dir + "{case_name}.{step}.{var_caller}.AFtable.txt"
     benchmark:
         Path(benchmark_dir + "bcftools_query_generatebackgroundaf_umitable_{case_name}_{step}_{var_caller}.tsv").as_posix()
     singularity:
