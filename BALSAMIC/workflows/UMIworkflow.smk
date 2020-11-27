@@ -4,8 +4,11 @@
 import os
 import logging
 
-from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.constants import RULE_DIRECTORY
+from BALSAMIC.utils.rule import (get_conda_env, get_threads, get_result_dir, 
+                                 get_sample_type, get_script_path, get_vcf)
+from BALSAMIC.utils.models import UMIworkflowConfig
+from BALSAMIC.utils.constants import RULE_DIRECTORY, VCFANNO_TOML, umiworkflow_params
+from BALSAMIC.utils.workflowscripts import get_densityplot
 
 LOG = logging.getLogger(__name__)
 
@@ -50,27 +53,32 @@ variant_call = [
     "snakemake_rules/umi/varcall_vardict.rule"
 ]
 
-annotate_vcf = ["snakemake_rules/umi/annotate_vep.rule"]
+annotate_vcf = ["snakemake_rules/annotation/vep.rule"]
 
 qc = ["snakemake_rules/umi/qc_umi.rule"]
 
 generate_tables = ["snakemake_rules/umi/generate_AF_tables.rule"]
 
+# parse parameters as workflow constants
+paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
+
 # Define wildcards
 SAMPLES = config["samples"]
-VAR_CALLER = ["TNscope","vardict"]
-ALL_STEPS = ["consensusalign","consensusfiltered", "umialign"]
-FILTERED_STEPS = ["consensusalign","consensusfiltered"]
+CASE_NAME = config["analysis"]["case_id"]
+VAR_CALLER = ["TNscope.umi","vardict.umi"]
+ALL_STEPS = ["consensusaligned","consensusfiltered", "umialign"]
+FILTERED_STEPS = ["consensusaligned","consensusfiltered"]
+NEW_CASE_NAME = expand("{case_nm}.{step}", case_nm = CASE_NAME, step=FILTERED_STEPS)
 
 # Define outputs
-analysis_output = [ expand(vcf_dir + "{sample}.{var_caller}.{step}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, step = ALL_STEPS),
-expand(vep_dir + "{sample}.{var_caller}.{step}.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=["all","pass"], step= FILTERED_STEPS),
-expand(qc_dir + "{sample}.{step}.umimetrics", sample=SAMPLES, step=FILTERED_STEPS),
-expand(qc_dir + "{sample}.{step}.collect_hsmetric_umi", sample=SAMPLES, step=FILTERED_STEPS),
-expand(qc_dir + "{sample}.{step}.mean_family_depth", sample=SAMPLES, step = ALL_STEPS),
-expand(qc_dir + "{sample}.TNscope.noiseAF", sample=SAMPLES),
-expand(plot_dir + "{sample}.TNscope.AFplot.pdf", sample=SAMPLES),
-expand(table_dir + "{sample}.{varcaller}.{step}.AFtable.txt", sample=SAMPLES, varcaller=VAR_CALLER, step= FILTERED_STEPS) ]
+analysis_output = [ expand(vcf_dir + "SNV.somatic.{case_name}.{step}.{var_caller}.vcf.gz", case_name=CASE_NAME, step =FILTERED_STEPS, var_caller=VAR_CALLER), 
+expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.{filters}.vcf.gz", var_type= "SNV", case_name=NEW_CASE_NAME, var_caller= VAR_CALLER, filters=["all", "pass"]),
+expand(qc_dir + "{case_name}.{step}.umimetrics", case_name=CASE_NAME, step=FILTERED_STEPS),
+expand(qc_dir + "{case_name}.{step}.collect_hsmetric_umi", case_name=CASE_NAME, step=FILTERED_STEPS),
+expand(qc_dir + "{case_name}.{step}.mean_family_depth", case_name=CASE_NAME, step = FILTERED_STEPS),
+expand(qc_dir + "{case_name}.{var_caller}.noiseAF", case_name=CASE_NAME, var_caller=['TNscope.umi']),
+expand(plot_dir + "{case_name}.{var_caller}.AFplot.pdf", case_name=CASE_NAME, var_caller=['TNscope.umi']),
+expand(table_dir + "{case_name}.{step}.{varcaller}.AFtable.txt", case_name=CASE_NAME, varcaller=VAR_CALLER, step= FILTERED_STEPS) ] 
 
 config["rules"] = umi_call + variant_call + generate_tables + annotate_vcf + qc
 

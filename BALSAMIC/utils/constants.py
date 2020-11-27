@@ -79,22 +79,10 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
-    "mutect": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC"]
-    },
     "vardict": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC"]
-    },
-    "strelka": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["paired"],
         "workflow_solution": ["BALSAMIC"]
     },
     "manta_germline": {
@@ -109,12 +97,6 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
-    "strelka_germline": {
-        "mutation": "germline",
-        "type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC"]
-    }
 }
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
@@ -446,8 +428,8 @@ REFERENCE_FILES = {
 umiworkflow_params = {
     "common": {
         "align_header":
-        "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
-        "align_intbases": 1000000,
+        "'@RG\\tID:Group\\tSM:{case_name}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+	"align_intbases": 1000000,
         "filter_tumor_af": 0.0005
     },
     "consensuscall": {
