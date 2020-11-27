@@ -12,9 +12,11 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_conda_env, get_threads)
-from BALSAMIC.utils.models import VarCallerFilter
-from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, VARDICT_SETTINGS, VCFANNO_TOML
+                                 get_conda_env, get_threads, get_script_path)
+from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
+from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
+                                    VARDICT_SETTINGS, VCFANNO_TOML, umiworkflow_params)
+from BALSAMIC.utils.workflowscripts import get_densityplot
 
 shell.prefix("set -eo pipefail; ")
 
@@ -32,6 +34,10 @@ vep_dir = get_result_dir(config) + "/vep/"
 qc_dir = result_dir + "qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
+umi_dir = get_result_dir(config) + "/umi/" 
+umi_qc_dir = qc_dir + "umi_qc/"
+
+
 singularity_image = config['singularity']['image']
 
 # picarddup flag
@@ -39,6 +45,9 @@ picarddup = get_picard_mrkdup(config)
 
 # VarDict filter settings
 VARDICT= VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+
+# parse parameters as constants for umiworkflow
+paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -110,12 +119,19 @@ else:
     ])
 
     align_rules = [
-        "snakemake_rules/align/bwa_mem.rule"
+        "snakemake_rules/align/bwa_mem.rule",
+        "snakemake_rules/umi/sentieon_umiextract.rule",
+        "snakemake_rules/umi/sentieon_consensuscall.rule"
     ]
 
 annotation_rules = [
     "snakemake_rules/annotation/vep.rule"
 ]
+
+umiqc_rules = [
+        "snakemake_rules/umi/qc_umi.rule"
+       # "snakemake_rules/umi/generate_AF_tables.rule"
+]    
 
 if config["analysis"]["sequencing_type"] == "wgs":
     variantcalling_rules = ["snakemake_rules/variant_calling/sentieon_germline.rule"]
@@ -182,7 +198,8 @@ else:
             "snakemake_rules/variant_calling/cnvkit_single.rule",
             "snakemake_rules/variant_calling/mergetype_tumor.rule",
             "snakemake_rules/variant_calling/somatic_tumor_only.rule",
-            "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule"
+            "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
+            "snakemake_rules/umi/sentieon_varcall_tnscope.rule"
         ])
 
         somatic_caller_snv = get_variant_callers(config=config,
@@ -223,8 +240,29 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
 if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs":
-    analysis_specific_results.extend(expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
-                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
+                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])),
+                                      expand(vcf_dir + "SNV.somatic.{case_name}.{step}.{var_caller}.vcf.gz", 
+                                            case_name= config["analysis"]["case_id"], 
+                                            step= ["consensusaligned","consensusfiltered"], 
+                                            var_caller=["TNscope.umi"]),
+                                      expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.{filters}.vcf.gz", 
+                                            var_type= "SNV", 
+                                            case_name= expand("{case_nm}.{step}", 
+                                                       case_nm = config["analysis"]["case_id"], 
+                                                       step=["consensusaligned","consensusfiltered"]), 
+                                            var_caller= ["TNscope.umi"], 
+                                            filters=["all", "pass"]),
+                                      expand(umi_qc_dir + "{case_name}.{step}.umi.{metric}",
+                                            case_name = config["analysis"]["case_id"],
+                                            step=["consensusaligned","consensusfiltered"],
+                                            metric = ["collect_hsmetric", "mean_family_depth"]),
+                                      expand(umi_qc_dir + "{case_name}.{var_caller}.{metric}",
+                                             case_name = config["analysis"]["case_id"],
+                                             var_caller = ["TNscope.umi"],
+                                             metric = ["noiseAF", "AFplot.pdf"])]) 
+    config["rules"] = config["rules"] + umiqc_rules
+
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
@@ -275,7 +313,8 @@ if 'delivery' in config:
 
 rule all:
     input:
-        quality_control_results + analysis_specific_results
+        #quality_control_results + analysis_specific_results
+        analysis_specific_results
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
