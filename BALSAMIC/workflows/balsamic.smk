@@ -273,4 +273,4 @@ rule all:
         import datetime
 
         with open(output, mode='w') as finish_file:
-            finish_file.write('%s\n' datetime.datetime.now())
+            finish_file.write('%s\n', datetime.datetime.now())
