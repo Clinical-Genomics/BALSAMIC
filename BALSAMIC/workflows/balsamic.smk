@@ -313,8 +313,7 @@ if 'delivery' in config:
 
 rule all:
     input:
-        #quality_control_results + analysis_specific_results
-        analysis_specific_results
+        quality_control_results + analysis_specific_results
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     shell:
