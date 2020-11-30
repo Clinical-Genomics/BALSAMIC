@@ -68,7 +68,6 @@ rule manta_germline:
     shell:
         """
 source activate {params.conda};
-rm -rf {params.tmpdir};
 configManta.py \
 --bam={input.bam} \
 --referenceFasta={input.fa} \

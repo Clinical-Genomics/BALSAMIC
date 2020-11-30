@@ -24,7 +24,6 @@ rule manta_tumor_only:
         benchmark_dir + 'manta_tumor_only_' + config["analysis"]["case_id"] + ".manta.tsv"
     shell:
       "source activate {params.conda};"
-      "rm -rf {params.tmpdir}; "
       "configManta.py "
           "--tumorBam={input.bamT} "
           "--referenceFasta={input.fa} "
