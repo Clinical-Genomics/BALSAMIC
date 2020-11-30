@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 # DOCKER hub path
-BALSAMIC_DOCKER_PATH = "docker://hassanf/balsamic"
+BALSAMIC_DOCKER_PATH = "docker://clinicalgenomics/balsamic"
 
 # BALSAMIC base dir
 BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
@@ -429,7 +429,7 @@ umiworkflow_params = {
     "common": {
         "align_header":
         "'@RG\\tID:Group\\tSM:{case_name}\\tLB:TargetPanel\\tPL:ILLUMINA'",
-	"align_intbases": 1000000,
+        "align_intbases": 1000000,
         "filter_tumor_af": 0.0005
     },
     "consensuscall": {

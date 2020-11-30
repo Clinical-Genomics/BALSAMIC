@@ -15,12 +15,6 @@ LOG = logging.getLogger(__name__)
 
 @click.command("reference",
                short_help="config workflow for generate reference")
-@click.option("-o",
-              "--outdir",
-              "--out-dir",
-              required=True,
-              help=("Output directory for ref files."
-                    "This path will be used as base path for files"))
 @click.option("-c",
               "--cosmic-key",
               required=True,

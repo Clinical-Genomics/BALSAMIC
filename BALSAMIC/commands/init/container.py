@@ -27,6 +27,7 @@ LOG = logging.getLogger(__name__)
               "--container-version",
               show_default=True,
               default=balsamic_version,
+              type=click.Choice(["develop", "master", balsamic_version]),
               help="Container for BALSAMIC version to download")
 @click.option('-f',
               '--force',
