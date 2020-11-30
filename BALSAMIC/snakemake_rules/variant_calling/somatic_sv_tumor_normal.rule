@@ -15,7 +15,6 @@ rule manta_tumor_normal:
         bamN = bam_dir + normal_bam, 
         bamT = bam_dir + tumor_bam,
     output:
-        candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
     params:

@@ -57,7 +57,6 @@ rule manta_germline:
         bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     output:
         final = vcf_dir + "SV.germline.{sample}.manta_germline.vcf.gz",
-        candidateindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz" 
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         conda = get_conda_env(config["conda_env_yaml"], "manta"),
