@@ -62,7 +62,6 @@ rule manta_germline:
         tmpdir = tempfile.mkstemp(prefix=tmp_dir),
         conda = get_conda_env(config["conda_env_yaml"], "gatk"),
         runmode = "local",
-        conda = get_conda_env(config["conda_env_yaml"],"manta"),
     threads: get_threads(cluster_config, "manta_germline")
     singularity: singularity_image
     benchmark:
