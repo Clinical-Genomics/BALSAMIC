@@ -26,6 +26,7 @@ java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk
 -I {input.bam} \
 -L {input.bed} \
 | bgzip > {output}; 
+rm -rf {params.tmpdir};
         """
         
 
@@ -48,6 +49,7 @@ mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output};
 tabix -f -p vcf {output};
+rm -rf {params.tmpdir};
         """
 
 
@@ -75,6 +77,7 @@ configManta.py \
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
 tabix -p vcf -f {output.final};
+rm -rf {params.tmpdir};
         """
 
 
@@ -103,4 +106,5 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} --interval {input.interval} --algo DNAscope -d {input.dbsnp} {output.vcf}
+rm -rf {params.tmpdir};
         """

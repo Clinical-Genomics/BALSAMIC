@@ -28,4 +28,5 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal_table} --algo DNAscope -d {input.dbsnp} {output.vcf}
+rm -rf {params.tmpdir};
       """

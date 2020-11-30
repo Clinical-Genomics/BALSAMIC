@@ -36,4 +36,5 @@ rule manta_tumor_normal:
         "cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final}; "
         "tabix -p vcf -f {output.final}; "
         "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
+        "rm -rf {params.tmpdir}; "
         

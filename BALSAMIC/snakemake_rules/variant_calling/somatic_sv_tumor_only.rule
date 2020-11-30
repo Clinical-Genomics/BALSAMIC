@@ -32,4 +32,5 @@ rule manta_tumor_only:
       "cp {params.tmpdir}/results/variants/tumorSV.vcf.gz {output.final}; "
       "tabix -p vcf -f {output.final}; "
       "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
+      "rm -rf {params.tmpdir};"
       

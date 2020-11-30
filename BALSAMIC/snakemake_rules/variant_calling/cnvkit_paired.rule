@@ -91,4 +91,6 @@ bcftools sort \
 tabix -p vcf -f {output.vcf};
 
 echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
         """

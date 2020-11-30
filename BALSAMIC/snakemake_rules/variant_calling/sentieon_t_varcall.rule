@@ -41,6 +41,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -q {input.recal_data_table} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+rm -rf {params.tmpdir};
         """
 
 rule sentieon_TNhaplotyper_tumor_only:
@@ -74,6 +75,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {input.recal_data_table} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+rm -rf {params.tmpdir};
         """
 
 
@@ -107,4 +109,5 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal} --algo TNscope --tumor_sample {params.tumor} {params.pon} --dbsnp {input.dbsnp} {output.vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+rm -rf {params.tmpdir};
         """

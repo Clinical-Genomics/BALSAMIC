@@ -37,6 +37,7 @@ bwa mem \
 {input.fa} {input.read1} {input.read2} \
 | samtools sort -T {params.tmpdir} --threads {threads} --output-fmt BAM -o {output.bamout} - ;
 samtools index -@ {threads} {output.bamout};
+rm -rf {params.tmpdir};
         """
 
 rule MarkDuplicates:
@@ -66,4 +67,5 @@ MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
 REMOVE_DUPLICATES={params.rm_dup} \
 METRICS_FILE='{output.stats}';
 samtools index {output.mrkdup};
+rm -rf {params.tmpdir};
     """
