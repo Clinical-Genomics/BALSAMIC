@@ -286,5 +286,5 @@ rule all:
     run:
         import datetime
 
-        with open(output, mode='w') as finish_file:
-            finish_file.write('%s\n', datetime.datetime.now())
+        with open(str(output[0]), mode='w') as finish_file:
+            finish_file.write('%s\n' % datetime.datetime.now())
