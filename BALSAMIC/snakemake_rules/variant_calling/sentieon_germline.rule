@@ -10,7 +10,7 @@ rule sentieon_DNAscope:
     output:
         vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="sentieon_DNAscope_{sample}"),
+        tmpdir = tempfile.mkstemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"]

@@ -44,7 +44,7 @@ rule cnvkit_batch_paired:
         name = config["analysis"]["case_id"],
         normal_name = normal_bam,
         target = config["panel"]["capture_kit"] if "panel" in config else "None",
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="cnvkit_batch_paired_" + config["analysis"]["case_id"]),
+        tmpdir = tempfile.mkstemp(prefix=tmp_dir),
         tumor_name = tumor_bam,
     shell:
         """
