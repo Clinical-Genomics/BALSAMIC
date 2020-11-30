@@ -61,7 +61,7 @@ tabix -f -p vcf {output.vcf};
 echo -e \"{params.name}\\tTUMOR\\n{params.name}-match\\tNORMAL\" > {output.namemap}; 
 echo -e \"{params.name}\" > {output.namemap}.tumor;
 echo -e \"{params.name}-match\" > {output.namemap}.normal; 
-echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml}; "
+echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {output.yaml};
     """
 
 
