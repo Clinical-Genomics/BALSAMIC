@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FClinical-Genomics%2FBALSAMIC.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FClinical-Genomics%2FBALSAMIC?ref=badge_shield)
+
 .. raw:: html
 
     <p align="center">
@@ -71,3 +73,7 @@ Snakemake cli given that there is a proper config file created.
 .. |rtfd_badge| image:: https://readthedocs.org/projects/balsamic/badge/?version=latest&style=flat
 .. _rtfd_badge: https://balsamic.readthedocs.io/en/latest
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FClinical-Genomics%2FBALSAMIC.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FClinical-Genomics%2FBALSAMIC?ref=badge_large)
