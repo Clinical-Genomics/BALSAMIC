@@ -18,7 +18,7 @@ rule bwa_mem:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="bwa_mem_{sampple}"),
+        tmpdir = tempfile.mkstemp(prefix=tmp_dir, suffix="bwa_mem_{sample}"),
         conda = get_conda_env(config["conda_env_yaml"],"bwa")
     threads: get_threads(cluster_config, "bwa_mem")
     singularity: singularity_image
