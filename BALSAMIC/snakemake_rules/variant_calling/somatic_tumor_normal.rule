@@ -10,7 +10,7 @@ rule vardict_tumor_normal:
   output:
     temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
   params:
-    tmpdir = tempfile.mkstemp(prefix=tmp_dir),
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     af = "0.005",
     max_pval = "0.9",
     max_mm = "4.5",
@@ -46,7 +46,7 @@ rule vardict_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
-    tmpdir = tempfile.mkstemp(prefix=tmp_dir),
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     conda = get_conda_env(config["conda_env_yaml"], "vardict"),
     name = config["analysis"]["case_id"],
   singularity: singularity_image
@@ -76,7 +76,7 @@ rule sentieon_TNhaplotyper:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         sentieon_exec = config["SENTIEON_EXEC"],

@@ -25,7 +25,7 @@ rule cnvkit_single:
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         extra = cnvkit_params,
         refcnn = cnv_dir + "FlatReference.cnn",
         target = config["panel"]["capture_kit"] if "panel" in config else "None", 

@@ -18,7 +18,7 @@ rule bwa_mem:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-        tmpdir = tempfile.mkstemp(prefix=tmp_dir),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         conda = get_conda_env(config["conda_env_yaml"],"bwa")
     threads: get_threads(cluster_config, "bwa_mem")
     singularity: singularity_image
@@ -46,7 +46,7 @@ rule MarkDuplicates:
     mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
     stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
   params:
-    tmpdir = tempfile.mkstemp(prefix=tmp_dir),
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
   singularity: singularity_image
