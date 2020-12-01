@@ -445,13 +445,13 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
                 if name not in bioinfo_tools:
                     continue
                 if name in bioinfo_tools_version:
-                    bioinfo_tools_version[name].append(
-                        version)
-                    bioinfo_tools_version[name] = list(set(bioinfo_tools_version[name]))
-                else:
+                    bioinfo_tools_version[name].append(version)
                     bioinfo_tools_version[name] = list(
-                        [version])
+                        set(bioinfo_tools_version[name]))
+                else:
+                    bioinfo_tools_version[name] = list([version])
     return bioinfo_tools_version
+
 
 def get_sample_dict(tumor, normal) -> dict:
     """Concatenates sample dicts for all provided files"""
