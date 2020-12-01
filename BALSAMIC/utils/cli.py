@@ -432,7 +432,8 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
 
     bioinfo_tools_version = {}
     for bioinfo_tool_name, container_conda_env_name in bioinfo_tools.items():
-        yaml_file = Path(container_conda_env_path, container_conda_env_name)
+        yaml_file = Path(container_conda_env_path, container_conda_env_name,
+                         container_conda_env_name + ".yaml")
         with open(yaml_file, "r") as f:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
