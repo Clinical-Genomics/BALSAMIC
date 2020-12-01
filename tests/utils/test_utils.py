@@ -12,14 +12,14 @@ from pathlib import Path
 
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
-from BALSAMIC.utils.constants import CONDA_ENV_PATH
+from BALSAMIC.utils.constants import CONTAINERS_CONDA_ENV_PATH
 from BALSAMIC.utils.constants import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
     get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
-    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
+    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_version,
     create_fastq_symlink, get_fastq_bind_path, singularity, get_file_extension)
 
 from BALSAMIC.utils.rule import (
@@ -111,10 +111,10 @@ def test_get_reference_output_files():
 
 def test_get_bioinfo_tools_list():
     # GIVEN a path for conda env files
-    conda_env_path = CONDA_ENV_PATH
+    conda_env_path = CONTAINERS_CONDA_ENV_PATH
 
     # WHEN getting dictionary of bioinformatic tools and their version
-    bioinfo_tools_dict = get_bioinfo_tools_list(conda_env_path)
+    bioinfo_tools_dict = get_bioinfo_tools_version(conda_env_path)
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)

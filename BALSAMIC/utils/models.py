@@ -9,7 +9,7 @@ from pydantic.types import DirectoryPath, FilePath
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.utils.constants import (
-    CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
+    BIOINFO_TOOL_ENV, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
     MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT)
 
 
@@ -286,22 +286,6 @@ class SampleInstanceModel(BaseModel):
         return value
 
 
-class BioinfoToolsModel(BaseModel):
-    """Holds versions of current bioinformatic tools used in analysis"""
-    tabix: Optional[str]
-    bcftools: Optional[str]
-    fastqc: Optional[str]
-    manta: Optional[str]
-    picard: Optional[str]
-    bwa: Optional[str]
-    strelka: Optional[str]
-    gatk: Optional[str]
-    samtools: Optional[str]
-    sambamba: Optional[str]
-    vardict: Optional[str]
-    cutadapt: Optional[str]
-
-
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided
     Attributes:
@@ -331,10 +315,10 @@ class BalsamicConfigModel(BaseModel):
         samples : Field(Dict); dictionary containing samples submitted for analysis
         reference : Field(Dict); dictionary containign paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
-        bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
-	singularity : Field(Path); path to singularity container of BALSAMIC
+        bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
+        bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
+        singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
-        conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
 
     """
@@ -346,8 +330,8 @@ class BalsamicConfigModel(BaseModel):
     reference: Dict[str, Path]
     singularity: FilePath
     background_variants: Optional[FilePath]
-    conda_env_yaml: FilePath = CONDA_ENV_YAML
-    bioinfo_tools: Optional[BioinfoToolsModel]
+    bioinfo_tools: dict
+    bioinfo_tools_version: dict
     panel: Optional[PanelModel]
 
     @validator("reference")

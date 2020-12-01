@@ -6,7 +6,6 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.constants import BALSAMIC_DOCKER_PATH
-from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
