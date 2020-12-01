@@ -441,10 +441,9 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
                     for pip_package in p["pip"]:
                         name, version = pip_package.split("==")
                         if name in bioinfo_tools_version:
-                            bioinfo_tools_version[name] = set(
-                                [bioinfo_tools_version[name], version])
+                            bioinfo_tools_version[name].add(version)
                         else:
-                            bioinfo_tools_version[name] = version
+                            bioinfo_tools_version[name] = set(version)
                 else:
                     try:
                         name = p.split("=")[0]
@@ -453,10 +452,9 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
                         name, version = p, None
                     finally:
                         if name in bioinfo_tools_version:
-                            bioinfo_tools_version[name] = set(
-                                [bioinfo_tools_version[name], version])
+                            bioinfo_tools_version[name].add(version)
                         else:
-                            bioinfo_tools_version[name] = version
+                            bioinfo_tools_version[name] = set(version)
     return bioinfo_tools_version
 
 
