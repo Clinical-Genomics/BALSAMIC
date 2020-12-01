@@ -66,7 +66,7 @@ LOG = logging.getLogger(__name__)
               help=('Instruct snakemake to be quiet!'
                     'No output will be printed'))
 @click.pass_context
-def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
+def reference(context, cosmic_key, snakefile, dagfile, singularity,
               genome_version, run_analysis, force_all, quiet, snakemake_opt):
     """ Configure workflow for reference generation """
 
@@ -87,7 +87,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
         singularity).absolute().as_posix()
 
     config = dict()
-    outdir = os.path.join(os.path.abspath(outdir), balsamic_version,
+    outdir = os.path.join(os.path.abspath(context.obj['outdir']), balsamic_version,
                           genome_version)
     config_json = os.path.join(outdir, "config.json")
     dagfile_path = os.path.join(outdir, dagfile)
@@ -135,7 +135,6 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
     # Singularity bind path
     bind_path = list()
     bind_path.append(config['output'])
-    bind_path.append(config['conda_env_yaml'])
     bind_path.append(config['rule_directory'])
 
     # Construct snakemake command to run workflow
