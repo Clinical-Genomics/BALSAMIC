@@ -431,32 +431,27 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
     used by BALSAMIC from config YAML into a dict """
 
     bioinfo_tools_version = {}
-    for bioinfo_tool_name, container_conda_env_name in bioinfo_tools.items():
+    for container_conda_env_name in set(bioinfo_tools.values()):
         yaml_file = Path(container_conda_env_path, container_conda_env_name,
                          container_conda_env_name + ".yaml")
         with open(yaml_file, "r") as f:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
-                if isinstance(p, dict):
-                    for pip_package in p["pip"]:
-                        name, version = pip_package.split("==")
-                        if name in bioinfo_tools_version:
-                            bioinfo_tools_version[name].add(version)
-                        else:
-                            bioinfo_tools_version[name] = set(version)
+                try:
+                    name = p.split("=")[0]
+                    version = "=".join(p.split("=")[1:])
+                except ValueError:
+                    name, version = p, None
+                if name not in bioinfo_tools:
+                    continue
+                if name in bioinfo_tools_version:
+                    bioinfo_tools_version[name].append(
+                        version)
+                    bioinfo_tools_version[name] = list(set(bioinfo_tools_version[name]))
                 else:
-                    try:
-                        name = p.split("=")[0]
-                        version = "=".join(p.split("=")[1:])
-                    except ValueError:
-                        name, version = p, None
-                    finally:
-                        if name in bioinfo_tools_version:
-                            bioinfo_tools_version[name].add(version)
-                        else:
-                            bioinfo_tools_version[name] = set(version)
+                    bioinfo_tools_version[name] = list(
+                        [version])
     return bioinfo_tools_version
-
 
 def get_sample_dict(tumor, normal) -> dict:
     """Concatenates sample dicts for all provided files"""
