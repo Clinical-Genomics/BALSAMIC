@@ -22,10 +22,10 @@ from BALSAMIC.utils.cli import (
     validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_version,
     create_fastq_symlink, get_fastq_bind_path, singularity, get_file_extension)
 
-from BALSAMIC.utils.rule import (
-    get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
-    get_variant_callers, get_script_path, get_result_dir, get_threads,
-    get_delivery_id, get_reference_output_files)
+from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
+                                 get_picard_mrkdup, get_variant_callers,
+                                 get_script_path, get_result_dir, get_threads,
+                                 get_delivery_id, get_reference_output_files)
 
 from BALSAMIC.utils.workflowscripts import get_file_contents, get_densityplot
 
@@ -398,29 +398,6 @@ def test_get_result_dir(sample_config):
     # GIVEN a sample_config dict
     # THEN get_result_dir should return result directory
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
-
-
-def test_get_conda_env_found(tmp_path):
-    # GIVEN a balsamic_env yaml
-    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
-
-    # WHEN passing pkg name with this yaml file
-    conda_env = get_conda_env(balsamic_env, 'cnvkit')
-
-    # THEN It should return the conda env which has that pkg
-    assert conda_env == "varcall_cnvkit"
-
-
-def test_get_conda_env_not_found(tmp_path):
-    # GIVEN a balsamic_env yaml
-    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
-    bioinfo_tool = "unknown_package"
-    error_msg = f"Installed package {bioinfo_tool} was not found in {balsamic_env}"
-
-    # WHEN passing pkg name with this yaml file
-    # THEN It should return the conda env which has that pkg
-    with pytest.raises(KeyError, match=error_msg):
-        get_conda_env(balsamic_env, 'unknown_package')
 
 
 def test_capturestdout():

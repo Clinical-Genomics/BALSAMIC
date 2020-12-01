@@ -4,7 +4,7 @@
 import os
 import logging
 
-from BALSAMIC.utils.rule import (get_conda_env, get_threads, get_result_dir, 
+from BALSAMIC.utils.rule import (get_threads, get_result_dir,
                                  get_sample_type, get_script_path, get_vcf)
 from BALSAMIC.utils.models import UMIworkflowConfig
 from BALSAMIC.utils.constants import RULE_DIRECTORY, VCFANNO_TOML, umiworkflow_params

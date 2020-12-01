@@ -7,7 +7,6 @@ import logging
 
 from datetime import date
 
-from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceMeta
