@@ -16,9 +16,14 @@ def test_init_reference_write_json(invoke_cli, tmp_path,
     test_output_reference_pdf = test_new_dir / balsamic_version / test_genome_version / "generate_ref_worflow_graph.pdf"
 
     result = invoke_cli([
-        'init', 'reference', '-c', 'secret_key', '--singularity',
-        singularity_container, '-o',
-        str(test_new_dir)
+        'init',
+        '-o',
+        str(test_new_dir),
+        'reference',
+        '-c',
+        'secret_key',
+        '--singularity',
+        singularity_container,
     ])
 
     # THEN output config and pdf file generate and command exit code 0
@@ -34,9 +39,14 @@ def test_init_reference_no_write_perm(
 
     # WHEN invoking config sample
     result = invoke_cli([
-        'init', 'reference', '-c', 'secret_key', '--singularity',
-        singularity_container, '-o',
-        str(test_new_dir)
+        'init',
+        '-o',
+        str(test_new_dir),
+        'reference',
+        '-c',
+        'secret_key',
+        '--singularity',
+        singularity_container,
     ])
 
     # THEN it should create test_reference.json and exist with no error
@@ -51,17 +61,32 @@ def test_init_reference_exception(invoke_cli, tmp_path, singularity_container):
     with mock.patch.object(graphviz, 'Source') as mocked:
         mocked.return_value = None
         result = invoke_cli([
-            'init', 'reference', '-c', 'secret_key', '--singularity',
-            singularity_container, '-o',
-            str(test_new_dir)
+            'init',
+            '-o',
+            str(test_new_dir),
+            'reference',
+            '-c',
+            'secret_key',
+            '--singularity',
+            singularity_container,
         ])
 
     assert result.exit_code == 1
 
 
-def test_init_reference(invoke_cli):
+def test_init_reference(invoke_cli, tmp_path):
+    # Given test_reference.json
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
     # WHEN invoking run reference command
-    result = invoke_cli(['init', 'reference', '--help'])
+    result = invoke_cli([
+        'init',
+        '-o',
+        str(test_new_dir),
+        'reference',
+        '--help',
+    ])
 
     # THEN It should show the help message with all params
     assert "--snakefile" in result.output
