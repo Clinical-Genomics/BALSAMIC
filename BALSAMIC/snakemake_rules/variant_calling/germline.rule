@@ -10,7 +10,7 @@ rule haplotypecaller:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
         tmpdir = tmp_dir,
-        conda = get_conda_env(config["bioinfo_tools"],"gatk"),
+        conda = config["bioinfo_tools"].get("gatk"),
     threads: get_threads(cluster_config, 'haplotypecaller')
     singularity: singularity_image
     benchmark:
@@ -62,7 +62,7 @@ rule strelka_germline:
     params:
         tmpdir = vcf_dir + "strelka_germline_{sample}/",
         runmode = "local",
-        conda = get_conda_env(config["bioinfo_tools"],"strelka"),
+        conda = config["bioinfo_tools"].get("strelka"),
     threads: get_threads(cluster_config, "strelka_germline")
     singularity: singularity_image
     benchmark:
@@ -92,7 +92,7 @@ rule manta_germline:
     params:
         tmpdir = vcf_dir + "manta_germline_{sample}/",
         runmode = "local",
-        conda = get_conda_env(config["bioinfo_tools"],"manta"),
+        conda = config["bioinfo_tools"].get("manta"),
     threads: get_threads(cluster_config, "manta_germline")
     singularity: singularity_image
     benchmark:

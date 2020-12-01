@@ -11,7 +11,7 @@ rule GATK_contest:
     N_vs_T = bam_dir + "normal_tumor.contest", 
     T_vs_N = bam_dir + "tumor_normal.contest", 
   params:
-    conda = get_conda_env(config["bioinfo_tools"],"gatk"),
+    conda = config["bioinfo_tools"].get("gatk"),
     tmpdir = tmp_dir,
     min_genotype_ratio="0.95",
     popcode = "EUR"

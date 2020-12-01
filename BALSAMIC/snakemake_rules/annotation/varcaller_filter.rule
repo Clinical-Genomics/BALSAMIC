@@ -10,7 +10,7 @@ rule ngs_filter_vardict:
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    conda = get_conda_env(config["bioinfo_tools"],"ensembl-vep"),
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
     MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
     AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
     DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],

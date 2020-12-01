@@ -18,7 +18,7 @@ rule manta_tumor_only:
     params:
       tmpdir = vcf_dir + "manta/",
       runmode = "local",
-      conda = get_conda_env(config["bioinfo_tools"],"manta")
+      conda = config["bioinfo_tools"].get("manta")
     threads: 4
     singularity: singularity_image
     benchmark: 

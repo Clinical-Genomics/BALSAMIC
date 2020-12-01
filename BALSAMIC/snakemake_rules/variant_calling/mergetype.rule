@@ -11,7 +11,7 @@ rule mergeBam_normal_gatk:
   output:
     bamN = bam_dir + "normal.sorted." + picarddup + ".bsrcl.merged.bam",
   params:
-    conda = get_conda_env(config["bioinfo_tools"],"picard"),
+    conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal
   singularity: singularity_image
   benchmark:
@@ -32,7 +32,7 @@ rule mergeBam_normal:
     cram = bam_dir + "normal.merged.cram",
   params:
     housekeeper_id = {"id": normal_sample, "tags": "normal"},
-    conda = get_conda_env(config["bioinfo_tools"],"picard"),
+    conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal
   threads: get_threads(cluster_config, "mergeBam_normal")
   singularity: singularity_image
@@ -56,7 +56,7 @@ rule mergeBam_tumor:
     cram = bam_dir + "tumor.merged.cram",
   params:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
-    conda = get_conda_env(config["bioinfo_tools"],"picard"),
+    conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "mergeBam_tumor")
   singularity: singularity_image
@@ -77,7 +77,7 @@ rule mergeBam_tumor_gatk:
   output:
     bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
   params:
-    conda = get_conda_env(config["bioinfo_tools"],"picard"),
+    conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "samtools_sort_index")
   singularity: singularity_image

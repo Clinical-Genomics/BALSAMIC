@@ -10,7 +10,7 @@ rule fastqc:
     read1 = fastqc_dir + "{sample}_1_fastqc.zip",
     read2 = fastqc_dir + "{sample}_2_fastqc.zip"
   params:
-    conda = get_conda_env(config["bioinfo_tools"],"fastqc"),
+    conda = config["bioinfo_tools"].get("fastqc"),
     tmpdir = tmp_dir,
     fastqc_dir = fastqc_dir
   singularity: singularity_image

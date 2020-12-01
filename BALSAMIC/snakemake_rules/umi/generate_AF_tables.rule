@@ -13,7 +13,7 @@ rule bcftools_query_generatebackgroundaf_umitable:
         singularity_image
     params:
         validated_set= config["background_variants"],
-        conda = get_conda_env(config["bioinfo_tools"],"bcftools"),
+        conda = config["bioinfo_tools"].get("bcftools"),
         sample_id = "{case_name}"
     threads: 
         get_threads(cluster_config, "bcftools_query_generatebackgroundaf_umitable")
