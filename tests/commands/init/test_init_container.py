@@ -11,7 +11,7 @@ def test_init_container(invoke_cli, tmp_path):
     # WHEN when pulling container as dry-run
     result = invoke_cli([
         'init',
-        '--out-dir',
+        '--outdir',
         str(test_new_dir),
         'container',
         '--dry',
@@ -29,7 +29,7 @@ def test_init_container_force(invoke_cli, tmp_path):
     # WHEN force pull dry-run container
     result = invoke_cli([
         'init',
-        '--out-dir',
+        '--outdir',
         str(test_new_dir),
         'container',
         '--force',
@@ -44,12 +44,12 @@ def test_init_container_specific_tag(invoke_cli, tmp_path):
     # Given a dummy path
     test_new_dir = tmp_path / "test_container_dir"
     test_new_dir.mkdir()
-    dummy_tag = "cool_new_feature"
+    dummy_tag = "develop"
 
     # WHEN pulling a specific tag other than standard version
     result = invoke_cli([
         'init',
-        '--out-dir',
+        '--outdir',
         str(test_new_dir),
         'container',
         '--force',
@@ -73,7 +73,7 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
         # WHEN pulling a container in a non dry-run mode
         result = invoke_cli([
             'init',
-            '--out-dir',
+            '--outdir',
             str(test_new_dir),
             'container',
         ])
@@ -96,7 +96,7 @@ def test_init_container_capture_failed_download(invoke_cli, tmp_path, caplog):
         # WHEN pulling a wrong container tag
         result = invoke_cli([
             'init',
-            '--out-dir',
+            '--outdir',
             str(test_new_dir),
             'container',
             '--container-version',
