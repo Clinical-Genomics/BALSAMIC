@@ -453,10 +453,10 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
                         name, version = p, None
                     finally:
                         if name in bioinfo_tools_version:
-                            bioinfo_tools[name] = ",".join(
+                            bioinfo_tools_version[name] = ",".join(
                                 set([bioinfo_tools_version[name], version]))
                         else:
-                            bioinfo_tools[name] = version
+                            bioinfo_tools_version[name] = version
     return bioinfo_tools
 
 
