@@ -457,7 +457,7 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
                                 set([bioinfo_tools_version[name], version]))
                         else:
                             bioinfo_tools_version[name] = version
-    return bioinfo_tools
+    return bioinfo_tools_version
 
 
 def get_sample_dict(tumor, normal) -> dict:
