@@ -14,7 +14,7 @@ from BALSAMIC.commands.init.container import container as container_command
                     "This path will be used as base path for files"))
 def initialize(context, outdir):
     "Initialize various resources after first installation."
-    context.obj['outdir'] = outdir 
+    context.obj['outdir'] = outdir
 
 
 initialize.add_command(reference_command)

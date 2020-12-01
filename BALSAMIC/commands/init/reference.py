@@ -87,8 +87,8 @@ def reference(context, cosmic_key, snakefile, dagfile, singularity,
         singularity).absolute().as_posix()
 
     config = dict()
-    outdir = os.path.join(os.path.abspath(context.obj['outdir']), balsamic_version,
-                          genome_version)
+    outdir = os.path.join(os.path.abspath(context.obj['outdir']),
+                          balsamic_version, genome_version)
     config_json = os.path.join(outdir, "config.json")
     dagfile_path = os.path.join(outdir, dagfile)
 
