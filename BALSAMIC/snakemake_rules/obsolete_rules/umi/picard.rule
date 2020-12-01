@@ -21,7 +21,7 @@ rule picard_FastqToSam_umi:
         bam_dir + "{sample}.unalg.bam"
     params:
         tmpdir = bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
+        conda = get_conda_env(config["bioinfo_tools"],"picard")
     shell:
         """
 source activate {params.conda}; 
@@ -43,7 +43,7 @@ rule picard_MarkIlluminaAdaptersi_umi:
         txt = bam_dir + "{sample}.unalg.umi.mrkadp.txt"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
+        conda = get_conda_env(config["bioinfo_tools"],"picard")
     shell:
         """
 source activate {params.conda}; 
@@ -60,7 +60,7 @@ rule picard_SamToFastq_umi:
         bam_dir + "{sample}.unalg.umi.mrkadp.fastq"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
+        conda = get_conda_env(config["bioinfo_tools"],"picard")
     shell:
         """
 source activate {params.conda}; 
@@ -82,7 +82,7 @@ rule picard_MergeBamAlignment_mrkadp_umi:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
     shell:
         """
@@ -108,7 +108,7 @@ rule picard_SamToFastq_cnsalg_umi:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.fastq"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 
@@ -129,7 +129,7 @@ rule picard_MergeBamAlignment_cnsalg_umi:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
     shell:
         """

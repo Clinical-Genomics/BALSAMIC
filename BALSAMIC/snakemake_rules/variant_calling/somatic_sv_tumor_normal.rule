@@ -21,7 +21,7 @@ rule manta_tumor_normal:
     params:
         tmpdir = vcf_dir + "manta/",
         runmode = "local",
-        conda = get_conda_env(config["conda_env_yaml"],"manta")
+        conda = get_conda_env(config["bioinfo_tools"],"manta")
     singularity: singularity_image
     benchmark: 
         benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"

@@ -12,7 +12,7 @@ rule fgbio_ExtractUmisFromBam:
         bam_dir + "{sample}.unalg.umi.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 
@@ -32,7 +32,7 @@ rule fgbio_GroupReadsByUmi:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 
@@ -54,7 +54,7 @@ rule fgbio_CallDuplexConsensusReads:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 
@@ -75,7 +75,7 @@ rule fgbio_FilterConsensusReads:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
     shell:
         """
@@ -99,7 +99,7 @@ rule fgio_ClipBam:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"], 
     shell:
         """
@@ -120,7 +120,7 @@ rule fgbio_CollectDuplexSeqMetrics:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam.duplex_qc.pdf"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 

@@ -23,7 +23,7 @@ rule vardict_single:
     vardict = "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0",
     var2vcf = "-E",
     name = config["analysis"]["case_id"],
-    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+    conda = get_conda_env(config["bioinfo_tools"],"vardict"),
   shell:
     "source activate {params.conda}; "
     "vardict -G {input.fa} -f {params.af} -N {params.name} "
@@ -42,7 +42,7 @@ rule vardict_merge:
   output:
     vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + config["analysis"]["case_id"] + "." + var_caller + ".vcf.gz"
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+    conda = get_conda_env(config["bioinfo_tools"],"vardict"),
   shell:
     "source activate {params.conda} ; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "

@@ -15,7 +15,7 @@ rule mergeBam_tumor_gatk:
   output:
     bamT = bam_dir + "tumor.sorted." + picarddup + ".ralgn.bsrcl.merged.bam",
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+    conda = get_conda_env(config["bioinfo_tools"],"samtools")
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "
@@ -27,7 +27,7 @@ rule mergeBam_tumor:
   output:
     bamT = bam_dir + "tumor.merged.bam",
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"samtools")
+    conda = get_conda_env(config["bioinfo_tools"],"samtools")
   shell:
     "source activate {params.conda}; "
     "samtools merge {output.bamT} {input.bamT}; samtools index {output.bamT}; "

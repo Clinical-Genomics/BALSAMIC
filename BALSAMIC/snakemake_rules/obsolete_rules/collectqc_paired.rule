@@ -24,7 +24,7 @@ rule collectqc:
   params:
     # This is using same environment as gatk
     resultdir = result_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    conda = get_conda_env(config["bioinfo_tools"],"gatk"),
   singularity: singularity_image
   shell:
     "source activate {params.conda};"

@@ -12,7 +12,7 @@ rule split_bed_by_chrom:
         tmpdir = tmp_dir,
         split_bed_dir = vcf_dir + "split_bed/",
         origin_bed = capture_kit,
-        conda = get_conda_env(config["conda_env_yaml"],"bedtools"),
+        conda = get_conda_env(config["bioinfo_tools"],"bedtools"),
     benchmark:
         benchmark_dir + 'split_bed_by_chrom.tsv'
     singularity: singularity_image

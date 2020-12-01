@@ -15,7 +15,7 @@ rule S_1_convert_Fastq_to_unaligned_bam:
         bam_dir + "{sample}.unalg.bam"
     params:
         tmpdir = bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
+        conda = get_conda_env(config["bioinfo_tools"],"picard")
     shell:
         """
 source activate {params.conda}; 
@@ -36,7 +36,7 @@ rule S_2_Extract_inline_umi:
         bam_dir + "{sample}.unalg.umi.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 
@@ -58,7 +58,7 @@ rule S_3_mark_illumina_adapter:
         txt = bam_dir + "{sample}.unalg.umi.mrkadp.txt"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
+        conda = get_conda_env(config["bioinfo_tools"],"picard")
     shell:
         """
 source activate {params.conda}; 
@@ -86,7 +86,7 @@ rule S_4_align_the_reads:
     params:
         tmpdir=bam_dir,
         ref = config["path"]["genomefa"] + config["references"]["genomefa"],
-        conda = get_conda_env(config["conda_env_yaml"],"picard")
+        conda = get_conda_env(config["bioinfo_tools"],"picard")
     shell:
         """
 source activate {params.conda}; 
@@ -117,7 +117,7 @@ rule S_5_1_groupreadsbyumi:
         bam = bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 
@@ -140,7 +140,7 @@ rule S_5_2_callduplexconsensusreads:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 
@@ -163,7 +163,7 @@ rule S_6_map_duplex_consensus_reads:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
     shell:
         """
@@ -209,7 +209,7 @@ rule S_7_filter_mapped_duplex_consensus_reads:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"]
     shell:
         """
@@ -233,7 +233,7 @@ rule S_8_clip_overlapping_reads:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.map.fltr.clip.bam"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         ref = config["path"]["genomefa"] + config["references"]["genomefa"], 
     shell:
         """
@@ -254,7 +254,7 @@ rule S_9_get_duplex_seq_metrics:
         bam_dir + "{sample}.unalg.umi.mrkadp.bwa.map.umi.bam.duplex_qc.pdf"
     params:
         tmpdir=bam_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
     shell:
         """
 source activate {params.conda}; 

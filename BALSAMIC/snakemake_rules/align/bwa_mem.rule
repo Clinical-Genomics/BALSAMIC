@@ -19,7 +19,7 @@ rule bwa_mem:
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
         tmpdir = Path(tmp_dir).as_posix(),
-        conda = get_conda_env(config["conda_env_yaml"],"bwa")
+        conda = get_conda_env(config["bioinfo_tools"],"bwa")
     threads: get_threads(cluster_config, "bwa_mem")
     singularity: singularity_image
     benchmark:
@@ -49,7 +49,7 @@ rule MarkDuplicates:
     stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
   params:
     tmpdir = tmp_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    conda = get_conda_env(config["bioinfo_tools"],"picard"),
     rm_dup = picard_flag(picarddup)
   singularity: singularity_image
   benchmark:

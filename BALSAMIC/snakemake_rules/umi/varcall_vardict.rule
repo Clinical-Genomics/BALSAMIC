@@ -15,7 +15,7 @@ rule vardict_umi:
     singularity: 
         singularity_image
     params:
-        conda = get_conda_env(config["conda_env_yaml"],"vardict"),
+        conda = get_conda_env(config["bioinfo_tools"],"vardict"),
         sample_id = "{case_name}",
         af = paramsumi.common.filter_tumor_af, 
         vardict = paramsumi.vardict.vardict_filters,

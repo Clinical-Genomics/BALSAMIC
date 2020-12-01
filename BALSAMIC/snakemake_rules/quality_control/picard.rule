@@ -17,7 +17,7 @@ rule CollectHsMetrics:
     mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
   params:
     tmpdir = tmp_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    conda = get_conda_env(config["bioinfo_tools"],"picard"),
     baitsetname = os.path.basename(config["panel"]["capture_kit"])
   singularity: singularity_image
   benchmark:
@@ -53,7 +53,7 @@ rule CollectAlignmentSummaryMetrics:
     bam_dir + "{sample}.sorted.alignmetric"
   params:
     tmpdir = tmp_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"picard"),
+    conda = get_conda_env(config["bioinfo_tools"],"picard"),
     adapter = config["QC"]["adapter"]
   singularity: singularity_image
   benchmark:
@@ -82,7 +82,7 @@ rule CollectInsertSizeMetrics:
     txt = bam_dir + "{sample}.sorted.insertsizemetric"
   params:
     tmpdir = tmp_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"picard")
+    conda = get_conda_env(config["bioinfo_tools"],"picard")
   singularity: singularity_image
   benchmark:
     benchmark_dir + "CollectInsertSizeMetrics_" + "{sample}.collect_insertsize_metrics.tsv"

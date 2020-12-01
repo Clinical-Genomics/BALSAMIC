@@ -15,7 +15,7 @@ rule bwa_mem_umi_mrkadp:
     "{sample}.unalg.umi.mrkadp.bwa.sam"
   params:
     header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-    conda = get_conda_env(config["conda_env_yaml"],"bwa")
+    conda = get_conda_env(config["bioinfo_tools"],"bwa")
   threads: 4
   shell:
     """
@@ -32,7 +32,7 @@ rule bwa_mem_umi_cnsalg:
     "{sample}.unalg.umi.mrkadp.bwa.map.umi.cnsunalg.bwa.sam"
   params:
     header_1 = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-    conda = get_conda_env(config["conda_env_yaml"],"bwa")
+    conda = get_conda_env(config["bioinfo_tools"],"bwa")
   threads: 4
   shell:
     """

@@ -51,7 +51,7 @@ rule fastp:
         adapter = " ".join(fastp_param_adapter),
         minimum_length = config["QC"]["min_seq_length"],
         sample_name = "{sample}",
-        conda = get_conda_env(config["conda_env_yaml"],"fastp")
+        conda = get_conda_env(config["bioinfo_tools"],"fastp")
     threads: get_threads(cluster_config, 'fastp')
     message:
         "Quality control and trimming input fastq for {params.sample_name}"

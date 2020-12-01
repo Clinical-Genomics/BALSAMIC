@@ -21,7 +21,7 @@ rule freebayes_germline:
   output:
     vcf_dir + freebayes_dir + "split_vcf/" + "{sample}.{bedchrom}_" + config["vcf"][var_caller]["default"]
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"freebayes"),
+    conda = get_conda_env(config["bioinfo_tools"],"freebayes"),
   threads: 4
   shell:
     "source activate {params.conda}; "
@@ -36,7 +36,7 @@ rule freebayes_merge:
   output:
     vcf_dir + config["vcf"][var_caller]["type"] + "." + config["vcf"][var_caller]["mutation"] + "." + "{sample}" + "." + var_caller + ".vcf.gz"
   params:
-    conda = get_conda_env(config["conda_env_yaml"], "freebayes"),
+    conda = get_conda_env(config["bioinfo_tools"], "freebayes"),
   shell:
     "source activate {params.conda}; "
     "bcftools concat {input} | bcftools sort - | bgzip > {output}; "

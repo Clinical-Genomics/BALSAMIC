@@ -16,7 +16,7 @@ rule vardict_tumor_normal:
     max_mm = "4.5",
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["case_id"],
-    conda = get_conda_env(config["conda_env_yaml"], "vardict"),
+    conda = get_conda_env(config["bioinfo_tools"], "vardict"),
   threads: get_threads(cluster_config, "vardict_tumor_normal")
   singularity: singularity_image
   benchmark:
@@ -49,7 +49,7 @@ rule vardict_merge:
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
     tmpdir = tmp_dir,
-    conda = get_conda_env(config["conda_env_yaml"], "vardict"),
+    conda = get_conda_env(config["bioinfo_tools"], "vardict"),
     name = config["analysis"]["case_id"],
   singularity: singularity_image
   benchmark:
@@ -82,7 +82,7 @@ rule mutect2_tumor_normal:
   params:
     tmpdir = tmp_dir,
     result_dir = vcf_dir + "mutect/",
-    conda = get_conda_env(config["conda_env_yaml"],"gatk")
+    conda = get_conda_env(config["bioinfo_tools"],"gatk")
   threads: get_threads(cluster_config, "mutect2_tumor_normal")
   singularity: singularity_image
   benchmark:
@@ -118,7 +118,7 @@ rule mutect2_merge:
   params:
     tmpdir = tmp_dir,
     name = config["analysis"]["case_id"],
-    conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
+    conda = get_conda_env(config["bioinfo_tools"],"bcftools"),
   singularity: singularity_image
   benchmark:
     benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
@@ -151,7 +151,7 @@ rule strelka_tumor_normal:
     name = config["analysis"]["case_id"],
     tmpdir = vcf_dir + "strelka/", 
     runmode = "local",
-    conda = get_conda_env(config["conda_env_yaml"],"strelka"),
+    conda = get_conda_env(config["bioinfo_tools"],"strelka"),
   threads: get_threads(cluster_config, "strelka_tumor_normal")
   singularity: singularity_image
   benchmark:
@@ -193,7 +193,7 @@ rule somatic_snv_indel_vcf_merge:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vcfmerge.vcf.gz"
     params:
         workdir = vcf_dir + "/vcfmerge",
-        conda = get_conda_env(config["conda_env_yaml"],"vcfmerge"),
+        conda = get_conda_env(config["bioinfo_tools"],"vcfmerge"),
     threads: get_threads(cluster_config, 'somatic_snv_indel_vcf_merge')
     singularity: singularity_image 
     benchmark:

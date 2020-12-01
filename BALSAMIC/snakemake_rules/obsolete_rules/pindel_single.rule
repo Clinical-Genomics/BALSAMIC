@@ -19,7 +19,7 @@ rule pindel_somatic_single:
     case_id = config["analysis"]["case_id"],
     config = pindel_dir + config["analysis"]["case_id"] + ".config",
     tmpdir = pindel_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"pindel")
+    conda = get_conda_env(config["bioinfo_tools"],"pindel")
   threads: 4
   shell:
     "source activate {params.conda};"

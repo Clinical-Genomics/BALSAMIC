@@ -32,7 +32,7 @@ rule cnvkit_single:
         name = config["analysis"]["case_id"],
         tumor_name = tumor_bam,
         cnv_dir = cnv_dir,
-        conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
+        conda = get_conda_env(config["bioinfo_tools"], "cnvkit"),
     singularity: singularity_image
     benchmark:
         benchmark_dir + 'cnvkit_single_' + config["analysis"]["case_id"] + ".cnvkit_single.tsv"

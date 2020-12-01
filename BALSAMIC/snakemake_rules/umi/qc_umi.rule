@@ -14,7 +14,7 @@ rule picard_umiaware:
     singularity: 
         singularity_image
     params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         sample_id = "{case_name}_{step}"
     threads:
         get_threads(cluster_config, "picard_umiaware")
@@ -45,7 +45,7 @@ rule picard_collecthsmetrics_umi:
     singularity:
         singularity_image
     params:
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
+        conda = get_conda_env(config["bioinfo_tools"],"picard"),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = "{case_name}_{step}"
     threads: 
@@ -80,7 +80,7 @@ rule samtools_view_calculatemeanfamilydepth_umi:
     singularity:
         singularity_image
     params:
-        conda = get_conda_env(config["conda_env_yaml"],"samtools"),
+        conda = get_conda_env(config["bioinfo_tools"],"samtools"),
         sample_id = "{case_name}_{step}"
     threads:
         get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
@@ -120,7 +120,7 @@ rule bcftools_query_calculatenoiseAF_umi:
     singularity:
         singularity_image
     params:
-        conda = get_conda_env(config["conda_env_yaml"],"bcftools"),
+        conda = get_conda_env(config["bioinfo_tools"],"bcftools"),
         sample_id = "{case_name}"
     threads:
         get_threads(cluster_config, "bcftools_query_calculatenoiseAF_umi")
