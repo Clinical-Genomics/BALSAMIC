@@ -18,10 +18,6 @@ LOG = logging.getLogger(__name__)
               default=False,
               is_flag=True,
               help="Dry run mode.")
-@click.option("-o",
-              "--out-dir",
-              required=True,
-              help="Output directory for container files.")
 @click.option("-v",
               "--container-version",
               show_default=True,
@@ -35,13 +31,13 @@ LOG = logging.getLogger(__name__)
               is_flag=True,
               help="Force re-downloading all containers")
 @click.pass_context
-def container(context, container_version, out_dir, force, dry):
+def container(context, container_version, force, dry):
     """
     Pull container(s) for BALSAMIC according to matching version
     """
     LOG.info("BALSAMIC started with log level %s" % context.obj['loglevel'])
     # resolve out_dir to absolute path
-    out_dir = Path(out_dir).resolve()
+    out_dir = Path(context.obj["outdir"]).resolve()
 
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
