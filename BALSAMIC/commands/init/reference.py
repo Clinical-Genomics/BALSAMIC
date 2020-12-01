@@ -9,6 +9,7 @@ import snakemake
 
 from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV
 
 LOG = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
 
     install_config = dict()
 
-    install_config["conda_env_yaml"] = balsamic_env.as_posix()
+    install_config["bioinfo_tools"] = BIOINFO_TOOL_ENV
     install_config["rule_directory"] = rule_directory.as_posix() + "/"
 
     install_config["singularity"] = dict()

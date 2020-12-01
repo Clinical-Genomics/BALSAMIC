@@ -195,7 +195,7 @@ rule prepare_refgene:
         refgene_sql = refgene_sql_url.get_output_file
     params:
         refgene_sql_awk = get_script_path('refseq_sql.awk'),
-        conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
+        conda_env = config["bioinfo_tools"].get("bedtools")
     output:
         refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
         bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed"
@@ -227,7 +227,7 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf")
     params:
         type = 'vcf',
-        conda_env = get_conda_env(config["conda_env_yaml"], "tabix")    
+        conda_env = config["bioinfo_tools"].get("tabix")
     output:
         os.path.join(vcf_dir, "{vcf}.vcf.gz"),
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
@@ -249,7 +249,7 @@ rule bwa_index:
     input:
         reference_genome_url.get_output_file
     params:
-        conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
+        conda_env = config["bioinfo_tools"].get("bwa")
     output:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
@@ -269,7 +269,7 @@ rule samtools_index_fasta:
     input:
         reference_genome_url.get_output_file
     params:
-        conda_env = get_conda_env(config["conda_env_yaml"], "samtools")
+        conda_env = config["bioinfo_tools"].get("samtools")
     output:
         reference_genome_url.get_output_file + ".fai"
     log:
@@ -291,7 +291,7 @@ rule picard_ref_dict:
     input:
         reference_genome_url.get_output_file
     params:
-        conda_env = get_conda_env(config["conda_env_yaml"], "picard")
+        conda_env = config["bioinfo_tools"].get("picard")
     output:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
@@ -314,7 +314,7 @@ rule vep_install:
         species = "homo_sapiens_merged",
         assembly = "GRCh37" if genome_ver == 'hg19' else "GRCh38",
         plugins = "all",
-        conda_env = get_conda_env(config["conda_env_yaml"], "ensembl-vep")
+        conda_env = config["bioinfo_tools"].get("ensembl-vep")
     output:
         directory(vep_dir)
     log:
