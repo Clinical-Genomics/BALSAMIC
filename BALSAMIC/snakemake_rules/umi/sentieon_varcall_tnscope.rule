@@ -9,8 +9,8 @@ rule sentieon_tnscope_umi:
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf = vcf_dir +  "SNV.somatic.{case_name}.{step}.TNscope.umi.vcf.gz",
-        namemap = vcf_dir + "SNV.somatic.{case_name}.{step}.TNscope.umi.sample_name_map"
+        vcf = vcf_dir +  "SNV.somatic.{case_name}.TNscope_{step}_umi.vcf.gz",
+        namemap = vcf_dir + "SNV.somatic.{case_name}.TNscope_{step}_umi.sample_name_map"
     benchmark:
         Path(benchmark_dir + "sentieon_tnscope_umi_{case_name}.{step}.tsv").as_posix()
     params:
