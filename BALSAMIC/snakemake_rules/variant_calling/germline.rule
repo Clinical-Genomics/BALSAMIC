@@ -37,7 +37,7 @@ rule haplotypecaller_merge:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
         tmpdir = tmp_dir,
-        conda = get_conda_env(config["bioinfo_tools"], "gatk"),
+        conda = config["bioinfo_tools"].get("gatk"),
     singularity: singularity_image
     benchmark:
         benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.vcf.gz" 

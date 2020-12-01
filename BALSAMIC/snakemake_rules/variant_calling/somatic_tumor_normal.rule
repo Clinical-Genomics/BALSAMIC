@@ -16,7 +16,7 @@ rule vardict_tumor_normal:
     max_mm = "4.5",
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["case_id"],
-    conda = get_conda_env(config["bioinfo_tools"], "vardict"),
+    conda = config["bioinfo_tools"].get("vardict"),
   threads: get_threads(cluster_config, "vardict_tumor_normal")
   singularity: singularity_image
   benchmark:
@@ -49,7 +49,7 @@ rule vardict_merge:
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
     tmpdir = tmp_dir,
-    conda = get_conda_env(config["bioinfo_tools"], "vardict"),
+    conda = config["bioinfo_tools"].get("vardict"),
     name = config["analysis"]["case_id"],
   singularity: singularity_image
   benchmark:
