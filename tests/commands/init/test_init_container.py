@@ -86,7 +86,7 @@ def test_init_container_capture_failed_download(invoke_cli, tmp_path, caplog):
     # Given a dummy path
     test_new_dir = tmp_path / "test_container_dir"
     test_new_dir.mkdir()
-    dummy_tag = "some_tag_that_does_not_exist_ngrtf123jsds3wqe2"
+    dummy_tag = "develop"
 
     with mock.patch.object(subprocess,
                            'check_output') as mocked, caplog.at_level(
