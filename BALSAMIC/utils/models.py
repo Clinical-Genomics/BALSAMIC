@@ -169,6 +169,7 @@ class AnalysisModel(BaseModel):
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
         analysis_dir : Field(required); existing path where to save files
+	umiworkflow : Field(bool); whether UMI workflow to run parallely 
 
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
@@ -198,6 +199,7 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
+    umiworkflow: bool = True
 
     class Config:
         validate_all = True
