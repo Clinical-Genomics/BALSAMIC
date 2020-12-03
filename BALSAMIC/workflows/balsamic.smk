@@ -248,7 +248,7 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
     if config["analysis"]["umiworkflow"]:
         config["rules"] = config["rules"] + umiqc_rules
         analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
-                                          vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]])), 
+                                          vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]), 
                                       expand(umi_qc_dir + "{case_name}.{step}_umi.{metric}",
                                           case_name = config["analysis"]["case_id"],
                                           step=["consensusaligned","consensusfiltered"],
@@ -262,7 +262,7 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
                                           var_caller = expand("{var_caller}_{step}_umi",
                                           var_caller =["TNscope"],
                                           step = ["consensusaligned","consensusfiltered"]))])
-            config["rules"] = config["rules"] + umiqc_rules + generatetable_umi_rules
+            config["rules"] = config["rules"] + generatetable_umi_rules
 
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
