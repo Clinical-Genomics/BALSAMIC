@@ -340,6 +340,7 @@ class BalsamicConfigModel(BaseModel):
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+	umiworkflow : Field(bool); whether UMI workflow to run parallely with balsamic workflow
 
     """
 
@@ -353,6 +354,7 @@ class BalsamicConfigModel(BaseModel):
     conda_env_yaml: FilePath = CONDA_ENV_YAML
     bioinfo_tools: Optional[BioinfoToolsModel]
     panel: Optional[PanelModel]
+    umiworkflow: bool = True
 
     @validator("reference")
     def abspath_as_str(cls, value):
