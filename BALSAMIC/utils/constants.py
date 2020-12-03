@@ -46,14 +46,14 @@ VCF_DICT = {
     "TNscope_consensusaligned_umi": {
         "mutation": "somatic",
 	"type": "SNV",
-	"analysis_type": "single",
-	"workflow_solution": "Sentieon_umi"
+	"analysis_type": ["single"],
+	"workflow_solution": ["Sentieon_umi"]
     },
-    "TNscope_consensusaligned_umi" : {
+    "TNscope_consensusfiltered_umi": {
 	"mutation": "somatic",
         "type": "SNV",
-        "analysis_type": "single",
-        "workflow_solution": "Sentieon_umi"
+        "analysis_type": ["single"],
+        "workflow_solution": ["Sentieon_umi"]
     },
     "tnsnv": {
         "mutation": "somatic",
