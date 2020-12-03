@@ -365,8 +365,8 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 @pytest.fixture(scope="session")
 def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
                           analysis_dir, reference_json, panel_bed_file,
-                          background_variant_file, sentieon_license,
-                          sentieon_install_dir):
+                          background_variant_file, umiworkflow,
+                          sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only with background variant file for umi workflow
@@ -383,22 +383,11 @@ def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
         runner.invoke(
             cli,
             [
-                "config",
-                "case",
-                "-p",
-                panel_bed_file,
-                "--background-variants",
-                background_variant_file,
-                "-t",
-                tumor,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--singularity",
-                singularity_container,
-                "--reference-config",
-                reference_json,
+                "config", "case", "-p", panel_bed_file,
+                "--background-variants", background_variant_file, "-t", tumor,
+                "--case-id", case_id, "--analysis-dir", analysis_dir,
+                "--singularity", singularity_container, "--reference-config",
+                reference_json, "--umiworkflow"
             ],
         )
 
@@ -422,26 +411,18 @@ def sample_config():
             "umi_trim_length": "5",
         },
         "analysis": {
-            "case_id":
-            "id1",
-            "analysis_type":
-            "paired",
-            "analysis_dir":
-            "tests/test_data/",
-            "fastq_path":
-            "tests/test_data/id1/fastq/",
-            "script":
-            "tests/test_data/id1/scripts/",
-            "log":
-            "tests/test_data/id1/logs/",
-            "result":
-            "tests/test_data/id1/analysis/",
-            "config_creation_date":
-            "yyyy-mm-dd xx",
-            "BALSAMIC_version":
-            "2.9.8",
+            "case_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "tests/test_data/",
+            "fastq_path": "tests/test_data/id1/fastq/",
+            "script": "tests/test_data/id1/scripts/",
+            "log": "tests/test_data/id1/logs/",
+            "result": "tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
             "dag":
             "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
+            "umiworkflow": "true"
         },
         "vcf": {
             "manta": {
