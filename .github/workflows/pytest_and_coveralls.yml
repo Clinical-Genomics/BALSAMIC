@@ -48,6 +48,9 @@ jobs:
         run: |
           conda activate balsamic
           py.test --cov-report=xml --cov=BALSAMIC -rsxv tests/*
+        env:
+          SENTIEON_LICENSE: dummy_license
+          SENTIEON_INSTALL_DIR: dummy_install_dir
 
       # Run Codecov
       - name: Upload coverage to Codecov
