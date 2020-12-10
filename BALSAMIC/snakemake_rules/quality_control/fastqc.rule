@@ -13,7 +13,7 @@ rule fastqc:
     conda = config["bioinfo_tools"].get("fastqc"),
     tmpdir = tmp_dir,
     fastqc_dir = fastqc_dir
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "fastqc_" + "{sample}.fastqc.tsv"
   shell:

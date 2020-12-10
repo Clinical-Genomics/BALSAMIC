@@ -11,7 +11,7 @@ rule RealignerTargetCreator:
   params:
     tmpdir = tmp_dir,
     conda = config["bioinfo_tools"].get("gatk"),
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "RealignerTargetCreator_" + "{sample}.realign_targetcreator.tsv"
   shell:
@@ -38,7 +38,7 @@ rule BaseRecalibrator:
   params:
     tmpdir = tmp_dir,
     conda = config["bioinfo_tools"].get("gatk"),
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
   benchmark:
     benchmark_dir + "BaseRecalibrator_" + "{sample}.base_recalibrator.tsv"
   shell:
@@ -71,7 +71,7 @@ rule PreparePopVCF:
     conda = config["bioinfo_tools"].get("bcftools"),
     anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
     popcode = "EUR"
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "PreparePopVCF_" + "tumor_prepare_pop_vcf.tsv"
   shell:

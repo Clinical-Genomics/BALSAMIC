@@ -22,10 +22,10 @@ rule manta_tumor_normal:
         tmpdir = vcf_dir + "manta/",
         runmode = "local",
         conda = config["bioinfo_tools"].get("manta")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix() 
     benchmark: 
         benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
-    threads: 4
+    threads: get_threads(cluster_config, "manta") 
     shell:
         "source activate {params.conda};"
         "rm -rf {params.tmpdir}; "

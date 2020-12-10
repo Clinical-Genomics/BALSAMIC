@@ -21,7 +21,7 @@ rule bwa_mem:
         tmpdir = Path(tmp_dir).as_posix(),
         conda = config["bioinfo_tools"].get("bwa")
     threads: get_threads(cluster_config, "bwa_mem")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     benchmark:
         Path(benchmark_dir, "bwa_mem_{sample}.bwa_mem.tsv").as_posix()
     shell:
@@ -51,7 +51,7 @@ rule MarkDuplicates:
     tmpdir = tmp_dir,
     conda = config["bioinfo_tools"].get("picard"),
     rm_dup = picard_flag(picarddup)
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
   benchmark:
     Path(benchmark_dir, "MarkDuplicates_{sample}.markduplicates.tsv").as_posix()
   shell:

@@ -18,7 +18,7 @@ rule ngs_filter_vardict:
     AF_max = [VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
     pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("vep") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.vardict.vep.tsv"
   shell:

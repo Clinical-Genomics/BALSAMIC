@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.constants import BALSAMIC_DOCKER_PATH
+from BALSAMIC.utils.constants import BALSAMIC_DOCKER_PATH, VALID_CONTAINER_CONDA_NAME
 
 LOG = logging.getLogger(__name__)
 
@@ -41,35 +41,37 @@ def container(context, container_version, force, dry):
 
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
-        docker_image_name = "release_v{}".format(container_version)
+        docker_image_base_name = "release_v{}".format(container_version)
     else:
-        docker_image_name = container_version
+        docker_image_base_name = container_version
 
-    container_stub_url = "{}:{}".format(BALSAMIC_DOCKER_PATH,
-                                        docker_image_name)
+    for image_suffix in VALID_CONTAINER_CONDA_NAME:
 
-    # Pull container
-    LOG.info("Singularity image source: {}".format(container_stub_url))
+        container_stub_url = "{}:{}-{}".format(BALSAMIC_DOCKER_PATH,
+                                              docker_image_base_name, image_suffix)
 
-    # Set container name according to above docker image name
-    image_name = Path(out_dir,
-                      "BALSAMIC_{}.sif".format(docker_image_name)).as_posix()
-    LOG.info("Image will be downloaded to {}".format(image_name))
-    LOG.info("Starting download. This process can take some time...")
+        # Pull container
+        LOG.info("Singularity image source: {}".format(container_stub_url))
 
-    cmd = ["singularity", "pull", "--name", f"{image_name}"]
-    if force:
-        cmd.append("--force")
-    cmd.append(container_stub_url)
+        # Set container name according to above docker image name
+        Path(out_dir).mkdir(exist_ok=True)
+        image_name = Path(out_dir, "{}.sif".format(image_suffix)).as_posix()
+        LOG.info("Image will be downloaded to {}".format(image_name))
+        LOG.info("Starting download. This process can take some time...")
 
-    try:
-        if dry:
-            LOG.info("Dry run mode, The following command will run: {}".format(
-                " ".join(cmd)))
-        else:
-            subprocess.check_output(cmd, cwd=out_dir, stderr=subprocess.STDOUT)
+        cmd = ["singularity", "pull", "--name", f"{image_name}"]
+        if force:
+            cmd.append("--force")
+        cmd.append(container_stub_url)
 
-    except:
-        LOG.error("Failed to pull singularity image "
-                  "from {}".format(container_stub_url))
-        raise click.Abort()
+        try:
+            if dry:
+                LOG.info("Dry run mode, The following command will run: {}".format(
+                    " ".join(cmd)))
+            else:
+                subprocess.run(" ".join(cmd), shell=True)
+
+        except:
+            LOG.error("Failed to pull singularity image "
+                      "from {}".format(container_stub_url))
+            raise click.Abort()

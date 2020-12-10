@@ -33,7 +33,7 @@ rule cnvkit_single:
         tumor_name = tumor_bam,
         cnv_dir = cnv_dir,
         conda = config["bioinfo_tools"].get("cnvkit"),
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + 'cnvkit_single_' + config["analysis"]["case_id"] + ".cnvkit_single.tsv"
     shell:

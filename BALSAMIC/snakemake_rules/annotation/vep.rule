@@ -19,7 +19,7 @@ rule vep_somatic:
     conda = config["bioinfo_tools"].get("ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("vep") + ".sif").as_posix()
   benchmark:
     benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
   shell:
@@ -70,7 +70,7 @@ rule vep_stat:
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("vep") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.pass.balsamic_stat.tsv" 
   shell:
@@ -95,7 +95,7 @@ rule vep_germline:
     conda = config["bioinfo_tools"].get("ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("vep") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'vep_' + "{var_type}.germline.{sample}.{var_caller}.vep.tsv"
   shell:

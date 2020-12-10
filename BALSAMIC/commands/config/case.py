@@ -59,7 +59,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--singularity",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
-              help="Download singularity image for BALSAMIC")
+              help="Image path for BALSAMIC containers. Output of 'balsamic init container' command" )
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
               required=True,

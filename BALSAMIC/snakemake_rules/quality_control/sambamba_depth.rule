@@ -14,7 +14,7 @@ rule sambamba_panel_depth:
     cov_step=50,
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = config["bioinfo_tools"].get("sambamba")
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("sambamba") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "panel_depth_" + "{sample}.sambamba_panel_depth.tsv"
   shell:
@@ -42,7 +42,7 @@ rule sambamba_exon_depth:
     cov_5="250",
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
     conda = config["bioinfo_tools"].get("sambamba")
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("sambamba") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "exon_depth_" + "{sample}.sambamba_exon_depth.tsv"
   shell:

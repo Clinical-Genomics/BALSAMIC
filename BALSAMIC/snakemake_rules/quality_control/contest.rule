@@ -15,7 +15,7 @@ rule GATK_contest:
     tmpdir = tmp_dir,
     min_genotype_ratio="0.95",
     popcode = "EUR"
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'GATK_contest_' + config["analysis"]["case_id"] + ".markduplicates.tsv"
   shell:

@@ -13,7 +13,7 @@ rule mergeBam_normal_gatk:
   params:
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
   benchmark:
     benchmark_dir + 'mergeBam_normal_gatk_' + "{mysample}.mergebam_normal_gatk.tsv".format(mysample = normal_sample)
   shell:
@@ -35,7 +35,7 @@ rule mergeBam_normal:
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal
   threads: get_threads(cluster_config, "mergeBam_normal")
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
   benchmark:
     benchmark_dir + 'mergeBam_normal_' + "{mysample}.mergebam_normal.tsv".format(mysample = normal_sample)
   shell:
@@ -59,7 +59,7 @@ rule mergeBam_tumor:
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "mergeBam_tumor")
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
   benchmark:
     benchmark_dir + 'mergeBam_tumor_' + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
   shell:
@@ -80,7 +80,7 @@ rule mergeBam_tumor_gatk:
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_tumor
   threads: get_threads(cluster_config, "samtools_sort_index")
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
   benchmark:
     benchmark_dir + 'mergeBam_tumor_gatk_' + "{mysample}.mergebam_tumor_gatk.tsv".format(mysample = tumor_sample)
   shell:

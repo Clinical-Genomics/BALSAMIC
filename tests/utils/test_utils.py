@@ -13,6 +13,7 @@ from pathlib import Path
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
 from BALSAMIC.utils.constants import CONTAINERS_CONDA_ENV_PATH
+from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV
 from BALSAMIC.utils.constants import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
@@ -110,15 +111,13 @@ def test_get_reference_output_files():
 
 
 def test_get_bioinfo_tools_list():
-    # GIVEN a path for conda env files
-    conda_env_path = CONTAINERS_CONDA_ENV_PATH
-
+    # GIVEN a path for container path and bioinfo tool dictionary
     # WHEN getting dictionary of bioinformatic tools and their version
-    bioinfo_tools_dict = get_bioinfo_tools_version(conda_env_path)
+    bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH)
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert bioinfo_tools_dict["cnvkit"] == "0.9.4"
+    assert set(bioinfo_tools_dict["samtools"]) == set(["1.10", "1.9"])
 
 
 def test_get_delivery_id():

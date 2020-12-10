@@ -15,7 +15,7 @@ rule split_bed_by_chrom:
         conda = config["bioinfo_tools"].get("bedtools"),
     benchmark:
         benchmark_dir + 'split_bed_by_chrom.tsv'
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
     shell:
         "source activate {params.conda}; "
         "tmpdir={params.tmpdir}/${{rand_str}}; "

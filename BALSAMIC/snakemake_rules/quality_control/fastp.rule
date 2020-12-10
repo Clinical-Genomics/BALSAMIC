@@ -37,7 +37,7 @@ rule fastp:
         html = qc_dir + "fastp/{sample}_fastp.html",
     benchmark:
              benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix() 
     params:
         read1_interm = fastq_dir + "{sample}_1.interm.fastq.gz",
         read2_interm = fastq_dir + "{sample}_2.interm.fastq.gz",
