@@ -3,13 +3,20 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
 
-from pydantic import (BaseModel, validator, Field, AnyUrl)
+from pydantic import BaseModel, validator, Field, AnyUrl
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC.utils.constants import (
-    CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
-    MUTATION_TYPE, RULE_DIRECTORY, BALSAMIC_VERSION, VALID_GENOME_VER,
-    VALID_REF_FORMAT)
+    CONDA_ENV_YAML,
+    ANALYSIS_TYPES,
+    WORKFLOW_SOLUTION,
+    MUTATION_CLASS,
+    MUTATION_TYPE,
+    RULE_DIRECTORY,
+    BALSAMIC_VERSION,
+    VALID_GENOME_VER,
+    VALID_REF_FORMAT,
+)
 
 
 class VCFAttributes(BaseModel):
@@ -77,6 +84,7 @@ class QCModel(BaseModel):
             be interpreted as integer and coerced to string
     
     """
+
     picard_rmdup: bool = False
     adapter: str = "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT"
     quality_trim: bool = True
@@ -107,6 +115,7 @@ class VarcallerAttribute(BaseModel):
             When a variable other than [SNV, CNV, SV] is passed in mutation_type field
             
     """
+
     mutation: str
     mutation_type: str = Field(alias="type")
     analysis_type: Optional[list]
@@ -116,14 +125,14 @@ class VarcallerAttribute(BaseModel):
     def workflow_solution_literal(cls, value) -> str:
         " Validate workflow solution "
         assert set(value).issubset(
-            set(WORKFLOW_SOLUTION)), f"{value} is not valid workflow solution."
+            set(WORKFLOW_SOLUTION)
+        ), f"{value} is not valid workflow solution."
         return value
 
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
         " Validate analysis types "
-        assert set(value).issubset(
-            set(ANALYSIS_TYPES)), f"{value} is not a valid analysis type."
+        assert set(value).issubset(set(ANALYSIS_TYPES)), f"{value} is not a valid analysis type."
         return value
 
     @validator("mutation", check_fields=False)
@@ -206,17 +215,14 @@ class AnalysisModel(BaseModel):
     def analysis_type_literal(cls, value) -> str:
         balsamic_analysis_types = ANALYSIS_TYPES
         if value not in balsamic_analysis_types:
-            raise ValueError(
-                f"Provided analysis type ({value}) not supported in BALSAMIC!")
+            raise ValueError(f"Provided analysis type ({value}) not supported in BALSAMIC!")
         return value
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
         balsamic_sequencing_types = ["wgs", "targeted"]
         if value not in balsamic_sequencing_types:
-            raise ValueError(
-                f"Provided sequencing type ({value}) not supported in BALSAMIC!"
-            )
+            raise ValueError(f"Provided sequencing type ({value}) not supported in BALSAMIC!")
         return value
 
     @validator("analysis_dir")
@@ -225,34 +231,37 @@ class AnalysisModel(BaseModel):
 
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "logs").as_posix() + "/"
+        return Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix() + "/"
 
     @validator("fastq_path")
     def parse_analysis_to_fastq_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "analysis", "fastq").as_posix() + "/"
+        return (
+            Path(values.get("analysis_dir"), values.get("case_id"), "analysis", "fastq").as_posix()
+            + "/"
+        )
 
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "scripts").as_posix() + "/"
+        return Path(values.get("analysis_dir"), values.get("case_id"), "scripts").as_posix() + "/"
 
     @validator("result")
     def parse_analysis_to_result_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "analysis").as_posix()
+        return Path(values.get("analysis_dir"), values.get("case_id"), "analysis").as_posix()
 
     @validator("benchmark")
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "benchmarks").as_posix() + "/"
+        return (
+            Path(values.get("analysis_dir"), values.get("case_id"), "benchmarks").as_posix() + "/"
+        )
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{BALSAMIC_VERSION}_graph.pdf'
+        return (
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
+            ).as_posix()
+            + f"_BALSAMIC_{BALSAMIC_VERSION}_graph.pdf"
+        )
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
@@ -274,6 +283,7 @@ class SampleInstanceModel(BaseModel):
         """
 
     file_prefix: str
+    sample_id: Optional[str]
     sample_type: str = Field(alias="type")
     readpair_suffix: List[str] = ["1", "2"]
 
@@ -281,13 +291,19 @@ class SampleInstanceModel(BaseModel):
     def sample_type_literal(cls, value):
         balsamic_sample_types = ["tumor", "normal"]
         if value not in balsamic_sample_types:
-            raise ValueError(
-                f"Provided sample type ({value}) not supported in BALSAMIC!")
+            raise ValueError(f"Provided sample type ({value}) not supported in BALSAMIC!")
         return value
+
+    @validator("sample_id")
+    def set_sample_id_if_missing_value(cls, value, values, **kwargs):
+        if value:
+            return value
+        return values.get("file_prefix")
 
 
 class BioinfoToolsModel(BaseModel):
     """Holds versions of current bioinformatic tools used in analysis"""
+
     tabix: Optional[str]
     bcftools: Optional[str]
     fastqc: Optional[str]
@@ -416,16 +432,14 @@ class ReferenceUrlsModel(BaseModel):
         hash_md5 = hashlib.md5()
         output_file = Path(self.output_path, self.output_file)
         if not output_file.is_file():
-            raise FileNotFoundError(
-                f"{output_file.as_posix()} file does not exist")
+            raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
 
-        with open(output_file.as_posix(), 'rb') as fh:
+        with open(output_file.as_posix(), "rb") as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 hash_md5.update(chunk)
 
-        with open(output_file.as_posix() + ".md5", 'w') as fh:
-            fh.write('{} {}\n'.format(output_file.as_posix(),
-                                      hash_md5.hexdigest()))
+        with open(output_file.as_posix() + ".md5", "w") as fh:
+            fh.write("{} {}\n".format(output_file.as_posix(), hash_md5.hexdigest()))
 
 
 class ReferenceMeta(BaseModel):
@@ -461,15 +475,14 @@ class ReferenceMeta(BaseModel):
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
 
-    @validator('*', pre=True)
+    @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):
         """validate and append path in ReferenceUrlsModel fields with basedir"""
         if isinstance(value, str):
             output_value = value
         else:
             if "output_path" in value:
-                value["output_path"] = Path(values["basedir"],
-                                            value["output_path"]).as_posix()
+                value["output_path"] = Path(values["basedir"], value["output_path"]).as_posix()
                 output_value = ReferenceUrlsModel.parse_obj(value)
             else:
                 output_value = value

@@ -112,31 +112,34 @@ class SnakeMake:
             dryrun = "--dryrun"
 
         if self.disable_variant_caller:
-            snakemake_config_key_value = f' --config disable_variant_caller={self.disable_variant_caller} '
+            snakemake_config_key_value = (
+                f" --config disable_variant_caller={self.disable_variant_caller} "
+            )
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
             for bind_path in self.singularity_bind:
-                self.singularity_arg += " --bind {}:{}".format(
-                    bind_path, bind_path)
+                self.singularity_arg += " --bind {}:{}".format(bind_path, bind_path)
             self.singularity_arg += "' "
 
         if self.run_mode == "cluster":
-            sbatch_cmd = (" '{} {} "
-                          " --sample-config {} --profile {} "
-                          " --account {} --qos {} "
-                          " --log-dir {} --script-dir {} "
-                          " --result-dir {} ".format(
-                              sys.executable,
-                              self.scheduler,
-                              self.configfile,
-                              self.profile,
-                              self.account,
-                              self.qos,
-                              self.log_path,
-                              self.script_path,
-                              self.result_path,
-                          ))
+            sbatch_cmd = (
+                " '{} {} "
+                " --sample-config {} --profile {} "
+                " --account {} --qos {} "
+                " --log-dir {} --script-dir {} "
+                " --result-dir {} ".format(
+                    sys.executable,
+                    self.scheduler,
+                    self.configfile,
+                    self.profile,
+                    self.account,
+                    self.qos,
+                    self.log_path,
+                    self.script_path,
+                    self.result_path,
+                )
+            )
 
             if self.mail_user:
                 sbatch_cmd += " --mail-user {} ".format(self.mail_user)
@@ -146,27 +149,31 @@ class SnakeMake:
 
             sbatch_cmd += " {dependencies} '"
 
-            cluster_cmd = (" --immediate-submit -j 999 "
-                           "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
-                           "--cluster-config {} --cluster {} ".format(
-                               self.case_name, self.cluster_config,
-                               sbatch_cmd))
+            cluster_cmd = (
+                " --immediate-submit -j 999 "
+                "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
+                "--cluster-config {} --cluster {} ".format(
+                    self.case_name, self.cluster_config, sbatch_cmd
+                )
+            )
 
-        sm_cmd = (" snakemake --notemp -p "
-                  " --directory {} --snakefile {} --configfiles {} "
-                  " {} {} {} {} {} {} {} {}".format(
-                      self.working_dir,
-                      self.snakefile,
-                      self.configfile,
-                      self.cluster_config,
-                      self.singularity_arg,
-                      forceall,
-                      dryrun,
-                      cluster_cmd,
-                      report,
-                      snakemake_config_key_value,
-                      sm_opt,
-                  ))
+        sm_cmd = (
+            " snakemake --notemp -p "
+            " --directory {} --snakefile {} --configfiles {} "
+            " {} {} {} {} {} {} {} {}".format(
+                self.working_dir,
+                self.snakefile,
+                self.configfile,
+                self.cluster_config,
+                self.singularity_arg,
+                forceall,
+                dryrun,
+                cluster_cmd,
+                report,
+                snakemake_config_key_value,
+                sm_opt,
+            )
+        )
 
         return sm_cmd
 
@@ -249,9 +256,9 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
         if sequencing_type == "wgs":
             snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
     elif analysis_type == "generate_ref":
-        snakefile = Path(p, 'workflows', 'GenerateRef')
+        snakefile = Path(p, "workflows", "GenerateRef")
     elif analysis_type == "umi":
-        snakefile = Path(p, 'workflows', 'UMIworkflow.smk')
+        snakefile = Path(p, "workflows", "UMIworkflow.smk")
 
     return str(snakefile)
 
@@ -282,8 +289,7 @@ def convert_defaultdict_to_regular_dict(inputdict: dict):
     """
     if isinstance(inputdict, collections.defaultdict):
         inputdict = {
-            key: convert_defaultdict_to_regular_dict(value)
-            for key, value in inputdict.items()
+            key: convert_defaultdict_to_regular_dict(value) for key, value in inputdict.items()
         }
     return inputdict
 
@@ -312,8 +318,7 @@ def find_file_index(file_path):
     for file_extension, file_index_extensions in indexible_files.items():
         if file_path.endswith(file_extension):
             for file_index_extension in file_index_extensions:
-                new_file_path = file_path.replace(file_extension,
-                                                  file_index_extension)
+                new_file_path = file_path.replace(file_extension, file_index_extension)
                 if os.path.isfile(new_file_path):
                     file_path_index.add(new_file_path)
 
@@ -321,9 +326,7 @@ def find_file_index(file_path):
 
 
 def get_file_extension(file_path):
-    known_multi_extensions = [
-        ".vcf.gz", ".vcf.gz.tbi", ".vcf.tbi", ".fastq.gz"
-    ]
+    known_multi_extensions = [".vcf.gz", ".vcf.gz.tbi", ".vcf.tbi", ".fastq.gz"]
     file_extension = ""
     for known_ext in known_multi_extensions:
         if file_path.endswith(known_ext):
@@ -344,8 +347,7 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     """
 
     matching_value = default
-    if (from_key in input_dict and by_key in input_dict
-            and by_value in input_dict[from_key]):
+    if from_key in input_dict and by_key in input_dict and by_value in input_dict[from_key]:
         idx = input_dict[from_key].index(by_value)
         matching_value = input_dict[by_key][idx]
 
@@ -427,8 +429,7 @@ def validate_fastq_pattern(sample):
     fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
     sample_basename = Path(sample).name
 
-    file_str = sample_basename[0:(
-        fq_pattern.search(sample_basename).span()[0] + 1)]
+    file_str = sample_basename[0 : (fq_pattern.search(sample_basename).span()[0] + 1)]
     return file_str
 
 
@@ -452,8 +453,7 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
                     for pip_package in p["pip"]:
                         name, version = pip_package.split("==")
                         if name in bioinfo_tools:
-                            bioinfo_tools[name] = ",".join(
-                                set([bioinfo_tools[name], version]))
+                            bioinfo_tools[name] = ",".join(set([bioinfo_tools[name], version]))
                         else:
                             bioinfo_tools[name] = version
                 else:
@@ -464,24 +464,27 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
                         name, version = p, None
                     finally:
                         if name in bioinfo_tools:
-                            bioinfo_tools[name] = ",".join(
-                                set([bioinfo_tools[name], version]))
+                            bioinfo_tools[name] = ",".join(set([bioinfo_tools[name], version]))
                         else:
                             bioinfo_tools[name] = version
     return bioinfo_tools
 
 
-def get_sample_dict(tumor, normal) -> dict:
+def get_sample_dict(
+    tumor: str, normal: str, tumor_name: str = None, normal_name: str = None
+) -> dict:
     """Concatenates sample dicts for all provided files"""
     samples = {}
     if normal:
         for sample in normal:
             key, val = get_sample_names(sample, "normal")
             samples[key] = val
+            samples[key]["sample_id"] = normal_name
 
     for sample in tumor:
         key, val = get_sample_names(sample, "tumor")
         samples[key] = val
+        samples[key]["sample_id"] = tumor_name
     return samples
 
 
@@ -491,11 +494,7 @@ def get_sample_names(filename, sample_type):
     if file_str:
         return (
             file_str,
-            {
-                "file_prefix": file_str,
-                "type": sample_type,
-                "readpair_suffix": ["1", "2"],
-            },
+            {"file_prefix": file_str, "type": sample_type, "readpair_suffix": ["1", "2"],},
         )
 
 
@@ -509,8 +508,7 @@ def create_fastq_symlink(casefiles, symlink_dir: Path):
         file_str = validate_fastq_pattern(filename)
         for f in parent_dir.rglob(f"*{file_str}*.fastq.gz"):
             try:
-                LOG.info(
-                    f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
+                LOG.info(f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
                 Path(symlink_dir, f.name).symlink_to(f)
             except FileExistsError:
                 LOG.info(f"File {symlink_dir / f.name} exists, skipping")
@@ -522,28 +520,23 @@ def generate_graph(config_collection_dict, config_path):
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(
             snakefile=get_snakefile(
-                analysis_type=config_collection_dict["analysis"]
-                ["analysis_type"],
-                sequencing_type=config_collection_dict["analysis"]
-                ["sequencing_type"],
+                analysis_type=config_collection_dict["analysis"]["analysis_type"],
+                sequencing_type=config_collection_dict["analysis"]["sequencing_type"],
             ),
             dryrun=True,
             configfiles=[config_path],
             printrulegraph=True,
         )
 
-    graph_title = "_".join([
-        "BALSAMIC",
-        BALSAMIC.__version__,
-        config_collection_dict["analysis"]["case_id"],
-    ])
+    graph_title = "_".join(
+        ["BALSAMIC", BALSAMIC.__version__, config_collection_dict["analysis"]["case_id"],]
+    )
     graph_dot = "".join(graph_dot).replace(
-        "snakemake_dag {",
-        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
+    )
     graph_obj = graphviz.Source(
         graph_dot,
-        filename=".".join(
-            config_collection_dict["analysis"]["dag"].split(".")[:-1]),
+        filename=".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]),
         format="pdf",
         engine="dot",
     )
