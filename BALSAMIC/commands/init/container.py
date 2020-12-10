@@ -47,8 +47,8 @@ def container(context, container_version, force, dry):
 
     for image_suffix in VALID_CONTAINER_CONDA_NAME:
 
-        container_stub_url = "{}:{}-{}".format(BALSAMIC_DOCKER_PATH,
-                                              docker_image_base_name, image_suffix)
+        container_stub_url = "{}:{}-{}".format(
+            BALSAMIC_DOCKER_PATH, docker_image_base_name, image_suffix)
 
         # Pull container
         LOG.info("Singularity image source: {}".format(container_stub_url))
@@ -66,8 +66,9 @@ def container(context, container_version, force, dry):
 
         try:
             if dry:
-                LOG.info("Dry run mode, The following command will run: {}".format(
-                    " ".join(cmd)))
+                LOG.info(
+                    "Dry run mode, The following command will run: {}".format(
+                        " ".join(cmd)))
             else:
                 subprocess.run(" ".join(cmd), shell=True)
 

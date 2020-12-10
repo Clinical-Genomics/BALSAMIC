@@ -453,7 +453,10 @@ umiworkflow_params = {
 }
 
 # list of bioinfo tools for each conda env
-VALID_CONTAINER_CONDA_NAME = {"align_qc", "annotate", "coverage_qc", "varcall_py36", "varcall_py27", "varcall_cnvkit"}
+VALID_CONTAINER_CONDA_NAME = {
+    "align_qc", "annotate", "coverage_qc", "varcall_py36", "varcall_py27",
+    "varcall_cnvkit"
+}
 
 BIOINFO_TOOL_ENV = {
     "bedtools": "align_qc",

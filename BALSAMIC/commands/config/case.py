@@ -56,10 +56,13 @@ LOG = logging.getLogger(__name__)
               type=click.Path(exists=True, resolve_path=True),
               required=False,
               help="Background set of valid variants for UMI")
-@click.option("--singularity",
-              type=click.Path(exists=True, resolve_path=True),
-              required=True,
-              help="Image path for BALSAMIC containers. Output of 'balsamic init container' command" )
+@click.option(
+    "--singularity",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help=
+    "Image path for BALSAMIC containers. Output of 'balsamic init container' command"
+)
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
               required=True,

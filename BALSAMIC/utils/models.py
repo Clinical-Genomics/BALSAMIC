@@ -328,7 +328,7 @@ class BalsamicConfigModel(BaseModel):
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
-    singularity: DirectoryPath 
+    singularity: DirectoryPath
     background_variants: Optional[FilePath]
     bioinfo_tools: dict
     bioinfo_tools_version: dict

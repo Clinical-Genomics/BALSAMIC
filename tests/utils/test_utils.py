@@ -113,7 +113,8 @@ def test_get_reference_output_files():
 def test_get_bioinfo_tools_list():
     # GIVEN a path for container path and bioinfo tool dictionary
     # WHEN getting dictionary of bioinformatic tools and their version
-    bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH)
+    bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV,
+                                                   CONTAINERS_CONDA_ENV_PATH)
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
