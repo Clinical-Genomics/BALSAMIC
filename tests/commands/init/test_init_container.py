@@ -75,7 +75,7 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
             'init',
             '--outdir',
             str(test_new_dir),
-            'container',
+            'container'
         ])
 
         # THEN output config and pdf file generate and command exit code 0
