@@ -156,8 +156,6 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
         for sample in sample_config_dict["samples"]:
             if sample["file_prefix"] in file["tag"]:
                 file["tag"] = file["tag"].replace(sample["file_prefix"], sample["sample_id"])
-                if sample["type"] not in file["tag"]:
-                    file["tag"].append(sample["type"])
 
     # Add Housekeeper file to report
     delivery_json["files"].append(

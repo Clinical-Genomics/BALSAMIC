@@ -102,8 +102,8 @@ LOG = logging.getLogger(__name__)
     multiple=True,
     help="Fastq files for normal sample.",
 )
-@click.option("--tumor-name", help="Internal ID of tumor sample")
-@click.option("--normal-name", help="Internal ID of normal sample")
+@click.option("--tumor-sample-id", help="Internal ID of tumor sample")
+@click.option("--normal-sample-id", help="Internal ID of normal sample")
 @click.pass_context
 def case_config(
     context,
@@ -119,13 +119,16 @@ def case_config(
     analysis_dir,
     tumor,
     normal,
-    tumor_name,
-    normal_name,
+    tumor_sample_id,
+    normal_sample_id,
 ):
 
     try:
         samples = get_sample_dict(
-            tumor=tumor, normal=normal, tumor_name=tumor_name, normal_name=normal_name
+            tumor=tumor,
+            normal=normal,
+            tumor_sample_id=tumor_sample_id,
+            normal_sample_id=normal_sample_id,
         )
     except AttributeError:
         LOG.error(f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
