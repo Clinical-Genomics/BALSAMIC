@@ -31,7 +31,7 @@ rule manta_tumor_normal:
     singularity: singularity_image
     benchmark: 
         benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
-    threads: 4
+    threads: get_threads(cluster_config, "manta") 
     shell:
         "source activate {params.conda};"
         "rm -rf {params.tmpdir}; "

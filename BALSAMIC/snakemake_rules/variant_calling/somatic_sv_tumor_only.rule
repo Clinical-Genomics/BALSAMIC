@@ -23,7 +23,7 @@ rule manta_tumor_only:
       tmpdir = vcf_dir + "manta/",
       runmode = "local",
       conda = get_conda_env(config["conda_env_yaml"],"manta")
-    threads: 4
+    threads: get_threads(cluster_config, "manta") 
     singularity: singularity_image
     benchmark: 
         benchmark_dir + 'manta_tumor_only_' + config["analysis"]["case_id"] + ".manta.tsv"
