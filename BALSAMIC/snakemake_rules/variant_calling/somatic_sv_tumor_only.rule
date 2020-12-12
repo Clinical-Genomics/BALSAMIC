@@ -19,7 +19,7 @@ rule manta_tumor_only:
       tmpdir = vcf_dir + "manta/",
       runmode = "local",
       conda = config["bioinfo_tools"].get("manta")
-    threads: get_threads(cluster_config, "manta") 
+    threads: get_threads(cluster_config, "manta_tumor_only") 
     singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix() 
     benchmark: 
         benchmark_dir + 'manta_tumor_only_' + config["analysis"]["case_id"] + ".manta.tsv"

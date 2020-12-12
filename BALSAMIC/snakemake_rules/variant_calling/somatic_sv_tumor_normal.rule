@@ -25,7 +25,7 @@ rule manta_tumor_normal:
     singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix() 
     benchmark: 
         benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
-    threads: get_threads(cluster_config, "manta") 
+    threads: get_threads(cluster_config, "manta_tumor_normal") 
     shell:
         "source activate {params.conda};"
         "rm -rf {params.tmpdir}; "
