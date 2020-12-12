@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--singularity",
               type=click.Path(),
               required=True,
-              help='Download singularity image for BALSAMIC')
+              help='Path for Singularity images for BALSAMIC')
 @click.option("-g",
               "--genome-version",
               default="hg19",
@@ -74,7 +74,6 @@ def reference(context, cosmic_key, snakefile, dagfile, singularity,
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 
-    balsamic_env = config_path / "balsamic_env.yaml"
     rule_directory = Path(__file__).parents[2]
 
     install_config = dict()
