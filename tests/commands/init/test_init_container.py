@@ -75,34 +75,28 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
             'init',
             '--outdir',
             str(test_new_dir),
-            'container'
+            'container', '--dry'
         ])
 
         # THEN output config and pdf file generate and command exit code 0
         assert result.exit_code == 0
 
 
-def test_init_container_capture_failed_download(invoke_cli, tmp_path, caplog):
+def test_init_container_wrong_tag(invoke_cli, tmp_path, caplog):
     # Given a dummy path
     test_new_dir = tmp_path / "test_container_dir"
     test_new_dir.mkdir()
-    dummy_tag = "develop"
+    dummy_tag = "some_tag_that_does_not_exist_ngrtf123jsds3wqe2"
 
-    with mock.patch.object(subprocess,
-                           'check_output') as mocked, caplog.at_level(
-                               logging.ERROR):
-        mocked.side_effect = 1
+    # WHEN pulling a wrong container tag
+    result = invoke_cli([
+        'init',
+        '--outdir',
+        str(test_new_dir),
+        'container',
+        '--container-version',
+        dummy_tag,
+    ])
 
-        # WHEN pulling a wrong container tag
-        result = invoke_cli([
-            'init',
-            '--outdir',
-            str(test_new_dir),
-            'container',
-            '--container-version',
-            dummy_tag,
-        ])
-
-        # THEN capture error log and error code
-        assert "Failed to pull singularity image" in caplog.text
-        assert result.exit_code > 0
+    # THEN capture error log and error code
+    assert result.exit_code > 0

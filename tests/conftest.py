@@ -152,9 +152,8 @@ def sample_fastq(tmp_path_factory):
         "normal": normal_fastq_R_2.absolute().as_posix(),
     }
 
-
 @pytest.fixture(scope="session")
-def singularity_container(tmp_path_factory):
+def singularity_container_sif(tmp_path_factory):
     """
     Create singularity container
     """
@@ -164,6 +163,16 @@ def singularity_container(tmp_path_factory):
     container_file.touch()
 
     return container_file.as_posix()
+
+@pytest.fixture(scope="session")
+def singularity_container(tmp_path_factory):
+    """
+    Create singularity container
+    """
+
+    container_dir = tmp_path_factory.mktemp("test_container")
+
+    return container_dir.as_posix()
 
 
 @pytest.fixture(scope="session")

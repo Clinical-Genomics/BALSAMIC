@@ -64,15 +64,9 @@ def container(context, container_version, force, dry):
             cmd.append("--force")
         cmd.append(container_stub_url)
 
-        try:
-            if dry:
-                LOG.info(
-                    "Dry run mode, The following command will run: {}".format(
-                        " ".join(cmd)))
-            else:
-                subprocess.run(" ".join(cmd), shell=True)
-
-        except:
-            LOG.error("Failed to pull singularity image "
-                      "from {}".format(container_stub_url))
-            raise click.Abort()
+        if dry:
+            LOG.info(
+                "Dry run mode, The following command will run: {}".format(
+                    " ".join(cmd)))
+        else:
+            subprocess.run(" ".join(cmd), shell=True)

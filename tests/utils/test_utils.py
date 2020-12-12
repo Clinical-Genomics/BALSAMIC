@@ -534,7 +534,7 @@ def test_find_file_index(tmpdir):
     assert str(bai_file_2) in result
 
 
-def test_singularity_shellcmd(singularity_container):
+def test_singularity_shellcmd(singularity_container_sif):
     """test singularity shell cmd
     """
 
@@ -549,7 +549,7 @@ def test_singularity_shellcmd(singularity_container):
         mocked.return_value = "/my_home/binary_path/singularity"
 
         # WHEN building singularity command
-        shellcmd = singularity(sif_path=singularity_container,
+        shellcmd = singularity(sif_path=singularity_container_sif,
                                cmd=dummy_command,
                                bind_paths=[dummy_path_1, dummy_path_2])
 
@@ -580,7 +580,7 @@ def test_singularity_shellcmd_sif_not_exist():
                     bind_paths=[dummy_path_1, dummy_path_2])
 
 
-def test_singularity_shellcmd_cmd_not_exist(singularity_container):
+def test_singularity_shellcmd_cmd_not_exist(singularity_container_sif):
     """test singularity shell cmd with nonexisting singularity command
     """
 
@@ -597,7 +597,7 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
                                                              match=error_msg):
         mocked.return_value = None
 
-        singularity(sif_path=singularity_container,
+        singularity(sif_path=singularity_container_sif,
                     cmd=dummy_command,
                     bind_paths=[dummy_path_1, dummy_path_2])
 
