@@ -16,6 +16,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
 from BALSAMIC.utils.models import VarCallerFilter
 from BALSAMIC.utils.constants import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, VARDICT_SETTINGS, VCFANNO_TOML
 
+shell.executable("/bin/bash -l")
 shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
