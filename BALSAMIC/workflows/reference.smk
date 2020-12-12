@@ -64,6 +64,7 @@ cosmicdb_url.secret=config['cosmic_key']
 
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
+shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 def get_md5(filename):
