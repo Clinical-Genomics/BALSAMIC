@@ -16,4 +16,7 @@ ARG CONTAINER_NAME
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml ./${CONTAINER_NAME}.yaml
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.sh ./${CONTAINER_NAME}.sh
 
+USER root
+
+RUN apk add --no-cache bash
 RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME} && conda clean --all --yes 
