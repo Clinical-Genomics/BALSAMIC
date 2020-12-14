@@ -161,7 +161,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
                 file["tag"] = (
                     file["tag"]
                     .replace(file_prefix, sample_name)
-                    .replace(file_prefix.replace("-", "_"), sample_name)
+                    .replace(file_prefix.replace("_", "-"), sample_name)
                 )
 
     # Add Housekeeper file to report
