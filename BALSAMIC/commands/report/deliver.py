@@ -21,6 +21,7 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import SnakeMake
+from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.exc import BalsamicError
 
@@ -160,18 +161,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     delivery_json = dict()
     delivery_json["files"] = delivery_file_ready_dict
 
-    for file in delivery_json["files"]:
-        for sample in sample_config_dict["samples"]:
-            file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
-            sample_name = sample_config_dict["samples"][sample]["sample_name"]
-            if file_prefix == file["id"]:
-                file["id"] = sample_name
-                file_tags = file["tag"].split(",")
-                for tag_index, tag in enumerate(file_tags):
-                    if tag == file_prefix or tag == file_prefix.replace(
-                            "_", "-"):
-                        file_tags[tag_index] = sample_name
-                file["tag"] = file_tags
+    delivery_json = convert_deliverables_tags(
+        delivery_json=delivery_json, sample_config_dict=sample_config_dict)
 
     # Add Housekeeper file to report
     delivery_json["files"].append({
