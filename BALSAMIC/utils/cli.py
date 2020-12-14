@@ -112,7 +112,9 @@ class SnakeMake:
             dryrun = "--dryrun"
 
         if self.disable_variant_caller:
-            snakemake_config_key_value = f' --config disable_variant_caller={self.disable_variant_caller} '
+            snakemake_config_key_value = (
+                f" --config disable_variant_caller={self.disable_variant_caller} "
+            )
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
@@ -249,9 +251,9 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
         if sequencing_type == "wgs":
             snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
     elif analysis_type == "generate_ref":
-        snakefile = Path(p, 'workflows', 'GenerateRef')
+        snakefile = Path(p, "workflows", "GenerateRef")
     elif analysis_type == "umi":
-        snakefile = Path(p, 'workflows', 'UMIworkflow.smk')
+        snakefile = Path(p, "workflows", "UMIworkflow.smk")
 
     return str(snakefile)
 
@@ -344,8 +346,8 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     """
 
     matching_value = default
-    if (from_key in input_dict and by_key in input_dict
-            and by_value in input_dict[from_key]):
+    if from_key in input_dict and by_key in input_dict and by_value in input_dict[
+            from_key]:
         idx = input_dict[from_key].index(by_value)
         matching_value = input_dict[by_key][idx]
 
@@ -471,17 +473,22 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
     return bioinfo_tools
 
 
-def get_sample_dict(tumor, normal) -> dict:
+def get_sample_dict(tumor: str,
+                    normal: str,
+                    tumor_sample_name: str = None,
+                    normal_sample_name: str = None) -> dict:
     """Concatenates sample dicts for all provided files"""
     samples = {}
     if normal:
         for sample in normal:
             key, val = get_sample_names(sample, "normal")
             samples[key] = val
+            samples[key]["sample_name"] = normal_sample_name
 
     for sample in tumor:
         key, val = get_sample_names(sample, "tumor")
         samples[key] = val
+        samples[key]["sample_name"] = tumor_sample_name
     return samples
 
 
@@ -558,3 +565,22 @@ def get_fastq_bind_path(fastq_path: Path) -> list():
     for fastq_file_path in Path(fastq_path).iterdir():
         parents.add(Path(fastq_file_path).resolve().parent.as_posix())
     return list(parents)
+
+
+def convert_deliverables_tags(delivery_json: dict,
+                              sample_config_dict: dict) -> dict:
+    """Replaces values of file_prefix with sample_name in deliverables dict"""
+
+    for file in delivery_json["files"]:
+        for sample in sample_config_dict["samples"]:
+            file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
+            sample_name = sample_config_dict["samples"][sample]["sample_name"]
+            if file_prefix == file["id"]:
+                file["id"] = sample_name
+                file_tags = file["tag"].split(",")
+                for tag_index, tag in enumerate(file_tags):
+                    if tag == file_prefix or tag == file_prefix.replace(
+                            "_", "-"):
+                        file_tags[tag_index] = sample_name
+                file["tag"] = file_tags
+    return delivery_json

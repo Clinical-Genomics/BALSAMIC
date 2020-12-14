@@ -26,7 +26,7 @@ def test_config_reference_write_json(invoke_cli, tmp_path,
 
 
 def test_config_reference_no_write_perm(
-        tmp_path, invoke_cli, singularity_container, no_write_perm_path):
+    tmp_path, invoke_cli, singularity_container, no_write_perm_path):
     # Given a path with no write permission
     test_new_dir = str(no_write_perm_path)
 
