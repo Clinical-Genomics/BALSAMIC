@@ -17,8 +17,7 @@ from BALSAMIC.utils.models import BalsamicConfigModel
 LOG = logging.getLogger(__name__)
 
 
-@click.command("case",
-               short_help="Create a sample config file from input sample data")
+@click.command("case", short_help="Create a sample config file from input sample data")
 @click.option(
     "--case-id",
     required=True,
@@ -103,8 +102,8 @@ LOG = logging.getLogger(__name__)
     multiple=True,
     help="Fastq files for normal sample.",
 )
-@click.option("--tumor-sample-id", help="Internal ID of tumor sample")
-@click.option("--normal-sample-id", help="Internal ID of normal sample")
+@click.option("--tumor-sample-name", help="Internal ID of tumor sample")
+@click.option("--normal-sample-name", help="Internal ID of normal sample")
 @click.pass_context
 def case_config(
     context,
@@ -120,29 +119,25 @@ def case_config(
     analysis_dir,
     tumor,
     normal,
-    tumor_sample_id,
-    normal_sample_id,
+    tumor_sample_name,
+    normal_sample_name,
 ):
 
     try:
         samples = get_sample_dict(
             tumor=tumor,
             normal=normal,
-            tumor_sample_id=tumor_sample_id,
-            normal_sample_id=normal_sample_id,
+            tumor_sample_name=tumor_sample_name,
+            normal_sample_name=normal_sample_name,
         )
     except AttributeError:
-        LOG.error(
-            f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz"
-        )
+        LOG.error(f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
         raise click.Abort()
 
     try:
         reference_dict = json.load(open(reference_config))["reference"]
     except Exception as e:
-        LOG.error(
-            f"Reference config {reference_config} does not follow correct format: {e}"
-        )
+        LOG.error(f"Reference config {reference_config} does not follow correct format: {e}")
         raise click.Abort()
 
     config_collection_dict = BalsamicConfigModel(
@@ -164,16 +159,13 @@ def case_config(
         samples=samples,
         vcf=VCF_DICT,
         bioinfo_tools=get_bioinfo_tools_list(CONDA_ENV_PATH),
-        panel={
-            "capture_kit": panel_bed,
-            "chrom": get_panel_chrom(panel_bed),
-        } if panel_bed else None,
+        panel={"capture_kit": panel_bed, "chrom": get_panel_chrom(panel_bed),}
+        if panel_bed
+        else None,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("Config file generated successfully")
 
-    Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
-               parents=True,
-               exist_ok=True)
+    Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]), parents=True, exist_ok=True)
     LOG.info("Directories created successfully")
 
     create_fastq_symlink(

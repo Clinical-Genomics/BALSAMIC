@@ -283,7 +283,7 @@ class SampleInstanceModel(BaseModel):
         """
 
     file_prefix: str
-    sample_id: Optional[str]
+    sample_name: Optional[str]
     sample_type: str = Field(alias="type")
     readpair_suffix: List[str] = ["1", "2"]
 
@@ -294,7 +294,7 @@ class SampleInstanceModel(BaseModel):
             raise ValueError(f"Provided sample type ({value}) not supported in BALSAMIC!")
         return value
 
-    @validator("sample_id")
+    @validator("sample_name")
     def set_sample_id_if_missing_value(cls, value, values, **kwargs):
         if value:
             return value

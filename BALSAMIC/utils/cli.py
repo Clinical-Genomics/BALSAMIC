@@ -471,7 +471,7 @@ def get_bioinfo_tools_list(conda_env_path) -> dict:
 
 
 def get_sample_dict(
-    tumor: str, normal: str, tumor_sample_id: str = None, normal_sample_id: str = None
+    tumor: str, normal: str, tumor_sample_name: str = None, normal_sample_name: str = None
 ) -> dict:
     """Concatenates sample dicts for all provided files"""
     samples = {}
@@ -479,12 +479,12 @@ def get_sample_dict(
         for sample in normal:
             key, val = get_sample_names(sample, "normal")
             samples[key] = val
-            samples[key]["sample_id"] = normal_sample_id
+            samples[key]["sample_name"] = normal_sample_name
 
     for sample in tumor:
         key, val = get_sample_names(sample, "tumor")
         samples[key] = val
-        samples[key]["sample_id"] = tumor_sample_id
+        samples[key]["sample_name"] = tumor_sample_name
     return samples
 
 
