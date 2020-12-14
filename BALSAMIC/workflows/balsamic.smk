@@ -102,8 +102,9 @@ qc_rules = [
     "snakemake_rules/quality_control/fastp.rule",
     "snakemake_rules/quality_control/fastqc.rule",
     "snakemake_rules/quality_control/multiqc.rule",
-    "snakemake_rules/umi/qc_umi.rule"
 ]
+
+
 if config["analysis"]["sequencing_type"] == "wgs":
     qc_rules.extend([
         "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
@@ -124,6 +125,7 @@ else:
         "snakemake_rules/umi/sentieon_umiextract.rule",
         "snakemake_rules/umi/sentieon_consensuscall.rule"
     ]
+
 
 annotation_rules = [ "snakemake_rules/annotation/vep.rule" ]
 
@@ -247,7 +249,6 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
     if config["analysis"]["umiworkflow"]:
-        config["rules"] = config["rules"] #+ umiqc_rules
         analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
                                           vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]), 
                                       expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
@@ -257,8 +258,9 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
                                           case_name = config["analysis"]["case_id"],
                                           var_caller = ["TNscope"],
                                           metric = ["noiseAF", "AFplot.pdf"])])
+        config["rules"] = config["rules"] + umiqc_rules
         if "background_variants" in config:
-            analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",                                           case_name = config["analysis"]["case_id"],
+            analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name = config["analysis"]["case_id"],
                                           var_caller = expand("{var_caller}_{step}_umi",
                                           var_caller =["TNscope"],
                                           step = ["consensusaligned","consensusfiltered"]))])
