@@ -34,7 +34,7 @@ rule haplotypecaller:
         "tmpdir={params.tmpdir}/${{rand_str}}; "
         "mkdir -p ${{tmpdir}}; "
         "export TMPDIR=${{tmpdir}}; "
-        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
+        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
             "-T HaplotypeCaller "
             "-R {input.fa} "
             "-I {input.bam} "
