@@ -272,13 +272,6 @@ def test_sample_instance_model():
     # THEN we can successully create a config dict
     assert SampleInstanceModel.parse_obj(valid_args)
 
-    valid_args_no_sample_name = {"file_prefix": "S2_R", "type": "normal"}
-    # THEN we can successully create a config dict
-    assert SampleInstanceModel.parse_obj(valid_args_no_sample_name)
-    assert (
-        SampleInstanceModel.parse_obj(valid_args_no_sample_name).sample_name ==
-        SampleInstanceModel.parse_obj(valid_args_no_sample_name).file_prefix)
-
     # GIVEN invalid input arguments
     invalid_args = {
         "file_prefix": "S2_R",
