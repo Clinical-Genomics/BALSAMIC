@@ -166,9 +166,12 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
             sample_name = sample_config_dict["samples"][sample]["sample_name"]
             if file_prefix == file["id"]:
                 file["id"] = sample_name
-                file["tag"] = (file["tag"].replace(
-                    file_prefix, sample_name).replace(
-                        file_prefix.replace("_", "-"), sample_name))
+                file_tags = file["tag"].split(",")
+                for tag_index, tag in enumerate(file_tags):
+                    if tag == file_prefix or tag == file_prefix.replace(
+                            "_", "-"):
+                        file_tags[tag_index] = sample_name
+                file["tag"] = file_tags
 
     # Add Housekeeper file to report
     delivery_json["files"].append({
@@ -178,8 +181,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "balsamic_delivery",
         "format":
         get_file_extension(report_file_name),
-        "tag":
-        "balsamic-report",
+        "tag": ["balsamic-report"],
         "id":
         case_name,
     })
@@ -191,8 +193,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "case_config",
         "format":
         get_file_extension(sample_config),
-        "tag":
-        "balsamic-config",
+        "tag": ["balsamic-config"],
         "id":
         case_name,
     })
@@ -204,8 +205,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "case_config",
         "format":
         get_file_extension(sample_config_dict["analysis"]["dag"]),
-        "tag":
-        "balsamic-dag",
+        "tag": ["balsamic-dag"],
         "id":
         case_name,
     })
