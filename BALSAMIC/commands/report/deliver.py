@@ -154,8 +154,13 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver, delivery_mo
 
     for file in delivery_json["files"]:
         for sample in sample_config_dict["samples"]:
-            if sample_config_dict["samples"][sample]["file_prefix"] in file["tag"]:
-                file["tag"] = file["tag"].replace(sample["file_prefix"], sample["sample_name"])
+            if sample_config_dict["samples"][sample]["file_prefix"] in file["id"]:
+                file["id"] = sample["sample_name"]
+                file["tag"] = (
+                    file["tag"]
+                    .replace(sample["file_prefix"], sample["sample_name"])
+                    .replace(sample["file_prefix"].replace("-", "_"), sample["sample_name"])
+                )
 
     # Add Housekeeper file to report
     delivery_json["files"].append(
