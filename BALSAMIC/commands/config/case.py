@@ -103,8 +103,8 @@ LOG = logging.getLogger(__name__)
     multiple=True,
     help="Fastq files for normal sample.",
 )
-@click.option("--tumor-sample-name", help="Internal ID of tumor sample")
-@click.option("--normal-sample-name", help="Internal ID of normal sample")
+@click.option("--tumor-sample-name", help="Tumor sample name")
+@click.option("--normal-sample-name", help="Normal sample name")
 @click.pass_context
 def case_config(
     context,
