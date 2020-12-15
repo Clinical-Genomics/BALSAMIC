@@ -560,11 +560,11 @@ def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> 
         for sample in sample_config_dict["samples"]:
             file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
             sample_name = sample_config_dict["samples"][sample]["sample_name"]
-            file_tags = file["tag"].split(",")
             if file_prefix == file["id"]:
                 file["id"] = sample_name
+                file_tags = file["tag"].split(",")
                 for tag_index, tag in enumerate(file_tags):
                     if tag == file_prefix or tag == file_prefix.replace("_", "-"):
                         file_tags[tag_index] = sample_name
-            file["tag"] = file_tags
+                file["tag"] = file_tags
     return delivery_json
