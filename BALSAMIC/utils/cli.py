@@ -572,10 +572,7 @@ def convert_deliverables_tags(delivery_json: dict,
     """Replaces values of file_prefix with sample_name in deliverables dict"""
 
     for file in delivery_json["files"]:
-        if isinstance(file["tag"], str):
-            file_tags = file["tag"].split(",")
-        else:
-            file_tags = file["tag"]
+        file_tags = file["tag"].split(",")
         for sample in sample_config_dict["samples"]:
             file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
             sample_name = sample_config_dict["samples"][sample]["sample_name"]
