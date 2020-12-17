@@ -65,8 +65,7 @@ def container(context, container_version, force, dry):
         cmd.append(container_stub_url)
 
         if dry:
-            LOG.info(
-                "Dry run mode, The following command will run: {}".format(
-                    " ".join(cmd)))
+            LOG.info("Dry run mode, The following command will run: {}".format(
+                " ".join(cmd)))
         else:
             subprocess.run(" ".join(cmd), shell=True)

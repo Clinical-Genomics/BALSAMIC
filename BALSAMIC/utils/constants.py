@@ -41,12 +41,12 @@ WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 VCF_DICT = {
     "TNscope_consensusaligned_umi": {
         "mutation": "somatic",
-	"type": "SNV",
-	"analysis_type": ["single"],
-	"workflow_solution": ["Sentieon_umi"]
+        "type": "SNV",
+        "analysis_type": ["single"],
+        "workflow_solution": ["Sentieon_umi"]
     },
     "TNscope_consensusfiltered_umi": {
-	"mutation": "somatic",
+        "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["single"],
         "workflow_solution": ["Sentieon_umi"]

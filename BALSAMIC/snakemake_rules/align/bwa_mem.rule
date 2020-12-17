@@ -18,7 +18,7 @@ rule bwa_mem:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-        conda = config["bioinfo_tools"].get("bwa")
+        conda = config["bioinfo_tools"].get("bwa"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     threads: get_threads(cluster_config, "bwa_mem")
     singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
