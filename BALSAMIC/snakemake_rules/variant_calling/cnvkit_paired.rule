@@ -32,13 +32,13 @@ rule cnvkit_batch_paired:
         namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"),
         scatter = cnv_dir + tumor_bam + "-scatter.pdf",
         vcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"),
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + "cnvkit_batch_paired_" + config["analysis"]["case_id"] + ".tsv"
-    singularity:
-        singularity_image
     params:
         cnv_dir = cnv_dir,
-        conda = get_conda_env(config["conda_env_yaml"], "cnvkit"),
+        conda = config["bioinfo_tools"].get("cnvkit"),
         extra = cnvkit_params,
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         name = config["analysis"]["case_id"],

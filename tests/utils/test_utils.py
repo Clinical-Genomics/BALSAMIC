@@ -12,20 +12,21 @@ from pathlib import Path
 
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
-from BALSAMIC.utils.constants import CONDA_ENV_PATH
+from BALSAMIC.utils.constants import CONTAINERS_CONDA_ENV_PATH
+from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV
 from BALSAMIC.utils.constants import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
     get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
-    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_list,
+    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_version,
     create_fastq_symlink, get_fastq_bind_path, singularity, get_file_extension)
 
-from BALSAMIC.utils.rule import (
-    get_chrom, get_vcf, get_sample_type, get_conda_env, get_picard_mrkdup,
-    get_variant_callers, get_script_path, get_result_dir, get_threads,
-    get_delivery_id, get_reference_output_files)
+from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
+                                 get_picard_mrkdup, get_variant_callers,
+                                 get_script_path, get_result_dir, get_threads,
+                                 get_delivery_id, get_reference_output_files)
 
 from BALSAMIC.utils.workflowscripts import get_file_contents, get_densityplot
 
@@ -110,15 +111,14 @@ def test_get_reference_output_files():
 
 
 def test_get_bioinfo_tools_list():
-    # GIVEN a path for conda env files
-    conda_env_path = CONDA_ENV_PATH
-
+    # GIVEN a path for container path and bioinfo tool dictionary
     # WHEN getting dictionary of bioinformatic tools and their version
-    bioinfo_tools_dict = get_bioinfo_tools_list(conda_env_path)
+    bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV,
+                                                   CONTAINERS_CONDA_ENV_PATH)
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert bioinfo_tools_dict["cnvkit"] == "0.9.4"
+    assert set(bioinfo_tools_dict["samtools"]) == set(["1.10", "1.9"])
 
 
 def test_get_delivery_id():
@@ -400,29 +400,6 @@ def test_get_result_dir(sample_config):
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
 
 
-def test_get_conda_env_found(tmp_path):
-    # GIVEN a balsamic_env yaml
-    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
-
-    # WHEN passing pkg name with this yaml file
-    conda_env = get_conda_env(balsamic_env, 'cnvkit')
-
-    # THEN It should return the conda env which has that pkg
-    assert conda_env == "varcall_cnvkit"
-
-
-def test_get_conda_env_not_found(tmp_path):
-    # GIVEN a balsamic_env yaml
-    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
-    bioinfo_tool = "unknown_package"
-    error_msg = f"Installed package {bioinfo_tool} was not found in {balsamic_env}"
-
-    # WHEN passing pkg name with this yaml file
-    # THEN It should return the conda env which has that pkg
-    with pytest.raises(KeyError, match=error_msg):
-        get_conda_env(balsamic_env, 'unknown_package')
-
-
 def test_capturestdout():
     # GIVEN a catpurestdout context
     test_stdout_message = 'Message to stdout'
@@ -557,7 +534,7 @@ def test_find_file_index(tmpdir):
     assert str(bai_file_2) in result
 
 
-def test_singularity_shellcmd(singularity_container):
+def test_singularity_shellcmd(singularity_container_sif):
     """test singularity shell cmd
     """
 
@@ -572,7 +549,7 @@ def test_singularity_shellcmd(singularity_container):
         mocked.return_value = "/my_home/binary_path/singularity"
 
         # WHEN building singularity command
-        shellcmd = singularity(sif_path=singularity_container,
+        shellcmd = singularity(sif_path=singularity_container_sif,
                                cmd=dummy_command,
                                bind_paths=[dummy_path_1, dummy_path_2])
 
@@ -603,7 +580,7 @@ def test_singularity_shellcmd_sif_not_exist():
                     bind_paths=[dummy_path_1, dummy_path_2])
 
 
-def test_singularity_shellcmd_cmd_not_exist(singularity_container):
+def test_singularity_shellcmd_cmd_not_exist(singularity_container_sif):
     """test singularity shell cmd with nonexisting singularity command
     """
 
@@ -620,7 +597,7 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
                                                              match=error_msg):
         mocked.return_value = None
 
-        singularity(sif_path=singularity_container,
+        singularity(sif_path=singularity_container_sif,
                     cmd=dummy_command,
                     bind_paths=[dummy_path_1, dummy_path_2])
 

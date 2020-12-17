@@ -16,10 +16,10 @@ rule vep_somatic:
     tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     vcfanno_toml = VCFANNO_TOML,
-    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   benchmark:
     benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
   shell:
@@ -66,11 +66,11 @@ rule vep_stat:
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
-    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.pass.balsamic_stat.tsv" 
   shell:
@@ -92,10 +92,10 @@ rule vep_germline:
     vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   params:
     housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
-    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'vep_' + "{var_type}.germline.{sample}.{var_caller}.vep.tsv"
   shell:

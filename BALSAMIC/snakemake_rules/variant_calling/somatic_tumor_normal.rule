@@ -16,9 +16,9 @@ rule vardict_tumor_normal:
     max_mm = "4.5",
     col_info = "-c 1 -S 2 -E 3 -g 4",
     name = config["analysis"]["case_id"],
-    conda = get_conda_env(config["conda_env_yaml"], "vardict"),
+    conda = config["bioinfo_tools"].get("vardict"),
   threads: get_threads(cluster_config, "vardict_tumor_normal")
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'vardict_tumor_normal_' + "{bedchrom}.vardict_tumor_normal.tsv"
   shell:
@@ -47,10 +47,10 @@ rule vardict_merge:
     yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
     namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
   params:
+    conda = config["bioinfo_tools"].get("vardict"),
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    conda = get_conda_env(config["conda_env_yaml"], "vardict"),
     name = config["analysis"]["case_id"],
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
   shell:
@@ -100,4 +100,3 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; 
 rm -rf {params.tmpdir};
         """
-

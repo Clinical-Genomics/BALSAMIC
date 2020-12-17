@@ -78,7 +78,7 @@ rule sentieon_consensusfilter_umi:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = paramsumi.consensuscall.filter_minreads,
         sample_id = '{case_name}',
-        conda = get_conda_env(config["conda_env_yaml"],"samtools")
+        conda = config["bioinfo_tools"].get("samtools")
     threads:
         get_threads(cluster_config, "sentieon_consensusfilter_umi")
     message:

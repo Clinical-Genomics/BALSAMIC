@@ -18,10 +18,10 @@ rule bwa_mem:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+        conda = config["bioinfo_tools"].get("bwa"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = get_conda_env(config["conda_env_yaml"],"bwa")
     threads: get_threads(cluster_config, "bwa_mem")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     benchmark:
         Path(benchmark_dir, "bwa_mem_{sample}.bwa_mem.tsv").as_posix()
     shell:
@@ -47,10 +47,10 @@ rule MarkDuplicates:
     mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
     stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
   params:
+    conda = config["bioinfo_tools"].get("picard"),
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    conda = get_conda_env(config["conda_env_yaml"],"picard"),
     rm_dup = picard_flag(picarddup)
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
   benchmark:
     Path(benchmark_dir, "MarkDuplicates_{sample}.markduplicates.tsv").as_posix()
   shell:

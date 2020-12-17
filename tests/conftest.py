@@ -154,7 +154,7 @@ def sample_fastq(tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
-def singularity_container(tmp_path_factory):
+def singularity_container_sif(tmp_path_factory):
     """
     Create singularity container
     """
@@ -164,6 +164,17 @@ def singularity_container(tmp_path_factory):
     container_file.touch()
 
     return container_file.as_posix()
+
+
+@pytest.fixture(scope="session")
+def singularity_container(tmp_path_factory):
+    """
+    Create singularity container
+    """
+
+    container_dir = tmp_path_factory.mktemp("test_container")
+
+    return container_dir.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -365,8 +376,8 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 @pytest.fixture(scope="session")
 def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
                           analysis_dir, reference_json, panel_bed_file,
-                          background_variant_file, 
-                          sentieon_license, sentieon_install_dir):
+                          background_variant_file, sentieon_license,
+                          sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only with background variant file for umi workflow

@@ -15,8 +15,8 @@ rule CollectMultipleMetrics:
     params:
         tmpdir = tmp_dir,
         output_prefix = qc_dir + "{sample}.multiple_metrics",
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
-    singularity: singularity_image
+        conda = config["bioinfo_tools"].get("picard"),
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + "CollectMultipleMetrics_" + "{sample}.picard_collect_multiple_metrics.tsv"
     shell:
@@ -41,8 +41,8 @@ rule CollectWgsMetrics:
         qc_dir + "{sample}_picard_wgs_metrics.txt"
     params:
         tmpdir = tmp_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
-    singularity: singularity_image
+        conda = config["bioinfo_tools"].get("picard"),
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + "CollectWgsMetrics_" + "{sample}.picard_collect_wgs_metrics.tsv"
     shell:

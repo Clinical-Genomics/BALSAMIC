@@ -68,8 +68,8 @@ rule multiqc:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "multiqc"},
         dir_list = "\n".join(dir_list),
         qc_dir = qc_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"multiqc"),
-    singularity: singularity_image
+        conda = config["bioinfo_tools"].get("multiqc"),
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("multiqc") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + "multiqc_" + config["analysis"]["case_id"] + ".multiqc.tsv"
     shell:

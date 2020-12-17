@@ -9,10 +9,10 @@ rule haplotypecaller:
     output:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
+        conda = config["bioinfo_tools"].get("gatk"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = get_conda_env(config["conda_env_yaml"],"gatk"),
     threads: get_threads(cluster_config, 'haplotypecaller')
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + 'haplotypecaller_' + "{sample}.{bedchrom}.haplotypecaller.tsv"
     shell:
@@ -38,10 +38,10 @@ rule haplotypecaller_merge:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = get_conda_env(config["conda_env_yaml"], "gatk"),
-    singularity: singularity_image
+        conda = config["bioinfo_tools"].get("gatk"),
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
     benchmark:
-        benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.vcf.gz" 
+        benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.tsv" 
     shell:
         """
 source activate {params.conda};
@@ -60,11 +60,11 @@ rule manta_germline:
     output:
         final = vcf_dir + "SV.germline.{sample}.manta_germline.vcf.gz",
     params:
+        conda = config["bioinfo_tools"].get("manta"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = get_conda_env(config["conda_env_yaml"], "manta"),
         runmode = "local",
     threads: get_threads(cluster_config, "manta_germline")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     benchmark:
         benchmark_dir + 'manta_germline_' + "{sample}.manta_germline.tsv"
     shell:

@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 # DOCKER hub path
-BALSAMIC_DOCKER_PATH = "docker://hassanf/balsamic"
+BALSAMIC_DOCKER_PATH = "docker://clinicalgenomics/balsamic"
 
 # BALSAMIC base dir
 BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
@@ -11,12 +11,8 @@ BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 # BALSAMIC scripts dir
 BALSAMIC_SCRIPTS = Path(BALSAMIC_BASE_DIR, "assets/scripts").as_posix()
 
-# Path to conda folder containing YAML files with verions of software usen un BALSAMIC workflow
-CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "conda").as_posix()
-
-# Path to config YAML file to be accessed by Snakemake
-CONDA_ENV_YAML = Path(
-    BALSAMIC_BASE_DIR / "config" / "balsamic_env.yaml").as_posix()
+# Path to containers directory containing YAML files for conda installation for each one
+CONTAINERS_CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "containers").as_posix()
 
 # Path to rule files to be accessed by Snakemake
 RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
@@ -45,12 +41,12 @@ WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 VCF_DICT = {
     "TNscope_consensusaligned_umi": {
         "mutation": "somatic",
-	"type": "SNV",
-	"analysis_type": ["single"],
-	"workflow_solution": ["Sentieon_umi"]
+        "type": "SNV",
+        "analysis_type": ["single"],
+        "workflow_solution": ["Sentieon_umi"]
     },
     "TNscope_consensusfiltered_umi": {
-	"mutation": "somatic",
+        "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["single"],
         "workflow_solution": ["Sentieon_umi"]
@@ -466,4 +462,32 @@ umiworkflow_params = {
         "vep_filters":
         "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     }
+}
+
+# list of bioinfo tools for each conda env
+VALID_CONTAINER_CONDA_NAME = {
+    "align_qc", "annotate", "coverage_qc", "varcall_py36", "varcall_py27",
+    "varcall_cnvkit"
+}
+
+BIOINFO_TOOL_ENV = {
+    "bedtools": "align_qc",
+    "bwa": "align_qc",
+    "fastqc": "align_qc",
+    "samtools": "align_qc",
+    "picard": "align_qc",
+    "multiqc": "align_qc",
+    "fastp": "align_qc",
+    "csvkit": "align_qc",
+    "ensembl-vep": "annotate",
+    "vcfanno": "annotate",
+    "sambamba": "coverage_qc",
+    "mosdepth": "coverage_qc",
+    "bcftools": "varcall_py36",
+    "tabix": "varcall_py36",
+    "gatk": "varcall_py36",
+    "vardict": "varcall_py36",
+    "strelka": "varcall_py27",
+    "manta": "varcall_py27",
+    "cnvkit": "varcall_cnvkit",
 }

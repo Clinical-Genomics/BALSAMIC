@@ -5,9 +5,10 @@ from pathlib import Path
 import click
 
 from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
-                                get_bioinfo_tools_list, create_fastq_symlink,
-                                generate_graph)
-from BALSAMIC.utils.constants import (CONDA_ENV_PATH, VCF_DICT)
+                                get_bioinfo_tools_version,
+                                create_fastq_symlink, generate_graph)
+from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH, VCF_DICT,
+                                      BIOINFO_TOOL_ENV)
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -55,10 +56,13 @@ LOG = logging.getLogger(__name__)
               type=click.Path(exists=True, resolve_path=True),
               required=False,
               help="Background set of valid variants for UMI")
-@click.option("--singularity",
-              type=click.Path(exists=True, resolve_path=True),
-              required=True,
-              help="Download singularity image for BALSAMIC")
+@click.option(
+    "--singularity",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help=
+    "Image path for BALSAMIC containers. Output of 'balsamic init container' command"
+)
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
@@ -122,7 +126,9 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         background_variants=background_variants,
         samples=samples,
         vcf=VCF_DICT,
-        bioinfo_tools=get_bioinfo_tools_list(CONDA_ENV_PATH),
+        bioinfo_tools=BIOINFO_TOOL_ENV,
+        bioinfo_tools_version=get_bioinfo_tools_version(
+            BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH),
         panel={
             "capture_kit": panel_bed,
             "chrom": get_panel_chrom(panel_bed),

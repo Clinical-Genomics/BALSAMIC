@@ -17,9 +17,9 @@ rule mosdepth_coverage:
     quantize='0:1:50:150:',
     sample_name='{sample}',
     output_dir=bam_dir,
-    conda = get_conda_env(config["conda_env_yaml"],"mosdepth")
+    conda = config["bioinfo_tools"].get("mosdepth")
   threads: get_threads(cluster_config, "mosdepth")
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "panel_depth_" + "{sample}.mosdepth.tsv"
   shell:

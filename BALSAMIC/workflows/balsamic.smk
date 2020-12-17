@@ -12,15 +12,19 @@ from snakemake.exceptions import RuleException, WorkflowError
 
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
-                                 get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_conda_env, get_threads, get_script_path)
+
 from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
-from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
-                                    VARDICT_SETTINGS, VCFANNO_TOML, umiworkflow_params)
+
 from BALSAMIC.utils.workflowscripts import get_densityplot
 
-shell.executable("/bin/bash -l")
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
+                                 get_vcf, get_picard_mrkdup, get_sample_type,
+                                 get_threads, get_script_path)
+
+from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
+                                    VARDICT_SETTINGS, VCFANNO_TOML, umiworkflow_params)
+
+shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
@@ -256,11 +260,11 @@ if config['analysis']['analysis_type'] == "single" and config["analysis"]["seque
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
     if config["analysis"]["umiworkflow"]:
         analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
-                                          vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]), 
-                                      expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
+                                          vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]),
+                                          expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
                                           case_name = config["analysis"]["case_id"],
                                           step=["consensusaligned","consensusfiltered"]),
-                                      expand(umi_qc_dir + "{case_name}.{var_caller}_umi.{metric}",
+                                          expand(umi_qc_dir + "{case_name}.{var_caller}_umi.{metric}",
                                           case_name = config["analysis"]["case_id"],
                                           var_caller = ["TNscope"],
                                           metric = ["noiseAF", "AFplot.pdf"])])
