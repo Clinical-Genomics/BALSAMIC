@@ -4,14 +4,14 @@
 # Variant-calling using vardict
 rule vardict_umi:
     input:
-        bam = umi_dir + "{case_name}.{step}.bam",
+        bam = umi_dir + "{case_name}.{step}.umi.bam",
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"]
     output:
-        vardict = vcf_dir + "SNV.somatic.{case_name}.{step}.vardict.umi.vcf.gz",
-        namemap = vcf_dir + "SNV.somatic.{case_name}.{step}.vardict.umi.sample_name_map",
+        vardict = vcf_dir + "SNV.somatic.{case_name}.vardict_{step}_umi.vcf.gz",
+        namemap = vcf_dir + "SNV.somatic.{case_name}.vardict_{step}_umi.sample_name_map",
     benchmark:
-        Path(benchmark_dir + "vardict_{case_name}_{step}.tsv").as_posix()
+        Path(benchmark_dir + "vardict_umi_{case_name}_{step}.tsv").as_posix()
     singularity: 
         singularity_image
     params:

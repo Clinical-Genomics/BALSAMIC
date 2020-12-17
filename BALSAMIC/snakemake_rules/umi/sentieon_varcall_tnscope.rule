@@ -4,22 +4,23 @@
 # Variant-calling using TNscope
 rule sentieon_tnscope_umi:
     input:
-        bam = umi_dir + "{case_name}.{step}.bam",
+        bam = umi_dir + "{case_name}.{step}.umi.bam",
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf = vcf_dir +  "SNV.somatic.{case_name}.{step}.TNscope.umi.vcf.gz",
-        namemap = vcf_dir + "SNV.somatic.{case_name}.{step}.TNscope.umi.sample_name_map"
+        vcf = vcf_dir +  "SNV.somatic.{case_name}.TNscope_{step}_umi.vcf.gz",
+        namemap = vcf_dir + "SNV.somatic.{case_name}.TNscope_{step}_umi.sample_name_map"
     benchmark:
-        Path(benchmark_dir + "sentieon_tnscope_{case_name}.{step}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_tnscope_umi_{case_name}.{step}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tumor_af = paramsumi.common.filter_tumor_af,
         algo = paramsumi.tnscope.algo,
         disable_detect = paramsumi.tnscope.disable_detect,
-        tumor_lod = config["tumorlod"], #paramsumi.tnscope.min_tumorLOD,
+        #tumor_lod = config["tumorlod"], #paramsumi.tnscope.min_tumorLOD,
+        tumor_lod = paramsumi.tnscope.min_tumorLOD,
         error_rate = paramsumi.tnscope.error_rate,
         prune_factor = paramsumi.tnscope.prunefactor,
         tumor = get_sample_type(config["samples"], "tumor"),

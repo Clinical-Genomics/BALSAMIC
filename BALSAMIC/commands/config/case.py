@@ -81,10 +81,15 @@ LOG = logging.getLogger(__name__)
               required=False,
               multiple=True,
               help="Fastq files for normal sample.")
+@click.option("--umiworkflow/--no-umiworkflow",
+              default=True,
+              show_default=True,
+              is_flag=True,
+              help="Enable running UMI workflow")
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, background_variants,
-                singularity, analysis_dir, tumor, normal):
+                singularity, analysis_dir, tumor, normal, umiworkflow):
 
     try:
         samples = get_sample_dict(tumor, normal)
@@ -114,6 +119,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "analysis_dir": analysis_dir,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
+            "umiworkflow": umiworkflow
         },
         reference=reference_dict,
         singularity=singularity,
