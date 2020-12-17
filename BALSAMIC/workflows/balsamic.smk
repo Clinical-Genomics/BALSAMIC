@@ -3,6 +3,8 @@
 
 import os
 import logging
+import tempfile
+
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -23,7 +25,10 @@ shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
 
-tmp_dir = os.path.join(get_result_dir(config), "tmp")
+# Create a temporary directory with trailing /
+tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
+Path.mkdir(Path(tmp_dir), exist_ok=True)
+
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
@@ -320,5 +325,8 @@ rule all:
         quality_control_results + analysis_specific_results
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
-    shell:
-        "date +'%Y-%m-%d T%T %:z' > {output}"
+    run:
+        import datetime
+
+        with open(str(output[0]), mode='w') as finish_file:
+            finish_file.write('%s\n' % datetime.datetime.now())
