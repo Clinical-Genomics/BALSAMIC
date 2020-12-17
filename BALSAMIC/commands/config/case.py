@@ -9,6 +9,10 @@ from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
                                 create_fastq_symlink, generate_graph)
 from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH, VCF_DICT,
                                       BIOINFO_TOOL_ENV)
+from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
+                                get_bioinfo_tools_list, create_fastq_symlink,
+                                generate_graph)
+from BALSAMIC.utils.constants import CONDA_ENV_PATH, VCF_DICT
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -87,12 +91,21 @@ LOG = logging.getLogger(__name__)
               is_flag=True,
               help="Enable running UMI workflow")
 @click.pass_context
+@click.option("--tumor-sample-name", help="Tumor sample name")
+@click.option("--normal-sample-name", help="Normal sample name")
+@click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, background_variants,
-                singularity, analysis_dir, tumor, normal, umiworkflow):
+                singularity, analysis_dir, tumor, normal, umiworkflow,
+                tumor_sample_name, normal_sample_name):
 
     try:
-        samples = get_sample_dict(tumor, normal)
+        samples = get_sample_dict(
+            tumor=tumor,
+            normal=normal,
+            tumor_sample_name=tumor_sample_name,
+            normal_sample_name=normal_sample_name,
+        )
     except AttributeError:
         LOG.error(
             f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz"
@@ -141,9 +154,10 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                exist_ok=True)
     LOG.info("Directories created successfully")
 
-    create_fastq_symlink(casefiles=(tumor + normal),
-                         symlink_dir=Path(
-                             config_collection_dict["analysis"]["fastq_path"]))
+    create_fastq_symlink(
+        casefiles=(tumor + normal),
+        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
+    )
     LOG.info(f"Symlinks generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + ".json")
@@ -153,7 +167,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
 
     try:
         generate_graph(config_collection_dict, config_path)
-        LOG.info(f'BALSAMIC Workflow has been configured successfully!')
+        LOG.info(f"BALSAMIC Workflow has been configured successfully!")
     except ValueError as e:
         LOG.error(
             f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',

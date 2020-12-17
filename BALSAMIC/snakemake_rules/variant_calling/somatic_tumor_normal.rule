@@ -39,6 +39,7 @@ tabix -p vcf {output};
 rm -rf {params.tmpdir};
     """
 
+
 rule vardict_merge:
   input:
     expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist) 

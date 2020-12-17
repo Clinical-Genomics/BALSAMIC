@@ -28,7 +28,6 @@ java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk
 | bgzip > {output}; 
 rm -rf {params.tmpdir};
         """
-        
 
 
 rule haplotypecaller_merge:

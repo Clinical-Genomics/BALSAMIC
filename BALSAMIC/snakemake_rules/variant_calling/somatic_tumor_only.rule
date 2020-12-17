@@ -34,8 +34,9 @@ rule vardict_tumor_only:
     "tmpdir={params.tmpdir}/${{rand_str}}; "
     "mkdir -p ${{tmpdir}}; "
     "export TMPDIR=${{tmpdir}}; "
-    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xmx32G\"'; "
+    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xmx48G\"'; "
     "vardict-java -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
+        " -th {threads} "
         "-b {input.bamT} "
         " -th {threads} "
         "{params.col_info} {input.bed} "
@@ -71,68 +72,6 @@ rule vardict_merge:
     "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
     "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
     "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml}; "
-    "source deactivate;" 
-
-
-rule mutect2_tumor_only:
-  input:
-    fa = config["reference"]["reference_genome"],
-    dbsnp = config["reference"]["dbsnp"],
-    cosmic = config["reference"]["cosmic"],
-    bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
-    bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
-  output:
-    temp(vcf_dir + "mutect/split_vcf/{bedchrom}_mutect.vcf.gz")
-  params:
-    tmpdir = tmp_dir,
-    conda = config["bioinfo_tools"].get("gatk")
-  threads: get_threads(cluster_config, "mutect2_tumor_only")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'mutect2_tumor_only_' + "{bedchrom}.mutect2_tumor_only.tsv"
-  shell:
-    "source activate {params.conda};"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
-        "-T MuTect2 "
-        "-R {input.fa} "
-        "--cosmic {input.cosmic} "
-        "--dbsnp {input.dbsnp} "
-        "-I:tumor {input.bamT} "
-        "--useNewAFCalculator "
-        "--disable_auto_index_creation_and_locking_when_reading_rods "
-        "-L {input.bed} "
-    " | bgzip > {output}; "
-    "tabix -p vcf {output}; " 
-    
-
-rule mutect2_merge: 
-  input:  
-    expand(vcf_dir + "mutect/split_vcf/{chrom}_mutect.vcf.gz", chrom=chromlist)   
-  output: 
-    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.sample_name_map",
-    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.yaml",
-    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".mutect.vcf.gz"  
-  params: 
-    tmpdir = tmp_dir, 
-    conda = config["bioinfo_tools"].get("gatk"),
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'mutect2_merge_' + config["analysis"]["case_id"] + ".mutect2_merge.tsv"
-  shell:  
-    "source activate {params.conda} ; " 
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output.vcf}; "  
-    "tabix -f -p vcf {output.vcf}; "  
-    "echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; " 
-    "echo -e \"TUMOR\" > {output.namemap}.tumor; " 
-    "echo '{{ vcf: {{ mutect: {{ name: mutect2 , path: {output.vcf} }} }} }}' > {output.yaml}; "
     "source deactivate;" 
 
 rule sentieon_TNhaplotyper_tumor_only:

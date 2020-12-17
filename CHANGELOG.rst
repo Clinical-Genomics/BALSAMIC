@@ -1,3 +1,32 @@
+[6.0.3]
+-------
+
+Added
+^^^^^
+
+* ``config case`` subcommand now has ``--tumor-sample-name`` and ``--normal-sample-name`` 
+
+Fixed
+^^^^^
+
+* Manta resource allocation is now properly set PR #523
+* VarDict resource allocation in cluster.json increased (both core and time allocation) PR #523
+* minimum memory request for GATK mutect2 and haplotypecaller is removed and max memory increased PR #523
+
+[6.0.2]
+-------
+
+Added
+^^^^^
+
+* Document for Snakemake rule grammar PR #489
+
+
+Fixed
+^^^^^
+
+* removed ``gatk3-register`` command from Dockerfile(s) PR #508
+
 
 [6.0.1]
 -------

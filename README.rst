@@ -4,7 +4,7 @@
         <a href="https://github.com/Clinical-Genomics/BALSAMIC">
             <img  width=480 src="https://raw.githubusercontent.com/Clinical-Genomics/BALSAMIC/master/BALSAMIC/assets/balsamic_logo.png">
         </a>
-        <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 6.0.1)</h3>
+        <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 6.0.3)</h3>
         <h3 align="center">FastQ to Annotated VCF</h3>
     </p>
 
@@ -26,7 +26,7 @@ Snakemake cli given that there is a proper config file created.
    * - Source code
      - https://github.com/Clinical-Genomics/BALSAMIC
    * - Version
-     - 6.0.1
+     - 6.0.3
    * - Author
      - Hassan Foroughi Asl
    * - Development model

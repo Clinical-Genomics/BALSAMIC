@@ -20,8 +20,9 @@ from BALSAMIC.utils.cli import (
     SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
     get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
-    validate_fastq_pattern, get_panel_chrom, get_bioinfo_tools_version,
-    create_fastq_symlink, get_fastq_bind_path, singularity, get_file_extension)
+    validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
+    get_fastq_bind_path, singularity, get_file_extension,
+    get_bioinfo_tools_version, convert_deliverables_tags)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_picard_mrkdup, get_variant_callers,
@@ -41,11 +42,13 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
     # WHEN getting list of variant callers
     # THEN capture error
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(config=tumor_normal_config,
-                                   analysis_type=wrong_analysis_type,
-                                   workflow_solution=workflow,
-                                   mutation_type=mutation_type,
-                                   mutation_class=mutation_class)
+        assert get_variant_callers(
+            config=tumor_normal_config,
+            analysis_type=wrong_analysis_type,
+            workflow_solution=workflow,
+            mutation_type=mutation_type,
+            mutation_class=mutation_class,
+        )
 
 
 def test_get_variant_callers_wrong_workflow(tumor_normal_config):
@@ -56,11 +59,13 @@ def test_get_variant_callers_wrong_workflow(tumor_normal_config):
     analysis_type = "paired"
 
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(config=tumor_normal_config,
-                                   analysis_type=analysis_type,
-                                   workflow_solution=wrong_workflow,
-                                   mutation_type=mutation_type,
-                                   mutation_class=mutation_class)
+        assert get_variant_callers(
+            config=tumor_normal_config,
+            analysis_type=analysis_type,
+            workflow_solution=wrong_workflow,
+            mutation_type=mutation_type,
+            mutation_class=mutation_class,
+        )
 
 
 def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
@@ -73,11 +78,13 @@ def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
     # WHEN getting list of variant callers
     # THEN capture error
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(config=tumor_normal_config,
-                                   analysis_type=analysis_type,
-                                   workflow_solution=workflow,
-                                   mutation_type=wrong_mutation_type,
-                                   mutation_class=mutation_class)
+        assert get_variant_callers(
+            config=tumor_normal_config,
+            analysis_type=analysis_type,
+            workflow_solution=workflow,
+            mutation_type=wrong_mutation_type,
+            mutation_class=mutation_class,
+        )
 
 
 def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
@@ -90,24 +97,26 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
     # WHEN getting list of variant callers
     # THEN capture error
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(config=tumor_normal_config,
-                                   analysis_type=analysis_type,
-                                   workflow_solution=workflow,
-                                   mutation_type=mutation_type,
-                                   mutation_class=wrong_mutation_class)
+        assert get_variant_callers(
+            config=tumor_normal_config,
+            analysis_type=analysis_type,
+            workflow_solution=workflow,
+            mutation_type=mutation_type,
+            mutation_class=wrong_mutation_class,
+        )
 
 
 def test_get_reference_output_files():
     # GIVEN a reference genome version
-    genome_ver = 'hg38'
-    file_type = 'fasta'
+    genome_ver = "hg38"
+    file_type = "fasta"
 
     # WHEN getting list of valid types
     fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver],
                                              file_type)
 
     # THEN it should return list of file
-    assert 'Homo_sapiens_assembly38.fasta' in fasta_files
+    assert "Homo_sapiens_assembly38.fasta" in fasta_files
 
 
 def test_get_bioinfo_tools_list():
@@ -123,18 +132,19 @@ def test_get_bioinfo_tools_list():
 
 def test_get_delivery_id():
     # GIVEN a delivery id, a dummy file string, list of tags, and a snakemake wildcard_dict
-    delivery_id_to_check = '{case_name}'
-    tags = ['angry_bird', 'tag_2']
-    dummy_file_string = 'some_file_angry_bird_with_result.txt'
-    wildcard_dict = {'case_name': 'angry_bird', "allow_missing": True}
-    actual_delivery_id = 'angry_bird'
+    delivery_id_to_check = "{case_name}"
+    tags = ["angry_bird", "tag_2"]
+    dummy_file_string = "some_file_angry_bird_with_result.txt"
+    wildcard_dict = {"case_name": "angry_bird", "allow_missing": True}
+    actual_delivery_id = "angry_bird"
 
     # WHEN getting the correct delivery_id
     delivery_id_candidate = get_delivery_id(
         id_candidate=delivery_id_to_check,
         file_to_store=dummy_file_string,
         tags=tags,
-        output_file_wildcards=wildcard_dict)
+        output_file_wildcards=wildcard_dict,
+    )
 
     # THEN correct delivery_id should be extracted
     assert delivery_id_candidate == actual_delivery_id
@@ -167,18 +177,18 @@ def test_get_file_extension_known_ext():
 def test_recursive_default_dict():
     # GIVEN a dictionary
     test_dict = recursive_default_dict()
-    test_dict['key_1']['key_2'] = 'value_1'
+    test_dict["key_1"]["key_2"] = "value_1"
 
     # WHEN it is recursively creates a default dictionary
     # THEN the output should be a dicitionary
     assert isinstance(test_dict, collections.defaultdict)
-    assert 'key_2' in test_dict['key_1']
+    assert "key_2" in test_dict["key_1"]
 
 
 def test_convert_defaultdict_to_regular_dict():
     # GIVEN a recursively created default dict
     test_dict = recursive_default_dict()
-    test_dict['key_1']['key_2'] = 'value_1'
+    test_dict["key_1"]["key_2"] = "value_1"
 
     # WHEN converting it back to normal dict
     test_dict = convert_defaultdict_to_regular_dict(test_dict)
@@ -186,7 +196,7 @@ def test_convert_defaultdict_to_regular_dict():
     # THEN the output type should be dict and not defaultdict
     assert not isinstance(test_dict, collections.defaultdict)
     assert isinstance(test_dict, dict)
-    assert 'key_2' in test_dict['key_1']
+    assert "key_2" in test_dict["key_1"]
 
 
 def test_iterdict(config_files):
@@ -271,7 +281,7 @@ def test_get_script_path():
     # WHEN asking to get path for the script
     for script in custom_scripts:
         # THEN assert full path for script
-        assert get_script_path(script).startswith('/')
+        assert get_script_path(script).startswith("/")
 
         # THEN assert if script file exists
         assert Path(get_script_path(script)).is_file()
@@ -279,14 +289,20 @@ def test_get_script_path():
 
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
-    workflow = [("paired", "wgs"), ("paired", "targeted"), ("single", "wgs"),
-                ("single", "targeted"), ("qc", ""), ("generate_ref", ""),
-                ("umi", "")]
+    workflow = [
+        ("paired", "wgs"),
+        ("paired", "targeted"),
+        ("single", "wgs"),
+        ("single", "targeted"),
+        ("qc", ""),
+        ("generate_ref", ""),
+        ("umi", ""),
+    ]
 
     # WHEN asking to see snakefile for paired
     for analysis_type, sequencing_type in workflow:
         snakefile = get_snakefile(analysis_type, sequencing_type)
-        pipeline = ''
+        pipeline = ""
 
         if sequencing_type in ['targeted', 'wgs', 'qc']:
             pipeline = "BALSAMIC/workflows/balsamic.smk"
@@ -297,7 +313,7 @@ def test_get_snakefile():
 
         # THEN it should return the snakefile path
         # THEN assert file exists
-        assert snakefile.startswith('/')
+        assert snakefile.startswith("/")
         assert pipeline in snakefile
         assert Path(snakefile).is_file()
 
@@ -306,7 +322,7 @@ def test_get_chrom(config_files):
     # Given a panel bed file
     bed_file = config_files["panel_bed_file"]
     actual_chrom = [
-        '10', '11', '16', '17', '18', '19', '2', '3', '4', '6', '7', '9', 'X'
+        "10", "11", "16", "17", "18", "19", "2", "3", "4", "6", "7", "9", "X"
     ]
 
     # WHEN passing this bed file
@@ -318,7 +334,7 @@ def test_get_chrom(config_files):
 
 def test_get_vcf(sample_config):
     # GIVEN a sample_config dict, varinat callers list
-    variant_callers = ['mutect', 'vardict', 'manta']
+    variant_callers = ["mutect", "vardict", "manta"]
 
     # WHEN passing args to that function
     vcf_list = get_vcf(sample_config, variant_callers,
@@ -332,13 +348,13 @@ def test_get_vcf(sample_config):
 
 def test_get_sample_type(sample_config):
     # GIVEN a sample_config dict, bio_type as tumor
-    bio_type = 'tumor'
+    bio_type = "tumor"
 
     # WHEN calling get_sample_type with bio_type
     sample_id = get_sample_type(sample_config["samples"], bio_type)
 
     # THEN It should return the tumor samples id
-    assert sample_id == ['S1_R']
+    assert sample_id == ["S1_R"]
 
 
 def test_get_picard_mrkdup(sample_config):
@@ -402,7 +418,7 @@ def test_get_result_dir(sample_config):
 
 def test_capturestdout():
     # GIVEN a catpurestdout context
-    test_stdout_message = 'Message to stdout'
+    test_stdout_message = "Message to stdout"
     with CaptureStdout() as captured_stdout_message:
         print(test_stdout_message, file=sys.stdout)
 
@@ -420,7 +436,7 @@ def test_get_config():
 
 def test_get_config_wrong_config():
     # GIVEN the config files name
-    config_file = 'non_existing_config'
+    config_file = "non_existing_config"
 
     # WHEN passing file names
     # THEN return the config files path
@@ -430,7 +446,7 @@ def test_get_config_wrong_config():
 
 def test_write_json(tmp_path, config_files):
     # GIVEN a dict from sample json file (reference.json)
-    ref_json = json.load(open(config_files['reference'], 'r'))
+    ref_json = json.load(open(config_files["reference"], "r"))
 
     tmp = tmp_path / "tmp"
     tmp.mkdir()
@@ -463,8 +479,8 @@ def test_write_json_error(tmp_path, config_files):
 
 def test_get_threads(config_files):
     # GIVEN cluster config file and rule name
-    cluster_config = json.load(open(config_files['cluster_json'], 'r'))
-    rule_name = 'sentieon_align_sort'
+    cluster_config = json.load(open(config_files["cluster_json"], "r"))
+    rule_name = "sentieon_align_sort"
 
     # WHEN passing cluster_config and rule_name
     # THEN It should return threads value '12'
@@ -498,7 +514,7 @@ def test_get_from_two_key():
     # GIVEN a dictionary with two keys that each have list of values
     input_dict = {
         "key_1": ["key_1_value_1", "key_1_value_2"],
-        "key_2": ["key_2_value_1", "key_2_value_2"]
+        "key_2": ["key_2_value_1", "key_2_value_2"],
     }
 
     # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
@@ -539,13 +555,13 @@ def test_singularity_shellcmd(singularity_container_sif):
     """
 
     # GIVEN a dummy command
-    dummy_command = 'ls this_path'
-    dummy_path_1 = 'this_path/path1'
-    dummy_path_2 = 'this_path/path2'
-    correct_shellcmd = 'exec --bind {} --bind {} ls this_path'.format(
+    dummy_command = "ls this_path"
+    dummy_path_1 = "this_path/path1"
+    dummy_path_2 = "this_path/path2"
+    correct_shellcmd = "exec --bind {} --bind {} ls this_path".format(
         dummy_path_1, dummy_path_2)
 
-    with mock.patch.object(shutil, 'which') as mocked:
+    with mock.patch.object(shutil, "which") as mocked:
         mocked.return_value = "/my_home/binary_path/singularity"
 
         # WHEN building singularity command
@@ -562,16 +578,16 @@ def test_singularity_shellcmd_sif_not_exist():
     """
 
     # GIVEN a dummy command
-    dummy_command = 'ls this_path'
-    dummy_sif_path = '/some_path/my_sif_path_3.1415/container.sif'
-    dummy_path_1 = 'this_path/path1'
-    dummy_path_2 = 'this_path/path2'
+    dummy_command = "ls this_path"
+    dummy_sif_path = "/some_path/my_sif_path_3.1415/container.sif"
+    dummy_path_1 = "this_path/path1"
+    dummy_path_2 = "this_path/path2"
     error_msg = "container file does not exist"
 
     # WHEN building singularity command
     # THEN successfully get error that container doesn't exist
     with mock.patch.object(shutil,
-                           'which') as mocked, pytest.raises(BalsamicError,
+                           "which") as mocked, pytest.raises(BalsamicError,
                                                              match=error_msg):
         mocked.return_value = "/my_home/binary_path/singularity"
 
@@ -585,15 +601,15 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container_sif):
     """
 
     # GIVEN a dummy command
-    dummy_command = 'ls this_path'
+    dummy_command = "ls this_path"
     error_msg = "singularity command does not exist"
-    dummy_path_1 = 'this_path/path1'
-    dummy_path_2 = 'this_path/path2'
+    dummy_path_1 = "this_path/path1"
+    dummy_path_2 = "this_path/path2"
 
     # WHEN building singularity command
     # THEN successfully get error if singualrity command doesn't exist
     with mock.patch.object(shutil,
-                           'which') as mocked, pytest.raises(BalsamicError,
+                           "which") as mocked, pytest.raises(BalsamicError,
                                                              match=error_msg):
         mocked.return_value = None
 
@@ -604,9 +620,9 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container_sif):
 
 def test_merge_json(config_files):
     # GIVEN a dict and json file
-    ref_dict = json.load(open(config_files['reference'], 'r'))
+    ref_dict = json.load(open(config_files["reference"], "r"))
 
-    json_file = config_files['sample']
+    json_file = config_files["sample"]
 
     # WHEN passing dict and json file to merge
     merge_dict = merge_json(ref_dict, json_file)
@@ -620,8 +636,8 @@ def test_merge_json(config_files):
 def test_merge_json_error(config_files):
     with pytest.raises(Exception, match=r"No such file or directory"):
         # GIVEN a dict and invalid json file path
-        ref_dict = json.load(open(config_files['reference'], 'r'))
-        json_file = 'reference.json'
+        ref_dict = json.load(open(config_files["reference"], "r"))
+        json_file = "reference.json"
 
         # WHEN passing python dict and invalid json path
         # THEN it should throw OSError as FileNotFoundError
@@ -629,49 +645,51 @@ def test_merge_json_error(config_files):
 
 
 def test_validate_fastq_pattern():
-    #GIVEN a path to a file with correct fastq file prefix
+    # GIVEN a path to a file with correct fastq file prefix
     fastq_path_r1 = "/home/analysis/dummy_tumor_R_1.fastq.gz"
     fastq_path_r2 = "/home/analysis/dummy_normal_R_2.fastq.gz"
-    #THEN it should return the correct prefix
+    # THEN it should return the correct prefix
     assert validate_fastq_pattern(fastq_path_r1) == "dummy_tumor_R"
     assert validate_fastq_pattern(fastq_path_r2) == "dummy_normal_R"
 
     with pytest.raises(AttributeError) as excinfo:
-        #GIVEN a path to a file with incorrect fastq file prefix
+        # GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_1 = "/home/analysis/dummy_tumor.fastq.gz"
         validate_fastq_pattern(bad_fastq_path_1)
-        #THEN AttributeError is raised
+        # THEN AttributeError is raised
     assert excinfo.value
 
     with pytest.raises(AttributeError) as excinfo:
-        #GIVEN a path to a file with incorrect fastq file prefix
+        # GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_2 = "/home/analysis/dummy_tumor_R3.fastq.gz"
         validate_fastq_pattern(bad_fastq_path_2)
-        #THEN AttributeError is raised
+        # THEN AttributeError is raised
     assert excinfo.value
 
     with pytest.raises(AttributeError) as excinfo:
-        #GIVEN a path to a file with incorrect fastq file prefix
+        # GIVEN a path to a file with incorrect fastq file prefix
         bad_fastq_path_3 = "/home/analysis/dummy_tumor_R_2.bam"
         validate_fastq_pattern(bad_fastq_path_3)
-        #THEN AttributeError is raised
+        # THEN AttributeError is raised
     assert excinfo.value
 
 
 def test_get_panel_chrom():
-    #GIVEN a valid PANEL BED file
-    panel_bed_file = 'tests/test_data/references/panel/panel.bed'
-    #THEN it should return a set containing multiple unique chromosomes
+    # GIVEN a valid PANEL BED file
+    panel_bed_file = "tests/test_data/references/panel/panel.bed"
+    # THEN it should return a set containing multiple unique chromosomes
     assert len(get_panel_chrom(panel_bed_file)) > 0
 
 
 def test_create_fastq_symlink(tmpdir_factory, caplog):
-    #GIVEN a list of valid input fastq files from test directory containing 4 files
+    # GIVEN a list of valid input fastq files from test directory containing 4 files
     symlink_from_path = tmpdir_factory.mktemp("symlink_from")
     symlink_to_path = tmpdir_factory.mktemp("symlink_to")
     filenames = [
-        "tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz",
-        "normal_R_2.fastq.gz"
+        "tumor_R_1.fastq.gz",
+        "normal_R_1.fastq.gz",
+        "tumor_R_2.fastq.gz",
+        "normal_R_2.fastq.gz",
     ]
     successful_log = "skipping"
     casefiles = [Path(symlink_from_path, x) for x in filenames]
@@ -679,26 +697,28 @@ def test_create_fastq_symlink(tmpdir_factory, caplog):
         casefile.touch()
     with caplog.at_level(logging.INFO):
         create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
-        #THEN destination should have 4 files
+        # THEN destination should have 4 files
         assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
-        #THEN exception triggers log message containing "skipping"
+        # THEN exception triggers log message containing "skipping"
         assert successful_log in caplog.text
 
 
 def test_get_fastq_bind_path(tmpdir_factory):
-    #GIVEN a list of valid input fastq filenames and test directories
+    # GIVEN a list of valid input fastq filenames and test directories
     filenames = [
-        "tumor_R_1.fastq.gz", "normal_R_1.fastq.gz", "tumor_R_2.fastq.gz",
-        "normal_R_2.fastq.gz"
+        "tumor_R_1.fastq.gz",
+        "normal_R_1.fastq.gz",
+        "tumor_R_2.fastq.gz",
+        "normal_R_2.fastq.gz",
     ]
-    #WHEN files are created, and symlinks are made in symlink directory
+    # WHEN files are created, and symlinks are made in symlink directory
     symlink_from_path = tmpdir_factory.mktemp("symlink_from")
     symlink_to_path = tmpdir_factory.mktemp("symlink_to")
     casefiles = [Path(symlink_from_path, x) for x in filenames]
     for casefile in casefiles:
         casefile.touch()
     create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
-    #THEN function returns list containing the original parent path!
+    # THEN function returns list containing the original parent path!
     assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
 
 
@@ -743,3 +763,50 @@ def test_get_densityplot():
     assert Path(test_file2).exists()
     assert Path(out_file).exists()
     assert test_result_name == "dummy_plot.pdf"
+
+
+def test_convert_deliverables_tags():
+
+    # GIVEN a deliverables dict and a sample config dict
+    delivery_json = {
+        "files": [
+            {
+                "path":
+                "/home/proj/stage/cancer/dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
+                "path_index": [],
+                "step": "fastp",
+                "tag": "S1-R,read2,quality-trimmed-fastq-read2",
+                "id": "S1_R",
+                "format": "fastq.gz",
+            },
+            {
+                "path":
+                "/home/proj/stage/cancer/dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
+                "path_index": [],
+                "step": "fastp",
+                "tag": "S1-R,json,quality-trimmed-fastq-json",
+                "id": "S1_R",
+                "format": "json",
+            },
+        ]
+    }
+
+    sample_config_dict = {
+        "samples": {
+            "S1_R": {
+                "file_prefix": "S1_R",
+                "sample_name": "ACC1",
+                "type": "tumor",
+                "readpair_suffix": ["1", "2"],
+            },
+        },
+    }
+
+    # WHEN running convert function
+    delivery_json = convert_deliverables_tags(
+        delivery_json=delivery_json, sample_config_dict=sample_config_dict)
+
+    # Prefix strings should be replaced with sample name
+    for file in delivery_json["files"]:
+        assert file["id"] == "ACC1"
+        assert "ACC1" in file["tag"]

@@ -242,6 +242,10 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
                 analysis_dir,
                 "--reference-config",
                 reference_json,
+            "--tumor-sample-name",
+            "ACC1",
+            "--normal-sample-name",
+            "ACC2",
             ],
         )
 
