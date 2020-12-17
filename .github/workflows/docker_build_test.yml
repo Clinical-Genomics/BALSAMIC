@@ -1,4 +1,4 @@
-name: build an push docker containers
+name: build and test docker containers
 
 # Tigger building and testing container only on pull requests
 on:
@@ -10,6 +10,7 @@ on:
       - "**"
     paths:
       - 'BALSAMIC/containers/**'
+      - 'Dockerfile'
 
 
 jobs:
