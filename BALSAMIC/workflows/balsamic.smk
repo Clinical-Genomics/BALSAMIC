@@ -24,7 +24,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
 from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
                                     VARDICT_SETTINGS, VCFANNO_TOML, umiworkflow_params)
 
-shell.executable("/bin/bash -l")
+shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)

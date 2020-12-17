@@ -64,6 +64,7 @@ cosmicdb_url.secret=config['cosmic_key']
 
 check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
 
+shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 def get_md5(filename):
@@ -201,7 +202,7 @@ rule prepare_refgene:
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -232,7 +233,7 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
     log:
         os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -253,7 +254,7 @@ rule bwa_index:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome_url.get_output_file + ".bwa_index.log"
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -273,7 +274,7 @@ rule samtools_index_fasta:
         reference_genome_url.get_output_file + ".fai"
     log:
         reference_genome_url.get_output_file + ".faidx.log"
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -295,7 +296,7 @@ rule picard_ref_dict:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
         reference_genome_url.get_output_file + ".ref_dict.log"
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -318,7 +319,7 @@ rule vep_install:
         directory(vep_dir)
     log:
         os.path.join(vep_dir, "vep_install_cache.log")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
