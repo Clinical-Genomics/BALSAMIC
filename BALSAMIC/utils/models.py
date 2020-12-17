@@ -154,6 +154,8 @@ class VCFModel(BaseModel):
     tnhaplotyper: VarcallerAttribute
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
+    TNscope_consensusaligned_umi: VarcallerAttribute
+    TNscope_consensusfiltered_umi: VarcallerAttribute
 
 
 class AnalysisModel(BaseModel):
@@ -169,6 +171,7 @@ class AnalysisModel(BaseModel):
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
         analysis_dir : Field(required); existing path where to save files
+        umiworkflow : Field(bool); whether UMI workflow to run parallely 
 
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
@@ -198,6 +201,7 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
+    umiworkflow: bool = True
 
     class Config:
         validate_all = True
@@ -336,6 +340,7 @@ class BalsamicConfigModel(BaseModel):
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+	umiworkflow : Field(bool); whether UMI workflow to run parallely with balsamic workflow
 
     """
 
@@ -349,6 +354,7 @@ class BalsamicConfigModel(BaseModel):
     conda_env_yaml: FilePath = CONDA_ENV_YAML
     bioinfo_tools: Optional[BioinfoToolsModel]
     panel: Optional[PanelModel]
+    umiworkflow: bool = True
 
     @validator("reference")
     def abspath_as_str(cls, value):

@@ -32,7 +32,7 @@ rule sentieon_bwa_umiextract:
         ref_fa = config["reference"]["reference_genome"],
         fastq_umi = expand(umi_dir + "{mysample}.umiextract.fastq.gz", mysample=get_sample_type(config["samples"],"tumor"))
     output:
-        align_umi = temp(umi_dir + "{case_name}.umialign.bam")
+        align_umi = temp(umi_dir + "{case_name}.align.umi.bam")
     benchmark:
         Path(benchmark_dir + "sentieon_bwa_umiextract_{case_name}.tsv").as_posix()
     params:

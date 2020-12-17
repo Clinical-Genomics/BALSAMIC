@@ -4,9 +4,9 @@
 # UMI-consensus calling
 rule sentieon_consensuscall_umi:
     input:
-        sam_consensus = umi_dir + "{case_name}.umialign.bam"
+        sam_consensus = umi_dir + "{case_name}.align.umi.bam"
     output:
-        fastq_consensus = temp(umi_dir + "{case_name}.consensuscall.fastq.gz")
+        fastq_consensus = temp(umi_dir + "{case_name}.consensuscall.umi.fastq.gz")
     benchmark:
         Path(benchmark_dir + "sentieon_consensuscall_umi_{case_name}.tsv").as_posix()
     params:
@@ -34,9 +34,9 @@ rule sentieon_consensuscall_umi:
 rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fq_consensus = umi_dir + "{case_name}.consensuscall.fastq.gz"
+        fq_consensus = umi_dir + "{case_name}.consensuscall.umi.fastq.gz"
     output:
-        align_consensus = umi_dir + "{case_name}.consensusaligned.bam"
+        align_consensus = umi_dir + "{case_name}.consensusaligned.umi.bam"
     benchmark:
         Path(benchmark_dir + "sentieon_bwa_umiconsensus_{case_name}.tsv").as_posix()
     params:
@@ -67,9 +67,9 @@ rule sentieon_bwa_umiconsensus:
 # Filter consensus called reads based on 'XZ' filtering
 rule sentieon_consensusfilter_umi:
     input:
-        umi_dir + "{case_name}.consensusaligned.bam"
+        umi_dir + "{case_name}.consensusaligned.umi.bam"
     output:
-        umi_dir + "{case_name}.consensusfiltered.bam"
+        umi_dir + "{case_name}.consensusfiltered.umi.bam"
     benchmark:
         Path(benchmark_dir + "sentieon_consensusfilter_umi_{case_name}.tsv").as_posix()
     singularity:

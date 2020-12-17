@@ -39,10 +39,22 @@ SENTIEON_TNSCOPE = Path(
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
 ANALYSIS_TYPES = ["paired", "single", "umi", "qc"]
-WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN"]
+WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 
 # Configuration of VCF settings
 VCF_DICT = {
+    "TNscope_consensusaligned_umi": {
+        "mutation": "somatic",
+	"type": "SNV",
+	"analysis_type": ["single"],
+	"workflow_solution": ["Sentieon_umi"]
+    },
+    "TNscope_consensusfiltered_umi": {
+	"mutation": "somatic",
+        "type": "SNV",
+        "analysis_type": ["single"],
+        "workflow_solution": ["Sentieon_umi"]
+    },
     "tnsnv": {
         "mutation": "somatic",
         "type": "SNV",
