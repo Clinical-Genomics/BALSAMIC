@@ -74,8 +74,8 @@ mkdir -p ${_analysis_dir}
 
 _genome_ver=hg19
 _cluster_config=BALSAMIC/config/cluster.json
-_singularity=BALSAMIC/containers/BALSAMIC_latest.sif
-_reference=reference/${_genome_ver}/reference.json
+_singularity=BALSAMIC/containers
+_reference=reference/6.0.1/${_genome_ver}/reference.json
 _tumor_fastq=tests/test_data/fastq/S1_R_1.fastq.gz
 _normal_fastq=tests/test_data/fastq/S2_R_1.fastq.gz
 _analysis_config=${_analysis_dir}'/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
@@ -91,6 +91,7 @@ else
 fi
 
 function balsamic_config() {
+set -x
   balsamic config case \
     -t ${_tumor_fastq} \
     ${_normal_option} \

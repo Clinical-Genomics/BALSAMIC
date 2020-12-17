@@ -9,10 +9,6 @@ from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
                                 create_fastq_symlink, generate_graph)
 from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH, VCF_DICT,
                                       BIOINFO_TOOL_ENV)
-from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
-                                get_bioinfo_tools_list, create_fastq_symlink,
-                                generate_graph)
-from BALSAMIC.utils.constants import CONDA_ENV_PATH, VCF_DICT
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -90,7 +86,6 @@ LOG = logging.getLogger(__name__)
               show_default=True,
               is_flag=True,
               help="Enable running UMI workflow")
-@click.pass_context
 @click.option("--tumor-sample-name", help="Tumor sample name")
 @click.option("--normal-sample-name", help="Normal sample name")
 @click.pass_context
