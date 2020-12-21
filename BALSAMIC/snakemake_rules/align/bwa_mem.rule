@@ -48,8 +48,10 @@ rule MarkDuplicates:
     stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
   params:
     conda = config["bioinfo_tools"].get("picard"),
+    mem = "-Xmx16G",
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     rm_dup = picard_flag(picarddup)
+  threads: get_threads(cluster_config, "MarkDuplicates")
   singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
   benchmark:
     Path(benchmark_dir, "MarkDuplicates_{sample}.markduplicates.tsv").as_posix()
@@ -58,7 +60,7 @@ rule MarkDuplicates:
 source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
-java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar \
+java -jar -Djava.io.tmpdir={params.tmpdir} {params.mem} $CONDA_PREFIX/share/picard.jar \
 MarkDuplicates \
 INPUT={input} \
 OUTPUT={output.mrkdup} \

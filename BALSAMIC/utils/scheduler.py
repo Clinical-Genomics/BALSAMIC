@@ -36,6 +36,8 @@ class SbatchScheduler:
         self.qos = None
         self.script = None
         self.time = None
+        self.profile = None
+        self.acctg_freq = None
 
     def build_cmd(self):
         """ builds sbatch command matching its options """
@@ -52,6 +54,8 @@ class SbatchScheduler:
             'qos',
             'time',
             'partition',
+            'profile',
+            'acctg_freq',
         ]
 
         for attribute in job_attributes:
@@ -186,6 +190,8 @@ def get_parser():
     parser.add_argument("--sample-config",
                         help='balsamic config sample output')
     parser.add_argument("--profile", help="profile to run jobs")
+    parser.add_argument("--slurm-profiler", help="Slurm profiler type (e.g. task). Refer to your SLURM manual to adjust this value") 
+    parser.add_argument("--slurm-profiler-interval", default="15", help="Profiler interval in seconds") 
     parser.add_argument("--account",
                         required=True,
                         help='cluster account name')
@@ -217,6 +223,9 @@ def main(args=None):
         if args.dependencies:
             scheduler_cmd.dependency = ','.join(
                 ["afterok:%s" % d for d in args.dependencies])
+        if args.slurm_profiler:
+            scheduler_cmd.profile = args.slurm_profiler
+            scheduler_cmd.acct_freq = "{}={}".format(args.slurm_profiler, args.slurm_profiler_interval) #"--profile task --acctg-freq=task=15"
     elif args.profile == 'qsub':
         jobid = '${JOB_ID}'
         scheduler_cmd = QsubScheduler()

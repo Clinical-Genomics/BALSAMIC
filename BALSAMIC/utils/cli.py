@@ -61,6 +61,7 @@ class SnakeMake:
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller
     dragen          - enable/disable dragen suite
+    slurm_profiler  - enable slurm profiler
     """
 
     def __init__(self):
@@ -89,6 +90,7 @@ class SnakeMake:
         self.sm_opt = str()
         self.disable_variant_caller = str()
         self.dragen = False
+        self.slurm_profiler = str()
 
     def build_cmd(self):
         forceall = str()
@@ -147,6 +149,9 @@ class SnakeMake:
                               self.script_path,
                               self.result_path,
                           ))
+
+            if self.slurm_profiler:
+                sbatch_cmd += " --slurm-profiler {}".format(self.slurm_profiler)
 
             if self.mail_user:
                 sbatch_cmd += " --mail-user {} ".format(self.mail_user)
