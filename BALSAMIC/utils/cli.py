@@ -151,7 +151,8 @@ class SnakeMake:
                           ))
 
             if self.slurm_profiler:
-                sbatch_cmd += " --slurm-profiler {}".format(self.slurm_profiler)
+                sbatch_cmd += " --slurm-profiler {}".format(
+                    self.slurm_profiler)
 
             if self.mail_user:
                 sbatch_cmd += " --mail-user {} ".format(self.mail_user)

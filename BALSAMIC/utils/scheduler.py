@@ -190,8 +190,14 @@ def get_parser():
     parser.add_argument("--sample-config",
                         help='balsamic config sample output')
     parser.add_argument("--profile", help="profile to run jobs")
-    parser.add_argument("--slurm-profiler", help="Slurm profiler type (e.g. task). Refer to your SLURM manual to adjust this value") 
-    parser.add_argument("--slurm-profiler-interval", default="15", help="Profiler interval in seconds") 
+    parser.add_argument(
+        "--slurm-profiler",
+        help=
+        "Slurm profiler type (e.g. task). Refer to your SLURM manual to adjust this value"
+    )
+    parser.add_argument("--slurm-profiler-interval",
+                        default="15",
+                        help="Profiler interval in seconds")
     parser.add_argument("--account",
                         required=True,
                         help='cluster account name')
@@ -225,7 +231,9 @@ def main(args=None):
                 ["afterok:%s" % d for d in args.dependencies])
         if args.slurm_profiler:
             scheduler_cmd.profile = args.slurm_profiler
-            scheduler_cmd.acct_freq = "{}={}".format(args.slurm_profiler, args.slurm_profiler_interval) #"--profile task --acctg-freq=task=15"
+            scheduler_cmd.acct_freq = "{}={}".format(
+                args.slurm_profiler, args.slurm_profiler_interval
+            )  #"--profile task --acctg-freq=task=15"
     elif args.profile == 'qsub':
         jobid = '${JOB_ID}'
         scheduler_cmd = QsubScheduler()

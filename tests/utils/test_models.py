@@ -10,6 +10,7 @@ from BALSAMIC.utils.models import (
     UMIParamsCommon, UMIParamsUMIextract, UMIParamsConsensuscall,
     UMIParamsTNscope, UMIParamsVardict, UMIParamsVEP)
 
+
 def test_referencemeta():
     """test ReferenceMeta for correctly building model"""
     # GIVEN a reference model

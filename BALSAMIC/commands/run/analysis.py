@@ -60,8 +60,11 @@ LOG = logging.getLogger(__name__)
               default="slurm",
               type=click.Choice(["slurm", "qsub"]),
               help="cluster profile to submit jobs")
-@click.option('--slurm-profiler',
-              help="Profile slurm jobs using the value of this option. Make sure you have slurm profiler enabled in your HPC.")
+@click.option(
+    '--slurm-profiler',
+    help=
+    "Profile slurm jobs using the value of this option. Make sure you have slurm profiler enabled in your HPC."
+)
 @click.option('-r',
               '--run-analysis',
               show_default=True,
