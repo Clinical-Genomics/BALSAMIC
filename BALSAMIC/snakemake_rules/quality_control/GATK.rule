@@ -76,7 +76,7 @@ rule PreparePopVCF:
     benchmark_dir + "PreparePopVCF_" + "tumor_prepare_pop_vcf.tsv"
   shell:
     "source activate {params.conda}; "
-    "readlink -e {input.bam}; "
+    "readlink -f {input.bam}; "
     "bcftools annotate "
         "-x {params.anno_str1}{params.popcode}_AF "
         "{input.ref1kg} "
