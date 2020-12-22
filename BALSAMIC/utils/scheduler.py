@@ -140,11 +140,14 @@ def read_sample_config(input_json):
         raise e
 
 
-def write_sacct_file(sacct_file, job_id):
+def write_sacct_file(sacct_file, job_id, job_name=str()):
     ''' writes a yaml file with job ids '''
     try:
         with open(sacct_file, 'a') as f:
-            f.write(job_id + "\n")
+            f.write(job_id)
+            if job_name:
+                f.write("," + job_name)
+            f.write("\n")
     except FileNotFoundError as e:
         logging.exception("Can not write {} file".format(sacct_file))
         raise e
@@ -196,7 +199,7 @@ def get_parser():
         "Slurm profiler type (e.g. task). Refer to your SLURM manual to adjust this value"
     )
     parser.add_argument("--slurm-profiler-interval",
-                        default="15",
+                        default="10",
                         help="Profiler interval in seconds")
     parser.add_argument("--account",
                         required=True,
@@ -246,6 +249,8 @@ def main(args=None):
 
     sacct_file = os.path.join(args.log_dir,
                               sample_config["analysis"]["case_id"] + ".sacct")
+    sacct_file_extended = os.path.join(args.log_dir,
+                              sample_config["analysis"]["case_id"] + "_extended.sacct")
 
     scheduler_cmd.account = args.account
     scheduler_cmd.mail_type = mail_type
@@ -266,6 +271,7 @@ def main(args=None):
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
+    write_sacct_file(sacct_file=sacct_file_extended, job_id=jobid, job_name=os.path.basename(jobscript))
 
 
 if __name__ == '__main__':
