@@ -32,4 +32,4 @@ rule split_bed_by_chrom:
             " > {params.split_bed_dir}$c.{params.origin_bed}; "
         "done; "
         "unset chromlist; "
-        "readlink -e {input.bam}; "
+        "readlink -f {input.bam}; "

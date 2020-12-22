@@ -25,7 +25,7 @@ rule vep_somatic:
   shell:
     """
 source activate {params.conda};
-vep_path=$(dirname $(readlink -e $(which vep)));
+vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf={params.tmpvcf};
 export PERL5LIB=;
 vcfanno --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
@@ -101,7 +101,7 @@ rule vep_germline:
   shell:
       """
 source activate {params.conda};
-vep_path=$(dirname $(readlink -e $(which vep)));
+vep_path=$(dirname $(readlink -f $(which vep)));
 export PERL5LIB=;
 vep \
 --dir $vep_path \
