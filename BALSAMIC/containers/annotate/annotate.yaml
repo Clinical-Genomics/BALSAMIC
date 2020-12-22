@@ -1,4 +1,5 @@
 channels:
+  - anaconda
   - bioconda
   - defaults
   - conda-forge
@@ -7,3 +8,4 @@ dependencies:
   - ensembl-vep=100.2
   - bcftools>=1.10
   - vcfanno=0.3.2
+  - gxx_linux-64 
