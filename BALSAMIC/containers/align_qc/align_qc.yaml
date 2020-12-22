@@ -6,7 +6,7 @@ channels:
 dependencies:
   - bedtools=2.29.0
   - bwa=0.7.15
-  - fastqc=0.11.5
+  - fastqc=0.11.9
   - samtools=1.9
   - tabix=0.2.5
   - picard=2.23.8
@@ -15,3 +15,4 @@ dependencies:
   - fastp=0.20.0
   - csvkit=1.0.4
   - libiconv
+  - fontconfig
