@@ -10,7 +10,7 @@ rule bcftools_query_generatebackgroundaf_umitable:
     benchmark:
         Path(benchmark_dir + "bcftools_query_generatebackgroundaf_umitable_{case_name}_{var_caller}.tsv").as_posix()
     singularity:
-        singularity_image
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         validated_set= config["background_variants"],
         conda = config["bioinfo_tools"].get("bcftools"),
