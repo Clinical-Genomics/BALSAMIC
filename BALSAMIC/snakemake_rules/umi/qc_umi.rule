@@ -78,7 +78,7 @@ rule samtools_view_calculatemeanfamilydepth_umi:
     benchmark:
         Path(benchmark_dir + "samtools_view_calculatemeanfamilydepth_umi_{case_name}_{step}.tsv").as_posix()
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         conda = config["bioinfo_tools"].get("samtools"),
         sample_id = "{case_name}_{step}"
@@ -118,7 +118,7 @@ rule bcftools_query_calculatenoiseAF_umi:
     benchmark:
         Path(benchmark_dir + "bcftools_query_calculatenoiseAF_umi_{case_name}.tsv").as_posix()
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         conda = config["bioinfo_tools"].get("bcftools"),
         sample_id = "{case_name}"
