@@ -1,6 +1,15 @@
+import os
+import subprocess
+import json
+from pathlib import Path
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
+import h5py
+
+from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.cli import get_config
 
 
 def get_file_contents(input_file, prefix_name):
@@ -42,3 +51,119 @@ def get_densityplot(input_file1, input_file2, prefix_name1, prefix_name2,
     plt.ylabel('Probability Density')
     plt.savefig(output_file)
     return output_file
+
+
+def plot_analysis(log_file):
+    """
+    plots analysis job.
+    """
+
+    cluster_config = get_config('cluster') 
+    with open(cluster_config, 'r') as f:
+        cluster_config = json.load(f)
+
+    #BALSAMIC.T_panel.CollectHsMetrics.21.sh_858877.err
+    #log_file = os.path.basename(log_file).split(".")
+    log_file_list = log_file.name.split(".")
+
+    job_name = ".".join(log_file_list[0:4]) 
+    rule_name = log_file_list[2] 
+    mem_per_core = 5222
+    requested_cores = get_threads(cluster_config, rule_name)
+    case_name = log_file_list[1]
+    fig_name = os.path.splitext(Path(log_file))[0]+".pdf" 
+    job_id = log_file_list[4].split("_")[1]
+    h5_file_name = Path(log_file.parent, job_name + ".h5").as_posix()
+
+    subprocess.run("sh5util -o {} -S -j {}".format(h5_file_name, job_id), shell=True)
+
+    df_array = np.array(h5py.File(h5_file_name)["Steps"]["batch"]["Nodes"])
+    node_name = df_array[0]
+    df = pd.DataFrame(np.array(h5py.File(h5_file_name)[
+        "Steps"]["batch"]["Nodes"][node_name]["Tasks"]["0"]))
+
+    # Convert kilohurtz to gigahurtz
+    df["CPUFrequency"] = df["CPUFrequency"]/1e6
+
+    # Convert kb to gb
+    df["RSS"] = df["RSS"]/1e6
+    df["VMSize"] = df["VMSize"]/1e6
+
+    figure_title = "Rule: {}\nRun time: {} seconds\nJob name: {}".format(
+        rule_name, df["ElapsedTime"].iloc[-1], job_name)
+
+    plt.figure(dpi=60, figsize=(8, 6))
+    plt.rcParams['figure.figsize'] = [10, 10]
+
+    fig, (cpu_ax, mem_ax, io_ax) = plt.subplots(nrows=3)
+    fig.suptitle(figure_title, fontsize=16)
+
+    cpu_ax_color = 'b'
+    df.plot(y="CPUUtilization", x="ElapsedTime",
+            ax=cpu_ax, style=cpu_ax_color+'--')
+    cpu_ax.set_label("Core usage")
+    cpu_ax.set_xlabel("Wall seconds")
+    cpu_ax.set_ylabel("Core usage (max {}%)".format(requested_cores*100))
+    cpu_ax.yaxis.label.set_color(cpu_ax_color)
+    cpu_ax.yaxis.label.set_color(cpu_ax_color)
+    cpu_ax.tick_params(axis='y', colors=cpu_ax_color)
+    max_cpu_line = cpu_ax.axhline(requested_cores*100, color=cpu_ax_color, ls='-')
+    max_cpu_line.set_label("Max available")
+    cpu_ax.legend(loc="best", frameon=False)
+    cpu_ax.set_title("CPU statistics")
+    cpu_ax.spines['top'].set_visible(False)
+    cpu_ax.spines['right'].set_visible(False)
+
+    mem_ax_color = 'g'
+    df.plot(y="VMSize", x="ElapsedTime", ax=mem_ax,
+            style=mem_ax_color+"--")
+    mem_ax.set_xlabel("Wall seconds")
+    mem_ax.set_ylabel("Memory usage GB (max {}GB)".format(
+        round(mem_per_core*requested_cores/1024)))
+    mem_ax.yaxis.label.set_color(mem_ax_color)
+    mem_ax.yaxis.label.set_color(mem_ax_color)
+    mem_ax.tick_params(axis='y', colors=mem_ax_color)
+    max_cpu_line = mem_ax.axhline(
+        round(mem_per_core*requested_cores/1024), color=mem_ax_color, ls='-')
+    max_cpu_line.set_label("Max available mem")
+    mem_ax.legend(loc="best", frameon=False)
+    mem_ax.set_title("Memory statistics")
+    mem_ax.spines['top'].set_visible(False)
+    mem_ax.spines['right'].set_visible(False)
+
+
+    read_io_ax_color = 'm'
+    read_io_ax = df.plot(y="ReadMB", x="ElapsedTime",
+                         style=read_io_ax_color+"--", ax=io_ax, legend=False)
+    read_io_ax.set_xlabel("Wall seconds")
+    read_io_ax.set_ylabel("Disk read (MANIFEST.inB)")
+    read_io_ax.yaxis.label.set_color(read_io_ax_color)
+    read_io_ax.yaxis.label.set_color(read_io_ax_color)
+    read_io_ax.tick_params(axis='y', colors=read_io_ax_color)
+    read_io_ax.spines['top'].set_visible(False)
+
+    write_io_ax = read_io_ax.twinx()
+    write_io_ax_color = 'y'
+    write_io_ax = df.plot(y="WriteMB", x="ElapsedTime",
+                          ax=write_io_ax, style=write_io_ax_color+"--")
+    write_io_ax.set_xlabel("Wall seconds")
+    write_io_ax.set_ylabel("Disk write (MB)")
+    write_io_ax.yaxis.label.set_color(write_io_ax_color)
+    write_io_ax.yaxis.label.set_color(write_io_ax_color)
+    write_io_ax.tick_params(axis='y', colors=write_io_ax_color)
+    write_io_ax.yaxis.tick_right()
+    write_io_ax.set_title("Disk I/O statistics")
+    write_io_ax.spines['top'].set_visible(False)
+
+
+    handles, labels = [], []
+    for ax in [write_io_ax, read_io_ax]:
+        for h, l in zip(*ax.get_legend_handles_labels()):
+            handles.append(h)
+            labels.append(l)
+
+    plt.legend(handles, labels, loc='best', ncol=len(handles), frameon=False)
+
+    plt.tight_layout()
+    plt.savefig(fig_name)
+    return fig_name
