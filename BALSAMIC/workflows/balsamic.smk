@@ -11,8 +11,10 @@ from yapf.yapflib.yapf_api import FormatFile
 from snakemake.exceptions import RuleException, WorkflowError
 
 from BALSAMIC.utils.exc import BalsamicError
+
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import check_executable
+from BALSAMIC.utils.cli import generate_h5
 
 from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
 
@@ -293,7 +295,13 @@ if 'benchmark_plots' in config:
         LOG.warning("sh5util executable does not exist. Won't be able to plot analysis")
     else:
         for log_file in Path("/home/hassan.foroughi/repos/BALSAMIC/run_tests/T_panel/logs").glob("*.err"):
-            log_file_plot = plot_analysis(log_file)
+
+            log_file_list = log_file.name.split(".")
+            job_name = ".".join(log_file_list[0:4]) 
+            job_id = log_file_list[4].split("_")[1]
+            h5_file = generate_h5(job_name, job_id, log_file.parent)
+
+            log_file_plot = plot_analysis(log_file, h5_file)
             logging.debug("Plot file for {} available at: {}".format(log_file.as_posix(), log_file_plot))
 
 
