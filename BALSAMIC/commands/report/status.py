@@ -10,7 +10,6 @@ from colorclass import Color
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import get_file_status_string
-from BALSAMIC.utils.workflowscripts import plot_analysis
 from BALSAMIC.utils.rule import get_result_dir
 
 LOG = logging.getLogger(__name__)
@@ -51,10 +50,20 @@ def status(context, sample_config, show_only_missing, print_files):
         sample_config_dict = json.load(fn)
 
     result_dir = get_result_dir(sample_config_dict)
-    log_dir = sample_config_dict["analysis"]["log"]
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
+
+    if os.path.isfile(os.path.join(result_dir, "analysis_finish")):
+        snakemake.snakemake(
+            snakefile=snakefile,
+            config={
+                "benchmark_plots": "True",
+            },
+            dryrun=True,
+            configfiles=[sample_config],
+            quiet=True,
+        )
 
     with CaptureStdout() as summary:
         snakemake.snakemake(
@@ -66,22 +75,6 @@ def status(context, sample_config, show_only_missing, print_files):
         )
     summary = [i.split("\t") for i in summary]
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
-
-    finish_status = True 
-    if not os.path.isfile(os.path.join(result_dir, "analysis_finish")):
-        LOG.warning(
-            "analysis_finish file is missing. Analysis might be incomplete or running."
-        )
-        finish_status = False 
-       
-    if finish_status:
-        for log_file in Path(log_dir).glob("*.err"):#glob.glob(os.pathlog_dir + "*.err"):
-            try:
-                log_file_plot = plot_analysis(log_file)
-                logging.debug("Plot file for {} available at: {}".format(log_file.as_posix(), log_file_plot))
-            except:
-                logging.warning("Failed to plot analysis benchmark for {}".format(log_file))
-            
 
     existing_files = set()
     missing_files = set()
