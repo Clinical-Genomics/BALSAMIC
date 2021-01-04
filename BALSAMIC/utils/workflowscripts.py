@@ -10,6 +10,7 @@ import h5py
 
 from BALSAMIC.utils.rule import get_threads
 from BALSAMIC.utils.cli import get_config
+from BALSAMIC.utils.cli import generate_h5
 
 
 def get_file_contents(input_file, prefix_name):
@@ -62,8 +63,6 @@ def plot_analysis(log_file):
     with open(cluster_config, 'r') as f:
         cluster_config = json.load(f)
 
-    #BALSAMIC.T_panel.CollectHsMetrics.21.sh_858877.err
-    #log_file = os.path.basename(log_file).split(".")
     log_file_list = log_file.name.split(".")
 
     job_name = ".".join(log_file_list[0:4]) 
@@ -73,13 +72,17 @@ def plot_analysis(log_file):
     case_name = log_file_list[1]
     fig_name = os.path.splitext(Path(log_file))[0]+".pdf" 
     job_id = log_file_list[4].split("_")[1]
-    h5_file_name = Path(log_file.parent, job_name + ".h5").as_posix()
 
-    subprocess.run("sh5util -o {} -S -j {}".format(h5_file_name, job_id), shell=True)
+    h5_file_name = generate_h5(job_name, job_id, log_file.parent)
 
-    df_array = np.array(h5py.File(h5_file_name)["Steps"]["batch"]["Nodes"])
-    node_name = df_array[0]
-    df = pd.DataFrame(np.array(h5py.File(h5_file_name)[
+    # This is lazy and memory inefficient, but it gets the job done.
+    df_array = h5py.File(h5_file_name, 'r')
+    node_name = list(df_array["Steps"]["batch"]["Nodes"].keys())[0]
+
+    if not "Tasks" in list(df_array["Steps"]["batch"]["Nodes"][node_name]):
+        return None 
+
+    df = pd.DataFrame(np.array(df_array[
         "Steps"]["batch"]["Nodes"][node_name]["Tasks"]["0"]))
 
     # Convert kilohurtz to gigahurtz
@@ -92,7 +95,6 @@ def plot_analysis(log_file):
     figure_title = "Rule: {}\nRun time: {} seconds\nJob name: {}".format(
         rule_name, df["ElapsedTime"].iloc[-1], job_name)
 
-    plt.figure(dpi=60, figsize=(8, 6))
     plt.rcParams['figure.figsize'] = [10, 10]
 
     fig, (cpu_ax, mem_ax, io_ax) = plt.subplots(nrows=3)
@@ -165,5 +167,6 @@ def plot_analysis(log_file):
     plt.legend(handles, labels, loc='best', ncol=len(handles), frameon=False)
 
     plt.tight_layout()
-    plt.savefig(fig_name)
+    plt.savefig(fig_name, dpi=300)
+    plt.close()
     return fig_name
