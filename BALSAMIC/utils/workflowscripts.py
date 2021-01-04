@@ -7,6 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import h5py
+import typing
 
 from BALSAMIC.utils.rule import get_threads
 from BALSAMIC.utils.cli import get_config
@@ -54,7 +55,7 @@ def get_densityplot(input_file1, input_file2, prefix_name1, prefix_name2,
     return output_file
 
 
-def plot_analysis(log_file):
+def plot_analysis(log_file: Path, h5_file: Path, fig_name: str=None) -> typing.Union[None, Path]:
     """
     plots analysis job.
     """
@@ -63,20 +64,19 @@ def plot_analysis(log_file):
     with open(cluster_config, 'r') as f:
         cluster_config = json.load(f)
 
-    log_file_list = log_file.name.split(".")
+    log_file_list = Path(log_file).name.split(".")
 
     job_name = ".".join(log_file_list[0:4]) 
     rule_name = log_file_list[2] 
     mem_per_core = 5222
     requested_cores = get_threads(cluster_config, rule_name)
     case_name = log_file_list[1]
-    fig_name = os.path.splitext(Path(log_file))[0]+".pdf" 
+    if not fig_name:
+        fig_name = os.path.splitext(Path(log_file))[0]+".pdf" 
     job_id = log_file_list[4].split("_")[1]
 
-    h5_file_name = generate_h5(job_name, job_id, log_file.parent)
-
     # This is lazy and memory inefficient, but it gets the job done.
-    df_array = h5py.File(h5_file_name, 'r')
+    df_array = h5py.File(h5_file, 'r')
     node_name = list(df_array["Steps"]["batch"]["Nodes"].keys())[0]
 
     if not "Tasks" in list(df_array["Steps"]["batch"]["Nodes"][node_name]):
