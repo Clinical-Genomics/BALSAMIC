@@ -249,8 +249,8 @@ def main(args=None):
 
     sacct_file = os.path.join(args.log_dir,
                               sample_config["analysis"]["case_id"] + ".sacct")
-    sacct_file_extended = os.path.join(args.log_dir,
-                              sample_config["analysis"]["case_id"] + "_extended.sacct")
+    sacct_file_extended = os.path.join(
+        args.log_dir, sample_config["analysis"]["case_id"] + "_extended.sacct")
 
     scheduler_cmd.account = args.account
     scheduler_cmd.mail_type = mail_type
@@ -271,7 +271,9 @@ def main(args=None):
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
-    write_sacct_file(sacct_file=sacct_file_extended, job_id=jobid, job_name=os.path.basename(jobscript))
+    write_sacct_file(sacct_file=sacct_file_extended,
+                     job_id=jobid,
+                     job_name=os.path.basename(jobscript))
 
 
 if __name__ == '__main__':

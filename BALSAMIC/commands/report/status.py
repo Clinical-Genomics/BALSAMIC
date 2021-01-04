@@ -65,7 +65,9 @@ def status(context, sample_config, show_only_missing, print_files):
             quiet=True,
         )
     else:
-      LOG.warning("analysis_finish file is missing. Analysis might be incomplete or running.")
+        LOG.warning(
+            "analysis_finish file is missing. Analysis might be incomplete or running."
+        )
 
     with CaptureStdout() as summary:
         snakemake.snakemake(

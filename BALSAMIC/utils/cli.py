@@ -574,10 +574,10 @@ def convert_deliverables_tags(delivery_json: dict,
 
 def check_executable(exe_name: str) -> bool:
     """Checks for executable exe_name in PATH"""
-    exe_exist = True 
+    exe_exist = True
 
     if find_executable(exe_name) is None:
-        exe_exist = False 
+        exe_exist = False
 
     return exe_exist
 
@@ -586,9 +586,13 @@ def generate_h5(job_name: str, job_id: str, file_path: str) -> str:
     """Generates H5 file for a finished job. Returns None if it cannot generate H5 file"""
     h5_file_name = Path(file_path, job_name + ".h5")
     try:
-        sh5util_output = subprocess.check_output(["sh5util", "-o", h5_file_name.as_posix(), "-S", "-j", job_id])
+        sh5util_output = subprocess.check_output(
+            ["sh5util", "-o",
+             h5_file_name.as_posix(), "-S", "-j", job_id])
     except:
-        LOG.warning("sh5util failed to generate h5 file with following error: %s", sh5util_output)
+        LOG.warning(
+            "sh5util failed to generate h5 file with following error: %s",
+            sh5util_output)
         h5_file_name = None
 
     return h5_file_name

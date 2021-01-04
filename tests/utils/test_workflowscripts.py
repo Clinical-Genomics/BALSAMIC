@@ -7,6 +7,7 @@ from BALSAMIC.utils.workflowscripts import get_file_contents
 from BALSAMIC.utils.workflowscripts import get_densityplot
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
+
 def test_get_file_contents():
     # GIVEN a test input file
     test_file = 'tests/test_data/densityplots/dummy_file1.txt'
@@ -49,9 +50,12 @@ def test_get_densityplot():
     assert Path(out_file).exists()
     assert test_result_name == "dummy_plot.pdf"
 
+
 def test_plot_analysis(tmp_path_factory):
     # GIVEN a dummy log file
-    dummy_log_file = Path("tests/test_data/dummy_run_logs/BALSAMIC.T_panel.bwa_mem.123.sh_31415926535.err")
+    dummy_log_file = Path(
+        "tests/test_data/dummy_run_logs/BALSAMIC.T_panel.bwa_mem.123.sh_31415926535.err"
+    )
     dummy_h5 = "tests/test_data/dummy_run_logs/BALSAMIC.T_panel.bwa_mem.123.h5"
     dummy_path = tmp_path_factory.mktemp("dummy_pdf_path")
     dummy_pdf_name = dummy_path / "BALSAMIC.T_panel.bwa_mem.123.pdf"
@@ -60,4 +64,4 @@ def test_plot_analysis(tmp_path_factory):
     # WHEN calling plot_analysis
     actual_pdf_file = plot_analysis(dummy_log_file, dummy_h5, dummy_pdf_name)
 
-    assert Path(actual_pdf_file).exists() 
+    assert Path(actual_pdf_file).exists()

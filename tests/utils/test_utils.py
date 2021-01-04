@@ -722,7 +722,6 @@ def test_get_fastq_bind_path(tmpdir_factory):
     assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
 
 
-
 def test_convert_deliverables_tags():
 
     # GIVEN a deliverables dict and a sample config dict
@@ -771,7 +770,7 @@ def test_convert_deliverables_tags():
 
 
 def test_check_executable_exists():
-    
+
     # GIVEN an existing executable command
     test_command = "ls"
 
@@ -781,7 +780,7 @@ def test_check_executable_exists():
 
 
 def test_check_executable_not_existing():
-    
+
     # GIVEN an existing executable command
     test_command = "twenty_twenty_was_bad"
 
