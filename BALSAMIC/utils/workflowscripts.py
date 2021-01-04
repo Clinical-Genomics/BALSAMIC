@@ -93,8 +93,8 @@ def plot_analysis(log_file: Path, h5_file: Path,
     df["RSS"] = df["RSS"] / 1e6
     df["VMSize"] = df["VMSize"] / 1e6
 
-    figure_title = "Rule: {}\nRun time: {} seconds\nJob name: {}".format(
-        rule_name, df["ElapsedTime"].iloc[-1], job_name)
+    figure_title = "Case name: {} Rule: {}\nRun time: {} seconds\tJob name(id): {}({})".format(
+        case_name, rule_name, df["ElapsedTime"].iloc[-1], job_name, job_id)
 
     plt.rcParams['figure.figsize'] = [10, 10]
 
