@@ -300,8 +300,9 @@ if 'benchmark_plots' in config:
             job_name = ".".join(log_file_list[0:4]) 
             job_id = log_file_list[4].split("_")[1]
             h5_file = generate_h5(job_name, job_id, log_file.parent)
+            benchmark_plot = Path(benchmark_dir, job_name + ".pdf")
 
-            log_file_plot = plot_analysis(log_file, h5_file)
+            log_file_plot = plot_analysis(log_file, h5_file, benchmark_plot)
             logging.debug("Plot file for {} available at: {}".format(log_file.as_posix(), log_file_plot))
 
 

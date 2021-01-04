@@ -56,7 +56,7 @@ def get_densityplot(input_file1, input_file2, prefix_name1, prefix_name2,
 
 
 def plot_analysis(log_file: Path, h5_file: Path,
-                  fig_name: str = None) -> typing.Union[None, Path]:
+                  fig_name: Path) -> typing.Union[None, Path]:
     """
     plots analysis job.
     """
@@ -72,8 +72,6 @@ def plot_analysis(log_file: Path, h5_file: Path,
     mem_per_core = 5222
     requested_cores = get_threads(cluster_config, rule_name)
     case_name = log_file_list[1]
-    if not fig_name:
-        fig_name = os.path.splitext(Path(log_file))[0] + ".pdf"
     job_id = log_file_list[4].split("_")[1]
 
     # This is lazy and memory inefficient, but it gets the job done.
@@ -93,13 +91,13 @@ def plot_analysis(log_file: Path, h5_file: Path,
     df["RSS"] = df["RSS"] / 1e6
     df["VMSize"] = df["VMSize"] / 1e6
 
-    figure_title = "Case name: {} Rule: {}\nRun time: {} seconds\tJob name(id): {}({})".format(
+    figure_title = "Case name: {}\nRule: {}\nRun time: {} seconds\nJob name: {}\nJob ID: {}".format(
         case_name, rule_name, df["ElapsedTime"].iloc[-1], job_name, job_id)
 
     plt.rcParams['figure.figsize'] = [10, 10]
 
     fig, (cpu_ax, mem_ax, io_ax) = plt.subplots(nrows=3)
-    fig.suptitle(figure_title, fontsize=16)
+    fig.suptitle(figure_title, fontsize=12, horizontalalignment="center")
 
     cpu_ax_color = 'b'
     df.plot(y="CPUUtilization",
