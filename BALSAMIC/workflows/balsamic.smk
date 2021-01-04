@@ -12,10 +12,12 @@ from snakemake.exceptions import RuleException, WorkflowError
 
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import check_executable
 
 from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
 
 from BALSAMIC.utils.workflowscripts import get_densityplot
+from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
@@ -285,6 +287,16 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
 
+if 'benchmark_plots' in config:
+    log_dir = config["analysis"]["log"]
+    if not check_executable("sh5util"):
+        LOG.warning("sh5util executable does not exist. Won't be able to plot analysis")
+    else:
+        for log_file in Path("/home/hassan.foroughi/repos/BALSAMIC/run_tests/T_panel/logs").glob("*.err"):
+            log_file_plot = plot_analysis(log_file)
+            logging.debug("Plot file for {} available at: {}".format(log_file.as_posix(), log_file_plot))
+
+
 if 'delivery' in config:
     wildcard_dict = {"sample": list(config["samples"].keys()),
                      "case_name": config["analysis"]["case_id"],
@@ -334,3 +346,5 @@ rule all:
 
         with open(str(output[0]), mode='w') as finish_file:
             finish_file.write('%s\n' % datetime.datetime.now())
+
+    
