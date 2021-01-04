@@ -22,7 +22,7 @@ from BALSAMIC.utils.cli import (
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
     get_fastq_bind_path, singularity, get_file_extension,
-    get_bioinfo_tools_version, convert_deliverables_tags)
+    get_bioinfo_tools_version, convert_deliverables_tags, check_executable)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_picard_mrkdup, get_variant_callers,
@@ -810,3 +810,23 @@ def test_convert_deliverables_tags():
     for file in delivery_json["files"]:
         assert file["id"] == "ACC1"
         assert "ACC1" in file["tag"]
+
+
+def test_check_executable_exists():
+    
+    # GIVEN an existing executable command
+    test_command = "ls"
+
+    # WHEN calling check_executable
+    # THEN it should return True
+    assert check_executable(test_command)
+
+
+def test_check_executable_not_existing():
+    
+    # GIVEN an existing executable command
+    test_command = "twenty_twenty_was_bad"
+
+    # WHEN calling check_executable
+    # THEN it should return True
+    assert not check_executable(test_command)
