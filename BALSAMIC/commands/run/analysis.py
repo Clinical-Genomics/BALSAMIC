@@ -61,7 +61,9 @@ LOG = logging.getLogger(__name__)
               type=click.Choice(["slurm", "qsub"]),
               help="cluster profile to submit jobs")
 @click.option(
-    '--slurm-profiler',
+    '--benchmark',
+    default=False,
+    is_flag=True,
     help=
     "Profile slurm jobs using the value of this option. Make sure you have slurm profiler enabled in your HPC."
 )
@@ -121,7 +123,7 @@ LOG = logging.getLogger(__name__)
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, force_all, snakemake_opt, mail_type, mail_user,
              account, analysis_type, qos, profile, disable_variant_caller,
-             quiet, dragen, slurm_profiler):
+             quiet, dragen, benchmark):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
@@ -208,7 +210,7 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
-    balsamic_run.slurm_profiler = slurm_profiler
+    balsamic_run.slurm_profiler = benchmark
 
     if disable_variant_caller:
         balsamic_run.disable_variant_caller = disable_variant_caller
