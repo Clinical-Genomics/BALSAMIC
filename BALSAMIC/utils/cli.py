@@ -585,14 +585,11 @@ def check_executable(exe_name: str) -> bool:
 def generate_h5(job_name: str, job_id: str, file_path: str) -> str:
     """Generates H5 file for a finished job. Returns None if it cannot generate H5 file"""
     h5_file_name = Path(file_path, job_name + ".h5")
-    try:
-        sh5util_output = subprocess.check_output(
-            ["sh5util", "-o",
-             h5_file_name.as_posix(), "-S", "-j", job_id])
-    except:
-        LOG.warning(
-            "sh5util failed to generate h5 file with following error: %s",
-            sh5util_output)
+    sh5util_output = subprocess.check_output(
+        ["sh5util", "-o",
+         h5_file_name.as_posix(), "-S", "-j", job_id], stderr=subprocess.STDOUT)
+    
+    if "sh5util: No node-step files found for jobid" in sh5util_output.decode("utf-8"):
         h5_file_name = None
 
     return h5_file_name
