@@ -22,7 +22,7 @@ from BALSAMIC.utils.cli import (
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
     get_fastq_bind_path, singularity, get_file_extension,
-    get_bioinfo_tools_version, convert_deliverables_tags, check_executable)
+    get_bioinfo_tools_version, convert_deliverables_tags, check_executable, job_id_dump_to_yaml)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_picard_mrkdup, get_variant_callers,
@@ -787,3 +787,22 @@ def test_check_executable_not_existing():
     # WHEN calling check_executable
     # THEN it should return True
     assert not check_executable(test_command)
+
+
+def test_job_id_dump_to_yaml(tmp_path):
+    
+    # GIVEN a file with one job id per line, a key (case name), and an output file name
+    dummy_dir = tmp_path / "job_id_dump_dir"
+    dummy_dir.mkdir()
+    dummy_job_id_dump = dummy_dir / "jod_id.dump"
+    dummy_job_id_dump.write_text("01234\n56789")
+
+    dummy_name = "angrybird"
+
+    dummy_yaml_out = dummy_dir / "jod_id.yaml"
+    
+    # WHEN creating yaml from job id dump
+    job_id_dump_to_yaml(dummy_job_id_dump, dummy_yaml_out, dummy_name)
+
+    # THEN file should exist
+    assert dummy_yaml_out.exists() 

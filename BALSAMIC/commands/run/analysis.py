@@ -10,7 +10,7 @@ from pathlib import Path
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import (createDir, get_schedulerpy, get_snakefile,
-                                SnakeMake, get_config, get_fastq_bind_path)
+                                SnakeMake, get_config, get_fastq_bind_path, job_id_dump_to_yaml)
 from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT, BALSAMIC_SCRIPTS
 
 LOG = logging.getLogger(__name__)
@@ -217,19 +217,12 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
 
     if dragen:
         balsamic_run.dragen = dragen
-    try:
-        cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
-        subprocess.run(cmd, shell=True)
-    except Exception as e:
-        print(e)
-        raise click.Abort()
+
+    cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
+    subprocess.run(cmd, shell=True)
 
     if run_analysis and run_mode == 'cluster':
-        jobid_file = os.path.join(
+        jobid_dump = os.path.join(
             logpath, sample_config["analysis"]["case_id"] + ".sacct")
-        jobid_dump = os.path.join(resultpath, profile + "_jobids.yaml")
-        with open(jobid_file, "r") as jobid_in, open(jobid_dump,
-                                                     "w") as jobid_out:
-            jobid_list = jobid_in.read().splitlines()
-            yaml.dump({sample_config['analysis']['case_id']: jobid_list},
-                      jobid_out)
+        jobid_yaml = os.path.join(resultpath, profile + "_jobids.yaml")
+        job_id_dump_to_yaml(jobid_dump, jobid_yaml, case_name)

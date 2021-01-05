@@ -596,3 +596,13 @@ def generate_h5(job_name: str, job_id: str, file_path: str) -> str:
         h5_file_name = None
 
     return h5_file_name
+
+
+def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
+    """Write an input job_id_sacct_file to yaml output"""
+    with open(job_id_dump, "r") as jobid_in, open(job_id_yaml,
+                                                 "w") as jobid_out:
+        jobid_list = jobid_in.read().splitlines()
+        yaml.dump({case_name: jobid_list},
+                  jobid_out)
+
