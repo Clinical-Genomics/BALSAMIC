@@ -1,4 +1,5 @@
 import json
+import subprocess
 import pytest
 import sys
 import copy
@@ -22,7 +23,7 @@ from BALSAMIC.utils.cli import (
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
     get_fastq_bind_path, singularity, get_file_extension,
-    get_bioinfo_tools_version, convert_deliverables_tags, check_executable, job_id_dump_to_yaml)
+    get_bioinfo_tools_version, convert_deliverables_tags, check_executable, job_id_dump_to_yaml, generate_h5)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_picard_mrkdup, get_variant_callers,
@@ -806,3 +807,20 @@ def test_job_id_dump_to_yaml(tmp_path):
 
     # THEN file should exist
     assert dummy_yaml_out.exists() 
+
+
+def test_generate_h5(tmp_path):
+    
+    # GIVEN a job name, a path, and a job id
+    dummy_path= tmp_path / "h5dir"
+    dummy_path.mkdir()
+    dummy_job_name = "awesome_name"
+    dummy_job_id = "31415.123123"
+    correct_output = Path(dummy_path, dummy_job_name + ".h5")
+
+    # WHEN generating a h5 output
+    with mock.patch('subprocess.check_output') as mocked: 
+        mocked.return_value = 0
+        actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
+      
+    assert actual_output == correct_output
