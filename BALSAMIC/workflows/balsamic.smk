@@ -47,12 +47,11 @@ fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
-qc_dir = result_dir + "qc/"
+qc_dir = get_result_dir(config) + "/qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
 umi_dir = get_result_dir(config) + "/umi/" 
 umi_qc_dir = qc_dir + "umi_qc/"
-
 
 singularity_image = config['singularity']['image']
 
@@ -143,9 +142,10 @@ else:
     ]
 
 
-annotation_rules = [ "snakemake_rules/annotation/vep.rule" ]
+annotation_rules = [ "snakemake_rules/annotation/vep.rule",
+                     "snakemake_rules/annotation/varcaller_filter.rule" ]
 
-umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule"]
+umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule" ]
  
 generatetable_umi_rules = [ "snakemake_rules/umi/generate_AF_tables.rule" ]
 
@@ -207,8 +207,6 @@ else:
 
         somatic_caller_snv = somatic_caller_snv + sentieon_callers
     else:
-
-        annotation_rules.append("snakemake_rules/annotation/varcaller_filter.rule")
 
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/cnvkit_single.rule",
