@@ -142,8 +142,7 @@ else:
     ]
 
 
-annotation_rules = [ "snakemake_rules/annotation/vep.rule",
-                     "snakemake_rules/annotation/varcaller_filter.rule" ]
+annotation_rules = [ "snakemake_rules/annotation/vep.rule"]
 
 umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule" ]
  
@@ -188,6 +187,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
+    annotation_rules.append("snakemake_rules/annotation/varcaller_filter.rule")
     if config['analysis']['analysis_type'] == "paired":
 
         qc_rules.append("snakemake_rules/quality_control/contest.rule")
