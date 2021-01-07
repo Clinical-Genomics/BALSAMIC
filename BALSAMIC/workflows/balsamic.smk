@@ -187,8 +187,8 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
-    annotation_rules.append("snakemake_rules/annotation/varcaller_filter.rule")
     if config['analysis']['analysis_type'] == "paired":
+        annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_normal.rule")
 
         qc_rules.append("snakemake_rules/quality_control/contest.rule")
 
@@ -207,6 +207,8 @@ else:
 
         somatic_caller_snv = somatic_caller_snv + sentieon_callers
     else:
+
+        annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_only.rule")
 
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/cnvkit_single.rule",
@@ -258,27 +260,26 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
 if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
-
-if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
-    if config["analysis"]["umiworkflow"]:
-        analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
-                                          vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]),
-                                          expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
-                                          case_name = config["analysis"]["case_id"],
-                                          step=["consensusaligned","consensusfiltered"]),
-                                          expand(umi_qc_dir + "{case_name}.{var_caller}_umi.{metric}",
-                                          case_name = config["analysis"]["case_id"],
-                                          var_caller = ["TNscope"],
-                                          metric = ["noiseAF", "AFplot.pdf"])])
-        config["rules"] = config["rules"] + umiqc_rules
-        if "background_variants" in config:
-            analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name = config["analysis"]["case_id"],
-                                          var_caller = expand("{var_caller}_{step}_umi",
-                                          var_caller =["TNscope"],
-                                          step = ["consensusaligned","consensusfiltered"]))])
-            config["rules"] = config["rules"] + generatetable_umi_rules
+
+if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["umiworkflow"]:
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
+                                      vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]),
+                                      expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
+                                      case_name = config["analysis"]["case_id"],
+                                      step=["consensusaligned","consensusfiltered"]),
+                                      expand(umi_qc_dir + "{case_name}.{var_caller}_umi.{metric}",
+                                      case_name = config["analysis"]["case_id"],
+                                      var_caller = ["TNscope"],
+                                      metric = ["noiseAF", "AFplot.pdf"])])
+    config["rules"] = config["rules"] + umiqc_rules
+    if "background_variants" in config:
+        analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name = config["analysis"]["case_id"],
+                                      var_caller = expand("{var_caller}_{step}_umi",
+                                      var_caller =["TNscope"],
+                                      step = ["consensusaligned","consensusfiltered"]))])
+        config["rules"] = config["rules"] + generatetable_umi_rules
 
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
