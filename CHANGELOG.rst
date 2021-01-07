@@ -1,3 +1,12 @@
+[6.0.4]
+-------
+
+Changed
+^^^^^^^
+
+* Reduces MQ cutoff from 50 to 40 to only remove obvious artifacts PR #535
+* Reduces AF cutoff from 0.02 to 0.01 PR #535
+
 [6.0.3]
 -------
 
