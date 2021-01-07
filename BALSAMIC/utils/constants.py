@@ -163,7 +163,7 @@ VARDICT_SETTINGS = {
         "field": "INFO",
     },
     "MQ": {
-        "tag_value": 50,
+        "tag_value": 40,
         "filter_name": "balsamic_low_mq",
         "field": "INFO"
     },
@@ -173,7 +173,7 @@ VARDICT_SETTINGS = {
         "field": "INFO"
     },
     "AF_min": {
-        "tag_value": 0.02,
+        "tag_value": 0.01,
         "filter_name": "balsamic_low_af",
         "field": "INFO"
     },
