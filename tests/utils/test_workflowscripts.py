@@ -80,4 +80,4 @@ def test_plot_analysis_bad_h5(tmp_path_factory):
     # WHEN calling plot_analysis
     actual_pdf_file = plot_analysis(dummy_log_file, dummy_h5, dummy_pdf_name)
 
-    assert actual_pdf_file is None 
+    assert actual_pdf_file is None

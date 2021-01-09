@@ -10,7 +10,8 @@ from pathlib import Path
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import (createDir, get_schedulerpy, get_snakefile,
-                                SnakeMake, get_config, get_fastq_bind_path, job_id_dump_to_yaml)
+                                SnakeMake, get_config, get_fastq_bind_path,
+                                job_id_dump_to_yaml)
 from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT, BALSAMIC_SCRIPTS
 
 LOG = logging.getLogger(__name__)

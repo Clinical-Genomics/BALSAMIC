@@ -51,7 +51,7 @@ def test_status_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers,
 
 
 def test_status_analysis_finish(invoke_cli, tumor_normal_config, helpers,
-                                    sentieon_install_dir, sentieon_license):
+                                sentieon_install_dir, sentieon_license):
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_normal_config)
 

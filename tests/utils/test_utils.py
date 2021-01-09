@@ -23,7 +23,8 @@ from BALSAMIC.utils.cli import (
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
     get_fastq_bind_path, singularity, get_file_extension,
-    get_bioinfo_tools_version, convert_deliverables_tags, check_executable, job_id_dump_to_yaml, generate_h5)
+    get_bioinfo_tools_version, convert_deliverables_tags, check_executable,
+    job_id_dump_to_yaml, generate_h5)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_picard_mrkdup, get_variant_callers,
@@ -791,7 +792,7 @@ def test_check_executable_not_existing():
 
 
 def test_job_id_dump_to_yaml(tmp_path):
-    
+
     # GIVEN a file with one job id per line, a key (case name), and an output file name
     dummy_dir = tmp_path / "job_id_dump_dir"
     dummy_dir.mkdir()
@@ -801,34 +802,34 @@ def test_job_id_dump_to_yaml(tmp_path):
     dummy_name = "angrybird"
 
     dummy_yaml_out = dummy_dir / "jod_id.yaml"
-    
+
     # WHEN creating yaml from job id dump
     job_id_dump_to_yaml(dummy_job_id_dump, dummy_yaml_out, dummy_name)
 
     # THEN file should exist
-    assert dummy_yaml_out.exists() 
+    assert dummy_yaml_out.exists()
 
 
 def test_generate_h5(tmp_path):
-    
+
     # GIVEN a job name, a path, and a job id
-    dummy_path= tmp_path / "h5dir"
+    dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
     dummy_job_name = "awesome_name"
     dummy_job_id = "31415.123123"
     correct_output = Path(dummy_path, dummy_job_name + ".h5")
 
     # WHEN generating a h5 output
-    with mock.patch.object(subprocess, 'check_output') as mocked: 
+    with mock.patch.object(subprocess, 'check_output') as mocked:
         actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
-      
+
     assert actual_output == correct_output
 
 
 def test_generate_h5_capture_no_output(tmp_path):
-    
+
     # GIVEN a job name, a path, and a job id
-    dummy_path= tmp_path / "h5dir"
+    dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
     dummy_job_name = "awesome_name"
     dummy_job_id = "31415.123123"
@@ -836,8 +837,8 @@ def test_generate_h5_capture_no_output(tmp_path):
     correct_output = Path(dummy_path, dummy_job_name + ".h5")
 
     # WHEN generating a h5 output
-    with mock.patch.object(subprocess, 'check_output') as mocked: 
+    with mock.patch.object(subprocess, 'check_output') as mocked:
         mocked.return_value = mocked_output.encode("utf-8")
         actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
-      
+
     assert actual_output == None

@@ -120,7 +120,11 @@ def plot_analysis(log_file: Path, h5_file: Path,
     max_cpu_line.set_label("Max available")
 
     mem_ax_color = 'g'
-    df.plot(y="VMSize", x="ElapsedTime", ax=mem_ax, color=mem_ax_color, style="--")
+    df.plot(y="VMSize",
+            x="ElapsedTime",
+            ax=mem_ax,
+            color=mem_ax_color,
+            style="--")
     mem_ax.set_title("Memory statistics")
     mem_ax.set_xlabel("Wall seconds")
     mem_ax.set_ylabel("Memory usage GB (max {}GB)".format(
@@ -156,7 +160,8 @@ def plot_analysis(log_file: Path, h5_file: Path,
                           x="ElapsedTime",
                           ax=write_io_ax,
                           color=write_io_ax_color,
-                          style="--", legend=False)
+                          style="--",
+                          legend=False)
     write_io_ax.set_title("Disk I/O statistics")
     write_io_ax.set_xlabel("Wall seconds")
     write_io_ax.set_ylabel("Disk write (MB)")
