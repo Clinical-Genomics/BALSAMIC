@@ -1,4 +1,5 @@
 import json
+import subprocess
 import pytest
 import sys
 import copy
@@ -22,7 +23,7 @@ from BALSAMIC.utils.cli import (
     get_file_status_string, get_from_two_key, find_file_index, merge_json,
     validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
     get_fastq_bind_path, singularity, get_file_extension,
-    get_bioinfo_tools_version, convert_deliverables_tags)
+    get_bioinfo_tools_version, convert_deliverables_tags, check_executable, job_id_dump_to_yaml, generate_h5)
 
 from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_picard_mrkdup, get_variant_callers,
@@ -722,49 +723,6 @@ def test_get_fastq_bind_path(tmpdir_factory):
     assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
 
 
-def test_get_file_contents():
-    #GIVEN a test input file
-    test_file = 'tests/test_data/densityplots/dummy_file1.txt'
-
-    # WHEN invoking function
-    test_file_built = get_file_contents(test_file, 'umi')
-    column_names = ['id', 'AF', 'method']
-
-    # THEN check column names and no. of column matches
-    assert all(test_file_built.columns == column_names)
-    assert len(test_file_built.columns) == 3
-
-
-def test_get_wrongfile_contents():
-    #GIVEN a test input file
-    test_wrongfile = 'tests/test_data/densityplots/dummy_wrongfile.txt'
-
-    # WHEN invoking function
-    with pytest.raises(ValueError):
-        test_wrongfile_built = get_file_contents(test_wrongfile, 'umi')
-        assert len(test_wrongfile_built.columns) != 3
-
-
-def test_get_densityplot():
-    #GIVEN prefix names, input and files
-    test_file1 = 'tests/test_data/densityplots/dummy_file1.txt'
-    test_file2 = 'tests/test_data/densityplots/dummy_file2.txt'
-    name1 = 'testnam1'
-    name2 = 'testnam2'
-    out_file = 'tests/test_data/densityplots/dummy_plot.pdf'
-
-    # WHEN invoking function out_file is created
-    test_result = get_densityplot(test_file1, test_file2, name1, name2,
-                                  out_file)
-    test_result_name = Path(test_result).name
-
-    # THEN check for filepaths
-    assert Path(test_file1).exists()
-    assert Path(test_file2).exists()
-    assert Path(out_file).exists()
-    assert test_result_name == "dummy_plot.pdf"
-
-
 def test_convert_deliverables_tags():
 
     # GIVEN a deliverables dict and a sample config dict
@@ -810,3 +768,76 @@ def test_convert_deliverables_tags():
     for file in delivery_json["files"]:
         assert file["id"] == "ACC1"
         assert "ACC1" in file["tag"]
+
+
+def test_check_executable_exists():
+
+    # GIVEN an existing executable command
+    test_command = "ls"
+
+    # WHEN calling check_executable
+    # THEN it should return True
+    assert check_executable(test_command)
+
+
+def test_check_executable_not_existing():
+
+    # GIVEN an existing executable command
+    test_command = "twenty_twenty_was_bad"
+
+    # WHEN calling check_executable
+    # THEN it should return True
+    assert not check_executable(test_command)
+
+
+def test_job_id_dump_to_yaml(tmp_path):
+    
+    # GIVEN a file with one job id per line, a key (case name), and an output file name
+    dummy_dir = tmp_path / "job_id_dump_dir"
+    dummy_dir.mkdir()
+    dummy_job_id_dump = dummy_dir / "jod_id.dump"
+    dummy_job_id_dump.write_text("01234\n56789")
+
+    dummy_name = "angrybird"
+
+    dummy_yaml_out = dummy_dir / "jod_id.yaml"
+    
+    # WHEN creating yaml from job id dump
+    job_id_dump_to_yaml(dummy_job_id_dump, dummy_yaml_out, dummy_name)
+
+    # THEN file should exist
+    assert dummy_yaml_out.exists() 
+
+
+def test_generate_h5(tmp_path):
+    
+    # GIVEN a job name, a path, and a job id
+    dummy_path= tmp_path / "h5dir"
+    dummy_path.mkdir()
+    dummy_job_name = "awesome_name"
+    dummy_job_id = "31415.123123"
+    correct_output = Path(dummy_path, dummy_job_name + ".h5")
+
+    # WHEN generating a h5 output
+    with mock.patch.object(subprocess, 'check_output') as mocked: 
+        actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
+      
+    assert actual_output == correct_output
+
+
+def test_generate_h5_capture_no_output(tmp_path):
+    
+    # GIVEN a job name, a path, and a job id
+    dummy_path= tmp_path / "h5dir"
+    dummy_path.mkdir()
+    dummy_job_name = "awesome_name"
+    dummy_job_id = "31415.123123"
+    mocked_output = "sh5util: No node-step files found for jobid"
+    correct_output = Path(dummy_path, dummy_job_name + ".h5")
+
+    # WHEN generating a h5 output
+    with mock.patch.object(subprocess, 'check_output') as mocked: 
+        mocked.return_value = mocked_output.encode("utf-8")
+        actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
+      
+    assert actual_output == None

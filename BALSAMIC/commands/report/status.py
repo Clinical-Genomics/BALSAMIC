@@ -3,6 +3,8 @@ import logging
 import json
 import click
 import snakemake
+
+from pathlib import Path
 from colorclass import Color
 
 from BALSAMIC.utils.cli import get_snakefile
@@ -52,6 +54,21 @@ def status(context, sample_config, show_only_missing, print_files):
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
+    if os.path.isfile(os.path.join(result_dir, "analysis_finish")):
+        snakemake.snakemake(
+            snakefile=snakefile,
+            config={
+                "benchmark_plots": "True",
+            },
+            dryrun=True,
+            configfiles=[sample_config],
+            quiet=True,
+        )
+    else:
+        LOG.warning(
+            "analysis_finish file is missing. Analysis might be incomplete or running."
+        )
+
     with CaptureStdout() as summary:
         snakemake.snakemake(
             snakefile=snakefile,
@@ -62,11 +79,6 @@ def status(context, sample_config, show_only_missing, print_files):
         )
     summary = [i.split("\t") for i in summary]
     summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
-
-    if not os.path.isfile(os.path.join(result_dir, "analysis_finish")):
-        LOG.warning(
-            "analysis_finish file is missing. Analysis might be incomplete or running."
-        )
 
     existing_files = set()
     missing_files = set()

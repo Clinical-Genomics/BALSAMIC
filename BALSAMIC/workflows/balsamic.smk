@@ -10,12 +10,18 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
 
+from PyPDF2 import PdfFileMerger
+
 from BALSAMIC.utils.exc import BalsamicError
+
 from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import check_executable
+from BALSAMIC.utils.cli import generate_h5
 
 from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
 
 from BALSAMIC.utils.workflowscripts import get_densityplot
+from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
@@ -41,12 +47,11 @@ fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
-qc_dir = result_dir + "qc/"
+qc_dir = get_result_dir(config) + "/qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
 umi_dir = get_result_dir(config) + "/umi/" 
 umi_qc_dir = qc_dir + "umi_qc/"
-
 
 singularity_image = config['singularity']['image']
 
@@ -137,9 +142,9 @@ else:
     ]
 
 
-annotation_rules = [ "snakemake_rules/annotation/vep.rule" ]
+annotation_rules = [ "snakemake_rules/annotation/vep.rule"]
 
-umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule"]
+umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule" ]
  
 generatetable_umi_rules = [ "snakemake_rules/umi/generate_AF_tables.rule" ]
 
@@ -183,6 +188,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     if config['analysis']['analysis_type'] == "paired":
+        annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_normal.rule")
 
         qc_rules.append("snakemake_rules/quality_control/contest.rule")
 
@@ -202,7 +208,7 @@ else:
         somatic_caller_snv = somatic_caller_snv + sentieon_callers
     else:
 
-        annotation_rules.append("snakemake_rules/annotation/varcaller_filter.rule")
+        annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_only.rule")
 
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/cnvkit_single.rule",
@@ -254,27 +260,26 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
 if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
-
-if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
-    if config["analysis"]["umiworkflow"]:
-        analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
-                                          vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]),
-                                          expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
-                                          case_name = config["analysis"]["case_id"],
-                                          step=["consensusaligned","consensusfiltered"]),
-                                          expand(umi_qc_dir + "{case_name}.{var_caller}_umi.{metric}",
-                                          case_name = config["analysis"]["case_id"],
-                                          var_caller = ["TNscope"],
-                                          metric = ["noiseAF", "AFplot.pdf"])])
-        config["rules"] = config["rules"] + umiqc_rules
-        if "background_variants" in config:
-            analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name = config["analysis"]["case_id"],
-                                          var_caller = expand("{var_caller}_{step}_umi",
-                                          var_caller =["TNscope"],
-                                          step = ["consensusaligned","consensusfiltered"]))])
-            config["rules"] = config["rules"] + generatetable_umi_rules
+
+if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["umiworkflow"]:
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
+                                      vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]),
+                                      expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
+                                      case_name = config["analysis"]["case_id"],
+                                      step=["consensusaligned","consensusfiltered"]),
+                                      expand(umi_qc_dir + "{case_name}.{var_caller}_umi.{metric}",
+                                      case_name = config["analysis"]["case_id"],
+                                      var_caller = ["TNscope"],
+                                      metric = ["noiseAF", "AFplot.pdf"])])
+    config["rules"] = config["rules"] + umiqc_rules
+    if "background_variants" in config:
+        analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name = config["analysis"]["case_id"],
+                                      var_caller = expand("{var_caller}_{step}_umi",
+                                      var_caller =["TNscope"],
+                                      step = ["consensusaligned","consensusfiltered"]))])
+        config["rules"] = config["rules"] + generatetable_umi_rules
 
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
@@ -284,6 +289,38 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
+
+if 'benchmark_plots' in config:
+    log_dir = config["analysis"]["log"]
+    if not check_executable("sh5util"):
+        LOG.warning("sh5util executable does not exist. Won't be able to plot analysis")
+    else:
+        # Make individual plot per job
+        for log_file in Path(log_dir).glob("*.err"):
+            log_file_list = log_file.name.split(".")
+            job_name = ".".join(log_file_list[0:4]) 
+            job_id = log_file_list[4].split("_")[1]
+            h5_file = generate_h5(job_name, job_id, log_file.parent)
+            benchmark_plot = Path(benchmark_dir, job_name + ".pdf")
+
+            log_file_plot = plot_analysis(log_file, h5_file, benchmark_plot)
+            logging.debug("Plot file for {} available at: {}".format(log_file.as_posix(), log_file_plot))
+
+        # Merge plots into one based on rule name
+        for my_rule in vars(rules).keys():
+            my_rule_pdf = PdfFileMerger()
+            my_rule_plots = list()
+            for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
+                my_rule_pdf.append(plots.as_posix())
+                my_rule_plots.append(plots)
+            my_rule_pdf.write(Path(benchmark_dir, my_rule+".pdf").as_posix())
+            my_rule_pdf.close()
+
+            # Delete previous plots after merging
+            for plots in my_rule_plots:
+                plots.unlink()
+            
+
 
 if 'delivery' in config:
     wildcard_dict = {"sample": list(config["samples"].keys()),
@@ -334,3 +371,5 @@ rule all:
 
         with open(str(output[0]), mode='w') as finish_file:
             finish_file.write('%s\n' % datetime.datetime.now())
+
+    

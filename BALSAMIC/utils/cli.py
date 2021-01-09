@@ -5,8 +5,10 @@ import logging
 import sys
 import collections
 import re
+import subprocess
 from pathlib import Path
 from io import StringIO
+from distutils.spawn import find_executable
 
 import yaml
 import snakemake
@@ -61,6 +63,7 @@ class SnakeMake:
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller
     dragen          - enable/disable dragen suite
+    slurm_profiler  - enable slurm profiler
     """
 
     def __init__(self):
@@ -89,6 +92,7 @@ class SnakeMake:
         self.sm_opt = str()
         self.disable_variant_caller = str()
         self.dragen = False
+        self.slurm_profiler = str()
 
     def build_cmd(self):
         forceall = str()
@@ -147,6 +151,10 @@ class SnakeMake:
                               self.script_path,
                               self.result_path,
                           ))
+
+            if self.slurm_profiler:
+                sbatch_cmd += " --slurm-profiler {}".format(
+                    self.slurm_profiler)
 
             if self.mail_user:
                 sbatch_cmd += " --mail-user {} ".format(self.mail_user)
@@ -562,3 +570,36 @@ def convert_deliverables_tags(delivery_json: dict,
                 file_tags.append(sample_name)
         file["tag"] = list(set(file_tags))
     return delivery_json
+
+
+def check_executable(exe_name: str) -> bool:
+    """Checks for executable exe_name in PATH"""
+    exe_exist = True
+
+    if find_executable(exe_name) is None:
+        exe_exist = False
+
+    return exe_exist
+
+
+def generate_h5(job_name: str, job_id: str, file_path: str) -> str:
+    """Generates H5 file for a finished job. Returns None if it cannot generate H5 file"""
+    h5_file_name = Path(file_path, job_name + ".h5")
+    sh5util_output = subprocess.check_output(
+        ["sh5util", "-o",
+         h5_file_name.as_posix(), "-S", "-j", job_id], stderr=subprocess.STDOUT)
+    
+    if "sh5util: No node-step files found for jobid" in sh5util_output.decode("utf-8"):
+        h5_file_name = None
+
+    return h5_file_name
+
+
+def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
+    """Write an input job_id_sacct_file to yaml output"""
+    with open(job_id_dump, "r") as jobid_in, open(job_id_yaml,
+                                                 "w") as jobid_out:
+        jobid_list = jobid_in.read().splitlines()
+        yaml.dump({case_name: jobid_list},
+                  jobid_out)
+

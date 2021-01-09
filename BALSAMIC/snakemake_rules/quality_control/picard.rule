@@ -16,7 +16,8 @@ rule CollectHsMetrics:
   output:
     mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
   params:
-    tmpdir = tmp_dir,
+    mem = "16g",
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     conda = config["bioinfo_tools"].get("picard"),
     baitsetname = os.path.basename(config["panel"]["capture_kit"])
   singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
@@ -24,16 +25,14 @@ rule CollectHsMetrics:
     benchmark_dir + "CollectHsMetrics_" + "{sample}.collect_hsmetrics.tsv"
   shell:
     "source activate {params.conda};"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "mkdir -p {params.tmpdir}; "
+    "export TMPDIR={params.tmpdir}; "
+    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
       "BedToIntervalList "
       "I={input.bed} "
       "O={input.bam}.picard.bedintervals "
       "SD={input.fadict}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
       "CollectHsMetrics "
       "BI={input.bam}.picard.bedintervals "
       "TI={input.bam}.picard.bedintervals "
@@ -52,7 +51,8 @@ rule CollectAlignmentSummaryMetrics:
   output:
     bam_dir + "{sample}.sorted.alignmetric"
   params:
-    tmpdir = tmp_dir,
+    mem = "16g",
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     conda = config["bioinfo_tools"].get("picard"),
     adapter = config["QC"]["adapter"]
   singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
@@ -60,11 +60,9 @@ rule CollectAlignmentSummaryMetrics:
     benchmark_dir + "CollectAlignmentSummaryMetrics_" + "{sample}.collect_alignment_summary.tsv"
   shell:
     "source activate {params.conda};"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "mkdir -p {params.tmpdir}; "
+    "export TMPDIR={params.tmpdir}; "
+    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
       "CollectAlignmentSummaryMetrics "
       "R={input.fa} "
       "I={input.bam} "
@@ -81,18 +79,17 @@ rule CollectInsertSizeMetrics:
     pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
     txt = bam_dir + "{sample}.sorted.insertsizemetric"
   params:
-    tmpdir = tmp_dir,
+    mem = "16g",
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     conda = config["bioinfo_tools"].get("picard")
   singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "CollectInsertSizeMetrics_" + "{sample}.collect_insertsize_metrics.tsv"
   shell:
     "source activate {params.conda};"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+    "mkdir -p {params.tmpdir}; "
+    "export TMPDIR={params.tmpdir}; "
+    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
       "CollectInsertSizeMetrics "
       "I={input.bam} "
       "H={output.pdf} "

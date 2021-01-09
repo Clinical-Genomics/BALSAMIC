@@ -33,7 +33,7 @@ def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, capsys):
         "--sample-config", tumor_normal_config, "--profile",
         scheduler_profile_slurm, "--qos", "low", "--account", "development",
         "--log-dir", log_dir, "--script-dir", script_dir, "--result-dir",
-        sample_config['analysis']['result']
+        sample_config['analysis']['result'], "--slurm-profiler", "task", "--slurm-profiler-interval", "10"
     ]
     scheduler_cmd.extend(scheduler_args)
 

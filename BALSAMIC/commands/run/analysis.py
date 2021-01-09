@@ -10,7 +10,7 @@ from pathlib import Path
 
 # CLI commands and decorators
 from BALSAMIC.utils.cli import (createDir, get_schedulerpy, get_snakefile,
-                                SnakeMake, get_config, get_fastq_bind_path)
+                                SnakeMake, get_config, get_fastq_bind_path, job_id_dump_to_yaml)
 from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT, BALSAMIC_SCRIPTS
 
 LOG = logging.getLogger(__name__)
@@ -60,6 +60,13 @@ LOG = logging.getLogger(__name__)
               default="slurm",
               type=click.Choice(["slurm", "qsub"]),
               help="cluster profile to submit jobs")
+@click.option(
+    '--benchmark',
+    default=False,
+    is_flag=True,
+    help=
+    "Profile slurm jobs using the value of this option. Make sure you have slurm profiler enabled in your HPC."
+)
 @click.option('-r',
               '--run-analysis',
               show_default=True,
@@ -116,7 +123,7 @@ LOG = logging.getLogger(__name__)
 def analysis(context, snake_file, sample_config, run_mode, cluster_config,
              run_analysis, force_all, snakemake_opt, mail_type, mail_user,
              account, analysis_type, qos, profile, disable_variant_caller,
-             quiet, dragen):
+             quiet, dragen, benchmark):
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
@@ -203,25 +210,19 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
+    balsamic_run.slurm_profiler = benchmark
 
     if disable_variant_caller:
         balsamic_run.disable_variant_caller = disable_variant_caller
 
     if dragen:
         balsamic_run.dragen = dragen
-    try:
-        cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
-        subprocess.run(cmd, shell=True)
-    except Exception as e:
-        print(e)
-        raise click.Abort()
+
+    cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
+    subprocess.run(cmd, shell=True)
 
     if run_analysis and run_mode == 'cluster':
-        jobid_file = os.path.join(
+        jobid_dump = os.path.join(
             logpath, sample_config["analysis"]["case_id"] + ".sacct")
-        jobid_dump = os.path.join(resultpath, profile + "_jobids.yaml")
-        with open(jobid_file, "r") as jobid_in, open(jobid_dump,
-                                                     "w") as jobid_out:
-            jobid_list = jobid_in.read().splitlines()
-            yaml.dump({sample_config['analysis']['case_id']: jobid_list},
-                      jobid_out)
+        jobid_yaml = os.path.join(resultpath, profile + "_jobids.yaml")
+        job_id_dump_to_yaml(jobid_dump, jobid_yaml, case_name)

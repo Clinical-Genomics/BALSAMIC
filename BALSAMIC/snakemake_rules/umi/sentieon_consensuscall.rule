@@ -73,7 +73,7 @@ rule sentieon_consensusfilter_umi:
     benchmark:
         Path(benchmark_dir + "sentieon_consensusfilter_umi_{case_name}.tsv").as_posix()
     singularity:
-        singularity_image
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = paramsumi.consensuscall.filter_minreads,
