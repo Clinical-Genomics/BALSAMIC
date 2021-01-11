@@ -154,20 +154,7 @@ def sample_fastq(tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
-def singularity_container_sif(tmp_path_factory):
-    """
-    Create singularity container
-    """
-
-    container_dir = tmp_path_factory.mktemp("test_container")
-    container_file = container_dir / "singularity_container.simg"
-    container_file.touch()
-
-    return container_file.as_posix()
-
-
-@pytest.fixture(scope="session")
-def singularity_container(tmp_path_factory):
+def balsamic_cache(tmp_path_factory):
     """
     Create singularity container
     """
@@ -207,7 +194,7 @@ ls -l # dummy command
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        singularity_container, reference_json, panel_bed_file,
+                        balsamic_cache, reference_json, panel_bed_file,
                         sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
@@ -236,12 +223,10 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
                 normal,
                 "--case-id",
                 case_id,
-                "--singularity",
-                singularity_container,
                 "--analysis-dir",
                 analysis_dir,
-                "--reference-config",
-                reference_json,
+                "--balsamic-cache",
+                balsamic_cache,
                 "--tumor-sample-name",
                 "ACC1",
                 "--normal-sample-name",

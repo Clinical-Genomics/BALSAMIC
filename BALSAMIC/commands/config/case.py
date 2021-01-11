@@ -1,9 +1,11 @@
+import os
 import json
 import logging
 from pathlib import Path
 
 import click
 
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
                                 get_bioinfo_tools_version,
                                 create_fastq_symlink, generate_graph)
@@ -41,11 +43,6 @@ LOG = logging.getLogger(__name__)
               show_default=True,
               is_flag=True,
               help="Trim adapters from reads in fastq")
-@click.option("-r",
-              "--reference-config",
-              required=True,
-              type=click.Path(exists=True, resolve_path=True),
-              help="Reference config file.")
 @click.option("-p",
               "--panel-bed",
               type=click.Path(exists=True, resolve_path=True),
@@ -57,11 +54,11 @@ LOG = logging.getLogger(__name__)
               required=False,
               help="Background set of valid variants for UMI")
 @click.option(
-    "--singularity",
+    "--balsamic-cache",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
     help=
-    "Image path for BALSAMIC containers. Output of 'balsamic init container' command"
+    "Path to BALSAMIC cache"
 )
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
@@ -88,11 +85,17 @@ LOG = logging.getLogger(__name__)
               help="Enable running UMI workflow")
 @click.option("--tumor-sample-name", help="Tumor sample name")
 @click.option("--normal-sample-name", help="Normal sample name")
+@click.option("-g",
+              "--genome-version",
+              default="hg19",
+              type=click.Choice(["hg19", "hg38"]),
+              help=("Genome version to prepare reference. Path to genome"
+                    "will be <outdir>/genome_version"))
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
-                quality_trim, reference_config, panel_bed, background_variants,
-                singularity, analysis_dir, tumor, normal, umiworkflow,
-                tumor_sample_name, normal_sample_name):
+                quality_trim, panel_bed, background_variants,
+                analysis_dir, tumor, normal, umiworkflow,
+                tumor_sample_name, normal_sample_name, genome_version, balsamic_cache):
 
     try:
         samples = get_sample_dict(
@@ -108,7 +111,9 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         raise click.Abort()
 
     try:
-        reference_dict = json.load(open(reference_config))["reference"]
+        reference_config = os.path.join(balsamic_cache, "reference", balsamic_version, genome_version, "reference.json")
+        with open(reference_config, 'r') as f:
+            reference_dict = json.load(f)["reference"]
     except Exception as e:
         LOG.error(
             f"Reference config {reference_config} does not follow correct format: {e}"
@@ -130,7 +135,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "umiworkflow": umiworkflow
         },
         reference=reference_dict,
-        singularity=singularity,
+        singularity=os.path.join(balsamic_cache, "containers"),
         background_variants=background_variants,
         samples=samples,
         vcf=VCF_DICT,
