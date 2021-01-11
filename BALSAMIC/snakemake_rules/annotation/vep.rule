@@ -2,9 +2,6 @@
 # coding: utf-8
 # VEP annotation module. Annotate all VCFs generated through VEP
 
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_threads
-
 rule vep_somatic:
   input:
     vcf = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
@@ -17,44 +14,49 @@ rule vep_somatic:
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
-    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
+    vcfanno_toml = VCFANNO_TOML,
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   benchmark:
     benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
   shell:
-    "source activate {params.conda}; "
-    "vep_path=$(dirname $(readlink -e $(which vep))); "
-    "tmpvcf={params.tmpvcf}; "
-    "export PERL5LIB=;"
-    "bcftools reheader -s {input.header} {input.vcf} | bcftools view -O z -o $tmpvcf ;" 
-    "vep "
-        "--dir $vep_path "
-        "--dir_cache {params.vep_cache} "
-        "--dir_plugins $vep_path "
-        "--input_file $tmpvcf "
-        "--output_file {output.vcf_all} "
-        "--compress_output bgzip "
-        "--fork {threads} "
-        "--vcf "
-        "--everything "
-        "--allow_non_variant "
-        "--dont_skip "
-        "--buffer_size 10000 "
-        "--format vcf "
-        "--offline "
-        "--variant_class "
-        "--merged "
-        "--cache "
-        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
-        "--verbose "
-        "--force_overwrite; "
-    "tabix -p vcf -f {output.vcf_all}; "
-    "bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all}; "
-    "tabix -p vcf -f {output.vcf_pass}; "
-    "rm $tmpvcf " 
-    
+    """
+source activate {params.conda};
+vep_path=$(dirname $(readlink -f $(which vep)));
+tmpvcf={params.tmpvcf};
+export PERL5LIB=;
+vcfanno --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
+| bcftools reheader --threads {threads} -s {input.header} \
+| bcftools view -O z -o $tmpvcf ;
+vep \
+--dir $vep_path \
+--dir_cache {params.vep_cache} \
+--dir_plugins $vep_path \
+--input_file $tmpvcf \
+--output_file {output.vcf_all} \
+--compress_output bgzip \
+--fork {threads} \
+--vcf \
+--everything \
+--allow_non_variant \
+--dont_skip \
+--buffer_size 10000 \
+--format vcf \
+--offline \
+--variant_class \
+--merged \
+--cache \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
+--verbose \
+--force_overwrite;
+tabix -p vcf -f {output.vcf_all};
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all};
+tabix -p vcf -f {output.vcf_pass};
+rm $tmpvcf;
+    """
 
 rule vep_stat:
   input:
@@ -64,11 +66,11 @@ rule vep_stat:
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
-    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.pass.balsamic_stat.tsv" 
   shell:
@@ -90,35 +92,37 @@ rule vep_germline:
     vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   params:
     housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
-    conda = get_conda_env(config["conda_env_yaml"],"ensembl-vep"),
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
     vep_cache = config["reference"]["vep"]
   threads: get_threads(cluster_config, 'vep')
-  singularity: singularity_image 
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'vep_' + "{var_type}.germline.{sample}.{var_caller}.vep.tsv"
   shell:
-    "source activate {params.conda}; "
-    "vep_path=$(dirname $(readlink -e $(which vep))); "
-    "export PERL5LIB=;"
-    "vep "
-        "--dir $vep_path "
-        "--dir_cache {params.vep_cache} "
-        "--dir_plugins $vep_path "
-        "--input_file {input.vcf} "
-        "--output_file {output.vcf_all} "
-        "--compress_output bgzip "
-        "--fork {threads} "
-        "--vcf "
-        "--everything "
-        "--allow_non_variant "
-        "--dont_skip "
-        "--buffer_size 10000 "
-        "--format vcf "
-        "--offline "
-        "--variant_class "
-        "--merged "
-        "--cache "
-        "--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA "
-        "--verbose "
-        "--force_overwrite; "
-    "tabix -p vcf -f {output.vcf_all}; "
+      """
+source activate {params.conda};
+vep_path=$(dirname $(readlink -f $(which vep)));
+export PERL5LIB=;
+vep \
+--dir $vep_path \
+--dir_cache {params.vep_cache} \
+--dir_plugins $vep_path \
+--input_file {input.vcf} \
+--output_file {output.vcf_all} \
+--compress_output bgzip \
+--fork {threads} \
+--vcf \
+--everything \
+--allow_non_variant \
+--dont_skip \
+--buffer_size 10000 \
+--format vcf \
+--offline \
+--variant_class \
+--merged \
+--cache \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
+--verbose \
+--force_overwrite;
+tabix -p vcf -f {output.vcf_all};
+    """

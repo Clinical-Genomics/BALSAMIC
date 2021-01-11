@@ -5,9 +5,10 @@ from pathlib import Path
 import click
 
 from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
-                                get_bioinfo_tools_list, create_fastq_symlink,
-                                generate_graph)
-from BALSAMIC.utils.constants import (CONDA_ENV_PATH, VCF_DICT)
+                                get_bioinfo_tools_version,
+                                create_fastq_symlink, generate_graph)
+from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH, VCF_DICT,
+                                      BIOINFO_TOOL_ENV)
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -23,7 +24,8 @@ LOG = logging.getLogger(__name__)
               default=True,
               show_default=True,
               is_flag=True,
-              help="UMI processing steps for samples with UMI tags")
+              help=("UMI processing steps for samples with UMI tags."
+                    "For WGS cases, UMI is always disabled."))
 @click.option("--umi-trim-length",
               default=5,
               show_default=True,
@@ -54,10 +56,13 @@ LOG = logging.getLogger(__name__)
               type=click.Path(exists=True, resolve_path=True),
               required=False,
               help="Background set of valid variants for UMI")
-@click.option("--singularity",
-              type=click.Path(exists=True, resolve_path=True),
-              required=True,
-              help="Download singularity image for BALSAMIC")
+@click.option(
+    "--singularity",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help=
+    "Image path for BALSAMIC containers. Output of 'balsamic init container' command"
+)
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
@@ -76,13 +81,26 @@ LOG = logging.getLogger(__name__)
               required=False,
               multiple=True,
               help="Fastq files for normal sample.")
+@click.option("--umiworkflow/--no-umiworkflow",
+              default=True,
+              show_default=True,
+              is_flag=True,
+              help="Enable running UMI workflow")
+@click.option("--tumor-sample-name", help="Tumor sample name")
+@click.option("--normal-sample-name", help="Normal sample name")
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                 quality_trim, reference_config, panel_bed, background_variants,
-                singularity, analysis_dir, tumor, normal):
+                singularity, analysis_dir, tumor, normal, umiworkflow,
+                tumor_sample_name, normal_sample_name):
 
     try:
-        samples = get_sample_dict(tumor, normal)
+        samples = get_sample_dict(
+            tumor=tumor,
+            normal=normal,
+            tumor_sample_name=tumor_sample_name,
+            normal_sample_name=normal_sample_name,
+        )
     except AttributeError:
         LOG.error(
             f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz"
@@ -101,7 +119,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
-            "umi_trim": umi,
+            "umi_trim": umi if panel_bed else False,
             "umi_trim_length": umi_trim_length,
         },
         analysis={
@@ -109,13 +127,16 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "analysis_dir": analysis_dir,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
+            "umiworkflow": umiworkflow
         },
         reference=reference_dict,
         singularity=singularity,
         background_variants=background_variants,
         samples=samples,
         vcf=VCF_DICT,
-        bioinfo_tools=get_bioinfo_tools_list(CONDA_ENV_PATH),
+        bioinfo_tools=BIOINFO_TOOL_ENV,
+        bioinfo_tools_version=get_bioinfo_tools_version(
+            BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH),
         panel={
             "capture_kit": panel_bed,
             "chrom": get_panel_chrom(panel_bed),
@@ -128,9 +149,10 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
                exist_ok=True)
     LOG.info("Directories created successfully")
 
-    create_fastq_symlink(casefiles=(tumor + normal),
-                         symlink_dir=Path(
-                             config_collection_dict["analysis"]["fastq_path"]))
+    create_fastq_symlink(
+        casefiles=(tumor + normal),
+        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
+    )
     LOG.info(f"Symlinks generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + ".json")
@@ -140,7 +162,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
 
     try:
         generate_graph(config_collection_dict, config_path)
-        LOG.info(f'BALSAMIC Workflow has been configured successfully!')
+        LOG.info(f"BALSAMIC Workflow has been configured successfully!")
     except ValueError as e:
         LOG.error(
             f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',

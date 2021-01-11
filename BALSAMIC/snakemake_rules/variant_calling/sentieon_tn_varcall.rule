@@ -1,10 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.rule import get_sample_type
-from BALSAMIC.utils.rule import get_threads
-
-
 rule sentieon_TN_corealign:
     input:
         ref = config["reference"]["reference_genome"],
@@ -17,7 +13,7 @@ rule sentieon_TN_corealign:
     output:
         bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam"
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TN_corealign')
@@ -27,15 +23,14 @@ rule sentieon_TN_corealign:
         benchmark_dir + 'sentieon_TN_corealign_' + config["analysis"]["case_id"] + ".corealign.tsv"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bamT} -i {input.bamN} -q {input.recalT} -q {input.recalN} --algo Realigner -k {input.mills} -k {input.indel_1kg} {output.bam}
 
+rm -rf {params.tmpdir};
         """
 
 
@@ -49,7 +44,7 @@ rule sentieon_TNsnv:
         stats = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.call_stats",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnsnv.sample_name_map",
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -61,16 +56,15 @@ rule sentieon_TNsnv:
         benchmark_dir + 'sentieon_TNsnv_' + config["analysis"]["case_id"] + ".tnsnv.tsv"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
 
 echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
+rm -rf {params.tmpdir};
         """
 
 
@@ -83,7 +77,7 @@ rule sentieon_TNhaplotyper:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -95,16 +89,15 @@ rule sentieon_TNhaplotyper:
         benchmark_dir + 'sentieon_TNhaplotyper_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} {output.vcf}
 
 echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
+rm -rf {params.tmpdir};
         """
 
 
@@ -120,7 +113,7 @@ rule sentieon_TNscope:
         vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         variant_setting = "--min_init_normal_lod 0.5 --min_normal_lod 1.0 --min_init_tumor_lod 1.0 --min_tumor_lod 8",
@@ -133,16 +126,15 @@ rule sentieon_TNscope:
         benchmark_dir + 'sentieon_TNscope_' + config["analysis"]["case_id"] + ".tnscope.tsv"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bamT} -q {input.recalT} -i {input.bamN} -q {input.recalN} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} {params.variant_setting} {output.vcf}
 
 echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
+rm -rf {params.tmpdir};
         """
 
 
@@ -153,7 +145,7 @@ rule sentioen_filter_TNscope:
     output:
         tnscope_filtered_vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -164,14 +156,12 @@ rule sentioen_filter_TNscope:
         benchmark_dir + 'sentioen_filter_TNscope_' + config["analysis"]["case_id"] + ".tnscope_filter.tsv"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 export SENTIEON_TNSCOPE={params.sentieon_ml_tnscope}
 
 {params.sentieon_exec} driver -r {input.ref} --algo TNModelApply -m {params.sentieon_ml_tnscope} -v {input.tnscope_vcf} {output.tnscope_filtered_vcf}
+rm -rf {params.tmpdir};
         """
-

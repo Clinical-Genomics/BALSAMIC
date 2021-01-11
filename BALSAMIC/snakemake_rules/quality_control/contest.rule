@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.rule import get_conda_env
-
 rule GATK_contest:
   input:
     bamN = bam_dir + "normal.merged.bam",
@@ -13,11 +11,11 @@ rule GATK_contest:
     N_vs_T = bam_dir + "normal_tumor.contest", 
     T_vs_N = bam_dir + "tumor_normal.contest", 
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+    conda = config["bioinfo_tools"].get("gatk"),
     tmpdir = tmp_dir,
     min_genotype_ratio="0.95",
     popcode = "EUR"
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + 'GATK_contest_' + config["analysis"]["case_id"] + ".markduplicates.tsv"
   shell:

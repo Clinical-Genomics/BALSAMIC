@@ -1,27 +1,32 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.rule import get_threads
-
 # Generate tables for AF scatterplots
-rule calculate_AF:
+rule bcftools_query_generatebackgroundaf_umitable:
     input:
-        vcf = vcf_dir + '{sample}.{var_caller}.umi.vcf.gz'
+        vcf = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.vcf.gz"
     output:
-        AF = table_dir + '{sample}.{var_caller}.umi.AFtable.txt'
+        AF = umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt"
+    benchmark:
+        Path(benchmark_dir + "bcftools_query_generatebackgroundaf_umitable_{case_name}_{var_caller}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         validated_set= config["background_variants"],
-        sample_id = '{sample}'
-    threads: get_threads(cluster_config, 'calculate_AF')
-    log:
-        log_dir + '{sample}.{var_caller}.AFcalculate.log'
-    benchmark: 
-        benchmark_dir + '{sample}.{var_caller}.AFcalculate.tsv'
-    message: "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
+        conda = config["bioinfo_tools"].get("bcftools"),
+        sample_id = "{case_name}"
+    threads: 
+        get_threads(cluster_config, "bcftools_query_generatebackgroundaf_umitable")
+    message: 
+        "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
     shell:
-        "bcftools query --regions-file {params.validated_set} "
-        "-f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\\n\" "
-        "{input.vcf} | "
-        "awk -v file={params.sample_id} "
-        "\'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$8/($7+$8)\"\\t\"file}}\' "
-        "> {output.AF}\n"
+        """
+source activate {params.conda};
+bcftools query \
+--regions-file {params.validated_set} \
+-f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\n\" \
+{input.vcf} | \
+awk -v file={params.sample_id} \
+\'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$8/($7+$8)\"\\t\"file}}\' \
+> {output.AF};
+        """

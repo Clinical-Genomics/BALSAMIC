@@ -9,18 +9,13 @@ import snakemake
 
 from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command("reference",
                short_help="config workflow for generate reference")
-@click.option("-o",
-              "--outdir",
-              "--out-dir",
-              required=True,
-              help=("Output directory for ref files."
-                    "This path will be used as base path for files"))
 @click.option("-c",
               "--cosmic-key",
               required=True,
@@ -39,7 +34,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--singularity",
               type=click.Path(),
               required=True,
-              help='Download singularity image for BALSAMIC')
+              help='Path for Singularity images for BALSAMIC')
 @click.option("-g",
               "--genome-version",
               default="hg19",
@@ -71,7 +66,7 @@ LOG = logging.getLogger(__name__)
               help=('Instruct snakemake to be quiet!'
                     'No output will be printed'))
 @click.pass_context
-def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
+def reference(context, cosmic_key, snakefile, dagfile, singularity,
               genome_version, run_analysis, force_all, quiet, snakemake_opt):
     """ Configure workflow for reference generation """
 
@@ -79,12 +74,11 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 
-    balsamic_env = config_path / "balsamic_env.yaml"
     rule_directory = Path(__file__).parents[2]
 
     install_config = dict()
 
-    install_config["conda_env_yaml"] = balsamic_env.as_posix()
+    install_config["bioinfo_tools"] = BIOINFO_TOOL_ENV
     install_config["rule_directory"] = rule_directory.as_posix() + "/"
 
     install_config["singularity"] = dict()
@@ -92,8 +86,8 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
         singularity).absolute().as_posix()
 
     config = dict()
-    outdir = os.path.join(os.path.abspath(outdir), balsamic_version,
-                          genome_version)
+    outdir = os.path.join(os.path.abspath(context.obj['outdir']),
+                          balsamic_version, genome_version)
     config_json = os.path.join(outdir, "config.json")
     dagfile_path = os.path.join(outdir, dagfile)
 
@@ -135,13 +129,11 @@ def reference(context, outdir, cosmic_key, snakefile, dagfile, singularity,
         LOG.error('Reference workflow graph generation failed')
         raise click.Abort()
 
-    LOG.info("BALSAMIC started with log level %s" % context.obj['loglevel'])
     LOG.info("Reference generation workflow started")
 
     # Singularity bind path
     bind_path = list()
     bind_path.append(config['output'])
-    bind_path.append(config['conda_env_yaml'])
     bind_path.append(config['rule_directory'])
 
     # Construct snakemake command to run workflow

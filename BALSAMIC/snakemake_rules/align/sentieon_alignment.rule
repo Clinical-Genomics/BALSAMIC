@@ -1,10 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from pathlib import Path
-from BALSAMIC.utils.rule import get_threads
-
-
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule sentieon_align_sort:
     input:
@@ -15,7 +11,7 @@ rule sentieon_align_sort:
     output:
         bamout = Path(bam_dir, "{sample}.bam").as_posix()
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -26,11 +22,9 @@ rule sentieon_align_sort:
         Path(benchmark_dir, "sentieon_align_sort_{sample}.align_sort.tsv").as_posix()
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem -M \
@@ -50,7 +44,7 @@ rule sentieon_dedup:
         score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
         metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         housekeeper_id = {"id": "{sample}", "tags": "scout"},
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -61,11 +55,9 @@ rule sentieon_dedup:
         Path(benchmark_dir, "sentieon_dedup_{sample}.dedup.tsv").as_posix()
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.score};
@@ -83,7 +75,7 @@ rule sentieon_realign:
     output:
         bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix(),
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_realign')
@@ -93,11 +85,9 @@ rule sentieon_realign:
         Path(benchmark_dir, "sentieon_realign_{sample}.dedup_realign.tsv").as_posix()
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo Realigner -k {input.mills} -k {input.indel_1kg} {output} 
@@ -116,7 +106,7 @@ rule sentieon_base_calibration:
         qual_recal = Path(bam_dir, "{sample}.dedup.realign.recal.csv").as_posix(),
         qual_recal_plot = Path(bam_dir, "{sample}.dedup.realign.recal.pdf").as_posix(),
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_base_calibration')
@@ -126,11 +116,9 @@ rule sentieon_base_calibration:
         Path(benchmark_dir, "sentieon_base_calibration_{sample}.base_recal.tsv").as_posix()
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.indel_1kg} {output.recal_data_table};

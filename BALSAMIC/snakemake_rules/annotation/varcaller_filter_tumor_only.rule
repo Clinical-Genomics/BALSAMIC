@@ -1,0 +1,38 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+# NGS filters for various scenarios
+
+rule ngs_filter_vardict:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.vcf.gz",
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
+  params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    conda = config["bioinfo_tools"].get("bcftools"),
+    MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
+    AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
+    DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],
+    AF_min = [VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
+    AF_max = [VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
+    pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
+  threads: get_threads(cluster_config, 'ngs_filter_vardict')
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
+  benchmark:
+    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.vardict.vep.tsv"
+  shell:
+    """
+source activate {params.conda};
+bcftools view {input.vcf} \
+| bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' \
+| bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --include 'INFO/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+tabix -p vcf -f {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_pass};
+    """

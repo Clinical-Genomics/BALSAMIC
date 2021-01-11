@@ -9,6 +9,7 @@ align_qc:
   - csvkit
 annotate:
   - ensembl-vep
+  - vcfanno
 coverage_qc:
   - sambamba
   - mosdepth

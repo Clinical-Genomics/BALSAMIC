@@ -1,10 +1,15 @@
 import pytest
+import os
+
+from unittest import mock
 
 from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
 from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
+
+MOCKED_OS_ENVIRON = 'os.environ'
 
 
 @pytest.fixture
@@ -24,15 +29,24 @@ def invoke_cli(cli_runner):
 def config_files():
     """ dict: path of the config files """
     return {
-        "sample": "BALSAMIC/config/sample.json",
-        "reference": "tests/test_data/references/reference.json",
-        "analysis_paired": "BALSAMIC/config/analysis_paired.json",
-        "cluster_json": "BALSAMIC/config/cluster.json",
-        "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
-        "analysis_single": "BALSAMIC/config/analysis_single.json",
-        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
-        "panel_bed_file": "tests/test_data/references/panel/panel.bed",
-        "test_reference": "tests/test_data/references/reference.json",
+        "sample":
+        "BALSAMIC/config/sample.json",
+        "reference":
+        "tests/test_data/references/reference.json",
+        "analysis_paired":
+        "BALSAMIC/config/analysis_paired.json",
+        "cluster_json":
+        "BALSAMIC/config/cluster.json",
+        "analysis_paired_umi":
+        "BALSAMIC/config/analysis_paired_umi.json",
+        "analysis_single":
+        "BALSAMIC/config/analysis_single.json",
+        "analysis_single_umi":
+        "BALSAMIC/config/analysis_single_umi.json",
+        "panel_bed_file":
+        "tests/test_data/references/panel/panel.bed",
+        "background_variant_file":
+        "tests/test_data/references/panel/background_variants.txt"
     }
 
 
@@ -57,8 +71,38 @@ def panel_bed_file():
 
 
 @pytest.fixture(scope="session")
+def background_variant_file():
+    return "tests/test_data/references/panel/background_variants.txt"
+
+
+@pytest.fixture(scope="session")
 def reference_json():
     return "tests/test_data/references/reference.json"
+
+
+@pytest.fixture(scope="session")
+def sentieon_license(tmp_path_factory):
+    """
+    Sentieon's license path fixture
+    """
+    sentieon_license_dir = tmp_path_factory.mktemp("sentieon_licence")
+    sentieon_license_path = sentieon_license_dir / "license_file.lic"
+    sentieon_license_path.touch()
+
+    return sentieon_license_path.as_posix()
+
+
+@pytest.fixture(scope="session")
+def sentieon_install_dir(tmp_path_factory):
+    """
+    Sentieon's license path fixture
+    """
+    sentieon_install_dir = tmp_path_factory.mktemp("sentieon_install_dir")
+    Path(sentieon_install_dir / "bin").mkdir(exist_ok=True)
+    sentieon_executable = sentieon_install_dir / "bin" / "sentieon"
+    sentieon_executable.touch()
+
+    return sentieon_install_dir.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -110,7 +154,7 @@ def sample_fastq(tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
-def singularity_container(tmp_path_factory):
+def singularity_container_sif(tmp_path_factory):
     """
     Create singularity container
     """
@@ -120,6 +164,17 @@ def singularity_container(tmp_path_factory):
     container_file.touch()
 
     return container_file.as_posix()
+
+
+@pytest.fixture(scope="session")
+def singularity_container(tmp_path_factory):
+    """
+    Create singularity container
+    """
+
+    container_dir = tmp_path_factory.mktemp("test_container")
+
+    return container_dir.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -151,14 +206,9 @@ ls -l # dummy command
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_config(
-        tmp_path_factory,
-        sample_fastq,
-        analysis_dir,
-        singularity_container,
-        reference_json,
-        panel_bed_file,
-):
+def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
+                        singularity_container, reference_json, panel_bed_file,
+                        sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -167,28 +217,37 @@ def tumor_normal_config(
     tumor = sample_fastq["tumor"]
     normal = sample_fastq["normal"]
 
-    runner = CliRunner()
-    runner.invoke(
-        cli,
-        [
-            "config",
-            "case",
-            "-p",
-            panel_bed_file,
-            "-t",
-            tumor,
-            "-n",
-            normal,
-            "--case-id",
-            case_id,
-            "--singularity",
-            singularity_container,
-            "--analysis-dir",
-            analysis_dir,
-            "--reference-config",
-            reference_json,
-        ],
-    )
+    with mock.patch.dict(
+            MOCKED_OS_ENVIRON, {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "-n",
+                normal,
+                "--case-id",
+                case_id,
+                "--singularity",
+                singularity_container,
+                "--analysis-dir",
+                analysis_dir,
+                "--reference-config",
+                reference_json,
+                "--tumor-sample-name",
+                "ACC1",
+                "--normal-sample-name",
+                "ACC2",
+            ],
+        )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -201,7 +260,8 @@ def fixture_config_helpers():
 
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                            singularity_container, reference_json):
+                            singularity_container, reference_json,
+                            sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -210,39 +270,39 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     tumor = sample_fastq["tumor"]
     normal = sample_fastq["normal"]
 
-    runner = CliRunner()
-    runner.invoke(
-        cli,
-        [
-            "config",
-            "case",
-            "-t",
-            tumor,
-            "-n",
-            normal,
-            "--case-id",
-            case_id,
-            "--singularity",
-            singularity_container,
-            "--analysis-dir",
-            analysis_dir,
-            "--reference-config",
-            reference_json,
-        ],
-    )
+    with mock.patch.dict(
+            MOCKED_OS_ENVIRON, {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-t",
+                tumor,
+                "-n",
+                normal,
+                "--case-id",
+                case_id,
+                "--singularity",
+                singularity_container,
+                "--analysis-dir",
+                analysis_dir,
+                "--reference-config",
+                reference_json,
+            ],
+        )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope="session")
-def tumor_only_config(
-        tmpdir_factory,
-        sample_fastq,
-        singularity_container,
-        analysis_dir,
-        reference_json,
-        panel_bed_file,
-):
+def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
+                      analysis_dir, reference_json, panel_bed_file,
+                      sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -250,33 +310,39 @@ def tumor_only_config(
     case_id = "sample_tumor_only"
     tumor = sample_fastq["tumor"]
 
-    runner = CliRunner()
-    runner.invoke(
-        cli,
-        [
-            "config",
-            "case",
-            "-p",
-            panel_bed_file,
-            "-t",
-            tumor,
-            "--case-id",
-            case_id,
-            "--analysis-dir",
-            analysis_dir,
-            "--singularity",
-            singularity_container,
-            "--reference-config",
-            reference_json,
-        ],
-    )
+    with mock.patch.dict(
+            MOCKED_OS_ENVIRON, {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--singularity",
+                singularity_container,
+                "--reference-config",
+                reference_json,
+            ],
+        )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                          singularity_container, reference_json):
+                          singularity_container, reference_json,
+                          sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -284,24 +350,61 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     case_id = "sample_tumor_only_wgs"
     tumor = sample_fastq["tumor"]
 
-    runner = CliRunner()
-    runner.invoke(
-        cli,
-        [
-            "config",
-            "case",
-            "-t",
-            tumor,
-            "--case-id",
-            case_id,
-            "--analysis-dir",
-            analysis_dir,
-            "--singularity",
-            singularity_container,
-            "--reference-config",
-            reference_json,
-        ],
-    )
+    with mock.patch.dict(
+            MOCKED_OS_ENVIRON, {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--singularity",
+                singularity_container,
+                "--reference-config",
+                reference_json,
+            ],
+        )
+
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
+                          analysis_dir, reference_json, panel_bed_file,
+                          background_variant_file, sentieon_license,
+                          sentieon_install_dir):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only with background variant file for umi workflow
+    """
+    case_id = "sample_tumor_only_umi"
+    tumor = sample_fastq["tumor"]
+
+    with mock.patch.dict(
+            MOCKED_OS_ENVIRON, {
+                'SENTIEON_LICENSE': sentieon_license,
+                'SENTIEON_INSTALL_DIR': sentieon_install_dir
+            }):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config", "case", "-p", panel_bed_file,
+                "--background-variants", background_variant_file, "-t", tumor,
+                "--case-id", case_id, "--analysis-dir", analysis_dir,
+                "--singularity", singularity_container, "--reference-config",
+                reference_json
+            ],
+        )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -323,26 +426,18 @@ def sample_config():
             "umi_trim_length": "5",
         },
         "analysis": {
-            "case_id":
-            "id1",
-            "analysis_type":
-            "paired",
-            "analysis_dir":
-            "tests/test_data/",
-            "fastq_path":
-            "tests/test_data/id1/fastq/",
-            "script":
-            "tests/test_data/id1/scripts/",
-            "log":
-            "tests/test_data/id1/logs/",
-            "result":
-            "tests/test_data/id1/analysis/",
-            "config_creation_date":
-            "yyyy-mm-dd xx",
-            "BALSAMIC_version":
-            "2.9.8",
+            "case_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "tests/test_data/",
+            "fastq_path": "tests/test_data/id1/fastq/",
+            "script": "tests/test_data/id1/scripts/",
+            "log": "tests/test_data/id1/logs/",
+            "result": "tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
             "dag":
             "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
+            "umiworkflow": "true"
         },
         "vcf": {
             "manta": {

@@ -12,7 +12,9 @@ from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
+from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.constants import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 
@@ -29,32 +31,41 @@ LOG = logging.getLogger(__name__)
     help="Sample config file. Output of balsamic config sample",
 )
 @click.option(
-    '-a',
-    '--analysis-type',
+    "-a",
+    "--analysis-type",
     required=False,
-    type=click.Choice(['qc', 'paired', 'single']),
+    type=click.Choice(["qc", "paired", "single"]),
     help=(
-        'Type of analysis to run from input config file.'
-        'By default it will read from config file, but it will override config file'
-        'if it is set here.'))
-@click.option('-r',
-              '--rules-to-deliver',
-              multiple=True,
-              help=('Specify a rule to deliver. Delivery '
-                    'mode selected via --delivery-mode option'))
+        "Type of analysis to run from input config file."
+        "By default it will read from config file, but it will override config file"
+        "if it is set here."),
+)
 @click.option(
-    '-m',
-    '--delivery-mode',
-    type=click.Choice(['a', 'r']),
-    default='a',
+    "-r",
+    "--rules-to-deliver",
+    multiple=True,
+    help=("Specify a rule to deliver. Delivery "
+          "mode selected via --delivery-mode option"),
+)
+@click.option(
+    "-m",
+    "--delivery-mode",
+    type=click.Choice(["a", "r"]),
+    default="a",
     show_default=True,
     help=(
         'a: append rules-to-deliver to current delivery '
         'options. or r: reset current rules to delivery to only the ones specified'
     ))
+@click.option(
+    '--disable-variant-caller',
+    help=
+    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
+    f'values are: {list(VCF_DICT.keys())}',
+)
 @click.pass_context
 def deliver(context, sample_config, analysis_type, rules_to_deliver,
-            delivery_mode):
+            delivery_mode, disable_variant_caller):
     """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
@@ -65,19 +76,27 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         sample_config_dict = json.load(fn)
 
     default_rules_to_deliver = [
-        "fastp", "multiqc", "vep_somatic", "vep_germline", "vep_stat",
-        "ngs_filter_vardict", "mergeBam_tumor", "mergeBam_normal",
-        "cnvkit_paired", "cnvkit_single", "sentieon_dedup"
+        "fastp",
+        "multiqc",
+        "vep_somatic",
+        "vep_germline",
+        "vep_stat",
+        "ngs_filter_vardict",
+        "mergeBam_tumor",
+        "mergeBam_normal",
+        "cnvkit_paired",
+        "cnvkit_single",
+        "sentieon_dedup",
     ]
 
     if not rules_to_deliver:
         rules_to_deliver = default_rules_to_deliver
 
     rules_to_deliver = list(rules_to_deliver)
-    if delivery_mode == 'a':
+    if delivery_mode == "a":
         rules_to_deliver.extend(default_rules_to_deliver)
 
-    case_name = sample_config_dict['analysis']['case_id']
+    case_name = sample_config_dict["analysis"]["case_id"]
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
     LOG.info("Creatiing delivery_report directory")
@@ -86,8 +105,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     os.makedirs(yaml_write_directory, exist_ok=True)
 
-    analysis_type = analysis_type if analysis_type else sample_config_dict[
-        'analysis']['analysis_type']
+    analysis_type = (analysis_type if analysis_type else
+                     sample_config_dict["analysis"]["analysis_type"])
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
@@ -99,15 +118,18 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     # write report.html file
     report = SnakeMake()
     report.case_name = case_name
-    report.working_dir = os.path.join(sample_config_dict['analysis']['analysis_dir'] , \
+    report.working_dir = os.path.join(
+        sample_config_dict['analysis']['analysis_dir'],
         sample_config_dict['analysis']['case_id'], 'BALSAMIC_run')
     report.report = report_file_name
     report.configfile = sample_config
     report.snakefile = snakefile
-    report.run_mode = 'local'
+    report.run_mode = "local"
     report.use_singularity = False
     report.run_analysis = True
     report.sm_opt = ["--quiet"]
+    if disable_variant_caller:
+        report.disable_variant_caller = disable_variant_caller
     cmd = sys.executable + " -m  " + report.build_cmd()
     subprocess.check_output(cmd.split(), shell=False)
     LOG.info(f"Workflow report file {report_file_name}")
@@ -135,6 +157,9 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     delivery_json = dict()
     delivery_json["files"] = delivery_file_ready_dict
 
+    delivery_json = convert_deliverables_tags(
+        delivery_json=delivery_json, sample_config_dict=sample_config_dict)
+
     # Add Housekeeper file to report
     delivery_json["files"].append({
         "path":
@@ -143,8 +168,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "balsamic_delivery",
         "format":
         get_file_extension(report_file_name),
-        "tag":
-        "balsamic-report",
+        "tag": ["balsamic-report"],
         "id":
         case_name,
     })
@@ -156,8 +180,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "case_config",
         "format":
         get_file_extension(sample_config),
-        "tag":
-        "balsamic-config",
+        "tag": ["balsamic-config"],
         "id":
         case_name,
     })
@@ -169,8 +192,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "case_config",
         "format":
         get_file_extension(sample_config_dict["analysis"]["dag"]),
-        "tag":
-        "balsamic-dag",
+        "tag": ["balsamic-dag"],
         "id":
         case_name,
     })
