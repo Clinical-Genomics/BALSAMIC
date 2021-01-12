@@ -1,4 +1,5 @@
 import pytest
+import json
 import os
 
 from unittest import mock
@@ -8,6 +9,7 @@ from functools import partial
 from click.testing import CliRunner
 from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
+from BALSAMIC import __version__ as balsamic_version
 
 MOCKED_OS_ENVIRON = 'os.environ'
 
@@ -31,8 +33,6 @@ def config_files():
     return {
         "sample":
         "BALSAMIC/config/sample.json",
-        "reference":
-        "tests/test_data/references/reference.json",
         "analysis_paired":
         "BALSAMIC/config/analysis_paired.json",
         "cluster_json":
@@ -51,19 +51,26 @@ def config_files():
 
 
 @pytest.fixture(scope="session")
-def conda():
-    """
-    conda env config file paths
-    """
+def reference():
+    """ reference json model """
     return {
-        "balsamic": "BALSAMIC/conda/balsamic.yaml",
-        "varcall_py27": "BALSAMIC/conda/varcall_py27.yaml",
-        "varcall_py36": "BALSAMIC/conda/varcall_py36.yaml",
-        "align_qc": "BALSAMIC/conda/align.yaml",
-        "annotate": "BALSAMIC/conda/annotate.yaml",
-        "coverage": "BALSAMIC/conda/coverage.yaml",
+    "reference": {
+        "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+        "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+        "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "1kg_known_indel": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
+        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+        "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+        "vep": "tests/test_data/references/vep/",
+        "refflat": "tests/test_data/references/genome/refseq.flat",
+        "refGene": "tests/test_data/references/genome/refGene.txt",
+        "wgs_calling_interval": "tests/test_data/references/genome/wgs_calling_regions.v1",
+        "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
+        "exon_bed": "tests/test_data/references/genome/refseq.flat.bed"
     }
-
+}
 
 @pytest.fixture(scope="session")
 def panel_bed_file():
@@ -73,11 +80,6 @@ def panel_bed_file():
 @pytest.fixture(scope="session")
 def background_variant_file():
     return "tests/test_data/references/panel/background_variants.txt"
-
-
-@pytest.fixture(scope="session")
-def reference_json():
-    return "tests/test_data/references/reference.json"
 
 
 @pytest.fixture(scope="session")
@@ -154,14 +156,27 @@ def sample_fastq(tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
-def balsamic_cache(tmp_path_factory):
+def balsamic_cache(tmp_path_factory, reference):
     """
     Create singularity container
     """
 
-    container_dir = tmp_path_factory.mktemp("test_container")
+    cache_dir = tmp_path_factory.mktemp("balsmic_coche")
+  
+    cache_container = cache_dir / "containers" / "align_qc"
+    cache_container.mkdir(parents=True, exist_ok=True)
+    cache_container_example = cache_container / "example.sif" 
+    cache_container_example.touch()
 
-    return container_dir.as_posix()
+    cache_reference = cache_dir / "reference" / balsamic_version / "hg19"
+    cache_reference.mkdir(parents=True, exist_ok=True)
+
+    cache_reference_json = cache_reference / "reference.json"
+    cache_reference_json.touch()
+    with open(cache_reference_json, 'w') as fp:
+        json.dump(reference, fp)
+
+    return cache_dir.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -194,7 +209,7 @@ ls -l # dummy command
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        balsamic_cache, reference_json, panel_bed_file,
+                        balsamic_cache, panel_bed_file,
                         sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
@@ -244,8 +259,7 @@ def fixture_config_helpers():
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                            singularity_container, reference_json,
+def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, balsamic_cache,
                             sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
@@ -272,12 +286,10 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
                 normal,
                 "--case-id",
                 case_id,
-                "--singularity",
-                singularity_container,
+                "--balsamic-cache",
+                balsamic_cache,
                 "--analysis-dir",
                 analysis_dir,
-                "--reference-config",
-                reference_json,
             ],
         )
 
@@ -285,8 +297,8 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope="session")
-def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
-                      analysis_dir, reference_json, panel_bed_file,
+def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache, 
+                      analysis_dir, panel_bed_file,
                       sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
@@ -314,10 +326,8 @@ def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
                 case_id,
                 "--analysis-dir",
                 analysis_dir,
-                "--singularity",
-                singularity_container,
-                "--reference-config",
-                reference_json,
+                "--balsamic-cache",
+                balsamic_cache,
             ],
         )
 
@@ -325,8 +335,7 @@ def tumor_only_config(tmpdir_factory, sample_fastq, singularity_container,
 
 
 @pytest.fixture(scope="session")
-def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                          singularity_container, reference_json,
+def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, balsamic_cache,
                           sentieon_license, sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
@@ -352,10 +361,8 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
                 case_id,
                 "--analysis-dir",
                 analysis_dir,
-                "--singularity",
-                singularity_container,
-                "--reference-config",
-                reference_json,
+                "--balsamic-cache",
+                balsamic_cache,
             ],
         )
 
@@ -363,8 +370,8 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope="session")
-def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
-                          analysis_dir, reference_json, panel_bed_file,
+def tumor_only_umi_config(tmpdir_factory, sample_fastq, balsamic_cache,
+                          analysis_dir, panel_bed_file,
                           background_variant_file, sentieon_license,
                           sentieon_install_dir):
     """
@@ -386,8 +393,8 @@ def tumor_only_umi_config(tmpdir_factory, sample_fastq, singularity_container,
                 "config", "case", "-p", panel_bed_file,
                 "--background-variants", background_variant_file, "-t", tumor,
                 "--case-id", case_id, "--analysis-dir", analysis_dir,
-                "--singularity", singularity_container, "--reference-config",
-                reference_json
+                "--balsamic-cache",
+                balsamic_cache,
             ],
         )
 

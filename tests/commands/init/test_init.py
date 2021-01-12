@@ -8,7 +8,7 @@ from BALSAMIC import __version__ as balsamic_version
 
 
 def test_init_reference_write_json(invoke_cli, tmp_path,
-                                   singularity_container):
+                                   ):
     # Given test_reference.json
     test_genome_version = "hg19"
     test_container_version = "develop"
@@ -36,7 +36,7 @@ def test_init_reference_write_json(invoke_cli, tmp_path,
 
 
 def test_init_reference_no_write_perm(
-        tmp_path, invoke_cli, singularity_container, no_write_perm_path):
+        tmp_path, invoke_cli, no_write_perm_path):
     # Given a path with no write permission
     test_genome_version = "hg19"
     test_container_version = "develop"
