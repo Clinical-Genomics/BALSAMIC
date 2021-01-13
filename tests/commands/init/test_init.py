@@ -75,24 +75,6 @@ def test_init_reference_graph_exception(invoke_cli, tmp_path):
     assert result.exit_code == 1
 
 
-#def test_init_container(invoke_cli, tmp_path):
-#    # Given a dummy path
-#    test_new_dir = tmp_path / "test_container_dir"
-#    test_new_dir.mkdir()
-#
-#    # WHEN when pulling container as dry-run
-#    result = invoke_cli([
-#        'init',
-#        '--outdir',
-#        str(test_new_dir),
-#        'container',
-#        '--dry',
-#    ])
-#
-#    # THEN command exit code 0
-#    assert result.exit_code == 0
-
-
 def test_init_container_force_dry(invoke_cli, tmp_path):
     # Given a dummy path
     test_new_dir = tmp_path / "test_container_dry_force"
@@ -112,7 +94,6 @@ def test_init_container_force_dry(invoke_cli, tmp_path):
     ])
 
     # THEN command exit code 0
-    print(result)
     assert result.exit_code == 0
 
 
