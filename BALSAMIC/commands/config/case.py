@@ -53,13 +53,10 @@ LOG = logging.getLogger(__name__)
               type=click.Path(exists=True, resolve_path=True),
               required=False,
               help="Background set of valid variants for UMI")
-@click.option(
-    "--balsamic-cache",
-    type=click.Path(exists=True, resolve_path=True),
-    required=True,
-    help=
-    "Path to BALSAMIC cache"
-)
+@click.option("--balsamic-cache",
+              type=click.Path(exists=True, resolve_path=True),
+              required=True,
+              help="Path to BALSAMIC cache")
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
@@ -93,9 +90,9 @@ LOG = logging.getLogger(__name__)
                     "will be <outdir>/genome_version"))
 @click.pass_context
 def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
-                quality_trim, panel_bed, background_variants,
-                analysis_dir, tumor, normal, umiworkflow,
-                tumor_sample_name, normal_sample_name, genome_version, balsamic_cache):
+                quality_trim, panel_bed, background_variants, analysis_dir,
+                tumor, normal, umiworkflow, tumor_sample_name,
+                normal_sample_name, genome_version, balsamic_cache):
 
     try:
         samples = get_sample_dict(
@@ -111,7 +108,9 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         raise click.Abort()
 
     try:
-        reference_config = os.path.join(balsamic_cache, "reference", balsamic_version, genome_version, "reference.json")
+        reference_config = os.path.join(balsamic_cache, "reference",
+                                        balsamic_version, genome_version,
+                                        "reference.json")
         with open(reference_config, 'r') as f:
             reference_dict = json.load(f)["reference"]
     except Exception as e:

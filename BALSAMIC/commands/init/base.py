@@ -8,14 +8,16 @@ import click
 import graphviz
 import snakemake
 
-from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV,BALSAMIC_DOCKER_PATH, VALID_CONTAINER_CONDA_NAME
+from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV, BALSAMIC_DOCKER_PATH, VALID_CONTAINER_CONDA_NAME
 from BALSAMIC.utils.cli import write_json, merge_json, CaptureStdout, get_snakefile, SnakeMake
 from BALSAMIC import __version__ as balsamic_version
 
 LOG = logging.getLogger(__name__)
 
-@click.command("init",
-               short_help="Download matching version for container and build reference")
+
+@click.command(
+    "init",
+    short_help="Download matching version for container and build reference")
 @click.option("-o",
               "--outdir",
               "--out-dir",
@@ -80,8 +82,9 @@ LOG = logging.getLogger(__name__)
               help=('Instruct snakemake to be quiet!'
                     'No output will be printed'))
 @click.pass_context
-def initialize(context, outdir, container_version, force, cosmic_key, snakefile, dagfile,
-              genome_version, run_analysis, force_all, quiet, snakemake_opt):
+def initialize(context, outdir, container_version, force, cosmic_key,
+               snakefile, dagfile, genome_version, run_analysis, force_all,
+               quiet, snakemake_opt):
     """
     Initialize various resources after first installation.
     - Pull container(s) for BALSAMIC according to matching version
@@ -91,7 +94,6 @@ def initialize(context, outdir, container_version, force, cosmic_key, snakefile,
 
     # resolve outdir to absolute path
     outdir = Path(outdir).resolve()
-
 
     container_outdir = Path(outdir, balsamic_version, "containers")
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
@@ -110,7 +112,8 @@ def initialize(context, outdir, container_version, force, cosmic_key, snakefile,
 
         # Set container name according to above docker image name
         Path(container_outdir).mkdir(parents=True, exist_ok=True)
-        image_name = Path(container_outdir, "{}.sif".format(image_suffix)).as_posix()
+        image_name = Path(container_outdir,
+                          "{}.sif".format(image_suffix)).as_posix()
         LOG.info("Image will be downloaded to {}".format(image_name))
         LOG.info("Starting download. This process can take some time...")
 
@@ -119,11 +122,9 @@ def initialize(context, outdir, container_version, force, cosmic_key, snakefile,
             cmd.append("--force")
         cmd.append(container_stub_url)
 
-        LOG.info("The following command will run: {}".format(
-            " ".join(cmd)))
+        LOG.info("The following command will run: {}".format(" ".join(cmd)))
         if run_analysis:
             subprocess.run(" ".join(cmd), shell=True)
-
 
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
@@ -136,7 +137,7 @@ def initialize(context, outdir, container_version, force, cosmic_key, snakefile,
     config_dict["singularity"] = dict()
     config_dict["singularity"]["image"] = container_outdir.as_posix()
 
-    reference_outdir = Path(outdir,balsamic_version, genome_version)
+    reference_outdir = Path(outdir, balsamic_version, genome_version)
     Path(reference_outdir).mkdir(parents=True, exist_ok=True)
     config_json = Path(reference_outdir, "config.json").as_posix()
     dagfile_path = Path(reference_outdir, dagfile).as_posix()

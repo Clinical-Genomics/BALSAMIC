@@ -445,7 +445,7 @@ def test_get_config_wrong_config():
 
 
 def test_write_json(tmp_path, reference):
-    # GIVEN a dict from sample json file 
+    # GIVEN a dict from sample json file
     tmp = tmp_path / "tmp"
     tmp.mkdir()
     output_json = tmp / "output.json"
@@ -558,7 +558,8 @@ def test_singularity_shellcmd(balsamic_cache):
     dummy_path_2 = "this_path/path2"
     correct_shellcmd = "exec --bind {} --bind {} ls this_path".format(
         dummy_path_1, dummy_path_2)
-    singularity_container_sif = Path(balsamic_cache, "containers" , "align_qc" , "example.sif").as_posix()
+    singularity_container_sif = Path(balsamic_cache, "containers", "align_qc",
+                                     "example.sif").as_posix()
 
     with mock.patch.object(shutil, "which") as mocked:
         mocked.return_value = "/my_home/binary_path/singularity"

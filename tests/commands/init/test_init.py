@@ -7,8 +7,10 @@ from unittest import mock
 from BALSAMIC import __version__ as balsamic_version
 
 
-def test_init_reference_write_json(invoke_cli, tmp_path,
-                                   ):
+def test_init_reference_write_json(
+        invoke_cli,
+        tmp_path,
+):
     # Given test_reference.json
     test_genome_version = "hg19"
     test_container_version = "develop"
@@ -35,8 +37,8 @@ def test_init_reference_write_json(invoke_cli, tmp_path,
     assert Path(test_output_reference_config).exists()
 
 
-def test_init_reference_no_write_perm(
-        tmp_path, invoke_cli, no_write_perm_path):
+def test_init_reference_no_write_perm(tmp_path, invoke_cli,
+                                      no_write_perm_path):
     # Given a path with no write permission
     test_genome_version = "hg19"
     test_container_version = "develop"
@@ -110,8 +112,8 @@ def test_init_container_specific_tag(invoke_cli, tmp_path):
         'init',
         '--outdir',
         str(test_new_dir),
-            '-c',
-            'secret_key',
+        '-c',
+        'secret_key',
         '--container-version',
         dummy_tag,
     ])
@@ -153,8 +155,8 @@ def test_init_container_wrong_tag(invoke_cli, tmp_path, caplog):
         'init',
         '--outdir',
         str(test_new_dir),
-            '-c',
-            'secret_key',
+        '-c',
+        'secret_key',
         '--container-version',
         dummy_tag,
     ])
