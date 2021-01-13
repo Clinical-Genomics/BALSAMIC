@@ -51,6 +51,8 @@ def test_init_reference_no_write_perm(
         'secret_key',
         '-v',
         test_container_version,
+        '-g',
+        test_genome_version,
     ])
 
     # THEN it should create test_reference.json and exist with no error
