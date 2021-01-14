@@ -3,6 +3,8 @@ import json
 
 from unittest import mock
 
+import graphviz
+
 from pathlib import Path
 from click.testing import CliRunner
 from BALSAMIC.commands.base import cli
@@ -25,6 +27,7 @@ def test_dag_graph_success(tumor_normal_wgs_config, tumor_only_config,
 
 
 def test_tumor_only_config_bad_filename(
+        invoke_cli,
         tmp_path_factory,
         analysis_dir,
         panel_bed_file,
@@ -39,9 +42,7 @@ def test_tumor_only_config_bad_filename(
     tumor = Path(faulty_fastq_dir / "error.fastq.gz").as_posix()
 
     # Invoke CLI command using file as argument
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
+    result = invoke_cli(
         [
             "config",
             "case",
@@ -63,6 +64,7 @@ def test_tumor_only_config_bad_filename(
 
 
 def test_run_without_permissions(
+        invoke_cli,
         no_write_perm_path,
         sample_fastq,
         panel_bed_file,
@@ -72,9 +74,7 @@ def test_run_without_permissions(
     case_id = "sample_tumor_only"
     tumor = sample_fastq["tumor"]
 
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
+    result = invoke_cli(
         [
             "config",
             "case",
@@ -95,6 +95,7 @@ def test_run_without_permissions(
 
 
 def test_tumor_only_umi_config_background_file(
+        invoke_cli,
         sample_fastq, analysis_dir, balsamic_cache, 
         panel_bed_file):
 
@@ -104,9 +105,7 @@ def test_tumor_only_umi_config_background_file(
     background_file = "tests/test_data/references/panel/background_variants.txt"
     background_variant_file = background_file
 
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
+    result = invoke_cli(
         [
             "config", "case", "-p", panel_bed_file, "-t", tumor, "--case-id",
             case_id, "--analysis-dir", analysis_dir, 
@@ -117,3 +116,31 @@ def test_tumor_only_umi_config_background_file(
     # THEN program exits and checks for filepath
     assert result.exit_code == 0
     assert Path(background_variant_file).exists()
+
+
+def test_config_case_graph_failed(invoke_cli, sample_fastq, analysis_dir, balsamic_cache, panel_bed_file):
+    # GIVEN an analysis config 
+    case_id = "sample_tumor_only"
+    tumor = sample_fastq["tumor"]
+
+
+    with mock.patch.object(graphviz, 'Source') as mocked:
+        mocked.return_value = None
+        result = invoke_cli(
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache
+            ],
+        )
+
+    assert result.exit_code == 1
