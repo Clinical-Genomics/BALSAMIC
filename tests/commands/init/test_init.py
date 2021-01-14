@@ -144,7 +144,7 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
         assert result.exit_code == 0
 
 
-def test_init_container_wrong_tag(invoke_cli, tmp_path, caplog):
+def test_init_container_wrong_tag(invoke_cli, tmp_path):
     # Given a dummy path
     test_new_dir = tmp_path / "test_container_dir"
     test_new_dir.mkdir()

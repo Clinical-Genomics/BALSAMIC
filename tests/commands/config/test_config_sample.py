@@ -27,9 +27,8 @@ def test_dag_graph_success(tumor_normal_wgs_config, tumor_only_config,
 def test_tumor_only_config_bad_filename(
         tmp_path_factory,
         analysis_dir,
-        singularity_container,
         panel_bed_file,
-        reference_json,
+        balsamic_cache,
 ):
 
     # GIVEN existing fastq file with wrong naming convention
@@ -54,10 +53,8 @@ def test_tumor_only_config_bad_filename(
             case_id,
             "--analysis-dir",
             analysis_dir,
-            "--singularity",
-            singularity_container,
-            "--reference-config",
-            reference_json,
+            "--balsamic-cache",
+            balsamic_cache,
         ],
     )
 
@@ -65,45 +62,11 @@ def test_tumor_only_config_bad_filename(
     assert result.exit_code == 1
 
 
-def test_tumor_only_config_bad_reference(sample_fastq, singularity_container,
-                                         analysis_dir, panel_bed_file):
-    # GIVEN CLI arguments including a bad reference config
-    faulty_reference_json = "tests/test_data/references/error_reference.json"
-    Path(faulty_reference_json).touch()
-    case_id = "sample_tumor_only"
-    tumor = sample_fastq["tumor"]
-    reference_json = faulty_reference_json
-
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        [
-            "config",
-            "case",
-            "-p",
-            panel_bed_file,
-            "-t",
-            tumor,
-            "--case-id",
-            case_id,
-            "--analysis-dir",
-            analysis_dir,
-            "--singularity",
-            singularity_container,
-            "--reference-config",
-            reference_json,
-        ],
-    )
-    # THEN program exits before completion
-    assert result.exit_code == 1
-
-
 def test_run_without_permissions(
         no_write_perm_path,
         sample_fastq,
-        singularity_container,
         panel_bed_file,
-        reference_json,
+        balsamic_cache,
 ):
     # GIVEN CLI arguments including an analysis_dir without write permissions
     case_id = "sample_tumor_only"
@@ -123,10 +86,8 @@ def test_run_without_permissions(
             case_id,
             "--analysis-dir",
             no_write_perm_path,
-            "--singularity",
-            singularity_container,
-            "--reference-config",
-            reference_json,
+            "--balsamic-cache",
+            balsamic_cache,
         ],
     )
     # THEN program exits before completion
@@ -134,7 +95,7 @@ def test_run_without_permissions(
 
 
 def test_tumor_only_umi_config_background_file(
-        sample_fastq, singularity_container, analysis_dir, reference_json,
+        sample_fastq, analysis_dir, balsamic_cache, 
         panel_bed_file):
 
     # GIVEN CLI arguments including a background variant file
@@ -148,9 +109,9 @@ def test_tumor_only_umi_config_background_file(
         cli,
         [
             "config", "case", "-p", panel_bed_file, "-t", tumor, "--case-id",
-            case_id, "--analysis-dir", analysis_dir, "--singularity",
-            singularity_container, "--reference-config", reference_json,
-            "--background-variants", background_variant_file
+            case_id, "--analysis-dir", analysis_dir, 
+            "--background-variants", background_variant_file, "--balsamic-cache",
+            balsamic_cache,
         ],
     )
     # THEN program exits and checks for filepath

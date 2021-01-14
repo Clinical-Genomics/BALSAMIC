@@ -107,17 +107,11 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         )
         raise click.Abort()
 
-    try:
-        reference_config = os.path.join(balsamic_cache, "reference",
-                                        balsamic_version, genome_version,
-                                        "reference.json")
-        with open(reference_config, 'r') as f:
-            reference_dict = json.load(f)["reference"]
-    except Exception as e:
-        LOG.error(
-            f"Reference config {reference_config} does not follow correct format: {e}"
-        )
-        raise click.Abort()
+    reference_config = os.path.join(balsamic_cache, "reference",
+                                    balsamic_version, genome_version,
+                                    "reference.json")
+    with open(reference_config, 'r') as f:
+        reference_dict = json.load(f)["reference"]
 
     config_collection_dict = BalsamicConfigModel(
         QC={
