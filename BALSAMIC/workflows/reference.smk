@@ -58,6 +58,7 @@ wgs_calling_url = reference_file_model.wgs_calling
 genome_chrom_size_url = reference_file_model.genome_chrom_size
 refgene_txt_url = reference_file_model.refgene_txt 
 refgene_sql_url = reference_file_model.refgene_sql
+rankscore_url = reference_file_model.rankscore
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
@@ -137,7 +138,8 @@ rule all:
             "wgs_calling_interval": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
             "vep": input.vep,
-            "genome": params.genome_ver
+            "genome": params.genome_ver,
+            "rankscore": input.rankscore,
         }
 
         with open(str(output.reference_json), "w") as fh:
