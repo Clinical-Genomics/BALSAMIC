@@ -148,7 +148,6 @@ def initialize(context, outdir, container_version, force, cosmic_key,
 
     config_dict["genome_version"] = genome_version
 
-    print(config_dict)
     write_json(config_dict, config_json)
     LOG.info('Reference generation workflow configured successfully - %s' %
              config_json)
