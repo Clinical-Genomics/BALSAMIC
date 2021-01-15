@@ -62,7 +62,7 @@ refgene_sql_url = reference_file_model.refgene_sql
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
 
-check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
+check_md5 = os.path.join(basedir, "reference.json.md5")
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
