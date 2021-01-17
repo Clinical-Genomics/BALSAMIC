@@ -110,7 +110,8 @@ rule all:
         variants_idx = expand(os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=indexable_vcf_files),
         vep = directory(vep_dir),
         wgs_calling = wgs_calling_url.get_output_file,
-        genome_chrom_size = genome_chrom_size_url.get_output_file 
+        genome_chrom_size = genome_chrom_size_url.get_output_file,
+        rankscore = rankscore_url.get_output_file,
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -157,7 +158,7 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
-                    cosmicdb_url, refgene_txt_url, refgene_sql_url]
+                    cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url]
 
 rule download_reference:
     output:
