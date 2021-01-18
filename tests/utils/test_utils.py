@@ -11,6 +11,7 @@ import logging
 
 from pathlib import Path
 
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
 from BALSAMIC.utils.constants import CONTAINERS_CONDA_ENV_PATH
@@ -558,7 +559,7 @@ def test_singularity_shellcmd(balsamic_cache):
     dummy_path_2 = "this_path/path2"
     correct_shellcmd = "exec --bind {} --bind {} ls this_path".format(
         dummy_path_1, dummy_path_2)
-    singularity_container_sif = Path(balsamic_cache, "containers", "align_qc",
+    singularity_container_sif = Path(balsamic_cache, balsamic_version, "containers", "align_qc",
                                      "example.sif").as_posix()
 
     with mock.patch.object(shutil, "which") as mocked:

@@ -313,6 +313,15 @@ REFERENCE_FILES = {
             "output_file": "refGene.sql",
             "output_path": "genome"
         },
+        "rankscore": {
+            "url":
+            "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "cancer_rank_model_-v0.1-.ini",
+            "output_path": "genome"
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -429,7 +438,16 @@ REFERENCE_FILES = {
             "genome_version": "hg19",
             "output_file": "refGene.sql",
             "output_path": "genome"
-        }
+        },
+        "rankscore": {
+            "url":
+            "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "cancer_rank_model_-v0.1-.ini",
+            "output_path": "genome"
+        },
     }
 }
 
@@ -480,6 +498,7 @@ BIOINFO_TOOL_ENV = {
     "fastp": "align_qc",
     "csvkit": "align_qc",
     "ensembl-vep": "annotate",
+    "genmod": "annotate",
     "vcfanno": "annotate",
     "sambamba": "coverage_qc",
     "mosdepth": "coverage_qc",

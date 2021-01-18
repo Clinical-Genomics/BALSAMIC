@@ -107,7 +107,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         )
         raise click.Abort()
 
-    reference_config = os.path.join(balsamic_cache, "reference",
+    reference_config = os.path.join(balsamic_cache,
                                     balsamic_version, genome_version,
                                     "reference.json")
     with open(reference_config, 'r') as f:
@@ -128,7 +128,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "umiworkflow": umiworkflow
         },
         reference=reference_dict,
-        singularity=os.path.join(balsamic_cache, "containers"),
+        singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         background_variants=background_variants,
         samples=samples,
         vcf=VCF_DICT,

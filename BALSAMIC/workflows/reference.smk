@@ -58,6 +58,7 @@ wgs_calling_url = reference_file_model.wgs_calling
 genome_chrom_size_url = reference_file_model.genome_chrom_size
 refgene_txt_url = reference_file_model.refgene_txt 
 refgene_sql_url = reference_file_model.refgene_sql
+rankscore_url = reference_file_model.rankscore
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
@@ -109,7 +110,8 @@ rule all:
         variants_idx = expand(os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=indexable_vcf_files),
         vep = directory(vep_dir),
         wgs_calling = wgs_calling_url.get_output_file,
-        genome_chrom_size = genome_chrom_size_url.get_output_file 
+        genome_chrom_size = genome_chrom_size_url.get_output_file,
+        rankscore = rankscore_url.get_output_file,
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -137,7 +139,8 @@ rule all:
             "wgs_calling_interval": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
             "vep": input.vep,
-            "genome": params.genome_ver
+            "genome": params.genome_ver,
+            "rankscore": input.rankscore,
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -155,7 +158,7 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
-                    cosmicdb_url, refgene_txt_url, refgene_sql_url]
+                    cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url]
 
 rule download_reference:
     output:

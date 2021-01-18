@@ -446,6 +446,7 @@ class ReferenceMeta(BaseModel):
       cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
       refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
       refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
+      rankscore: ReferenceUrlsModel. Optional rankscore model
     """
 
     basedir: str = ""
@@ -462,6 +463,7 @@ class ReferenceMeta(BaseModel):
     cosmicdb: Optional[ReferenceUrlsModel]
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
+    rankscore: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):

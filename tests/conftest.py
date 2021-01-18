@@ -68,7 +68,8 @@ def reference():
         "refGene": "tests/test_data/references/genome/refGene.txt",
         "wgs_calling_interval": "tests/test_data/references/genome/wgs_calling_regions.v1",
         "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
-        "exon_bed": "tests/test_data/references/genome/refseq.flat.bed"
+        "exon_bed": "tests/test_data/references/genome/refseq.flat.bed",
+        "rankscore": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
     }
 }
 
@@ -163,12 +164,12 @@ def balsamic_cache(tmp_path_factory, reference):
 
     cache_dir = tmp_path_factory.mktemp("balsmic_coche")
   
-    cache_container = cache_dir / "containers" / "align_qc"
+    cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
     cache_container.mkdir(parents=True, exist_ok=True)
     cache_container_example = cache_container / "example.sif" 
     cache_container_example.touch()
 
-    cache_reference = cache_dir / "reference" / balsamic_version / "hg19"
+    cache_reference = cache_dir / balsamic_version / "hg19"
     cache_reference.mkdir(parents=True, exist_ok=True)
 
     cache_reference_json = cache_reference / "reference.json"
