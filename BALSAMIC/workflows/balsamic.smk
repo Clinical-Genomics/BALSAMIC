@@ -187,6 +187,8 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
+    annotation_rules.append("snakemake_rules/annotation/rankscore.rule")
+
     if config['analysis']['analysis_type'] == "paired":
         annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_normal.rule")
 
@@ -260,7 +262,7 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
 if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.vcf.gz",
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
 
 if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["umiworkflow"]:

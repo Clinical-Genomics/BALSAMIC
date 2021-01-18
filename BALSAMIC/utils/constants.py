@@ -498,6 +498,7 @@ BIOINFO_TOOL_ENV = {
     "fastp": "align_qc",
     "csvkit": "align_qc",
     "ensembl-vep": "annotate",
+    "genmod": "annotate",
     "vcfanno": "annotate",
     "sambamba": "coverage_qc",
     "mosdepth": "coverage_qc",

@@ -74,7 +74,7 @@ mkdir -p ${_analysis_dir}
 
 _genome_ver=hg19
 _cluster_config=BALSAMIC/config/cluster.json
-_balsamic_cache=init
+_balsamic_cache=balsamic_cache
 _tumor_fastq=tests/test_data/fastq/S1_R_1.fastq.gz
 _normal_fastq=tests/test_data/fastq/S2_R_1.fastq.gz
 _analysis_config=${_analysis_dir}'/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
