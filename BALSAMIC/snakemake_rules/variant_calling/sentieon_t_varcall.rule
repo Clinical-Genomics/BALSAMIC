@@ -86,12 +86,14 @@ rule sentieon_TNscope_tumor_only:
         bam = expand(bam_dir + "{tumor}.dedup.realign.bam", tumor=get_sample_type(config["samples"], "tumor")),
         recal = expand(bam_dir + "{tumor}.dedup.realign.recal_data.table", tumor=get_sample_type(config["samples"], "tumor")),
     output:
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
+        vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
+        namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
+        sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
@@ -108,6 +110,36 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} -q {input.recal} --algo TNscope --tumor_sample {params.tumor} {params.pon} --dbsnp {input.dbsnp} {output.vcf};
 
-echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap_snv};
+cp {output.namemap_snv} {output.namemap_sv}
 rm -rf {params.tmpdir};
+        """
+
+rule bcftools_view_split_variant:
+    input:
+        ref = config["reference"]["reference_genome"],
+        vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+    output:
+        vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+    params:
+        conda = config["bioinfo_tools"].get("bcftools"),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+    threads:
+        get_threads(cluster_config, 'split_sentieon_sv_snv')
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
+    benchmark:
+        benchmark_dir + 'split_sentieon_sv_snv_' + config["analysis"]["case_id"] + ".tsv"
+    shell:
+        """
+source activate {params.conda};
+export TMPDIR={params.tmpdir};
+mkdir -p {params.tmpdir};
+
+bcftools view --include 'INFO/SVTYPE=="."' -O z -o {output.vcf_snv} {input.vcf}; 
+tabix -p vcf -f {output.vcf_snv};
+
+bcftools view --include 'INFO/SVTYPE!="."' -O z -o {output.vcf_sv} {input.vcf}; 
+tabix -p vcf -f {output.vcf_sv};
         """
