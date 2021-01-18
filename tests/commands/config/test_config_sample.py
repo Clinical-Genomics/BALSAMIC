@@ -62,7 +62,6 @@ def test_tumor_only_config(invoke_cli, sample_fastq, tmp_path,
     test_analysis_dir.mkdir()
     case_id = "sample_tumor_only"
     tumor = sample_fastq["tumor"]
-    normal = sample_fastq["normal"]
 
     # WHEN creating a case analysis
     with mock.patch.dict(
