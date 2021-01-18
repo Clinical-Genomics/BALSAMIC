@@ -164,12 +164,12 @@ def balsamic_cache(tmp_path_factory, reference):
 
     cache_dir = tmp_path_factory.mktemp("balsmic_coche")
   
-    cache_container = cache_dir / "containers" / "align_qc"
+    cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
     cache_container.mkdir(parents=True, exist_ok=True)
     cache_container_example = cache_container / "example.sif" 
     cache_container_example.touch()
 
-    cache_reference = cache_dir / "reference" / balsamic_version / "hg19"
+    cache_reference = cache_dir / balsamic_version / "hg19"
     cache_reference.mkdir(parents=True, exist_ok=True)
 
     cache_reference_json = cache_reference / "reference.json"
