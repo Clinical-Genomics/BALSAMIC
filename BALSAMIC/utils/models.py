@@ -3,13 +3,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
 
-from pydantic import (BaseModel, validator, Field, AnyUrl)
+from pydantic import BaseModel, validator, Field, AnyUrl
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.utils.constants import (
-    CONDA_ENV_YAML, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
+    BIOINFO_TOOL_ENV, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
     MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT)
 
 
@@ -80,6 +80,7 @@ class QCModel(BaseModel):
             be interpreted as integer and coerced to string
     
     """
+
     picard_rmdup: bool = False
     adapter: str = "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT"
     quality_trim: bool = True
@@ -110,6 +111,7 @@ class VarcallerAttribute(BaseModel):
             When a variable other than [SNV, CNV, SV] is passed in mutation_type field
             
     """
+
     mutation: str
     mutation_type: str = Field(alias="type")
     analysis_type: Optional[list]
@@ -148,15 +150,14 @@ class VCFModel(BaseModel):
     tnsnv: VarcallerAttribute
     manta: VarcallerAttribute
     cnvkit: VarcallerAttribute
-    mutect: VarcallerAttribute
     vardict: VarcallerAttribute
-    strelka: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnhaplotyper: VarcallerAttribute
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
-    strelka_germline: VarcallerAttribute
+    TNscope_consensusaligned_umi: VarcallerAttribute
+    TNscope_consensusfiltered_umi: VarcallerAttribute
 
 
 class AnalysisModel(BaseModel):
@@ -172,6 +173,7 @@ class AnalysisModel(BaseModel):
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
         analysis_dir : Field(required); existing path where to save files
+        umiworkflow : Field(bool); whether UMI workflow to run parallely 
 
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
@@ -201,6 +203,7 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
+    umiworkflow: bool = True
 
     class Config:
         validate_all = True
@@ -233,8 +236,8 @@ class AnalysisModel(BaseModel):
 
     @validator("fastq_path")
     def parse_analysis_to_fastq_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "analysis", "fastq").as_posix() + "/"
+        return (Path(values.get("analysis_dir"), values.get("case_id"),
+                     "analysis", "fastq").as_posix() + "/")
 
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
@@ -248,8 +251,8 @@ class AnalysisModel(BaseModel):
 
     @validator("benchmark")
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "benchmarks").as_posix() + "/"
+        return (Path(values.get("analysis_dir"), values.get("case_id"),
+                     "benchmarks").as_posix() + "/")
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
@@ -268,6 +271,7 @@ class SampleInstanceModel(BaseModel):
     Attributes:
         file_prefix : Field(str); basename of sample pair
         sample_type : Field(str; alias=type); type of sample [tumor, normal]
+        sample_name : Field(str); Internal ID of sample to use in deliverables
         readpair_suffix : Field(List); currently always set to [1, 2]
     
     Raises:
@@ -277,6 +281,7 @@ class SampleInstanceModel(BaseModel):
         """
 
     file_prefix: str
+    sample_name: Optional[str]
     sample_type: str = Field(alias="type")
     readpair_suffix: List[str] = ["1", "2"]
 
@@ -288,21 +293,11 @@ class SampleInstanceModel(BaseModel):
                 f"Provided sample type ({value}) not supported in BALSAMIC!")
         return value
 
-
-class BioinfoToolsModel(BaseModel):
-    """Holds versions of current bioinformatic tools used in analysis"""
-    tabix: Optional[str]
-    bcftools: Optional[str]
-    fastqc: Optional[str]
-    manta: Optional[str]
-    picard: Optional[str]
-    bwa: Optional[str]
-    strelka: Optional[str]
-    gatk: Optional[str]
-    samtools: Optional[str]
-    sambamba: Optional[str]
-    vardict: Optional[str]
-    cutadapt: Optional[str]
+    @validator("sample_name")
+    def set_sample_id_if_missing_value(cls, value, values, **kwargs):
+        if value:
+            return value
+        return values.get("file_prefix")
 
 
 class PanelModel(BaseModel):
@@ -334,11 +329,12 @@ class BalsamicConfigModel(BaseModel):
         samples : Field(Dict); dictionary containing samples submitted for analysis
         reference : Field(Dict); dictionary containign paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
-        bioinfo_tools : Field(BioinfoToolsModel); dictionary of bioinformatics software and their versions used for the analysis
-	singularity : Field(Path); path to singularity container of BALSAMIC
+        bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
+        bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
+        singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
-        conda_env_yaml : Field(Path(CONVA_ENV_YAML)); path where Balsamic configs can be found
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+	umiworkflow : Field(bool); whether UMI workflow to run parallely with balsamic workflow
 
     """
 
@@ -347,11 +343,12 @@ class BalsamicConfigModel(BaseModel):
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
-    singularity: FilePath
+    singularity: DirectoryPath
     background_variants: Optional[FilePath]
-    conda_env_yaml: FilePath = CONDA_ENV_YAML
-    bioinfo_tools: Optional[BioinfoToolsModel]
+    bioinfo_tools: dict
+    bioinfo_tools_version: dict
     panel: Optional[PanelModel]
+    umiworkflow: bool = True
 
     @validator("reference")
     def abspath_as_str(cls, value):
@@ -421,12 +418,12 @@ class ReferenceUrlsModel(BaseModel):
             raise FileNotFoundError(
                 f"{output_file.as_posix()} file does not exist")
 
-        with open(output_file.as_posix(), 'rb') as fh:
+        with open(output_file.as_posix(), "rb") as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 hash_md5.update(chunk)
 
-        with open(output_file.as_posix() + ".md5", 'w') as fh:
-            fh.write('{} {}\n'.format(output_file.as_posix(),
+        with open(output_file.as_posix() + ".md5", "w") as fh:
+            fh.write("{} {}\n".format(output_file.as_posix(),
                                       hash_md5.hexdigest()))
 
 
@@ -449,6 +446,7 @@ class ReferenceMeta(BaseModel):
       cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
       refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
       refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
+      rankscore: ReferenceUrlsModel. Optional rankscore model
     """
 
     basedir: str = ""
@@ -465,8 +463,9 @@ class ReferenceMeta(BaseModel):
     cosmicdb: Optional[ReferenceUrlsModel]
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
+    rankscore: Optional[ReferenceUrlsModel]
 
-    @validator('*', pre=True)
+    @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):
         """validate and append path in ReferenceUrlsModel fields with basedir"""
         if isinstance(value, str):

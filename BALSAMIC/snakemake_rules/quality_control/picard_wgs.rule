@@ -13,19 +13,18 @@ rule CollectMultipleMetrics:
     output:
         expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard)
     params:
-        tmpdir = tmp_dir,
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         output_prefix = qc_dir + "{sample}.multiple_metrics",
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
-    singularity: singularity_image
+        conda = config["bioinfo_tools"].get("picard"),
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + "CollectMultipleMetrics_" + "{sample}.picard_collect_multiple_metrics.tsv"
     shell:
         "source activate {params.conda};"
-        "rand_str=$(openssl rand -hex 5); "
-        "tmpdir={params.tmpdir}/${{rand_str}}; "
-        "mkdir -p ${{tmpdir}}; "
-        "export TMPDIR=${{tmpdir}}; "
-        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+        "mkdir -p {params.tmpdir}; "
+        "export TMPDIR={params.tmpdir}; "
+        "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
             " CollectMultipleMetrics "
             " I={input.bam} "
             " O={params.output_prefix} "
@@ -40,18 +39,17 @@ rule CollectWgsMetrics:
     output:
         qc_dir + "{sample}_picard_wgs_metrics.txt"
     params:
-        tmpdir = tmp_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"picard"),
-    singularity: singularity_image
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        conda = config["bioinfo_tools"].get("picard"),
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + "CollectWgsMetrics_" + "{sample}.picard_collect_wgs_metrics.tsv"
     shell:
         "source activate {params.conda};"
-        "rand_str=$(openssl rand -hex 5); "
-        "tmpdir={params.tmpdir}/${{rand_str}}; "
-        "mkdir -p ${{tmpdir}}; "
-        "export TMPDIR=${{tmpdir}}; "
-        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx16G $CONDA_PREFIX/share/picard.jar "
+        "mkdir -p {params.tmpdir}; "
+        "export TMPDIR={params.tmpdir}; "
+        "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
             " CollectWgsMetrics "
             " I={input.bam} "
             " O={output} "

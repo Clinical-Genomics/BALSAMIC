@@ -7,7 +7,6 @@ import logging
 
 from datetime import date
 
-from BALSAMIC.utils.rule import get_conda_env
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceMeta
@@ -59,12 +58,14 @@ wgs_calling_url = reference_file_model.wgs_calling
 genome_chrom_size_url = reference_file_model.genome_chrom_size
 refgene_txt_url = reference_file_model.refgene_txt 
 refgene_sql_url = reference_file_model.refgene_sql
+rankscore_url = reference_file_model.rankscore
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
 
-check_md5 = os.path.join(basedir, "reference_" + str(current_day) + ".md5")
+check_md5 = os.path.join(basedir, "reference.json.md5")
 
+shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 def get_md5(filename):
@@ -109,7 +110,8 @@ rule all:
         variants_idx = expand(os.path.join(vcf_dir,"{vcf}.gz.tbi"), vcf=indexable_vcf_files),
         vep = directory(vep_dir),
         wgs_calling = wgs_calling_url.get_output_file,
-        genome_chrom_size = genome_chrom_size_url.get_output_file 
+        genome_chrom_size = genome_chrom_size_url.get_output_file,
+        rankscore = rankscore_url.get_output_file,
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -137,7 +139,8 @@ rule all:
             "wgs_calling_interval": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
             "vep": input.vep,
-            "genome": params.genome_ver
+            "genome": params.genome_ver,
+            "rankscore": input.rankscore,
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -155,7 +158,7 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
-                    cosmicdb_url, refgene_txt_url, refgene_sql_url]
+                    cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url]
 
 rule download_reference:
     output:
@@ -195,14 +198,14 @@ rule prepare_refgene:
         refgene_sql = refgene_sql_url.get_output_file
     params:
         refgene_sql_awk = get_script_path('refseq_sql.awk'),
-        conda_env = get_conda_env(config["conda_env_yaml"], "bedtools")
+        conda_env = config["bioinfo_tools"].get("bedtools")
     output:
         refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
         bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed"
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -227,13 +230,13 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf")
     params:
         type = 'vcf',
-        conda_env = get_conda_env(config["conda_env_yaml"], "tabix")    
+        conda_env = config["bioinfo_tools"].get("tabix")
     output:
         os.path.join(vcf_dir, "{vcf}.vcf.gz"),
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
     log:
         os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -249,12 +252,12 @@ rule bwa_index:
     input:
         reference_genome_url.get_output_file
     params:
-        conda_env = get_conda_env(config["conda_env_yaml"], "bwa")
+        conda_env = config["bioinfo_tools"].get("bwa")
     output:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome_url.get_output_file + ".bwa_index.log"
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -269,12 +272,12 @@ rule samtools_index_fasta:
     input:
         reference_genome_url.get_output_file
     params:
-        conda_env = get_conda_env(config["conda_env_yaml"], "samtools")
+        conda_env = config["bioinfo_tools"].get("samtools")
     output:
         reference_genome_url.get_output_file + ".fai"
     log:
         reference_genome_url.get_output_file + ".faidx.log"
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -291,12 +294,12 @@ rule picard_ref_dict:
     input:
         reference_genome_url.get_output_file
     params:
-        conda_env = get_conda_env(config["conda_env_yaml"], "picard")
+        conda_env = config["bioinfo_tools"].get("picard")
     output:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
         reference_genome_url.get_output_file + ".ref_dict.log"
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};
@@ -314,12 +317,12 @@ rule vep_install:
         species = "homo_sapiens_merged",
         assembly = "GRCh37" if genome_ver == 'hg19' else "GRCh38",
         plugins = "all",
-        conda_env = get_conda_env(config["conda_env_yaml"], "ensembl-vep")
+        conda_env = config["bioinfo_tools"].get("ensembl-vep")
     output:
         directory(vep_dir)
     log:
         os.path.join(vep_dir, "vep_install_cache.log")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
     shell:
         """
 source activate {params.conda_env};

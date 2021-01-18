@@ -44,11 +44,16 @@
 		"n": 16
 	},
 	"cnvkit_paired": {
-		"time": "10:00:00",
+		"time": "12:00:00",
 		"n": 10
 	},
-	"cnvkit_single": {
+	"dragen_align_call_tumor_only": {
 		"time": "10:00:00",
+		"n": 24,
+		"partition": "dragen"
+	},
+	"cnvkit_single": {
+		"time": "12:00:00",
 		"n": 10
 	},
 	"haplotypecaller": {
@@ -64,8 +69,12 @@
 		"n": 16
 	},
 	"manta_tumor_only": {
-		"time": "06:00:00",
-		"n": 10
+		"time": "10:00:00",
+		"n": 12
+	},
+	"manta_tumor_normal": {
+		"time": "10:00:00",
+		"n": 12
 	},
 	"mergeBam_normal": {
 		"time": "10:00:00",

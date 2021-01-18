@@ -12,10 +12,10 @@ rule split_bed_by_chrom:
         tmpdir = tmp_dir,
         split_bed_dir = vcf_dir + "split_bed/",
         origin_bed = capture_kit,
-        conda = get_conda_env(config["conda_env_yaml"],"bedtools"),
+        conda = config["bioinfo_tools"].get("bedtools"),
     benchmark:
         benchmark_dir + 'split_bed_by_chrom.tsv'
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
     shell:
         "source activate {params.conda}; "
         "tmpdir={params.tmpdir}/${{rand_str}}; "
@@ -32,4 +32,4 @@ rule split_bed_by_chrom:
             " > {params.split_bed_dir}$c.{params.origin_bed}; "
         "done; "
         "unset chromlist; "
-        "readlink -e {input.bam}; "
+        "readlink -f {input.bam}; "

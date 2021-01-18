@@ -101,30 +101,6 @@ def get_result_dir(config):
     return config['analysis']['result']
 
 
-def get_conda_env(yaml_file, pkg):
-    """
-    Retrieve conda environment for package from a predefined yaml file
-
-    input: balsamic_env 
-    output: string of conda env where packge is in
-    """
-
-    with open(yaml_file, 'r') as file_in:
-        yaml_in = yaml.safe_load(file_in)
-
-    conda_env_found = None
-
-    for conda_env, pkgs in yaml_in.items():
-        if pkg in pkgs:
-            conda_env_found = conda_env
-            break
-
-    if conda_env_found is not None:
-        return conda_env_found
-    else:
-        raise KeyError(f'Installed package {pkg} was not found in {yaml_file}')
-
-
 def get_picard_mrkdup(config):
     """
     input: sample config file output from BALSAMIC

@@ -9,25 +9,25 @@ rule haplotypecaller:
     output:
         vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
-        tmpdir = tmp_dir,
-        conda = get_conda_env(config["conda_env_yaml"],"gatk"),
+        conda = config["bioinfo_tools"].get("gatk"),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     threads: get_threads(cluster_config, 'haplotypecaller')
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
     benchmark:
         benchmark_dir + 'haplotypecaller_' + "{sample}.{bedchrom}.haplotypecaller.tsv"
     shell:
-        "source activate {params.conda}; "
-        "rand_str=$(openssl rand -hex 5); "
-        "tmpdir={params.tmpdir}/${{rand_str}}; "
-        "mkdir -p ${{tmpdir}}; "
-        "export TMPDIR=${{tmpdir}}; "
-        "java -jar -Djava.io.tmpdir=${{tmpdir}} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar "
-            "-T HaplotypeCaller "
-            "-R {input.fa} "
-            "-I {input.bam} "
-            "-L {input.bed} "
-            "| bgzip > {output}; " 
-        
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+-T HaplotypeCaller \
+-R {input.fa} \
+-I {input.bam} \
+-L {input.bed} \
+| bgzip > {output}; 
+rm -rf {params.tmpdir};
+        """
 
 
 rule haplotypecaller_merge:
@@ -36,50 +36,20 @@ rule haplotypecaller_merge:
     output:
         vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
     params:
-        tmpdir = tmp_dir,
-        conda = get_conda_env(config["conda_env_yaml"], "gatk"),
-    singularity: singularity_image
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        conda = config["bioinfo_tools"].get("gatk"),
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
     benchmark:
-        benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.vcf.gz" 
+        benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.tsv" 
     shell:
-        "source activate {params.conda}; "
-        "rand_str=$(openssl rand -hex 5); "
-        "tmpdir={params.tmpdir}/${{rand_str}}; "
-        "mkdir -p ${{tmpdir}}; "
-        "export TMPDIR=${{tmpdir}}; "
-        "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output}; "
-        "tabix -f -p vcf {output}; "
-
-
-
-rule strelka_germline:
-    input:
-        fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
-        mantaindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz"
-    output:
-        final = vcf_dir + "SNV.germline.{sample}.strelka_germline.vcf.gz"
-    params:
-        tmpdir = vcf_dir + "strelka_germline_{sample}/",
-        runmode = "local",
-        conda = get_conda_env(config["conda_env_yaml"],"strelka"),
-    threads: get_threads(cluster_config, "strelka_germline")
-    singularity: singularity_image
-    benchmark:
-        benchmark_dir + 'strelka_germline_' + "{sample}.strelka_germline.tsv"
-    shell:
-        "source activate {params.conda};"
-        "rm -rf {params.tmpdir}; "
-        "configureStrelkaGermlineWorkflow.py "
-            "--bam={input.bam} "
-            "--referenceFasta={input.fa} "
-            "--indelCandidates {input.mantaindel} "
-            "--exome "
-            "--runDir={params.tmpdir}; "
-        "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-        "cp {params.tmpdir}/results/variants/variants.vcf.gz {output.final}; " 
-        "tabix -p vcf -f {output.final}; "
-        
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output};
+tabix -f -p vcf {output};
+rm -rf {params.tmpdir};
+        """
 
 
 rule manta_germline:
@@ -88,26 +58,26 @@ rule manta_germline:
         bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
     output:
         final = vcf_dir + "SV.germline.{sample}.manta_germline.vcf.gz",
-        candidateindel = vcf_dir + "manta_germline_{sample}/results/variants/candidateSmallIndels.vcf.gz" 
     params:
-        tmpdir = vcf_dir + "manta_germline_{sample}/",
+        conda = config["bioinfo_tools"].get("manta"),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        conda = get_conda_env(config["conda_env_yaml"],"manta"),
     threads: get_threads(cluster_config, "manta_germline")
-    singularity: singularity_image
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     benchmark:
         benchmark_dir + 'manta_germline_' + "{sample}.manta_germline.tsv"
     shell:
-        "source activate {params.conda}; "
-        "rm -rf {params.tmpdir}; "
-        "configManta.py "
-            "--bam={input.bam} "
-            "--referenceFasta={input.fa} "
-            "--runDir={params.tmpdir}; "
-        "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads}; "
-        "cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final}; "
-        "tabix -p vcf -f {output.final}; "
-        
+        """
+source activate {params.conda};
+configManta.py \
+--bam={input.bam} \
+--referenceFasta={input.fa} \
+--runDir={params.tmpdir};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
+tabix -p vcf -f {output.final};
+rm -rf {params.tmpdir};
+        """
 
 
 rule sentieon_DNAscope:
@@ -119,7 +89,7 @@ rule sentieon_DNAscope:
     output:
         vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"]
     threads: get_threads(cluster_config, 'sentieon_DNAscope')
@@ -129,12 +99,11 @@ rule sentieon_DNAscope:
         benchmark_dir + "{sample}.dnascope.tsv"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}};
-mkdir -p ${{tmpdir}};
-export TMPDIR=${{tmpdir}};
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver -t {threads} -r {input.ref} -i {input.bam} --interval {input.interval} --algo DNAscope -d {input.dbsnp} {output.vcf}
+rm -rf {params.tmpdir};
         """

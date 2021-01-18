@@ -3,17 +3,16 @@ import sys
 from pathlib import Path
 
 # DOCKER hub path
-BALSAMIC_DOCKER_PATH = "docker://hassanf/balsamic"
+BALSAMIC_DOCKER_PATH = "docker://clinicalgenomics/balsamic"
 
 # BALSAMIC base dir
 BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 
-# Path to conda folder containing YAML files with verions of software usen un BALSAMIC workflow
-CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "conda").as_posix()
+# BALSAMIC scripts dir
+BALSAMIC_SCRIPTS = Path(BALSAMIC_BASE_DIR, "assets/scripts").as_posix()
 
-# Path to config YAML file to be accessed by Snakemake
-CONDA_ENV_YAML = Path(
-    BALSAMIC_BASE_DIR / "config" / "balsamic_env.yaml").as_posix()
+# Path to containers directory containing YAML files for conda installation for each one
+CONTAINERS_CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "containers").as_posix()
 
 # Path to rule files to be accessed by Snakemake
 RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
@@ -36,10 +35,22 @@ SENTIEON_TNSCOPE = Path(
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
 ANALYSIS_TYPES = ["paired", "single", "umi", "qc"]
-WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN"]
+WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 
 # Configuration of VCF settings
 VCF_DICT = {
+    "TNscope_consensusaligned_umi": {
+        "mutation": "somatic",
+        "type": "SNV",
+        "analysis_type": ["single"],
+        "workflow_solution": ["Sentieon_umi"]
+    },
+    "TNscope_consensusfiltered_umi": {
+        "mutation": "somatic",
+        "type": "SNV",
+        "analysis_type": ["single"],
+        "workflow_solution": ["Sentieon_umi"]
+    },
     "tnsnv": {
         "mutation": "somatic",
         "type": "SNV",
@@ -76,22 +87,10 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
-    "mutect": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC"]
-    },
     "vardict": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC"]
-    },
-    "strelka": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["paired"],
         "workflow_solution": ["BALSAMIC"]
     },
     "manta_germline": {
@@ -106,15 +105,52 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
-    "strelka_germline": {
-        "mutation": "germline",
-        "type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "workflow_solution": ["BALSAMIC"]
+}
+
+# Minimum required QC-values from HS metrics to be able to pass analysis
+HSMETRICS_QC_CHECK = {
+    "gicfdna_3.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 500,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "gmcksolid_4.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 500,
+        "FOLD_80_BASE_PENALTY": 1.7,
+        "PCT_OFF_BAIT": 0.3
+    },
+    "gmsmyeloid_5.2_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.4
+    },
+    "lymphoma_6.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "gmslymphoid_7.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 1000,
+        "FOLD_80_BASE_PENALTY": 1.5,
+        "PCT_OFF_BAIT": 0.35
+    },
+    "twistexomerefseq_9.1_hg19_design.bed": {
+        "MEAN_TARGET_COVERAGE": 100,
+        "FOLD_80_BASE_PENALTY": 1.8,
+        "PCT_OFF_BAIT": 0.25
+    },
+    "wgs": {
+        "MEAN_TARGET_COVERAGE": 30
+    },
+    "METRIC_CRITERIA": {
+        "MEAN_TARGET_COVERAGE": "gt",
+        "FOLD_80_BASE_PENALTY": "lt",
+        "PCT_OFF_BAIT": "lt"
     }
 }
 
 # Configuration of VARDICT settings
+
 VARDICT_SETTINGS = {
     "AD": {
         "tag_value": 5,
@@ -127,7 +163,7 @@ VARDICT_SETTINGS = {
         "field": "INFO",
     },
     "MQ": {
-        "tag_value": 50,
+        "tag_value": 40,
         "filter_name": "balsamic_low_mq",
         "field": "INFO"
     },
@@ -137,7 +173,7 @@ VARDICT_SETTINGS = {
         "field": "INFO"
     },
     "AF_min": {
-        "tag_value": 0.02,
+        "tag_value": 0.01,
         "filter_name": "balsamic_low_af",
         "field": "INFO"
     },
@@ -277,6 +313,15 @@ REFERENCE_FILES = {
             "output_file": "refGene.sql",
             "output_path": "genome"
         },
+        "rankscore": {
+            "url":
+            "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "cancer_rank_model_-v0.1-.ini",
+            "output_path": "genome"
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -393,14 +438,23 @@ REFERENCE_FILES = {
             "genome_version": "hg19",
             "output_file": "refGene.sql",
             "output_path": "genome"
-        }
+        },
+        "rankscore": {
+            "url":
+            "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "cancer_rank_model_-v0.1-.ini",
+            "output_path": "genome"
+        },
     }
 }
 
 umiworkflow_params = {
     "common": {
         "align_header":
-        "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        "'@RG\\tID:Group\\tSM:{case_name}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         "align_intbases": 1000000,
         "filter_tumor_af": 0.0005
     },
@@ -426,4 +480,33 @@ umiworkflow_params = {
         "vep_filters":
         "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     }
+}
+
+# list of bioinfo tools for each conda env
+VALID_CONTAINER_CONDA_NAME = {
+    "align_qc", "annotate", "coverage_qc", "varcall_py36", "varcall_py27",
+    "varcall_cnvkit"
+}
+
+BIOINFO_TOOL_ENV = {
+    "bedtools": "align_qc",
+    "bwa": "align_qc",
+    "fastqc": "align_qc",
+    "samtools": "align_qc",
+    "picard": "align_qc",
+    "multiqc": "align_qc",
+    "fastp": "align_qc",
+    "csvkit": "align_qc",
+    "ensembl-vep": "annotate",
+    "genmod": "annotate",
+    "vcfanno": "annotate",
+    "sambamba": "coverage_qc",
+    "mosdepth": "coverage_qc",
+    "bcftools": "varcall_py36",
+    "tabix": "varcall_py36",
+    "gatk": "varcall_py36",
+    "vardict": "varcall_py36",
+    "strelka": "varcall_py27",
+    "manta": "varcall_py27",
+    "cnvkit": "varcall_cnvkit",
 }

@@ -1,33 +1,30 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.rule import get_threads
-from BALSAMIC.utils.models import UMIworkflowConfig
-from BALSAMIC.utils.constants import umiworkflow_params
-
-paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
-
 # Variant-calling using TNscope
 rule sentieon_tnscope_umi:
     input:
-        bam =  umi_dir + "{sample}.{step}.bam",
+        bam = umi_dir + "{case_name}.{step}.umi.bam",
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-         vcf = vcf_dir + "{sample}.TNscope.{step}.vcf.gz",
+        vcf = vcf_dir +  "SNV.somatic.{case_name}.TNscope_{step}_umi.vcf.gz",
+        namemap = vcf_dir + "SNV.somatic.{case_name}.TNscope_{step}_umi.sample_name_map"
     benchmark:
-        Path(benchmark_dir + "sentieon_tnscope_{sample}_{step}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_tnscope_umi_{case_name}.{step}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tumor_af = paramsumi.common.filter_tumor_af,
         algo = paramsumi.tnscope.algo,
         disable_detect = paramsumi.tnscope.disable_detect,
-        tumor_lod = config["tumorlod"], #paramsumi.tnscope.min_tumorLOD,
+        #tumor_lod = config["tumorlod"], #paramsumi.tnscope.min_tumorLOD,
+        tumor_lod = paramsumi.tnscope.min_tumorLOD,
         error_rate = paramsumi.tnscope.error_rate,
         prune_factor = paramsumi.tnscope.prunefactor,
-        sample_id = "{sample}"
+        tumor = get_sample_type(config["samples"], "tumor"),
+        sample_id = '{case_name}'
     threads: 
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message: 
@@ -49,4 +46,6 @@ rule sentieon_tnscope_umi:
 --pcr_indel_model NONE \
 --prune_factor {params.prune_factor} \
 {output.vcf};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
         """
