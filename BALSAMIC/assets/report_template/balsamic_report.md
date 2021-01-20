@@ -1,7 +1,7 @@
 # kvalitetsrapport: klinisk sekvensering av cancer prover
 
 
-##Sammanfattning
+## Sammanfattning
 
 {% set table_qc_header = [] %}
 {% for qc_name, qc_name_meta in analysis_results.qc.items() -%}
