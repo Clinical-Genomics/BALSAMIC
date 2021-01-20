@@ -1,14 +1,33 @@
 # kvalitetsrapport: klinisk sekvensering av cancer prover
 
-##Sammanfattning
-| Prov-id | Provtyp | Familj | Analysdatum | Analyspanel | Mediansekvensdjup [x] | Fold-80 | Medelinsättningsstorlek [baspar] |
-| ------- | ------- | ------ | ----------- | ----- | ---------------- | ------- | ----------------------- |
-| 2021-xx   | Tumör   | FamXX  | 2021-01-20  | GMCKsolid | 1651 | 1.41 | 145 |
 
-##Täckningsgrad för vald analyspanel
-| Prov-id | Täckningsgrad [50X] | Täckningsgrad [100X] | Täckningsgrad [200X] | Täckningsgrad [500X] | Täckningsgrad [1000X] |
-| ------- | ------------------- | -------------------- | -------------------- | -------------------- | --------------------- |
-| 2021-xx | 99.99 | 99.99 | 99.81 | 95.45 | 82.45 |
+##Sammanfattning
+
+{% set table_qc_header = [] %}
+{% for qc_name, qc_name_meta in analysis_results.qc.items() -%}
+{{ table_qc_header.append(qc_name_meta[lang]) or ''}}
+{% endfor -%}
+
+| Prov-id | Provtyp | Familj | Analysdatum | Analyspanel | {{ table_qc_header|join('|') }} |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+{%- for sample in meta.sample_map.keys() %} 
+| {{ meta.sample_map[sample] }} | {{ meta.sample_type[sample] }} | {{ meta.case_name }} | {% if meta.date %} {{ meta.date }} {% else %} {{ meta.now }} {% endif %} | {{ meta.gene_panel_name }} | {{ to_report["qc"][sample]|join('|') }} | 
+{%- endfor %}
+
+
+<br>
+
+## Täckningsgrad för vald analyspanel
+{% set table_coverage_header = [] %}
+{% for coverage_name, coverage_name_meta in analysis_results.coverage.items() -%}
+{{ table_coverage_header.append(coverage_name_meta[lang]) or ''}}
+{% endfor %}
+
+| Prov-id | Provtyp | {{ table_coverage_header|join('|') }} |
+| --- | --- | --- | --- | --- | --- | --- |
+{%- for sample in meta.sample_map.keys() %} 
+| {{ meta.sample_map[sample] }} | {{ meta.sample_type[sample] }} | {{ to_report.coverage[sample]|join('|') }} |
+{%- endfor %}
 
 ### Förklaringar
 Värdena presenterade för Mediansekvensdjup och Täckningsgrad är efter borttagning av duplikata läsningar.
