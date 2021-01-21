@@ -5,11 +5,11 @@
   <meta charset="utf-8">
   <meta name="generator" content="Markdown">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>{% if meta.subtitle %} {{ meta.subtitle }} - {% endif %} {% if meta.title %}{{ meta.title }}{% endif %}</title>
+  <title>{% if meta.title %}{{ meta.title }}{% endif %}</title>
   <style type="text/css">
   body {
     font-family: 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
-    max-width: 670px;
+    max-width: 1000px;
     padding: 20px;
     margin:0 auto;
     font-size:10pt;
@@ -81,7 +81,7 @@
     font-size: 12px;
     font-weight: 500;
     border-radius:3px;
-    padding: 0px 6px;
+    padding: 1px 6px;
     cursor: pointer;
   }
   span.expander:hover {
@@ -110,6 +110,7 @@
 
   /* Make definition lists look like nice tables */
   dl {
+    width:50%;
     background-color: #D9D9D9;
   }
   .clearfix:after, .clearfix:before, dl:after, dl:before {
@@ -178,7 +179,7 @@
     margin-top:10px;
   }
   h3.date {
-    display:none;
+    display:block;
   }
 
   .swedac_logo {
@@ -214,8 +215,7 @@
 <body>
 
 {% if meta.title %}<h1 class="title">{{ meta.title }}</h1>{% endif %}
-{% if meta.subtitle %}<h1 class="subtitle">{{ meta.subtitle }}</h1>{% endif %}
-{% if meta.date %}<h3 class="date">{{ meta.date }}</h3>{% endif %}
+{% if meta.now %}<h3 class="date">rapportdatum: {{ meta.now }}</h3>{% endif %}
 
 {{ body }}
 
