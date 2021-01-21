@@ -1,5 +1,6 @@
 import json
 import sys
+import os
 
 multiple_json = [{
     'file_name': 'multiqc_picard_insertSize.json',
@@ -19,22 +20,21 @@ multiple_json = [{
 }]
 
 
-def get_qc_metrics(case_name, output):
+def get_qc_metrics(analysis_path):
     """Reads picard metrics for a particular case and returns a new dict
 
     Args:
-        case_name: given casename
+        analysis_path: analysis result path e.g. /path/case_name/analysis
 
     Returns:
-        metrics_dict: dictionary
+        qc_data: a dictionary of extracted metrics
 
     """
     qc_data = {}
-    file_path = '/home/proj/production/cancer/cases/' + case_name + '/analysis/qc/multiqc_data/'
 
     # Loop through json files
     for single_json in multiple_json:
-        file_name = file_path + single_json['file_name']
+        file_name = os.path.join(analysis_path, "qc", "multiqc_data", single_json['file_name'])
         with open(file_name, 'r') as f:
             json_file = json.load(f)
         for k in single_json['required_metrics']:
@@ -44,9 +44,4 @@ def get_qc_metrics(case_name, output):
                     qc_data[sampleid] = {}
                 qc_data[sampleid][k] = json_file[j][k]
 
-    with open(output, 'w') as output_file:
-        json.dump(qc_data, output_file, indent=2)
-
-
-if __name__ == '__main__':
-    get_qc_metrics(*sys.argv[1:])
+    return qc_data
