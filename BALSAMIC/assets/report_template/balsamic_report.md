@@ -5,13 +5,13 @@
 Familj
 : {{ meta.case_name }}
 
-Analysispanel
+Analyspanel
 : {{ meta.gene_panel_name }} 
 
-Analysisdatum
+Analysdatum
 : {{ meta.now }}
 
-Bioinformatikanlys:
+Bioinformatiskanalys:
 : {{ meta.bioinformatic }}
 
 # Sammanfattning
