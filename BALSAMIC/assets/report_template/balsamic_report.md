@@ -1,35 +1,36 @@
 # kvalitetsrapport: klinisk sekvensering av cancer prover
 
+# Provinformation
 
-## Sammanfattning
+Familj
+: {{ meta.case_name }}
 
-{% set table_qc_header = [] %}
-{% for qc_name, qc_name_meta in analysis_results.qc.items() -%}
-{{ table_qc_header.append(qc_name_meta[lang]) or ''}}
-{% endfor -%}
+Analysispanel
+: {{ meta.gene_panel_name }} 
 
-| Prov-id | Provtyp | Familj | Analysdatum | Analyspanel | {{ table_qc_header|join('|') }} |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-{%- for sample in meta.sample_map.keys() %} 
-| {{ meta.sample_map[sample] }} | {{ meta.sample_type[sample] }} | {{ meta.case_name }} | {% if meta.date %} {{ meta.date }} {% else %} {{ meta.now }} {% endif %} | {{ meta.gene_panel_name }} | {{ to_report["qc"][sample]|join('|') }} | 
+Analysisdatum
+: {{ meta.now }}
+
+Bioinformatikanlys:
+: {{ meta.bioinformatic }}
+
+# Sammanfattning
+
+| Prov-id | Provtyp | {{ meta.qc_table_header|join('|') }} |
+| :---: | :---: | :---: | :---: | :---: |
+{%- for sample, value in meta.qc_table_content.items() %} 
+{{ value|join('|') }} |
 {%- endfor %}
 
 
-<br>
-
-## Täckningsgrad för vald analyspanel
-{% set table_coverage_header = [] %}
-{% for coverage_name, coverage_name_meta in analysis_results.coverage.items() -%}
-{{ table_coverage_header.append(coverage_name_meta[lang]) or ''}}
-{% endfor %}
-
-| Prov-id | Provtyp | {{ table_coverage_header|join('|') }} |
-| --- | --- | --- | --- | --- | --- | --- |
-{%- for sample in meta.sample_map.keys() %} 
-| {{ meta.sample_map[sample] }} | {{ meta.sample_type[sample] }} | {{ to_report.coverage[sample]|join('|') }} |
+# Täckningsgrad för vald analyspanel
+| Prov-id | Provtyp | {{ meta.coverage_table_header|join('|') }} |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+{%- for sample, value in meta.coverage_table_content.items() %} 
+{{ value|join('|') }} |
 {%- endfor %}
 
-### Förklaringar
+# Förklaringar
 Värdena presenterade för Mediansekvensdjup och Täckningsgrad är efter borttagning av duplikata läsningar.
 
 **Mediansekvensdjup**: Median av seknvenseringsdjup över alla baser inkluderade i analyspanelen.
@@ -39,3 +40,5 @@ Värdena presenterade för Mediansekvensdjup och Täckningsgrad är efter bortta
 **Medelinsättningsstorlek:** Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. <200bp tyder på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning.  
 
 **Täckningsgrad:** Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.
+
+**Obs**: BALSAMIC-analys är inte en ackrediterad metod.
