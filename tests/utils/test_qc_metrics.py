@@ -5,9 +5,8 @@ from BALSAMIC.utils.qc_metrics import get_qc_metrics
 
 def test_get_metrics():
 
-    # GIVEN analysis_path and json metric file
+    # GIVEN analysis_path
     analysis_path = 'tests/test_data/qc_files/analysis'
-    single_json = 'multiqc_picard_HsMetrics.json'
 
     # WHEN invokes function
     qc_data = get_qc_metrics(analysis_path)
