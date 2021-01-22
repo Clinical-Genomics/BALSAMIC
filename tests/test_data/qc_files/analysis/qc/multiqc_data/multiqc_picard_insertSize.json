@@ -1,0 +1,28 @@
+{
+    "concatenated_ACC6365A27_XXXXXX_R_FR": {
+        "SAMPLE_NAME": "concatenated_ACC6365A27_XXXXXX_R",
+        "MEDIAN_INSERT_SIZE": 69.0,
+        "MODE_INSERT_SIZE": 64.0,
+        "MEDIAN_ABSOLUTE_DEVIATION": 16.0,
+        "MIN_INSERT_SIZE": 2.0,
+        "MAX_INSERT_SIZE": 243033817.0,
+        "MEAN_INSERT_SIZE": 74.182602,
+        "STANDARD_DEVIATION": 26.792937,
+        "READ_PAIRS": 20176840.0,
+        "PAIR_ORIENTATION": "FR",
+        "WIDTH_OF_10_PERCENT": 7.0,
+        "WIDTH_OF_20_PERCENT": 13.0,
+        "WIDTH_OF_30_PERCENT": 19.0,
+        "WIDTH_OF_40_PERCENT": 25.0,
+        "WIDTH_OF_50_PERCENT": 33.0,
+        "WIDTH_OF_60_PERCENT": 41.0,
+        "WIDTH_OF_70_PERCENT": 49.0,
+        "WIDTH_OF_80_PERCENT": 61.0,
+        "WIDTH_OF_90_PERCENT": 83.0,
+        "WIDTH_OF_95_PERCENT": 115.0,
+        "WIDTH_OF_99_PERCENT": 187.0,
+        "SAMPLE": "unknown",
+        "LIBRARY": "unknown",
+        "READ_GROUP": ""
+    }
+}
