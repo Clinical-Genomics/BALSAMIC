@@ -14,3 +14,4 @@ colorclass
 pydantic
 numpy
 cyvcf2<0.10.0
+markdown==3.3.3
