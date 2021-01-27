@@ -24,6 +24,8 @@ from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.qc_metrics import get_qc_metrics
+from BALSAMIC.utils.qc_report import render_html, report_data_population
 
 LOG = logging.getLogger(__name__)
 
@@ -39,6 +41,13 @@ LOG = logging.getLogger(__name__)
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
+@click.option("--sample-id-map", required=True, help=("Separated internal sample ID with external ID. Use comma for"
+"multiple samples. These IDs MUST exist in sample-config."
+"Syntax: internal_id:sample_type:external_id"
+". e.g. ACC1:tumor:KS454,ACC2:normal:KS556"))
+@click.option("--case-id-map", required=True, help=("Separated internal case ID with external ID."
+"Syntax: gene_panel_name:external_id"
+". e.g. gmck-solid:KSK899"))
 @click.option(
     "-a",
     "--analysis-type",
@@ -69,7 +78,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.pass_context
 def deliver(context, sample_config, analysis_type, rules_to_deliver,
-            delivery_mode):
+            delivery_mode, sample_id_map, case_id_map):
     """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
@@ -113,6 +122,31 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
                      sample_config_dict["analysis"]["analysis_type"])
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
+
+    if sequencing_type != "wgs": 
+        case_id_map = case_id_map.split(":")
+        sample_id_map = sample_id_map.split(",")
+        sample_map = dict()
+        sample_type = dict()
+        for sample in sample_id_map:
+            lims_id = sample.split(":")[0]
+            sample_map[lims_id] = sample.split(":")[1]
+            sample_type[lims_id] = sample.split(":")[2]
+
+        meta = dict()
+        meta["sample_map"] = sample_map
+        meta["sample_type"] = sample_type
+        meta["now"] = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S") 
+        meta["internal_case_id"] = case_name 
+        meta["gene_panel_name"] = case_id_map[1]
+        meta["case_name"] = case_id_map[2]
+      
+        collected_qc = get_qc_metrics(sample_config_dict["analysis"]["result"])
+        meta = report_data_population(collected_qc=collected_qc, meta=meta)
+        balsamic_qc_report = os.path.join(yaml_write_directory, "balsamic_qc_report.html")
+        balsamic_qc_report = render_html(meta=meta, html_out=balsamic_qc_report)
+        print(balsamic_qc_report)
+
 
     report_file_name = os.path.join(
         yaml_write_directory,
@@ -200,6 +234,19 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "id":
         case_name,
     })
+    # Add balsamic_qc_report
+    if balsamic_qc_report:
+        delivery_json["files"].append({
+            "path":
+            balsamic_qc_report, 
+            "step":
+            "balsamic_delivery",
+            "format":
+            get_file_extension(balsamic_qc_report),
+            "tag": ["delivery_report"],
+            "id":
+            case_name,
+        })
 
     write_json(delivery_json, delivery_file_name)
     with open(delivery_file_name + ".yaml", "w") as fn:
