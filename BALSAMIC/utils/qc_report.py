@@ -8,8 +8,6 @@ from BALSAMIC.utils.constants import REPORT_MODEL
 
 def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> dict:
     """populates a metadata dictionary that contains qc and case/sample information"""
-    sample_list = list(collected_qc.keys())
-    
     meta = {**meta, **{"title": "Kvalitetsrapport",
             "subtitle": f"BALSAMIC version {balsamic_version}",
             "bioinformatic": f"BALSAMIC version {balsamic_version}",
