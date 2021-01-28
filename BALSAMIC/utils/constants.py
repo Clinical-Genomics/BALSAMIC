@@ -345,19 +345,41 @@ REFERENCE_FILES = {
     },
 }
 
-REPORT_MODEL = {"qc": {"MEDIAN_TARGET_COVERAGE": {"sv": "Mediansekvensdjup [x]",
-                                       "en": "Median sequencing depth [x]"},
-            "FOLD_80_BASE_PENALTY": {"sv": "Fold-80",
-                                     "en": "Fold-80"},
-            "MEAN_INSERT_SIZE": {"sv": "Medelinsättningsstorlek [baspar]",
-                                 "en": "Mean insert size [base pair]"}},
-              "coverage": {"PCT_TARGET_BASES_50X": {"sv": "Täckningsgrad [50X]",
-                                           "en": "Mean insert size [base pair]"},
-                  "PCT_TARGET_BASES_100X": {"sv": "Täckningsgrad [100X]",
-                                            "en": "Mean insert size [base pair]"},
-                  "PCT_TARGET_BASES_200X": {"sv": "Täckningsgrad [200X]",
-                                            "en": "Mean insert size [base pair]"},
-                  "PCT_TARGET_BASES_500X": {"sv": "Täckningsgrad [500X]",
-                                            "en": "Mean insert size [base pair]"},
-                  "PCT_TARGET_BASES_1000X": {"sv": "Täckningsgrad [1000X]",
-                                             "en": "Mean insert size [base pair]"}}}
+REPORT_MODEL = {
+    "qc": {
+        "MEDIAN_TARGET_COVERAGE": {
+            "sv": "Mediansekvensdjup [x]",
+            "en": "Median sequencing depth [x]"
+        },
+        "FOLD_80_BASE_PENALTY": {
+            "sv": "Fold-80",
+            "en": "Fold-80"
+        },
+        "MEAN_INSERT_SIZE": {
+            "sv": "Medelinsättningsstorlek [baspar]",
+            "en": "Mean insert size [base pair]"
+        }
+    },
+    "coverage": {
+        "PCT_TARGET_BASES_50X": {
+            "sv": "Täckningsgrad [50X]",
+            "en": "Mean insert size [50X]"
+        },
+        "PCT_TARGET_BASES_100X": {
+            "sv": "Täckningsgrad [100X]",
+            "en": "Mean insert size [100X]"
+        },
+        "PCT_TARGET_BASES_200X": {
+            "sv": "Täckningsgrad [200X]",
+            "en": "Mean insert size [100X]"
+        },
+        "PCT_TARGET_BASES_500X": {
+            "sv": "Täckningsgrad [500X]",
+            "en": "Mean insert size [500X]"
+        },
+        "PCT_TARGET_BASES_1000X": {
+            "sv": "Täckningsgrad [1000X]",
+            "en": "Mean insert size [1000X]"
+        }
+    }
+}

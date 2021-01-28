@@ -70,12 +70,12 @@ def test_json_file():
 
 
 def test_sample_ids():
-  
+
     # GIVEN sampleid
     sampleid = 'concatenated_ACCyyyy_XXXXXX_R'
     expected_sampleid = 'ACCyyyy'
 
-    # WHEN apply split 
+    # WHEN apply split
     built_sampleid = sampleid.split('_')[1]
 
     # THEN assert

@@ -34,7 +34,8 @@ def get_qc_metrics(analysis_path):
 
     # Loop through json files
     for single_json in multiple_json:
-        file_name = os.path.join(analysis_path, "qc", "multiqc_data", single_json['file_name'])
+        file_name = os.path.join(analysis_path, "qc", "multiqc_data",
+                                 single_json['file_name'])
         with open(file_name, 'r') as f:
             json_file = json.load(f)
         for k in single_json['required_metrics']:

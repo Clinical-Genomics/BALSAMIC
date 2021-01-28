@@ -13,11 +13,11 @@ def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):
                                   helpers.case_id + ".hk")
 
     # WHEN running analysis
-    result = invoke_cli(
-        ['report', 'deliver', '--sample-config', tumor_only_config,
-                '--sample-id-map',
-                'ACC1:tumor:KS454', '--case-id-map', 'gmck-solid:KSK899'
-            ])
+    result = invoke_cli([
+        'report', 'deliver', '--sample-config', tumor_only_config,
+        '--sample-id-map', 'ACC1:tumor:KS454', '--case-id-map',
+        'gmck-solid:KSK899'
+    ])
 
     # THEN it should run without any error
     assert result.exit_code == 0
@@ -56,11 +56,11 @@ def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers):
     touch_temp_no_delivery_file.touch()
 
     # WHEN running analysis
-    result = invoke_cli(
-            ['report', 'deliver', '--sample-config', tumor_normal_config,
-                '--sample-id-map',
-                'ACC1:tumor:KS454,ACC2:tumor:KS454', '--case-id-map', 'gmck-solid:KSK899'
-                ])
+    result = invoke_cli([
+        'report', 'deliver', '--sample-config', tumor_normal_config,
+        '--sample-id-map', 'ACC1:tumor:KS454,ACC2:tumor:KS454',
+        '--case-id-map', 'gmck-solid:KSK899'
+    ])
 
     # THEN it should run without any error
     assert result.exit_code == 0
