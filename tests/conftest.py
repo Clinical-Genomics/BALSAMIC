@@ -90,28 +90,28 @@ def sample_fastq(tmp_path_factory):
     fastq_invalid = fastq_dir / "sample.fastq.gz"
 
     # dummy tumor fastq file
-    tumor_fastq_R_1 = fastq_dir / "concatenated_tumor_XXXXXX_R_1.fastq.gz"
-    tumor_fastq_R_2 = fastq_dir / "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+    tumorfastqR1 = fastq_dir / "concatenated_tumor_XXXXXX_R_1.fastq.gz"
+    tumorfastqR2 = fastq_dir / "concatenated_tumor_XXXXXX_R_2.fastq.gz"
 
     # dummy normal fastq file
-    normal_fastq_R_1 = fastq_dir / "concatenated_normal_XXXXXX_R_1.fastq.gz"
-    normal_fastq_R_2 = fastq_dir / "concatenated_normal_XXXXXX_R_2.fastq.gz"
+    normalfastqR1 = fastq_dir / "concatenated_normal_XXXXXX_R_1.fastq.gz"
+    normalfastqR2 = fastq_dir / "concatenated_normal_XXXXXX_R_2.fastq.gz"
 
     for fastq_file in (
             fastq_valid,
             fastq_invalid,
-            tumor_fastq_R_1,
-            tumor_fastq_R_2,
-            normal_fastq_R_1,
-            normal_fastq_R_2,
+            tumorfastqR1,
+            tumorfastqR2,
+            normalfastqR1,
+            normalfastqR2,
     ):
         fastq_file.touch()
 
     return {
         "fastq_valid": fastq_valid.absolute().as_posix(),
         "fastq_invalid": fastq_invalid.absolute().as_posix(),
-        "tumor": tumor_fastq_R_1.absolute().as_posix(),
-        "normal": normal_fastq_R_2.absolute().as_posix(),
+        "tumor": tumorfastqR1.absolute().as_posix(),
+        "normal": normalfastqR1.absolute().as_posix(),
     }
 
 
