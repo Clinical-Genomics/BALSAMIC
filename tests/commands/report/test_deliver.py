@@ -15,7 +15,7 @@ def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):
     # WHEN running analysis
     result = invoke_cli([
         'report', 'deliver', '--sample-config', tumor_only_config,
-        '--sample-id-map', 'ACC1:tumor:KS454', '--case-id-map',
+        '--sample-id-map', 'tumor:tumor:KS454', '--case-id-map',
         'gmck-solid:KSK899'
     ])
 
@@ -58,7 +58,7 @@ def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers):
     # WHEN running analysis
     result = invoke_cli([
         'report', 'deliver', '--sample-config', tumor_normal_config,
-        '--sample-id-map', 'ACC1:tumor:KS454,ACC2:tumor:KS454',
+        '--sample-id-map', 'tumor:tumor:KS454,normal:normal:KS999',
         '--case-id-map', 'gmck-solid:KSK899'
     ])
 
