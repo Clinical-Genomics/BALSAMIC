@@ -20,6 +20,12 @@ def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers):
     ])
 
     # THEN it should run without any error
+    print(result)
+    print(" ".join([
+        'report', 'deliver', '--sample-config', tumor_only_config,
+        '--sample-id-map', 'tumor:tumor:KS454', '--case-id-map',
+        'gmck-solid:KSK899'
+    ]))
     assert result.exit_code == 0
     assert actual_delivery_report.is_file()
 

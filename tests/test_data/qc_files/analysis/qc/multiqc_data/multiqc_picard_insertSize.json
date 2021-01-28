@@ -1,6 +1,6 @@
 {
-    "concatenated_ACC6365A27_XXXXXX_R_FR": {
-        "SAMPLE_NAME": "concatenated_ACC6365A27_XXXXXX_R",
+    "concatenated_tumor_XXXXXX_R_FR": {
+        "SAMPLE_NAME": "concatenated_tumor_XXXXXX_R",
         "MEDIAN_INSERT_SIZE": 69.0,
         "MODE_INSERT_SIZE": 64.0,
         "MEDIAN_ABSOLUTE_DEVIATION": 16.0,

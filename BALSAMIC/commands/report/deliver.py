@@ -143,8 +143,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         meta["sample_type"] = sample_type
         meta["now"] = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
         meta["internal_case_id"] = case_name
-        meta["gene_panel_name"] = case_id_map[1]
-        meta["case_name"] = case_id_map[2]
+        meta["gene_panel_name"] = case_id_map[0]
+        meta["case_name"] = case_id_map[1]
 
         collected_qc = get_qc_metrics(sample_config_dict["analysis"]["result"])
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
