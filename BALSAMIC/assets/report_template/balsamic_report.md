@@ -1,12 +1,13 @@
-# kvalitetsrapport: klinisk sekvensering av cancer prover
-
 # Provinformation
 
-Familj
+ProvID
 : {{ meta.case_name }}
 
 Analyspanel
 : {{ meta.gene_panel_name }} 
+
+Analyskod
+: {{ meta.apptag }} 
 
 Analysdatum
 : {{ meta.now }}
@@ -35,10 +36,8 @@ Värdena presenterade för Mediansekvensdjup och Täckningsgrad är efter bortta
 
 **Mediansekvensdjup**: Median av sekvenseringsdjup över alla baser inkluderade i analyspanelen.
 
-**Fold-80**: Jämnhet av täckningsgraden över alla gener i analyspanlen. Ett värde mellan 1.0-1.8 visar god jämnhet.
+**Fold 80 base penalty**: Jämnhet av täckningsgraden över alla gener i analyspanlen. Ett värde mellan 1.0-1.8 visar god jämnhet.
 
-**Medelinsättningsstorlek:** Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. <200bp kan tyda på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning.  
+**Fragmentlängd, medel:** Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. <200bp kan tyda på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning.  
 
 **Täckningsgrad:** Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.
-
-**Obs**: BALSAMIC-analys är inte en ackrediterad metod.
