@@ -52,7 +52,7 @@ LOG = logging.getLogger(__name__)
               required=True,
               help=("Separated internal case ID with external ID."
                     "Syntax: gene_panel_name:external_id"
-                    ". e.g. gmck-solid:KSK899"))
+                    ". e.g. gmck-solid:KSK899:apptag"))
 @click.option(
     "-a",
     "--analysis-type",
@@ -145,6 +145,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         meta["internal_case_id"] = case_name
         meta["gene_panel_name"] = case_id_map[0]
         meta["case_name"] = case_id_map[1]
+        meta["apptag"] = case_id_map[2]
 
         collected_qc = get_qc_metrics(sample_config_dict["analysis"]["result"])
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
@@ -152,110 +153,109 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
                                           "balsamic_qc_report.html")
         balsamic_qc_report = render_html(meta=meta,
                                          html_out=balsamic_qc_report)
-        print(balsamic_qc_report)
 
-    report_file_name = os.path.join(
-        yaml_write_directory,
-        sample_config_dict["analysis"]["case_id"] + "_report.html")
-    LOG.info("Creating report file {}".format(report_file_name))
-
-    # write report.html file
-    report = SnakeMake()
-    report.case_name = case_name
-    report.working_dir = os.path.join(
-        sample_config_dict["analysis"]["analysis_dir"],
-        sample_config_dict["analysis"]["case_id"],
-        "BALSAMIC_run",
-    )
-    report.report = report_file_name
-    report.configfile = sample_config
-    report.snakefile = snakefile
-    report.run_mode = "local"
-    report.use_singularity = False
-    report.run_analysis = True
-    report.sm_opt = ["--quiet"]
-    cmd = sys.executable + " -m  " + report.build_cmd()
-    subprocess.check_output(cmd.split(), shell=False)
-    LOG.info(f"Workflow report file {report_file_name}")
-
-    snakemake.snakemake(
-        snakefile=snakefile,
-        config={
-            "delivery": "True",
-            "rules_to_deliver": ",".join(rules_to_deliver)
-        },
-        dryrun=True,
-        configfiles=[sample_config],
-        quiet=True,
-    )
-
-    delivery_file_name = os.path.join(yaml_write_directory, case_name + ".hk")
-
-    delivery_file_ready = os.path.join(
-        yaml_write_directory,
-        case_name + "_delivery_ready.hk",
-    )
-    with open(delivery_file_ready, "r") as fn:
-        delivery_file_ready_dict = json.load(fn)
-
-    delivery_json = dict()
-    delivery_json["files"] = delivery_file_ready_dict
-
-    delivery_json = convert_deliverables_tags(
-        delivery_json=delivery_json, sample_config_dict=sample_config_dict)
-
-    # Add Housekeeper file to report
-    delivery_json["files"].append({
-        "path":
-        report_file_name,
-        "step":
-        "balsamic_delivery",
-        "format":
-        get_file_extension(report_file_name),
-        "tag": ["balsamic-report"],
-        "id":
-        case_name,
-    })
-    # Add CASE_ID.JSON to report
-    delivery_json["files"].append({
-        "path":
-        Path(sample_config).resolve().as_posix(),
-        "step":
-        "case_config",
-        "format":
-        get_file_extension(sample_config),
-        "tag": ["balsamic-config"],
-        "id":
-        case_name,
-    })
-    # Add DAG Graph to report
-    delivery_json["files"].append({
-        "path":
-        sample_config_dict["analysis"]["dag"],
-        "step":
-        "case_config",
-        "format":
-        get_file_extension(sample_config_dict["analysis"]["dag"]),
-        "tag": ["balsamic-dag"],
-        "id":
-        case_name,
-    })
-    # Add balsamic_qc_report
-    if balsamic_qc_report:
-        delivery_json["files"].append({
-            "path":
-            balsamic_qc_report,
-            "step":
-            "balsamic_delivery",
-            "format":
-            get_file_extension(balsamic_qc_report),
-            "tag": ["delivery_report"],
-            "id":
-            case_name,
-        })
-
-    write_json(delivery_json, delivery_file_name)
-    with open(delivery_file_name + ".yaml", "w") as fn:
-        yaml.dump(delivery_json, fn, default_flow_style=False)
-
-    LOG.info(f"Housekeeper delivery file {delivery_file_name}")
+#    report_file_name = os.path.join(
+#        yaml_write_directory,
+#        sample_config_dict["analysis"]["case_id"] + "_report.html")
+#    LOG.info("Creating report file {}".format(report_file_name))
+#
+#    # write report.html file
+#    report = SnakeMake()
+#    report.case_name = case_name
+#    report.working_dir = os.path.join(
+#        sample_config_dict["analysis"]["analysis_dir"],
+#        sample_config_dict["analysis"]["case_id"],
+#        "BALSAMIC_run",
+#    )
+#    report.report = report_file_name
+#    report.configfile = sample_config
+#    report.snakefile = snakefile
+#    report.run_mode = "local"
+#    report.use_singularity = False
+#    report.run_analysis = True
+#    report.sm_opt = ["--quiet"]
+#    cmd = sys.executable + " -m  " + report.build_cmd()
+#    subprocess.check_output(cmd.split(), shell=False)
+#    LOG.info(f"Workflow report file {report_file_name}")
+#
+#    snakemake.snakemake(
+#        snakefile=snakefile,
+#        config={
+#            "delivery": "True",
+#            "rules_to_deliver": ",".join(rules_to_deliver)
+#        },
+#        dryrun=True,
+#        configfiles=[sample_config],
+#        quiet=True,
+#    )
+#
+#    delivery_file_name = os.path.join(yaml_write_directory, case_name + ".hk")
+#
+#    delivery_file_ready = os.path.join(
+#        yaml_write_directory,
+#        case_name + "_delivery_ready.hk",
+#    )
+#    with open(delivery_file_ready, "r") as fn:
+#        delivery_file_ready_dict = json.load(fn)
+#
+#    delivery_json = dict()
+#    delivery_json["files"] = delivery_file_ready_dict
+#
+#    delivery_json = convert_deliverables_tags(
+#        delivery_json=delivery_json, sample_config_dict=sample_config_dict)
+#
+#    # Add Housekeeper file to report
+#    delivery_json["files"].append({
+#        "path":
+#        report_file_name,
+#        "step":
+#        "balsamic_delivery",
+#        "format":
+#        get_file_extension(report_file_name),
+#        "tag": ["balsamic-report"],
+#        "id":
+#        case_name,
+#    })
+#    # Add CASE_ID.JSON to report
+#    delivery_json["files"].append({
+#        "path":
+#        Path(sample_config).resolve().as_posix(),
+#        "step":
+#        "case_config",
+#        "format":
+#        get_file_extension(sample_config),
+#        "tag": ["balsamic-config"],
+#        "id":
+#        case_name,
+#    })
+#    # Add DAG Graph to report
+#    delivery_json["files"].append({
+#        "path":
+#        sample_config_dict["analysis"]["dag"],
+#        "step":
+#        "case_config",
+#        "format":
+#        get_file_extension(sample_config_dict["analysis"]["dag"]),
+#        "tag": ["balsamic-dag"],
+#        "id":
+#        case_name,
+#    })
+#    # Add balsamic_qc_report
+#    if balsamic_qc_report:
+#        delivery_json["files"].append({
+#            "path":
+#            balsamic_qc_report,
+#            "step":
+#            "balsamic_delivery",
+#            "format":
+#            get_file_extension(balsamic_qc_report),
+#            "tag": ["delivery_report"],
+#            "id":
+#            case_name,
+#        })
+#
+#    write_json(delivery_json, delivery_file_name)
+#    with open(delivery_file_name + ".yaml", "w") as fn:
+#        yaml.dump(delivery_json, fn, default_flow_style=False)
+#
+#    LOG.info(f"Housekeeper delivery file {delivery_file_name}")

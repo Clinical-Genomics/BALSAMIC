@@ -14,7 +14,8 @@ def report_data_population(collected_qc: dict, meta: dict,
         **meta,
         **{
             "title": "Kvalitetsrapport",
-            "subtitle": f"BALSAMIC version {balsamic_version}",
+            "subtitle": "klinisk sekvensering av cancer prover",
+            "footnote": "Slut på rapporten",
             "bioinformatic": f"BALSAMIC version {balsamic_version}",
             "qc_table_content": {},
             "coverage_table_content": {}
@@ -31,16 +32,32 @@ def report_data_population(collected_qc: dict, meta: dict,
         sample_cov = [
             meta["sample_map"][lims_id], meta["sample_type"][lims_id]
         ]
-        for qc_item in REPORT_MODEL["qc"].keys():
-            sample_qc.append(collected_qc[lims_id][qc_item])
-        for cov_item in REPORT_MODEL["coverage"].keys():
-            sample_cov.append(collected_qc[lims_id][cov_item])
+
+        sample_qc = sample_qc + parse_collected_qc(collected_qc=collected_qc, model_param="qc", lims_id=lims_id)
+        sample_cov = sample_cov + parse_collected_qc(collected_qc=collected_qc, model_param="coverage", lims_id=lims_id)
 
         meta["qc_table_content"][lims_id] = sample_qc
         meta["coverage_table_content"][lims_id] = sample_cov
 
+    print(meta)
+
     return meta
 
+def parse_collected_qc(collected_qc: dict, model_param: str, lims_id: str) -> list:
+    """parses collect qc and returns model_param"""
+    parsed_qc = list()
+
+    for qc_item, qc_value in REPORT_MODEL[model_param].items():
+        decimal_point = qc_value["decimal"]
+        qc_to_report = collected_qc[lims_id][qc_item]
+        if "as_percent" in qc_value:
+            qc_to_report = qc_to_report * 100
+        qc_to_report = str(round(qc_to_report, decimal_point))
+        parsed_qc.append(qc_to_report)
+
+    return parsed_qc
+
+    
 
 def render_html(meta: dict, html_out: str):
     """renders html report from template"""
