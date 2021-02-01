@@ -72,7 +72,7 @@ def render_html(meta: dict, html_out: str):
 
     markdown_text = md_template.convert(source=report_body)
 
-    env = Environment(loader=FileSystemLoader(template_path), autoescape=True)
+    env = Environment(loader=FileSystemLoader(template_path), autoescape=False)
 
     template = env.get_template("balsamic_report.html")
 
@@ -87,7 +87,7 @@ def render_body(meta: dict,
                 template_path: str,
                 body_template_md: str = "balsamic_report.md") -> str:
     """renders text body of the report from a markdown template"""
-    env = Environment(loader=FileSystemLoader(template_path), autoescape=True)
+    env = Environment(loader=FileSystemLoader(template_path), autoescape=False)
 
     template = env.get_template(body_template_md)
 

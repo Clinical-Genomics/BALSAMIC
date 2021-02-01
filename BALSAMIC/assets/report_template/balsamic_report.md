@@ -10,7 +10,7 @@ Analyskod
 : {{ meta.apptag }} 
 
 Analysdatum
-: {{ meta.now }}
+: {{ meta.config_date }}
 
 Bioinformatiskanalys:
 : {{ meta.bioinformatic }}

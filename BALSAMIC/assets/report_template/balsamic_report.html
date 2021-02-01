@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="generator" content="Markdown">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>{% if meta.title %}{{ meta.title }}{% endif %}</title>
+  <title>{% if meta.subtitle %} {{ meta.subtitle }} - {% endif %} {% if meta.title %}{{ meta.title }}{% endif %}</title>
   <style type="text/css">
   body {
     font-family: 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
@@ -215,12 +215,13 @@
 <body>
 
 {% if meta.title %}<h1 class="title">{{ meta.title }}</h1>{% endif %}
+{% if meta.subtitle %}<h1 class="subtitle">{{ meta.subtitle }}</h1>{% endif %}
 {% if meta.now %}<h3 class="date">rapportdatum: {{ meta.now }}</h3>{% endif %}
 
 {{ body }}
 
 <footer>
-  {% if meta.subtitle %}{{ meta.subtitle }}{% endif %}
+  {% if meta.footnote %}{{ meta.footnote }}{% endif %}
 </footer>
 </body>
 </html>
