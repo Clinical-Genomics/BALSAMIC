@@ -39,8 +39,6 @@ def report_data_population(collected_qc: dict, meta: dict,
         meta["qc_table_content"][lims_id] = sample_qc
         meta["coverage_table_content"][lims_id] = sample_cov
 
-    print(meta)
-
     return meta
 
 def parse_collected_qc(collected_qc: dict, model_param: str, lims_id: str) -> list:
