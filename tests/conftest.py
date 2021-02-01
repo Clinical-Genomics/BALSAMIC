@@ -100,10 +100,10 @@ def sample_fastq(tmp_path_factory):
     for fastq_file in (
             fastq_valid,
             fastq_invalid,
-            tumorfastqR1,
-            tumorfastqR2,
-            normalfastqR1,
-            normalfastqR2,
+            tumorfastqr1,
+            tumorfastqr2,
+            normalfastqr1,
+            normalfastqr2,
     ):
         fastq_file.touch()
 
