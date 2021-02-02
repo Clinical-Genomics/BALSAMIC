@@ -33,15 +33,19 @@ def report_data_population(collected_qc: dict, meta: dict,
             meta["sample_map"][lims_id], meta["sample_type"][lims_id]
         ]
 
-        sample_qc = sample_qc + parse_collected_qc(collected_qc=collected_qc, model_param="qc", lims_id=lims_id)
-        sample_cov = sample_cov + parse_collected_qc(collected_qc=collected_qc, model_param="coverage", lims_id=lims_id)
+        sample_qc = sample_qc + parse_collected_qc(
+            collected_qc=collected_qc, model_param="qc", lims_id=lims_id)
+        sample_cov = sample_cov + parse_collected_qc(
+            collected_qc=collected_qc, model_param="coverage", lims_id=lims_id)
 
         meta["qc_table_content"][lims_id] = sample_qc
         meta["coverage_table_content"][lims_id] = sample_cov
 
     return meta
 
-def parse_collected_qc(collected_qc: dict, model_param: str, lims_id: str) -> list:
+
+def parse_collected_qc(collected_qc: dict, model_param: str,
+                       lims_id: str) -> list:
     """parses collect qc and returns model_param"""
     parsed_qc = list()
 
@@ -57,7 +61,6 @@ def parse_collected_qc(collected_qc: dict, model_param: str, lims_id: str) -> li
 
     return parsed_qc
 
-    
 
 def render_html(meta: dict, html_out: str):
     """renders html report from template"""

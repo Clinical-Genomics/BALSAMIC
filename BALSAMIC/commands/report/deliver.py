@@ -142,7 +142,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         meta["sample_map"] = sample_map
         meta["sample_type"] = sample_type
         meta["now"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        meta["config_date"] = sample_config_dict["analysis"]["config_creation_date"] 
+        meta["config_date"] = sample_config_dict["analysis"][
+            "config_creation_date"]
         meta["internal_case_id"] = case_name
         meta["gene_panel_name"] = case_id_map[0]
         meta["case_name"] = case_id_map[1]
