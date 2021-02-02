@@ -51,6 +51,8 @@ def parse_collected_qc(collected_qc: dict, model_param: str, lims_id: str) -> li
         if "as_percent" in qc_value:
             qc_to_report = qc_to_report * 100
         qc_to_report = str(round(qc_to_report, decimal_point))
+        if "as_percent" in qc_value:
+            qc_to_report = f"{qc_to_report} %"
         parsed_qc.append(qc_to_report)
 
     return parsed_qc

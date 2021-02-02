@@ -151,7 +151,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         collected_qc = get_qc_metrics(sample_config_dict["analysis"]["result"])
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
         balsamic_qc_report = os.path.join(yaml_write_directory,
-                                          "balsamic_qc_report.html")
+                                          case_name + "_qc_report.html")
         balsamic_qc_report = render_html(meta=meta,
                                          html_out=balsamic_qc_report)
 
