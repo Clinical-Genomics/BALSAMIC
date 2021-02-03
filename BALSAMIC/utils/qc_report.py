@@ -14,7 +14,7 @@ def report_data_population(collected_qc: dict, meta: dict,
         **meta,
         **{
             "title": "Kvalitetsrapport",
-            "subtitle": "klinisk sekvensering av cancer prover",
+            "subtitle": "Klinisk sekvensering av cancerprover",
             "footnote": "Slut på rapporten",
             "bioinformatic": f"BALSAMIC version {balsamic_version}",
             "qc_table_content": {},

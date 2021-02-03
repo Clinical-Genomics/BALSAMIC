@@ -1,8 +1,7 @@
 import json
-import sys
 import os
 
-multiple_json = [{
+MULTIPLE_JSON = [{
     'file_name': 'multiqc_picard_insertSize.json',
     'required_metrics': ['MEAN_INSERT_SIZE']
 }, {
@@ -33,7 +32,7 @@ def get_qc_metrics(analysis_path):
     qc_data = {}
 
     # Loop through json files
-    for single_json in multiple_json:
+    for single_json in MULTIPLE_JSON:
         file_name = os.path.join(analysis_path, "qc", "multiqc_data",
                                  single_json['file_name'])
         with open(file_name, 'r') as f:

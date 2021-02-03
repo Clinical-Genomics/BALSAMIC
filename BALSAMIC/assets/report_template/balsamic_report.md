@@ -12,7 +12,7 @@ Analyskod
 Analysdatum
 : {{ meta.config_date }}
 
-Bioinformatiskanalys:
+Bioinformatisk analys
 : {{ meta.bioinformatic }}
 
 # Sammanfattning
