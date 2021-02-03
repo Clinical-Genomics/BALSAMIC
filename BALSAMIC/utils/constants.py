@@ -344,3 +344,55 @@ REFERENCE_FILES = {
         },
     },
 }
+
+REPORT_MODEL = {
+    "qc": {
+        "MEDIAN_TARGET_COVERAGE": {
+            "sv": "Mediansekvensdjup [x]",
+            "en": "Median sequencing depth [x]",
+            "decimal": 0,
+        },
+        "FOLD_80_BASE_PENALTY": {
+            "sv": "Fold 80 base penalty",
+            "en": "Fold 80 base penalty",
+            "decimal": 2,
+        },
+        "MEAN_INSERT_SIZE": {
+            "sv": "Fragmentlängd, medel [baspar]",
+            "en": "Mean insert size [base pair]",
+            "decimal": 2,
+        }
+    },
+    "coverage": {
+        "PCT_TARGET_BASES_50X": {
+            "sv": "Täckningsgrad [50X]",
+            "en": "Mean insert size [50X]",
+            "decimal": 2,
+            "as_percent": True,
+        },
+        "PCT_TARGET_BASES_100X": {
+            "sv": "Täckningsgrad [100X]",
+            "en": "Mean insert size [100X]",
+            "decimal": 2,
+            "as_percent": True,
+        },
+        "PCT_TARGET_BASES_200X": {
+            "sv": "Täckningsgrad [200X]",
+            "en": "Mean insert size [100X]",
+            "decimal": 2,
+            "as_percent": True,
+        },
+        "PCT_TARGET_BASES_500X": {
+            "sv": "Täckningsgrad [500X]",
+            "en": "Mean insert size [500X]",
+            "decimal": 2,
+            "as_percent": True,
+        },
+        "PCT_TARGET_BASES_1000X": {
+            "sv": "Täckningsgrad [1000X]",
+            "en": "Mean insert size [1000X]",
+            "decimal": 2,
+            "as_percent": True,
+        }
+    }
+}
