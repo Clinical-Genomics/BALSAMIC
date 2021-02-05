@@ -1,6 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+from BALSAMIC.utils.constants import VARCALL_PARAMS
+
 rule sentieon_TN_corealign:
     input:
         ref = config["reference"]["reference_genome"],
@@ -117,7 +119,8 @@ rule sentieon_TNscope:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        variant_setting = "--min_init_normal_lod 0.5 --min_normal_lod 1.0 --min_init_tumor_lod 1.0 --min_tumor_lod 8",
+        tumor_options = VARCALL_PARAMS["tnscope"]["tumor"], 
+        normal_options = VARCALL_PARAMS["tnscope"]["normal"], 
         sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -139,7 +142,7 @@ intermediate_vcf={params.tmpdir}/tn_sentieon_varcall_file
 -r {input.ref} -i {input.bamT} -q {input.recalT} -i {input.bamN} \
 -q {input.recalN} --algo TNscope --tumor_sample {params.tumor} \
 -normal_sample {params.normal} --dbsnp {input.dbsnp} \
-{params.variant_setting} $intermediate_vcf 
+{params.tumor_options} {params.normal_options} $intermediate_vcf 
 
 {params.sentieon_exec} driver -r {input.ref} --algo TNModelApply \
 -m {params.sentieon_ml_tnscope} -v $intermediate_vcf {output.vcf_all}
