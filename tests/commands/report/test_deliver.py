@@ -15,8 +15,11 @@ def test_deliver_tumor_only_panel(invoke_cli, tumor_only_config, helpers,
                 'SENTIEON_INSTALL_DIR': sentieon_install_dir
             }):
         # WHEN running analysis
-        result = invoke_cli(
-            ['report', 'deliver', '--sample-config', tumor_only_config])
+        result = invoke_cli([
+            'report', 'deliver', '--sample-config', tumor_only_config,
+            '--sample-id-map', 'tumor:tumor:KS454', '--case-id-map',
+            'gmck-solid:KSK899:apptag'
+        ])
 
         # THEN it should run without any error
         assert result.exit_code == 0
@@ -62,8 +65,9 @@ def test_deliver_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers,
             }):
         # WHEN running analysis
         result = invoke_cli([
-            'report', 'deliver', '--disable-variant-caller', 'mutect',
-            '--sample-config', tumor_normal_config
+            'report', 'deliver', '--sample-config', tumor_normal_config,
+            '--sample-id-map', 'tumor:tumor:KS454,normal:normal:KS999',
+            '--case-id-map', 'gmck-solid:KSK899:apptag'
         ])
 
         # THEN it should run without any error

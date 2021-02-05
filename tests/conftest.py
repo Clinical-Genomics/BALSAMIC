@@ -3,7 +3,7 @@ import json
 import os
 
 from unittest import mock
-
+from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
@@ -131,28 +131,28 @@ def sample_fastq(tmp_path_factory):
     fastq_invalid = fastq_dir / "sample.fastq.gz"
 
     # dummy tumor fastq file
-    tumor_fastq_R_1 = fastq_dir / "tumor_R_1.fastq.gz"
-    tumor_fastq_R_2 = fastq_dir / "tumor_R_2.fastq.gz"
+    tumorfastqr1 = fastq_dir / "concatenated_tumor_XXXXXX_R_1.fastq.gz"
+    tumorfastqr2 = fastq_dir / "concatenated_tumor_XXXXXX_R_2.fastq.gz"
 
     # dummy normal fastq file
-    normal_fastq_R_1 = fastq_dir / "normal_R_1.fastq.gz"
-    normal_fastq_R_2 = fastq_dir / "normal_R_2.fastq.gz"
+    normalfastqr1 = fastq_dir / "concatenated_normal_XXXXXX_R_1.fastq.gz"
+    normalfastqr2 = fastq_dir / "concatenated_normal_XXXXXX_R_2.fastq.gz"
 
     for fastq_file in (
             fastq_valid,
             fastq_invalid,
-            tumor_fastq_R_1,
-            tumor_fastq_R_2,
-            normal_fastq_R_1,
-            normal_fastq_R_2,
+            tumorfastqr1,
+            tumorfastqr2,
+            normalfastqr1,
+            normalfastqr2,
     ):
         fastq_file.touch()
 
     return {
         "fastq_valid": fastq_valid.absolute().as_posix(),
         "fastq_invalid": fastq_invalid.absolute().as_posix(),
-        "tumor": tumor_fastq_R_1.absolute().as_posix(),
-        "normal": normal_fastq_R_2.absolute().as_posix(),
+        "tumor": tumorfastqr1.absolute().as_posix(),
+        "normal": normalfastqr1.absolute().as_posix(),
     }
 
 
@@ -186,6 +186,7 @@ def analysis_dir(tmp_path_factory):
     Creates and returns analysis directory
     """
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
+
     return analysis_dir.as_posix()
 
 
@@ -209,9 +210,20 @@ ls -l # dummy command
 
 
 @pytest.fixture(scope="session")
+<<<<<<< HEAD
 def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
                         balsamic_cache, panel_bed_file,
                         sentieon_license, sentieon_install_dir):
+=======
+def tumor_normal_config(
+        tmp_path_factory,
+        sample_fastq,
+        analysis_dir,
+        singularity_container,
+        reference_json,
+        panel_bed_file,
+):
+>>>>>>> origin/master
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -249,6 +261,11 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
                 "ACC2",
             ],
         )
+
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir.mkdir(parents=True, exist_ok=False)
+    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/",
+              qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -298,9 +315,20 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, balsam
 
 
 @pytest.fixture(scope="session")
+<<<<<<< HEAD
 def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache, 
                       analysis_dir, panel_bed_file,
                       sentieon_license, sentieon_install_dir):
+=======
+def tumor_only_config(
+        tmpdir_factory,
+        sample_fastq,
+        singularity_container,
+        analysis_dir,
+        reference_json,
+        panel_bed_file,
+):
+>>>>>>> origin/master
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -331,6 +359,11 @@ def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache,
                 balsamic_cache,
             ],
         )
+
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir.mkdir(parents=True, exist_ok=False)
+    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/",
+              qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
