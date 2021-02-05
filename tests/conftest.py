@@ -210,20 +210,9 @@ ls -l # dummy command
 
 
 @pytest.fixture(scope="session")
-<<<<<<< HEAD
 def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
                         balsamic_cache, panel_bed_file,
                         sentieon_license, sentieon_install_dir):
-=======
-def tumor_normal_config(
-        tmp_path_factory,
-        sample_fastq,
-        analysis_dir,
-        singularity_container,
-        reference_json,
-        panel_bed_file,
-):
->>>>>>> origin/master
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -315,20 +304,9 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, balsam
 
 
 @pytest.fixture(scope="session")
-<<<<<<< HEAD
 def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache, 
                       analysis_dir, panel_bed_file,
                       sentieon_license, sentieon_install_dir):
-=======
-def tumor_only_config(
-        tmpdir_factory,
-        sample_fastq,
-        singularity_container,
-        analysis_dir,
-        reference_json,
-        panel_bed_file,
-):
->>>>>>> origin/master
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
