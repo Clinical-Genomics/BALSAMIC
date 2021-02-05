@@ -141,13 +141,13 @@ intermediate_vcf={params.tmpdir}/tn_sentieon_varcall_file
 {params.sentieon_exec} driver -t {threads} \
 -r {input.ref} -i {input.bamT} -q {input.recalT} -i {input.bamN} \
 -q {input.recalN} --algo TNscope --tumor_sample {params.tumor} \
--normal_sample {params.normal} --dbsnp {input.dbsnp} \
+--normal_sample {params.normal} --dbsnp {input.dbsnp} \
 {params.tumor_options} {params.normal_options} $intermediate_vcf 
 
 {params.sentieon_exec} driver -r {input.ref} --algo TNModelApply \
 -m {params.sentieon_ml_tnscope} -v $intermediate_vcf {output.vcf_all}
 
-echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap_snv};
+echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap_snv};
 cp {output.namemap_snv} {output.namemap_sv}
 rm -rf {params.tmpdir};
         """
