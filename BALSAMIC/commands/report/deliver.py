@@ -35,13 +35,13 @@ LOG = logging.getLogger(__name__)
 )
 @click.option(
     "--sample-id-map",
-    required=True,
+    required=False,
     help=("Separated internal sample ID with external ID. Use comma for"
           "multiple samples. These IDs MUST exist in sample-config."
           "Syntax: internal_id:sample_type:external_id"
           ". e.g. ACC1:tumor:KS454,ACC2:normal:KS556"))
 @click.option("--case-id-map",
-              required=True,
+              required=False,
               help=("Separated internal case ID with external ID."
                     "Syntax: gene_panel_name:external_id"
                     ". e.g. gmck-solid:KSK899:apptag"))
@@ -125,7 +125,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
     snakefile = get_snakefile(analysis_type, sequencing_type)
 
-    if sequencing_type != "wgs":
+    balsamic_qc_report = None
+    if sequencing_type != "wgs" and sample_id_map and case_id_map:
         case_id_map = case_id_map.split(":")
         sample_id_map = sample_id_map.split(",")
         sample_map = dict()
