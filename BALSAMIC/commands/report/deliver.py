@@ -14,13 +14,10 @@ from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
-<<<<<<< HEAD
 from BALSAMIC.utils.constants import VCF_DICT
-=======
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.qc_metrics import get_qc_metrics
 from BALSAMIC.utils.qc_report import render_html, report_data_population
->>>>>>> origin/master
 
 LOG = logging.getLogger(__name__)
 
