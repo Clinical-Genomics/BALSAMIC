@@ -188,16 +188,16 @@ VARDICT_SETTINGS = {
     "description": "General purpose filters used for filtering VarDict",
 }
 
-# Configuration for TNscope settings:
+# Configuration for SENTIEON settings:
 
-TNscope_SETTINGS = {
+SENTIEON_VARCALL_SETTINGS = {
     "AD": {
         "tag_value": 10,
         "filter_name": "balsamic_low_tumor_ad",
         "field": "FORMAT"
     },
     "DP": {
-        "tag_value": 100,
+        "tag_value": 10,
         "filter_name": "balsamic_low_tumor_dp",
         "field": "FORMAT",
     },
@@ -216,40 +216,10 @@ TNscope_SETTINGS = {
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO"
     },
-    "varcaller_name": "tnscope",
+    "varcaller_name": "sentieon",
     "filter_type": "general",
     "analysis_type": "tumor_only",
-    "description": "General purpose filters used for filtering tnscope"
-}
-
-
-# Configuration for TNhaplotyper settings:
-
-TNhaplotyper_SETTINGS = {
-    "AD": {
-        "tag_value": 10,
-        "filter_name": "balsamic_low_tumor_ad",
-        "field": "FORMAT"
-    },
-    "AF_max": {
-        "tag_value": 1,
-        "filter_name": "balsamic_af_one",
-        "field": "FORMAT"
-    },
-    "AF_min": {
-        "tag_value": 0.01,
-        "filter_name": "balsamic_low_af",
-        "field": "FORMAT"
-    },
-    "pop_freq": {
-        "tag_value": 0.005,
-        "filter_name": "balsamic_high_pop_freq",
-        "field": "INFO"
-    },
-    "varcaller_name": "tnhaplotyper",
-    "filter_type": "general",
-    "analysis_type": "tumor_only",
-    "description": "General purpose filters used for filtering tnhaplotyper"
+    "description": "General purpose filters used for filtering tnscope and tnhaplotyper"
 }
 
 # reference related constants
