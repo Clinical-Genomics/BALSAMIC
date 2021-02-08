@@ -43,7 +43,7 @@ class VarCallerFilter(BaseModel):
         AF_min: VCFAttributes (optional); minimum allelic fraction
         AF_max: VCFAttributes (optional); maximum allelic fraction
         MQ: VCFAttributes (optional); minimum mapping quality
-        DP: VCFAttributes; minimum read depth
+        DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
         varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
@@ -55,7 +55,7 @@ class VarCallerFilter(BaseModel):
     AF_min: Optional[VCFAttributes]
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
-    DP: VCFAttributes
+    DP: Optional[VCFAttributes]
     pop_freq: VCFAttributes
     varcaller_name: str
     filter_type: str

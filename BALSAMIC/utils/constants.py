@@ -188,6 +188,70 @@ VARDICT_SETTINGS = {
     "description": "General purpose filters used for filtering VarDict",
 }
 
+# Configuration for TNscope settings:
+
+TNscope_SETTINGS = {
+    "AD": {
+        "tag_value": 10,
+        "filter_name": "balsamic_low_tumor_ad",
+        "field": "FORMAT"
+    },
+    "DP": {
+        "tag_value": 100,
+        "filter_name": "balsamic_low_tumor_dp",
+        "field": "FORMAT",
+    },
+    "AF_max": {
+        "tag_value": 1,
+        "filter_name": "balsamic_af_one",
+        "field": "FORMAT"
+    },
+    "AF_min": {
+        "tag_value": 0.01,
+        "filter_name": "balsamic_low_af",
+        "field": "FORMAT"
+    },
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO"
+    },
+    "varcaller_name": "tnscope",
+    "filter_type": "general",
+    "analysis_type": "tumor_only",
+    "description": "General purpose filters used for filtering tnscope"
+}
+
+
+# Configuration for TNhaplotyper settings:
+
+TNhaplotyper_SETTINGS = {
+    "AD": {
+        "tag_value": 10,
+        "filter_name": "balsamic_low_tumor_ad",
+        "field": "FORMAT"
+    },
+    "AF_max": {
+        "tag_value": 1,
+        "filter_name": "balsamic_af_one",
+        "field": "FORMAT"
+    },
+    "AF_min": {
+        "tag_value": 0.01,
+        "filter_name": "balsamic_low_af",
+        "field": "FORMAT"
+    },
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO"
+    },
+    "varcaller_name": "tnhaplotyper",
+    "filter_type": "general",
+    "analysis_type": "tumor_only",
+    "description": "General purpose filters used for filtering tnhaplotyper"
+}
+
 # reference related constants
 VALID_REF_FORMAT = ["fasta", "vcf", "text", "gtf", "gff"]
 VALID_GENOME_VER = ["hg19", "hg38"]
