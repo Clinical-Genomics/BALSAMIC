@@ -35,3 +35,66 @@ tabix -p vcf -f {output.vcf_filtered};
 bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 tabix -p vcf -f {output.vcf_pass};
     """
+
+rule ngs_filter_tnscope:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
+  params:
+    conda = config["bioinfo_tools"].get("bcftools"),
+    AD = [TNscope.AD.tag_value, TNscope.AD.filter_name],
+    DP = [TNscope.DP.tag_value, TNscope.DP.filter_name],
+    AF_min = [TNscope.AF_min.tag_value, TNscope.AF_min.filter_name],
+    AF_max = [TNscope.AF_max.tag_value, TNscope.AF_max.filter_name],
+    pop_freq = [TNscope.pop_freq.tag_value, TNscope.pop_freq.filter_name],
+  threads: get_threads(cluster_config, 'ngs_filter_tnscope')
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  benchmark:
+    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnscope.vep.tsv"
+  shell:
+    """
+source activate {params.conda};
+bcftools view {input.vcf} \
+| bcftools filter --include 'FORMAT/AFDP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+tabix -p vcf -f {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_pass};
+    """
+
+
+rule ngs_filter_tnhaplotyper:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
+  params:
+    conda = config["bioinfo_tools"].get("bcftools"),
+    AD = [TNhaplotyper.AD.tag_value, TNhaplotyper.AD.filter_name],
+    AF_min = [TNhaplotyper.AF_min.tag_value, TNhaplotyper.AF_min.filter_name],
+    AF_max = [TNhaplotyper.AF_max.tag_value, TNhaplotyper.AF_max.filter_name],
+    pop_freq = [TNhaplotyper.pop_freq.tag_value, TNhaplotyper.pop_freq.filter_name],
+  threads: get_threads(cluster_config, 'ngs_filter_tnhaplotyper')
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  benchmark:
+    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnhaplotyper.vep.tsv"
+  shell:
+    """
+source activate {params.conda};
+bcftools view {input.vcf} \
+| bcftools filter --include 'FORMAT/AD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+tabix -p vcf -f {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_pass};
+    """
