@@ -175,6 +175,7 @@ else:
 somatic_caller_sv = ['manta', 'cnvkit']
 if config["analysis"]["sequencing_type"] == "wgs":
     somatic_caller_snv = ['tnhaplotyper', 'tnsnv', 'tnscope']
+    variantcalling_rules.append("snakemake_rules/variant_calling/sentieon_split_snv_sv.rule")
     if config['analysis']['analysis_type'] == "paired":
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",

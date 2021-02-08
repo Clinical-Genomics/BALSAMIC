@@ -37,6 +37,14 @@ MUTATION_TYPE = ["SNV", "SV", "CNV"]
 ANALYSIS_TYPES = ["paired", "single", "umi", "qc"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 
+# Variantcaller parameters
+VARCALL_PARAMS = {
+"tnscope":
+{
+"tumor": "--min_init_tumor_lod 1.0 --min_tumor_lod 8",
+"normal": "--min_init_normal_lod 0.5 --min_normal_lod 1.0",
+}
+}
 # Configuration of VCF settings
 VCF_DICT = {
     "TNscope_consensusaligned_umi": {
