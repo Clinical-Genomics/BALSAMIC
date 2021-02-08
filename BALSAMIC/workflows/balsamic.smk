@@ -28,8 +28,8 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_threads, get_script_path)
 
 from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
-                                    VARDICT_SETTINGS,TNscope_SETTINGS, TNhaplotyper_SETTINGS,
-                                    VCFANNO_TOML, umiworkflow_params)
+                                    VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS, VCFANNO_TOML, 
+                                    umiworkflow_params)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -60,9 +60,8 @@ singularity_image = config['singularity']['image']
 picarddup = get_picard_mrkdup(config)
 
 # Varcaller filter settings
-VARDICT= VarCallerFilter.parse_obj(VARDICT_SETTINGS)
-TNscope= VarCallerFilter.parse_obj(TNscope_SETTINGS)
-TNhaplotyper= VarCallerFilter.parse_obj(TNhaplotyper_SETTINGS)
+VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 
 # parse parameters as constants for umiworkflow
 paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
