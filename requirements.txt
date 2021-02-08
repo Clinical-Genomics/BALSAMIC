@@ -19,3 +19,4 @@ snakemake==5.13.0
 yapf>=0.30.0
 h5py>=3.1.0
 PyPDF2>=1.26.0
+markdown==3.3.3
