@@ -171,7 +171,7 @@ rule download_reference:
             log_file = output_file + ".log"
 
             if ref.url.scheme == "gs":
-                cmd = "gsutil cp -L {} {} -".format(log_file, ref.url)
+                cmd = "export TMPDIR=/tmp; gsutil cp -L {} {} -".format(log_file, ref.url)
             else:
                 cmd = "wget -a {} -O - {}".format(log_file, ref.url)
 
