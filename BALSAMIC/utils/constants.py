@@ -192,7 +192,7 @@ VARDICT_SETTINGS = {
 
 SENTIEON_VARCALL_SETTINGS = {
     "AD": {
-        "tag_value": 10,
+        "tag_value": 2,
         "filter_name": "balsamic_low_tumor_ad",
         "field": "FORMAT"
     },
@@ -207,7 +207,7 @@ SENTIEON_VARCALL_SETTINGS = {
         "field": "FORMAT"
     },
     "AF_min": {
-        "tag_value": 0.01,
+        "tag_value": 0.05,
         "filter_name": "balsamic_low_af",
         "field": "FORMAT"
     },
