@@ -187,7 +187,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
                                      "snakemake_rules/dragen_suite/dragen_dna.rule",
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
-        annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_only.rule")
+        annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule")
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     annotation_rules.append("snakemake_rules/annotation/rankscore.rule")
