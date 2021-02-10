@@ -2,12 +2,13 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
-rule ngs_filter_sentieon:
+rule ngs_filter_tnscope:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.pass.vcf.gz",
+    wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.filtered.vcf.gz",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.filtered.pass.vcf.gz",
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz",
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -15,21 +16,94 @@ rule ngs_filter_sentieon:
     AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
     AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
-  threads: get_threads(cluster_config, 'ngs_filter_sentieon')
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    cnt_reads = [SENTIEON_CALLER.cnt_reads.tag_value, SENTIEON_CALLER.cnt_reads.filter_name],
+    qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
+    sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
+  threads: 
+    get_threads(cluster_config, 'ngs_filter_tnscope')
+  singularity: 
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
+    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnscope.vep.tsv"
   shell:
     """
 source activate {params.conda};
-bcftools view {input.vcf} \
+grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
+bcftools filter --regions-file {input.wgs_calling_file}.bed {input.vcf} \
+| bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools filter --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
+|  bcftools filter --include 'FORMAT/ALT_F1R2 > {params.cnt_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.cnt_reads[0]} &&  FORMAT/REF_F1R2 > {params.cnt_reads[0]} && FORMAT/REF_F2R1 > {params.cnt_reads[0]})' --soft-filter '{params.cnt_reads[1]}' --mode '+' \
+| bcftools filter --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+tabix -p vcf -f {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_pass};
+    """
+
+rule ngs_filter_tnhaplotyper:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.pass.vcf.gz",
+    wgs_calling_file = config["reference"]["wgs_calling_interval"]
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.filtered.pass.vcf.gz",
+  params:
+    conda = config["bioinfo_tools"].get("bcftools"),
+    DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
+    AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
+    AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
+    AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
+    pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
+    cnt_reads = [SENTIEON_CALLER.cnt_reads.tag_value, SENTIEON_CALLER.cnt_reads.filter_name],
+    qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name]
+  threads: 
+    get_threads(cluster_config, 'ngs_filter_tnhaplotyper')
+  singularity: 
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  benchmark:
+    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnhaplotyper.vep.tsv"
+  shell:
+    """
+source activate {params.conda};
+grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
+bcftools filter --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --include 'FORMAT/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools filter --include 'FORMAT/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools filter --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
+|  bcftools filter --include 'FORMAT/ALT_F1R2 > {params.cnt_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.cnt_reads[0]} &&  FORMAT/REF_F1R2 > {params.cnt_reads[0]} && FORMAT/REF_F2R1 > {params.cnt_reads[0]})' --soft-filter '{params.cnt_reads[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;
 tabix -p vcf -f {output.vcf_filtered};
 bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 tabix -p vcf -f {output.vcf_pass};
+    """
+
+rule ngs_filter_intersect:
+  input:
+    tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz",
+    tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.filtered.pass.vcf.gz"
+  output:
+    vcf_name = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.clinical.vcf.gz"
+  params:
+    conda = config["bioinfo_tools"].get("bcftools"),
+    vcf_dir = vep_dir + "sentieon_callers_intersect"
+  threads: 
+    get_threads(cluster_config, 'ngs_filter_intersect')
+  singularity: 
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()     
+  benchmark:
+    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.vep.tsv"
+  shell:
+    """
+source activate {params.conda};
+bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z ;
+cp {params.vcf_dir}/0002.vcf.gz {output.vcf_name};
+tabix -p vcf -f {output.vcf_name};
+rm -r {params.vcf_dir}         
     """
