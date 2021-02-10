@@ -192,7 +192,7 @@ VARDICT_SETTINGS = {
 
 SENTIEON_VARCALL_SETTINGS = {
     "AD": {
-        "tag_value": 2,
+        "tag_value": 3,
         "filter_name": "balsamic_low_tumor_ad",
         "field": "FORMAT"
     },
@@ -212,9 +212,24 @@ SENTIEON_VARCALL_SETTINGS = {
         "field": "FORMAT"
     },
     "pop_freq": {
-        "tag_value": 0.005,
+        "tag_value": 0.001,
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO"
+    },
+    "qss": {
+	"tag_value": 20 ,
+	"filter_name": "balsamic_low_quality_scores",
+	"field": "FORMAT"
+    },
+    "cnt_reads": {
+	"tag_value": 0 ,
+	"filter_name": "balsamic_low_read_counts",
+	"field": "FORMAT"
+    },
+    "sor": {
+	"tag_value": 3,
+	"filter_name": "balsamic_sym_or",
+	"field": "INFO"
     },
     "varcaller_name": "sentieon",
     "filter_type": "general",
