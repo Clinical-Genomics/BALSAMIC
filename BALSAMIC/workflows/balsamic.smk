@@ -263,8 +263,8 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
                                         filters=["all", "pass"])]
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']["analysis_type"] == "single":
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
-                                            vcf=get_vcf(config, ["tnscope","tnhaplotyper"], [config["analysis"]["case_id"]]))])
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.clinical.vcf.gz",
+                                            vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
 
 if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
