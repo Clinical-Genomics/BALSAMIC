@@ -20,14 +20,12 @@
 
 
 .. toctree::
-   :caption: API and CLI reference 
+   :caption: CLI reference 
    :name: api_cli_reference
    :hidden:
    :maxdepth: 1
 
-   cli_reference
    cli_package
-   source/modules
  
 .. toctree::
     :caption: Other Info
