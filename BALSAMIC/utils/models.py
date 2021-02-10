@@ -45,7 +45,7 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
-	cnt_reads: VCFAttributes (optional); minimum read counts 
+	strand_reads: VCFAttributes (optional); minimum strand specific read counts 
         qss: VCFAttributes (optional); minimum sum of base quality scores
 	sor: VCFAttributes (optional); minimum symmetrical log-odds ratio  
 	varcaller_name: str (required); variant caller name
@@ -60,7 +60,7 @@ class VarCallerFilter(BaseModel):
     MQ: Optional[VCFAttributes]
     DP: Optional[VCFAttributes]
     pop_freq: VCFAttributes
-    cnt_reads: Optional[VCFAttributes]
+    strand_reads: Optional[VCFAttributes]
     qss : Optional[VCFAttributes]
     sor : Optional[VCFAttributes]
     varcaller_name: str

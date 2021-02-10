@@ -221,14 +221,14 @@ SENTIEON_VARCALL_SETTINGS = {
 	"filter_name": "balsamic_low_quality_scores",
 	"field": "FORMAT"
     },
-    "cnt_reads": {
+    "strand_reads": {
 	"tag_value": 0 ,
-	"filter_name": "balsamic_low_read_counts",
+	"filter_name": "balsamic_low_strand_read_counts",
 	"field": "FORMAT"
     },
     "sor": {
 	"tag_value": 3,
-	"filter_name": "balsamic_sym_or",
+	"filter_name": "balsamic_high_strand_oddsratio",
 	"field": "INFO"
     },
     "varcaller_name": "sentieon",
