@@ -196,6 +196,55 @@ VARDICT_SETTINGS = {
     "description": "General purpose filters used for filtering VarDict",
 }
 
+# Configuration for SENTIEON settings:
+
+SENTIEON_VARCALL_SETTINGS = {
+    "AD": {
+        "tag_value": 3,
+        "filter_name": "balsamic_low_tumor_ad",
+        "field": "FORMAT"
+    },
+    "DP": {
+        "tag_value": 10,
+        "filter_name": "balsamic_low_tumor_dp",
+        "field": "FORMAT",
+    },
+    "AF_max": {
+        "tag_value": 1,
+        "filter_name": "balsamic_af_one",
+        "field": "FORMAT"
+    },
+    "AF_min": {
+        "tag_value": 0.05,
+        "filter_name": "balsamic_low_af",
+        "field": "FORMAT"
+    },
+    "pop_freq": {
+        "tag_value": 0.001,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO"
+    },
+    "qss": {
+	"tag_value": 20 ,
+	"filter_name": "balsamic_low_quality_scores",
+	"field": "FORMAT"
+    },
+    "strand_reads": {
+	"tag_value": 0 ,
+	"filter_name": "balsamic_low_strand_read_counts",
+	"field": "FORMAT"
+    },
+    "sor": {
+	"tag_value": 3,
+	"filter_name": "balsamic_high_strand_oddsratio",
+	"field": "INFO"
+    },
+    "varcaller_name": "sentieon",
+    "filter_type": "general",
+    "analysis_type": "tumor_only",
+    "description": "General purpose filters used for filtering tnscope and tnhaplotyper"
+}
+
 # reference related constants
 VALID_REF_FORMAT = ["fasta", "vcf", "text", "gtf", "gff"]
 VALID_GENOME_VER = ["hg19", "hg38"]

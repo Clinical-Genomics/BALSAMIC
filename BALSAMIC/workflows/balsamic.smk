@@ -28,7 +28,8 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_threads, get_script_path)
 
 from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
-                                    VARDICT_SETTINGS, VCFANNO_TOML, umiworkflow_params)
+                                    VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS, VCFANNO_TOML, 
+                                    umiworkflow_params)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -58,8 +59,9 @@ singularity_image = config['singularity']['image']
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
 
-# VarDict filter settings
-VARDICT= VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+# Varcaller filter settings
+VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
+SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 
 # parse parameters as constants for umiworkflow
 paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
@@ -186,6 +188,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
                                      "snakemake_rules/dragen_suite/dragen_dna.rule",
                                      "snakemake_rules/variant_calling/cnvkit_single.rule"])
+        annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule")
 else:
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     annotation_rules.append("snakemake_rules/annotation/rankscore.rule")
@@ -259,6 +262,10 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
                                  expand(vep_dir + "{vcf}.{filters}.vcf.gz",
                                         vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]),
                                         filters=["all", "pass"])]
+
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']["analysis_type"] == "single":
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
+                                            vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
 
 if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
