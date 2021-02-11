@@ -47,6 +47,15 @@ Removed
 
 * ``gatk-register`` command removed from installing GATK PR #496
 
+[6.1.0]
+-------
+
+Added
+^^^^^
+* CLI option to expand report generation for TGA and WES runs. Please see ``balsamic report deliver --help``
+* BALSAMIC now generates a custom HTML report for TGA and WES cases.
+
+
 [6.0.4]
 -------
 
