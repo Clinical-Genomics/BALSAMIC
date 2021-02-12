@@ -48,6 +48,21 @@ def get_fold80(hs_metrics: pd.DataFrame) -> pd.DataFrame:
 
     return fold80_value
 
+def get_fold80(hs_metrics: pd.DataFrame) -> pd.DataFrame:
+    """Reads the HS_metrics (DataFrame) and returns the fold-80 values as list
+
+    Args:
+        hs_metrics: DataFrame
+
+    Returns:
+        qc_df: List
+
+    """
+    fold80_value = list(hs_metrics)
+
+    return fold80_value
+
+
 def get_bait_name(input_config: str):
     """Get the bait name from case config
 
@@ -135,9 +150,9 @@ def check_qc_criteria(input_qc_df: pd.DataFrame,
 
     # 2) Adding new col with the calculated difference in the qc values
     merged_df['qc_diff_' + normal_sample] = merged_df[
-        column_header[2]] - merged_df[column_header[0]]
+                                                column_header[2]] - merged_df[column_header[0]]
     merged_df['qc_diff_' + tumor_sample] = merged_df[
-        column_header[2]] - merged_df[column_header[1]]
+                                               column_header[2]] - merged_df[column_header[1]]
 
     # 3) Desired conditions for normal and tumor sample to pass. Two different conditions are required
     # since the conditions are different for the samples and should not overwrite each other.
