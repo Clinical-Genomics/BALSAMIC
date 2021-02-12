@@ -34,6 +34,19 @@ def read_qc_table(qc_table: dict):
     qc_df = pd.DataFrame.from_dict(qc_table)
     return qc_df
 
+def get_fold80(hs_metrics: pd.DataFrame) -> pd.DataFrame:
+    """Reads the HS_metrics (DataFrame) and returns the fold-80 values as list
+
+    Args:
+        hs_metrics: DataFrame
+
+    Returns:
+        qc_df: List
+
+    """
+    fold80_value = list(hs_metrics)
+
+    return fold80_value
 
 def get_bait_name(input_config: str):
     """Get the bait name from case config
