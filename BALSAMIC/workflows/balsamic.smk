@@ -182,7 +182,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
                                      "snakemake_rules/variant_calling/cnvkit_paired.rule"])
-
+        annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule")
     else:
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
@@ -263,7 +263,6 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
                                         vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]),
                                         filters=["all", "pass"])]
 
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']["analysis_type"] == "single":
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
                                             vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
 
