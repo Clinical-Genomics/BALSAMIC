@@ -261,10 +261,9 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
                                         vcf=get_vcf(config, germline_caller, config["samples"])),
                                  expand(vep_dir + "{vcf}.{filters}.vcf.gz",
                                         vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]),
-                                        filters=["all", "pass"])]
-
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
-                                            vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
+                                        filters=["all", "pass"]),
+                                 expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
+                                            vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))]
 
 if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
