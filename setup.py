@@ -23,7 +23,7 @@ setup(
     install_requires=install_requires,
     packages=find_packages(),
     package_data={
-        "assets": ["scripts/*R", "sentieon_models/*model"], 
+        "assets": ["scripts/*R", "sentieon_models/*model"],
         "config": ["*.json"]
     },
     include_package_data=True,
