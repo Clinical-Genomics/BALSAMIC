@@ -15,6 +15,7 @@ rule ngs_filter_tnscope:
     AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
     AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
   threads: get_threads(cluster_config, 'ngs_filter_tnscope')
   singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   benchmark:
