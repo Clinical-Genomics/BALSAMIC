@@ -6,18 +6,18 @@ from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 from BALSAMIC.utils.rule import get_sample_type
 
 
-def read_hs_metrics(hs_metrics_file: str):
-    """Reads the HS metrics (json-format) and returns it as a DataFrame
+def read_json(json_file: str):
+    """Reads a json-file and returns it as a DataFrame
 
     Args:
-        hs_metrics_file: A string path to the file
+        json_file: A string path to the file
 
     Returns:
         metrics_df: DataFrame
 
     """
-    with open(hs_metrics_file):
-        metrics_df = pd.read_json(hs_metrics_file)
+    with open(json_file):
+        metrics_df = pd.read_json(json_file)
     return metrics_df
 
 
@@ -235,7 +235,7 @@ def get_qc_check(hs_metrics, output, config):
 
     """
     # Read the HS metrics and qc table and convert to df
-    hs_metrics_df = read_hs_metrics(hs_metrics)
+    hs_metrics_df = read_json(hs_metrics)
     qc_table_df = read_qc_table(HSMETRICS_QC_CHECK)
 
     # Extract the bait name and create a new df with the desired qc criteria
