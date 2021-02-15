@@ -23,10 +23,10 @@ rule ngs_filter_tnscope:
     """
 source activate {params.conda};
 bcftools view {input.vcf} \
-| bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'SMPL_MIN(FORMAT/AD) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AF[0] <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;
 tabix -p vcf -f {output.vcf_filtered};
