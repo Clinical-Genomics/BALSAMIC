@@ -1,3 +1,12 @@
+[6.1.1]
+-------
+
+Fixed
+^^^^^
+
+* Fixed a bug with missing QC templates after ``pip install``
+
+
 [6.1.0]
 -------
 
