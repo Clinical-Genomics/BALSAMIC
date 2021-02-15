@@ -47,6 +47,12 @@ Removed
 
 * ``gatk-register`` command removed from installing GATK PR #496
 
+[6.1.1]
+-------
+
+* Fixed a bug with missing QC templates after ``pip install``
+
+
 [6.1.0]
 -------
 
