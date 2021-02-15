@@ -34,33 +34,20 @@ def read_qc_table(qc_table: dict):
     qc_df = pd.DataFrame.from_dict(qc_table)
     return qc_df
 
-def get_fold80(hs_metrics: pd.DataFrame) -> pd.DataFrame:
-    """Reads the HS_metrics (DataFrame) and returns the fold-80 values as list
+def get_qc_value(hs_metrics: pd.DataFrame, qc_value: str = "FOLD_80_BASE_PENALTY") -> pd.DataFrame:
+    """Reads the HS_metrics (DataFrame) and returns the desired qc-value(s) as list. Fold-80 is default value
 
     Args:
         hs_metrics: DataFrame
+        qc_value: String
 
     Returns:
         qc_df: List
 
     """
-    fold80_value = list(hs_metrics)
+    output_value = list(hs_metrics.loc[qc_value])
 
-    return fold80_value
-
-def get_fold80(hs_metrics: pd.DataFrame) -> pd.DataFrame:
-    """Reads the HS_metrics (DataFrame) and returns the fold-80 values as list
-
-    Args:
-        hs_metrics: DataFrame
-
-    Returns:
-        qc_df: List
-
-    """
-    fold80_value = list(hs_metrics)
-
-    return fold80_value
+    return output_value
 
 
 def get_bait_name(input_config: str):
