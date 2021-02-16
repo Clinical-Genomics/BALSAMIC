@@ -124,7 +124,6 @@ def check_qc_criteria_simple(input_qc_list: list, qc_criteria: str):
     # Open the text file with the QC-criteria and put it in a variable as float.
     with open(qc_criteria, "r") as f:
         qc_value = float(f.read())
-        print(qc_value)
 
     # Check if QC pass or fail
     for val in input_qc_list:
