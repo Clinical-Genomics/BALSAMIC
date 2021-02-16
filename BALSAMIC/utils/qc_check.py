@@ -34,6 +34,7 @@ def read_qc_table(qc_table: dict):
     qc_df = pd.DataFrame.from_dict(qc_table)
     return qc_df
 
+
 def get_qc_value(hs_metrics: pd.DataFrame, qc_value: str = "FOLD_80_BASE_PENALTY") -> pd.DataFrame:
     """Reads the HS_metrics (DataFrame) and returns the desired qc-value(s) as list. Fold-80 is default value
 
@@ -107,6 +108,29 @@ def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
     qc_df = qc_df.rename(columns={bait: bait + "_criteria"})
 
     return qc_df
+
+
+def check_qc_criteria_simple(input_qc_list: list, qc_criteria: str):
+    """ A simplified function to checks if the Balsamic QC-value passes one single QC-criteria
+
+    Args:
+        input_qc_list: list of QC-value(s)
+        qc_criteria: path to QC-criteria (text-file)
+
+    Returns:
+        Boolean
+
+    """
+    # Open the text file with the QC-criteria and put it in a variable as float.
+    with open(qc_criteria, "r") as f:
+        qc_value = float(f.read())
+        print(qc_value)
+
+    # Check if QC pass or fail
+    for val in input_qc_list:
+        if val > qc_value:
+            return False
+    return True
 
 
 def check_qc_criteria(input_qc_df: pd.DataFrame,
