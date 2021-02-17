@@ -202,7 +202,8 @@ else:
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
             "snakemake_rules/variant_calling/mergetype.rule",
-            "snakemake_rules/variant_calling/cnvkit_paired.rule"
+            "snakemake_rules/variant_calling/cnvkit_paired.rule",
+            "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"
         ])
 
         somatic_caller_snv = get_variant_callers(config=config,
@@ -210,8 +211,14 @@ else:
                                                  workflow_solution="BALSAMIC",
                                                  mutation_type="SNV",
                                                  mutation_class="somatic")
+    
+        somatic_caller_snv_umi = get_variant_callers(config=config,
+                                                 analysis_type="paired",
+                                                 workflow_solution="Sentieon_umi",
+                                                 mutation_type="SNV",
+                                                 mutation_class="somatic")
 
-        somatic_caller_snv = somatic_caller_snv + sentieon_callers
+        somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi
     else:
 
         annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_only.rule")
@@ -236,7 +243,7 @@ else:
                                                  mutation_type="SNV",
                                                  mutation_class="somatic")
 
-        somatic_caller_snv = somatic_caller_snv + sentieon_callers 
+        somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi 
 
 somatic_caller = somatic_caller_snv + somatic_caller_sv
 
@@ -267,28 +274,31 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
-                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
+                                           vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
 
 else:
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
                                             vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
 
-if config['analysis']['analysis_type'] == "single" and config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["umiworkflow"]:
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.{filters}.vcf.gz",
-                                      vcf=get_vcf(config, somatic_caller_snv_umi, [config["analysis"]["case_id"]]), filters=["all","pass"]),
-                                      expand(umi_qc_dir + "{case_name}.{step}_umi.mean_family_depth",
+if config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["umiworkflow"]:
+    analysis_specific_results.extend([expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
+                                      var_type="SNV", case_name=config["analysis"]["case_id"],
+                                      var_caller=expand("{step}.{var_caller}_umi", 
+                                      var_caller = ["TNscope"], step=["consensuscalled","consensusfiltered"])),
+                                      expand(umi_qc_dir + "{sample}.{step}_umi.mean_family_depth",
+                                      sample =  config["samples"],
+                                      step=["consensuscalled","consensusfiltered"]),
+                                      expand(umi_qc_dir + "{case_name}.{var_caller}_umi.noiseAF",
                                       case_name = config["analysis"]["case_id"],
-                                      step=["consensusaligned","consensusfiltered"]),
-                                      expand(umi_qc_dir + "{case_name}.{var_caller}_umi.{metric}",
-                                      case_name = config["analysis"]["case_id"],
-                                      var_caller = ["TNscope"],
-                                      metric = ["noiseAF", "AFplot.pdf"])])
+                                      var_caller = ["TNscope"])])
     config["rules"] = config["rules"] + umiqc_rules
+    
     if "background_variants" in config:
-        analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name = config["analysis"]["case_id"],
-                                      var_caller = expand("{var_caller}_{step}_umi",
+        analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", 
+                                      case_name = config["analysis"]["case_id"],
+                                      var_caller = expand("{step}.{var_caller}_umi",
                                       var_caller =["TNscope"],
-                                      step = ["consensusaligned","consensusfiltered"]))])
+                                      step = ["consensuscalled","consensusfiltered"]))])
         config["rules"] = config["rules"] + generatetable_umi_rules
 
 
@@ -381,5 +391,3 @@ rule all:
 
         with open(str(output[0]), mode='w') as finish_file:
             finish_file.write('%s\n' % datetime.datetime.now())
-
-    
