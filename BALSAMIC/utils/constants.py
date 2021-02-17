@@ -511,7 +511,7 @@ REFERENCE_FILES = {
 umiworkflow_params = {
     "common": {
         "align_header":
-        "'@RG\\tID:Group\\tSM:{case_name}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        "'@RG\\tID:{sample}\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         "align_intbases": 1000000,
         "filter_tumor_af": 0.0005
     },
