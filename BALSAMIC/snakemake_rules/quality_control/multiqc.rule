@@ -52,8 +52,8 @@ else:
     # dir list
     dir_list = [bam_dir, fastqc_dir]
 
-    if config["analysis"]["analysis_type"]== "single" and config["analysis"]["umiworkflow"]:
-        multiqc_input.extend(expand(umi_qc_dir + "{case_name}.consensusfiltered_umi.collect_hsmetric", case_name=config["analysis"]["case_id"]))
+    if config["analysis"]["umiworkflow"]:
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.consensusfiltered_umi.collect_hsmetric", sample=config["samples"]))
         
         dir_list = [bam_dir, fastqc_dir, umi_qc_dir]
 
