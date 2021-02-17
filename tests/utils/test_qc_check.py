@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.qc_check import read_hs_metrics, read_qc_table, check_qc_criteria, write_output
+from BALSAMIC.utils.qc_check import read_json, read_qc_table, check_qc_criteria, write_output
 from BALSAMIC.utils.qc_check import get_bait_name, get_sample_name, get_qc_criteria, failed_qc
 from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
 
@@ -13,7 +13,7 @@ def test_read_hs_metrics():
     hs_metrics_path = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"
 
     # WHEN reading the file
-    df = read_hs_metrics(hs_metrics_path)
+    df = read_json(hs_metrics_path)
 
     # THEN check if the file contains any values
     bol_list = df.any().tolist()
@@ -76,7 +76,7 @@ def test_check_qc_criteria_output_csv_and_qc(tmp_path, tumor_normal_config):
 
     qc_criteria_df = get_qc_criteria(read_qc_table(HSMETRICS_QC_CHECK),
                                      get_bait_name(new_config_json_file))
-    hs_metrics_df = read_hs_metrics(hs_metrics)
+    hs_metrics_df = read_json(hs_metrics)
     sample_names = get_sample_name(new_config_json_file)
 
     # WHEN calling the functions
