@@ -376,14 +376,19 @@ if 'delivery' in config:
     FormatFile(delivery_ready)
 
 rule all:
-    input:
-        quality_control_results + analysis_specific_results
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
     run:
-        import datetime
 
-        with open(str(output[0]), mode='w') as finish_file:
-            finish_file.write('%s\n' % datetime.datetime.now())
+        # Read the hs-metrics and get fold-80 value. Then check if the value pass/fail.
+        hs_metrics = read_json("/Users/keyvan.elhami/git_repositories/BALSAMIC/tests/test_data/qc_files/multiqc_picard_HsMetrics.json")
+        fold80_value = get_qc_value(hs_metrics)
+        check_result = check_qc_criteria_simple(fold80_value, "/Users/keyvan.elhami/git_repositories/BALSAMIC/tests/test_data/qc_files/fold_80.txt")
+
+        # If QC failed raise an error
+        if not check_result:
+            raise Exception("Analysis failed")
+        else:
+            Path(output[0]).touch()
 
     
