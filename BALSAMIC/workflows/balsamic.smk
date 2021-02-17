@@ -23,6 +23,10 @@ from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
 from BALSAMIC.utils.workflowscripts import get_densityplot
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
+from BALSAMIC.utils.qc_check import check_qc_criteria_simple
+from BALSAMIC.utils.qc_check import get_qc_value
+from BALSAMIC.utils.qc_check import read_json
+
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
                                  get_threads, get_script_path)
