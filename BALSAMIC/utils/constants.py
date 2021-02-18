@@ -47,16 +47,10 @@ VARCALL_PARAMS = {
 }
 # Configuration of VCF settings
 VCF_DICT = {
-    "TNscope_consensusaligned_umi": {
+    "TNscope_umi": {
         "mutation": "somatic",
         "type": "SNV",
-        "analysis_type": ["single"],
-        "workflow_solution": ["Sentieon_umi"]
-    },
-    "TNscope_consensusfiltered_umi": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["single"],
+        "analysis_type": ["single", "paired"],
         "workflow_solution": ["Sentieon_umi"]
     },
     "tnsnv": {
@@ -511,7 +505,7 @@ REFERENCE_FILES = {
 umiworkflow_params = {
     "common": {
         "align_header":
-        "'@RG\\tID:Group\\tSM:{case_name}\\tLB:TargetPanel\\tPL:ILLUMINA'",
+        "'@RG\\tID:{sample}\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         "align_intbases": 1000000,
         "filter_tumor_af": 0.0005
     },
