@@ -111,7 +111,7 @@ def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
 
 
 def check_qc_criteria_simple(input_qc_list: list, qc_criteria: str):
-    """ A simplified function to checks if the Balsamic QC-value passes one single QC-criteria
+    """ A simplified function to check if the Balsamic QC-value pass for one single QC-criteria
 
     Args:
         input_qc_list: list of QC-value(s)
@@ -125,7 +125,7 @@ def check_qc_criteria_simple(input_qc_list: list, qc_criteria: str):
     with open(qc_criteria, "r") as f:
         qc_value = float(f.read())
 
-    # Check if QC pass or fail
+    # Check if QC value is greater than the QC-criteria. If so, return False
     for val in input_qc_list:
         if val > qc_value:
             return False
