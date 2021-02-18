@@ -4,18 +4,18 @@
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
 rule picard_umiaware:
     input:
-        bam = umi_dir + "{sample}.{step}.umi.bam"
+        bam = umi_dir + "{sample}.consensusfiltered.umi.bam"
     output:
-        bam = umi_qc_dir + "{sample}.{step}.picard.umiaware.bam",
-        duplicates = umi_qc_dir + "{sample}.{step}_umi.duplicatemetrics",
-        umimetrics = umi_qc_dir + "{sample}.{step}_umi.metrics"
+        bam = umi_qc_dir + "{sample}.picard.umiaware.bam",
+        duplicates = umi_qc_dir + "{sample}.umi.duplicatemetrics",
+        umimetrics = umi_qc_dir + "{sample}.umi.metrics"
     benchmark:
-        Path(benchmark_dir + "picard_umiaware_{sample}_{step}.tsv").as_posix()
+        Path(benchmark_dir + "picard_umiaware_{sample}.tsv").as_posix()
     singularity: 
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         conda = config["bioinfo_tools"].get("picard"),
-        sample_id = "{sample}_{step}"
+        sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "picard_umiaware")
     message:
@@ -36,18 +36,18 @@ rule picard_collecthsmetrics_umi:
     input:
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
         bed = config["panel"]["capture_kit"],
-        bam = umi_dir + "{sample}.{step}.umi.bam",
+        bam = umi_dir + "{sample}.consensusfiltered.umi.bam",
         fa = config["reference"]["reference_genome"]
     output:
-        mrkdup = umi_qc_dir + "{sample}.{step}_umi.collect_hsmetric"
+        mrkdup = umi_qc_dir + "{sample}.umi.collect_hsmetric"
     benchmark:
-        Path(benchmark_dir + "picard_collecthsmetrics_umi_{sample}_{step}.tsv").as_posix()
+        Path(benchmark_dir + "picard_collecthsmetrics_umi_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         conda = config["bioinfo_tools"].get("picard"),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
-        sample_id = "{sample}_{step}"
+        sample_id = "{sample}"
     threads: 
         get_threads(cluster_config, "CollectHsMetrics")
     message:
@@ -71,17 +71,17 @@ O={output.mrkdup};
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
 rule samtools_view_calculatemeanfamilydepth_umi:
     input:
-        bam = umi_dir + "{sample}.{step}.umi.bam"
+        bam = umi_dir + "{sample}.consensusfiltered.umi.bam"
     output:
-        temp_fl = temp (umi_qc_dir + "{sample}.{step}.umi.temp.fl"),
-        totalsum = umi_qc_dir + "{sample}.{step}_umi.mean_family_depth"
+        temp_fl = temp (umi_qc_dir + "{sample}.umi.temp.fl"),
+        totalsum = umi_qc_dir + "{sample}.umi.mean_family_depth"
     benchmark:
-        Path(benchmark_dir + "samtools_view_calculatemeanfamilydepth_umi_{sample}_{step}.tsv").as_posix()
+        Path(benchmark_dir + "samtools_view_calculatemeanfamilydepth_umi_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         conda = config["bioinfo_tools"].get("samtools"),
-        sample_id = "{sample}_{step}"
+        sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
     message:
@@ -105,65 +105,3 @@ END{{printf(\"{params.sample_id}_meandepth: \"sum/NR)}}' \
 {output.temp_fl} > \
 {output.totalsum}
         """
-
-## Noise AF = TotalAF_with_UMI/TotalAF_without_UMI - considering TNscope values
-rule bcftools_query_calculatenoiseAF_umi:
-    input:
-        umiextract = vcf_dir + "SNV.somatic.{case_name}.consensuscalled.TNscope_umi.vcf.gz",
-        consensuscall = vcf_dir + "SNV.somatic.{case_name}.consensusfiltered.TNscope_umi.vcf.gz"
-    output:
-        umiextractAF = temp (umi_qc_dir + "{case_name}.consensuscalled.TNscope_umi.AF.txt"),
-        consensuscallAF = temp (umi_qc_dir + "{case_name}.consensusfiltered.TNscope_umi.AF.txt"),
-        noiseAF = umi_qc_dir + "{case_name}.TNscope_umi.noiseAF"
-    benchmark:
-        Path(benchmark_dir + "bcftools_query_calculatenoiseAF_umi_{case_name}.tsv").as_posix()
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    params:
-        conda = config["bioinfo_tools"].get("bcftools"),
-        sample_id = "{case_name}"
-    threads:
-        get_threads(cluster_config, "bcftools_query_calculatenoiseAF_umi")
-    message: 
-        "Calculate noise AF values for {params.sample_id}"
-    shell:
-        """
-source activate {params.conda};
-
-bcftools query \
--f \"%CHROM:%POS:%REF->%ALT\\t[%AF]\\n\" \
-{input.umiextract} > \
-{output.umiextractAF};
-
-bcftools query \
--f \"%CHROM:%POS:%REF->%ALT\\t[%AF]\\n\" \
-{input.consensuscall} > \
-{output.consensuscallAF};
-
-awk '{{if (FILENAME~/umialign.AF.txt/) \
-{{sum1+=$2}} \
-else {{sum2+=$2}}; \
-if (FNR == 1 && NR != 1) {{f1_nr = NR-1}}}} \
-END {{print(\"NoiseAF: \"(sum1/f1_nr)/(sum2/(NR-f1_nr)))}}' \
-{output.umiextractAF} \
-{output.consensuscallAF} > \
-{output.noiseAF}
-        """
-
-# Plot the TNscope calculated AFs before and after consensuscall
-rule seaborn_densityplot_umi:
-    input:
-        table1 = umi_qc_dir + "{case_name}.consensuscalled.TNscope_umi.AF.txt",
-        table2 = umi_qc_dir + "{case_name}.consensusfiltered.TNscope_umi.AF.txt"
-    output:
-        AF_plot = umi_qc_dir  + "{case_name}.TNscope_umi.AFplot.pdf"
-    benchmark:
-        Path(benchmark_dir + "seaborn_densityplot_umi_{case_name}.tsv").as_posix()
-    params:
-        sample_id = "{case_name}"
-    threads:
-        get_threads(cluster_config, "seaborn_densityplot_umi")
-    message:
-        "Density AF plots for sample {params.sample_id}"
-    run:
-        get_densityplot(input.table1, input.table2, "consensuscalled", "consensuscallfiltered", output.AF_plot)
