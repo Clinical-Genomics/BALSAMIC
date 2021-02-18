@@ -42,7 +42,7 @@ def test_get_qc_value_and_qc_criteria_simple():
     qc_list = get_qc_value(read_json(hs_metrics_path))
     qc_criteria = check_qc_criteria_simple(qc_list, fold80)
 
-    #THEN check if the qc-list in not empty and the qc-criteria is bool
+    # THEN check if the qc-list in not empty and the qc-criteria is bool
     assert len(qc_list) > 0, "qc_list is empty"
     assert type(qc_criteria) == bool, "qc_criteria is not Boolean"
 
