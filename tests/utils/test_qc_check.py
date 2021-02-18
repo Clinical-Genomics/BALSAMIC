@@ -23,8 +23,6 @@ def test_read_hs_metrics():
 
 def test_read_qc_table():
     # GIVEN the file exist
-    from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
-
     # WHEN reading the file
     df = read_qc_table(HSMETRICS_QC_CHECK)
 
