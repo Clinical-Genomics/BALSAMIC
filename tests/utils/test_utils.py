@@ -32,7 +32,7 @@ from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
                                  get_script_path, get_result_dir, get_threads,
                                  get_delivery_id, get_reference_output_files)
 
-from BALSAMIC.utils.workflowscripts import get_file_contents, get_densityplot
+from BALSAMIC.utils.workflowscripts import get_file_contents
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
