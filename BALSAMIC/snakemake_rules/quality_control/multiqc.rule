@@ -53,7 +53,7 @@ else:
     dir_list = [bam_dir, fastqc_dir]
 
     if config["analysis"]["umiworkflow"]:
-        multiqc_input.extend(expand(umi_qc_dir + "{sample}.consensusfiltered_umi.collect_hsmetric", sample=config["samples"]))
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         
         dir_list = [bam_dir, fastqc_dir, umi_qc_dir]
 
