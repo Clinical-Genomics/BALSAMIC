@@ -47,16 +47,10 @@ VARCALL_PARAMS = {
 }
 # Configuration of VCF settings
 VCF_DICT = {
-    "TNscope_consensusaligned_umi": {
+    "TNscope_umi": {
         "mutation": "somatic",
         "type": "SNV",
-        "analysis_type": ["single"],
-        "workflow_solution": ["Sentieon_umi"]
-    },
-    "TNscope_consensusfiltered_umi": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["single"],
+        "analysis_type": ["single", "paired"],
         "workflow_solution": ["Sentieon_umi"]
     },
     "tnsnv": {
