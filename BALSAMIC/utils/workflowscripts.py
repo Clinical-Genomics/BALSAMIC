@@ -12,19 +12,6 @@ from BALSAMIC.utils.cli import get_config
 from BALSAMIC.utils.cli import generate_h5
 
 
-def get_file_contents(input_file, prefix_name):
-    """ Reads the 2-column tsv file and returns file contents with header names.
-
-    Arguments:
-    input_file: Path to the TSV file 
-    """
-
-    input_df = pd.read_csv(input_file, sep='\t', header=None)
-    input_df.columns = ['id', 'AF']
-    input_df['method'] = prefix_name
-    return input_df
-
-
 def plot_analysis(log_file: Path, h5_file: Path,
                   fig_name: Path) -> typing.Union[None, Path]:
     """
