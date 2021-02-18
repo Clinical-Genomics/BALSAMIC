@@ -20,7 +20,6 @@ from BALSAMIC.utils.cli import generate_h5
 
 from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
 
-from BALSAMIC.utils.workflowscripts import get_densityplot
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
@@ -276,24 +275,16 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
 
-    analysis_specific_results.extend([expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
-                                      var_type="SNV", case_name=config["analysis"]["case_id"],
-                                      var_caller=expand("{step}.{var_caller}_umi",
-                                      var_caller = ["TNscope"], step=["consensuscalled","consensusfiltered"])),
-                                      expand(umi_qc_dir + "{sample}.{step}_umi.mean_family_depth",
-                                      sample =  config["samples"],
-                                      step=["consensuscalled","consensusfiltered"]),
-                                      expand(umi_qc_dir + "{case_name}.{var_caller}_umi.noiseAF",
-                                      case_name = config["analysis"]["case_id"],
-                                      var_caller = ["TNscope"])])
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.pass.vcf.gz",
+                                      vcf=get_vcf(config, ["TNscope_umi"], [config["analysis"]["case_id"]])),
+                                      expand(umi_qc_dir + "{sample}.umi.mean_family_depth",
+                                      sample =  config["samples"])])
     config["rules"] = config["rules"] + umiqc_rules
     
     if "background_variants" in config:
         analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
                                       case_name = config["analysis"]["case_id"],
-                                      var_caller = expand("{step}.{var_caller}_umi",
-                                      var_caller =["TNscope"],
-                                      step = ["consensuscalled","consensusfiltered"]))])
+                                      var_caller =["TNscope_umi"])]),
         config["rules"] = config["rules"] + generatetable_umi_rules
 
 else:
