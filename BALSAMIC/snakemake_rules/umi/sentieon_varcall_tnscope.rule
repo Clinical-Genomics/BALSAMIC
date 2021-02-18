@@ -2,17 +2,16 @@
 # coding: utf-8
 
 # Variant-calling using TNscope
+
 rule sentieon_tnscope_umi:
     input:
-        bam = expand(umi_dir + "{mysample}.{step}.umi.bam", mysample=config["samples"], step =["consensuscalled", "consensusfiltered"]),
+        bam = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", mysample=config["samples"]),
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        consensuscall = [ vcf_dir +  "SNV.somatic." + config["analysis"]["case_id"] + ".consensuscalled.TNscope_umi.vcf.gz",
-        vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".consensuscalled.TNscope_umi.sample_name_map" ],
-        consensusfilter = [ vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".consensusfiltered.TNscope_umi.vcf.gz",
-        vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".consensusfiltered.TNscope_umi.sample_name_map" ]
+        vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + "TNscope_umi.vcf.gz",
+        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + "TNscope_umi.sample_name_map"
     benchmark:
         Path(benchmark_dir + "sentieon_tnscope_umi_"+ config["analysis"]["case_id"] +".tsv").as_posix()
     params:
@@ -34,7 +33,7 @@ rule sentieon_tnscope_umi:
 {params.sentieon_exec} driver \
 -t {threads} \
 -r {input.ref_fa} \
--i {input.bam[0]} \
+-i {input.bam} \
 --algo {params.algo} \
 --tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
@@ -45,26 +44,7 @@ rule sentieon_tnscope_umi:
 --max_error_per_read {params.error_rate} \
 --pcr_indel_model NONE \
 --prune_factor {params.prune_factor} \
-{output.consensuscall[0]};
+{output.vcf};
 
-echo -e \"{params.tumor}\\tTUMOR\" > {output.consensuscall[1]};
-
-
-{params.sentieon_exec} driver \
--t {threads} \
--r {input.ref_fa} \
--i {input.bam[1]} \
---algo {params.algo} \
---tumor_sample {params.tumor} \
---dbsnp {input.dbsnp} \
---min_tumor_allele_frac {params.tumor_af} \
---filter_t_alt_frac {params.tumor_af} \
---min_init_tumor_lod {params.tumor_lod} \
---disable_detector {params.disable_detect} \
---max_error_per_read {params.error_rate} \
---pcr_indel_model NONE \
---prune_factor {params.prune_factor} \
-{output.consensusfilter[0]};
-
-echo -e \"{params.tumor}\\tTUMOR\" > {output.consensusfilter[1]}; 
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
         """
