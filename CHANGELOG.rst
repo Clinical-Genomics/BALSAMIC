@@ -1,8 +1,8 @@
-[x.x.x]
+[6.1.2]
 -------
 
 Changed
-^^^^^
+^^^^^^^
 
 * Changed hk delivery tag for coverage-qc-report
 
