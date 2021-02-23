@@ -252,7 +252,7 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
             "balsamic_delivery",
             "format":
             get_file_extension(balsamic_qc_report),
-            "tag": ["delivery_report"],
+            "tag": ["coverage-qc-report"],
             "id":
             case_name,
         })
