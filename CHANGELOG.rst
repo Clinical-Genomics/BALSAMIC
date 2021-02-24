@@ -1,5 +1,14 @@
+[7.0.1]
+-------
+
+Added
+^^^^^
+
+* github action workflow to autobuild release containers
+
+
 [7.0.0]
-------
+-------
 
 Added
 ^^^^^
