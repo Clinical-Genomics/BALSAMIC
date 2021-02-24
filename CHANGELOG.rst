@@ -1,9 +1,51 @@
+[7.0.0]
+------
+
+Added
+^^^^^
+
+* ``balsamic init`` to download reference and related containers done in PRs #464 #538
+* ``balsamic config case`` now only take a cache path instead of container and reference #538
+* UMI workflow added to main workflow in series of PRs #469 #477 #483 #498 #503 #514 #517
+* DRAGEN for WGS applications in PR #488
+* A framework for QC check PR #401
+* ``--quiet``` option for ``run analysis`` PR #491
+* Benchmark SLURM jobs after the analysis is finished PR #534
+* One container per conda environment (i.e. decouple containers) PR #511 #525 #522
+* ``--disable-variant-caller`` command for ``report deliver`` PR #439
+* Added genmod and rankscore in series of two PRs #531 and #533
+* Variant filtering to Tumor-Normal in PR #534
+* Split SNV/InDels and SVs from TNScope variant caller PR #540
+* WGS Tumor only variant filters added in PR #548
+
+Changed
+^^^^^^^
+
+* Update Manta to 1.6.0 PR #470
+* Update FastQC to 0.11.9 PR #532
+* Update BCFTools to 1.11 PR #537
+* Update Samtools to 1.11 PR #537
+* Increase resources and runtime for various workflows in PRs #482 
+* Python package dependenicies versions fixed in PR #480
+* QoL changes to workflow in series of PR #471
+* Series of documentation updates in PRs #489 #553
+* QoL changes to scheduler script PR #491
+* QoL changes to how temporary directories are handlded PR #516
+* TNScope model apply rule merged with TNScope variant calling for tumor-normal in WGS #540
+* Decoupled ``fastp`` rule into two rules to make it possible to use it for UMI runs #570
+
+
+Fixed
+^^^^^
+
+* A bug in Manta variant calling rules that didn't name samples properly to TUMOR/NORMAL in the VCF file #572
+
+
 [6.1.2]
 -------
 
 Changed
 ^^^^^^^
-
 * Changed hk delivery tag for coverage-qc-report
 
 
@@ -12,6 +54,20 @@ Changed
 
 Fixed
 ^^^^^
+
+* No UMI trimming for WGS applications #486
+* Fixed a bug where BALSAMIC was checking for sacct/jobid file in local mode PR #497
+* ``readlink`` command in ``vep_germline``, ``vep_somatic``, ``split_bed``, and ``GATK_popVCF`` #533
+* Fix various bugs for memory handling of Picardtools and its executable in PR #534
+* Fixed various issues with ``gsutils`` in PR #550
+
+Removed
+^^^^^^^
+
+* ``gatk-register`` command removed from installing GATK PR #496
+
+[6.1.1]
+-------
 
 * Fixed a bug with missing QC templates after ``pip install``
 
@@ -23,6 +79,7 @@ Added
 ^^^^^
 * CLI option to expand report generation for TGA and WES runs. Please see ``balsamic report deliver --help``
 * BALSAMIC now generates a custom HTML report for TGA and WES cases.
+
 
 [6.0.4]
 -------
