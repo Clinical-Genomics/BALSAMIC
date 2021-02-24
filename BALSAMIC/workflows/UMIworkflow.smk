@@ -19,6 +19,9 @@ umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 umi_qc_dir = get_result_dir(config) + "/qc/"
+qc_dir = get_result_dir(config) + "/qc/"
+tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
+Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 singularity_image = config["singularity"]["image"]
 
@@ -40,6 +43,8 @@ except Exception as error:
     raise
 
 # Define umiworkflow rules
+fastp_umi = ["snakemake_rules/quality_control/fastp.rule"]
+
 umi_call = [
     "snakemake_rules/umi/sentieon_umiextract.rule",
     "snakemake_rules/umi/sentieon_consensuscall.rule"
@@ -63,11 +68,14 @@ paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 SAMPLES = config["samples"]
 CASE_NAME = config["analysis"]["case_id"]
 
+FILTERED_STEPS = ["consensuscalled","consensusfiltered"]
+EXTN_NAME = expand("{step}.{var_caller}_umi", var_caller = ["TNscope"], step=FILTERED_STEPS)
+
 # Define outputs
 analysis_output = [expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz", var_type= "SNV", case_name=CASE_NAME, var_caller=["TNscope_umi"]),
 expand(umi_qc_dir + "{sample}.umi.{metric}", sample=SAMPLES, metric = ["metrics", "mean_family_depth"])]
 
-config["rules"] = umi_call + variant_call +  annotate_vcf + qc
+config["rules"] = fastp_umi + umi_call + variant_call +  annotate_vcf + qc
 
 if "background_variants" in config:
     analysis_output.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
