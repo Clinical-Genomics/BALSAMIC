@@ -102,8 +102,8 @@ export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {params.read1} \
---in2 {params.read2} \
+--in1 {input.read1} \
+--in2 {input.read2} \
 --out1 {output.read1} \
 --out2 {output.read2} \
 --json {output.json} \

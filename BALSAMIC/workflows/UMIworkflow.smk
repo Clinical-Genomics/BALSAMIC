@@ -68,9 +68,6 @@ paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 SAMPLES = config["samples"]
 CASE_NAME = config["analysis"]["case_id"]
 
-FILTERED_STEPS = ["consensuscalled","consensusfiltered"]
-EXTN_NAME = expand("{step}.{var_caller}_umi", var_caller = ["TNscope"], step=FILTERED_STEPS)
-
 # Define outputs
 analysis_output = [expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz", var_type= "SNV", case_name=CASE_NAME, var_caller=["TNscope_umi"]),
 expand(umi_qc_dir + "{sample}.umi.{metric}", sample=SAMPLES, metric = ["metrics", "mean_family_depth"])]
