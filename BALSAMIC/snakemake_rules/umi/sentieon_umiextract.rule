@@ -4,8 +4,8 @@
 # Extract umi tags using the defined read structure. 
 rule sentieon_umiextract:
     input:
-        read1 = Path(fastq_dir + "{sample}_1.fastq.gz").as_posix(),
-        read2 = Path(fastq_dir + "{sample}_2.fastq.gz").as_posix()
+        read1 = Path(fastq_dir + "{sample}_1.umi_optimized.fastq.gz").as_posix(),
+        read2 = Path(fastq_dir + "{sample}_2.umi_optimized.fastq.gz").as_posix()
     output:
         ds_umi = temp(umi_dir + "{sample}.umiextract.fastq.gz")
     benchmark:
