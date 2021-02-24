@@ -1,28 +1,21 @@
 import os
 import sys
 import logging
-import glob
 import json
 import yaml
 import click
-import copy
 import snakemake
 import datetime
 import subprocess
-from collections import defaultdict
-from yapf.yapflib.yapf_api import FormatFile
 from pathlib import Path
 
-from BALSAMIC.utils.cli import get_from_two_key
-from BALSAMIC.utils.cli import merge_dict_on_key
 from BALSAMIC.utils.cli import get_file_extension
-from BALSAMIC.utils.cli import find_file_index
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.constants import VCF_DICT
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.qc_metrics import get_qc_metrics
 from BALSAMIC.utils.qc_report import render_html, report_data_population
@@ -77,13 +70,18 @@ LOG = logging.getLogger(__name__)
     default="a",
     show_default=True,
     help=(
-        "a: append rules-to-deliver to current delivery "
-        "options. or r: reset current rules to delivery to only the ones specified"
-    ),
+        'a: append rules-to-deliver to current delivery '
+        'options. or r: reset current rules to delivery to only the ones specified'
+    ))
+@click.option(
+    '--disable-variant-caller',
+    help=
+    f'Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid '
+    f'values are: {list(VCF_DICT.keys())}',
 )
 @click.pass_context
 def deliver(context, sample_config, analysis_type, rules_to_deliver,
-            delivery_mode, sample_id_map, case_id_map):
+            delivery_mode, disable_variant_caller, sample_id_map, case_id_map):
     """
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
@@ -166,10 +164,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     report = SnakeMake()
     report.case_name = case_name
     report.working_dir = os.path.join(
-        sample_config_dict["analysis"]["analysis_dir"],
-        sample_config_dict["analysis"]["case_id"],
-        "BALSAMIC_run",
-    )
+        sample_config_dict['analysis']['analysis_dir'],
+        sample_config_dict['analysis']['case_id'], 'BALSAMIC_run')
     report.report = report_file_name
     report.configfile = sample_config
     report.snakefile = snakefile
@@ -177,6 +173,8 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
     report.use_singularity = False
     report.run_analysis = True
     report.sm_opt = ["--quiet"]
+    if disable_variant_caller:
+        report.disable_variant_caller = disable_variant_caller
     cmd = sys.executable + " -m  " + report.build_cmd()
     subprocess.check_output(cmd.split(), shell=False)
     LOG.info(f"Workflow report file {report_file_name}")

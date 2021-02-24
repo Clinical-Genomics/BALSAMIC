@@ -1,13 +1,5 @@
-import re
-import os
 import logging
-import glob
-import json
-import yaml
 import click
-
-from BALSAMIC.utils.rule import get_result_dir
-#from BALSAMIC.utils import plot_cov
 
 LOG = logging.getLogger(__name__)
 

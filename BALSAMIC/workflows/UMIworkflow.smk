@@ -4,24 +4,26 @@
 import os
 import logging
 
-from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.rule import (get_threads, get_result_dir,
+                                 get_sample_type, get_script_path, get_vcf)
+from BALSAMIC.utils.models import UMIworkflowConfig
+from BALSAMIC.utils.constants import RULE_DIRECTORY, VCFANNO_TOML, umiworkflow_params
 
 LOG = logging.getLogger(__name__)
 
 shell.prefix("set -eo pipefail; ")
 
-rule_dir = config["rule_directory"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 benchmark_dir = config["analysis"]["benchmark"]
 umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
-log_dir =  config["analysis"]["log"]
-table_dir = get_result_dir(config) + "/tables/"
-plot_dir = get_result_dir(config) + "/plots/"
+umi_qc_dir = get_result_dir(config) + "/qc/"
+qc_dir = get_result_dir(config) + "/qc/"
+tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
+Path.mkdir(Path(tmp_dir), exist_ok=True)
 
-
-singularity_image = config['singularity']['image']
+singularity_image = config["singularity"]["image"]
 
 # Declare sentieon variables
 sentieon = True
@@ -35,38 +37,51 @@ if len(cluster_config.keys()) == 0:
 
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 except Exception as error:
     LOG.error("ERROR: Set SENTIEON_LICENSE and SENTIEON_INSTALL_DIR environment variable to run this pipeline.")
     raise
 
 # Define umiworkflow rules
+fastp_umi = ["snakemake_rules/quality_control/fastp.rule"]
 
 umi_call = [
     "snakemake_rules/umi/sentieon_umiextract.rule",
     "snakemake_rules/umi/sentieon_consensuscall.rule"
 ]
 
-variant_call = [
-    "snakemake_rules/umi/sentieon_varcall_tnscope.rule",
-    "snakemake_rules/umi/varcall_vardict.rule"
-]
+if config["analysis"]["analysis_type"] == "single":
+    variant_call = ["snakemake_rules/umi/sentieon_varcall_tnscope.rule"]
+else:
+    variant_call = ["snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"]
 
-annotate_vcf = ["snakemake_rules/umi/annotate_vep.rule"]
+annotate_vcf = ["snakemake_rules/annotation/vep.rule"]
 
-generate_plots = ["snakemake_rules/umi/generate_AF_tables.rules"]
+qc = ["snakemake_rules/umi/qc_umi.rule"]
+
+generate_tables = ["snakemake_rules/umi/generate_AF_tables.rule"]
+
+# parse parameters as workflow constants
+paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 
 # Define wildcards
 SAMPLES = config["samples"]
-VAR_CALLER = ['TNscope','vardict']
+CASE_NAME = config["analysis"]["case_id"]
 
 # Define outputs
-analysis_output = [expand(vcf_dir + "{sample}.{var_caller}.umi.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER), expand(vep_dir + "{sample}.{var_caller}.umi.{filler}.vcf.gz", sample=SAMPLES, var_caller=VAR_CALLER, filler=['all','pass']), expand(table_dir + "{sample}.{var_caller}.umi.AFtable.txt", sample=SAMPLES, var_caller=VAR_CALLER)]
+analysis_output = [expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz", var_type= "SNV", case_name=CASE_NAME, var_caller=["TNscope_umi"]),
+expand(umi_qc_dir + "{sample}.umi.{metric}", sample=SAMPLES, metric = ["metrics", "mean_family_depth"])]
 
-config["rules"] = umi_call + variant_call + annotate_vcf + generate_plots
+config["rules"] = fastp_umi + umi_call + variant_call +  annotate_vcf + qc
+
+if "background_variants" in config:
+    analysis_output.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
+                                   case_name = config["analysis"]["case_id"],
+                                   var_caller =["TNscope_umi"])])
+    config["rules"] = config["rules"] + generate_tables
 
 for r in config["rules"]:
-    include: os.path.join(rule_dir + r)
+    include: Path(RULE_DIRECTORY, r).as_posix()
 
 rule all:
     input:

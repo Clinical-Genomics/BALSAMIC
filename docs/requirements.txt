@@ -7,3 +7,4 @@ sphinx-argparse
 sphinx-click
 sphinx_rtd_theme
 sphinxcontrib-napoleon
+furo

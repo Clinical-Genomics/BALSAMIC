@@ -1,12 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from snakemake.shell import shell
-
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_sample_type
-from BALSAMIC import __version__ as bv
-
 normal_bam = "normal.merged.bam"
 tumor_bam = "tumor.merged.bam"
 
@@ -21,27 +15,36 @@ rule manta_tumor_normal:
         bamN = bam_dir + normal_bam, 
         bamT = bam_dir + tumor_bam,
     output:
-        candidateindel = vcf_dir + "manta/results/variants/candidateSmallIndels.vcf.gz",
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
     params:
-        tmpdir = vcf_dir + "manta/",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        conda = get_conda_env(config["conda_env_yaml"],"manta")
-    singularity: singularity_image
+        tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal"),
+        conda = config["bioinfo_tools"].get("manta")
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix() 
     benchmark: 
         benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
     threads: get_threads(cluster_config, "manta_tumor_normal") 
     shell:
-        "source activate {params.conda};"
-        "rm -rf {params.tmpdir}; "
-        "configManta.py "
-            "--normalBam={input.bamN} "
-            "--tumorBam={input.bamT} "
-            "--referenceFasta={input.fa} "
-            "--runDir={params.tmpdir}; "
-        "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-        "cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final}; "
-        "tabix -p vcf -f {output.final}; "
-        "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
-        
+        """
+source activate {params.conda};
+
+configManta.py
+   "--normalBam={input.bamN}
+   "--tumorBam={input.bamT}
+   "--referenceFasta={input.fa}
+   "--runDir={params.tmpdir};
+
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+
+cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final};
+
+tabix -p vcf -f {output.final};
+
+echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+

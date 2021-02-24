@@ -1,0 +1,5 @@
+[[annotation]]
+file="gnomad.genomes.r2.1.1.sites.vcf.bgz"
+fields = ["AF", "AF_popmax"]
+ops=["self", "self"]
+names=["GNOMADAF", "GNOMADAF_popmax"]

@@ -1,4 +1,3 @@
-import os
 import re
 import yaml
 from pathlib import Path
@@ -100,30 +99,6 @@ def get_result_dir(config):
     """
 
     return config['analysis']['result']
-
-
-def get_conda_env(yaml_file, pkg):
-    """
-    Retrieve conda environment for package from a predefined yaml file
-
-    input: balsamic_env 
-    output: string of conda env where packge is in
-    """
-
-    with open(yaml_file, 'r') as file_in:
-        yaml_in = yaml.safe_load(file_in)
-
-    conda_env_found = None
-
-    for conda_env, pkgs in yaml_in.items():
-        if pkg in pkgs:
-            conda_env_found = conda_env
-            break
-
-    if conda_env_found is not None:
-        return conda_env_found
-    else:
-        raise KeyError(f'Installed package {pkg} was not found in {yaml_file}')
 
 
 def get_picard_mrkdup(config):
@@ -264,18 +239,22 @@ def get_delivery_id(id_candidate: str, file_to_store: str, tags: list,
 
 
 def get_reference_output_files(reference_files_dict: dict,
-                               file_type: str) -> list:
+                               file_type: str,
+                               gzip: bool = None) -> list:
     """ Returns list of files matching a file_type from reference files
 
     Args:
         reference_files_dict: A validated dict model from reference
         file_type: a file type string, e.g. vcf, fasta
-  
+        gzip: a list of boolean
+
     Returns:
-        ref_vcf_list: list of file_type files that are found in reference_files_dict 
+        ref_vcf_list: list of file_type files that are found in reference_files_dict
     """
     ref_vcf_list = []
     for reference_key, reference_item in reference_files_dict.items():
         if reference_item['file_type'] == file_type:
+            if gzip is not None and reference_item['gzip'] != gzip:
+                continue
             ref_vcf_list.append(reference_item['output_file'])
     return ref_vcf_list

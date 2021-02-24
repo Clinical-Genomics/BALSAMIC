@@ -1,14 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
-
-from BALSAMIC.utils.rule import get_conda_env, get_picard_mrkdup
-from BALSAMIC import __version__ as bv
-
-picarddup = get_picard_mrkdup(config)
-
-rule panel_depth:
+rule sambamba_panel_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["panel"]["capture_kit"]
@@ -20,8 +13,8 @@ rule panel_depth:
     cov_end=1000,
     cov_step=50,
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
-    conda = get_conda_env(config["conda_env_yaml"],"sambamba")
-  singularity: singularity_image
+    conda = config["bioinfo_tools"].get("sambamba")
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("sambamba") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "panel_depth_" + "{sample}.sambamba_panel_depth.tsv"
   shell:
@@ -34,7 +27,7 @@ rule panel_depth:
         "`echo $covStr` {input.bam} > {output}; "
     
 
-rule exon_depth:
+rule sambamba_exon_depth:
   input:
     bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
     bed = config["reference"]["exon_bed"]
@@ -48,8 +41,8 @@ rule exon_depth:
     cov_4="200",
     cov_5="250",
     filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
-    conda = get_conda_env(config["conda_env_yaml"],"sambamba")
-  singularity: singularity_image
+    conda = config["bioinfo_tools"].get("sambamba")
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("sambamba") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "exon_depth_" + "{sample}.sambamba_exon_depth.tsv"
   shell:

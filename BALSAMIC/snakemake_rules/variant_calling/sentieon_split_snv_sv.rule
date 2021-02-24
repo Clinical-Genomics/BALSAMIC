@@ -1,0 +1,31 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+rule bcftools_view_split_variant:
+    input:
+        ref = config["reference"]["reference_genome"],
+        vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+    output:
+        vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+    params:
+        conda = config["bioinfo_tools"].get("bcftools"),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+    threads:
+        get_threads(cluster_config, 'split_sentieon_sv_snv')
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
+    benchmark:
+        benchmark_dir + 'split_sentieon_sv_snv_' + config["analysis"]["case_id"] + ".tsv"
+    shell:
+        """
+source activate {params.conda};
+export TMPDIR={params.tmpdir};
+mkdir -p {params.tmpdir};
+
+bcftools view --include 'INFO/SVTYPE=="."' -O z -o {output.vcf_snv} {input.vcf}; 
+tabix -p vcf -f {output.vcf_snv};
+
+bcftools view --include 'INFO/SVTYPE!="."' -O z -o {output.vcf_sv} {input.vcf}; 
+tabix -p vcf -f {output.vcf_sv};
+        """

@@ -1,7 +1,7 @@
 ===============
 Other resources
 ===============
-.. contents::
+
 
 Resources
 ---------

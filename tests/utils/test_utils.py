@@ -1,5 +1,5 @@
 import json
-import os
+import subprocess
 import pytest
 import sys
 import copy
@@ -11,48 +11,26 @@ import logging
 
 from pathlib import Path
 
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
-from BALSAMIC.utils.constants import CONDA_ENV_PATH
+from BALSAMIC.utils.constants import CONTAINERS_CONDA_ENV_PATH
+from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV
 from BALSAMIC.utils.constants import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
-    SnakeMake,
-    CaptureStdout,
-    iterdict,
-    get_snakefile,
-    createDir,
-    write_json,
-    get_config,
-    recursive_default_dict,
-    convert_defaultdict_to_regular_dict,
-    get_file_status_string,
-    get_from_two_key,
-    find_file_index,
-    merge_json,
-    validate_fastq_pattern,
-    get_panel_chrom,
-    get_bioinfo_tools_list,
-    create_fastq_symlink,
-    get_fastq_bind_path,
-    singularity,
-    get_file_extension,
-    convert_deliverables_tags,
-)
+    SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
+    get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
+    get_file_status_string, get_from_two_key, find_file_index, merge_json,
+    validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
+    get_fastq_bind_path, singularity, get_file_extension,
+    get_bioinfo_tools_version, convert_deliverables_tags, check_executable,
+    job_id_dump_to_yaml, generate_h5)
 
-from BALSAMIC.utils.rule import (
-    get_chrom,
-    get_vcf,
-    get_sample_type,
-    get_conda_env,
-    get_picard_mrkdup,
-    get_variant_callers,
-    get_script_path,
-    get_result_dir,
-    get_threads,
-    get_delivery_id,
-    get_reference_output_files,
-)
+from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
+                                 get_picard_mrkdup, get_variant_callers,
+                                 get_script_path, get_result_dir, get_threads,
+                                 get_delivery_id, get_reference_output_files)
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -143,15 +121,14 @@ def test_get_reference_output_files():
 
 
 def test_get_bioinfo_tools_list():
-    # GIVEN a path for conda env files
-    conda_env_path = CONDA_ENV_PATH
-
+    # GIVEN a path for container path and bioinfo tool dictionary
     # WHEN getting dictionary of bioinformatic tools and their version
-    bioinfo_tools_dict = get_bioinfo_tools_list(conda_env_path)
+    bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV,
+                                                   CONTAINERS_CONDA_ENV_PATH)
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert bioinfo_tools_dict["cnvkit"] == "0.9.4"
+    assert set(bioinfo_tools_dict["samtools"]) == set(["1.11", "1.9"])
 
 
 def test_get_delivery_id():
@@ -223,12 +200,10 @@ def test_convert_defaultdict_to_regular_dict():
     assert "key_2" in test_dict["key_1"]
 
 
-def test_iterdict(config_files):
+def test_iterdict(reference):
     """ GIVEN a dict for iteration """
-    test_dict = json.load(open(config_files["test_reference"], "r"))
-
     # WHEN passing dict to this function
-    dict_gen = iterdict(test_dict)
+    dict_gen = iterdict(reference)
 
     # THEN it will create dict generator, we can iterate it, get the key, values as string
     for key, value in dict_gen:
@@ -278,6 +253,7 @@ def test_snakemake_slurm():
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
     snakemake_slurm.sm_opt = ("containers", )
+    snakemake_slurm.quiet = True
     snakemake_slurm.use_singularity = True
     snakemake_slurm.singularity_bind = ["path_1", "path_2"]
     snakemake_slurm.run_analysis = True
@@ -285,7 +261,6 @@ def test_snakemake_slurm():
     # WHEN calling the build command
     shell_command = snakemake_slurm.build_cmd()
 
-    # print(shell_command)
     # THEN constructing snakecommand for slurm runner
     assert isinstance(shell_command, str)
     assert "worflow/variantCalling_paired" in shell_command
@@ -295,6 +270,7 @@ def test_snakemake_slurm():
     assert "sbatch.py" in shell_command
     assert "test_case" in shell_command
     assert "containers" in shell_command
+    assert "--quiet" in shell_command
 
 
 def test_get_script_path():
@@ -327,15 +303,11 @@ def test_get_snakefile():
         snakefile = get_snakefile(analysis_type, sequencing_type)
         pipeline = ""
 
-        if sequencing_type == "targeted":
-            pipeline = "BALSAMIC/workflows/VariantCalling.smk"
-        elif sequencing_type == "wgs":
-            pipeline = "BALSAMIC/workflows/VariantCalling_sentieon.smk"
-        elif analysis_type == "qc":
-            pipeline = "BALSAMIC/workflows/Alignment.smk"
-        elif analysis_type == "generate_ref":
-            pipeline = "BALSAMIC/workflows/GenerateRef"
-        elif analysis_type == "umi":
+        if sequencing_type in ['targeted', 'wgs', 'qc']:
+            pipeline = "BALSAMIC/workflows/balsamic.smk"
+        elif analysis_type == 'generate_ref':
+            pipeline = "BALSAMIC/workflows/reference.smk"
+        elif analysis_type == 'umi':
             pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
 
         # THEN it should return the snakefile path
@@ -443,29 +415,6 @@ def test_get_result_dir(sample_config):
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
 
 
-def test_get_conda_env_found(tmp_path):
-    # GIVEN a balsamic_env yaml
-    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
-
-    # WHEN passing pkg name with this yaml file
-    conda_env = get_conda_env(balsamic_env, "cnvkit")
-
-    # THEN It should return the conda env which has that pkg
-    assert conda_env == "varcall_cnvkit"
-
-
-def test_get_conda_env_not_found(tmp_path):
-    # GIVEN a balsamic_env yaml
-    balsamic_env = "BALSAMIC/config/balsamic_env.yaml"
-    bioinfo_tool = "unknown_package"
-    error_msg = f"Installed package {bioinfo_tool} was not found in {balsamic_env}"
-
-    # WHEN passing pkg name with this yaml file
-    # THEN It should return the conda env which has that pkg
-    with pytest.raises(KeyError, match=error_msg):
-        get_conda_env(balsamic_env, "unknown_package")
-
-
 def test_capturestdout():
     # GIVEN a catpurestdout context
     test_stdout_message = "Message to stdout"
@@ -494,27 +443,25 @@ def test_get_config_wrong_config():
         assert get_config(config_file)
 
 
-def test_write_json(tmp_path, config_files):
-    # GIVEN a dict from sample json file (reference.json)
-    ref_json = json.load(open(config_files["reference"], "r"))
-
+def test_write_json(tmp_path, reference):
+    # GIVEN a dict from sample json file
     tmp = tmp_path / "tmp"
     tmp.mkdir()
     output_json = tmp / "output.json"
 
     # WHEN passing dict and file name
-    write_json(ref_json, output_json)
+    write_json(reference, output_json)
     output = output_json.read_text()
 
     # THEN It will create a json file with given dict
-    for key, value in iterdict(ref_json):
+    for key, value in iterdict(reference):
         assert key in output
         assert value in output
 
     assert len(list(tmp.iterdir())) == 1
 
 
-def test_write_json_error(tmp_path, config_files):
+def test_write_json_error(tmp_path):
     with pytest.raises(Exception, match=r"Is a directory"):
         # GIVEN a invalid dict
         ref_json = {"path": "this_path", "reference": ""}
@@ -600,7 +547,7 @@ def test_find_file_index(tmpdir):
     assert str(bai_file_2) in result
 
 
-def test_singularity_shellcmd(singularity_container):
+def test_singularity_shellcmd(balsamic_cache):
     """test singularity shell cmd
     """
 
@@ -610,16 +557,16 @@ def test_singularity_shellcmd(singularity_container):
     dummy_path_2 = "this_path/path2"
     correct_shellcmd = "exec --bind {} --bind {} ls this_path".format(
         dummy_path_1, dummy_path_2)
+    singularity_container_sif = Path(balsamic_cache, balsamic_version, "containers", "align_qc",
+                                     "example.sif").as_posix()
 
     with mock.patch.object(shutil, "which") as mocked:
         mocked.return_value = "/my_home/binary_path/singularity"
 
         # WHEN building singularity command
-        shellcmd = singularity(
-            sif_path=singularity_container,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
+        shellcmd = singularity(sif_path=singularity_container_sif,
+                               cmd=dummy_command,
+                               bind_paths=[dummy_path_1, dummy_path_2])
 
         # THEN successfully return a correct singularity cmd
         assert correct_shellcmd in shellcmd
@@ -648,7 +595,7 @@ def test_singularity_shellcmd_sif_not_exist():
                     bind_paths=[dummy_path_1, dummy_path_2])
 
 
-def test_singularity_shellcmd_cmd_not_exist(singularity_container):
+def test_singularity_shellcmd_cmd_not_exist():
     """test singularity shell cmd with nonexisting singularity command
     """
 
@@ -657,6 +604,7 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
     error_msg = "singularity command does not exist"
     dummy_path_1 = "this_path/path1"
     dummy_path_2 = "this_path/path2"
+    singularity_container_sif = "some_path/container.sif"
 
     # WHEN building singularity command
     # THEN successfully get error if singualrity command doesn't exist
@@ -665,21 +613,17 @@ def test_singularity_shellcmd_cmd_not_exist(singularity_container):
                                                              match=error_msg):
         mocked.return_value = None
 
-        singularity(
-            sif_path=singularity_container,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
+        singularity(sif_path=singularity_container_sif,
+                    cmd=dummy_command,
+                    bind_paths=[dummy_path_1, dummy_path_2])
 
 
-def test_merge_json(config_files):
+def test_merge_json(reference, config_files):
     # GIVEN a dict and json file
-    ref_dict = json.load(open(config_files["reference"], "r"))
-
     json_file = config_files["sample"]
 
     # WHEN passing dict and json file to merge
-    merge_dict = merge_json(ref_dict, json_file)
+    merge_dict = merge_json(reference, json_file)
 
     # THEN It will merge both the data and return dict
     assert isinstance(merge_dict, dict)
@@ -687,15 +631,14 @@ def test_merge_json(config_files):
     assert "reference" in merge_dict
 
 
-def test_merge_json_error(config_files):
+def test_merge_json_error(reference):
     with pytest.raises(Exception, match=r"No such file or directory"):
         # GIVEN a dict and invalid json file path
-        ref_dict = json.load(open(config_files["reference"], "r"))
         json_file = "reference.json"
 
         # WHEN passing python dict and invalid json path
         # THEN it should throw OSError as FileNotFoundError
-        assert merge_json(ref_dict, json_file)
+        assert merge_json(reference, json_file)
 
 
 def test_validate_fastq_pattern():
@@ -821,3 +764,76 @@ def test_convert_deliverables_tags():
     for file in delivery_json["files"]:
         assert file["id"] == "ACC1"
         assert "ACC1" in file["tag"]
+
+
+def test_check_executable_exists():
+
+    # GIVEN an existing executable command
+    test_command = "ls"
+
+    # WHEN calling check_executable
+    # THEN it should return True
+    assert check_executable(test_command)
+
+
+def test_check_executable_not_existing():
+
+    # GIVEN an existing executable command
+    test_command = "twenty_twenty_was_bad"
+
+    # WHEN calling check_executable
+    # THEN it should return True
+    assert not check_executable(test_command)
+
+
+def test_job_id_dump_to_yaml(tmp_path):
+
+    # GIVEN a file with one job id per line, a key (case name), and an output file name
+    dummy_dir = tmp_path / "job_id_dump_dir"
+    dummy_dir.mkdir()
+    dummy_job_id_dump = dummy_dir / "jod_id.dump"
+    dummy_job_id_dump.write_text("01234\n56789")
+
+    dummy_name = "angrybird"
+
+    dummy_yaml_out = dummy_dir / "jod_id.yaml"
+
+    # WHEN creating yaml from job id dump
+    job_id_dump_to_yaml(dummy_job_id_dump, dummy_yaml_out, dummy_name)
+
+    # THEN file should exist
+    assert dummy_yaml_out.exists()
+
+
+def test_generate_h5(tmp_path):
+
+    # GIVEN a job name, a path, and a job id
+    dummy_path = tmp_path / "h5dir"
+    dummy_path.mkdir()
+    dummy_job_name = "awesome_name"
+    dummy_job_id = "31415.123123"
+    correct_output = Path(dummy_path, dummy_job_name + ".h5")
+
+    # WHEN generating a h5 output
+    with mock.patch.object(subprocess, 'check_output') as mocked:
+        actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
+
+    assert actual_output == correct_output
+
+
+def test_generate_h5_capture_no_output(tmp_path):
+
+    # GIVEN a job name, a path, and a job id
+    dummy_path = tmp_path / "h5dir"
+    dummy_path.mkdir()
+    dummy_job_name = "awesome_name"
+    dummy_job_id = "31415.123123"
+    mocked_output = "sh5util: No node-step files found for jobid"
+    correct_output = Path(dummy_path, dummy_job_name + ".h5")
+
+    # WHEN generating a h5 output
+    with mock.patch.object(subprocess, 'check_output') as mocked:
+        mocked.return_value = mocked_output.encode("utf-8")
+        actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
+
+    assert actual_output == None

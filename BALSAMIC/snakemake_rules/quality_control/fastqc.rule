@@ -1,12 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-__author__ = "Hassan Foroughi Asl"
-
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC import __version__ as bv
-
-
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 rule fastqc:
   input:
@@ -16,10 +10,10 @@ rule fastqc:
     read1 = fastqc_dir + "{sample}_1_fastqc.zip",
     read2 = fastqc_dir + "{sample}_2_fastqc.zip"
   params:
-    conda = get_conda_env(config["conda_env_yaml"],"fastqc"),
+    conda = config["bioinfo_tools"].get("fastqc"),
     tmpdir = tmp_dir,
     fastqc_dir = fastqc_dir
-  singularity: singularity_image
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix() 
   benchmark:
     benchmark_dir + "fastqc_" + "{sample}.fastqc.tsv"
   shell:

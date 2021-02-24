@@ -1,57 +1,95 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-
-from BALSAMIC.utils.rule import get_conda_env
-from BALSAMIC.utils.rule import get_threads
-
-
 # UMI-consensus calling
-rule sentieon_umi_consensus_call:
+rule sentieon_consensuscall_umi:
     input:
-        sam_consensus = umi_dir + '{sample}.umialign.sam',
+        sam_consensus = umi_dir + "{sample}.align.umi.bam"
     output:
-        fastq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz',
+        fastq_consensus = temp(umi_dir + "{sample}.consensuscall.umi.fastq.gz")
+    benchmark:
+        Path(benchmark_dir + "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        tag = 'XR',
-        ip_format = 'SAM',
+        tag = paramsumi.consensuscall.tag, 
+        ip_format = paramsumi.consensuscall.align_format,
         sample_id = '{sample}'
     threads: 
-        get_threads(cluster_config, 'sentieon_umi_consensus_call')
-    log: 
-        log_dir + '{sample}.consensuscall.log'
-    benchmark : 
-        benchmark_dir + '{sample}.consensuscall.tsv'
+        get_threads(cluster_config, "sentieon_consensuscall_umi")
     message: 
-        "Consensus molecule creation for sample {params.sample_id}"
+        "Consensus molecule creation using sentieon for sample {params.sample_id}"
     shell:
-        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
-        "{params.sentieon_exec} umi consensus -t {threads} -i {input.sam_consensus} -o {output.fastq_consensus} --input_format {params.ip_format} --umi_tag {params.tag} --read_name_prefix 'UMI-' &> {log}\n"
+        """
+{params.sentieon_exec} umi consensus \
+-t {threads} \
+-i {input.sam_consensus} \
+-o {output.fastq_consensus} \
+--input_format {params.ip_format} \
+--umi_tag {params.tag} \
+--read_name_prefix 'UMI-'; 
+        """
 
 # Alignment of consensus reads
-rule sentieon_umi_consensus_align:
+rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fq_consensus = umi_dir + '{sample}.consensuscall.fastq.gz',
+        fq_consensus = umi_dir + "{sample}.consensuscall.umi.fastq.gz"
     output:
-        align_consensus = umi_dir + '{sample}.consensusalign.bam',
+        align_consensus = umi_dir + "{sample}.consensuscalled.umi.bam"
+    benchmark:
+        Path(benchmark_dir + "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
     params:
-        sentieon_exec = config["SENTIEON_INSTALL_DIR"] + "/bin/sentieon",
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sheader = "'@RG\\tID:Group\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
-        ip_bases = '1000000',
-        sample_id = '{sample}'
+        sheader = paramsumi.common.align_header,
+        ip_bases = paramsumi.common.align_intbases,
+        sample_id = "{sample}"
     threads: 
-        get_threads(cluster_config, 'sentieon_umi_consensus_align')
-    log: 
-        log_dir + '{sample}.consensusalign.log'
-    benchmark : 
-        benchmark_dir + '{sample}.consensusalign.tsv'
+        get_threads(cluster_config, "sentieon_bwa_umiconsensus")
     message:
-         "Mapping of consensus reads with the bwa mem, sorting for sample {params.sample_id}"
+         "Mapping of consensus reads with the sentieon bwa mem, sorting for sample {params.sample_id}"
     shell:
-        "export SENTIEON_LICENSE={params.sentieon_lic}\n"
-        "{params.sentieon_exec} bwa mem -R {params.sheader} -t {threads} -K {params.ip_bases} -p -C {input.ref_fa} {input.fq_consensus} | {params.sentieon_exec} util sort -r {input.ref_fa} --sam2bam -o {output.align_consensus} -i - 2> {log}\n"
+        """
+{params.sentieon_exec} bwa mem \
+-R {params.sheader} \
+-t {threads} \
+-K {params.ip_bases} \
+-p -C {input.ref_fa} \
+{input.fq_consensus} | \
+{params.sentieon_exec} util sort \
+-r {input.ref_fa} \
+--sam2bam \
+-o {output.align_consensus} \
+-i - ;
+        """
 
+# Filter consensus called reads based on 'XZ' filtering
+rule sentieon_consensusfilter_umi:
+    input:
+        umi_dir + "{case_name}.consensuscalled.umi.bam"
+    output:
+        umi_dir + "{case_name}.consensusfiltered.umi.bam"
+    benchmark:
+        Path(benchmark_dir + "sentieon_consensusfilter_umi_{case_name}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
+    params:
+        consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
+        minreads = paramsumi.consensuscall.filter_minreads,
+        sample_id = '{case_name}',
+        conda = config["bioinfo_tools"].get("samtools")
+    threads:
+        get_threads(cluster_config, "sentieon_consensusfilter_umi")
+    message:
+        "Filtering consensus reads based on XZ tag for sample {params.sample_id}"
+    shell:
+        """
+source activate {params.conda};
+
+samtools view -h {input} | \
+awk -v MinR={params.minreads} -v OFS=\'\\t\' -f {params.consensusfilter_script} | \
+samtools view -bh - > {output};
+
+samtools index {output};
+        """

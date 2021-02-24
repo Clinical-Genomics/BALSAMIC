@@ -1,26 +1,24 @@
 import os
 import json
-import yaml
-import sys
-import collections
-import BALSAMIC
-import snakemake
-import re
 import shutil
 import logging
-import click
-import graphviz
-
+import sys
+import collections
+import re
+import subprocess
 from pathlib import Path
-from colorclass import Color
 from io import StringIO
-from itertools import chain
-from collections import defaultdict
-from BALSAMIC.utils.constants import CONDA_ENV_PATH
+from distutils.spawn import find_executable
+
+import yaml
+import snakemake
+import graphviz
+from colorclass import Color
+
+import BALSAMIC
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
-
-from BALSAMIC.utils.exc import BalsamicError
 
 
 class CaptureStdout(list):
@@ -44,7 +42,6 @@ class SnakeMake:
     To build a snakemake command using cli options
 
     Params:
-    
     case_name       - analysis case name
     working_dir     - working directory for snakemake
     configfile      - sample configuration file (json) output of balsamic-config-sample
@@ -61,9 +58,12 @@ class SnakeMake:
     run_analysis    - To run pipeline
     use_singularity - To use singularity
     singularity_bind- Singularity bind path
+    quiet           - Quiet mode for snakemake
     singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller
+    dragen          - enable/disable dragen suite
+    slurm_profiler  - enable slurm profiler
     """
 
     def __init__(self):
@@ -84,26 +84,33 @@ class SnakeMake:
         self.mail_user = str()
         self.forceall = False
         self.run_analysis = False
+        self.quiet = False
         self.report = str()
         self.use_singularity = True
         self.singularity_bind = str()
         self.singularity_arg = str()
         self.sm_opt = str()
         self.disable_variant_caller = str()
+        self.dragen = False
+        self.slurm_profiler = str()
 
     def build_cmd(self):
         forceall = str()
+        quiet_mode = str()
         sm_opt = str()
         cluster_cmd = str()
         dryrun = str()
         report = str()
-        snakemake_config_key_value = str()
+        snakemake_config_key_value = list()
 
         if self.forceall:
             forceall = "--forceall"
 
         if self.report:
             report = "--report {}".format(self.report)
+
+        if self.quiet:
+            quiet_mode = " --quiet "
 
         if self.sm_opt:
             sm_opt = " ".join(self.sm_opt)
@@ -112,9 +119,14 @@ class SnakeMake:
             dryrun = "--dryrun"
 
         if self.disable_variant_caller:
-            snakemake_config_key_value = (
-                f" --config disable_variant_caller={self.disable_variant_caller} "
-            )
+            snakemake_config_key_value.append(
+                f'disable_variant_caller={self.disable_variant_caller}')
+
+        if self.dragen:
+            snakemake_config_key_value.append('dragen=True')
+
+        if snakemake_config_key_value:
+            snakemake_config_key_value.insert(0, "--config")
 
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
@@ -140,6 +152,10 @@ class SnakeMake:
                               self.result_path,
                           ))
 
+            if self.slurm_profiler:
+                sbatch_cmd += " --slurm-profiler {}".format(
+                    self.slurm_profiler)
+
             if self.mail_user:
                 sbatch_cmd += " --mail-user {} ".format(self.mail_user)
 
@@ -154,22 +170,15 @@ class SnakeMake:
                                self.case_name, self.cluster_config,
                                sbatch_cmd))
 
-        sm_cmd = (" snakemake --notemp -p "
-                  " --directory {} --snakefile {} --configfiles {} "
-                  " {} {} {} {} {} {} {} {}".format(
-                      self.working_dir,
-                      self.snakefile,
-                      self.configfile,
-                      self.cluster_config,
-                      self.singularity_arg,
-                      forceall,
-                      dryrun,
-                      cluster_cmd,
-                      report,
-                      snakemake_config_key_value,
-                      sm_opt,
-                  ))
+        # Merge snakmake config key value list
+        snakemake_config_key_value = " ".join(snakemake_config_key_value)
 
+        sm_cmd = (
+            f" snakemake --notemp -p "
+            f" --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
+            f" {self.cluster_config} {self.singularity_arg} {quiet_mode} "
+            f" {forceall} {dryrun} {cluster_cmd} "
+            f" {report} {snakemake_config_key_value} {sm_opt}")
         return sm_cmd
 
 
@@ -233,7 +242,7 @@ def get_schedulerpy():
     """
 
     p = Path(__file__).parents[1]
-    scheduler = str(Path(p, "commands/run/scheduler.py"))
+    scheduler = str(Path(p, "utils", "scheduler.py"))
 
     return scheduler
 
@@ -244,14 +253,9 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     """
 
     p = Path(__file__).parents[1]
-    if analysis_type == "qc":
-        snakefile = Path(p, "workflows", "Alignment.smk")
-    elif analysis_type in ["single", "paired"]:
-        snakefile = Path(p, "workflows", "VariantCalling.smk")
-        if sequencing_type == "wgs":
-            snakefile = Path(p, "workflows", "VariantCalling_sentieon.smk")
-    elif analysis_type == "generate_ref":
-        snakefile = Path(p, "workflows", "GenerateRef")
+    snakefile = Path(p, "workflows", "balsamic.smk")
+    if analysis_type == "generate_ref":
+        snakefile = Path(p, 'workflows', 'reference.smk')
     elif analysis_type == "umi":
         snakefile = Path(p, "workflows", "UMIworkflow.smk")
 
@@ -288,18 +292,6 @@ def convert_defaultdict_to_regular_dict(inputdict: dict):
             for key, value in inputdict.items()
         }
     return inputdict
-
-
-def merge_dict_on_key(dict_1, dict_2, by_key):
-    """
-    Merge two list of dictionaries based on key
-    """
-    merged_dict = defaultdict(dict)
-    for interm_list in (dict_1, dict_2):
-        for item in interm_list:
-            merged_dict[item[by_key]].update(item)
-    merged_dict_list = merged_dict.values()
-    return merged_dict_list
 
 
 def find_file_index(file_path):
@@ -441,36 +433,29 @@ def get_panel_chrom(panel_bed) -> list:
     return {s.split("\t")[0] for s in lines}
 
 
-def get_bioinfo_tools_list(conda_env_path) -> dict:
+def get_bioinfo_tools_version(bioinfo_tools: dict,
+                              container_conda_env_path: os.PathLike) -> dict:
     """Parses the names and versions of bioinfo tools 
     used by BALSAMIC from config YAML into a dict """
 
-    bioinfo_tools = {}
-    for yaml_file in Path(conda_env_path).rglob("*.yaml"):
+    bioinfo_tools_version = {}
+    for container_conda_env_name in set(bioinfo_tools.values()):
+        yaml_file = Path(container_conda_env_path, container_conda_env_name,
+                         container_conda_env_name + ".yaml")
         with open(yaml_file, "r") as f:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
-                if isinstance(p, dict):
-                    for pip_package in p["pip"]:
-                        name, version = pip_package.split("==")
-                        if name in bioinfo_tools:
-                            bioinfo_tools[name] = ",".join(
-                                set([bioinfo_tools[name], version]))
-                        else:
-                            bioinfo_tools[name] = version
+                name = p.split("=")[0]
+                version = "=".join(p.split("=")[1:])
+                if name not in bioinfo_tools:
+                    continue
+                if name in bioinfo_tools_version:
+                    bioinfo_tools_version[name].append(version)
+                    bioinfo_tools_version[name] = list(
+                        set(bioinfo_tools_version[name]))
                 else:
-                    try:
-                        name = p.split("=")[0]
-                        version = "=".join(p.split("=")[1:])
-                    except ValueError:
-                        name, version = p, None
-                    finally:
-                        if name in bioinfo_tools:
-                            bioinfo_tools[name] = ",".join(
-                                set([bioinfo_tools[name], version]))
-                        else:
-                            bioinfo_tools[name] = version
-    return bioinfo_tools
+                    bioinfo_tools_version[name] = list([version])
+    return bioinfo_tools_version
 
 
 def get_sample_dict(tumor: str,
@@ -585,3 +570,36 @@ def convert_deliverables_tags(delivery_json: dict,
                 file_tags.append(sample_name)
         file["tag"] = list(set(file_tags))
     return delivery_json
+
+
+def check_executable(exe_name: str) -> bool:
+    """Checks for executable exe_name in PATH"""
+    exe_exist = True
+
+    if find_executable(exe_name) is None:
+        exe_exist = False
+
+    return exe_exist
+
+
+def generate_h5(job_name: str, job_id: str, file_path: str) -> str:
+    """Generates H5 file for a finished job. Returns None if it cannot generate H5 file"""
+    h5_file_name = Path(file_path, job_name + ".h5")
+    sh5util_output = subprocess.check_output(
+        ["sh5util", "-o",
+         h5_file_name.as_posix(), "-S", "-j", job_id],
+        stderr=subprocess.STDOUT)
+
+    if "sh5util: No node-step files found for jobid" in sh5util_output.decode(
+            "utf-8"):
+        h5_file_name = None
+
+    return h5_file_name
+
+
+def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
+    """Write an input job_id_sacct_file to yaml output"""
+    with open(job_id_dump, "r") as jobid_in, open(job_id_yaml,
+                                                  "w") as jobid_out:
+        jobid_list = jobid_in.read().splitlines()
+        yaml.dump({case_name: jobid_list}, jobid_out)

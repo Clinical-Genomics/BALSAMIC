@@ -1,12 +1,4 @@
-import pytest
-import glob
 import BALSAMIC
-import json
-import logging
-
-from pathlib import Path
-from click.testing import CliRunner
-from BALSAMIC.commands.base import cli
 
 
 def test_cli(invoke_cli):
@@ -25,7 +17,6 @@ def test_config(invoke_cli):
 
     # THEN It should show config options in result
     assert 'case' in result.output
-    assert 'reference' in result.output
 
 
 def test_config_case(invoke_cli):
@@ -114,28 +105,6 @@ def test_run_missing_opt(invoke_cli):
 def test_run_analysis_invalid(invoke_cli):
     # WHEN invoking run with invalid input value
     result = invoke_cli(['run', 'analysis', '--run-mode', 'foo'])
-
-    # THEN It should throw invalid value error
-    assert result.exit_code == 2
-    assert 'Error: Invalid value' in result.output
-
-
-def test_run_reference(invoke_cli):
-    # WHEN invoking run reference command
-    result = invoke_cli(['run', 'reference', '--help'])
-
-    # THEN It should show the help message with all params
-    assert "--snakefile" in result.output
-    assert "--configfile" in result.output
-    assert "--run-mode" in result.output
-    assert "--cluster-config" in result.output
-    assert "--run-analysis" in result.output
-    assert result.exit_code == 0
-
-
-def test_run_ref_invalid(invoke_cli):
-    # WHEN invoking run reference command with invalid param
-    result = invoke_cli(['run', 'reference', '--run-mode', 'foo'])
 
     # THEN It should throw invalid value error
     assert result.exit_code == 2
