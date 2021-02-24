@@ -25,31 +25,23 @@ if 'quality_trim' in config['QC'].keys():
                                 "--umi_len", config['QC']['umi_trim_length'],
                                 "--umi_prefix","UMI"])
 
-# Double pass to hard trim adapter and UMIs
-rule fastp:
+rule fastp_umi:
     input:
         read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
         read2=config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
     output:
-        read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
-        json = qc_dir + "fastp/{sample}_fastp.json",
-        html = qc_dir + "fastp/{sample}_fastp.html",
+        read1 = fastq_dir + "{sample}_1.umi_optimized.fastq.gz",
+        read2 = fastq_dir + "{sample}_2.umi_optimized.fastq.gz",
+        json = qc_dir + "fastp/{sample}_fastp_umi.json",
+        html = qc_dir + "fastp/{sample}_fastp_umi.html",
     benchmark:
-             benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix() 
+        benchmark_dir + "fastp_umi" + "{sample}_fastp.tsv"
+    singularity: 
+        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
-        read1_interm = fastq_dir + "{sample}_1.interm.fastq.gz",
-        read2_interm = fastq_dir + "{sample}_2.interm.fastq.gz",
-        json_out_interm = fastq_dir + "{sample}_interm_fastp.json",
-        html_out_interm = fastq_dir + "{sample}_interm_fastp.html",
-        housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
         tmpdir = tmp_dir,
-        fastq_dir = fastq_dir,
         qc = " ".join(fastp_param_qc),
-        umi = " ".join(fastp_param_umi),
         adapter = " ".join(fastp_param_adapter),
-        minimum_length = config["QC"]["min_seq_length"],
         sample_name = "{sample}",
         conda = config["bioinfo_tools"].get("fastp")
     threads: get_threads(cluster_config, 'fastp')
@@ -64,18 +56,48 @@ fastp \
 --thread {threads} \
 --in1 {input.read1} \
 --in2 {input.read2} \
---out1 {params.read1_interm} \
---out2 {params.read2_interm} \
---json {params.json_out_interm} \
---html {params.html_out_interm} \
+--out1 {output.read1} \
+--out2 {output.read2} \
+--json {output.json} \
+--html {output.html} \
 --overrepresentation_analysis \
 {params.qc} \
 {params.adapter};
+        """
+
+# Double pass to hard trim adapter and UMIs
+rule fastp:
+    input:
+        read1 = fastq_dir + "{sample}_1.umi_optimized.fastq.gz",
+        read2 = fastq_dir + "{sample}_2.umi_optimized.fastq.gz"
+    output:
+        read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
+        read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
+        json = qc_dir + "fastp/{sample}_fastp.json",
+        html = qc_dir + "fastp/{sample}_fastp.html"
+    benchmark:
+        benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
+    singularity: 
+        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix() 
+    params:
+        housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
+        tmpdir = tmp_dir,
+        umi = " ".join(fastp_param_umi),
+        minimum_length = config["QC"]["min_seq_length"],
+        sample_name = "{sample}",
+        conda = config["bioinfo_tools"].get("fastp")
+    threads: get_threads(cluster_config, 'fastp')
+    message:
+        "Quality control and trimming of umi optimized fastq file for {params.sample_name}"
+    shell:
+        """
+source activate {params.conda};
+export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {params.read1_interm} \
---in2 {params.read2_interm} \
+--in1 {input.read1} \
+--in2 {input.read2} \
 --out1 {output.read1} \
 --out2 {output.read2} \
 --json {output.json} \
@@ -86,9 +108,4 @@ fastp \
 --disable_trim_poly_g \
 --length_required {params.minimum_length} \
 {params.umi};
-
-rm {params.read1_interm};
-rm {params.read2_interm};
-rm {params.json_out_interm};
-rm {params.html_out_interm};
         """
