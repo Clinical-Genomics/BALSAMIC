@@ -32,6 +32,14 @@ Changed
 * QoL changes to scheduler script PR #491
 * QoL changes to how temporary directories are handlded PR #516
 * TNScope model apply rule merged with TNScope variant calling for tumor-normal in WGS #540
+* Decoupled ``fastp`` rule into two rules to make it possible to use it for UMI runs #570
+
+
+Fixed
+^^^^^
+
+* A bug in Manta variant calling rules that didn't name samples properly to TUMOR/NORMAL in the VCF file #572
+
 
 [6.1.2]
 -------
