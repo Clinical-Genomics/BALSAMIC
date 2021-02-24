@@ -40,11 +40,8 @@ rule fastp_umi:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
-        fastq_dir = fastq_dir,
         qc = " ".join(fastp_param_qc),
-        umi = " ".join(fastp_param_umi),
         adapter = " ".join(fastp_param_adapter),
-        minimum_length = config["QC"]["min_seq_length"],
         sample_name = "{sample}",
         conda = config["bioinfo_tools"].get("fastp")
     threads: get_threads(cluster_config, 'fastp')
@@ -85,10 +82,7 @@ rule fastp:
     params:
         housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
         tmpdir = tmp_dir,
-        fastq_dir = fastq_dir,
-        qc = " ".join(fastp_param_qc),
         umi = " ".join(fastp_param_umi),
-        adapter = " ".join(fastp_param_adapter),
         minimum_length = config["QC"]["min_seq_length"],
         sample_name = "{sample}",
         conda = config["bioinfo_tools"].get("fastp")
