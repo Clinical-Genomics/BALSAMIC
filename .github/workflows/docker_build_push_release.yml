@@ -3,10 +3,8 @@ name: build and push docker containers
 # Tigger building and testing container only on pull requests
 on:
   push:
-    branches:
-      - master
-      - develop
-
+    tags:
+      - "**"
 jobs:
   main:
     name: Docker image build push 
@@ -35,6 +33,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} 
+          tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} 
           build-args:
             CONTAINER_NAME=${{ matrix.container-name }}
