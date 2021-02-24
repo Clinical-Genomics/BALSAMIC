@@ -1,4 +1,4 @@
-name: build and push docker containers
+name: build and push docker containers release
 
 # Tigger building and testing container only on pull requests
 on:
