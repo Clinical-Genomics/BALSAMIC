@@ -8,7 +8,6 @@ from BALSAMIC.utils.rule import (get_threads, get_result_dir,
                                  get_sample_type, get_script_path, get_vcf)
 from BALSAMIC.utils.models import UMIworkflowConfig
 from BALSAMIC.utils.constants import RULE_DIRECTORY, VCFANNO_TOML, umiworkflow_params
-from BALSAMIC.utils.workflowscripts import get_densityplot
 
 LOG = logging.getLogger(__name__)
 
@@ -46,10 +45,10 @@ umi_call = [
     "snakemake_rules/umi/sentieon_consensuscall.rule"
 ]
 
-variant_call = [
-    "snakemake_rules/umi/sentieon_varcall_tnscope.rule",
-    "snakemake_rules/umi/varcall_vardict.rule"
-]
+if config["analysis"]["analysis_type"] == "single":
+    variant_call = ["snakemake_rules/umi/sentieon_varcall_tnscope.rule"]
+else:
+    variant_call = ["snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"]
 
 annotate_vcf = ["snakemake_rules/annotation/vep.rule"]
 
@@ -63,20 +62,18 @@ paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
 # Define wildcards
 SAMPLES = config["samples"]
 CASE_NAME = config["analysis"]["case_id"]
-VAR_CALLER = ["TNscope","vardict"]
-ALL_STEPS = ["consensusaligned","consensusfiltered", "umialign"]
-FILTERED_STEPS = ["consensusaligned","consensusfiltered"]
-EXTN_NAME = expand("{var_caller}_{step}_umi", var_caller = ["TNscope","vardict"], step=FILTERED_STEPS)
 
 # Define outputs
-analysis_output = [ expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.{filters}.vcf.gz", var_type= "SNV", case_name=CASE_NAME, var_caller=EXTN_NAME, filters=["all", "pass"]),
-expand(umi_qc_dir + "{case_name}.{step}_umi.{metric}", case_name=CASE_NAME, step=FILTERED_STEPS, metric = ["metrics","collect_hsmetric", "mean_family_depth"]),
-expand(umi_qc_dir + "{case_name}.{var_caller}_umi.noiseAF", case_name=CASE_NAME, var_caller=["TNscope"]),
-expand(umi_qc_dir + "{case_name}.{var_caller}_umi.AFplot.pdf", case_name=CASE_NAME, var_caller=["TNscope"]),
-expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=CASE_NAME, var_caller=EXTN_NAME)
-]
+analysis_output = [expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz", var_type= "SNV", case_name=CASE_NAME, var_caller=["TNscope_umi"]),
+expand(umi_qc_dir + "{sample}.umi.{metric}", sample=SAMPLES, metric = ["metrics", "mean_family_depth"])]
 
-config["rules"] = umi_call + variant_call +  annotate_vcf + qc + generate_tables
+config["rules"] = umi_call + variant_call +  annotate_vcf + qc
+
+if "background_variants" in config:
+    analysis_output.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
+                                   case_name = config["analysis"]["case_id"],
+                                   var_caller =["TNscope_umi"])])
+    config["rules"] = config["rules"] + generate_tables
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()

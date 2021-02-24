@@ -2,10 +2,12 @@
 # coding: utf-8
 
 # Variant-calling using TNscope
-
-rule sentieon_tnscope_umi:
+rule sentieon_tnscope_umi_tn:
     input:
-        bam = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", mysample=config["samples"]),
+        bamT = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", 
+                      mysample=get_sample_type(config["samples"], "tumor")),
+        bamN = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", 
+                      mysample=get_sample_type(config["samples"], "normal")), 
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
@@ -13,7 +15,7 @@ rule sentieon_tnscope_umi:
         vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".TNscope_umi.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".TNscope_umi.sample_name_map"
     benchmark:
-        Path(benchmark_dir + "sentieon_tnscope_umi_"+ config["analysis"]["case_id"] +".tsv").as_posix()
+        Path(benchmark_dir + "sentieon_tnscope_umi_"+ config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -24,18 +26,22 @@ rule sentieon_tnscope_umi:
         error_rate = paramsumi.tnscope.error_rate,
         prune_factor = paramsumi.tnscope.prunefactor,
         tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal") 
     threads: 
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message: 
-        "Calling SNVs using TNscope for sample {params.tumor}"
+        "Calling SNVs using TNscope for tumor sample: {params.tumor}"
+        " versus normal sample: {params.normal}"
     shell:
         """
 {params.sentieon_exec} driver \
 -t {threads} \
 -r {input.ref_fa} \
--i {input.bam} \
+-i {input.bamT} \
+-i {input.bamN} \
 --algo {params.algo} \
 --tumor_sample {params.tumor} \
+--normal_sample {params.normal} \
 --dbsnp {input.dbsnp} \
 --min_tumor_allele_frac {params.tumor_af} \
 --filter_t_alt_frac {params.tumor_af} \
@@ -46,5 +52,5 @@ rule sentieon_tnscope_umi:
 --prune_factor {params.prune_factor} \
 {output.vcf};
 
-echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
         """

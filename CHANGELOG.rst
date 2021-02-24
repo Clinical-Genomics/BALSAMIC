@@ -33,6 +33,17 @@ Changed
 * QoL changes to how temporary directories are handlded PR #516
 * TNScope model apply rule merged with TNScope variant calling for tumor-normal in WGS #540
 
+[6.1.2]
+-------
+
+Changed
+^^^^^^^
+* Changed hk delivery tag for coverage-qc-report
+
+
+[6.1.1]
+-------
+
 Fixed
 ^^^^^
 
@@ -77,7 +88,7 @@ Changed
 Added
 ^^^^^
 
-* ``config case`` subcommand now has ``--tumor-sample-name`` and ``--normal-sample-name`` 
+* ``config case`` subcommand now has ``--tumor-sample-name`` and ``--normal-sample-name``
 
 Fixed
 ^^^^^
@@ -144,7 +155,7 @@ Changed
 
 Removed
 ^^^^^^^
-* In preparation for GATK4, IndelRealigner is removed #404 
+* In preparation for GATK4, IndelRealigner is removed #404
 
 
 [5.0.1]
@@ -211,7 +222,7 @@ Changed
 
 * Fastq files are no longer being copied as part of creation of the case config file.
   A symlink is now created at the destination path instead
-* Config structure is no longer contained in a collestion of JSON files. 
+* Config structure is no longer contained in a collestion of JSON files.
   The config models are now built using Pydantic and are contained in BALSAMIC/utils/models.py
 
 Removed
@@ -270,7 +281,7 @@ Added
 * Filter models added for tumor-only mode
 * Enabling adapter trim enables pe adapter trim option for fastp
 * Annotate germline variant calls
-* Baitset name to picard hsmetrics 
+* Baitset name to picard hsmetrics
 
 Deprecated
 ^^^^^^^^^^
@@ -376,7 +387,7 @@ Removed
 * Removed coverage annotation from mutect2
 * Removed source deactivate from rules to suppress conda warning
 * Removed ``plugins delivery`` subcommand
-* Removed annotation for germline caller results 
+* Removed annotation for germline caller results
 
 [4.1.0]
 -------
@@ -480,7 +491,7 @@ Changed
 
 
 * SLURM resource allocation for various variancalling rules optimized
-* mergetype rule updated and only accepts one single tumor instead of multiple 
+* mergetype rule updated and only accepts one single tumor instead of multiple
 
 [3.2.3] - 2019-10-24
 --------------------
@@ -590,7 +601,7 @@ Fixed
 ^^^^^
 
 
-* Fixed a bug with boolean values in analysis.json 
+* Fixed a bug with boolean values in analysis.json
 
 Changed
 ^^^^^^^
@@ -647,7 +658,7 @@ Fixed
 ^^^^^
 
 
-* Multiple fixes to snakemake rules 
+* Multiple fixes to snakemake rules
 
 Changed
 ^^^^^^^
