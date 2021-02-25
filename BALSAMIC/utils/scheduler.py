@@ -234,7 +234,7 @@ def main(args=None):
                 ["afterok:%s" % d for d in args.dependencies])
         if args.slurm_profiler:
             scheduler_cmd.profile = args.slurm_profiler
-            scheduler_cmd.acct_freq = "{}={}".format(
+            scheduler_cmd.acctg_freq = "{}={}".format(
                 args.slurm_profiler, args.slurm_profiler_interval
             )  #"--profile task --acctg-freq=task=15"
     elif args.profile == 'qsub':
@@ -272,7 +272,7 @@ def main(args=None):
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
     write_sacct_file(sacct_file=sacct_file_extended,
-                     job_id=jobid,
+                     job_id=scheduler_cmd.build_cmd(),
                      job_name=os.path.basename(jobscript))
 
 

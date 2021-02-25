@@ -211,7 +211,8 @@ def analysis(context, snake_file, sample_config, run_mode, cluster_config,
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
     balsamic_run.sm_opt = snakemake_opt
-    balsamic_run.slurm_profiler = benchmark
+    if benchmark and profile == "slurm":
+        balsamic_run.slurm_profiler = "task"
 
     if disable_variant_caller:
         balsamic_run.disable_variant_caller = disable_variant_caller
