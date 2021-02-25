@@ -6,6 +6,11 @@ Fixed
 
 * fix job scheduling bug for benchmarking
 
+Added
+^^^^^
+
+* UMI FAQs to balsamic docs
+
 [7.0.1]
 -------
 
