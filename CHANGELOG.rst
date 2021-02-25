@@ -1,3 +1,11 @@
+[7.0.2]
+-------
+
+Fixed
+^^^^^
+
+* fix job scheduling bug for benchmarking
+
 [7.0.1]
 -------
 
