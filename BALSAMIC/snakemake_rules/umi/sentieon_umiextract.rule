@@ -4,8 +4,8 @@
 # Extract umi tags using the defined read structure. 
 rule sentieon_umiextract:
     input:
-        read1 = fastq_dir + "{sample}_1.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.fastq.gz"
+        read1 = Path(fastq_dir + "{sample}_1.umi_optimized.fastq.gz").as_posix(),
+        read2 = Path(fastq_dir + "{sample}_2.umi_optimized.fastq.gz").as_posix()
     output:
         ds_umi = temp(umi_dir + "{sample}.umiextract.fastq.gz")
     benchmark:
@@ -30,15 +30,15 @@ rule sentieon_umiextract:
 rule sentieon_bwa_umiextract:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fastq_umi = expand(umi_dir + "{mysample}.umiextract.fastq.gz", mysample=get_sample_type(config["samples"],"tumor"))
+        fastq_umi = umi_dir + "{sample}.umiextract.fastq.gz"
     output:
-        align_umi = temp(umi_dir + "{case_name}.align.umi.bam")
+        align_umi = temp(umi_dir + "{sample}.align.umi.bam")
     benchmark:
-        Path(benchmark_dir + "sentieon_bwa_umiextract_{case_name}.tsv").as_posix()
+        Path(benchmark_dir + "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id = '{case_name}',
+        sample_id = '{sample}',
         sheader = paramsumi.common.align_header,
         ip_bases = paramsumi.common.align_intbases
     threads: 

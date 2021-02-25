@@ -20,21 +20,31 @@ rule manta_tumor_normal:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
+        tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("manta")
     singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix() 
     benchmark: 
         benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
     threads: get_threads(cluster_config, "manta_tumor_normal") 
     shell:
-        "source activate {params.conda};"
-        "configManta.py "
-            "--normalBam={input.bamN} "
-            "--tumorBam={input.bamT} "
-            "--referenceFasta={input.fa} "
-            "--runDir={params.tmpdir}; "
-        "python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};"
-        "cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final}; "
-        "tabix -p vcf -f {output.final}; "
-        "echo -e \"TUMOR\\tTUMOR\nNORMAL\\tNORMAL\" > {output.namemap}; " 
-        "rm -rf {params.tmpdir}; "
-        
+        """
+source activate {params.conda};
+
+configManta.py
+   "--normalBam={input.bamN}
+   "--tumorBam={input.bamT}
+   "--referenceFasta={input.fa}
+   "--runDir={params.tmpdir};
+
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+
+cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final};
+
+tabix -p vcf -f {output.final};
+
+echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+

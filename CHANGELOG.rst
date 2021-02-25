@@ -1,3 +1,77 @@
+[7.0.0]
+------
+
+Added
+^^^^^
+
+* ``balsamic init`` to download reference and related containers done in PRs #464 #538
+* ``balsamic config case`` now only take a cache path instead of container and reference #538
+* UMI workflow added to main workflow in series of PRs #469 #477 #483 #498 #503 #514 #517
+* DRAGEN for WGS applications in PR #488
+* A framework for QC check PR #401
+* ``--quiet``` option for ``run analysis`` PR #491
+* Benchmark SLURM jobs after the analysis is finished PR #534
+* One container per conda environment (i.e. decouple containers) PR #511 #525 #522
+* ``--disable-variant-caller`` command for ``report deliver`` PR #439
+* Added genmod and rankscore in series of two PRs #531 and #533
+* Variant filtering to Tumor-Normal in PR #534
+* Split SNV/InDels and SVs from TNScope variant caller PR #540
+* WGS Tumor only variant filters added in PR #548
+
+Changed
+^^^^^^^
+
+* Update Manta to 1.6.0 PR #470
+* Update FastQC to 0.11.9 PR #532
+* Update BCFTools to 1.11 PR #537
+* Update Samtools to 1.11 PR #537
+* Increase resources and runtime for various workflows in PRs #482 
+* Python package dependenicies versions fixed in PR #480
+* QoL changes to workflow in series of PR #471
+* Series of documentation updates in PRs #489 #553
+* QoL changes to scheduler script PR #491
+* QoL changes to how temporary directories are handlded PR #516
+* TNScope model apply rule merged with TNScope variant calling for tumor-normal in WGS #540
+* Decoupled ``fastp`` rule into two rules to make it possible to use it for UMI runs #570
+
+
+Fixed
+^^^^^
+
+* A bug in Manta variant calling rules that didn't name samples properly to TUMOR/NORMAL in the VCF file #572
+
+
+[6.1.2]
+-------
+
+Changed
+^^^^^^^
+* Changed hk delivery tag for coverage-qc-report
+
+
+[6.1.1]
+-------
+
+Fixed
+^^^^^
+
+* No UMI trimming for WGS applications #486
+* Fixed a bug where BALSAMIC was checking for sacct/jobid file in local mode PR #497
+* ``readlink`` command in ``vep_germline``, ``vep_somatic``, ``split_bed``, and ``GATK_popVCF`` #533
+* Fix various bugs for memory handling of Picardtools and its executable in PR #534
+* Fixed various issues with ``gsutils`` in PR #550
+
+Removed
+^^^^^^^
+
+* ``gatk-register`` command removed from installing GATK PR #496
+
+[6.1.1]
+-------
+
+* Fixed a bug with missing QC templates after ``pip install``
+
+
 [6.1.0]
 -------
 
@@ -5,6 +79,7 @@ Added
 ^^^^^
 * CLI option to expand report generation for TGA and WES runs. Please see ``balsamic report deliver --help``
 * BALSAMIC now generates a custom HTML report for TGA and WES cases.
+
 
 [6.0.4]
 -------
@@ -21,7 +96,7 @@ Changed
 Added
 ^^^^^
 
-* ``config case`` subcommand now has ``--tumor-sample-name`` and ``--normal-sample-name`` 
+* ``config case`` subcommand now has ``--tumor-sample-name`` and ``--normal-sample-name``
 
 Fixed
 ^^^^^
@@ -88,7 +163,7 @@ Changed
 
 Removed
 ^^^^^^^
-* In preparation for GATK4, IndelRealigner is removed #404 
+* In preparation for GATK4, IndelRealigner is removed #404
 
 
 [5.0.1]
@@ -155,7 +230,7 @@ Changed
 
 * Fastq files are no longer being copied as part of creation of the case config file.
   A symlink is now created at the destination path instead
-* Config structure is no longer contained in a collestion of JSON files. 
+* Config structure is no longer contained in a collestion of JSON files.
   The config models are now built using Pydantic and are contained in BALSAMIC/utils/models.py
 
 Removed
@@ -214,7 +289,7 @@ Added
 * Filter models added for tumor-only mode
 * Enabling adapter trim enables pe adapter trim option for fastp
 * Annotate germline variant calls
-* Baitset name to picard hsmetrics 
+* Baitset name to picard hsmetrics
 
 Deprecated
 ^^^^^^^^^^
@@ -320,7 +395,7 @@ Removed
 * Removed coverage annotation from mutect2
 * Removed source deactivate from rules to suppress conda warning
 * Removed ``plugins delivery`` subcommand
-* Removed annotation for germline caller results 
+* Removed annotation for germline caller results
 
 [4.1.0]
 -------
@@ -424,7 +499,7 @@ Changed
 
 
 * SLURM resource allocation for various variancalling rules optimized
-* mergetype rule updated and only accepts one single tumor instead of multiple 
+* mergetype rule updated and only accepts one single tumor instead of multiple
 
 [3.2.3] - 2019-10-24
 --------------------
@@ -534,7 +609,7 @@ Fixed
 ^^^^^
 
 
-* Fixed a bug with boolean values in analysis.json 
+* Fixed a bug with boolean values in analysis.json
 
 Changed
 ^^^^^^^
@@ -591,7 +666,7 @@ Fixed
 ^^^^^
 
 
-* Multiple fixes to snakemake rules 
+* Multiple fixes to snakemake rules
 
 Changed
 ^^^^^^^
