@@ -27,10 +27,10 @@ rule manta_tumor_only:
       """
 source activate {params.conda};
 
-configManta.py
-   "--tumorBam={input.bamT}
-   "--referenceFasta={input.fa}
-   "--runDir={params.tmpdir};
+configManta.py \
+  --tumorBam={input.bamT} \
+  --referenceFasta={input.fa} \
+  --runDir={params.tmpdir};
 
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 

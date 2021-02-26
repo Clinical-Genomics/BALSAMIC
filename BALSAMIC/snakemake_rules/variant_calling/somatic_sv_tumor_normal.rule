@@ -31,11 +31,11 @@ rule manta_tumor_normal:
         """
 source activate {params.conda};
 
-configManta.py
-   "--normalBam={input.bamN}
-   "--tumorBam={input.bamT}
-   "--referenceFasta={input.fa}
-   "--runDir={params.tmpdir};
+configManta.py \
+  --normalBam={input.bamN} \
+  --tumorBam={input.bamT} \
+  --referenceFasta={input.fa} \
+  --runDir={params.tmpdir};
 
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
@@ -43,7 +43,7 @@ cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final};
 
 tabix -p vcf -f {output.final};
 
-echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
+echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
 rm -rf {params.tmpdir};
         """
