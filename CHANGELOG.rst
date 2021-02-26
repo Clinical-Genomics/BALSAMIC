@@ -1,5 +1,10 @@
-[X.X.X]
+[7.0.2]
 -------
+
+Added
+^^^^^
+
+* Updated docs with FAQ for UMI workflow
 
 Fixed
 ^^^^^

@@ -52,5 +52,5 @@ rule sentieon_tnscope_umi_tn:
 --prune_factor {params.prune_factor} \
 {output.vcf};
 
-echo -e \"{params.tumor}\\tTUMOR\n{params.normal}\\tNORMAL\" > {output.namemap};
+echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
         """
