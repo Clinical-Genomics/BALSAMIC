@@ -46,3 +46,4 @@
     snakemake_etiquette
     README
     semver
+    FAQs
