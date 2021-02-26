@@ -18,6 +18,6 @@ rule rankscore:
   shell:
     """
 source activate {params.conda};
-genmod score -r -c {input.rankscore} {input.vcf} -o {output.vcf_ranked}
+genmod score -r -c {input.rankscore} {input.vcf} | bcftools view -o {output.vcf_ranked} -O z
 tabix -p vcf -f {output.vcf_ranked};
     """
