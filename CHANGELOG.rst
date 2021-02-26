@@ -5,6 +5,8 @@ Fixed
 ^^^^^
 
 * fix job scheduling bug for benchmarking
+* rankscore's output is now a proper vcf.gz file
+* Manta rules now properly make a sample_name file
 
 Added
 ^^^^^
