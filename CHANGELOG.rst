@@ -1,3 +1,12 @@
+[X.X.X]
+-------
+
+Removed
+^^^^^^^
+
+* ``tnsnv`` removed from WGS analysis, both tumor-only and tumor-normal
+
+
 [7.0.2]
 -------
 
