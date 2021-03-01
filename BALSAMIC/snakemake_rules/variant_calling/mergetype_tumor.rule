@@ -2,8 +2,6 @@
 # coding: utf-8
 
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
-
 
 rule mergeBam_tumor:
   input:
