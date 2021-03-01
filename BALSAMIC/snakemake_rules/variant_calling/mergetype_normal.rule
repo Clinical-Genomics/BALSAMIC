@@ -3,24 +3,6 @@
 
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
-rule mergeBam_normal_gatk:
-  input:
-    bamN = bam_dir + "{mysample}.sorted.{picardstr}.bsrcl.bam".format(mysample = normal_sample,
-                                                                            picardstr = picarddup)
-  output:
-    bamN = bam_dir + "normal.sorted." + picarddup + ".bsrcl.merged.bam",
-  params:
-    conda = config["bioinfo_tools"].get("picard"),
-    picard = picard_extra_normal
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'mergeBam_normal_gatk_' + "{mysample}.mergebam_normal_gatk.tsv".format(mysample = normal_sample)
-  shell:
-    "source activate {params.conda}; "
-    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamN} OUTPUT={output.bamN}; "
-    "samtools index {output.bamN}; "
-    
-
 rule mergeBam_normal:
   input:
     fasta = config["reference"]["reference_genome"],

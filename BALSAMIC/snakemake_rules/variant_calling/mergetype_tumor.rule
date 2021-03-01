@@ -25,21 +25,3 @@ rule mergeBam_tumor:
     "samtools index {output.bam}; "
     "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; "
     "samtools index {output.cram}; "
-
-
-rule mergeBam_tumor_gatk:
-  input:
-    bamT = bam_dir + "{mysample}.sorted.{picardstr}.bsrcl.bam".format(mysample = tumor_sample,
-                                                                            picardstr = picarddup)
-  output:
-    bamT = bam_dir + "tumor.sorted." + picarddup + ".bsrcl.merged.bam",
-  params:
-    conda = config["bioinfo_tools"].get("picard"),
-    picard = picard_extra_tumor
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + "{mysample}.mergebam_tumor_gatk.tsv".format(mysample = tumor_sample)
-  shell:
-    "source activate {params.conda}; "
-    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bamT} OUTPUT={output.bamT}; "
-    "samtools index {output.bamT}; "
