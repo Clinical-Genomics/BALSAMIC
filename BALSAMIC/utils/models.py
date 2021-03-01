@@ -153,7 +153,6 @@ class VarcallerAttribute(BaseModel):
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
-    tnsnv: VarcallerAttribute
     manta: VarcallerAttribute
     cnvkit: VarcallerAttribute
     vardict: VarcallerAttribute

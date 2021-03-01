@@ -53,12 +53,6 @@ VCF_DICT = {
         "analysis_type": ["single", "paired"],
         "workflow_solution": ["Sentieon_umi"]
     },
-    "tnsnv": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "workflow_solution": ["Sentieon"]
-    },
     "tnscope": {
         "mutation": "somatic",
         "type": "SNV",
