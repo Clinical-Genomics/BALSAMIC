@@ -10,7 +10,6 @@ Fixed
 ^^^^^
 
 * Fixed issue 577 with missing ``tumor.bam`` and ``normal.bam`` 
-* Fixed issue 577 with missing ``tumor.bam`` and ``normal.bam`` 
 
 [7.0.2]
 -------
