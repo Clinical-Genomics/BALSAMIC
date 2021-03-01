@@ -219,6 +219,7 @@ else:
 
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
     annotation_rules.append("snakemake_rules/annotation/rankscore.rule")
+    variantcalling_rules.append("snakemake_rules/variant_calling/mergetype_tumor.rule")
 
     if config['analysis']['analysis_type'] == "paired":
         annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_normal.rule")
@@ -228,7 +229,7 @@ else:
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-            "snakemake_rules/variant_calling/mergetype.rule",
+            "snakemake_rules/variant_calling/mergetype_normal.rule",
             "snakemake_rules/variant_calling/cnvkit_paired.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"
         ])
@@ -258,7 +259,6 @@ else:
 
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/cnvkit_single.rule",
-            "snakemake_rules/variant_calling/mergetype_tumor.rule",
             "snakemake_rules/variant_calling/somatic_tumor_only.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope.rule"
