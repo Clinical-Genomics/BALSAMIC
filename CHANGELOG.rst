@@ -6,6 +6,11 @@ Removed
 
 * ``tnsnv`` removed from WGS analysis, both tumor-only and tumor-normal
 
+Fixed
+^^^^^
+
+* Fixed issue 577 with missing ``tumor.bam`` and ``normal.bam`` 
+* Fixed issue 577 with missing ``tumor.bam`` and ``normal.bam`` 
 
 [7.0.2]
 -------
@@ -22,10 +27,6 @@ Fixed
 * rankscore's output is now a proper vcf.gz file
 * Manta rules now properly make a sample_name file
 
-Added
-^^^^^
-
-* UMI FAQs to balsamic docs
 
 [7.0.1]
 -------
