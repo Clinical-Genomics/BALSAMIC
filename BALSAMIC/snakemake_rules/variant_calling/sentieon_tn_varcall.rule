@@ -81,8 +81,8 @@ rule sentieon_TNhaplotyper:
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = "TUMOR", 
+        normal = "NORMAL", 
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNhaplotyper')
@@ -118,8 +118,8 @@ rule sentieon_TNscope:
         namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = "TUMOR",
+        normal = "NORMAL",
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"], 
         normal_options = VARCALL_PARAMS["tnscope"]["normal"], 
         sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
