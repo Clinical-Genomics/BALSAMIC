@@ -3,13 +3,51 @@
 
 from BALSAMIC.utils.constants import VARCALL_PARAMS
 
+rule sentieon_base_calibration:
+    input:
+        ref = config["reference"]["reference_genome"],
+        mills = config["reference"]["mills_1kg"],
+        indel_1kg = config["reference"]["1kg_known_indel"],
+        dbsnp = config["reference"]["dbsnp"],
+        bam = Path(bam_dir, "{sample_type}.merged.bam").as_posix()
+    output:
+        recal_data_table = Path(bam_dir, "{sample_type}.merged.recal_data.table").as_posix(),
+        qual_recal = Path(bam_dir, "{sample_type}.merged.recal.csv").as_posix(),
+        qual_recal_plot = Path(bam_dir, "{sample_type}.recal.pdf").as_posix(),
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+    threads: get_threads(cluster_config, 'sentieon_base_calibration')
+    benchmark:
+        Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.indel_1kg} {output.recal_data_table};
+
+{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {output.recal_data_table} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.indel_1kg} {output.recal_data_table}.post;
+
+{params.sentieon_exec} driver -t {threads} --algo QualCal --plot --before {output.recal_data_table} --after {output.recal_data_table}.post {output.qual_recal};
+
+{params.sentieon_exec} plot QualCal -o {output.qual_recal_plot} {output.qual_recal};
+
+rm -rf {params.tmpdir};
+        """
+
+
+
 rule sentieon_TN_corealign:
     input:
         ref = config["reference"]["reference_genome"],
-        bamT = expand(bam_dir + "{mysample}.dedup.realign.bam", mysample=get_sample_type(config["samples"], "tumor")),
-        bamN = expand(bam_dir + "{mysample}.dedup.realign.bam", mysample=get_sample_type(config["samples"], "normal")),
-        recalT = expand(bam_dir + "{mysample}.dedup.realign.recal_data.table", mysample=get_sample_type(config["samples"], "tumor")),
-        recalN = expand(bam_dir + "{mysample}.dedup.realign.recal_data.table", mysample=get_sample_type(config["samples"], "normal")),
+        bamT = expand(bam_dir + "tumor.merged.bam"),
+        bamN = expand(bam_dir + "normal.merged.bam"),
+        recalT = expand(bam_dir + "tumor.merged.recal_data.table"),
+        recalN = expand(bam_dir + "normal.merged.recal_data.table"),
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
     output:
@@ -19,8 +57,6 @@ rule sentieon_TN_corealign:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TN_corealign')
-    log:
-        vcf_dir + config["analysis"]["case_id"] + ".corealign.log"
     benchmark:
         benchmark_dir + 'sentieon_TN_corealign_' + config["analysis"]["case_id"] + ".corealign.tsv"
     shell:
@@ -34,41 +70,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rm -rf {params.tmpdir};
         """
-
-
-rule sentieon_TNsnv:
-    input:
-        bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam",
-        ref = config["reference"]["reference_genome"],
-        dbsnp = config["reference"]["dbsnp"],
-    output:
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnsnv.vcf.gz",
-        stats = vcf_dir + config["analysis"]["case_id"] + ".tnsnv.call_stats",
-        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnsnv.sample_name_map",
-    params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-    threads: get_threads(cluster_config, 'sentieon_TNsnv')
-    log:
-        vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
-    benchmark:
-        benchmark_dir + 'sentieon_TNsnv_' + config["analysis"]["case_id"] + ".tnsnv.tsv"
-    shell:
-        """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {input.dbsnp} --call_stats_out {output.stats} {output.vcf} 
-
-echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
-rm -rf {params.tmpdir};
-        """
-
 
 rule sentieon_TNhaplotyper:
     input:
@@ -107,10 +108,10 @@ rule sentieon_TNscope:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
-        bamT = expand(bam_dir + "{tumor}.dedup.realign.bam", tumor=get_sample_type(config["samples"], "tumor")),
-        bamN = expand(bam_dir + "{normal}.dedup.realign.bam", normal=get_sample_type(config["samples"], "normal")),
-        recalT = expand(bam_dir + "{tumor}.dedup.realign.recal_data.table", tumor=get_sample_type(config["samples"], "tumor")),
-        recalN = expand(bam_dir + "{normal}.dedup.realign.recal_data.table", normal=get_sample_type(config["samples"], "normal")),
+        bamT = expand(bam_dir + "tumor.merged.bam"),
+        bamN = expand(bam_dir + "normal.merged.bam"),
+        recalT = expand(bam_dir + "tumor.merged.recal_data.table"),
+        recalN = expand(bam_dir + "normal.merged.recal_data.table"),
     output:
         vcf_all = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
