@@ -70,8 +70,8 @@ rm -rf {params.tmpdir};
 
 rule sentieon_TNhaplotyper:
     input:
-        bamT = bam_dir + "tumor.sorted." + picarddup + ".merged.bam",
-        bamN = bam_dir + "normal.sorted." + picarddup + ".merged.bam",
+        bamT = bam_dir + "tumor.merged.bam",
+        bamN = bam_dir + "normal.merged.bam",
         interval = config["panel"]["capture_kit"],
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],

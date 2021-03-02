@@ -76,7 +76,7 @@ rule vardict_merge:
 
 rule sentieon_TNhaplotyper_tumor_only:
     input:
-        bam = bam_dir + "tumor.sorted." + picarddup + ".merged.bam",
+        bam = bam_dir + "tumor.merged.bam",
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],

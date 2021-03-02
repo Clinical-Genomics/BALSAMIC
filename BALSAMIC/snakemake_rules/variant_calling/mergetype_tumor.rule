@@ -3,11 +3,15 @@
 
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
+if config["analysis"]["sequencing_type"] == 'wgs':
+    tumor_bam = "{tumor}.dedup.realign".format(tumor = tumor_sample)
+else:
+    tumor_bam = "{tumor}.sorted.{picardstr}.bam".format(tumor = tumor_sample, picardstr = picarddup)
+
 rule mergeBam_tumor:
   input:
     fasta = config["reference"]["reference_genome"],
-    bam = bam_dir + "{mysample}.sorted.{picardstr}.bam".format(mysample = tumor_sample,
-                                                                picardstr = picarddup)
+    bam = bam_dir + tumor_bam
   output:
     bam = bam_dir + "tumor.merged.bam",
     cram = bam_dir + "tumor.merged.cram",

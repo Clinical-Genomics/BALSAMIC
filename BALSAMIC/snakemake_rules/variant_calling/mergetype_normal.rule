@@ -3,11 +3,15 @@
 
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
+if config["analysis"]["sequencing_type"] == 'wgs':
+    normal_bam = "{normal}.dedup.realign".format(normal = normal_sample)
+else:
+    normal_bam = "{normal}.sorted.{picardstr}.bam".format(normal = normal_sample, picardstr = picarddup)
+
 rule mergeBam_normal:
   input:
     fasta = config["reference"]["reference_genome"],
-    bam = bam_dir + "{mysample}.sorted.{picardstr}.bam".format(mysample = normal_sample,
-                                                                picardstr = picarddup)
+    bam = bam_dir + normal_bam 
   output:
     bam = bam_dir + "normal.merged.bam", 
     cram = bam_dir + "normal.merged.cram",
