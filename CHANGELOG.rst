@@ -10,6 +10,7 @@ Fixed
 ^^^^^
 
 * Fixed issue 577 with missing ``tumor.merged.bam`` and ``normal.merged.bam`` 
+* Issue 448 with lingering tmp_dir. It is not deleted after analysis is properly finished.
 
 Changed
 ^^^^^^^

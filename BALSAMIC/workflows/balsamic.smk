@@ -416,13 +416,21 @@ if 'delivery' in config:
 
 rule all:
     input:
-#        vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
-#        vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         quality_control_results + analysis_specific_results
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
+    params:
+        tmp_dir = tmp_dir
     run:
         import datetime
+        import shutil
+
+        try:
+            shutil.rmtree(params.tmp_dir)
+        except OSError as e:
+            print ("Error: %s - %s." % (e.filename, e.strerror))
 
         with open(str(output[0]), mode='w') as finish_file:
             finish_file.write('%s\n' % datetime.datetime.now())
+        
+        
