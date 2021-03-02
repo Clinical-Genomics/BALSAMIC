@@ -118,8 +118,11 @@ qc_rules = [
     "snakemake_rules/quality_control/fastp.rule",
     "snakemake_rules/quality_control/fastqc.rule",
     "snakemake_rules/quality_control/multiqc.rule",
+    "snakemake_rules/variant_calling/mergetype_tumor.rule"
 ]
 
+if config['analysis']['analysis_type'] == "paired":
+    qc_rules.append("snakemake_rules/variant_calling/mergetype_normal.rule")
 
 if config["analysis"]["sequencing_type"] == "wgs":
     qc_rules.extend([
@@ -139,7 +142,7 @@ else:
     align_rules = [
         "snakemake_rules/align/bwa_mem.rule",
         "snakemake_rules/umi/sentieon_umiextract.rule",
-        "snakemake_rules/umi/sentieon_consensuscall.rule"
+        "snakemake_rules/umi/sentieon_consensuscall.rule",
     ]
 
 
@@ -175,7 +178,6 @@ else:
 
 if config["analysis"]["sequencing_type"] == "wgs":
     variantcalling_rules.append("snakemake_rules/variant_calling/sentieon_split_snv_sv.rule")
-    variantcalling_rules.append("snakemake_rules/variant_calling/mergetype_tumor.rule")
     if config['analysis']['analysis_type'] == "paired":
 
         somatic_caller_snv = get_variant_callers(config=config,
@@ -192,7 +194,6 @@ if config["analysis"]["sequencing_type"] == "wgs":
 
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-                                     "snakemake_rules/variant_calling/mergetype_normal.rule",
                                      "snakemake_rules/variant_calling/cnvkit_paired.rule"])
 
         annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule")
@@ -231,7 +232,6 @@ else:
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-            "snakemake_rules/variant_calling/mergetype_normal.rule",
             "snakemake_rules/variant_calling/cnvkit_paired.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"
         ])
@@ -300,9 +300,7 @@ if "disable_variant_caller" in config:
 config["rules"] = align_rules + qc_rules
 
 # Define common and analysis specific outputs
-quality_control_results = [result_dir + "qc/" + "multiqc_report.html", os.path.join(bam_dir, "tumor.merged.bam")]
-if config['analysis']['analysis_type'] == "paired":
-    quality_control_results.append(os.path.join(bam_dir, "normal.merged.bam")) 
+quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
 
 analysis_specific_results = []
 if config['analysis']["analysis_type"] in ["paired", "single"]:
