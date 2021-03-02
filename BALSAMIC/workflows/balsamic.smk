@@ -426,7 +426,7 @@ rule all:
         import shutil
 
         try:
-            shutil.rmtree(mydir)
+            shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
