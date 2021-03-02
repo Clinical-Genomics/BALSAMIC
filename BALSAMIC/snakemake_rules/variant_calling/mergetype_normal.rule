@@ -4,7 +4,7 @@
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
 if config["analysis"]["sequencing_type"] == 'wgs':
-    normal_bam = "{normal}.dedup.realign".format(normal = normal_sample)
+    normal_bam = "{normal}.dedup.realign.bam".format(normal = normal_sample)
 else:
     normal_bam = "{normal}.sorted.{picardstr}.bam".format(normal = normal_sample, picardstr = picarddup)
 

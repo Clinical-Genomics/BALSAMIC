@@ -4,7 +4,7 @@
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
 if config["analysis"]["sequencing_type"] == 'wgs':
-    tumor_bam = "{tumor}.dedup.realign".format(tumor = tumor_sample)
+    tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = tumor_sample)
 else:
     tumor_bam = "{tumor}.sorted.{picardstr}.bam".format(tumor = tumor_sample, picardstr = picarddup)
 
