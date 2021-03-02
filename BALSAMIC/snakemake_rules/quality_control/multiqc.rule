@@ -1,7 +1,10 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-multiqc_input = []
+multiqc_input = [bam_dir + "tumor.merged.bam"]
+
+if config['analysis']['analysis_type'] == "paired":
+    multiqc_input.append(bam_dir + "normal.merged.bam")
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':
@@ -23,6 +26,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=config["samples"]))
     multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=config["samples"]))
+    multiqc_input.append(bam_dir+"tumor.merged.recal_data.table")
+    if config['analysis']['analysis_type'] == "paired":
+        multiqc_input.append(bam_dir+"normal.merged.recal_data.table")
 
     # dir list
     dir_list = [qc_dir]

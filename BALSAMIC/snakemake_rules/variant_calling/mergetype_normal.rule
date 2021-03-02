@@ -1,0 +1,31 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
+
+if config["analysis"]["sequencing_type"] == 'wgs':
+    normal_bam = "{normal}.dedup.realign.bam".format(normal = normal_sample)
+else:
+    normal_bam = "{normal}.sorted.{picardstr}.bam".format(normal = normal_sample, picardstr = picarddup)
+
+rule mergeBam_normal:
+  input:
+    fasta = config["reference"]["reference_genome"],
+    bam = bam_dir + normal_bam 
+  output:
+    bam = bam_dir + "normal.merged.bam", 
+    cram = bam_dir + "normal.merged.cram",
+  params:
+    housekeeper_id = {"id": normal_sample, "tags": "normal"},
+    conda = config["bioinfo_tools"].get("picard"),
+    picard = picard_extra_normal
+  threads: get_threads(cluster_config, "mergeBam_normal")
+  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+  benchmark:
+    benchmark_dir + 'mergeBam_normal_' + "{mysample}.mergebam_normal.tsv".format(mysample = normal_sample)
+  shell:
+    "source activate {params.conda}; "
+    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; "
+    "samtools index {output.bam}; "
+    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; "
+    "samtools index {output.cram}; "

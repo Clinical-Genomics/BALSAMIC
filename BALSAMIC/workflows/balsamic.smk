@@ -118,8 +118,11 @@ qc_rules = [
     "snakemake_rules/quality_control/fastp.rule",
     "snakemake_rules/quality_control/fastqc.rule",
     "snakemake_rules/quality_control/multiqc.rule",
+    "snakemake_rules/variant_calling/mergetype_tumor.rule"
 ]
 
+if config['analysis']['analysis_type'] == "paired":
+    qc_rules.append("snakemake_rules/variant_calling/mergetype_normal.rule")
 
 if config["analysis"]["sequencing_type"] == "wgs":
     qc_rules.extend([
@@ -139,7 +142,7 @@ else:
     align_rules = [
         "snakemake_rules/align/bwa_mem.rule",
         "snakemake_rules/umi/sentieon_umiextract.rule",
-        "snakemake_rules/umi/sentieon_consensuscall.rule"
+        "snakemake_rules/umi/sentieon_consensuscall.rule",
     ]
 
 
@@ -228,7 +231,6 @@ else:
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-            "snakemake_rules/variant_calling/mergetype.rule",
             "snakemake_rules/variant_calling/cnvkit_paired.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"
         ])
@@ -258,7 +260,6 @@ else:
 
         variantcalling_rules.extend([
             "snakemake_rules/variant_calling/cnvkit_single.rule",
-            "snakemake_rules/variant_calling/mergetype_tumor.rule",
             "snakemake_rules/variant_calling/somatic_tumor_only.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope.rule"
@@ -302,9 +303,12 @@ quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
 
 analysis_specific_results = []
 if config['analysis']["analysis_type"] in ["paired", "single"]:
+    germline_call_samples = ["tumor"]
+    if config['analysis']['analysis_type'] == "paired":
+        germline_call_samples.append("normal")
     config["rules"] = config["rules"] + variantcalling_rules + annotation_rules
     analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
-                                        vcf=get_vcf(config, germline_caller, config["samples"])),
+                                        vcf=get_vcf(config, germline_caller, germline_call_samples)),
                                  expand(vep_dir + "{vcf}.{filters}.vcf.gz",
                                         vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]),
                                         filters=["all", "pass"])]
@@ -412,6 +416,8 @@ if 'delivery' in config:
 
 rule all:
     input:
+#        vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
+#        vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         quality_control_results + analysis_specific_results
     output:
         os.path.join(get_result_dir(config), "analysis_finish")
