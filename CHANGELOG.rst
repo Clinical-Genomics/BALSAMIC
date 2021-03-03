@@ -1,10 +1,11 @@
-[X.X.X]
+[7.1.0]
 -------
 
 Removed
 ^^^^^^^
 
 * ``tnsnv`` removed from WGS analysis, both tumor-only and tumor-normal
+* GATK-BaseRecalibrator is removed from all workflows
 
 Fixed
 ^^^^^
