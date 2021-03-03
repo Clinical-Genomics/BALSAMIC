@@ -4,17 +4,17 @@
 rule haplotypecaller:
     input:
         fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bsrcl.bam",
+        bam = bam_dir + "{sample_type}.merged.bam",
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
-        vcf_dir + "haplotypecaller/split_vcf/{sample}.{bedchrom}_haplotypecaller.vcf.gz"
+        vcf_dir + "haplotypecaller/split_vcf/{sample_type}.{bedchrom}_haplotypecaller.vcf.gz"
     params:
         conda = config["bioinfo_tools"].get("gatk"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     threads: get_threads(cluster_config, 'haplotypecaller')
     singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
     benchmark:
-        benchmark_dir + 'haplotypecaller_' + "{sample}.{bedchrom}.haplotypecaller.tsv"
+        benchmark_dir + 'haplotypecaller_' + "{sample_type}.{bedchrom}.haplotypecaller.tsv"
     shell:
         """
 source activate {params.conda};
@@ -32,15 +32,15 @@ rm -rf {params.tmpdir};
 
 rule haplotypecaller_merge:
     input:
-        expand(vcf_dir + "haplotypecaller/split_vcf/{{sample}}.{chrom}_haplotypecaller.vcf.gz", chrom=chromlist)
+        expand(vcf_dir + "haplotypecaller/split_vcf/{{sample_type}}.{chrom}_haplotypecaller.vcf.gz", chrom=chromlist)
     output:
-        vcf_dir + "SNV.germline.{sample}.haplotypecaller.vcf.gz"
+        vcf_dir + "SNV.germline.{sample_type}.haplotypecaller.vcf.gz"
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         conda = config["bioinfo_tools"].get("gatk"),
     singularity: Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix() 
     benchmark:
-        benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample}.haplotypecaller.tsv" 
+        benchmark_dir + 'haplotypecaller_merge_' + "SNV.germline.{sample_type}.haplotypecaller.tsv" 
     shell:
         """
 source activate {params.conda};
@@ -55,9 +55,9 @@ rm -rf {params.tmpdir};
 rule manta_germline:
     input:
         fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+        bam = bam_dir + "{sample_type}.merged.bam",
     output:
-        final = vcf_dir + "SV.germline.{sample}.manta_germline.vcf.gz",
+        final = vcf_dir + "SV.germline.{sample_type}.manta_germline.vcf.gz",
     params:
         conda = config["bioinfo_tools"].get("manta"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
@@ -65,7 +65,7 @@ rule manta_germline:
     threads: get_threads(cluster_config, "manta_germline")
     singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     benchmark:
-        benchmark_dir + 'manta_germline_' + "{sample}.manta_germline.tsv"
+        benchmark_dir + 'manta_germline_' + "{sample_type}.manta_germline.tsv"
     shell:
         """
 source activate {params.conda};
@@ -82,21 +82,19 @@ rm -rf {params.tmpdir};
 
 rule sentieon_DNAscope:
     input:
-        bam = bam_dir + "{sample}.sorted." + picarddup + ".bsrcl.bam",
+        bam = bam_dir + "{sample_type}.merged.bam",
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         interval = config["panel"]["capture_kit"]
     output:
-        vcf = vcf_dir + "SNV.germline.{sample}.dnascope.vcf.gz",
+        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"]
     threads: get_threads(cluster_config, 'sentieon_DNAscope')
-    log: 
-        vcf_dir + "{sample}.dnascope.log"
     benchmark:
-        benchmark_dir + "{sample}.dnascope.tsv"
+        benchmark_dir + "sentieon_dnascope_{sample_type}.tsv"
     shell:
         """
 mkdir -p {params.tmpdir};
