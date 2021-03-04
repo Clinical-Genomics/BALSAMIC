@@ -23,8 +23,7 @@ setup(
     install_requires=install_requires,
     packages=find_packages(),
     package_data={
-        "assets": ["scripts/*R", "sentieon_models/*model", "vcfanno/*.toml"],
-        "config": ["*.json"]
+        "": ["*.toml", "*.json", "*.R", "*.model", "*.yaml", "*.sh", "*.rule", "*.smk", "*.awk"],
     },
     include_package_data=True,
     zip_safe=False,
