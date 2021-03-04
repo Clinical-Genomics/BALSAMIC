@@ -3,12 +3,6 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-try:
-    with open("requirements.txt", "r") as f:
-        install_requires = [x.strip() for x in f.readlines()]
-except IOError:
-    install_requires = []
-
 # Load the package's __version__.py module as a dictionary.
 about = {}
 with open(os.path.join(here, "BALSAMIC", "__version__.py")) as f:
