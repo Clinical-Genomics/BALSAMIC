@@ -17,11 +17,11 @@ Software Requirments
 Step 1. Installing BALSAMIC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Create a conda environment using ``BALSAMIC/conda/balsamic.yaml``:
+1. Create a conda environment:
 
 ::
 
-    conda env create --file BALSAMIC/conda/balsamic.yaml --name balsamic
+    conda create -c conda-forge -c defaults --name S_BALSAMIC python==3.7 pip
 
 
 2. Activate environment: 
@@ -36,7 +36,14 @@ Step 1. Installing BALSAMIC
 
 ::
 
-  pip install -r requirements.txt -e .
+  pip install --no-cache-dir -U git+https://github.com/Clinical-Genomics/BALSAMIC
+
+
+Or if you have repository cloned and want it in editable mode:
+
+::
+
+  pip install -e .
 
 
 Step 2. generate BALSAMIC cache and pull containers

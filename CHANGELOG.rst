@@ -1,3 +1,12 @@
+[7.1.1]
+-------
+
+Fixed:
+^^^^^
+
+* Moved all requirements to setup.py, and added all package_data there. Clean up unused files.
+
+
 [7.1.0]
 -------
 
