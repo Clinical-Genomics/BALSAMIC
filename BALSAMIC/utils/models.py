@@ -338,7 +338,6 @@ class BalsamicConfigModel(BaseModel):
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-	umiworkflow : Field(bool); whether UMI workflow to run parallely with balsamic workflow
 
     """
 
@@ -352,7 +351,6 @@ class BalsamicConfigModel(BaseModel):
     bioinfo_tools: dict
     bioinfo_tools_version: dict
     panel: Optional[PanelModel]
-    umiworkflow: bool = True
 
     @validator("reference")
     def abspath_as_str(cls, value):
