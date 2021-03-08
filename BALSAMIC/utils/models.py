@@ -207,7 +207,7 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
-    umiworkflow: bool = True
+    umiworkflow: bool
 
     class Config:
         validate_all = True
