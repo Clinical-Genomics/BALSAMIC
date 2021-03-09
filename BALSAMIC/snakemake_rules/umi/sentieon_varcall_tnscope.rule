@@ -5,7 +5,7 @@
 
 rule sentieon_tnscope_umi:
     input:
-        bam = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", mysample=config["samples"]),
+        bam = umi_dir + "tumor.umi_consensusfiltered.merged.bam",
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
@@ -23,7 +23,7 @@ rule sentieon_tnscope_umi:
         tumor_lod = paramsumi.tnscope.min_tumorLOD,
         error_rate = paramsumi.tnscope.error_rate,
         prune_factor = paramsumi.tnscope.prunefactor,
-        tumor = get_sample_type(config["samples"], "tumor"),
+        tumor = "TUMOR"
     threads: 
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message: 

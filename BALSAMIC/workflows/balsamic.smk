@@ -118,7 +118,7 @@ qc_rules = [
     "snakemake_rules/quality_control/fastp.rule",
     "snakemake_rules/quality_control/fastqc.rule",
     "snakemake_rules/quality_control/multiqc.rule",
-    "snakemake_rules/variant_calling/mergetype_tumor.rule"
+    "snakemake_rules/variant_calling/mergetype_tumor.rule",
 ]
 
 if config['analysis']['analysis_type'] == "paired":
@@ -148,7 +148,11 @@ else:
 
 annotation_rules = [ "snakemake_rules/annotation/vep.rule"]
 
-umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule" ]
+umiqc_rules = ["snakemake_rules/umi/qc_umi.rule",
+               "snakemake_rules/umi/mergetype_tumor_umi.rule"]
+
+if config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["analysis_type"] == "paired":
+    umiqc_rules.extend(["snakemake_rules/umi/mergetype_normal_umi.rule"])
  
 generatetable_umi_rules = [ "snakemake_rules/umi/generate_AF_tables.rule" ]
 

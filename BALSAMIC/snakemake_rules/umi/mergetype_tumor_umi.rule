@@ -1,0 +1,32 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
+
+
+rule mergeBam_tumor_umiconsensus:
+    input:
+        fasta = config["reference"]["reference_genome"],
+        bam = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam",
+                      mysample=tumor_sample)
+    output:
+        bam = umi_dir + "tumor.umi_consensusfiltered.merged.bam"
+    params:
+        conda = config["bioinfo_tools"].get("picard"),
+        picard = picard_extra_tumor,
+        sample = tumor_sample
+    threads: 
+        get_threads(cluster_config, "mergeBam_tumor_umiconsensus")
+    singularity: 
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
+    benchmark:
+        benchmark_dir + 'mergeBam_tumor_umiconsensus_' + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
+    message:
+        "Replace ReadGroups using picard for tumor sample {params.sample}"
+    shell:
+        """
+source activate {params.conda};
+picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam};
+samtools index {output.bam};
+        """
+

@@ -125,7 +125,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "analysis_dir": analysis_dir,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
-            "umiworkflow": umiworkflow
+            "umiworkflow": umiworkflow if panel_bed else False
         },
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),

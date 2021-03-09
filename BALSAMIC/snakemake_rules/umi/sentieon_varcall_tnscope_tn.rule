@@ -4,10 +4,8 @@
 # Variant-calling using TNscope
 rule sentieon_tnscope_umi_tn:
     input:
-        bamT = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", 
-                      mysample=get_sample_type(config["samples"], "tumor")),
-        bamN = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", 
-                      mysample=get_sample_type(config["samples"], "normal")), 
+        bamT = umi_dir + "tumor.umi_consensusfiltered.merged.bam",
+        bamN = umi_dir + "normal.umi_consensusfiltered.merged.bam",
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
@@ -25,13 +23,13 @@ rule sentieon_tnscope_umi_tn:
         tumor_lod = paramsumi.tnscope.min_tumorLOD,
         error_rate = paramsumi.tnscope.error_rate,
         prune_factor = paramsumi.tnscope.prunefactor,
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal") 
+        tumor = "TUMOR",
+        normal = "NORMAL"
     threads: 
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message: 
-        "Calling SNVs using TNscope for tumor sample: {params.tumor}"
-        " versus normal sample: {params.normal}"
+        "Calling SNVs using TNscope for sample: {params.tumor}"
+        " versus sample {params.normal}"
     shell:
         """
 {params.sentieon_exec} driver \
