@@ -12,7 +12,6 @@ rule mergeBam_tumor_umiconsensus:
     output:
         bam = umi_dir + "tumor.umi_consensusfiltered.merged.bam"
     params:
-        housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
         conda = config["bioinfo_tools"].get("picard"),
         picard = picard_extra_tumor,
         sample = tumor_sample
@@ -39,7 +38,6 @@ rule mergeBam_normal_umiconsensus:
   output:
     bam = umi_dir + "normal.umi_consensusfiltered.merged.bam"
   params:
-    housekeeper_id = {"id": normal_sample, "tags": "normal"},
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal,
     sample = normal_sample
