@@ -2,7 +2,7 @@
 # coding: utf-8
 
 picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
-picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
+
 
 rule mergeBam_tumor_umiconsensus:
     input:
@@ -30,26 +30,3 @@ picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.b
 samtools index {output.bam};
         """
 
-rule mergeBam_normal_umiconsensus:
-  input:
-    fasta = config["reference"]["reference_genome"],
-    bam = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam",
-                      mysample=normal_sample)
-  output:
-    bam = umi_dir + "normal.umi_consensusfiltered.merged.bam"
-  params:
-    conda = config["bioinfo_tools"].get("picard"),
-    picard = picard_extra_normal,
-    sample = normal_sample
-  threads: get_threads(cluster_config, "mergeBam_normal")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'mergeBam_normal_umiconsensus_' + "{mysample}.mergebam_normal.tsv".format(mysample = normal_sample)
-  message:
-    "Replace ReadGroups using picard for normal sample {params.sample}"
-  shell:
-        """
-source activate {params.conda}; 
-picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
-samtools index {output.bam};
-        """
