@@ -247,6 +247,7 @@ def test_analysis_model():
         "analysis_type": "paired",
         "sequencing_type": "targeted",
         "analysis_dir": "tests/test_data",
+        "umiworkflow": "true"
     }
     # THEN we can successully create a config dict
     assert AnalysisModel.parse_obj(valid_args)

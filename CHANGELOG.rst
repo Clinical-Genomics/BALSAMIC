@@ -1,3 +1,13 @@
+[7.1.2]
+-------
+
+Fixed:
+^^^^^
+
+* umi_workflow config json is set as true for panel and wgs as false.
+* Rename umiconsensus bam file headers from {samplenames} to TUMOR/NORMAL. 
+
+
 [7.1.1]
 -------
 
@@ -5,7 +15,6 @@ Fixed:
 ^^^^^
 
 * Moved all requirements to setup.py, and added all package_data there. Clean up unused files.
-
 
 [7.1.0]
 -------
