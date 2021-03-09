@@ -18,8 +18,8 @@ benchmark_dir = config["analysis"]["benchmark"]
 umi_dir = get_result_dir(config) + "/umi/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
-umi_qc_dir = get_result_dir(config) + "/qc/"
-qc_dir = get_result_dir(config) + "/qc/"
+umi_qc_dir = get_result_dir(config) + "/qc/umi_qc/"
+qc_dir = get_result_dir(config) + "/qc/umi_qc/"
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
@@ -42,12 +42,18 @@ except Exception as error:
     LOG.error("ERROR: Set SENTIEON_LICENSE and SENTIEON_INSTALL_DIR environment variable to run this pipeline.")
     raise
 
+# Sample names for tumor or normal
+tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+if config['analysis']['analysis_type'] == "paired":
+     normal_sample = get_sample_type(config["samples"], "normal")[0]
+
 # Define umiworkflow rules
 fastp_umi = ["snakemake_rules/quality_control/fastp.rule"]
 
 umi_call = [
     "snakemake_rules/umi/sentieon_umiextract.rule",
-    "snakemake_rules/umi/sentieon_consensuscall.rule"
+    "snakemake_rules/umi/sentieon_consensuscall.rule",
+    "snakemake_rules/umi/mergetype_umi.rule"
 ]
 
 if config["analysis"]["analysis_type"] == "single":

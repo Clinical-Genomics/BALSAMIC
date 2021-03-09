@@ -148,7 +148,9 @@ else:
 
 annotation_rules = [ "snakemake_rules/annotation/vep.rule"]
 
-umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule" ]
+umiqc_rules = [ "snakemake_rules/umi/qc_umi.rule",
+                "snakemake_rules/umi/mergetype_umi.rule",
+              ]
  
 generatetable_umi_rules = [ "snakemake_rules/umi/generate_AF_tables.rule" ]
 
