@@ -4,7 +4,8 @@
 Fixed:
 ^^^^^
 
-*  umi_workflow config json is set as true for panel and wgs as false
+* umi_workflow config json is set as true for panel and wgs as false.
+* Rename umiconsensus bam file headers from {samplenames} to TUMOR/NORMAL. 
 
 
 [7.1.1]
