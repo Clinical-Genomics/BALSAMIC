@@ -53,13 +53,14 @@ fastp_umi = ["snakemake_rules/quality_control/fastp.rule"]
 umi_call = [
     "snakemake_rules/umi/sentieon_umiextract.rule",
     "snakemake_rules/umi/sentieon_consensuscall.rule",
-    "snakemake_rules/umi/mergetype_umi.rule"
+    "snakemake_rules/umi/mergetype_tumor_umi.rule"
 ]
 
 if config["analysis"]["analysis_type"] == "single":
     variant_call = ["snakemake_rules/umi/sentieon_varcall_tnscope.rule"]
 else:
     variant_call = ["snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"]
+    umi_call.extend(["snakemake_rules/umi/mergetype_normal_umi.rule"])
 
 annotate_vcf = ["snakemake_rules/annotation/vep.rule"]
 
