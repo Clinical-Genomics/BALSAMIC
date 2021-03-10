@@ -17,7 +17,7 @@ Install Sphinx and extensions:
 
    python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .
    cd docs
-   pip install -r ../requirements-dev.txt -r ../requirements.txt 
+   pip install -r requirements.txt -r ../requirements-dev.txt
 
 Build docs:
 
