@@ -15,14 +15,14 @@ Install Sphinx and extensions:
 
 .. code-block::
 
+   python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .
    cd docs
-   pip install -r requirements.txt -r ../requirements-dev.txt -r ../requirements.txt 
+   pip install -r requirements.txt -r ../requirements-dev.txt
 
 Build docs:
 
 .. code-block::
 
-   sphinx-apidoc -o source/ ../BALSAMIC
    sphinx-build -T -E -b html -d _build/doctrees-readthedocs -D language=en . _build/html
 
 View docs (\ ``open`` or similar command from your OS):

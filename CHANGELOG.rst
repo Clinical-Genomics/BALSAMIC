@@ -6,6 +6,7 @@ Fixed:
 
 * umi_workflow config json is set as true for panel and wgs as false.
 * Rename umiconsensus bam file headers from {samplenames} to TUMOR/NORMAL. 
+* Documentation autobuild on RTFD
 
 
 [7.1.1]
