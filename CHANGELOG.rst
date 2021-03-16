@@ -1,3 +1,11 @@
+[7.1.3]
+-------
+
+Fixed:
+^^^^^
+
+* ``assets`` path is now added to bind path
+
 [7.1.2]
 -------
 
