@@ -1,3 +1,11 @@
+[7.1.5]
+-------
+
+Changed:
+^^^^^^^^
+
+* update download url for 1000genome WGS sites from ftp to http
+
 [7.1.4]
 -------
 
