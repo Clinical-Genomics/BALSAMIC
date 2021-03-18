@@ -1,3 +1,27 @@
+[7.1.5]
+-------
+
+Changed:
+^^^^^^^^
+
+* update download url for 1000genome WGS sites from ftp to http
+
+[7.1.4]
+-------
+
+Changed:
+^^^^^^^^
+
+* bump picard to version 2.25.0
+
+[7.1.3]
+-------
+
+Fixed:
+^^^^^
+
+* ``assets`` path is now added to bind path
+
 [7.1.2]
 -------
 
