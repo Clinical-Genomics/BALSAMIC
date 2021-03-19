@@ -1,3 +1,11 @@
+[7.1.6]
+-------
+
+Fixed:
+^^^^^^
+
+* CSS style for qc coverage report is changed to landscape
+
 [7.1.5]
 -------
 
