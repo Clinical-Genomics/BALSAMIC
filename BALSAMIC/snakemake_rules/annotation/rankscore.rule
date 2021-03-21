@@ -7,9 +7,9 @@ rule rankscore:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
     rankscore = config["reference"]["rankscore"]
   output:
-    vcf_ranked = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.ranked.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.ranked.vcf.gz",
   params:
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     conda = config["bioinfo_tools"].get("genmod"),
   threads: get_threads(cluster_config, 'rankscore')
   singularity: Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix() 
