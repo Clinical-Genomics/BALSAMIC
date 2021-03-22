@@ -1,6 +1,11 @@
 [7.1.7]
 -------
 
+Added:
+^^^^^^
+
+* ngs_filter_tnscope is also part of deliveries now
+
 Changed:
 ^^^^^^^^
 
