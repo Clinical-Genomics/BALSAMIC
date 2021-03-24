@@ -25,6 +25,7 @@ rule picard_umiaware:
 source activate {params.conda};
 
 picard UmiAwareMarkDuplicatesWithMateCigar \
+--DUPLEX_UMI=TRUE \
 I={input.bam} \
 O={output.bam} \
 M={output.duplicates} \
@@ -65,7 +66,9 @@ picard CollectHsMetrics \
 BI={input.bam}.picard.bedintervals \
 TI={input.bam}.picard.bedintervals \
 I={input.bam} \
-O={output.mrkdup};
+R={input.fa} \
+O={output.mrkdup} \
+COVERAGE_CAP=50000;
         """
 
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
