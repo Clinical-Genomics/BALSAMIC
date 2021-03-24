@@ -20,13 +20,14 @@ rule bcftools_query_generatebackgroundaf_umitable:
     message: 
         "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
     shell:
-        """
+      """
 source activate {params.conda};
 bcftools query \
 --regions-file {params.validated_set} \
--f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t%AD{{0}}\\t%AD{{1}}]\n\" \
+-f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t]\n\" \
 {input.vcf} | \
 awk -v file={params.sample_id} \
-\'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$8/($7+$8)\"\\t\"file}}\' \
+\'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$5\"\\t\"$6\"\\t\"file}}\' \
 > {output.AF};
         """
+
