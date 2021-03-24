@@ -1,3 +1,17 @@
+[7.1.8]
+-------
+
+Fixed:
+^^^^^^
+
+* Target coverage (Picard HsMetrics) for UMI files is now correctly calculated.
+
+Changed:
+^^^^^^
+
+*  TNscope calculated AF values are fetched and written to AFtable.txt.
+
+
 [7.1.7]
 -------
 
