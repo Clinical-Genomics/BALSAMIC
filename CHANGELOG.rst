@@ -1,3 +1,31 @@
+[7.1.7]
+-------
+
+Added:
+^^^^^^
+
+* ngs_filter_tnscope is also part of deliveries now
+
+Changed:
+^^^^^^^^
+
+* rankscore is now a research tag instead of clinical
+* Some typo and fixes in the coverage and constant metrics
+* Delivery process is more verbose
+
+Fixed:
+^^^^^^
+
+* CNVKit output is now properly imported in the deliveries and workflow
+
+[7.1.6]
+-------
+
+Fixed:
+^^^^^^
+
+* CSS style for qc coverage report is changed to landscape
+
 [7.1.5]
 -------
 

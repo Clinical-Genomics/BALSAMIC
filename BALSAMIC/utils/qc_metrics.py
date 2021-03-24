@@ -13,7 +13,7 @@ MULTIPLE_JSON = [{
     'required_metrics': [
         'MEAN_TARGET_COVERAGE', 'MEDIAN_TARGET_COVERAGE',
         'PCT_TARGET_BASES_50X', 'PCT_TARGET_BASES_100X',
-        'PCT_TARGET_BASES_200X', 'PCT_TARGET_BASES_500X',
+        'PCT_TARGET_BASES_250X', 'PCT_TARGET_BASES_500X',
         'PCT_TARGET_BASES_1000X', 'FOLD_80_BASE_PENALTY'
     ]
 }]
@@ -39,9 +39,10 @@ def get_qc_metrics(analysis_path):
             json_file = json.load(f)
         for k in single_json['required_metrics']:
             for j in json_file.keys():
-                sampleid = j.split('_')[1]
-                if sampleid not in qc_data:
-                    qc_data[sampleid] = {}
-                qc_data[sampleid][k] = json_file[j][k]
+                if "umi" not in j:
+                    sampleid = j.split('_')[1]
+                    if sampleid not in qc_data:
+                        qc_data[sampleid] = {}
+                    qc_data[sampleid][k] = json_file[j][k]
 
     return qc_data
