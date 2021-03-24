@@ -196,6 +196,12 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                                 mutation_type="SV",
                                                 mutation_class="somatic")
 
+        somatic_caller_cnv = get_variant_callers(config=config,
+                                                 analysis_type="paired",
+                                                 workflow_solution="BALSAMIC",
+                                                 mutation_type="CNV",
+                                                 mutation_class="somatic")
+
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
                                      "snakemake_rules/variant_calling/cnvkit_paired.rule"])
@@ -208,6 +214,12 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                                 workflow_solution="BALSAMIC",
                                                 mutation_type="SV",
                                                 mutation_class="somatic")
+
+        somatic_caller_cnv = get_variant_callers(config=config,
+                                                 analysis_type="single",
+                                                 workflow_solution="BALSAMIC",
+                                                 mutation_type="CNV",
+                                                 mutation_class="somatic")
 
         somatic_caller_snv = get_variant_callers(config=config,
                                                  analysis_type="single",
@@ -245,6 +257,12 @@ else:
                                                 mutation_type="SV",
                                                 mutation_class="somatic")
 
+        somatic_caller_cnv = get_variant_callers(config=config,
+                                                 analysis_type="paired",
+                                                 workflow_solution="BALSAMIC",
+                                                 mutation_type="CNV",
+                                                 mutation_class="somatic")
+
         somatic_caller_snv = get_variant_callers(config=config,
                                                  analysis_type="paired",
                                                  workflow_solution="BALSAMIC",
@@ -275,6 +293,12 @@ else:
                                                 mutation_type="SV",
                                                 mutation_class="somatic")
 
+        somatic_caller_cnv = get_variant_callers(config=config,
+                                                 analysis_type="single",
+                                                 workflow_solution="BALSAMIC",
+                                                 mutation_type="CNV",
+                                                 mutation_class="somatic")
+
         somatic_caller_snv = get_variant_callers(config=config,
                                                  analysis_type="single",
                                                  workflow_solution="BALSAMIC",
@@ -289,7 +313,7 @@ else:
 
         somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi 
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv
+somatic_caller = somatic_caller_snv + somatic_caller_sv + somatic_caller_cnv
 
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
@@ -380,7 +404,7 @@ if 'benchmark_plots' in config:
 
 
 if 'delivery' in config:
-    wildcard_dict = {"sample": list(config["samples"].keys()),
+    wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],
                      "case_name": config["analysis"]["case_id"],
                      "allow_missing": True
                      }
@@ -406,10 +430,10 @@ if 'delivery' in config:
             LOG.warning("Cannot deliver step (rule) {}: {}".format(my_rule, e))
             continue
 
-        LOG.info("Delivering step (rule) {}.".format(my_rule))
-        output_files_ready.extend(get_rule_output(rules=rules,
-                                                  rule_name=my_rule,
-                                                  output_file_wildcards=wildcard_dict))
+        LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
+        files_to_deliver = get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict)
+        LOG.debug("The following files added to delivery: {}".format(files_to_deliver))
+        output_files_ready.extend(files_to_deliver)
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
     delivery_ready = os.path.join(get_result_dir(config),
