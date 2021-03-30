@@ -20,7 +20,7 @@ analysis_dir = "/home/proj/long-term-stage/cancer/UMI_analysis_runs_APJ/cancer_t
 
 bam_dir = analysis_dir + "/bam/"
 cnv_dir = analysis_dir + "/cnv/"
-tmp_dir="~/tmp/"
+tmp_dir= analysis_dir + "/tmp/"
 
 picarddup="mrkdup"
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
@@ -31,6 +31,7 @@ def get_fastqs(wildcards):
 
 def get_coverage_fls(wildcards):
     return glob.glob(cnv_dir + "/" + "*coverage.cnn")
+
 
 def picard_flag(picarddup):
     if picarddup == "mrkdup":
@@ -44,7 +45,7 @@ ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 ALL_PON = expand(cnv_dir + "PON_reference.cnn")
 
 rule all:
-    input: ALL_BAMS + ALL_REFS + ALL_COVS + ALL_PON
+    input: ALL_BAMS + ALL_COVS + ALL_COVS  + ALL_PON
 
 rule align_bwa_mem:
     input:
@@ -132,8 +133,8 @@ rule create_target:
         refFlat = refflat,
         access_bed = access_5kb_hg19
     output:
-        target_bed = Path(cnv_dir + "target.bed").as_posix(),
-        offtarget_bed = Path(cnv_dir + "antitarget.bed").as_posix()
+        target_bed = cnv_dir + "target.bed",
+        offtarget_bed = cnv_dir + "antitarget.bed"
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
     shell:
@@ -149,15 +150,15 @@ rule create_coverage:
         target_bed = Path(cnv_dir + "target.bed").as_posix(),
         antitarget_bed = Path(cnv_dir + "antitarget.bed").as_posix()
     output:
-        target_cnn = temp(cnv_dir + "{sample}.targetcoverage.cnn"),
-        antitarget_cnn = temp(cnv_dir + "{sample}.antitargetcoverage.cnn")
+        target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
+        antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
     shell:
         """
 source activate varcall_cnvkit;
 cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn};
-cnvkit.py coverage {input.bam} {input.target_bed} -o {output.antitarget_cnn};
+cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn};
         """
 
 rule create_reference:
@@ -173,3 +174,4 @@ rule create_reference:
 source activate varcall_cnvkit;
 cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn};
         """
+
