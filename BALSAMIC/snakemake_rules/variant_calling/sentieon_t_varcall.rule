@@ -60,6 +60,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR", 
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
+        pcr_model = "NONE",
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
@@ -72,7 +73,16 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {input.recal_data_table} --algo TNhaplotyper --tumor_sample {params.tumor} {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
+{params.sentieon_exec} driver \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+-q {input.recal_data_table} \
+--algo TNhaplotyper \
+--tumor_sample {params.tumor} {params.pon} \
+--pcr_indel_mode {params.pcr_model} \
+--cosmic {input.cosmic} \
+--dbsnp {input.dbsnp} {output.vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
 rm -rf {params.tmpdir};
@@ -94,6 +104,7 @@ rule sentieon_TNscope_tumor_only:
         tumor = "TUMOR", 
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"], 
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
+        pcr_model = "NONE",
         sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -107,10 +118,15 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -t {threads} -r {input.ref} \
--i {input.bam} -q {input.recal} --algo TNscope \
+{params.sentieon_exec} driver \
+-t {threads} \
+-r {input.ref} \
+-i {input.bam} \
+-q {input.recal} \
+--algo TNscope \
 --tumor_sample {params.tumor} {params.pon} \
 --dbsnp {input.dbsnp} \
+--pcr_indel_mode {params.pcr_model} \
 {params.tumor_options} {output.vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap_snv};
