@@ -367,6 +367,16 @@ REFERENCE_FILES = {
             "output_file": "cancer_rank_model_-v0.1-.ini",
             "output_path": "genome"
         },
+	"access_regions":{
+            "url":
+            "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version" : "hg38",
+            "output_file": "access_5kb_hg38.txt",
+            "output_path" : "genome"
+
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -493,6 +503,16 @@ REFERENCE_FILES = {
             "output_file": "cancer_rank_model_-v0.1-.ini",
             "output_path": "genome"
         },
+	"access_regions":{
+            "url":
+	    "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
+	    "file_type": "text",
+	    "gzip": False,
+	    "genome_version" : "hg19",
+	    "output_file": "access_5kb_hg19.txt",
+            "output_path" : "genome"
+
+	},
     }
 }
 
