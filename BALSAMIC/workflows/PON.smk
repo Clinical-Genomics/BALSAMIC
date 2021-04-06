@@ -27,13 +27,14 @@ raw_dir = config["analysis"]["raw_data"]
 analysis_dir = config["analysis"]["analysis_dir"]
 reffasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
-access_5kb_hg19 = config["reference"]["access_5kb_hg19"]
+access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
 
 bam_dir = analysis_dir + "/bam/"
 cnv_dir = analysis_dir + "/cnv/"
-tmp_dir = analysis_dir + "/tmp/"
+tmp_dir = os.path.join(analysis_dir, "tmp", "" )
+Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 picarddup="mrkdup"
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
@@ -43,7 +44,6 @@ ALL_BAMS = expand(bam_dir + "{sample}.normal.merged.bam", sample=case_ids)
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=case_ids, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 ALL_PON = expand(cnv_dir + "PON_reference.cnn")
-
 
 rule all:
     input: ALL_BAMS + ALL_REFS + ALL_COVS  + ALL_PON
@@ -58,8 +58,8 @@ rule align_bwa_mem:
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
         conda = "align_qc",
-        #tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tmpdir = tmp_dir
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        #tmpdir = tmp_dir
     threads: 18
     singularity: 
         Path(singularity_image + "align_qc.sif").as_posix()
@@ -88,8 +88,7 @@ rule MarkDuplicates:
         stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
     params:
         conda = "align_qc",
-        #tmpdir = tempfile.mkdtemp(prefix=tmp_dir,dir=analysis_dir),
-        tmpdir = tmp_dir,    
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         mem = "16g",
         rm_dup = picard_flag(picarddup)
     threads: 12
@@ -183,4 +182,3 @@ rule create_reference:
 source activate varcall_cnvkit;
 cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn};
         """
-
