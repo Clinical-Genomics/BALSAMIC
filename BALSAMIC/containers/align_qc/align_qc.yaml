@@ -7,12 +7,12 @@ dependencies:
   - bedtools=2.29.0
   - bwa=0.7.15
   - fastqc=0.11.9
-  - samtools=1.9
+  - samtools=1.12
   - tabix=0.2.5
   - picard=2.25.0
   - r-base
   - multiqc=1.9
-  - fastp=0.20.0
+  - fastp=0.20.1
   - csvkit=1.0.4
   - libiconv
   - fontconfig
