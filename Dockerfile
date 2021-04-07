@@ -6,7 +6,7 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
-LABEL about.version="6.0.2"
+LABEL about.version="7.1.8"
 
 ENV PATH="/opt/conda/bin/:${PATH}"
 
@@ -20,3 +20,4 @@ USER root
 
 RUN apk add --no-cache bash
 RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME} && conda clean --all --yes 
+RUN chown root /mnt
