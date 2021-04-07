@@ -128,7 +128,7 @@ def test_get_bioinfo_tools_list():
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert set(bioinfo_tools_dict["samtools"]) == set(["1.11", "1.9"])
+    assert set(bioinfo_tools_dict["samtools"]) == set(["1.11", "1.12", "1.9"])
 
 
 def test_get_delivery_id():
