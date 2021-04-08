@@ -4,13 +4,11 @@
 from pathlib import Path
 import glob
 import tempfile
+import os
 
 
 def get_fastqs(wildcards):
-    return glob.glob(raw_dir + "/" + wildcards.sample + "/fastq/" + "*_R_[1-2].fastq.gz")
-
-def get_coverage_files(wildcards):
-    return glob.glob(cnv_dir + "/" + "*coverage.cnn")
+    return glob.glob(fastq_dir + "/*_" + wildcards.sample  + "*_R_[1-2].fastq.gz")
 
 def picard_flag(picarddup):
     if picarddup == "mrkdup":
@@ -22,8 +20,9 @@ shell.prefix("set -eo pipefail; ")
 
 localrules: all
 
-case_ids = config["analysis"]["case_id"]
-raw_dir = config["analysis"]["raw_data"]
+case_id = config["analysis"]["case_id"]
+pon_ids = config["analysis"]["pon_ids"]
+fastq_dir = config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"]
 reffasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
@@ -40,13 +39,13 @@ picarddup="mrkdup"
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
 
-ALL_BAMS = expand(bam_dir + "{sample}.normal.merged.bam", sample=case_ids)
-ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=case_ids, cov=['target','antitarget'])
+ALL_BAMS = expand(bam_dir + "{sample}.normal.merged.bam", sample=pon_ids)
+ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=pon_ids, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
-ALL_PON = expand(cnv_dir + "PON_reference.cnn")
+ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
 
 rule all:
-    input: ALL_BAMS + ALL_REFS + ALL_COVS  + ALL_PON
+    input: ALL_BAMS + ALL_REFS + ALL_COVS + ALL_PON
 
 rule align_bwa_mem:
     input:
@@ -54,16 +53,14 @@ rule align_bwa_mem:
         reads = get_fastqs,
         refidx = expand(reffasta + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = temp(bam_dir + "{sample}.sorted.bam")
+        bamout = bam_dir + "{sample}.sorted.bam"
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
         conda = "align_qc",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        #tmpdir = tmp_dir
     threads: 18
     singularity: 
         Path(singularity_image + "align_qc.sif").as_posix()
-    priority: 50
     shell:
         """
 source activate {params.conda};
@@ -75,7 +72,11 @@ bwa mem \
 -M \
 -v 1 \
 {input.fa} {input.reads} \
-| samtools sort -T {params.tmpdir} --threads {threads} --output-fmt BAM -o {output.bamout} - ;
+| samtools sort \
+ -T {params.tmpdir} \
+--threads {threads} \
+--output-fmt BAM \
+-o {output.bamout} - ;
 samtools index -@ {threads} {output.bamout};
 rm -rf {params.tmpdir};
         """
@@ -92,7 +93,6 @@ rule MarkDuplicates:
         mem = "16g",
         rm_dup = picard_flag(picarddup)
     threads: 12
-    priority : 40
     singularity: 
         Path(singularity_image + "align_qc.sif").as_posix() 
     shell:
@@ -117,12 +117,11 @@ rule rename_sample_bam:
         fasta = reffasta,
         bam = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix()
     output:
-        bam = Path(bam_dir + "{sample}.normal.merged.bam").as_posix()
+        bam = bam_dir + "{sample}.normal.merged.bam"
     params:
         conda = "align_qc",
         picard = picard_extra_normal,
     threads: 12
-    priority : 30
     singularity:
         Path(singularity_image + "align_qc.sif").as_posix() 
     shell:
@@ -140,7 +139,6 @@ rule create_target:
     output:
         target_bed = cnv_dir + "target.bed",
         offtarget_bed = cnv_dir + "antitarget.bed"
-    priority: 40
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
     shell:
@@ -158,7 +156,6 @@ rule create_coverage:
     output:
         target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
         antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
-    priority : 20
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
     shell:
@@ -170,13 +167,12 @@ cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn}
 
 rule create_reference:
     input:
-        cnn = get_coverage_files,
+        cnn = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample=pon_ids, ext=["targetcoverage","antitargetcoverage"]),
         ref = reffasta
     output:
-        ref_cnn = Path(cnv_dir + "PON_reference.cnn").as_posix()
+        ref_cnn = Path(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn").as_posix()
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
-    priority: 1
     shell:
         """
 source activate varcall_cnvkit;
