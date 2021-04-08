@@ -113,7 +113,7 @@ rule all:
         wgs_calling = wgs_calling_url.get_output_file,
         genome_chrom_size = genome_chrom_size_url.get_output_file,
         rankscore = rankscore_url.get_output_file,
-	access_regions = access_regions_url.get_output_file
+        access_regions = access_regions_url.get_output_file
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -199,7 +199,7 @@ rule prepare_refgene:
     input:
         refgene_txt = refgene_txt_url.get_output_file,
         refgene_sql = refgene_sql_url.get_output_file,
-	accessible_regions  = access_regions_url.get_output_file,
+        accessible_regions  = access_regions_url.get_output_file,
     params:
         refgene_sql_awk = get_script_path('refseq_sql.awk'),
         conda_env = config["bioinfo_tools"].get("bedtools")
