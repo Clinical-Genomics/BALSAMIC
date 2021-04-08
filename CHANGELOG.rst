@@ -1,3 +1,69 @@
+[7.1.8]
+-------
+
+Fixed:
+^^^^^^
+
+* Target coverage (Picard HsMetrics) for UMI files is now correctly calculated.
+
+Changed:
+^^^^^^
+
+*  TNscope calculated AF values are fetched and written to AFtable.txt.
+
+
+[7.1.7]
+-------
+
+Added:
+^^^^^^
+
+* ngs_filter_tnscope is also part of deliveries now
+
+Changed:
+^^^^^^^^
+
+* rankscore is now a research tag instead of clinical
+* Some typo and fixes in the coverage and constant metrics
+* Delivery process is more verbose
+
+Fixed:
+^^^^^^
+
+* CNVKit output is now properly imported in the deliveries and workflow
+
+[7.1.6]
+-------
+
+Fixed:
+^^^^^^
+
+* CSS style for qc coverage report is changed to landscape
+
+[7.1.5]
+-------
+
+Changed:
+^^^^^^^^
+
+* update download url for 1000genome WGS sites from ftp to http
+
+[7.1.4]
+-------
+
+Changed:
+^^^^^^^^
+
+* bump picard to version 2.25.0
+
+[7.1.3]
+-------
+
+Fixed:
+^^^^^
+
+* ``assets`` path is now added to bind path
+
 [7.1.2]
 -------
 

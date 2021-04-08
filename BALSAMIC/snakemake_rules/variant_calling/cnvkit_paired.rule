@@ -17,7 +17,7 @@ else:
     cnvkit_params += f" --targets {cnv_dir}/targets.bed "
     cnvkit_params += " --target-avg-size 50 "
 
-rule cnvkit_batch_paired:
+rule cnvkit_paired:
     input:
         fasta = config["reference"]["reference_genome"],
         bamN = bam_dir + normal_bam + ".bam",

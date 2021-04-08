@@ -98,11 +98,12 @@ def deliver(context, sample_config, analysis_type, rules_to_deliver,
         "vep_germline",
         "vep_stat",
         "ngs_filter_vardict",
+        "ngs_filter_tnscope",
+        "rankscore",
         "mergeBam_tumor",
         "mergeBam_normal",
         "cnvkit_paired",
         "cnvkit_single",
-        "sentieon_dedup",
     ]
 
     if not rules_to_deliver:

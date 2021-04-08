@@ -414,7 +414,7 @@ REFERENCE_FILES = {
         },
         "vcf_1kg": {
             "url":
-            "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+            "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5c.20130502.sites.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
@@ -577,31 +577,31 @@ REPORT_MODEL = {
     "coverage": {
         "PCT_TARGET_BASES_50X": {
             "sv": "Täckningsgrad [50X]",
-            "en": "Mean insert size [50X]",
+            "en": "Target coverage [50X]",
             "decimal": 2,
             "as_percent": True,
         },
         "PCT_TARGET_BASES_100X": {
             "sv": "Täckningsgrad [100X]",
-            "en": "Mean insert size [100X]",
+            "en": "Target coverage [100X]",
             "decimal": 2,
             "as_percent": True,
         },
-        "PCT_TARGET_BASES_200X": {
-            "sv": "Täckningsgrad [200X]",
-            "en": "Mean insert size [100X]",
+        "PCT_TARGET_BASES_250X": {
+            "sv": "Täckningsgrad [250X]",
+            "en": "Target coverage [250X]",
             "decimal": 2,
             "as_percent": True,
         },
         "PCT_TARGET_BASES_500X": {
             "sv": "Täckningsgrad [500X]",
-            "en": "Mean insert size [500X]",
+            "en": "Target coverage [500X]",
             "decimal": 2,
             "as_percent": True,
         },
         "PCT_TARGET_BASES_1000X": {
             "sv": "Täckningsgrad [1000X]",
-            "en": "Mean insert size [1000X]",
+            "en": "Target coverage [1000X]",
             "decimal": 2,
             "as_percent": True,
         }
