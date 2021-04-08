@@ -7,6 +7,11 @@ Added:
 * Changelog reminder workflow to Github
 
 
+Changed:
+^^^^^^^^
+
+* Expanded multiqc result search dir to whole analysis dir
+
 [7.1.8]
 -------
 
@@ -16,7 +21,7 @@ Fixed:
 * Target coverage (Picard HsMetrics) for UMI files is now correctly calculated.
 
 Changed:
-^^^^^^
+^^^^^^^^
 
 *  TNscope calculated AF values are fetched and written to AFtable.txt.
 
