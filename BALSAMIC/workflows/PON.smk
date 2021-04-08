@@ -38,14 +38,12 @@ Path.mkdir(Path(tmp_dir), exist_ok=True)
 picarddup="mrkdup"
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
-
-ALL_BAMS = expand(bam_dir + "{sample}.normal.merged.bam", sample=pon_ids)
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=pon_ids, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
 
 rule all:
-    input: ALL_BAMS + ALL_REFS + ALL_COVS + ALL_PON
+    input: ALL_REFS + ALL_COVS + ALL_PON
 
 rule align_bwa_mem:
     input:
@@ -83,10 +81,10 @@ rm -rf {params.tmpdir};
 
 rule MarkDuplicates:
     input:
-        Path(bam_dir, "{sample}.sorted.bam").as_posix()
+        bam_dir + "{sample}.sorted.bam"
     output:
-        mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
-        stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
+        mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+        stats =  bam_dir + "{sample}.sorted." + picarddup + ".txt"
     params:
         conda = "align_qc",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
@@ -115,7 +113,7 @@ rm -rf {params.tmpdir};
 rule rename_sample_bam:
     input:
         fasta = reffasta,
-        bam = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix()
+        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
     output:
         bam = bam_dir + "{sample}.normal.merged.bam"
     params:
@@ -150,9 +148,9 @@ cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtar
 
 rule create_coverage:
     input:
-        bam = Path(bam_dir + "{sample}.normal.merged.bam").as_posix(),
-        target_bed = Path(cnv_dir + "target.bed").as_posix(),
-        antitarget_bed = Path(cnv_dir + "antitarget.bed").as_posix()
+        bam = bam_dir + "{sample}.normal.merged.bam",
+        target_bed = cnv_dir + "target.bed",
+        antitarget_bed = cnv_dir + "antitarget.bed"
     output:
         target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
         antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
@@ -167,10 +165,10 @@ cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn}
 
 rule create_reference:
     input:
-        cnn = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample=pon_ids, ext=["targetcoverage","antitargetcoverage"]),
+        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=pon_ids, prefix=["target","antitarget"]),
         ref = reffasta
     output:
-        ref_cnn = Path(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn").as_posix()
+        ref_cnn = cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn"
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
     shell:
