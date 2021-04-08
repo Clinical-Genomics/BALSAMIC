@@ -1,3 +1,12 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* Changelog reminder workflow to Github
+
+
 [7.1.8]
 -------
 
