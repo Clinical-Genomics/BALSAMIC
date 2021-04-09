@@ -505,13 +505,12 @@ REFERENCE_FILES = {
         },
 	"access_regions":{
             "url":
-	    "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
+            "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
 	    "file_type": "text",
 	    "gzip": False,
 	    "genome_version" : "hg19",
 	    "output_file": "access_5kb_hg19.txt",
             "output_path" : "genome"
-
 	},
     }
 }

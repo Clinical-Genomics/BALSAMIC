@@ -143,7 +143,7 @@ rule all:
             "vep": input.vep,
             "genome": params.genome_ver,
             "rankscore": input.rankscore,
-	    "access_regions": input.access_regions
+            "access_regions": input.access_regions
         }
 
         with open(str(output.reference_json), "w") as fh:
