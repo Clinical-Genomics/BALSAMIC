@@ -41,9 +41,10 @@ picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILL
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=pon_ids, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
+ALL_CNV = expand(cnv_dir + "CNV." + "tumor" + ".done")
 
 rule all:
-    input: ALL_REFS + ALL_COVS + ALL_PON
+    input: ALL_REFS + ALL_COVS + ALL_PON #+ ALL_CNV
 
 rule align_bwa_mem:
     input:
@@ -175,4 +176,24 @@ rule create_reference:
         """
 source activate varcall_cnvkit;
 cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn};
+        """
+
+## Test rule: for running cnvkit if tumor sample is provided
+rule cnvkit_analysis_single:
+    input:
+        pon =  cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn",
+        tumor = bam_dir + "/" + "tumor.merged.bam",
+    output:
+        txt = cnv_dir + "CNV." + "tumor" + ".done"
+    params:
+        cnv_dir = cnv_dir
+    singularity:
+         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+    shell:
+        """
+source activate varcall_cnvkit;
+cnvkit.py batch {input.tumor} \
+--reference {input.pon} \
+--output-dir {params.cnv_dir} \
+--diagram --scatter && touch {output.txt};
         """
