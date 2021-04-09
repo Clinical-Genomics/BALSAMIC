@@ -5,6 +5,7 @@ Added:
 ^^^^^^
 
 * Changelog reminder workflow to Github
+* Snakemake workflow for created PON reference
 
 
 [7.1.8]
