@@ -460,7 +460,7 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
     return bioinfo_tools_version
 
 
-def get_sample_dict(tumor: str = None,
+def get_sample_dict(tumor: str,
                     normal: str = None,
                     tumor_sample_name: str = None,
                     normal_sample_name: str = None) -> dict:
@@ -472,11 +472,10 @@ def get_sample_dict(tumor: str = None,
             samples[key] = val
             samples[key]["sample_name"] = normal_sample_name
 
-    if tumor:
-    	for sample in tumor:
-            key, val = get_sample_names(sample, "tumor")
-            samples[key] = val
-            samples[key]["sample_name"] = tumor_sample_name
+    for sample in tumor:
+    	key, val = get_sample_names(sample, "tumor")
+        samples[key] = val
+        samples[key]["sample_name"] = tumor_sample_name
     return samples
 
 
