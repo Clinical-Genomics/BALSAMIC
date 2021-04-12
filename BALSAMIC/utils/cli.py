@@ -256,6 +256,8 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     snakefile = Path(p, "workflows", "balsamic.smk")
     if analysis_type == "generate_ref":
         snakefile = Path(p, 'workflows', 'reference.smk')
+    if analysis_type == "pon":
+        snakefile = Path(p, 'workflows', 'PON.smk')
     elif analysis_type == "umi":
         snakefile = Path(p, "workflows", "UMIworkflow.smk")
 
@@ -458,7 +460,7 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
     return bioinfo_tools_version
 
 
-def get_sample_dict(tumor: str,
+def get_sample_dict2(tumor: str,
                     normal: str,
                     tumor_sample_name: str = None,
                     normal_sample_name: str = None) -> dict:
@@ -474,6 +476,37 @@ def get_sample_dict(tumor: str,
         key, val = get_sample_names(sample, "tumor")
         samples[key] = val
         samples[key]["sample_name"] = tumor_sample_name
+    return samples
+
+
+def get_sample_dict(tumor: str = None,
+                    normal: str = None,
+                    tumor_sample_name: str = None,
+                    normal_sample_name: str = None) -> dict:
+    """Concatenates sample dicts for all provided files"""
+    samples = {}
+    if normal:
+        for sample in normal:
+            key, val = get_sample_names(sample, "normal")
+            samples[key] = val
+            samples[key]["sample_name"] = normal_sample_name
+
+    if tumor:
+    	for sample in tumor:
+            key, val = get_sample_names(sample, "tumor")
+            samples[key] = val
+            samples[key]["sample_name"] = tumor_sample_name
+    return samples
+
+
+def pon_sample_dict(normal: str,
+                    normal_sample_name: str = None) -> dict:
+    """Concatenates sample dicts for all provided files"""
+    samples = {}
+    for sample in normal:
+        key, val = get_sample_names(sample, "normal")
+        samples[key] = val
+        samples[key]["sample_name"] = normal_sample_name
     return samples
 
 
