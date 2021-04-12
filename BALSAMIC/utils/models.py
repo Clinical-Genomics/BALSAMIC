@@ -449,6 +449,7 @@ class ReferenceMeta(BaseModel):
       refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
       refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
       rankscore: ReferenceUrlsModel. Optional rankscore model
+      access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
     """
 
     basedir: str = ""
@@ -466,6 +467,7 @@ class ReferenceMeta(BaseModel):
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
     rankscore: Optional[ReferenceUrlsModel]
+    access_regions: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):

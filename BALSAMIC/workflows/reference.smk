@@ -59,6 +59,7 @@ genome_chrom_size_url = reference_file_model.genome_chrom_size
 refgene_txt_url = reference_file_model.refgene_txt 
 refgene_sql_url = reference_file_model.refgene_sql
 rankscore_url = reference_file_model.rankscore
+access_regions_url = reference_file_model.access_regions
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
@@ -112,6 +113,7 @@ rule all:
         wgs_calling = wgs_calling_url.get_output_file,
         genome_chrom_size = genome_chrom_size_url.get_output_file,
         rankscore = rankscore_url.get_output_file,
+        access_regions = access_regions_url.get_output_file
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -141,6 +143,7 @@ rule all:
             "vep": input.vep,
             "genome": params.genome_ver,
             "rankscore": input.rankscore,
+            "access_regions": input.access_regions
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -158,7 +161,7 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
-                    cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url]
+                    cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url]
 
 rule download_reference:
     output:
@@ -195,13 +198,14 @@ rule download_reference:
 rule prepare_refgene:
     input:
         refgene_txt = refgene_txt_url.get_output_file,
-        refgene_sql = refgene_sql_url.get_output_file
+        refgene_sql = refgene_sql_url.get_output_file,
+        accessible_regions  = access_regions_url.get_output_file,
     params:
         refgene_sql_awk = get_script_path('refseq_sql.awk'),
         conda_env = config["bioinfo_tools"].get("bedtools")
     output:
         refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
-        bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed"
+        bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
@@ -219,6 +223,7 @@ header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
 awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt} \
 | cut -f 1-11 > {output.refflat};
 sed -i 's/chr//g' {input.refgene_txt};
+sed -i 's/chr//g' {input.accessible_regions};
         """
 
 ##########################################################
