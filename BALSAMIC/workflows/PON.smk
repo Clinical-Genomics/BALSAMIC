@@ -21,7 +21,7 @@ shell.prefix("set -eo pipefail; ")
 localrules: all
 
 case_id = config["analysis"]["case_id"]
-pon_ids = config["analysis"]["pon_ids"]
+samples = config["samples"]
 fastq_dir = config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"]
 reffasta = config["reference"]["reference_genome"]
@@ -38,19 +38,20 @@ Path.mkdir(Path(tmp_dir), exist_ok=True)
 picarddup="mrkdup"
 picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
 
-ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=pon_ids, cov=['target','antitarget'])
+ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
 PON_DONE = expand(cnv_dir + "PON." + "reference" + ".done")
 CNV_DONE = expand(cnv_dir + "CNV." + "tumor" + ".done")
 
 rule all:
-    input: ALL_REFS + ALL_COVS +  PON_DONE + CNV_DONE
+    input: ALL_REFS + ALL_COVS +  PON_DONE #+ CNV_DONE
 
 rule align_bwa_mem:
     input:
         fa = reffasta,
-        reads = get_fastqs,
+        read1 = config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
+        read2 = config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
         refidx = expand(reffasta + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bamout = bam_dir + "{sample}.sorted.bam"
@@ -71,7 +72,7 @@ bwa mem \
 -R {params.bam_header}  \
 -M \
 -v 1 \
-{input.fa} {input.reads} \
+{input.fa} {input.read1} {input.read2} \
 | samtools sort \
  -T {params.tmpdir} \
 --threads {threads} \
@@ -149,7 +150,7 @@ cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn}
 
 rule create_reference:
     input:
-        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=pon_ids, prefix=["target","antitarget"]),
+        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=samples, prefix=["target","antitarget"]),
         ref = reffasta
     output:
         ref_cnn = cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn",
