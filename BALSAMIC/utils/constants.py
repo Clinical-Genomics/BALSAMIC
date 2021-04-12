@@ -34,7 +34,7 @@ SENTIEON_TNSCOPE = Path(
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
-ANALYSIS_TYPES = ["paired", "single", "umi", "qc"]
+ANALYSIS_TYPES = ["paired", "single", "umi", "qc", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 
 # Variantcaller parameters
