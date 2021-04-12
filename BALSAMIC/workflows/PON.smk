@@ -30,8 +30,8 @@ access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
 
-bam_dir = analysis_dir + "/bam/"
-cnv_dir = analysis_dir + "/cnv/"
+bam_dir = os.path.join(analysis_dir, "bam", "")
+cnv_dir = os.path.join(analysis_dir, "cnv", "")
 tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
@@ -41,10 +41,11 @@ picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILL
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=pon_ids, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
-ALL_CNV = expand(cnv_dir + "CNV." + "tumor" + ".done")
+ALL_CNV = expand(cnv_dir + "PON." + "reference" + ".done")
+#ALL_CNV = expand(cnv_dir + "CNV." + "tumor" + ".done")
 
 rule all:
-    input: ALL_REFS + ALL_COVS + ALL_PON #+ ALL_CNV
+    input: ALL_REFS + ALL_COVS + ALL_PON + ALL_CNV
 
 rule align_bwa_mem:
     input:
@@ -80,7 +81,7 @@ samtools index -@ {threads} {output.bamout};
 rm -rf {params.tmpdir};
         """
 
-rule MarkDuplicates:
+rule picard_markduplicates:
     input:
         bam_dir + "{sample}.sorted.bam"
     output:
@@ -111,24 +112,6 @@ samtools index {output.mrkdup};
 rm -rf {params.tmpdir};
         """
 
-rule rename_sample_bam:
-    input:
-        fasta = reffasta,
-        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam"
-    output:
-        bam = bam_dir + "{sample}.normal.merged.bam"
-    params:
-        conda = "align_qc",
-        picard = picard_extra_normal,
-    threads: 12
-    singularity:
-        Path(singularity_image + "align_qc.sif").as_posix() 
-    shell:
-        """
-source activate {params.conda};
-picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam};
-samtools index {output.bam};
-        """
 
 rule create_target:
     input:
@@ -149,7 +132,7 @@ cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtar
 
 rule create_coverage:
     input:
-        bam = bam_dir + "{sample}.normal.merged.bam",
+        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
         target_bed = cnv_dir + "target.bed",
         antitarget_bed = cnv_dir + "antitarget.bed"
     output:
@@ -169,13 +152,14 @@ rule create_reference:
         cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=pon_ids, prefix=["target","antitarget"]),
         ref = reffasta
     output:
-        ref_cnn = cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn"
+        ref_cnn = cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn",
+        txt = cnv_dir + "PON." + "reference" + ".done"
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
     shell:
         """
 source activate varcall_cnvkit;
-cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn};
+cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn} && touch {output.txt} ;
         """
 
 ## Test rule: for running cnvkit if tumor sample is provided
