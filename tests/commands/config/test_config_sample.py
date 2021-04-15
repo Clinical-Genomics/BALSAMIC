@@ -6,8 +6,7 @@ from unittest import mock
 import graphviz
 
 from pathlib import Path
-from click.testing import CliRunner
-from BALSAMIC.commands.base import cli
+
 
 
 def test_tumor_normal_config(invoke_cli, sample_fastq, tmp_path,
@@ -200,11 +199,12 @@ def test_tumor_only_umi_config_background_file(
     assert Path(background_variant_file).exists()
 
 
-def test_config_case_graph_failed(invoke_cli, sample_fastq, analysis_dir, balsamic_cache, panel_bed_file):
+def test_config_case_graph_failed(invoke_cli, sample_fastq,
+                                  analysis_dir, balsamic_cache,
+                                  panel_bed_file):
     # GIVEN an analysis config 
     case_id = "sample_tumor_only"
     tumor = sample_fastq["tumor"]
-
 
     with mock.patch.object(graphviz, 'Source') as mocked:
         mocked.return_value = None
@@ -226,3 +226,68 @@ def test_config_case_graph_failed(invoke_cli, sample_fastq, analysis_dir, balsam
         )
 
     assert result.exit_code == 1
+
+
+def test_pon_config(invoke_cli, sample_fastq, tmp_path,
+                    balsamic_cache, panel_bed_file):
+    # GIVEN a case ID, fastq files, and an analysis dir
+    test_analysis_dir = tmp_path / "test_analysis_dir"
+    test_analysis_dir.mkdir()
+    case_id = "sample_pon"
+    normal = sample_fastq["normal"]
+    normal1 = sample_fastq["normal1"]
+    normal2 = sample_fastq["normal2"]
+
+    # WHEN creating a case analysis
+    result = invoke_cli(
+        [
+            "config",
+            "pon",
+            "--case-id",
+            case_id,
+            "-p",
+            panel_bed_file,
+            "-n",
+            normal,
+            "-n",
+            normal1,
+            "-n",
+            normal2,
+            "--analysis-dir",
+            test_analysis_dir,
+            "--balsamic-cache",
+            balsamic_cache
+            ]
+        )
+
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(test_analysis_dir, case_id, case_id + "_PON.json").exists()
+
+
+def test_pon_config_failed(invoke_cli, tmp_path,
+                    balsamic_cache, panel_bed_file):
+    # GIVEN a case ID, fastq files, and an analysis dir
+    test_analysis_dir = tmp_path / "test_analysis_dir"
+    test_analysis_dir.mkdir()
+    case_id = "sample_pon"
+
+    # WHEN creating a case analysis
+    result = invoke_cli(
+        [
+            "config",
+            "pon",
+            "--case-id",
+            case_id,
+            "-p",
+            panel_bed_file,
+            "--analysis-dir",
+            test_analysis_dir,
+            "--balsamic-cache",
+            balsamic_cache
+        ]
+    )
+
+    # THEN a config should be created and exist
+    assert 'Error: Missing option' in result.output
+    assert result.exit_code == 2
