@@ -473,7 +473,7 @@ def get_sample_dict(tumor: str,
             samples[key]["sample_name"] = normal_sample_name
 
     for sample in tumor:
-    	key, val = get_sample_names(sample, "tumor")
+        key, val = get_sample_names(sample, "tumor")
         samples[key] = val
         samples[key]["sample_name"] = tumor_sample_name
     return samples
