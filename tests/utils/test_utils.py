@@ -296,6 +296,7 @@ def test_get_snakefile():
         ("qc", ""),
         ("generate_ref", ""),
         ("umi", ""),
+        ("pon", "")
     ]
 
     # WHEN asking to see snakefile for paired
@@ -309,6 +310,8 @@ def test_get_snakefile():
             pipeline = "BALSAMIC/workflows/reference.smk"
         elif analysis_type == 'umi':
             pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
+        elif analysis_type == 'pon':
+            pipeline = "BALSAMIC/workflows/PON.smk"
 
         # THEN it should return the snakefile path
         # THEN assert file exists
