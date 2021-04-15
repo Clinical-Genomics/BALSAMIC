@@ -6,7 +6,7 @@ Added:
 
 * Changelog reminder workflow to Github
 * Snakemake workflow for created PON reference
-
+* Balsamic cli config command(pon) for creating json for PON analysis
 
 [7.1.8]
 -------
