@@ -70,6 +70,7 @@ def reference():
         "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
         "exon_bed": "tests/test_data/references/genome/refseq.flat.bed",
         "rankscore": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
+        "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed"
     }
 }
 
@@ -137,6 +138,10 @@ def sample_fastq(tmp_path_factory):
     # dummy normal fastq file
     normalfastqr1 = fastq_dir / "concatenated_normal_XXXXXX_R_1.fastq.gz"
     normalfastqr2 = fastq_dir / "concatenated_normal_XXXXXX_R_2.fastq.gz"
+    normal1fastqr1 = fastq_dir / "concatenated_normal1_XXXXXX_R_1.fastq.gz"
+    normal1fastqr2 = fastq_dir / "concatenated_normal1_XXXXXX_R_2.fastq.gz"
+    normal2fastqr1 = fastq_dir / "concatenated_normal2_XXXXXX_R_1.fastq.gz"
+    normal2fastqr2 = fastq_dir / "concatenated_normal2_XXXXXX_R_2.fastq.gz"
 
     for fastq_file in (
             fastq_valid,
@@ -145,6 +150,10 @@ def sample_fastq(tmp_path_factory):
             tumorfastqr2,
             normalfastqr1,
             normalfastqr2,
+            normal1fastqr1,
+            normal1fastqr2,
+            normal2fastqr1,
+            normal2fastqr2,
     ):
         fastq_file.touch()
 
@@ -153,6 +162,8 @@ def sample_fastq(tmp_path_factory):
         "fastq_invalid": fastq_invalid.absolute().as_posix(),
         "tumor": tumorfastqr1.absolute().as_posix(),
         "normal": normalfastqr1.absolute().as_posix(),
+        "normal1": normal1fastqr1.absolute().as_posix(),
+        "normal2": normal2fastqr1.absolute().as_posix(),
     }
 
 
