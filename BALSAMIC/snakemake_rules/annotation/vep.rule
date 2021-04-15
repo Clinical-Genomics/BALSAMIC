@@ -10,7 +10,6 @@ rule vep_somatic:
   output:
     vcf_all = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz",
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
@@ -53,16 +52,14 @@ vep \
 --verbose \
 --force_overwrite;
 tabix -p vcf -f {output.vcf_all};
-bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_all};
-tabix -p vcf -f {output.vcf_pass};
 rm $tmpvcf;
     """
 
 rule vep_stat:
   input:
-    vep = vep_dir + "SNV.somatic.{case_name}.{var_caller}.pass.vcf.gz",
+    vep = vep_dir + "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
   output:
-    tmb = vep_dir + "SNV.somatic.{case_name}.{var_caller}.pass.balsamic_stat"
+    tmb = vep_dir + "SNV.somatic.{case_name}.{var_caller}.balsamic_stat"
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
@@ -72,7 +69,7 @@ rule vep_stat:
   threads: get_threads(cluster_config, 'vep')
   singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   benchmark:
-    benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.pass.balsamic_stat.tsv" 
+    benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.balsamic_stat.tsv" 
   shell:
     "source activate {params.conda}; "
     "if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi; "
