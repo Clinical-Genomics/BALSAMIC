@@ -424,6 +424,40 @@ def tumor_only_umi_config(tmpdir_factory, sample_fastq, balsamic_cache,
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
+
+@pytest.fixture(scope="session")
+def pon_config(tmpdir_factory, sample_fastq, balsamic_cache,
+                analysis_dir, panel_bed_file):
+    """
+    invokes balsamic config for list of normal samples
+    -n,n1,n2 to create pon sample config
+    """
+    case_id = "sample_pon"
+    normal = sample_fastq["normal"]
+    normal1 = sample_fastq["normal1"]
+    normal2 = sample_fastq["normal2"]
+
+    runner = CliRunner()
+    runner.invoke(
+        cli,
+        [
+            "config", "pon",
+            "-p", panel_bed_file,
+            "-n", normal,
+            "-n", normal1,
+            "-n", normal2,
+            "--case-id",
+            case_id,
+            "--analysis-dir",
+            analysis_dir,
+            "--balsamic-cache",
+            balsamic_cache
+            ],
+        )
+
+    return Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
+
+
 @pytest.fixture(scope="session")
 def sample_config():
     """
@@ -452,7 +486,6 @@ def sample_config():
             "BALSAMIC_version": "2.9.8",
             "dag":
             "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
-            "umiworkflow": "true"
         },
         "vcf": {
             "manta": {
@@ -516,6 +549,7 @@ def sample_config():
                 "readpair_suffix": ["1", "2"],
             },
         },
+	"umiworkflow": "true"	
     }
 
     return sample_config
