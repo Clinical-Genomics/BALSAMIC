@@ -7,8 +7,7 @@ import tempfile
 import os
 
 
-def get_fastqs(wildcards):
-    return glob.glob(fastq_dir + "/*_" + wildcards.sample  + "*_R_[1-2].fastq.gz")
+from BALSAMIC.utils.rule import get_threads
 
 def picard_flag(picarddup):
     if picarddup == "mrkdup":
@@ -24,11 +23,13 @@ case_id = config["analysis"]["case_id"]
 samples = config["samples"]
 fastq_dir = config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"]
+qc_dir = analysis_dir + "/qc/"
 reffasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
 access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
+benchmark_dir = config["analysis"]["benchmark"]
 
 bam_dir = os.path.join(analysis_dir, "bam", "")
 cnv_dir = os.path.join(analysis_dir, "cnv", "")
@@ -36,7 +37,7 @@ tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 picarddup="mrkdup"
-picard_extra_normal=" ".join(["RGPU=ILLUMINAi", "RGID=PON","RGSM=PON", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
+
 
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
@@ -44,75 +45,11 @@ ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
 PON_DONE = expand(cnv_dir + "PON." + "reference" + ".done")
 CNV_DONE = expand(cnv_dir + "CNV." + "tumor" + ".done")
 
+include: "../snakemake_rules/quality_control/fastp.rule"
+include: "../snakemake_rules/align/bwa_mem.rule"
+
 rule all:
     input: ALL_REFS + ALL_COVS +  PON_DONE #+ CNV_DONE
-
-rule align_bwa_mem:
-    input:
-        fa = reffasta,
-        read1 = config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
-        read2 = config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
-        refidx = expand(reffasta + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
-    output:
-        bamout = bam_dir + "{sample}.sorted.bam"
-    params:
-        bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
-        conda = "align_qc",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    threads: 18
-    singularity: 
-        Path(singularity_image + "align_qc.sif").as_posix()
-    shell:
-        """
-source activate {params.conda};
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-bwa mem \
--t {threads} \
--R {params.bam_header}  \
--M \
--v 1 \
-{input.fa} {input.read1} {input.read2} \
-| samtools sort \
- -T {params.tmpdir} \
---threads {threads} \
---output-fmt BAM \
--o {output.bamout} - ;
-samtools index -@ {threads} {output.bamout};
-rm -rf {params.tmpdir};
-        """
-
-rule picard_markduplicates:
-    input:
-        bam_dir + "{sample}.sorted.bam"
-    output:
-        mrkdup = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
-        stats =  bam_dir + "{sample}.sorted." + picarddup + ".txt"
-    params:
-        conda = "align_qc",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        mem = "16g",
-        rm_dup = picard_flag(picarddup)
-    threads: 12
-    singularity: 
-        Path(singularity_image + "align_qc.sif").as_posix() 
-    shell:
-        """
-source activate {params.conda};
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
-MarkDuplicates \
-INPUT={input} \
-OUTPUT={output.mrkdup} \
-VALIDATION_STRINGENCY=SILENT \
-MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
-REMOVE_DUPLICATES={params.rm_dup} \
-METRICS_FILE='{output.stats}';
-samtools index {output.mrkdup};
-rm -rf {params.tmpdir};
-        """
-
 
 rule create_target:
     input:
@@ -124,6 +61,8 @@ rule create_target:
         offtarget_bed = cnv_dir + "antitarget.bed"
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+    benchmark:
+        Path(benchmark_dir, "cnvkit.targets.tsv").as_posix() 
     shell:
         """
 source activate varcall_cnvkit;
@@ -141,6 +80,8 @@ rule create_coverage:
         antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+    benchmark:
+        Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
     shell:
         """
 source activate varcall_cnvkit;
@@ -157,6 +98,8 @@ rule create_reference:
         txt = cnv_dir + "PON." + "reference" + ".done"
     singularity:
         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+    benchmark:
+        Path(benchmark_dir, "cnvkit.reference.tsv").as_posix()
     shell:
         """
 source activate varcall_cnvkit;
