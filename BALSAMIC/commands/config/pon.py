@@ -6,9 +6,14 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.cli import (pon_sample_dict,
-                                create_fastq_symlink, generate_graph)
+from BALSAMIC.utils.cli import (create_fastq_symlink,
+                                generate_graph,
+				get_bioinfo_tools_version,
+				pon_sample_dict)
 from BALSAMIC.utils.models import PonBalsamicConfigModel
+
+from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH,
+				      BIOINFO_TOOL_ENV)
 
 LOG = logging.getLogger(__name__)
 
@@ -16,34 +21,33 @@ LOG = logging.getLogger(__name__)
                short_help="Create a sample config file for PON analysis")
 @click.option("--case-id",
               required=True,
-              help="Sample id that is used for reporting, \
-              naming the analysis jobs, and analysis path")
+              help="Sample id used for reporting analysis")
 @click.option("--umi/--no-umi",
               default=True,
               show_default=True,
               is_flag=True,
               help=("UMI processing steps for samples with UMI tags."
-                    "For WGS cases, UMI is always disabled."))
+                    "For WGS cases,by default UMI is disabled."))
 @click.option("--umi-trim-length",
               default=5,
               show_default=True,
               type=int,
-              help="Trim N bases from reads in fastq")
+              help="Trimming first N bases from reads in fastq file")
 @click.option("--quality-trim/--no-quality-trim",
               default=True,
               show_default=True,
               is_flag=True,
-              help="Trim low quality reads in fastq")
+              help="Trimming low quality reads in fastq file")
 @click.option("--adapter-trim/--no-adapter-trim",
               default=True,
               show_default=True,
               is_flag=True,
-              help="Trim adapters from reads in fastq")
+              help="Preprocess fastq reads by trimming adapters")
 @click.option("-p",
               "--panel-bed",
               type=click.Path(exists=True, resolve_path=True),
               required=False,
-              help="Panel bed file for variant calling.")
+              help="Panel bed file for calculating target regions.")
 @click.option("--balsamic-cache",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
@@ -51,15 +55,14 @@ LOG = logging.getLogger(__name__)
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
-              help="Root analysis path to store analysis logs and results. \
-                                     The final path will be analysis-dir/sample-id"
+              help="Root analysis path directory."
               )
 @click.option("-n",
               "--normal",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
               multiple=True,
-              help="Fastq files for normal sample.")
+              help="List of fastq files for panel of normal samples")
 @click.option("--normal-sample-name", help="Normal sample name")
 @click.option("-g",
               "--genome-version",
@@ -68,9 +71,10 @@ LOG = logging.getLogger(__name__)
               help=("Genome version to prepare reference. Path to genome"
                     "will be <outdir>/genome_version"))
 @click.pass_context
-def pon_config(context, case_id, umi, umi_trim_length, adapter_trim,
-                quality_trim, panel_bed, analysis_dir, normal, 
-		normal_sample_name, genome_version, balsamic_cache):
+def pon_config(context, case_id,analysis_dir, normal, 
+		normal_sample_name, panel_bed, quality_trim,
+		umi, umi_trim_length, adapter_trim,
+		genome_version, balsamic_cache):
 
     try:
         samples = pon_sample_dict(
@@ -79,7 +83,7 @@ def pon_config(context, case_id, umi, umi_trim_length, adapter_trim,
         )
     except AttributeError:
         LOG.error(
-            f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz"
+            f"Input fastq file name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz"
         )
         raise click.Abort()
 
@@ -91,8 +95,8 @@ def pon_config(context, case_id, umi, umi_trim_length, adapter_trim,
 
     config_collection_dict = PonBalsamicConfigModel(
         QC={
+	    "adapter_trim": adapter_trim,
             "quality_trim": quality_trim,
-            "adapter_trim": adapter_trim,
             "umi_trim": umi if panel_bed else False,
             "umi_trim_length": umi_trim_length,
         },
@@ -105,33 +109,36 @@ def pon_config(context, case_id, umi, umi_trim_length, adapter_trim,
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         samples=samples,
-        panel={
+        bioinfo_tools=BIOINFO_TOOL_ENV,
+        bioinfo_tools_version=get_bioinfo_tools_version(
+            BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH),
+	panel={
             "capture_kit": panel_bed
         } if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)
-    LOG.info("Config file generated successfully")
+    LOG.info("PON config file generated successfully")
 
     Path.mkdir(Path(config_collection_dict["analysis"]["fastq_path"]),
                parents=True,
                exist_ok=True)
-    LOG.info("Directories created successfully")
+    LOG.info("fastq directories created successfully")
 
     create_fastq_symlink(
         casefiles=(normal),
         symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
     )
-    LOG.info(f"Symlinks generated successfully")
+    LOG.info(f"fastqs symlinks generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + "_PON" + ".json")
     with open(config_path, "w+") as fh:
         fh.write(json.dumps(config_collection_dict, indent=4))
-    LOG.info(f"Config file saved successfully - {config_path}")
+    LOG.info(f"PON config file saved successfully - {config_path}")
 
     try:
         generate_graph(config_collection_dict, config_path)
-        LOG.info(f"BALSAMIC PON Workflow has been configured successfully!")
-    except ValueError as e:
+        LOG.info(f"BALSAMIC PON workflow has been configured successfully!")
+    except ValueError:
         LOG.error(
-            f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',
+            f'BALSAMIC PON dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',
         )
         raise click.Abort()
