@@ -215,7 +215,7 @@ def test_snakemake_local():
     # GIVEN required params
     snakemake_local = SnakeMake()
     snakemake_local.working_dir = "this_path/snakemake"
-    snakemake_local.snakefile = "worflow/variantCalling_paired"
+    snakemake_local.snakefile = "workflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
     snakemake_local.use_singularity = True

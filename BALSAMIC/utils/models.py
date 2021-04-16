@@ -45,10 +45,10 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
-	    strand_reads: VCFAttributes (optional); minimum strand specific read counts
+	strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
-	    sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
-	    varcaller_name: str (required); variant caller name
+	sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
+	varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
         analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
         description: str (required); comment section for description
@@ -173,7 +173,7 @@ class AnalysisModel(BaseModel):
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
-	        pon : panel of normal analysis
+	    pon : panel of normal analysis
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
@@ -366,7 +366,7 @@ class BalsamicConfigModel(BaseModel):
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-	    umiworkflow : Field(bool); whether UMI workflow to run in parallel
+	umiworkflow : Field(bool); whether UMI workflow to run in parallel
     """
 
     QC: QCModel
@@ -544,7 +544,7 @@ class UMIParamsConsensuscall(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-	    filter_minreads: str (required); settings to filter consensus tags based on group size
+	filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
@@ -600,7 +600,7 @@ class UMIworkflowConfig(BaseModel):
 	umiextract: params defined in the rule sentieon_umiextract
 	consensuscall: params defined in the rule sentieon_consensuscall
 	tnscope: params defined in the rule sentieon_tnscope_umi
-    vardict: params defined in the rule vardict_umi
+	vardict: params defined in the rule vardict_umi
 	vep: params defined in the rule vep_umi
     """
     common: UMIParamsCommon
