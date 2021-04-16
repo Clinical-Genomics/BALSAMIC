@@ -45,10 +45,10 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
-	strand_reads: VCFAttributes (optional); minimum strand specific read counts 
+	    strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
-	sor: VCFAttributes (optional); minimum symmetrical log-odds ratio  
-	varcaller_name: str (required); variant caller name
+	    sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
+	    varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
         analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
         description: str (required); comment section for description
@@ -61,8 +61,8 @@ class VarCallerFilter(BaseModel):
     DP: Optional[VCFAttributes]
     pop_freq: VCFAttributes
     strand_reads: Optional[VCFAttributes]
-    qss : Optional[VCFAttributes]
-    sor : Optional[VCFAttributes]
+    qss: Optional[VCFAttributes]
+    sor: Optional[VCFAttributes]
     varcaller_name: str
     filter_type: str
     analysis_type: str
@@ -173,19 +173,17 @@ class AnalysisModel(BaseModel):
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
-	    pon : panel of normal analysis
+	        pon : panel of normal analysis
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
         analysis_dir : Field(required); existing path where to save files
-
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
         log : Field(optional); Path where logs will be saved
         result : Field(optional); Path where BALSAMIC output will be stored
         benchmark : Field(optional); Path where benchmark report will be stored
         dag : Field(optional); Path where DAG graph of workflow will be stored
-
         BALSAMIC_version  : Field(optional); Current version of BALSAMIC
         config_creation_date  : Field(optional); Timestamp when config was created
 
@@ -329,7 +327,7 @@ class PonBalsamicConfigModel(BaseModel):
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
         samples : Field(Dict); dictionary containing samples submitted for analysis
-        reference : Field(Dict); dictionary containign paths to reference genome files
+        reference : Field(Dict); dictionary containing paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         singularity : Field(Path); path to singularity container of BALSAMIC
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
@@ -353,21 +351,22 @@ class PonBalsamicConfigModel(BaseModel):
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
 
+
 class BalsamicConfigModel(BaseModel):
     """Summarizes config models in preparation for export 
     
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
-        vcf : Field(VCFmodel); variables relevand for variant calling pipeline
+        vcf : Field(VCFmodel); variables relevant for variant calling pipeline
         samples : Field(Dict); dictionary containing samples submitted for analysis
-        reference : Field(Dict); dictionary containign paths to reference genome files
+        reference : Field(Dict); dictionary containing paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
         bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-	umiworkflow : Field(bool); whether UMI workflow to run parallely
+	    umiworkflow : Field(bool); whether UMI workflow to run in parallel
     """
 
     QC: QCModel
@@ -465,7 +464,7 @@ class ReferenceMeta(BaseModel):
     This class defines a meta for various reference files. Only reference_genome is mandatory.
 
     Attributes:
-      basedir: str for basedirectory which will be appended to all ReferenceUrlsModel fields
+      basedir: str for base directory which will be appended to all ReferenceUrlsModel fields
       reference_genome: ReferenceUrlsModel. Required field for reference genome fasta file
       dbsnp: ReferenceUrlsModel. Optional field for dbSNP vcf file
       hc_vcf_1kg: ReferenceUrlsModel. Optional field for high confidence 1000Genome vcf
@@ -545,7 +544,7 @@ class UMIParamsConsensuscall(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-	filter_minreads: str (required); settings to filter consensus tags based on group size
+	    filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
@@ -601,7 +600,7 @@ class UMIworkflowConfig(BaseModel):
 	umiextract: params defined in the rule sentieon_umiextract
 	consensuscall: params defined in the rule sentieon_consensuscall
 	tnscope: params defined in the rule sentieon_tnscope_umi
-    	vardict: params defined in the rule vardict_umi
+    vardict: params defined in the rule vardict_umi
 	vep: params defined in the rule vep_umi
     """
     common: UMIParamsCommon

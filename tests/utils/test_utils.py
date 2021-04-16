@@ -227,7 +227,7 @@ def test_snakemake_local():
 
     # THEN it will contruct the snakemake command to run
     assert isinstance(shell_command, str)
-    assert "worflow/variantCalling_paired" in shell_command
+    assert "workflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
     assert "this_path/snakemake" in shell_command
     assert "--dryrun" in shell_command
