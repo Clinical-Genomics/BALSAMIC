@@ -341,7 +341,7 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
                                         vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]),
                                         filters=["all", "pass"])]
 
-if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["umiworkflow"]:
+if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs" and config["umiworkflow"]:
     analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
