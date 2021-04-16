@@ -331,7 +331,8 @@ class PonBalsamicConfigModel(BaseModel):
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         singularity : Field(Path); path to singularity container of BALSAMIC
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-
+	bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
+        bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
     """
 
     QC: QCModel
@@ -339,6 +340,8 @@ class PonBalsamicConfigModel(BaseModel):
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: DirectoryPath
+    bioinfo_tools: dict
+    bioinfo_tools_version: dict
     panel: Optional[PanelModel]
 
     @validator("reference")
