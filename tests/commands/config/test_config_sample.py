@@ -8,7 +8,6 @@ import graphviz
 from pathlib import Path
 
 
-
 def test_tumor_normal_config(invoke_cli, sample_fastq, tmp_path,
                         balsamic_cache, panel_bed_file,
                         sentieon_license, sentieon_install_dir):
@@ -93,7 +92,7 @@ def test_tumor_only_config(invoke_cli, sample_fastq, tmp_path,
 
 def test_dag_graph_success(tumor_normal_wgs_config, tumor_only_config,
                            tumor_normal_config, tumor_only_wgs_config,
-                           tumor_only_umi_config):
+                           tumor_only_umi_config, pon_config):
     # WHEN creating config using standard CLI input and setting Sentieon env vars
     # THEN DAG graph should be created successfully
     assert Path(json.load(
@@ -105,6 +104,8 @@ def test_dag_graph_success(tumor_normal_wgs_config, tumor_only_config,
         open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
     assert Path(json.load(
         open(tumor_only_umi_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(
+        open(pon_config))["analysis"]["dag"]).exists()
 
 
 def test_tumor_only_config_bad_filename(
@@ -291,3 +292,4 @@ def test_pon_config_failed(invoke_cli, tmp_path,
     # THEN a config should be created and exist
     assert 'Error: Missing option' in result.output
     assert result.exit_code == 2
+
