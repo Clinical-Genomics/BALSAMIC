@@ -164,123 +164,20 @@ class VCFModel(BaseModel):
     TNscope_umi: VarcallerAttribute
 
 
-class PonAnalysisModel(BaseModel):
-    """Pydantic model containing PON workflow variables
-
-    Attributes:
-
-        case_id : Field(required); string case identifier
-     	analysis_type : Field(required); string literal [single, paired, pon]
-            single : if only tumor samples are provided
-            paired : if both tumor and normal samples are provided        
-	    pon : panel of normal analysis
-	sequencing_type : Field(required); string literal [targeted, wgs]
-            targeted : if capture kit was used to enrich specific genomic regions
-            wgs : if whole genome sequencing was performed
-        analysis_dir : Field(required); existing path where to save files
-        fastq_path : Field(optional); Path where fastq files will be stored
-        script : Field(optional); Path where snakemake scripts will be stored
-        log : Field(optional); Path where logs will be saved
-        result : Field(optional); Path where BALSAMIC output will be stored
-        benchmark : Field(optional); Path where benchmark report will be stored
-        dag : Field(optional); Path where DAG graph of workflow will be stored
-        BALSAMIC_version  : Field(optional); Current version of BALSAMIC
-        config_creation_date  : Field(optional); Timestamp when config was created
-
-    Raises:
-        ValueError:
-            When sequencing_type is set to any value other than [wgs, targeted]	
-	"""
-    case_id: str
-    analysis_type: str
-    sequencing_type: str
-    analysis_dir: DirectoryPath
-    fastq_path: Optional[DirectoryPath]
-    script: Optional[DirectoryPath]
-    log: Optional[DirectoryPath]
-    result: Optional[DirectoryPath]
-    benchmark: Optional[DirectoryPath]
-    dag: Optional[FilePath]
-    BALSAMIC_version: str = balsamic_version
-    config_creation_date: Optional[str]
-
-    class Config:
-        validate_all = True
-
-    
-    @validator("analysis_type")
-    def analysis_type_literal(cls, value) -> str:
-        balsamic_analysis_types = ANALYSIS_TYPES
-        if value not in balsamic_analysis_types:
-            raise ValueError(
-                f"Provided analysis type ({value}) not supported in BALSAMIC!")
-        return value
-
-
-    @validator("sequencing_type")
-    def sequencing_type_literal(cls, value) -> str:
-        balsamic_sequencing_types = ["wgs", "targeted"]
-        if value not in balsamic_sequencing_types:
-            raise ValueError(
-                f"Provided sequencing type ({value}) not supported in BALSAMIC!"
-            )
-        return value
-
-    @validator("analysis_dir")
-    def dirpath_always_abspath(cls, value) -> str:
-        return Path(value).resolve().as_posix()
-
-    @validator("log")
-    def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "logs").as_posix() + "/"
-
-    @validator("fastq_path")
-    def parse_analysis_to_fastq_path(cls, value, values, **kwargs) -> str:
-        return (Path(values.get("analysis_dir"), values.get("case_id"),
-                     "analysis", "fastq").as_posix() + "/")
-
-#    @validator("script")
-#    def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
-#        return Path(values.get("analysis_dir"), values.get("case_id"),
-#                    "scripts").as_posix() + "/"
-
-#    @validator("result")
-#    def parse_analysis_to_result_path(cls, value, values, **kwargs) -> str:
-#        return Path(values.get("analysis_dir"), values.get("case_id"),
-#                    "analysis").as_posix()
-
-#    @validator("benchmark")
-#    def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
-#        return (Path(values.get("analysis_dir"), values.get("case_id"),
-#                     "benchmarks").as_posix() + "/")
-
-    @validator("dag")
-    def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{balsamic_version}_graph.pdf'
-    
-    @validator("config_creation_date")
-    def datetime_as_string(cls, value):
-        return datetime.now().strftime("%Y-%m-%d %H:%M")
-
-
-
 class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
 
     Attributes:
     
         case_id : Field(required); string case identifier
-        analysis_type : Field(required); string literal [single, paired]
+        analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
+	    pon : panel of normal analysis
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
         analysis_dir : Field(required); existing path where to save files
-        umiworkflow : Field(bool); whether UMI workflow to run parallely 
 
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
@@ -294,7 +191,7 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When analysis_type is set to any value other than [single, paired, qc]
+            When analysis_type is set to any value other than [single, paired, qc, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
     """
 
@@ -310,7 +207,6 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
-    umiworkflow: bool
 
     class Config:
         validate_all = True
@@ -441,7 +337,7 @@ class PonBalsamicConfigModel(BaseModel):
     """
 
     QC: QCModel
-    analysis: PonAnalysisModel
+    analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: DirectoryPath
@@ -471,7 +367,7 @@ class BalsamicConfigModel(BaseModel):
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-
+	umiworkflow : Field(bool); whether UMI workflow to run parallely
     """
 
     QC: QCModel
@@ -484,6 +380,7 @@ class BalsamicConfigModel(BaseModel):
     bioinfo_tools: dict
     bioinfo_tools_version: dict
     panel: Optional[PanelModel]
+    umiworkflow: bool
 
     @validator("reference")
     def abspath_as_str(cls, value):
