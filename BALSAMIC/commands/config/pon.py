@@ -124,7 +124,7 @@ def pon_config(context, case_id,analysis_dir, normal,
     LOG.info("fastq directories created successfully")
 
     create_fastq_symlink(
-        casefiles=(normal),
+        casefiles=normal,
         symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
     )
     LOG.info(f"fastqs symlinks generated successfully")
@@ -132,7 +132,7 @@ def pon_config(context, case_id,analysis_dir, normal,
     config_path = Path(analysis_dir) / case_id / (case_id + "_PON" + ".json")
     with open(config_path, "w+") as fh:
         fh.write(json.dumps(config_collection_dict, indent=4))
-    LOG.info(f"PON config file saved successfully - {config_path}")
+    LOG.info(f"PON config file saved successfully - {config_path}"
 
     try:
         generate_graph(config_collection_dict, config_path)

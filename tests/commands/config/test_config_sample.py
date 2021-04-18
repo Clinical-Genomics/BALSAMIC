@@ -108,23 +108,25 @@ def test_dag_graph_success(tumor_normal_wgs_config, tumor_only_config,
         open(pon_config))["analysis"]["dag"]).exists()
 
 
-def test_tumor_only_config_bad_filename(
+def test_config_bad_filename(
         invoke_cli,
         tmp_path_factory,
         analysis_dir,
         panel_bed_file,
         balsamic_cache,
 ):
-
     # GIVEN existing fastq file with wrong naming convention
     faulty_fastq_dir = tmp_path_factory.mktemp("error_fastq")
     Path(faulty_fastq_dir / "error.fastq.gz").touch()
 
-    case_id = "faulty_tumor"
+    case_id1 = "faulty_tumor"
+    case_id2 = "faulty_pon_normal"
     tumor = Path(faulty_fastq_dir / "error.fastq.gz").as_posix()
+    normal = Path(faulty_fastq_dir / "error.fastq.gz").as_posix()
+
 
     # Invoke CLI command using file as argument
-    result = invoke_cli(
+    case_result = invoke_cli(
         [
             "config",
             "case",
@@ -133,7 +135,24 @@ def test_tumor_only_config_bad_filename(
             "-p",
             panel_bed_file,
             "--case-id",
-            case_id,
+            case_id1,
+            "--analysis-dir",
+            analysis_dir,
+            "--balsamic-cache",
+            balsamic_cache,
+        ],
+    )
+
+    pon_result = invoke_cli(
+        [
+            "config",
+            "pon",
+            "-n",
+            normal,
+            "-p",
+            panel_bed_file,
+            "--case-id",
+            case_id2,
             "--analysis-dir",
             analysis_dir,
             "--balsamic-cache",
@@ -142,7 +161,8 @@ def test_tumor_only_config_bad_filename(
     )
 
     # THEN run should abort
-    assert result.exit_code == 1
+    assert case_result.exit_code == 1
+    assert pon_result.exit_code == 1
 
 
 def test_run_without_permissions(
@@ -200,16 +220,20 @@ def test_tumor_only_umi_config_background_file(
     assert Path(background_variant_file).exists()
 
 
-def test_config_case_graph_failed(invoke_cli, sample_fastq,
+def test_config_graph_failed(invoke_cli, sample_fastq,
                                   analysis_dir, balsamic_cache,
                                   panel_bed_file):
     # GIVEN an analysis config 
     case_id = "sample_tumor_only"
+    pon_case_id = "sample_pon"
     tumor = sample_fastq["tumor"]
+    normal = sample_fastq["normal"]
+    normal1 = sample_fastq["normal1"]
+    normal2 = sample_fastq["normal2"]
 
     with mock.patch.object(graphviz, 'Source') as mocked:
         mocked.return_value = None
-        result = invoke_cli(
+        case_result = invoke_cli(
             [
                 "config",
                 "case",
@@ -225,8 +249,29 @@ def test_config_case_graph_failed(invoke_cli, sample_fastq,
                 balsamic_cache
             ],
         )
+        pon_result = invoke_cli(
+            [
+                "config",
+                "pon",
+                "-p",
+                panel_bed_file,
+                "-n",
+                normal,
+                "-n",
+                normal1,
+                "-n",
+                normal2,
+                "--case-id",
+                pon_case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache
+            ],
+        )
 
-    assert result.exit_code == 1
+    assert case_result.exit_code == 1
+    assert pon_result.exit_code == 1
 
 
 def test_pon_config(invoke_cli, sample_fastq, tmp_path,
@@ -239,7 +284,7 @@ def test_pon_config(invoke_cli, sample_fastq, tmp_path,
     normal1 = sample_fastq["normal1"]
     normal2 = sample_fastq["normal2"]
 
-    # WHEN creating a case analysis
+    # WHEN creating a case config
     result = invoke_cli(
         [
             "config",
@@ -292,4 +337,3 @@ def test_pon_config_failed(invoke_cli, tmp_path,
     # THEN a config should be created and exist
     assert 'Error: Missing option' in result.output
     assert result.exit_code == 2
-
