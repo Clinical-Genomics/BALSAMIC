@@ -117,13 +117,15 @@ def test_config_bad_filename(
 ):
     # GIVEN existing fastq file with wrong naming convention
     faulty_fastq_dir = tmp_path_factory.mktemp("error_fastq")
-    Path(faulty_fastq_dir / "error.fastq.gz").touch()
+    fastq_file_name_tumor = "tumor_error.fastq.gz"
+    fastq_file_name_normal = "normal_error.fastq.gz"
+    Path(faulty_fastq_dir / fastq_file_name_tumor).touch()
+    Path(faulty_fastq_dir / fastq_file_name_normal).touch()
 
     case_id1 = "faulty_tumor"
     case_id2 = "faulty_pon_normal"
-    tumor = Path(faulty_fastq_dir / "error.fastq.gz").as_posix()
-    normal = Path(faulty_fastq_dir / "error.fastq.gz").as_posix()
-
+    tumor = Path(faulty_fastq_dir / fastq_file_name_tumor).as_posix()
+    normal = Path(faulty_fastq_dir / fastq_file_name_normal).as_posix()
 
     # Invoke CLI command using file as argument
     case_result = invoke_cli(
