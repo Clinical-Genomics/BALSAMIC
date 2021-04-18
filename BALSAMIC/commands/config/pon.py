@@ -132,13 +132,12 @@ def pon_config(context, case_id,analysis_dir, normal,
     config_path = Path(analysis_dir) / case_id / (case_id + "_PON" + ".json")
     with open(config_path, "w+") as fh:
         fh.write(json.dumps(config_collection_dict, indent=4))
-    LOG.info(f"PON config file saved successfully - {config_path}"
+    LOG.info(f"PON config file saved successfully - {config_path}")
 
     try:
         generate_graph(config_collection_dict, config_path)
         LOG.info(f"BALSAMIC PON workflow has been configured successfully!")
     except ValueError:
         LOG.error(
-            f'BALSAMIC PON dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',
-        )
+            f'BALSAMIC PON dag graph generation failed - {config_collection_dict["analysis"]["dag"]}')
         raise click.Abort()
