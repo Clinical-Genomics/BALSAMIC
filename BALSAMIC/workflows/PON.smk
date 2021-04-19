@@ -7,7 +7,7 @@ import tempfile
 import os
 
 
-from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.rule import get_threads, get_result_dir
 
 def picard_flag(picarddup):
     if picarddup == "mrkdup":
@@ -19,11 +19,12 @@ shell.prefix("set -eo pipefail; ")
 
 localrules: all
 
-case_id = config["analysis"]["case_id"]
 samples = config["samples"]
-fastq_dir = config["analysis"]["fastq_path"]
-analysis_dir = config["analysis"]["analysis_dir"]
-qc_dir = analysis_dir + "/qc/"
+fastq_dir = get_result_dir(config) + "/fastq/"
+qc_dir = get_result_dir(config) + "/qc/"
+bam_dir =  get_result_dir(config) + "/bam/"
+cnv_dir =  get_result_dir(config) + "/cnv/"
+
 reffasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
 access_5kb_hg19 = config["reference"]["access_regions"]
@@ -31,13 +32,10 @@ target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
 benchmark_dir = config["analysis"]["benchmark"]
 
-bam_dir = os.path.join(analysis_dir, "bam", "")
-cnv_dir = os.path.join(analysis_dir, "cnv", "")
-tmp_dir = os.path.join(analysis_dir, "tmp", "" )
+tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 picarddup="mrkdup"
-
 
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
@@ -60,7 +58,7 @@ rule create_target:
         target_bed = cnv_dir + "target.bed",
         offtarget_bed = cnv_dir + "antitarget.bed"
     singularity:
-        Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+        Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix() 
     shell:
@@ -79,7 +77,7 @@ rule create_coverage:
         target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
         antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
     singularity:
-        Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+        Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
         Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
     shell:
@@ -97,7 +95,7 @@ rule create_reference:
         ref_cnn = cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn",
         txt = cnv_dir + "PON." + "reference" + ".done"
     singularity:
-        Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+        Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
         Path(benchmark_dir, "cnvkit.reference.tsv").as_posix()
     shell:
@@ -116,7 +114,7 @@ rule cnvkit_analysis_single:
     params:
         cnv_dir = cnv_dir
     singularity:
-         Path(singularity_image + "varcall_cnvkit.sif").as_posix()
+         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     shell:
         """
 source activate varcall_cnvkit;
