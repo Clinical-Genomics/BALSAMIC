@@ -8,6 +8,8 @@ import os
 
 
 from BALSAMIC.utils.rule import get_threads, get_result_dir
+from BALSAMIC.utils.constants import RULE_DIRECTORY
+
 
 def picard_flag(picarddup):
     if picarddup == "mrkdup":
@@ -41,13 +43,13 @@ ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
 PON_DONE = expand(cnv_dir + "PON." + "reference" + ".done")
-CNV_DONE = expand(cnv_dir + "CNV." + "tumor" + ".done")
 
-include: "../snakemake_rules/quality_control/fastp.rule"
-include: "../snakemake_rules/align/bwa_mem.rule"
+config["rules"] = ["snakemake_rules/quality_control/fastp.rule", "snakemake_rules/align/bwa_mem.rule"]
+for r in config["rules"]:
+    include: Path(RULE_DIRECTORY, r).as_posix()
 
 rule all:
-    input: ALL_REFS + ALL_COVS +  PON_DONE #+ CNV_DONE
+    input: ALL_REFS + ALL_COVS +  PON_DONE
 
 rule create_target:
     input:
@@ -102,24 +104,4 @@ rule create_reference:
         """
 source activate varcall_cnvkit;
 cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn} && touch {output.txt} ;
-        """
-
-## Test rule: for running cnvkit if tumor sample is provided
-rule cnvkit_analysis_single:
-    input:
-        pon =  cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn",
-        tumor = bam_dir + "tumor.merged.bam",
-    output:
-        txt = cnv_dir + "CNV." + "tumor" + ".done"
-    params:
-        cnv_dir = cnv_dir
-    singularity:
-         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
-    shell:
-        """
-source activate varcall_cnvkit;
-cnvkit.py batch {input.tumor} \
---reference {input.pon} \
---output-dir {params.cnv_dir} \
---diagram --scatter && touch {output.txt};
         """
