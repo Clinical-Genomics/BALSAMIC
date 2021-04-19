@@ -233,8 +233,8 @@ def test_config_graph_failed(invoke_cli, sample_fastq,
     normal1 = sample_fastq["normal1"]
     normal2 = sample_fastq["normal2"]
 
-    with mock.patch.object(graphviz, 'Source') as mocked:
-        mocked.return_value = None
+    with mock.patch.object(graphviz, 'Source') as mocked1:
+        mocked1.return_value = None
         case_result = invoke_cli(
             [
                 "config",
@@ -251,7 +251,9 @@ def test_config_graph_failed(invoke_cli, sample_fastq,
                 balsamic_cache
             ],
         )
-        pon_result = invoke_cli(
+        with mock.patch.object(graphviz, 'Source') as mocked2:
+            mocked2.return_value = None
+            pon_result = invoke_cli(
             [
                 "config",
                 "pon",
