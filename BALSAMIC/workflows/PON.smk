@@ -11,6 +11,11 @@ from BALSAMIC.utils.rule import get_threads, get_result_dir
 from BALSAMIC.utils.constants import RULE_DIRECTORY
 
 
+def get_pon_samples(fastq_dir):
+    samples = [(f.split('_1'))[0] for f in os.listdir(fastq_dir) if f.endswith('_R_1.fastq.gz')]
+    return samples
+
+
 def picard_flag(picarddup):
     if picarddup == "mrkdup":
         return "FALSE"
@@ -21,7 +26,6 @@ shell.prefix("set -eo pipefail; ")
 
 localrules: all
 
-samples = config["samples"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 qc_dir = get_result_dir(config) + "/qc/"
 bam_dir =  get_result_dir(config) + "/bam/"
@@ -38,6 +42,8 @@ tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 picarddup="mrkdup"
+
+samples=get_pon_samples(fastq_dir)
 
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
