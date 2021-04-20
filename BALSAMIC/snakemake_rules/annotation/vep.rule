@@ -57,7 +57,7 @@ rm $tmpvcf;
 
 rule vep_stat:
   input:
-    vep = vep_dir + "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
+    vep = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
   output:
     tmb = vep_dir + "SNV.somatic.{case_name}.{var_caller}.balsamic_stat"
   params:
