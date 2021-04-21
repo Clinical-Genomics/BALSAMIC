@@ -572,8 +572,8 @@ def convert_deliverables_tags(delivery_json: dict,
                     file_tags.append(sample_name)
             if sample_type == file["id"]:
                 file["id"] = sample_name
-                if sample_name not in file_tags:
-                    file_tags.append(sample_name)
+            if sample_type in file_tags:
+                file_tags.remove(sample_type)
         file["tag"] = list(set(file_tags))
     return delivery_json
 
