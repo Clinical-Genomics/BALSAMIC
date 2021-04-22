@@ -1,3 +1,4 @@
+import os
 import re
 import yaml
 import logging
@@ -10,6 +11,7 @@ from BALSAMIC.utils.constants import (MUTATION_TYPE, MUTATION_CLASS,
 from BALSAMIC.utils.exc import WorkflowRunError
 
 LOG = logging.getLogger(__name__)
+
 
 def get_chrom(panelfile):
     """
@@ -159,13 +161,16 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
 
     for output_name in output_file_names:
         output_file = getattr(rules, rule_name).output[output_name]
-        
-        LOG.debug("Found following potential output files: {}".format(output_file))
+
+        LOG.debug(
+            "Found following potential output files: {}".format(output_file))
         for file_wildcard_list in snakemake.utils.listfiles(output_file):
             file_to_store = file_wildcard_list[0]
             # Do not store file if it is a temp() output
             if file_to_store in temp_files:
-                LOG.debug("File is tagged as temporary file in the workflow:".format(file_to_store))
+                LOG.debug(
+                    "File is tagged as temporary file in the workflow:".format(
+                        file_to_store))
                 continue
 
             file_extension = get_file_extension(file_to_store)
@@ -180,13 +185,14 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
                 tags=base_tags,
                 output_file_wildcards=output_file_wildcards)
 
-
             # Return empty string if delivery_id is not resolved.
             # This can happen when wildcard from one rule tries to match with a file
             # from another rule. example: vep_somatic might pick up ngs_filter_vardict files
             pattern = re.compile(r"{([^}\.[!:]+)")
             if pattern.findall(delivery_id):
-                LOG.error("Problem in pattern matching the following: {}".format(delivery_id))
+                LOG.error(
+                    "Problem in pattern matching the following: {}".format(
+                        delivery_id))
                 continue
 
             # Create a composit tag from housekeeper tag and named output
@@ -196,9 +202,12 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             # replace all instsances of "_" with "-", since housekeeper doesn't like _
             file_tags = [t.replace("_", "-") for t in file_tags]
 
-            LOG.debug("Found the following delivery id: {}".format(delivery_id))
-            LOG.debug("Found the following file to store: {}".format(file_to_store))
-            LOG.debug("Above file is in the following rule: {}".format(rule_name))
+            LOG.debug(
+                "Found the following delivery id: {}".format(delivery_id))
+            LOG.debug(
+                "Found the following file to store: {}".format(file_to_store))
+            LOG.debug(
+                "Above file is in the following rule: {}".format(rule_name))
             output_files.append(
                 (file_to_store, file_to_store_index, rule_name,
                  ",".join(file_tags), delivery_id, file_extension))
@@ -268,3 +277,13 @@ def get_reference_output_files(reference_files_dict: dict,
                 continue
             ref_vcf_list.append(reference_item['output_file'])
     return ref_vcf_list
+
+
+def get_pon_samples(fastq_dir):
+    """ Given dirpath containing list of PON fastq files
+	Returns list of sample names
+    """
+    samples = [(f.split('_1'))[0]
+               for f in os.listdir(fastq_dir)
+               if f.endswith('_R_1.fastq.gz')]
+    return samples
