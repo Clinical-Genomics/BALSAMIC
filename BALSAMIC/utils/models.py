@@ -326,7 +326,6 @@ class PonBalsamicConfigModel(BaseModel):
 
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
-        samples : Field(Dict); dictionary containing samples submitted for analysis
         reference : Field(Dict); dictionary containing paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         singularity : Field(Path); path to singularity container of BALSAMIC
@@ -337,7 +336,6 @@ class PonBalsamicConfigModel(BaseModel):
 
     QC: QCModel
     analysis: AnalysisModel
-    samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: DirectoryPath
     bioinfo_tools: dict
