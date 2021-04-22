@@ -4,11 +4,11 @@ channels:
   - defaults
 
 dependencies:
-  - bedtools=2.29.0
+  - bedtools=2.30.0
   - bwa=0.7.15
   - fastqc=0.11.9
-  - samtools=1.9
-  - tabix=0.2.5
+  - samtools=1.12
+  - tabix=0.2.6
   - picard=2.25.0
   - r-base
   - multiqc=1.9
