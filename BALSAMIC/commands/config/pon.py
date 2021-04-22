@@ -6,16 +6,26 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.cli import (create_fastq_symlink,
-                                generate_graph,
-				get_bioinfo_tools_version,
-				pon_sample_dict)
+from BALSAMIC.utils.cli import (create_fastq_symlink, generate_graph,
+                                get_bioinfo_tools_version, pon_sample_dict)
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
 from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH,
-				      BIOINFO_TOOL_ENV)
+                                      BIOINFO_TOOL_ENV)
 
 LOG = logging.getLogger(__name__)
+
+
+def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
+    for fastq_name in os.listdir(pon_fastqs):
+        pon_fastq = Path(pon_fastqs, fastq_name).as_posix()
+        pon_sym_file = Path(symlink_dir, fastq_name).as_posix()
+        try:
+            LOG.info(f"Creating symlink {fastq_name} -> {pon_sym_file}")
+            os.symlink(pon_fastq, pon_sym_file)
+        except FileExistsError:
+            LOG.info(f"File {pon_sym_file} exists, skipping")
+
 
 @click.command("pon",
                short_help="Create a sample config file for PON analysis")
@@ -55,15 +65,11 @@ LOG = logging.getLogger(__name__)
 @click.option("--analysis-dir",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
-              help="Root analysis path directory."
-              )
-@click.option("-n",
-              "--normal",
+              help="Root analysis path directory.")
+@click.option("--fastq-path",
               type=click.Path(exists=True, resolve_path=True),
               required=True,
-              multiple=True,
-              help="List of fastq files for panel of normal samples")
-@click.option("--normal-sample-name", help="Normal sample name")
+              help="Path directing to list of PON fastq samples.")
 @click.option("-g",
               "--genome-version",
               default="hg19",
@@ -71,31 +77,18 @@ LOG = logging.getLogger(__name__)
               help=("Genome version to prepare reference. Path to genome"
                     "will be <outdir>/genome_version"))
 @click.pass_context
-def pon_config(context, case_id,analysis_dir, normal, 
-		normal_sample_name, panel_bed, quality_trim,
-		umi, umi_trim_length, adapter_trim,
-		genome_version, balsamic_cache):
+def pon_config(context, case_id, analysis_dir, fastq_path, panel_bed,
+               quality_trim, umi, umi_trim_length, adapter_trim,
+               genome_version, balsamic_cache):
 
-    try:
-        samples = pon_sample_dict(
-            normal=normal,
-            normal_sample_name=normal_sample_name
-        )
-    except AttributeError:
-        LOG.error(
-            f"Input fastq file name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz"
-        )
-        raise click.Abort()
-
-    reference_config = os.path.join(balsamic_cache,
-                                    balsamic_version, genome_version,
-                                    "reference.json")
+    reference_config = os.path.join(balsamic_cache, balsamic_version,
+                                    genome_version, "reference.json")
     with open(reference_config, 'r') as f:
         reference_dict = json.load(f)["reference"]
 
     config_collection_dict = PonBalsamicConfigModel(
         QC={
-	    "adapter_trim": adapter_trim,
+            "adapter_trim": adapter_trim,
             "quality_trim": quality_trim,
             "umi_trim": umi if panel_bed else False,
             "umi_trim_length": umi_trim_length,
@@ -107,12 +100,12 @@ def pon_config(context, case_id,analysis_dir, normal,
             "sequencing_type": "targeted" if panel_bed else "wgs"
         },
         reference=reference_dict,
-        singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
-        samples=samples,
+        singularity=os.path.join(balsamic_cache, balsamic_version,
+                                 "containers"),
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH),
-	panel={
+        panel={
             "capture_kit": panel_bed
         } if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)
@@ -123,10 +116,9 @@ def pon_config(context, case_id,analysis_dir, normal,
                exist_ok=True)
     LOG.info("fastq directories created successfully")
 
-    create_fastq_symlink(
-        casefiles=normal,
-        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
-    )
+    create_pon_fastq_symlink(
+        pon_fastqs=fastq_path,
+        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]))
     LOG.info(f"fastqs symlinks generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + "_PON" + ".json")
@@ -139,5 +131,6 @@ def pon_config(context, case_id,analysis_dir, normal,
         LOG.info(f"BALSAMIC PON workflow has been configured successfully!")
     except ValueError:
         LOG.error(
-            f'BALSAMIC PON dag graph generation failed - {config_collection_dict["analysis"]["dag"]}')
+            f'BALSAMIC PON dag graph generation failed - {config_collection_dict["analysis"]["dag"]}'
+        )
         raise click.Abort()
