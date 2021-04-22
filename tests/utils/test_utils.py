@@ -729,8 +729,8 @@ def test_convert_deliverables_tags():
                 "/home/proj/stage/cancer/dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "S1-R,read2,quality-trimmed-fastq-read2,tumor",
-                "id": "tumor",
+                "tag": "S1-R,read2,quality-trimmed-fastq-read2",
+                "id": "S1_R",
                 "format": "fastq.gz",
             },
             {
@@ -738,7 +738,7 @@ def test_convert_deliverables_tags():
                 "/home/proj/stage/cancer/dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "json,quality-trimmed-fastq-json,tumor",
+                "tag": "S1-R,json,quality-trimmed-fastq-json",
                 "id": "S1_R",
                 "format": "json",
             },
@@ -764,7 +764,7 @@ def test_convert_deliverables_tags():
     for file in delivery_json["files"]:
         assert file["id"] == "ACC1"
         assert "ACC1" in file["tag"]
-        assert "tumor" in file["tag"]
+        assert "tumor" not in file["tag"]
 
 
 def test_check_executable_exists():
