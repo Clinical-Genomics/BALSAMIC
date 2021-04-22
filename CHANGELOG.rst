@@ -9,7 +9,11 @@ Fixed:
 Changed:
 ^^^^^^
 
-*  TNscope calculated AF values are fetched and written to AFtable.txt.
+* TNscope calculated AF values are fetched and written to AFtable.txt.
+* tabix updated to 0.2.6
+* fastp updated to 0.20.1
+* samtools updated to 1.12
+* bedtools updated to 2.30.0
 
 
 [7.1.7]

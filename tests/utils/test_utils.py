@@ -128,7 +128,7 @@ def test_get_bioinfo_tools_list():
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert set(bioinfo_tools_dict["samtools"]) == set(["1.11", "1.9"])
+    assert set(bioinfo_tools_dict["samtools"]) == set(["1.12", "1.11", "1.9"])
 
 
 def test_get_delivery_id():
@@ -726,22 +726,32 @@ def test_convert_deliverables_tags():
         "files": [
             {
                 "path":
-                "/home/proj/stage/cancer/dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
+                "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "S1-R,read2,quality-trimmed-fastq-read2",
+                "tag": "read2,quality-trimmed-fastq-read2,tumor",
                 "id": "S1_R",
                 "format": "fastq.gz",
             },
             {
                 "path":
-                "/home/proj/stage/cancer/dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
+                "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "S1-R,json,quality-trimmed-fastq-json",
+                "tag": "S1_R,json,quality-trimmed-fastq-json",
                 "id": "S1_R",
                 "format": "json",
             },
+            {
+                "path":
+                "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S2_R_fastp.json",
+                "path_index": [],
+                "step": "fastp",
+                "tag": "ACC1,json,quality-trimmed-fastq-json",
+                "id": "tumor",
+                "format": "json",
+            },
+
         ]
     }
 
@@ -761,9 +771,10 @@ def test_convert_deliverables_tags():
         delivery_json=delivery_json, sample_config_dict=sample_config_dict)
 
     # Prefix strings should be replaced with sample name
-    for file in delivery_json["files"]:
-        assert file["id"] == "ACC1"
-        assert "ACC1" in file["tag"]
+    for delivery_file in delivery_json["files"]:
+        assert delivery_file["id"] == "ACC1"
+        assert "ACC1" in delivery_file["tag"]
+        assert "tumor" not in delivery_file["tag"]
 
 
 def test_check_executable_exists():
