@@ -18,3 +18,4 @@ COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml ./${CONTAINER_
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.sh ./${CONTAINER_NAME}.sh
 
 RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME} && conda clean --all --yes 
+RUN chown root /mnt
