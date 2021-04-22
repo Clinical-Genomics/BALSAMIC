@@ -1,3 +1,24 @@
+[7.1.9]
+-------
+
+
+Changed:
+^^^^^^^^
+
+* only pass variants are not part of delivery anymore
+* delivery tag file ids are properly matched with sample_name
+* tabix updated to 0.2.6
+* fastp updated to 0.20.1
+* samtools updated to 1.12
+* bedtools updated to 2.30.0
+
+Removed:
+^^^^^^^^
+
+* sentieon-dedup rule from delivery
+* Removed all pre filter pass from delivery
+
+
 [7.1.8]
 -------
 
@@ -7,14 +28,9 @@ Fixed:
 * Target coverage (Picard HsMetrics) for UMI files is now correctly calculated.
 
 Changed:
-^^^^^^
+^^^^^^^^
 
 * TNscope calculated AF values are fetched and written to AFtable.txt.
-* tabix updated to 0.2.6
-* fastp updated to 0.20.1
-* samtools updated to 1.12
-* bedtools updated to 2.30.0
-
 
 [7.1.7]
 -------
