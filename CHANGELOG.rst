@@ -1,6 +1,14 @@
 [7.1.9]
 -------
 
+Fixed:
+^^^^^^
+
+* Bug in `ngs_filter` rule set for tumor-only WGS
+
+[7.1.9]
+-------
+
 
 Changed:
 ^^^^^^^^
