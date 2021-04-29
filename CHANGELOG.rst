@@ -4,7 +4,7 @@
 Fixed:
 ^^^^^^
 
-* Bug in `ngs_filter` rule set for tumor-only WGS
+* Bug in ``ngs_filter`` rule set for tumor-only WGS
 
 [7.1.9]
 -------
