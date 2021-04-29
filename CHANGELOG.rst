@@ -7,6 +7,11 @@ Added:
 * Changelog reminder workflow to Github
 * Snakemake workflow for created PON reference
 
+Changed:
+^^^^^^^^
+
+* Expanded multiqc result search dir to whole analysis dir
+
 
 [7.1.9]
 -------
@@ -28,11 +33,6 @@ Removed:
 * sentieon-dedup rule from delivery
 * Removed all pre filter pass from delivery
 
-
-Changed:
-^^^^^^^^
-
-* Expanded multiqc result search dir to whole analysis dir
 
 [7.1.8]
 -------
