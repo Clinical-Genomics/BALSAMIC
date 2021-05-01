@@ -5,6 +5,7 @@ Fixed:
 ^^^^^^
 
 * Bug in ``ngs_filter`` rule set for tumor-only WGS
+* Missing delivery of tumor only WGS filter
 
 [7.1.9]
 -------
