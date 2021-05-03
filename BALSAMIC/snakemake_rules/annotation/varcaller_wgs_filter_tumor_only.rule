@@ -7,7 +7,7 @@ rule ngs_filter_tnscope:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz",
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -28,7 +28,7 @@ rule ngs_filter_tnscope:
     """
 source activate {params.conda};
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
-bcftools filter -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
+bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
@@ -46,7 +46,7 @@ rule ngs_filter_tnhaplotyper:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.filtered.vcf.gz",
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper_isec.filtered.vcf.gz",
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -66,7 +66,7 @@ rule ngs_filter_tnhaplotyper:
     """
 source activate {params.conda};
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
-bcftools filter -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
+bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
@@ -80,10 +80,11 @@ tabix -p vcf -f {output.vcf_filtered};
 
 rule ngs_filter_intersect:
   input:
-    tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
-    tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.filtered.vcf.gz"
+    tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz",
+    tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper_isec.filtered.vcf.gz"
   output:
-    vcf_name = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz"
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz",
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     vcf_dir = vep_dir + "sentieon_callers_intersect",
@@ -97,8 +98,10 @@ rule ngs_filter_intersect:
   shell:
     """
 source activate {params.conda};
-bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z -f PASS;
-cp {params.vcf_dir}/0002.vcf.gz {output.vcf_name};
-tabix -p vcf -f {output.vcf_name};
+bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z;
+cp {params.vcf_dir}/0002.vcf.gz {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_pass};
 rm -r {params.vcf_dir}         
     """

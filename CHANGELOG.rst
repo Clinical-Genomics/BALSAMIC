@@ -8,6 +8,15 @@ Added:
 * Snakemake workflow for created PON reference
 * Balsamic cli config command(pon) for creating json for PON analysis
 
+[7.1.10]
+-------
+
+Fixed:
+^^^^^^
+
+* Bug in ``ngs_filter`` rule set for tumor-only WGS
+* Missing delivery of tumor only WGS filter
+
 [7.1.9]
 -------
 
