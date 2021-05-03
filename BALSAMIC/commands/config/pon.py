@@ -7,24 +7,13 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.cli import (create_fastq_symlink, generate_graph,
-                                get_bioinfo_tools_version, pon_sample_dict)
+                                get_bioinfo_tools_version, create_pon_fastq_symlink)
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
 from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH,
                                       BIOINFO_TOOL_ENV)
 
 LOG = logging.getLogger(__name__)
-
-
-def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
-    for fastq_name in os.listdir(pon_fastqs):
-        pon_fastq = Path(pon_fastqs, fastq_name).as_posix()
-        pon_sym_file = Path(symlink_dir, fastq_name).as_posix()
-        try:
-            LOG.info(f"Creating symlink {fastq_name} -> {pon_sym_file}")
-            os.symlink(pon_fastq, pon_sym_file)
-        except FileExistsError:
-            LOG.info(f"File {pon_sym_file} exists, skipping")
 
 
 @click.command("pon",
@@ -73,14 +62,13 @@ def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
 @click.option("-g",
               "--genome-version",
               default="hg19",
-              type=click.Choice(["hg19", "hg38"]),
+              type=click.Choice(["hg19"]),
               help=("Genome version to prepare reference. Path to genome"
                     "will be <outdir>/genome_version"))
 @click.pass_context
 def pon_config(context, case_id, analysis_dir, fastq_path, panel_bed,
                quality_trim, umi, umi_trim_length, adapter_trim,
                genome_version, balsamic_cache):
-
     reference_config = os.path.join(balsamic_cache, balsamic_version,
                                     genome_version, "reference.json")
     with open(reference_config, 'r') as f:
