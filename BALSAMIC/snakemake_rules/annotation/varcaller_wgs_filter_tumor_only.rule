@@ -4,7 +4,7 @@
 
 rule ngs_filter_tnscope:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.pass.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
@@ -28,7 +28,7 @@ rule ngs_filter_tnscope:
     """
 source activate {params.conda};
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
-bcftools filter --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
+bcftools filter -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
@@ -43,7 +43,7 @@ tabix -p vcf -f {output.vcf_filtered};
 
 rule ngs_filter_tnhaplotyper:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.pass.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.filtered.vcf.gz",
@@ -66,7 +66,7 @@ rule ngs_filter_tnhaplotyper:
     """
 source activate {params.conda};
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
-bcftools filter --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
+bcftools filter -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \

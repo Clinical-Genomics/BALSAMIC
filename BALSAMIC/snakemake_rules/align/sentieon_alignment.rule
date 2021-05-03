@@ -45,7 +45,6 @@ rule sentieon_dedup:
         metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        housekeeper_id = {"id": "{sample}", "tags": "scout"},
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
     threads: get_threads(cluster_config, 'sentieon_dedup')
