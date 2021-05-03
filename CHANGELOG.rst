@@ -7,11 +7,20 @@ Added:
 * Changelog reminder workflow to Github
 * Snakemake workflow for created PON reference
 
+
 Changed:
 ^^^^^^^^
 
 * Expanded multiqc result search dir to whole analysis dir
 
+[7.1.10]
+-------
+
+Fixed:
+^^^^^^
+
+* Bug in ``ngs_filter`` rule set for tumor-only WGS
+* Missing delivery of tumor only WGS filter
 
 [7.1.9]
 -------
