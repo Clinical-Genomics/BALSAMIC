@@ -442,28 +442,6 @@ def tumor_only_umi_config(tmpdir_factory, sample_fastq, balsamic_cache,
 
 
 @pytest.fixture(scope="session")
-def pon_config(tmpdir_factory, sample_fastq, balsamic_cache, analysis_dir,
-               pon_fastq_path, panel_bed_file):
-    """
-    invokes balsamic config for list of normal samples in 
-    fastq_path to create pon sample config
-    """
-    case_id = "sample_pon"
-
-    runner = CliRunner()
-    runner.invoke(
-        cli,
-        [
-            "config", "pon", "-p", panel_bed_file, "--case-id", case_id,
-            "--analysis-dir", analysis_dir, "--fastq_path", pon_fastq_path,
-            "--balsamic-cache", balsamic_cache
-        ],
-    )
-
-    return Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
-
-
-@pytest.fixture(scope="session")
 def sample_config():
     """
     sample config dict to test workflow utils
