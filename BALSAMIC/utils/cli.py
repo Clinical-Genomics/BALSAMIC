@@ -479,17 +479,6 @@ def get_sample_dict(tumor: str,
     return samples
 
 
-def pon_sample_dict(normal: str,
-                    normal_sample_name: str = None) -> dict:
-    """Concatenates sample dicts for all provided files"""
-    samples = {}
-    for sample in normal:
-        key, val = get_sample_names(sample, "normal")
-        samples[key] = val
-        samples[key]["sample_name"] = normal_sample_name
-    return samples
-
-
 def get_sample_names(filename, sample_type):
     """Creates a dict with sample prefix, sample type, and readpair suffix"""
     file_str = validate_fastq_pattern(filename)
@@ -616,3 +605,14 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
                                                   "w") as jobid_out:
         jobid_list = jobid_in.read().splitlines()
         yaml.dump({case_name: jobid_list}, jobid_out)
+
+
+def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
+    for fastq_name in os.listdir(pon_fastqs):
+        pon_fastq = Path(pon_fastqs, fastq_name).as_posix()
+        pon_sym_file = Path(symlink_dir, fastq_name).as_posix()
+        try:
+            LOG.info(f"Creating symlink {fastq_name} -> {pon_sym_file}")
+            os.symlink(pon_fastq, pon_sym_file)
+        except FileExistsError:
+            LOG.info(f"File {pon_sym_file} exists, skipping")
