@@ -531,13 +531,15 @@ class UMIParamsTNscope(BaseModel):
         algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
         disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
         filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: float (required); Minimum tumorLOD value
-        error_rate: int (required); allow error-rate to consider in calling
+        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
+        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
+	error_rate: int (required); allow error-rate to consider in calling
         prunefactor: int (required); pruning factor in the kmer graph
     """
 
     algo: str
-    min_tumorLOD: float
+    init_tumorLOD: float
+    min_tumorLOD: int
     error_rate: int
     prunefactor: int
     disable_detect: str
