@@ -6,6 +6,7 @@ Added:
 
 * Changelog reminder workflow to Github
 * Snakemake workflow for created PON reference
+* Added tumor lod option for passing tnscope-umi final variants
 
 [7.1.10]
 -------
