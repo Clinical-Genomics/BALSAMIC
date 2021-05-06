@@ -573,7 +573,7 @@ class UMIworkflowConfig(BaseModel):
 	umiextract: params defined in the rule sentieon_umiextract
 	consensuscall: params defined in the rule sentieon_consensuscall
 	tnscope: params defined in the rule sentieon_tnscope_umi
-    vardict: params defined in the rule vardict_umi
+	vardict: params defined in the rule vardict_umi
 	vep: params defined in the rule vep_umi
     """
     common: UMIParamsCommon
