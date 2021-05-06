@@ -336,7 +336,8 @@ def test_umiparams_tnscope():
     #GIVEN tnscope params
     test_tnscope_params = {
         "algo": "algoname",
-        "min_tumorLOD": 6,
+        "init_tumorLOD": 0.5,
+	"min_tumorLOD": 6,
         "error_rate": 5,
         "prunefactor": 3,
         "disable_detect": "abc"
@@ -347,6 +348,7 @@ def test_umiparams_tnscope():
 
     #THEN assert values
     assert test_tnscope_params_built.algo == "algoname"
+    assert test_tnscope_params_built.init_tumorLOD == 0.5
     assert test_tnscope_params_built.min_tumorLOD == 6
     assert test_tnscope_params_built.error_rate == 5
     assert test_tnscope_params_built.prunefactor == 3

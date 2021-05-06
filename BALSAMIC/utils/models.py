@@ -61,8 +61,8 @@ class VarCallerFilter(BaseModel):
     DP: Optional[VCFAttributes]
     pop_freq: VCFAttributes
     strand_reads: Optional[VCFAttributes]
-    qss : Optional[VCFAttributes]
-    sor : Optional[VCFAttributes]
+    qss: Optional[VCFAttributes]
+    sor: Optional[VCFAttributes]
     varcaller_name: str
     filter_type: str
     analysis_type: str
