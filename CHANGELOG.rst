@@ -7,6 +7,12 @@ Added:
 * Changelog reminder workflow to Github
 * Snakemake workflow for created PON reference
 
+
+Changed:
+^^^^^^^^
+
+* Expanded multiqc result search dir to whole analysis dir
+
 [7.1.10]
 -------
 
@@ -47,6 +53,7 @@ Fixed:
 
 Changed:
 ^^^^^^^^
+
 
 * TNscope calculated AF values are fetched and written to AFtable.txt.
 
