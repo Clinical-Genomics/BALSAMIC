@@ -30,8 +30,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     if config['analysis']['analysis_type'] == "paired":
         multiqc_input.append(bam_dir+"normal.merged.recal_data.table")
 
-    # dir list
-    dir_list = [qc_dir]
 
 else:
     # fastqc metrics
@@ -55,14 +53,9 @@ else:
     multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.region.dist.txt", sample=config["samples"]))
     multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.summary.txt", sample=config["samples"]))
 
-    # dir list
-    dir_list = [bam_dir, fastqc_dir]
-
     if config["umiworkflow"]:
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         
-        dir_list = [bam_dir, fastqc_dir, umi_qc_dir]
-
 
 rule multiqc:
     input:
@@ -72,7 +65,7 @@ rule multiqc:
         json = qc_dir + "multiqc_data/multiqc_data.json",
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "multiqc"},
-        dir_list = "\n".join(dir_list),
+        dir_list = result_dir,
         qc_dir = qc_dir,
         conda = config["bioinfo_tools"].get("multiqc"),
     singularity: Path(singularity_image, config["bioinfo_tools"].get("multiqc") + ".sif").as_posix() 

@@ -8,6 +8,12 @@ Added:
 * Snakemake workflow for created PON reference
 * Balsamic cli config command(pon) for creating json for PON analysis
 
+
+Changed:
+^^^^^^^^
+
+* Expanded multiqc result search dir to whole analysis dir
+
 [7.1.10]
 -------
 
@@ -48,6 +54,7 @@ Fixed:
 
 Changed:
 ^^^^^^^^
+
 
 * TNscope calculated AF values are fetched and written to AFtable.txt.
 
