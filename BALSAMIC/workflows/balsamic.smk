@@ -342,7 +342,7 @@ if config['analysis']["analysis_type"] in ["paired", "single"]:
     LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
 
 if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs" and config["umiworkflow"]:
-    analysis_specific_results.extend(expand(vep_dir + "{vcf}.pass.balsamic_stat",
+    analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
                                             vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
