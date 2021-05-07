@@ -34,7 +34,10 @@ def test_pon_config(invoke_cli, tmp_path, balsamic_cache,
     # THEN a config should be created and exist
     assert result.exit_code == 0
     assert Path(test_analysis_dir, case_id, case_id + "_PON.json").exists()
-
+    # load json file and check if dag exists
+    pon_config = json.load(open(Path(test_analysis_dir, case_id, case_id + "_PON.json")))
+    # assert if config json dag file is created
+    assert Path(pon_config[ "analysis" ][ "dag" ]).exists()
 
 def test_pon_config_failed(invoke_cli, tmp_path, balsamic_cache,
                            panel_bed_file):
@@ -75,36 +78,6 @@ def test_create_pon_fastq_symlink(tmp_path_factory, caplog):
         assert len(list(Path(pon_symlink_to).rglob("*.fastq.gz"))) == 2
         # THEN exception triggers log message containing "skipping"
         assert "skipping" not in caplog.text
-
-
-def test_pon_dag_success(invoke_cli, tmp_path, balsamic_cache,
-                         panel_bed_file, pon_fastq_path):
-    # GIVEN a case ID, fastq files, and an analysis dir
-    case_id = "sample_pon"
-    test_analysis_dir = tmp_path / "test_analysis_dir"
-    test_analysis_dir.mkdir()
-
-    # WHEN creating a case config
-    pon_result = invoke_cli([
-        "config",
-        "pon",
-        "--case-id",
-        case_id,
-        "-p",
-        panel_bed_file,
-        "--analysis-dir",
-        test_analysis_dir,
-        "--fastq-path",
-        pon_fastq_path,
-        "--balsamic-cache",
-        balsamic_cache
-    ])
-
-    # THEN the result json should be created
-    file = Path(test_analysis_dir, case_id, case_id + "_PON.json")
-    data = json.load(open(file))
-    # assert if config json dag file is created
-    assert Path(data["analysis"]["dag"]).exists()
 
 
 def test_config_pon_graph_failed(invoke_cli, analysis_dir,
