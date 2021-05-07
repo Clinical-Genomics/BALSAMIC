@@ -556,19 +556,25 @@ def convert_deliverables_tags(delivery_json: dict,
                               sample_config_dict: dict) -> dict:
     """Replaces values of file_prefix with sample_name in deliverables dict"""
 
-    for file in delivery_json["files"]:
-        file_tags = file["tag"].split(",")
+    for delivery_file in delivery_json["files"]:
+        file_tags = delivery_file["tag"].split(",")
         for sample in sample_config_dict["samples"]:
             file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
             sample_name = sample_config_dict["samples"][sample]["sample_name"]
-            if file_prefix == file["id"]:
-                file["id"] = sample_name
+            sample_type = sample_config_dict["samples"][sample]["type"]
+            if file_prefix == delivery_file["id"]:
+                delivery_file["id"] = sample_name
                 for tag_index, tag in enumerate(file_tags):
                     if tag == file_prefix or tag == file_prefix.replace(
                             "_", "-"):
                         file_tags[tag_index] = sample_name
-                file_tags.append(sample_name)
-        file["tag"] = list(set(file_tags))
+                if sample_name not in file_tags:
+                    file_tags.append(sample_name)
+            if sample_type == delivery_file["id"]:
+                delivery_file["id"] = sample_name
+            if sample_type in file_tags:
+                file_tags.remove(sample_type)
+        delivery_file["tag"] = list(set(file_tags))
     return delivery_json
 
 
