@@ -23,9 +23,9 @@ class VCFAttributes(BaseModel):
     A value of 5 from INFO field and filter_name will be balsamic_low_tumor_ad
 
     Attributes:
-      tag_value: float
-      filter_name: str
-      field: str
+        tag_value: float
+        filter_name: str
+        field: str
     """
 
     tag_value: float
@@ -45,10 +45,10 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
-	strand_reads: VCFAttributes (optional); minimum strand specific read counts
+        strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
-	sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
-	varcaller_name: str (required); variant caller name
+        sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
+        varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
         analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
         description: str (required); comment section for description
@@ -168,12 +168,12 @@ class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
 
     Attributes:
-    
+              
         case_id : Field(required); string case identifier
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
-	    pon : panel of normal analysis
+            pon : panel of normal analysis
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
@@ -330,7 +330,7 @@ class PonBalsamicConfigModel(BaseModel):
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         singularity : Field(Path); path to singularity container of BALSAMIC
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-	bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
+        bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
         bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
     """
 
@@ -367,7 +367,7 @@ class BalsamicConfigModel(BaseModel):
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-	umiworkflow : Field(bool); whether UMI workflow to run in parallel
+        umiworkflow : Field(bool); whether UMI workflow to run in parallel
     """
 
     QC: QCModel
@@ -545,7 +545,7 @@ class UMIParamsConsensuscall(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-	filter_minreads: str (required); settings to filter consensus tags based on group size
+	    filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
@@ -561,13 +561,15 @@ class UMIParamsTNscope(BaseModel):
         algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
         disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
         filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: float (required); Minimum tumorLOD value
+        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
+        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
         error_rate: int (required); allow error-rate to consider in calling
         prunefactor: int (required); pruning factor in the kmer graph
     """
 
     algo: str
-    min_tumorLOD: float
+    init_tumorLOD: float
+    min_tumorLOD: int
     error_rate: int
     prunefactor: int
     disable_detect: str
