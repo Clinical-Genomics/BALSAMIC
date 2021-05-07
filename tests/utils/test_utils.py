@@ -215,7 +215,7 @@ def test_snakemake_local():
     # GIVEN required params
     snakemake_local = SnakeMake()
     snakemake_local.working_dir = "this_path/snakemake"
-    snakemake_local.snakefile = "worflow/variantCalling_paired"
+    snakemake_local.snakefile = "workflow/variantCalling_paired"
     snakemake_local.configfile = "sample_config.json"
     snakemake_local.run_mode = "local"
     snakemake_local.use_singularity = True
@@ -227,7 +227,7 @@ def test_snakemake_local():
 
     # THEN it will contruct the snakemake command to run
     assert isinstance(shell_command, str)
-    assert "worflow/variantCalling_paired" in shell_command
+    assert "workflow/variantCalling_paired" in shell_command
     assert "sample_config.json" in shell_command
     assert "this_path/snakemake" in shell_command
     assert "--dryrun" in shell_command
@@ -296,6 +296,7 @@ def test_get_snakefile():
         ("qc", ""),
         ("generate_ref", ""),
         ("umi", ""),
+        ("pon", "")
     ]
 
     # WHEN asking to see snakefile for paired
@@ -309,6 +310,8 @@ def test_get_snakefile():
             pipeline = "BALSAMIC/workflows/reference.smk"
         elif analysis_type == 'umi':
             pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
+        elif analysis_type == 'pon':
+            pipeline = "BALSAMIC/workflows/PON.smk"
 
         # THEN it should return the snakefile path
         # THEN assert file exists

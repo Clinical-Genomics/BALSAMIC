@@ -125,7 +125,6 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "analysis_dir": analysis_dir,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
-            "umiworkflow": umiworkflow if panel_bed else False
         },
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
@@ -139,6 +138,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
             "capture_kit": panel_bed,
             "chrom": get_panel_chrom(panel_bed),
         } if panel_bed else None,
+    	umiworkflow=umiworkflow if panel_bed else False
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("Config file generated successfully")
 
