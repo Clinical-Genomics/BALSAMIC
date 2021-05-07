@@ -534,7 +534,8 @@ umiworkflow_params = {
     },
     "tnscope": {
         "algo": "TNscope",
-        "min_tumorLOD": 0.5,
+        "min_tumorLOD": 4,
+        "init_tumorLOD": 0.5,
         "error_rate": 5,
         "prunefactor": 3,
         "disable_detect": "sv"
