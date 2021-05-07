@@ -9,7 +9,7 @@ LABEL about.description="Bioinformatic analysis pipeline for somatic mutations i
 LABEL about.version="7.1.8"
 
 ENV PATH="/opt/conda/bin/:${PATH}"
-RUN apt-get install -y bash 
+RUN apt-get install --no-install-recommends -y bash 
 
 ARG CONTAINER_NAME
 
