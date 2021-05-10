@@ -1,6 +1,11 @@
 [X.X.X]
 -------
 
+Added:
+^^^^^^
+
+* Simple test for docker container
+
 Fixed:
 ^^^^^^
 
