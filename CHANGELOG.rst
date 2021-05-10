@@ -1,3 +1,16 @@
+[X.X.X]
+-------
+
+Fixed:
+^^^^^^
+
+* Correctly version bump for Dockerfile
+
+Removed:
+^^^^^^^^
+
+* Removed unused Dockerfile releases
+
 [7.1.10]
 -------
 
