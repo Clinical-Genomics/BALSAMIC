@@ -43,3 +43,12 @@ jobs:
           tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} 
           build-args:
             CONTAINER_NAME=${{ matrix.container-name }}
+      - name: Test container
+        id: docker_test_container
+        shell: bash
+        run: |
+          docker run \
+          -i -t --rm \
+          -v $(realpath tests):/docker_tests \
+          clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
+          bash /docker_tests/dockertest.sh ${{ matrix.container-name }}
