@@ -1,2 +1,4 @@
+conda-env list
 source activate $1 
-conda env --list
+conda info --env
+conda info
