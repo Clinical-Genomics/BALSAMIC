@@ -118,8 +118,6 @@ rule all:
         check_md5 = check_md5
     log:
         os.path.join(basedir, "reference.json.log")
-    params:
-        genome_ver = genome_ver
     run:
         import json
 
@@ -139,7 +137,6 @@ rule all:
             "wgs_calling_interval": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
             "vep": input.vep,
-            "genome": params.genome_ver,
             "rankscore": input.rankscore,
         }
 

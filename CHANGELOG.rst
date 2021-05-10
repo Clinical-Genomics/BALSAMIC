@@ -10,6 +10,7 @@ Removed:
 ^^^^^^^^
 
 * Removed unused Dockerfile releases
+* Removed redundant genome version from ``reference.json``
 
 [7.1.10]
 -------
