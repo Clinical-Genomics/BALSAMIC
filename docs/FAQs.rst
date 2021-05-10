@@ -63,3 +63,30 @@ UMI workflow is validated with two datasets (SeraCare and HapMap). The Vardict f
 
 We are still investigating other UMI-aware variant callers and maybe in the future, if something works better, additional varcallers will be added to the UMIworkflow.
 
+**Git Related Questions**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**How to make a new release of balsamic**
+
+Here is the release model look like:
+
+.. figure:: images/git_releasemodel.png
+
+*Requirements:* bumpversion
+
+`pip install bumpversion`
+
+If changes are hotfixes/patches, make a release from master.
+Else make a release from develop.
+
+If decided to make a release version is from `develop`, do the following to release a balsamic new version:
+
+1. git checkout develop
+
+2. git pull
+
+3. bumpversion --verbose [major/minor/patch]
+
+4. git push
+
+5. git push --tags
