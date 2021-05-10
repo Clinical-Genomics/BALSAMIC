@@ -1,3 +1,22 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* Simple test for docker container
+
+Fixed:
+^^^^^^
+
+* Correctly version bump for Dockerfile
+
+Removed:
+^^^^^^^^
+
+* Removed unused Dockerfile releases
+* Removed redundant genome version from ``reference.json``
+
 [7.1.10]
 -------
 
