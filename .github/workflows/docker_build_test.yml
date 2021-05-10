@@ -48,7 +48,6 @@ jobs:
         shell: bash
         run: |
           docker run \
-          -i -t --rm \
           -v $(readlink -f container_tests):/container_tests \
           clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
           bash /container_tests/dockertest.sh ${{ matrix.container-name }}
