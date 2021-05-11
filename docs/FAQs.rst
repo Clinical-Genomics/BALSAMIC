@@ -81,12 +81,16 @@ Else make a release from develop.
 
 If decided to make a release version is from `develop`, do the following to release a balsamic new version:
 
-1. git checkout develop
+1. `git checkout master && git pull`
+1. `git checkout develop`
+1. `git merge master`
+1.  Fix all possible conflicts and `git push`
+1. `git checkout -B release_X.X.X`
+1. Change X.X.X version of the release in the CHANGELOG.rst
 
-2. git pull
-
-3. bumpversion --verbose [major/minor/patch]
-
-4. git push
-
-5. git push --tags
+Make a pull request to master at this point. After pull request is approved and merged into master:
+1. `git checkout master`
+1. `git pull`
+1. `bumpversion --verbose [major/minor/patch]`
+1. `git push`
+1. `git push --tags`
