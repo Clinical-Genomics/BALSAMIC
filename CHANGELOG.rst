@@ -8,7 +8,7 @@ Added:
 * Snakemake workflow for created PON reference
 * Balsamic cli config command(pon) for creating json for PON analysis
 * tumor lod option for passing tnscope-umi final variants
-* Balsamic docs includes git commands to make a balsamic release 
+* Git guide to make balsamic release in FAQ docs
 
 Changed:
 ^^^^^^^^
