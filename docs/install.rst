@@ -28,7 +28,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda activate balsamic
+    conda activate S_BALSAMIC
 
 
 
