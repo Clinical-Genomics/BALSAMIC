@@ -68,7 +68,7 @@ We are still investigating other UMI-aware variant callers and maybe in the futu
 
 **How to make a new release of balsamic**
 
-Here is the release model look like:
+Our release model looks like in the figure below:
 
 .. figure:: images/git_releasemodel.png
 
@@ -79,18 +79,20 @@ Here is the release model look like:
 If changes are hotfixes/patches, make a release from master.
 Else make a release from develop.
 
-If decided to make a release version is from `develop`, do the following to release a balsamic new version:
+If decided to make a release version from `develop`, do the following to release a balsamic new version:
 
 1. `git checkout master && git pull`
-1. `git checkout develop`
-1. `git merge master`
-1.  Fix all possible conflicts and `git push`
-1. `git checkout -B release_X.X.X`
-1. Change X.X.X version of the release in the CHANGELOG.rst
+2. `git checkout develop`
+3. `git merge master`
+4.  Fix all possible conflicts and `git push`
+5. `git checkout -B release_X.X.X`
 
-Make a pull request to master at this point. After pull request is approved and merged into master:
+Change X.X.X version of the release in the CHANGELOG.rst
+
+Make a pull request to master at this point. After pull request is approved and merge it into master:
+
 1. `git checkout master`
-1. `git pull`
-1. `bumpversion --verbose [major/minor/patch]`
-1. `git push`
-1. `git push --tags`
+2. `git pull`
+3. `bumpversion --verbose [major/minor/patch]`
+4. `git push`
+5. `git push --tags`
