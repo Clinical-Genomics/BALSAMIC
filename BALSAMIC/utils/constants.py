@@ -34,16 +34,15 @@ SENTIEON_TNSCOPE = Path(
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
-ANALYSIS_TYPES = ["paired", "single", "umi", "qc"]
+ANALYSIS_TYPES = ["paired", "single", "umi", "qc", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 
 # Variantcaller parameters
 VARCALL_PARAMS = {
-"tnscope":
-{
-"tumor": "--min_init_tumor_lod 1.0 --min_tumor_lod 8",
-"normal": "--min_init_normal_lod 0.5 --min_normal_lod 1.0",
-}
+    "tnscope": {
+        "tumor": "--min_init_tumor_lod 1.0 --min_tumor_lod 8",
+        "normal": "--min_init_normal_lod 0.5 --min_normal_lod 1.0",
+    }
 }
 # Configuration of VCF settings
 VCF_DICT = {
@@ -213,24 +212,28 @@ SENTIEON_VARCALL_SETTINGS = {
         "field": "INFO"
     },
     "qss": {
-	"tag_value": 20 ,
-	"filter_name": "balsamic_low_quality_scores",
-	"field": "FORMAT"
+        "tag_value": 20,
+        "filter_name": "balsamic_low_quality_scores",
+        "field": "FORMAT"
     },
     "strand_reads": {
-	"tag_value": 0 ,
-	"filter_name": "balsamic_low_strand_read_counts",
-	"field": "FORMAT"
+        "tag_value": 0,
+        "filter_name": "balsamic_low_strand_read_counts",
+        "field": "FORMAT"
     },
     "sor": {
-	"tag_value": 3,
-	"filter_name": "balsamic_high_strand_oddsratio",
-	"field": "INFO"
+        "tag_value": 3,
+        "filter_name": "balsamic_high_strand_oddsratio",
+        "field": "INFO"
     },
-    "varcaller_name": "sentieon",
-    "filter_type": "general",
-    "analysis_type": "tumor_only",
-    "description": "General purpose filters used for filtering tnscope and tnhaplotyper"
+    "varcaller_name":
+    "sentieon",
+    "filter_type":
+    "general",
+    "analysis_type":
+    "tumor_only",
+    "description":
+    "General purpose filters used for filtering tnscope and tnhaplotyper"
 }
 
 # reference related constants
@@ -367,6 +370,15 @@ REFERENCE_FILES = {
             "output_file": "cancer_rank_model_-v0.1-.ini",
             "output_path": "genome"
         },
+        "access_regions": {
+            "url":
+            "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "access_5kb_hg38.txt",
+            "output_path": "genome"
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -493,6 +505,15 @@ REFERENCE_FILES = {
             "output_file": "cancer_rank_model_-v0.1-.ini",
             "output_path": "genome"
         },
+        "access_regions": {
+            "url":
+            "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "access_5kb_hg19.txt",
+            "output_path": "genome"
+        },
     }
 }
 
@@ -513,7 +534,8 @@ umiworkflow_params = {
     },
     "tnscope": {
         "algo": "TNscope",
-        "min_tumorLOD": 0.5,
+        "min_tumorLOD": 4,
+        "init_tumorLOD": 0.5,
         "error_rate": 5,
         "prunefactor": 3,
         "disable_detect": "sv"

@@ -31,22 +31,16 @@ def invoke_cli(cli_runner):
 def config_files():
     """ dict: path of the config files """
     return {
-        "sample":
-        "BALSAMIC/config/sample.json",
-        "analysis_paired":
-        "BALSAMIC/config/analysis_paired.json",
-        "cluster_json":
-        "BALSAMIC/config/cluster.json",
-        "analysis_paired_umi":
-        "BALSAMIC/config/analysis_paired_umi.json",
-        "analysis_single":
-        "BALSAMIC/config/analysis_single.json",
-        "analysis_single_umi":
-        "BALSAMIC/config/analysis_single_umi.json",
-        "panel_bed_file":
-        "tests/test_data/references/panel/panel.bed",
+        "sample": "BALSAMIC/config/sample.json",
+        "analysis_paired": "BALSAMIC/config/analysis_paired.json",
+        "cluster_json": "BALSAMIC/config/cluster.json",
+        "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
+        "analysis_single": "BALSAMIC/config/analysis_single.json",
+        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
+        "panel_bed_file": "tests/test_data/references/panel/panel.bed",
         "background_variant_file":
-        "tests/test_data/references/panel/background_variants.txt"
+        "tests/test_data/references/panel/background_variants.txt",
+        "pon_fastq_path": "tests/test_data/fastq/",
     }
 
 
@@ -54,24 +48,47 @@ def config_files():
 def reference():
     """ reference json model """
     return {
-    "reference": {
-        "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
-        "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-        "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-        "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
-        "1kg_known_indel": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
-        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
-        "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-        "vep": "tests/test_data/references/vep/",
-        "refflat": "tests/test_data/references/genome/refseq.flat",
-        "refGene": "tests/test_data/references/genome/refGene.txt",
-        "wgs_calling_interval": "tests/test_data/references/genome/wgs_calling_regions.v1",
-        "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
-        "exon_bed": "tests/test_data/references/genome/refseq.flat.bed",
-        "rankscore": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
+        "reference": {
+            "reference_genome":
+            "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+            "dbsnp":
+            "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+            "1kg_snps_all":
+            "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+            "1kg_snps_high":
+            "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+            "1kg_known_indel":
+            "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
+            "mills_1kg":
+            "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+            "gnomad_variant":
+            "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "cosmic":
+            "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+            "vep":
+            "tests/test_data/references/vep/",
+            "refflat":
+            "tests/test_data/references/genome/refseq.flat",
+            "refGene":
+            "tests/test_data/references/genome/refGene.txt",
+            "wgs_calling_interval":
+            "tests/test_data/references/genome/wgs_calling_regions.v1",
+            "genome_chrom_size":
+            "tests/test_data/references/genome/hg19.chrom.sizes",
+            "exon_bed":
+            "tests/test_data/references/genome/refseq.flat.bed",
+            "rankscore":
+            "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
+            "access_regions":
+            "tests/test_data/references/genome/access-5k-mappable.hg19.bed"
+        }
     }
-}
+
+
+@pytest.fixture(scope="session")
+def pon_fastq_path():
+    return "tests/test_data/fastq/"
+
 
 @pytest.fixture(scope="session")
 def panel_bed_file():
@@ -163,10 +180,10 @@ def balsamic_cache(tmp_path_factory, reference):
     """
 
     cache_dir = tmp_path_factory.mktemp("balsmic_coche")
-  
+
     cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
     cache_container.mkdir(parents=True, exist_ok=True)
-    cache_container_example = cache_container / "example.sif" 
+    cache_container_example = cache_container / "example.sif"
     cache_container_example.touch()
 
     cache_reference = cache_dir / balsamic_version / "hg19"
@@ -211,8 +228,8 @@ ls -l # dummy command
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        balsamic_cache, panel_bed_file,
-                        sentieon_license, sentieon_install_dir):
+                        balsamic_cache, panel_bed_file, sentieon_license,
+                        sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -266,8 +283,9 @@ def fixture_config_helpers():
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, balsamic_cache,
-                            sentieon_license, sentieon_install_dir):
+def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                            balsamic_cache, sentieon_license,
+                            sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -304,9 +322,9 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, balsam
 
 
 @pytest.fixture(scope="session")
-def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache, 
-                      analysis_dir, panel_bed_file,
-                      sentieon_license, sentieon_install_dir):
+def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache,
+                      analysis_dir, panel_bed_file, sentieon_license,
+                      sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -347,8 +365,9 @@ def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache,
 
 
 @pytest.fixture(scope="session")
-def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir, balsamic_cache,
-                          sentieon_license, sentieon_install_dir):
+def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
+                          balsamic_cache, sentieon_license,
+                          sentieon_install_dir):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -402,9 +421,18 @@ def tumor_only_umi_config(tmpdir_factory, sample_fastq, balsamic_cache,
         runner.invoke(
             cli,
             [
-                "config", "case", "-p", panel_bed_file,
-                "--background-variants", background_variant_file, "-t", tumor,
-                "--case-id", case_id, "--analysis-dir", analysis_dir,
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "--background-variants",
+                background_variant_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
                 "--balsamic-cache",
                 balsamic_cache,
             ],
@@ -430,18 +458,26 @@ def sample_config():
             "umi_trim_length": "5",
         },
         "analysis": {
-            "case_id": "id1",
-            "analysis_type": "paired",
-            "analysis_dir": "tests/test_data/",
-            "fastq_path": "tests/test_data/id1/fastq/",
-            "script": "tests/test_data/id1/scripts/",
-            "log": "tests/test_data/id1/logs/",
-            "result": "tests/test_data/id1/analysis/",
-            "config_creation_date": "yyyy-mm-dd xx",
-            "BALSAMIC_version": "2.9.8",
+            "case_id":
+            "id1",
+            "analysis_type":
+            "paired",
+            "analysis_dir":
+            "tests/test_data/",
+            "fastq_path":
+            "tests/test_data/id1/fastq/",
+            "script":
+            "tests/test_data/id1/scripts/",
+            "log":
+            "tests/test_data/id1/logs/",
+            "result":
+            "tests/test_data/id1/analysis/",
+            "config_creation_date":
+            "yyyy-mm-dd xx",
+            "BALSAMIC_version":
+            "2.9.8",
             "dag":
             "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
-            "umiworkflow": "true"
         },
         "vcf": {
             "manta": {
@@ -505,6 +541,7 @@ def sample_config():
                 "readpair_suffix": ["1", "2"],
             },
         },
+        "umiworkflow": "true"
     }
 
     return sample_config

@@ -23,9 +23,9 @@ class VCFAttributes(BaseModel):
     A value of 5 from INFO field and filter_name will be balsamic_low_tumor_ad
 
     Attributes:
-      tag_value: float
-      filter_name: str
-      field: str
+        tag_value: float
+        filter_name: str
+        field: str
     """
 
     tag_value: float
@@ -45,10 +45,10 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
-	strand_reads: VCFAttributes (optional); minimum strand specific read counts 
+        strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
-	sor: VCFAttributes (optional); minimum symmetrical log-odds ratio  
-	varcaller_name: str (required); variant caller name
+        sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
+        varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
         analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
         description: str (required); comment section for description
@@ -61,8 +61,8 @@ class VarCallerFilter(BaseModel):
     DP: Optional[VCFAttributes]
     pop_freq: VCFAttributes
     strand_reads: Optional[VCFAttributes]
-    qss : Optional[VCFAttributes]
-    sor : Optional[VCFAttributes]
+    qss: Optional[VCFAttributes]
+    sor: Optional[VCFAttributes]
     varcaller_name: str
     filter_type: str
     analysis_type: str
@@ -168,30 +168,28 @@ class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
 
     Attributes:
-    
+              
         case_id : Field(required); string case identifier
-        analysis_type : Field(required); string literal [single, paired]
+        analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
+            pon : panel of normal analysis
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
         analysis_dir : Field(required); existing path where to save files
-        umiworkflow : Field(bool); whether UMI workflow to run parallely 
-
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
         log : Field(optional); Path where logs will be saved
         result : Field(optional); Path where BALSAMIC output will be stored
         benchmark : Field(optional); Path where benchmark report will be stored
         dag : Field(optional); Path where DAG graph of workflow will be stored
-
         BALSAMIC_version  : Field(optional); Current version of BALSAMIC
         config_creation_date  : Field(optional); Timestamp when config was created
 
     Raises:
         ValueError:
-            When analysis_type is set to any value other than [single, paired, qc]
+            When analysis_type is set to any value other than [single, paired, qc, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
     """
 
@@ -207,7 +205,6 @@ class AnalysisModel(BaseModel):
     dag: Optional[FilePath]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
-    umiworkflow: bool
 
     class Config:
         validate_all = True
@@ -324,21 +321,53 @@ class PanelModel(BaseModel):
         return Path(value).resolve().as_posix()
 
 
+class PonBalsamicConfigModel(BaseModel):
+    """Summarizes config models in preparation for export
+
+    Attributes:
+        QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
+        reference : Field(Dict); dictionary containing paths to reference genome files
+        panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
+        singularity : Field(Path); path to singularity container of BALSAMIC
+        rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+        bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
+        bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
+    """
+
+    QC: QCModel
+    analysis: AnalysisModel
+    reference: Dict[str, Path]
+    singularity: DirectoryPath
+    bioinfo_tools: dict
+    bioinfo_tools_version: dict
+    panel: Optional[PanelModel]
+
+    @validator("reference")
+    def abspath_as_str(cls, value):
+        for k, v in value.items():
+            value[k] = Path(v).resolve().as_posix()
+        return value
+
+    @validator("singularity")
+    def transform_path_to_dict(cls, value):
+        return {"image": Path(value).resolve().as_posix()}
+
+
 class BalsamicConfigModel(BaseModel):
     """Summarizes config models in preparation for export 
     
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
-        vcf : Field(VCFmodel); variables relevand for variant calling pipeline
+        vcf : Field(VCFmodel); variables relevant for variant calling pipeline
         samples : Field(Dict); dictionary containing samples submitted for analysis
-        reference : Field(Dict); dictionary containign paths to reference genome files
+        reference : Field(Dict); dictionary containing paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
         bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-
+        umiworkflow : Field(bool); whether UMI workflow to run in parallel
     """
 
     QC: QCModel
@@ -351,6 +380,7 @@ class BalsamicConfigModel(BaseModel):
     bioinfo_tools: dict
     bioinfo_tools_version: dict
     panel: Optional[PanelModel]
+    umiworkflow: bool
 
     @validator("reference")
     def abspath_as_str(cls, value):
@@ -435,7 +465,7 @@ class ReferenceMeta(BaseModel):
     This class defines a meta for various reference files. Only reference_genome is mandatory.
 
     Attributes:
-      basedir: str for basedirectory which will be appended to all ReferenceUrlsModel fields
+      basedir: str for base directory which will be appended to all ReferenceUrlsModel fields
       reference_genome: ReferenceUrlsModel. Required field for reference genome fasta file
       dbsnp: ReferenceUrlsModel. Optional field for dbSNP vcf file
       hc_vcf_1kg: ReferenceUrlsModel. Optional field for high confidence 1000Genome vcf
@@ -449,6 +479,7 @@ class ReferenceMeta(BaseModel):
       refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
       refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
       rankscore: ReferenceUrlsModel. Optional rankscore model
+      access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
     """
 
     basedir: str = ""
@@ -466,6 +497,7 @@ class ReferenceMeta(BaseModel):
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
     rankscore: Optional[ReferenceUrlsModel]
+    access_regions: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):
@@ -513,7 +545,7 @@ class UMIParamsConsensuscall(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-	filter_minreads: str (required); settings to filter consensus tags based on group size
+	    filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
@@ -529,13 +561,15 @@ class UMIParamsTNscope(BaseModel):
         algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
         disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
         filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: float (required); Minimum tumorLOD value
+        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
+        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
         error_rate: int (required); allow error-rate to consider in calling
         prunefactor: int (required); pruning factor in the kmer graph
     """
 
     algo: str
-    min_tumorLOD: float
+    init_tumorLOD: float
+    min_tumorLOD: int
     error_rate: int
     prunefactor: int
     disable_detect: str
@@ -569,7 +603,7 @@ class UMIworkflowConfig(BaseModel):
 	umiextract: params defined in the rule sentieon_umiextract
 	consensuscall: params defined in the rule sentieon_consensuscall
 	tnscope: params defined in the rule sentieon_tnscope_umi
-    	vardict: params defined in the rule vardict_umi
+	vardict: params defined in the rule vardict_umi
 	vep: params defined in the rule vep_umi
     """
     common: UMIParamsCommon

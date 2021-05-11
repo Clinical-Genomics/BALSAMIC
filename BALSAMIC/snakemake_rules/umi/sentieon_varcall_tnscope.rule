@@ -21,6 +21,7 @@ rule sentieon_tnscope_umi:
         algo = paramsumi.tnscope.algo,
         disable_detect = paramsumi.tnscope.disable_detect,
         tumor_lod = paramsumi.tnscope.min_tumorLOD,
+        init_tumor_lod = paramsumi.tnscope.init_tumorLOD,
         error_rate = paramsumi.tnscope.error_rate,
         prune_factor = paramsumi.tnscope.prunefactor,
         tumor = "TUMOR"
@@ -39,7 +40,8 @@ rule sentieon_tnscope_umi:
 --dbsnp {input.dbsnp} \
 --min_tumor_allele_frac {params.tumor_af} \
 --filter_t_alt_frac {params.tumor_af} \
---min_init_tumor_lod {params.tumor_lod} \
+--min_init_tumor_lod {params.init_tumor_lod} \
+--min_tumor_lod {params.tumor_lod} \
 --disable_detector {params.disable_detect} \
 --max_error_per_read {params.error_rate} \
 --pcr_indel_model NONE \

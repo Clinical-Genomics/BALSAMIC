@@ -1,9 +1,19 @@
-[X.X.X]
+7.2.0
 -------
 
 Added:
 ^^^^^^
 
+* Changelog reminder workflow to Github
+* Snakemake workflow for created PON reference
+* Balsamic cli config command(pon) for creating json for PON analysis
+* tumor lod option for passing tnscope-umi final variants
+* Git guide to make balsamic release in FAQ docs
+
+Changed:
+^^^^^^^^
+
+* Expanded multiqc result search dir to whole analysis dir
 * Simple test for docker container
 
 Fixed:
@@ -57,6 +67,7 @@ Fixed:
 
 Changed:
 ^^^^^^^^
+
 
 * TNscope calculated AF values are fetched and written to AFtable.txt.
 

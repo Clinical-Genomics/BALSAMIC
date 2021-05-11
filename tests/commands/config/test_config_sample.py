@@ -6,8 +6,6 @@ from unittest import mock
 import graphviz
 
 from pathlib import Path
-from click.testing import CliRunner
-from BALSAMIC.commands.base import cli
 
 
 def test_tumor_normal_config(invoke_cli, sample_fastq, tmp_path,
@@ -108,23 +106,23 @@ def test_dag_graph_success(tumor_normal_wgs_config, tumor_only_config,
         open(tumor_only_umi_config))["analysis"]["dag"]).exists()
 
 
-def test_tumor_only_config_bad_filename(
+def test_config_bad_filename(
         invoke_cli,
         tmp_path_factory,
         analysis_dir,
         panel_bed_file,
         balsamic_cache,
 ):
-
     # GIVEN existing fastq file with wrong naming convention
     faulty_fastq_dir = tmp_path_factory.mktemp("error_fastq")
-    Path(faulty_fastq_dir / "error.fastq.gz").touch()
+    fastq_file_name_tumor = "tumor_error.fastq.gz"
+    Path(faulty_fastq_dir / fastq_file_name_tumor).touch()
 
-    case_id = "faulty_tumor"
-    tumor = Path(faulty_fastq_dir / "error.fastq.gz").as_posix()
+    case_id1 = "faulty_tumor"
+    tumor = Path(faulty_fastq_dir / fastq_file_name_tumor).as_posix()
 
     # Invoke CLI command using file as argument
-    result = invoke_cli(
+    case_result = invoke_cli(
         [
             "config",
             "case",
@@ -133,7 +131,7 @@ def test_tumor_only_config_bad_filename(
             "-p",
             panel_bed_file,
             "--case-id",
-            case_id,
+            case_id1,
             "--analysis-dir",
             analysis_dir,
             "--balsamic-cache",
@@ -141,8 +139,9 @@ def test_tumor_only_config_bad_filename(
         ],
     )
 
+
     # THEN run should abort
-    assert result.exit_code == 1
+    assert case_result.exit_code == 1
 
 
 def test_run_without_permissions(
@@ -200,15 +199,16 @@ def test_tumor_only_umi_config_background_file(
     assert Path(background_variant_file).exists()
 
 
-def test_config_case_graph_failed(invoke_cli, sample_fastq, analysis_dir, balsamic_cache, panel_bed_file):
+def test_config_graph_failed(invoke_cli, sample_fastq,
+                                  analysis_dir, balsamic_cache,
+                                  panel_bed_file):
     # GIVEN an analysis config 
     case_id = "sample_tumor_only"
     tumor = sample_fastq["tumor"]
 
-
     with mock.patch.object(graphviz, 'Source') as mocked:
         mocked.return_value = None
-        result = invoke_cli(
+        case_result = invoke_cli(
             [
                 "config",
                 "case",
@@ -225,4 +225,5 @@ def test_config_case_graph_failed(invoke_cli, sample_fastq, analysis_dir, balsam
             ],
         )
 
-    assert result.exit_code == 1
+    assert case_result.exit_code == 1
+
