@@ -26,19 +26,17 @@ Snakemake cli given that there is a proper config file created.
    * - Source code
      - https://github.com/Clinical-Genomics/BALSAMIC
    * - Version
-     - 7.2.0
+     - |latest_tag|
    * - Author
      - Hassan Foroughi Asl
    * - Development model
      - Gitflow
    * - Build status
-     - |travis_status_badge|_
+     - |test_status_badge|
    * - Container latest release status
-     - |docker_latest_release_status|_
-   * - Container build type
-     - |docker_build_type|_
+     - |docker_latest_release_status|
    * - Container master status 
-     - |docker_latest_build_status|_
+     - |docker_latest_build_status|
    * - Code coverage
      - |code_cov_badge|_
    * - Documentation
@@ -49,21 +47,17 @@ Snakemake cli given that there is a proper config file created.
      - @ashwini06 , @mropat , @imsarath , @keyvanelhami
 
 
-.. |code_cov_badge| image:: https://coveralls.io/repos/github/Clinical-Genomics/BALSAMIC/badge.svg?branch=master 
-.. _code_cov_badge: https://coveralls.io/github/Clinical-Genomics/BALSAMIC
+.. |code_cov_badge| image:: https://codecov.io/gh/Clinical-Genomics/BALSAMIC/branch/develop/graph/badge.svg?token=qP68U3PNwV 
+.. _code_cov_badge: https://codecov.io/gh/Clinical-Genomics/BALSAMIC
 
-.. |travis_status_badge| image:: https://travis-ci.org/Clinical-Genomics/BALSAMIC.svg?branch=master
-.. _travis_status_badge: https://travis-ci.org/Clinical-Genomics/BALSAMIC
+.. |latest_tag| image:: https://img.shields.io/github/v/tag/clinical-genomics/BALSAMIC
 
-.. |docker_latest_build_status| image:: https://img.shields.io/docker/cloud/build/hassanf/balsamic
-.. _docker_latest_build_status: https://hub.docker.com/r/hassanf/balsamic
+.. |test_status_badge| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/pytest_and_coveralls.yml/badge.svg
 
-.. |docker_latest_release_status| image:: https://img.shields.io/docker/v/hassanf/balsamic?sort=semver 
-.. _docker_latest_release_status: https://hub.docker.com/r/hassanf/balsamic/tags 
+.. |docker_latest_build_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push_master.yml/badge.svg 
+
+.. |docker_latest_release_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push_release.yml/badge.svg?tag=v7.2.0 
   
-.. |docker_build_type| image:: https://img.shields.io/docker/cloud/automated/hassanf/balsamic
-.. _docker_build_type: https://hub.docker.com/r/hassanf/balsamic
-
 .. |snakemake_badge| image:: https://img.shields.io/badge/snakemake-%E2%89%A55.12.3-brightgreen.svg 
 
 .. |singularity_badge| image:: https://img.shields.io/badge/singularity-%E2%89%A53.1.1-brightgreen.svg
