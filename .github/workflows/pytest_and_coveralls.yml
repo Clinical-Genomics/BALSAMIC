@@ -1,4 +1,4 @@
-name: PyTest and Coveralls
+name: pytests 
 
 on: ["push", "pull_request"]
 

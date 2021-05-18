@@ -1,11 +1,10 @@
-name: build and push docker containers
+name: master container
 
 # Tigger building and testing container only on pull requests
 on:
   push:
     branches:
       - master
-      - develop
 
 jobs:
   main:
