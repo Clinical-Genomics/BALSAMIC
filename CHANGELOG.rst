@@ -1,4 +1,12 @@
-7.2.0
+[X.X.X]
+-------
+
+Changed:
+^^^^^^^^
+
+* Rename Github actions to reflect their content
+
+[7.2.0]
 -------
 
 Added:
