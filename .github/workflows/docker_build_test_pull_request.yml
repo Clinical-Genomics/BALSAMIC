@@ -1,4 +1,4 @@
-name: build and test docker containers
+name: pull request container
 
 # Tigger building and testing container only on pull requests
 on:
