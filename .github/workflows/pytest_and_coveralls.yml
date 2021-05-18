@@ -1,4 +1,4 @@
-name: pytests 
+name: pytests
 
 on: ["push", "pull_request"]
 

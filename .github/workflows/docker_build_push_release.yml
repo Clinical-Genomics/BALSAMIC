@@ -1,4 +1,4 @@
-name: latest release container 
+name: latest release container
 
 # Tigger building and testing container only on pull requests
 on:
