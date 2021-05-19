@@ -1,3 +1,11 @@
+[7.2.2]
+-------
+
+Fixed:
+^^^^^^
+
+* An error with Sentieon for better management of memory fixes #621
+
 [7.2.1]
 -------
 
