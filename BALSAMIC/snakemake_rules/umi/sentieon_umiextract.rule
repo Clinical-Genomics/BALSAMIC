@@ -11,6 +11,7 @@ rule sentieon_umiextract:
     benchmark:
         Path(benchmark_dir + "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
+        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         ds_params= paramsumi.umiextract.read_structure,
@@ -21,6 +22,8 @@ rule sentieon_umiextract:
         "UMI tag extraction using sentieon for sample {params.sample_id}"
     shell:
         """
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
 {params.sentieon_exec} umi extract \
 {params.ds_params} {input.read1} {input.read2} \
 -o {output.ds_umi};
@@ -36,6 +39,7 @@ rule sentieon_bwa_umiextract:
     benchmark:
         Path(benchmark_dir + "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
+        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = '{sample}',
@@ -47,6 +51,8 @@ rule sentieon_bwa_umiextract:
         "Aligning of UMI extracted reads with sentieon bwa mem, sorting for sample {params.sample_id}"
     shell:
         """
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
 {params.sentieon_exec} bwa mem \
 -R {params.sheader} \
 -K {params.ip_bases} \

@@ -36,6 +36,7 @@ if len(cluster_config.keys()) == 0:
     cluster_config = config
 
 try:
+    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
     config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 except Exception as error:

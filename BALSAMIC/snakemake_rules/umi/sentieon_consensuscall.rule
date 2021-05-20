@@ -10,6 +10,7 @@ rule sentieon_consensuscall_umi:
     benchmark:
         Path(benchmark_dir + "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
     params:
+        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tag = paramsumi.consensuscall.tag, 
@@ -21,6 +22,8 @@ rule sentieon_consensuscall_umi:
         "Consensus molecule creation using sentieon for sample {params.sample_id}"
     shell:
         """
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
 {params.sentieon_exec} umi consensus \
 -t {threads} \
 -i {input.sam_consensus} \
@@ -40,6 +43,7 @@ rule sentieon_bwa_umiconsensus:
     benchmark:
         Path(benchmark_dir + "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
     params:
+        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sheader = paramsumi.common.align_header,
@@ -51,6 +55,8 @@ rule sentieon_bwa_umiconsensus:
          "Mapping of consensus reads with the sentieon bwa mem, sorting for sample {params.sample_id}"
     shell:
         """
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
 {params.sentieon_exec} bwa mem \
 -R {params.sheader} \
 -t {threads} \
