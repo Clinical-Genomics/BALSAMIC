@@ -66,6 +66,7 @@ export MALLOC_CONF=lg_dirty_mult:-1
 {params.sentieon_exec} util sort \
 -r {input.ref_fa} \
 --sam2bam \
+--umi_post_process \
 -o {output.align_consensus} \
 -i - ;
         """
