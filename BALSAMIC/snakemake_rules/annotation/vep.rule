@@ -71,13 +71,15 @@ rule vep_stat:
   benchmark:
     benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.balsamic_stat.tsv" 
   shell:
-    "source activate {params.conda}; "
-    "if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi; "
-    "bcftools view --type snps -f PASS {input.vep} 2> /dev/null "
-        " | bcftools filter -i \"{params.bcftools_filter_string}\" "
-        " | filter_vep --ontology --filter {params.filter_vep_string} "
-        " | bcftools +counts "
-        " | awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.tmb};"
+    """
+source activate {params.conda};
+if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
+bcftools view --type snps -f PASS {input.vep} 2> /dev/null \
+| bcftools filter -i \"{params.bcftools_filter_string}\" \
+| filter_vep --ontology --filter {params.filter_vep_string} \
+| bcftools +counts \
+| awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.tmb};
+    """
     
 
 rule vep_germline:

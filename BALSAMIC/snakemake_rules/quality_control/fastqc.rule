@@ -17,9 +17,11 @@ rule fastqc:
   benchmark:
     benchmark_dir + "fastqc_" + "{sample}.fastqc.tsv"
   shell:
-    "source activate {params.conda};"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "fastqc {input.read1} --dir ${{tmpdir}} --outdir {params.fastqc_dir};" 
-    "fastqc {input.read2} --dir ${{tmpdir}} --outdir {params.fastqc_dir};"
+    """
+source activate {params.conda};
+rand_str=$(openssl rand -hex 5);
+tmpdir={params.tmpdir}/${{rand_str}};
+mkdir -p ${{tmpdir}};
+fastqc {input.read1} --dir ${{tmpdir}} --outdir {params.fastqc_dir};
+fastqc {input.read2} --dir ${{tmpdir}} --outdir {params.fastqc_dir};
+    """

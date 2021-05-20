@@ -23,16 +23,18 @@ rule mosdepth_coverage:
   benchmark:
     benchmark_dir + "panel_depth_" + "{sample}.mosdepth.tsv"
   shell:
-    "source activate {params.conda}; "
-    "export MOSDEPTH_Q0=NO_COVERAGE;"
-    "export MOSDEPTH_Q1=LOW_COVERAGE;"
-    "export MOSDEPTH_Q2=CALLABLE;"
-    "export MOSDEPTH_Q3=HIGH_COVERAGE;"
-    "mosdepth "
-      "--by {input.bed} "
-      "--mapq {params.mapq} "
-      "--flag {params.samflag} "
-      "--quantize {params.quantize} "
-      "--threads {threads} "
-      "{params.output_dir}/{params.sample_name} "
-      "{input.bam};"
+    """
+source activate {params.conda};
+export MOSDEPTH_Q0=NO_COVERAGE;
+export MOSDEPTH_Q1=LOW_COVERAGE;
+export MOSDEPTH_Q2=CALLABLE;
+export MOSDEPTH_Q3=HIGH_COVERAGE;
+mosdepth \
+--by {input.bed} \
+--mapq {params.mapq} \
+--flag {params.samflag} \
+--quantize {params.quantize} \
+--threads {threads} \
+{params.output_dir}/{params.sample_name} \
+{input.bam};
+    """
