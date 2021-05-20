@@ -1,3 +1,16 @@
+[7.X.X]
+-------
+
+Changed:
+^^^^^^^^
+* Upgrade to latest sentieon version 202010.02
+
+
+Fixed:
+^^^^^^
+* post-processing of the umi consensus in handling BI tags
+
+
 [7.2.2]
 -------
 
