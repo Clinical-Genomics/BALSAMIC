@@ -9,6 +9,7 @@ Changed:
 Fixed:
 ^^^^^^
 * post-processing of the umi consensus in handling BI tags
+* vcf-filtered-clinical tag files will have all variants including PASS
 
 
 [7.2.2]
