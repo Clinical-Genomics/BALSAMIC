@@ -2,21 +2,25 @@
 # coding: utf-8
 
 rule samtools_flagstats_stats_idxstats:
-  input:
-    bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
-  output:
-    flagstats = bam_dir + "{sample}.samtools.flagstats.txt",
-    idxstats = bam_dir + "{sample}.samtools.idxstats.txt",
-    stats = bam_dir + "{sample}.samtools.stats.txt",
-  params:
-    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    conda = config["bioinfo_tools"].get("samtools")
-  threads: get_threads(cluster_config, "samtools")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + "{sample}.samtools_flagstats_stats_idxstats.tsv"
-  shell:
-    """
+    input:
+        bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
+    output:
+        flagstats = bam_dir + "{sample}.samtools.flagstats.txt",
+        idxstats = bam_dir + "{sample}.samtools.idxstats.txt",
+        stats = bam_dir + "{sample}.samtools.stats.txt",
+    benchmark:
+        benchmark_dir + "samtools_flagstats_stats_idxstats_{sample}.tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        conda = config["bioinfo_tools"].get("samtools")
+    threads:
+        get_threads(cluster_config, "samtools")
+    message:
+        "Running samtools flagstats, stats, and idxstats for {sample}"
+    shell:
+        """
 source activate {params.conda};
 mkdir -p {params.tmpdir}; 
 export TMPDIR={params.tmpdir}; 
@@ -24,4 +28,4 @@ export TMPDIR={params.tmpdir};
 samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
 samtools stats --threads {threads} {input.bam} > {output.stats};
 samtools idxstats --threads {threads} {input.bam} > {output.idxstats};
-    """
+        """
