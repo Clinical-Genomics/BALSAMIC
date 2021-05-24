@@ -13,12 +13,13 @@ rule samtools_flagstats_stats_idxstats:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
     params:
+        conda = config["bioinfo_tools"].get("samtools"),
+        sample = "{sample}",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = config["bioinfo_tools"].get("samtools")
     threads:
         get_threads(cluster_config, "samtools")
     message:
-        "Running samtools flagstats, stats, and idxstats for {sample}"
+        "Running samtools flagstats, stats, and idxstats for {params.sample}"
     shell:
         """
 source activate {params.conda};
