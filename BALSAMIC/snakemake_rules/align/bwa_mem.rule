@@ -31,7 +31,7 @@ rule bwa_mem:
         ("Align fastq files with bwa-mem to reference genome and "
         "sort using samtools for sample: {params.sample_id}")
     shell:
-    """
+        """
 source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
@@ -49,30 +49,30 @@ bwa mem \
 
 samtools index -@ {threads} {output.bamout};
 rm -rf {params.tmpdir};
-    """
+        """
 
 rule picard_MarkDuplicates:
-  input:
-    Path(bam_dir, "{sample}.sorted.bam").as_posix()
-  output:
-    mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
-    stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
-  benchmark:
-    Path(benchmark_dir,"picard_MarkDuplicates_{sample}.tsv").as_posix()
-  singularity:
-    Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
-  params:
-    conda = config["bioinfo_tools"].get("picard"),
-    mem = "16g",
-    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    rm_dup = picard_flag(picarddup),
-    sample_id = "{sample}"
-  threads:
-    get_threads(cluster_config, "picard_MarkDuplicates")
-  message:
-    "Picard marking duplicates and samtool indexing for sample: {params.sample_id}"
-  shell:
-    """
+    input:
+        Path(bam_dir, "{sample}.sorted.bam").as_posix()
+    output:
+        mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
+        stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
+    benchmark:
+        Path(benchmark_dir,"picard_MarkDuplicates_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        conda = config["bioinfo_tools"].get("picard"),
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        rm_dup = picard_flag(picarddup),
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "picard_MarkDuplicates")
+    message:
+        "Picard marking duplicates and samtool indexing for sample: {params.sample_id}"
+    shell:
+        """
 source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
@@ -89,4 +89,4 @@ METRICS_FILE='{output.stats}';
 samtools index {output.mrkdup};
 
 rm -rf {params.tmpdir};
-    """
+        """
