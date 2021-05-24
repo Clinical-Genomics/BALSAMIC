@@ -120,6 +120,7 @@ qc_rules = [
     "snakemake_rules/quality_control/fastp.rule",
     "snakemake_rules/quality_control/fastqc.rule",
     "snakemake_rules/quality_control/multiqc.rule",
+    "snakemake_rules/quality_control/samtools.rule",
     "snakemake_rules/variant_calling/mergetype_tumor.rule",
 ]
 
