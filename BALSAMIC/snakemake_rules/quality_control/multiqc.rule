@@ -54,9 +54,7 @@ else:
     multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.summary.txt", sample=config["samples"]))
 
     # samtools metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.samtools.flagstats.txt", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.samtools.idxstats.txt", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.samtools.stats.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt", sample=config["samples"], stats=['flagstats', 'idxstats', 'stats']))
 
     if config["umiworkflow"]:
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
