@@ -24,7 +24,7 @@ rule ngs_filter_vardict:
   shell:
     """
 source activate {params.conda};
-bcftools view -f PASS {input.vcf} \
+bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' \
 | bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
