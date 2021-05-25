@@ -11,6 +11,10 @@ rule mosdepth_coverage:
     bam_dir + "{sample}.mosdepth.summary.txt",
     bam_dir + "{sample}.per-base.bed.gz",
     bam_dir + "{sample}.regions.bed.gz"
+  benchmark:
+    benchmark_dir + "mosdepth_covearge_" + "{sample}.tsv"
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix() 
   params:
     mapq='20',
     samflag='1796',
@@ -18,17 +22,19 @@ rule mosdepth_coverage:
     sample_name='{sample}',
     output_dir=bam_dir,
     conda = config["bioinfo_tools"].get("mosdepth")
-  threads: get_threads(cluster_config, "mosdepth")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + "panel_depth_" + "{sample}.mosdepth.tsv"
+  threads:
+    get_threads(cluster_config, "mosdepth")
+  message:
+    "Running mosdepth for coveage on {params.sample_name}"
   shell:
     """
 source activate {params.conda};
+
 export MOSDEPTH_Q0=NO_COVERAGE;
 export MOSDEPTH_Q1=LOW_COVERAGE;
 export MOSDEPTH_Q2=CALLABLE;
 export MOSDEPTH_Q3=HIGH_COVERAGE;
+
 mosdepth \
 --by {input.bed} \
 --mapq {params.mapq} \
