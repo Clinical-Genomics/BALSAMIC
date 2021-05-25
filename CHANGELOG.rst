@@ -10,7 +10,7 @@ Fixed:
 ^^^^^^
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
-* Refactor snakemake rules according to snakemake etiquette 
+* Refactor snakemake align rules according to snakemake etiquette 
 
 [7.2.2]
 -------
