@@ -4,7 +4,7 @@
 Changed:
 ^^^^^^^^
 * Upgrade to latest sentieon version 202010.02
-
+* New name `MarkDuplicates` to `picard_markduplicates` in `bwa_mem` rule and `cluster.json`
 
 Fixed:
 ^^^^^^
