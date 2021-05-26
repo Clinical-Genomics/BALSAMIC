@@ -1,6 +1,11 @@
 [7.X.X]
 -------
 
+Added:
+^^^^^^
+
+* samtools flagstats and stats to workflow and MultiQC
+
 Changed:
 ^^^^^^^^
 * Upgrade to latest sentieon version 202010.02
