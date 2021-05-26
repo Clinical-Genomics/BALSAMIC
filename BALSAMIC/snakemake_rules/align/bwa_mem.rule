@@ -56,7 +56,7 @@ rule picard_markduplicates:
         Path(bam_dir, "{sample}.sorted.bam").as_posix()
     output:
         mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
-        stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix(),
+        picard_stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix(),
         flagstats = Path(bam_dir, "{sample}.samtools.flagstats.txt").as_posix(),
         idxstats = Path(bam_dir, "{sample}.samtools.idxstats.txt").as_posix(),
         stats = Path(bam_dir, "{sample}.samtools.stats.txt").as_posix(),
@@ -87,7 +87,7 @@ OUTPUT={output.mrkdup} \
 VALIDATION_STRINGENCY=SILENT \
 MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
 REMOVE_DUPLICATES={params.rm_dup} \
-METRICS_FILE='{output.stats}';
+METRICS_FILE='{output.picard_stats}';
 
 samtools index {output.mrkdup};
 
