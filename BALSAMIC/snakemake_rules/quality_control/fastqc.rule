@@ -9,17 +9,29 @@ rule fastqc:
   output:
     read1 = fastqc_dir + "{sample}_1_fastqc.zip",
     read2 = fastqc_dir + "{sample}_2_fastqc.zip"
+  benchmark:
+    benchmark_dir + "fastqc_{sample}.tsv"
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix() 
   params:
     conda = config["bioinfo_tools"].get("fastqc"),
-    tmpdir = tmp_dir,
-    fastqc_dir = fastqc_dir
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + "fastqc_" + "{sample}.fastqc.tsv"
+    fastqc_dir = fastqc_dir,
+    sample = "{sample}",
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+  message:
+    "Running FastQC on {params.sample}"
   shell:
-    "source activate {params.conda};"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "fastqc {input.read1} --dir ${{tmpdir}} --outdir {params.fastqc_dir};" 
-    "fastqc {input.read2} --dir ${{tmpdir}} --outdir {params.fastqc_dir};"
+    """
+source activate {params.conda};
+
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+fastqc {input.read1} \
+--dir {params.tmpdir} \
+--outdir {params.fastqc_dir};
+
+fastqc {input.read2} \
+--dir {params.tmpdir} \
+--outdir {params.fastqc_dir};
+    """
