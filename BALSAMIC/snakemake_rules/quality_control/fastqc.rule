@@ -27,6 +27,11 @@ source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-fastqc {input.read1} --dir {params.tmpdir} --outdir {params.fastqc_dir};
-fastqc {input.read2} --dir {params.tmpdir} --outdir {params.fastqc_dir};
+fastqc {input.read1} \
+--dir {params.tmpdir} \
+--outdir {params.fastqc_dir};
+
+fastqc {input.read2} \
+--dir {params.tmpdir} \
+--outdir {params.fastqc_dir};
     """

@@ -28,7 +28,9 @@ source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+java -jar -Djava.io.tmpdir={params.tmpdir} \
+-Xms8G -Xmx16G \
+$CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
 -T ContEst \
 -R {input.fa} \
 -I:eval {input.bamN} \
@@ -38,7 +40,9 @@ java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk
 --min_genotype_ratio {params.min_genotype_ratio} \
 -o {output.N_vs_T};
 
-java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx16G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+java -jar -Djava.io.tmpdir={params.tmpdir} \
+-Xms8G -Xmx16G \
+$CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
 -T ContEst \
 -R {input.fa} \
 -I:eval {input.bamT} \
