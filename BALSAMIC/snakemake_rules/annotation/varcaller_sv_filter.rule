@@ -19,6 +19,6 @@ rule ngs_filter_manta:
     """
 source activate {params.conda};
 
-bcftools view -f PASS -o {output.vcf_pass} -O z {input.vcf};
-tabix -p vcf -f {output.vcf_pass};
+bcftools view -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
+tabix -p vcf -f {output.vcf_sv_pass};
     """
