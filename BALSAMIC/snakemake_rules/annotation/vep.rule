@@ -10,26 +10,34 @@ rule vep_somatic:
   output:
     vcf_all = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
-  params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
-    tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
-    ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
-    vcfanno_toml = VCFANNO_TOML,
-    conda = config["bioinfo_tools"].get("ensembl-vep"),
-    vep_cache = config["reference"]["vep"]
-  threads: get_threads(cluster_config, 'vep')
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   benchmark:
-    benchmark_dir + 'vep_' + "{var_type}.somatic.{case_name}.{var_caller}.vep.tsv"
+    benchmark_dir + "vep_somatic_{var_type}.somatic.{case_name}.{var_caller}.tsv"
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
+    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
+    ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
+    message_text = "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz", 
+    tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    vcfanno_toml = VCFANNO_TOML,
+    vep_cache = config["reference"]["vep"]
+  threads:
+    get_threads(cluster_config, "vep")
+  message:
+    "Running vep annotation on {params.message_text}" 
   shell:
     """
 source activate {params.conda};
+
 vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf={params.tmpvcf};
 export PERL5LIB=;
+
 vcfanno --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
 | bcftools reheader --threads {threads} -s {input.header} \
 | bcftools view -O z -o $tmpvcf ;
+
 vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
@@ -51,6 +59,7 @@ vep \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
 --verbose \
 --force_overwrite;
+
 tabix -p vcf -f {output.vcf_all};
 rm $tmpvcf;
     """
@@ -60,24 +69,33 @@ rule vep_stat:
     vep = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
   output:
     tmb = vep_dir + "SNV.somatic.{case_name}.{var_caller}.balsamic_stat"
-  params:
-    housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
-    bed = config["panel"]["capture_kit"] if "panel" in config else "",
-    conda = config["bioinfo_tools"].get("ensembl-vep"),
-    filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
-    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
-  threads: get_threads(cluster_config, 'vep')
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   benchmark:
-    benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.balsamic_stat.tsv" 
+    benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.tsv" 
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
+  params:
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
+    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
+    bed = config["panel"]["capture_kit"] if "panel" in config else "",
+    filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
+    housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
+    message_text = "SNV.somatic.{case_name}.{var_caller}.all"
+  threads:
+    get_threads(cluster_config, "vep")
+  message:
+    "Calculating TMB for {params.message_text}" 
   shell:
-    "source activate {params.conda}; "
-    "if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi; "
-    "bcftools view --type snps -f PASS {input.vep} 2> /dev/null "
-        " | bcftools filter -i \"{params.bcftools_filter_string}\" "
-        " | filter_vep --ontology --filter {params.filter_vep_string} "
-        " | bcftools +counts "
-        " | awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.tmb};"
+    """
+source activate {params.conda};
+
+if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
+
+bcftools view --type snps -f PASS {input.vep} 2> /dev/null \
+| bcftools filter -i \"{params.bcftools_filter_string}\" \
+| filter_vep --ontology --filter {params.filter_vep_string} \
+| bcftools +counts \
+| awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.tmb};
+    """
     
 
 rule vep_germline:
@@ -87,19 +105,26 @@ rule vep_germline:
   output:
     vcf_all = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
-  params:
-    housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
-    conda = config["bioinfo_tools"].get("ensembl-vep"),
-    vep_cache = config["reference"]["vep"]
-  threads: get_threads(cluster_config, 'vep')
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   benchmark:
-    benchmark_dir + 'vep_' + "{var_type}.germline.{sample}.{var_caller}.vep.tsv"
+    benchmark_dir + "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv"
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
+  params:
+    conda = config["bioinfo_tools"].get("ensembl-vep"),
+    housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
+    message_text = "{var_type}.germline.{sample}.{var_caller}",
+    vep_cache = config["reference"]["vep"]
+  threads:
+    get_threads(cluster_config, 'vep')
+  message:
+    "Running vep annotation on {params.message_text}" 
   shell:
       """
 source activate {params.conda};
+
 vep_path=$(dirname $(readlink -f $(which vep)));
 export PERL5LIB=;
+
 vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \

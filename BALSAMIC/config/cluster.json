@@ -31,7 +31,7 @@
 		"time": "15:00:00",
 		"n": 10
 	},
-	"MarkDuplicates": {
+	"picard_markduplicates": {
 		"time": "03:30:00",
 		"n": 8
 	},

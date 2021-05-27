@@ -16,50 +16,70 @@ rule bwa_mem:
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
+    benchmark:
+        Path(benchmark_dir,"bwa_mem_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     params:
         bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
         conda = config["bioinfo_tools"].get("bwa"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    threads: get_threads(cluster_config, "bwa_mem")
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
-    benchmark:
-        Path(benchmark_dir, "bwa_mem_{sample}.bwa_mem.tsv").as_posix()
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "bwa_mem")
+    message:
+        ("Align fastq files with bwa-mem to reference genome and "
+        "sort using samtools for sample: {params.sample_id}")
     shell:
         """
 source activate {params.conda};
-mkdir -p {params.tmpdir}; 
-export TMPDIR={params.tmpdir}; 
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
 bwa mem \
 -t {threads} \
 -R {params.bam_header}  \
 -M \
 -v 1 \
 {input.fa} {input.read1} {input.read2} \
-| samtools sort -T {params.tmpdir} --threads {threads} --output-fmt BAM -o {output.bamout} - ;
+| samtools sort -T {params.tmpdir} \
+--threads {threads} \
+--output-fmt BAM \
+-o {output.bamout} - ;
+
 samtools index -@ {threads} {output.bamout};
 rm -rf {params.tmpdir};
         """
 
-rule MarkDuplicates:
-  input:
-    Path(bam_dir, "{sample}.sorted.bam").as_posix()
-  output:
-    mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
-    stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix()
-  params:
-    conda = config["bioinfo_tools"].get("picard"),
-    mem = "16g",
-    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    rm_dup = picard_flag(picarddup)
-  threads: get_threads(cluster_config, "MarkDuplicates")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
-  benchmark:
-    Path(benchmark_dir, "MarkDuplicates_{sample}.markduplicates.tsv").as_posix()
-  shell:
-    """
+rule picard_markduplicates:
+    input:
+        Path(bam_dir, "{sample}.sorted.bam").as_posix()
+    output:
+        mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
+        picard_stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix(),
+        flagstats = Path(bam_dir, "{sample}.samtools.flagstats.txt").as_posix(),
+        idxstats = Path(bam_dir, "{sample}.samtools.idxstats.txt").as_posix(),
+        stats = Path(bam_dir, "{sample}.samtools.stats.txt").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"picard_markduplicates_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        conda = config["bioinfo_tools"].get("picard"),
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        rm_dup = picard_flag(picarddup),
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "picard_markduplicates")
+    message:
+        "Picard marking duplicates and samtool indexing for sample: {params.sample_id}"
+    shell:
+        """
 source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
+
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
 MarkDuplicates \
 INPUT={input} \
@@ -67,7 +87,13 @@ OUTPUT={output.mrkdup} \
 VALIDATION_STRINGENCY=SILENT \
 MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
 REMOVE_DUPLICATES={params.rm_dup} \
-METRICS_FILE='{output.stats}';
+METRICS_FILE='{output.picard_stats}';
+
 samtools index {output.mrkdup};
+
+samtools flagstats --threads {threads} {output.mrkdup} > {output.flagstats};
+samtools stats --threads {threads} {output.mrkdup} > {output.stats};
+samtools idxstats --threads {threads} {output.mrkdup} > {output.idxstats};
+
 rm -rf {params.tmpdir};
-    """
+        """
