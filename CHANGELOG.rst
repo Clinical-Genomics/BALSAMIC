@@ -5,15 +5,19 @@ Added:
 ^^^^^^
 
 * samtools flagstats and stats to workflow and MultiQC
+* PASSed SV calls from Manta to clinical delivery
+
 
 Changed:
 ^^^^^^^^
+
 * Upgrade to latest sentieon version 202010.02
 * New name `MarkDuplicates` to `picard_markduplicates` in `bwa_mem` rule and `cluster.json`
 * New name rule `GATK_contest` to `gatk_contest` 
 
 Fixed:
 ^^^^^^
+
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
 * Refactor snakemake align rules according to snakemake etiquette 
