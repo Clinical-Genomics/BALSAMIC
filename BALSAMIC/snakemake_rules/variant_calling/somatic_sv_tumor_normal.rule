@@ -48,3 +48,35 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
+rule delly_tumor_normal:
+    input:
+        fa = config["reference"]["reference_genome"] ,
+        bamN = bam_dir + normal_bam,
+        bamT = bam_dir + tumor_bam,
+        excl = config["reference"]["centel"] ,
+    output:
+        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        runmode = "local",
+        tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal"),
+        conda = config["bioinfo_tools"].get("delly")
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    benchmark:
+        benchmark_dir + 'delly_tumor_normal_' + config["analysis"]["case_id"] + ".delly.tsv"
+    threads: get_threads(cluster_config, "delly_tumor_normal")
+    shell:
+        """
+source activate {params.conda};
+
+delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN}
+
+cp {params.tmpdir}/delly.bcf* {output.final};
+
+echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+

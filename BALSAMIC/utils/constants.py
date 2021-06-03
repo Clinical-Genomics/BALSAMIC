@@ -100,6 +100,12 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
+   "delly": {
+        "mutation": "somatic",
+        "type": "SV",
+        "analysis_type": ["paired", "single"],
+        "workflow_solution": ["BALSAMIC"]
+    },
 }
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
