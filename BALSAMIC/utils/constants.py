@@ -520,6 +520,15 @@ REFERENCE_FILES = {
             "output_file": "access_5kb_hg19.txt",
             "output_path": "genome"
         },
+        "dly_excl": {
+            "url":
+            "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg19.excl.tsv",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "dly_excl.txt",
+            "output_path": "genome"
+        },
     }
 }
 
