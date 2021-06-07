@@ -391,7 +391,7 @@ REFERENCE_FILES = {
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
-            "output_file": "dly_excl",
+            "output_file": "dly_excl.tsv",
             "output_path": "genome"
         },
     },
@@ -535,7 +535,7 @@ REFERENCE_FILES = {
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
-            "output_file": "dly_excl",
+            "output_file": "dly_excl.tsv",
             "output_path": "genome"
         },
     }
