@@ -63,6 +63,7 @@ rule delly_tumor_normal:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("delly")
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     benchmark:
         benchmark_dir + 'delly_tumor_normal_' + config["analysis"]["case_id"] + ".delly.tsv"
     threads: get_threads(cluster_config, "delly_tumor_normal")
