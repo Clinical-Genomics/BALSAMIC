@@ -12,3 +12,4 @@ dependencies:
   - vardict=2019.06.04=pl526_0
   - vardict-java=1.7
   - libiconv
+  - delly=0.8.7
