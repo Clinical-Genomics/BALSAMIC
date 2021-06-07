@@ -600,6 +600,7 @@ BIOINFO_TOOL_ENV = {
     "strelka": "varcall_py27",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
+    "delly": "varcall_delly"
 }
 
 REPORT_MODEL = {
