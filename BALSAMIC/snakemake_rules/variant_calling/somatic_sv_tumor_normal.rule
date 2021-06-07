@@ -53,6 +53,7 @@ rule delly_tumor_normal:
         fa = config["reference"]["reference_genome"] ,
         bamN = bam_dir + normal_bam,
         bamT = bam_dir + tumor_bam,
+        dly_excl = config["reference"]["dly_excl"],
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
@@ -69,7 +70,7 @@ rule delly_tumor_normal:
         """
 source activate {params.conda};
 
-delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN}
+delly call -x {input.dly_excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN}
 
 cp {params.tmpdir}/delly.bcf* {output.final};
 
