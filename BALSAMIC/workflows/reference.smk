@@ -60,7 +60,7 @@ refgene_txt_url = reference_file_model.refgene_txt
 refgene_sql_url = reference_file_model.refgene_sql
 rankscore_url = reference_file_model.rankscore
 access_regions_url = reference_file_model.access_regions
-dly_excl_url = reference_file_model.access_regions
+dly_excl_url = reference_file_model.dly_excl
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
