@@ -576,7 +576,7 @@ umiworkflow_params = {
 # list of bioinfo tools for each conda env
 VALID_CONTAINER_CONDA_NAME = {
     "align_qc", "annotate", "coverage_qc", "varcall_py36", "varcall_py27",
-    "varcall_cnvkit"
+    "varcall_cnvkit","varcall_delly"
 }
 
 BIOINFO_TOOL_ENV = {
@@ -600,6 +600,7 @@ BIOINFO_TOOL_ENV = {
     "strelka": "varcall_py27",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
+    "delly": "varcall_delly"
 }
 
 REPORT_MODEL = {
