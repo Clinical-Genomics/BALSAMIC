@@ -55,7 +55,7 @@ rule delly_tumor_normal:
         bamT = bam_dir + tumor_bam,
         excl = config["reference"]["dly_excl"],
     output:
-        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
@@ -72,8 +72,8 @@ rule delly_tumor_normal:
 source activate {params.conda};
 
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN}
-
-cp {params.tmpdir}/delly.bcf* {output.final};
+bcftools view -O z -o {params.tmpdir}/delly.vcf.gz {params.tmpdir}/delly.bcf
+cp {params.tmpdir}/delly.vcf.gz {output.final};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
