@@ -26,3 +26,5 @@ varcall_cnvkit:
   - cnvkit
 vcf_merge:
   - vcfmerge
+varcall_delly:
+  - delly

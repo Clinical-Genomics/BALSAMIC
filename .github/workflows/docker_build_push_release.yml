@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix: 
-        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36]
+        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly]
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
