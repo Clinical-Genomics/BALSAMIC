@@ -6,6 +6,7 @@ Added:
 
 * samtools flagstats and stats to workflow and MultiQC
 * Delly v0.8.7 somatic SV caller
+* Delly containter
 
 Changed:
 ^^^^^^^^
