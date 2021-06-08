@@ -8,6 +8,7 @@ Added:
 * Delly v0.8.7 somatic SV caller
 * Delly containter
 * bcf to vcf command
+* bcftools v1.12 to delly container
 
 Changed:
 ^^^^^^^^

@@ -6,4 +6,5 @@ channels:
 dependencies:
   - python=3.6
   - pip=9.0.3
+  - bcftools=1.12
   - delly=0.8.7
