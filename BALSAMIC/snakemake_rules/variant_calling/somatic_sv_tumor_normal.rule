@@ -27,7 +27,8 @@ rule manta_tumor_normal:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("manta")
-    threads: get_threads(cluster_config, "manta_tumor_normal")
+    threads:
+        get_threads(cluster_config, "manta_tumor_normal")
     message:
         ("Call structural variants using manta for {input.bamT} vs {input.bamN} files then "
         "index the compressed vcf file")
