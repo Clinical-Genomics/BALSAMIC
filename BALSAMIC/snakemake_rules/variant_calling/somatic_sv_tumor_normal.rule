@@ -72,7 +72,9 @@ rule delly_tumor_normal:
 source activate {params.conda};
 
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN}
-bcftools view -O z -o {params.tmpdir}/delly.vcf.gz {params.tmpdir}/delly.bcf
+echo TUMOR$'\t'tumor$'\n'NORMAL$'\t'control > {params.tmpdir}/samples.tsv
+delly filter -p -f somatic -o {params.tmpdir}/delly.somatic.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf
+bcftools view -O z -o {params.tmpdir}/delly.vcf.gz {params.tmpdir}/delly.somatic.bcf
 cp {params.tmpdir}/delly.vcf.gz {output.final};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
