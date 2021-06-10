@@ -17,16 +17,20 @@ rule manta_tumor_normal:
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
+    benchmark:
+        benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("manta")
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix() 
-    benchmark: 
-        benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
-    threads: get_threads(cluster_config, "manta_tumor_normal") 
+    threads: get_threads(cluster_config, "manta_tumor_normal")
+    message:
+        ("Call structural variants using manta for {input.bamT} vs {input.bamN} files then "
+        "index the compressed vcf file")
     shell:
         """
 source activate {params.conda};
@@ -57,25 +61,35 @@ rule delly_tumor_normal:
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
+    benchmark:
+        benchmark_dir + 'delly_tumor_normal_' + config["analysis"]["case_id"] + "_delly.tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("delly")
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
-    benchmark:
-        benchmark_dir + 'delly_tumor_normal_' + config["analysis"]["case_id"] + "_delly.tsv"
     threads: get_threads(cluster_config, "delly_tumor_normal")
+    message:
+        ("Call structural variants using delly for {input.bamT} vs {input.bamN} files then "
+        "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
 source activate {params.conda};
 
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN}
+
 echo TUMOR$'\t'tumor$'\n'NORMAL$'\t'control > {params.tmpdir}/samples.tsv
+
 delly filter -p -f somatic -o {params.tmpdir}/delly.somatic.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf
+
 bcftools view -O z -o {params.tmpdir}/delly.vcf.gz {params.tmpdir}/delly.somatic.bcf
+
 cp {params.tmpdir}/delly.vcf.gz {output.final};
+
+tabix -p vcf -f {output.final};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
