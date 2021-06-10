@@ -7,7 +7,6 @@ Added:
 * samtools flagstats and stats to workflow and MultiQC
 * Delly v0.8.7 somatic SV caller
 * Delly containter
-* bcf to vcf command
 * bcftools v1.12 to delly container
 * tabix v0.2.6 to delly container
 
