@@ -65,7 +65,7 @@ rule delly_tumor_normal:
         conda = config["bioinfo_tools"].get("delly")
     singularity: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     benchmark:
-        benchmark_dir + 'delly_tumor_normal_' + config["analysis"]["case_id"] + ".delly.tsv"
+        benchmark_dir + 'delly_tumor_normal_' + config["analysis"]["case_id"] + "_delly.tsv"
     threads: get_threads(cluster_config, "delly_tumor_normal")
     shell:
         """
@@ -81,4 +81,3 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 
 rm -rf {params.tmpdir};
         """
-
