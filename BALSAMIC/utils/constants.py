@@ -385,13 +385,13 @@ REFERENCE_FILES = {
             "output_file": "access_5kb_hg38.txt",
             "output_path": "genome"
         },
-        "dly_excl": {
+        "delly_exclusion": {
             "url":
             "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg38.excl.tsv",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
-            "output_file": "dly_excl.tsv",
+            "output_file": "delly_exclusion.tsv",
             "output_path": "genome"
         },
     },
@@ -529,13 +529,13 @@ REFERENCE_FILES = {
             "output_file": "access_5kb_hg19.txt",
             "output_path": "genome"
         },
-        "dly_excl": {
+        "delly_exclusion": {
             "url":
             "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg19.excl.tsv",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
-            "output_file": "dly_excl.tsv",
+            "output_file": "delly_exclusion.tsv",
             "output_path": "genome"
         },
     }
