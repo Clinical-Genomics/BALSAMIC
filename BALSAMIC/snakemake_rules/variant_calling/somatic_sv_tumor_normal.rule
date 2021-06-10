@@ -71,7 +71,8 @@ rule delly_tumor_normal:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("delly")
-    threads: get_threads(cluster_config, "delly_tumor_normal")
+    threads:
+        get_threads(cluster_config, "delly_tumor_normal")
     message:
         ("Call structural variants using delly for {input.bamT} vs {input.bamN} files then "
         "filter somatic variants and finally convert from bcf to compressed vcf file")
