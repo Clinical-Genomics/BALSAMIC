@@ -1,6 +1,14 @@
 name: pytests
 
-on: ["push", "pull_request"]
+on:
+  push:
+    paths-ignore:
+      - "CHANGELOG.rst"
+      - "docs/**"
+  pull_requests:
+    paths-ignore:
+      - "CHANGELOG.rst"
+      - "docs/**"
 
 jobs:
   pytest_coveralls:
