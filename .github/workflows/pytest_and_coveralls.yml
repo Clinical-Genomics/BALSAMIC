@@ -2,11 +2,11 @@ name: pytests
 
 on:
   push:
-    path-ignore:
+    paths-ignore:
       - "CHANGELOG.rst"
       - "docs/**"
   pull_request:
-    path-ignore:
+    paths-ignore:
       - "CHANGELOG.rst"
       - "docs/**"
 
