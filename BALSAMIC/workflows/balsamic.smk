@@ -148,7 +148,8 @@ else:
     ]
 
 
-annotation_rules = [ "snakemake_rules/annotation/vep.rule"]
+annotation_rules = ["snakemake_rules/annotation/vep.rule", 
+                    "snakemake_rules/annotation/varcaller_sv_filter.rule"]
 
 umiqc_rules = ["snakemake_rules/umi/qc_umi.rule",
                "snakemake_rules/umi/mergetype_tumor_umi.rule"]
@@ -364,6 +365,10 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
 else:
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
                                             vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
+
+# SV filters output
+analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
+                                        vcf=get_vcf(config, ["manta"], [config["analysis"]["case_id"]]))])
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
