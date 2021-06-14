@@ -15,7 +15,7 @@ Changed:
 * Upgrade to latest sentieon version 202010.02
 * New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
-* Ignore pytest github workflow on ``docs`` and ``CHANGELOG.rst`` changes
+* Avoid running pytest github actions workflow on ``docs`` and ``CHANGELOG.rst`` changes
 
 Fixed:
 ^^^^^^
