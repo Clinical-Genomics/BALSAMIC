@@ -7,6 +7,7 @@ Added:
 * samtools flagstats and stats to workflow and MultiQC
 * PASSed SV calls from Manta to clinical delivery
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
+* Added ``vcf2cytosure``` to annotate container
 
 
 Changed:
