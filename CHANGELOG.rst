@@ -24,6 +24,11 @@ Fixed:
 * Refactor snakemake align rules according to snakemake etiquette 
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
 
+Removed:
+^^^^^^^^
+
+* Cleaned up unused container definitions and conda environment files
+
 [7.2.2]
 -------
 
