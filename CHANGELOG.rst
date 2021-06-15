@@ -26,7 +26,7 @@ Fixed:
 * vcf-filtered-clinical tag files will have all variants including PASS
 * Refactor snakemake align rules according to snakemake etiquette 
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
-* Refactor snakemake manta and delly rules according to snakemake etiquette
+* Refactor snakemake manta rule according to snakemake etiquette
 [7.2.2]
 -------
 
