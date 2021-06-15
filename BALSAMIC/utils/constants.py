@@ -390,7 +390,7 @@ REFERENCE_FILES = {
             "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg38.excl.tsv",
             "file_type": "text",
             "gzip": False,
-            "genome_version": "hg19",
+            "genome_version": "hg38",
             "output_file": "delly_exclusion.tsv",
             "output_path": "genome"
         },
