@@ -11,13 +11,16 @@ Added:
 * tabix v0.2.6 to delly container
 * PASSed SV calls from Manta to clinical delivery
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
+* Added ``vcf2cytosure``` to annotate container
+* ``git`` to the container definition
 
 Changed:
 ^^^^^^^^
 
 * Upgrade to latest sentieon version 202010.02
-* New name `MarkDuplicates` to `picard_markduplicates` in `bwa_mem` rule and `cluster.json`
-* New name rule `GATK_contest` to `gatk_contest` 
+* New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
+* New name rule ``GATK_contest`` to ``gatk_contest`` 
+* Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
 
 Fixed:
 ^^^^^^
@@ -27,6 +30,12 @@ Fixed:
 * Refactor snakemake align rules according to snakemake etiquette 
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
 * Refactor snakemake manta rule according to snakemake etiquette
+
+Removed:
+^^^^^^^^
+
+* Cleaned up unused container definitions and conda environment files
+
 [7.2.2]
 -------
 
