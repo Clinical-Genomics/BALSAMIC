@@ -87,7 +87,7 @@ delly filter -p -f somatic -o {params.tmpdir}/delly.somatic.bcf -s {params.tmpdi
 
 bcftools view -O z -o {params.tmpdir}/delly.vcf.gz {params.tmpdir}/delly.somatic.bcf
 
-cp {params.tmpdir}/delly.vcf.gz {output.final};
+bcftools view -O z -o {output.final} {params.tmpdir}/delly.somatic.bcf
 
 tabix -p vcf -f {output.final};
 
