@@ -1,3 +1,11 @@
+[7.2.3]
+-------
+
+Fixed:
+^^^^^^
+
+* Fixed a bug with multithreading in sentieon umi consensus (issue #656)
+
 [7.2.2]
 -------
 

@@ -25,7 +25,6 @@ rule sentieon_consensuscall_umi:
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
 {params.sentieon_exec} umi consensus \
--t {threads} \
 -i {input.sam_consensus} \
 -o {output.fastq_consensus} \
 --input_format {params.ip_format} \
