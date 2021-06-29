@@ -26,6 +26,7 @@ Fixed:
 * vcf-filtered-clinical tag files will have all variants including PASS
 * Refactor snakemake align rules according to snakemake etiquette 
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
+* Order of columns in QC and coverage report issue #601
 
 Removed:
 ^^^^^^^^
