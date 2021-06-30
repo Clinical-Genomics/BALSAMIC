@@ -1,3 +1,11 @@
+[7.2.3]
+-------
+
+Fixed:
+^^^^^^
+
+* Fixed memory issue with vcfanno in vep_somatic rule fixes #661
+
 [7.2.2]
 -------
 
