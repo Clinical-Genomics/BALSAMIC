@@ -447,6 +447,8 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
         with open(yaml_file, "r") as f:
             packages = yaml.safe_load(f).get("dependencies")
             for p in packages:
+                if isinstance(p, dict):
+                    continue
                 name = p.split("=")[0]
                 version = "=".join(p.split("=")[1:])
                 if name not in bioinfo_tools:
