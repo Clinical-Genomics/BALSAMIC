@@ -13,6 +13,7 @@ Added:
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
 * Added ``vcf2cytosure``` to annotate container
 * ``git`` to the container definition
+* prepare_delly_exclusion rule
 
 Changed:
 ^^^^^^^^
