@@ -34,6 +34,7 @@ Removed:
 ^^^^^^^^
 
 * Cleaned up unused container definitions and conda environment files
+* Remove cnvkit calling for WGS cases
 
 [7.2.2]
 -------
