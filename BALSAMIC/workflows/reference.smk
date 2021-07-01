@@ -339,3 +339,15 @@ vep_install --SPECIES {params.species} \
 --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log}; 
         """
 
+
+rule prepare_delly_exclusion:
+    input:
+        delly_exclusion = delly_exclusion_url.get_output_file,
+    log:
+        os.path.join(basedir, "genome", "delly_exclusion.log"),
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    shell:
+        """
+sed -i 's/chr//g' {input.delly_exclusion} 2> {log}
+        """
