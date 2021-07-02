@@ -14,7 +14,6 @@ Added:
 * Added ``vcf2cytosure``` to annotate container
 * ``git`` to the container definition
 * prepare_delly_exclusion rule
-=======
 * Installation of PureCN rpackage in cnvkit container
 
 
