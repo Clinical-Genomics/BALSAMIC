@@ -97,15 +97,17 @@ try:
 
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
+    
+    config["PURECN"] = Path(os.environ["PURECN"],"PureCN.R").as_posix()
+    
 except KeyError as error:
     sentieon = False
-    LOG.warning("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-                "to run SENTIEON variant callers")
+    LOG.warning("Set environment variables {} to run BALSAMIC workflow".format(error.args[0]))
 
 if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error("Senteion exectuable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
+    LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
     raise BalsamicError
-    
+
 if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
               "to run SENTIEON variant callers")

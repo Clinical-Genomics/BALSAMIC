@@ -24,6 +24,7 @@ varcall_py27:
   - manta
 varcall_cnvkit:
   - cnvkit
+  - purecn
 vcf_merge:
   - vcfmerge
 varcall_delly:
