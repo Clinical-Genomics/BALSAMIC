@@ -19,6 +19,7 @@ Changed:
 * New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
+* Update GNOMAD URL
 * Split tumor-only ``cnvkit batch`` into individual commands
 
 Fixed:
