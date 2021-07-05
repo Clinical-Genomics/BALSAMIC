@@ -2,7 +2,7 @@
 Short tutorial
 ==============
 
-Here a short toturial is provided for BALSAMIC (**version** = 7.2.2). 
+Here a short toturial is provided for BALSAMIC (**version** = 7.2.3). 
 
 Running a test sample
 ---------------------
