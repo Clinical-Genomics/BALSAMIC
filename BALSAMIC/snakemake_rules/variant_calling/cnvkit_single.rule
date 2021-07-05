@@ -22,6 +22,8 @@ rule cnvkit_single:
         benchmark_dir + 'cnvkit_single_' + config["analysis"]["case_id"] + ".cnvkit_single.tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix() 
+    threads: 
+        get_threads(cluster_config, "cnvkit_single")
     params:
         purecn_exec = config["PURECN"],
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
@@ -54,13 +56,13 @@ cnvkit.py antitarget {input.baits_bed} \
 cnvkit.py coverage {input.bamT} \
 {params.cnv_dir}/targets.bed \
 --min-mapq 20 \
---processes 16 \
+--processes {threads} \
 --output {params.cnv_dir}/tumor.targetcoverage.cnn;
 
 cnvkit.py coverage {input.bamT} \
 {params.cnv_dir}/antitarget_bed \
 --min-mapq 20 \
---processes 16 \
+--processes {threads} \
 --output {params.cnv_dir}/tumor.antitargetcoverage.cnn;
 
 ## Compile a coverage reference from the given list of files
@@ -83,7 +85,7 @@ cnvkit.py segment {output.cnr} \
 --output {params.cnv_dir}/tumor.initial.cns \
 --method cbs \
 --drop-low-coverage \
---processes 16;
+--processes {threads};
 
 ## Convert copy number segments (.cns) to standard SEG format to be used in PureCN
 cnvkit.py export seg {params.cnv_dir}/tumor.initial.cns \
