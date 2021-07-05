@@ -80,7 +80,9 @@ def reference():
             "rankscore":
             "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
             "access_regions":
-            "tests/test_data/references/genome/access-5k-mappable.hg19.bed"
+            "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
+            "delly_exclusion":
+            "tests/test_data/references/genome/delly_exclusion.tsv"
         }
     }
 

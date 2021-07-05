@@ -27,3 +27,5 @@ varcall_cnvkit:
   - purecn
 vcf_merge:
   - vcfmerge
+varcall_delly:
+  - delly

@@ -5,12 +5,18 @@ Added:
 ^^^^^^
 
 * samtools flagstats and stats to workflow and MultiQC
+* Delly v0.8.7 somatic SV caller
+* Delly containter
+* bcftools v1.12 to delly container
+* tabix v0.2.6 to delly container
 * PASSed SV calls from Manta to clinical delivery
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
 * Added ``vcf2cytosure``` to annotate container
 * ``git`` to the container definition
+* prepare_delly_exclusion rule
 * Installation of PureCN rpackage in cnvkit container
 * Calculate tumor-purity and ploidy using ``PureCN`` for cnvkit call
+
 
 Changed:
 ^^^^^^^^
@@ -29,6 +35,8 @@ Fixed:
 * vcf-filtered-clinical tag files will have all variants including PASS
 * Refactor snakemake align rules according to snakemake etiquette 
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
+* Refactor snakemake manta rule according to snakemake etiquette
+=======
 * Order of columns in QC and coverage report issue #601
 
 Removed:

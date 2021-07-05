@@ -108,3 +108,8 @@ vardict
 :Article: `Nucleic Acid Research <https://pubmed.ncbi.nlm.nih.gov/27060149/>`
 :Version: `2019.06.04`
 
+Delly
+~~~~~~~
+:Source code: `GitHub <https://github.com/dellytools/delly>`
+:Article: `Bioinformatics <https://academic.oup.com/bioinformatics/article/28/18/i333/245403>`
+:Version: `0.8.7`

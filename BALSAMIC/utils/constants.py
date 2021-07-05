@@ -100,6 +100,12 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
+   "delly": {
+        "mutation": "somatic",
+        "type": "SV",
+        "analysis_type": ["paired", "single"],
+        "workflow_solution": ["BALSAMIC"]
+    },
 }
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
@@ -379,6 +385,15 @@ REFERENCE_FILES = {
             "output_file": "access_5kb_hg38.txt",
             "output_path": "genome"
         },
+        "delly_exclusion": {
+            "url":
+            "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg38.excl.tsv",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "delly_exclusion.tsv",
+            "output_path": "genome"
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -514,6 +529,15 @@ REFERENCE_FILES = {
             "output_file": "access_5kb_hg19.txt",
             "output_path": "genome"
         },
+        "delly_exclusion": {
+            "url":
+            "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg19.excl.tsv",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "delly_exclusion.tsv",
+            "output_path": "genome"
+        },
     }
 }
 
@@ -552,7 +576,7 @@ umiworkflow_params = {
 # list of bioinfo tools for each conda env
 VALID_CONTAINER_CONDA_NAME = {
     "align_qc", "annotate", "coverage_qc", "varcall_py36", "varcall_py27",
-    "varcall_cnvkit"
+    "varcall_cnvkit","varcall_delly"
 }
 
 BIOINFO_TOOL_ENV = {
@@ -576,6 +600,7 @@ BIOINFO_TOOL_ENV = {
     "strelka": "varcall_py27",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
+    "delly": "varcall_delly"
 }
 
 REPORT_MODEL = {
