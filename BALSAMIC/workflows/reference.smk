@@ -115,7 +115,8 @@ rule all:
         genome_chrom_size = genome_chrom_size_url.get_output_file,
         rankscore = rankscore_url.get_output_file,
         access_regions = access_regions_url.get_output_file,
-        delly_exclusion = delly_exclusion_url.get_output_file
+        delly_exclusion = delly_exclusion_url.get_output_file,
+        delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv")
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -143,7 +144,8 @@ rule all:
             "vep": input.vep,
             "rankscore": input.rankscore,
             "access_regions": input.access_regions,
-            "delly_exclusion" : input.delly_exclusion
+            "delly_exclusion" : input.delly_exclusion,
+            "delly_exclusion_converted " : input.delly_exclusion_converted
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -343,11 +345,13 @@ vep_install --SPECIES {params.species} \
 rule prepare_delly_exclusion:
     input:
         delly_exclusion = delly_exclusion_url.get_output_file,
+    output:
+        delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
     log:
         os.path.join(basedir, "genome", "delly_exclusion.log"),
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     shell:
         """
-sed -i 's/chr//g' {input.delly_exclusion} 2> {log}
+sed 's/chr//g' {input.delly_exclusion} > {output.delly_exclusion_converted} 2> {log}
         """

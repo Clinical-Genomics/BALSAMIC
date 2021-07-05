@@ -58,7 +58,7 @@ rule delly_tumor_normal:
         fa = config["reference"]["reference_genome"] ,
         bamN = bam_dir + normal_bam,
         bamT = bam_dir + tumor_bam,
-        excl = config["reference"]["delly_exclusion"],
+        excl = config["reference"]["delly_exclusion_converted"],
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
