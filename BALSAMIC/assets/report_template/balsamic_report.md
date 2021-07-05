@@ -17,7 +17,7 @@ Bioinformatisk analys
 
 # Sammanfattning
 
-| Prov-id | Provtyp | {{ meta.qc_table_header|join('|') }} |
+| Provtyp | Prov-id | {{ meta.qc_table_header|join('|') }} |
 | :---: | :---: | :---: | :---: | :---: |
 {%- for sample, value in meta.qc_table_content.items() %} 
 {{ value|join('|') }} |
@@ -25,7 +25,7 @@ Bioinformatisk analys
 
 
 # Täckningsgrad för vald analyspanel
-| Prov-id | Provtyp | {{ meta.coverage_table_header|join('|') }} |
+| Provtyp | Prov-id | {{ meta.coverage_table_header|join('|') }} |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 {%- for sample, value in meta.coverage_table_content.items() %} 
 {{ value|join('|') }} |
