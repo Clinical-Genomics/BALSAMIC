@@ -10,6 +10,7 @@ Added:
 * Added ``vcf2cytosure``` to annotate container
 * ``git`` to the container definition
 * Installation of PureCN rpackage in cnvkit container
+* Calculate tumor-purity and ploidy using ``PureCN`` for cnvkit call
 
 Changed:
 ^^^^^^^^
@@ -18,6 +19,7 @@ Changed:
 * New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
+* Split tumor-only ``cnvkit batch`` into individual commands
 
 Fixed:
 ^^^^^^
@@ -32,6 +34,7 @@ Removed:
 ^^^^^^^^
 
 * Cleaned up unused container definitions and conda environment files
+* Remove cnvkit calling for WGS cases
 
 [7.2.2]
 -------

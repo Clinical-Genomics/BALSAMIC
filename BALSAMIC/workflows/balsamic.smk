@@ -201,15 +201,9 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                                 mutation_type="SV",
                                                 mutation_class="somatic")
 
-        somatic_caller_cnv = get_variant_callers(config=config,
-                                                 analysis_type="paired",
-                                                 workflow_solution="BALSAMIC",
-                                                 mutation_type="CNV",
-                                                 mutation_class="somatic")
-
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-                                     "snakemake_rules/variant_calling/cnvkit_paired.rule"])
+                                    ])
 
         annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule")
     else:
@@ -220,12 +214,6 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                                 mutation_type="SV",
                                                 mutation_class="somatic")
 
-        somatic_caller_cnv = get_variant_callers(config=config,
-                                                 analysis_type="single",
-                                                 workflow_solution="BALSAMIC",
-                                                 mutation_type="CNV",
-                                                 mutation_class="somatic")
-
         somatic_caller_snv = get_variant_callers(config=config,
                                                  analysis_type="single",
                                                  workflow_solution="Sentieon",
@@ -235,7 +223,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
                                      "snakemake_rules/dragen_suite/dragen_dna.rule",
-                                     "snakemake_rules/variant_calling/cnvkit_single.rule"])
+                                     ])
 
         annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule")
 
