@@ -38,7 +38,6 @@ Fixed:
 * Refactor snakemake align rules according to snakemake etiquette 
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
 * Refactor snakemake manta rule according to snakemake etiquette
-=======
 * Order of columns in QC and coverage report issue #601
 
 Removed:
