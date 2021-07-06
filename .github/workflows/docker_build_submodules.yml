@@ -1,7 +1,7 @@
 name: build test container submodule
 
 # Tigger building and testing container only on pull requests
-on: ["push", "pull_request"]
+on: ["push"]
 
 jobs:
   main:
