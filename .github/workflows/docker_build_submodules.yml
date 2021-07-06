@@ -11,7 +11,8 @@ jobs:
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v2
-        submodules: recursive
+        with:
+            submodules: recursive
       - name: Get branch name
         id: get_branch_name
         shell: bash
