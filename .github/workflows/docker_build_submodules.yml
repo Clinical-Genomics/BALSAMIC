@@ -27,6 +27,6 @@ jobs:
         id: docker_build_only
         uses: docker/build-push-action@v2
         with:
+          context: ascatNgs
           push: false 
           tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-ascatngs 
-          file: ascatNgs/Dockerfile
