@@ -1,3 +1,11 @@
+[7.2.4]
+-------
+
+Changed:
+^^^^^^
+
+* Updated sentieon util sort in umi to use Sentieon 20201002 version
+
 [7.2.3]
 -------
 
