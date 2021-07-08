@@ -300,7 +300,7 @@ REFERENCE_FILES = {
         },
         "gnomad_variant": {
             "url":
-            "gs://gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz",
+            "gs://gcp-public-data--gnomad/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz",
             "file_type": "vcf",
             "gzip": False,
             "genome_version": "hg38",
@@ -309,7 +309,7 @@ REFERENCE_FILES = {
         },
         "gnomad_variant_index": {
             "url":
-            "gs://gnomad-public/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz.tbi",
+            "gs://gcp-public-data--gnomad/release/2.1.1/liftover_grch38/vcf/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf.bgz.tbi",
             "file_type": "vcf",
             "gzip": False,
             "genome_version": "hg38",
@@ -426,7 +426,7 @@ REFERENCE_FILES = {
         },
         "vcf_1kg": {
             "url":
-            "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5c.20130502.sites.vcf.gz",
+            "gs://genomics-public-data/ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5a.20130502.sites.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
@@ -435,7 +435,7 @@ REFERENCE_FILES = {
         },
         "gnomad_variant": {
             "url":
-            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "gs://gcp-public-data--gnomad/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz",
             "file_type": "vcf",
             "gzip": False,
             "genome_version": "hg19",
@@ -444,7 +444,7 @@ REFERENCE_FILES = {
         },
         "gnomad_variant_index": {
             "url":
-            "gs://gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
+            "gs://gcp-public-data--gnomad/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
             "file_type": "vcf",
             "gzip": False,
             "genome_version": "hg19",
