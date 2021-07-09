@@ -37,7 +37,6 @@ Fixed:
 * Refactor snakemake align rules according to snakemake etiquette 
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
 * Refactor snakemake manta rule according to snakemake etiquette
-=======
 * Order of columns in QC and coverage report issue #601
 
 Removed:
@@ -45,6 +44,30 @@ Removed:
 
 * Cleaned up unused container definitions and conda environment files
 * Remove cnvkit calling for WGS cases
+
+[7.2.5]
+-------
+
+Changed:
+^^^^^^^^
+
+* Updated path for gnomad and 1000genomes to a working path from Google Storage
+
+[7.2.4]
+-------
+
+Changed:
+^^^^^^^^
+
+* Updated sentieon util sort in umi to use Sentieon 20201002 version
+
+[7.2.3]
+-------
+
+Fixed:
+^^^^^^
+
+* Fixed memory issue with vcfanno in vep_somatic rule fixes #661
 
 [7.2.2]
 -------

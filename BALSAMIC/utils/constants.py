@@ -441,7 +441,7 @@ REFERENCE_FILES = {
         },
         "vcf_1kg": {
             "url":
-            "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5c.20130502.sites.vcf.gz",
+            "gs://genomics-public-data/ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5a.20130502.sites.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
