@@ -7,7 +7,7 @@ on:
       - "**"
 jobs:
   main:
-    name: Docker image build push 
+    name: Docker image build push
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: true
@@ -33,6 +33,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} 
+          tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
           build-args:
             CONTAINER_NAME=${{ matrix.container-name }}

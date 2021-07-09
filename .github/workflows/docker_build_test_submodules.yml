@@ -1,4 +1,4 @@
-name: pull request container
+name: build test container submodule
 
 # Tigger building and testing container only on pull requests
 on:
@@ -13,19 +13,16 @@ on:
       - 'BALSAMIC/containers/**'
       - 'Dockerfile'
 
-
 jobs:
   main:
     name: Docker image build test 
     runs-on: ubuntu-18.04
-    strategy:
-      fail-fast: false 
-      matrix: 
-        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly]
     steps:
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v2
+        with:
+            submodules: recursive
       - name: Get branch name
         id: get_branch_name
         shell: bash
@@ -40,15 +37,6 @@ jobs:
         id: docker_build_only
         uses: docker/build-push-action@v2
         with:
+          context: ascatNgs
           push: false 
-          tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} 
-          build-args:
-            CONTAINER_NAME=${{ matrix.container-name }}
-      - name: Test container
-        id: docker_test_container
-        shell: bash
-        run: |
-          docker run \
-          -v $(readlink -f container_tests):/container_tests \
-          clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
-          bash /container_tests/dockertest.sh ${{ matrix.container-name }}
+          tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-ascatngs 
