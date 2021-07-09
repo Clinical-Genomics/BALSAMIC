@@ -120,7 +120,7 @@ GRCh37d5_Y.loci contains the following contents:
 
 2. GC correction file:
  
- First step is to download 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is provided here_
+First step is to download 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is provided here_
 
 .. here_: https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs
 
@@ -149,7 +149,6 @@ followed by:
     next if($1 < 0.05); next if($F[0] eq $l_c && $F[1]-1000 < $l_p);\
     printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];'\
     > SnpPositions_GRCh37_1000g.tsv
-
 
 Second step is to use SnpPositions.tsv file and generate SnpGcCorrections.tsv file as described here_
 
