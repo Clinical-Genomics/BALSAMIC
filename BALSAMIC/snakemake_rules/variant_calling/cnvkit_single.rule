@@ -40,7 +40,7 @@ rule cnvkit_single:
 source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
-export PURECN='/opt/conda/envs/varcall_cnvkit/lib/R/library/PureCN/extdata'
+export PURECN='/opt/conda/envs/varcall_cnvkit/lib/R/library/PureCN/extdata/PureCN.R'
 
 ## create target and anti-target bed files
 cnvkit.py target {input.baits_bed} \
