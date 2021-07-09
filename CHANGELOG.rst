@@ -16,6 +16,7 @@ Added:
 * prepare_delly_exclusion rule
 * Installation of PureCN rpackage in cnvkit container
 * Calculate tumor-purity and ploidy using ``PureCN`` for cnvkit call
+* Reference section to docs/FAQ.rst
 
 
 Changed:
