@@ -134,7 +134,10 @@ followed by:
 .. code:: console
 
     curl -sSL $TG_DATA | zgrep -F 'E_Multiple_observations' | grep -F 'TSA=SNV' |\
-    perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/); next if($F[0] eq $l_c && $F[1]-1000 < $l_p); $F[7]=~m/MAF=([^;]+)/; next if($1 < 0.05); printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];' > SnpPositions_GRCh37_1000g.tsv
+    perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/);\
+    next if($F[0] eq $l_c && $F[1]-1000 < $l_p); $F[7]=~m/MAF=([^;]+)/;\
+    next if($1 < 0.05); printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1];\
+    $l_c=$F[0]; $l_p=$F[1];' > SnpPositions_GRCh37_1000g.tsv
 
 
 --or--
@@ -142,7 +145,10 @@ followed by:
 .. code:: console
 
     curl -sSL $TG_DATA | zgrep -F 'E_Multiple_observations' | grep -F 'TSA=SNV' |\
-    perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/); $F[7]=~m/MAF=([^;]+)/; next if($1 < 0.05); next if($F[0] eq $l_c && $F[1]-1000 < $l_p); printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];' > SnpPositions_GRCh37_1000g.tsv
+    perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/); $F[7]=~m/MAF=([^;]+)/;\
+    next if($1 < 0.05); next if($F[0] eq $l_c && $F[1]-1000 < $l_p);\
+    printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];'\
+    > SnpPositions_GRCh37_1000g.tsv
 
 
 Second step is to use SnpPositions.tsv file and generate SnpGcCorrections.tsv file as described here_
