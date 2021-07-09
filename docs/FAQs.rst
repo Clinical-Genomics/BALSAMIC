@@ -107,7 +107,7 @@ Detailed information is available at the ascatNGS_
 
 .. _ascatNGS: https://github.com/cancerit/ascatNgs
 
-Briefly, ascatNGS needs gender loci file if gender information for the input sample is not available. The second file is `SnpGcCorrections.tsv`, which is prepared from the 1000 genome SNP panel.
+Briefly, ascatNGS needs gender loci file if gender information for the input sample is not available. The second file is *SnpGcCorrections.tsv*, which is prepared from the 1000 genome SNP panel.
 
 1. **Gender loci file:**
   
@@ -152,7 +152,7 @@ Followed by:
     printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];'\
     > SnpPositions_GRCh37_1000g.tsv
 
-Second step is to use `SnpPositions.tsv` file and generate `SnpGcCorrections.tsv` file as described here_
+Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv* file as described here_
 
 .. here_: https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv
 
