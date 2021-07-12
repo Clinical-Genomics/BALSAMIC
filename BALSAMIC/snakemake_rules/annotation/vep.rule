@@ -64,7 +64,7 @@ tabix -p vcf -f {output.vcf_all};
 rm $tmpvcf;
     """
 
-rule vep_stat:
+rule tmb_calculation:
   input:
     vep = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
   output:
@@ -75,7 +75,7 @@ rule vep_stat:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
     conda = config["bioinfo_tools"].get("ensembl-vep"),
-    bcftools_filter_string = "INFO/DP>=50 && FORMAT/AD>=5 && FORMAT/AF>=0.1",
+    af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
@@ -90,11 +90,14 @@ source activate {params.conda};
 
 if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
 
-bcftools view --type snps -f PASS {input.vep} 2> /dev/null \
-| bcftools filter -i \"{params.bcftools_filter_string}\" \
-| filter_vep --ontology --filter {params.filter_vep_string} \
-| bcftools +counts \
-| awk -v region=${{region_size}} '$0~/SNPs/ {{print \"tmb:\",$NF/region}}' > {output.tmb};
+bcftools view --types snps,indels --apply-filters PASS {input.vep} \
+| bcftools filter -i "INFO/AF>={params.af_cutoff}" \
+| filter_vep --filter 'not Existing_variation' \
+| filter_vep --filter 'not COSMIC' \
+| filter_vep --filter 'not non_coding_transcript_exon_variant' \
+| filter_vep --filter 'not non_coding_transcript_variant' \
+| filter_vep --filter 'not feature_truncation' -C \
+| awk -v region=${{region_size}} '{{print $NF/region}}' > {output.tmb};
     """
     
 
