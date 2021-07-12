@@ -46,6 +46,7 @@ Removed:
 
 * Cleaned up unused container definitions and conda environment files
 * Remove cnvkit calling for WGS cases
+* Removed the install.sh script
 
 [7.2.5]
 -------
