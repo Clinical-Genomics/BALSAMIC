@@ -8,11 +8,11 @@ on:
 
 jobs:
   main:
-    name: Docker image build push 
+    name: Docker image build push
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: true
-      matrix: 
+      matrix:
         container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly]
     steps:
       - name: Set up QEMU
@@ -34,6 +34,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} 
+          tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
           build-args:
             CONTAINER_NAME=${{ matrix.container-name }}

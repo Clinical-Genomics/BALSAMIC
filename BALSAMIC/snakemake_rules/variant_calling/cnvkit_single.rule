@@ -25,7 +25,6 @@ rule cnvkit_single:
     threads: 
         get_threads(cluster_config, "cnvkit_single")
     params:
-        purecn_exec = config["PURECN"],
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor_name = "tumor.merged",
@@ -41,6 +40,7 @@ rule cnvkit_single:
 source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
+export PURECN='/opt/conda/envs/varcall_cnvkit/lib/R/library/PureCN/extdata/PureCN.R'
 
 ## create target and anti-target bed files
 cnvkit.py target {input.baits_bed} \
@@ -94,7 +94,7 @@ cnvkit.py export seg {params.cnv_dir}/tumor.initial.cns \
 ## Run PureCN to estimate tumor-purity and ploidy
 mkdir -p {params.purecn_dir}
 
-Rscript {params.purecn_exec} \
+Rscript $PURECN \
 --out {params.purecn_dir} \
 --sampleid TUMOR \
 --tumor {output.cnr} \

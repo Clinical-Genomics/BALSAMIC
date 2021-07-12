@@ -5,7 +5,7 @@ on:
     paths-ignore:
       - "CHANGELOG.rst"
       - "docs/**"
-  pull_requests:
+  pull_request:
     paths-ignore:
       - "CHANGELOG.rst"
       - "docs/**"
