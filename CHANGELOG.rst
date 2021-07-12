@@ -30,6 +30,7 @@ Changed:
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
 * Update GNOMAD URL
 * Split tumor-only ``cnvkit batch`` into individual commands
+* Updated Snakemake to v6.5.3 
 
 Fixed:
 ^^^^^^
