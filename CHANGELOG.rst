@@ -16,6 +16,8 @@ Added:
 * prepare_delly_exclusion rule
 * Installation of PureCN rpackage in cnvkit container
 * Calculate tumor-purity and ploidy using ``PureCN`` for cnvkit call
+* ``ascatngs`` as a submodule
+* GitHub action to build and test ``ascatngs`` container
 * Reference section to docs/FAQ.rst
 
 

@@ -82,7 +82,9 @@ def reference():
             "access_regions":
             "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
             "delly_exclusion":
-            "tests/test_data/references/genome/delly_exclusion.tsv"
+            "tests/test_data/references/genome/delly_exclusion.tsv",
+            "delly_exclusion_converted":
+            "tests/test_data/references/genome/delly_exclusion_converted.tsv"
         }
     }
 

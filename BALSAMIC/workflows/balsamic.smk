@@ -98,8 +98,6 @@ try:
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
     
-    config["PURECN"] = Path(os.environ["PURECN"],"PureCN.R").as_posix()
-    
 except KeyError as error:
     sentieon = False
     LOG.warning("Set environment variables {} to run BALSAMIC workflow".format(error.args[0]))
@@ -269,6 +267,9 @@ else:
                                                  mutation_class="somatic")
 
         somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi
+
+        somatic_caller_sv = somatic_caller_sv + somatic_caller_cnv
+
     else:
 
         annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_only.rule")
@@ -304,9 +305,11 @@ else:
                                                  mutation_type="SNV",
                                                  mutation_class="somatic")
 
-        somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi 
+        somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv + somatic_caller_cnv
+        somatic_caller_sv = somatic_caller_sv + somatic_caller_cnv
+
+somatic_caller = somatic_caller_snv + somatic_caller_sv
 
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
