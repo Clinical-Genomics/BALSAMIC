@@ -18,6 +18,7 @@ Added:
 * Calculate tumor-purity and ploidy using ``PureCN`` for cnvkit call
 * ``ascatngs`` as a submodule
 * GitHub action to build and test ``ascatngs`` container
+* Reference section to docs/FAQ.rst
 
 
 Changed:
@@ -45,6 +46,30 @@ Removed:
 
 * Cleaned up unused container definitions and conda environment files
 * Remove cnvkit calling for WGS cases
+
+[7.2.5]
+-------
+
+Changed:
+^^^^^^^^
+
+* Updated path for gnomad and 1000genomes to a working path from Google Storage
+
+[7.2.4]
+-------
+
+Changed:
+^^^^^^^^
+
+* Updated sentieon util sort in umi to use Sentieon 20201002 version
+
+[7.2.3]
+-------
+
+Fixed:
+^^^^^^
+
+* Fixed memory issue with vcfanno in vep_somatic rule fixes #661
 
 [7.2.2]
 -------
