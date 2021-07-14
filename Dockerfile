@@ -6,7 +6,7 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
-LABEL about.version="7.2.5"
+LABEL about.version="7.2.6"
 
 ENV PATH="/opt/conda/bin/:${PATH}"
 RUN apk add --no-cache bash gcc 
