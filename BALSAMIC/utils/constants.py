@@ -318,11 +318,11 @@ REFERENCE_FILES = {
         },
         "cosmicdb": {
             "url":
-            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v92/VCF/CosmicCodingMuts.vcf.gz",
+            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
-            "output_file": "cosmic_coding_muts_v92.vcf",
+            "output_file": "cosmic_coding_muts_v94.vcf",
             "output_path": "variants"
         },
         "wgs_calling": {
@@ -453,11 +453,11 @@ REFERENCE_FILES = {
         },
         "cosmicdb": {
             "url":
-            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
+            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
-            "output_file": "cosmic_coding_muts_v90.vcf",
+            "output_file": "cosmic_coding_muts_v94.vcf",
             "output_path": "variants"
         },
         "wgs_calling": {
