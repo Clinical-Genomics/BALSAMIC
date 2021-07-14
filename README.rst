@@ -4,7 +4,7 @@
         <a href="https://github.com/Clinical-Genomics/BALSAMIC">
             <img  width=480 src="https://raw.githubusercontent.com/Clinical-Genomics/BALSAMIC/master/BALSAMIC/assets/balsamic_logo.png">
         </a>
-        <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 7.2.5)</h3>
+        <h3 align="center">Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (v 7.2.6)</h3>
         <h3 align="center">FastQ to Annotated VCF</h3>
     </p>
 
@@ -56,7 +56,7 @@ Snakemake cli given that there is a proper config file created.
 
 .. |docker_latest_build_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push_master.yml/badge.svg 
 
-.. |docker_latest_release_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push_release.yml/badge.svg?tag=v7.2.5 
+.. |docker_latest_release_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push_release.yml/badge.svg?tag=v7.2.6 
   
 .. |snakemake_badge| image:: https://img.shields.io/badge/snakemake-%E2%89%A55.12.3-brightgreen.svg 
 

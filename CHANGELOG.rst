@@ -55,6 +55,14 @@ Removed:
 Changed:
 ^^^^^^^^
 
+* Updated COSMIC path to use version 94
+
+[7.2.5]
+-------
+
+Changed:
+^^^^^^^^
+
 * Updated path for gnomad and 1000genomes to a working path from Google Storage
 
 [7.2.4]
