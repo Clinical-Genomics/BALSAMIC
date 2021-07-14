@@ -500,6 +500,8 @@ class ReferenceMeta(BaseModel):
     rankscore: Optional[ReferenceUrlsModel]
     access_regions: Optional[ReferenceUrlsModel]
     delly_exclusion: Optional[ReferenceUrlsModel]
+    ascat_GCcorrection: Optional[ReferenceUrlsModel]
+    ascat_chrYloci: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):

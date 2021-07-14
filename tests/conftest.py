@@ -84,7 +84,11 @@ def reference():
             "delly_exclusion":
             "tests/test_data/references/genome/delly_exclusion.tsv",
             "delly_exclusion_converted":
-            "tests/test_data/references/genome/delly_exclusion_converted.tsv"
+            "tests/test_data/references/genome/delly_exclusion_converted.tsv",
+            "ascat_GCcorrection":
+            "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
+            "ascat_chrYloci":
+            "tests/test_data/references/genome/GRCh37_Y.loci"
         }
     }
 

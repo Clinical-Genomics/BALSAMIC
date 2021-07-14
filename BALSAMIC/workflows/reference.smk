@@ -61,6 +61,8 @@ refgene_sql_url = reference_file_model.refgene_sql
 rankscore_url = reference_file_model.rankscore
 access_regions_url = reference_file_model.access_regions
 delly_exclusion_url = reference_file_model.delly_exclusion
+ascat_GCcorrection_url = reference_file_model.ascat_GCcorrection
+ascat_chrYloci_url = reference_file_model.ascat_chrYloci
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
@@ -116,7 +118,9 @@ rule all:
         rankscore = rankscore_url.get_output_file,
         access_regions = access_regions_url.get_output_file,
         delly_exclusion = delly_exclusion_url.get_output_file,
-        delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv")
+        delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
+        ascat_GCcorrection = ascat_GCcorrection_url.get_output_file,
+        ascat_chrYloci = ascat_GCcorrection_url.get_output_file
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -145,7 +149,9 @@ rule all:
             "rankscore": input.rankscore,
             "access_regions": input.access_regions,
             "delly_exclusion" : input.delly_exclusion,
-            "delly_exclusion_converted " : input.delly_exclusion_converted
+            "delly_exclusion_converted " : input.delly_exclusion_converted,
+            "ascat_GCcorrection" : input.ascat_GCcorrection,
+            "ascat_chrYloci" : input.ascat_chrYloci
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -163,7 +169,8 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
-                    cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url, delly_exclusion_url]
+                    cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url,
+                    delly_exclusion_url, ascat_GCcorrection_url, ascat_chrYloci_url]
 
 rule download_reference:
     output:

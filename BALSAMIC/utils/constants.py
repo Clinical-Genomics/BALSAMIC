@@ -538,6 +538,25 @@ REFERENCE_FILES = {
             "output_file": "delly_exclusion.tsv",
             "output_path": "genome"
         },
+        "ascat_GCcorrection": {
+            "url":
+                "https://github.com/Clinical-Genomics/reference-files/blob/master/cancer/references/GRCh37_SnpGcCorrections.tsv.gz",
+            "file_type": "text",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": "GRCh37_SnpGcCorrections.tsv",
+            "output_path": "genome"
+        },
+        "ascat_chrYloci": {
+            "url":
+                "https://github.com/Clinical-Genomics/reference-files/blob/master/cancer/references/GRCh37_d5_Y.loci",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "GRCh37_Y.loci",
+            "output_path": "genome"
+        },
+
     }
 }
 
