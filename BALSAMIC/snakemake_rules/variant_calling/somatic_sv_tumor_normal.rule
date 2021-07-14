@@ -87,8 +87,6 @@ echo TUMOR$'\t'tumor$'\n'NORMAL$'\t'control > {params.tmpdir}/samples.tsv
 
 delly filter -p -f somatic -o {params.tmpdir}/delly.somatic.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf
 
-bcftools view -O z -o {params.tmpdir}/delly.vcf.gz {params.tmpdir}/delly.somatic.bcf
-
 bcftools view -O z -o {output.final} {params.tmpdir}/delly.somatic.bcf
 
 tabix -p vcf -f {output.final};

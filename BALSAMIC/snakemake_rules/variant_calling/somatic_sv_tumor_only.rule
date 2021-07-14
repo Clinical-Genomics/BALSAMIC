@@ -9,20 +9,25 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
 rule manta_tumor_only:
     input:
-      fa = config["reference"]["reference_genome"],
-      bamT = bam_dir + tumor_bam
+        fa = config["reference"]["reference_genome"],
+        bamT = bam_dir + tumor_bam
     output:
-      final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
-      namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map"
-    params:
-      tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-      runmode = "local",
-      tumor = get_sample_type(config["samples"], "tumor"),
-      conda = config["bioinfo_tools"].get("manta")
-    threads: get_threads(cluster_config, "manta_tumor_only") 
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix() 
-    benchmark: 
+        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map"
+    benchmark:
         benchmark_dir + 'manta_tumor_only_' + config["analysis"]["case_id"] + ".manta.tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        runmode = "local",
+        tumor = get_sample_type(config["samples"], "tumor"),
+        conda = config["bioinfo_tools"].get("manta")
+    threads:
+        get_threads(cluster_config, "manta_tumor_only")
+    message:
+        ("Call structural variants using manta for {input.bamT} file then "
+        "index the compressed vcf file")
     shell:
       """
 source activate {params.conda};
@@ -43,3 +48,41 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
       """
 
+
+rule delly_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"] ,
+        bamT = bam_dir + tumor_bam,
+        excl = config["reference"]["delly_exclusion_converted"],
+    output:
+        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz"
+    benchmark:
+        benchmark_dir + 'delly_tumor_only_' + config["analysis"]["case_id"] + "_delly.tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        runmode = "local",
+        tumor = get_sample_type(config["samples"], "tumor"),
+        conda = config["bioinfo_tools"].get("delly")
+    threads:
+        get_threads(cluster_config, "delly_tumor_only")
+    message:
+        ("Call structural variants using delly for {input.bamT} file then "
+        "filter somatic variants and finally convert from bcf to compressed vcf file")
+    shell:
+        """
+source activate {params.conda};
+
+delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT}
+
+delly filter -p -o {params.tmpdir}/delly.filtered.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf
+
+bcftools view -O z -o {output.final} {params.tmpdir}/delly.filtered.bcf
+
+tabix -p vcf -f {output.final};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
