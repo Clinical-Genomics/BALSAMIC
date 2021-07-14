@@ -30,6 +30,7 @@ Changed:
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
 * Update GNOMAD URL
 * Split tumor-only ``cnvkit batch`` into individual commands
+* Improved TMB calculation issue #51
 
 Fixed:
 ^^^^^^
@@ -47,6 +48,14 @@ Removed:
 * Cleaned up unused container definitions and conda environment files
 * Remove cnvkit calling for WGS cases
 * Removed the install.sh script
+
+[7.2.5]
+-------
+
+Changed:
+^^^^^^^^
+
+* Updated COSMIC path to use version 94
 
 [7.2.5]
 -------
