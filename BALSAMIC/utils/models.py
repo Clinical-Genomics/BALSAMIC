@@ -465,22 +465,24 @@ class ReferenceMeta(BaseModel):
     This class defines a meta for various reference files. Only reference_genome is mandatory.
 
     Attributes:
-      basedir: str for base directory which will be appended to all ReferenceUrlsModel fields
-      reference_genome: ReferenceUrlsModel. Required field for reference genome fasta file
-      dbsnp: ReferenceUrlsModel. Optional field for dbSNP vcf file
-      hc_vcf_1kg: ReferenceUrlsModel. Optional field for high confidence 1000Genome vcf
-      mills_1kg: ReferenceUrlsModel. Optional field for Mills' high confidence indels vcf
-      known_indel_1kg: ReferenceUrlsModel. Optional field for 1000Genome known indel vcf
-      vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
-      wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
-      genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
-      gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
-      cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
-      refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
-      refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
-      rankscore: ReferenceUrlsModel. Optional rankscore model
-      access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
-      delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
+        basedir: str for base directory which will be appended to all ReferenceUrlsModel fields
+        reference_genome: ReferenceUrlsModel. Required field for reference genome fasta file
+        dbsnp: ReferenceUrlsModel. Optional field for dbSNP vcf file
+        hc_vcf_1kg: ReferenceUrlsModel. Optional field for high confidence 1000Genome vcf
+        mills_1kg: ReferenceUrlsModel. Optional field for Mills' high confidence indels vcf
+        known_indel_1kg: ReferenceUrlsModel. Optional field for 1000Genome known indel vcf
+        vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
+        wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
+        genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
+        gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
+        cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
+        refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
+        refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
+        rankscore: ReferenceUrlsModel. Optional rankscore model
+        access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
+        delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
+        ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
+        ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
     """
 
     basedir: str = ""
@@ -500,8 +502,8 @@ class ReferenceMeta(BaseModel):
     rankscore: Optional[ReferenceUrlsModel]
     access_regions: Optional[ReferenceUrlsModel]
     delly_exclusion: Optional[ReferenceUrlsModel]
-    ascat_GCcorrection: Optional[ReferenceUrlsModel]
-    ascat_chrYloci: Optional[ReferenceUrlsModel]
+    ascat_gccorrection: Optional[ReferenceUrlsModel]
+    ascat_chryloci: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):
