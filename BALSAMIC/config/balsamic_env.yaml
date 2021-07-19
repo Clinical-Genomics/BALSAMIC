@@ -29,3 +29,5 @@ vcf_merge:
   - vcfmerge
 varcall_delly:
   - delly
+ascatngs:
+  -ascat
