@@ -74,11 +74,11 @@ rule delly_tumor_only:
         """
 source activate {params.conda};
 
-delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT}
+delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT};
 
-delly filter -p -o {params.tmpdir}/delly.filtered.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf
+delly filter -p -o {params.tmpdir}/delly.filtered.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf;
 
-bcftools view -O z -o {output.final} {params.tmpdir}/delly.filtered.bcf
+bcftools view -O z -o {output.final} {params.tmpdir}/delly.filtered.bcf;
 
 tabix -p vcf -f {output.final};
 
