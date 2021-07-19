@@ -324,11 +324,11 @@ REFERENCE_FILES = {
         },
         "cosmicdb": {
             "url":
-            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v92/VCF/CosmicCodingMuts.vcf.gz",
+            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
-            "output_file": "cosmic_coding_muts_v92.vcf",
+            "output_file": "cosmic_coding_muts_v94.vcf",
             "output_path": "variants"
         },
         "wgs_calling": {
@@ -468,11 +468,11 @@ REFERENCE_FILES = {
         },
         "cosmicdb": {
             "url":
-            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v90/VCF/CosmicCodingMuts.vcf.gz",
+            "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
-            "output_file": "cosmic_coding_muts_v90.vcf",
+            "output_file": "cosmic_coding_muts_v94.vcf",
             "output_path": "variants"
         },
         "wgs_calling": {
@@ -538,6 +538,25 @@ REFERENCE_FILES = {
             "output_file": "delly_exclusion.tsv",
             "output_path": "genome"
         },
+        "ascat_gccorrection": {
+            "url":
+                "https://github.com/Clinical-Genomics/reference-files/blob/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_SnpGcCorrections.tsv.gz",
+            "file_type": "text",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": "GRCh37_SnpGcCorrections.tsv",
+            "output_path": "genome"
+        },
+        "ascat_chryloci": {
+            "url":
+                "https://github.com/Clinical-Genomics/reference-files/raw/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_d5_Y.loci",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "GRCh37_Y.loci",
+            "output_path": "genome"
+        },
+
     }
 }
 
