@@ -158,6 +158,8 @@ if config["analysis"]["sequencing_type"] != "wgs" and config["analysis"]["analys
     umiqc_rules.extend(["snakemake_rules/umi/mergetype_normal_umi.rule"])
  
 generatetable_umi_rules = [ "snakemake_rules/umi/generate_AF_tables.rule" ]
+varcaller_umi_filter_rules = ["snakemake_rules/annotation/varcaller_umi_pass.rule"]
+
 
 if config["analysis"]["sequencing_type"] == "wgs":
     variantcalling_rules = ["snakemake_rules/variant_calling/sentieon_germline.rule"]
@@ -343,11 +345,11 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
 
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.vcf.gz",
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.pass.vcf.gz",
                                       vcf=get_vcf(config, ["TNscope_umi"], [config["analysis"]["case_id"]])),
                                       expand(umi_qc_dir + "{sample}.umi.mean_family_depth",
                                       sample =  config["samples"])])
-    config["rules"] = config["rules"] + umiqc_rules
+    config["rules"] = config["rules"] + umiqc_rules + varcaller_umi_filter_rules 
     
     if "background_variants" in config:
         analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",

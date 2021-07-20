@@ -63,7 +63,8 @@ else:
     variant_call = ["snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"]
     umi_call.extend(["snakemake_rules/umi/mergetype_normal_umi.rule"])
 
-annotate_vcf = ["snakemake_rules/annotation/vep.rule"]
+annotate_vcf = ["snakemake_rules/annotation/vep.rule",
+                "snakemake_rules/annotation/varcaller_umi_pass.rule"]
 
 qc = ["snakemake_rules/umi/qc_umi.rule"]
 
@@ -77,7 +78,7 @@ SAMPLES = config["samples"]
 CASE_NAME = config["analysis"]["case_id"]
 
 # Define outputs
-analysis_output = [expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz", var_type= "SNV", case_name=CASE_NAME, var_caller=["TNscope_umi"]),
+analysis_output = [expand(vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.pass.vcf.gz", var_type= "SNV", case_name=CASE_NAME, var_caller=["TNscope_umi"]),
 expand(umi_qc_dir + "{sample}.umi.{metric}", sample=SAMPLES, metric = ["metrics", "mean_family_depth"])]
 
 config["rules"] = fastp_umi + umi_call + variant_call +  annotate_vcf + qc
