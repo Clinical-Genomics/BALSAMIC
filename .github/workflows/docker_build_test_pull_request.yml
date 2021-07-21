@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false 
       matrix: 
-        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly]
+        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly, balsamic]
     steps:
       - name: Git checkout
         id: git_checkout
@@ -45,6 +45,7 @@ jobs:
           build-args:
             CONTAINER_NAME=${{ matrix.container-name }}
       - name: Test container
+        if: ${{ matrix.container-name != 'balsamic' }}
         id: docker_test_container
         shell: bash
         run: |
