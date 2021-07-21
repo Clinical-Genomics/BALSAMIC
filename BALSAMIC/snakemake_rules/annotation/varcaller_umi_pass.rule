@@ -6,7 +6,7 @@ rule ngs_filter_tnscope_umi:
     input:
         vcf = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.vcf.gz",
     output:
-        vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.pass.vcf.gz",
+        umi_vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.pass.vcf.gz",
     benchmark:
         benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnscope_umi.vep.tsv"
     singularity: 
@@ -14,14 +14,14 @@ rule ngs_filter_tnscope_umi:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
         conda = config["bioinfo_tools"].get("bcftools"),
-        sample_id = '{case_name}'
+        case_name = '{case_name}'
     threads: 
         get_threads(cluster_config, 'ngs_filter_tnscope_umi')
     message: 
-        "Filtering TNscope umi PASS variants using bcftools for {params.sample_id}"
+        "Filtering TNscope umi PASS variants using bcftools for {params.case_name}"
     shell:
         """
 source activate {params.conda};
-bcftools view -f PASS {input.vcf} -O z -o {output.vcf_pass};
-tabix -p vcf -f {output.vcf_pass};
+bcftools view -f PASS {input.vcf} -O z -o {output.umi_vcf_pass};
+tabix -p vcf -f {output.umi_vcf_pass};
         """

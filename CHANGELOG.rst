@@ -21,7 +21,7 @@ Added:
 * Reference section to docs/FAQ.rst
 * ascat download references
 * Delly tumor only rule
-* Filter TNscope umi ``pass`` variants 
+* Filter TNscope umi ``pass`` variants and add them to final delivery 
 
 Changed:
 ^^^^^^^^
