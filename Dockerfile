@@ -8,13 +8,17 @@ LABEL about.maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 LABEL about.version="7.2.6"
 
-RUN apk add --no-cache bash gcc git 
+ENV PATH="/opt/conda/bin/:${PATH}"
+RUN apk add --no-cache bash gcc git libc-dev zlib-dev linux-headers
 
 ARG CONTAINER_NAME
+ARG WORK_DIR=project
 
 # Copy all project files
-COPY . tmp/
+COPY . /${WORK_DIR}
 
-RUN /bin/sh /tmp/BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.sh ${CONTAINER_NAME} && \
-	conda clean --all --yes && \
-	rm -rf tmp/
+RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+RUN if [ "$CONTAINER_NAME" = "balsamic" ]; then cd /project && pip install --no-cache-dir . ; fi
+
+# Clean work environment
+RUN rm -rf /project && conda clean --all --yes
