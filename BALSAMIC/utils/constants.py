@@ -540,7 +540,7 @@ REFERENCE_FILES = {
         },
         "ascat_gccorrection": {
             "url":
-                "https://github.com/Clinical-Genomics/reference-files/blob/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_SnpGcCorrections.tsv.gz",
+                "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_SnpGcCorrections.tsv.gz",
             "file_type": "text",
             "gzip": True,
             "genome_version": "hg19",
@@ -549,7 +549,7 @@ REFERENCE_FILES = {
         },
         "ascat_chryloci": {
             "url":
-                "https://github.com/Clinical-Genomics/reference-files/raw/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_d5_Y.loci",
+                "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_d5_Y.loci",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
