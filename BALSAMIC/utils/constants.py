@@ -620,6 +620,9 @@ BIOINFO_TOOL_ENV = {
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "varcall_delly",
+}
+
+BIOINFO_TOOL_SUBMODULE = {
     "ascat": "ascatngs"
 }
 
