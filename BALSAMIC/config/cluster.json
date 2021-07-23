@@ -239,5 +239,21 @@
 	"bcftools_query_calculatenoiseAF_umi": { 
 		"time": "2:00:00",
 		"n": 8
+	},
+	"delly_tumor_normal": {
+		"time": "8:00:00",
+		"n": 36
+	},
+	"delly_tumor_only": {
+		"time": "8:00:00",
+		"n": 36
+	},
+	"ascat_tumor_normal": {
+		"time": "8:00:00",
+		"n": 36
+	},
+	"ascat_tumor_only": {
+		"time" : "8:00:00",
+		"n": 36
 	}
 }
