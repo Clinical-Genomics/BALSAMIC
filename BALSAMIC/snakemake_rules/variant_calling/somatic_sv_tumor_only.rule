@@ -102,7 +102,7 @@ rule ascat_tumor_only:
         rawprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
         sunriseplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
         tumorplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
-        ASPCFplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        aspcfplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
         ascatprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
@@ -113,7 +113,6 @@ rule ascat_tumor_only:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
-        conda = config["bioinfo_tools"].get("ascat")
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")
     message:
@@ -121,11 +120,18 @@ rule ascat_tumor_only:
         "filter somatic variants and finally convert to compressed vcf file")
     shell:
         """
-source activate {params.conda};
-
 export LD_LIBRARY_PATH=:/opt/wtsi-cgp/lib;
 
-ascat.pl -protocol WGS -species human -assembly GRCh37 -cpus 36 -reference {input.fa} -snp_gc {input.gccorrection} -outdir {params.tmpdir} -gender L -locus {input.chryloci} -tumour {input.bamT};
+ascat.pl \
+  -protocol WGS \
+  -species human \
+  -assembly GRCh37 \
+  -cpus 36 \
+  -reference {input.fa} \
+  -snp_gc {input.gccorrection} \
+  -outdir {params.tmpdir} \
+  -gender L -locus {input.chryloci} \
+  -tumour {input.bamT};
 
 cp  {params.tmpdir}/TUMOR.copynumber.caveman.vcf.gz {output.finalvcf};
 
@@ -141,7 +147,7 @@ cp {params.tmpdir}/TUMOR.tumour.png {output.tumorplot};
 
 cp {params.tmpdir}/TUMOR.ASCATprofile.png {output.ascatprofileplot};
 
-cp {params.tmpdir}/TUMOR.ASPCF.png {output.ascatprofileplot};
+cp {params.tmpdir}/TUMOR.ASPCF.png {output.aspcfplot};
 
 tabix -p vcf -f {output.final};
 
