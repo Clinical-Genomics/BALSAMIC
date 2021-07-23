@@ -118,13 +118,13 @@ rule ascat_tumor_normal:
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("ascatngs") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("ascat") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        conda = config["bioinfo_tools"].get("ascatngs")
+        conda = config["bioinfo_tools"].get("ascat")
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")
     message:
