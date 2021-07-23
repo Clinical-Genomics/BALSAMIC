@@ -22,6 +22,8 @@ Added:
 * ascat download references
 * Delly tumor only rule
 * ascat tumor normal and tumor only rules to WGS workflow
+
+
 Changed:
 ^^^^^^^^
 
