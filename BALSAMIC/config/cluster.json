@@ -251,9 +251,5 @@
 	"ascat_tumor_normal": {
 		"time": "8:00:00",
 		"n": 36
-	},
-	"ascat_tumor_only": {
-		"time" : "8:00:00",
-		"n": 36
 	}
 }
