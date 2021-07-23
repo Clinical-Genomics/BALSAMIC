@@ -21,7 +21,7 @@ Added:
 * Reference section to docs/FAQ.rst
 * ascat download references
 * Delly tumor only rule
-
+* ascat tumor normal and tumor only rules
 Changed:
 ^^^^^^^^
 
