@@ -19,8 +19,9 @@ Added:
 * ``ascatngs`` as a submodule
 * GitHub action to build and test ``ascatngs`` container
 * Reference section to docs/FAQ.rst
-* ascat download references
+* ascat download references from reference_file repository
 * Delly tumor only rule
+* ascat download container
 * Balsamic container installation
 
 Changed:
