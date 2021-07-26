@@ -21,6 +21,7 @@ Added:
 * Reference section to docs/FAQ.rst
 * ascat download references
 * Delly tumor only rule
+* Balsamic container installation
 
 Changed:
 ^^^^^^^^
@@ -32,6 +33,7 @@ Changed:
 * Update GNOMAD URL
 * Split tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
+* ``docker/build-push-action@v2`` checkouts only the working directory
 
 Fixed:
 ^^^^^^

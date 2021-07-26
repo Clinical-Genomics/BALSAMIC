@@ -1,6 +1,6 @@
 name: pull request container
 
-# Tigger building and testing container only on pull requests
+# Trigger building and testing container only on pull requests
 on:
   push:
     branches-ignore:
@@ -26,6 +26,7 @@ jobs:
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v2
+        ref: ${GITHUB_REF##*/}
       - name: Get branch name
         id: get_branch_name
         shell: bash
@@ -53,3 +54,12 @@ jobs:
           -v $(readlink -f container_tests):/container_tests \
           clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
           bash /container_tests/dockertest.sh ${{ matrix.container-name }}
+      - name: Test balsamic container
+        if: ${{ matrix.container-name == 'balsamic' }}
+        id: balsamic_test_container
+        shell: bash
+        run: |
+          docker run \
+          -v $(readlink -f container_tests):/container_tests \
+          clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
+          bash /container_tests/balsamic.sh ${{ matrix.container-name }}
