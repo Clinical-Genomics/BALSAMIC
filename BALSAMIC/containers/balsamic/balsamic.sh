@@ -1,1 +1,1 @@
-conda env update --name base --file ${1}.yaml --prune
+conda env update -n base --file ${1}.yaml --prune

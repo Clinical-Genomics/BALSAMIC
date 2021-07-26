@@ -34,7 +34,6 @@ Changed:
 * Update GNOMAD URL
 * Split tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
-* ``docker/build-push-action@v2`` checkouts only the working directory
 
 Fixed:
 ^^^^^^

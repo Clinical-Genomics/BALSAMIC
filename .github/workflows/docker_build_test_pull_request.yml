@@ -26,7 +26,6 @@ jobs:
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v2
-        ref: ${GITHUB_REF##*/}
       - name: Get branch name
         id: get_branch_name
         shell: bash

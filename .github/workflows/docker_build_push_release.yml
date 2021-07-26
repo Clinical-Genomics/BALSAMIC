@@ -1,6 +1,6 @@
 name: latest release container
 
-# Tigger building and testing container only on pull requests
+# Trigger building and testing container only on pull requests
 on:
   push:
     tags:

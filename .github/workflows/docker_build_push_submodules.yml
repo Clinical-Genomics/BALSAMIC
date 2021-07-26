@@ -1,6 +1,6 @@
 name: build test container submodule
 
-# Tigger building and testing container only on pull requests
+# Trigger building and testing container only on pull requests
 on:
   push:
     branches:
