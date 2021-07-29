@@ -162,7 +162,7 @@ class VCFModel(BaseModel):
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
     TNscope_umi: VarcallerAttribute
-    delly: VarcallerAttribute
+#    delly: VarcallerAttribute
 
 class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
