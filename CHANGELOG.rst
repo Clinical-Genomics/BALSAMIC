@@ -22,6 +22,8 @@ Added:
 * ascat download references from reference_file repository
 * Delly tumor only rule
 * ascat download container
+* Documentation update on setting sentieon env variables in ``bashrc``
+
 Changed:
 ^^^^^^^^
 
