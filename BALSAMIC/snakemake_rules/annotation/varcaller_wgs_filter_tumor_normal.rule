@@ -2,12 +2,16 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
-rule ngs_filter_tnscope:
+rule bcftools_filter_tnscope_tn:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz",
+  benchmark:
+    Path(benchmark_dir + 'bcftools_filter_tnscope_tn_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
@@ -15,14 +19,16 @@ rule ngs_filter_tnscope:
     AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
     AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
-  threads: get_threads(cluster_config, 'ngs_filter_tnscope')
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnscope.tsv"
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    message_text = "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz"
+  threads:
+    get_threads(cluster_config, 'bcftools_filter_tnscope_tn')
+  message:
+    "Filtering wgs tumor-normal tnscope annotated variants using bcftools on {params.message_text}"
   shell:
     """
 source activate {params.conda};
+
 bcftools view {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
@@ -30,7 +36,10 @@ bcftools view {input.vcf} \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;
+
 tabix -p vcf -f {output.vcf_filtered};
+
 bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+
 tabix -p vcf -f {output.vcf_pass};
     """

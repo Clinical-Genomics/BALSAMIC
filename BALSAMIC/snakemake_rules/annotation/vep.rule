@@ -11,7 +11,7 @@ rule vep_somatic:
     vcf_all = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
   benchmark:
-    benchmark_dir + "vep_somatic_{var_type}.somatic.{case_name}.{var_caller}.tsv"
+    Path(benchmark_dir + "vep_somatic_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -70,7 +70,7 @@ rule tmb_calculation:
   output:
     tmb = vep_dir + "SNV.somatic.{case_name}.{var_caller}.balsamic_stat"
   benchmark:
-    benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.tsv" 
+    Path(benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
@@ -109,7 +109,7 @@ rule vep_germline:
     vcf_all = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   benchmark:
-    benchmark_dir + "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv"
+    Path(benchmark_dir + "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:

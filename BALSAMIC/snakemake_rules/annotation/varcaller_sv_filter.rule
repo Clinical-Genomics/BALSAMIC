@@ -3,27 +3,28 @@
 # NGS filters for various scenarios
 
 
-rule ngs_filter_manta:
+rule bcftools_filter_manta:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.manta.all.vcf.gz",
   output:
     vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.manta.all.filtered.pass.vcf.gz",
   benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.manta.vep.tsv"
+    Path(benchmark_dir + 'bcftools_filter_manta_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
-    case_name = "{case_name}",
+    message_text = "{var_type}.somatic.{case_name}.manta.all.vcf.gz",
     conda = config["bioinfo_tools"].get("bcftools"),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
   threads:
-    get_threads(cluster_config, 'ngs_filter_manta')
+    get_threads(cluster_config, 'bcftools_filter_manta')
   message:
-    ("Running ngs filters on annotated Manta structural variant calling results.")
+    ("Filtering manta annotated structural variants using bcftools on {params.message_text}")
   shell:
     """
 source activate {params.conda};
 
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
+
 tabix -p vcf -f {output.vcf_sv_pass};
     """

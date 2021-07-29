@@ -2,12 +2,16 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
-rule ngs_filter_tnscope:
+rule bcftools_filter_tnscope_tonly:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz",
+  benchmark:
+    Path(benchmark_dir + 'bcftools_filter_tnscope_tonly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -18,16 +22,17 @@ rule ngs_filter_tnscope:
     strand_reads = [SENTIEON_CALLER.strand_reads.tag_value, SENTIEON_CALLER.strand_reads.filter_name],
     qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
     sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
+    message_text = "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz"
   threads: 
-    get_threads(cluster_config, 'ngs_filter_tnscope')
-  singularity: 
-    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnscope.tsv"
+    get_threads(cluster_config, 'bcftools_filter_tnscope_tonly')
+  message:
+    "Filtering wgs tumor-only tnscope annotated variants using bcftools on {params.message_text}"
   shell:
     """
 source activate {params.conda};
+
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
+
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
@@ -38,15 +43,20 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;
+
 tabix -p vcf -f {output.vcf_filtered};
     """
 
-rule ngs_filter_tnhaplotyper:
+rule bcftools_filter_tnhaplotyper_tonly:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper_isec.filtered.vcf.gz",
+  benchmark:
+    Path(benchmark_dir + 'bcftools_filter_tnhaplotyper_tonly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -55,17 +65,18 @@ rule ngs_filter_tnhaplotyper:
     AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
     strand_reads = [SENTIEON_CALLER.strand_reads.tag_value, SENTIEON_CALLER.strand_reads.filter_name],
-    qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name]
+    qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
+    message_text = "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz"
   threads: 
-    get_threads(cluster_config, 'ngs_filter_tnhaplotyper')
-  singularity: 
-    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.tnhaplotyper.tsv"
+    get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tonly')
+  message:
+    "Filtering wgs tumor-only tnhaplotyper annotated variants using bcftools on {params.message_text}"
   shell:
     """
 source activate {params.conda};
+
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
+
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
@@ -75,33 +86,43 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;
+
 tabix -p vcf -f {output.vcf_filtered};
     """
 
-rule ngs_filter_intersect:
+rule bcftools_intersect_tonly:
   input:
     tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz",
     tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper_isec.filtered.vcf.gz"
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz",
+  benchmark:
+    Path(benchmark_dir + 'bcftools_intersect_tonly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     vcf_dir = vep_dir + "sentieon_callers_intersect",
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    message_text = "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz"
   threads: 
-    get_threads(cluster_config, 'ngs_filter_intersect')
-  singularity: 
-    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()     
-  benchmark:
-    benchmark_dir + 'ngs_filter_intersect' + "{var_type}.somatic.{case_name}.tsv"
+    get_threads(cluster_config, 'bcftools_intersect_tonly')
+  message:
+    "Retrieving common annotated variants between tnscope and tnhaplotyper using bcftools for {params.message_text}"
   shell:
     """
 source activate {params.conda};
+
 bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z;
+
 cp {params.vcf_dir}/0002.vcf.gz {output.vcf_filtered};
+
 tabix -p vcf -f {output.vcf_filtered};
+
 bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+
 tabix -p vcf -f {output.vcf_pass};
+
 rm -r {params.vcf_dir}         
     """
