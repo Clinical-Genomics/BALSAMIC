@@ -367,6 +367,8 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
     if "dragen" in config:
         analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
                                           Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()])
+# delly get vcf file
+analysis_specific_results.extend([Path(vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz")])
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
