@@ -363,12 +363,13 @@ else:
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
                                         vcf=get_vcf(config, ["manta"], [config["analysis"]["case_id"]]))])
 
+analysis_specific_results.extend([expand(vcf_dir + "{vcf}.vcf.gz",
+                                         vcf=get_vcf(config, ["delly"],[config["analysis"]["case_id"]]))])
+
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
         analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
                                           Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()])
-# delly get vcf file
-analysis_specific_results.extend([Path(vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz")])
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
