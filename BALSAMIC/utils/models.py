@@ -162,6 +162,7 @@ class VCFModel(BaseModel):
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
     TNscope_umi: VarcallerAttribute
+    ascat: VarcallerAttribute
 
 
 class AnalysisModel(BaseModel):

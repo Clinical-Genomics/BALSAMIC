@@ -65,6 +65,10 @@
         "vcfmerge":{
             "mutation": "somatic",
             "type": "SNV"
+        },
+        "ascat": {
+            "mutation": "somatic",
+            "type": "SV"
         }
     }
 }
