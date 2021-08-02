@@ -95,3 +95,75 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 
 rm -rf {params.tmpdir};
         """
+
+
+rule ascat_tumor_normal:
+    input:
+        fa = config["reference"]["reference_genome"] ,
+        bamN = bam_dir + normal_bam,
+        bamT = bam_dir + tumor_bam,
+        gccorrection = config["reference"]["ascat_gccorrection"],
+        chryloci= config["reference"]["ascat_chryloci"],
+    output:
+        finalvcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        samplestatistics = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        germlineplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
+        rawprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
+        sunriseplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
+        tumorplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
+        aspcfplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        ascatprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
+    benchmark:
+        benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("ascat") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        runmode = "local",
+        tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal"),
+    threads:
+        get_threads(cluster_config, "ascat_tumor_normal")
+    message:
+        ("Call copy number variants using ascatNGS for {input.bamT} vs {input.bamN} files then "
+        "filter somatic variants and finally convert to compressed vcf file")
+    shell:
+        """
+export LD_LIBRARY_PATH=:/opt/wtsi-cgp/lib;
+
+ascat.pl \
+  -protocol WGS \
+  -species human \
+  -assembly GRCh37 \
+  -cpus 36 \
+  -reference {input.fa} \
+  -snp_gc {input.gccorrection} \
+  -outdir {params.tmpdir} \
+  -gender L -locus {input.chryloci} \
+  -tumour {input.bamT} \
+  -normal {input.bamN};
+
+cp  {params.tmpdir}/TUMOR.copynumber.caveman.vcf.gz {output.finalvcf};
+
+cp {params.tmpdir}/TUMOR.samplestatistics.txt {output.samplestatistics};
+
+cp {params.tmpdir}/TUMOR.germline.png {output.germlineplot};
+
+cp {params.tmpdir}/TUMOR.rawprofile.png {output.rawprofileplot};
+
+cp {params.tmpdir}/TUMOR.sunrise.png {output.sunriseplot};
+
+cp {params.tmpdir}/TUMOR.tumour.png {output.tumorplot};
+
+cp {params.tmpdir}/TUMOR.ASCATprofile.png {output.ascatprofileplot};
+
+cp {params.tmpdir}/TUMOR.ASPCF.png {output.aspcfplot};
+
+tabix -p vcf -f {output.finalvcf};
+
+echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
