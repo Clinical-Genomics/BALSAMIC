@@ -12,13 +12,15 @@ ENV PATH="/opt/conda/bin/:${PATH}"
 RUN apk add --no-cache bash gcc git libc-dev zlib-dev linux-headers
 
 ARG CONTAINER_NAME
-ARG WORK_DIR=project
+ARG GIT_BRANCH_NAME
 
 # Copy all project files
-COPY . /${WORK_DIR}
+COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml ./${CONTAINER_NAME}.yaml
+COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.sh ./${CONTAINER_NAME}.sh
 
-RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
-RUN if [ "$CONTAINER_NAME" = "balsamic" ]; then cd /project && pip install --no-cache-dir . ; fi
+RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+
+RUN if [ "$CONTAINER_NAME" = "balsamic" ]; then pip install --no-cache-dir git+https://github.com/Clinical-Genomics/BALSAMIC.git@${GIT_BRANCH_NAME} ; fi
 
 # Clean work environment
-RUN rm -rf /project && conda clean --all --yes
+RUN conda clean --all --yes
