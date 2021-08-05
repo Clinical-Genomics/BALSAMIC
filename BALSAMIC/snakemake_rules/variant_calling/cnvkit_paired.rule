@@ -20,7 +20,7 @@ rule cnvkit_paired:
         scatter = cnv_dir + "tumor.merged" + "-scatter.pdf",
         vcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"),
     benchmark:
-        benchmark_dir + "cnvkit_batch_paired_" + config["analysis"]["case_id"] + ".tsv"
+        Path(benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix() 
     params:
@@ -29,12 +29,12 @@ rule cnvkit_paired:
         conda = config["bioinfo_tools"].get("cnvkit"),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         name = config["analysis"]["case_id"],
-        normal_name = "normal.merged",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor_name = "tumor.merged",
-        case_id = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"],
+        sample_id = "tumor_normal"
     message:
-        "Run CNVkit pipeline for sample {params.case_id} while tumor purity/ploidy calculated using PureCN"
+        "Run CNVkit pipeline for sample {params.case_name} while tumor purity/ploidy calculated using PureCN"
     shell:
         """
 source activate {params.conda};
@@ -109,7 +109,7 @@ mkdir -p {params.purecn_dir}
 
 Rscript $PURECN \
 --out {params.purecn_dir} \
---sampleid TUMOR_NORMAL \
+--sampleid {params.sample_id} \
 --tumor {output.cnr} \
 --segfile {params.cnv_dir}/tumor.seg \
 --vcf  {input.snv_vcf} \
@@ -118,13 +118,14 @@ Rscript $PURECN \
 --force --postoptimize \
 --seed 124;
 
-purity=$(awk -F\, 'NR>1 {{print $2}}' {params.purecn_dir}/TUMOR_NORMAL.csv)
-ploidy=$(awk -F\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/TUMOR_NORMAL.csv)
+purity=$(awk -F\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
+ploidy=$(awk -F\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv)
+gender=$(awk -F\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\")
 
 ## Call copy number variants from segmented log2 ratios
 cnvkit.py call {params.cnv_dir}/tumor.initial.cns \
 --vcf {input.snv_vcf} \
---sample-sex male \
+--sample-sex $gender \
 --method clonal \
 --purity $purity \
 --ploidy $ploidy \
@@ -143,7 +144,8 @@ cnvkit.py diagram {output.cnr} \
 ## Identify targeted genes with copy number gain or loss
 cnvkit.py genemetrics {output.cnr} \
 --segment {output.cns} \
---drop-low-coverage -y \
+--drop-low-coverage \
+--sample-sex $gender \
 --output {output.gene_metrics};
 
 ## List the genenames that contain a possibe copy number breakpoint.
@@ -154,7 +156,8 @@ cnvkit.py breaks {output.cnr} {output.cns} \
 cnvkit.py export vcf {output.cns} \
 --cnr {output.cnr} \
 -o {params.cnv_dir}/{params.tumor_name}.vcf \
---sample-id TUMOR;
+--sample-id {params.sample_id};
+--sample-sex $gender;
 
 bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf;
 
