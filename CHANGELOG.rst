@@ -34,7 +34,7 @@ Changed:
 * Update GNOMAD URL
 * Split tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
-* Split tumor-normal ``cnvkit batch`` into individual commands
+* Split Tumor-Normal ``cnvkit batch`` into individual commands
 
 Fixed:
 ^^^^^^
