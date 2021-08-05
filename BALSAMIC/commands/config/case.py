@@ -10,7 +10,7 @@ from BALSAMIC.utils.cli import (get_sample_dict, get_panel_chrom,
                                 get_bioinfo_tools_version,
                                 create_fastq_symlink, generate_graph)
 from BALSAMIC.utils.constants import (CONTAINERS_CONDA_ENV_PATH, VCF_DICT,
-                                      BIOINFO_TOOL_ENV)
+                                      BIOINFO_TOOL_ENV, BIOINFO_TOOL_SUBMODULE)
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -131,7 +131,7 @@ def case_config(context, case_id, umi, umi_trim_length, adapter_trim,
         background_variants=background_variants,
         samples=samples,
         vcf=VCF_DICT,
-        bioinfo_tools=BIOINFO_TOOL_ENV,
+        bioinfo_tools={**BIOINFO_TOOL_ENV, **BIOINFO_TOOL_SUBMODULE},
         bioinfo_tools_version=get_bioinfo_tools_version(
             BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH),
         panel={

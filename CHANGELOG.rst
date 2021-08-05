@@ -21,6 +21,8 @@ Added:
 * Reference section to docs/FAQ.rst
 * ascat download references from reference_file repository
 * Delly tumor only rule
+* ascat download container
+* Documentation update on setting sentieon env variables in ``bashrc``
 
 Changed:
 ^^^^^^^^
@@ -43,6 +45,7 @@ Fixed:
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
 * Refactor snakemake manta rule according to snakemake etiquette
 * Order of columns in QC and coverage report issue #601
+* delly run
 
 Removed:
 ^^^^^^^^
