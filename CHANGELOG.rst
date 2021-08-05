@@ -32,7 +32,7 @@ Changed:
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
 * Update GNOMAD URL
-* Split tumor-only ``cnvkit batch`` into individual commands
+* Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
 
 Fixed:
