@@ -8,20 +8,21 @@ rule bcftools_query_generatebackgroundaf_umitable:
     output:
         AF = umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt"
     benchmark:
-        Path(benchmark_dir + "bcftools_query_generatebackgroundaf_umitable_{case_name}_{var_caller}.tsv").as_posix()
+        Path(benchmark_dir, "bcftools_query_generatebackgroundaf_umitable_{case_name}_{var_caller}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         validated_set= config["background_variants"],
         conda = config["bioinfo_tools"].get("bcftools"),
-        sample_id = "{case_name}"
+        case_name = "{case_name}"
     threads: 
         get_threads(cluster_config, "bcftools_query_generatebackgroundaf_umitable")
     message: 
-        "Creating Allelic frequency table from VCF file for sample {params.sample_id}"
+        "Creating Allelic frequency table from VCF file for sample {params.case_name}"
     shell:
         """
 source activate {params.conda};
+
 bcftools query \
 --regions-file {params.validated_set} \
 -f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t]\n\" \

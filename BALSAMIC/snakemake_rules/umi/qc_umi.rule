@@ -10,7 +10,7 @@ rule picard_umiaware:
         duplicates = umi_qc_dir + "{sample}.umi.duplicatemetrics",
         umimetrics = umi_qc_dir + "{sample}.umi.metrics"
     benchmark:
-        Path(benchmark_dir + "picard_umiaware_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "picard_umiaware_{sample}.tsv").as_posix()
     singularity: 
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
@@ -42,7 +42,7 @@ rule picard_collecthsmetrics_umi:
     output:
         mrkdup = umi_qc_dir + "{sample}.umi.collect_hsmetric"
     benchmark:
-        Path(benchmark_dir + "picard_collecthsmetrics_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "picard_collecthsmetrics_umi_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
@@ -79,7 +79,7 @@ rule samtools_view_calculatemeanfamilydepth_umi:
         temp_fl = temp (umi_qc_dir + "{sample}.umi.temp.fl"),
         totalsum = umi_qc_dir + "{sample}.umi.mean_family_depth"
     benchmark:
-        Path(benchmark_dir + "samtools_view_calculatemeanfamilydepth_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "samtools_view_calculatemeanfamilydepth_umi_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:

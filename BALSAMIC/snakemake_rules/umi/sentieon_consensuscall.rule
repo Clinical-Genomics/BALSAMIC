@@ -8,7 +8,7 @@ rule sentieon_consensuscall_umi:
     output:
         fastq_consensus = temp(umi_dir + "{sample}.consensuscall.umi.fastq.gz")
     benchmark:
-        Path(benchmark_dir + "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
     params:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -41,7 +41,7 @@ rule sentieon_bwa_umiconsensus:
     output:
         align_consensus = umi_dir + "{sample}.consensuscalled.umi.bam"
     benchmark:
-        Path(benchmark_dir + "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
     params:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -78,7 +78,7 @@ rule sentieon_consensusfilter_umi:
     output:
         umi_dir + "{case_name}.consensusfiltered.umi.bam"
     benchmark:
-        Path(benchmark_dir + "sentieon_consensusfilter_umi_{case_name}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_consensusfilter_umi_{case_name}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:

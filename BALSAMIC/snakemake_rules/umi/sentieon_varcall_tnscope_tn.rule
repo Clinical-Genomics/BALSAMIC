@@ -13,7 +13,7 @@ rule sentieon_tnscope_umi_tn:
         vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".TNscope_umi.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".TNscope_umi.sample_name_map"
     benchmark:
-        Path(benchmark_dir + "sentieon_tnscope_umi_"+ config["analysis"]["case_id"] + ".tsv").as_posix()
+        Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],

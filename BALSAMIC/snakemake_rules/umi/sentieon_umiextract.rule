@@ -9,7 +9,7 @@ rule sentieon_umiextract:
     output:
         ds_umi = temp(umi_dir + "{sample}.umiextract.fastq.gz")
     benchmark:
-        Path(benchmark_dir + "sentieon_umiextract_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -37,7 +37,7 @@ rule sentieon_bwa_umiextract:
     output:
         align_umi = temp(umi_dir + "{sample}.align.umi.bam")
     benchmark:
-        Path(benchmark_dir + "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -53,6 +53,7 @@ rule sentieon_bwa_umiextract:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+
 {params.sentieon_exec} bwa mem \
 -R {params.sheader} \
 -K {params.ip_bases} \
