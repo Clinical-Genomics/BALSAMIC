@@ -14,10 +14,14 @@ rule sentieon_DNAscope:
         pcr_model = "NONE",
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"]
-    threads: get_threads(cluster_config, 'sentieon_DNAscope')
+        sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
+        case_name = "{sample_type}"
     benchmark:
-        benchmark_dir + 'sentieon_DNAscope_' + "{sample_type}.dnascope.tsv"
+        Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample_type}.tsv").as_posix()
+    threads:
+        get_threads(cluster_config, 'sentieon_DNAscope')
+    message:
+        "Calling germline variants using Sentieon DNAscope for sample {params.case_name}"
     shell:
       """
 mkdir -p {params.tmpdir};

@@ -56,7 +56,7 @@
 		"time": "12:00:00",
 		"n": 10
 	},
-	"haplotypecaller": {
+	"gatk_haplotypecaller": {
 		"time": "03:00:00",
 		"n": 10
 	},

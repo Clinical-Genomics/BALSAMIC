@@ -15,17 +15,24 @@ rule mergeBam_tumor:
   output:
     bam = bam_dir + "tumor.merged.bam",
     cram = bam_dir + "tumor.merged.cram",
+  benchmark:
+    Path(benchmark_dir,'mergeBam_tumor_' + "{mysample}.tsv".format(mysample=tumor_sample)).as_posix()
+  singularity:
+    Path(singularity_image, config[ "bioinfo_tools" ].get("picard") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
     conda = config["bioinfo_tools"].get("picard"),
-    picard = picard_extra_tumor
-  threads: get_threads(cluster_config, "mergeBam_tumor")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + 'mergeBam_tumor_' + "{mysample}.mergebam_tumor.tsv".format(mysample = tumor_sample)
+    picard = picard_extra_tumor,
+    case_name = "{mysample}"
+  threads:
+    get_threads(cluster_config, "mergeBam_tumor")
+  message:
+    "Replace bam header using Picard tools for sample {params.case_name}"
   shell:
-    "source activate {params.conda}; "
-    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; "
-    "samtools index {output.bam}; "
-    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; "
-    "samtools index {output.cram}; "
+    """
+source activate {params.conda};
+picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
+samtools index {output.bam}; 
+samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 
+samtools index {output.cram}; 
+    """

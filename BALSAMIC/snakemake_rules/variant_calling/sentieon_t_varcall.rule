@@ -21,13 +21,17 @@ rule sentieon_base_calibration:
         recal_data_table = Path(bam_dir, "{sample_type}.merged.recal_data.table").as_posix(),
         qual_recal = Path(bam_dir, "{sample_type}.merged.recal.csv").as_posix(),
         qual_recal_plot = Path(bam_dir, "{sample_type}.recal.pdf").as_posix(),
+    benchmark:
+        Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-    threads: get_threads(cluster_config, 'sentieon_base_calibration')
-    benchmark:
-        Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
+        sample_id = "sample_type"
+    threads:
+        get_threads(cluster_config, 'sentieon_base_calibration')
+    message:
+        "Base recalibration using sentieon tools for sample {params.sample_id}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -35,13 +39,34 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.indel_1kg} {output.recal_data_table};
+{params.sentieon_exec} driver --algo QualCal \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+-k {input.dbsnp} \
+-k {input.mills} \
+-k {input.indel_1kg} \
+{output.recal_data_table};
 
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} -q {output.recal_data_table} --algo QualCal -k {input.dbsnp} -k {input.mills} -k {input.indel_1kg} {output.recal_data_table}.post;
+{params.sentieon_exec} driver --algo QualCal \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+-q {output.recal_data_table} \
+-k {input.dbsnp} \
+-k {input.mills} \
+-k {input.indel_1kg} \
+{output.recal_data_table}.post;
 
-{params.sentieon_exec} driver -t {threads} --algo QualCal --plot --before {output.recal_data_table} --after {output.recal_data_table}.post {output.qual_recal};
+{params.sentieon_exec} driver --algo QualCal \
+-t {threads} \
+--plot \
+--before {output.recal_data_table} \
+--after {output.recal_data_table}.post \
+{output.qual_recal};
 
-{params.sentieon_exec} plot QualCal -o {output.qual_recal_plot} {output.qual_recal};
+{params.sentieon_exec} plot QualCal \ 
+-o {output.qual_recal_plot} {output.qual_recal};
 
 rm -rf {params.tmpdir};
         """
@@ -56,6 +81,8 @@ rule sentieon_TNhaplotyper_tumor_only:
     output:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
+    benchmark:
+        Path(benchmark_dir, "sentieon_TNhaplotyper_tumor_only_" + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR", 
@@ -63,9 +90,11 @@ rule sentieon_TNhaplotyper_tumor_only:
         pcr_model = "NONE",
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-    threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
-    benchmark:
-        benchmark_dir + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
+        sample_id = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
+    message:
+        "Calling SNVs using sentieon TNhaplotyper for sample {params.sample_id}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -73,12 +102,11 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver \
+{params.sentieon_exec} driver --algo TNhaplotyper \
 -r {input.ref} \
 -t {threads} \
 -i {input.bam} \
 -q {input.recal_data_table} \
---algo TNhaplotyper \
 --tumor_sample {params.tumor} {params.pon} \
 --pcr_indel_mode {params.pcr_model} \
 --cosmic {input.cosmic} \
@@ -99,6 +127,8 @@ rule sentieon_TNscope_tumor_only:
         vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
         namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
+    benchmark:
+        Path(benchmark_dir, "sentieon_TNscope_tumor_only_" + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR", 
@@ -108,9 +138,11 @@ rule sentieon_TNscope_tumor_only:
         sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-    threads: get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
-    benchmark:
-        benchmark_dir + config["analysis"]["case_id"] + ".tnscope.tsv"
+        sample_id =  config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
+    message:
+        "Calling SNVs using sentieon TNscope for sample {params.sample_id}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -118,12 +150,11 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver \
+{params.sentieon_exec} driver --algo TNscope \
 -t {threads} \
 -r {input.ref} \
 -i {input.bam} \
 -q {input.recal} \
---algo TNscope \
 --tumor_sample {params.tumor} {params.pon} \
 --dbsnp {input.dbsnp} \
 --pcr_indel_mode {params.pcr_model} \

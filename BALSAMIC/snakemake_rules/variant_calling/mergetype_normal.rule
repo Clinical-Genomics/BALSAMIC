@@ -15,17 +15,22 @@ rule mergeBam_normal:
   output:
     bam = bam_dir + "normal.merged.bam", 
     cram = bam_dir + "normal.merged.cram",
+  benchmark:
+    Path(benchmark_dir,'mergeBam_normal_' + "{mysample}.tsv".format(mysample=normal_sample)).as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": normal_sample, "tags": "normal"},
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal
-  threads: get_threads(cluster_config, "mergeBam_normal")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'mergeBam_normal_' + "{mysample}.mergebam_normal.tsv".format(mysample = normal_sample)
+  threads:
+    get_threads(cluster_config, "mergeBam_normal")
   shell:
-    "source activate {params.conda}; "
-    "picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; "
-    "samtools index {output.bam}; "
-    "samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; "
-    "samtools index {output.cram}; "
+    """
+source activate {params.conda}; 
+
+picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
+samtools index {output.bam}; 
+samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 
+samtools index {output.cram}; 
+    """
