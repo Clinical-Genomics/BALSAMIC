@@ -55,7 +55,8 @@ rule delly_tumor_only:
         bamT = bam_dir + tumor_bam,
         excl = config["reference"]["delly_exclusion_converted"],
     output:
-        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz"
+        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
     benchmark:
         benchmark_dir + 'delly_tumor_only_' + config["analysis"]["case_id"] + "_delly.tsv"
     singularity:
