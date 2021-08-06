@@ -45,6 +45,8 @@ Fixed:
 * Refactor snakemake manta rule according to snakemake etiquette
 * Order of columns in QC and coverage report issue #601
 * delly run
+* Refactor snakemake umi rules according to snakemake etiquette
+* Refactor snakemake variant calling rules according to snakemake etiquette
 
 Removed:
 ^^^^^^^^
