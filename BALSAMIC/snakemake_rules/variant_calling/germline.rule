@@ -102,38 +102,37 @@ tabix -p vcf -f {output.final};
 rm -rf {params.tmpdir};
         """
 
-## commenting this rule as its same as in sentieon_germline.rule
-#rule sentieon_DNAscope:
-#    input:
-#        bam = bam_dir + "{sample_type}.merged.bam",
-#        ref = config["reference"]["reference_genome"],
-#        dbsnp = config["reference"]["dbsnp"],
-#        interval = config["panel"]["capture_kit"]
-#    output:
-#        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
-#    benchmark:
-#        Path(benchmark_dir, "sentieon_dnascope_{sample_type}.tsv").as_posix()
-#    params:
-#        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-#        sentieon_exec = config["SENTIEON_EXEC"],
-#        sentieon_lic = config["SENTIEON_LICENSE"],
-#        sample_id = '{sample_type}'
-#    threads:
-#        get_threads(cluster_config, 'sentieon_DNAscope')
-#    message:
-#        "Calling germline variants using Sentieon DNAscope for sample {params.sample_id}"
-#    shell:
-#        """
-#mkdir -p {params.tmpdir};
-#export TMPDIR={params.tmpdir};
-#export SENTIEON_TMPDIR={params.tmpdir};
+rule sentieon_DNAscope:
+    input:
+        bam = bam_dir + "{sample_type}.merged.bam",
+        ref = config["reference"]["reference_genome"],
+        dbsnp = config["reference"]["dbsnp"],
+        interval = config["panel"]["capture_kit"]
+    output:
+        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, "sentieon_dnascope_{sample_type}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        sample_id = '{sample_type}'
+    threads:
+        get_threads(cluster_config, 'sentieon_DNAscope')
+    message:
+        "Calling germline variants using Sentieon DNAscope for sample {params.sample_id}"
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 
-#{params.sentieon_exec} driver --algo DNAscope \
-#-t {threads} \
-#-r {input.ref} \
-#-i {input.bam} \
-#--interval {input.interval} \
-#-d {input.dbsnp} {output.vcf};
+{params.sentieon_exec} driver --algo DNAscope \
+-t {threads} \
+-r {input.ref} \
+-i {input.bam} \
+--interval {input.interval} \
+-d {input.dbsnp} {output.vcf};
 
-#rm -rf {params.tmpdir};
-#        """
+rm -rf {params.tmpdir};
+        """

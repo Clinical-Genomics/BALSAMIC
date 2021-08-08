@@ -27,7 +27,7 @@ bcftools query \
 --regions-file {params.validated_set} \
 -f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t]\n\" \
 {input.vcf} | \
-awk -v file={params.sample_id} \
+awk -v file={params.case_name} \
 \'{{print $1\":\"$2\"_\"$3\"->\"$4\"\\t\"$5\"\\t\"$6\"\\t\"file}}\' \
 > {output.AF};
         """

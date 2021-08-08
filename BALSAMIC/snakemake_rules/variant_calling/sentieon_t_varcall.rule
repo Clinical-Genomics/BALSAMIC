@@ -60,8 +60,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver --algo QualCal \
 -t {threads} \
---plot \
---before {output.recal_data_table} \
+--plot --before {output.recal_data_table} \
 --after {output.recal_data_table}.post \
 {output.qual_recal};
 
@@ -124,7 +123,7 @@ rule sentieon_TNscope_tumor_only:
         bam = expand(bam_dir + "tumor.merged.bam"),
         recal = expand(bam_dir + "tumor.merged.recal_data.table")
     output:
-        vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
         namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
