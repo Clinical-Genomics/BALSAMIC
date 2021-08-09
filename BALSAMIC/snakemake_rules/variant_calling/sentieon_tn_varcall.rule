@@ -27,10 +27,11 @@ rule sentieon_base_calibration:
         "Base recalibration using Sentieon tools for sample {params.case_name}"
     shell:
         """
-#mkdir -p {params.tmpdir};
-#export TMPDIR={params.tmpdir};
-#export SENTIEON_TMPDIR={params.tmpdir};
-#export SENTIEON_LICENSE={params.sentieon_lic};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} driver --algo QualCal \
 -r {input.ref} \
 -t {threads} \
