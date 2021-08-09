@@ -110,7 +110,7 @@ __ ascatNGS_
 Briefly, ascatNGS needs gender loci file if gender information for the input sample is not available. The second file is *SnpGcCorrections.tsv*, which is prepared from the 1000 genome SNP panel.
 
 1. **Gender loci file:**
-  
+
 GRCh37d5_Y.loci contains the following contents:
 
 .. line-block::
@@ -121,11 +121,12 @@ GRCh37d5_Y.loci contains the following contents:
 
 
 2. **GC correction file:**
- 
+
 First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is available from ascatNGS-reference-files_ (Human reference files from 1000 genomes VCFs)
 
 .. _ascatNGS-reference-files : https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs
-__ ascatNGS-reference-files_
+
+
 .. code:: console
 
     export TG_DATA=ftp://ftp.ensembl.org/pub/grch37/release-83/variation/vcf/homo_sapiens/1000GENOMES-phase_3.vcf.gz
@@ -155,7 +156,9 @@ Followed by:
 Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv* file, more details see ascatNGS-convert-snppositions_
 
 .. _ascatNGS-convert-snppositions: https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv
-__ ascatNGS-convert-snppositions_
+
+
+
 .. code:: console
 
     ascatSnpPanelGcCorrections.pl genome.fa SnpPositions.tsv > SnpGcCorrections.tsv
