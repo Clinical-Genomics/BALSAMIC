@@ -23,14 +23,15 @@ rule mergeBam_tumor:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_tumor,
-    case_name =  tumor_sample
+    case_name = tumor_sample
   threads:
     get_threads(cluster_config, "mergeBam_tumor")
   message:
-    "Replace bam header using Picard tools for sample {params.case_name}"
+    "Replace bam header using Picard tools for tumor sample {params.case_name}"
   shell:
     """
 source activate {params.conda};
+
 picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
 samtools index {output.bam}; 
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 

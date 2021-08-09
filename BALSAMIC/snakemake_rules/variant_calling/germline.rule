@@ -19,7 +19,8 @@ rule gatk_haplotypecaller:
     threads:
         get_threads(cluster_config,'gatk_haplotypecaller')
     message:
-        "Calling germline variants using gatk haplotypecaller for sample {params.sample_id}"
+        ("Calling germline variants using gatk haplotypecaller for"
+         "targeted-panel sample {params.sample_id}")
     shell:
         """
 source activate {params.conda};
