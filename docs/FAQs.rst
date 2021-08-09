@@ -60,7 +60,7 @@ Mainly to reduce the calling of false-positive variants. Consensus filtering is 
 UMI workflow is validated with two datasets (SeraCare and HapMap). The Vardict failed to call the true reference variants while the TNscope performed better. A more detailed analysis is summarized here_. 
 
 .. _here: https://drive.google.com/file/d/1Y1kNPE5u9VvykjmNhG4RydVMUyezbqh5/view?usp=sharing
-
+__ here_
 We are still investigating other UMI-aware variant callers and maybe in the future, if something works better, additional varcallers will be added to the UMIworkflow.
 
 **Git Related Questions**
@@ -103,10 +103,10 @@ Make a pull request to master at this point. After pull request is approved and 
 
 **How to generate reference files for ascatNGS**
 
-Detailed information is available at the ascatNGS_
+Detailed information is available from ascatNGS_ documentation
 
 .. _ascatNGS: https://github.com/cancerit/ascatNgs
-
+__ ascatNGS_
 Briefly, ascatNGS needs gender loci file if gender information for the input sample is not available. The second file is *SnpGcCorrections.tsv*, which is prepared from the 1000 genome SNP panel.
 
 1. **Gender loci file:**
@@ -122,10 +122,10 @@ GRCh37d5_Y.loci contains the following contents:
 
 2. **GC correction file:**
  
-First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is provided here_
+First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is available from ascatNGS-reference-files_ (Human reference files from 1000 genomes VCFs)
 
-.. here_: https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs
-
+.. _ascatNGS-reference-files : https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs
+__ ascatNGS-reference-files_
 .. code:: console
 
     export TG_DATA=ftp://ftp.ensembl.org/pub/grch37/release-83/variation/vcf/homo_sapiens/1000GENOMES-phase_3.vcf.gz
@@ -152,10 +152,10 @@ Followed by:
     printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];'\
     > SnpPositions_GRCh37_1000g.tsv
 
-Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv* file as described here_
+Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv* file, more details see ascatNGS-convert-snppositions_
 
-.. here_: https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv
-
+.. _ascatNGS-convert-snppositions: https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv
+__ ascatNGS-convert-snppositions_
 .. code:: console
 
     ascatSnpPanelGcCorrections.pl genome.fa SnpPositions.tsv > SnpGcCorrections.tsv
