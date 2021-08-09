@@ -24,6 +24,8 @@ rule sentieon_umiextract:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} umi extract \
 {params.ds_params} {input.read1} {input.read2} \
 -o {output.ds_umi};
@@ -53,6 +55,7 @@ rule sentieon_bwa_umiextract:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
 -R {params.sheader} \

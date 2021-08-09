@@ -33,6 +33,8 @@ rule sentieon_tnscope_umi_tn:
         " versus sample {params.normal}"
     shell:
         """
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} driver \
 -t {threads} \
 -r {input.ref_fa} \

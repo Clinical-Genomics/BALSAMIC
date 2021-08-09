@@ -24,6 +24,8 @@ rule sentieon_consensuscall_umi:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} umi consensus \
 -t {threads} \
 -i {input.sam_consensus} \
@@ -57,6 +59,8 @@ rule sentieon_bwa_umiconsensus:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} bwa mem \
 -R {params.sheader} \
 -t {threads} \

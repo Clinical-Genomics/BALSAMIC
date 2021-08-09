@@ -31,6 +31,8 @@ rule sentieon_tnscope_umi:
         "Calling SNVs using TNscope for sample {params.tumor}"
     shell:
         """
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} driver \
 -t {threads} \
 -r {input.ref_fa} \

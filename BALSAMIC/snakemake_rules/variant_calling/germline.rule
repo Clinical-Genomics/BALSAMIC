@@ -126,6 +126,7 @@ rule sentieon_DNAscope:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver --algo DNAscope \
 -t {threads} \

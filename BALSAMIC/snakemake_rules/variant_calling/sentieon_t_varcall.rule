@@ -81,7 +81,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     benchmark:
-        Path(benchmark_dir, "sentieon_TNhaplotyper_tumor_only_" + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
+        Path(benchmark_dir, "sentieon_TNhaplotyper_tumor_only_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR", 
