@@ -45,6 +45,7 @@ Fixed:
 * Refactor snakemake manta rule according to snakemake etiquette
 * Order of columns in QC and coverage report issue #601
 * delly run
+* ascat documentaion links in FAQs
 
 Removed:
 ^^^^^^^^
