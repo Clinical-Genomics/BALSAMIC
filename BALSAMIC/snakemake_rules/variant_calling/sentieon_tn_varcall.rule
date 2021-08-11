@@ -174,7 +174,8 @@ rule sentieon_TNscope:
     threads:
         get_threads(cluster_config, 'sentieon_TNscope')
     message:
-        "Calling SNVs and SVs using Sentieon TNscope and applying ML algorithm for sample {params.case_name}"
+        ("Calling SNVs and SVs using Sentieon TNscope and "
+         "applying machine learning algorithm for sample {params.case_name}")
     shell:
         """
 mkdir -p {params.tmpdir};
