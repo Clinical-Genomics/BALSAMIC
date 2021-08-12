@@ -23,6 +23,7 @@ Added:
 * Delly tumor only rule
 * ascat download container
 * Documentation update on setting sentieon env variables in ``bashrc``
+* ascat tumor normal rule for wgs cases
 
 Changed:
 ^^^^^^^^
