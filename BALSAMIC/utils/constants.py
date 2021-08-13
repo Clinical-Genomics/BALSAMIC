@@ -106,6 +106,12 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
+   "ascat": {
+       "mutation": "somatic",
+       "type": "SV",
+       "analysis_type": ["paired"],
+       "workflow_solution": ["BALSAMIC"]
+   },
 }
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
@@ -619,7 +625,7 @@ BIOINFO_TOOL_ENV = {
     "strelka": "varcall_py27",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
-    "delly": "varcall_delly",
+    "delly": "varcall_delly"
 }
 
 BIOINFO_TOOL_SUBMODULE = {

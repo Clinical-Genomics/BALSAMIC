@@ -23,6 +23,7 @@ Added:
 * Delly tumor only rule
 * ascat download container
 * Documentation update on setting sentieon env variables in ``bashrc``
+* ascat tumor normal rule for wgs cases
 
 Changed:
 ^^^^^^^^
@@ -32,7 +33,7 @@ Changed:
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
 * Update GNOMAD URL
-* Split tumor-only ``cnvkit batch`` into individual commands
+* Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
 * Split Tumor-Normal ``cnvkit batch`` into individual commands
 
@@ -46,6 +47,7 @@ Fixed:
 * Refactor snakemake manta rule according to snakemake etiquette
 * Order of columns in QC and coverage report issue #601
 * delly run
+* ascat documentaion links in FAQs
 
 Removed:
 ^^^^^^^^
