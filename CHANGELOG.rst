@@ -47,6 +47,7 @@ Fixed:
 * Order of columns in QC and coverage report issue #601
 * delly run
 * ascat documentaion links in FAQs
+* Wrong spacing in reference json issue #704
 
 Removed:
 ^^^^^^^^
