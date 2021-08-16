@@ -450,7 +450,7 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
                 if isinstance(p, dict):
                     continue
                 package = p.split("=")[0]
-                if (len(package.split(::)) > 1):
+                if (len(package.split("::")) > 1):
                     name = package.split("::")[1]
                 else:
                     name = package
