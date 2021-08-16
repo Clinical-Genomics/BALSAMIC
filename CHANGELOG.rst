@@ -5,10 +5,10 @@ Added:
 ^^^^^^
 
 * samtools flagstats and stats to workflow and MultiQC
-* Delly v0.8.7 somatic SV caller
-* Delly containter
-* bcftools v1.12 to delly container
-* tabix v0.2.6 to delly container
+* Delly v0.8.7 somatic SV caller #644
+* Delly containter #644
+* bcftools v1.12 to delly container #644
+* tabix v0.2.6 to delly container #644
 * PASSed SV calls from Manta to clinical delivery
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
 * Added ``vcf2cytosure``` to annotate container
@@ -16,14 +16,14 @@ Added:
 * prepare_delly_exclusion rule
 * Installation of PureCN rpackage in cnvkit container
 * Calculate tumor-purity and ploidy using ``PureCN`` for cnvkit call
-* ``ascatngs`` as a submodule
+* ``ascatngs`` as a submodule #672
 * GitHub action to build and test ``ascatngs`` container
 * Reference section to docs/FAQ.rst
-* ascat download references from reference_file repository
-* Delly tumor only rule
-* ascat download container
+* ascat download references from reference_file repository #672
+* Delly tumor only rule #644
+* ascat download container #672
 * Documentation update on setting sentieon env variables in ``bashrc``
-* ascat tumor normal rule for wgs cases
+* ascat tumor normal rule for wgs cases #672
 
 Changed:
 ^^^^^^^^
@@ -46,7 +46,7 @@ Fixed:
 * Refactor snakemake manta rule according to snakemake etiquette
 * Order of columns in QC and coverage report issue #601
 * delly run #644
-* ascat documentaion links in FAQs
+* ascat documentaion links in FAQs #672
 * py36 container build and push #703
 
 Removed:
