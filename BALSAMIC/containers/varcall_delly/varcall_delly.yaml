@@ -2,6 +2,6 @@ channels:
   - defaults
 
 dependencies:
-  - bioconda::bcftools=1.10.2
-  - bioconda::tabix
   - bioconda::delly=0.8.7
+  - bioconda::bcftools=1.10.2
+  - tabix=1.11
