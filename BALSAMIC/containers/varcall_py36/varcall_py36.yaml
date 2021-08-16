@@ -8,5 +8,5 @@ dependencies:
   - bioconda::samtools=1.11
   - bioconda::gatk=3.8
   - bioconda::vardict=2019.06.04=pl526_0
-  - bioconda:.vardict-java=1.7
+  - bioconda::vardict-java=1.7
   - conda-forge::libiconv
