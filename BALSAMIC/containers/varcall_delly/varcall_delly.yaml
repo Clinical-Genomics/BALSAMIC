@@ -2,6 +2,7 @@ channels:
   - defaults
 
 dependencies:
+  - python=3.6
   - bioconda::delly=0.8.7
   - bioconda::bcftools=1.10.2
   - tabix
