@@ -2,14 +2,14 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
-rule bcftools_filter_vardict_tonly:
+rule bcftools_filter_vardict_tumoronly:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.vcf.gz",
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.vcf.gz",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
   benchmark:
-    Path(benchmark_dir + 'bcftools_filter_vardict_tonly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_vardict_tumoronly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -23,7 +23,7 @@ rule bcftools_filter_vardict_tonly:
     pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
     message_text=  "{var_type}.somatic.{case_name}.vardict.all.vcf.gz"
   threads:
-    get_threads(cluster_config, 'bcftools_filter_vardict_tonly')
+    get_threads(cluster_config, 'bcftools_filter_vardict_tumoronly')
   message:
     "Filtering vardict tumor-only annotated variants using bcftools on {params.message_text}"
   shell:

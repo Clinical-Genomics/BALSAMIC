@@ -9,7 +9,7 @@ rule bcftools_filter_manta:
   output:
     vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.manta.all.filtered.pass.vcf.gz",
   benchmark:
-    Path(benchmark_dir + 'bcftools_filter_manta_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_manta_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:

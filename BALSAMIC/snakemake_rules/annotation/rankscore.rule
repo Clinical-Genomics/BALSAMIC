@@ -9,7 +9,7 @@ rule genmod_rankscore_vardict:
   output:
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.ranked.vcf.gz",
   benchmark:
-    Path(benchmark_dir + 'genmod_rankscore_vardict_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'genmod_rankscore_vardict_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:

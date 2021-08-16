@@ -2,14 +2,14 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
-rule bcftools_filter_tnscope_tonly:
+rule bcftools_filter_tnscope_tumoronly:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz",
   benchmark:
-    Path(benchmark_dir + 'bcftools_filter_tnscope_tonly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_tnscope_tumoronly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
   params:
@@ -24,7 +24,7 @@ rule bcftools_filter_tnscope_tonly:
     sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
     message_text = "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz"
   threads: 
-    get_threads(cluster_config, 'bcftools_filter_tnscope_tonly')
+    get_threads(cluster_config, 'bcftools_filter_tnscope_tumoronly')
   message:
     "Filtering wgs tumor-only tnscope annotated variants using bcftools on {params.message_text}"
   shell:
@@ -47,16 +47,16 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 tabix -p vcf -f {output.vcf_filtered};
     """
 
-rule bcftools_filter_tnhaplotyper_tonly:
+rule bcftools_filter_tnhaplotyper_tumoronly:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper_isec.filtered.vcf.gz",
   benchmark:
-    Path(benchmark_dir + 'bcftools_filter_tnhaplotyper_tonly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumoronly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
-    Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
+    Path(singularity_image, config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -68,7 +68,7 @@ rule bcftools_filter_tnhaplotyper_tonly:
     qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
     message_text = "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz"
   threads: 
-    get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tonly')
+    get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumoronly')
   message:
     "Filtering wgs tumor-only tnhaplotyper annotated variants using bcftools on {params.message_text}"
   shell:
@@ -90,7 +90,7 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 tabix -p vcf -f {output.vcf_filtered};
     """
 
-rule bcftools_intersect_tonly:
+rule bcftools_intersect_tumoronly:
   input:
     tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz",
     tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper_isec.filtered.vcf.gz"
@@ -98,7 +98,7 @@ rule bcftools_intersect_tonly:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz",
   benchmark:
-    Path(benchmark_dir + 'bcftools_intersect_tonly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_intersect_tumoronly_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
   params:
@@ -107,7 +107,7 @@ rule bcftools_intersect_tonly:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     message_text = "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz"
   threads: 
-    get_threads(cluster_config, 'bcftools_intersect_tonly')
+    get_threads(cluster_config, 'bcftools_intersect_tumoronly')
   message:
     "Retrieving common annotated variants between tnscope and tnhaplotyper using bcftools for {params.message_text}"
   shell:

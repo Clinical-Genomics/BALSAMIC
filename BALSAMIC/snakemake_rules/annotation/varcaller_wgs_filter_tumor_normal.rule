@@ -2,14 +2,14 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
-rule bcftools_filter_tnscope_tn:
+rule bcftools_filter_tnscope_tumor_normal:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.vcf.gz",
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.filtered.pass.vcf.gz",
   benchmark:
-    Path(benchmark_dir + 'bcftools_filter_tnscope_tn_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_tnscope_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -22,7 +22,7 @@ rule bcftools_filter_tnscope_tn:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     message_text = "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz"
   threads:
-    get_threads(cluster_config, 'bcftools_filter_tnscope_tn')
+    get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_normal')
   message:
     "Filtering wgs tumor-normal tnscope annotated variants using bcftools on {params.message_text}"
   shell:
