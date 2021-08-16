@@ -45,9 +45,9 @@ Fixed:
 * Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
 * Refactor snakemake manta rule according to snakemake etiquette
 * Order of columns in QC and coverage report issue #601
-* delly run
+* delly run #644
 * ascat documentaion links in FAQs
-* py36 container build
+* py36 container build and push #703
 
 Removed:
 ^^^^^^^^
