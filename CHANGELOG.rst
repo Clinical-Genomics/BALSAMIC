@@ -5,10 +5,10 @@ Added:
 ^^^^^^
 
 * ``samtools`` flagstats and stats to workflow and MultiQC
-* ``delly`` v0.8.7 somatic SV caller #644
+* ``delly v0.8.7`` somatic SV caller #644
 * ``delly`` containter #644
-* ``bcftools`` v1.12 to delly container #644
-* ``tabix`` v0.2.6 to delly container #644
+* ``bcftools v1.12`` to ``delly`` container #644
+* ``tabix v0.2.6`` to ``delly`` container #644
 * Passed SV calls from Manta to clinical delivery
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
 * Added ``vcf2cytosure``` to annotate container
