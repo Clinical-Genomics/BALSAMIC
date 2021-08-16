@@ -1,18 +1,16 @@
 channels:
-  - bioconda
-  - conda-forge
   - defaults
 
 dependencies:
-  - bedtools=2.30.0
-  - bwa=0.7.15
-  - fastqc=0.11.9
-  - samtools=1.12
-  - tabix=0.2.6
-  - picard=2.25.0
-  - r-base
-  - multiqc=1.9
-  - fastp=0.20.1
-  - csvkit=1.0.4
-  - libiconv
-  - fontconfig
+  - bioconda::bedtools=2.30.0
+  - bioconda::bwa=0.7.15
+  - bioconda::fastqc=0.11.9
+  - bioconda::samtools=1.12
+  - bioconda::tabix=0.2.6
+  - bioconda::picard=2.25.0
+  - bioconda::multiqc=1.9
+  - bioconda::fastp=0.20.1
+  - conda-forge::csvkit=1.0.4
+  - conda-forge::libiconv
+  - conda-forge::fontconfig
+  - conda-forge::r-base=4.1.1
