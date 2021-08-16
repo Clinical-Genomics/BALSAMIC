@@ -1,19 +1,17 @@
 channels:
-  - bioconda
   - conda-forge
   - defaults
-  - r
 
 dependencies:
   - python=3.6
-  - pip=9.0.3
-  - bcftools=1.10.2
-  - tabix=0.2.6
-  - r-base=4.1.0
-  - r-optparse=1.6.6
-  - bioconductor-iranges=2.26.0
-  - bioconductor-genomeinfodb=1.28.0
-  - bioconductor-genomicranges=1.44.0
-  - bioconductor-dnacopy=1.66.0
-  - bioconductor-variantannotation=1.38.0
-  - bioconductor-purecn=1.22.1
+  - conda-forge::pip=9.0.3
+  - conda-forge::r-base=4.1.0
+  - conda-forge::r-optparse=1.6.6
+  - bioconda::bioconductor-iranges=2.26.0
+  - bioconda::bioconductor-genomeinfodb=1.28.0
+  - bioconda::bioconductor-genomicranges=1.44.0
+  - bioconda::bioconductor-dnacopy=1.66.0
+  - bioconda::bioconductor-variantannotation=1.38.0
+  - bioconda::bioconductor-purecn=1.22.1
+  - bioconda::bcftools=1.10.2
+  - bioconda::tabix=0.2.6
