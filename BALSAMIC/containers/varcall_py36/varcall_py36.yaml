@@ -1,15 +1,12 @@
 channels:
-  - bioconda
-  - conda-forge
   - defaults
 
 dependencies:
   - python=3.6
-  - bcftools=1.11
-  - tabix=0.2.6
-  - samtools=1.11
-  - gatk=3.8
-  - vardict=2019.06.04=pl526_0
-  - vardict-java=1.7
-  - libiconv
-
+  - bioconda::bcftools=1.11
+  - bioconda::tabix=0.2.6
+  - bioconda::samtools=1.11
+  - bioconda::gatk=3.8
+  - bioconda::vardict=2019.06.04=pl526_0
+  - bioconda:.vardict-java=1.7
+  - conda-forge::libiconv
