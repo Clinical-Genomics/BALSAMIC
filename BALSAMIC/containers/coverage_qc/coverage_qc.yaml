@@ -1,5 +1,6 @@
 channels:
   - defaults
+  - conda-forge
 
 dependencies:
   - bioconda::sambamba=0.6.6
