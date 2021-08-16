@@ -4,26 +4,26 @@
 Added:
 ^^^^^^
 
-* samtools flagstats and stats to workflow and MultiQC
-* Delly v0.8.7 somatic SV caller #644
-* Delly containter #644
-* bcftools v1.12 to delly container #644
-* tabix v0.2.6 to delly container #644
-* PASSed SV calls from Manta to clinical delivery
+* ``samtools`` flagstats and stats to workflow and MultiQC
+* ``delly`` v0.8.7 somatic SV caller #644
+* ``delly`` containter #644
+* ``bcftools`` v1.12 to delly container #644
+* ``tabix`` v0.2.6 to delly container #644
+* Passed SV calls from Manta to clinical delivery
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
 * Added ``vcf2cytosure``` to annotate container
 * ``git`` to the container definition
 * prepare_delly_exclusion rule
-* Installation of PureCN rpackage in cnvkit container
-* Calculate tumor-purity and ploidy using ``PureCN`` for cnvkit call
+* Installation of ``PureCN`` rpackage in ``cnvkit`` container
+* Calculate tumor-purity and ploidy using ``PureCN`` for ``cnvkit`` call
 * ``ascatngs`` as a submodule #672
 * GitHub action to build and test ``ascatngs`` container
-* Reference section to docs/FAQ.rst
-* ascat download references from reference_file repository #672
-* Delly tumor only rule #644
-* ascat download container #672
+* Reference section to ``docs/FAQ.rst``
+* ``ascatngs`` download references from reference_file repository #672
+* ``delly`` tumor only rule #644
+* ``ascatngs`` download container #672
 * Documentation update on setting sentieon env variables in ``bashrc``
-* ascat tumor normal rule for wgs cases #672
+* ``ascatngs`` tumor normal rule for wgs cases #672
 
 Changed:
 ^^^^^^^^
@@ -32,7 +32,7 @@ Changed:
 * New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
-* Update GNOMAD URL
+* Update ``GNOMAD`` URL
 * Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
 
@@ -41,13 +41,13 @@ Fixed:
 
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
-* Refactor snakemake align rules according to snakemake etiquette 
-* Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette
-* Refactor snakemake manta rule according to snakemake etiquette
+* Refactor ``snakemake`` align rules according to ``snakemake`` etiquette 
+* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette
+* Refactor snakemake ``manta`` rule according to snakemake etiquette
 * Order of columns in QC and coverage report issue #601
-* delly not showing in workflow at runtime #644
-* ascat documentaion links in FAQs #672
-* py36 container build and push #703
+* ``delly`` not showing in workflow at runtime #644
+* ``ascatngs`` documentaion links in ``FAQs`` #672
+* ``varcall_py36`` container build and push #703
 
 Removed:
 ^^^^^^^^
