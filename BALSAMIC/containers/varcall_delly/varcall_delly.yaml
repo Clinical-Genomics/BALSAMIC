@@ -1,9 +1,8 @@
 channels:
   - defaults
-  - bioconda
   - conda-forge
 
 dependencies:
-  - delly=0.8.7
-  - bcftools=1.10.2
-  - tabix=0.2.6
+  - bioconda::delly=0.8.7
+  - bioconda::bcftools=1.10.2
+  - bioconda::tabix=0.2.6
