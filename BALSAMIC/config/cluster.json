@@ -228,7 +228,7 @@
 		"time": "4:00:00",
 		"n": 12
 	},
-	"bcftools_generatebackgroundaf_table": {
+	"bcftools_query_generatebackgroundaf_umitable": {
 		"time": "2:00:00",
 		"n": 8
 	},

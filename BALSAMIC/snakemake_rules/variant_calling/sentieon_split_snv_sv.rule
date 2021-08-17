@@ -11,15 +11,15 @@ rule bcftools_view_split_variant:
     benchmark:
         Path(benchmark_dir,'bcftools_view_split_variant_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     singularity:
-        Path(singularity_image, config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         conda = config["bioinfo_tools"].get("bcftools"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample_id = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'bcftools_view_split_variant')
     message:
-        "Split tnscope snv and sv variants using bcftools for sample {params.sample_id} "
+        "Split tnscope snv and sv variants using bcftools for sample {params.case_name} "
     shell:
         """
 source activate {params.conda};

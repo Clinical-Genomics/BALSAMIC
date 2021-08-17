@@ -23,11 +23,11 @@ rule mergeBam_tumor:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_tumor,
-    case_name = tumor_sample
+    sample = tumor_sample
   threads:
     get_threads(cluster_config, "mergeBam_tumor")
   message:
-    "Replace bam header using Picard tools for tumor sample {params.case_name}"
+    "Replace bam header using Picard tools for tumor sample {params.sample}"
   shell:
     """
 source activate {params.conda};

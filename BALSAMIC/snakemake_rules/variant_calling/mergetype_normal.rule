@@ -23,11 +23,11 @@ rule mergeBam_normal:
     housekeeper_id = {"id": normal_sample, "tags": "normal"},
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal,
-    case_name = normal_sample
+    sample = normal_sample
   threads:
     get_threads(cluster_config, "mergeBam_normal")
   message:
-    "Replace bam header using Picard tools for normal sample {params.case_name}"
+    "Replace bam header using Picard tools for normal sample {params.sample}"
   shell:
     """
 source activate {params.conda}; 

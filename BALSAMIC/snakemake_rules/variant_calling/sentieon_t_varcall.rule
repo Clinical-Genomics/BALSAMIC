@@ -27,11 +27,11 @@ rule sentieon_base_calibration:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id = "sample_type"
+        sample = "sample_type"
     threads:
         get_threads(cluster_config, 'sentieon_base_calibration')
     message:
-        "Base recalibration using sentieon tools for sample {params.sample_id}"
+        "Base recalibration using sentieon tools for sample {params.sample}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -89,11 +89,11 @@ rule sentieon_TNhaplotyper_tumor_only:
         pcr_model = "NONE",
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
     message:
-        "Calling SNVs using sentieon TNhaplotyper for sample {params.sample_id}"
+        "Calling SNVs using sentieon TNhaplotyper for sample {params.case_name}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -137,11 +137,11 @@ rule sentieon_TNscope_tumor_only:
         sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id =  config["analysis"]["case_id"]
+        case_name =  config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     message:
-        "Calling SNVs using sentieon TNscope for sample {params.sample_id}"
+        "Calling SNVs using sentieon TNscope for sample {params.case_name}"
     shell:
         """
 mkdir -p {params.tmpdir};

@@ -13,14 +13,14 @@ rule gatk_haplotypecaller:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     params:
-        conda = config[ "bioinfo_tools" ].get("gatk"),
+        conda = config["bioinfo_tools"].get("gatk"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample_id = '{sample_type}'
+        sample = '{sample_type}'
     threads:
         get_threads(cluster_config,'gatk_haplotypecaller')
     message:
         ("Calling germline variants using gatk haplotypecaller for"
-         "targeted-panel sample {params.sample_id}")
+         "targeted-panel sample {params.sample}")
     shell:
         """
 source activate {params.conda};
@@ -50,9 +50,9 @@ rule haplotypecaller_merge:
     params:
         tmpdir = tempfile.mkdtemp(prefix = tmp_dir),
         conda = config["bioinfo_tools"].get("gatk"),
-        sample_id = '{sample_type}'
+        sample = '{sample_type}'
     message:
-        "Concatenate haplotyper outputs of multiple chr vcfs using bcftools for sample {params.sample_id}"
+        "Concatenate haplotyper outputs of multiple chr vcfs using bcftools for sample {params.sample}"
     shell:
         """
 source activate {params.conda};
@@ -80,11 +80,11 @@ rule manta_germline:
         conda = config["bioinfo_tools"].get("manta"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        sample_id = "{sample_type}"
+        sample = "{sample_type}"
     threads:
         get_threads(cluster_config,"manta_germline")
     message:
-        "Calling germline variants using manta for sample {params.sample_id}"
+        "Calling germline variants using manta for sample {params.sample}"
     shell:
         """
 source activate {params.conda};
@@ -117,11 +117,11 @@ rule sentieon_DNAscope:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id = '{sample_type}'
+        sample = '{sample_type}'
     threads:
         get_threads(cluster_config, 'sentieon_DNAscope')
     message:
-        "Calling germline variants using Sentieon DNAscope for sample {params.sample_id}"
+        "Calling germline variants using Sentieon DNAscope for sample {params.sample}"
     shell:
         """
 mkdir -p {params.tmpdir};
