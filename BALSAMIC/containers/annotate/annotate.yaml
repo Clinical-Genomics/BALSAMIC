@@ -1,14 +1,13 @@
 channels:
   - anaconda
-  - bioconda
   - defaults
   - conda-forge
 
 dependencies:
-  - ensembl-vep=100.2
-  - bcftools>=1.10
-  - vcfanno=0.3.2
-  - gxx_linux-64 
+  - bioconda::ensembl-vep=100.2
+  - bioconda::bcftools>=1.10
+  - bioconda::vcfanno=0.3.2
+  - gxx_linux-64
   - pip
   - pip:
     - "--editable git+https://github.com/NBISweden/vcf2cytosure@0.5.1#egg=vcf2cytosure"
