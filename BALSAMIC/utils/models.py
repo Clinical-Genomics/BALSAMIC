@@ -10,7 +10,8 @@ from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.utils.constants import (
     BIOINFO_TOOL_ENV, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
-    MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT)
+    MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT,
+    BIOINFO_TOOL_SUBMODULE)
 
 
 class VCFAttributes(BaseModel):
@@ -162,7 +163,8 @@ class VCFModel(BaseModel):
     manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
     TNscope_umi: VarcallerAttribute
-
+    delly: VarcallerAttribute
+    ascat: VarcallerAttribute
 
 class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
