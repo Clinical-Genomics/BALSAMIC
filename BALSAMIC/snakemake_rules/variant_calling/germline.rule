@@ -129,11 +129,12 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver --algo DNAscope \
+{params.sentieon_exec} driver \
 -t {threads} \
 -r {input.ref} \
 -i {input.bam} \
 --interval {input.interval} \
+--algo DNAscope \
 -d {input.dbsnp} {output.vcf};
 
 rm -rf {params.tmpdir};

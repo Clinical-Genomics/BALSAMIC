@@ -39,27 +39,30 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver --algo QualCal \
+{params.sentieon_exec} driver \
 -r {input.ref} \
 -t {threads} \
 -i {input.bam} \
+--algo QualCal \
 -k {input.dbsnp} \
 -k {input.mills} \
 -k {input.indel_1kg} \
 {output.recal_data_table};
 
-{params.sentieon_exec} driver --algo QualCal \
+{params.sentieon_exec} driver \
 -r {input.ref} \
 -t {threads} \
 -i {input.bam} \
 -q {output.recal_data_table} \
+--algo QualCal \
 -k {input.dbsnp} \
 -k {input.mills} \
 -k {input.indel_1kg} \
 {output.recal_data_table}.post;
 
-{params.sentieon_exec} driver --algo QualCal \
+{params.sentieon_exec} driver \
 -t {threads} \
+--algo QualCal \
 --plot --before {output.recal_data_table} \
 --after {output.recal_data_table}.post \
 {output.qual_recal};
@@ -101,11 +104,12 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver --algo TNhaplotyper \
+{params.sentieon_exec} driver \
 -r {input.ref} \
 -t {threads} \
 -i {input.bam} \
 -q {input.recal_data_table} \
+--algo TNhaplotyper \
 --tumor_sample {params.tumor} {params.pon} \
 --pcr_indel_mode {params.pcr_model} \
 --cosmic {input.cosmic} \
@@ -149,11 +153,12 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver --algo TNscope \
--t {threads} \
+{params.sentieon_exec} driver \
 -r {input.ref} \
 -i {input.bam} \
 -q {input.recal} \
+-t {threads} \
+--algo TNscope \
 --tumor_sample {params.tumor} {params.pon} \
 --dbsnp {input.dbsnp} \
 --pcr_indel_mode {params.pcr_model} \

@@ -16,11 +16,11 @@ rule mergeBam_normal_umiconsensus:
   params:
     conda = config["bioinfo_tools"].get("picard"),
     picard = picard_extra_normal,
-    case_name = normal_sample
+    sample = normal_sample
   threads:
     get_threads(cluster_config, "mergeBam_normal_umiconsensus")
   message:
-    "Replace ReadGroups using picard for normal sample {params.case_name}"
+    "Replace ReadGroups using picard for normal sample {params.sample}"
   shell:
         """
 source activate {params.conda};

@@ -38,5 +38,6 @@ export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 --algo DNAscope \
 --pcr_indel_mode {params.pcr_model} \
 -d {input.dbsnp} {output.vcf};
+
 rm -rf {params.tmpdir};
       """
