@@ -7,7 +7,7 @@ dependencies:
   - bioconda::ensembl-vep=100.2
   - bioconda::bcftools>=1.10
   - bioconda::vcfanno=0.3.2
-  - gxx_linux-64
-  - pip
+  - anaconda::gxx_linux-64=7.3.0
+  - anaconda::pip=20.2.4
   - pip:
     - "--editable git+https://github.com/NBISweden/vcf2cytosure@0.5.1#egg=vcf2cytosure"
