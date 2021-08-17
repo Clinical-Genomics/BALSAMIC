@@ -1,7 +1,5 @@
 channels:
-  - bioconda
-  - conda-forge
   - defaults
 
 dependencies:
-  - ascat=4.5.0
+  - bioconda::ascat=4.5.0
