@@ -48,6 +48,9 @@ Fixed:
 * ``delly`` not showing in workflow at runtime #644
 * ``ascatngs`` documentaion links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
+* delly run
+* ascat documentaion links in FAQs
+* Wrong spacing in reference json issue #704
 
 Removed:
 ^^^^^^^^
