@@ -42,7 +42,7 @@ mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export PURECN='/opt/conda/envs/varcall_cnvkit/lib/R/library/PureCN/extdata/PureCN.R'
 
-## create target and anti-target bed files
+# create target and anti-target bed files
 cnvkit.py target {input.baits_bed} \
 --annotate {input.refflat} \
 --split \
@@ -52,7 +52,7 @@ cnvkit.py antitarget {input.baits_bed} \
 --access {input.access_bed} \
 --output {params.cnv_dir}/antitarget_bed;
 
-## calculate coverage in the given regions from BAM read depths
+# calculate coverage in the given regions from BAM read depths
 cnvkit.py coverage {input.bamT} \
 {params.cnv_dir}/targets.bed \
 --min-mapq 20 \
@@ -77,34 +77,34 @@ cnvkit.py coverage {input.bamN} \
 --processes {threads} \
 --output {params.cnv_dir}/normal.antitargetcoverage.cnn;
 
-## Compile a coverage reference from the given list of files
+# Compile a coverage reference from the given list of files
 cnvkit.py reference \
 {params.cnv_dir}/normal.targetcoverage.cnn \
 {params.cnv_dir}/normal.antitargetcoverage.cnn \
 --fasta {input.fasta} \
 --output {params.cnv_dir}/normalReference.cnn;
 
-## Combine the uncorrected target and antitarget coverage tables (.cnn) and
-### correct for biases in regional coverage and GC content, according to the given normal reference
+# Combine the uncorrected target and antitarget coverage tables (.cnn) and
+# correct for biases in regional coverage and GC content, according to the given normal reference
 cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn \
 {params.cnv_dir}/tumor.antitargetcoverage.cnn \
 {params.cnv_dir}/normalReference.cnn \
 --output {output.cnr};
        
-## Infer copy number segments from the given coverage table
-### segmentattion methods (-m): cbs: reccommended for mid-size target panels and exomes
-### drop bins with 0  read depth and bins whose log2 values deviating from avg
+# Infer copy number segments from the given coverage table
+# segmentattion methods (-m): cbs: reccommended for mid-size target panels and exomes
+# drop bins with 0  read depth and bins whose log2 values deviating from avg
 cnvkit.py segment {output.cnr} \
 --output {params.cnv_dir}/tumor.initial.cns \
 --method cbs \
 --drop-low-coverage \
 --processes {threads};
 
-## Convert copy number segments (.cns) to standard SEG format to be used in PureCN
+# Convert copy number segments (.cns) to standard SEG format to be used in PureCN
 cnvkit.py export seg {params.cnv_dir}/tumor.initial.cns \
 --output {params.cnv_dir}/tumor.seg;
 
-## Run PureCN to estimate tumor-purity and ploidy
+# Run PureCN to estimate tumor-purity and ploidy
 mkdir -p {params.purecn_dir}
 
 Rscript $PURECN \
@@ -118,11 +118,11 @@ Rscript $PURECN \
 --force --postoptimize \
 --seed 124;
 
-purity=$(awk -F\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
-ploidy=$(awk -F\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv)
-gender=$(awk -F\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\")
+purity=$(awk -F\\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
+ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv)
+gender=$(awk -F\\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\")
 
-## Call copy number variants from segmented log2 ratios
+# Call copy number variants from segmented log2 ratios
 cnvkit.py call {params.cnv_dir}/tumor.initial.cns \
 --vcf {input.snv_vcf} \
 --sample-sex $gender \
@@ -131,28 +131,29 @@ cnvkit.py call {params.cnv_dir}/tumor.initial.cns \
 --ploidy $ploidy \
 --output {output.cns};
 
-## Plot bin-level log2 coverages and segmentation calls
+# Plot bin-level log2 coverages and segmentation calls
 cnvkit.py scatter {output.cnr} \
 --segment {output.cns} \
 --output {output.scatter};
 
-## Draw copy number (.cnr or .cns) on chromosomes as an ideogram
+# Draw copy number (.cnr or .cns) on chromosomes as an ideogram
+# Draw copy number (.cnr or .cns) on chromosomes as an ideogram
 cnvkit.py diagram {output.cnr} \
 --segment  {output.cns} \
 --output {output.diagram};
 
-## Identify targeted genes with copy number gain or loss
+# Identify targeted genes with copy number gain or loss
 cnvkit.py genemetrics {output.cnr} \
 --segment {output.cns} \
 --drop-low-coverage \
 --sample-sex $gender \
 --output {output.gene_metrics};
 
-## List the genenames that contain a possibe copy number breakpoint.
+# List the genenames that contain a possibe copy number breakpoint.
 cnvkit.py breaks {output.cnr} {output.cns} \
 | cut -f1 | sort -u > {output.gene_breaks};
 
-## Convert segments to a vcf file
+# Convert segments to a vcf file
 cnvkit.py export vcf {output.cns} \
 --cnr {output.cnr} \
 -o {params.cnv_dir}/{params.tumor_name}.vcf \
