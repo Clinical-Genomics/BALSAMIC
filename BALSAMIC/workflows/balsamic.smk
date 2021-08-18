@@ -148,8 +148,7 @@ else:
     ]
 
 
-annotation_rules = ["snakemake_rules/annotation/vep.rule", 
-                    "snakemake_rules/annotation/varcaller_sv_filter.rule"]
+annotation_rules = ["snakemake_rules/annotation/vep.rule"]
 
 umiqc_rules = ["snakemake_rules/umi/qc_umi.rule",
                "snakemake_rules/umi/mergetype_tumor_umi.rule"]
@@ -171,10 +170,13 @@ else:
     germline_caller_SNV = get_variant_callers(config=config, analysis_type="paired",
                                               workflow_solution="BALSAMIC",
                                               mutation_type="SNV",
+                                              sequencing_type=config["analysis"]["sequencing_type"],
                                               mutation_class="germline")
+
     germline_caller_SV = get_variant_callers(config=config, analysis_type="paired",
                                              workflow_solution="BALSAMIC",
                                              mutation_type="SV",
+                                             sequencing_type=config["analysis"]["sequencing_type"],
                                              mutation_class="germline")
 
     germline_caller = germline_caller_SNV + germline_caller_SV
@@ -185,37 +187,59 @@ else:
 
 if config["analysis"]["sequencing_type"] == "wgs":
     variantcalling_rules.append("snakemake_rules/variant_calling/sentieon_split_snv_sv.rule")
+
     if config['analysis']['analysis_type'] == "paired":
 
         somatic_caller_snv = get_variant_callers(config=config,
-                                                 analysis_type="paired",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="Sentieon",
                                                  mutation_type="SNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
+                                                 mutation_class="somatic")
+
+        somatic_caller_cnv = get_variant_callers(config=config,
+                                                 analysis_type=config['analysis']['analysis_type'],
+                                                 workflow_solution="BALSAMIC",
+                                                 mutation_type="CNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
 
         somatic_caller_sv = get_variant_callers(config=config,
-                                                analysis_type="paired",
+                                                analysis_type=config['analysis']['analysis_type'],
                                                 workflow_solution="BALSAMIC",
                                                 mutation_type="SV",
+                                                sequencing_type=config["analysis"]["sequencing_type"],
                                                 mutation_class="somatic")
 
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
                                      "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
                                     ])
 
-        annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule")
+        annotation_rules.extend(["snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
+                                 "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_normal.rule",
+                                ])
+
     else:
 
         somatic_caller_sv = get_variant_callers(config=config,
-                                                analysis_type="single",
+                                                analysis_type=config['analysis']['analysis_type'],
                                                 workflow_solution="BALSAMIC",
                                                 mutation_type="SV",
+                                                sequencing_type=config["analysis"]["sequencing_type"],
                                                 mutation_class="somatic")
 
+        somatic_caller_cnv = get_variant_callers(config=config,
+                                                 analysis_type=config['analysis']['analysis_type'],
+                                                 workflow_solution="BALSAMIC",
+                                                 mutation_type="CNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
+                                                 mutation_class="somatic")
+
         somatic_caller_snv = get_variant_callers(config=config,
-                                                 analysis_type="single",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="Sentieon",
                                                  mutation_type="SNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
 
         variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
@@ -223,12 +247,16 @@ if config["analysis"]["sequencing_type"] == "wgs":
                                      "snakemake_rules/dragen_suite/dragen_dna.rule",
                                      ])
 
-        annotation_rules.append("snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule")
+        annotation_rules.extend(["snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule",
+                                 "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_only.rule",
+                                ])
 
 else:
 
     sentieon_callers = ["tnhaplotyper"] if sentieon else []
-    annotation_rules.append("snakemake_rules/annotation/rankscore.rule")
+    annotation_rules.extend(["snakemake_rules/annotation/rankscore.rule",
+                             "snakemake_rules/annotation/varcaller_sv_filter.rule",
+                            ])
 
     if config['analysis']['analysis_type'] == "paired":
         annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_normal.rule")
@@ -243,32 +271,34 @@ else:
         ])
 
         somatic_caller_sv = get_variant_callers(config=config,
-                                                analysis_type="paired",
+                                                analysis_type=config['analysis']['analysis_type'],
                                                 workflow_solution="BALSAMIC",
                                                 mutation_type="SV",
+                                                sequencing_type=config["analysis"]["sequencing_type"],
                                                 mutation_class="somatic")
 
         somatic_caller_cnv = get_variant_callers(config=config,
-                                                 analysis_type="paired",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="BALSAMIC",
                                                  mutation_type="CNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
 
         somatic_caller_snv = get_variant_callers(config=config,
-                                                 analysis_type="paired",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="BALSAMIC",
                                                  mutation_type="SNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
     
         somatic_caller_snv_umi = get_variant_callers(config=config,
-                                                 analysis_type="paired",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="Sentieon_umi",
                                                  mutation_type="SNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
 
         somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi
-
-        somatic_caller_sv = somatic_caller_sv + somatic_caller_cnv
 
     else:
 
@@ -282,34 +312,38 @@ else:
         ])
 
         somatic_caller_sv = get_variant_callers(config=config,
-                                                analysis_type="single",
+                                                analysis_type=config['analysis']['analysis_type'],
                                                 workflow_solution="BALSAMIC",
                                                 mutation_type="SV",
+                                                sequencing_type=config["analysis"]["sequencing_type"],
                                                 mutation_class="somatic")
 
         somatic_caller_cnv = get_variant_callers(config=config,
-                                                 analysis_type="single",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="BALSAMIC",
                                                  mutation_type="CNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
 
         somatic_caller_snv = get_variant_callers(config=config,
-                                                 analysis_type="single",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="BALSAMIC",
                                                  mutation_type="SNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
 
         somatic_caller_snv_umi = get_variant_callers(config=config,
-                                                 analysis_type="single",
+                                                 analysis_type=config['analysis']['analysis_type'],
                                                  workflow_solution="Sentieon_umi",
                                                  mutation_type="SNV",
+                                                 sequencing_type=config["analysis"]["sequencing_type"],
                                                  mutation_class="somatic")
 
         somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi
 
-        somatic_caller_sv = somatic_caller_sv + somatic_caller_cnv
 
-somatic_caller = somatic_caller_snv + somatic_caller_sv
+somatic_caller = somatic_caller_snv + somatic_caller_sv + somatic_caller_cnv
+LOG.info(f"{somatic_caller}")
 
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
@@ -359,16 +393,10 @@ else:
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
                                             vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
 
-# SV filters output
+# SV and CNV filters output
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
-                                        vcf=get_vcf(config, ["manta"], [config["analysis"]["case_id"]]))])
+                                        vcf=get_vcf(config, somatic_caller_sv+somatic_caller_cnv, [config["analysis"]["case_id"]]))])
 
-analysis_specific_results.extend([expand(vcf_dir + "{vcf}.vcf.gz",
-                                         vcf=get_vcf(config, ["delly"],[config["analysis"]["case_id"]]))])
-
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
-    analysis_specific_results.extend([expand(vcf_dir + "{vcf}.vcf.gz",
-                                             vcf=get_vcf(config, ["ascat"],[config["analysis"]["case_id"]]))])
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
