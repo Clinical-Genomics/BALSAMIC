@@ -8,6 +8,10 @@ on:
       - develop
     tags-ignore:
       - "**"
+    paths:
+      - 'ascatNgs/Dockerfile'
+      - 'BALSAMIC/containers/**'
+      - 'Dockerfile'
 
 jobs:
   main:
