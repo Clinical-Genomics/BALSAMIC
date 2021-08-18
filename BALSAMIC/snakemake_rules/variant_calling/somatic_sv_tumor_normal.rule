@@ -68,7 +68,6 @@ rule delly_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("delly")
@@ -105,22 +104,21 @@ rule ascat_tumor_normal:
         gccorrection = config["reference"]["ascat_gccorrection"],
         chryloci= config["reference"]["ascat_chryloci"],
     output:
-        finalvcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
-        samplestatistics = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        germlineplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
-        rawprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
-        sunriseplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
-        tumorplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
-        aspcfplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
-        ascatprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
-        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
+        finalvcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        samplestatistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        germlineplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
+        rawprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
+        sunriseplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
+        tumorplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
+        aspcfplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        ascatprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("ascat") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
     threads:
