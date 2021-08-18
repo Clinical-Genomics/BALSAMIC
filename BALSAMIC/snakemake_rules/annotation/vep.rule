@@ -115,12 +115,12 @@ rule vep_germline:
   params:
     conda = config["bioinfo_tools"].get("ensembl-vep"),
     housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
-    message_text = "{var_type}.germline.{sample}.{var_caller}",
+    sample = '{sample}',
     vep_cache = config["reference"]["vep"]
   threads:
     get_threads(cluster_config, 'vep')
   message:
-    "Running vep annotation on {params.message_text}" 
+    "Running vep annotation on {params.sample}"
   shell:
       """
 source activate {params.conda};

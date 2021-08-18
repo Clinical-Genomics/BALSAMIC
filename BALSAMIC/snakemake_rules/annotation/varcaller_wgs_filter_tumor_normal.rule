@@ -20,11 +20,11 @@ rule bcftools_filter_tnscope_tumor_normal:
     AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    message_text = "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz"
+    case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_normal')
   message:
-    "Filtering wgs tumor-normal tnscope annotated variants using bcftools on {params.message_text}"
+    "Filtering wgs tumor-normal tnscope annotated variants using bcftools on {params.case_name}"
   shell:
     """
 source activate {params.conda};

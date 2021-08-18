@@ -2,30 +2,31 @@
 # coding: utf-8
 # Rank variants according to a rankscore model
 
-rule genmod_rankscore_vardict:
+rule genmod_score_vardict:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
     rankscore = config["reference"]["rankscore"]
   output:
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.ranked.vcf.gz",
   benchmark:
-    Path(benchmark_dir, 'genmod_rankscore_vardict_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'genmod_score_vardict_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     conda = config["bioinfo_tools"].get("genmod"),
-    message_text = "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz"
+    case_name = "{case_name}"
   threads:
-    get_threads(cluster_config, 'genmod_rankscore_vardict')
+    get_threads(cluster_config, 'genmod_score_vardict')
   message:
     ("Score annotated vardict variants using genmod"
-    "and compress vcf using bcftools on {params.message_text}")
+    "and compress vcf using bcftools on {params.case_name}")
   shell:
     """
 source activate {params.conda};
 
-genmod score -r -c {input.rankscore} {input.vcf} | bcftools view -o {output.vcf_pass} -O z;
+genmod score -r -c {input.rankscore} {input.vcf} | \
+bcftools view -o {output.vcf_pass} -O z;
 
 tabix -p vcf -f {output.vcf_pass};
     """

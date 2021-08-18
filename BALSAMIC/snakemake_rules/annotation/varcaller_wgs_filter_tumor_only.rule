@@ -22,11 +22,11 @@ rule bcftools_filter_tnscope_tumoronly:
     strand_reads = [SENTIEON_CALLER.strand_reads.tag_value, SENTIEON_CALLER.strand_reads.filter_name],
     qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
     sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
-    message_text = "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz"
+    case_name = '{case_name}'
   threads: 
     get_threads(cluster_config, 'bcftools_filter_tnscope_tumoronly')
   message:
-    "Filtering wgs tumor-only tnscope annotated variants using bcftools on {params.message_text}"
+    "Filtering wgs tumor-only tnscope annotated variants using bcftools on {params.case_name}"
   shell:
     """
 source activate {params.conda};
@@ -66,11 +66,11 @@ rule bcftools_filter_tnhaplotyper_tumoronly:
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
     strand_reads = [SENTIEON_CALLER.strand_reads.tag_value, SENTIEON_CALLER.strand_reads.filter_name],
     qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
-    message_text = "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz"
+    case_name = '{case_name}'
   threads: 
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumoronly')
   message:
-    "Filtering wgs tumor-only tnhaplotyper annotated variants using bcftools on {params.message_text}"
+    "Filtering wgs tumor-only tnhaplotyper annotated variants using bcftools on {params.case_name}"
   shell:
     """
 source activate {params.conda};
@@ -105,11 +105,11 @@ rule bcftools_intersect_tumoronly:
     conda = config["bioinfo_tools"].get("bcftools"),
     vcf_dir = vep_dir + "sentieon_callers_intersect",
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    message_text = "{var_type}.somatic.{case_name}.tnscope_isec.filtered.vcf.gz"
+    case_name = '{case_name}'
   threads: 
     get_threads(cluster_config, 'bcftools_intersect_tumoronly')
   message:
-    "Retrieving common annotated variants between tnscope and tnhaplotyper using bcftools for {params.message_text}"
+    "Retrieving common annotated variants between tnscope and tnhaplotyper using bcftools for {params.case_name}"
   shell:
     """
 source activate {params.conda};

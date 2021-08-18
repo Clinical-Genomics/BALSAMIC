@@ -22,11 +22,11 @@ rule bcftools_filter_vardict_tumor_normal:
     AF_max = [VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
     possible_germline = "balsamic_possible_germline",
     pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
-    message_text = "{var_type}.somatic.{case_name}.vardict.all.vcf.gz"
+    case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_vardict_tumor_normal')
   message:
-    "Filtering vardict tumor-normal annotated variants using bcftools on {params.message_text}"
+    "Filtering vardict tumor-normal annotated variants using bcftools on {params.case_name}"
   shell:
     """
 source activate {params.conda};

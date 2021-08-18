@@ -13,13 +13,13 @@ rule bcftools_filter_manta:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
-    message_text = "{var_type}.somatic.{case_name}.manta.all.vcf.gz",
+    case_name = '{case_name}',
     conda = config["bioinfo_tools"].get("bcftools"),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
   threads:
     get_threads(cluster_config, 'bcftools_filter_manta')
   message:
-    ("Filtering manta annotated structural variants using bcftools on {params.message_text}")
+    ("Filtering manta annotated structural variants using bcftools on {params.case_name}")
   shell:
     """
 source activate {params.conda};
