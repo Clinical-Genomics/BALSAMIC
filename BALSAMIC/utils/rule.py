@@ -6,7 +6,7 @@ from pathlib import Path
 import snakemake
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import find_file_index
-from BALSAMIC.utils.constants import (MUTATION_TYPE, MUTATION_CLASS,
+from BALSAMIC.utils.constants import (MUTATION_TYPE, MUTATION_CLASS, SEQUENCING_TYPE,
                                       WORKFLOW_SOLUTION, ANALYSIS_TYPES)
 from BALSAMIC.utils.exc import WorkflowRunError
 
@@ -39,7 +39,7 @@ def get_vcf(config, var_caller, sample):
 
 
 def get_variant_callers(config, mutation_type: str, mutation_class: str,
-                        analysis_type: str, workflow_solution: str):
+                        analysis_type: str, workflow_solution: str, sequencing_type: str):
     """ Get list of variant callers for a given list of input
 
     Args:
@@ -48,13 +48,15 @@ def get_variant_callers(config, mutation_type: str, mutation_class: str,
         mutation_class: A mutation class string, e.g. somatic
         analysis_type: A analysis type string, e.g. paired
         workflow_solution: A workflow type string, e.g. BALSAMIC
+        sequencing_type: A sequencing type, e.g. wgs or panel
 
     Returns:
         A list variant caller names extracted from config
 
     Raises:
-        WorkflowRunError if mutation_type, mutation_class, analysis_type, or workflow_solution do not have valid value
+        WorkflowRunError if values are not valid
     """
+
     valid_variant_callers = set()
     if mutation_type not in MUTATION_TYPE:
         raise WorkflowRunError(
@@ -72,13 +74,17 @@ def get_variant_callers(config, mutation_type: str, mutation_class: str,
         raise WorkflowRunError(
             f"{mutation_class} is not a valid mutation class.")
 
+    if sequencing_type not in SEQUENCING_TYPE:
+        raise WorkflowRunError(
+            f"{sequencing_type} is not a valid sequencing type.")
+
     for variant_caller_name, variant_caller_params in config["vcf"].items():
         if mutation_type in variant_caller_params.get(
                 "type") and mutation_class in variant_caller_params.get(
                     "mutation") and analysis_type in variant_caller_params.get(
                         "analysis_type"
                     ) and workflow_solution in variant_caller_params.get(
-                        "workflow_solution"):
+                        "workflow_solution") and sequencing_type in variant_caller_params.get("sequencing_type"):
             valid_variant_callers.add(variant_caller_name)
     return list(valid_variant_callers)
 
