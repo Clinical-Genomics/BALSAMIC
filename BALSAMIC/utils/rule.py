@@ -48,7 +48,7 @@ def get_variant_callers(config, mutation_type: str, mutation_class: str,
         mutation_class: A mutation class string, e.g. somatic
         analysis_type: A analysis type string, e.g. paired
         workflow_solution: A workflow type string, e.g. BALSAMIC
-        sequencing_type: A sequencing type, e.g. wgs or panel
+        sequencing_type: A sequencing type, e.g. wgs or targeted
 
     Returns:
         A list variant caller names extracted from config
