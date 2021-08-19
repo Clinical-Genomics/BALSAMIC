@@ -26,6 +26,7 @@ Added:
 * ``ascatngs`` tumor normal rule for wgs cases #672
 * Individual rules (i.e. ngs filters) for cnv and sv callers. Only Manta will be delivered and added to the list of output files. #708
 * Added "targeted" and "wgs" tags to variant callers to provide another layer of separation. #708
+* ``manta`` convert inversion #709
 
 Changed:
 ^^^^^^^^

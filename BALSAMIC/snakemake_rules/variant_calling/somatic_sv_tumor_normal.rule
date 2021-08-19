@@ -26,7 +26,8 @@ rule manta_tumor_normal:
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        conda = config["bioinfo_tools"].get("manta")
+        conda = config["bioinfo_tools"].get("manta"),
+        manta_install_path = "/opt/conda/envs/varcall_py27/share/manta-1.6.0-1"
     threads:
         get_threads(cluster_config, "manta_tumor_normal")
     message:
@@ -36,6 +37,8 @@ rule manta_tumor_normal:
         """
 source activate {params.conda};
 
+samtools_path=$(readlink -f $(which samtools))
+
 configManta.py \
   --normalBam={input.bamN} \
   --tumorBam={input.bamT} \
@@ -44,7 +47,12 @@ configManta.py \
 
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
-cp {params.tmpdir}/results/variants/somaticSV.vcf.gz {output.final};
+{params.manta_install_path}/libexec/convertInversion.py \
+  $samtools_path \
+  {input.fa} \
+  {params.tmpdir}/results/variants/somaticSV.vcf.gz > {params.tmpdir}/results/variants/somaticSV_converted.vcf; 
+
+bgzip -l 9 -c {params.tmpdir}/results/variants/somaticSV_converted.vcf > {output.final};
 
 tabix -p vcf -f {output.final};
 
