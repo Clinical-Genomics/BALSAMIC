@@ -69,6 +69,10 @@
         "delly":{
             "mutation": "somatic",
             "type": "SV"
+        },
+        "ascat": {
+            "mutation": "somatic",
+            "type": "SV"
         }
     }
 }

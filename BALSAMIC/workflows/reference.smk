@@ -149,7 +149,7 @@ rule all:
             "rankscore": input.rankscore,
             "access_regions": input.access_regions,
             "delly_exclusion" : input.delly_exclusion,
-            "delly_exclusion_converted " : input.delly_exclusion_converted,
+            "delly_exclusion_converted" : input.delly_exclusion_converted,
             "ascat_gccorrection" : input.ascat_gccorrection,
             "ascat_chryloci" : input.ascat_chryloci
         }
