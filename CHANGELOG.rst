@@ -24,6 +24,8 @@ Added:
 * ascat download container
 * Documentation update on setting sentieon env variables in ``bashrc``
 * ascat tumor normal rule for wgs cases
+* Individual rules (i.e. ngs filters) for cnv and sv callers. Only Manta will be delivered and added to the list of output files. #708
+* Added "targeted" and "wgs" tags to variant callers to provide another layer of separation. #708
 
 Changed:
 ^^^^^^^^
@@ -35,6 +37,9 @@ Changed:
 * Update GNOMAD URL
 * Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
+* Generalized ascat, delly, and manta result in workflow. #708
+* Generalized workflow to eliminate duplicate entries and code. #708
+
 
 Fixed:
 ^^^^^^
