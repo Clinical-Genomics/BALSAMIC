@@ -363,6 +363,13 @@ else:
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
                                         vcf=get_vcf(config, ["manta"], [config["analysis"]["case_id"]]))])
 
+analysis_specific_results.extend([expand(vcf_dir + "{vcf}.vcf.gz",
+                                         vcf=get_vcf(config, ["delly"],[config["analysis"]["case_id"]]))])
+
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
+    analysis_specific_results.extend([expand(vcf_dir + "{vcf}.vcf.gz",
+                                             vcf=get_vcf(config, ["ascat"],[config["analysis"]["case_id"]]))])
+
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
         analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
