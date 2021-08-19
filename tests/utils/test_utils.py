@@ -120,7 +120,7 @@ def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config):
     workflow = "BALSAMIC"
     mutation_type = "SNV"
     mutation_class = "somatic"
-    wrong_sequencing_type = "wgs"
+    wrong_sequencing_type = "wts"
     analysis_type = "paired"
 
     # WHEN getting list of variant callers
