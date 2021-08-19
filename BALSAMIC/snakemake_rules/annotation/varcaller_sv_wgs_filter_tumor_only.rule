@@ -53,3 +53,4 @@ source activate {params.conda};
 
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
+    """
