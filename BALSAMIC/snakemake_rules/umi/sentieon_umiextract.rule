@@ -11,6 +11,7 @@ rule sentieon_umiextract:
     benchmark:
         Path(benchmark_dir, "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -24,6 +25,10 @@ rule sentieon_umiextract:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi extract \
@@ -41,6 +46,7 @@ rule sentieon_bwa_umiextract:
     benchmark:
         Path(benchmark_dir, "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -55,6 +61,10 @@ rule sentieon_bwa_umiextract:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \

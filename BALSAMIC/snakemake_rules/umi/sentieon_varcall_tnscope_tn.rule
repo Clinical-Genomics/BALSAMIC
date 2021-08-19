@@ -15,6 +15,7 @@ rule sentieon_tnscope_umi_tn:
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         tumor_af = paramsumi.common.filter_tumor_af,
@@ -33,6 +34,9 @@ rule sentieon_tnscope_umi_tn:
         " versus sample {params.normal}"
     shell:
         """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
