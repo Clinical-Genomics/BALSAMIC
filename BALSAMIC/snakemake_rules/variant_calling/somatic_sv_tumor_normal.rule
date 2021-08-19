@@ -50,9 +50,9 @@ python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 {params.manta_install_path}/libexec/convertInversion.py \
   $samtools_path \
   {input.fa} \
-  {params.tmpdir}/results/variants/somaticSV.vcf.gz > {output.final}; 
+  {params.tmpdir}/results/variants/somaticSV.vcf.gz > {params.tmpdir}/results/variants/somaticSV_converted.vcf; 
 
-bgzip {output.final};
+bgzip -l 9 -c {params.tmpdir}/results/variants/somaticSV_converted.vcf > {output.final};
 
 tabix -p vcf -f {output.final};
 
