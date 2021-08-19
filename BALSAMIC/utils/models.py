@@ -229,7 +229,7 @@ class AnalysisModel(BaseModel):
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
-        balsamic_sequencing_types = ["wgs", "targeted"]
+        balsamic_sequencing_types = SEQUENCING_TYPE
         if value not in balsamic_sequencing_types:
             raise ValueError(
                 f"Provided sequencing type ({value}) not supported in BALSAMIC!"
