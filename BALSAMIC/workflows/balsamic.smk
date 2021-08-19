@@ -167,19 +167,21 @@ else:
         "snakemake_rules/variant_calling/split_bed.rule"
     ]
 
-    germline_caller_SNV = get_variant_callers(config=config, analysis_type="paired",
+    germline_caller_snv = get_variant_callers(config=config,
+                                              analysis_type=config['analysis']['analysis_type'],
                                               workflow_solution="BALSAMIC",
                                               mutation_type="SNV",
                                               sequencing_type=config["analysis"]["sequencing_type"],
                                               mutation_class="germline")
 
-    germline_caller_SV = get_variant_callers(config=config, analysis_type="paired",
+    germline_caller_sv = get_variant_callers(config=config,
+                                             analysis_type=config['analysis']['analysis_type'],
                                              workflow_solution="BALSAMIC",
                                              mutation_type="SV",
                                              sequencing_type=config["analysis"]["sequencing_type"],
                                              mutation_class="germline")
 
-    germline_caller = germline_caller_SNV + germline_caller_SV
+    germline_caller = germline_caller_snv + germline_caller_sv
 
 
     if sentieon:
