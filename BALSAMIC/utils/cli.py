@@ -449,7 +449,8 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
             for p in packages:
                 if isinstance(p, dict):
                     continue
-                name = p.split("=")[0]
+                package = p.split("=")[0]
+                name = package.split("::")[1]
                 version = "=".join(p.split("=")[1:])
                 if name not in bioinfo_tools:
                     continue
