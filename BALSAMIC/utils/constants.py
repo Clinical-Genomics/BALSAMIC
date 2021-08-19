@@ -114,7 +114,7 @@ VCF_DICT = {
         "mutation": "somatic",
         "type": "SV",
         "analysis_type": ["paired", "single"],
-        "sequencing_type": ["wgs"],
+        "sequencing_type": ["wgs", "targeted"],
         "workflow_solution": ["BALSAMIC"]
     },
    "ascat": {
