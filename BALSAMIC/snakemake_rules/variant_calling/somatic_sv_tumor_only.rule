@@ -22,7 +22,8 @@ rule manta_tumor_only:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
-        conda = config["bioinfo_tools"].get("manta")
+        conda = config["bioinfo_tools"].get("manta"),
+        manta_install_path= "/opt/conda/envs/varcall_py27/share/manta-1.6.0-1"
     threads:
         get_threads(cluster_config, "manta_tumor_only")
     message:
@@ -32,6 +33,8 @@ rule manta_tumor_only:
       """
 source activate {params.conda};
 
+samtools_path=$(readlink -f $(which samtools))
+
 configManta.py \
   --tumorBam={input.bamT} \
   --referenceFasta={input.fa} \
@@ -39,7 +42,12 @@ configManta.py \
 
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
-cp {params.tmpdir}/results/variants/tumorSV.vcf.gz {output.final};
+{params.manta_install_path}/libexec/convertInversion.py \
+  $samtools_path \
+  {input.fa} \
+  {params.tmpdir}/results/variants/tumorSV.vcf.gz > {output.final}; 
+
+bgzip {output.final};
 
 tabix -p vcf -f {output.final};
 
