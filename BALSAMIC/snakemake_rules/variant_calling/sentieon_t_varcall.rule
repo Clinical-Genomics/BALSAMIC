@@ -46,8 +46,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo QualCal \
 -k {input.dbsnp} \
 -k {input.mills} \
--k {input.indel_1kg} \
-{output.recal_data_table};
+-k {input.indel_1kg} {output.recal_data_table};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
@@ -67,7 +66,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --after {output.recal_data_table}.post \
 {output.qual_recal};
 
-{params.sentieon_exec} plot QualCal \ 
+{params.sentieon_exec} plot QualCal \
 -o {output.qual_recal_plot} {output.qual_recal};
 
 rm -rf {params.tmpdir};
@@ -165,6 +164,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {params.tumor_options} {output.vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap_snv};
-cp {output.namemap_snv} {output.namemap_sv}
+
+cp {output.namemap_snv} {output.namemap_sv};
 rm -rf {params.tmpdir};
         """
