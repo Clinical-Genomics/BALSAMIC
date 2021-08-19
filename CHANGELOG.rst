@@ -24,6 +24,7 @@ Added:
 * ``ascatngs`` download container #672
 * Documentation update on setting sentieon env variables in ``bashrc``
 * ``ascatngs`` tumor normal rule for wgs cases #672
+* ``manta`` convert inversion #709
 
 Changed:
 ^^^^^^^^
