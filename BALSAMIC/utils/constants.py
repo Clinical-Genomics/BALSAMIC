@@ -106,6 +106,12 @@ VCF_DICT = {
         "analysis_type": ["paired", "single"],
         "workflow_solution": ["BALSAMIC"]
     },
+   "ascat": {
+       "mutation": "somatic",
+       "type": "SV",
+       "analysis_type": ["paired"],
+       "workflow_solution": ["BALSAMIC"]
+   },
 }
 
 # Minimum required QC-values from HS metrics to be able to pass analysis
@@ -595,7 +601,7 @@ umiworkflow_params = {
 # list of bioinfo tools for each conda env
 VALID_CONTAINER_CONDA_NAME = {
     "align_qc", "annotate", "coverage_qc", "varcall_py36", "varcall_py27",
-    "varcall_cnvkit","varcall_delly"
+    "varcall_cnvkit","varcall_delly","ascatngs"
 }
 
 BIOINFO_TOOL_ENV = {
@@ -620,6 +626,10 @@ BIOINFO_TOOL_ENV = {
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "varcall_delly"
+}
+
+BIOINFO_TOOL_SUBMODULE = {
+    "ascat": "ascatngs"
 }
 
 REPORT_MODEL = {

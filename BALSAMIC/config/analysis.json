@@ -65,6 +65,14 @@
         "vcfmerge":{
             "mutation": "somatic",
             "type": "SNV"
+        },
+        "delly":{
+            "mutation": "somatic",
+            "type": "SV"
+        },
+        "ascat": {
+            "mutation": "somatic",
+            "type": "SV"
         }
     }
 }
