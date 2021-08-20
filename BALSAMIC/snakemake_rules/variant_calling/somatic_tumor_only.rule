@@ -9,70 +9,88 @@ def get_pon(config):
         return None
 
 rule vardict_tumor_only:
-  input:
-    fa = config["reference"]["reference_genome"],
-    bamT = bam_dir + "tumor.merged.bam",
-    bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
-  output:
-    temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
-  params:
-    tmpdir = tmp_dir,
-    af = "0.001",
-    max_pval = "0.9",
-    max_mm = "4.5",
-    col_info = "-c 1 -S 2 -E 3 -g 4",
-    name = config["analysis"]["case_id"],
-    conda = config["bioinfo_tools"].get("vardict"),
-  threads: get_threads(cluster_config, "vardict_tumor_only")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + 'vardict_tumor_only_' + '{bedchrom}.vardict.tsv'
-  shell:
-    "source activate {params.conda}; "
-    "export PERL5LIB=;"
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "export VAR_DICT_OPTS='\"-Djava.io.tmpdir=${{tmpdir}}\" \"-Xmx48G\"'; "
-    "vardict-java -u -I 600 -G {input.fa} -f {params.af} -N {params.name} "
-        " -th {threads} "
-        "-b {input.bamT} "
-        " -th {threads} "
-        "{params.col_info} {input.bed} "
-        "| teststrandbias.R "
-        "| var2vcf_valid.pl -P {params.max_pval} "
-        "-m {params.max_mm} -E -f {params.af} -N {params.name} "
-        "| bgzip > {output}; "
-    "tabix -p vcf {output}; "
-    "source deactivate;"
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = bam_dir + "tumor.merged.bam",
+        bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
+    output:
+        temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
+    benchmark:
+        Path(benchmark_dir, 'vardict_tumor_only_' + '{bedchrom}.tsv').as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        af = "0.001",
+        max_pval = "0.9",
+        max_mm = "4.5",
+        col_info = "-c 1 -S 2 -E 3 -g 4",
+        case_name = config["analysis"]["case_id"],
+        conda = config["bioinfo_tools"].get("vardict"),
+    threads:
+        get_threads(cluster_config, "vardict_tumor_only")
+    message:
+        "Calling variants using vardict for sample {params.case_name}"
+    shell:
+        """
+source activate {params.conda};
+export PERL5LIB=;
+
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx48G\"'; 
+
+vardict-java -u -I 600 \
+-G {input.fa} \
+-f {params.af} \
+-N {params.case_name} \
+-th {threads} \
+-b {input.bamT} \
+-th {threads} \
+{params.col_info} {input.bed} \
+| teststrandbias.R \
+| var2vcf_valid.pl -P {params.max_pval} \
+-m {params.max_mm} -E -f {params.af} -N {params.case_name} \
+| bgzip > {output};
+
+tabix -p vcf {output};
+    """
 
 rule vardict_merge:
-  input:
-    expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
-  output:
-    namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map",
-    yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
-    vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
-  params:
-    tmpdir = tmp_dir,
-    conda = config["bioinfo_tools"].get("vardict"),
-    name = config["analysis"]["case_id"],
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
-  benchmark:
-    benchmark_dir + 'vardict_merge_' + config["analysis"]["case_id"] + ".vardict_merge.tsv"
-  shell:
-    "source activate {params.conda} ; "
-    "rand_str=$(openssl rand -hex 5); "
-    "tmpdir={params.tmpdir}/${{rand_str}}; "
-    "mkdir -p ${{tmpdir}}; "
-    "export TMPDIR=${{tmpdir}}; "
-    "bcftools concat {input} | bcftools sort --temp-dir ${{tmpdir}} - | bgzip > {output.vcf}; "
-    "tabix -f -p vcf {output.vcf}; "
-    "echo -e \"{params.name}\\tTUMOR\" > {output.namemap}; " 
-    "echo -e \"{params.name}\" > {output.namemap}.tumor; " 
-    "echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml}; "
-    "source deactivate;" 
+    input:
+        expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
+    output:
+        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map",
+        yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+    benchmark:
+        Path(benchmark_dir, 'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        conda = config["bioinfo_tools"].get("vardict"),
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config,"vardict_merge")
+    message:
+        ("Merging all chromosomes vardict results into "
+         "single vcf using bcftools for sample {params.case_name}")
+    shell:
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+bcftools concat {input} \
+| bcftools sort --temp-dir {params.tmpdir} - \
+| bgzip > {output.vcf};
+tabix -f -p vcf {output.vcf}; 
+
+echo -e \"{params.case_name}\\tTUMOR\" > {output.namemap};
+echo -e \"{params.case_name}\" > {output.namemap}.tumor; 
+echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml};
+        """
 
 rule sentieon_TNhaplotyper_tumor_only:
     input:
@@ -84,25 +102,35 @@ rule sentieon_TNhaplotyper_tumor_only:
     output:
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
+    benchmark:
+        Path(benchmark_dir,'sentieon_TNhaplotyper_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        tmpdir = tmp_dir, 
-        tumor = get_sample_type(config["samples"], "tumor"),
-        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]), 
+        tumor = "TUMOR",
+        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
+        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-    threads: get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
-    log:
-        vcf_dir + config["analysis"]["case_id"] + ".tnsnv.log"
-    benchmark:
-        benchmark_dir + 'sentieon_TNhaplotyper_tumor_only_' + config["analysis"]["case_id"] + ".tnhaplotyper.tsv"
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
+    message:
+        "Calling variants using TNhaplotyper for sample {params.case_name}"
     shell:
         """
-rand_str=$(openssl rand -hex 5);
-tmpdir={params.tmpdir}/${{rand_str}}; 
-mkdir -p ${{tmpdir}}; 
-export TMPDIR=${{tmpdir}}; 
-export SENTIEON_TMPDIR=${{tmpdir}};
+mkdir -p {params.tmpdir}; 
+export TMPDIR={params.tmpdir}; 
+export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
-{params.sentieon_exec} driver -r {input.ref} -t {threads} -i {input.bam} --interval {input.interval} --algo TNhaplotyper --tumor_sample TUMOR {params.pon} --cosmic {input.cosmic} --dbsnp {input.dbsnp} {output.vcf} 
-echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
+
+{params.sentieon_exec} driver \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+--interval {input.interval} \
+--algo TNhaplotyper \
+--tumor_sample {params.tumor} {params.pon} \
+--cosmic {input.cosmic} \
+--dbsnp {input.dbsnp} {output.vcf};
+ 
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
         """
