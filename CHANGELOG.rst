@@ -40,23 +40,25 @@ Changed:
 * Improved TMB calculation issue #51
 * Generalized ascat, delly, and manta result in workflow. #708
 * Generalized workflow to eliminate duplicate entries and code. #708
-
+* Split Tumor-Normal ``cnvkit batch`` into individual commands
+>>>>>>> origin/develop
 
 Fixed:
 ^^^^^^
 
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
-* Refactor ``snakemake`` align rules according to ``snakemake`` etiquette 
-* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette
-* Refactor snakemake ``manta`` rule according to snakemake etiquette
+* Refactor snakemake ``annotate`` rules according to snakemake etiquette #636
+* Refactor snakemake ``align`` rules according to snakemake etiquette #636 
+* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette #636
 * Order of columns in QC and coverage report issue #601
 * ``delly`` not showing in workflow at runtime #644
-* ``ascatngs`` documentaion links in ``FAQs`` #672
+* ``ascatngs`` documentation links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
-* delly run
-* ascat documentaion links in FAQs
+* Refactor snakemake ``umi`` rules according to snakemake etiquette #636
+* Refactor snakemake ``variant calling`` rules according to snakemake etiquette #636
 * Wrong spacing in reference json issue #704
+
 
 Removed:
 ^^^^^^^^

@@ -9,11 +9,11 @@ rule bcftools_filter_manta:
   output:
     vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.manta.all.filtered.pass.vcf.gz",
   benchmark:
-    benchmark_dir + 'bcftools_filter_' + "{var_type}.somatic.{case_name}.manta.vep.tsv"
+    Path(benchmark_dir, 'bcftools_filter_manta_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
-    case_name = "{case_name}",
+    case_name = '{case_name}',
     conda = config["bioinfo_tools"].get("bcftools"),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
   threads:
@@ -25,6 +25,7 @@ rule bcftools_filter_manta:
 source activate {params.conda};
 
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
+
 tabix -p vcf -f {output.vcf_sv_pass};
     """
 
