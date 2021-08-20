@@ -351,7 +351,9 @@ else:
 
 # SV and CNV filters output
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
-                                        vcf=get_vcf(config, somatic_caller_sv+somatic_caller_cnv, [config["analysis"]["case_id"]]))])
+                                        vcf=get_vcf(config,
+                                                    somatic_caller_sv + somatic_caller_cnv,
+                                                    [config["analysis"]["case_id"]]))])
 
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":

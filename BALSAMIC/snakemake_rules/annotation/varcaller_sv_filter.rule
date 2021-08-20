@@ -3,13 +3,13 @@
 # NGS filters for various scenarios
 
 
-rule ngs_filter_manta:
+rule bcftools_filter_manta:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.manta.all.vcf.gz",
   output:
     vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.manta.all.filtered.pass.vcf.gz",
   benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.manta.vep.tsv"
+    benchmark_dir + 'bcftools_filter_' + "{var_type}.somatic.{case_name}.manta.vep.tsv"
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
@@ -17,9 +17,9 @@ rule ngs_filter_manta:
     conda = config["bioinfo_tools"].get("bcftools"),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
   threads:
-    get_threads(cluster_config, 'ngs_filter_manta')
+    get_threads(cluster_config, 'bcftools_filter_manta')
   message:
-    ("Running ngs filters on annotated Manta structural variant calling results.")
+    "Filtering Manta results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
 source activate {params.conda};
@@ -29,22 +29,22 @@ tabix -p vcf -f {output.vcf_sv_pass};
     """
 
 
-rule ngs_filter_cnvkit:
+rule bcftools_filter_cnvkit:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.cnvkit.all.vcf.gz",
   output:
     vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.cnvkit.all.filtered.pass.vcf.gz",
   benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.cnvkit.vep.tsv"
+    benchmark_dir + 'bcftools_filter_' + "{var_type}.somatic.{case_name}.cnvkit.vep.tsv"
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
     case_name = "{case_name}",
     conda = config["bioinfo_tools"].get("bcftools"),
   threads:
-    get_threads(cluster_config, 'ngs_filter_cnvkit')
+    get_threads(cluster_config, 'bcftools_filter_cnvkit')
   message:
-    "Running ngs filters on annotated CNVKit results."
+    "Filtering CNVkit results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
 source activate {params.conda};
@@ -54,22 +54,22 @@ tabix -p vcf -f {output.vcf_sv_pass};
     """
 
 
-rule ngs_filter_delly:
+rule bcftools_filter_delly:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.delly.all.vcf.gz",
   output:
     vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.delly.all.filtered.pass.vcf.gz",
   benchmark:
-    benchmark_dir + 'ngs_filter_' + "{var_type}.somatic.{case_name}.delly.vep.tsv"
+    benchmark_dir + 'bcftools_filter_' + "{var_type}.somatic.{case_name}.delly.vep.tsv"
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
     case_name = "{case_name}",
     conda = config["bioinfo_tools"].get("bcftools"),
   threads:
-    get_threads(cluster_config, 'ngs_filter_delly')
+    get_threads(cluster_config, 'bcftools_filter_delly')
   message:
-    "Running ngs filters on annotated CNVKit results."
+    "Filtering Delly results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
 source activate {params.conda};
