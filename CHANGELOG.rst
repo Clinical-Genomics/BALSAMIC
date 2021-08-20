@@ -33,10 +33,12 @@ Changed:
 * New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
+* Updated ``snakemake`` to ``v6.5.3`` #501 
 * Update ``GNOMAD`` URL
 * Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
 * Split Tumor-Normal ``cnvkit batch`` into individual commands
+
 
 Fixed:
 ^^^^^^
@@ -50,8 +52,6 @@ Fixed:
 * ``delly`` not showing in workflow at runtime #644
 * ``ascatngs`` documentation links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
-* Refactor snakemake ``umi`` rules according to snakemake etiquette #636
-* Refactor snakemake ``variant calling`` rules according to snakemake etiquette #636
 * Wrong spacing in reference json issue #704
 
 
