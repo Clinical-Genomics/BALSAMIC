@@ -9,7 +9,7 @@ from pydantic.types import DirectoryPath, FilePath
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.utils.constants import (
-    BIOINFO_TOOL_ENV, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
+    BIOINFO_TOOL_ENV, SEQUENCING_TYPE, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
     MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT,
     BIOINFO_TOOL_SUBMODULE)
 
@@ -111,6 +111,7 @@ class VarcallerAttribute(BaseModel):
         mutation_type: str of mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
+        sequencing_type: list of str for workflows
 
     Raises:
         ValueError:
@@ -122,6 +123,7 @@ class VarcallerAttribute(BaseModel):
     mutation: str
     mutation_type: str = Field(alias="type")
     analysis_type: Optional[list]
+    sequencing_type: Optional[list]
     workflow_solution: Optional[list]
 
     @validator("workflow_solution", check_fields=False)
@@ -148,6 +150,12 @@ class VarcallerAttribute(BaseModel):
     def mutation_type_literal(cls, value) -> str:
         " Validate mutation type "
         assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
+        return value
+
+    @validator("sequencing_type", check_fields=False)
+    def sequencing_type_literal(cls, value) -> str:
+        " Validate sequencing type "
+        assert set(value).issubset(set(SEQUENCING_TYPE)), f"{value} is not not a valid sequencing type."
         return value
 
 
@@ -221,7 +229,7 @@ class AnalysisModel(BaseModel):
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
-        balsamic_sequencing_types = ["wgs", "targeted"]
+        balsamic_sequencing_types = SEQUENCING_TYPE
         if value not in balsamic_sequencing_types:
             raise ValueError(
                 f"Provided sequencing type ({value}) not supported in BALSAMIC!"

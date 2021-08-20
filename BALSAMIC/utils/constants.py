@@ -36,6 +36,7 @@ MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
 ANALYSIS_TYPES = ["paired", "single", "umi", "qc", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
+SEQUENCING_TYPE = ["wgs", "targeted"]
 
 # Variantcaller parameters
 VARCALL_PARAMS = {
@@ -50,67 +51,78 @@ VCF_DICT = {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["single", "paired"],
+        "sequencing_type": ["targeted"],
         "workflow_solution": ["Sentieon_umi"]
     },
     "tnscope": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["Sentieon"]
     },
     "tnhaplotyper": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["Sentieon"]
     },
     "dnascope": {
         "mutation": "germline",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["Sentieon"]
     },
     "manta": {
         "mutation": "somatic",
         "type": "SV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"]
     },
     "cnvkit": {
         "mutation": "somatic",
         "type": "CNV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"]
     },
     "vardict": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"]
     },
     "manta_germline": {
         "mutation": "germline",
         "type": "SV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"]
     },
     "haplotypecaller": {
         "mutation": "germline",
         "type": "SNV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"]
     },
    "delly": {
         "mutation": "somatic",
         "type": "SV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["wgs", "targeted"],
         "workflow_solution": ["BALSAMIC"]
     },
    "ascat": {
-       "mutation": "somatic",
-       "type": "SV",
-       "analysis_type": ["paired"],
-       "workflow_solution": ["BALSAMIC"]
+        "mutation": "somatic",
+        "type": "CNV",
+        "analysis_type": ["paired"],
+        "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"]
    },
 }
 

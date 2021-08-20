@@ -38,6 +38,7 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
     wrong_analysis_type = "cohort"
     workflow = "BALSAMIC"
     mutation_type = "SNV"
+    sequencing_type = "wgs"
     mutation_class = "germline"
 
     # WHEN getting list of variant callers
@@ -49,6 +50,7 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
             workflow_solution=workflow,
             mutation_type=mutation_type,
             mutation_class=mutation_class,
+            sequencing_type=sequencing_type,
         )
 
 
@@ -57,6 +59,7 @@ def test_get_variant_callers_wrong_workflow(tumor_normal_config):
     wrong_workflow = "MIP"
     mutation_type = "SNV"
     mutation_class = "germline"
+    sequencing_type = "wgs"
     analysis_type = "paired"
 
     with pytest.raises(WorkflowRunError):
@@ -66,6 +69,7 @@ def test_get_variant_callers_wrong_workflow(tumor_normal_config):
             workflow_solution=wrong_workflow,
             mutation_type=mutation_type,
             mutation_class=mutation_class,
+            sequencing_type=sequencing_type,
         )
 
 
@@ -74,6 +78,7 @@ def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
     workflow = "BALSAMIC"
     wrong_mutation_type = "INDEL"
     mutation_class = "germline"
+    sequencing_type = "wgs"
     analysis_type = "paired"
 
     # WHEN getting list of variant callers
@@ -85,6 +90,7 @@ def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
             workflow_solution=workflow,
             mutation_type=wrong_mutation_type,
             mutation_class=mutation_class,
+            sequencing_type=sequencing_type,
         )
 
 
@@ -93,6 +99,7 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
     workflow = "BALSAMIC"
     mutation_type = "SNV"
     wrong_mutation_class = "mosaic"
+    sequencing_type = "wgs"
     analysis_type = "paired"
 
     # WHEN getting list of variant callers
@@ -104,6 +111,28 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
             workflow_solution=workflow,
             mutation_type=mutation_type,
             mutation_class=wrong_mutation_class,
+            sequencing_type=sequencing_type,
+        )
+
+
+def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config):
+    # GIVEN a wrong workflow name
+    workflow = "BALSAMIC"
+    mutation_type = "SNV"
+    mutation_class = "somatic"
+    wrong_sequencing_type = "wts"
+    analysis_type = "paired"
+
+    # WHEN getting list of variant callers
+    # THEN capture error
+    with pytest.raises(WorkflowRunError):
+        assert get_variant_callers(
+            config=tumor_normal_config,
+            analysis_type=analysis_type,
+            workflow_solution=workflow,
+            mutation_type=mutation_type,
+            mutation_class=mutation_class,
+            sequencing_type=wrong_sequencing_type,
         )
 
 
