@@ -52,7 +52,7 @@ Fixed:
 * Refactor snakemake ``umi`` rules according to snakemake etiquette #636
 * Refactor snakemake ``variant calling`` rules according to snakemake etiquette #636
 * Wrong spacing in reference json issue #704
-
+* Refactor snakemake ``quality control`` rules according to snakemake etiquette #636
 
 Removed:
 ^^^^^^^^
