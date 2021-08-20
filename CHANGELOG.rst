@@ -37,6 +37,7 @@ Changed:
 * Update ``GNOMAD`` URL
 * Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
+* Split Tumor-Normal ``cnvkit batch`` into individual commands
 
 
 Fixed:
@@ -44,14 +45,15 @@ Fixed:
 
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
-* Refactor ``snakemake`` align rules according to ``snakemake`` etiquette 
-* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette
-* Refactor snakemake ``manta`` rule according to snakemake etiquette
+* Refactor snakemake ``annotate`` rules according to snakemake etiquette #636
+* Refactor snakemake ``align`` rules according to snakemake etiquette #636 
+* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette #636
 * Order of columns in QC and coverage report issue #601
 * ``delly`` not showing in workflow at runtime #644
-* ``ascatngs`` documentaion links in ``FAQs`` #672
+* ``ascatngs`` documentation links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
 * Wrong spacing in reference json issue #704
+
 
 Removed:
 ^^^^^^^^
