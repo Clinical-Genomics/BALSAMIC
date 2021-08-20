@@ -42,20 +42,15 @@ Fixed:
 
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
-* Refactor snakemake align rules according to snakemake etiquette #636
-* Refactor snakemake fastqc vep contest and mosdepth rules according to snakemake etiquette #636
-* Refactor snakemake manta rule according to snakemake etiquette
-* Order of columns in QC and coverage report issue #601
-* Refactor snakemake annotate rules according to snakemake etiquette #636
-* Refactor ``snakemake`` align rules according to ``snakemake`` etiquette 
-* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette
-* Refactor snakemake ``manta`` rule according to snakemake etiquette
+* Refactor snakemake ``annotate`` rules according to snakemake etiquette #636
+* Refactor snakemake ``align`` rules according to snakemake etiquette #636 
+* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette #636
 * Order of columns in QC and coverage report issue #601
 * ``delly`` not showing in workflow at runtime #644
 * ``ascatngs`` documentation links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
-* Refactor snakemake umi rules according to snakemake etiquette
-* Refactor snakemake variant calling rules according to snakemake etiquette
+* Refactor snakemake ``umi`` rules according to snakemake etiquette #636
+* Refactor snakemake ``variant calling`` rules according to snakemake etiquette #636
 * Wrong spacing in reference json issue #704
 
 
