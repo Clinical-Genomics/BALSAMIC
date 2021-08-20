@@ -50,8 +50,11 @@ Fixed:
 * ``ascatngs`` documentaion links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
 * delly run
+* Refactor snakemake umi rules according to snakemake etiquette
+* Refactor snakemake variant calling rules according to snakemake etiquette
 * ascat documentaion links in FAQs
 * Wrong spacing in reference json issue #704
+
 
 Removed:
 ^^^^^^^^
