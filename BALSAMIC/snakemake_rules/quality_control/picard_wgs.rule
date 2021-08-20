@@ -6,53 +6,69 @@ picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cy
                            "insert_size_metrics", "quality_by_cycle_metrics",
                            "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 
-rule CollectMultipleMetrics:
+rule picard_CollectMultipleMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
         reference = config["reference"]["reference_genome"]
     output:
-        expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard)
+        expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample = config["samples"], metrics_wc = picard_metrics_wildcard)
+    benchmark:
+        Path(benchmark_dir, "picard_CollectMultipleMetrics_" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         output_prefix = qc_dir + "{sample}.multiple_metrics",
         conda = config["bioinfo_tools"].get("picard"),
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
-    benchmark:
-        benchmark_dir + "CollectMultipleMetrics_" + "{sample}.picard_collect_multiple_metrics.tsv"
+        sample = '{sample}'
+    threads:
+        get_threads(cluster_config,'picard_CollectMultipleMetrics')
+    message:
+        "Collecting picard multiple quality metrics for wgs sample {params.sample}"
     shell:
-        "source activate {params.conda};"
-        "mkdir -p {params.tmpdir}; "
-        "export TMPDIR={params.tmpdir}; "
-        "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
-            " CollectMultipleMetrics "
-            " I={input.bam} "
-            " O={params.output_prefix} "
-            " R={input.reference}; "
-        
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectMultipleMetrics \
+I={input.bam} \
+O={params.output_prefix} \
+R={input.reference};
+        """
 
 
-rule CollectWgsMetrics:
+rule picard_CollectWgsMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
         reference = config["reference"]["reference_genome"]
     output:
         qc_dir + "{sample}_picard_wgs_metrics.txt"
+    benchmark:
+        Path(benchmark_dir + "picard_CollectWgsMetrics_" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config[ "bioinfo_tools" ].get("picard") + ".sif").as_posix()
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         conda = config["bioinfo_tools"].get("picard"),
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
-    benchmark:
-        benchmark_dir + "CollectWgsMetrics_" + "{sample}.picard_collect_wgs_metrics.tsv"
+        sample = '{sample}'
+    threads:
+        get_threads(cluster_config,'picard_CollectWgsMetrics')
+    message:
+        "Collecting various picard quality metrics for wgs sample '{params.sample}'"
     shell:
-        "source activate {params.conda};"
-        "mkdir -p {params.tmpdir}; "
-        "export TMPDIR={params.tmpdir}; "
-        "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
-            " CollectWgsMetrics "
-            " I={input.bam} "
-            " O={output} "
-            " R={input.reference}; "
-        
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectWgsMetrics \
+I={input.bam} \
+O={output} \
+R={input.reference};
+        """
 
