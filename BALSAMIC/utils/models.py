@@ -628,3 +628,49 @@ class UMIworkflowConfig(BaseModel):
     tnscope: UMIParamsTNscope
     vardict: UMIParamsVardict
     vep: UMIParamsVEP
+
+
+class balsamicParamsVardict(BaseModel):
+    """This class defines the params settings used as constants in vardict rule.
+
+    Attributes:
+        vardict_filters: str (required); set of filters to apply for variant-calling using vardict
+    """
+
+    allelic_frequency: float
+    max_pval: float
+    max_mm: float
+    column_info: str
+
+class balsamicParamsCommon(BaseModel):
+    """This class defines the common params settings used as constants across various rules in UMI workflow.
+
+      Attributes:
+          pcr_model: str (required); output alignment format. eg. 'NONE'
+          align_header: str (required); header line appended to the aligned BAM output
+      """
+
+    align_header: str
+    pcr_model: str
+    min_mapq: int
+    picard_RG_normal: str
+    picard_RG_tumor: str
+
+
+class balsamicworkflowConfig(BaseModel):
+    """ Defines set of rules in balsamic workflow
+
+    Handles attributes for corresponding rules.
+
+    Attributes:
+
+    """
+    common: balsamicParamsCommon
+    vardict: balsamicParamsVardict
+    umicommon: UMIParamsCommon
+    umiextract: UMIParamsUMIextract
+    umiconsensuscall: UMIParamsConsensuscall
+    tnscope_umi: UMIParamsTNscope
+    vardict_umi: UMIParamsVardict
+    vep: UMIParamsVEP
+

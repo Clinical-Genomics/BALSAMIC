@@ -18,7 +18,7 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import check_executable
 from BALSAMIC.utils.cli import generate_h5
 
-from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig
+from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig, balsamicworkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
@@ -27,8 +27,8 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_threads, get_script_path)
 
 from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
-                                    VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS, VCFANNO_TOML, 
-                                    umiworkflow_params)
+                                    VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS, VCFANNO_TOML, workflow_params)
+                                    #umiworkflow_params, workflow_params)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -62,8 +62,9 @@ picarddup = get_picard_mrkdup(config)
 VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 
-# parse parameters as constants for umiworkflow
-paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
+# parse parameters as constants to workflows
+#paramsumi = UMIworkflowConfig.parse_obj(umiworkflow_params)
+params = balsamicworkflowConfig.parse_obj(workflow_params)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
