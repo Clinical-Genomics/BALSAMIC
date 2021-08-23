@@ -578,14 +578,30 @@ REFERENCE_FILES = {
     }
 }
 
-umiworkflow_params = {
+workflow_params = {
     "common": {
+        "pcr_model": "NONE",
+        "align_header": "'@RG\\tID:{sample}\\tSM:{sample}\\tPL:ILLUMINAi'",
+        "min_mapq": "20",
+        "picard_RG_normal": " ".join(["RGPU=ILLUMINAi", "RGID=NORMAL","RGSM=NORMAL", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"]),
+        "picard_RG_tumor": " ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
+    },
+    "vardict" : {
+        "allelic_frequency": "0.001",
+        "max_pval": "0.9",
+        "max_mm": "4.5",
+        "column_info": "-c 1 -S 2 -E 3 -g 4",
+        },
+#}
+
+#umiworkflow_params = {
+    "umicommon": {
         "align_header":
         "'@RG\\tID:{sample}\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         "align_intbases": 1000000,
         "filter_tumor_af": 0.0005
     },
-    "consensuscall": {
+    "umiconsensuscall": {
         "align_format": "BAM",
         "filter_minreads": "3,1,1",
         "tag": "XR"
@@ -593,7 +609,7 @@ umiworkflow_params = {
     "umiextract": {
         "read_structure": "-d '3M2S+T,3M2S+T'"
     },
-    "tnscope": {
+    "tnscope_umi": {
         "algo": "TNscope",
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
@@ -601,7 +617,7 @@ umiworkflow_params = {
         "prunefactor": 3,
         "disable_detect": "sv"
     },
-    "vardict": {
+    "vardict_umi": {
         "vardict_filters": "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0"
     },
     "vep": {
