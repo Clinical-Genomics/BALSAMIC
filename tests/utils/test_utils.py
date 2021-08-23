@@ -149,15 +149,18 @@ def test_get_reference_output_files():
     assert "Homo_sapiens_assembly38.fasta" in fasta_files
 
 
-def test_get_bioinfo_tools_list():
+def test_get_bioinfo_tools_version():
     # GIVEN a path for container path and bioinfo tool dictionary
     # WHEN getting dictionary of bioinformatic tools and their version
     bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV,
                                                    CONTAINERS_CONDA_ENV_PATH)
+    observed_versions = list(set(bioinfo_tools_dict["samtools"])).sort()
+    expected_versions = list(set(["1.12", "1.11", "1.9"])).sort()
+
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert set(bioinfo_tools_dict["samtools"]) == set(["1.12", "1.11", "1.9"])
+    assert observed_versions == expected_versions  
 
 
 def test_get_delivery_id():

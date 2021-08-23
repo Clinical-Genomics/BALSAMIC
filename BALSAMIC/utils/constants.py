@@ -641,7 +641,8 @@ BIOINFO_TOOL_ENV = {
 }
 
 BIOINFO_TOOL_SUBMODULE = {
-    "ascat": "ascatngs"
+    "ascat": "ascatngs",
+    "sentieon": "sentieon"
 }
 
 REPORT_MODEL = {
