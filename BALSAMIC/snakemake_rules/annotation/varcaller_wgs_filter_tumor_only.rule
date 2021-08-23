@@ -11,7 +11,7 @@ rule bcftools_filter_tnscope_tumor_only:
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
-    Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -56,7 +56,7 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
-    Path(singularity_image, config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
@@ -100,7 +100,7 @@ rule bcftools_intersect_tumor_only:
   benchmark:
     Path(benchmark_dir, 'bcftools_intersect_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
-    Path(singularity_image,config[ "bioinfo_tools" ].get("bcftools") + ".sif").as_posix()
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
     vcf_dir = vep_dir + "sentieon_callers_intersect",

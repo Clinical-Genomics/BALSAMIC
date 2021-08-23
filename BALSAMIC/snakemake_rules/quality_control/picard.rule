@@ -18,7 +18,7 @@ rule picard_CollectHsMetrics:
     benchmark:
         Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
     singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
