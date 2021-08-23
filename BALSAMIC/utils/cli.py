@@ -452,11 +452,7 @@ def bioinfo_tool_version_non_conda(packages: dict,
         version = "=".join(p.split("=")[1:])
         if name not in bioinfo_tools:
             continue
-        if name in bioinfo_version:
-            bioinfo_version[name].append(version)
-            bioinfo_version[name] = list(set(bioinfo_version[name]))
-        else:
-            bioinfo_version[name] = list([version])
+        bioinfo_version[name] = list([version])
 
     return bioinfo_version
 
