@@ -434,7 +434,9 @@ def get_panel_chrom(panel_bed) -> list:
     lines = [line.rstrip("\n") for line in open(panel_bed, "r")]
     return {s.split("\t")[0] for s in lines}
 
-def bioinfo_tool_version_non_conda(packages: dict, bioinfo_tools: dict) -> dict:
+
+def bioinfo_tool_version_non_conda(packages: dict,
+                                   bioinfo_tools: dict) -> dict:
     """Parses a non-conda bioinfo tool dictionary
 
     Args:
@@ -452,12 +454,12 @@ def bioinfo_tool_version_non_conda(packages: dict, bioinfo_tools: dict) -> dict:
             continue
         if name in non_conda_bioinfo_version:
             bioinfo_version[name].append(version)
-            bioinfo_version[name] = list(set(
-                bioinfo_version[name]))
+            bioinfo_version[name] = list(set(bioinfo_version[name]))
         else:
             bioinfo_version[name] = list([version])
 
     return bioinfo_version
+
 
 def bioinfo_tool_version_conda(packages: list, bioinfo_tools: dict) -> dict:
     """Parses conda environment dictionary and extracts depdencies as version
