@@ -31,6 +31,7 @@ rule cnvkit_paired:
         name = config["analysis"]["case_id"],
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor_name = "tumor.merged",
+        min_mapq = params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         sample_id = "tumor_normal"
     message:
@@ -55,25 +56,25 @@ cnvkit.py antitarget {input.baits_bed} \
 # calculate coverage in the given regions from BAM read depths
 cnvkit.py coverage {input.bamT} \
 {params.cnv_dir}/targets.bed \
---min-mapq 20 \
+--min-mapq {params.min_mapq} \
 --processes {threads} \
 --output {params.cnv_dir}/tumor.targetcoverage.cnn;
 
 cnvkit.py coverage {input.bamT} \
 {params.cnv_dir}/antitarget_bed \
---min-mapq 20 \
+--min-mapq {params.min_mapq} \
 --processes {threads} \
 --output {params.cnv_dir}/tumor.antitargetcoverage.cnn;
 
 cnvkit.py coverage {input.bamN} \
 {params.cnv_dir}/targets.bed \
---min-mapq 20 \
+--min-mapq {params.min_mapq} \
 --processes {threads} \
 --output {params.cnv_dir}/normal.targetcoverage.cnn;
 
 cnvkit.py coverage {input.bamN} \
 {params.cnv_dir}/antitarget_bed \
---min-mapq 20 \
+--min-mapq {params.min_mapq} \
 --processes {threads} \
 --output {params.cnv_dir}/normal.antitargetcoverage.cnn;
 
