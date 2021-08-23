@@ -452,7 +452,7 @@ def bioinfo_tool_version_non_conda(packages: dict,
         version = "=".join(p.split("=")[1:])
         if name not in bioinfo_tools:
             continue
-        if name in non_conda_bioinfo_version:
+        if name in bioinfo_version:
             bioinfo_version[name].append(version)
             bioinfo_version[name] = list(set(bioinfo_version[name]))
         else:
@@ -508,8 +508,8 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
                          container_conda_env_name + ".yaml")
         with open(yaml_file, "r") as f:
             conda_yaml = yaml.safe_load(f)
-            packages = conda_yaml.get("dependencies", "")
-            if packages:
+            if isinstance(conda_yaml, dict):
+                packages = conda_yaml.get("dependencies")
                 bioinfo_tools_version = {
                     **bioinfo_tools_version,
                     **bioinfo_tool_version_conda(packages, bioinfo_tools)
