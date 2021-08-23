@@ -2,42 +2,41 @@
 # coding: utf-8
 
 rule PreparePopVCF:
-  input:
-    bam = bam_dir + "tumor.merged.bam",
-    ref1kg = config["reference"]["1kg_snps_all"], 
-  output:
-    popvcf = result_dir + "popvcf.vcf"
-  params:
-    conda = config["bioinfo_tools"].get("bcftools"),
-    anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
-    popcode = "EUR"
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + "PreparePopVCF_" + "tumor_prepare_pop_vcf.tsv"
-  shell:
-    "source activate {params.conda}; "
-    "readlink -f {input.bam}; "
-    "bcftools annotate "
-        "-x {params.anno_str1}{params.popcode}_AF "
-        "{input.ref1kg} "
-    " | "
-    "bcftools annotate "
-        "-i INFO/{params.popcode}_AF!=0.0 "
-    " | "
-    "awk -v OFS=\"\\t\" "
-      "'$1~/^#/ {{ print; }} "
-      " $1!~/^#/ {{ "
-        "split($8,INFO,\";\"); "
-        "newINFO=\"\";"
-        "for (i in INFO) {{ "
-          "if (INFO[i]~\"{params.popcode}_AF\") {{ "
-            "split(INFO[i],AF,\"=\"); "
-            "P=substr(AF[1], 1, length(AF[1])-3); "
-            "INFO[i]=P\"={{\"$4\"*=\"AF[2]\",\"$5\"=\"1-AF[2]\"}}\"; "
-            "INFO[i]=INFO[i]\";set=\"P;}} "
-          "newINFO=INFO[i] \";\" newINFO; "
-          "}} "
-        "$8=substr(newINFO, 1, length(newINFO)-1); "
-        "print; }}' > {output.popvcf}; "
+    input:
+        bam = bam_dir + "tumor.merged.bam",
+        ref1kg = config["reference"]["1kg_snps_all"],
+    output:
+        popvcf = result_dir + "popvcf.vcf"
+    benchmark:
+        Path(benchmark_dir, "PreparePopVCF_" + "tumor.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        conda = config["bioinfo_tools"].get("bcftools"),
+        anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
+        popcode = "EUR"
+    message:
+        "Generate intermediate pop vcf file for gatk analysis"
+    shell:
+        """
+source activate {params.conda};
+readlink -f {input.bam};
+
+bcftools annotate \
+-x {params.anno_str1}{params.popcode}_AF \
+{input.ref1kg} \
+| bcftools annotate \
+-i INFO/{params.popcode}_AF!=0.0 \
+| awk -v OFS=\"\\t\" '$1~/^#/ {{ print; }} $1!~/^#/ {{ split($8,INFO,\";\"); newINFO=\"\";"
+
+for (i in INFO) {{ \
+if (INFO[i]~\"{params.popcode}_AF\") {{ \
+split(INFO[i],AF,\"=\"); P=substr(AF[1], 1, length(AF[1])-3); \
+INFO[i]=P\"={{\"$4\"*=\"AF[2]\",\"$5\"=\"1-AF[2]\"}}\"; \
+INFO[i]=INFO[i]\";set=\"P; }} \
+newINFO=INFO[i] \";\" newINFO; }} \
+$8=sustr(newINFO, 1, length(newINFO)-1); print; }}' \
+ > {output.popvcf};
+        """
     
 

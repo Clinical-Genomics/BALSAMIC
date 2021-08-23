@@ -10,8 +10,8 @@ if config['analysis']['analysis_type'] == "paired":
 if config["analysis"]["sequencing_type"] == 'wgs':
     picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics",
                                "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics",
-                               "quality_by_cycle_metrics",
-                               "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
+                               "quality_by_cycle_metrics", "quality_by_cycle.pdf",
+                               "quality_distribution_metrics", "quality_distribution.pdf"]
     # fastqc metrics
     multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
 
@@ -66,16 +66,23 @@ rule multiqc:
     output:
         html = qc_dir + "multiqc_report.html",
         json = qc_dir + "multiqc_data/multiqc_data.json",
+    benchmark:
+        Path(benchmark_dir, "multiqc_" + config["analysis"]["case_id"] + ".multiqc.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("multiqc") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "multiqc"},
         dir_list = result_dir,
         qc_dir = qc_dir,
         conda = config["bioinfo_tools"].get("multiqc"),
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("multiqc") + ".sif").as_posix() 
-    benchmark:
-        benchmark_dir + "multiqc_" + config["analysis"]["case_id"] + ".multiqc.tsv"
+        case_name = config["analysis"]["case_id"]
+    message:
+        "Aggregrate quality metrics results using multiqc for sample {params.case_name}"
     shell:
-        "source activate {params.conda};"
-        "echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list; "
-        "multiqc --force --outdir {params.qc_dir} --data-format json -l {params.qc_dir}/dir_list; " 
-        "chmod -R 777 {params.qc_dir};"
+        """
+source activate {params.conda};
+
+echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list;
+multiqc --force --outdir {params.qc_dir} --data-format json -l {params.qc_dir}/dir_list;
+chmod -R 777 {params.qc_dir};
+        """

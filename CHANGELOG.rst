@@ -58,7 +58,7 @@ Fixed:
 * ``ascatngs`` documentation links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
 * Wrong spacing in reference json issue #704
-
+* Refactor snakemake ``quality control`` rules according to snakemake etiquette #636
 
 Removed:
 ^^^^^^^^
