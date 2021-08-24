@@ -1,5 +1,1 @@
-channels:
-  - defaults
-
-dependencies:
-  - bioconda::ascat=4.5.0
+- ascatNgs=4.5.0
