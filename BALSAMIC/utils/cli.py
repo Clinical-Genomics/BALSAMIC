@@ -450,9 +450,8 @@ def bioinfo_tool_version_non_conda(packages: dict,
     for p in packages:
         name = p.split("=")[0]
         version = "=".join(p.split("=")[1:])
-        if name not in bioinfo_tools:
-            continue
-        bioinfo_version[name] = list([version])
+        if name in bioinfo_tools:
+            bioinfo_version[name] = list([version])
 
     return bioinfo_version
 
