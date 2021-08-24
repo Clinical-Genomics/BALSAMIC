@@ -6,9 +6,9 @@ from pydantic import ValidationError
 
 from BALSAMIC.utils.models import (
     VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
-    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, UMIworkflowConfig,
+    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, BalsamicWorkflowConfig,
     UMIParamsCommon, UMIParamsUMIextract, UMIParamsConsensuscall,
-    UMIParamsTNscope, balsamicParamsVardict, balsamicParamsVEP)
+    UMIParamsTNscope, ParamsCommon, ParamsVardict, ParamsVEP)
 
 
 def test_referencemeta():
@@ -355,7 +355,7 @@ def test_umiparams_tnscope():
     assert test_tnscope_params_built.disable_detect == "abc"
 
 
-def test_balsamicparams_vardict():
+def test_params_vardict():
     """ test UMIParamsVardict model for correct validation"""
 
     #GIVEN vardict params
@@ -367,7 +367,7 @@ def test_balsamicparams_vardict():
     }
 
     #WHEN building the model
-    test_vardict_built = balsamicParamsVardict(**test_vardict_params)
+    test_vardict_built = ParamsVardict(**test_vardict_params)
 
     #THEN assert values
     assert test_vardict_built.allelic_frequency ==  0.01
@@ -382,7 +382,7 @@ def test_params_vep():
     test_vep = {"vep_filters": "all defaults params"}
 
     #WHEN building the model
-    test_vep_built = balsamicParamsVEP(**test_vep)
+    test_vep_built = ParamsVEP(**test_vep)
 
     #THEN assert values
     assert test_vep_built.vep_filters == "all defaults params"

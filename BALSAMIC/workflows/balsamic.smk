@@ -18,7 +18,7 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import check_executable
 from BALSAMIC.utils.cli import generate_h5
 
-from BALSAMIC.utils.models import VarCallerFilter, UMIworkflowConfig, balsamicworkflowConfig
+from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
@@ -63,7 +63,7 @@ VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 
 # parse parameters as constants to workflows
-params = balsamicworkflowConfig.parse_obj(workflow_params)
+params = BalsamicWorkflowConfig.parse_obj(workflow_params)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":

@@ -590,26 +590,26 @@ class UMIParamsTNscope(BaseModel):
     disable_detect: str
 
 
-class UMIworkflowConfig(BaseModel):
-    """ Defines set of rules in UMI workflow.
+#class UMIworkflowConfig(BaseModel):
+#    """ Defines set of rules in UMI workflow.
 
-    Handles attributes for corresponding rules.
+#    Handles attributes for corresponding rules.
 
-    Attributes:
-	common: global params defined across all rules in UMI workflow
-	umiextract: params defined in the rule sentieon_umiextract
-	consensuscall: params defined in the rule sentieon_consensuscall
-	tnscope: params defined in the rule sentieon_tnscope_umi
-	vardict: params defined in the rule vardict_umi
-	vep: params defined in the rule vep_umi
-    """
-    common: UMIParamsCommon
-    umiextract: UMIParamsUMIextract
-    consensuscall: UMIParamsConsensuscall
-    tnscope: UMIParamsTNscope
+#    Attributes:
+#	common: global params defined across all rules in UMI workflow
+#	umiextract: params defined in the rule sentieon_umiextract
+#	consensuscall: params defined in the rule sentieon_consensuscall
+#	tnscope: params defined in the rule sentieon_tnscope_umi
+#	vardict: params defined in the rule vardict_umi
+#	vep: params defined in the rule vep_umi
+#    """
+#    common: UMIParamsCommon
+#    umiextract: UMIParamsUMIextract
+#    consensuscall: UMIParamsConsensuscall
+#    tnscope: UMIParamsTNscope
 
 
-class balsamicParamsVardict(BaseModel):
+class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
 
     Attributes:
@@ -621,7 +621,7 @@ class balsamicParamsVardict(BaseModel):
     max_mm: float
     column_info: str
 
-class balsamicParamsCommon(BaseModel):
+class ParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.
 
       Attributes:
@@ -635,7 +635,7 @@ class balsamicParamsCommon(BaseModel):
     picard_RG_normal: str
     picard_RG_tumor: str
 
-class balsamicParamsVEP(BaseModel):
+class ParamsVEP(BaseModel):
     """This class defines the params settings used as constants in vep rule.
 
     Attributes:
@@ -644,19 +644,24 @@ class balsamicParamsVEP(BaseModel):
     vep_filters: str
 
 
-class balsamicworkflowConfig(BaseModel):
+class BalsamicWorkflowConfig(BaseModel):
     """ Defines set of rules in balsamic workflow
 
     Handles attributes for corresponding rules.
 
     Attributes:
-
+    common: global params defined across all rules in balsamic workflow
+    umicommon: global params defined across specific rules in UMI workflow
+    vep: global params defined in the rule vep
+    vardict: params defined in the rule vardict
+    umiextract : params defined in the rule sentieon_umiextract
+    umiconsensuscall: params defined in the rule sentieon_consensuscall
+	tnscope_umi: params defined in the rule sentieon_tnscope_umi
     """
-    common: balsamicParamsCommon
-    vardict: balsamicParamsVardict
-    vep: balsamicParamsVEP
+    common: ParamsCommon
+    vardict: ParamsVardict
+    vep: ParamsVEP
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
-

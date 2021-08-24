@@ -6,7 +6,7 @@ import logging
 
 from BALSAMIC.utils.rule import (get_threads, get_result_dir,
                                  get_sample_type, get_script_path, get_vcf)
-from BALSAMIC.utils.models import UMIworkflowConfig
+from BALSAMIC.utils.models import BalsamicWorkflowConfig
 from BALSAMIC.utils.constants import RULE_DIRECTORY, VCFANNO_TOML, workflow_params
 
 LOG = logging.getLogger(__name__)
@@ -70,8 +70,7 @@ qc = ["snakemake_rules/umi/qc_umi.rule"]
 generate_tables = ["snakemake_rules/umi/generate_AF_tables.rule"]
 
 # parse parameters as workflow constants
-#umiparams = UMIworkflowConfig.parse_obj(workflow_params)
-params = balsamicworkflowConfig.parse_obj(workflow_params)
+params = BalsamicWorkflowConfig.parse_obj(workflow_params)
 
 # Define wildcards
 SAMPLES = config["samples"]
