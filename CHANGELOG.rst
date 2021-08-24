@@ -28,6 +28,8 @@ Added:
 * Added "targeted" and "wgs" tags to variant callers to provide another layer of separation. #708
 * ``manta`` convert inversion #709
 * Sentieon version to bioinformatic tool version parsing #685 
+* added ``CITATION.cff`` to cite BALSAMIC
+
 
 Changed:
 ^^^^^^^^
@@ -44,7 +46,6 @@ Changed:
 * Generalized workflow to eliminate duplicate entries and code. #708
 * Split Tumor-Normal ``cnvkit batch`` into individual commands
 * Changed the way conda and non-conda bioinfo tools version are parsed
-
 
 
 Fixed:
