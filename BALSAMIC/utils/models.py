@@ -414,13 +414,13 @@ class ReferenceUrlsModel(BaseModel):
     This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
 
     Attributes:
-      url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
-      file_type: describes file type. Accepted values are VALID_REF_FORMAT constant 
-      gzip: gzip status. Binary: True or False
-      genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant 
+        url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
+        file_type: describes file type. Accepted values are VALID_REF_FORMAT constant
+        gzip: gzip status. Binary: True or False
+        genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant
 
     Raises:
-      ValidationError: When it can't validate values matching above attributes
+        ValidationError: When it can't validate values matching above attributes
       
     """
 
@@ -614,7 +614,7 @@ class ParamsCommon(BaseModel):
         min_mapq: int (required); minimum mapping quality score. Eg: 20- probability of mapping random read at 99% accuracy
         picard_RG_normal: str (required); replace readgroups in normal bam file
         picard_RG_tumor: str (required); replace readgroups in tumor bam file
-      """
+    """
 
     align_header: str
     pcr_model: str
@@ -637,13 +637,13 @@ class BalsamicWorkflowConfig(BaseModel):
     Handles attributes for corresponding rules.
 
     Attributes:
-    common: global params defined across all rules in balsamic workflow
-    umicommon: global params defined across specific rules in UMI workflow
-    vep: global params defined in the rule vep
-    vardict: params defined in the rule vardict
-    umiextract : params defined in the rule sentieon_umiextract
-    umiconsensuscall: params defined in the rule sentieon_consensuscall
-	tnscope_umi: params defined in the rule sentieon_tnscope_umi
+        common: global params defined across all rules in balsamic workflow
+        umicommon: global params defined across specific rules in UMI workflow
+        vep: global params defined in the rule vep
+        vardict: params defined in the rule vardict
+        umiextract : params defined in the rule sentieon_umiextract
+        umiconsensuscall: params defined in the rule sentieon_consensuscall
+        tnscope_umi: params defined in the rule sentieon_tnscope_umi
     """
     common: ParamsCommon
     vardict: ParamsVardict
