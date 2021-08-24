@@ -592,7 +592,10 @@ workflow_params = {
         "max_mm": "4.5",
         "column_info": "-c 1 -S 2 -E 3 -g 4",
         },
-#}
+    "vep": {
+        "vep_filters":
+            "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
+        },
 
 #umiworkflow_params = {
     "umicommon": {
@@ -617,13 +620,6 @@ workflow_params = {
         "prunefactor": 3,
         "disable_detect": "sv"
     },
-    "vardict_umi": {
-        "vardict_filters": "-c 1 -S 2 -E 3 -g 4 -r 1 -F 0"
-    },
-    "vep": {
-        "vep_filters":
-        "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
-    }
 }
 
 # list of bioinfo tools for each conda env

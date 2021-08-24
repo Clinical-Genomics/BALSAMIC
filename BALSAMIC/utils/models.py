@@ -591,29 +591,11 @@ class UMIParamsTNscope(BaseModel):
     disable_detect: str
 
 
-class UMIParamsVardict(BaseModel):
-    """This class defines the params settings used as constants in UMIworkflow-rule vardict.
-
-    Attributes:
-        vardict_filters: str (required); set of filters to apply for variant-calling using vardict
-    """
-    vardict_filters: str
-
-
-class UMIParamsVEP(BaseModel):
-    """This class defines the params settings used as constants in UMIworkflow-rule vep.
-
-    Attributes:
-        vep_filters: str (required); set of filters to apply for variant-calling using vardict
-    """
-    vep_filters: str
-
-
 class UMIworkflowConfig(BaseModel):
     """ Defines set of rules in UMI workflow.
- 
+
     Handles attributes for corresponding rules.
-	
+
     Attributes:
 	common: global params defined across all rules in UMI workflow
 	umiextract: params defined in the rule sentieon_umiextract
@@ -626,8 +608,6 @@ class UMIworkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     consensuscall: UMIParamsConsensuscall
     tnscope: UMIParamsTNscope
-    vardict: UMIParamsVardict
-    vep: UMIParamsVEP
 
 
 class balsamicParamsVardict(BaseModel):
@@ -656,6 +636,14 @@ class balsamicParamsCommon(BaseModel):
     picard_RG_normal: str
     picard_RG_tumor: str
 
+class balsamicParamsVEP(BaseModel):
+    """This class defines the params settings used as constants in vep rule.
+
+    Attributes:
+        vep_filters: str (required); set of filters to apply for variant-calling using vardict
+    """
+    vep_filters: str
+
 
 class balsamicworkflowConfig(BaseModel):
     """ Defines set of rules in balsamic workflow
@@ -667,10 +655,9 @@ class balsamicworkflowConfig(BaseModel):
     """
     common: balsamicParamsCommon
     vardict: balsamicParamsVardict
+    vep: balsamicParamsVEP
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
-    vardict_umi: UMIParamsVardict
-    vep: UMIParamsVEP
 
