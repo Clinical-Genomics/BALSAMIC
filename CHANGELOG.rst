@@ -43,7 +43,7 @@ Changed:
 * Generalized ascat, delly, and manta result in workflow. #708
 * Generalized workflow to eliminate duplicate entries and code. #708
 * Split Tumor-Normal ``cnvkit batch`` into individual commands
-* Changed the way conda and non-conda bioinfo tools version as parsed
+* Changed the way conda and non-conda bioinfo tools version are parsed
 
 
 

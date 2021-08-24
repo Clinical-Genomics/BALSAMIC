@@ -458,7 +458,7 @@ def bioinfo_tool_version_non_conda(packages: dict,
 
 
 def bioinfo_tool_version_conda(packages: list, bioinfo_tools: dict, current_bioinfo_tool_version:dict) -> dict:
-    """Parses conda environment dictionary and extracts depdencies as version
+    """Parses conda environment dictionary and extracts dependencies as version
 
     Args:
         packages: list. List of bioinfo tools in channel::tool_name=version format
@@ -493,7 +493,7 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
 
     Args:
         bioinfo_tools: dict. A dictionary with bioinfo tools as keys and container as value
-        container_conda_env_path: path. Path to all container and conda yaml there of
+        container_conda_env_path: path. Path to all container and conda yaml 
 
     Returns:
         bioinfo_tools_version: dict. Dictionary of bioinfo tools as key and version as value
