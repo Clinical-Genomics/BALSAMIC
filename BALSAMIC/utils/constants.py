@@ -596,8 +596,6 @@ workflow_params = {
         "vep_filters":
             "--compress_output bgzip --vcf --everything --allow_non_variant --dont_skip --buffer_size 10000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
         },
-
-#umiworkflow_params = {
     "umicommon": {
         "align_header":
         "'@RG\\tID:{sample}\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",

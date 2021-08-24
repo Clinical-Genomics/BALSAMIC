@@ -17,7 +17,7 @@ rule bwa_mem:
     output:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
     benchmark:
-        Path(benchmark_dir,"bwa_mem_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "bwa_mem_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     params:
