@@ -435,31 +435,86 @@ def get_panel_chrom(panel_bed) -> list:
     return {s.split("\t")[0] for s in lines}
 
 
+def bioinfo_tool_version_non_conda(packages: dict,
+                                   bioinfo_tools: dict) -> dict:
+    """Parses a non-conda bioinfo tool dictionary
+
+    Args:
+        packages: dict. Dictionary of bioinfo tools in tool_name=version format
+        bioinfo_tools: dict. Bioinfo tools with key as tool name
+
+    Returns:
+        non_conda_bioinfo_version: dict. A dictionary of tools as key and version as list in value
+    """
+    bioinfo_version = {}
+    for p in packages:
+        name = p.split("=")[0]
+        version = "=".join(p.split("=")[1:])
+        if name in bioinfo_tools:
+            bioinfo_version[name] = list([version])
+
+    return bioinfo_version
+
+
+def bioinfo_tool_version_conda(packages: list, bioinfo_tools: dict, current_bioinfo_tool_version:dict) -> dict:
+    """Parses conda environment dictionary and extracts dependencies as version
+
+    Args:
+        packages: list. List of bioinfo tools in channel::tool_name=version format
+        bioinfo_tools: dict. Bioinfo tools with key as tool name
+        current_bioinfo_tool_version: dict. Current list of bioinfo tool versions.
+
+    Returns:
+        conda_bioinfo_version: dict. A dictionary of tools as key and version as list in value
+    """
+    conda_bioinfo_version = current_bioinfo_tool_version
+    for p in packages:
+        if isinstance(p, dict):
+            continue
+        name = p.split("::")[1].split("=")[0]
+        version = "=".join(p.split("=")[1:])
+        if name not in bioinfo_tools:
+            continue
+        if name in conda_bioinfo_version:
+            conda_bioinfo_version[name].append(version)
+            conda_bioinfo_version[name] = list(set(
+                conda_bioinfo_version[name]))
+        else:
+            conda_bioinfo_version[name] = list([version])
+
+    return conda_bioinfo_version
+
+
 def get_bioinfo_tools_version(bioinfo_tools: dict,
                               container_conda_env_path: os.PathLike) -> dict:
     """Parses the names and versions of bioinfo tools 
-    used by BALSAMIC from config YAML into a dict """
+    used by BALSAMIC from config YAML into a dict.
+
+    Args:
+        bioinfo_tools: dict. A dictionary with bioinfo tools as keys and container as value
+        container_conda_env_path: path. Path to all container and conda yaml 
+
+    Returns:
+        bioinfo_tools_version: dict. Dictionary of bioinfo tools as key and version as value
+    """
 
     bioinfo_tools_version = {}
     for container_conda_env_name in set(bioinfo_tools.values()):
         yaml_file = Path(container_conda_env_path, container_conda_env_name,
                          container_conda_env_name + ".yaml")
         with open(yaml_file, "r") as f:
-            packages = yaml.safe_load(f).get("dependencies")
-            for p in packages:
-                if isinstance(p, dict):
-                    continue
-                package = p.split("=")[0]
-                name = package.split("::")[1]
-                version = "=".join(p.split("=")[1:])
-                if name not in bioinfo_tools:
-                    continue
-                if name in bioinfo_tools_version:
-                    bioinfo_tools_version[name].append(version)
-                    bioinfo_tools_version[name] = list(
-                        set(bioinfo_tools_version[name]))
-                else:
-                    bioinfo_tools_version[name] = list([version])
+            conda_yaml = yaml.safe_load(f)
+            if isinstance(conda_yaml, dict):
+                packages = conda_yaml.get("dependencies")
+                bioinfo_tools_version = {
+                    **bioinfo_tools_version,
+                    **bioinfo_tool_version_conda(packages, bioinfo_tools, bioinfo_tools_version)
+                }
+            else:
+                bioinfo_tools_version = {
+                    **bioinfo_tools_version,
+                    **bioinfo_tool_version_non_conda(conda_yaml, bioinfo_tools)
+                }
     return bioinfo_tools_version
 
 

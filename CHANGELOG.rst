@@ -27,6 +27,7 @@ Added:
 * Individual rules (i.e. ngs filters) for cnv and sv callers. Only Manta will be delivered and added to the list of output files. #708
 * Added "targeted" and "wgs" tags to variant callers to provide another layer of separation. #708
 * ``manta`` convert inversion #709
+* Sentieon version to bioinformatic tool version parsing #685 
 
 Changed:
 ^^^^^^^^
@@ -42,7 +43,8 @@ Changed:
 * Generalized ascat, delly, and manta result in workflow. #708
 * Generalized workflow to eliminate duplicate entries and code. #708
 * Split Tumor-Normal ``cnvkit batch`` into individual commands
->>>>>>> origin/develop
+* Changed the way conda and non-conda bioinfo tools version are parsed
+
 
 
 Fixed:
