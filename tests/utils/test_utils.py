@@ -154,11 +154,11 @@ def test_get_bioinfo_tools_version():
     # WHEN getting dictionary of bioinformatic tools and their version
     bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV,
                                                    CONTAINERS_CONDA_ENV_PATH)
-    observed_versions = list(set(bioinfo_tools_dict["samtools"])).sort()
+    observed_versions = set(bioinfo_tools_dict["samtools"])
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert observed_versions == ["1.12", "1.11", "1.9"].sort() 
+    assert set(observed_versions).issubset(set(["1.12", "1.11", "1.9"])) 
 
 
 def test_get_delivery_id():
