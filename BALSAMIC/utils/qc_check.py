@@ -55,7 +55,7 @@ def get_bait_name(input_config: str):
 
 
 def get_sample_name(input_config: str):
-    """ Get the sample names from the config file
+    """Get the sample names from the config file
 
     Args:
         input_config: Path to config
@@ -75,7 +75,7 @@ def get_sample_name(input_config: str):
 
 
 def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
-    """ Creates a new DataFrame with the QC criteria for only the desired bait set
+    """Creates a new DataFrame with the QC criteria for only the desired bait set
 
     Args:
         input_df: qc table as DataFrame
@@ -100,7 +100,7 @@ def check_qc_criteria(
     normal_sample: str,
     tumor_sample: str,
 ) -> pd.DataFrame:
-    """ This function can be divided in different parts:
+    """This function can be divided in different parts:
         1) Merging intersected values for the df with the desired QC criteria and bait set, with the HS Metrics df
         2) Creating new columns with the QC-differences from the QC criteria
         3) Setting QC flags
@@ -172,7 +172,7 @@ def check_qc_criteria(
 def failed_qc(
     input_df: pd.DataFrame, normal_sample: str, tumor_sample: str
 ) -> pd.DataFrame:
-    """ Outputs if the QC failed
+    """Outputs if the QC failed
 
     Args:
         input_df: DataFrame with qc parameters and qc differences
@@ -203,7 +203,7 @@ def failed_qc(
 
 
 def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
-    """ Outputs the QC parameters as csv-file
+    """Outputs the QC parameters as csv-file
 
     Args:
         input_df: DataFrame with qc parameters and qc differences
@@ -220,7 +220,7 @@ def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
 
 def get_qc_check(hs_metrics, output, config):
-    """ Runs all above functions to provide the desired outputs
+    """Runs all above functions to provide the desired outputs
 
     Args:
         hs_metrics: Path to hs_metrics file

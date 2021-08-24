@@ -156,7 +156,7 @@ def test_referenceurlsmodel_write_md5_no_output_file(tmp_path_factory):
 
 
 def test_referenceurlsmodel_validate_genome_version():
-    """test ReferenceUrlsModel for validating genome version """
+    """test ReferenceUrlsModel for validating genome version"""
     # GIVEN a reference model
     dummy_output_file = "some_random_file"
     dummy_output_path = "some_path"
@@ -288,7 +288,7 @@ def test_sample_instance_model():
 
 
 def test_umiparams_common():
-    """ test UMIParamsCommon model for correct validation """
+    """test UMIParamsCommon model for correct validation"""
 
     # GIVEN a UMI workflow common params
     test_commonparams = {
@@ -305,7 +305,7 @@ def test_umiparams_common():
 
 
 def test_umiparams_umiextract():
-    """ test UMIParamsUMIextract model for correct validation """
+    """test UMIParamsUMIextract model for correct validation"""
     # GIVEN umiextract params
     test_umiextractparams = {"read_structure": "['mode', 'r1,r2']"}
 
@@ -317,7 +317,7 @@ def test_umiparams_umiextract():
 
 
 def test_umiparams_consensuscall():
-    """ test UMIParamsConsensuscall model for correct validation """
+    """test UMIParamsConsensuscall model for correct validation"""
 
     # GIVEN consensuscall params
     test_consensuscall = {
@@ -336,7 +336,7 @@ def test_umiparams_consensuscall():
 
 
 def test_umiparams_tnscope():
-    """ test UMIParamsTNscope model for correct validation """
+    """test UMIParamsTNscope model for correct validation"""
 
     # GIVEN tnscope params
     test_tnscope_params = {
@@ -361,7 +361,7 @@ def test_umiparams_tnscope():
 
 
 def test_params_vardict():
-    """ test UMIParamsVardict model for correct validation"""
+    """test UMIParamsVardict model for correct validation"""
 
     # GIVEN vardict params
     test_vardict_params = {
@@ -382,7 +382,7 @@ def test_params_vardict():
 
 
 def test_params_vep():
-    """ test UMIParamsVEP model for correct validation"""
+    """test UMIParamsVEP model for correct validation"""
 
     # GIVEN vardict params
     test_vep = {"vep_filters": "all defaults params"}

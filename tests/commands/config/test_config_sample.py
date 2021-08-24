@@ -124,7 +124,11 @@ def test_dag_graph_success(
 
 
 def test_config_bad_filename(
-    invoke_cli, tmp_path_factory, analysis_dir, panel_bed_file, balsamic_cache,
+    invoke_cli,
+    tmp_path_factory,
+    analysis_dir,
+    panel_bed_file,
+    balsamic_cache,
 ):
     # GIVEN existing fastq file with wrong naming convention
     faulty_fastq_dir = tmp_path_factory.mktemp("error_fastq")
@@ -157,7 +161,11 @@ def test_config_bad_filename(
 
 
 def test_run_without_permissions(
-    invoke_cli, no_write_perm_path, sample_fastq, panel_bed_file, balsamic_cache,
+    invoke_cli,
+    no_write_perm_path,
+    sample_fastq,
+    panel_bed_file,
+    balsamic_cache,
 ):
     # GIVEN CLI arguments including an analysis_dir without write permissions
     case_id = "sample_tumor_only"

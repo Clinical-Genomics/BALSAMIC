@@ -127,7 +127,7 @@ def initialize(
     """
     Initialize various resources after first installation.
     - Pull container(s) for BALSAMIC according to matching version
-    - Download and build a reference 
+    - Download and build a reference
     """
     LOG.info("BALSAMIC started with log level %s" % context.obj["loglevel"])
 

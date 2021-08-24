@@ -11,12 +11,12 @@ from cyvcf2 import VCF
 
 @click.group()
 def vcfutils():
-    """ Commands to process VCF files """
+    """Commands to process VCF files"""
 
 
 ##Tab-delimited input file containing specific header format.Information is stored as dictionary.
 def readinput(text_file):
-    """ Input text file processing. Outputs a dictionary """
+    """Input text file processing. Outputs a dictionary"""
     input_info = {}
     with open(text_file, "r") as input_file:
         header = input_file.readline().strip().split("\t")
@@ -40,7 +40,7 @@ def readinput(text_file):
 
 
 def vcfheader():
-    """ Write standard header lines for VCF output """
+    """Write standard header lines for VCF output"""
     file_date = date.today().strftime("%Y%m%d")
     vcf_header = "{}".format(
         """##fileformat=VCFv4.2
@@ -64,7 +64,7 @@ def vcfheader():
 
 
 def collect_ref_info(variant):
-    """ Collect necessary variant information from input file"""
+    """Collect necessary variant information from input file"""
     allele_freq, variant_type, aa_hgvs = variant.split(";")
     info = ";".join(
         [
@@ -77,7 +77,7 @@ def collect_ref_info(variant):
 
 
 def collect_vcf_info(variant):
-    """ Clean reference vcf and collect info from required fields """
+    """Clean reference vcf and collect info from required fields"""
     info = str(variant).split("\t")
     info = [re.sub(r"(.*)(_ENST\d+;)", r"\1;", i) for i in info]
     info = [re.sub(r"(.*)(;CNT=\d+\n)", r"\1", i) for i in info]
@@ -107,7 +107,7 @@ def collect_vcf_info(variant):
     help="Output file name",
 )
 def createvcf(input_file, reference_file, output_file):
-    """ Filter input variants from reference VCF """
+    """Filter input variants from reference VCF"""
     ## Exact information which is collected as keys in read_input() is retrieved
     ## Compare the matching keys in both files and extract additional information
 

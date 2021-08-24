@@ -12,7 +12,7 @@ import re
 
 
 def test_readinput_return_dict(input_file):
-    """ test input file for properly returning the required fields """
+    """test input file for properly returning the required fields"""
 
     # GIVEN input file with required fields
     valid_input_info = {
@@ -44,7 +44,7 @@ def test_vcfheader_return_string():
 
 
 def test_ensids_return_string():
-    """ test ensembl ids in a reference vcf file """
+    """test ensembl ids in a reference vcf file"""
 
     # GIVEN the ensembl ID
     info = "GENE=AKT1_ENST00000555528"
@@ -58,7 +58,7 @@ def test_ensids_return_string():
 
 
 def test_collect_ref_info_return_list():
-    """ test fields in a reference file """
+    """test fields in a reference file"""
 
     # GIVEN the variant info fields in input file
     valid_variant = "0.00119999998;SNP;p.Glu17Lys"
@@ -73,7 +73,7 @@ def test_collect_ref_info_return_list():
 
 
 def test_cli_inputs_return_filepaths(input_file, reference_file, output_file):
-    """ test commandline cli inputs for file exists """
+    """test commandline cli inputs for file exists"""
 
     # GIVEN the required files
 
@@ -90,7 +90,7 @@ def test_cli_inputs_return_filepaths(input_file, reference_file, output_file):
 
 
 def test_createvcf_return_str():
-    """ test createvcf function return values """
+    """test createvcf function return values"""
 
     # GIVEN the required variant info
     info = "7\t140453136\tCOSV56056643\tA\tT\t.\t.\tGENE=BRAF;STRAND=-;LEGACY_ID=COSM476;CDS=c.1799T>A;AA=p.V600E;VARIANT_TYPE=SNP;AA_HGVS=p.Val600Glu;AF=0.00104"

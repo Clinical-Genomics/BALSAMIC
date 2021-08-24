@@ -16,20 +16,20 @@ MOCKED_OS_ENVIRON = "os.environ"
 
 @pytest.fixture
 def cli_runner():
-    """ click - cli testing """
+    """click - cli testing"""
     runner = CliRunner()
     return runner
 
 
 @pytest.fixture
 def invoke_cli(cli_runner):
-    """ invoking cli commands with options"""
+    """invoking cli commands with options"""
     return partial(cli_runner.invoke, cli)
 
 
 @pytest.fixture(scope="session")
 def config_files():
-    """ dict: path of the config files """
+    """dict: path of the config files"""
     return {
         "sample": "BALSAMIC/config/sample.json",
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
@@ -45,7 +45,7 @@ def config_files():
 
 @pytest.fixture(scope="session")
 def reference():
-    """ reference json model """
+    """reference json model"""
     return {
         "reference": {
             "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",

@@ -91,7 +91,7 @@ class QCModel(BaseModel):
         ValueError:
             When the input in min_seq_length and umi_trim_length cannot
             be interpreted as integer and coerced to string
-    
+
     """
 
     picard_rmdup: bool = False
@@ -123,7 +123,7 @@ class VarcallerAttribute(BaseModel):
         ValueError:
             When a variable other than [somatic, germline] is passed in mutation field
             When a variable other than [SNV, CNV, SV] is passed in mutation_type field
-            
+
     """
 
     mutation: str
@@ -134,7 +134,7 @@ class VarcallerAttribute(BaseModel):
 
     @validator("workflow_solution", check_fields=False)
     def workflow_solution_literal(cls, value) -> str:
-        " Validate workflow solution "
+        "Validate workflow solution"
         assert set(value).issubset(
             set(WORKFLOW_SOLUTION)
         ), f"{value} is not valid workflow solution."
@@ -142,7 +142,7 @@ class VarcallerAttribute(BaseModel):
 
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
-        " Validate analysis types "
+        "Validate analysis types"
         assert set(value).issubset(
             set(ANALYSIS_TYPES)
         ), f"{value} is not a valid analysis type."
@@ -150,19 +150,19 @@ class VarcallerAttribute(BaseModel):
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
-        " Validate mutation class "
+        "Validate mutation class"
         assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
-        " Validate mutation type "
+        "Validate mutation type"
         assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
         return value
 
     @validator("sequencing_type", check_fields=False)
     def sequencing_type_literal(cls, value) -> str:
-        " Validate sequencing type "
+        "Validate sequencing type"
         assert set(value).issubset(
             set(SEQUENCING_TYPE)
         ), f"{value} is not not a valid sequencing type."
@@ -189,7 +189,7 @@ class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
 
     Attributes:
-              
+
         case_id : Field(required); string case identifier
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
@@ -308,18 +308,18 @@ class AnalysisModel(BaseModel):
 
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis
-    
+
     Attributes:
         file_prefix : Field(str); basename of sample pair
         sample_type : Field(str; alias=type); type of sample [tumor, normal]
         sample_name : Field(str); Internal ID of sample to use in deliverables
         readpair_suffix : Field(List); currently always set to [1, 2]
-    
+
     Raises:
         ValueError:
             When sample_type is set ot any value other than [tumor, normal]
 
-        """
+    """
 
     file_prefix: str
     sample_name: Optional[str]
@@ -395,8 +395,8 @@ class PonBalsamicConfigModel(BaseModel):
 
 
 class BalsamicConfigModel(BaseModel):
-    """Summarizes config models in preparation for export 
-    
+    """Summarizes config models in preparation for export
+
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
         vcf : Field(VCFmodel); variables relevant for variant calling pipeline
@@ -442,7 +442,7 @@ class BalsamicConfigModel(BaseModel):
 
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
-    
+
     This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
 
     Attributes:
@@ -453,7 +453,7 @@ class ReferenceUrlsModel(BaseModel):
 
     Raises:
         ValidationError: When it can't validate values matching above attributes
-      
+
     """
 
     url: AnyUrl
@@ -591,7 +591,7 @@ class UMIParamsConsensuscall(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-	    filter_minreads: str (required); settings to filter consensus tags based on group size
+            filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
@@ -666,7 +666,7 @@ class ParamsVEP(BaseModel):
 
 
 class BalsamicWorkflowConfig(BaseModel):
-    """ Defines set of rules in balsamic workflow
+    """Defines set of rules in balsamic workflow
 
     Handles attributes for corresponding rules.
 
