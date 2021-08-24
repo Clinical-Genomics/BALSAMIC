@@ -15,7 +15,7 @@ rule sentieon_umiextract:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        ds_params= paramsumi.umiextract.read_structure,
+        ds_params= params.umiextract.read_structure,
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "sentieon_umiextract")
@@ -51,8 +51,8 @@ rule sentieon_bwa_umiextract:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = '{sample}',
-        sheader = paramsumi.common.align_header,
-        ip_bases = paramsumi.common.align_intbases
+        sheader = params.umicommon.align_header,
+        ip_bases = params.umicommon.align_intbases
     threads: 
         get_threads(cluster_config, "sentieon_bwa_umiextract")
     message: 

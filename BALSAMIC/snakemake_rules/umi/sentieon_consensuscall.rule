@@ -14,8 +14,8 @@ rule sentieon_consensuscall_umi:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        tag = paramsumi.consensuscall.tag, 
-        ip_format = paramsumi.consensuscall.align_format,
+        tag = params.umiconsensuscall.tag,
+        ip_format = params.umiconsensuscall.align_format,
         sample_id = '{sample}'
     threads: 
         get_threads(cluster_config, "sentieon_consensuscall_umi")
@@ -54,8 +54,8 @@ rule sentieon_bwa_umiconsensus:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sheader = paramsumi.common.align_header,
-        ip_bases = paramsumi.common.align_intbases,
+        sheader = params.umicommon.align_header,
+        ip_bases = params.umicommon.align_intbases,
         sample_id = "{sample}"
     threads: 
         get_threads(cluster_config, "sentieon_bwa_umiconsensus")
@@ -97,7 +97,7 @@ rule sentieon_consensusfilter_umi:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
-        minreads = paramsumi.consensuscall.filter_minreads,
+        minreads = params.umiconsensuscall.filter_minreads,
         sample_id = '{case_name}',
         conda = config["bioinfo_tools"].get("samtools")
     threads:

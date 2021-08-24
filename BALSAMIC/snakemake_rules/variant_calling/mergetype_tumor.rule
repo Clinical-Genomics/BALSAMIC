@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-picard_extra_tumor=" ".join(["RGPU=ILLUMINAi", "RGID=TUMOR",  "RGSM=TUMOR", "RGPL=ILLUMINAi", "RGLB=ILLUMINAi"])
-
 if config["analysis"]["sequencing_type"] == 'wgs':
     tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = tumor_sample)
 else:
@@ -22,7 +20,7 @@ rule mergeBam_tumor:
   params:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
     conda = config["bioinfo_tools"].get("picard"),
-    picard = picard_extra_tumor,
+    picard = params.common.picard_RG_tumor,
     sample = tumor_sample
   threads:
     get_threads(cluster_config, "mergeBam_tumor")

@@ -21,10 +21,10 @@ rule vardict_tumor_only:
         Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        af = "0.001",
-        max_pval = "0.9",
-        max_mm = "4.5",
-        col_info = "-c 1 -S 2 -E 3 -g 4",
+        af = params.vardict.allelic_frequency,
+        max_pval = params.vardict.max_pval,
+        max_mm = params.vardict.max_mm,
+        col_info = params.vardict.column_info,
         case_name = config["analysis"]["case_id"],
         conda = config["bioinfo_tools"].get("vardict"),
     threads:
@@ -46,7 +46,6 @@ vardict-java -u -I 600 \
 -N {params.case_name} \
 -th {threads} \
 -b {input.bamT} \
--th {threads} \
 {params.col_info} {input.bed} \
 | teststrandbias.R \
 | var2vcf_valid.pl -P {params.max_pval} \

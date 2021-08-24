@@ -30,6 +30,7 @@ rule cnvkit_single:
         tumor_name = "tumor.merged",
         purecn_dir = cnv_dir + "PureCN",
         cnv_dir = cnv_dir,
+        min_mapq= params.common.min_mapq,
         conda = config["bioinfo_tools"].get("cnvkit"),
         case_name = config["analysis"]["case_id"],
         sample_id = "tumor"
@@ -56,13 +57,13 @@ cnvkit.py antitarget {input.baits_bed} \
 # calculate coverage in the given regions from BAM read depths
 cnvkit.py coverage {input.bamT} \
 {params.cnv_dir}/targets.bed \
---min-mapq 20 \
+--min-mapq {params.min_mapq} \
 --processes {threads} \
 --output {params.cnv_dir}/tumor.targetcoverage.cnn;
 
 cnvkit.py coverage {input.bamT} \
 {params.cnv_dir}/antitarget_bed \
---min-mapq 20 \
+--min-mapq {params.min_mapq} \
 --processes {threads} \
 --output {params.cnv_dir}/tumor.antitargetcoverage.cnn;
 
