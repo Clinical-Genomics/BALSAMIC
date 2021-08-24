@@ -11,7 +11,7 @@ rule sentieon_DNAscope:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        pcr_model = "NONE",
+        pcr_model = params.common.pcr_model,
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],

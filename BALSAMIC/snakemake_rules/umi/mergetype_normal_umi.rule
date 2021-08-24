@@ -15,7 +15,6 @@ rule mergeBam_normal_umiconsensus:
     Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("picard"),
-    #picard = picard_extra_normal,
     picard = params.common.picard_RG_normal,
     sample = normal_sample
   threads:

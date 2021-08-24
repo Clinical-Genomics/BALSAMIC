@@ -21,7 +21,7 @@ rule bwa_mem:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     params:
-        bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+        bam_header = params.common.align_header,
         conda = config["bioinfo_tools"].get("bwa"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"

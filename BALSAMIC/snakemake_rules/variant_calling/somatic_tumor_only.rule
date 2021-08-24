@@ -46,7 +46,6 @@ vardict-java -u -I 600 \
 -N {params.case_name} \
 -th {threads} \
 -b {input.bamT} \
--th {threads} \
 {params.col_info} {input.bed} \
 | teststrandbias.R \
 | var2vcf_valid.pl -P {params.max_pval} \

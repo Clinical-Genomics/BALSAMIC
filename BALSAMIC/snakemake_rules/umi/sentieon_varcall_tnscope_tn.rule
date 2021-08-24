@@ -25,6 +25,7 @@ rule sentieon_tnscope_umi_tn:
         init_tumor_lod = params.tnscope_umi.init_tumorLOD,
         error_rate = params.tnscope_umi.error_rate,
         prune_factor = params.tnscope_umi.prunefactor,
+        pcr_model = params.common.pcr_model,
         tumor = "TUMOR",
         normal = "NORMAL"
     threads: 
@@ -54,7 +55,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --min_tumor_lod {params.tumor_lod} \
 --disable_detector {params.disable_detect} \
 --max_error_per_read {params.error_rate} \
---pcr_indel_model NONE \
+--pcr_indel_model {params.pcr_model} \
 --prune_factor {params.prune_factor} \
 {output.vcf};
 
