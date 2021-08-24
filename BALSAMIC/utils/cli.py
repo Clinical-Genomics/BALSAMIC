@@ -493,7 +493,7 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
 
     Args:
         bioinfo_tools: dict. A dictionary with bioinfo tools as keys and container as value
-        container_conda_env_path: path. Path to all container and conda yaml there of
+        container_conda_env_path: path. Path to all container and conda yaml 
 
     Returns:
         bioinfo_tools_version: dict. Dictionary of bioinfo tools as key and version as value
