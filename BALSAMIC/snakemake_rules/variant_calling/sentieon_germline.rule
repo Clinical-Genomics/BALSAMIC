@@ -11,13 +11,17 @@ rule sentieon_DNAscope:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        pcr_model = "NONE",
+        pcr_model = params.common.pcr_model,
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"]
-    threads: get_threads(cluster_config, 'sentieon_DNAscope')
+        sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
+        sample = "{sample_type}"
     benchmark:
-        benchmark_dir + 'sentieon_DNAscope_' + "{sample_type}.dnascope.tsv"
+        Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample_type}.tsv").as_posix()
+    threads:
+        get_threads(cluster_config, 'sentieon_DNAscope')
+    message:
+        "Calling germline variants using Sentieon DNAscope for sample {params.sample}"
     shell:
       """
 mkdir -p {params.tmpdir};
@@ -34,5 +38,6 @@ export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 --algo DNAscope \
 --pcr_indel_mode {params.pcr_model} \
 -d {input.dbsnp} {output.vcf};
+
 rm -rf {params.tmpdir};
       """

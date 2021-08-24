@@ -6,9 +6,9 @@ from pydantic import ValidationError
 
 from BALSAMIC.utils.models import (
     VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
-    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, UMIworkflowConfig,
+    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, BalsamicWorkflowConfig,
     UMIParamsCommon, UMIParamsUMIextract, UMIParamsConsensuscall,
-    UMIParamsTNscope, UMIParamsVardict, UMIParamsVEP)
+    UMIParamsTNscope, ParamsCommon, ParamsVardict, ParamsVEP)
 
 
 def test_referencemeta():
@@ -355,27 +355,34 @@ def test_umiparams_tnscope():
     assert test_tnscope_params_built.disable_detect == "abc"
 
 
-def test_umiparams_vardict():
+def test_params_vardict():
     """ test UMIParamsVardict model for correct validation"""
 
     #GIVEN vardict params
-    test_umivardict = {"vardict_filters": "-a 1 -b 2 -c 5"}
+    test_vardict_params = {
+        "allelic_frequency": 0.01,
+        "max_pval": 0.5,
+        "max_mm": 2,
+        "column_info": "-a 1 -b 2 -c 3"
+    }
 
     #WHEN building the model
-    test_umivardict_built = UMIParamsVardict(**test_umivardict)
+    test_vardict_built = ParamsVardict(**test_vardict_params)
 
     #THEN assert values
-    assert test_umivardict_built.vardict_filters == "-a 1 -b 2 -c 5"
+    assert test_vardict_built.allelic_frequency ==  0.01
+    assert test_vardict_built.max_pval == 0.5
+    assert test_vardict_built.max_mm == 2
+    assert test_vardict_built.column_info == "-a 1 -b 2 -c 3"
 
-
-def test_umiparams_vep():
+def test_params_vep():
     """ test UMIParamsVEP model for correct validation"""
 
     #GIVEN vardict params
-    test_umivep = {"vep_filters": "all defaults params"}
+    test_vep = {"vep_filters": "all defaults params"}
 
     #WHEN building the model
-    test_umivep_built = UMIParamsVEP(**test_umivep)
+    test_vep_built = ParamsVEP(**test_vep)
 
     #THEN assert values
-    assert test_umivep_built.vep_filters == "all defaults params"
+    assert test_vep_built.vep_filters == "all defaults params"

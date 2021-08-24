@@ -11,7 +11,7 @@ rule vep_somatic:
     vcf_all = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
   benchmark:
-    benchmark_dir + "vep_somatic_{var_type}.somatic.{case_name}.{var_caller}.tsv"
+    Path(benchmark_dir, "vep_somatic_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -21,7 +21,8 @@ rule vep_somatic:
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz", 
     tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
     vcfanno_toml = VCFANNO_TOML,
-    vep_cache = config["reference"]["vep"]
+    vep_cache = config["reference"]["vep"],
+    vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep")
   message:
@@ -44,21 +45,9 @@ vep \
 --dir_plugins $vep_path \
 --input_file $tmpvcf \
 --output_file {output.vcf_all} \
---compress_output bgzip \
 --fork {threads} \
---vcf \
---everything \
---allow_non_variant \
---dont_skip \
---buffer_size 10000 \
---format vcf \
---offline \
---variant_class \
---merged \
---cache \
+{params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
---verbose \
---force_overwrite;
 
 tabix -p vcf -f {output.vcf_all};
 rm $tmpvcf;
@@ -70,7 +59,7 @@ rule tmb_calculation:
   output:
     tmb = vep_dir + "SNV.somatic.{case_name}.{var_caller}.balsamic_stat"
   benchmark:
-    benchmark_dir + "vep_stat_SNV.somatic.{case_name}.{var_caller}.tsv" 
+    Path(benchmark_dir, "vep_stat_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
@@ -109,18 +98,19 @@ rule vep_germline:
     vcf_all = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
   benchmark:
-    benchmark_dir + "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv"
+    Path(benchmark_dir, "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
     conda = config["bioinfo_tools"].get("ensembl-vep"),
     housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
-    message_text = "{var_type}.germline.{sample}.{var_caller}",
-    vep_cache = config["reference"]["vep"]
+    sample = '{sample}',
+    vep_cache = config["reference"]["vep"],
+    vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep')
   message:
-    "Running vep annotation on {params.message_text}" 
+    "Running vep annotation on {params.sample}"
   shell:
       """
 source activate {params.conda};
@@ -134,20 +124,8 @@ vep \
 --dir_plugins $vep_path \
 --input_file {input.vcf} \
 --output_file {output.vcf_all} \
---compress_output bgzip \
 --fork {threads} \
---vcf \
---everything \
---allow_non_variant \
---dont_skip \
---buffer_size 10000 \
---format vcf \
---offline \
---variant_class \
---merged \
---cache \
+{params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
---verbose \
---force_overwrite;
 tabix -p vcf -f {output.vcf_all};
     """

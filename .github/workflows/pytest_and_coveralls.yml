@@ -1,5 +1,4 @@
 name: pytests
-
 on:
   push:
     paths-ignore:
@@ -9,7 +8,6 @@ on:
     paths-ignore:
       - "CHANGELOG.rst"
       - "docs/**"
-
 jobs:
   pytest_coveralls:
     name: run PyTest
@@ -18,19 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.6]
-
     steps:
       # Checkout BALSAMIC
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v2
-
       # Get branch name
       - name: Get branch name
         id: get_branch_name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
-
       # Conda env create
       - name: setup conda
         id: setup_conda
@@ -38,8 +33,7 @@ jobs:
         with:
           activate-environment: balsamic
           environment-file: BALSAMIC/conda/balsamic.yaml
-          python-version: ${{ matrix.python-version }} 
-
+          python-version: ${{ matrix.python-version }}
       # Install BALSAMIC
       - name: Install BALSAMIC
         id: install_balsamic
@@ -48,7 +42,6 @@ jobs:
           conda activate balsamic
           pip install --no-cache-dir -r requirements-dev.txt
           pip install .
-
       # Run PyTest
       - name: Run PyTest
         id: pytest
@@ -59,7 +52,6 @@ jobs:
         env:
           SENTIEON_LICENSE: dummy_license
           SENTIEON_INSTALL_DIR: dummy_install_dir
-
       # Run Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1

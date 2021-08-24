@@ -24,7 +24,12 @@ Added:
 * ``ascatngs`` download container #672
 * Documentation update on setting sentieon env variables in ``bashrc``
 * ``ascatngs`` tumor normal rule for wgs cases #672
+* Individual rules (i.e. ngs filters) for cnv and sv callers. Only Manta will be delivered and added to the list of output files. #708
+* Added "targeted" and "wgs" tags to variant callers to provide another layer of separation. #708
 * ``manta`` convert inversion #709
+* Sentieon version to bioinformatic tool version parsing #685 
+* added ``CITATION.cff`` to cite BALSAMIC
+
 
 Changed:
 ^^^^^^^^
@@ -33,25 +38,31 @@ Changed:
 * New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
 * New name rule ``GATK_contest`` to ``gatk_contest`` 
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
+* Updated ``snakemake`` to ``v6.5.3`` #501 
 * Update ``GNOMAD`` URL
 * Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
+* Generalized ascat, delly, and manta result in workflow. #708
+* Generalized workflow to eliminate duplicate entries and code. #708
+* Split Tumor-Normal ``cnvkit batch`` into individual commands
+* Moved params that are used in multiple rules to constants #711
+* Changed the way conda and non-conda bioinfo tools version are parsed
+
 
 Fixed:
 ^^^^^^
 
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
-* Refactor ``snakemake`` align rules according to ``snakemake`` etiquette 
-* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette
-* Refactor snakemake ``manta`` rule according to snakemake etiquette
+* Refactor snakemake ``annotate`` rules according to snakemake etiquette #636
+* Refactor snakemake ``align`` rules according to snakemake etiquette #636 
+* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette #636
 * Order of columns in QC and coverage report issue #601
 * ``delly`` not showing in workflow at runtime #644
-* ``ascatngs`` documentaion links in ``FAQs`` #672
+* ``ascatngs`` documentation links in ``FAQs`` #672
 * ``varcall_py36`` container build and push #703
-* delly run
-* ascat documentaion links in FAQs
 * Wrong spacing in reference json issue #704
+* Refactor snakemake ``quality control`` rules according to snakemake etiquette #636
 
 Removed:
 ^^^^^^^^

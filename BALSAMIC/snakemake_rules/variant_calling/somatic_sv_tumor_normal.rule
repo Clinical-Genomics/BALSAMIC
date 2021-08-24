@@ -11,14 +11,14 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
 rule manta_tumor_normal:
     input:
-        fa = config["reference"]["reference_genome"] ,
+        fa = config["reference"]["reference_genome"],
         bamN = bam_dir + normal_bam, 
         bamT = bam_dir + tumor_bam,
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
     benchmark:
-        benchmark_dir + 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".manta.tsv"
+        Path(benchmark_dir, 'manta_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     params:
@@ -27,11 +27,12 @@ rule manta_tumor_normal:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         conda = config["bioinfo_tools"].get("manta"),
+        case_name = config["analysis"]["case_id"],
         manta_install_path = "/opt/conda/envs/varcall_py27/share/manta-1.6.0-1"
     threads:
         get_threads(cluster_config, "manta_tumor_normal")
     message:
-        ("Call structural variants using manta for {input.bamT} vs {input.bamN} files then "
+        ("Calling structural variants using manta for {params.case_name} and "
         "index the compressed vcf file")
     shell:
         """
@@ -40,10 +41,10 @@ source activate {params.conda};
 samtools_path=$(readlink -f $(which samtools))
 
 configManta.py \
-  --normalBam={input.bamN} \
-  --tumorBam={input.bamT} \
-  --referenceFasta={input.fa} \
-  --runDir={params.tmpdir};
+--normalBam={input.bamN} \
+--tumorBam={input.bamT} \
+--referenceFasta={input.fa} \
+--runDir={params.tmpdir};
 
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
@@ -63,7 +64,7 @@ rm -rf {params.tmpdir};
 
 rule delly_tumor_normal:
     input:
-        fa = config["reference"]["reference_genome"] ,
+        fa = config["reference"]["reference_genome"],
         bamN = bam_dir + normal_bam,
         bamT = bam_dir + tumor_bam,
         excl = config["reference"]["delly_exclusion_converted"],
@@ -71,19 +72,19 @@ rule delly_tumor_normal:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
     benchmark:
-        benchmark_dir + 'delly_tumor_normal_' + config["analysis"]["case_id"] + "_delly.tsv"
+        Path(benchmark_dir, 'delly_tumor_normal_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        conda = config["bioinfo_tools"].get("delly")
+        conda = config["bioinfo_tools"].get("delly"),
+        case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "delly_tumor_normal")
     message:
-        ("Call structural variants using delly for {input.bamT} vs {input.bamN} files then "
+        ("Calling structural variants using delly for {params.case_name},"
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
@@ -113,22 +114,21 @@ rule ascat_tumor_normal:
         gccorrection = config["reference"]["ascat_gccorrection"],
         chryloci= config["reference"]["ascat_chryloci"],
     output:
-        finalvcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
-        samplestatistics = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        germlineplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
-        rawprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
-        sunriseplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
-        tumorplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
-        aspcfplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
-        ascatprofileplot = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
-        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
+        finalvcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        samplestatistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        germlineplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
+        rawprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
+        sunriseplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
+        tumorplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
+        aspcfplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        ascatprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("ascat") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("ascatNgs") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
     threads:

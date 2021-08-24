@@ -17,11 +17,11 @@ rule bwa_mem:
     output:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
     benchmark:
-        Path(benchmark_dir,"bwa_mem_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "bwa_mem_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     params:
-        bam_header = "'@RG\\tID:" +  "{sample}" + "\\tSM:" + "{sample}" + "\\tPL:ILLUMINAi'",
+        bam_header = params.common.align_header,
         conda = config["bioinfo_tools"].get("bwa"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"

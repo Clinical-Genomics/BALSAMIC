@@ -31,7 +31,7 @@ setup(
         "pygments>=2.6.1",
         "pyyaml>=5.3.1",
         "six>=1.12.0",
-        "snakemake==5.13.0",
+        "snakemake==6.5.3",
         "yapf>=0.30.0",
         "h5py>=3.1.0",
         "PyPDF2>=1.26.0",

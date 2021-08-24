@@ -9,9 +9,8 @@ from pydantic.types import DirectoryPath, FilePath
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.utils.constants import (
-    BIOINFO_TOOL_ENV, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
-    MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT,
-    BIOINFO_TOOL_SUBMODULE)
+    BIOINFO_TOOL_ENV, SEQUENCING_TYPE, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
+    MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT)
 
 
 class VCFAttributes(BaseModel):
@@ -111,6 +110,7 @@ class VarcallerAttribute(BaseModel):
         mutation_type: str of mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
+        sequencing_type: list of str for workflows
 
     Raises:
         ValueError:
@@ -122,6 +122,7 @@ class VarcallerAttribute(BaseModel):
     mutation: str
     mutation_type: str = Field(alias="type")
     analysis_type: Optional[list]
+    sequencing_type: Optional[list]
     workflow_solution: Optional[list]
 
     @validator("workflow_solution", check_fields=False)
@@ -148,6 +149,12 @@ class VarcallerAttribute(BaseModel):
     def mutation_type_literal(cls, value) -> str:
         " Validate mutation type "
         assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
+        return value
+
+    @validator("sequencing_type", check_fields=False)
+    def sequencing_type_literal(cls, value) -> str:
+        " Validate sequencing type "
+        assert set(value).issubset(set(SEQUENCING_TYPE)), f"{value} is not not a valid sequencing type."
         return value
 
 
@@ -221,7 +228,7 @@ class AnalysisModel(BaseModel):
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
-        balsamic_sequencing_types = ["wgs", "targeted"]
+        balsamic_sequencing_types = SEQUENCING_TYPE
         if value not in balsamic_sequencing_types:
             raise ValueError(
                 f"Provided sequencing type ({value}) not supported in BALSAMIC!"
@@ -407,13 +414,13 @@ class ReferenceUrlsModel(BaseModel):
     This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
 
     Attributes:
-      url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
-      file_type: describes file type. Accepted values are VALID_REF_FORMAT constant 
-      gzip: gzip status. Binary: True or False
-      genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant 
+        url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
+        file_type: describes file type. Accepted values are VALID_REF_FORMAT constant
+        gzip: gzip status. Binary: True or False
+        genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant
 
     Raises:
-      ValidationError: When it can't validate values matching above attributes
+        ValidationError: When it can't validate values matching above attributes
       
     """
 
@@ -583,40 +590,65 @@ class UMIParamsTNscope(BaseModel):
     disable_detect: str
 
 
-class UMIParamsVardict(BaseModel):
-    """This class defines the params settings used as constants in UMIworkflow-rule vardict.
+class ParamsVardict(BaseModel):
+    """This class defines the params settings used as constants in vardict rule.
 
     Attributes:
-        vardict_filters: str (required); set of filters to apply for variant-calling using vardict
+        allelic_frequency: float (required); minimum allelic frequency to detect
+        max_pval: float (required); the maximum p-value. Vardict default: 0.05
+        max_mm: float (required); the maximum mean mismatches allowed. Vardict default: 5.25
+        column_info: str (required); set of vardict filters for passing final variants
     """
-    vardict_filters: str
 
+    allelic_frequency: float
+    max_pval: float
+    max_mm: float
+    column_info: str
 
-class UMIParamsVEP(BaseModel):
-    """This class defines the params settings used as constants in UMIworkflow-rule vep.
+class ParamsCommon(BaseModel):
+    """This class defines the common params settings used as constants across various rules in balsamic workflow.
 
     Attributes:
-        vep_filters: str (required); set of filters to apply for variant-calling using vardict
+        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
+        align_header: str (required); header line appended to the aligned BAM output
+        min_mapq: int (required); minimum mapping quality score. Eg: 20- probability of mapping random read at 99% accuracy
+        picard_RG_normal: str (required); replace readgroups in normal bam file
+        picard_RG_tumor: str (required); replace readgroups in tumor bam file
+    """
+
+    align_header: str
+    pcr_model: str
+    min_mapq: int
+    picard_RG_normal: str
+    picard_RG_tumor: str
+
+class ParamsVEP(BaseModel):
+    """This class defines the params settings used as constants in vep rule.
+
+    Attributes:
+        vep_filters: str (required); set of choosen options for processing vep annotated vcf file
     """
     vep_filters: str
 
 
-class UMIworkflowConfig(BaseModel):
-    """ Defines set of rules in UMI workflow.
- 
+class BalsamicWorkflowConfig(BaseModel):
+    """ Defines set of rules in balsamic workflow
+
     Handles attributes for corresponding rules.
-	
+
     Attributes:
-	common: global params defined across all rules in UMI workflow
-	umiextract: params defined in the rule sentieon_umiextract
-	consensuscall: params defined in the rule sentieon_consensuscall
-	tnscope: params defined in the rule sentieon_tnscope_umi
-	vardict: params defined in the rule vardict_umi
-	vep: params defined in the rule vep_umi
+        common: global params defined across all rules in balsamic workflow
+        umicommon: global params defined across specific rules in UMI workflow
+        vep: global params defined in the rule vep
+        vardict: params defined in the rule vardict
+        umiextract : params defined in the rule sentieon_umiextract
+        umiconsensuscall: params defined in the rule sentieon_consensuscall
+        tnscope_umi: params defined in the rule sentieon_tnscope_umi
     """
-    common: UMIParamsCommon
+    common: ParamsCommon
+    vardict: ParamsVardict
+    vep: ParamsVEP
+    umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
-    consensuscall: UMIParamsConsensuscall
-    tnscope: UMIParamsTNscope
-    vardict: UMIParamsVardict
-    vep: UMIParamsVEP
+    umiconsensuscall: UMIParamsConsensuscall
+    tnscope_umi: UMIParamsTNscope
