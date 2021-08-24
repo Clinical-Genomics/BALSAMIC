@@ -107,7 +107,7 @@ LOG = logging.getLogger(__name__)
     "--quiet",
     default=False,
     is_flag=True,
-    help=("Instruct snakemake to be quiet!" "No output will be printed"),
+    help="Instruct snakemake to be quiet! No output will be printed",
 )
 @click.pass_context
 def initialize(

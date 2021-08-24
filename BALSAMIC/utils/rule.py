@@ -188,7 +188,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             # Do not store file if it is a temp() output
             if file_to_store in temp_files:
                 LOG.debug(
-                    "File is tagged as temporary file in the workflow:".format(
+                    "File is tagged as temporary file in the workflow: {}".format(
                         file_to_store
                     )
                 )

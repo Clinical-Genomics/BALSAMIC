@@ -116,7 +116,7 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     default=False,
     is_flag=True,
-    help=("Force run all analysis. This is same as " "snakemake --forceall"),
+    help="Force run all analysis. This is same as snakemake --forceall",
 )
 @click.option(
     "--snakemake-opt", multiple=True, help="Pass these options directly to snakemake"
@@ -135,7 +135,7 @@ LOG = logging.getLogger(__name__)
     "--quiet",
     default=False,
     is_flag=True,
-    help=("Instruct snakemake to be quiet!" "No output will be printed"),
+    help="Instruct snakemake to be quiet! No output will be printed",
 )
 @click.option(
     "--mail-type",
