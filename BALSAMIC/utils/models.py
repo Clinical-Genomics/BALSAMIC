@@ -590,30 +590,14 @@ class UMIParamsTNscope(BaseModel):
     disable_detect: str
 
 
-#class UMIworkflowConfig(BaseModel):
-#    """ Defines set of rules in UMI workflow.
-
-#    Handles attributes for corresponding rules.
-
-#    Attributes:
-#	common: global params defined across all rules in UMI workflow
-#	umiextract: params defined in the rule sentieon_umiextract
-#	consensuscall: params defined in the rule sentieon_consensuscall
-#	tnscope: params defined in the rule sentieon_tnscope_umi
-#	vardict: params defined in the rule vardict_umi
-#	vep: params defined in the rule vep_umi
-#    """
-#    common: UMIParamsCommon
-#    umiextract: UMIParamsUMIextract
-#    consensuscall: UMIParamsConsensuscall
-#    tnscope: UMIParamsTNscope
-
-
 class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
 
     Attributes:
-        vardict_filters: str (required); set of filters to apply for variant-calling using vardict
+        allelic_frequency: float (required); minimum allelic frequency to detect
+        max_pval: float (required); the maximum p-value. Vardict default: 0.05
+        max_mm: float (required); the maximum mean mismatches allowed. Vardict default: 5.25
+        column_info: str (required); set of vardict filters for passing final variants
     """
 
     allelic_frequency: float
@@ -622,11 +606,14 @@ class ParamsVardict(BaseModel):
     column_info: str
 
 class ParamsCommon(BaseModel):
-    """This class defines the common params settings used as constants across various rules in UMI workflow.
+    """This class defines the common params settings used as constants across various rules in balsamic workflow.
 
-      Attributes:
-          pcr_model: str (required); output alignment format. eg. 'NONE'
-          align_header: str (required); header line appended to the aligned BAM output
+    Attributes:
+        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
+        align_header: str (required); header line appended to the aligned BAM output
+        min_mapq: int (required); minimum mapping quality score. Eg: 20- probability of mapping random read at 99% accuracy
+        picard_RG_normal: str (required); replace readgroups in normal bam file
+        picard_RG_tumor: str (required); replace readgroups in tumor bam file
       """
 
     align_header: str
@@ -639,7 +626,7 @@ class ParamsVEP(BaseModel):
     """This class defines the params settings used as constants in vep rule.
 
     Attributes:
-        vep_filters: str (required); set of filters to apply for variant-calling using vardict
+        vep_filters: str (required); set of choosen options for processing vep annotated vcf file
     """
     vep_filters: str
 
