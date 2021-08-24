@@ -1,21 +1,19 @@
 name: build test container submodule
-
 # Tigger building and testing container only on pull requests
 on:
   push:
     tags:
       - "**"
-
 jobs:
   main:
-    name: Docker image build test 
+    name: Docker image build test
     runs-on: ubuntu-18.04
     steps:
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v2
         with:
-            submodules: recursive
+          submodules: recursive
       - name: Get branch name
         id: get_branch_name
         shell: bash
@@ -31,5 +29,5 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ascatNgs
-          push: true 
-          tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-ascatngs 
+          push: true
+          tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-ascatngs
