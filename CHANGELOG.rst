@@ -42,8 +42,7 @@ Changed:
 * Generalized ascat, delly, and manta result in workflow. #708
 * Generalized workflow to eliminate duplicate entries and code. #708
 * Split Tumor-Normal ``cnvkit batch`` into individual commands
->>>>>>> origin/develop
-
+* Moved params that are used in multiple rules to constants #711
 
 Fixed:
 ^^^^^^
