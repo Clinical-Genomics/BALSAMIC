@@ -5,10 +5,23 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from BALSAMIC.utils.models import (
-    VCFAttributes, VarCallerFilter, QCModel, VarcallerAttribute, AnalysisModel,
-    SampleInstanceModel, ReferenceUrlsModel, ReferenceMeta, BalsamicWorkflowConfig,
-    UMIParamsCommon, UMIParamsUMIextract, UMIParamsConsensuscall,
-    UMIParamsTNscope, ParamsCommon, ParamsVardict, ParamsVEP)
+    VCFAttributes,
+    VarCallerFilter,
+    QCModel,
+    VarcallerAttribute,
+    AnalysisModel,
+    SampleInstanceModel,
+    ReferenceUrlsModel,
+    ReferenceMeta,
+    BalsamicWorkflowConfig,
+    UMIParamsCommon,
+    UMIParamsUMIextract,
+    UMIParamsConsensuscall,
+    UMIParamsTNscope,
+    ParamsCommon,
+    ParamsVardict,
+    ParamsVEP,
+)
 
 
 def test_referencemeta():
@@ -173,7 +186,7 @@ def test_vcfattributes():
     dummy_attribute = {
         "tag_value": 5.0,
         "filter_name": "dummy_filter_name",
-        "field": "INFO"
+        "field": "INFO",
     }
 
     # WHEN building the model
@@ -190,20 +203,12 @@ def test_varcallerfilter():
 
     # GIVEN a VarCallerFilter
     dummy_varcaller = {
-        "AD": {
-            "tag_value": 5.0,
-            "filter_name": "dummy_alt_depth",
-            "field": "INFO"
-        },
-        "DP": {
-            "tag_value": 100.0,
-            "filter_name": "dummy_depth",
-            "field": "INFO"
-        },
+        "AD": {"tag_value": 5.0, "filter_name": "dummy_alt_depth", "field": "INFO"},
+        "DP": {"tag_value": 100.0, "filter_name": "dummy_depth", "field": "INFO"},
         "pop_freq": {
             "tag_value": 0.005,
             "filter_name": "dummy_pop_freq",
-            "field": "INFO"
+            "field": "INFO",
         },
         "varcaller_name": "dummy_varcaller",
         "filter_type": "dummy_ffpe_filter",
@@ -247,7 +252,7 @@ def test_analysis_model():
         "analysis_type": "paired",
         "sequencing_type": "targeted",
         "analysis_dir": "tests/test_data",
-        "umiworkflow": "true"
+        "umiworkflow": "true",
     }
     # THEN we can successully create a config dict
     assert AnalysisModel.parse_obj(valid_args)
@@ -289,7 +294,7 @@ def test_umiparams_common():
     test_commonparams = {
         "align_header": "test_header_name",
         "align_intbases": 100,
-        "filter_tumor_af": 0.01
+        "filter_tumor_af": 0.01,
     }
     # WHEN building the model
     test_commonparams_built = UMIParamsCommon(**test_commonparams)
@@ -314,17 +319,17 @@ def test_umiparams_umiextract():
 def test_umiparams_consensuscall():
     """ test UMIParamsConsensuscall model for correct validation """
 
-    #GIVEN consensuscall params
+    # GIVEN consensuscall params
     test_consensuscall = {
         "align_format": "BAM",
         "filter_minreads": "6,3,3",
-        "tag": "XZ"
+        "tag": "XZ",
     }
 
-    #WHEN building the model
+    # WHEN building the model
     test_consensuscall_built = UMIParamsConsensuscall(**test_consensuscall)
 
-    #THEN assert values
+    # THEN assert values
     assert test_consensuscall_built.align_format == "BAM"
     assert test_consensuscall_built.filter_minreads == "6,3,3"
     assert test_consensuscall_built.tag == "XZ"
@@ -333,20 +338,20 @@ def test_umiparams_consensuscall():
 def test_umiparams_tnscope():
     """ test UMIParamsTNscope model for correct validation """
 
-    #GIVEN tnscope params
+    # GIVEN tnscope params
     test_tnscope_params = {
         "algo": "algoname",
         "init_tumorLOD": 0.5,
         "min_tumorLOD": 6,
         "error_rate": 5,
         "prunefactor": 3,
-        "disable_detect": "abc"
+        "disable_detect": "abc",
     }
 
-    #WHEN building the model
+    # WHEN building the model
     test_tnscope_params_built = UMIParamsTNscope(**test_tnscope_params)
 
-    #THEN assert values
+    # THEN assert values
     assert test_tnscope_params_built.algo == "algoname"
     assert test_tnscope_params_built.init_tumorLOD == 0.5
     assert test_tnscope_params_built.min_tumorLOD == 6
@@ -358,31 +363,32 @@ def test_umiparams_tnscope():
 def test_params_vardict():
     """ test UMIParamsVardict model for correct validation"""
 
-    #GIVEN vardict params
+    # GIVEN vardict params
     test_vardict_params = {
         "allelic_frequency": 0.01,
         "max_pval": 0.5,
         "max_mm": 2,
-        "column_info": "-a 1 -b 2 -c 3"
+        "column_info": "-a 1 -b 2 -c 3",
     }
 
-    #WHEN building the model
+    # WHEN building the model
     test_vardict_built = ParamsVardict(**test_vardict_params)
 
-    #THEN assert values
-    assert test_vardict_built.allelic_frequency ==  0.01
+    # THEN assert values
+    assert test_vardict_built.allelic_frequency == 0.01
     assert test_vardict_built.max_pval == 0.5
     assert test_vardict_built.max_mm == 2
     assert test_vardict_built.column_info == "-a 1 -b 2 -c 3"
 
+
 def test_params_vep():
     """ test UMIParamsVEP model for correct validation"""
 
-    #GIVEN vardict params
+    # GIVEN vardict params
     test_vep = {"vep_filters": "all defaults params"}
 
-    #WHEN building the model
+    # WHEN building the model
     test_vep_built = ParamsVEP(**test_vep)
 
-    #THEN assert values
+    # THEN assert values
     assert test_vep_built.vep_filters == "all defaults params"

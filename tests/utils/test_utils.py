@@ -19,18 +19,44 @@ from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV
 from BALSAMIC.utils.constants import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
-    SnakeMake, CaptureStdout, iterdict, get_snakefile, createDir, write_json,
-    get_config, recursive_default_dict, convert_defaultdict_to_regular_dict,
-    get_file_status_string, get_from_two_key, find_file_index, merge_json,
-    validate_fastq_pattern, get_panel_chrom, create_fastq_symlink,
-    get_fastq_bind_path, singularity, get_file_extension,
-    get_bioinfo_tools_version, convert_deliverables_tags, check_executable,
-    job_id_dump_to_yaml, generate_h5)
+    SnakeMake,
+    CaptureStdout,
+    iterdict,
+    get_snakefile,
+    createDir,
+    write_json,
+    get_config,
+    recursive_default_dict,
+    convert_defaultdict_to_regular_dict,
+    get_file_status_string,
+    get_from_two_key,
+    find_file_index,
+    merge_json,
+    validate_fastq_pattern,
+    get_panel_chrom,
+    create_fastq_symlink,
+    get_fastq_bind_path,
+    singularity,
+    get_file_extension,
+    get_bioinfo_tools_version,
+    convert_deliverables_tags,
+    check_executable,
+    job_id_dump_to_yaml,
+    generate_h5,
+)
 
-from BALSAMIC.utils.rule import (get_chrom, get_vcf, get_sample_type,
-                                 get_picard_mrkdup, get_variant_callers,
-                                 get_script_path, get_result_dir, get_threads,
-                                 get_delivery_id, get_reference_output_files)
+from BALSAMIC.utils.rule import (
+    get_chrom,
+    get_vcf,
+    get_sample_type,
+    get_picard_mrkdup,
+    get_variant_callers,
+    get_script_path,
+    get_result_dir,
+    get_threads,
+    get_delivery_id,
+    get_reference_output_files,
+)
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -142,8 +168,7 @@ def test_get_reference_output_files():
     file_type = "fasta"
 
     # WHEN getting list of valid types
-    fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver],
-                                             file_type)
+    fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver], file_type)
 
     # THEN it should return list of file
     assert "Homo_sapiens_assembly38.fasta" in fasta_files
@@ -152,13 +177,14 @@ def test_get_reference_output_files():
 def test_get_bioinfo_tools_version():
     # GIVEN a path for container path and bioinfo tool dictionary
     # WHEN getting dictionary of bioinformatic tools and their version
-    bioinfo_tools_dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV,
-                                                   CONTAINERS_CONDA_ENV_PATH)
+    bioinfo_tools_dict = get_bioinfo_tools_version(
+        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
+    )
     observed_versions = set(bioinfo_tools_dict["samtools"])
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert set(observed_versions).issubset(set(["1.12", "1.11", "1.9"])) 
+    assert set(observed_versions).issubset(set(["1.12", "1.11", "1.9"]))
 
 
 def test_get_delivery_id():
@@ -282,7 +308,7 @@ def test_snakemake_slurm():
     snakemake_slurm.profile = "slurm"
     snakemake_slurm.mail_type = "FAIL"
     snakemake_slurm.mail_user = "john.doe@example.com"
-    snakemake_slurm.sm_opt = ("containers", )
+    snakemake_slurm.sm_opt = ("containers",)
     snakemake_slurm.quiet = True
     snakemake_slurm.use_singularity = True
     snakemake_slurm.singularity_bind = ["path_1", "path_2"]
@@ -326,7 +352,7 @@ def test_get_snakefile():
         ("qc", ""),
         ("generate_ref", ""),
         ("umi", ""),
-        ("pon", "")
+        ("pon", ""),
     ]
 
     # WHEN asking to see snakefile for paired
@@ -334,13 +360,13 @@ def test_get_snakefile():
         snakefile = get_snakefile(analysis_type, sequencing_type)
         pipeline = ""
 
-        if sequencing_type in ['targeted', 'wgs', 'qc']:
+        if sequencing_type in ["targeted", "wgs", "qc"]:
             pipeline = "BALSAMIC/workflows/balsamic.smk"
-        elif analysis_type == 'generate_ref':
+        elif analysis_type == "generate_ref":
             pipeline = "BALSAMIC/workflows/reference.smk"
-        elif analysis_type == 'umi':
+        elif analysis_type == "umi":
             pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
-        elif analysis_type == 'pon':
+        elif analysis_type == "pon":
             pipeline = "BALSAMIC/workflows/PON.smk"
 
         # THEN it should return the snakefile path
@@ -354,7 +380,19 @@ def test_get_chrom(config_files):
     # Given a panel bed file
     bed_file = config_files["panel_bed_file"]
     actual_chrom = [
-        "10", "11", "16", "17", "18", "19", "2", "3", "4", "6", "7", "9", "X"
+        "10",
+        "11",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "3",
+        "4",
+        "6",
+        "7",
+        "9",
+        "X",
     ]
 
     # WHEN passing this bed file
@@ -369,8 +407,9 @@ def test_get_vcf(sample_config):
     variant_callers = ["mutect", "vardict", "manta"]
 
     # WHEN passing args to that function
-    vcf_list = get_vcf(sample_config, variant_callers,
-                       [sample_config["analysis"]["case_id"]])
+    vcf_list = get_vcf(
+        sample_config, variant_callers, [sample_config["analysis"]["case_id"]]
+    )
 
     # THEN It should return the list of vcf file names
     assert any("mutect" in vcf_name for vcf_name in vcf_list)
@@ -548,11 +587,13 @@ def test_get_from_two_key():
     }
 
     # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
-    result = get_from_two_key(input_dict,
-                              from_key="key_1",
-                              by_key="key_2",
-                              by_value="key_1_value_2",
-                              default=None)
+    result = get_from_two_key(
+        input_dict,
+        from_key="key_1",
+        by_key="key_2",
+        by_value="key_1_value_2",
+        default=None,
+    )
 
     # THEN retrun value should be key_2_value_2 and not None
     assert result == "key_2_value_2"
@@ -589,17 +630,21 @@ def test_singularity_shellcmd(balsamic_cache):
     dummy_path_1 = "this_path/path1"
     dummy_path_2 = "this_path/path2"
     correct_shellcmd = "exec --bind {} --bind {} ls this_path".format(
-        dummy_path_1, dummy_path_2)
-    singularity_container_sif = Path(balsamic_cache, balsamic_version, "containers", "align_qc",
-                                     "example.sif").as_posix()
+        dummy_path_1, dummy_path_2
+    )
+    singularity_container_sif = Path(
+        balsamic_cache, balsamic_version, "containers", "align_qc", "example.sif"
+    ).as_posix()
 
     with mock.patch.object(shutil, "which") as mocked:
         mocked.return_value = "/my_home/binary_path/singularity"
 
         # WHEN building singularity command
-        shellcmd = singularity(sif_path=singularity_container_sif,
-                               cmd=dummy_command,
-                               bind_paths=[dummy_path_1, dummy_path_2])
+        shellcmd = singularity(
+            sif_path=singularity_container_sif,
+            cmd=dummy_command,
+            bind_paths=[dummy_path_1, dummy_path_2],
+        )
 
         # THEN successfully return a correct singularity cmd
         assert correct_shellcmd in shellcmd
@@ -618,14 +663,16 @@ def test_singularity_shellcmd_sif_not_exist():
 
     # WHEN building singularity command
     # THEN successfully get error that container doesn't exist
-    with mock.patch.object(shutil,
-                           "which") as mocked, pytest.raises(BalsamicError,
-                                                             match=error_msg):
+    with mock.patch.object(shutil, "which") as mocked, pytest.raises(
+        BalsamicError, match=error_msg
+    ):
         mocked.return_value = "/my_home/binary_path/singularity"
 
-        singularity(sif_path=dummy_sif_path,
-                    cmd=dummy_command,
-                    bind_paths=[dummy_path_1, dummy_path_2])
+        singularity(
+            sif_path=dummy_sif_path,
+            cmd=dummy_command,
+            bind_paths=[dummy_path_1, dummy_path_2],
+        )
 
 
 def test_singularity_shellcmd_cmd_not_exist():
@@ -641,14 +688,16 @@ def test_singularity_shellcmd_cmd_not_exist():
 
     # WHEN building singularity command
     # THEN successfully get error if singualrity command doesn't exist
-    with mock.patch.object(shutil,
-                           "which") as mocked, pytest.raises(BalsamicError,
-                                                             match=error_msg):
+    with mock.patch.object(shutil, "which") as mocked, pytest.raises(
+        BalsamicError, match=error_msg
+    ):
         mocked.return_value = None
 
-        singularity(sif_path=singularity_container_sif,
-                    cmd=dummy_command,
-                    bind_paths=[dummy_path_1, dummy_path_2])
+        singularity(
+            sif_path=singularity_container_sif,
+            cmd=dummy_command,
+            bind_paths=[dummy_path_1, dummy_path_2],
+        )
 
 
 def test_merge_json(reference, config_files):
@@ -758,8 +807,7 @@ def test_convert_deliverables_tags():
     delivery_json = {
         "files": [
             {
-                "path":
-                "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
                 "tag": "read2,quality-trimmed-fastq-read2,tumor",
@@ -767,8 +815,7 @@ def test_convert_deliverables_tags():
                 "format": "fastq.gz",
             },
             {
-                "path":
-                "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
                 "path_index": [],
                 "step": "fastp",
                 "tag": "S1_R,json,quality-trimmed-fastq-json",
@@ -776,15 +823,13 @@ def test_convert_deliverables_tags():
                 "format": "json",
             },
             {
-                "path":
-                "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S2_R_fastp.json",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S2_R_fastp.json",
                 "path_index": [],
                 "step": "fastp",
                 "tag": "ACC1,json,quality-trimmed-fastq-json",
                 "id": "tumor",
                 "format": "json",
             },
-
         ]
     }
 
@@ -801,7 +846,8 @@ def test_convert_deliverables_tags():
 
     # WHEN running convert function
     delivery_json = convert_deliverables_tags(
-        delivery_json=delivery_json, sample_config_dict=sample_config_dict)
+        delivery_json=delivery_json, sample_config_dict=sample_config_dict
+    )
 
     # Prefix strings should be replaced with sample name
     for delivery_file in delivery_json["files"]:
@@ -859,7 +905,7 @@ def test_generate_h5(tmp_path):
     correct_output = Path(dummy_path, dummy_job_name + ".h5")
 
     # WHEN generating a h5 output
-    with mock.patch.object(subprocess, 'check_output') as mocked:
+    with mock.patch.object(subprocess, "check_output") as mocked:
         actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
 
     assert actual_output == correct_output
@@ -876,7 +922,7 @@ def test_generate_h5_capture_no_output(tmp_path):
     correct_output = Path(dummy_path, dummy_job_name + ".h5")
 
     # WHEN generating a h5 output
-    with mock.patch.object(subprocess, 'check_output') as mocked:
+    with mock.patch.object(subprocess, "check_output") as mocked:
         mocked.return_value = mocked_output.encode("utf-8")
         actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
 
