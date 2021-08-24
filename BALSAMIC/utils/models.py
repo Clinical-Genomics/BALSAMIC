@@ -1,3 +1,5 @@
+import os
+import json
 import hashlib
 from datetime import datetime
 from pathlib import Path
@@ -9,7 +11,7 @@ from pydantic.types import DirectoryPath, FilePath
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.utils.constants import (
-    BIOINFO_TOOL_ENV, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
+    BIOINFO_TOOL_ENV, SEQUENCING_TYPE, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
     MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT,
     BIOINFO_TOOL_SUBMODULE)
 
@@ -221,8 +223,7 @@ class AnalysisModel(BaseModel):
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
-        balsamic_sequencing_types = ["wgs", "targeted"]
-        if value not in balsamic_sequencing_types:
+        if value not in SEQUENCING_TYPE:
             raise ValueError(
                 f"Provided sequencing type ({value}) not supported in BALSAMIC!"
             )
@@ -620,3 +621,59 @@ class UMIworkflowConfig(BaseModel):
     tnscope: UMIParamsTNscope
     vardict: UMIParamsVardict
     vep: UMIParamsVEP
+
+
+class QCMetricsModel(BaseModel):
+    """ Defines the quality control metrics model associated with a specific analysis file
+
+    Attributes:
+        file_name : string (required); quality control analysis file name
+        sequencing_type : List (required); string literal [targeted, wgs]
+        metrics : List (required); quality control metric names
+    """
+    file_name: str
+    sequencing_type: List[str]
+    metrics: List[str]
+
+
+class QCCheckModel(BaseModel):
+    """ Defines the quality control check model
+
+     Attributes:
+        file_name : string (required); quality control analysis file name
+        sequencing_type : string (required); targeted or wgs run
+        qc_metrics : List(QCMetricsModel) (required); quality control metric attributes
+     """
+    analysis_path: DirectoryPath
+    sequencing_type: str
+    qc_metrics: List[QCMetricsModel]
+
+    def get_file_path(self, file_name):
+        """return analysis file full path"""
+        return os.path.join(self.analysis_path, "qc", "multiqc_data", file_name)
+
+    # @validator("qc_metrics")
+    # def evaluate_metrics(cls, values):
+        # TODO
+
+    @property
+    def get_metrics_json(self):
+        """returns a json object of the quality control metrics values"""
+        qc_metrics_json = {}
+
+        # Loop through MultiQC json files
+        for model in self.qc_metrics:
+            if self.sequencing_type in model.sequencing_type:
+                with open(self.get_file_path(file_name=model.file_name), 'r') as f:
+                    metric_file = json.load(f)
+                for j in metric_file.keys():
+                    if "umi" not in j:
+                        for k in model.metrics:
+                            if k in metric_file[j]:
+                                sample_name = j.split("_")[0]
+                                if not qc_metrics_json or sample_name not in qc_metrics_json.keys():
+                                    qc_metrics_json[sample_name] = [{k: metric_file[j][k]}]
+                                else:
+                                    qc_metrics_json[sample_name].append({k: metric_file[j][k]})
+
+        return qc_metrics_json

@@ -1,6 +1,5 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-
 import os
 import logging
 import tempfile
@@ -453,19 +452,32 @@ rule all:
     input:
         quality_control_results + analysis_specific_results
     output:
-        os.path.join(get_result_dir(config), "analysis_finish")
+        qc_json_file = os.path.join(get_result_dir(config),"qc_metrics_summary.json"),
+        finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
-        tmp_dir = tmp_dir
+        tmp_dir = tmp_dir,
+        result_dir = result_dir
     run:
         import datetime
         import shutil
+        import json
 
+        from BALSAMIC.utils.qc_metrics import get_qc_metrics
+
+        # TODO
+        # Error handling QC metrics
+
+        # Bump QC metrics to a JSON file
+        qc_metrics_summary = get_qc_metrics(params.result_dir, config["analysis"]["sequencing_type"])
+        with open(str(output.qc_json_file), mode='w') as qc_json_file:
+            json.dump(qc_metrics_summary, qc_json_file, indent=4, sort_keys=True)
+
+        # Delete a temporal directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
-        with open(str(output[0]), mode='w') as finish_file:
+        # Finish timestamp file
+        with open(str(output.finish_file), mode='w') as finish_file:
             finish_file.write('%s\n' % datetime.datetime.now())
-        
-        
