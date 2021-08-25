@@ -2,26 +2,35 @@ from pathlib import Path
 from unittest import mock
 
 
-def test_status_tumor_only_panel(invoke_cli, tumor_only_config,
-                                 sentieon_install_dir, sentieon_license):
+def test_status_tumor_only_panel(
+    invoke_cli, tumor_only_config, sentieon_install_dir, sentieon_license
+):
     # GIVEN a tumor-only config file
     # WHEN running analysis
     with mock.patch.dict(
-            'os.environ', {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
-        result = invoke_cli([
-            'report', 'status', '--show-only-missing', '--sample-config',
-            tumor_only_config
-        ])
+        "os.environ",
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        result = invoke_cli(
+            [
+                "report",
+                "status",
+                "--show-only-missing",
+                "--sample-config",
+                tumor_only_config,
+            ]
+        )
 
         # THEN it should run without any error
         assert result.exit_code == 0
 
 
-def test_status_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers,
-                                   sentieon_install_dir, sentieon_license):
+def test_status_tumor_normal_panel(
+    invoke_cli, tumor_normal_config, helpers, sentieon_install_dir, sentieon_license
+):
     # GIVEN a tumor-normal config file
     # WHEN running analysis with three actual delivery files
     # Actual delivery files dummies with and without index
@@ -37,21 +46,29 @@ def test_status_tumor_normal_panel(invoke_cli, tumor_normal_config, helpers,
     tumor_bam_delivery_file.touch()
 
     with mock.patch.dict(
-            'os.environ', {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
-        result = invoke_cli([
-            'report', 'status', '--print-files', '--sample-config',
-            tumor_normal_config
-        ])
+        "os.environ",
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        result = invoke_cli(
+            [
+                "report",
+                "status",
+                "--print-files",
+                "--sample-config",
+                tumor_normal_config,
+            ]
+        )
 
         # THEN it should run without any error
         assert result.exit_code == 0
 
 
-def test_status_analysis_finish(invoke_cli, tumor_normal_config, helpers,
-                                sentieon_install_dir, sentieon_license):
+def test_status_analysis_finish(
+    invoke_cli, tumor_normal_config, helpers, sentieon_install_dir, sentieon_license
+):
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_normal_config)
 
@@ -64,12 +81,12 @@ def test_status_analysis_finish(invoke_cli, tumor_normal_config, helpers,
     vep_result_dir = Path(helpers.result_dir, "vep")
     vep_result_dir.mkdir(parents=True, exist_ok=True)
     touch_vcf_delivery_file = Path(
-        vep_result_dir,
-        "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz")
+        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz"
+    )
     touch_vcf_delivery_file.touch()
     touch_vcf_delivery_file_index = Path(
-        vep_result_dir,
-        "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz.tbi")
+        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz.tbi"
+    )
     touch_vcf_delivery_file_index.touch()
 
     # An analysis_finish file to mock a finished analysis
@@ -79,15 +96,22 @@ def test_status_analysis_finish(invoke_cli, tumor_normal_config, helpers,
     actual_analysis_finish_file.touch()
 
     with mock.patch.dict(
-            'os.environ', {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
+        "os.environ",
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
         # WHEN running analysis
-        result = invoke_cli([
-            'report', 'status', '--print-files', '--sample-config',
-            tumor_normal_config
-        ])
+        result = invoke_cli(
+            [
+                "report",
+                "status",
+                "--print-files",
+                "--sample-config",
+                tumor_normal_config,
+            ]
+        )
 
         # THEN it should run without any error
         assert result.exit_code == 0

@@ -11,25 +11,25 @@ from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
 
-MOCKED_OS_ENVIRON = 'os.environ'
+MOCKED_OS_ENVIRON = "os.environ"
 
 
 @pytest.fixture
 def cli_runner():
-    """ click - cli testing """
+    """click - cli testing"""
     runner = CliRunner()
     return runner
 
 
 @pytest.fixture
 def invoke_cli(cli_runner):
-    """ invoking cli commands with options"""
+    """invoking cli commands with options"""
     return partial(cli_runner.invoke, cli)
 
 
 @pytest.fixture(scope="session")
 def config_files():
-    """ dict: path of the config files """
+    """dict: path of the config files"""
     return {
         "sample": "BALSAMIC/config/sample.json",
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
@@ -38,57 +38,36 @@ def config_files():
         "analysis_single": "BALSAMIC/config/analysis_single.json",
         "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
         "panel_bed_file": "tests/test_data/references/panel/panel.bed",
-        "background_variant_file":
-        "tests/test_data/references/panel/background_variants.txt",
+        "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
         "pon_fastq_path": "tests/test_data/fastq/",
     }
 
 
 @pytest.fixture(scope="session")
 def reference():
-    """ reference json model """
+    """reference json model"""
     return {
         "reference": {
-            "reference_genome":
-            "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
-            "dbsnp":
-            "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-            "1kg_snps_all":
-            "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-            "1kg_snps_high":
-            "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
-            "1kg_known_indel":
-            "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
-            "mills_1kg":
-            "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
-            "gnomad_variant":
-            "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-            "cosmic":
-            "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-            "vep":
-            "tests/test_data/references/vep/",
-            "refflat":
-            "tests/test_data/references/genome/refseq.flat",
-            "refGene":
-            "tests/test_data/references/genome/refGene.txt",
-            "wgs_calling_interval":
-            "tests/test_data/references/genome/wgs_calling_regions.v1",
-            "genome_chrom_size":
-            "tests/test_data/references/genome/hg19.chrom.sizes",
-            "exon_bed":
-            "tests/test_data/references/genome/refseq.flat.bed",
-            "rankscore":
-            "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
-            "access_regions":
-            "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
-            "delly_exclusion":
-            "tests/test_data/references/genome/delly_exclusion.tsv",
-            "delly_exclusion_converted":
-            "tests/test_data/references/genome/delly_exclusion_converted.tsv",
-            "ascat_gccorrection":
-            "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
-            "ascat_chryloci":
-            "tests/test_data/references/genome/GRCh37_Y.loci"
+            "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+            "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+            "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+            "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+            "1kg_known_indel": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
+            "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+            "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+            "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+            "vep": "tests/test_data/references/vep/",
+            "refflat": "tests/test_data/references/genome/refseq.flat",
+            "refGene": "tests/test_data/references/genome/refGene.txt",
+            "wgs_calling_interval": "tests/test_data/references/genome/wgs_calling_regions.v1",
+            "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
+            "exon_bed": "tests/test_data/references/genome/refseq.flat.bed",
+            "rankscore": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
+            "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
+            "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
+            "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
+            "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
+            "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
         }
     }
 
@@ -164,12 +143,12 @@ def sample_fastq(tmp_path_factory):
     normalfastqr2 = fastq_dir / "concatenated_normal_XXXXXX_R_2.fastq.gz"
 
     for fastq_file in (
-            fastq_valid,
-            fastq_invalid,
-            tumorfastqr1,
-            tumorfastqr2,
-            normalfastqr1,
-            normalfastqr2,
+        fastq_valid,
+        fastq_invalid,
+        tumorfastqr1,
+        tumorfastqr2,
+        normalfastqr1,
+        normalfastqr2,
     ):
         fastq_file.touch()
 
@@ -199,7 +178,7 @@ def balsamic_cache(tmp_path_factory, reference):
 
     cache_reference_json = cache_reference / "reference.json"
     cache_reference_json.touch()
-    with open(cache_reference_json, 'w') as fp:
+    with open(cache_reference_json, "w") as fp:
         json.dump(reference, fp)
 
     return cache_dir.as_posix()
@@ -235,9 +214,15 @@ ls -l # dummy command
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
-                        balsamic_cache, panel_bed_file, sentieon_license,
-                        sentieon_install_dir):
+def tumor_normal_config(
+    tmp_path_factory,
+    sample_fastq,
+    analysis_dir,
+    balsamic_cache,
+    panel_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -247,10 +232,12 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
     normal = sample_fastq["normal"]
 
     with mock.patch.dict(
-            MOCKED_OS_ENVIRON, {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -278,8 +265,7 @@ def tumor_normal_config(tmp_path_factory, sample_fastq, analysis_dir,
 
     qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/",
-              qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -291,9 +277,14 @@ def fixture_config_helpers():
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                            balsamic_cache, sentieon_license,
-                            sentieon_install_dir):
+def tumor_normal_wgs_config(
+    tmp_path_factory,
+    sample_fastq,
+    analysis_dir,
+    balsamic_cache,
+    sentieon_license,
+    sentieon_install_dir,
+):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
     for tumor-normal
@@ -303,10 +294,12 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     normal = sample_fastq["normal"]
 
     with mock.patch.dict(
-            MOCKED_OS_ENVIRON, {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -330,9 +323,15 @@ def tumor_normal_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope="session")
-def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache,
-                      analysis_dir, panel_bed_file, sentieon_license,
-                      sentieon_install_dir):
+def tumor_only_config(
+    tmpdir_factory,
+    sample_fastq,
+    balsamic_cache,
+    analysis_dir,
+    panel_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -341,10 +340,12 @@ def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache,
     tumor = sample_fastq["tumor"]
 
     with mock.patch.dict(
-            MOCKED_OS_ENVIRON, {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -366,16 +367,20 @@ def tumor_only_config(tmpdir_factory, sample_fastq, balsamic_cache,
 
     qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/",
-              qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope="session")
-def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
-                          balsamic_cache, sentieon_license,
-                          sentieon_install_dir):
+def tumor_only_wgs_config(
+    tmp_path_factory,
+    sample_fastq,
+    analysis_dir,
+    balsamic_cache,
+    sentieon_license,
+    sentieon_install_dir,
+):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only
@@ -384,10 +389,12 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
     tumor = sample_fastq["tumor"]
 
     with mock.patch.dict(
-            MOCKED_OS_ENVIRON, {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -409,10 +416,16 @@ def tumor_only_wgs_config(tmp_path_factory, sample_fastq, analysis_dir,
 
 
 @pytest.fixture(scope="session")
-def tumor_only_umi_config(tmpdir_factory, sample_fastq, balsamic_cache,
-                          analysis_dir, panel_bed_file,
-                          background_variant_file, sentieon_license,
-                          sentieon_install_dir):
+def tumor_only_umi_config(
+    tmpdir_factory,
+    sample_fastq,
+    balsamic_cache,
+    analysis_dir,
+    panel_bed_file,
+    background_variant_file,
+    sentieon_license,
+    sentieon_install_dir,
+):
     """
     invokes balsamic config sample -t xxx to create sample config
     for tumor only with background variant file for umi workflow
@@ -421,10 +434,12 @@ def tumor_only_umi_config(tmpdir_factory, sample_fastq, balsamic_cache,
     tumor = sample_fastq["tumor"]
 
     with mock.patch.dict(
-            MOCKED_OS_ENVIRON, {
-                'SENTIEON_LICENSE': sentieon_license,
-                'SENTIEON_INSTALL_DIR': sentieon_install_dir
-            }):
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
         runner = CliRunner()
         runner.invoke(
             cli,
@@ -457,8 +472,7 @@ def sample_config():
     sample_config = {
         "QC": {
             "picard_rmdup": "False",
-            "adapter":
-            "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+            "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
             "min_seq_length": "25",
             "quality_trim": "True",
             "adapter_trim": "False",
@@ -466,76 +480,30 @@ def sample_config():
             "umi_trim_length": "5",
         },
         "analysis": {
-            "case_id":
-            "id1",
-            "analysis_type":
-            "paired",
-            "analysis_dir":
-            "tests/test_data/",
-            "fastq_path":
-            "tests/test_data/id1/fastq/",
-            "script":
-            "tests/test_data/id1/scripts/",
-            "log":
-            "tests/test_data/id1/logs/",
-            "result":
-            "tests/test_data/id1/analysis/",
-            "config_creation_date":
-            "yyyy-mm-dd xx",
-            "BALSAMIC_version":
-            "2.9.8",
-            "dag":
-            "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
+            "case_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "tests/test_data/",
+            "fastq_path": "tests/test_data/id1/fastq/",
+            "script": "tests/test_data/id1/scripts/",
+            "log": "tests/test_data/id1/logs/",
+            "result": "tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
+            "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
         },
         "vcf": {
-            "manta": {
-                "mutation": "somatic",
-                "type": "SV"
-            },
-            "vardict": {
-                "mutation": "somatic",
-                "type": "SNV"
-            },
-            "pindel": {
-                "mutation": "somatic",
-                "type": "SV"
-            },
-            "strelka": {
-                "mutation": "somatic",
-                "type": "SNV"
-            },
-            "mutect": {
-                "mutation": "somatic",
-                "type": "SNV"
-            },
-            "tnscope": {
-                "mutation": "somatic",
-                "type": "SNV"
-            },
-            "tnsnv": {
-                "mutation": "somatic",
-                "type": "SNV"
-            },
-            "tnhaplotyper": {
-                "mutation": "somatic",
-                "type": "SNV"
-            },
-            "dnascope": {
-                "mutation": "germline",
-                "type": "SNV"
-            },
-            "manta_germline": {
-                "mutation": "germline",
-                "type": "SV"
-            },
-            "haplotypecaller": {
-                "mutation": "germline",
-                "type": "SNV"
-            },
-            "strelka_germline": {
-                "mutation": "germline",
-                "type": "SNV"
-            },
+            "manta": {"mutation": "somatic", "type": "SV"},
+            "vardict": {"mutation": "somatic", "type": "SNV"},
+            "pindel": {"mutation": "somatic", "type": "SV"},
+            "strelka": {"mutation": "somatic", "type": "SNV"},
+            "mutect": {"mutation": "somatic", "type": "SNV"},
+            "tnscope": {"mutation": "somatic", "type": "SNV"},
+            "tnsnv": {"mutation": "somatic", "type": "SNV"},
+            "tnhaplotyper": {"mutation": "somatic", "type": "SNV"},
+            "dnascope": {"mutation": "germline", "type": "SNV"},
+            "manta_germline": {"mutation": "germline", "type": "SV"},
+            "haplotypecaller": {"mutation": "germline", "type": "SNV"},
+            "strelka_germline": {"mutation": "germline", "type": "SNV"},
         },
         "samples": {
             "S1_R": {
@@ -549,7 +517,7 @@ def sample_config():
                 "readpair_suffix": ["1", "2"],
             },
         },
-        "umiworkflow": "true"
+        "umiworkflow": "true",
     }
 
     return sample_config

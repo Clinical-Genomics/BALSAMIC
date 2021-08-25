@@ -28,7 +28,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create -c conda-forge -c defaults --name S_BALSAMIC python==3.7 pip
+    conda create -c conda-forge -c defaults --name S_BALSAMIC python==3.7 pip pygraphviz
 
 
 2. Activate environment: 

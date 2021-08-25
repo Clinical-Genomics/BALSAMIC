@@ -19,48 +19,42 @@ from BALSAMIC.utils.cli import add_doc as doc
 from BALSAMIC import __version__
 
 LOG = logging.getLogger(__name__)
-LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 @click.group()
-@click.option('--loglevel',
-              default='DEBUG',
-              type=click.Choice(LOG_LEVELS),
-              help="Set the level of log output.",
-              show_default=True)
+@click.option(
+    "--loglevel",
+    default="DEBUG",
+    type=click.Choice(LOG_LEVELS),
+    help="Set the level of log output.",
+    show_default=True,
+)
 @click.version_option(version=__version__)
 @click.pass_context
-@doc("""BALSAMIC {version}: Bioinformatic Analysis pipeLine for
-        SomAtic MutatIons in Cancer""".format(version=__version__))
+@doc(
+    """BALSAMIC {version}: Bioinformatic Analysis pipeLine for
+        SomAtic MutatIons in Cancer""".format(
+        version=__version__
+    )
+)
 def cli(context, loglevel):
     "BALSAMIC"
     coloredlogs.DEFAULT_FIELD_STYLES = {
-        'asctime': {
-            'color': 'green'
-        },
-        'hostname': {
-            'color': 'magenta'
-        },
-        'levelname': {
-            'color': 'yellow',
-            'bold': True
-        },
-        'programname': {
-            'color': 'cyan'
-        },
-        'name': {
-            'color': 'blue'
-        }
+        "asctime": {"color": "green"},
+        "hostname": {"color": "magenta"},
+        "levelname": {"color": "yellow", "bold": True},
+        "programname": {"color": "cyan"},
+        "name": {"color": "blue"},
     }
     coloredlogs.install(
         level=loglevel,
-        fmt=
-        '%(programname)s %(hostname)s %(asctime)s %(name)s pid:%(process)d [%(levelname)s] %(message)s'
+        fmt="%(programname)s %(hostname)s %(asctime)s %(name)s pid:%(process)d [%(levelname)s] %(message)s",
     )
     LOG.info("Running BALSAMIC version %s", __version__)
 
     context.obj = {}
-    context.obj['loglevel'] = loglevel
+    context.obj["loglevel"] = loglevel
     # LOG.info(f"BALSAMIC started with log level {loglevel}.")
 
 

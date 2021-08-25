@@ -5,6 +5,7 @@ import pytest
 from BALSAMIC.utils.cli import generate_h5
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
+
 def test_plot_analysis(tmp_path_factory):
     # GIVEN a dummy log file
     dummy_log_file = Path(

@@ -9,8 +9,15 @@ from pydantic.types import DirectoryPath, FilePath
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.utils.constants import (
-    BIOINFO_TOOL_ENV, SEQUENCING_TYPE, ANALYSIS_TYPES, WORKFLOW_SOLUTION, MUTATION_CLASS,
-    MUTATION_TYPE, VALID_GENOME_VER, VALID_REF_FORMAT)
+    BIOINFO_TOOL_ENV,
+    SEQUENCING_TYPE,
+    ANALYSIS_TYPES,
+    WORKFLOW_SOLUTION,
+    MUTATION_CLASS,
+    MUTATION_TYPE,
+    VALID_GENOME_VER,
+    VALID_REF_FORMAT,
+)
 
 
 class VCFAttributes(BaseModel):
@@ -84,7 +91,7 @@ class QCModel(BaseModel):
         ValueError:
             When the input in min_seq_length and umi_trim_length cannot
             be interpreted as integer and coerced to string
-    
+
     """
 
     picard_rmdup: bool = False
@@ -116,7 +123,7 @@ class VarcallerAttribute(BaseModel):
         ValueError:
             When a variable other than [somatic, germline] is passed in mutation field
             When a variable other than [SNV, CNV, SV] is passed in mutation_type field
-            
+
     """
 
     mutation: str
@@ -127,34 +134,38 @@ class VarcallerAttribute(BaseModel):
 
     @validator("workflow_solution", check_fields=False)
     def workflow_solution_literal(cls, value) -> str:
-        " Validate workflow solution "
+        "Validate workflow solution"
         assert set(value).issubset(
-            set(WORKFLOW_SOLUTION)), f"{value} is not valid workflow solution."
+            set(WORKFLOW_SOLUTION)
+        ), f"{value} is not valid workflow solution."
         return value
 
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
-        " Validate analysis types "
+        "Validate analysis types"
         assert set(value).issubset(
-            set(ANALYSIS_TYPES)), f"{value} is not a valid analysis type."
+            set(ANALYSIS_TYPES)
+        ), f"{value} is not a valid analysis type."
         return value
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
-        " Validate mutation class "
+        "Validate mutation class"
         assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
-        " Validate mutation type "
+        "Validate mutation type"
         assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
         return value
 
     @validator("sequencing_type", check_fields=False)
     def sequencing_type_literal(cls, value) -> str:
-        " Validate sequencing type "
-        assert set(value).issubset(set(SEQUENCING_TYPE)), f"{value} is not not a valid sequencing type."
+        "Validate sequencing type"
+        assert set(value).issubset(
+            set(SEQUENCING_TYPE)
+        ), f"{value} is not not a valid sequencing type."
         return value
 
 
@@ -173,11 +184,12 @@ class VCFModel(BaseModel):
     delly: VarcallerAttribute
     ascat: VarcallerAttribute
 
+
 class AnalysisModel(BaseModel):
     """Pydantic model containing workflow variables
 
     Attributes:
-              
+
         case_id : Field(required); string case identifier
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
@@ -223,7 +235,8 @@ class AnalysisModel(BaseModel):
         balsamic_analysis_types = ANALYSIS_TYPES
         if value not in balsamic_analysis_types:
             raise ValueError(
-                f"Provided analysis type ({value}) not supported in BALSAMIC!")
+                f"Provided analysis type ({value}) not supported in BALSAMIC!"
+            )
         return value
 
     @validator("sequencing_type")
@@ -241,34 +254,52 @@ class AnalysisModel(BaseModel):
 
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "logs").as_posix() + "/"
+        return (
+            Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
+            + "/"
+        )
 
     @validator("fastq_path")
     def parse_analysis_to_fastq_path(cls, value, values, **kwargs) -> str:
-        return (Path(values.get("analysis_dir"), values.get("case_id"),
-                     "analysis", "fastq").as_posix() + "/")
+        return (
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), "analysis", "fastq"
+            ).as_posix()
+            + "/"
+        )
 
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "scripts").as_posix() + "/"
+        return (
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), "scripts"
+            ).as_posix()
+            + "/"
+        )
 
     @validator("result")
     def parse_analysis_to_result_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    "analysis").as_posix()
+        return Path(
+            values.get("analysis_dir"), values.get("case_id"), "analysis"
+        ).as_posix()
 
     @validator("benchmark")
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
-        return (Path(values.get("analysis_dir"), values.get("case_id"),
-                     "benchmarks").as_posix() + "/")
+        return (
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), "benchmarks"
+            ).as_posix()
+            + "/"
+        )
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
-        return Path(values.get("analysis_dir"), values.get("case_id"),
-                    values.get("case_id")).as_posix(
-                    ) + f'_BALSAMIC_{balsamic_version}_graph.pdf'
+        return (
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
+            ).as_posix()
+            + f"_BALSAMIC_{balsamic_version}_graph.pdf"
+        )
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
@@ -277,18 +308,18 @@ class AnalysisModel(BaseModel):
 
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis
-    
+
     Attributes:
         file_prefix : Field(str); basename of sample pair
         sample_type : Field(str; alias=type); type of sample [tumor, normal]
         sample_name : Field(str); Internal ID of sample to use in deliverables
         readpair_suffix : Field(List); currently always set to [1, 2]
-    
+
     Raises:
         ValueError:
             When sample_type is set ot any value other than [tumor, normal]
 
-        """
+    """
 
     file_prefix: str
     sample_name: Optional[str]
@@ -300,7 +331,8 @@ class SampleInstanceModel(BaseModel):
         balsamic_sample_types = ["tumor", "normal"]
         if value not in balsamic_sample_types:
             raise ValueError(
-                f"Provided sample type ({value}) not supported in BALSAMIC!")
+                f"Provided sample type ({value}) not supported in BALSAMIC!"
+            )
         return value
 
     @validator("sample_name")
@@ -363,8 +395,8 @@ class PonBalsamicConfigModel(BaseModel):
 
 
 class BalsamicConfigModel(BaseModel):
-    """Summarizes config models in preparation for export 
-    
+    """Summarizes config models in preparation for export
+
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
         vcf : Field(VCFmodel); variables relevant for variant calling pipeline
@@ -410,7 +442,7 @@ class BalsamicConfigModel(BaseModel):
 
 class ReferenceUrlsModel(BaseModel):
     """Defines a basemodel for reference urls
-    
+
     This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
 
     Attributes:
@@ -421,7 +453,7 @@ class ReferenceUrlsModel(BaseModel):
 
     Raises:
         ValidationError: When it can't validate values matching above attributes
-      
+
     """
 
     url: AnyUrl
@@ -456,16 +488,14 @@ class ReferenceUrlsModel(BaseModel):
         hash_md5 = hashlib.md5()
         output_file = Path(self.output_path, self.output_file)
         if not output_file.is_file():
-            raise FileNotFoundError(
-                f"{output_file.as_posix()} file does not exist")
+            raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
 
         with open(output_file.as_posix(), "rb") as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 hash_md5.update(chunk)
 
         with open(output_file.as_posix() + ".md5", "w") as fh:
-            fh.write("{} {}\n".format(output_file.as_posix(),
-                                      hash_md5.hexdigest()))
+            fh.write("{} {}\n".format(output_file.as_posix(), hash_md5.hexdigest()))
 
 
 class ReferenceMeta(BaseModel):
@@ -521,8 +551,9 @@ class ReferenceMeta(BaseModel):
             output_value = value
         else:
             if "output_path" in value:
-                value["output_path"] = Path(values["basedir"],
-                                            value["output_path"]).as_posix()
+                value["output_path"] = Path(
+                    values["basedir"], value["output_path"]
+                ).as_posix()
                 output_value = ReferenceUrlsModel.parse_obj(value)
             else:
                 output_value = value
@@ -560,13 +591,13 @@ class UMIParamsConsensuscall(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-	    filter_minreads: str (required); settings to filter consensus tags based on group size
+            filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
-    align_format: str = 'BAM'
-    filter_minreads: str = '3,1,1'
-    tag: str = 'XR'
+    align_format: str = "BAM"
+    filter_minreads: str = "3,1,1"
+    tag: str = "XR"
 
 
 class UMIParamsTNscope(BaseModel):
@@ -605,6 +636,7 @@ class ParamsVardict(BaseModel):
     max_mm: float
     column_info: str
 
+
 class ParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in balsamic workflow.
 
@@ -622,17 +654,19 @@ class ParamsCommon(BaseModel):
     picard_RG_normal: str
     picard_RG_tumor: str
 
+
 class ParamsVEP(BaseModel):
     """This class defines the params settings used as constants in vep rule.
 
     Attributes:
         vep_filters: str (required); set of choosen options for processing vep annotated vcf file
     """
+
     vep_filters: str
 
 
 class BalsamicWorkflowConfig(BaseModel):
-    """ Defines set of rules in balsamic workflow
+    """Defines set of rules in balsamic workflow
 
     Handles attributes for corresponding rules.
 
@@ -645,6 +679,7 @@ class BalsamicWorkflowConfig(BaseModel):
         umiconsensuscall: params defined in the rule sentieon_consensuscall
         tnscope_umi: params defined in the rule sentieon_tnscope_umi
     """
+
     common: ParamsCommon
     vardict: ParamsVardict
     vep: ParamsVEP
