@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7.9]
+        python-version: [3.7]
     steps:
       # Checkout BALSAMIC
       - name: Git checkout
