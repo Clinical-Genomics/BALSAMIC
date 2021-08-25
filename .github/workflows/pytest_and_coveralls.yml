@@ -37,8 +37,8 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate balsamic
+          pip install --no-cache-dir .
           pip install --no-cache-dir -r requirements-dev.txt
-          pip install .
       # Run PyTest
       - name: Run PyTest
         id: pytest
