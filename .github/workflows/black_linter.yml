@@ -1,4 +1,4 @@
-name: Lint
+name: Black linter and code formatter
 on: [pull_request]
 jobs:
   lint:
