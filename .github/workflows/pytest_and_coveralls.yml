@@ -38,6 +38,12 @@ jobs:
         run: |
           conda activate balsamic
           pip install --no-cache-dir .
+      # Install pytest coveralls dependencies 
+      - name: Install PyTest and Coveralls
+        id: install_balsamic
+        shell: bash -l {0}
+        run: |
+          conda activate balsamic
           pip install --no-cache-dir -r requirements-dev.txt
       # Run PyTest
       - name: Run PyTest
