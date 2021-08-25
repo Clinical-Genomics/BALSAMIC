@@ -10,7 +10,7 @@ from BALSAMIC.commands.plugins.vcfutils import vcfutils as vcfutils_command
 @click.group()
 @click.pass_context
 def plugins(context):
-    """ Additional and helper utilities for third party applications """
+    """Additional and helper utilities for third party applications"""
     pass
 
 

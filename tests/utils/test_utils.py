@@ -257,7 +257,7 @@ def test_convert_defaultdict_to_regular_dict():
 
 
 def test_iterdict(reference):
-    """ GIVEN a dict for iteration """
+    """GIVEN a dict for iteration"""
     # WHEN passing dict to this function
     dict_gen = iterdict(reference)
 
@@ -622,8 +622,7 @@ def test_find_file_index(tmpdir):
 
 
 def test_singularity_shellcmd(balsamic_cache):
-    """test singularity shell cmd
-    """
+    """test singularity shell cmd"""
 
     # GIVEN a dummy command
     dummy_command = "ls this_path"
@@ -651,8 +650,7 @@ def test_singularity_shellcmd(balsamic_cache):
 
 
 def test_singularity_shellcmd_sif_not_exist():
-    """test singularity shell cmd with non-existing file
-    """
+    """test singularity shell cmd with non-existing file"""
 
     # GIVEN a dummy command
     dummy_command = "ls this_path"
@@ -676,8 +674,7 @@ def test_singularity_shellcmd_sif_not_exist():
 
 
 def test_singularity_shellcmd_cmd_not_exist():
-    """test singularity shell cmd with nonexisting singularity command
-    """
+    """test singularity shell cmd with nonexisting singularity command"""
 
     # GIVEN a dummy command
     dummy_command = "ls this_path"

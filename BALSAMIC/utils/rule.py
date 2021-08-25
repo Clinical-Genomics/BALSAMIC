@@ -58,7 +58,7 @@ def get_variant_callers(
     workflow_solution: str,
     sequencing_type: str,
 ):
-    """ Get list of variant callers for a given list of input
+    """Get list of variant callers for a given list of input
 
     Args:
         config: A validated dictionary of case_config
@@ -165,7 +165,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
     Args:
         rule_names: rule_name to query from rules object
         rules: snakemake rules object
-    
+
     Returns:
         output_files: list of tuples (file, file_index, rule_name, tags, id, file_extension) for rules
     """
@@ -264,7 +264,7 @@ def get_delivery_id(
     id_candidate: str, file_to_store: str, tags: list, output_file_wildcards: dict
 ):
     """resolve delivery id from file_to_store, tags, and output_file_wildcards
-  
+
     This function will get a filename, a list of tags, and an id_candidate. id_candidate should be form of a fstring.
 
     Args:
@@ -272,7 +272,7 @@ def get_delivery_id(
         file_to_store: a filename to search a resolved id
         tags: a list of tags with a resolve id in it
         output_file_wildcards: a dictionary of wildcards. Keys are wildcard names, and values are list of wildcard values
-    
+
     Returns:
         delivery_id: a resolved id string. If it can't be resolved, it'll return the id_candidate value
     """
@@ -289,7 +289,7 @@ def get_delivery_id(
 def get_reference_output_files(
     reference_files_dict: dict, file_type: str, gzip: bool = None
 ) -> list:
-    """ Returns list of files matching a file_type from reference files
+    """Returns list of files matching a file_type from reference files
 
     Args:
         reference_files_dict: A validated dict model from reference
@@ -309,8 +309,8 @@ def get_reference_output_files(
 
 
 def get_pon_samples(fastq_dir):
-    """ Given dirpath containing list of PON fastq files
-	Returns list of sample names
+    """Given dirpath containing list of PON fastq files
+    Returns list of sample names
     """
     samples = [
         (f.split("_1"))[0] for f in os.listdir(fastq_dir) if f.endswith("_R_1.fastq.gz")

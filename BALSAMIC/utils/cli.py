@@ -232,7 +232,7 @@ def write_json(json_out, output_config):
 
 
 def iterdict(dic):
-    """ dictionary iteration - returns generator"""
+    """dictionary iteration - returns generator"""
     for key, value in dic.items():
         if isinstance(value, dict):
             yield from iterdict(value)
@@ -336,7 +336,7 @@ def get_file_extension(file_path):
 def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     """
     Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
-    
+
     from_key and by_key should both exist
     """
 
@@ -354,9 +354,9 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
 
 def get_file_status_string(file_to_check):
     """
-      Checks if file exsits. and returns a string with checkmark or redcorss mark
-      if it exists or doesn't exist respectively.
-      Always assume file doesn't exist, unless proven otherwise.
+    Checks if file exsits. and returns a string with checkmark or redcorss mark
+    if it exists or doesn't exist respectively.
+    Always assume file doesn't exist, unless proven otherwise.
     """
     return_str = Color("[{red}\u2717{/red}] File missing: ") + file_to_check
 
@@ -422,7 +422,7 @@ def merge_json(*args):
 
 def validate_fastq_pattern(sample):
     """Finds the correct filename prefix from file path, and returns it.
-    An error is raised if sample name has invalid pattern """
+    An error is raised if sample name has invalid pattern"""
 
     fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
     sample_basename = Path(sample).name
@@ -491,12 +491,12 @@ def bioinfo_tool_version_conda(
 def get_bioinfo_tools_version(
     bioinfo_tools: dict, container_conda_env_path: os.PathLike
 ) -> dict:
-    """Parses the names and versions of bioinfo tools 
+    """Parses the names and versions of bioinfo tools
     used by BALSAMIC from config YAML into a dict.
 
     Args:
         bioinfo_tools: dict. A dictionary with bioinfo tools as keys and container as value
-        container_conda_env_path: path. Path to all container and conda yaml 
+        container_conda_env_path: path. Path to all container and conda yaml
 
     Returns:
         bioinfo_tools_version: dict. Dictionary of bioinfo tools as key and version as value
@@ -564,7 +564,7 @@ def get_sample_names(filename, sample_type):
 
 def create_fastq_symlink(casefiles, symlink_dir: Path):
     """Creates symlinks for provided files in analysis/fastq directory.
-    Identifies file prefix pattern, and also creates symlinks for the 
+    Identifies file prefix pattern, and also creates symlinks for the
     second read file, if needed"""
 
     for filename in casefiles:
@@ -612,7 +612,7 @@ def generate_graph(config_collection_dict, config_path):
 
 
 def get_fastq_bind_path(fastq_path: Path) -> list():
-    """Takes a path with symlinked fastq files. 
+    """Takes a path with symlinked fastq files.
     Returns unique paths to parent directories for singulatiry bind
     """
     parents = set()

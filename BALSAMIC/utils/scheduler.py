@@ -40,7 +40,7 @@ class SbatchScheduler:
         self.acctg_freq = None
 
     def build_cmd(self):
-        """ builds sbatch command matching its options """
+        """builds sbatch command matching its options"""
         sbatch = ["sbatch"]
 
         job_attributes = [
@@ -131,7 +131,7 @@ class QsubScheduler:
 
 
 def read_sample_config(input_json):
-    """ load input sample_config file. Output of balsamic config sample. """
+    """load input sample_config file. Output of balsamic config sample."""
 
     try:
         with open(input_json) as f:
@@ -142,7 +142,7 @@ def read_sample_config(input_json):
 
 
 def write_sacct_file(sacct_file, job_id, job_name=str()):
-    """ writes a yaml file with job ids """
+    """writes a yaml file with job ids"""
     try:
         with open(sacct_file, "a") as f:
             f.write(job_id)
@@ -155,7 +155,7 @@ def write_sacct_file(sacct_file, job_id, job_name=str()):
 
 
 def submit_job(sbatch_cmd, profile):
-    """ subprocess call for sbatch command """
+    """subprocess call for sbatch command"""
     # run sbatch cmd
     try:
         res = subprocess.run(sbatch_cmd, check=True, shell=True, stdout=subprocess.PIPE)
@@ -178,7 +178,7 @@ def submit_job(sbatch_cmd, profile):
 
 
 def get_parser():
-    """ argument parser """
+    """argument parser"""
     parser = argparse.ArgumentParser(
         description="""
         This is an internal script and should be invoked independently.
@@ -213,7 +213,7 @@ def get_parser():
 
 
 def main(args=None):
-    """ entry point for scheduler.py """
+    """entry point for scheduler.py"""
     parser = get_parser()
     args = parser.parse_args(args)
 
