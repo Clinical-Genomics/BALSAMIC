@@ -47,6 +47,7 @@ Changed:
 * Split Tumor-Normal ``cnvkit batch`` into individual commands
 * Moved params that are used in multiple rules to constants #711
 * Changed the way conda and non-conda bioinfo tools version are parsed
+* Python code formatter changed from Black to YAPF
 
 
 Fixed:
