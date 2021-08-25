@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
-      matrix:
-        python-version: [3.7]
     steps:
       # Checkout BALSAMIC
       - name: Git checkout
@@ -33,7 +31,6 @@ jobs:
         with:
           activate-environment: balsamic
           environment-file: BALSAMIC/conda/balsamic.yaml
-          python-version: ${{ matrix.python-version }}
       # Install BALSAMIC
       - name: Install BALSAMIC
         id: install_balsamic
