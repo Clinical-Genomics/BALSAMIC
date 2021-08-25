@@ -6,7 +6,7 @@ from BALSAMIC.utils.qc_metrics import get_qc_metrics
 def test_get_metrics():
 
     # GIVEN analysis_path
-    analysis_path = 'tests/test_data/qc_files/analysis'
+    analysis_path = "tests/test_data/qc_files/analysis"
 
     # WHEN invokes function
     qc_data = get_qc_metrics(analysis_path)
@@ -18,8 +18,8 @@ def test_get_metrics():
 def test_file_name():
 
     # GIVEN analysis path and json files
-    analysis_path = 'tests/test_data/qc_files/analysis'
-    single_json = 'multiqc_picard_HsMetrics.json'
+    analysis_path = "tests/test_data/qc_files/analysis"
+    single_json = "multiqc_picard_HsMetrics.json"
 
     # WHEN looking for files
     file_name = analysis_path + "/qc/multiqc_data/" + single_json
@@ -31,16 +31,13 @@ def test_file_name():
 def test_input_list():
 
     # GIVEN input list of dicts
-    multiple_json = [{
-        'file_name': 'test_insertsize.json',
-        'required_metrics': ['coverage', 'dups']
-    }, {
-        'file_name': 'test_HSmetrics.json',
-        'required_metrics': ['fold80', 'pct']
-    }]
+    multiple_json = [
+        {"file_name": "test_insertsize.json", "required_metrics": ["coverage", "dups"]},
+        {"file_name": "test_HSmetrics.json", "required_metrics": ["fold80", "pct"]},
+    ]
 
     # WHEN looking for dict keys
-    json_keys = ['file_name', 'required_metrics']
+    json_keys = ["file_name", "required_metrics"]
     multiple_json_keys = []
     for j in multiple_json:
         multiple_json_keys += list(j.keys())
@@ -53,14 +50,14 @@ def test_json_file():
 
     # GIVEN
     actual_json = {
-        'concatenated_ACCyyyy_XXXXXX_R': {
-            'SAMPLE_NAME': 'concatenated_ACC7yyyy_XXXXXX_R',
-            'FOLD_80_BASE_PENALTY': 201.0,
-            'MEAN_TARGET_COVERAGE': 150.0
+        "concatenated_ACCyyyy_XXXXXX_R": {
+            "SAMPLE_NAME": "concatenated_ACC7yyyy_XXXXXX_R",
+            "FOLD_80_BASE_PENALTY": 201.0,
+            "MEAN_TARGET_COVERAGE": 150.0,
         }
     }
 
-    required_metrics = ['FOLD_80_BASE_PENALTY', 'MEAN_TARGET_COVERAGE']
+    required_metrics = ["FOLD_80_BASE_PENALTY", "MEAN_TARGET_COVERAGE"]
 
     # WHEN access keys in actual json
     actual_json_keys = list(actual_json[list(actual_json.keys())[0]].keys())
@@ -72,11 +69,11 @@ def test_json_file():
 def test_sample_ids():
 
     # GIVEN sampleid
-    sampleid = 'concatenated_ACCyyyy_XXXXXX_R'
-    expected_sampleid = 'ACCyyyy'
+    sampleid = "concatenated_ACCyyyy_XXXXXX_R"
+    expected_sampleid = "ACCyyyy"
 
     # WHEN apply split
-    built_sampleid = sampleid.split('_')[1]
+    built_sampleid = sampleid.split("_")[1]
 
     # THEN assert
     assert built_sampleid == expected_sampleid

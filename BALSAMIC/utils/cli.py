@@ -120,10 +120,11 @@ class SnakeMake:
 
         if self.disable_variant_caller:
             snakemake_config_key_value.append(
-                f'disable_variant_caller={self.disable_variant_caller}')
+                f"disable_variant_caller={self.disable_variant_caller}"
+            )
 
         if self.dragen:
-            snakemake_config_key_value.append('dragen=True')
+            snakemake_config_key_value.append("dragen=True")
 
         if snakemake_config_key_value:
             snakemake_config_key_value.insert(0, "--config")
@@ -131,30 +132,30 @@ class SnakeMake:
         if self.use_singularity:
             self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
             for bind_path in self.singularity_bind:
-                self.singularity_arg += " --bind {}:{}".format(
-                    bind_path, bind_path)
+                self.singularity_arg += " --bind {}:{}".format(bind_path, bind_path)
             self.singularity_arg += "' "
 
         if self.run_mode == "cluster":
-            sbatch_cmd = (" '{} {} "
-                          " --sample-config {} --profile {} "
-                          " --account {} --qos {} "
-                          " --log-dir {} --script-dir {} "
-                          " --result-dir {} ".format(
-                              sys.executable,
-                              self.scheduler,
-                              self.configfile,
-                              self.profile,
-                              self.account,
-                              self.qos,
-                              self.log_path,
-                              self.script_path,
-                              self.result_path,
-                          ))
+            sbatch_cmd = (
+                " '{} {} "
+                " --sample-config {} --profile {} "
+                " --account {} --qos {} "
+                " --log-dir {} --script-dir {} "
+                " --result-dir {} ".format(
+                    sys.executable,
+                    self.scheduler,
+                    self.configfile,
+                    self.profile,
+                    self.account,
+                    self.qos,
+                    self.log_path,
+                    self.script_path,
+                    self.result_path,
+                )
+            )
 
             if self.slurm_profiler:
-                sbatch_cmd += " --slurm-profiler {}".format(
-                    self.slurm_profiler)
+                sbatch_cmd += " --slurm-profiler {}".format(self.slurm_profiler)
 
             if self.mail_user:
                 sbatch_cmd += " --mail-user {} ".format(self.mail_user)
@@ -164,11 +165,13 @@ class SnakeMake:
 
             sbatch_cmd += " {dependencies} '"
 
-            cluster_cmd = (" --immediate-submit -j 999 "
-                           "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
-                           "--cluster-config {} --cluster {} ".format(
-                               self.case_name, self.cluster_config,
-                               sbatch_cmd))
+            cluster_cmd = (
+                " --immediate-submit -j 999 "
+                "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
+                "--cluster-config {} --cluster {} ".format(
+                    self.case_name, self.cluster_config, sbatch_cmd
+                )
+            )
 
         # Merge snakmake config key value list
         snakemake_config_key_value = " ".join(snakemake_config_key_value)
@@ -178,7 +181,8 @@ class SnakeMake:
             f" --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
             f" {self.cluster_config} {self.singularity_arg} {quiet_mode} "
             f" {forceall} {dryrun} {cluster_cmd} "
-            f" {report} {snakemake_config_key_value} {sm_opt}")
+            f" {report} {snakemake_config_key_value} {sm_opt}"
+        )
         return sm_cmd
 
 
@@ -228,7 +232,7 @@ def write_json(json_out, output_config):
 
 
 def iterdict(dic):
-    """ dictionary iteration - returns generator"""
+    """dictionary iteration - returns generator"""
     for key, value in dic.items():
         if isinstance(value, dict):
             yield from iterdict(value)
@@ -255,9 +259,9 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
     if analysis_type == "generate_ref":
-        snakefile = Path(p, 'workflows', 'reference.smk')
+        snakefile = Path(p, "workflows", "reference.smk")
     if analysis_type == "pon":
-        snakefile = Path(p, 'workflows', 'PON.smk')
+        snakefile = Path(p, "workflows", "PON.smk")
     elif analysis_type == "umi":
         snakefile = Path(p, "workflows", "UMIworkflow.smk")
 
@@ -308,8 +312,7 @@ def find_file_index(file_path):
     for file_extension, file_index_extensions in indexible_files.items():
         if file_path.endswith(file_extension):
             for file_index_extension in file_index_extensions:
-                new_file_path = file_path.replace(file_extension,
-                                                  file_index_extension)
+                new_file_path = file_path.replace(file_extension, file_index_extension)
                 if os.path.isfile(new_file_path):
                     file_path_index.add(new_file_path)
 
@@ -317,9 +320,7 @@ def find_file_index(file_path):
 
 
 def get_file_extension(file_path):
-    known_multi_extensions = [
-        ".vcf.gz", ".vcf.gz.tbi", ".vcf.tbi", ".fastq.gz"
-    ]
+    known_multi_extensions = [".vcf.gz", ".vcf.gz.tbi", ".vcf.tbi", ".fastq.gz"]
     file_extension = ""
     for known_ext in known_multi_extensions:
         if file_path.endswith(known_ext):
@@ -335,13 +336,16 @@ def get_file_extension(file_path):
 def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
     """
     Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
-    
+
     from_key and by_key should both exist
     """
 
     matching_value = default
-    if from_key in input_dict and by_key in input_dict and by_value in input_dict[
-            from_key]:
+    if (
+        from_key in input_dict
+        and by_key in input_dict
+        and by_value in input_dict[from_key]
+    ):
         idx = input_dict[from_key].index(by_value)
         matching_value = input_dict[by_key][idx]
 
@@ -350,9 +354,9 @@ def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
 
 def get_file_status_string(file_to_check):
     """
-      Checks if file exsits. and returns a string with checkmark or redcorss mark
-      if it exists or doesn't exist respectively.
-      Always assume file doesn't exist, unless proven otherwise.
+    Checks if file exsits. and returns a string with checkmark or redcorss mark
+    if it exists or doesn't exist respectively.
+    Always assume file doesn't exist, unless proven otherwise.
     """
     return_str = Color("[{red}\u2717{/red}] File missing: ") + file_to_check
 
@@ -418,13 +422,12 @@ def merge_json(*args):
 
 def validate_fastq_pattern(sample):
     """Finds the correct filename prefix from file path, and returns it.
-    An error is raised if sample name has invalid pattern """
+    An error is raised if sample name has invalid pattern"""
 
     fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
     sample_basename = Path(sample).name
 
-    file_str = sample_basename[0:(
-        fq_pattern.search(sample_basename).span()[0] + 1)]
+    file_str = sample_basename[0 : (fq_pattern.search(sample_basename).span()[0] + 1)]
     return file_str
 
 
@@ -435,8 +438,7 @@ def get_panel_chrom(panel_bed) -> list:
     return {s.split("\t")[0] for s in lines}
 
 
-def bioinfo_tool_version_non_conda(packages: dict,
-                                   bioinfo_tools: dict) -> dict:
+def bioinfo_tool_version_non_conda(packages: dict, bioinfo_tools: dict) -> dict:
     """Parses a non-conda bioinfo tool dictionary
 
     Args:
@@ -456,7 +458,9 @@ def bioinfo_tool_version_non_conda(packages: dict,
     return bioinfo_version
 
 
-def bioinfo_tool_version_conda(packages: list, bioinfo_tools: dict, current_bioinfo_tool_version:dict) -> dict:
+def bioinfo_tool_version_conda(
+    packages: list, bioinfo_tools: dict, current_bioinfo_tool_version: dict
+) -> dict:
     """Parses conda environment dictionary and extracts dependencies as version
 
     Args:
@@ -477,22 +481,22 @@ def bioinfo_tool_version_conda(packages: list, bioinfo_tools: dict, current_bioi
             continue
         if name in conda_bioinfo_version:
             conda_bioinfo_version[name].append(version)
-            conda_bioinfo_version[name] = list(set(
-                conda_bioinfo_version[name]))
+            conda_bioinfo_version[name] = list(set(conda_bioinfo_version[name]))
         else:
             conda_bioinfo_version[name] = list([version])
 
     return conda_bioinfo_version
 
 
-def get_bioinfo_tools_version(bioinfo_tools: dict,
-                              container_conda_env_path: os.PathLike) -> dict:
-    """Parses the names and versions of bioinfo tools 
+def get_bioinfo_tools_version(
+    bioinfo_tools: dict, container_conda_env_path: os.PathLike
+) -> dict:
+    """Parses the names and versions of bioinfo tools
     used by BALSAMIC from config YAML into a dict.
 
     Args:
         bioinfo_tools: dict. A dictionary with bioinfo tools as keys and container as value
-        container_conda_env_path: path. Path to all container and conda yaml 
+        container_conda_env_path: path. Path to all container and conda yaml
 
     Returns:
         bioinfo_tools_version: dict. Dictionary of bioinfo tools as key and version as value
@@ -500,28 +504,35 @@ def get_bioinfo_tools_version(bioinfo_tools: dict,
 
     bioinfo_tools_version = {}
     for container_conda_env_name in set(bioinfo_tools.values()):
-        yaml_file = Path(container_conda_env_path, container_conda_env_name,
-                         container_conda_env_name + ".yaml")
+        yaml_file = Path(
+            container_conda_env_path,
+            container_conda_env_name,
+            container_conda_env_name + ".yaml",
+        )
         with open(yaml_file, "r") as f:
             conda_yaml = yaml.safe_load(f)
             if isinstance(conda_yaml, dict):
                 packages = conda_yaml.get("dependencies")
                 bioinfo_tools_version = {
                     **bioinfo_tools_version,
-                    **bioinfo_tool_version_conda(packages, bioinfo_tools, bioinfo_tools_version)
+                    **bioinfo_tool_version_conda(
+                        packages, bioinfo_tools, bioinfo_tools_version
+                    ),
                 }
             else:
                 bioinfo_tools_version = {
                     **bioinfo_tools_version,
-                    **bioinfo_tool_version_non_conda(conda_yaml, bioinfo_tools)
+                    **bioinfo_tool_version_non_conda(conda_yaml, bioinfo_tools),
                 }
     return bioinfo_tools_version
 
 
-def get_sample_dict(tumor: str,
-                    normal: str,
-                    tumor_sample_name: str = None,
-                    normal_sample_name: str = None) -> dict:
+def get_sample_dict(
+    tumor: str,
+    normal: str,
+    tumor_sample_name: str = None,
+    normal_sample_name: str = None,
+) -> dict:
     """Concatenates sample dicts for all provided files"""
     samples = {}
     if normal:
@@ -553,7 +564,7 @@ def get_sample_names(filename, sample_type):
 
 def create_fastq_symlink(casefiles, symlink_dir: Path):
     """Creates symlinks for provided files in analysis/fastq directory.
-    Identifies file prefix pattern, and also creates symlinks for the 
+    Identifies file prefix pattern, and also creates symlinks for the
     second read file, if needed"""
 
     for filename in casefiles:
@@ -561,8 +572,7 @@ def create_fastq_symlink(casefiles, symlink_dir: Path):
         file_str = validate_fastq_pattern(filename)
         for f in parent_dir.rglob(f"*{file_str}*.fastq.gz"):
             try:
-                LOG.info(
-                    f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
+                LOG.info(f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
                 Path(symlink_dir, f.name).symlink_to(f)
             except FileExistsError:
                 LOG.info(f"File {symlink_dir / f.name} exists, skipping")
@@ -574,28 +584,27 @@ def generate_graph(config_collection_dict, config_path):
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(
             snakefile=get_snakefile(
-                analysis_type=config_collection_dict["analysis"]
-                ["analysis_type"],
-                sequencing_type=config_collection_dict["analysis"]
-                ["sequencing_type"],
+                analysis_type=config_collection_dict["analysis"]["analysis_type"],
+                sequencing_type=config_collection_dict["analysis"]["sequencing_type"],
             ),
             dryrun=True,
             configfiles=[config_path],
             printrulegraph=True,
         )
 
-    graph_title = "_".join([
-        "BALSAMIC",
-        BALSAMIC.__version__,
-        config_collection_dict["analysis"]["case_id"],
-    ])
+    graph_title = "_".join(
+        [
+            "BALSAMIC",
+            BALSAMIC.__version__,
+            config_collection_dict["analysis"]["case_id"],
+        ]
+    )
     graph_dot = "".join(graph_dot).replace(
-        "snakemake_dag {",
-        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
+        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
+    )
     graph_obj = graphviz.Source(
         graph_dot,
-        filename=".".join(
-            config_collection_dict["analysis"]["dag"].split(".")[:-1]),
+        filename=".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]),
         format="pdf",
         engine="dot",
     )
@@ -603,7 +612,7 @@ def generate_graph(config_collection_dict, config_path):
 
 
 def get_fastq_bind_path(fastq_path: Path) -> list():
-    """Takes a path with symlinked fastq files. 
+    """Takes a path with symlinked fastq files.
     Returns unique paths to parent directories for singulatiry bind
     """
     parents = set()
@@ -612,8 +621,7 @@ def get_fastq_bind_path(fastq_path: Path) -> list():
     return list(parents)
 
 
-def convert_deliverables_tags(delivery_json: dict,
-                              sample_config_dict: dict) -> dict:
+def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> dict:
     """Replaces values of file_prefix with sample_name in deliverables dict"""
 
     for delivery_file in delivery_json["files"]:
@@ -625,8 +633,7 @@ def convert_deliverables_tags(delivery_json: dict,
             if file_prefix == delivery_file["id"]:
                 delivery_file["id"] = sample_name
                 for tag_index, tag in enumerate(file_tags):
-                    if tag == file_prefix or tag == file_prefix.replace(
-                            "_", "-"):
+                    if tag == file_prefix or tag == file_prefix.replace("_", "-"):
                         file_tags[tag_index] = sample_name
                 if sample_name not in file_tags:
                     file_tags.append(sample_name)
@@ -652,12 +659,11 @@ def generate_h5(job_name: str, job_id: str, file_path: str) -> str:
     """Generates H5 file for a finished job. Returns None if it cannot generate H5 file"""
     h5_file_name = Path(file_path, job_name + ".h5")
     sh5util_output = subprocess.check_output(
-        ["sh5util", "-o",
-         h5_file_name.as_posix(), "-S", "-j", job_id],
-        stderr=subprocess.STDOUT)
+        ["sh5util", "-o", h5_file_name.as_posix(), "-S", "-j", job_id],
+        stderr=subprocess.STDOUT,
+    )
 
-    if "sh5util: No node-step files found for jobid" in sh5util_output.decode(
-            "utf-8"):
+    if "sh5util: No node-step files found for jobid" in sh5util_output.decode("utf-8"):
         h5_file_name = None
 
     return h5_file_name
@@ -665,8 +671,7 @@ def generate_h5(job_name: str, job_id: str, file_path: str) -> str:
 
 def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
     """Write an input job_id_sacct_file to yaml output"""
-    with open(job_id_dump, "r") as jobid_in, open(job_id_yaml,
-                                                  "w") as jobid_out:
+    with open(job_id_dump, "r") as jobid_in, open(job_id_yaml, "w") as jobid_out:
         jobid_list = jobid_in.read().splitlines()
         yaml.dump({case_name: jobid_list}, jobid_out)
 

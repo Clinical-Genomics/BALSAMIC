@@ -40,33 +40,34 @@ class SbatchScheduler:
         self.acctg_freq = None
 
     def build_cmd(self):
-        """ builds sbatch command matching its options """
-        sbatch = ['sbatch']
+        """builds sbatch command matching its options"""
+        sbatch = ["sbatch"]
 
         job_attributes = [
-            'account',
-            'dependency',
-            'error',
-            'output',
-            'mail_type',
-            'mail_user',
-            'ntasks',
-            'qos',
-            'time',
-            'partition',
-            'profile',
-            'acctg_freq',
+            "account",
+            "dependency",
+            "error",
+            "output",
+            "mail_type",
+            "mail_user",
+            "ntasks",
+            "qos",
+            "time",
+            "partition",
+            "profile",
+            "acctg_freq",
         ]
 
         for attribute in job_attributes:
             if getattr(self, attribute):
                 attribute_value = getattr(self, attribute)
-                sbatch.append('--{} \"{}\"'.format(attribute.replace("_", "-"),
-                                                   attribute_value))
+                sbatch.append(
+                    '--{} "{}"'.format(attribute.replace("_", "-"), attribute_value)
+                )
 
         sbatch.append(self.script)
 
-        return ' '.join(sbatch)
+        return " ".join(sbatch)
 
 
 class QsubScheduler:
@@ -130,7 +131,7 @@ class QsubScheduler:
 
 
 def read_sample_config(input_json):
-    ''' load input sample_config file. Output of balsamic config sample. '''
+    """load input sample_config file. Output of balsamic config sample."""
 
     try:
         with open(input_json) as f:
@@ -141,9 +142,9 @@ def read_sample_config(input_json):
 
 
 def write_sacct_file(sacct_file, job_id, job_name=str()):
-    ''' writes a yaml file with job ids '''
+    """writes a yaml file with job ids"""
     try:
-        with open(sacct_file, 'a') as f:
+        with open(sacct_file, "a") as f:
             f.write(job_id)
             if job_name:
                 f.write("," + job_name)
@@ -154,13 +155,10 @@ def write_sacct_file(sacct_file, job_id, job_name=str()):
 
 
 def submit_job(sbatch_cmd, profile):
-    ''' subprocess call for sbatch command '''
+    """subprocess call for sbatch command"""
     # run sbatch cmd
     try:
-        res = subprocess.run(sbatch_cmd,
-                             check=True,
-                             shell=True,
-                             stdout=subprocess.PIPE)
+        res = subprocess.run(sbatch_cmd, check=True, shell=True, stdout=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
         logging.exception("Failed to submit {}".format(sbatch_cmd))
         raise e
@@ -173,42 +171,40 @@ def submit_job(sbatch_cmd, profile):
         jobid = m.group(1)
     elif profile == "qsub":
         jobid_tmp = str(res).split()[3]
-        jobid = jobid_tmp.strip("\"()\"")
+        jobid = jobid_tmp.strip('"()"')
 
     print(jobid)
     return jobid
 
 
 def get_parser():
-    ''' argument parser '''
-    parser = argparse.ArgumentParser(description='''
+    """argument parser"""
+    parser = argparse.ArgumentParser(
+        description="""
         This is an internal script and should be invoked independently.
         This script gets a list of arugments (see --help) and submits a job to slurm as
         afterok dependency.
-        ''')
-    parser.add_argument("dependencies",
-                        nargs="*",
-                        help="{{dependencies}} from snakemake")
+        """
+    )
+    parser.add_argument(
+        "dependencies", nargs="*", help="{{dependencies}} from snakemake"
+    )
     parser.add_argument("snakescript", help="Snakemake script")
-    parser.add_argument("--sample-config",
-                        help='balsamic config sample output')
+    parser.add_argument("--sample-config", help="balsamic config sample output")
     parser.add_argument("--profile", help="profile to run jobs")
     parser.add_argument(
         "--slurm-profiler",
-        help=
-        "Slurm profiler type (e.g. task). Refer to your SLURM manual to adjust this value"
+        help="Slurm profiler type (e.g. task). Refer to your SLURM manual to adjust this value",
     )
-    parser.add_argument("--slurm-profiler-interval",
-                        default="10",
-                        help="Profiler interval in seconds")
-    parser.add_argument("--account",
-                        required=True,
-                        help='cluster account name')
-    parser.add_argument("--qos",
-                        default='low',
-                        help='cluster job Priority (slurm - QOS)')
-    parser.add_argument("--mail-type", help='cluster mail type')
-    parser.add_argument("--mail-user", help='mail user')
+    parser.add_argument(
+        "--slurm-profiler-interval", default="10", help="Profiler interval in seconds"
+    )
+    parser.add_argument("--account", required=True, help="cluster account name")
+    parser.add_argument(
+        "--qos", default="low", help="cluster job Priority (slurm - QOS)"
+    )
+    parser.add_argument("--mail-type", help="cluster mail type")
+    parser.add_argument("--mail-user", help="mail user")
     parser.add_argument("--log-dir", help="Log directory")
     parser.add_argument("--result-dir", help="Result directory")
     parser.add_argument("--script-dir", help="Script directory")
@@ -217,7 +213,7 @@ def get_parser():
 
 
 def main(args=None):
-    ''' entry point for scheduler.py '''
+    """entry point for scheduler.py"""
     parser = get_parser()
     args = parser.parse_args(args)
 
@@ -226,19 +222,20 @@ def main(args=None):
     shutil.copy2(jobscript, args.script_dir)
     jobscript = os.path.join(args.script_dir, os.path.basename(jobscript))
 
-    if args.profile == 'slurm':
-        jobid = '%j'
+    if args.profile == "slurm":
+        jobid = "%j"
         scheduler_cmd = SbatchScheduler()
         if args.dependencies:
-            scheduler_cmd.dependency = ','.join(
-                ["afterok:%s" % d for d in args.dependencies])
+            scheduler_cmd.dependency = ",".join(
+                ["afterok:%s" % d for d in args.dependencies]
+            )
         if args.slurm_profiler:
             scheduler_cmd.profile = args.slurm_profiler
             scheduler_cmd.acctg_freq = "{}={}".format(
                 args.slurm_profiler, args.slurm_profiler_interval
-            )  #"--profile task --acctg-freq=task=15"
-    elif args.profile == 'qsub':
-        jobid = '${JOB_ID}'
+            )  # "--profile task --acctg-freq=task=15"
+    elif args.profile == "qsub":
+        jobid = "${JOB_ID}"
         scheduler_cmd = QsubScheduler()
         scheduler_cmd.dependency = args.dependencies
 
@@ -247,19 +244,21 @@ def main(args=None):
 
     sample_config = read_sample_config(input_json=args.sample_config)
 
-    sacct_file = os.path.join(args.log_dir,
-                              sample_config["analysis"]["case_id"] + ".sacct")
+    sacct_file = os.path.join(
+        args.log_dir, sample_config["analysis"]["case_id"] + ".sacct"
+    )
     sacct_file_extended = os.path.join(
-        args.log_dir, sample_config["analysis"]["case_id"] + "_extended.sacct")
+        args.log_dir, sample_config["analysis"]["case_id"] + "_extended.sacct"
+    )
 
     scheduler_cmd.account = args.account
     scheduler_cmd.mail_type = mail_type
     scheduler_cmd.error = os.path.join(
-        args.log_dir,
-        os.path.basename(jobscript) + "_" + jobid + ".err")
+        args.log_dir, os.path.basename(jobscript) + "_" + jobid + ".err"
+    )
     scheduler_cmd.output = os.path.join(
-        args.log_dir,
-        os.path.basename(jobscript) + "_" + jobid + ".out")
+        args.log_dir, os.path.basename(jobscript) + "_" + jobid + ".out"
+    )
 
     scheduler_cmd.ntasks = job_properties["cluster"]["n"]
     scheduler_cmd.time = job_properties["cluster"]["time"]
@@ -271,10 +270,12 @@ def main(args=None):
     jobid = submit_job(scheduler_cmd.build_cmd(), args.profile)
 
     write_sacct_file(sacct_file=sacct_file, job_id=jobid)
-    write_sacct_file(sacct_file=sacct_file_extended,
-                     job_id=scheduler_cmd.build_cmd(),
-                     job_name=os.path.basename(jobscript))
+    write_sacct_file(
+        sacct_file=sacct_file_extended,
+        job_id=scheduler_cmd.build_cmd(),
+        job_name=os.path.basename(jobscript),
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
