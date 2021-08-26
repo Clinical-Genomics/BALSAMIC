@@ -1,9 +1,10 @@
-name: build test container submodule
+name: build and push container submodule
 # Tigger building and testing container only on pull requests
 on:
   push:
     tags:
       - "**"
+
 jobs:
   main:
     name: Docker image build test
