@@ -1,6 +1,9 @@
 import json
 import os
 
+from BALSAMIC.utils.constants import METRICS
+from BALSAMIC.utils.models import QCCheckModel
+
 MULTIPLE_JSON = [
     {
         "file_name": "multiqc_picard_insertSize.json",
@@ -54,3 +57,28 @@ def get_qc_metrics(analysis_path):
                     qc_data[sampleid][k] = json_file[j][k]
 
     return qc_data
+
+
+def get_qc_metrics_json(analysis_path, sequencing_type):
+    """Reads picard metrics for a particular case and returns a json object
+
+    Args:
+        analysis_path: analysis result path e.g. /path/case_name/analysis
+        sequencing_type : NGS approach
+            targeted : if capture kit was used to enrich specific genomic regions
+            wgs : if whole genome sequencing was performed
+
+    Returns:
+        qc_metrics_json: quality control summarised metrics
+
+    """
+
+    qc_check_model = QCCheckModel(
+        analysis_path=analysis_path,
+        sequencing_type=sequencing_type,
+        qc_metrics=METRICS["qc"],
+    )
+
+    qc_metrics_json = json.dumps(qc_check_model.get_metrics, indent=4, sort_keys=True)
+
+    return qc_metrics_json

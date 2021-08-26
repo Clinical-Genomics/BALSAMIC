@@ -654,3 +654,32 @@ REPORT_MODEL = {
         },
     },
 }
+
+METRICS = {
+    "qc": [
+        {
+            "file_name": "multiqc_picard_insertSize.json",
+            "sequencing_type": ["targeted", "wgs"],
+            "metrics": ["MEAN_INSERT_SIZE"],
+        },
+        {
+            "file_name": "multiqc_picard_dups.json",
+            "sequencing_type": ["targeted", "wgs"],
+            "metrics": ["PERCENT_DUPLICATION"],
+        },
+        {
+            "file_name": "multiqc_picard_HsMetrics.json",
+            "sequencing_type": ["targeted"],
+            "metrics": [
+                "MEAN_TARGET_COVERAGE",
+                "MEDIAN_TARGET_COVERAGE",
+                "PCT_TARGET_BASES_50X",
+                "PCT_TARGET_BASES_100X",
+                "PCT_TARGET_BASES_250X",
+                "PCT_TARGET_BASES_500X",
+                "PCT_TARGET_BASES_1000X",
+                "FOLD_80_BASE_PENALTY",
+            ],
+        },
+    ]
+}

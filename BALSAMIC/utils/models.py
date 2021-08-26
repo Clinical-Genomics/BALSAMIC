@@ -1,4 +1,6 @@
 import hashlib
+import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
@@ -687,3 +689,72 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
+
+
+class QCMetricsModel(BaseModel):
+    """Defines the quality control metrics model associated with a specific analysis file
+
+    Attributes:
+        file_name : string (required); quality control analysis file name
+        sequencing_type : List (required); string literal [targeted, wgs]
+        metrics : List (required); quality control metric names
+    """
+
+    file_name: str
+    sequencing_type: List[str]
+    metrics: List[str]
+
+
+class QCCheckModel(BaseModel):
+    """Defines the quality control check model
+
+    Attributes:
+       file_name : string (required); quality control analysis file name
+       sequencing_type : string (required); targeted or wgs run
+       qc_metrics : List(QCMetricsModel) (required); quality control metric attributes
+    """
+
+    analysis_path: DirectoryPath
+    sequencing_type: str
+    qc_metrics: List[QCMetricsModel]
+
+    def get_file_path(self, file_name):
+        """return analysis file full path"""
+        return os.path.join(self.analysis_path, "qc", "multiqc_data", file_name)
+
+    @validator("analysis_path")
+    def analysis_path_as_abspath(cls, value) -> str:
+        return Path(value).resolve().as_posix()
+
+    # @validator("qc_metrics")
+    # def check_metrics(cls, values):
+    # TODO
+
+    @property
+    def get_metrics(self):
+        """returns a dictionary of the quality control metrics"""
+        qc_metrics_dict = {}
+
+        # Loop through MultiQC json files
+        for model in self.qc_metrics:
+            if self.sequencing_type in model.sequencing_type:
+                with open(self.get_file_path(file_name=model.file_name), "r") as f:
+                    metric_file = json.load(f)
+                for j in metric_file.keys():
+                    if "umi" not in j:
+                        for k in model.metrics:
+                            if k in metric_file[j]:
+                                sample_name = j.split("_")[0]
+                                if (
+                                    not qc_metrics_dict
+                                    or sample_name not in qc_metrics_dict.keys()
+                                ):
+                                    qc_metrics_dict[sample_name] = [
+                                        {k: metric_file[j][k]}
+                                    ]
+                                else:
+                                    qc_metrics_dict[sample_name].append(
+                                        {k: metric_file[j][k]}
+                                    )
+
+        return qc_metrics_dict
