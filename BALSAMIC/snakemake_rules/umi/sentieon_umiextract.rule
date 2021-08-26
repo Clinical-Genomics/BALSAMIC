@@ -9,12 +9,13 @@ rule sentieon_umiextract:
     output:
         ds_umi = temp(umi_dir + "{sample}.umiextract.fastq.gz")
     benchmark:
-        Path(benchmark_dir + "sentieon_umiextract_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        ds_params= paramsumi.umiextract.read_structure,
+        ds_params= params.umiextract.read_structure,
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "sentieon_umiextract")
@@ -24,6 +25,12 @@ rule sentieon_umiextract:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} umi extract \
 {params.ds_params} {input.read1} {input.read2} \
 -o {output.ds_umi};
@@ -37,14 +44,15 @@ rule sentieon_bwa_umiextract:
     output:
         align_umi = temp(umi_dir + "{sample}.align.umi.bam")
     benchmark:
-        Path(benchmark_dir + "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = '{sample}',
-        sheader = paramsumi.common.align_header,
-        ip_bases = paramsumi.common.align_intbases
+        sheader = params.umicommon.align_header,
+        ip_bases = params.umicommon.align_intbases
     threads: 
         get_threads(cluster_config, "sentieon_bwa_umiextract")
     message: 
@@ -53,6 +61,12 @@ rule sentieon_bwa_umiextract:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
+
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
 {params.sentieon_exec} bwa mem \
 -R {params.sheader} \
 -K {params.ip_bases} \

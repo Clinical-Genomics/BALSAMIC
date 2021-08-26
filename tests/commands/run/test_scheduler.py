@@ -15,36 +15,47 @@ from BALSAMIC.utils.cli import createDir
 
 def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, capsys):
     # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
-    test_jobid = '999999999999'
-    test_return_value = 'Submitted batch job ' + test_jobid
-    scheduler_args = [
-        '9000', '9001', '9002', snakemake_job_script['snakescript']
-    ]
-    scheduler_profile_slurm = 'slurm'
-    with open(tumor_normal_config, 'r') as input_config:
+    test_jobid = "999999999999"
+    test_return_value = "Submitted batch job " + test_jobid
+    scheduler_args = ["9000", "9001", "9002", snakemake_job_script["snakescript"]]
+    scheduler_profile_slurm = "slurm"
+    with open(tumor_normal_config, "r") as input_config:
         sample_config = json.load(input_config)
 
     # Create directory for log and script
-    script_dir = createDir(sample_config['analysis']['script'])
-    log_dir = createDir(sample_config['analysis']['log'])
+    script_dir = createDir(sample_config["analysis"]["script"])
+    log_dir = createDir(sample_config["analysis"]["log"])
 
     # Construct scheduler's cmd
     scheduler_cmd = [
-        "--sample-config", tumor_normal_config, "--profile",
-        scheduler_profile_slurm, "--qos", "low", "--account", "development",
-        "--log-dir", log_dir, "--script-dir", script_dir, "--result-dir",
-        sample_config['analysis']['result'], "--slurm-profiler", "task",
-        "--slurm-profiler-interval", "10"
+        "--sample-config",
+        tumor_normal_config,
+        "--profile",
+        scheduler_profile_slurm,
+        "--qos",
+        "low",
+        "--account",
+        "development",
+        "--log-dir",
+        log_dir,
+        "--script-dir",
+        script_dir,
+        "--result-dir",
+        sample_config["analysis"]["result"],
+        "--slurm-profiler",
+        "task",
+        "--slurm-profiler-interval",
+        "10",
     ]
     scheduler_cmd.extend(scheduler_args)
 
     # WHEN calling scheduler_main with mocked subprocess
-    with mock.patch.object(subprocess, 'run') as mocked:
-        mocked.return_value.stdout = test_return_value.encode('utf-8')
+    with mock.patch.object(subprocess, "run") as mocked:
+        mocked.return_value.stdout = test_return_value.encode("utf-8")
         scheduler_main(scheduler_cmd)
 
     # THEN sacct file should be written with the job id(s)
-    with open(log_dir + '/sample_tumor_normal.sacct', 'r') as fin:
+    with open(log_dir + "/sample_tumor_normal.sacct", "r") as fin:
         assert fin.read() == test_jobid + "\n"
 
     # THEN captured output is job id
@@ -54,35 +65,43 @@ def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, capsys):
 
 def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, capsys):
     # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
-    test_jobname = 'script.sh'
+    test_jobname = "script.sh"
     test_return_value = f'Your job 31415 ("{test_jobname}") has been submitted'
-    scheduler_args = [
-        '1000', '1001', '1002', snakemake_job_script['snakescript']
-    ]
-    scheduler_profile_qsub = 'qsub'
-    with open(tumor_normal_config, 'r') as input_config:
+    scheduler_args = ["1000", "1001", "1002", snakemake_job_script["snakescript"]]
+    scheduler_profile_qsub = "qsub"
+    with open(tumor_normal_config, "r") as input_config:
         sample_config = json.load(input_config)
 
     # Create directory for log and script
-    script_dir = createDir(sample_config['analysis']['script'])
-    log_dir = createDir(sample_config['analysis']['log'])
+    script_dir = createDir(sample_config["analysis"]["script"])
+    log_dir = createDir(sample_config["analysis"]["log"])
 
     # Construct scheduler's cmd
     scheduler_cmd = [
-        "--sample-config", tumor_normal_config, "--profile",
-        scheduler_profile_qsub, "--qos", "low", "--account", "development",
-        "--log-dir", log_dir, "--script-dir", script_dir, "--result-dir",
-        sample_config['analysis']['result']
+        "--sample-config",
+        tumor_normal_config,
+        "--profile",
+        scheduler_profile_qsub,
+        "--qos",
+        "low",
+        "--account",
+        "development",
+        "--log-dir",
+        log_dir,
+        "--script-dir",
+        script_dir,
+        "--result-dir",
+        sample_config["analysis"]["result"],
     ]
     scheduler_cmd.extend(scheduler_args)
 
     # WHEN calling scheduler_main with mocked subprocess
-    with mock.patch.object(subprocess, 'run') as mocked:
-        mocked.return_value.stdout = test_return_value.encode('utf-8')
+    with mock.patch.object(subprocess, "run") as mocked:
+        mocked.return_value.stdout = test_return_value.encode("utf-8")
         scheduler_main(scheduler_cmd)
 
     # THEN sacct file should be written with the job id(s)
-    with open(log_dir + '/sample_tumor_normal.sacct', 'r') as fin:
+    with open(log_dir + "/sample_tumor_normal.sacct", "r") as fin:
         assert fin.read() == test_jobname + "\n"
 
     # THEN captured output is job id
@@ -92,13 +111,13 @@ def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, capsys):
 
 def test_submit_job_slurm(snakemake_job_script):
     # GIVEN a jobid
-    test_jobid = '1234'
-    test_return_value = 'Submitted batch job ' + test_jobid
+    test_jobid = "1234"
+    test_return_value = "Submitted batch job " + test_jobid
 
     # WHEN getting jobid for slurm
-    with mock.patch.object(subprocess, 'run') as mocked:
-        mocked.return_value.stdout = test_return_value.encode('utf-8')
-        actual_jobid = submit_job(['random_command'], 'slurm')
+    with mock.patch.object(subprocess, "run") as mocked:
+        mocked.return_value.stdout = test_return_value.encode("utf-8")
+        actual_jobid = submit_job(["random_command"], "slurm")
 
     # THEN output jobid should match
     assert actual_jobid == test_jobid
@@ -106,13 +125,13 @@ def test_submit_job_slurm(snakemake_job_script):
 
 def test_submit_job_qsub(snakemake_job_script):
     # GIVEN a jobid
-    test_jobname = 'script.sh'
+    test_jobname = "script.sh"
     test_return_value = f'Your job 31415 ("{test_jobname}") has been submitted'
 
     # WHEN getting jobid for slurm
-    with mock.patch.object(subprocess, 'run') as mocked:
-        mocked.return_value.stdout = test_return_value.encode('utf-8')
-        actual_jobname = submit_job(['random_command'], 'qsub')
+    with mock.patch.object(subprocess, "run") as mocked:
+        mocked.return_value.stdout = test_return_value.encode("utf-8")
+        actual_jobname = submit_job(["random_command"], "qsub")
 
     # THEN output jobid should match
     assert actual_jobname == test_jobname
@@ -149,7 +168,7 @@ def test_qsub_scheduler():
     # GIVEN values for qsub command
     qsub_cmd = QsubScheduler()
     qsub_cmd.account = "development"
-    qsub_cmd.dependency = ['test_jobname.sh']
+    qsub_cmd.dependency = ["test_jobname.sh"]
     qsub_cmd.error = "test_job.err"
     qsub_cmd.output = "test_job.out"
     qsub_cmd.mail_type = "FAIL"
@@ -165,15 +184,15 @@ def test_qsub_scheduler():
     # THEN qsub command should be constructed
     assert isinstance(qsub_cmd, str)
     assert qsub_cmd == (
-        'qsub -V -S /bin/bash  -q development  -e test_job.err  -o test_job.out  -m s   -M '
-        'john.doe@example.com  -p low  -l excl=1  -pe mpi 2   -hold_jid test_jobname.sh  example_script.sh '
+        "qsub -V -S /bin/bash  -q development  -e test_job.err  -o test_job.out  -m s   -M "
+        "john.doe@example.com  -p low  -l excl=1  -pe mpi 2   -hold_jid test_jobname.sh  example_script.sh "
     )
 
 
 def test_read_sample_config_err(config_files):
     with pytest.raises(Exception):
         # GIVEN a bed file instead of json file
-        bed_file = config_files['panel_bed_file']
+        bed_file = config_files["panel_bed_file"]
 
         # WHEN calling read_sample_config
         # THEN It should raise the exception error
@@ -195,7 +214,7 @@ def test_submit_job_err():
     with pytest.raises(subprocess.CalledProcessError):
         # GIVEN a wrong command
         sbatch_cmd = "SBATCH jobscript.sh"
-        profile = 'slurm'
+        profile = "slurm"
 
         # WHEN calling submit_job function
         # THEN it should return the exit code 1 and raise the subprocess error

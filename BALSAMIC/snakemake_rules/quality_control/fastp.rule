@@ -35,7 +35,7 @@ rule fastp_umi:
         json = qc_dir + "fastp/{sample}_fastp_umi.json",
         html = qc_dir + "fastp/{sample}_fastp_umi.html",
     benchmark:
-        benchmark_dir + "fastp_umi" + "{sample}_fastp.tsv"
+        Path(benchmark_dir, "fastp_umi" + "{sample}.tsv").as_posix()
     singularity: 
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
@@ -44,7 +44,8 @@ rule fastp_umi:
         adapter = " ".join(fastp_param_adapter),
         sample_name = "{sample}",
         conda = config["bioinfo_tools"].get("fastp")
-    threads: get_threads(cluster_config, 'fastp')
+    threads:
+        get_threads(cluster_config, 'fastp')
     message:
         "Quality control and trimming input fastq for {params.sample_name}"
     shell:
@@ -76,7 +77,7 @@ rule fastp:
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:
-        benchmark_dir + "fastp_" + "{sample}_fastp.tsv"
+        Path(benchmark_dir, "fastp_" + "{sample}.tsv").as_posix()
     singularity: 
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix() 
     params:
@@ -86,7 +87,8 @@ rule fastp:
         minimum_length = config["QC"]["min_seq_length"],
         sample_name = "{sample}",
         conda = config["bioinfo_tools"].get("fastp")
-    threads: get_threads(cluster_config, 'fastp')
+    threads:
+        get_threads(cluster_config, 'fastp')
     message:
         "Quality control and trimming of umi optimized fastq file for {params.sample_name}"
     shell:

@@ -13,7 +13,7 @@ setup(
     version=about["__version__"],
     url="https://github.com/Clinical-Genomics/BALSAMIC",
     author="Hassan Foroughi Asl",
-    author_email='hassan.foroughi@scilifelab.se',
+    author_email="hassan.foroughi@scilifelab.se",
     install_requires=[
         "click>=7.1.2",
         "colorclass>=2.2.0",
@@ -31,7 +31,7 @@ setup(
         "pygments>=2.6.1",
         "pyyaml>=5.3.1",
         "six>=1.12.0",
-        "snakemake==5.13.0",
+        "snakemake==6.5.3",
         "yapf>=0.30.0",
         "h5py>=3.1.0",
         "PyPDF2>=1.26.0",
@@ -41,13 +41,22 @@ setup(
     packages=find_packages(),
     package_data={
         "": [
-            "*.toml", "*.json", "*.R", "*.model", "*.yaml", "*.sh", "*.rule",
-            "*.smk", "*.awk", "*.html", "*.md"
+            "*.toml",
+            "*.json",
+            "*.R",
+            "*.model",
+            "*.yaml",
+            "*.sh",
+            "*.rule",
+            "*.smk",
+            "*.awk",
+            "*.html",
+            "*.md",
         ],
     },
     include_package_data=True,
     zip_safe=False,
     entry_points={
-        'console_scripts': ['balsamic=BALSAMIC.commands.base:cli'],
+        "console_scripts": ["balsamic=BALSAMIC.commands.base:cli"],
     },
 )

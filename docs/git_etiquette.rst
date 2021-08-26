@@ -4,8 +4,14 @@ Git Etiquette
 
 It is recommended to follow a system to standardize the commit messages loosely. Following up from commit messages discussed on https://github.com/Clinical-Genomics/development/pull/97 , the format below is recommended for commit messages:
 
+**Code formatting**
+^^^^^^^^^^^^^^^^^^^
+
+BALSAMIC is using Black (https://github.com/psf/black) as code formatter.
+
+
 **Subject line**
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 Subject can include one of the following:
 
@@ -18,7 +24,7 @@ Subject can include one of the following:
 #. **version**\ : Any changes to .bumpversion config and or change of version will be specified with this. This includes comments within .bumpversion, structure of .bumpversion, etc.
 
 **Scope**
-^^^^^^^^^^^^^
+^^^^^^^^^
 
 Scope is specified within parenthesis. It show the *scope* of the subject line. The following scope are valid:
 
@@ -33,7 +39,7 @@ Scope is specified within parenthesis. It show the *scope* of the subject line. 
 Note: If scope is broad or matching with multiple (it shouldn't, but if it does) one can leave out the scope.
 
 **Message**
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^
 
 It's better to start Git commit message with the following words:
 

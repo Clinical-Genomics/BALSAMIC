@@ -17,8 +17,7 @@ LOG = logging.getLogger(__name__)
 
 @click.command(
     "status",
-    short_help=
-    "Creates a YAML file with output from variant caller and alignment.",
+    short_help="Creates a YAML file with output from variant caller and alignment.",
 )
 @click.option(
     "-s",
@@ -26,19 +25,22 @@ LOG = logging.getLogger(__name__)
     required=True,
     help="Sample config file. Output of balsamic config sample",
 )
-@click.option("-m",
-              "--show-only-missing",
-              is_flag=True,
-              default=False,
-              show_default=True,
-              help="Only show missing files.")
+@click.option(
+    "-m",
+    "--show-only-missing",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Only show missing files.",
+)
 @click.option(
     "-p",
     "--print-files",
     is_flag=True,
     default=False,
     show_default=True,
-    help="Print list of files. Otherwise only final count will be printed.")
+    help="Print list of files. Otherwise only final count will be printed.",
+)
 @click.pass_context
 def status(context, sample_config, show_only_missing, print_files):
     """
@@ -98,8 +100,8 @@ def status(context, sample_config, show_only_missing, print_files):
         if not file_status:
             missing_files.add(delivery_file)
 
-    finish_file_count = 'Finished file count: {}'.format(len(existing_files))
-    missing_file_count = 'Missing file count: {}'.format(len(missing_files))
-    click.echo(Color('{yellow}Final tally:{/yellow}'))
-    click.echo(Color('{yellow}\t' + finish_file_count + '{/yellow}'))
-    click.echo(Color('{yellow}\t' + missing_file_count + '{/yellow}'))
+    finish_file_count = "Finished file count: {}".format(len(existing_files))
+    missing_file_count = "Missing file count: {}".format(len(missing_files))
+    click.echo(Color("{yellow}Final tally:{/yellow}"))
+    click.echo(Color("{yellow}\t" + finish_file_count + "{/yellow}"))
+    click.echo(Color("{yellow}\t" + missing_file_count + "{/yellow}"))

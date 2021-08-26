@@ -2,99 +2,125 @@
 # coding: utf-8
 
 def picard_flag(picarddup):
-  if picarddup == "mrkdup":
-      return "FALSE"
-  else:
-      return "TRUE"
+    if picarddup == "mrkdup":
+        return "FALSE"
+    else:
+        return "TRUE"
 
-rule CollectHsMetrics:
-  input:
-    fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
-    bed = config["panel"]["capture_kit"],
-    bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
-    fa = config["reference"]["reference_genome"],
-  output:
-    mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
-  params:
-    mem = "16g",
-    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    conda = config["bioinfo_tools"].get("picard"),
-    baitsetname = os.path.basename(config["panel"]["capture_kit"])
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + "CollectHsMetrics_" + "{sample}.collect_hsmetrics.tsv"
-  shell:
-    "source activate {params.conda};"
-    "mkdir -p {params.tmpdir}; "
-    "export TMPDIR={params.tmpdir}; "
-    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
-      "BedToIntervalList "
-      "I={input.bed} "
-      "O={input.bam}.picard.bedintervals "
-      "SD={input.fadict}; "
-    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
-      "CollectHsMetrics "
-      "BI={input.bam}.picard.bedintervals "
-      "TI={input.bam}.picard.bedintervals "
-      "I={input.bam} "
-      "O={output.mrkdup} "
-      "R={input.fa} "
-      "BAIT_SET_NAME={params.baitsetname} "
-      "COVERAGE_CAP=50000 "
-      "METRIC_ACCUMULATION_LEVEL=ALL_READS; "
-    
+rule picard_CollectHsMetrics:
+    input:
+        fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
+        bed = config["panel"]["capture_kit"],
+        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+        fa = config["reference"]["reference_genome"],
+    output:
+        mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
+    benchmark:
+        Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        conda = config["bioinfo_tools"].get("picard"),
+        baitsetname = os.path.basename(config["panel"]["capture_kit"]),
+        sample = '{sample}'
+    threads:
+        get_threads(cluster_config, 'picard_CollectHsMetrics')
+    message:
+        "Calculating picard HsMetrics for sample '{params.sample}'"
+    shell:
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
 
-rule CollectAlignmentSummaryMetrics:
-  input:
-    bam = bam_dir + "{sample}.sorted.bam",
-    fa = config["reference"]["reference_genome"]
-  output:
-    bam_dir + "{sample}.sorted.alignmetric"
-  params:
-    mem = "16g",
-    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    conda = config["bioinfo_tools"].get("picard"),
-    adapter = config["QC"]["adapter"]
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + "CollectAlignmentSummaryMetrics_" + "{sample}.collect_alignment_summary.tsv"
-  shell:
-    "source activate {params.conda};"
-    "mkdir -p {params.tmpdir}; "
-    "export TMPDIR={params.tmpdir}; "
-    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
-      "CollectAlignmentSummaryMetrics "
-      "R={input.fa} "
-      "I={input.bam} "
-      "O={output} "
-      "ADAPTER_SEQUENCE={params.adapter} "
-      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
-      "METRIC_ACCUMULATION_LEVEL=LIBRARY;"
-    
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+BedToIntervalList \
+I={input.bed} \
+O={input.bam}.picard.bedintervals \
+SD={input.fadict};
 
-rule CollectInsertSizeMetrics:
-  input:
-    bam = bam_dir + "{sample}.sorted.bam"
-  output:
-    pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
-    txt = bam_dir + "{sample}.sorted.insertsizemetric"
-  params:
-    mem = "16g",
-    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    conda = config["bioinfo_tools"].get("picard")
-  singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
-  benchmark:
-    benchmark_dir + "CollectInsertSizeMetrics_" + "{sample}.collect_insertsize_metrics.tsv"
-  shell:
-    "source activate {params.conda};"
-    "mkdir -p {params.tmpdir}; "
-    "export TMPDIR={params.tmpdir}; "
-    "picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} "
-      "CollectInsertSizeMetrics "
-      "I={input.bam} "
-      "H={output.pdf} "
-      "O={output.txt} "
-      "M=0.01 "
-      "INCLUDE_DUPLICATES=TRUE "
-      "METRIC_ACCUMULATION_LEVEL=ALL_READS "
-      "METRIC_ACCUMULATION_LEVEL=LIBRARY; "
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectHsMetrics \
+BI={input.bam}.picard.bedintervals \
+TI={input.bam}.picard.bedintervals \
+I={input.bam} \
+O={output.mrkdup} \
+R={input.fa} \
+BAIT_SET_NAME={params.baitsetname} \
+COVERAGE_CAP=50000 \
+METRIC_ACCUMULATION_LEVEL=ALL_READS;
+      """
+
+rule picard_CollectAlignmentSummaryMetrics:
+    input:
+        bam = bam_dir + "{sample}.sorted.bam",
+        fa = config["reference"]["reference_genome"]
+    output:
+        bam_dir + "{sample}.sorted.alignmetric"
+    benchmark:
+        Path(benchmark_dir, "CollectAlignmentSummaryMetrics_" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        conda = config["bioinfo_tools"].get("picard"),
+        adapter = config["QC"]["adapter"],
+        sample = '{sample}'
+    threads:
+        get_threads(cluster_config,'picard_CollectAlignmentSummaryMetrics')
+    message:
+        "Calculating picard alignment summary metrics for sample '{params.sample}'"
+    shell:
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectAlignmentSummaryMetrics \
+R={input.fa} \
+I={input.bam} \
+O={output} \
+ADAPTER_SEQUENCE={params.adapter} \
+METRIC_ACCUMULATION_LEVEL=ALL_READS \
+METRIC_ACCUMULATION_LEVEL=LIBRARY;
+        """
+
+rule picard_CollectInsertSizeMetrics:
+    input:
+        bam = bam_dir + "{sample}.sorted.bam"
+    output:
+        pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
+        txt = bam_dir + "{sample}.sorted.insertsizemetric"
+    benchmark:
+        Path(benchmark_dir, "picard_CollectInsertSizeMetrics_" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        conda = config["bioinfo_tools"].get("picard"),
+        sample = '{sample}'
+    threads:
+        get_threads(cluster_config,'picard_CollectInsertSizeMetrics')
+    message:
+        "Calculating picard InsertSize metrics for sample '{params.sample}'"
+    shell:
+        """
+source activate {params.conda};
+mkdir -p {params.tmpdir}; 
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectInsertSizeMetrics \
+I={input.bam} \
+H={output.pdf} \
+O={output.txt} \
+M=0.01 \
+INCLUDE_DUPLICATES=TRUE \
+METRIC_ACCUMULATION_LEVEL=ALL_READS \
+METRIC_ACCUMULATION_LEVEL=LIBRARY;
+        """

@@ -1,0 +1,3 @@
+[submodule "submodules/ascatNgs"]
+	path = submodules/ascatNgs
+	url = https://github.com/cancerit/ascatNgs

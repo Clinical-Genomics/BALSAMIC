@@ -55,7 +55,7 @@ def get_bait_name(input_config: str):
 
 
 def get_sample_name(input_config: str):
-    """ Get the sample names from the config file
+    """Get the sample names from the config file
 
     Args:
         input_config: Path to config
@@ -75,7 +75,7 @@ def get_sample_name(input_config: str):
 
 
 def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
-    """ Creates a new DataFrame with the QC criteria for only the desired bait set
+    """Creates a new DataFrame with the QC criteria for only the desired bait set
 
     Args:
         input_df: qc table as DataFrame
@@ -94,10 +94,13 @@ def get_qc_criteria(input_df: pd.DataFrame, bait: str) -> pd.DataFrame:
     return qc_df
 
 
-def check_qc_criteria(input_qc_df: pd.DataFrame,
-                      input_hsmetrics_df: pd.DataFrame, normal_sample: str,
-                      tumor_sample: str) -> pd.DataFrame:
-    """ This function can be divided in different parts:
+def check_qc_criteria(
+    input_qc_df: pd.DataFrame,
+    input_hsmetrics_df: pd.DataFrame,
+    normal_sample: str,
+    tumor_sample: str,
+) -> pd.DataFrame:
+    """This function can be divided in different parts:
         1) Merging intersected values for the df with the desired QC criteria and bait set, with the HS Metrics df
         2) Creating new columns with the QC-differences from the QC criteria
         3) Setting QC flags
@@ -115,52 +118,61 @@ def check_qc_criteria(input_qc_df: pd.DataFrame,
     """
 
     # 1) Merge the two df by col (axis = 1) for those rows that are shared (intersected) by passing join='inner'
-    merged_df = pd.concat([input_hsmetrics_df, input_qc_df],
-                          axis=1,
-                          join='inner')
+    merged_df = pd.concat([input_hsmetrics_df, input_qc_df], axis=1, join="inner")
     column_header = list(merged_df.columns)
 
     # 2) Adding new col with the calculated difference in the qc values
-    merged_df['qc_diff_' + normal_sample] = merged_df[
-        column_header[2]] - merged_df[column_header[0]]
-    merged_df['qc_diff_' + tumor_sample] = merged_df[
-        column_header[2]] - merged_df[column_header[1]]
+    merged_df["qc_diff_" + normal_sample] = (
+        merged_df[column_header[2]] - merged_df[column_header[0]]
+    )
+    merged_df["qc_diff_" + tumor_sample] = (
+        merged_df[column_header[2]] - merged_df[column_header[1]]
+    )
 
     # 3) Desired conditions for normal and tumor sample to pass. Two different conditions are required
     # since the conditions are different for the samples and should not overwrite each other.
-    conditions_normal = [(merged_df['qc_diff_' + normal_sample] <= 0) &
-                         (merged_df['METRIC_CRITERIA'] == 'gt'),
-                         (merged_df['qc_diff_' + normal_sample] >= 0) &
-                         (merged_df['METRIC_CRITERIA'] == 'lt')]
+    conditions_normal = [
+        (merged_df["qc_diff_" + normal_sample] <= 0)
+        & (merged_df["METRIC_CRITERIA"] == "gt"),
+        (merged_df["qc_diff_" + normal_sample] >= 0)
+        & (merged_df["METRIC_CRITERIA"] == "lt"),
+    ]
 
-    conditions_tumor = [(merged_df['qc_diff_' + tumor_sample] <= 0) &
-                        (merged_df['METRIC_CRITERIA'] == 'gt'),
-                        (merged_df['qc_diff_' + tumor_sample] >= 0) &
-                        (merged_df['METRIC_CRITERIA'] == 'lt')]
+    conditions_tumor = [
+        (merged_df["qc_diff_" + tumor_sample] <= 0)
+        & (merged_df["METRIC_CRITERIA"] == "gt"),
+        (merged_df["qc_diff_" + tumor_sample] >= 0)
+        & (merged_df["METRIC_CRITERIA"] == "lt"),
+    ]
 
     # If above conditions are "True", set them as "pass"
-    set_qc = ['Pass', 'Pass']
+    set_qc = ["Pass", "Pass"]
 
     # Adding new column with qc flag.
-    merged_df['qc_check_' + normal_sample] = np.select(conditions_normal,
-                                                       set_qc,
-                                                       default="Fail")
-    merged_df['qc_check_' + tumor_sample] = np.select(conditions_tumor,
-                                                      set_qc,
-                                                      default="Fail")
+    merged_df["qc_check_" + normal_sample] = np.select(
+        conditions_normal, set_qc, default="Fail"
+    )
+    merged_df["qc_check_" + tumor_sample] = np.select(
+        conditions_tumor, set_qc, default="Fail"
+    )
 
     # 4) create a new df and copy the desired columns (separated by ',').
-    qc_check_df = merged_df[[
-        'qc_check_' + normal_sample, 'qc_diff_' + normal_sample,
-        'qc_check_' + tumor_sample, 'qc_diff_' + tumor_sample
-    ]].copy()
+    qc_check_df = merged_df[
+        [
+            "qc_check_" + normal_sample,
+            "qc_diff_" + normal_sample,
+            "qc_check_" + tumor_sample,
+            "qc_diff_" + tumor_sample,
+        ]
+    ].copy()
 
     return qc_check_df
 
 
-def failed_qc(input_df: pd.DataFrame, normal_sample: str,
-              tumor_sample: str) -> pd.DataFrame:
-    """ Outputs if the QC failed
+def failed_qc(
+    input_df: pd.DataFrame, normal_sample: str, tumor_sample: str
+) -> pd.DataFrame:
+    """Outputs if the QC failed
 
     Args:
         input_df: DataFrame with qc parameters and qc differences
@@ -173,9 +185,9 @@ def failed_qc(input_df: pd.DataFrame, normal_sample: str,
     """
 
     # copy the columns with qc criteria
-    copy_qc_df = input_df[[
-        'qc_check_' + normal_sample, 'qc_check_' + tumor_sample
-    ]].copy()
+    copy_qc_df = input_df[
+        ["qc_check_" + normal_sample, "qc_check_" + tumor_sample]
+    ].copy()
 
     # Creating df which set "True" for "Fail" values and "False" for "Pass" values
     qc_boolean = copy_qc_df.isin(["Fail"])
@@ -191,7 +203,7 @@ def failed_qc(input_df: pd.DataFrame, normal_sample: str,
 
 
 def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
-    """ Outputs the QC parameters as csv-file
+    """Outputs the QC parameters as csv-file
 
     Args:
         input_df: DataFrame with qc parameters and qc differences
@@ -202,13 +214,13 @@ def write_output(input_df: pd.DataFrame, output_path: str) -> pd.DataFrame:
 
     """
 
-    output_df = input_df.to_csv(output_path, sep='\t')
+    output_df = input_df.to_csv(output_path, sep="\t")
 
     return output_df
 
 
 def get_qc_check(hs_metrics, output, config):
-    """ Runs all above functions to provide the desired outputs
+    """Runs all above functions to provide the desired outputs
 
     Args:
         hs_metrics: Path to hs_metrics file
@@ -229,8 +241,9 @@ def get_qc_check(hs_metrics, output, config):
     qc_criteria_df = get_qc_criteria(qc_table_df, bait_set)
 
     # Create a df with qc-flag for each criteria for each sample
-    extract_criteria = check_qc_criteria(qc_criteria_df, hs_metrics_df,
-                                         sample_names[0], sample_names[1])
+    extract_criteria = check_qc_criteria(
+        qc_criteria_df, hs_metrics_df, sample_names[0], sample_names[1]
+    )
 
     # Check if qc failed
     failed_qc(extract_criteria, sample_names[0], sample_names[1])

@@ -1,3 +1,77 @@
+[8.0.0]
+-------
+
+Added:
+^^^^^^
+
+* ``samtools`` flagstats and stats to workflow and MultiQC
+* ``delly v0.8.7`` somatic SV caller #644
+* ``delly`` containter #644
+* ``bcftools v1.12`` to ``delly`` container #644
+* ``tabix v0.2.6`` to ``delly`` container #644
+* Passed SV calls from Manta to clinical delivery
+* An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
+* Added ``vcf2cytosure`` to annotate container
+* ``git`` to the container definition
+* prepare_delly_exclusion rule
+* Installation of ``PureCN`` rpackage in ``cnvkit`` container
+* Calculate tumor-purity and ploidy using ``PureCN`` for ``cnvkit`` call
+* ``ascatngs`` as a submodule #672
+* GitHub action to build and test ``ascatngs`` container
+* Reference section to ``docs/FAQ.rst``
+* ``ascatngs`` download references from reference_file repository #672
+* ``delly`` tumor only rule #644
+* ``ascatngs`` download container #672
+* Documentation update on setting sentieon env variables in ``bashrc``
+* ``ascatngs`` tumor normal rule for wgs cases #672
+* Individual rules (i.e. ngs filters) for cnv and sv callers. Only Manta will be delivered and added to the list of output files. #708
+* Added "targeted" and "wgs" tags to variant callers to provide another layer of separation. #708
+* ``manta`` convert inversion #709
+* Sentieon version to bioinformatic tool version parsing #685 
+* added ``CITATION.cff`` to cite BALSAMIC
+
+
+Changed:
+^^^^^^^^
+
+* Upgrade to latest sentieon version 202010.02
+* New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
+* New name rule ``GATK_contest`` to ``gatk_contest`` 
+* Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
+* Updated ``snakemake`` to ``v6.5.3`` #501 
+* Update ``GNOMAD`` URL
+* Split Tumor-only ``cnvkit batch`` into individual commands
+* Improved TMB calculation issue #51
+* Generalized ascat, delly, and manta result in workflow. #708
+* Generalized workflow to eliminate duplicate entries and code. #708
+* Split Tumor-Normal ``cnvkit batch`` into individual commands
+* Moved params that are used in multiple rules to constants #711
+* Changed the way conda and non-conda bioinfo tools version are parsed
+* Python code formatter changed from Black to YAPF #619
+
+
+Fixed:
+^^^^^^
+
+* post-processing of the umi consensus in handling BI tags
+* vcf-filtered-clinical tag files will have all variants including PASS
+* Refactor snakemake ``annotate`` rules according to snakemake etiquette #636
+* Refactor snakemake ``align`` rules according to snakemake etiquette #636 
+* Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette #636
+* Order of columns in QC and coverage report issue #601
+* ``delly`` not showing in workflow at runtime #644
+* ``ascatngs`` documentation links in ``FAQs`` #672
+* ``varcall_py36`` container build and push #703
+* Wrong spacing in reference json issue #704
+* Refactor snakemake ``quality control`` rules according to snakemake etiquette #636
+
+Removed:
+^^^^^^^^
+
+* Cleaned up unused container definitions and conda environment files
+* Remove cnvkit calling for WGS cases
+* Removed the install.sh script
+
 [7.2.5]
 -------
 
