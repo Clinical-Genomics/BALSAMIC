@@ -1,4 +1,4 @@
-[7.X.X]
+[8.0.0]
 -------
 
 Added:
@@ -11,7 +11,7 @@ Added:
 * ``tabix v0.2.6`` to ``delly`` container #644
 * Passed SV calls from Manta to clinical delivery
 * An extra filter to VarDict tumor-normal to remove variants with STATUS=Germline, all other will still be around
-* Added ``vcf2cytosure``` to annotate container
+* Added ``vcf2cytosure`` to annotate container
 * ``git`` to the container definition
 * prepare_delly_exclusion rule
 * Installation of ``PureCN`` rpackage in ``cnvkit`` container
