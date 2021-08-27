@@ -5,7 +5,6 @@ import os
 import hashlib
 import logging
 
-from datetime import date
 
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
@@ -18,7 +17,6 @@ LOG = logging.getLogger(__name__)
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-current_day = date.today()
 
 # backward compatible genome version extraction from config
 if 'genome_version' in config:
@@ -129,6 +127,9 @@ rule all:
         os.path.join(basedir, "reference.json.log")
     run:
         import json
+        from datetime import date
+
+        today = date.today()
 
         ref_json = dict()
         ref_json['reference'] = {
@@ -151,7 +152,8 @@ rule all:
             "delly_exclusion" : input.delly_exclusion,
             "delly_exclusion_converted" : input.delly_exclusion_converted,
             "ascat_gccorrection" : input.ascat_gccorrection,
-            "ascat_chryloci" : input.ascat_chryloci
+            "ascat_chryloci" : input.ascat_chryloci,
+            "reference_access_date": today,
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -159,7 +161,8 @@ rule all:
         
         create_md5(ref_json['reference'], output.check_md5)
 
-        shell("date +'%Y-%M-%d T%T %:z' > {output.finished}") 
+        with open(str(output.finished), mode='w') as finish_file:
+            finish_file.write('%s\n' % today)
 
 
 ##########################################################
