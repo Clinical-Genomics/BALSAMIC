@@ -1,3 +1,9 @@
+[X.X.X]
+-------
+
+Added:
+* ``BALSAMIC`` container #671
+
 [8.0.1]
 -------
 
