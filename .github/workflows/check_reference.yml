@@ -1,0 +1,87 @@
+name: Test reference dry run
+on:
+  push:
+    paths-ignore:
+      - "CHANGELOG.rst"
+      - "docs/**"
+  pull_request:
+    paths-ignore:
+      - "CHANGELOG.rst"
+      - "docs/**"
+jobs:
+  download_reference:
+    name: download reference
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.6]
+    steps:
+      # Checkout BALSAMIC
+      - name: Git checkout
+        id: git_checkout
+        uses: actions/checkout@v2
+      # Get branch name
+      - name: Get branch name
+        id: get_branch_name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+      # Install Singularity prerequisites
+      - name: Setup Go
+        id: setup_go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.13.15' # The Go version to download (if necessary) and use.
+      - name: Install dependencies
+        id: install_dependencies
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+          build-essential \
+          libssl-dev \
+          uuid-dev \
+          libgpgme11-dev \
+          squashfs-tools \
+          libseccomp-dev \
+          wget \
+          pkg-config \
+          git \
+          cryptsetup
+      - name: Downloand and install Singularity
+        id: install_singularity
+        env:
+          SINGULARITY_VERSION: 3.5.2
+        shell: bash
+        run: |
+          wget https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz && \
+          tar -xzf singularity-${SINGULARITY_VERSION}.tar.gz && \
+          cd singularity && ./mconfig && \
+          make -C builddir && \
+          sudo make -C builddir install
+      - name: Test Singularity
+        shell: bash
+        run: |
+          singularity --version
+      # Conda env create
+      - name: setup conda
+        id: setup_conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: balsamic
+          environment-file: BALSAMIC/conda/balsamic.yaml
+          python-version: ${{ matrix.python-version }}
+      # Install BALSAMIC
+      - name: Install BALSAMIC
+        id: install_balsamic
+        shell: bash -l {0}
+        run: |
+          conda activate balsamic
+          pip install --no-cache-dir -r requirements-dev.txt
+          pip install .
+      # Run balsamic init
+      - name: Run balsamic init
+        id: balsamic_init
+        shell: bash -l {0}
+        run: |
+          conda activate balsamic
+          balsamic init -o balsamic_cache --cosmic-key "${{ secrets.COSMIC_TOKEN }}" --genome-version hg19
