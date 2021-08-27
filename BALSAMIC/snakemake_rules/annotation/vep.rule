@@ -10,6 +10,7 @@ rule vep_somatic:
   output:
     vcf_all = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
+    bcftools_stats = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.stats"
   benchmark:
     Path(benchmark_dir, "vep_somatic_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
@@ -50,6 +51,9 @@ vep \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
 
 tabix -p vcf -f {output.vcf_all};
+
+bcftools stats {output.vcf_all} > {output.bcftools_stats};
+
 rm $tmpvcf;
     """
 
@@ -97,6 +101,7 @@ rule vep_germline:
   output:
     vcf_all = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
     vcf_summary = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz_summary.html",
+    bcftools_stats = vep_dir + "{var_type}.germline.{case_name}.{var_caller}.all.stats"
   benchmark:
     Path(benchmark_dir, "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv").as_posix()
   singularity:
@@ -127,5 +132,8 @@ vep \
 --fork {threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
+
 tabix -p vcf -f {output.vcf_all};
+
+bcftools stats {output.vcf_all} > {output.bcftools_stats};
     """
