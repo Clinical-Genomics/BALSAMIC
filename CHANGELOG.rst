@@ -1,3 +1,18 @@
+[X.X.X]
+-------
+
+Added:
+* ```BALSAMIC``` quality control metrics JSON file generation #707
+
+
+[8.0.1]
+-------
+
+Fixed:
+^^^^^^
+
+* Fixed context for Dockerfile for release content #720
+
 [8.0.0]
 -------
 

@@ -1,9 +1,10 @@
-name: build test container submodule
+name: build and push container submodule
 # Tigger building and testing container only on pull requests
 on:
   push:
     tags:
       - "**"
+
 jobs:
   main:
     name: Docker image build test
@@ -28,6 +29,6 @@ jobs:
         id: docker_build_and_push
         uses: docker/build-push-action@v2
         with:
-          context: ascatNgs
+          context: submodules/ascatNgs
           push: true
           tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-ascatngs
