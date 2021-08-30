@@ -15,7 +15,7 @@ BALSAMIC is using Black (https://github.com/psf/black) as code formatter.
 
 PRs should follow the following keywords in the title: https://www.conventionalcommits.org/en/v1.0.0/
 
-Commit messages are recommended to following the following similar to PRs:
+For example, the following conventions are recommended while creating the PR titles and commit messages:
 
 
 #. **feat**\ : Introducing a new features. This includes but not limited to workflows, SnakeMake rule, cli, and plugins. In other words, anything that is new and fundamental change will also go here. Enhancements and optimizations will go into refactor.
