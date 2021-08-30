@@ -1,3 +1,10 @@
+[X.X.X]
+-------
+
+Added:
+* Workflow to check PR tiltes to make easier to tell PR intents #724
+
+
 [8.0.1]
 -------
 
