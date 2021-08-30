@@ -13,6 +13,10 @@ Fixed:
 
 * Fixed context for Dockerfile for release content #720
 
+Added:
+
+* ``ascatngs`` hg38 references
+
 [8.0.0]
 -------
 
