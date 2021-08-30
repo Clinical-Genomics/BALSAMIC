@@ -2,7 +2,8 @@
 -------
 
 Added:
-* Workflow to check PR tiltes to make easier to tell PR intents #724
+* Workflow to check PR titles to make easier to tell PR intents #724
+* Workflow to dry run `balsamic init` command part of #675 
 
 
 [8.0.1]
