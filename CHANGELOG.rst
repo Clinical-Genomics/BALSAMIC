@@ -15,7 +15,7 @@ Fixed:
 
 Added:
 
-* ``ascatngs`` hg38 references
+* ``ascatngs`` hg38 references to constants #683 
 
 [8.0.0]
 -------
