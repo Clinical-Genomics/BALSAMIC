@@ -48,7 +48,7 @@ vep \
 --output_file {output.vcf_all} \
 --fork {threads} \
 {params.vep_defaults} \
---custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
 
 tabix -p vcf -f {output.vcf_all};
 
@@ -131,7 +131,7 @@ vep \
 --output_file {output.vcf_all} \
 --fork {threads} \
 {params.vep_defaults} \
---custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA;
 
 tabix -p vcf -f {output.vcf_all};
 
