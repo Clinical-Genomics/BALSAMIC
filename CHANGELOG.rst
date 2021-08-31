@@ -6,6 +6,10 @@ Added:
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
 * Added reference download date to ``reference.json``
 
+Changed:
+* Updated docs for git FAQs
+
+
 [8.0.1]
 -------
 
