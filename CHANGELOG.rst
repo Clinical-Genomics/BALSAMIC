@@ -4,6 +4,14 @@
 Fixed:
 ^^^^^^
 
+* Fixed breaking shell command for VEP annotation rules #734
+
+[8.0.1]
+-------
+
+Fixed:
+^^^^^^
+
 * Fixed context for Dockerfile for release content #720
 
 [8.0.0]
