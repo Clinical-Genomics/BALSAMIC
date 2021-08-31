@@ -2,12 +2,17 @@
 -------
 
 Added:
+^^^^^^
+
 * Workflow to check PR tiltes to make easier to tell PR intents #724
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
-* Added reference download date to ``reference.json``
+* Added reference download date to ``reference.json`` #726
+* ``ascatngs`` hg38 references to constants #683 
 
 Changed:
-* Updated docs for git FAQs
+^^^^^^^^
+
+* Updated docs for git FAQs #731
 
 [8.0.2]
 -------
@@ -25,9 +30,6 @@ Fixed:
 
 * Fixed context for Dockerfile for release content #720
 
-Added:
-
-* ``ascatngs`` hg38 references to constants #683 
 
 [8.0.0]
 -------
