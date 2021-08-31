@@ -38,10 +38,21 @@ picarddup = get_picard_mrkdup(config)
 samples = get_pon_samples(fastq_dir)
 
 
+panel_ref_dir = os.path.split(target_bed)[0]
+panel_name = os.path.split(target_bed)[1].replace('.bed','')
+
+pon_dir = panel_ref_dir + "/" + "PON_references" + "/"
+
+if not os.path.exists(pon_directory):
+    os.makedirs(pon_directory)
+
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
-ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
-PON_DONE = expand(cnv_dir + "PON." + "reference" + ".done")
+ALL_PON = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.cnn")
+PON_DONE = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.done")
+
+#ALL_PON = expand(cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn")
+#PON_DONE = expand(cnv_dir + "PON." + "reference" + ".done")
 
 config["rules"] = ["snakemake_rules/quality_control/fastp.rule", 
                    "snakemake_rules/align/bwa_mem.rule"]
@@ -95,8 +106,8 @@ rule create_reference:
         cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=samples, prefix=["target","antitarget"]),
         ref = reffasta
     output:
-        ref_cnn = cnv_dir + config["analysis"]["case_id"] + "_PON_reference.cnn",
-        txt = cnv_dir + "PON." + "reference" + ".done"
+        ref_cnn = ALL_PON,
+        txt = PON_done
     singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
