@@ -4,6 +4,7 @@
 Added:
 * Workflow to check PR tiltes to make easier to tell PR intents #724
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
+* Added reference download date to ``reference.json``
 
 [8.0.1]
 -------
