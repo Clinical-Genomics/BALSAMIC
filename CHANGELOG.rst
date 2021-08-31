@@ -1,3 +1,11 @@
+[8.0.2]
+-------
+
+Fixed:
+^^^^^^
+
+* Fixed breaking shell command for VEP annotation rules #734
+
 [8.0.1]
 -------
 
