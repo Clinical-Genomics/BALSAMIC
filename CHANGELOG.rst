@@ -13,6 +13,7 @@ Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
+* Changed softlinks for libreadline.so in varcall_py36 container #739
 
 [8.0.2]
 -------
@@ -21,7 +22,6 @@ Fixed:
 ^^^^^^
 
 * Fixed breaking shell command for VEP annotation rules #734
-* softlink for libreadline.so in varcall_py36 container #739
 
 [8.0.1]
 -------
