@@ -46,7 +46,7 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         version=__version__
     )
 )
-def cli(context, loglevel):
+def cli(context, tmp, loglevel):
     "BALSAMIC"
     coloredlogs.DEFAULT_FIELD_STYLES = {
         "asctime": {"color": "green"},
