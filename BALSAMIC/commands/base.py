@@ -30,6 +30,14 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     help="Set the level of log output.",
     show_default=True,
 )
+@click.option(
+    "--tmp",
+    "--tmp-dir",
+    "-t",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Set temporary directory for analysis.",
+)
 @click.version_option(version=__version__)
 @click.pass_context
 @doc(
