@@ -43,8 +43,8 @@ panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
 pon_dir = panel_ref_dir + "/" + "PON_references" + "/"
 
-if not os.path.exists(pon_directory):
-    os.makedirs(pon_directory)
+if not os.path.exists(pon_dir):
+    os.makedirs(pon_dir)
 
 ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
@@ -107,7 +107,7 @@ rule create_reference:
         ref = reffasta
     output:
         ref_cnn = ALL_PON,
-        txt = PON_done
+        txt = PON_DONE
     singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
