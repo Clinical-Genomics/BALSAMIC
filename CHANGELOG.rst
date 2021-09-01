@@ -21,6 +21,7 @@ Fixed:
 ^^^^^^
 
 * Fixed breaking shell command for VEP annotation rules #734
+* softlink for libreadline.so in varcall_py36 container #739
 
 [8.0.1]
 -------
