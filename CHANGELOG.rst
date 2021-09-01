@@ -13,6 +13,7 @@ Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
+* Storing PON references in production target panel location Clinical-Genomics/cgp-cancer-cnvcall#10 
 
 [8.0.2]
 -------
