@@ -44,10 +44,10 @@ pon_dir = panel_ref_dir + "/" + "PON_references" + "/"
 if not os.path.exists(pon_dir):
     os.makedirs(pon_dir)
 
-ALL_COVS = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
-ALL_REFS = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
-ALL_PON = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.cnn")
-PON_DONE = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.done")
+coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
+baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
+pon_reference = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.cnn")
+pon_finish = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.done")
 
 config["rules"] = ["snakemake_rules/quality_control/fastp.rule", 
                    "snakemake_rules/align/bwa_mem.rule"]
@@ -56,7 +56,7 @@ for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
 
 rule all:
-    input: ALL_REFS + ALL_COVS +  PON_DONE
+    input: pon_finish 
 
 rule create_target:
     input:
@@ -101,8 +101,8 @@ rule create_reference:
         cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=samples, prefix=["target","antitarget"]),
         ref = reffasta
     output:
-        ref_cnn = ALL_PON,
-        txt = PON_DONE
+        ref_cnn = pon_reference,
+        txt = pon_finish
     singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
