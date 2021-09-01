@@ -13,7 +13,7 @@ Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
-* Changed softlinks for libreadline.so in varcall_py36 container #739
+* Changed softlinks from libreadline.so.8.1 to libreadline.so.6 in varcall_py36 container #739
 
 [8.0.2]
 -------
