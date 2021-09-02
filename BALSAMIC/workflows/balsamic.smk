@@ -439,7 +439,7 @@ rule all:
     input:
         quality_control_results + analysis_specific_results
     output:
-        qc_json_file = os.path.join(get_result_dir(config),"qc_metrics_summary.json"),
+        qc_json_file = os.path.join(get_result_dir(config), "qc", "qc_metrics_summary.json"),
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
         tmp_dir = tmp_dir,
