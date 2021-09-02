@@ -31,7 +31,6 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     show_default=True,
 )
 @click.option(
-    "--tmp",
     "--tmp-dir",
     "-t",
     type=click.Path(exists=True, resolve_path=True),
@@ -46,7 +45,7 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         version=__version__
     )
 )
-def cli(context, tmp, loglevel):
+def cli(context, tmp_dir, loglevel):
     "BALSAMIC"
     coloredlogs.DEFAULT_FIELD_STYLES = {
         "asctime": {"color": "green"},
@@ -63,7 +62,7 @@ def cli(context, tmp, loglevel):
 
     context.obj = {}
     context.obj["loglevel"] = loglevel
-    # LOG.info(f"BALSAMIC started with log level {loglevel}.")
+    context.obj["tmp_dir"] = tmp_dir
 
 
 cli.add_command(run_command)

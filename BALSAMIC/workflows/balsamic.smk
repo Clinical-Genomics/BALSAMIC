@@ -36,8 +36,14 @@ shell.prefix("set -eo pipefail; ")
 LOG = logging.getLogger(__name__)
 
 # Create a temporary directory with trailing /
+# User provided tmpdir should exist, otherwise create one
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+if "tmp_dir" in config["analysis"]:
+    tmp_dir = config["analysis"]["tmp_dir"] 
+else:
+    Path.mkdir(Path(tmp_dir), exist_ok=True)
+
+LOG.info("temp directory for analysis is set to: {}".format(tmp_dir))
 
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"

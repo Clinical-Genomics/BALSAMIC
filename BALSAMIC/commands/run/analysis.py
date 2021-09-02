@@ -211,6 +211,9 @@ def analysis(
     case_name = sample_config["analysis"]["case_id"]
     sequencing_type = sample_config["analysis"]["sequencing_type"]
 
+    if 'tmp_dir' in context.obj:
+        sample_config["analysis"]["tmp_dir"] = context.obj['tmp_dir']
+
     if run_analysis:
         # if not dry run, then create (new) log/script directory
         for dirpath, dirnames, files in os.walk(logpath):
