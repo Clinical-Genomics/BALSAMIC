@@ -13,7 +13,11 @@ Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
-* Changed softlinks for libreadline.so in varcall_py36 container #739
+
+Fixed:
+^^^^^^
+
+* Fixed bug with using varcall_py36 container with VarDict #739
 
 [8.0.2]
 -------

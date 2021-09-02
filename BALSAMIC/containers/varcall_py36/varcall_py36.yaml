@@ -10,3 +10,4 @@ dependencies:
   - bioconda::vardict=2019.06.04=pl526_0
   - bioconda::vardict-java=1.7
   - conda-forge::libiconv
+  - conda-forge::r-base=3.6.3
