@@ -37,17 +37,12 @@ Path.mkdir(Path(tmp_dir), exist_ok=True)
 picarddup = get_picard_mrkdup(config)
 samples = get_pon_samples(fastq_dir)
 
-panel_ref_dir = os.path.split(target_bed)[0]
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
-pon_dir = panel_ref_dir + "/" + "PON_references" + "/"
-
-if not os.path.exists(pon_dir):
-    os.makedirs(pon_dir)
 
 coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
-pon_reference = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.cnn")
-pon_finish = expand(pon_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.done")
+pon_reference = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.cnn")
+pon_finish = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.done")
 
 config["rules"] = ["snakemake_rules/quality_control/fastp.rule", 
                    "snakemake_rules/align/bwa_mem.rule"]
