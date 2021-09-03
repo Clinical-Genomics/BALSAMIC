@@ -13,6 +13,7 @@ Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
+* Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10 
 
 Fixed:
 ^^^^^^
