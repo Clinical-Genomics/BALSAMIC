@@ -115,192 +115,185 @@ if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
 os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
+germline_caller_snv_balsamic = get_variant_callers(config=config,
+                                        analysis_type=config['analysis']['analysis_type'],
+                                        workflow_solution="BALSAMIC",
+                                        mutation_type="SNV",
+                                        sequencing_type=config["analysis"]["sequencing_type"],
+                                        mutation_class="germline")
+
+germline_caller_snv_sentieon = get_variant_callers(config=config,
+                                       analysis_type=config['analysis']['analysis_type'],
+                                       workflow_solution="Sentieon",
+                                       mutation_type="SNV",
+                                       sequencing_type=config["analysis"]["sequencing_type"],
+                                       mutation_class="germline")
+
+germline_caller_sv = get_variant_callers(config=config,
+                                       analysis_type=config['analysis']['analysis_type'],
+                                       workflow_solution="BALSAMIC",
+                                       mutation_type="SV",
+                                       sequencing_type=config["analysis"]["sequencing_type"],
+                                       mutation_class="germline")
+
+somatic_caller_cnv = get_variant_callers(config=config,
+                                         analysis_type=config['analysis']['analysis_type'],
+                                         workflow_solution="BALSAMIC",
+                                         mutation_type="CNV",
+                                         sequencing_type=config["analysis"]["sequencing_type"],
+                                         mutation_class="somatic")
+
+somatic_caller_sv = get_variant_callers(config=config,
+                                        analysis_type=config['analysis']['analysis_type'],
+                                        workflow_solution="BALSAMIC",
+                                        mutation_type="SV",
+                                        sequencing_type=config["analysis"]["sequencing_type"],
+                                        mutation_class="somatic")
+
+somatic_caller_snv_balsamic = get_variant_callers(config=config,
+                                       analysis_type=config['analysis']['analysis_type'],
+                                       workflow_solution="BALSAMIC",
+                                       mutation_type="SNV",
+                                       sequencing_type=config["analysis"]["sequencing_type"],
+                                       mutation_class="somatic")
+
+somatic_caller_snv_sentieon = get_variant_callers(config=config,
+                                         analysis_type=config['analysis']['analysis_type'],
+                                         workflow_solution="Sentieon",
+                                         mutation_type="SNV",
+                                         sequencing_type=config["analysis"]["sequencing_type"],
+                                         mutation_class="somatic")
+
+somatic_caller_snv_umi = get_variant_callers(config=config,
+                                         analysis_type=config['analysis']['analysis_type'],
+                                         workflow_solution="Sentieon_umi",
+                                         mutation_type="SNV",
+                                         sequencing_type=config["analysis"]["sequencing_type"],
+                                         mutation_class="somatic")
+
+germline_caller = germline_caller_snv_sentieon + germline_caller_snv_balsamic + germline_caller_sv
+LOG.info(f"{germline_caller}")
+
 # Define set of rules
-qc_rules = [
-    "snakemake_rules/quality_control/fastp.rule",
-    "snakemake_rules/quality_control/fastqc.rule",
-    "snakemake_rules/quality_control/multiqc.rule",
-    "snakemake_rules/variant_calling/mergetype_tumor.rule",
-]
+
+SNAKEMAKE_RULES = {
+    "common": {
+        "qc":
+            [
+            "snakemake_rules/quality_control/fastp.rule",
+            "snakemake_rules/quality_control/fastqc.rule",
+            "snakemake_rules/quality_control/multiqc.rule",
+            "snakemake_rules/variant_calling/mergetype_tumor.rule",
+            ],
+        "align":[],
+        "varcall":["snakemake_rules/variant_calling/germline_sv.rule"],
+        "annotate":["snakemake_rules/annotation/vep.rule"],
+    },
+    "single_targeted":{
+        "qc":[
+            "snakemake_rules/quality_control/GATK.rule",
+            "snakemake_rules/quality_control/picard.rule",
+            "snakemake_rules/quality_control/sambamba_depth.rule",
+            "snakemake_rules/quality_control/mosdepth.rule",
+            "snakemake_rules/umi/qc_umi.rule",
+            "snakemake_rules/umi/mergetype_tumor_umi.rule",
+        ],
+        "align":[
+            "snakemake_rules/align/bwa_mem.rule",
+            "snakemake_rules/umi/sentieon_umiextract.rule",
+            "snakemake_rules/umi/sentieon_consensuscall.rule",
+        ],
+        "varcall":[
+            "snakemake_rules/variant_calling/germline.rule",
+            "snakemake_rules/variant_calling/split_bed.rule",
+            "snakemake_rules/variant_calling/cnvkit_single.rule",
+            "snakemake_rules/variant_calling/somatic_tumor_only.rule",
+            "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
+            "snakemake_rules/umi/sentieon_varcall_tnscope.rule",
+        ],
+        "annotate":[
+            "snakemake_rules/annotation/rankscore.rule",
+            "snakemake_rules/annotation/varcaller_sv_filter.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
+        ],
+    },
+    "paired_targeted":{
+        "qc":[
+            "snakemake_rules/quality_control/GATK.rule",
+            "snakemake_rules/quality_control/picard.rule",
+            "snakemake_rules/quality_control/sambamba_depth.rule",
+            "snakemake_rules/quality_control/mosdepth.rule",
+            "snakemake_rules/umi/qc_umi.rule",
+            "snakemake_rules/variant_calling/mergetype_normal.rule",
+            "snakemake_rules/umi/mergetype_tumor_umi.rule",
+            "snakemake_rules/umi/mergetype_normal_umi.rule",
+            "snakemake_rules/quality_control/contest.rule",
+        ],
+        "align":[
+            "snakemake_rules/align/bwa_mem.rule",
+            "snakemake_rules/umi/sentieon_umiextract.rule",
+            "snakemake_rules/umi/sentieon_consensuscall.rule",
+        ],
+        "varcall":[
+            "snakemake_rules/variant_calling/germline.rule",
+            "snakemake_rules/variant_calling/split_bed.rule",
+            "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
+            "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
+            "snakemake_rules/variant_calling/cnvkit_paired.rule",
+            "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule",
+        ],
+        "annotate":[
+            "snakemake_rules/annotation/rankscore.rule",
+            "snakemake_rules/annotation/varcaller_sv_filter.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
+        ],
+    },
+    "single_wgs":{
+        "qc":[
+            "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
+            "snakemake_rules/quality_control/picard_wgs.rule"
+        ],
+        "align":["snakemake_rules/align/sentieon_alignment.rule"],
+        "varcall":[
+            "snakemake_rules/variant_calling/sentieon_germline.rule",
+            "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
+            "snakemake_rules/variant_calling/sentieon_t_varcall.rule",
+            "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
+            "snakemake_rules/dragen_suite/dragen_dna.rule",
+        ],
+        "annotate":[
+            "snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule",
+            "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_only.rule",
+        ],
+    },
+    "paired_wgs":{
+        "qc":[
+            "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
+            "snakemake_rules/quality_control/picard_wgs.rule",
+            "snakemake_rules/variant_calling/mergetype_normal.rule",
+        ],
+        "align":["snakemake_rules/align/sentieon_alignment.rule"],
+        "varcall":[
+            "snakemake_rules/variant_calling/sentieon_germline.rule",
+            "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
+            "snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
+            "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
+        ],
+        "annotate":[
+            "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_normal.rule",
+        ],
+    },
+}
 
 germline_call_samples = ["tumor"]
 if config['analysis']['analysis_type'] == "paired":
     germline_call_samples.append("normal")
-    qc_rules.append("snakemake_rules/variant_calling/mergetype_normal.rule")
 
-if config["analysis"]["sequencing_type"] == "wgs":
-    qc_rules.extend([
-        "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
-        "snakemake_rules/quality_control/picard_wgs.rule"])
-
-    align_rules = ["snakemake_rules/align/sentieon_alignment.rule"]
-else:
+if config["analysis"]["sequencing_type"] != "wgs":
     chromlist = config["panel"]["chrom"]
-    qc_rules.extend([
-        "snakemake_rules/quality_control/GATK.rule",
-        "snakemake_rules/quality_control/picard.rule",
-        "snakemake_rules/quality_control/sambamba_depth.rule",
-        "snakemake_rules/quality_control/mosdepth.rule"
-    ])
 
-    align_rules = [
-        "snakemake_rules/align/bwa_mem.rule",
-        "snakemake_rules/umi/sentieon_umiextract.rule",
-        "snakemake_rules/umi/sentieon_consensuscall.rule",
-    ]
-
-
-annotation_rules = ["snakemake_rules/annotation/vep.rule"]
-
-
-if config["analysis"]["sequencing_type"] == "wgs":
-    variantcalling_rules = ["snakemake_rules/variant_calling/sentieon_germline.rule"]
-    germline_caller = ["dnascope"]
-else:
-    variantcalling_rules = [
-        "snakemake_rules/variant_calling/germline.rule",
-        "snakemake_rules/variant_calling/split_bed.rule"
-    ]
-
-    germline_caller_snv = get_variant_callers(config=config,
-                                              analysis_type=config['analysis']['analysis_type'],
-                                              workflow_solution="BALSAMIC",
-                                              mutation_type="SNV",
-                                              sequencing_type=config["analysis"]["sequencing_type"],
-                                              mutation_class="germline")
-
-    germline_caller_sv = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="BALSAMIC",
-                                             mutation_type="SV",
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="germline")
-
-    germline_caller = germline_caller_snv + germline_caller_sv
-
-
-    if sentieon:
-        germline_caller.append("dnascope")
-
-if config["analysis"]["sequencing_type"] == "wgs":
-    variantcalling_rules.append("snakemake_rules/variant_calling/sentieon_split_snv_sv.rule")
-
-
-    somatic_caller_cnv = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="BALSAMIC",
-                                             mutation_type="CNV",
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="somatic")
-
-
-    somatic_caller_sv = get_variant_callers(config=config,
-                                            analysis_type=config['analysis']['analysis_type'],
-                                            workflow_solution="BALSAMIC",
-                                            mutation_type="SV",
-                                            sequencing_type=config["analysis"]["sequencing_type"],
-                                            mutation_class="somatic")
-
-
-    somatic_caller_snv = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="Sentieon",
-                                             mutation_type="SNV",
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="somatic")
-
-
-    if config['analysis']['analysis_type'] == "paired":
-
-        variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
-                                     "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-                                    ])
-
-        annotation_rules.extend(["snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
-                                 "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_normal.rule",
-                                ])
-
-    else:
-
-        variantcalling_rules.extend(["snakemake_rules/variant_calling/sentieon_t_varcall.rule",
-                                     "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
-                                     "snakemake_rules/dragen_suite/dragen_dna.rule",
-                                     ])
-
-        annotation_rules.extend(["snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule",
-                                 "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_only.rule",
-                                ])
-
-else:
-
-    sentieon_callers = ["tnhaplotyper"] if sentieon else []
-
-    umiqc_rules = ["snakemake_rules/umi/qc_umi.rule",
-                   "snakemake_rules/umi/mergetype_tumor_umi.rule"]
-     
-    generatetable_umi_rules = [ "snakemake_rules/umi/generate_AF_tables.rule" ]
-
-    annotation_rules.extend(["snakemake_rules/annotation/rankscore.rule",
-                                 "snakemake_rules/annotation/varcaller_sv_filter.rule",
-                                ])
-
-    somatic_caller_sv = get_variant_callers(config=config,
-                                            analysis_type=config['analysis']['analysis_type'],
-                                            workflow_solution="BALSAMIC",
-                                            mutation_type="SV",
-                                            sequencing_type=config["analysis"]["sequencing_type"],
-                                            mutation_class="somatic")
-
-    somatic_caller_cnv = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="BALSAMIC",
-                                             mutation_type="CNV",
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="somatic")
-
-    somatic_caller_snv = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="BALSAMIC",
-                                             mutation_type="SNV",
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="somatic")
-
-    somatic_caller_snv_umi = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="Sentieon_umi",
-                                             mutation_type="SNV",
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="somatic")
-
-    somatic_caller_snv = somatic_caller_snv + sentieon_callers + somatic_caller_snv_umi
-
-
-    if config["analysis"]["analysis_type"] == "paired":
-        umiqc_rules.extend(["snakemake_rules/umi/mergetype_normal_umi.rule"])
-        annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_normal.rule")
-
-        qc_rules.append("snakemake_rules/quality_control/contest.rule")
-
-        variantcalling_rules.extend([
-            "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
-            "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-            "snakemake_rules/variant_calling/cnvkit_paired.rule",
-            "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule"
-        ])
-
-    else:
-
-        annotation_rules.append("snakemake_rules/annotation/varcaller_filter_tumor_only.rule")
-
-        variantcalling_rules.extend([
-            "snakemake_rules/variant_calling/cnvkit_single.rule",
-            "snakemake_rules/variant_calling/somatic_tumor_only.rule",
-            "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
-            "snakemake_rules/umi/sentieon_varcall_tnscope.rule"
-        ])
-
-
-
+somatic_caller_snv = somatic_caller_snv_umi + somatic_caller_snv_balsamic + somatic_caller_snv_sentieon
 somatic_caller = somatic_caller_snv + somatic_caller_sv + somatic_caller_cnv
 LOG.info(f"{somatic_caller}")
 
@@ -313,14 +306,25 @@ if "disable_variant_caller" in config:
         if var_caller in germline_caller:
             germline_caller.remove(var_caller)
 
-config["rules"] = align_rules + qc_rules
+rules_to_include = []
+analysis_type = config['analysis']["analysis_type"]
+sequence_type = config['analysis']["sequencing_type"]
+
+for sub,value in SNAKEMAKE_RULES.items():
+  if sub in ["common", analysis_type + "_" + sequence_type]:
+    for module_name,module_rules in value.items():
+      rules_to_include.extend(module_rules)
+
+LOG.info(f"{rules_to_include}")
+
+for r in rules_to_include:
+    include: Path(RULE_DIRECTORY, r).as_posix()
 
 # Define common and analysis specific outputs
 quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
 
 analysis_specific_results = []
 if config['analysis']["analysis_type"] in ["paired", "single"]:
-    config["rules"] = config["rules"] + variantcalling_rules + annotation_rules
     analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                         vcf=get_vcf(config, germline_caller, germline_call_samples)),
                                  expand(vep_dir + "{vcf}.all.vcf.gz",
@@ -337,13 +341,11 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
                                       vcf=get_vcf(config, ["TNscope_umi"], [config["analysis"]["case_id"]])),
                                       expand(umi_qc_dir + "{sample}.umi.mean_family_depth",
                                       sample =  config["samples"])])
-    config["rules"] = config["rules"] + umiqc_rules
-    
+
     if "background_variants" in config:
         analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
                                       case_name = config["analysis"]["case_id"],
                                       var_caller =["TNscope_umi"])]),
-        config["rules"] = config["rules"] + generatetable_umi_rules
 
 else:
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
@@ -360,9 +362,6 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
     if "dragen" in config:
         analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
                                           Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()])
-
-for r in config["rules"]:
-    include: Path(RULE_DIRECTORY, r).as_posix()
 
 if 'benchmark_plots' in config:
     log_dir = config["analysis"]["log"]
@@ -453,5 +452,3 @@ rule all:
 
         with open(str(output[0]), mode='w') as finish_file:
             finish_file.write('%s\n' % datetime.datetime.now())
-        
-        
