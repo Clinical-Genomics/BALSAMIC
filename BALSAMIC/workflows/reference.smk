@@ -156,7 +156,7 @@ rule all:
             "ascat_gccorrection" : input.ascat_gccorrection,
             "ascat_chryloci" : input.ascat_chryloci,
             "clinvar": input.clinvar,
-            "reference_access_date": today
+            "reference_access_date": today,
         }
 
         with open(str(output.reference_json), "w") as fh:
