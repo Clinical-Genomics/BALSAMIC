@@ -8,6 +8,7 @@ Added:
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
 * Added reference download date to ``reference.json`` #726
 * ``ascatngs`` hg38 references to constants #683 
+* Added ClinVar as a source to download and to be annotated with VCFAnno #737
 
 Changed:
 ^^^^^^^^
