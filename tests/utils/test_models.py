@@ -396,110 +396,116 @@ def test_params_vep():
     assert test_vep_built.vep_filters == "all defaults params"
 
 
-def test_QCMetricsModel():
+def test_qc_metrics_model():
     """test QCMetricsModel attributes validation"""
 
     # GIVEN a dummy metrics object
-    dummy_metrics = {
-        "file_name": "multiqc_picard_dups.json",
-        "sequencing_type": ["targeted", "wgs"],
-        "metrics": ["MEAN_INSERT_SIZE"],
+    dummy_file_name = "multiqc_picard_dups.json"
+    dummy_seq_type = ["targeted", "wgs"]
+    dummy_metrics = ["MEAN_INSERT_SIZE"]
+
+    dummy_attributes = {
+        "file_name": dummy_file_name,
+        "sequencing_type": dummy_seq_type,
+        "metrics": dummy_metrics,
     }
 
     # GIVEN an incomplete dummy metrics object
     dummy_incomplete_attributes = {
-        "sequencing_type": ["targeted", "wgs"],
-        "metrics": ["MEAN_INSERT_SIZE"],
+        "sequencing_type": dummy_seq_type,
+        "metrics": dummy_metrics,
     }
 
     # WHEN building the QCMetricsModel
-    dummy_metrics_built = QCMetricsModel(**dummy_metrics)
+    dummy_metrics_built = QCMetricsModel(**dummy_attributes)
 
     # THEN assert retrieved values from the created model
-    assert dummy_metrics_built.file_name == "multiqc_picard_dups.json"
-    assert dummy_metrics_built.sequencing_type == ["targeted", "wgs"]
-    assert dummy_metrics_built.metrics == ["MEAN_INSERT_SIZE"]
+    assert dummy_metrics_built.file_name == dummy_file_name
+    assert dummy_metrics_built.sequencing_type == dummy_seq_type
+    assert dummy_metrics_built.metrics == dummy_metrics
 
     # THEN model raise error on validation for incomplete metrics
     with pytest.raises(ValidationError):
         QCMetricsModel(**dummy_incomplete_attributes)
 
 
-def test_QCCheckModel():
-    """test QCCheckModel attributes validation"""
+@pytest.mark.parametrize(
+    "dummy_analysis_path, dummy_seq_type, dummy_attributes",
+    [
+        (
+            "tests/test_data/qc_files/analysis",
+            "wgs",
+            [
+                {
+                    "file_name": "multiqc_picard_insertSize.json",
+                    "sequencing_type": ["targeted", "wgs"],
+                    "metrics": ["MEAN_INSERT_SIZE"],
+                },
+                {
+                    "file_name": "multiqc_picard_dups.json",
+                    "sequencing_type": ["targeted", "wgs"],
+                    "metrics": ["PERCENT_DUPLICATION"],
+                },
+                {
+                    "file_name": "multiqc_picard_HsMetrics.json",
+                    "sequencing_type": ["targeted"],
+                    "metrics": ["MEAN_TARGET_COVERAGE"],
+                },
+            ],
+        )
+    ],
+)
+class TestQCCheckModel:
+    """Defines the tests to check the quality control validation model"""
 
-    # GIVEN QC check dummy attributes
-    dummy_attributes = {
-        "analysis_path": "tests/test_data/qc_files/analysis",
-        "sequencing_type": "wgs",
-        "qc_metrics": [
-            {
-                "file_name": "multiqc_picard_insertSize.json",
-                "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["MEAN_INSERT_SIZE"],
-            },
-            {
-                "file_name": "multiqc_picard_dups.json",
-                "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["PERCENT_DUPLICATION"],
-            },
-        ],
-    }
+    @pytest.fixture
+    def dummy_model(self, dummy_analysis_path, dummy_seq_type, dummy_attributes):
+        """creates a QC check model with the provided dummy data"""
 
-    # GIVEN an incomplete dummy metrics object
-    dummy_incomplete_attributes = {
-        "analysis_path": "tests/test_data/qc_files/analysis",
-        "sequencing_type": "wgs",
-    }
+        # GIVEN QC check dummy attributes
+        dummy_attributes = {
+            "analysis_path": dummy_analysis_path,
+            "sequencing_type": dummy_seq_type,
+            "qc_attributes": dummy_attributes,
+        }
 
-    # WHEN building the QCCheckModel
-    dummy_attributes_built = QCCheckModel(**dummy_attributes)
+        # WHEN building the QCCheckModel
+        dummy_model = QCCheckModel(**dummy_attributes)
 
-    # THEN assert retrieved values from the created model
-    assert (
-        dummy_attributes_built.analysis_path
-        == Path("tests/test_data/qc_files/analysis").resolve().as_posix()
-    )
-    assert dummy_attributes_built.sequencing_type == "wgs"
-    assert isinstance(dummy_attributes_built.qc_metrics[0], QCMetricsModel)
-    assert isinstance(dummy_attributes_built.qc_metrics[1], QCMetricsModel)
+        return dummy_model
 
-    # THEN model raise error on validation for incomplete attributes
-    with pytest.raises(ValidationError):
-        QCCheckModel(**dummy_incomplete_attributes)
+    def test_qc_check_model_attributes(
+        self, dummy_analysis_path, dummy_seq_type, dummy_model
+    ):
+        """tests QCCheckModel attributes validation"""
 
+        # GIVEN an incomplete dummy metrics object
+        dummy_incomplete_attributes = {
+            "analysis_path": dummy_analysis_path,
+            "sequencing_type": dummy_seq_type,
+        }
 
-def test_QCCheckModel_get_metrics():
-    """metric values extraction test"""
+        # THEN assert retrieved values from the created model
+        assert (
+            dummy_model.analysis_path == Path(dummy_analysis_path).resolve().as_posix()
+        )
+        assert dummy_model.sequencing_type == "wgs"
+        assert isinstance(dummy_model.qc_attributes[0], QCMetricsModel)
 
-    # GIVEN QC check dummy attributes
-    dummy_attributes = {
-        "analysis_path": "tests/test_data/qc_files/analysis",
-        "sequencing_type": "wgs",
-        "qc_metrics": [
-            {
-                "file_name": "multiqc_picard_insertSize.json",
-                "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["MEAN_INSERT_SIZE"],
-            },
-            {
-                "file_name": "multiqc_picard_dups.json",
-                "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["PERCENT_DUPLICATION"],
-            },
-        ],
-    }
+        # THEN model raise error on validation for incomplete attributes
+        with pytest.raises(ValidationError):
+            QCCheckModel(**dummy_incomplete_attributes)
 
-    # GIVEN an expected output
-    expected_output = {
-        "concatenated": [
-            {"MEAN_INSERT_SIZE": 74.182602},
-            {"PERCENT_DUPLICATION": 0.718251},
-        ]
-    }
+    def test_qc_check_model_get_metrics(self, dummy_model):
+        """tests metric values extraction"""
 
-    # WHEN building the QCCheckModel
-    dummy_attributes_built = QCCheckModel(**dummy_attributes)
+        # GIVEN an expected output
+        expected_output = {
+            "concatenated": {
+                "MEAN_INSERT_SIZE": 74.182602,
+                "PERCENT_DUPLICATION": 0.718251,
+            }
+        }
 
-    # THEN check if the obtained metrics correspond to the expected ones
-    assert dummy_attributes_built.get_metrics.items() == expected_output.items()
+        # THEN check if the obtained metrics correspond to the expected ones
+        assert dummy_model.get_metrics.items() == expected_output.items()

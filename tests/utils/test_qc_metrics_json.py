@@ -5,6 +5,7 @@ from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
 
 def test_get_qc_metrics_json():
     """test JSON object generation"""
+
     # GIVEN analysis_path and sequencing type
     analysis_path = "tests/test_data/qc_files/analysis"
     sequencing_type = "wgs"

@@ -711,50 +711,47 @@ class QCCheckModel(BaseModel):
     Attributes:
        file_name : string (required); quality control analysis file name
        sequencing_type : string (required); targeted or wgs run
-       qc_metrics : List(QCMetricsModel) (required); quality control metric attributes
+       qc_attributes : List(QCMetricsModel) (required); quality control metric attributes
     """
 
     analysis_path: DirectoryPath
     sequencing_type: str
-    qc_metrics: List[QCMetricsModel]
+    qc_attributes: List[QCMetricsModel]
 
     def get_file_path(self, file_name):
-        """return analysis file full path"""
+        """returns an analysis file full path"""
         return os.path.join(self.analysis_path, "qc", "multiqc_data", file_name)
+
+    def get_raw_metrics(self, file_name):
+        """returns a metrics json object from a specified file"""
+        with open(self.get_file_path(file_name=file_name), "r") as f:
+            return json.load(f)
 
     @validator("analysis_path")
     def analysis_path_as_abspath(cls, value) -> str:
         return Path(value).resolve().as_posix()
 
-    # @validator("qc_metrics")
-    # def check_metrics(cls, values):
-    # TODO
-
     @property
     def get_metrics(self):
         """returns a dictionary of the quality control metrics"""
-        qc_metrics_dict = {}
+        metrics_dict = {}
 
         # Loop through MultiQC json files
-        for model in self.qc_metrics:
-            if self.sequencing_type in model.sequencing_type:
-                with open(self.get_file_path(file_name=model.file_name), "r") as f:
-                    metric_file = json.load(f)
-                for j in metric_file.keys():
+        for attribute in self.qc_attributes:
+            if self.sequencing_type in attribute.sequencing_type:
+                raw_metrics = self.get_raw_metrics(attribute.file_name)
+                for j in raw_metrics.keys():
                     if "umi" not in j:
-                        for k in model.metrics:
-                            if k in metric_file[j]:
+                        for k in attribute.metrics:
+                            if k in raw_metrics[j]:
                                 sample_name = j.split("_")[0]
-                                if (
-                                    not qc_metrics_dict
-                                    or sample_name not in qc_metrics_dict.keys()
-                                ):
-                                    qc_metrics_dict[sample_name] = [
-                                        {k: metric_file[j][k]}
-                                    ]
+                                if sample_name not in metrics_dict.keys():
+                                    metrics_dict.update(
+                                        {sample_name: {k: raw_metrics[j][k]}}
+                                    )
                                 else:
-                                    qc_metrics_dict[sample_name].append(
-                                        {k: metric_file[j][k]}
+                                    metrics_dict[sample_name].update(
+                                        {k: raw_metrics[j][k]}
                                     )
 
-        return qc_metrics_dict
+        return metrics_dict
