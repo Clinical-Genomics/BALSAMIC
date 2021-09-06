@@ -120,7 +120,7 @@ rule all:
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
         ascat_gccorrection = ascat_gccorrection_url.get_output_file,
         ascat_chryloci = ascat_chryloci_url.get_output_file,
-        clinvar = clinvar_url.get_output_file
+        clinvar = clinvar_url.get_output_file + ".gz",
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -129,9 +129,9 @@ rule all:
         os.path.join(basedir, "reference.json.log")
     run:
         import json
-        from datetime import date
+        from datetime import date 
 
-        today = date.today()
+        today = date.today().strftime('%d-%m-%Y')
 
         ref_json = dict()
         ref_json['reference'] = {
@@ -156,7 +156,7 @@ rule all:
             "ascat_gccorrection" : input.ascat_gccorrection,
             "ascat_chryloci" : input.ascat_chryloci,
             "clinvar": input.clinvar,
-            "reference_access_date": today,
+            "reference_access_date": today
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -165,7 +165,7 @@ rule all:
         create_md5(ref_json['reference'], output.check_md5)
 
         with open(str(output.finished), mode='w') as finish_file:
-            finish_file.write('%s\n' % today)
+            finish_file.write('%s\n' % today )
 
 
 ##########################################################
