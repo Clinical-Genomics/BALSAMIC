@@ -20,6 +20,7 @@ Fixed:
 ^^^^^^
 
 * Fixed bug with using varcall_py36 container with VarDict #739
+* Fixed a bug with VEP module in MultiQC by excluding #746
 * Fixed a bug with ``bcftools stats`` results failing in MultiQC #744
 
 [8.0.2]
