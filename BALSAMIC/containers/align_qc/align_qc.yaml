@@ -8,7 +8,7 @@ dependencies:
   - bioconda::samtools=1.12
   - bioconda::tabix=0.2.6
   - bioconda::picard=2.25.0
-  - bioconda::multiqc=1.9
+  - bioconda::multiqc=1.11
   - bioconda::fastp=0.20.1
   - conda-forge::csvkit=1.0.4
   - conda-forge::libiconv
