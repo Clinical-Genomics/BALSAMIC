@@ -2,7 +2,7 @@ import json
 import os
 
 from BALSAMIC.utils.constants import METRICS
-from BALSAMIC.utils.models import QCCheckModel
+from BALSAMIC.utils.models import QCExtractionModel
 
 MULTIPLE_JSON = [
     {
@@ -73,12 +73,14 @@ def get_qc_metrics_json(analysis_path, sequencing_type):
 
     """
 
-    qc_check_model = QCCheckModel(
+    qc_extraction_model = QCExtractionModel(
         analysis_path=analysis_path,
         sequencing_type=sequencing_type,
         qc_attributes=METRICS["qc"],
     )
 
-    qc_metrics_json = json.dumps(qc_check_model.get_metrics, indent=4, sort_keys=True)
+    qc_metrics_json = json.dumps(
+        qc_extraction_model.get_metrics, indent=4, sort_keys=True
+    )
 
     return qc_metrics_json

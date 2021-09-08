@@ -705,8 +705,8 @@ class QCMetricsModel(BaseModel):
     metrics: List[str]
 
 
-class QCCheckModel(BaseModel):
-    """Defines the quality control check model
+class QCExtractionModel(BaseModel):
+    """Defines the quality control metrics extraction model
 
     Attributes:
        file_name : string (required); quality control analysis file name
@@ -723,13 +723,48 @@ class QCCheckModel(BaseModel):
         return os.path.join(self.analysis_path, "qc", "multiqc_data", file_name)
 
     def get_raw_metrics(self, file_name):
-        """returns a metrics json object from a specified file"""
+        """extracts a metrics json object from a QC file"""
         with open(self.get_file_path(file_name=file_name), "r") as f:
-            return json.load(f)
+            raw_metrics = json.load(f)
+
+        # Ignore the metrics associated with UMIs
+        filtered_raw_metrics = {
+            sample_name: metrics
+            for sample_name, metrics in raw_metrics.items()
+            if "umi" not in sample_name
+        }
+
+        return filtered_raw_metrics
+
+    @staticmethod
+    def append_metrics_to_dict(sample_id, metric, raw_metrics, metrics_dict):
+        """append new metric value objects to a dictionary"""
+
+        if metric in raw_metrics[sample_id]:
+            sample_name = sample_id.split("_")[0]
+
+            if sample_name not in metrics_dict:
+                metrics_dict.update(
+                    {sample_name: {metric: raw_metrics[sample_id][metric]}}
+                )
+            else:
+                metrics_dict[sample_name].update(
+                    {metric: raw_metrics[sample_id][metric]}
+                )
+
+        return metrics_dict
 
     @validator("analysis_path")
     def analysis_path_as_abspath(cls, value) -> str:
         return Path(value).resolve().as_posix()
+
+    @validator("qc_attributes", pre=True, always=True)
+    def filter_attributes_seq_type(cls, value, values):
+        """selects the metrics corresponding to the sequencing run type"""
+
+        return [
+            v for v in value if values.get("sequencing_type") in v["sequencing_type"]
+        ]
 
     @property
     def get_metrics(self):
@@ -738,20 +773,11 @@ class QCCheckModel(BaseModel):
 
         # Loop through MultiQC json files
         for attribute in self.qc_attributes:
-            if self.sequencing_type in attribute.sequencing_type:
-                raw_metrics = self.get_raw_metrics(attribute.file_name)
-                for j in raw_metrics.keys():
-                    if "umi" not in j:
-                        for k in attribute.metrics:
-                            if k in raw_metrics[j]:
-                                sample_name = j.split("_")[0]
-                                if sample_name not in metrics_dict.keys():
-                                    metrics_dict.update(
-                                        {sample_name: {k: raw_metrics[j][k]}}
-                                    )
-                                else:
-                                    metrics_dict[sample_name].update(
-                                        {k: raw_metrics[j][k]}
-                                    )
+            raw_metrics = self.get_raw_metrics(attribute.file_name)
+            for j in raw_metrics:
+                for k in attribute.metrics:
+                    metrics_dict = self.append_metrics_to_dict(
+                        j, k, raw_metrics, metrics_dict
+                    )
 
         return metrics_dict

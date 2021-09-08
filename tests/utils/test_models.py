@@ -22,7 +22,7 @@ from BALSAMIC.utils.models import (
     ParamsVardict,
     ParamsVEP,
     QCMetricsModel,
-    QCCheckModel,
+    QCExtractionModel,
 )
 
 
@@ -430,7 +430,7 @@ def test_qc_metrics_model():
 
 
 @pytest.mark.parametrize(
-    "dummy_analysis_path, dummy_seq_type, dummy_attributes",
+    "dummy_analysis_path, dummy_seq_type, dummy_metrics",
     [
         (
             "tests/test_data/qc_files/analysis",
@@ -455,29 +455,29 @@ def test_qc_metrics_model():
         )
     ],
 )
-class TestQCCheckModel:
-    """Defines the tests to check the quality control validation model"""
+class TestQCExtractionModel:
+    """Defines the tests to check the quality control metrics extraction model"""
 
     @pytest.fixture
-    def dummy_model(self, dummy_analysis_path, dummy_seq_type, dummy_attributes):
-        """creates a QC check model with the provided dummy data"""
+    def dummy_model(self, dummy_analysis_path, dummy_seq_type, dummy_metrics):
+        """creates a QC extraction model with the provided dummy data"""
 
-        # GIVEN QC check dummy attributes
+        # GIVEN QC extraction dummy attributes
         dummy_attributes = {
             "analysis_path": dummy_analysis_path,
             "sequencing_type": dummy_seq_type,
-            "qc_attributes": dummy_attributes,
+            "qc_attributes": dummy_metrics,
         }
 
-        # WHEN building the QCCheckModel
-        dummy_model = QCCheckModel(**dummy_attributes)
+        # WHEN building the QCExtractionModel
+        dummy_model = QCExtractionModel(**dummy_attributes)
 
         return dummy_model
 
-    def test_qc_check_model_attributes(
+    def test_qc_extraction_model_attributes(
         self, dummy_analysis_path, dummy_seq_type, dummy_model
     ):
-        """tests QCCheckModel attributes validation"""
+        """tests QCExtractionModel attributes validation"""
 
         # GIVEN an incomplete dummy metrics object
         dummy_incomplete_attributes = {
@@ -492,11 +492,16 @@ class TestQCCheckModel:
         assert dummy_model.sequencing_type == "wgs"
         assert isinstance(dummy_model.qc_attributes[0], QCMetricsModel)
 
+        # THEN assert that the retrieved attributes are filtered by sequencing type
+        assert len(dummy_model.qc_attributes) == 2
+        assert "wgs" in dummy_model.qc_attributes[0].sequencing_type
+        assert "wgs" in dummy_model.qc_attributes[1].sequencing_type
+
         # THEN model raise error on validation for incomplete attributes
         with pytest.raises(ValidationError):
-            QCCheckModel(**dummy_incomplete_attributes)
+            QCExtractionModel(**dummy_incomplete_attributes)
 
-    def test_qc_check_model_get_metrics(self, dummy_model):
+    def test_qc_extraction_model_get_metrics(self, dummy_model):
         """tests metric values extraction"""
 
         # GIVEN an expected output

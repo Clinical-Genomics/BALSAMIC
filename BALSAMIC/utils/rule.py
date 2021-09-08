@@ -106,7 +106,7 @@ def get_variant_callers(
 def get_sequencing_type(config):
     """
     input: sample config file from BALSAMIC
-    output: sequencing type string]
+    output: sequencing type string ("targeted" or "wgs")
     """
 
     return config["analysis"]["sequencing_type"]
