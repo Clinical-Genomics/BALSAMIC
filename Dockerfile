@@ -11,8 +11,8 @@ LABEL about.version="8.0.1"
 ENV MUSL_LOCPATH="/usr/share/i18n/locales/musl"
 ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 ENV PATH="/opt/conda/bin/:${PATH}"
-RUN apk add --no-cache bash gcc git libc-dev zlib-dev linux-headers libintl && \
-    apk --no-cache --virtual .locale_tmp add cmake make musl-dev gettext-dev && \
+RUN apk add --no-cache bash gcc git zlib-dev musl-dev libintl && \
+    apk --no-cache --virtual .locale_tmp add cmake make gettext-dev && \
 	git clone https://gitlab.com/rilian-la-te/musl-locales && \
 	cd musl-locales && cmake -DLOCALE_PROFILE=OFF -DCMAKE_INSTALL_PREFIX:PATH=/usr . && make && make install && \
 	cd .. && rm -r musl-locales && \
