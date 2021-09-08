@@ -20,5 +20,5 @@ authors:
   given-names: "Valtteri"
   orcid: "https://orcid.org/0000-0000-0000-0000"
 title: "BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer"
-version: v8.0.1
+version: v8.0.2
 url: "https://github.com/Clinical-Genomics/BALSAMIC"

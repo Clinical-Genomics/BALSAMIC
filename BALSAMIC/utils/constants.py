@@ -362,6 +362,30 @@ REFERENCE_FILES = {
             "output_file": "delly_exclusion.tsv",
             "output_path": "genome",
         },
+        "ascat_gccorrection": {
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/35465e2644f76f2d59427a9b379d34ecea71f259/cancer/references/hg38_SnpGcCorrections.tsv.gz",
+            "file_type": "text",
+            "gzip": True,
+            "genome_version": "hg38",
+            "output_file": "hg38_SnpGcCorrections.tsv",
+            "output_path": "genome",
+        },
+        "ascat_chryloci": {
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/35465e2644f76f2d59427a9b379d34ecea71f259/cancer/references/hg38_Y.loci",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "hg38_Y.loci",
+            "output_path": "genome",
+        },
+        "clinvar": {
+            "url": "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar.vcf.gz",
+            "file_type": "vcf",
+            "gzip": True,
+            "genome_version": "hg38",
+            "output_file": "clinvar.vcf",
+            "output_path": "variants",
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -507,6 +531,14 @@ REFERENCE_FILES = {
             "genome_version": "hg19",
             "output_file": "GRCh37_Y.loci",
             "output_path": "genome",
+        },
+        "clinvar": {
+            "url": "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar.vcf.gz",
+            "file_type": "vcf",
+            "gzip": True,
+            "genome_version": "hg19",
+            "output_file": "clinvar.vcf",
+            "output_path": "variants",
         },
     },
 }
