@@ -436,38 +436,37 @@ def test_qc_extraction_model_parameters(qc_metrics):
     dummy_parameters = dict(qc_metrics)
 
     # GIVEN a metrics object with an incorrect sequencing type
-    qc_metrics["sequencing_type"] = "RNA-Seq"
-    dummy_incorrect_seq_type_parameters = qc_metrics
+    not_valid_seq_type = "RNA-Seq"
+    dummy_parameters["sequencing_type"] = "not_valid_seq_type"
+    dummy_incorrect_seq_type_parameters = dummy_parameters
 
     # GIVEN an incomplete dummy metrics object
-    del qc_metrics["sequencing_type"]
-    dummy_incomplete_parameters = qc_metrics
+    del dummy_parameters["sequencing_type"]
+    dummy_incomplete_parameters = dummy_parameters
 
     # WHEN building the QC extractions models
-    dummy_model = QCExtractionModel(**dummy_parameters)
+    dummy_model = QCExtractionModel(**qc_metrics)
 
     # THEN assert retrieved values from the created model
     assert (
         dummy_model.analysis_path
-        == Path(dummy_parameters["analysis_path"]).resolve().as_posix()
+        == Path(qc_metrics["analysis_path"]).resolve().as_posix()
     )
-    assert dummy_model.sequencing_type == dummy_parameters["sequencing_type"]
+    assert dummy_model.sequencing_type == qc_metrics["sequencing_type"]
     assert isinstance(dummy_model.qc_attributes[0], QCMetricsModel)
 
     # THEN assert that the retrieved attributes are filtered by sequencing type
     assert len(dummy_model.qc_attributes) == 2
-    assert (
-        dummy_parameters["sequencing_type"]
-        in dummy_model.qc_attributes[0].sequencing_type
-    )
-    assert (
-        dummy_parameters["sequencing_type"]
-        in dummy_model.qc_attributes[1].sequencing_type
-    )
+    assert qc_metrics["sequencing_type"] in dummy_model.qc_attributes[0].sequencing_type
+    assert qc_metrics["sequencing_type"] in dummy_model.qc_attributes[1].sequencing_type
 
     # THEN model raise error on validation for not supported sequencing type
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError) as seq_type_exc:
         QCExtractionModel(**dummy_incorrect_seq_type_parameters)
+        assert (
+            f"Provided sequencing type ({not_valid_seq_type}) not supported"
+            in seq_type_exc.value
+        )
 
     # THEN model raise error on validation for incomplete parameters
     with pytest.raises(ValidationError):
