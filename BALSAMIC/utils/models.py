@@ -719,11 +719,11 @@ class QCExtractionModel(BaseModel):
     qc_attributes: List[QCMetricsModel]
 
     def get_file_path(self, file_name):
-        """returns an analysis file full path"""
+        """Returns an analysis file full path"""
         return os.path.join(self.analysis_path, "qc", "multiqc_data", file_name)
 
     def get_raw_metrics(self, file_name):
-        """extracts a metrics json object from a QC file"""
+        """Extracts a metrics json object from a QC file"""
         with open(self.get_file_path(file_name=file_name), "r") as f:
             raw_metrics = json.load(f)
 
@@ -738,7 +738,7 @@ class QCExtractionModel(BaseModel):
 
     @staticmethod
     def append_metrics_to_dict(sample_id, metric, raw_metrics, metrics_dict):
-        """append new metric value objects to a dictionary"""
+        """Append new metric value objects to a dictionary"""
 
         if metric in raw_metrics[sample_id]:
             sample_name = sample_id.split("_")[0]
@@ -758,9 +758,18 @@ class QCExtractionModel(BaseModel):
     def analysis_path_as_abspath(cls, value) -> str:
         return Path(value).resolve().as_posix()
 
+    @validator("sequencing_type")
+    def sequencing_type_literal(cls, value) -> str:
+        balsamic_sequencing_types = SEQUENCING_TYPE
+        if value not in balsamic_sequencing_types:
+            raise ValueError(
+                f"Provided sequencing type ({value}) not supported in BALSAMIC!"
+            )
+        return value
+
     @validator("qc_attributes", pre=True, always=True)
     def filter_attributes_seq_type(cls, value, values):
-        """selects the metrics corresponding to the sequencing run type"""
+        """Selects the metrics corresponding to the sequencing run type"""
 
         return [
             v for v in value if values.get("sequencing_type") in v["sequencing_type"]
@@ -768,7 +777,7 @@ class QCExtractionModel(BaseModel):
 
     @property
     def get_metrics(self):
-        """returns a dictionary of the quality control metrics"""
+        """Returns a dictionary of the quality control metrics"""
         metrics_dict = {}
 
         # Loop through MultiQC json files

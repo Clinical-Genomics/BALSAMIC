@@ -521,3 +521,29 @@ def sample_config():
     }
 
     return sample_config
+
+
+@pytest.fixture(scope="session")
+def qc_metrics():
+    """Sample data for QC model testing"""
+    return {
+        "analysis_path": "tests/test_data/qc_files/analysis",
+        "sequencing_type": "wgs",
+        "qc_attributes": [
+            {
+                "file_name": "multiqc_picard_insertSize.json",
+                "sequencing_type": ["targeted", "wgs"],
+                "metrics": ["MEAN_INSERT_SIZE"],
+            },
+            {
+                "file_name": "multiqc_picard_dups.json",
+                "sequencing_type": ["targeted", "wgs"],
+                "metrics": ["PERCENT_DUPLICATION"],
+            },
+            {
+                "file_name": "multiqc_picard_HsMetrics.json",
+                "sequencing_type": ["targeted"],
+                "metrics": ["MEAN_TARGET_COVERAGE"],
+            },
+        ],
+    }

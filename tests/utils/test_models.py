@@ -429,88 +429,64 @@ def test_qc_metrics_model():
         QCMetricsModel(**dummy_incomplete_attributes)
 
 
-@pytest.mark.parametrize(
-    "dummy_analysis_path, dummy_seq_type, dummy_metrics",
-    [
-        (
-            "tests/test_data/qc_files/analysis",
-            "wgs",
-            [
-                {
-                    "file_name": "multiqc_picard_insertSize.json",
-                    "sequencing_type": ["targeted", "wgs"],
-                    "metrics": ["MEAN_INSERT_SIZE"],
-                },
-                {
-                    "file_name": "multiqc_picard_dups.json",
-                    "sequencing_type": ["targeted", "wgs"],
-                    "metrics": ["PERCENT_DUPLICATION"],
-                },
-                {
-                    "file_name": "multiqc_picard_HsMetrics.json",
-                    "sequencing_type": ["targeted"],
-                    "metrics": ["MEAN_TARGET_COVERAGE"],
-                },
-            ],
-        )
-    ],
-)
-class TestQCExtractionModel:
-    """Defines the tests to check the quality control metrics extraction model"""
+def test_qc_extraction_model_parameters(qc_metrics):
+    """tests QCExtractionModel parameters validation"""
 
-    @pytest.fixture
-    def dummy_model(self, dummy_analysis_path, dummy_seq_type, dummy_metrics):
-        """creates a QC extraction model with the provided dummy data"""
+    # Given a sample metrics object
+    dummy_parameters = dict(qc_metrics)
 
-        # GIVEN QC extraction dummy attributes
-        dummy_attributes = {
-            "analysis_path": dummy_analysis_path,
-            "sequencing_type": dummy_seq_type,
-            "qc_attributes": dummy_metrics,
+    # GIVEN a metrics object with an incorrect sequencing type
+    qc_metrics["sequencing_type"] = "RNA-Seq"
+    dummy_incorrect_seq_type_parameters = qc_metrics
+
+    # GIVEN an incomplete dummy metrics object
+    del qc_metrics["sequencing_type"]
+    dummy_incomplete_parameters = qc_metrics
+
+    # WHEN building the QC extractions models
+    dummy_model = QCExtractionModel(**dummy_parameters)
+
+    # THEN assert retrieved values from the created model
+    assert (
+        dummy_model.analysis_path
+        == Path(dummy_parameters["analysis_path"]).resolve().as_posix()
+    )
+    assert dummy_model.sequencing_type == dummy_parameters["sequencing_type"]
+    assert isinstance(dummy_model.qc_attributes[0], QCMetricsModel)
+
+    # THEN assert that the retrieved attributes are filtered by sequencing type
+    assert len(dummy_model.qc_attributes) == 2
+    assert (
+        dummy_parameters["sequencing_type"]
+        in dummy_model.qc_attributes[0].sequencing_type
+    )
+    assert (
+        dummy_parameters["sequencing_type"]
+        in dummy_model.qc_attributes[1].sequencing_type
+    )
+
+    # THEN model raise error on validation for not supported sequencing type
+    with pytest.raises(ValidationError):
+        QCExtractionModel(**dummy_incorrect_seq_type_parameters)
+
+    # THEN model raise error on validation for incomplete parameters
+    with pytest.raises(ValidationError):
+        QCExtractionModel(**dummy_incomplete_parameters)
+
+
+def test_qc_extraction_model_get_metrics(qc_metrics):
+    """tests metric values extraction"""
+
+    # GIVEN an expected output
+    expected_output = {
+        "concatenated": {
+            "MEAN_INSERT_SIZE": 74.182602,
+            "PERCENT_DUPLICATION": 0.718251,
         }
+    }
 
-        # WHEN building the QCExtractionModel
-        dummy_model = QCExtractionModel(**dummy_attributes)
+    # WHEN building the QC extractions models
+    dummy_model = QCExtractionModel(**qc_metrics)
 
-        return dummy_model
-
-    def test_qc_extraction_model_attributes(
-        self, dummy_analysis_path, dummy_seq_type, dummy_model
-    ):
-        """tests QCExtractionModel attributes validation"""
-
-        # GIVEN an incomplete dummy metrics object
-        dummy_incomplete_attributes = {
-            "analysis_path": dummy_analysis_path,
-            "sequencing_type": dummy_seq_type,
-        }
-
-        # THEN assert retrieved values from the created model
-        assert (
-            dummy_model.analysis_path == Path(dummy_analysis_path).resolve().as_posix()
-        )
-        assert dummy_model.sequencing_type == "wgs"
-        assert isinstance(dummy_model.qc_attributes[0], QCMetricsModel)
-
-        # THEN assert that the retrieved attributes are filtered by sequencing type
-        assert len(dummy_model.qc_attributes) == 2
-        assert "wgs" in dummy_model.qc_attributes[0].sequencing_type
-        assert "wgs" in dummy_model.qc_attributes[1].sequencing_type
-
-        # THEN model raise error on validation for incomplete attributes
-        with pytest.raises(ValidationError):
-            QCExtractionModel(**dummy_incomplete_attributes)
-
-    def test_qc_extraction_model_get_metrics(self, dummy_model):
-        """tests metric values extraction"""
-
-        # GIVEN an expected output
-        expected_output = {
-            "concatenated": {
-                "MEAN_INSERT_SIZE": 74.182602,
-                "PERCENT_DUPLICATION": 0.718251,
-            }
-        }
-
-        # THEN check if the obtained metrics correspond to the expected ones
-        assert dummy_model.get_metrics.items() == expected_output.items()
+    # THEN check if the obtained metrics correspond to the expected ones
+    assert dummy_model.get_metrics.items() == expected_output.items()
