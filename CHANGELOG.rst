@@ -2,7 +2,35 @@
 -------
 
 Added:
-* ```BALSAMIC``` quality control metrics JSON file generation #707
+^^^^^^
+
+* Workflow to check PR tiltes to make easier to tell PR intents #724
+* ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
+* Added reference download date to ``reference.json`` #726
+* ``ascatngs`` hg38 references to constants #683 
+* Added ClinVar as a source to download and to be annotated with VCFAnno #737
+* ```BALSAMIC``` quality control metrics JSON file generation #723
+
+Changed:
+^^^^^^^^
+
+* Updated docs for git FAQs #731
+* Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10 
+
+Fixed:
+^^^^^^
+
+* Fixed bug with using varcall_py36 container with VarDict #739
+* Fixed a bug with VEP module in MultiQC by excluding #746
+* Fixed a bug with ``bcftools stats`` results failing in MultiQC #744
+
+[8.0.2]
+-------
+
+Fixed:
+^^^^^^
+
+* Fixed breaking shell command for VEP annotation rules #734
 
 
 [8.0.1]
