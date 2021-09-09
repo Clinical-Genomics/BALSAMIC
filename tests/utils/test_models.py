@@ -432,17 +432,16 @@ def test_qc_metrics_model():
 def test_qc_extraction_model_parameters(qc_metrics):
     """tests QCExtractionModel parameters validation"""
 
-    # Given a sample metrics object
-    dummy_parameters = dict(qc_metrics)
-
     # GIVEN a metrics object with an incorrect sequencing type
+    dummy_seq = dict(qc_metrics)
     not_valid_seq_type = "RNA-Seq"
-    dummy_parameters["sequencing_type"] = "not_valid_seq_type"
-    dummy_incorrect_seq_type_parameters = dummy_parameters
+    dummy_seq["sequencing_type"] = "not_valid_seq_type"
+    dummy_incorrect_seq_type_parameters = dummy_seq
 
     # GIVEN an incomplete dummy metrics object
-    del dummy_parameters["sequencing_type"]
-    dummy_incomplete_parameters = dummy_parameters
+    dummy_incomplete = dict(qc_metrics)
+    del dummy_incomplete["sequencing_type"]
+    dummy_incomplete_parameters = dummy_incomplete
 
     # WHEN building the QC extractions models
     dummy_model = QCExtractionModel(**qc_metrics)

@@ -711,7 +711,7 @@ class QCExtractionModel(BaseModel):
     """Defines the quality control metrics extraction model
 
     Attributes:
-       file_name : string (required); quality control analysis file name
+       analysis_path : string (required); quality control analysis file name
        sequencing_type : string (required); targeted or wgs run
        qc_attributes : List(QCMetricsModel) (required); quality control metric attributes
     """
