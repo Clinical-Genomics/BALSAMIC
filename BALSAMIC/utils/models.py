@@ -741,7 +741,7 @@ class QCExtractionModel(BaseModel):
         """Append new metric value objects to a dictionary"""
 
         if metric in raw_metrics[sample_id]:
-            sample_name = sample_id.split("_")[0]
+            sample_name = "_".join([sample_id.split("_")[0], sample_id.split("_")[1]])
 
             if sample_name not in metrics_dict:
                 metrics_dict.update(

@@ -17,7 +17,7 @@ from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.constants import VCF_DICT
 from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.utils.qc_metrics import get_qc_metrics
+from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
 from BALSAMIC.utils.qc_report import render_html, report_data_population
 
 LOG = logging.getLogger(__name__)
@@ -172,7 +172,11 @@ def deliver(
         meta["case_name"] = case_id_map[1]
         meta["apptag"] = case_id_map[2]
 
-        collected_qc = get_qc_metrics(sample_config_dict["analysis"]["result"])
+        collected_qc = json.loads(
+            get_qc_metrics_json(
+                sample_config_dict["analysis"]["result"], sequencing_type
+            )
+        )
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
         balsamic_qc_report = os.path.join(
             yaml_write_directory, case_name + "_qc_report.html"

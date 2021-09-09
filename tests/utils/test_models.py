@@ -479,7 +479,7 @@ def test_qc_extraction_model_get_metrics(qc_metrics):
 
     # GIVEN an expected output
     expected_output = {
-        "concatenated": {
+        "concatenated_tumor": {
             "MEAN_INSERT_SIZE": 74.182602,
             "PERCENT_DUPLICATION": 0.718251,
         }
