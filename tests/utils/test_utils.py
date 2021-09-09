@@ -351,7 +351,6 @@ def test_get_snakefile():
         ("single", "targeted"),
         ("qc", ""),
         ("generate_ref", ""),
-        ("umi", ""),
         ("pon", ""),
     ]
 
@@ -364,8 +363,6 @@ def test_get_snakefile():
             pipeline = "BALSAMIC/workflows/balsamic.smk"
         elif analysis_type == "generate_ref":
             pipeline = "BALSAMIC/workflows/reference.smk"
-        elif analysis_type == "umi":
-            pipeline = "BALSAMIC/workflows/UMIworkflow.smk"
         elif analysis_type == "pon":
             pipeline = "BALSAMIC/workflows/PON.smk"
 

@@ -112,7 +112,6 @@ def test_dag_graph_success(
     tumor_only_config,
     tumor_normal_config,
     tumor_only_wgs_config,
-    tumor_only_umi_config,
 ):
     # WHEN creating config using standard CLI input and setting Sentieon env vars
     # THEN DAG graph should be created successfully
@@ -120,7 +119,6 @@ def test_dag_graph_success(
     assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
     assert Path(json.load(open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
     assert Path(json.load(open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
-    assert Path(json.load(open(tumor_only_umi_config))["analysis"]["dag"]).exists()
 
 
 def test_config_bad_filename(
