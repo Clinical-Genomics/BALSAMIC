@@ -7,12 +7,14 @@ Added:
 * Workflow to check PR tiltes to make easier to tell PR intents #724
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
 * Added reference download date to ``reference.json`` #726
-* ``ascatngs`` hg38 references to constants #683 
+* ``ascatngs`` hg38 references to constants #683
+* Added various basic filters to all variant callers irregardless of their delivery status #750
 
 Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
+* refactored main workflow with more readible organization #614
 
 Fixed:
 ^^^^^^
