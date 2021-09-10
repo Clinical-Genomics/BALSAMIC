@@ -327,6 +327,7 @@ def tumor_only_config(
     tmpdir_factory,
     sample_fastq,
     balsamic_cache,
+    background_variants,
     analysis_dir,
     panel_bed_file,
     sentieon_license,
@@ -362,6 +363,8 @@ def tumor_only_config(
                 analysis_dir,
                 "--balsamic-cache",
                 balsamic_cache,
+                "--background-variants",
+                background_variant_file,
             ],
         )
 

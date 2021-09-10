@@ -262,8 +262,6 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
         snakefile = Path(p, "workflows", "reference.smk")
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
-    elif analysis_type == "umi":
-        snakefile = Path(p, "workflows", "UMIworkflow.smk")
 
     return str(snakefile)
 
