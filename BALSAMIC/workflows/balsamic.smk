@@ -14,9 +14,7 @@ from PyPDF2 import PdfFileMerger
 
 from BALSAMIC.utils.exc import BalsamicError
 
-from BALSAMIC.utils.cli import write_json
-from BALSAMIC.utils.cli import check_executable
-from BALSAMIC.utils.cli import generate_h5
+from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5)
 
 from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
@@ -111,11 +109,20 @@ if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
               "to run SENTIEON variant callers")
     raise BalsamicError
 
+# Add normal sample if analysis is paired
+germline_call_samples = ["tumor"]
+if config['analysis']['analysis_type'] == "paired":
+    germline_call_samples.append("normal")
+
+# Create list of chromosomes in panel for panel only variant calling to be used in rules
+if config["analysis"]["sequencing_type"] != "wgs":
+    chromlist = config["panel"]["chrom"]
+
 # Set temporary dir environment variable
 os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
-
+# Extract variant callers for the workflow
 germline_caller = []
 somatic_caller = []
 for m in MUTATION_TYPE:
@@ -159,11 +166,19 @@ for m in MUTATION_TYPE:
 
     somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
 
-LOG.info(f"{germline_caller}")
-LOG.info(f"{somatic_caller}")
+# Remove variant callers from list of callers
+if "disable_variant_caller" in config:
+    variant_callers_to_remove = config["disable_variant_caller"].split(",")
+    for var_caller in variant_callers_to_remove:
+        if var_caller in somatic_caller:
+            somatic_caller.remove(var_caller)
+        if var_caller in germline_caller:
+            germline_caller.remove(var_caller)
+
+LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
+LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
 
 # Define set of rules
-
 SNAKEMAKE_RULES = {
     "common": {
         "qc":
@@ -274,23 +289,6 @@ SNAKEMAKE_RULES = {
     },
 }
 
-germline_call_samples = ["tumor"]
-if config['analysis']['analysis_type'] == "paired":
-    germline_call_samples.append("normal")
-
-if config["analysis"]["sequencing_type"] != "wgs":
-    chromlist = config["panel"]["chrom"]
-
-
-# Remove variant callers from list of callers
-if "disable_variant_caller" in config:
-    variant_callers_to_remove = config["disable_variant_caller"].split(",")
-    for var_caller in variant_callers_to_remove:
-        if var_caller in somatic_caller:
-            somatic_caller.remove(var_caller)
-        if var_caller in germline_caller:
-            germline_caller.remove(var_caller)
-
 rules_to_include = []
 analysis_type = config['analysis']["analysis_type"]
 sequence_type = config['analysis']["sequencing_type"]
@@ -300,7 +298,7 @@ for sub,value in SNAKEMAKE_RULES.items():
     for module_name,module_rules in value.items():
       rules_to_include.extend(module_rules)
 
-LOG.info(f"{rules_to_include}")
+LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
 for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
@@ -308,17 +306,12 @@ for r in rules_to_include:
 # Define common and analysis specific outputs
 quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
 
-analysis_specific_results = []
-if config['analysis']["analysis_type"] in ["paired", "single"]:
-    analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
-                                        vcf=get_vcf(config, germline_caller, germline_call_samples)),
-                                 expand(vep_dir + "{vcf}.all.vcf.gz",
-                                        vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))]
-    LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
+analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
+                                    vcf=get_vcf(config, germline_caller, germline_call_samples)),
+                             expand(vep_dir + "{vcf}.all.vcf.gz",
+                                    vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))]
 
-if config['analysis']["analysis_type"] in ["paired", "single"] and config["analysis"]["sequencing_type"] != "wgs" and config["umiworkflow"]:
-    analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
-                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
 
@@ -327,16 +320,17 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
                                       case_name = config["analysis"]["case_id"],
                                       var_caller =["TNscope_umi"])]),
 
-#else:
-#    analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
-#                                            vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
+#Calculate TMB per somatic variant caller
+analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
+                                        vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])))
 
-# SV and CNV filters output
+#Gather all the filtered and PASSed variants post annotation
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
                                         vcf=get_vcf(config,
                                                     somatic_caller,
                                                     [config["analysis"]["case_id"]]))])
 
+LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
