@@ -527,7 +527,7 @@ REFERENCE_FILES = {
     },
 }
 
-workflow_params = {
+WORKFLOW_PARAMS = {
     "common": {
         "pcr_model": "NONE",
         "align_header": "'@RG\\tID:{sample}\\tSM:{sample}\\tPL:ILLUMINAi'",

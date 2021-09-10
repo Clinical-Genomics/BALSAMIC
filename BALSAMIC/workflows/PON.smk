@@ -9,7 +9,7 @@ import os
 
 from BALSAMIC.utils.rule import (get_picard_mrkdup, get_threads, 
                                  get_result_dir, get_pon_samples)
-from BALSAMIC.utils.constants import (RULE_DIRECTORY, workflow_params)
+from BALSAMIC.utils.constants import (RULE_DIRECTORY, WORKFLOW_PARAMS)
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
 shell.prefix("set -eo pipefail; ")
@@ -17,7 +17,7 @@ shell.prefix("set -eo pipefail; ")
 localrules: all
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(workflow_params)
+params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 fastq_dir = get_result_dir(config) + "/fastq/"
 qc_dir = get_result_dir(config) + "/qc/"
