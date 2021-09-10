@@ -27,6 +27,7 @@ from BALSAMIC.utils.cli import (
     write_json,
     get_config,
     recursive_default_dict,
+    create_pon_fastq_symlink,
     convert_defaultdict_to_regular_dict,
     get_file_status_string,
     get_from_two_key,
@@ -794,6 +795,25 @@ def test_get_fastq_bind_path(tmpdir_factory):
     # THEN function returns list containing the original parent path!
     assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
 
+
+def test_create_pon_fastq_symlink_file_exist_error(tmpdir_factory, caplog):
+    # GIVEN a list of valid fastq file names for cnv pon
+    fastq_files = [
+        "case1_R_1.fastq.gz",
+    ]
+
+    # WHEN files are created, and symlinks are made in symlink directory
+    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
+    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
+    source_fastq_files = [ Path(symlink_from_path, x).as_posix() for x in fastq_files]
+    for fastq_file in fastq_files:
+        Path(symlink_from_path, fastq_file).touch()
+        Path(symlink_to_path, fastq_file).touch()
+    
+    with caplog.at_level(logging.INFO):
+        create_pon_fastq_symlink(symlink_from_path, symlink_to_path )
+        assert "exists, skipping" in caplog.text
+        
 
 def test_convert_deliverables_tags():
 
