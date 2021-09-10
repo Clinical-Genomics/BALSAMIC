@@ -28,7 +28,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
 
 from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
                                     VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS, VCFANNO_TOML,
-                                    workflow_params)
+                                    WORKFLOW_PARAMS)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -63,7 +63,7 @@ VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(workflow_params)
+params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
