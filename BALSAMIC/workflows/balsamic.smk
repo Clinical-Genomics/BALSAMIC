@@ -28,7 +28,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
 
 from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
                                     VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS, VCFANNO_TOML,
-                                    workflow_params)
+                                    MUTATION_TYPE, workflow_params)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -115,64 +115,52 @@ if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
 os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
-germline_caller_snv_balsamic = get_variant_callers(config=config,
-                                        analysis_type=config['analysis']['analysis_type'],
-                                        workflow_solution="BALSAMIC",
-                                        mutation_type="SNV",
-                                        sequencing_type=config["analysis"]["sequencing_type"],
-                                        mutation_class="germline")
 
-germline_caller_snv_sentieon = get_variant_callers(config=config,
-                                       analysis_type=config['analysis']['analysis_type'],
-                                       workflow_solution="Sentieon",
-                                       mutation_type="SNV",
-                                       sequencing_type=config["analysis"]["sequencing_type"],
-                                       mutation_class="germline")
+germline_caller = []
+somatic_caller = []
+for m in MUTATION_TYPE:
+    germline_caller_balsamic = get_variant_callers(config=config,
+                                            analysis_type=config['analysis']['analysis_type'],
+                                            workflow_solution="BALSAMIC",
+                                            mutation_type=m,
+                                            sequencing_type=config["analysis"]["sequencing_type"],
+                                            mutation_class="germline")
 
-germline_caller_sv = get_variant_callers(config=config,
-                                       analysis_type=config['analysis']['analysis_type'],
-                                       workflow_solution="BALSAMIC",
-                                       mutation_type="SV",
-                                       sequencing_type=config["analysis"]["sequencing_type"],
-                                       mutation_class="germline")
+    germline_caller_sentieon = get_variant_callers(config=config,
+                                           analysis_type=config['analysis']['analysis_type'],
+                                           workflow_solution="Sentieon",
+                                           mutation_type=m,
+                                           sequencing_type=config["analysis"]["sequencing_type"],
+                                           mutation_class="germline")
 
-somatic_caller_cnv = get_variant_callers(config=config,
-                                         analysis_type=config['analysis']['analysis_type'],
-                                         workflow_solution="BALSAMIC",
-                                         mutation_type="CNV",
-                                         sequencing_type=config["analysis"]["sequencing_type"],
-                                         mutation_class="somatic")
+    germline_caller = germline_caller + germline_caller_balsamic + germline_caller_sentieon 
 
-somatic_caller_sv = get_variant_callers(config=config,
-                                        analysis_type=config['analysis']['analysis_type'],
-                                        workflow_solution="BALSAMIC",
-                                        mutation_type="SV",
-                                        sequencing_type=config["analysis"]["sequencing_type"],
-                                        mutation_class="somatic")
 
-somatic_caller_snv_balsamic = get_variant_callers(config=config,
-                                       analysis_type=config['analysis']['analysis_type'],
-                                       workflow_solution="BALSAMIC",
-                                       mutation_type="SNV",
-                                       sequencing_type=config["analysis"]["sequencing_type"],
-                                       mutation_class="somatic")
+    somatic_caller_balsamic = get_variant_callers(config=config,
+                                           analysis_type=config['analysis']['analysis_type'],
+                                           workflow_solution="BALSAMIC",
+                                           mutation_type=m,
+                                           sequencing_type=config["analysis"]["sequencing_type"],
+                                           mutation_class="somatic")
 
-somatic_caller_snv_sentieon = get_variant_callers(config=config,
-                                         analysis_type=config['analysis']['analysis_type'],
-                                         workflow_solution="Sentieon",
-                                         mutation_type="SNV",
-                                         sequencing_type=config["analysis"]["sequencing_type"],
-                                         mutation_class="somatic")
+    somatic_caller_sentieon = get_variant_callers(config=config,
+                                             analysis_type=config['analysis']['analysis_type'],
+                                             workflow_solution="Sentieon",
+                                             mutation_type=m,
+                                             sequencing_type=config["analysis"]["sequencing_type"],
+                                             mutation_class="somatic")
 
-somatic_caller_snv_umi = get_variant_callers(config=config,
-                                         analysis_type=config['analysis']['analysis_type'],
-                                         workflow_solution="Sentieon_umi",
-                                         mutation_type="SNV",
-                                         sequencing_type=config["analysis"]["sequencing_type"],
-                                         mutation_class="somatic")
+    somatic_caller_sentieon_umi = get_variant_callers(config=config,
+                                             analysis_type=config['analysis']['analysis_type'],
+                                             workflow_solution="Sentieon_umi",
+                                             mutation_type=m,
+                                             sequencing_type=config["analysis"]["sequencing_type"],
+                                             mutation_class="somatic")
 
-germline_caller = germline_caller_snv_sentieon + germline_caller_snv_balsamic + germline_caller_sv
+    somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
+
 LOG.info(f"{germline_caller}")
+LOG.info(f"{somatic_caller}")
 
 # Define set of rules
 
@@ -293,9 +281,6 @@ if config['analysis']['analysis_type'] == "paired":
 if config["analysis"]["sequencing_type"] != "wgs":
     chromlist = config["panel"]["chrom"]
 
-somatic_caller_snv = somatic_caller_snv_umi + somatic_caller_snv_balsamic + somatic_caller_snv_sentieon
-somatic_caller = somatic_caller_snv + somatic_caller_sv + somatic_caller_cnv
-LOG.info(f"{somatic_caller}")
 
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
@@ -337,24 +322,19 @@ if config['analysis']["analysis_type"] in ["paired", "single"] and config["analy
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
 
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.vcf.gz",
-                                      vcf=get_vcf(config, ["TNscope_umi"], [config["analysis"]["case_id"]])),
-                                      expand(umi_qc_dir + "{sample}.umi.mean_family_depth",
-                                      sample =  config["samples"])])
-
     if "background_variants" in config:
         analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
                                       case_name = config["analysis"]["case_id"],
                                       var_caller =["TNscope_umi"])]),
 
-else:
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
-                                            vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
+#else:
+#    analysis_specific_results.extend([expand(vep_dir + "{vcf}.filtered.pass.vcf.gz",
+#                                            vcf=get_vcf(config, ["tnscope"], [config["analysis"]["case_id"]]))])
 
 # SV and CNV filters output
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
                                         vcf=get_vcf(config,
-                                                    somatic_caller_sv + somatic_caller_cnv,
+                                                    somatic_caller,
                                                     [config["analysis"]["case_id"]]))])
 
 

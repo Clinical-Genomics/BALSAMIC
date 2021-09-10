@@ -47,3 +47,73 @@ bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 
 tabix -p vcf -f {output.vcf_pass};
     """
+
+
+
+rule bcftools_filter_tnhaplotyper_tumor_normal:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_normal' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    conda = config["bioinfo_tools"].get("bcftools"),
+    pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
+    case_name =  '{case_name}'
+  threads:
+    get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_normal')
+  message:
+    "Filtering tnhaplotyper tumor-normal annotated variants using bcftools on {params.case_name}"
+  shell:
+    """
+source activate {params.conda};
+
+bcftools view {input.vcf} \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_filtered};
+
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+
+tabix -p vcf -f {output.vcf_pass};
+    """
+
+
+
+rule bcftools_filter_TNscope_umi_tumor_normal:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.vcf.gz",
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_normal' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    conda = config["bioinfo_tools"].get("bcftools"),
+    pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
+    case_name =  '{case_name}'
+  threads:
+    get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_normal')
+  message:
+    "Filtering TNscope_umi tumor-normal annotated variants using bcftools on {params.case_name}"
+  shell:
+    """
+source activate {params.conda};
+
+bcftools view {input.vcf} \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_filtered};
+
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+
+tabix -p vcf -f {output.vcf_pass};
+    """
