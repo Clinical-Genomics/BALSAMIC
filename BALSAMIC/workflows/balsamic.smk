@@ -118,6 +118,10 @@ if config['analysis']['analysis_type'] == "paired":
 if config["analysis"]["sequencing_type"] != "wgs":
     chromlist = config["panel"]["chrom"]
 
+background_variant_file = ""
+if "background_variants" in config:
+    background_variant_file = config["background_variants"]
+
 # Set temporary dir environment variable
 os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
@@ -200,6 +204,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/mosdepth.rule",
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
+            "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align":[
             "snakemake_rules/align/bwa_mem.rule",
@@ -231,6 +236,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/mergetype_normal_umi.rule",
             "snakemake_rules/quality_control/contest.rule",
+            "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align":[
             "snakemake_rules/align/bwa_mem.rule",
@@ -315,7 +321,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
 
-    if "background_variants" in config:
+    if background_variant_file:
         analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
                                       case_name = config["analysis"]["case_id"],
                                       var_caller =["TNscope_umi"])]),

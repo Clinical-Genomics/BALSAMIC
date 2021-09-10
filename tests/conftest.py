@@ -220,6 +220,7 @@ def tumor_normal_config(
     sample_fastq,
     analysis_dir,
     balsamic_cache,
+    background_variant_file,
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
@@ -261,6 +262,8 @@ def tumor_normal_config(
                 "ACC1",
                 "--normal-sample-name",
                 "ACC2",
+                "--background-variants",
+                background_variant_file,
             ],
         )
 
@@ -328,7 +331,7 @@ def tumor_only_config(
     tmpdir_factory,
     sample_fastq,
     balsamic_cache,
-    background_variants,
+    background_variant_file,
     analysis_dir,
     panel_bed_file,
     sentieon_license,
