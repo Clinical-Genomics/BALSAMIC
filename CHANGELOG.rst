@@ -17,7 +17,6 @@ Added:
 * Added reference download date to ``reference.json`` #726
 * ``ascatngs`` hg38 references to constants #683 
 * Added ClinVar as a source to download and to be annotated with VCFAnno #737
-* BALSAMIC container #728
 
 Changed:
 ^^^^^^^^
