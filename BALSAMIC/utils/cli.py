@@ -15,7 +15,7 @@ import snakemake
 import graphviz
 from colorclass import Color
 
-import BALSAMIC
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -593,7 +593,7 @@ def generate_graph(config_collection_dict, config_path):
     graph_title = "_".join(
         [
             "BALSAMIC",
-            BALSAMIC.__version__,
+            balsamic_version,
             config_collection_dict["analysis"]["case_id"],
         ]
     )
