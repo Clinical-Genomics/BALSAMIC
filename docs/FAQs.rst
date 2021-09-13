@@ -72,7 +72,7 @@ Our release model looks like in the figure below:
 
 .. figure:: images/git_releasemodel.png
 
-*Requirements:* bumpversion
+**Requirements:** bumpversion
 
 `pip install bumpversion`
 
@@ -97,6 +97,10 @@ Make a pull request to master at this point. After pull request is approved and 
 4. `git push`
 5. `git push --tags`
 
+**Note**
+
+- Never force rebase commits into either `master` or `develop` branches.
+- When merging pull requests commits into `master` branch, use **Create a merge commit**, which helps to capture all the commit history. On contrary, when merging pull requests into `develop` branch, use **Squash and merge** button, which combines multiple commits messages into one commit.
 
 **References**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
