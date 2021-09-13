@@ -17,6 +17,7 @@ from BALSAMIC.utils.qc_check import (
 )
 from BALSAMIC.constants.quality_check_reporting import HSMETRICS_QC_CHECK
 
+
 def test_read_hs_metrics():
     # GIVEN the file exist
     hs_metrics_path = "tests/test_data/qc_files/multiqc_picard_HsMetrics.json"

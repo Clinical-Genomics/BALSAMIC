@@ -1,5 +1,9 @@
 COMMON_SETTINGS = {
-"pop_freq":{"tag_value": 0.005, "filter_name": "balsamic_high_pop_freq", "field": "INFO"},
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO",
+    },
     "varcaller_name": "None",
     "filter_type": "general",
     "analysis_type": "tumor_only,tumor_normal",
