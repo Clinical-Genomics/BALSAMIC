@@ -4,12 +4,20 @@
 Added:
 ^^^^^^
 
+* BALSAMIC container #728
+* BALSAMIC quality control metrics JSON file generation #723
+
+[8.1.0]
+-------
+
+Added:
+^^^^^^
+
 * Workflow to check PR tiltes to make easier to tell PR intents #724
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
 * Added reference download date to ``reference.json`` #726
 * ``ascatngs`` hg38 references to constants #683 
 * Added ClinVar as a source to download and to be annotated with VCFAnno #737
-* ```BALSAMIC``` quality control metrics JSON file generation #723
 
 Changed:
 ^^^^^^^^
@@ -31,7 +39,6 @@ Fixed:
 ^^^^^^
 
 * Fixed breaking shell command for VEP annotation rules #734
-
 
 [8.0.1]
 -------
