@@ -12,6 +12,10 @@ Changed:
 
 * refactored main workflow with more readible organization #614
 
+Removed:
+^^^^^^^^
+
+* The option of running umiworkflow independently with balsamic command-line option "-a umi"
 
 [8.1.0]
 -------
