@@ -25,7 +25,6 @@ rule picard_umiaware:
 source activate {params.conda};
 
 picard UmiAwareMarkDuplicatesWithMateCigar \
---DUPLEX_UMI=TRUE \
 I={input.bam} \
 O={output.bam} \
 M={output.duplicates} \
