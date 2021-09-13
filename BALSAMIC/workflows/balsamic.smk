@@ -26,7 +26,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
-from BALSAMIC.constants.variant_filters import VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
+from BALSAMIC.constants.variant_filters import COMMON_SETTINGS,VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.constants.workflow_params import VARCALL_PARAMS
 
@@ -60,6 +60,7 @@ singularity_image = config['singularity']['image']
 picarddup = get_picard_mrkdup(config)
 
 # Varcaller filter settings
+COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
 VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 
@@ -323,6 +324,11 @@ analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
 if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
+
+    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.vcf.gz",
+                                  vcf=get_vcf(config, ["TNscope_umi"], [config["analysis"]["case_id"]])),
+                                  expand(umi_qc_dir + "{sample}.umi.mean_family_depth",
+                                  sample =  config["samples"])])
 
     if background_variant_file:
         analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",

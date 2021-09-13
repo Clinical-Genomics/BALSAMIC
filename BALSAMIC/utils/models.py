@@ -60,12 +60,12 @@ class VarCallerFilter(BaseModel):
         description: str (required); comment section for description
     """
 
-    AD: VCFAttributes
+    AD: Optional[VCFAttributes]
     AF_min: Optional[VCFAttributes]
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: Optional[VCFAttributes]
-    pop_freq: VCFAttributes
+    pop_freq: Optional[VCFAttributes]
     strand_reads: Optional[VCFAttributes]
     qss: Optional[VCFAttributes]
     sor: Optional[VCFAttributes]

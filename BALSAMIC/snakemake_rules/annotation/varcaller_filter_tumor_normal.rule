@@ -62,7 +62,7 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
-    pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
+    pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
     case_name =  '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_normal')
@@ -97,7 +97,7 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     conda = config["bioinfo_tools"].get("bcftools"),
-    pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
+    pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
     case_name =  '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_normal')
