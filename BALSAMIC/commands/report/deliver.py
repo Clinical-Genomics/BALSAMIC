@@ -121,7 +121,7 @@ def deliver(
         "bcftools_filter_manta",
         "bcftools_intersect_tumor_only",
         "bcftools_filter_TNscope_umi_tumor_only",
-	"genmod_score_vardict",
+        "genmod_score_vardict",
         "mergeBam_tumor",
         "mergeBam_normal",
         "cnvkit_paired",
