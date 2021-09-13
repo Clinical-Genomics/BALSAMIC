@@ -1,5 +1,5 @@
 name: Build and push master and develop container
-# Tigger building and testing container only on pull requests
+# Trigger building and testing container only on pull requests
 on:
   push:
     branches:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly]
+        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly, balsamic]
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1

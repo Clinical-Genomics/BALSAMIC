@@ -1,3 +1,17 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* Added various basic filters to all variant callers irregardless of their delivery status #750
+* BALSAMIC container #728
+
+Changed:
+^^^^^^^^
+
+* refactored main workflow with more readible organization #614
+
 [8.1.0]
 -------
 
@@ -9,14 +23,11 @@ Added:
 * Added reference download date to ``reference.json`` #726
 * ``ascatngs`` hg38 references to constants #683 
 * Added ClinVar as a source to download and to be annotated with VCFAnno #737
-* Added various basic filters to all variant callers irregardless of their delivery status #750
-
 
 Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
-* refactored main workflow with more readible organization #614
 * Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10 
 
 
@@ -42,7 +53,6 @@ Fixed:
 ^^^^^^
 
 * Fixed context for Dockerfile for release content #720
-
 
 [8.0.0]
 -------
