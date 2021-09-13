@@ -24,9 +24,12 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_vcf, get_picard_mrkdup, get_sample_type,
                                  get_threads, get_script_path)
 
-from BALSAMIC.utils.constants import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, 
-                                    VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS, VCFANNO_TOML,
-                                    MUTATION_TYPE, WORKFLOW_PARAMS)
+from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
+                                    RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
+from BALSAMIC.constants.variant_filters import VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
+from BALSAMIC.constants.workflow_params import VARCALL_PARAMS
+
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")

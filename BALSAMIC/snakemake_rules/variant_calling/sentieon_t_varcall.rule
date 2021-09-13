@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.constants import VARCALL_PARAMS
-
 def get_pon(config):
     """ return pon cli string, complete with file """
     if "PON" in config["analysis"]:

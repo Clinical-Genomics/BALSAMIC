@@ -8,16 +8,15 @@ from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
-from BALSAMIC.utils.constants import (
+from BALSAMIC.constants.common import (
     BIOINFO_TOOL_ENV,
     SEQUENCING_TYPE,
     ANALYSIS_TYPES,
     WORKFLOW_SOLUTION,
     MUTATION_CLASS,
     MUTATION_TYPE,
-    VALID_GENOME_VER,
-    VALID_REF_FORMAT,
 )
+from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
 
 class VCFAttributes(BaseModel):

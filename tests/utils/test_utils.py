@@ -14,9 +14,8 @@ from pathlib import Path
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
-from BALSAMIC.utils.constants import CONTAINERS_CONDA_ENV_PATH
-from BALSAMIC.utils.constants import BIOINFO_TOOL_ENV
-from BALSAMIC.utils.constants import REFERENCE_FILES
+from BALSAMIC.constants.common import CONTAINERS_CONDA_ENV_PATH,BIOINFO_TOOL_ENV
+from BALSAMIC.constants.reference import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
     SnakeMake,

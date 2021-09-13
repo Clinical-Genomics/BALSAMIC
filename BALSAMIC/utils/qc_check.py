@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import json
 import os
-from BALSAMIC.utils.constants import HSMETRICS_QC_CHECK
+from BALSAMIC.constants.quality_check_reporting import HSMETRICS_QC_CHECK
 from BALSAMIC.utils.rule import get_sample_type
 
 

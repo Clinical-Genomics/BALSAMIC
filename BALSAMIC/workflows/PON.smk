@@ -9,7 +9,8 @@ import os
 
 from BALSAMIC.utils.rule import (get_picard_mrkdup, get_threads, 
                                  get_result_dir, get_pon_samples)
-from BALSAMIC.utils.constants import (RULE_DIRECTORY, WORKFLOW_PARAMS)
+from BALSAMIC.constants.common import RULE_DIRECTORY
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
 shell.prefix("set -eo pipefail; ")

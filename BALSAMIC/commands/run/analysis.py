@@ -18,7 +18,8 @@ from BALSAMIC.utils.cli import (
     get_fastq_bind_path,
     job_id_dump_to_yaml,
 )
-from BALSAMIC.utils.constants import ANALYSIS_TYPES, VCF_DICT, BALSAMIC_SCRIPTS
+from BALSAMIC.constants.common import ANALYSIS_TYPES, BALSAMIC_SCRIPTS
+from BALSAMIC.constants.workflow_params import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 
