@@ -28,7 +28,7 @@ ARG CONTAINER_NAME
 COPY . /${WORK_DIR}
 
 RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
-RUN if [ "$CONTAINER_NAME" = "balsamic" ]; then cd /project && pip install --no-cache-dir . ; fi
+RUN if [ "$CONTAINER_NAME" = "balsamic" ]; then cd /project && pip install --upgrade --no-cache-dir . ; fi
 
 # Clean work environment
 RUN rm -rf /project && conda clean --all --yes
