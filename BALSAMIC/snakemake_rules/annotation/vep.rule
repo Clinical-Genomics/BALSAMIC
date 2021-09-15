@@ -59,11 +59,11 @@ rm $tmpvcf;
 
 rule tmb_calculation:
   input:
-    vep = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vep = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
   output:
-    tmb = vep_dir + "SNV.somatic.{case_name}.{var_caller}.balsamic_stat"
+    tmb = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.balsamic_stat"
   benchmark:
-    Path(benchmark_dir, "vep_stat_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_stat_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
@@ -72,7 +72,7 @@ rule tmb_calculation:
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
-    message_text = "SNV.somatic.{case_name}.{var_caller}.all"
+    message_text = "{var_type}.somatic.{case_name}.{var_caller}.all"
   threads:
     get_threads(cluster_config, "vep")
   message:

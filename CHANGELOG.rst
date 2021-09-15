@@ -4,7 +4,20 @@
 Added:
 ^^^^^^
 
+* Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
+
+
+Changed:
+^^^^^^^^
+
+* refactored main workflow with more readible organization #614
+
+Removed:
+^^^^^^^^
+
+* The option of running umiworkflow independently with balsamic command-line option "-a umi"
+
 
 Fixed:
 ^^^^^^
@@ -28,6 +41,7 @@ Changed:
 
 * Updated docs for git FAQs #731
 * Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10 
+
 
 Fixed:
 ^^^^^^

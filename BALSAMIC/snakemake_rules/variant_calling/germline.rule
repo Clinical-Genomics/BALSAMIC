@@ -66,42 +66,6 @@ rm -rf {params.tmpdir};
         """
 
 
-rule manta_germline:
-    input:
-        fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample_type}.merged.bam",
-    output:
-        final = vcf_dir + "SV.germline.{sample_type}.manta_germline.vcf.gz",
-    benchmark:
-        Path(benchmark_dir, 'manta_germline_' + "{sample_type}.tsv").as_posix()
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
-    params:
-        conda = config["bioinfo_tools"].get("manta"),
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
-        sample = "{sample_type}"
-    threads:
-        get_threads(cluster_config,"manta_germline")
-    message:
-        "Calling germline variants using manta for sample {params.sample}"
-    shell:
-        """
-source activate {params.conda};
-
-configManta.py \
---bam={input.bam} \
---referenceFasta={input.fa} \
---runDir={params.tmpdir};
-
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
-
-cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
-
-tabix -p vcf -f {output.final};
-
-rm -rf {params.tmpdir};
-        """
 
 rule sentieon_DNAscope:
     input:

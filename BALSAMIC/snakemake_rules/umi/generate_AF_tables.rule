@@ -12,7 +12,7 @@ rule bcftools_query_generatebackgroundaf_umitable:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-        validated_set= config["background_variants"],
+        background_variant_region = background_variant_file,
         conda = config["bioinfo_tools"].get("bcftools"),
         case_name = "{case_name}"
     threads: 
@@ -24,7 +24,7 @@ rule bcftools_query_generatebackgroundaf_umitable:
 source activate {params.conda};
 
 bcftools query \
---regions-file {params.validated_set} \
+--regions-file {params.background_variant_region} \
 -f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t]\n\" \
 {input.vcf} | \
 awk -v file={params.case_name} \
