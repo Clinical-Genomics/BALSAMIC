@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.constants import REPORT_MODEL
+from BALSAMIC.constants.quality_check_reporting import REPORT_MODEL
 
 
 def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> dict:

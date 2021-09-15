@@ -1,6 +1,6 @@
 import json
 
-from BALSAMIC.utils.constants import METRICS
+from BALSAMIC.constants.quality_check_reporting import METRICS
 from BALSAMIC.utils.models import QCExtractionModel
 
 

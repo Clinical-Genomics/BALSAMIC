@@ -15,10 +15,11 @@ from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.constants import VCF_DICT
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
 from BALSAMIC.utils.qc_report import render_html, report_data_population
+from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
 
 LOG = logging.getLogger(__name__)
 
@@ -67,10 +68,8 @@ LOG = logging.getLogger(__name__)
     "-r",
     "--rules-to-deliver",
     multiple=True,
-    help=(
-        "Specify a rule to deliver. Delivery "
-        "mode selected via --delivery-mode option"
-    ),
+    help=f"Specify a rule to deliver. Delivery mode selected via --delivery-mode option."
+    f"Current available rules to deliver are: {', '.join(DELIVERY_RULES)} ",
 )
 @click.option(
     "-m",
@@ -78,10 +77,8 @@ LOG = logging.getLogger(__name__)
     type=click.Choice(["a", "r"]),
     default="a",
     show_default=True,
-    help=(
-        "a: append rules-to-deliver to current delivery "
-        "options. or r: reset current rules to delivery to only the ones specified"
-    ),
+    help="a: append rules-to-deliver to current delivery options. "
+    "r: reset current rules to delivery to only the ones specified",
 )
 @click.option(
     "--disable-variant-caller",
@@ -108,24 +105,7 @@ def deliver(
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)
 
-    default_rules_to_deliver = [
-        "fastp",
-        "multiqc",
-        "vep_somatic",
-        "vep_germline",
-        "vep_stat",
-        "bcftools_filter_vardict_tumor_only",
-        "bcftools_filter_vardict_tumor_normal",
-        "bcftools_filter_tnscope_tumor_only",
-        "bcftools_filter_tnscope_tumor_normal",
-        "bcftools_filter_manta",
-        "bcftools_intersect_tumor_only",
-        "genmod_score_vardict",
-        "mergeBam_tumor",
-        "mergeBam_normal",
-        "cnvkit_paired",
-        "cnvkit_single",
-    ]
+    default_rules_to_deliver = DELIVERY_RULES
 
     if not rules_to_deliver:
         rules_to_deliver = default_rules_to_deliver
