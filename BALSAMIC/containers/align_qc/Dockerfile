@@ -11,7 +11,7 @@ LABEL about.version="8.1.0"
 ENV PATH="/opt/conda/bin/:${PATH}"
 ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
-RUN apk add --no-cache bash gcc git zlib-dev musl-dev libintl
+RUN apk add --no-cache bash gcc git
 
 ARG WORK_DIR=project
 ARG CONTAINER_NAME
@@ -19,7 +19,7 @@ ARG CONTAINER_NAME
 # Copy all project files
 COPY . /${WORK_DIR}
 
-RUN ls && pwd && ls /${WORK_DIR} && cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 # Clean work environment
 RUN rm -rf /project && conda clean --all --yes
