@@ -43,14 +43,12 @@ rule fastp_umi:
         qc = " ".join(fastp_param_qc),
         adapter = " ".join(fastp_param_adapter),
         sample_name = "{sample}",
-        conda = config["bioinfo_tools"].get("fastp")
     threads:
         get_threads(cluster_config, 'fastp')
     message:
         "Quality control and trimming input fastq for {params.sample_name}"
     shell:
         """
-source activate {params.conda};
 export TMPDIR={params.tmpdir};
 
 fastp \
@@ -86,14 +84,12 @@ rule fastp:
         umi = " ".join(fastp_param_umi),
         minimum_length = config["QC"]["min_seq_length"],
         sample_name = "{sample}",
-        conda = config["bioinfo_tools"].get("fastp")
     threads:
         get_threads(cluster_config, 'fastp')
     message:
         "Quality control and trimming of umi optimized fastq file for {params.sample_name}"
     shell:
         """
-source activate {params.conda};
 export TMPDIR={params.tmpdir};
 
 fastp \

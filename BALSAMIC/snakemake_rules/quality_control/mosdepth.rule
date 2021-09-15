@@ -21,14 +21,12 @@ rule mosdepth_coverage:
         quantize = '0:1:50:150:',
         sample_name = '{sample}',
         output_dir = bam_dir,
-        conda = config["bioinfo_tools"].get("mosdepth")
     threads:
         get_threads(cluster_config, "mosdepth_coverage")
     message:
         "Calculate coverage using mosdepth for sample {params.sample_name}"
     shell:
         """
-source activate {params.conda};
 export MOSDEPTH_Q0=NO_COVERAGE;
 export MOSDEPTH_Q1=LOW_COVERAGE;
 export MOSDEPTH_Q2=CALLABLE;

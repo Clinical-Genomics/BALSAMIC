@@ -16,7 +16,6 @@ rule vep_somatic:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    conda = config["bioinfo_tools"].get("ensembl-vep"),
     housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz", 
@@ -30,7 +29,6 @@ rule vep_somatic:
     "Running vep annotation on {params.message_text}" 
   shell:
     """
-source activate {params.conda};
 
 vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf={params.tmpvcf};
@@ -67,7 +65,6 @@ rule tmb_calculation:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
-    conda = config["bioinfo_tools"].get("ensembl-vep"),
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
@@ -79,7 +76,6 @@ rule tmb_calculation:
     "Calculating TMB for {params.message_text}" 
   shell:
     """
-source activate {params.conda};
 
 if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
 
@@ -107,7 +103,6 @@ rule vep_germline:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
-    conda = config["bioinfo_tools"].get("ensembl-vep"),
     housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
     sample = '{sample}',
     vep_cache = config["reference"]["vep"],
@@ -118,7 +113,6 @@ rule vep_germline:
     "Running vep annotation on {params.sample}"
   shell:
       """
-source activate {params.conda};
 
 vep_path=$(dirname $(readlink -f $(which vep)));
 export PERL5LIB=;

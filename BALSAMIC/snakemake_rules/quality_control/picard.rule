@@ -16,7 +16,6 @@ rule picard_CollectHsMetrics:
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = config["bioinfo_tools"].get("picard"),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample = '{sample}'
     threads:
@@ -25,7 +24,6 @@ rule picard_CollectHsMetrics:
         "Calculating picard HsMetrics for sample '{params.sample}'"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
@@ -60,7 +58,6 @@ rule picard_CollectAlignmentSummaryMetrics:
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = config["bioinfo_tools"].get("picard"),
         adapter = config["QC"]["adapter"],
         sample = '{sample}'
     threads:
@@ -69,7 +66,6 @@ rule picard_CollectAlignmentSummaryMetrics:
         "Calculating picard alignment summary metrics for sample '{params.sample}'"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
@@ -96,7 +92,6 @@ rule picard_CollectInsertSizeMetrics:
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = config["bioinfo_tools"].get("picard"),
         sample = '{sample}'
     threads:
         get_threads(cluster_config,'picard_CollectInsertSizeMetrics')
@@ -104,7 +99,6 @@ rule picard_CollectInsertSizeMetrics:
         "Calculating picard InsertSize metrics for sample '{params.sample}'"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir}; 
 export TMPDIR={params.tmpdir};
 

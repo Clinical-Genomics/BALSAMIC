@@ -14,7 +14,6 @@ rule bcftools_filter_manta:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
     case_name = '{case_name}',
-    conda = config["bioinfo_tools"].get("bcftools"),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
   threads:
     get_threads(cluster_config, 'bcftools_filter_manta')
@@ -22,7 +21,6 @@ rule bcftools_filter_manta:
     "Filtering Manta results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-source activate {params.conda};
 
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 
@@ -41,14 +39,12 @@ rule bcftools_filter_cnvkit:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
     case_name = "{case_name}",
-    conda = config["bioinfo_tools"].get("bcftools"),
   threads:
     get_threads(cluster_config, 'bcftools_filter_cnvkit')
   message:
     "Filtering CNVkit results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-source activate {params.conda};
 
 bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
@@ -66,14 +62,12 @@ rule bcftools_filter_delly:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
     case_name = "{case_name}",
-    conda = config["bioinfo_tools"].get("bcftools"),
   threads:
     get_threads(cluster_config, 'bcftools_filter_delly')
   message:
     "Filtering Delly results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-source activate {params.conda};
 
 bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};

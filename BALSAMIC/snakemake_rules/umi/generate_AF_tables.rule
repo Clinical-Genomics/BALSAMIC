@@ -13,7 +13,6 @@ rule bcftools_query_generatebackgroundaf_umitable:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         background_variant_region = background_variant_file,
-        conda = config["bioinfo_tools"].get("bcftools"),
         case_name = "{case_name}"
     threads: 
         get_threads(cluster_config, "bcftools_query_generatebackgroundaf_umitable")
@@ -21,7 +20,6 @@ rule bcftools_query_generatebackgroundaf_umitable:
         "Creating Allelic frequency table from VCF file for sample {params.case_name}"
     shell:
         """
-source activate {params.conda};
 
 bcftools query \
 --regions-file {params.background_variant_region} \

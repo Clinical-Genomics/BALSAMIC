@@ -26,14 +26,12 @@ rule vardict_tumor_only:
         max_mm = params.vardict.max_mm,
         col_info = params.vardict.column_info,
         case_name = config["analysis"]["case_id"],
-        conda = config["bioinfo_tools"].get("vardict"),
     threads:
         get_threads(cluster_config, "vardict_tumor_only")
     message:
         "Calling variants using vardict for sample {params.case_name}"
     shell:
         """
-source activate {params.conda};
 export PERL5LIB=;
 
 mkdir -p {params.tmpdir};
@@ -68,7 +66,6 @@ rule vardict_merge:
         Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = config["bioinfo_tools"].get("vardict"),
         case_name = config["analysis"]["case_id"],
     threads:
         get_threads(cluster_config,"vardict_merge")
@@ -77,7 +74,6 @@ rule vardict_merge:
          "single vcf using bcftools for sample {params.case_name}")
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 

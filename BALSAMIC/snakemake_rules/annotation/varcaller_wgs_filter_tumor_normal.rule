@@ -13,7 +13,6 @@ rule bcftools_filter_tnscope_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    conda = config["bioinfo_tools"].get("bcftools"),
     AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
     AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
@@ -27,7 +26,6 @@ rule bcftools_filter_tnscope_tumor_normal:
     "Filtering wgs tumor-normal tnscope annotated variants using bcftools on {params.case_name}"
   shell:
     """
-source activate {params.conda};
 
 bcftools view {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
@@ -56,7 +54,6 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    conda = config["bioinfo_tools"].get("bcftools"),
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
     case_name = '{case_name}'
   threads: 
@@ -65,7 +62,6 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
     "Filtering wgs tumor-normal tnhaplotyper annotated variants using bcftools on {params.case_name}"
   shell:
     """
-source activate {params.conda};
 
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 

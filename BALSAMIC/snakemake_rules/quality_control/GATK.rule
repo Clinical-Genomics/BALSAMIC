@@ -12,14 +12,12 @@ rule PreparePopVCF:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("bcftools"),
         anno_str1 = "FORMAT/GT,FORMAT/GL,FORMAT/DS,^INFO/AC,^INFO/AF,^INFO/AN,^INFO/",
         popcode = "EUR"
     message:
         "Generate intermediate pop vcf file for gatk analysis"
     shell:
         """
-source activate {params.conda};
 readlink -f {input.bam};
 
 bcftools annotate \

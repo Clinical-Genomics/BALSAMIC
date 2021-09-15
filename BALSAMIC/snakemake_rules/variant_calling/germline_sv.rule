@@ -12,7 +12,6 @@ rule manta_germline:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("manta"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         sample = "{sample_type}"
@@ -22,7 +21,6 @@ rule manta_germline:
         "Calling germline variants using manta for sample {params.sample}"
     shell:
         """
-source activate {params.conda};
 
 configManta.py \
 --bam={input.bam} \

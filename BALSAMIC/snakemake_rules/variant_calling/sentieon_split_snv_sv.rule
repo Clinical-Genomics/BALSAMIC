@@ -13,7 +13,6 @@ rule bcftools_view_split_variant:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("bcftools"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"]
     threads:
@@ -22,7 +21,6 @@ rule bcftools_view_split_variant:
         "Split tnscope snv and sv variants using bcftools for sample {params.case_name}"
     shell:
         """
-source activate {params.conda};
 export TMPDIR={params.tmpdir};
 mkdir -p {params.tmpdir};
 

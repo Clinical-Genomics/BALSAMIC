@@ -26,7 +26,6 @@ rule manta_tumor_normal:
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        conda = config["bioinfo_tools"].get("manta"),
         case_name = config["analysis"]["case_id"],
         manta_install_path = "/opt/conda/envs/varcall_py27/share/manta-1.6.0-1"
     threads:
@@ -36,7 +35,6 @@ rule manta_tumor_normal:
         "index the compressed vcf file")
     shell:
         """
-source activate {params.conda};
 
 samtools_path=$(readlink -f $(which samtools))
 
@@ -79,7 +77,6 @@ rule delly_tumor_normal:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
-        conda = config["bioinfo_tools"].get("delly"),
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "delly_tumor_normal")
@@ -88,7 +85,6 @@ rule delly_tumor_normal:
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
-source activate {params.conda};
 
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN};
 

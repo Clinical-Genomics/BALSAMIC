@@ -14,7 +14,6 @@ rule picard_umiaware:
     singularity: 
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("picard"),
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "picard_umiaware")
@@ -22,7 +21,6 @@ rule picard_umiaware:
         "Picard Umiaware mark dups for sample {params.sample_id}"
     shell:
         """
-source activate {params.conda};
 
 picard UmiAwareMarkDuplicatesWithMateCigar \
 I={input.bam} \
@@ -45,7 +43,6 @@ rule picard_collecthsmetrics_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("picard"),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = "{sample}"
     threads: 
@@ -54,7 +51,6 @@ rule picard_collecthsmetrics_umi:
         "Collect HSmetrics using Picardtools for {params.sample_id}"
     shell:
         """
-source activate {params.conda};
 
 picard BedToIntervalList \
 I={input.bed} \
@@ -82,7 +78,6 @@ rule samtools_view_calculatemeanfamilydepth_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("samtools"),
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
@@ -90,7 +85,6 @@ rule samtools_view_calculatemeanfamilydepth_umi:
         "Calculating mean family depth using samtools and awk for {params.sample_id}"
     shell:
         """
-source activate {params.conda};
 
 samtools view -@ {threads} {input.bam} | \
 grep 'RX:Z:' | \

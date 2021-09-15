@@ -12,7 +12,6 @@ rule mergeBam_tumor_umiconsensus:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("picard"),
         picard = params.common.picard_RG_tumor,
         sample = tumor_sample
     threads: 
@@ -21,7 +20,6 @@ rule mergeBam_tumor_umiconsensus:
         "Replace ReadGroups using picard for tumor sample {params.sample}"
     shell:
         """
-source activate {params.conda};
 picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam};
 samtools index {output.bam};
         """

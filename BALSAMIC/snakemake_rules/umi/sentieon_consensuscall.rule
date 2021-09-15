@@ -99,14 +99,12 @@ rule sentieon_consensusfilter_umi:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = params.umiconsensuscall.filter_minreads,
         sample_id = '{case_name}',
-        conda = config["bioinfo_tools"].get("samtools")
     threads:
         get_threads(cluster_config, "sentieon_consensusfilter_umi")
     message:
         "Filtering consensus reads based on XZ tag for sample {params.sample_id}"
     shell:
         """
-source activate {params.conda};
 
 samtools view -h {input} | \
 awk -v MinR={params.minreads} -v OFS=\'\\t\' -f {params.consensusfilter_script} | \

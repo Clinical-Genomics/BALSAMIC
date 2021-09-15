@@ -20,14 +20,12 @@ rule vardict_tumor_normal:
         max_mm = params.vardict.max_mm,
         col_info = params.vardict.column_info,
         case_name = config["analysis"]["case_id"],
-        conda = config["bioinfo_tools"].get("vardict"),
     threads:
         get_threads(cluster_config, "vardict_tumor_normal")
     message:
         "Calling variants using vardict for sample {params.case_name}"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx32G\"';
@@ -53,7 +51,6 @@ rule vardict_merge:
         yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
     params:
-        conda = config["bioinfo_tools"].get("vardict"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"],
     benchmark:
@@ -67,7 +64,6 @@ rule vardict_merge:
         "single vcf using bcftools for sample {params.case_name}")
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 
 bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf}; 
