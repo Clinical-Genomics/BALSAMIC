@@ -6,6 +6,11 @@ Added:
 
 * BALSAMIC container #728
 
+Fixed:
+^^^^^^
+
+* Pip installation failure inside balsamic container #758
+
 [8.1.0]
 -------
 
