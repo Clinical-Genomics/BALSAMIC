@@ -19,7 +19,7 @@ ARG CONTAINER_NAME
 # Copy all project files
 COPY . /${WORK_DIR}
 
-RUN ls && pwd && ls /${WORK_DIR} cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+RUN ls && pwd && ls /${WORK_DIR} && cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 # Clean work environment
 RUN rm -rf /project && conda clean --all --yes
