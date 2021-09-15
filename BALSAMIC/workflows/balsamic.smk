@@ -79,15 +79,11 @@ if config['analysis']['analysis_type'] == "paired":
 # Set case id/name
 case_id = config["analysis"]["case_id"]
 
-# Declare sentieon variables
-sentieon = True
-SENTIEON_LICENSE = ''
-SENTIEON_INSTALL_DIR = ''
-
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
+# Find and set Sentieon binary and license server from env variables
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
     config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
@@ -101,16 +97,12 @@ try:
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
     
 except KeyError as error:
-    sentieon = False
-    LOG.warning("Set environment variables {} to run BALSAMIC workflow".format(error.args[0]))
+    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+              "to run SENTIEON variant callers")
+    raise BalsamicError
 
 if not Path(config["SENTIEON_EXEC"]).exists():
     LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
-    raise BalsamicError
-
-if config["analysis"]["sequencing_type"] == "wgs" and not sentieon:
-    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-              "to run SENTIEON variant callers")
     raise BalsamicError
 
 # Add normal sample if analysis is paired
@@ -209,18 +201,15 @@ analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                     vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))]
 
 if config["analysis"]["sequencing_type"] != "wgs":
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
-                                           vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]]))])
+    analysis_specific_results.append(expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
+                                           vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
-    analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.vcf.gz",
-                                  vcf=get_vcf(config, ["TNscope_umi"], [config["analysis"]["case_id"]])),
-                                  expand(umi_qc_dir + "{sample}.umi.mean_family_depth",
-                                  sample =  config["samples"])])
+    analysis_specific_results.append(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config["samples"]))
 
     if background_variant_file:
         analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
-                                      case_name = config["analysis"]["case_id"],
-                                      var_caller =["TNscope_umi"])]),
+                                      case_name=config["analysis"]["case_id"],
+                                      var_caller=["TNscope_umi"])]),
 
 #Calculate TMB per somatic variant caller
 analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
@@ -228,9 +217,7 @@ analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
 
 #Gather all the filtered and PASSed variants post annotation
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
-                                        vcf=get_vcf(config,
-                                                    somatic_caller,
-                                                    [config["analysis"]["case_id"]]))])
+                                        vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))])
 
 LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
 
