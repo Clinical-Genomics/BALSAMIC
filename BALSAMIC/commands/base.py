@@ -25,7 +25,7 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 @click.group()
 @click.option(
     "--loglevel",
-    default="DEBUG",
+    default="INFO",
     type=click.Choice(LOG_LEVELS),
     help="Set the level of log output.",
     show_default=True,

@@ -35,6 +35,7 @@ shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
+logging.getLogger("filelock").setLevel("WARN")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
