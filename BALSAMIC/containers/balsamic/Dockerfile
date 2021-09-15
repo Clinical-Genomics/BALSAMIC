@@ -28,7 +28,7 @@ ARG CONTAINER_NAME
 COPY . /${WORK_DIR}
 
 RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
-RUN pip install --upgrade --no-cache-dir .
+RUN cd /${WORK_DIR} && pip install --upgrade --no-cache-dir .
 
 # Clean work environment
 RUN rm -rf /project && conda clean --all --yes
