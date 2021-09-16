@@ -6,6 +6,8 @@ picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cy
                            "insert_size_metrics", "quality_by_cycle_metrics",
                            "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 
+
+
 rule picard_CollectMultipleMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
@@ -20,7 +22,6 @@ rule picard_CollectMultipleMetrics:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         output_prefix = qc_dir + "{sample}.multiple_metrics",
-        conda = config["bioinfo_tools"].get("picard"),
         sample = '{sample}'
     threads:
         get_threads(cluster_config,'picard_CollectMultipleMetrics')
@@ -28,7 +29,6 @@ rule picard_CollectMultipleMetrics:
         "Collecting picard multiple quality metrics for wgs sample {params.sample}"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
@@ -53,7 +53,6 @@ rule picard_CollectWgsMetrics:
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        conda = config["bioinfo_tools"].get("picard"),
         sample = '{sample}'
     threads:
         get_threads(cluster_config,'picard_CollectWgsMetrics')
@@ -61,7 +60,6 @@ rule picard_CollectWgsMetrics:
         "Collecting various picard quality metrics for wgs sample '{params.sample}'"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
@@ -71,4 +69,3 @@ I={input.bam} \
 O={output} \
 R={input.reference};
         """
-

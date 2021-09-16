@@ -3,6 +3,8 @@
 
 # Variant-calling using TNscope
 
+
+
 rule sentieon_tnscope_umi:
     input:
         bam = umi_dir + "tumor.umi_consensusfiltered.merged.bam",

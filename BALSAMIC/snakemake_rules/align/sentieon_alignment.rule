@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
+
+
 rule sentieon_align_sort:
     input:
         ref = config["reference"]["reference_genome"],

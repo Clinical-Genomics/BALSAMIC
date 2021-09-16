@@ -9,7 +9,7 @@ import click
 import graphviz
 import snakemake
 
-from BALSAMIC.utils.constants import (
+from BALSAMIC.constants.common import (
     BIOINFO_TOOL_ENV,
     BALSAMIC_DOCKER_PATH,
     VALID_CONTAINER_CONDA_NAME,

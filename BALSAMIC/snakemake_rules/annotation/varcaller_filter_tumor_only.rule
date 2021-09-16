@@ -2,6 +2,8 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
+
+
 rule bcftools_filter_vardict_tumor_only:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.vcf.gz",
@@ -14,7 +16,6 @@ rule bcftools_filter_vardict_tumor_only:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    conda = config["bioinfo_tools"].get("bcftools"),
     MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
     AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
     DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],
@@ -28,14 +29,74 @@ rule bcftools_filter_vardict_tumor_only:
     "Filtering vardict tumor-only annotated variants using bcftools on {params.case_name}"
   shell:
     """
-source activate {params.conda};
-
 bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' \
 | bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools filter --include 'INFO/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_filtered};
+
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+
+tabix -p vcf -f {output.vcf_pass};
+    """
+
+
+rule bcftools_filter_tnhaplotyper_tumor_only:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
+    case_name =  '{case_name}'
+  threads:
+    get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_only')
+  message:
+    "Filtering tnhaplotyper tumor-only annotated variants using bcftools on {params.case_name}"
+  shell:
+    """
+bcftools view {input.vcf} \
+| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
+| bcftools view -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_filtered};
+
+bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+
+tabix -p vcf -f {output.vcf_pass};
+    """
+
+
+rule bcftools_filter_TNscope_umi_tumor_only:
+  input:
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.vcf.gz",
+  output:
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
+    case_name =  '{case_name}'
+  threads:
+    get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_only')
+  message:
+    "Filtering TNscope_umi tumor-only annotated variants using bcftools on {params.case_name}"
+  shell:
+    """
+bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;
 

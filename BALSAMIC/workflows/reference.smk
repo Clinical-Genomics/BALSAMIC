@@ -9,7 +9,7 @@ import logging
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceMeta
-from BALSAMIC.utils.constants import REFERENCE_FILES 
+from BALSAMIC.constants.reference import REFERENCE_FILES 
 
 LOG = logging.getLogger(__name__)
 

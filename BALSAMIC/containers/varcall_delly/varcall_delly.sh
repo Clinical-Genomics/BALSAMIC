@@ -1,2 +1,1 @@
-conda env create -n ${1} --file ${1}.yaml
-source activate ${1}
+conda env update -n base --file ${1}.yaml --prune
