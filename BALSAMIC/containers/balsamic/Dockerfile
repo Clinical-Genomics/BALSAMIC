@@ -31,4 +31,4 @@ RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINE
 RUN cd /${WORK_DIR} && pip install --upgrade --no-cache-dir .
 
 # Clean work environment
-RUN rm -rf /project && conda clean --all --yes
+RUN rm -rf /${WORK_DIR} && conda clean --all --yes

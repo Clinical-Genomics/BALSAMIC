@@ -21,4 +21,4 @@ COPY . /${WORK_DIR}
 RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 # Clean work environment
-RUN rm -rf /project && conda clean --all --yes
+RUN rm -rf /${WORK_DIR} && conda clean --all --yes
