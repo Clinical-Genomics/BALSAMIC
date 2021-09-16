@@ -40,7 +40,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --block_size 3G \
 --sam2bam -i -;
         """
-
 rule sentieon_dedup:
     input:
         bam = Path(bam_dir, "{sample}.bam").as_posix(),
@@ -82,7 +81,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --metrics {output.metrics} \
 {output.bam};
         """
-
 rule sentieon_realign:
     input:
         ref = config["reference"]["reference_genome"],

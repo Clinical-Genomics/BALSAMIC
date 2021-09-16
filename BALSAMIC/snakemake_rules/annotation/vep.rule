@@ -85,7 +85,6 @@ bcftools view --types snps,indels --apply-filters PASS {input.vep} \
 | filter_vep --filter 'not feature_truncation' -C \
 | awk -v region=${{region_size}} '{{print $NF/region}}' > {output.tmb};
     """
-
 rule vep_germline:
   input:
     vcf = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",

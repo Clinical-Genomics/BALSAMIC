@@ -114,7 +114,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
 rm -rf {params.tmpdir};
         """
-
 rule sentieon_TNscope_tumor_only:
     input:
         ref = config["reference"]["reference_genome"],

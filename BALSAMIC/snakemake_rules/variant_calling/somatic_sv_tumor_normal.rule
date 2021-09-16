@@ -97,7 +97,6 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 
 rm -rf {params.tmpdir};
         """
-
 rule ascat_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"] ,

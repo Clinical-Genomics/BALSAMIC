@@ -44,8 +44,6 @@ bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 
 tabix -p vcf -f {output.vcf_pass};
     """
-
-
 rule bcftools_filter_tnhaplotyper_tumor_normal:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
@@ -75,8 +73,6 @@ bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 
 tabix -p vcf -f {output.vcf_pass};
     """
-
-
 rule bcftools_filter_TNscope_umi_tumor_normal:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.vcf.gz",
