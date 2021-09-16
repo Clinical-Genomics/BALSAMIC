@@ -11,7 +11,7 @@ LABEL about.version="8.1.0"
 ENV PATH="/opt/conda/bin/:${PATH}"
 ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
-RUN apk add --no-cache bash gcc git
+RUN apk add --no-cache bash gcc git zlib-dev
 
 ARG WORK_DIR=project
 ARG CONTAINER_NAME
