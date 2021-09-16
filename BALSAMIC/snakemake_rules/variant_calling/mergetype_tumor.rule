@@ -27,7 +27,6 @@ rule mergeBam_tumor:
     "Replace bam header using Picard tools for tumor sample {params.sample}"
   shell:
     """
-
 picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
 samtools index {output.bam}; 
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 

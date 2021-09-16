@@ -37,7 +37,6 @@ O={params.output_prefix} \
 R={input.reference};
         """
 
-
 rule picard_CollectWgsMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
@@ -67,4 +66,3 @@ I={input.bam} \
 O={output} \
 R={input.reference};
         """
-

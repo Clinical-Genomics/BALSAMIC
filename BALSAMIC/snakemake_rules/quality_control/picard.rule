@@ -44,7 +44,6 @@ BAIT_SET_NAME={params.baitsetname} \
 COVERAGE_CAP=50000 \
 METRIC_ACCUMULATION_LEVEL=ALL_READS;
       """
-
 rule picard_CollectAlignmentSummaryMetrics:
     input:
         bam = bam_dir + "{sample}.sorted.bam",
@@ -78,7 +77,6 @@ ADAPTER_SEQUENCE={params.adapter} \
 METRIC_ACCUMULATION_LEVEL=ALL_READS \
 METRIC_ACCUMULATION_LEVEL=LIBRARY;
         """
-
 rule picard_CollectInsertSizeMetrics:
     input:
         bam = bam_dir + "{sample}.sorted.bam"

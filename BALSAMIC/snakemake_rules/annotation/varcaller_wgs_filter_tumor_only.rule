@@ -28,7 +28,6 @@ rule bcftools_filter_tnscope_tumor_only:
     "Filtering wgs tumor-only tnscope annotated variants using bcftools on {params.case_name}"
   shell:
     """
-
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
@@ -44,7 +43,6 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 
 tabix -p vcf -f {output.vcf_filtered};
     """
-
 rule bcftools_filter_tnhaplotyper_tumor_only:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
@@ -71,7 +69,6 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
     "Filtering wgs tumor-only tnhaplotyper annotated variants using bcftools on {params.case_name}"
   shell:
     """
-
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
@@ -90,7 +87,6 @@ bcftools view -f PASS --threads {threads} -O z {output.vcf_pass} {output.vcf_fil
 
 tabix -p vcf -f {output.vcf_pass}
     """
-
 rule bcftools_intersect_tumor_only:
   input:
     tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.all.filtered.vcf.gz",
@@ -112,7 +108,6 @@ rule bcftools_intersect_tumor_only:
     "Retrieving common annotated variants between tnscope and tnhaplotyper using bcftools for {params.case_name}"
   shell:
     """
-
 bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z;
 
 cp {params.vcf_dir}/0002.vcf.gz {output.vcf_filtered};

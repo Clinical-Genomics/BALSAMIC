@@ -39,7 +39,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --umi_tag {params.tag} \
 --read_name_prefix 'UMI-'; 
         """
-
 # Alignment of consensus reads
 rule sentieon_bwa_umiconsensus:
     input:
@@ -84,7 +83,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -o {output.align_consensus} \
 -i - ;
         """
-
 # Filter consensus called reads based on 'XZ' filtering
 rule sentieon_consensusfilter_umi:
     input:
@@ -105,7 +103,6 @@ rule sentieon_consensusfilter_umi:
         "Filtering consensus reads based on XZ tag for sample {params.sample_id}"
     shell:
         """
-
 samtools view -h {input} | \
 awk -v MinR={params.minreads} -v OFS=\'\\t\' -f {params.consensusfilter_script} | \
 samtools view -bh - > {output};

@@ -21,7 +21,6 @@ rule manta_germline:
         "Calling germline variants using manta for sample {params.sample}"
     shell:
         """
-
 configManta.py \
 --bam={input.bam} \
 --referenceFasta={input.fa} \

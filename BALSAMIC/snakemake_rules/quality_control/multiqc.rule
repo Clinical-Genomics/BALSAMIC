@@ -80,7 +80,6 @@ rule multiqc:
         "Aggregrate quality metrics results using multiqc for sample {params.case_name}"
     shell:
         """
-
 echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list;
 multiqc --force --outdir {params.qc_dir} --exclude {params.exclude_module} --data-format json -l {params.qc_dir}/dir_list;
 chmod -R 777 {params.qc_dir};

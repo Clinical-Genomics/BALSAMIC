@@ -35,7 +35,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {params.ds_params} {input.read1} {input.read2} \
 -o {output.ds_umi};
         """
-
 # Align the UMI-extracted reads
 rule sentieon_bwa_umiextract:
     input:

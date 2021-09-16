@@ -63,7 +63,6 @@ fastp \
 {params.qc} \
 {params.adapter};
         """
-
 # Double pass to hard trim adapter and UMIs
 rule fastp:
     input:

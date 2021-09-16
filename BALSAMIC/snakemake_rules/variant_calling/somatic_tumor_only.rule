@@ -52,7 +52,6 @@ vardict-java -u -I 600 \
 
 tabix -p vcf {output};
     """
-
 rule vardict_merge:
     input:
         expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
@@ -86,7 +85,6 @@ echo -e \"{params.case_name}\\tTUMOR\" > {output.namemap};
 echo -e \"{params.case_name}\" > {output.namemap}.tumor; 
 echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml};
         """
-
 rule sentieon_TNhaplotyper_tumor_only:
     input:
         bam = bam_dir + "tumor.merged.bam",

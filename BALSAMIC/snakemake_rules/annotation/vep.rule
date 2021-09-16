@@ -29,7 +29,6 @@ rule vep_somatic:
     "Running vep annotation on {params.message_text}" 
   shell:
     """
-
 vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf={params.tmpvcf};
 export PERL5LIB=;
@@ -54,7 +53,6 @@ bcftools stats {output.vcf_all} > {output.bcftools_stats};
 
 rm $tmpvcf;
     """
-
 rule tmb_calculation:
   input:
     vep = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
@@ -76,7 +74,6 @@ rule tmb_calculation:
     "Calculating TMB for {params.message_text}" 
   shell:
     """
-
 if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
 
 bcftools view --types snps,indels --apply-filters PASS {input.vep} \
@@ -88,7 +85,6 @@ bcftools view --types snps,indels --apply-filters PASS {input.vep} \
 | filter_vep --filter 'not feature_truncation' -C \
 | awk -v region=${{region_size}} '{{print $NF/region}}' > {output.tmb};
     """
-    
 
 rule vep_germline:
   input:
@@ -113,7 +109,6 @@ rule vep_germline:
     "Running vep annotation on {params.sample}"
   shell:
       """
-
 vep_path=$(dirname $(readlink -f $(which vep)));
 export PERL5LIB=;
 

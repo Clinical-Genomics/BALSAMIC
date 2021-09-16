@@ -42,7 +42,6 @@ bwa mem \
 samtools index -@ {threads} {output.bamout};
 rm -rf {params.tmpdir};
         """
-
 rule picard_markduplicates:
     input:
         Path(bam_dir, "{sample}.sorted.bam").as_posix()

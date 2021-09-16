@@ -27,7 +27,6 @@ rule bcftools_filter_vardict_tumor_only:
     "Filtering vardict tumor-only annotated variants using bcftools on {params.case_name}"
   shell:
     """
-
 bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' \
 | bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
@@ -43,7 +42,6 @@ bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 
 tabix -p vcf -f {output.vcf_pass};
     """
-
 
 rule bcftools_filter_tnhaplotyper_tumor_only:
   input:
@@ -64,7 +62,6 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
     "Filtering tnhaplotyper tumor-only annotated variants using bcftools on {params.case_name}"
   shell:
     """
-
 bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;
@@ -75,7 +72,6 @@ bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 
 tabix -p vcf -f {output.vcf_pass};
     """
-
 
 rule bcftools_filter_TNscope_umi_tumor_only:
   input:
@@ -96,7 +92,6 @@ rule bcftools_filter_TNscope_umi_tumor_only:
     "Filtering TNscope_umi tumor-only annotated variants using bcftools on {params.case_name}"
   shell:
     """
-
 bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
 | bcftools view -o {output.vcf_filtered} -O z;

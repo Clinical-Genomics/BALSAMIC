@@ -23,4 +23,3 @@ rule mergeBam_tumor_umiconsensus:
 picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam};
 samtools index {output.bam};
         """
-

@@ -41,7 +41,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --sam2bam -i -;
         """
 
-
 rule sentieon_dedup:
     input:
         bam = Path(bam_dir, "{sample}.bam").as_posix(),
@@ -83,7 +82,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --metrics {output.metrics} \
 {output.bam};
         """
-
 
 rule sentieon_realign:
     input:

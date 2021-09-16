@@ -20,7 +20,6 @@ rule bcftools_query_generatebackgroundaf_umitable:
         "Creating Allelic frequency table from VCF file for sample {params.case_name}"
     shell:
         """
-
 bcftools query \
 --regions-file {params.background_variant_region} \
 -f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t]\n\" \

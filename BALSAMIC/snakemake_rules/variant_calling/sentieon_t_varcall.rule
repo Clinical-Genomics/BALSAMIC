@@ -69,7 +69,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rm -rf {params.tmpdir};
         """
-
 rule sentieon_TNhaplotyper_tumor_only:
     input:
         bam = expand(bam_dir + "tumor.merged.bam"),
@@ -115,7 +114,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
 rm -rf {params.tmpdir};
         """
-
 
 rule sentieon_TNscope_tumor_only:
     input:

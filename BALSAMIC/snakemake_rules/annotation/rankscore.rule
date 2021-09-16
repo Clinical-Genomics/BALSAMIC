@@ -22,7 +22,6 @@ rule genmod_score_vardict:
     "and compress vcf using bcftools on {params.case_name}")
   shell:
     """
-
 genmod score -r -c {input.rankscore} {input.vcf} | \
 bcftools view -o {output.vcf_pass} -O z;
 

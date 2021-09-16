@@ -31,7 +31,6 @@ rule manta_tumor_only:
         "index the compressed vcf file")
     shell:
       """
-
 samtools_path=$(readlink -f $(which samtools))
 
 configManta.py \
@@ -54,7 +53,6 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
 rm -rf {params.tmpdir};
       """
-
 
 rule delly_tumor_only:
     input:
@@ -80,7 +78,6 @@ rule delly_tumor_only:
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
-
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT}
 
 delly filter -p -o {params.tmpdir}/delly.filtered.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf

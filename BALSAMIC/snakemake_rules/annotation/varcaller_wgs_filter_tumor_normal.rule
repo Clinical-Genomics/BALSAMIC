@@ -26,7 +26,6 @@ rule bcftools_filter_tnscope_tumor_normal:
     "Filtering wgs tumor-normal tnscope annotated variants using bcftools on {params.case_name}"
   shell:
     """
-
 bcftools view {input.vcf} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
@@ -41,7 +40,6 @@ bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
 
 tabix -p vcf -f {output.vcf_pass};
     """
-
 rule bcftools_filter_tnhaplotyper_tumor_normal:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
@@ -62,7 +60,6 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
     "Filtering wgs tumor-normal tnhaplotyper annotated variants using bcftools on {params.case_name}"
   shell:
     """
-
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \

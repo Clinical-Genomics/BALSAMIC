@@ -61,7 +61,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rm -rf {params.tmpdir};
         """
 
-
 rule sentieon_TN_corealign:
     input:
         ref = config["reference"]["reference_genome"],
@@ -105,7 +104,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rm -rf {params.tmpdir};
         """
-
 rule sentieon_TNhaplotyper:
     input:
         bam = bam_dir + config["analysis"]["case_id"] + ".corealign.bam",
@@ -148,7 +146,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
-
 
 rule sentieon_TNscope:
     input:

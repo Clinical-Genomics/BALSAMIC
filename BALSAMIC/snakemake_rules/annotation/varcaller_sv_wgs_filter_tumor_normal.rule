@@ -22,11 +22,9 @@ rule bcftools_filter_manta:
     "Filtering Manta results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """
-
 
 rule bcftools_filter_delly:
   input:
@@ -46,11 +44,9 @@ rule bcftools_filter_delly:
     "Filtering Delly results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """
-
 
 rule bcftools_filter_ascat:
   input:
@@ -70,7 +66,6 @@ rule bcftools_filter_ascat:
     "Filtering Ascat results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """

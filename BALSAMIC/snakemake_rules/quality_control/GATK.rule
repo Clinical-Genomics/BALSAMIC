@@ -36,5 +36,4 @@ newINFO=INFO[i] \";\" newINFO; }} \
 $8=sustr(newINFO, 1, length(newINFO)-1); print; }}' \
  > {output.popvcf};
         """
-    
 

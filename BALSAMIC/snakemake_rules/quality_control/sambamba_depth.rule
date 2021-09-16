@@ -32,7 +32,6 @@ sambamba depth region \
 --filter {params.filter_string} \
 `echo $covStr` {input.bam} > {output}; 
         """
-
 rule sambamba_exon_depth:
     input:
         bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
@@ -58,7 +57,6 @@ rule sambamba_exon_depth:
         "Calculate exon depth stastics using sambamba for sample {params.sample}"
     shell:
         """
-
 sambamba depth region \
 --regions {input.bed} \
 --min-base-quality={params.base_qual} \

@@ -35,7 +35,6 @@ rule manta_tumor_normal:
         "index the compressed vcf file")
     shell:
         """
-
 samtools_path=$(readlink -f $(which samtools))
 
 configManta.py \
@@ -59,7 +58,6 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 
 rm -rf {params.tmpdir};
         """
-
 rule delly_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
@@ -85,7 +83,6 @@ rule delly_tumor_normal:
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
-
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN};
 
 echo -e \"{params.tumor}\\ttumor\\n{params.normal}\\tcontrol\" > {params.tmpdir}/samples.tsv;
@@ -100,7 +97,6 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 
 rm -rf {params.tmpdir};
         """
-
 
 rule ascat_tumor_normal:
     input:
@@ -170,4 +166,3 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 
 rm -rf {params.tmpdir};
         """
-
