@@ -10,6 +10,8 @@ def repeat(param, values):
     return " ".join(param_values)
 
 
+
+
 rule sentieon_wgs_metrics:
     input:
         bam = bam_dir + '{sample}.dedup.bam',

@@ -4,21 +4,53 @@
 Added:
 ^^^^^^
 
+* Added various basic filters to all variant callers irregardless of their delivery status #750
+* BALSAMIC container #728
+* Added ``--tmp/--tmp-dir`` option to base command #449
+
+
+Changed:
+^^^^^^^^
+
+* refactored main workflow with more readible organization #614
+* refactored conda envs within container to be on base and container definition is uncoupled #759
+
+Removed:
+^^^^^^^^
+
+* The option of running umiworkflow independently with balsamic command-line option "-a umi"
+
+
+Fixed:
+^^^^^^
+
+* Pip installation failure inside balsamic container #758
+
+[8.1.0]
+-------
+
+Added:
+^^^^^^
+
 * Workflow to check PR tiltes to make easier to tell PR intents #724
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
 * Added reference download date to ``reference.json`` #726
 * ``ascatngs`` hg38 references to constants #683 
-* Added ``--tmp/--tmp-dir`` option to base command #449
+* Added ClinVar as a source to download and to be annotated with VCFAnno #737
 
 Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
+* Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10 
+
 
 Fixed:
 ^^^^^^
 
 * Fixed bug with using varcall_py36 container with VarDict #739
+* Fixed a bug with VEP module in MultiQC by excluding #746
+* Fixed a bug with ``bcftools stats`` results failing in MultiQC #744
 
 [8.0.2]
 -------
@@ -35,7 +67,6 @@ Fixed:
 ^^^^^^
 
 * Fixed context for Dockerfile for release content #720
-
 
 [8.0.0]
 -------

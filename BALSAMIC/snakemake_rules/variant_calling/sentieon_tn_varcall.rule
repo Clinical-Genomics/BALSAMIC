@@ -1,7 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from BALSAMIC.utils.constants import VARCALL_PARAMS
+
 
 rule sentieon_base_calibration:
     input:
@@ -107,6 +107,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rm -rf {params.tmpdir};
         """
+
 
 rule sentieon_TNhaplotyper:
     input:

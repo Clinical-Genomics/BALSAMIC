@@ -68,6 +68,7 @@ def reference():
             "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
             "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
             "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
+            "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
         }
     }
 
@@ -219,6 +220,7 @@ def tumor_normal_config(
     sample_fastq,
     analysis_dir,
     balsamic_cache,
+    background_variant_file,
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
@@ -260,6 +262,8 @@ def tumor_normal_config(
                 "ACC1",
                 "--normal-sample-name",
                 "ACC2",
+                "--background-variants",
+                background_variant_file,
             ],
         )
 
@@ -327,6 +331,7 @@ def tumor_only_config(
     tmpdir_factory,
     sample_fastq,
     balsamic_cache,
+    background_variant_file,
     analysis_dir,
     panel_bed_file,
     sentieon_license,
@@ -362,6 +367,8 @@ def tumor_only_config(
                 analysis_dir,
                 "--balsamic-cache",
                 balsamic_cache,
+                "--background-variants",
+                background_variant_file,
             ],
         )
 
@@ -401,55 +408,6 @@ def tumor_only_wgs_config(
             [
                 "config",
                 "case",
-                "-t",
-                tumor,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
-            ],
-        )
-
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_only_umi_config(
-    tmpdir_factory,
-    sample_fastq,
-    balsamic_cache,
-    analysis_dir,
-    panel_bed_file,
-    background_variant_file,
-    sentieon_license,
-    sentieon_install_dir,
-):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only with background variant file for umi workflow
-    """
-    case_id = "sample_tumor_only_umi"
-    tumor = sample_fastq["tumor"]
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "-p",
-                panel_bed_file,
-                "--background-variants",
-                background_variant_file,
                 "-t",
                 tumor,
                 "--case-id",

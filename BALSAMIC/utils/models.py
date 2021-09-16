@@ -8,16 +8,15 @@ from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
-from BALSAMIC.utils.constants import (
+from BALSAMIC.constants.common import (
     BIOINFO_TOOL_ENV,
     SEQUENCING_TYPE,
     ANALYSIS_TYPES,
     WORKFLOW_SOLUTION,
     MUTATION_CLASS,
     MUTATION_TYPE,
-    VALID_GENOME_VER,
-    VALID_REF_FORMAT,
 )
+from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
 
 class VCFAttributes(BaseModel):
@@ -61,12 +60,12 @@ class VarCallerFilter(BaseModel):
         description: str (required); comment section for description
     """
 
-    AD: VCFAttributes
+    AD: Optional[VCFAttributes]
     AF_min: Optional[VCFAttributes]
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: Optional[VCFAttributes]
-    pop_freq: VCFAttributes
+    pop_freq: Optional[VCFAttributes]
     strand_reads: Optional[VCFAttributes]
     qss: Optional[VCFAttributes]
     sor: Optional[VCFAttributes]
@@ -522,6 +521,7 @@ class ReferenceMeta(BaseModel):
         delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
         ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
+        clinvar: ReferenceUrlsModel. Optional field for clinvar reference
     """
 
     basedir: str = ""
@@ -543,6 +543,7 @@ class ReferenceMeta(BaseModel):
     delly_exclusion: Optional[ReferenceUrlsModel]
     ascat_gccorrection: Optional[ReferenceUrlsModel]
     ascat_chryloci: Optional[ReferenceUrlsModel]
+    clinvar: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):

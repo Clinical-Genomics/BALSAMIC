@@ -6,6 +6,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 else:
     tumor_bam = "{tumor}.sorted.{picardstr}.bam".format(tumor = tumor_sample, picardstr = picarddup)
 
+
+
 rule mergeBam_tumor:
   input:
     fasta = config["reference"]["reference_genome"],
@@ -19,7 +21,6 @@ rule mergeBam_tumor:
     Path(singularity_image, config[ "bioinfo_tools" ].get("picard") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
-    conda = config["bioinfo_tools"].get("picard"),
     picard = params.common.picard_RG_tumor,
     sample = tumor_sample
   threads:
@@ -28,8 +29,6 @@ rule mergeBam_tumor:
     "Replace bam header using Picard tools for tumor sample {params.sample}"
   shell:
     """
-source activate {params.conda};
-
 picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
 samtools index {output.bam}; 
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 

@@ -9,7 +9,7 @@ import logging
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceMeta
-from BALSAMIC.utils.constants import REFERENCE_FILES 
+from BALSAMIC.constants.reference import REFERENCE_FILES 
 
 LOG = logging.getLogger(__name__)
 
@@ -61,6 +61,7 @@ access_regions_url = reference_file_model.access_regions
 delly_exclusion_url = reference_file_model.delly_exclusion
 ascat_gccorrection_url = reference_file_model.ascat_gccorrection
 ascat_chryloci_url = reference_file_model.ascat_chryloci
+clinvar_url = reference_file_model.clinvar
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
@@ -118,7 +119,8 @@ rule all:
         delly_exclusion = delly_exclusion_url.get_output_file,
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
         ascat_gccorrection = ascat_gccorrection_url.get_output_file,
-        ascat_chryloci = ascat_chryloci_url.get_output_file
+        ascat_chryloci = ascat_chryloci_url.get_output_file,
+        clinvar = clinvar_url.get_output_file + ".gz",
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -127,9 +129,9 @@ rule all:
         os.path.join(basedir, "reference.json.log")
     run:
         import json
-        from datetime import date
+        from datetime import date 
 
-        today = date.today()
+        today = date.today().strftime('%d-%m-%Y')
 
         ref_json = dict()
         ref_json['reference'] = {
@@ -153,6 +155,7 @@ rule all:
             "delly_exclusion_converted" : input.delly_exclusion_converted,
             "ascat_gccorrection" : input.ascat_gccorrection,
             "ascat_chryloci" : input.ascat_chryloci,
+            "clinvar": input.clinvar,
             "reference_access_date": today,
         }
 
@@ -162,7 +165,7 @@ rule all:
         create_md5(ref_json['reference'], output.check_md5)
 
         with open(str(output.finished), mode='w') as finish_file:
-            finish_file.write('%s\n' % today)
+            finish_file.write('%s\n' % today )
 
 
 ##########################################################
@@ -173,7 +176,7 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
                     cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url,
-                    delly_exclusion_url, ascat_gccorrection_url, ascat_chryloci_url]
+                    delly_exclusion_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url]
 
 rule download_reference:
     output:
