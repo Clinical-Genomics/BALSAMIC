@@ -2,8 +2,7 @@ channels:
   - defaults
 
 dependencies:
-  - anaconda::python=2.7
-  - bioconda::strelka=2.8.4
+  - conda-forge::python=2.7
   - bioconda::manta=1.6.0
   - bioconda::bcftools=1.9
   - bioconda::tabix=0.2.6

@@ -1,5 +1,5 @@
 name: latest release container
-# Tigger building and testing container only on pull requests
+# Trigger building and testing container only on pull requests
 on:
   push:
     tags:
@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly]
+        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py36, varcall_delly, balsamic]
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -31,6 +31,7 @@ jobs:
         id: docker_build_push
         uses: docker/build-push-action@v2
         with:
+          file: BALSAMIC/containers/${{ matrix.container-name }}/Dockerfile
           push: true
           tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
           build-args: CONTAINER_NAME=${{ matrix.container-name }}

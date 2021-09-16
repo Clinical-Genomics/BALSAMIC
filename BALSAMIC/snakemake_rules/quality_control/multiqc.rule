@@ -60,6 +60,8 @@ else:
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         
 
+
+
 rule multiqc:
     input:
         multiqc_input
@@ -74,15 +76,13 @@ rule multiqc:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "multiqc"},
         dir_list = result_dir,
         qc_dir = qc_dir,
-        conda = config["bioinfo_tools"].get("multiqc"),
-        case_name = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"],
+        exclude_module = "vep"
     message:
         "Aggregrate quality metrics results using multiqc for sample {params.case_name}"
     shell:
         """
-source activate {params.conda};
-
 echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list;
-multiqc --force --outdir {params.qc_dir} --data-format json -l {params.qc_dir}/dir_list;
+multiqc --force --outdir {params.qc_dir} --exclude {params.exclude_module} --data-format json -l {params.qc_dir}/dir_list;
 chmod -R 777 {params.qc_dir};
         """

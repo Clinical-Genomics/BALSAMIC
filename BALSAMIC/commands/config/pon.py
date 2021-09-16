@@ -14,7 +14,7 @@ from BALSAMIC.utils.cli import (
 )
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
-from BALSAMIC.utils.constants import CONTAINERS_CONDA_ENV_PATH, BIOINFO_TOOL_ENV
+from BALSAMIC.constants.common import CONTAINERS_CONDA_ENV_PATH, BIOINFO_TOOL_ENV
 
 LOG = logging.getLogger(__name__)
 

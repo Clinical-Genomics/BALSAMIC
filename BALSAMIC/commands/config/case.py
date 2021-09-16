@@ -13,11 +13,11 @@ from BALSAMIC.utils.cli import (
     create_fastq_symlink,
     generate_graph,
 )
-from BALSAMIC.utils.constants import (
+from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
-    VCF_DICT,
     BIOINFO_TOOL_ENV,
 )
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
