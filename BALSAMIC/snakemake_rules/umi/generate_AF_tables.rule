@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # Generate tables for AF scatterplots
+
+
 rule bcftools_query_generatebackgroundaf_umitable:
     input:
         vcf = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.vcf.gz"
@@ -13,7 +15,6 @@ rule bcftools_query_generatebackgroundaf_umitable:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         background_variant_region = background_variant_file,
-        conda = config["bioinfo_tools"].get("bcftools"),
         case_name = "{case_name}"
     threads: 
         get_threads(cluster_config, "bcftools_query_generatebackgroundaf_umitable")
@@ -21,8 +22,6 @@ rule bcftools_query_generatebackgroundaf_umitable:
         "Creating Allelic frequency table from VCF file for sample {params.case_name}"
     shell:
         """
-source activate {params.conda};
-
 bcftools query \
 --regions-file {params.background_variant_region} \
 -f \"%CHROM\\t%POS\\t%REF\\t%ALT\\t%FILTER\\t[%AF\\t]\n\" \

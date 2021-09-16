@@ -12,6 +12,7 @@ Changed:
 ^^^^^^^^
 
 * refactored main workflow with more readible organization #614
+* refactored conda envs within container to be on base #759
 
 Removed:
 ^^^^^^^^

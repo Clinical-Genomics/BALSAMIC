@@ -2,6 +2,8 @@
 # coding: utf-8
 # NGS filters for various scenarios
 
+
+
 rule bcftools_filter_tnscope_tumor_only:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
@@ -13,7 +15,6 @@ rule bcftools_filter_tnscope_tumor_only:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
     AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
     AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
@@ -29,8 +30,6 @@ rule bcftools_filter_tnscope_tumor_only:
     "Filtering wgs tumor-only tnscope annotated variants using bcftools on {params.case_name}"
   shell:
     """
-source activate {params.conda};
-
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
@@ -47,6 +46,7 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 tabix -p vcf -f {output.vcf_filtered};
     """
 
+
 rule bcftools_filter_tnhaplotyper_tumor_only:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
@@ -59,7 +59,6 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    conda = config["bioinfo_tools"].get("bcftools"),
     DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
     AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
     AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
@@ -74,8 +73,6 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
     "Filtering wgs tumor-only tnhaplotyper annotated variants using bcftools on {params.case_name}"
   shell:
     """
-source activate {params.conda};
-
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
@@ -95,6 +92,7 @@ bcftools view -f PASS --threads {threads} -O z {output.vcf_pass} {output.vcf_fil
 tabix -p vcf -f {output.vcf_pass}
     """
 
+
 rule bcftools_intersect_tumor_only:
   input:
     tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.all.filtered.vcf.gz",
@@ -107,7 +105,6 @@ rule bcftools_intersect_tumor_only:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    conda = config["bioinfo_tools"].get("bcftools"),
     vcf_dir = vep_dir + "sentieon_callers_intersect",
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name = '{case_name}'
@@ -117,8 +114,6 @@ rule bcftools_intersect_tumor_only:
     "Retrieving common annotated variants between tnscope and tnhaplotyper using bcftools for {params.case_name}"
   shell:
     """
-source activate {params.conda};
-
 bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z;
 
 cp {params.vcf_dir}/0002.vcf.gz {output.vcf_filtered};

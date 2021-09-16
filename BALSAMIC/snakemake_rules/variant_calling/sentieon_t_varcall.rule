@@ -8,6 +8,8 @@ def get_pon(config):
     else:
         return None
 
+
+
 rule sentieon_base_calibration:
     input:
         ref = config["reference"]["reference_genome"],
@@ -69,6 +71,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rm -rf {params.tmpdir};
         """
+
 
 rule sentieon_TNhaplotyper_tumor_only:
     input:

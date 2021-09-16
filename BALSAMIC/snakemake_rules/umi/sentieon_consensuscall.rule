@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # UMI-consensus calling
+
+
 rule sentieon_consensuscall_umi:
     input:
         sam_consensus = umi_dir + "{sample}.align.umi.bam"
@@ -39,8 +41,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --umi_tag {params.tag} \
 --read_name_prefix 'UMI-'; 
         """
-
 # Alignment of consensus reads
+
+
 rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
@@ -84,8 +87,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -o {output.align_consensus} \
 -i - ;
         """
-
 # Filter consensus called reads based on 'XZ' filtering
+
+
 rule sentieon_consensusfilter_umi:
     input:
         umi_dir + "{case_name}.consensuscalled.umi.bam"
@@ -99,15 +103,12 @@ rule sentieon_consensusfilter_umi:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = params.umiconsensuscall.filter_minreads,
         sample_id = '{case_name}',
-        conda = config["bioinfo_tools"].get("samtools")
     threads:
         get_threads(cluster_config, "sentieon_consensusfilter_umi")
     message:
         "Filtering consensus reads based on XZ tag for sample {params.sample_id}"
     shell:
         """
-source activate {params.conda};
-
 samtools view -h {input} | \
 awk -v MinR={params.minreads} -v OFS=\'\\t\' -f {params.consensusfilter_script} | \
 samtools view -bh - > {output};
