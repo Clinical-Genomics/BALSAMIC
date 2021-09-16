@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # UMI-consensus calling
+
+
 rule sentieon_consensuscall_umi:
     input:
         sam_consensus = umi_dir + "{sample}.align.umi.bam"
@@ -40,6 +42,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --read_name_prefix 'UMI-'; 
         """
 # Alignment of consensus reads
+
+
 rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
@@ -84,6 +88,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -i - ;
         """
 # Filter consensus called reads based on 'XZ' filtering
+
+
 rule sentieon_consensusfilter_umi:
     input:
         umi_dir + "{case_name}.consensuscalled.umi.bam"

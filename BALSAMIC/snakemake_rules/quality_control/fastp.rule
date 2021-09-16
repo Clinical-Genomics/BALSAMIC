@@ -25,6 +25,8 @@ if 'quality_trim' in config['QC'].keys():
                                 "--umi_len", config['QC']['umi_trim_length'],
                                 "--umi_prefix","UMI"])
 
+
+
 rule fastp_umi:
     input:
         read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
@@ -64,6 +66,8 @@ fastp \
 {params.adapter};
         """
 # Double pass to hard trim adapter and UMIs
+
+
 rule fastp:
     input:
         read1 = fastq_dir + "{sample}_1.umi_optimized.fastq.gz",

@@ -60,6 +60,8 @@ else:
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         
 
+
+
 rule multiqc:
     input:
         multiqc_input

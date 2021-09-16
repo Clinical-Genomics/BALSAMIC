@@ -1,6 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
+
 rule vardict_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
@@ -42,6 +44,8 @@ vardict-java -U -u -I 600 -G {input.fa} -f {params.af} -N {params.case_name} \
 tabix -p vcf {output};
 rm -rf {params.tmpdir};
     """
+
+
 rule vardict_merge:
     input:
         expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
@@ -75,6 +79,8 @@ echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf} }} }} }}' > {outp
 
 rm -rf {params.tmpdir};
     """
+
+
 rule sentieon_TNhaplotyper:
     input:
         bamT = bam_dir + "tumor.merged.bam",

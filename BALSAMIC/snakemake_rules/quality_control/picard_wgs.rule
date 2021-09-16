@@ -6,6 +6,8 @@ picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cy
                            "insert_size_metrics", "quality_by_cycle_metrics",
                            "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 
+
+
 rule picard_CollectMultipleMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",
@@ -36,6 +38,8 @@ I={input.bam} \
 O={params.output_prefix} \
 R={input.reference};
         """
+
+
 rule picard_CollectWgsMetrics:
     input:
         bam = bam_dir + "{sample}.dedup.bam",

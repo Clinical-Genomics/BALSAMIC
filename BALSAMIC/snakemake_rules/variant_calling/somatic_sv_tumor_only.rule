@@ -7,6 +7,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = get_sample_type(config["samples"], "tumor")[0])
 
 
+
+
 rule manta_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
@@ -53,6 +55,8 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
 rm -rf {params.tmpdir};
       """
+
+
 rule delly_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],

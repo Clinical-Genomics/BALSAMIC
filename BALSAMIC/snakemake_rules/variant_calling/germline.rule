@@ -1,6 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
+
 rule gatk_haplotypecaller:
     input:
         fa = config["reference"]["reference_genome"],
@@ -34,6 +36,8 @@ java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk
 
 rm -rf {params.tmpdir};
         """
+
+
 rule haplotypecaller_merge:
     input:
         expand(vcf_dir + "haplotypecaller/split_vcf/{{sample_type}}.{chrom}_haplotypecaller.vcf.gz", chrom=chromlist)
@@ -58,6 +62,8 @@ tabix -f -p vcf {output};
 
 rm -rf {params.tmpdir};
         """
+
+
 rule sentieon_DNAscope:
     input:
         bam = bam_dir + "{sample_type}.merged.bam",

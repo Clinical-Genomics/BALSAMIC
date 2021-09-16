@@ -2,6 +2,8 @@
 # coding: utf-8
 
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
+
+
 rule picard_umiaware:
     input:
         bam = umi_dir + "{sample}.consensusfiltered.umi.bam"
@@ -28,6 +30,8 @@ M={output.duplicates} \
 UMI_METRICS={output.umimetrics};
         """
 ## CollectHSmetrics - median target coverage-required
+
+
 rule picard_collecthsmetrics_umi:
     input:
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
@@ -63,6 +67,8 @@ O={output.mrkdup} \
 COVERAGE_CAP=50000;
         """
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
+
+
 rule samtools_view_calculatemeanfamilydepth_umi:
     input:
         bam = umi_dir + "{sample}.consensusfiltered.umi.bam"

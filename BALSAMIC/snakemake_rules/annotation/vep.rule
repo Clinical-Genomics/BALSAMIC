@@ -2,6 +2,8 @@
 # coding: utf-8
 # VEP annotation module. Annotate all VCFs generated through VEP
 
+
+
 rule vep_somatic:
   input:
     vcf = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
@@ -53,6 +55,8 @@ bcftools stats {output.vcf_all} > {output.bcftools_stats};
 
 rm $tmpvcf;
     """
+
+
 rule tmb_calculation:
   input:
     vep = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
@@ -85,6 +89,8 @@ bcftools view --types snps,indels --apply-filters PASS {input.vep} \
 | filter_vep --filter 'not feature_truncation' -C \
 | awk -v region=${{region_size}} '{{print $NF/region}}' > {output.tmb};
     """
+
+
 rule vep_germline:
   input:
     vcf = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",

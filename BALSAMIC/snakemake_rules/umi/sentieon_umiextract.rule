@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # Extract umi tags using the defined read structure. 
+
+
 rule sentieon_umiextract:
     input:
         read1 = Path(fastq_dir + "{sample}_1.umi_optimized.fastq.gz").as_posix(),
@@ -36,6 +38,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -o {output.ds_umi};
         """
 # Align the UMI-extracted reads
+
+
 rule sentieon_bwa_umiextract:
     input:
         ref_fa = config["reference"]["reference_genome"],

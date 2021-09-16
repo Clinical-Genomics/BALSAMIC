@@ -6,6 +6,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 else:
     tumor_bam = "{tumor}.sorted.{picardstr}.bam".format(tumor = tumor_sample, picardstr = picarddup)
 
+
+
 rule mergeBam_tumor:
   input:
     fasta = config["reference"]["reference_genome"],

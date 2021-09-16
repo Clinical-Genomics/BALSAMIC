@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
+
+
 rule bwa_mem:
     input:
         fa = config["reference"]["reference_genome"],
@@ -42,6 +44,8 @@ bwa mem \
 samtools index -@ {threads} {output.bamout};
 rm -rf {params.tmpdir};
         """
+
+
 rule picard_markduplicates:
     input:
         Path(bam_dir, "{sample}.sorted.bam").as_posix()

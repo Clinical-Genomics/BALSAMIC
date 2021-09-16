@@ -3,6 +3,8 @@
 # NGS filters for various scenarios
 
 
+
+
 rule bcftools_filter_manta:
   input:
     vcf = vep_dir + "SV.somatic.{case_name}.manta.all.vcf.gz",
@@ -25,6 +27,8 @@ rule bcftools_filter_manta:
 bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """
+
+
 rule bcftools_filter_delly:
   input:
     vcf = vep_dir + "SV.somatic.{case_name}.delly.all.vcf.gz",
