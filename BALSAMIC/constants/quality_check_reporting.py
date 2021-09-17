@@ -113,8 +113,8 @@ METRICS = {
                 "PCT_TARGET_BASES_250X": {},
                 "PCT_TARGET_BASES_500X": {},
                 "PCT_TARGET_BASES_1000X": {},
-                "FOLD_80_BASE_PENALTY": {"threshold": 1.8, "norm": "lt"},
-                "PCT_OFF_BAIT": {"threshold": 0.4, "norm": "lt"},
+                "FOLD_80_BASE_PENALTY": {"threshold": 5.0, "norm": "lt"},
+                "PCT_OFF_BAIT": {"threshold": 0.45, "norm": "lt"},
             },
         },
     ]

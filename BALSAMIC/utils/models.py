@@ -811,13 +811,12 @@ class QCCheckModel(BaseModel):
 
         def check_metric(metric, score, condition):
             """Checks if a specific metric meets the filtering conditions"""
-            if None not in condition.values():
-                if not eval(
-                    f"operator.{condition['norm']}({score},{condition['threshold']})"
-                ):
-                    raise ValueError(
-                        f"The {metric} metric is not {condition['norm']} than {condition['threshold']}. Actual value: {score}."
-                    )
+            if None not in condition.values() and not eval(
+                f"operator.{condition['norm']}({score},{condition['threshold']})"
+            ):
+                raise ValueError(
+                    f"The {metric} metric is not {condition['norm']} than {condition['threshold']}. Actual value: {score}."
+                )
 
         def get_metrics():
             """Returns a dictionary of the quality control metrics ready for validation"""
