@@ -178,19 +178,15 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url,
                     delly_exclusion_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url]
 
-for ref in download_content:
-    output_file = ref.get_output_file
-    log_file = output_file + ".log"
+rule download_reference:
+    output:
+        expand("{output}", output=[ref.get_output_file for ref in download_content])
+    run:
+        import requests
 
-    rule:
-        output:
-            expand("{output}", output=output_file) #output=[ref.get_output_file for ref in download_content])
-    	run:
-            import requests
-
-            #for ref in download_content:
-            #output_file = ref.get_output_file
-            #log_file = output_file + ".log"
+        for ref in download_content:
+            output_file = ref.get_output_file
+            log_file = output_file + ".log"
 
             if ref.url.scheme == "gs":
                 cmd = "export TMPDIR=/tmp; gsutil cp -L {} {} -".format(log_file, ref.url)

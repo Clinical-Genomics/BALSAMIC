@@ -105,7 +105,7 @@ LOG = logging.getLogger(__name__)
     "-c",
     "--cluster-config",
     show_default=True,
-    default=get_config("cluster"),
+    default=get_config("reference_cluster"),
     type=click.Path(),
     help="cluster config json file. (eg- SLURM, QSUB)",
 )
@@ -204,17 +204,8 @@ def initialize(
         raise click.Abort()
 
 
-#    sbatch_template = ("#!/bin/bash -l\n"
-#                       "#SBATCH --account={account_type}\n"
-#                       "#SBATCH -N 1 -c 36 \n"
-#                       "#SBATCH -t 5:00:00\n"
-#                       "#SBATCH --qos={qos}\n"
-#                       "#SBATCH -J balsamic_cache\n")
-
 # resolve outdir to absolute path
     outdir = Path(outdir).resolve()
-    #scripts_dir = Path(outdir, "scripts")
-    #Path(scripts_dir).mkdir(parents=True, exist_ok=True)
 
     container_outdir = Path(outdir, balsamic_version, "containers")
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
@@ -246,18 +237,6 @@ def initialize(
         if run_analysis:
             subprocess.run(" ".join(cmd), shell=True)
 
-    # job_fl = os.path.join(
-    #    scripts_dir, "balsamic_container_{}.sh".format(image_suffix)
-    # )
-    # template = sbatch_template + "\n" + " ".join(cmd)
-    # with open(job_fl, "w") as jb_fl:
-    #    jb_fl.write(template.format(account_type=account, qos=qos))
-    # LOG.info("The following command will run: {}".format(" ".join(cmd)))
-    # if run_analysis and run_mode == "cluster":
-    #    subprocess.check_call(["sbatch", job_fl])
-    # elif run_analysis and run_mode == "local":
-    #    subprocess.run(" ".join(cmd), shell=True)
-
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 
@@ -283,6 +262,8 @@ def initialize(
         config_dict["cosmic_key"] = cosmic_key
 
     config_dict["genome_version"] = genome_version
+    config_dict["analysis"] = {}
+    config_dict["analysis"]["case_id"] = "reference" + "." + genome_version + ".v" + balsamic_version
 
     write_json(config_dict, config_json)
     LOG.info("Reference generation workflow configured successfully - %s" %
@@ -336,20 +317,23 @@ def initialize(
     balsamic_run.qos = qos
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath
+    balsamic_run.result_path = reference_outdir
+    balsamic_run.case_name = config_dict["analysis"]["case_id"]
     balsamic_run.quiet = quiet
-    balsamic_run.sm_opt = snakemake_opt  # + ["--cores", "1"]
+    balsamic_run.sm_opt = snakemake_opt
 
     # Always use singularity
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = bind_path
 
     cmd = sys.executable + " -m " + balsamic_run.build_cmd()
-    #subprocess.run(balsamic_run.build_cmd(), shell=True)
-    #subprocess.run(cmd, shell=True)
+    subprocess.run(cmd, shell=True)
+    #print(cmd + "\n")i
+
 
     if run_analysis and run_mode == "cluster":
-        jobid_dump = os.path.join(logpath, "reference_generation.sacct")
+        jobid_dump = os.path.join(
+            logpath, config_dict["analysis"]["case_id"] + ".sacct"
+            )
         jobid_yaml = os.path.join(reference_outdir, profile + "_jobids.yaml")
-        job_id_dump_to_yaml(jobid_dump, jobid_yaml, "reference_generation")
-    elif run_analysis and run_mode == "local":
-        subprocess.run(cmd, shell=True)
+        job_id_dump_to_yaml(jobid_dump, jobid_yaml, config_dict["analysis"]["case_id"])
