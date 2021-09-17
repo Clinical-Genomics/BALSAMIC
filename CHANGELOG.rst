@@ -6,7 +6,7 @@ Added:
 
 * Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
-
+* BALSAMIC reference generation via cluster submission #686 
 
 Changed:
 ^^^^^^^^
