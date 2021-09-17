@@ -30,15 +30,17 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command(
-    "init",
-    short_help="Download matching version for container and build reference")
+    "init", short_help="Download matching version for container and build reference"
+)
 @click.option(
     "-o",
     "--outdir",
     "--out-dir",
     required=True,
-    help=("Output directory for ref files."
-          "This path will be used as base path for files"),
+    help=(
+        "Output directory for ref files."
+        "This path will be used as base path for files"
+    ),
 )
 @click.option(
     "-v",
@@ -56,10 +58,7 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help="Force re-downloading all containers",
 )
-@click.option("-c",
-              "--cosmic-key",
-              required=True,
-              help="cosmic db authentication key")
+@click.option("-c", "--cosmic-key", required=True, help="cosmic db authentication key")
 @click.option(
     "-s",
     "--snakefile",
@@ -80,8 +79,10 @@ LOG = logging.getLogger(__name__)
     "--genome-version",
     default="hg19",
     type=click.Choice(["hg19", "hg38"]),
-    help=("Genome version to prepare reference. Path to genome"
-          "will be <outdir>/genome_version"),
+    help=(
+        "Genome version to prepare reference. Path to genome"
+        "will be <outdir>/genome_version"
+    ),
 )
 @click.option(
     "-r",
@@ -89,17 +90,20 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     default=False,
     is_flag=True,
-    help=("By default balsamic run_analysis will run in dry run mode."
-          "Raise this flag to make the actual analysis"),
+    help=(
+        "By default balsamic run_analysis will run in dry run mode."
+        "Raise this flag to make the actual analysis"
+    ),
 )
 @click.option(
     "--run-mode",
     show_default=True,
     default="cluster",
     type=click.Choice(["local", "cluster"]),
-    help=
-    ("Run mode to use. By default SLURM will be used to generate the balsamic_cache"
-     "Alternatively, option for local computing"),
+    help=(
+        "Run mode to use. By default SLURM will be used to generate the balsamic_cache"
+        "Alternatively, option for local computing"
+    ),
 )
 @click.option(
     "-c",
@@ -129,22 +133,26 @@ LOG = logging.getLogger(__name__)
     default="low",
     help="QOS for sbatch jobs. Passed to " + get_schedulerpy(),
 )
-@click.option("--mail-user",
-              help="cluster mail user to send out email. e.g.: slurm_mail_user"
-              )
+@click.option(
+    "--mail-user", help="cluster mail user to send out email. e.g.: slurm_mail_user"
+)
 @click.option(
     "--mail-type",
-    type=click.Choice([
-        "NONE",
-        "BEGIN",
-        "END",
-        "FAIL",
-        "REQUEUE",
-        "ALL",
-        "TIME_LIMIT",
-    ]),
-    help=("cluster mail type to send out email. This will "
-          "be applied to all jobs and override snakemake settings."),
+    type=click.Choice(
+        [
+            "NONE",
+            "BEGIN",
+            "END",
+            "FAIL",
+            "REQUEUE",
+            "ALL",
+            "TIME_LIMIT",
+        ]
+    ),
+    help=(
+        "cluster mail type to send out email. This will "
+        "be applied to all jobs and override snakemake settings."
+    ),
 )
 @click.option(
     "-f",
@@ -154,9 +162,9 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help="Force run all analysis. This is same as snakemake --forceall",
 )
-@click.option("--snakemake-opt",
-              multiple=True,
-              help="Pass these options directly to snakemake")
+@click.option(
+    "--snakemake-opt", multiple=True, help="Pass these options directly to snakemake"
+)
 @click.option(
     "-q",
     "--quiet",
@@ -203,8 +211,7 @@ def initialize(
         )
         raise click.Abort()
 
-
-# resolve outdir to absolute path
+    # resolve outdir to absolute path
     outdir = Path(outdir).resolve()
 
     container_outdir = Path(outdir, balsamic_version, "containers")
@@ -215,16 +222,15 @@ def initialize(
         docker_image_base_name = container_version
 
     for image_suffix in VALID_CONTAINER_CONDA_NAME:
-        container_stub_url = "{}:{}-{}".format(BALSAMIC_DOCKER_PATH,
-                                               docker_image_base_name,
-                                               image_suffix)
+        container_stub_url = "{}:{}-{}".format(
+            BALSAMIC_DOCKER_PATH, docker_image_base_name, image_suffix
+        )
         # Pull container
         LOG.info("Singularity image source: {}".format(container_stub_url))
 
         # Set container name according to above docker image name
         Path(container_outdir).mkdir(parents=True, exist_ok=True)
-        image_name = Path(container_outdir,
-                          "{}.sif".format(image_suffix)).as_posix()
+        image_name = Path(container_outdir, "{}.sif".format(image_suffix)).as_posix()
         LOG.info("Image will be downloaded to {}".format(image_name))
         LOG.info("Starting download. This process can take some time...")
 
@@ -263,11 +269,12 @@ def initialize(
 
     config_dict["genome_version"] = genome_version
     config_dict["analysis"] = {}
-    config_dict["analysis"]["case_id"] = "reference" + "." + genome_version + ".v" + balsamic_version
+    config_dict["analysis"]["case_id"] = (
+        "reference" + "." + genome_version + ".v" + balsamic_version
+    )
 
     write_json(config_dict, config_json)
-    LOG.info("Reference generation workflow configured successfully - %s" %
-             config_json)
+    LOG.info("Reference generation workflow configured successfully - %s" % config_json)
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(
@@ -277,20 +284,17 @@ def initialize(
             printrulegraph=True,
         )
 
-    graph_title = "_".join(
-        ["BALSAMIC", balsamic_version, "Generate reference"])
+    graph_title = "_".join(["BALSAMIC", balsamic_version, "Generate reference"])
     graph_dot = "".join(graph_dot).replace(
-        "snakemake_dag {",
-        'BALSAMIC { label="' + graph_title + '";labelloc="t";')
-    graph_obj = graphviz.Source(graph_dot,
-                                filename=dagfile_path,
-                                format="pdf",
-                                engine="dot")
+        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
+    )
+    graph_obj = graphviz.Source(
+        graph_dot, filename=dagfile_path, format="pdf", engine="dot"
+    )
 
     try:
         graph_pdf = graph_obj.render()
-        LOG.info("Reference workflow graph generated successfully - %s " %
-                 graph_pdf)
+        LOG.info("Reference workflow graph generated successfully - %s " % graph_pdf)
     except Exception:
         LOG.error("Reference workflow graph generation failed")
         raise click.Abort()
@@ -328,12 +332,11 @@ def initialize(
 
     cmd = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)
-    #print(cmd + "\n")i
-
+    # print(cmd + "\n")i
 
     if run_analysis and run_mode == "cluster":
         jobid_dump = os.path.join(
             logpath, config_dict["analysis"]["case_id"] + ".sacct"
-            )
+        )
         jobid_yaml = os.path.join(reference_outdir, profile + "_jobids.yaml")
         job_id_dump_to_yaml(jobid_dump, jobid_yaml, config_dict["analysis"]["case_id"])
