@@ -95,26 +95,27 @@ METRICS = {
         {
             "file_name": "multiqc_picard_insertSize.json",
             "sequencing_type": ["targeted", "wgs"],
-            "metrics": ["MEAN_INSERT_SIZE"],
+            "metrics": {"MEAN_INSERT_SIZE": {}},
         },
         {
             "file_name": "multiqc_picard_dups.json",
             "sequencing_type": ["targeted", "wgs"],
-            "metrics": ["PERCENT_DUPLICATION"],
+            "metrics": {"PERCENT_DUPLICATION": {}},
         },
         {
             "file_name": "multiqc_picard_HsMetrics.json",
             "sequencing_type": ["targeted"],
-            "metrics": [
-                "MEAN_TARGET_COVERAGE",
-                "MEDIAN_TARGET_COVERAGE",
-                "PCT_TARGET_BASES_50X",
-                "PCT_TARGET_BASES_100X",
-                "PCT_TARGET_BASES_250X",
-                "PCT_TARGET_BASES_500X",
-                "PCT_TARGET_BASES_1000X",
-                "FOLD_80_BASE_PENALTY",
-            ],
+            "metrics": {
+                "MEAN_TARGET_COVERAGE": {"threshold": 500, "norm": "gt"},
+                "MEDIAN_TARGET_COVERAGE": {},
+                "PCT_TARGET_BASES_50X": {},
+                "PCT_TARGET_BASES_100X": {},
+                "PCT_TARGET_BASES_250X": {},
+                "PCT_TARGET_BASES_500X": {},
+                "PCT_TARGET_BASES_1000X": {},
+                "FOLD_80_BASE_PENALTY": {"threshold": 1.8, "norm": "lt"},
+                "PCT_OFF_BAIT": {"threshold": 0.4, "norm": "lt"},
+            },
         },
     ]
 }

@@ -1,5 +1,6 @@
 import hashlib
 import json
+import operator
 import os
 from datetime import datetime
 from pathlib import Path
@@ -692,6 +693,32 @@ class BalsamicWorkflowConfig(BaseModel):
     tnscope_umi: UMIParamsTNscope
 
 
+class QCNormModel(BaseModel):
+    """Defines the quality control filtering parameters
+
+    Attributes:
+        threshold: float (optional); validation cut off
+        norm: string (optional); condition for validation
+    """
+
+    threshold: Optional[float]
+    norm: Optional[str]
+
+    @validator("norm")
+    def check_operator(cls, value):
+        """Validates if the retrieved norm is a valid operator"""
+        if value is not None:
+            assert value in [
+                "lt",
+                "le",
+                "eq",
+                "ne",
+                "ge",
+                "gt",
+            ], f"{value} is not not a valid operator"
+        return value
+
+
 class QCMetricsModel(BaseModel):
     """Defines the quality control metrics model associated with a specific analysis file
 
@@ -703,11 +730,11 @@ class QCMetricsModel(BaseModel):
 
     file_name: str
     sequencing_type: List[str]
-    metrics: List[str]
+    metrics: Dict[str, QCNormModel]
 
 
-class QCExtractionModel(BaseModel):
-    """Defines the quality control metrics extraction model
+class QCCheckModel(BaseModel):
+    """Defines the quality control metrics validation model
 
     Attributes:
        analysis_path : string (required); quality control analysis file name
@@ -718,42 +745,6 @@ class QCExtractionModel(BaseModel):
     analysis_path: DirectoryPath
     sequencing_type: str
     qc_attributes: List[QCMetricsModel]
-
-    def get_file_path(self, file_name):
-        """Returns an analysis file full path"""
-        return os.path.join(self.analysis_path, "qc", "multiqc_data", file_name)
-
-    def get_raw_metrics(self, file_name):
-        """Extracts a metrics json object from a QC file"""
-        with open(self.get_file_path(file_name=file_name), "r") as f:
-            raw_metrics = json.load(f)
-
-        # Ignore the metrics associated with UMIs
-        filtered_raw_metrics = {
-            sample_name: metrics
-            for sample_name, metrics in raw_metrics.items()
-            if "umi" not in sample_name
-        }
-
-        return filtered_raw_metrics
-
-    @staticmethod
-    def append_metrics_to_dict(sample_id, metric, raw_metrics, metrics_dict):
-        """Append new metric value objects to a dictionary"""
-
-        if metric in raw_metrics[sample_id]:
-            sample_name = "_".join([sample_id.split("_")[0], sample_id.split("_")[1]])
-
-            if sample_name not in metrics_dict:
-                metrics_dict.update(
-                    {sample_name: {metric: raw_metrics[sample_id][metric]}}
-                )
-            else:
-                metrics_dict[sample_name].update(
-                    {metric: raw_metrics[sample_id][metric]}
-                )
-
-        return metrics_dict
 
     @validator("analysis_path")
     def analysis_path_as_abspath(cls, value) -> str:
@@ -768,26 +759,81 @@ class QCExtractionModel(BaseModel):
             )
         return value
 
-    @validator("qc_attributes", pre=True, always=True)
-    def filter_attributes_seq_type(cls, value, values):
+    @validator("qc_attributes", pre=True)
+    def filter_attributes_seq_type(cls, value, values) -> List[QCMetricsModel]:
         """Selects the metrics corresponding to the sequencing run type"""
-
         return [
             v for v in value if values.get("sequencing_type") in v["sequencing_type"]
         ]
 
-    @property
-    def get_metrics(self):
-        """Returns a dictionary of the quality control metrics"""
-        metrics_dict = {}
+    @validator("qc_attributes")
+    def metrics_validation(cls, value, values) -> List[QCMetricsModel]:
+        """Checks that the QC metrics meet the filtering parameters, returning a metric-value dictionary"""
 
-        # Loop through MultiQC json files
-        for attribute in self.qc_attributes:
-            raw_metrics = self.get_raw_metrics(attribute.file_name)
-            for j in raw_metrics:
-                for k in attribute.metrics:
-                    metrics_dict = self.append_metrics_to_dict(
-                        j, k, raw_metrics, metrics_dict
+        def get_file_path(file_name):
+            """Returns an analysis file full path"""
+            return os.path.join(
+                values["analysis_path"], "qc", "multiqc_data", file_name
+            )
+
+        def get_raw_metrics(file_name):
+            """Extracts a metrics json object from a QC file"""
+            with open(get_file_path(file_name=file_name), "r") as f:
+                raw_metrics = json.load(f)
+
+            # Ignore the metrics associated with UMIs
+            filtered_raw_metrics = {
+                sample_name: metrics
+                for sample_name, metrics in raw_metrics.items()
+                if "umi" not in sample_name
+            }
+
+            return filtered_raw_metrics
+
+        def append_metrics_to_dict(sample_id, metric, raw_metrics, metrics_dict):
+            """Append new metric value objects to a dictionary"""
+
+            if metric in raw_metrics[sample_id]:
+                sample_name = "_".join(
+                    [sample_id.split("_")[0], sample_id.split("_")[1]]
+                )
+
+                if sample_name not in metrics_dict:
+                    metrics_dict.update(
+                        {sample_name: {metric: raw_metrics[sample_id][metric]}}
+                    )
+                else:
+                    metrics_dict[sample_name].update(
+                        {metric: raw_metrics[sample_id][metric]}
                     )
 
-        return metrics_dict
+            return metrics_dict
+
+        def check_metric(metric, score, condition):
+            """Checks if a specific metric meets the filtering conditions"""
+            if None not in condition.values():
+                if not eval(
+                    f"operator.{condition['norm']}({score},{condition['threshold']})"
+                ):
+                    raise ValueError(
+                        f"The {metric} metric is not {condition['norm']} than {condition['threshold']}. Actual value: {score}."
+                    )
+
+        def get_metrics():
+            """Returns a dictionary of the quality control metrics ready for validation"""
+            metrics_dict = {}
+
+            # Loop through MultiQC json files
+            for attribute in value:
+                raw_metrics = get_raw_metrics(attribute.file_name)
+                for j in raw_metrics:
+                    for k in attribute.metrics:
+                        metrics_dict = append_metrics_to_dict(
+                            j, k, raw_metrics, metrics_dict
+                        )
+
+                        check_metric(k, raw_metrics[j][k], dict(attribute.metrics[k]))
+
+            return metrics_dict
+
+        return get_metrics()

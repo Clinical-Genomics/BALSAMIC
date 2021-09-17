@@ -491,17 +491,17 @@ def qc_metrics():
             {
                 "file_name": "multiqc_picard_insertSize.json",
                 "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["MEAN_INSERT_SIZE"],
+                "metrics": {"MEAN_INSERT_SIZE": {}},
             },
             {
                 "file_name": "multiqc_picard_dups.json",
                 "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["PERCENT_DUPLICATION"],
+                "metrics": {"PERCENT_DUPLICATION": {"threshold": 0.9, "norm": "lt"}},
             },
             {
                 "file_name": "multiqc_picard_HsMetrics.json",
                 "sequencing_type": ["targeted"],
-                "metrics": ["MEAN_TARGET_COVERAGE"],
+                "metrics": {"MEAN_TARGET_COVERAGE": {"threshold": 500, "norm": "gt"}},
             },
         ],
     }

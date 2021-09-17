@@ -21,8 +21,9 @@ from BALSAMIC.utils.models import (
     ParamsCommon,
     ParamsVardict,
     ParamsVEP,
+    QCCheckModel,
     QCMetricsModel,
-    QCExtractionModel,
+    QCNormModel,
 )
 
 
@@ -402,7 +403,7 @@ def test_qc_metrics_model():
     # GIVEN a dummy metrics object
     dummy_file_name = "multiqc_picard_dups.json"
     dummy_seq_type = ["targeted", "wgs"]
-    dummy_metrics = ["MEAN_INSERT_SIZE"]
+    dummy_metrics = {"MEAN_INSERT_SIZE": QCNormModel(threshold=None, norm=None)}
 
     dummy_attributes = {
         "file_name": dummy_file_name,
@@ -416,7 +417,7 @@ def test_qc_metrics_model():
         "metrics": dummy_metrics,
     }
 
-    # WHEN building the QCMetricsModel
+    # WHEN building the QC metrics model
     dummy_metrics_built = QCMetricsModel(**dummy_attributes)
 
     # THEN assert retrieved values from the created model
@@ -429,13 +430,13 @@ def test_qc_metrics_model():
         QCMetricsModel(**dummy_incomplete_attributes)
 
 
-def test_qc_extraction_model_parameters(qc_metrics):
-    """tests QCExtractionModel parameters validation"""
+def test_qc_check_model_parameters(qc_metrics):
+    """tests QCCheckModel parameters validation"""
 
     # GIVEN a metrics object with an incorrect sequencing type
     dummy_seq = dict(qc_metrics)
     not_valid_seq_type = "RNA-Seq"
-    dummy_seq["sequencing_type"] = "not_valid_seq_type"
+    dummy_seq["sequencing_type"] = not_valid_seq_type
     dummy_incorrect_seq_type_parameters = dummy_seq
 
     # GIVEN an incomplete dummy metrics object
@@ -443,8 +444,8 @@ def test_qc_extraction_model_parameters(qc_metrics):
     del dummy_incomplete["sequencing_type"]
     dummy_incomplete_parameters = dummy_incomplete
 
-    # WHEN building the QC extractions models
-    dummy_model = QCExtractionModel(**qc_metrics)
+    # WHEN building the QC check model
+    dummy_model = QCCheckModel(**qc_metrics)
 
     # THEN assert retrieved values from the created model
     assert (
@@ -452,27 +453,25 @@ def test_qc_extraction_model_parameters(qc_metrics):
         == Path(qc_metrics["analysis_path"]).resolve().as_posix()
     )
     assert dummy_model.sequencing_type == qc_metrics["sequencing_type"]
-    assert isinstance(dummy_model.qc_attributes[0], QCMetricsModel)
 
     # THEN assert that the retrieved attributes are filtered by sequencing type
-    assert len(dummy_model.qc_attributes) == 2
-    assert qc_metrics["sequencing_type"] in dummy_model.qc_attributes[0].sequencing_type
-    assert qc_metrics["sequencing_type"] in dummy_model.qc_attributes[1].sequencing_type
+    assert "MEAN_INSERT_SIZE" in dummy_model.qc_attributes["concatenated_tumor"]
+    assert "PERCENT_DUPLICATION" in dummy_model.qc_attributes["concatenated_tumor"]
+    assert "MEAN_TARGET_COVERAGE" not in dummy_model.qc_attributes["concatenated_tumor"]
 
     # THEN model raise error on validation for not supported sequencing type
     with pytest.raises(ValueError) as seq_type_exc:
-        QCExtractionModel(**dummy_incorrect_seq_type_parameters)
-        assert (
-            f"Provided sequencing type ({not_valid_seq_type}) not supported"
-            in seq_type_exc.value
-        )
+        QCCheckModel(**dummy_incorrect_seq_type_parameters)
+    assert f"Provided sequencing type ({not_valid_seq_type}) not supported" in str(
+        seq_type_exc.value
+    )
 
     # THEN model raise error on validation for incomplete parameters
     with pytest.raises(ValidationError):
-        QCExtractionModel(**dummy_incomplete_parameters)
+        QCCheckModel(**dummy_incomplete_parameters)
 
 
-def test_qc_extraction_model_get_metrics(qc_metrics):
+def test_qc_check_model_get_metrics(qc_metrics):
     """tests metric values extraction"""
 
     # GIVEN an expected output
@@ -483,8 +482,51 @@ def test_qc_extraction_model_get_metrics(qc_metrics):
         }
     }
 
-    # WHEN building the QC extractions models
-    dummy_model = QCExtractionModel(**qc_metrics)
+    # WHEN building the QC check model
+    dummy_model = QCCheckModel(**qc_metrics)
 
     # THEN check if the obtained metrics correspond to the expected ones
-    assert dummy_model.get_metrics.items() == expected_output.items()
+    assert dummy_model.qc_attributes.items() == expected_output.items()
+
+
+def test_qc_check_model_validation_attributes(qc_metrics):
+    """tests attribute validation"""
+
+    # GIVEN a dummy metrics object with a parameter condition
+    dummy_metrics = dict(qc_metrics)
+    dummy_metrics["qc_attributes"][0]["metrics"]["MEAN_INSERT_SIZE"] = {
+        "threshold": 70.0,
+        "norm": "lt",
+    }
+
+    # THEN check if the model raises an error for not meeting a specific condition
+    with pytest.raises(ValueError) as cond_exc:
+        QCCheckModel(**dummy_metrics)
+    assert (
+        f"The MEAN_INSERT_SIZE metric is not lt than 70.0. Actual value: 74.182602."
+        in str(cond_exc.value)
+    )
+
+
+def test_qc_norm_model_attributes():
+    """checks the behaviour of the QCNormModel"""
+
+    # GIVEN a dummy attributes object
+    dummy_attributes = {"threshold": 1.0, "norm": "lt"}
+
+    # GIVEN a non accepted attributes object
+    dummy_incorrect_attributes = {"threshold": 1.0, "norm": "higher"}
+
+    # WHEN building the QC norm model
+    dummy_model = QCNormModel(**dummy_attributes)
+
+    # THEN assert retrieved values from the created model
+    assert dummy_model.threshold == 1.0
+    assert dummy_model.norm == "lt"
+
+    # THEN model raise error on validation for incomplete parameters
+    with pytest.raises(ValueError) as param_exc:
+        QCNormModel(**dummy_incorrect_attributes)
+    assert f"{dummy_incorrect_attributes['norm']} is not not a valid operator" in str(
+        param_exc.value
+    )
