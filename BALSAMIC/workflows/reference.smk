@@ -224,7 +224,7 @@ rule prepare_refgene:
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
-    container: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
     shell:
         """
 header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
@@ -254,7 +254,7 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
     log:
         os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
-    container: Path(singularity_image, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
     shell:
         """
 bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
@@ -272,7 +272,7 @@ rule bwa_index:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome_url.get_output_file + ".bwa_index.log"
-    container: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
     shell:
         """
 bwa index -a bwtsw {input} 2> {log};
@@ -289,7 +289,7 @@ rule samtools_index_fasta:
         reference_genome_url.get_output_file + ".fai"
     log:
         reference_genome_url.get_output_file + ".faidx.log"
-    container: Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
     shell:
         """
 samtools faidx {input} 2> {log};
@@ -308,7 +308,7 @@ rule picard_ref_dict:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
         reference_genome_url.get_output_file + ".ref_dict.log"
-    container: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     shell:
         """
 picard CreateSequenceDictionary REFERENCE={input} OUTPUT={output} 2> {log};
@@ -329,7 +329,7 @@ rule vep_install:
         directory(vep_dir)
     log:
         os.path.join(vep_dir, "vep_install_cache.log")
-    container: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
     shell:
         """
 vep_install --SPECIES {params.species} \
@@ -348,7 +348,7 @@ rule prepare_delly_exclusion:
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
     log:
         os.path.join(basedir, "genome", "delly_exclusion.log"),
-    container: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     shell:
         """
 sed 's/chr//g' {input.delly_exclusion} > {output.delly_exclusion_converted} 2> {log}

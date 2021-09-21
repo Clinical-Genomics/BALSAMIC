@@ -62,7 +62,7 @@ rule create_target:
     output:
         target_bed = cnv_dir + "target.bed",
         offtarget_bed = cnv_dir + "antitarget.bed"
-    container:
+    singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix() 
@@ -80,7 +80,7 @@ rule create_coverage:
     output:
         target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
         antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
-    container:
+    singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
         Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
@@ -97,7 +97,7 @@ rule create_reference:
     output:
         ref_cnn = pon_reference,
         txt = pon_finish
-    container:
+    singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
         Path(benchmark_dir, "cnvkit.reference.tsv").as_posix()
