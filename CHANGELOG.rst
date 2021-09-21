@@ -18,7 +18,7 @@ Removed:
 ^^^^^^^^
 
 * The option of running umiworkflow independently with balsamic command-line option "-a umi"
-
+* Removed source activate from reference and pon workflows #764
 
 Fixed:
 ^^^^^^
