@@ -40,7 +40,6 @@ def config_files():
         "panel_bed_file": "tests/test_data/references/panel/panel.bed",
         "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
         "pon_fastq_path": "tests/test_data/fastq/",
-        "qc_metrics": "BALSAMIC/config/qc_metrics.json",
     }
 
 
