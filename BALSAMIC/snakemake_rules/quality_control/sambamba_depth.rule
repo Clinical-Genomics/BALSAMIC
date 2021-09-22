@@ -1,6 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
+
 rule sambamba_panel_depth:
     input:
         bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
@@ -17,7 +19,6 @@ rule sambamba_panel_depth:
         cov_end = 1000,
         cov_step = 50,
         filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
-        conda = config["bioinfo_tools"].get("sambamba"),
         sample = '{sample}'
     threads:
         get_threads(cluster_config, 'sambamba_panel_depth')
@@ -25,7 +26,6 @@ rule sambamba_panel_depth:
         "Calculate depth statistics using sambamba for sample {params.sample}"
     shell:
         """
-source activate {params.conda};
 covStr=`seq {params.cov_start} {params.cov_step} {params.cov_end} | xargs -n1 echo -n \" --cov-threshold\"`;
 
 sambamba depth region \
@@ -34,6 +34,7 @@ sambamba depth region \
 --filter {params.filter_string} \
 `echo $covStr` {input.bam} > {output}; 
         """
+
 
 rule sambamba_exon_depth:
     input:
@@ -53,7 +54,6 @@ rule sambamba_exon_depth:
         cov_4 = "200",
         cov_5 = "250",
         filter_string = "'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
-        conda = config["bioinfo_tools"].get("sambamba"),
         sample = 'sample'
     threads:
         get_threads(cluster_config,'sambamba_exon_depth')
@@ -61,8 +61,6 @@ rule sambamba_exon_depth:
         "Calculate exon depth stastics using sambamba for sample {params.sample}"
     shell:
         """
-source activate {params.conda};
-
 sambamba depth region \
 --regions {input.bed} \
 --min-base-quality={params.base_qual} \

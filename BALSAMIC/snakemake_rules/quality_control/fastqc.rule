@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
+
+
 rule fastqc:
     input:
         read1 = fastq_dir + "{sample}_1.fastq.gz",
@@ -14,7 +16,6 @@ rule fastqc:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("fastqc"),
         fastqc_dir = fastqc_dir,
         sample = "{sample}",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
@@ -22,7 +23,6 @@ rule fastqc:
         "Running FastQC on {params.sample}"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     

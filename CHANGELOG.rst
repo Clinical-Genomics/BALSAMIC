@@ -6,6 +6,7 @@ Added:
 
 * Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
+* Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 
 
@@ -13,17 +14,19 @@ Changed:
 ^^^^^^^^
 
 * refactored main workflow with more readible organization #614
+* refactored conda envs within container to be on base and container definition is uncoupled #759
 
 Removed:
 ^^^^^^^^
 
 * The option of running umiworkflow independently with balsamic command-line option "-a umi"
-
+* Removed source activate from reference and pon workflows #764
 
 Fixed:
 ^^^^^^
 
 * Pip installation failure inside balsamic container #758
+* Fixed issue #768 with missing ``vep_install`` command in container
 
 [8.1.0]
 -------

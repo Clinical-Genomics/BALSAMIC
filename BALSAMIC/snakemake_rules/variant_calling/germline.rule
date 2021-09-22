@@ -1,6 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
+
 rule gatk_haplotypecaller:
     input:
         fa = config["reference"]["reference_genome"],
@@ -13,7 +15,6 @@ rule gatk_haplotypecaller:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("gatk"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample = '{sample_type}'
     threads:
@@ -23,7 +24,6 @@ rule gatk_haplotypecaller:
          "targeted-panel sample {params.sample}")
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
@@ -49,13 +49,11 @@ rule haplotypecaller_merge:
         Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix = tmp_dir),
-        conda = config["bioinfo_tools"].get("gatk"),
         sample = '{sample_type}'
     message:
         "Concatenate haplotyper outputs of multiple chr vcfs using bcftools for sample {params.sample}"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
@@ -64,7 +62,6 @@ tabix -f -p vcf {output};
 
 rm -rf {params.tmpdir};
         """
-
 
 
 rule sentieon_DNAscope:
