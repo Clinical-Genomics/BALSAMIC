@@ -440,7 +440,7 @@ def test_qc_metrics_model():
     metrics_model = QCMetricsModel(**input_attr)
 
     # THEN assert retrieved values from the created model
-    assert metrics_model == input_attr["name"]
+    assert metrics_model.name == input_attr["name"]
     assert metrics_model.value == input_attr["value"]
 
     # THEN the model raises an error due to an incomplete input
@@ -474,7 +474,7 @@ def test_qc_check_model():
     metrics_model = QCCheckModel(**metrics)
 
     # THEN assert retrieved values from the created model
-    metrics_model.metrics.items() == metrics.items()
+    assert metrics_model.metrics.items() == metrics["metrics"].items()
 
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as val_exc:
