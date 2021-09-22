@@ -8,11 +8,10 @@ from BALSAMIC.utils.qc_metrics import (
 )
 
 
-def test_read_metrics():
+def test_read_metrics(analysis_path):
     """test metric extraction from a specific QC file"""
 
-    # GIVEN an analysis_path and a QC file name
-    analysis_path = "tests/test_data/qc_files/analysis"
+    # GIVEN a QC file name
     file_name = "multiqc_picard_dups.json"
 
     # Given an expected output
@@ -71,11 +70,10 @@ def test_update_metrics_dict():
     assert m_dict.items() == expected_output.items()
 
 
-def test_get_qc_metrics_dict(qc_metrics):
+def test_get_qc_metrics_dict(analysis_path, qc_metrics):
     """test QC metric extraction and its format"""
 
-    # GIVEN input parameters
-    analysis_path = "tests/test_data/qc_files/analysis"
+    # GIVEN a sequencing type
     seq_type = "targeted"
 
     # GIVEN an expected output
@@ -101,11 +99,10 @@ def test_get_qc_metrics_dict(qc_metrics):
     assert metrics_dict.items() == expected_output.items()
 
 
-def test_get_qc_metrics_json():
+def test_get_qc_metrics_json(analysis_path):
     """test JSON object generation"""
 
-    # GIVEN an analysis_path and sequencing type
-    analysis_path = "tests/test_data/qc_files/analysis"
+    # GIVEN a sequencing type
     seq_type = "targeted"
 
     # WHEN calling the function

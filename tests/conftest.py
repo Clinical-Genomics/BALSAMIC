@@ -483,6 +483,12 @@ def sample_config():
 
 
 @pytest.fixture(scope="session")
+def analysis_path():
+    """Analysis test path"""
+    return "tests/test_data/qc_files/analysis"
+
+
+@pytest.fixture(scope="session")
 def qc_metrics():
     """Sample data for QC model testing"""
     return {
