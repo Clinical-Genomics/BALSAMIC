@@ -68,7 +68,6 @@ rule create_target:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix() 
     shell:
         """
-source activate varcall_cnvkit;
 cnvkit.py target {input.target_bait} --annotate {input.refFlat} --split -o {output.target_bed};
 cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtarget_bed};
         """
@@ -87,7 +86,6 @@ rule create_coverage:
         Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
     shell:
         """
-source activate varcall_cnvkit;
 cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn};
 cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn};
         """
@@ -105,6 +103,5 @@ rule create_reference:
         Path(benchmark_dir, "cnvkit.reference.tsv").as_posix()
     shell:
         """
-source activate varcall_cnvkit;
 cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn} && touch {output.txt} ;
         """
