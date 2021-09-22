@@ -40,6 +40,7 @@ def config_files():
         "panel_bed_file": "tests/test_data/references/panel/panel.bed",
         "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
         "pon_fastq_path": "tests/test_data/fastq/",
+        "qc_metrics": "BALSAMIC/config/qc_metrics.json",
     }
 
 
@@ -485,23 +486,24 @@ def sample_config():
 def qc_metrics():
     """Sample data for QC model testing"""
     return {
-        "analysis_path": "tests/test_data/qc_files/analysis",
-        "sequencing_type": "wgs",
-        "qc_attributes": [
-            {
-                "file_name": "multiqc_picard_insertSize.json",
-                "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["MEAN_INSERT_SIZE"],
+        "qc": {
+            "targeted": {
+                "multiqc_picard_insertSize.json": {
+                    "MEAN_INSERT_SIZE": {"condition": None}
+                },
+                "multiqc_picard_HsMetrics.json": {
+                    "MEAN_TARGET_COVERAGE": {
+                        "condition": {"norm": "gt", "threshold": 500.0}
+                    }
+                },
             },
-            {
-                "file_name": "multiqc_picard_dups.json",
-                "sequencing_type": ["targeted", "wgs"],
-                "metrics": ["PERCENT_DUPLICATION"],
+            "wgs": {
+                "multiqc_picard_insertSize.json": {
+                    "MEAN_INSERT_SIZE": {"condition": None}
+                },
+                "multiqc_picard_dups.json": {
+                    "PERCENT_DUPLICATION": {"condition": None}
+                },
             },
-            {
-                "file_name": "multiqc_picard_HsMetrics.json",
-                "sequencing_type": ["targeted"],
-                "metrics": ["MEAN_TARGET_COVERAGE"],
-            },
-        ],
+        }
     }

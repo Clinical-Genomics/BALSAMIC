@@ -91,30 +91,29 @@ HSMETRICS_QC_CHECK = {
 }
 
 METRICS = {
-    "qc": [
-        {
-            "file_name": "multiqc_picard_insertSize.json",
-            "sequencing_type": ["targeted", "wgs"],
-            "metrics": ["MEAN_INSERT_SIZE"],
+    "qc": {
+        "targeted": {
+            "multiqc_picard_insertSize.json": {
+                "MEAN_INSERT_SIZE": {"condition": None},
+            },
+            "multiqc_picard_dups.json": {"PERCENT_DUPLICATION": {"condition": None}},
+            "multiqc_picard_HsMetrics.json": {
+                "MEAN_TARGET_COVERAGE": {
+                    "condition": {"norm": "gt", "threshold": 500.0}
+                },
+                "MEDIAN_TARGET_COVERAGE": {"condition": None},
+                "PCT_TARGET_BASES_50X": {"condition": None},
+                "PCT_TARGET_BASES_100X": {"condition": None},
+                "PCT_TARGET_BASES_250X": {"condition": None},
+                "PCT_TARGET_BASES_500X": {"condition": None},
+                "PCT_TARGET_BASES_1000X": {"condition": None},
+                "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 5.0}},
+                "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.45}},
+            },
         },
-        {
-            "file_name": "multiqc_picard_dups.json",
-            "sequencing_type": ["targeted", "wgs"],
-            "metrics": ["PERCENT_DUPLICATION"],
+        "wgs": {
+            "multiqc_picard_insertSize.json": {"MEAN_INSERT_SIZE": {"condition": None}},
+            "multiqc_picard_dups.json": {"PERCENT_DUPLICATION": {"condition": None}},
         },
-        {
-            "file_name": "multiqc_picard_HsMetrics.json",
-            "sequencing_type": ["targeted"],
-            "metrics": [
-                "MEAN_TARGET_COVERAGE",
-                "MEDIAN_TARGET_COVERAGE",
-                "PCT_TARGET_BASES_50X",
-                "PCT_TARGET_BASES_100X",
-                "PCT_TARGET_BASES_250X",
-                "PCT_TARGET_BASES_500X",
-                "PCT_TARGET_BASES_1000X",
-                "FOLD_80_BASE_PENALTY",
-            ],
-        },
-    ]
+    }
 }
