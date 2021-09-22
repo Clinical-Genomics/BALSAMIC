@@ -9,5 +9,7 @@ do
   then
     echo "${valid_command} could not be found"
     exit 1
+  else
+    echo "${valid_command} command is found and valid"
   fi
 done
