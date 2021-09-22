@@ -6,6 +6,7 @@ Added:
 
 * Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
+* Container specific tests #770
 
 
 Changed:
@@ -24,6 +25,7 @@ Fixed:
 ^^^^^^
 
 * Pip installation failure inside balsamic container #758
+* Fixed issue #768 with missing ``vep_install`` command in container
 
 [8.1.0]
 -------
