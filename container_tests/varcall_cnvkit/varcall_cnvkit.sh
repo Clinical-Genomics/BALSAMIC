@@ -1,7 +1,7 @@
 #!/bin/bash -l
 # Test if commands exist
 
-valid_commands=( "cnvkit" "bcftools" "tabix" )
+valid_commands=( "cnvkit.py" "bcftools" "tabix" )
 
 for valid_command in "${valid_commands[@]}"
 do

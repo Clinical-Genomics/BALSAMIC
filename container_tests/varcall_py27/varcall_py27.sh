@@ -1,7 +1,7 @@
 #!/bin/bash -l
 # Test if commands exist
 
-valid_commands=( "tabix" "manta" "bcftools" "samtools" )
+valid_commands=( "tabix" "configManta.py" "bcftools" "samtools" )
 
 for valid_command in "${valid_commands[@]}"
 do
