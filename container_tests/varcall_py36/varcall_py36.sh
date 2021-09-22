@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 # Test if commands exist
 
 valid_commands=( "bcftools" "samtools" "tabix" "vardict" "vardict-java" )

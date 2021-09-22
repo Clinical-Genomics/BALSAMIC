@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 # Test if commands exist
 
 valid_commands=( "tabix" "configManta.py" "bcftools" "samtools" )
