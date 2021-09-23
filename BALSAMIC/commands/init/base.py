@@ -106,7 +106,6 @@ LOG = logging.getLogger(__name__)
     ),
 )
 @click.option(
-    "-c",
     "--cluster-config",
     show_default=True,
     default=get_config("reference_cluster"),
