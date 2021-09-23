@@ -33,8 +33,8 @@ def test_init_reference_write_json(
             "init",
             "-o",
             str(test_new_dir),
-            "-c",
-            "secret_key",
+            "--cosmic-key",
+			"secret_key",
             "-v",
             test_container_version,
         ]
@@ -58,7 +58,7 @@ def test_init_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
             "init",
             "-o",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "-v",
             test_container_version,
@@ -83,8 +83,8 @@ def test_init_reference_graph_exception(invoke_cli, tmp_path):
                 "init",
                 "-o",
                 str(test_new_dir),
-                "-c",
-                "secret_key",
+                "--cosmic-key",
+				"secret_key",
             ]
         )
 
@@ -103,7 +103,7 @@ def test_init_container_force_dry(invoke_cli, tmp_path):
             "init",
             "--outdir",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "--force",
             "-v",
@@ -127,7 +127,7 @@ def test_init_container_specific_tag(invoke_cli, tmp_path):
             "init",
             "--outdir",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "--container-version",
             dummy_tag,
@@ -152,12 +152,15 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
                 "init",
                 "--outdir",
                 str(test_new_dir),
-                "-c",
+                "--cosmic-key",
                 "secret_key",
                 "--run-analysis",
+                "--account",
+                "development"
             ]
         )
 
+        #print(result.output)
         # THEN output config and pdf file generate and command exit code 0
         assert result.exit_code == 0
 
@@ -174,7 +177,7 @@ def test_init_container_wrong_tag(invoke_cli, tmp_path):
             "init",
             "--outdir",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "--container-version",
             dummy_tag,
