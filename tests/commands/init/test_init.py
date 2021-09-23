@@ -156,7 +156,7 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
                 "secret_key",
                 "--run-analysis",
                 "--account",
-                "development"
+                "development",
             ]
         )
 
