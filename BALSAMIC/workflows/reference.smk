@@ -4,6 +4,7 @@
 import os
 import hashlib
 import logging
+from pathlib import Path
 
 
 from BALSAMIC.utils.rule import get_script_path
@@ -217,7 +218,6 @@ rule prepare_refgene:
         accessible_regions  = access_regions_url.get_output_file,
     params:
         refgene_sql_awk = get_script_path('refseq_sql.awk'),
-        conda_env = config["bioinfo_tools"].get("bedtools")
     output:
         refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
         bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
@@ -227,7 +227,6 @@ rule prepare_refgene:
     singularity: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
     shell:
         """
-source activate {params.conda_env};
 header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
 (echo \"$header\"; cat {input.refgene_txt};) \
 | csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 \
@@ -250,7 +249,6 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf")
     params:
         type = 'vcf',
-        conda_env = config["bioinfo_tools"].get("tabix")
     output:
         os.path.join(vcf_dir, "{vcf}.vcf.gz"),
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
@@ -259,7 +257,6 @@ rule bgzip_tabix:
     singularity: Path(singularity_image, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
     shell:
         """
-source activate {params.conda_env};
 bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
         """
 
@@ -271,8 +268,6 @@ bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
 rule bwa_index:
     input:
         reference_genome_url.get_output_file
-    params:
-        conda_env = config["bioinfo_tools"].get("bwa")
     output:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
@@ -280,7 +275,6 @@ rule bwa_index:
     singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
     shell:
         """
-source activate {params.conda_env};
 bwa index -a bwtsw {input} 2> {log};
         """
 
@@ -291,8 +285,6 @@ bwa index -a bwtsw {input} 2> {log};
 rule samtools_index_fasta:
     input:
         reference_genome_url.get_output_file
-    params:
-        conda_env = config["bioinfo_tools"].get("samtools")
     output:
         reference_genome_url.get_output_file + ".fai"
     log:
@@ -300,7 +292,6 @@ rule samtools_index_fasta:
     singularity: Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
     shell:
         """
-source activate {params.conda_env};
 samtools faidx {input} 2> {log};
         """
 
@@ -313,8 +304,6 @@ samtools faidx {input} 2> {log};
 rule picard_ref_dict:
     input:
         reference_genome_url.get_output_file
-    params:
-        conda_env = config["bioinfo_tools"].get("picard")
     output:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
@@ -322,7 +311,6 @@ rule picard_ref_dict:
     singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     shell:
         """
-source activate {params.conda_env};
 picard CreateSequenceDictionary REFERENCE={input} OUTPUT={output} 2> {log};
         """
 
@@ -337,7 +325,6 @@ rule vep_install:
         species = "homo_sapiens_merged",
         assembly = "GRCh37" if genome_ver == 'hg19' else "GRCh38",
         plugins = "all",
-        conda_env = config["bioinfo_tools"].get("ensembl-vep")
     output:
         directory(vep_dir)
     log:
@@ -345,7 +332,6 @@ rule vep_install:
     singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
     shell:
         """
-source activate {params.conda_env};
 vep_install --SPECIES {params.species} \
 --AUTO cfp \
 --ASSEMBLY {params.assembly} \
@@ -362,8 +348,7 @@ rule prepare_delly_exclusion:
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
     log:
         os.path.join(basedir, "genome", "delly_exclusion.log"),
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    singularity: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     shell:
         """
 sed 's/chr//g' {input.delly_exclusion} > {output.delly_exclusion_converted} 2> {log}
