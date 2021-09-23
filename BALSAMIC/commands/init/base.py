@@ -21,7 +21,7 @@ from BALSAMIC.utils.cli import (
     SnakeMake,
     get_config,
     get_schedulerpy,
-    #job_id_dump_to_yaml,
+    # job_id_dump_to_yaml,
 )
 from BALSAMIC import __version__ as balsamic_version
 
@@ -334,7 +334,7 @@ def initialize(
     cmd = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)
 
-    #if run_analysis and run_mode == "cluster":
+    # if run_analysis and run_mode == "cluster":
     #    jobid_dump = os.path.join(
     #        logpath, config_dict["analysis"]["case_id"] + ".sacct"
     #    )
