@@ -34,7 +34,7 @@ def test_init_reference_write_json(
             "-o",
             str(test_new_dir),
             "--cosmic-key",
-			"secret_key",
+            "secret_key",
             "-v",
             test_container_version,
         ]
@@ -84,7 +84,7 @@ def test_init_reference_graph_exception(invoke_cli, tmp_path):
                 "-o",
                 str(test_new_dir),
                 "--cosmic-key",
-				"secret_key",
+                "secret_key",
             ]
         )
 
@@ -156,11 +156,10 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
                 "secret_key",
                 "--run-analysis",
                 "--account",
-                "development"
+                "development",
             ]
         )
 
-        #print(result.output)
         # THEN output config and pdf file generate and command exit code 0
         assert result.exit_code == 0
 

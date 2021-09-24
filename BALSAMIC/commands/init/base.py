@@ -16,13 +16,12 @@ from BALSAMIC.constants.common import (
 )
 from BALSAMIC.utils.cli import (
     write_json,
-    merge_json,
     CaptureStdout,
     get_snakefile,
     SnakeMake,
     get_config,
     get_schedulerpy,
-    job_id_dump_to_yaml,
+    # job_id_dump_to_yaml,
 )
 from BALSAMIC import __version__ as balsamic_version
 
@@ -106,7 +105,6 @@ LOG = logging.getLogger(__name__)
     ),
 )
 @click.option(
-    "-c",
     "--cluster-config",
     show_default=True,
     default=get_config("reference_cluster"),
@@ -324,6 +322,9 @@ def initialize(
     balsamic_run.result_path = reference_outdir
     balsamic_run.case_name = config_dict["analysis"]["case_id"]
     balsamic_run.quiet = quiet
+    if mail_type:
+        balsamic_run.mail_type = mail_type
+    balsamic_run.mail_user = mail_user
     balsamic_run.sm_opt = snakemake_opt
 
     # Always use singularity
@@ -332,11 +333,10 @@ def initialize(
 
     cmd = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)
-    # print(cmd + "\n")i
 
-    if run_analysis and run_mode == "cluster":
-        jobid_dump = os.path.join(
-            logpath, config_dict["analysis"]["case_id"] + ".sacct"
-        )
-        jobid_yaml = os.path.join(reference_outdir, profile + "_jobids.yaml")
-        job_id_dump_to_yaml(jobid_dump, jobid_yaml, config_dict["analysis"]["case_id"])
+    # if run_analysis and run_mode == "cluster":
+    #    jobid_dump = os.path.join(
+    #        logpath, config_dict["analysis"]["case_id"] + ".sacct"
+    #    )
+    #    jobid_yaml = os.path.join(reference_outdir, profile + "_jobids.yaml")
+    #    job_id_dump_to_yaml(jobid_dump, jobid_yaml, config_dict["analysis"]["case_id"])

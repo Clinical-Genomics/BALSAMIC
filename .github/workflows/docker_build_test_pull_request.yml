@@ -39,19 +39,9 @@ jobs:
           build-args: CONTAINER_NAME=${{ matrix.container-name }}
       - name: Test container
         id: docker_test_container
-        if: ${{ matrix.container-name != 'balsamic' }}
         shell: bash
         run: |
           docker run \
           -v $(readlink -f container_tests):/container_tests \
           clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
-          bash /container_tests/dockertest.sh ${{ matrix.container-name }}
-      - name: Test balsamic container
-        id: docker_test_balsamic_container
-        if: ${{ matrix.container-name == 'balsamic' }}
-        shell: bash
-        run: |
-          docker run \
-          -v $(readlink -f container_tests):/container_tests \
-          clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
-          bash /container_tests/balsamic.sh ${{ matrix.container-name }}
+          bash /container_tests/${{ matrix.container-name }}/${{ matrix.container-name }}.sh
