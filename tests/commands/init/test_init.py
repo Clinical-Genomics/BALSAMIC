@@ -95,6 +95,39 @@ def test_init_reference_click_abort(invoke_cli, tmp_path):
     assert result.exit_code == 1
 
 
+def test_init_reference_mail_type(invoke_cli, tmp_path):
+    # Given test_reference output directory
+    test_container_version = "develop"
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    dummy_mail_type = "END"
+    dummy_mail_user = "dummy@gmail.com"
+
+    # WHEN running the command
+    result = invoke_cli(
+        [
+            "init",
+            "-o",
+            str(test_new_dir),
+            "--cosmic-key",
+            "secret_key",
+            "-v",
+            test_container_version,
+            "--run-analysis",
+            "--run-mode",
+            "local",
+            "--mail-type",
+            dummy_mail_type,
+            "--mail-user",
+            dummy_mail_user,
+        ]
+    )
+
+    # THEN it should exit code for not providing the run-mode
+    assert result.exit_code == 0
+
+
 def test_init_reference_graph_exception(invoke_cli, tmp_path):
     # Given test_reference.json
     test_new_dir = tmp_path / "test_reference_nonfunctional_graph"
