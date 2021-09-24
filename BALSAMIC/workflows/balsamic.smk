@@ -315,9 +315,13 @@ rule all:
         from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
 
         # Save QC metrics to a JSON file
-        qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
-        with open(str(output.qc_json_file), mode='w') as jsonFile:
-            jsonFile.write(qc_metrics_summary)
+        try:
+            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
+            with open(str(output.qc_json_file), mode='w') as jsonFile:
+                jsonFile.write(qc_metrics_summary)
+        except ValueError as val_exc:
+            LOG.error(val_exc)
+            raise BalsamicError("QC metrics do not meet the filtering criteria")
 
         # Delete a temporal directory tree
         try:

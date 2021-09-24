@@ -705,7 +705,7 @@ class QCConditionModel(BaseModel):
     threshold: float
 
     @validator("norm")
-    def check_operator(cls, value):
+    def check_operator(cls, value) -> str:
         """Validates if the retrieved norm is a valid operator"""
         assert value in [
             "lt",
