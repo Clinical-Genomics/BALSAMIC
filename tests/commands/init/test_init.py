@@ -8,8 +8,8 @@ from BALSAMIC import __version__ as balsamic_version
 
 
 def test_init_reference_write_json(
-    invoke_cli,
-    tmp_path,
+        invoke_cli,
+        tmp_path,
 ):
     # Given test_reference.json
     test_genome_version = "hg19"
@@ -19,13 +19,13 @@ def test_init_reference_write_json(
 
     # WHEN creating config.json in reference dir
     test_output_reference_config = (
-        test_new_dir / balsamic_version / test_genome_version / "config.json"
+            test_new_dir / balsamic_version / test_genome_version / "config.json"
     )
     test_output_reference_pdf = (
-        test_new_dir
-        / balsamic_version
-        / test_genome_version
-        / "generate_ref_worflow_graph.pdf"
+            test_new_dir
+            / balsamic_version
+            / test_genome_version
+            / "generate_ref_worflow_graph.pdf"
     )
 
     result = invoke_cli(
@@ -68,6 +68,30 @@ def test_init_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
     )
 
     # THEN it should create test_reference.json and exist with no error
+    assert result.exit_code == 1
+
+
+def test_init_reference_click_abort(invoke_cli, tmp_path):
+    # Given test_reference output directory
+    test_container_version = "develop"
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    # WHEN running the command
+    result = invoke_cli(
+        [
+            "init",
+            "-o",
+            str(test_new_dir),
+            "--cosmic-key",
+            "secret_key",
+            "-v",
+            test_container_version,
+            "--run-analysis"
+        ]
+    )
+
+    # THEN it should exit code for not providing the run-mode
     assert result.exit_code == 1
 
 
