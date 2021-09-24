@@ -5,11 +5,12 @@ import os
 import hashlib
 import logging
 
+from copy import deepcopy
 
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceMeta
-from BALSAMIC.constants.reference import REFERENCE_FILES 
+from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL 
 
 LOG = logging.getLogger(__name__)
 
@@ -35,6 +36,9 @@ cosmicdb_key = config['cosmic_key']
 os.environ['TMPDIR'] = basedir 
 
 # indexable VCF files
+# For future reference, if you delete this line pydantic fails in tests
+# Don't know why, but don't delete it and keep deepcopy /A&H
+REFERENCE_FILES = deepcopy(REFERENCE_MODEL)
 indexable_vcf_files = get_reference_output_files(REFERENCE_FILES[genome_ver],
                                                  file_type='vcf',
                                                  gzip = True)
