@@ -333,10 +333,3 @@ def initialize(
 
     cmd = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)
-
-    if run_analysis and run_mode == "cluster":
-        jobid_dump = os.path.join(
-            logpath, config_dict["analysis"]["case_id"] + ".sacct"
-        )
-        jobid_yaml = os.path.join(reference_outdir, profile + "_jobids.yaml")
-        job_id_dump_to_yaml(jobid_dump, jobid_yaml, config_dict["analysis"]["case_id"])
