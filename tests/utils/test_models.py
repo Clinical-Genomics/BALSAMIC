@@ -399,14 +399,11 @@ def test_params_vep():
     assert test_vep_built.vep_filters == "all defaults params"
 
 
-def test_qc_condition_model():
+def test_qc_condition_model_pass_validation(qc_extracted_metrics):
     """test QCConditionModel input attributes validation"""
 
     # GIVEN input attributes
-    input_attr = {"norm": "lt", "threshold": 1.0}
-
-    # GIVEN a non accepted input
-    invalid_input = {"norm": "higher", "threshold": 1.0}
+    input_attr = qc_extracted_metrics["metrics"]["sample_1"][0]["condition"]
 
     # WHEN building the QC norm model
     condition_model = QCConditionModel(**input_attr)
@@ -414,6 +411,13 @@ def test_qc_condition_model():
     # THEN assert retrieved values from the created model
     assert condition_model.norm == input_attr["norm"]
     assert condition_model.threshold == input_attr["threshold"]
+
+
+def test_qc_condition_model_fail_validation():
+    """test QCConditionModel input attributes for an invalid input"""
+
+    # GIVEN a non accepted input
+    invalid_input = {"norm": "higher", "threshold": 1.0}
 
     # THEN the model raises an error due to the not accepted norm
     with pytest.raises(ValueError) as norm_exc:
@@ -423,18 +427,11 @@ def test_qc_condition_model():
     )
 
 
-def test_qc_metrics_model():
+def test_qc_metrics_model_pass_validation(qc_extracted_metrics):
     """test QCMetricsModel input attributes"""
 
     # GIVEN input attributes
-    input_attr = {
-        "name": "METRIC",
-        "value": 0.5,
-        "condition": {"norm": "lt", "threshold": 1.0},
-    }
-
-    # GIVEN a non accepted input
-    invalid_input = {"name": "METRIC"}
+    input_attr = qc_extracted_metrics["metrics"]["sample_1"][0]
 
     # WHEN building the QC metrics model
     metrics_model = QCMetricsModel(**input_attr)
@@ -443,38 +440,36 @@ def test_qc_metrics_model():
     assert metrics_model.name == input_attr["name"]
     assert metrics_model.value == input_attr["value"]
 
+
+def test_qc_metrics_model_fail_validation():
+    """test QCMetricsModel for invalid input attributes"""
+
+    # GIVEN a non accepted input
+    invalid_input = {"name": "METRIC"}
+
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
         QCMetricsModel(**invalid_input)
-    print(input_exc.value)
+
     assert f"field required" in str(input_exc.value)
 
 
-def test_qc_check_model():
-    """test QCCheckModel metrics validation"""
-
-    # GIVEN input attributes
-    metrics = {
-        "metrics": {
-            "sample_1": [
-                {
-                    "name": "MEAN_INSERT_SIZE",
-                    "value": 0.5,
-                    "condition": {"norm": "lt", "threshold": 1.0},
-                }
-            ]
-        }
-    }
-
-    # GIVEN input attributes with a value that does not meet the specified condition
-    metrics_high_value = copy.deepcopy(metrics)
-    metrics_high_value["metrics"]["sample_1"][0]["value"] = 10.0
+def test_qc_check_model_pass_validation(qc_extracted_metrics):
+    """test QCCheckModel metrics parsing"""
 
     # WHEN building the QC check model
-    metrics_model = QCCheckModel(**metrics)
+    metrics_model = QCCheckModel(**qc_extracted_metrics)
 
     # THEN assert retrieved values from the created model
-    assert metrics_model.metrics.items() == metrics["metrics"].items()
+    assert metrics_model.metrics.items() == qc_extracted_metrics["metrics"].items()
+
+
+def test_qc_check_model_fail_validation(qc_extracted_metrics):
+    """test QCCheckModel metrics validation"""
+
+    # GIVEN input attributes with a value that does not meet the specified condition
+    metrics_high_value = copy.deepcopy(qc_extracted_metrics)
+    metrics_high_value["metrics"]["sample_1"][0]["value"] = 10.0
 
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as val_exc:
@@ -484,33 +479,8 @@ def test_qc_check_model():
     )
 
 
-def test_qc_check_model_get_json():
+def test_qc_check_model_get_json_property(qc_extracted_metrics):
     """test metric-value json extraction"""
-
-    # GIVEN input attributes
-    metrics = {
-        "metrics": {
-            "sample_1": [
-                {
-                    "name": "MEAN_INSERT_SIZE",
-                    "value": 0.5,
-                    "condition": {"norm": "lt", "threshold": 1.0},
-                },
-                {
-                    "name": "MEAN_INSERT_SIZE_2",
-                    "value": 0.5,
-                    "condition": {"norm": "lt", "threshold": 1.0},
-                },
-            ],
-            "sample_2": [
-                {
-                    "name": "MEAN_INSERT_SIZE",
-                    "value": 0.5,
-                    "condition": {"norm": "lt", "threshold": 1.0},
-                },
-            ],
-        }
-    }
 
     # GIVEN expected output
     expected_output = {
@@ -519,7 +489,7 @@ def test_qc_check_model_get_json():
     }
 
     # WHEN building the QC check model
-    metrics_model = QCCheckModel(**metrics)
+    metrics_model = QCCheckModel(**qc_extracted_metrics)
 
     # THEN check if the extracted metrics and its structure meets the expected one
     assert json.loads(metrics_model.get_json).items() == expected_output.items()
