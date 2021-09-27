@@ -55,15 +55,14 @@ def test_update_metrics_dict():
         sample_id + "2": [{"name": "test_metric_2", "value": value, "condition": None}],
     }
 
-    # WHEN
-    # Adding a metric to an empty dictionary
+    # WHEN adding a metric to an empty dictionary
     m_dict = update_metrics_dict(sample_id + "1", metric, value, {})
 
-    # Appending a metric
+    # WHEN appending a metric to an already created dictionary
     metric[0] = "test_metric_2"
     m_dict = update_metrics_dict(sample_id + "1", metric, value, m_dict)
 
-    # Appending a metric from another sample to a dictionary
+    # WHEN appending a metric from another sample to a dictionary
     m_dict = update_metrics_dict(sample_id + "2", metric, value, m_dict)
 
     # THEN check if the dictionary is updated correctly
