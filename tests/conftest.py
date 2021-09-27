@@ -521,7 +521,7 @@ def qc_extracted_metrics():
         "metrics": {
             "sample_1": [
                 {
-                    "name": "MEAN_INSERT_SIZE",
+                    "name": "MEAN_INSERT_SIZE_1",
                     "value": 0.5,
                     "condition": {"norm": "lt", "threshold": 1.0},
                 },
@@ -533,7 +533,7 @@ def qc_extracted_metrics():
             ],
             "sample_2": [
                 {
-                    "name": "MEAN_INSERT_SIZE",
+                    "name": "MEAN_INSERT_SIZE_1",
                     "value": 0.5,
                     "condition": {"norm": "lt", "threshold": 1.0},
                 },

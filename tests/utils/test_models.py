@@ -465,7 +465,7 @@ def test_qc_check_model_pass_validation(qc_extracted_metrics):
 
 
 def test_qc_check_model_fail_validation(qc_extracted_metrics):
-    """test QCCheckModel metrics validation"""
+    """test QCCheckModel metrics validation for an invalid metric"""
 
     # GIVEN input attributes with a value that does not meet the specified condition
     metrics_high_value = copy.deepcopy(qc_extracted_metrics)
@@ -477,6 +477,20 @@ def test_qc_check_model_fail_validation(qc_extracted_metrics):
     assert f"The MEAN_INSERT_SIZE metric is not lt than 1.0. Actual value: 10.0" in str(
         val_exc.value
     )
+
+
+def test_qc_check_model_multiple_fails_validation(qc_extracted_metrics):
+    """test QCCheckModel metrics validation for multiple metrics not meeting the specified conditions"""
+
+    # GIVEN input attributes with a value that does not meet the specified condition
+    metrics_high_value = copy.deepcopy(qc_extracted_metrics)
+    metrics_high_value["metrics"]["sample_1"][0]["value"] = 10.0
+    metrics_high_value["metrics"]["sample_2"][0]["value"] = 10.0
+
+    # THEN the model raises an error due to an incomplete input
+    with pytest.raises(ValueError) as val_exc:
+        QCCheckModel(**metrics_high_value)
+    assert f"2 validation errors for QCCheckModel" in str(val_exc.value)
 
 
 def test_qc_check_model_get_json_property(qc_extracted_metrics):
