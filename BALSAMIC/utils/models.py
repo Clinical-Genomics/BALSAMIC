@@ -1,6 +1,5 @@
 import hashlib
 import json
-import operator
 import os
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +17,7 @@ from BALSAMIC.constants.common import (
     WORKFLOW_SOLUTION,
     MUTATION_CLASS,
     MUTATION_TYPE,
+    VALID_OPS,
 )
 from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
@@ -136,7 +136,7 @@ class VarcallerAttribute(BaseModel):
 
     @validator("workflow_solution", check_fields=False)
     def workflow_solution_literal(cls, value) -> str:
-        "Validate workflow solution"
+        """Validate workflow solution"""
         assert set(value).issubset(
             set(WORKFLOW_SOLUTION)
         ), f"{value} is not valid workflow solution."
@@ -144,7 +144,7 @@ class VarcallerAttribute(BaseModel):
 
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
-        "Validate analysis types"
+        """Validate analysis types"""
         assert set(value).issubset(
             set(ANALYSIS_TYPES)
         ), f"{value} is not a valid analysis type."
@@ -152,19 +152,19 @@ class VarcallerAttribute(BaseModel):
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
-        "Validate mutation class"
+        """Validate mutation class"""
         assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
-        "Validate mutation type"
+        """Validate mutation type"""
         assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
         return value
 
     @validator("sequencing_type", check_fields=False)
     def sequencing_type_literal(cls, value) -> str:
-        "Validate sequencing type"
+        """Validate sequencing type"""
         assert set(value).issubset(
             set(SEQUENCING_TYPE)
         ), f"{value} is not not a valid sequencing type."
@@ -707,14 +707,7 @@ class QCConditionModel(BaseModel):
     @validator("norm")
     def check_operator(cls, value) -> str:
         """Validates if the retrieved norm is a valid operator"""
-        assert value in [
-            "lt",
-            "le",
-            "eq",
-            "ne",
-            "ge",
-            "gt",
-        ], f"{value} is not a valid condition for QC filtering"
+        assert value in VALID_OPS, f"{value} is not a valid condition for QC filtering"
         return value
 
 
@@ -745,10 +738,12 @@ class QCCheckModel(BaseModel):
     def check_metric(cls, value):
         """Checks if each metric meets the filtering conditions"""
         for metric in value:
-            if metric.condition is not None and not eval(
-                f"operator.{metric.condition.norm}({metric.value},{metric.condition.threshold})"
-            ):
-                raise ValueError(
+            if metric.condition is None:
+                continue
+            else:
+                assert VALID_OPS[metric.condition.norm](
+                    metric.value, metric.condition.threshold
+                ), (
                     f"The {metric.name} metric is not {metric.condition.norm} than {metric.condition.threshold}. "
                     f"Actual value: {metric.value}."
                 )

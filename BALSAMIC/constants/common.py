@@ -1,4 +1,5 @@
 """This file contains constants variables used by BALSAMIC"""
+import operator
 import sys
 from pathlib import Path
 
@@ -76,4 +77,13 @@ BIOINFO_TOOL_ENV = {
     "delly": "varcall_delly",
     "ascatNgs": "ascatngs",
     "sentieon": "sentieon",
+}
+
+VALID_OPS = {
+    "lt": operator.lt,
+    "le": operator.le,
+    "eq": operator.eq,
+    "ne": operator.ne,
+    "ge": operator.ge,
+    "gt": operator.gt,
 }
