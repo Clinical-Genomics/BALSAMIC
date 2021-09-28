@@ -4,13 +4,6 @@
 normal_bam = "normal.merged.bam"
 tumor_bam = "tumor.merged.bam"
 
-if config["analysis"]["sequencing_type"] == 'wgs':
-    normal_bam = "{normal}.dedup.realign.bam".format(normal = get_sample_type(config["samples"], "normal")[0])
-    tumor_bam = "{tumor}.dedup.realign.bam".format(tumor = get_sample_type(config["samples"], "tumor")[0])
-
-
-
-
 rule manta_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
