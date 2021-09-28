@@ -27,6 +27,7 @@ Fixed:
 * Pip installation failure inside balsamic container #758
 * Fixed issue #768 with missing ``vep_install`` command in container
 * Fixed issue #765 with correct input bam files for SV rules
+* Locked version for ``cryptography`` package
 
 [8.1.0]
 -------
