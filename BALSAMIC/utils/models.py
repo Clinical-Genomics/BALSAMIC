@@ -729,7 +729,7 @@ class QCCheckModel(BaseModel):
     """Defines the quality control validation model
 
     Attributes:
-        metrics: Dict(sample_name, QCMetricsModel) (required); quality control metric attributes
+        metrics: Dict(sample_name, list(QCMetricsModel)) (required); quality control metric attributes
     """
 
     metrics: Dict[str, List[QCMetricsModel]]

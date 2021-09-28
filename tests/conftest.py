@@ -516,7 +516,7 @@ def qc_metrics():
 
 @pytest.fixture(scope="session")
 def qc_extracted_metrics():
-    """Sample extracted metrics for QC model testing"""
+    """Extracted metrics for QC model testing"""
     return {
         "metrics": {
             "sample_1": [

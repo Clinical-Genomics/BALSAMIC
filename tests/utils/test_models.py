@@ -474,8 +474,9 @@ def test_qc_check_model_fail_validation(qc_extracted_metrics):
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as val_exc:
         QCCheckModel(**metrics_high_value)
-    assert f"The MEAN_INSERT_SIZE metric is not lt than 1.0. Actual value: 10.0" in str(
-        val_exc.value
+    assert (
+        f"The MEAN_INSERT_SIZE_1 metric is not lt than 1.0. Actual value: 10.0"
+        in str(val_exc.value)
     )
 
 
@@ -498,8 +499,8 @@ def test_qc_check_model_get_json_property(qc_extracted_metrics):
 
     # GIVEN expected output
     expected_output = {
-        "sample_1": {"MEAN_INSERT_SIZE": 0.5, "MEAN_INSERT_SIZE_2": 0.5},
-        "sample_2": {"MEAN_INSERT_SIZE": 0.5},
+        "sample_1": {"MEAN_INSERT_SIZE_1": 0.5, "MEAN_INSERT_SIZE_2": 0.5},
+        "sample_2": {"MEAN_INSERT_SIZE_1": 0.5},
     }
 
     # WHEN building the QC check model
