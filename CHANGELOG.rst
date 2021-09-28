@@ -28,6 +28,7 @@ Fixed:
 * Fixed issue #768 with missing ``vep_install`` command in container
 * Fixed issue #765 with correct input bam files for SV rules
 * Locked version for ``cryptography`` package
+* Bumped version for ``bcftools`` in cnvkit container
 
 [8.1.0]
 -------
