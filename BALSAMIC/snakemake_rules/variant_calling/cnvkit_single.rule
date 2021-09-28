@@ -2,7 +2,6 @@
 # coding: utf-8
 
 
-
 rule cnvkit_single:
     input:
         access_bed = config["reference"]["access_regions"],
@@ -34,7 +33,8 @@ rule cnvkit_single:
         cnv_dir = cnv_dir,
         min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
-        sample_id = "tumor"
+        sample_id = "tumor",
+        genome_version = config["reference"]["reference_genome"].split('/')[-3]
     message:
         ("Run CNVkit pipeline for sample {params.case_name},"
         "while tumor purity/ploidy calculated using PureCN")
@@ -96,20 +96,23 @@ cnvkit.py export seg {params.cnv_dir}/tumor.initial.cns \
 # Run PureCN to estimate tumor-purity and ploidy
 mkdir -p {params.purecn_dir}
 
-Rscript $PURECN \
+if (Rscript $PURECN \
 --out {params.purecn_dir} \
 --sampleid {params.sample_id} \
 --tumor {output.cnr} \
 --segfile {params.cnv_dir}/tumor.seg \
 --vcf  {input.snv_vcf} \
---genome hg19 \
+--genome {params.genome_version} \
 --funsegmentation Hclust \
 --force --postoptimize \
---seed 124;
+--seed 124); then 
 
 purity=$(awk -F\\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
 ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv)
 gender=$(awk -F\\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\")
+if $gender="?"; then gender="x"; fi
+
+else gender="male"; purity="0.02"; ploidy=2; fi
 
 # Call copy number variants from segmented log2 ratios
 cnvkit.py call {params.cnv_dir}/tumor.initial.cns \
