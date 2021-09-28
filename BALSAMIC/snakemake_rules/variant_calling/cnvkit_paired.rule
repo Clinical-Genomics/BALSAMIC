@@ -1,8 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-genome_version = config["reference"]["reference_genome"].split('/')[-3]
-
 rule cnvkit_paired:
     input:
         access_bed = config["reference"]["access_regions"],
