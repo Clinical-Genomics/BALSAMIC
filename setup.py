@@ -36,7 +36,7 @@ setup(
         "h5py>=3.1.0",
         "PyPDF2>=1.26.0",
         "markdown==3.3.3",
-        "cryptography<3.4",
+        "cryptography==3.2.1",
     ],
     packages=find_packages(),
     package_data={
