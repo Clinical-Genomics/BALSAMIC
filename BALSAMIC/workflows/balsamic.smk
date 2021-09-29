@@ -22,7 +22,7 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path)
+                                 get_threads, get_script_path, get_sequencing_type)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
@@ -302,17 +302,29 @@ rule all:
     input:
         quality_control_results + analysis_specific_results
     output:
-        os.path.join(get_result_dir(config), "analysis_finish")
+        qc_json_file = os.path.join(get_result_dir(config), "qc", "qc_metrics_summary.json"),
+        finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
-        tmp_dir = tmp_dir
+        tmp_dir = tmp_dir,
+        result_dir = result_dir,
+        sequencing_type = get_sequencing_type(config)
     run:
         import datetime
         import shutil
 
+        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
+
+        # Save QC metrics to a JSON file
+        qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
+        with open(str(output.qc_json_file), mode="w") as jsonFile:
+            jsonFile.write(qc_metrics_summary)
+
+        # Delete a temporal directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
-        with open(str(output[0]), mode='w') as finish_file:
-            finish_file.write('%s\n' % datetime.datetime.now())
+        # Finish timestamp file
+        with open(str(output.finish_file), mode="w") as finish_file:
+            finish_file.write("%s\n" % datetime.datetime.now())

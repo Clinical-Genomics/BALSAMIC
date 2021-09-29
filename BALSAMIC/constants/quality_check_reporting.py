@@ -89,3 +89,31 @@ HSMETRICS_QC_CHECK = {
         "PCT_OFF_BAIT": "lt",
     },
 }
+
+METRICS = {
+    "qc": {
+        "targeted": {
+            "multiqc_picard_insertSize.json": {
+                "MEAN_INSERT_SIZE": {"condition": None},
+            },
+            "multiqc_picard_dups.json": {"PERCENT_DUPLICATION": {"condition": None}},
+            "multiqc_picard_HsMetrics.json": {
+                "MEAN_TARGET_COVERAGE": {
+                    "condition": {"norm": "gt", "threshold": 500.0}
+                },
+                "MEDIAN_TARGET_COVERAGE": {"condition": None},
+                "PCT_TARGET_BASES_50X": {"condition": None},
+                "PCT_TARGET_BASES_100X": {"condition": None},
+                "PCT_TARGET_BASES_250X": {"condition": None},
+                "PCT_TARGET_BASES_500X": {"condition": None},
+                "PCT_TARGET_BASES_1000X": {"condition": None},
+                "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 5.0}},
+                "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.45}},
+            },
+        },
+        "wgs": {
+            "multiqc_picard_insertSize.json": {"MEAN_INSERT_SIZE": {"condition": None}},
+            "multiqc_picard_dups.json": {"PERCENT_DUPLICATION": {"condition": None}},
+        },
+    }
+}

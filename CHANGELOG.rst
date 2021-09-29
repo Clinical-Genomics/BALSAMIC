@@ -7,6 +7,7 @@ Added:
 * Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
 * Container specific tests #770
+* BALSAMIC quality control metrics extraction and validation #754
 
 
 Changed:
