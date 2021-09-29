@@ -28,7 +28,12 @@ def update_metrics_dict(sample_id, metric, value, metrics_dict):
         metrics_dict[sample_name] = []
 
     metrics_dict[sample_name].append(
-        {"name": metric[0], "value": value, "condition": metric[1]["condition"]}
+        {
+            "name": metric[0],
+            "value": value,
+            "condition": metric[1]["condition"],
+            "meets_condition": None,
+        }
     )
 
     return metrics_dict

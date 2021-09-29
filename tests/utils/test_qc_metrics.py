@@ -37,36 +37,28 @@ def test_read_metrics(analysis_path):
     assert raw_metrics.items() == expected_output.items()
 
 
-def test_update_metrics_dict():
+def test_update_metrics_dict(qc_extracted_metrics):
     """test adding metrics to a nested dictionary"""
 
     # GIVEN input parameters
     sample_id = "sample_"
-    metric = ["test_metric", {"condition": None}]
+    metric = ["MEAN_INSERT_SIZE", {"condition": {"norm": "lt", "threshold": 1.0}}]
     value = 0.5
 
-    # Given an expected output
-    expected_output = {
-        sample_id
-        + "1": [
-            {"name": "test_metric", "value": value, "condition": None},
-            {"name": "test_metric_2", "value": value, "condition": None},
-        ],
-        sample_id + "2": [{"name": "test_metric_2", "value": value, "condition": None}],
-    }
-
     # WHEN adding a metric to an empty dictionary
+    metric[0] = "MEAN_INSERT_SIZE_1"
     m_dict = update_metrics_dict(sample_id + "1", metric, value, {})
 
     # WHEN appending a metric to an already created dictionary
-    metric[0] = "test_metric_2"
+    metric[0] = "MEAN_INSERT_SIZE_2"
     m_dict = update_metrics_dict(sample_id + "1", metric, value, m_dict)
 
     # WHEN appending a metric from another sample to a dictionary
+    metric[0] = "MEAN_INSERT_SIZE_1"
     m_dict = update_metrics_dict(sample_id + "2", metric, value, m_dict)
 
     # THEN check if the dictionary is updated correctly
-    assert m_dict.items() == expected_output.items()
+    assert m_dict.items() == qc_extracted_metrics["metrics"].items()
 
 
 def test_get_qc_metrics_dict(analysis_path, qc_metrics):
@@ -82,11 +74,13 @@ def test_get_qc_metrics_dict(analysis_path, qc_metrics):
                 "name": "MEAN_INSERT_SIZE",
                 "value": 74.182602,
                 "condition": None,
+                "meets_condition": None,
             },
             {
                 "name": "MEAN_TARGET_COVERAGE",
                 "value": 832.13854,
                 "condition": {"norm": "gt", "threshold": 500.0},
+                "meets_condition": None,
             },
         ]
     }

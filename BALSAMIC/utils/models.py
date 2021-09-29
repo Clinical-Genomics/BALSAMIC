@@ -718,11 +718,13 @@ class QCMetricsModel(BaseModel):
         name: str (required); quality control metric name
         value: float (required); metrics value
         condition: QCConditionModel (optional); condition for QC validation
+        meets_condition: bool (optional); flag indicating whether the condition has been met
     """
 
     name: str
     value: float
     condition: Optional[QCConditionModel]
+    meets_condition: Optional[bool]
 
 
 class QCCheckModel(BaseModel):
@@ -736,27 +738,25 @@ class QCCheckModel(BaseModel):
 
     @validator("metrics", each_item=True)
     def check_metric(cls, value):
-        """Checks if each metric meets the filtering conditions"""
-        for metric in value:
-            if metric.condition is None:
-                continue
+        """Checks if each metric meets its filtering condition and discretizes it"""
+        for i, metric in enumerate(value):
+            if metric.condition is None or VALID_OPS[metric.condition.norm](
+                metric.value, metric.condition.threshold
+            ):
+                value[i].meets_condition = True
             else:
-                assert VALID_OPS[metric.condition.norm](
-                    metric.value, metric.condition.threshold
-                ), (
-                    f"The {metric.name} metric is not {metric.condition.norm} than {metric.condition.threshold}. "
-                    f"Actual value: {metric.value}."
-                )
+                value[i].meets_condition = False
 
         return value
 
     @property
     def get_json(self):
         """Restructures the metrics dictionary and returns a metric-value json object"""
-        metrics_json = {k: {} for k in self.metrics}
+        metrics_json = {k: {"passed": {}, "failed": {}} for k in self.metrics}
 
         for sample_name, metrics in self.metrics.items():
             for metric in metrics:
-                metrics_json[sample_name].update({metric.name: metric.value})
+                res = "passed" if metric.meets_condition else "failed"
+                metrics_json[sample_name][res].update({metric.name: metric.value})
 
         return json.dumps(metrics_json, indent=4, sort_keys=True)

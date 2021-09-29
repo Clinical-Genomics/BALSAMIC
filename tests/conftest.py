@@ -524,11 +524,13 @@ def qc_extracted_metrics():
                     "name": "MEAN_INSERT_SIZE_1",
                     "value": 0.5,
                     "condition": {"norm": "lt", "threshold": 1.0},
+                    "meets_condition": None,
                 },
                 {
                     "name": "MEAN_INSERT_SIZE_2",
                     "value": 0.5,
                     "condition": {"norm": "lt", "threshold": 1.0},
+                    "meets_condition": None,
                 },
             ],
             "sample_2": [
@@ -536,6 +538,7 @@ def qc_extracted_metrics():
                     "name": "MEAN_INSERT_SIZE_1",
                     "value": 0.5,
                     "condition": {"norm": "lt", "threshold": 1.0},
+                    "meets_condition": None,
                 },
             ],
         }
