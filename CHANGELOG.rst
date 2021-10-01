@@ -30,6 +30,7 @@ Fixed:
 * Fixed issue #765 with correct input bam files for SV rules
 * Locked version for ``cryptography`` package
 * Bumped version for ``bcftools`` in cnvkit container
+* Fixed issues #776 and #777 with correct install paths for gatk and manta
 
 [8.1.0]
 -------
