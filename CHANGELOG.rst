@@ -28,9 +28,11 @@ Fixed:
 * Pip installation failure inside balsamic container #758
 * Fixed issue #768 with missing ``vep_install`` command in container
 * Fixed issue #765 with correct input bam files for SV rules
+* Continuation of CNVkit even if ``PURECN`` fails #774 #775
 * Locked version for ``cryptography`` package
 * Bumped version for ``bcftools`` in cnvkit container
 * Fixed issues #776 and #777 with correct install paths for gatk and manta
+
 
 [8.1.0]
 -------
