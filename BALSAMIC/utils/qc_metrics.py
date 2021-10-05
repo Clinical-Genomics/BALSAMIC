@@ -61,3 +61,18 @@ def get_qc_metrics_json(analysis_path, sequencing_type):
     )
 
     return qc_check_model.get_json
+
+
+def get_qc_failed_metrics(qc_metrics_json):
+    """Returns a dictionary of failed metrics from a QC metrics summarized JSON file"""
+    failed_metrics = {}
+
+    for sample_name, metrics in json.loads(qc_metrics_json).items():
+        if not metrics["failed"]:
+            continue
+        else:
+            failed_metrics[sample_name] = {}
+            for metric in metrics["failed"].items():
+                failed_metrics[sample_name].update({metric[0]: metric[1]})
+
+    return failed_metrics

@@ -312,7 +312,7 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
+        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, get_qc_failed_metrics
 
         # Save QC metrics to a JSON file
         qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
@@ -324,6 +324,12 @@ rule all:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
+
+        # Raise an error if QC metrics validation failed
+        qc_failed_metrics = get_qc_failed_metrics(qc_metrics_summary)
+        if qc_failed_metrics:
+            LOG.error("The following QC metrics do not meet the filtering criteria: \n{}".format(qc_failed_metrics))
+            raise BalsamicError
 
         # Finish timestamp file
         with open(str(output.finish_file), mode="w") as finish_file:

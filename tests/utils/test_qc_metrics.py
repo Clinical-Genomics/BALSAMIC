@@ -5,6 +5,7 @@ from BALSAMIC.utils.qc_metrics import (
     read_metrics,
     update_metrics_dict,
     get_qc_metrics_dict,
+    get_qc_failed_metrics,
 )
 
 
@@ -107,3 +108,27 @@ def test_get_qc_metrics_json(analysis_path):
         assert True
     except TypeError:
         assert False
+
+
+def test_get_qc_failed_metrics():
+    """test extraction of failed metrics from an already generated JSON object"""
+
+    # GIVEN a JSON object
+    qc_metrics_json = json.dumps(
+        {
+            "sample_1": {"failed": {"METRIC_1": 0.5, "METRIC_2": 0.5}, "passed": {}},
+            "sample_2": {"failed": {"METRIC_1": 0.5}, "passed": {"METRIC_2": 0.5}},
+        }
+    )
+
+    # GIVEN the expected output
+    expected_output = {
+        "sample_1": {"METRIC_1": 0.5, "METRIC_2": 0.5},
+        "sample_2": {"METRIC_1": 0.5},
+    }
+
+    # WHEN calling the function
+    qc_failed_metrics = get_qc_failed_metrics(qc_metrics_json)
+
+    # THEN check if the obtained metrics are the ones that failed the QC validation
+    assert qc_failed_metrics.items() == expected_output.items()
