@@ -66,7 +66,7 @@ rule delly_tumor_only:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        tumor = "TUMOR",
+        tumor = get_sample_type(config["samples"], "tumor"),
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "delly_tumor_only")
@@ -77,9 +77,7 @@ rule delly_tumor_only:
         """
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT}
 
-echo -e \"{params.tumor}\\ttumor\" > {params.tmpdir}/samples.tsv;
-
-delly filter -p -o {params.tmpdir}/delly.filtered.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf
+delly filter -p -f germline -o {params.tmpdir}/delly.filtered.bcf {params.tmpdir}/delly.bcf
 
 bcftools view -O z -o {output.final} {params.tmpdir}/delly.filtered.bcf
 
