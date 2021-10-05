@@ -256,7 +256,7 @@ if 'benchmark_plots' in config:
             # Delete previous plots after merging
             for plots in my_rule_plots:
                 plots.unlink()
-            
+
 
 
 if 'delivery' in config:
@@ -328,7 +328,7 @@ rule all:
         # Raise an error if QC metrics validation failed
         qc_failed_metrics = get_qc_failed_metrics(qc_metrics_summary)
         if qc_failed_metrics:
-            LOG.error("The following QC metrics do not meet the filtering criteria: \n{}".format(qc_failed_metrics))
+            LOG.error("QC metrics validation has failed. Metrics summary: \n{}".format(qc_metrics_summary))
             raise BalsamicError
 
         # Finish timestamp file
