@@ -8,7 +8,7 @@ Added:
 * BALSAMIC container #728
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
-* QC metrics validation error treatment
+* Handling of QC metrics validation errors #783
 
 Changed:
 ^^^^^^^^

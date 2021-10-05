@@ -132,3 +132,24 @@ def test_get_qc_failed_metrics():
 
     # THEN check if the obtained metrics are the ones that failed the QC validation
     assert qc_failed_metrics.items() == expected_output.items()
+
+
+def test_get_qc_failed_metrics_empty():
+    """test metric extraction from validated JSON object"""
+
+    # GIVEN a JSON object
+    qc_metrics_json = json.dumps(
+        {
+            "sample_1": {"failed": {}, "passed": {"METRIC_1": 0.5, "METRIC_2": 0.5}},
+            "sample_2": {"failed": {}, "passed": {"METRIC_2": 0.5}},
+        }
+    )
+
+    # GIVEN the expected output
+    expected_output = {}
+
+    # WHEN calling the function
+    qc_failed_metrics = get_qc_failed_metrics(qc_metrics_json)
+
+    # THEN check if the obtained metrics are the ones that failed the QC validation
+    assert qc_failed_metrics.items() == expected_output.items()
