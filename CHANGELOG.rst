@@ -32,7 +32,7 @@ Fixed:
 * Locked version for ``cryptography`` package
 * Bumped version for ``bcftools`` in cnvkit container
 * Fixed issues #776 and #777 with correct install paths for gatk and manta
-
+* Fixed issue #782 for missing AF in the vcf INFO field
 
 [8.1.0]
 -------
