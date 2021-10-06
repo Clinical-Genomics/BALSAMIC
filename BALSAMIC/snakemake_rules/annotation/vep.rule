@@ -24,7 +24,7 @@ rule vep_somatic:
     tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
     vcfanno_toml = VCFANNO_TOML,
     vep_cache = config["reference"]["vep"],
-    vep_defaults = params.vep.vep_filters
+    vep_defaults = params.vep.vep_filters,
   threads:
     get_threads(cluster_config, "vep")
   message:
@@ -71,7 +71,8 @@ rule tmb_calculation:
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
-    message_text = "{var_type}.somatic.{case_name}.{var_caller}.all"
+    message_text = "{var_type}.somatic.{case_name}.{var_caller}.all",
+    tmpfiles = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}",
   threads:
     get_threads(cluster_config, "vep")
   message:
@@ -80,14 +81,34 @@ rule tmb_calculation:
     """
 if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
 
-bcftools view --types snps,indels --apply-filters PASS {input.vep} \
-| bcftools filter -i "INFO/AF>={params.af_cutoff}" \
+echo -e '##INFO=<ID=AF_TUMOR,Number=1,Type=Float,Description="Allele Frequency of Tumor Sample">' > {params.tmpfiles}.header
+
+bcftools query -s TUMOR \
+-f '%CHROM\\t%POS\\t[%AF]\\n' \
+{input.vep} \
+| bgzip -c > {params.tmpfiles}.tumor.txt.gz;
+
+tabix -f -s1 -b2 -e2 {params.tmpfiles}.tumor.txt.gz;
+
+bcftools view -s TUMOR {input.vep} \
+| bcftools annotate -s TUMOR \
+-a {params.tmpfiles}.tumor.txt.gz \
+-h {params.tmpfiles}.header \
+-c CHROM,POS,INFO/AF_TUMOR \
+-O z -o {input.vep}.temp;
+
+tabix -f -p vcf {input.vep}.temp;
+
+bcftools view --types snps,indels --apply-filters PASS {input.vep}.temp \
+| bcftools filter -i "INFO/AF_TUMOR>={params.af_cutoff}" \
 | filter_vep --filter 'not Existing_variation' \
 | filter_vep --filter 'not COSMIC' \
 | filter_vep --filter 'not non_coding_transcript_exon_variant' \
 | filter_vep --filter 'not non_coding_transcript_variant' \
 | filter_vep --filter 'not feature_truncation' -C \
 | awk -v region=${{region_size}} '{{print $NF/region}}' > {output.tmb};
+
+rm  {params.tmpfiles}.tumor.txt.gz {params.tmpfiles}.tumor.txt.gz.tbi {params.tmpfiles}.header;
     """
 
 
