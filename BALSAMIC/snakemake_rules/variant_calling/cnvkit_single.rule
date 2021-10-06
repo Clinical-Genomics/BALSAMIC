@@ -37,7 +37,7 @@ rule cnvkit_single:
         cnv_dir = cnv_dir,
         min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
-        sample_id = "tumor",
+        sample_id = "TUMOR",
         genome_version = GENOME_VERSION
     message:
         ("Run CNVkit pipeline for sample {params.case_name},"
