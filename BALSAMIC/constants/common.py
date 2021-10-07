@@ -50,7 +50,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "varcall_py27",
     "varcall_cnvkit",
     "delly",
-    "ascatngs",
+    "ascatNgs",
 }
 
 BIOINFO_TOOL_ENV = {
@@ -75,7 +75,7 @@ BIOINFO_TOOL_ENV = {
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "delly",
-    "ascatNgs": "ascatngs",
+    "ascatNgs": "ascatNgs",
     "sentieon": "sentieon",
 }
 
