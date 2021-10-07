@@ -72,6 +72,7 @@ rule tmb_calculation:
     filter_vep_string = "'not COSMIC and not Existing_variation and synonymous_variant'", 
     housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.all",
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     tmpfiles = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}",
   threads:
     get_threads(cluster_config, "vep")
@@ -79,27 +80,30 @@ rule tmb_calculation:
     "Calculating TMB for {params.message_text}" 
   shell:
     """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
 if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
 
-echo -e '##INFO=<ID=AF_TUMOR,Number=1,Type=Float,Description="Allele Frequency of Tumor Sample">' > {params.tmpfiles}.header
+echo -e '##INFO=<ID=AF_TUMOR,Number=1,Type=Float,Description="Allele Frequency of Tumor Sample">' > {params.tmpdir}/vcf_header
 
 bcftools query -s TUMOR \
 -f '%CHROM\\t%POS\\t[%AF]\\n' \
 {input.vep} \
-| bgzip -c > {params.tmpfiles}.tumor.txt.gz;
+| bgzip -c > {params.tmpdir}/tumor.txt.gz;
 
-tabix -f -s1 -b2 -e2 {params.tmpfiles}.tumor.txt.gz;
+tabix -f -s1 -b2 -e2 {params.tmpdir}/tumor.txt.gz;
 
 bcftools view -s TUMOR {input.vep} \
 | bcftools annotate -s TUMOR \
--a {params.tmpfiles}.tumor.txt.gz \
--h {params.tmpfiles}.header \
+-a {params.tmpdir}/tumor.txt.gz \
+-h {params.tmpdir}/vcf_header \
 -c CHROM,POS,INFO/AF_TUMOR \
--O z -o {input.vep}.temp;
+-O z -o {params.tmpdir}/temp.vcf.gz;
 
-tabix -f -p vcf {input.vep}.temp;
+tabix -f -p vcf {params.tmpdir}/temp.vcf.gz;
 
-bcftools view --types snps,indels --apply-filters PASS {input.vep}.temp \
+bcftools view --types snps,indels --apply-filters PASS {params.tmpdir}/temp.vcf.gz \
 | bcftools filter -i "INFO/AF_TUMOR>={params.af_cutoff}" \
 | filter_vep --filter 'not Existing_variation' \
 | filter_vep --filter 'not COSMIC' \
@@ -108,7 +112,7 @@ bcftools view --types snps,indels --apply-filters PASS {input.vep}.temp \
 | filter_vep --filter 'not feature_truncation' -C \
 | awk -v region=${{region_size}} '{{print $NF/region}}' > {output.tmb};
 
-rm  {params.tmpfiles}.tumor.txt.gz {params.tmpfiles}.tumor.txt.gz.tbi {params.tmpfiles}.header;
+rm -r {params.tmpdir};
     """
 
 
