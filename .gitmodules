@@ -1,6 +1,3 @@
 [submodule "submodules/ascatNgs"]
 	path = submodules/ascatNgs
 	url = https://github.com/cancerit/ascatNgs
-[submodule "submodules/delly"]
-	path = submodules/delly
-	url = https://github.com/dellytools/delly
