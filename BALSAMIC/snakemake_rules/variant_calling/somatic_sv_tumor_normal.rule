@@ -4,10 +4,6 @@
 normal_bam = "normal.merged.bam"
 tumor_bam = "tumor.merged.bam"
 
-if 'genome_version' not in config["reference"]:
-    GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
-    LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
-
 rule manta_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
@@ -74,8 +70,8 @@ rule delly_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = "TUMOR",
+        normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "delly_tumor_normal")
@@ -123,8 +119,8 @@ rule ascat_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("ascatNgs") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = "TUMOR",
+        normal = "NORMAL",
         genome = GENOME_VERSION
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")

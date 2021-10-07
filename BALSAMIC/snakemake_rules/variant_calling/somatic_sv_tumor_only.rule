@@ -66,7 +66,7 @@ rule delly_tumor_only:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        tumor = get_sample_type(config["samples"], "tumor"),
+        tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "delly_tumor_only")
