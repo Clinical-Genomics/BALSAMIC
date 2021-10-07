@@ -75,9 +75,7 @@ rule delly_tumor_only:
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
-delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT}
-
-delly filter -p -f germline -o {output.bcf} -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf
+delly call -x {input.excl} -o {output.bcf} -g {input.fa} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
@@ -101,9 +99,9 @@ rule bcftools_bcf2vcf_delly:
         ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
     shell:
         """
-        bcftools view -O z -o {output.vcf} {input.bcf};
+bcftools view -O z -o {output.vcf} {input.bcf};
 
-        tabix -p vcf -f {output.vcf};
+tabix -p vcf -f {output.vcf};
         """
 
 
