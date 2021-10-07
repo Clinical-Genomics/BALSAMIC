@@ -96,7 +96,7 @@ rule bcftools_bcf2vcf_delly:
     input:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
     output:
-        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
     benchmark:
         Path(benchmark_dir, 'bcftools_bcf2vcf_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
