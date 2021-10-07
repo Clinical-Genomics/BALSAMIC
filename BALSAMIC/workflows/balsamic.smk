@@ -1,6 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-
+import json
 import os
 import logging
 import tempfile
@@ -312,24 +312,22 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, get_qc_failed_metrics
+        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, get_qc_filtered_metrics_json
 
-        # Save QC metrics to a JSON file
+        # QC metrics extraction and validation
         qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
-        with open(str(output.qc_json_file), mode="w") as jsonFile:
-            jsonFile.write(qc_metrics_summary)
+        if json.loads(get_qc_filtered_metrics_json(qc_metrics_summary, "failed")):
+            LOG.error("QC metrics validation has failed. Metrics summary: \n{}".format(qc_metrics_summary))
+            raise BalsamicError
+        else:
+            with open(str(output.qc_json_file), mode="w") as jsonFile:
+                jsonFile.write(get_qc_filtered_metrics_json(qc_metrics_summary, "passed"))
 
         # Delete a temporal directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
-
-        # Raise an error if QC metrics validation failed
-        qc_failed_metrics = get_qc_failed_metrics(qc_metrics_summary)
-        if qc_failed_metrics:
-            LOG.error("QC metrics validation has failed. Metrics summary: \n{}".format(qc_metrics_summary))
-            raise BalsamicError
 
         # Finish timestamp file
         with open(str(output.finish_file), mode="w") as finish_file:
