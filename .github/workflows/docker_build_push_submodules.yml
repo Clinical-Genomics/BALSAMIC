@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false 
       matrix:
-        container-name: [ascatNgs, delly]
+        container-name: [ascatNgs]
     steps:
       - name: Git checkout
         id: git_checkout
