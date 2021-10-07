@@ -95,7 +95,7 @@ rule bcftools_bcf2vcf_delly:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         case_name = config["analysis"]["case_id"]
-  threads:
+    threads:
         get_threads(cluster_config, "bcftools_bcf2vcf_delly")
     message:
         ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
