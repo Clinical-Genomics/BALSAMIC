@@ -84,15 +84,26 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
-rule delly_bcf_to_vcf:
+rule bcftools_bcf2vcf_delly:
     input:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
     output:
-        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, 'bcftools_bcf2vcf_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        case_name = config["analysis"]["case_id"]
+  threads:
+        get_threads(cluster_config, "bcftools_bcf2vcf_delly")
+    message:
+        ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
     shell:
-      """
-bcftools view -O z -o {output.vcf} {input.bcf}
+        """
+        bcftools view -O z -o {output.vcf} {input.bcf};
 
-tabix -p vcf -f {output.vcf};
-      """
+        tabix -p vcf -f {output.vcf};
+        """
+
 
