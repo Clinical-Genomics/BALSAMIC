@@ -48,6 +48,7 @@ COPY --from=0 /opt/delly/bin/delly .
 WORKDIR /root/
 
 # Add Delly to PATH
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV PATH="/opt/delly/bin:${PATH}"
 
 # by default /bin/sh is executed
