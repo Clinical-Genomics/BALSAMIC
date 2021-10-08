@@ -6,6 +6,7 @@ MAINTAINER Tobias Rausch rausch@embl.de
 # install required packages
 RUN apt-get update && apt-get install -y \
     autoconf \
+    bash \
     build-essential \
     cmake \
     g++ \
@@ -28,6 +29,7 @@ RUN apt-get update && apt-get install -y \
 
 # set environment
 ENV BOOST_ROOT /usr
+ENV PATH="/opt/delly/bin:${PATH}"
 
 # install delly
 RUN cd /opt \
@@ -36,20 +38,3 @@ RUN cd /opt \
     && git checkout v0.8.7 \
     && make STATIC=1 all \
     && make install
-
-
-# Multi-stage build
-FROM alpine:latest
-RUN apk add --no-cache bash gcc git && mkdir -p /opt/delly/bin
-WORKDIR /opt/delly/bin
-COPY --from=0 /opt/delly/bin/delly .
-
-# Workdir
-WORKDIR /root/
-
-# Add Delly to PATH
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV PATH="/opt/delly/bin:${PATH}"
-
-# by default /bin/sh is executed
-CMD ["/bin/bash"]
