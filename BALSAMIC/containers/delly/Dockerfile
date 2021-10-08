@@ -1,8 +1,6 @@
 # use the ubuntu base image
 FROM ubuntu:18.04
 
-MAINTAINER Tobias Rausch rausch@embl.de
-
 # install required packages
 RUN apt-get update && apt-get install -y \
     autoconf \
