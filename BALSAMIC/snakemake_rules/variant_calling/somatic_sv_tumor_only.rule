@@ -88,7 +88,7 @@ rule bcftools_bcf2vcf_delly:
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
     benchmark:
-        Path(benchmark_dir, 'bcftools_bcf2vcf_' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
