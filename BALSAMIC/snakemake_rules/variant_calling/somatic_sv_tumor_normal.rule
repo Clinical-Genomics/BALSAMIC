@@ -62,7 +62,7 @@ rule delly_tumor_normal:
         bamT = bam_dir + tumor_bam,
         excl = config["reference"]["delly_exclusion_converted"],
     output:
-        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
     benchmark:
         Path(benchmark_dir, 'delly_tumor_normal_' + config["analysis"]["case_id"] + ".tsv")
@@ -70,8 +70,8 @@ rule delly_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = "TUMOR",
+        normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "delly_tumor_normal")
@@ -84,16 +84,37 @@ delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bam
 
 echo -e \"{params.tumor}\\ttumor\\n{params.normal}\\tcontrol\" > {params.tmpdir}/samples.tsv;
 
-delly filter -p -f somatic -o {params.tmpdir}/delly.somatic.bcf -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf;
-
-bcftools view -O z -o {output.final} {params.tmpdir}/delly.somatic.bcf;
-
-tabix -p vcf -f {output.final};
+delly filter -p -f somatic -o {output.final} -s {params.tmpdir}/samples.tsv {params.tmpdir}/delly.bcf;
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
 rm -rf {params.tmpdir};
         """
+
+
+rule bcftools_bcf2vcf_delly:
+    input:
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+    output:
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "bcftools_bcf2vcf_delly")
+    message:
+        ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
+    shell:
+        """
+bcftools view -O z -o {output.vcf} {input.bcf};
+
+tabix -p vcf -f {output.vcf};
+        """
+
+
 
 
 rule ascat_tumor_normal:
@@ -119,8 +140,9 @@ rule ascat_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("ascatNgs") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = "TUMOR",
+        normal = "NORMAL",
+        genome = GENOME_VERSION
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")
     message:
@@ -133,8 +155,8 @@ export LD_LIBRARY_PATH=:/opt/wtsi-cgp/lib;
 ascat.pl \
   -protocol WGS \
   -species human \
-  -assembly GRCh37 \
-  -cpus 36 \
+  -assembly {params.genome} \
+  -cpus {threads} \
   -reference {input.fa} \
   -snp_gc {input.gccorrection} \
   -outdir {params.tmpdir} \
@@ -142,21 +164,21 @@ ascat.pl \
   -tumour {input.bamT} \
   -normal {input.bamN};
 
-cp  {params.tmpdir}/TUMOR.copynumber.caveman.vcf.gz {output.finalvcf};
+cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.finalvcf};
 
-cp {params.tmpdir}/TUMOR.samplestatistics.txt {output.samplestatistics};
+cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.samplestatistics};
 
-cp {params.tmpdir}/TUMOR.germline.png {output.germlineplot};
+cp {params.tmpdir}/{params.tumor}.germline.png {output.germlineplot};
 
-cp {params.tmpdir}/TUMOR.rawprofile.png {output.rawprofileplot};
+cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.rawprofileplot};
 
-cp {params.tmpdir}/TUMOR.sunrise.png {output.sunriseplot};
+cp {params.tmpdir}/{params.tumor}.sunrise.png {output.sunriseplot};
 
-cp {params.tmpdir}/TUMOR.tumour.png {output.tumorplot};
+cp {params.tmpdir}/{params.tumor}.tumour.png {output.tumorplot};
 
-cp {params.tmpdir}/TUMOR.ASCATprofile.png {output.ascatprofileplot};
+cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascatprofileplot};
 
-cp {params.tmpdir}/TUMOR.ASPCF.png {output.aspcfplot};
+cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.aspcfplot};
 
 tabix -p vcf -f {output.finalvcf};
 

@@ -49,8 +49,8 @@ VALID_CONTAINER_CONDA_NAME = {
     "varcall_py36",
     "varcall_py27",
     "varcall_cnvkit",
-    "varcall_delly",
-    "ascatngs",
+    "delly",
+    "ascatNgs",
 }
 
 BIOINFO_TOOL_ENV = {
@@ -74,8 +74,8 @@ BIOINFO_TOOL_ENV = {
     "strelka": "varcall_py27",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
-    "delly": "varcall_delly",
-    "ascatNgs": "ascatngs",
+    "delly": "delly",
+    "ascatNgs": "ascatNgs",
     "sentieon": "sentieon",
 }
 
