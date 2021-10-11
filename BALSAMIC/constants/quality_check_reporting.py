@@ -50,9 +50,6 @@ REPORT_MODEL = {
     },
 }
 
-# Minimum required QC-values from HS metrics to be able to pass analysis
-HSMETRICS_QC_CHECK = {}
-
 METRIC_FILES = {
     "picard_insertSize": "multiqc_picard_insertSize.json",
     "picard_dups": "multiqc_picard_dups.json",
