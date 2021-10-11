@@ -53,17 +53,23 @@ REPORT_MODEL = {
 # Minimum required QC-values from HS metrics to be able to pass analysis
 HSMETRICS_QC_CHECK = {}
 
+METRIC_FILES = {
+    "picard_insertSize": "multiqc_picard_insertSize.json",
+    "picard_dups": "multiqc_picard_dups.json",
+    "picard_HsMetrics": "multiqc_picard_HsMetrics.json",
+}
+
 METRICS = {
     "qc": {
         "targeted": {
             "common": {
-                "multiqc_picard_insertSize.json": {
+                METRIC_FILES["picard_insertSize"]: {
                     "MEAN_INSERT_SIZE": {"condition": None},
                 },
-                "multiqc_picard_dups.json": {
+                METRIC_FILES["picard_dups"]: {
                     "PERCENT_DUPLICATION": {"condition": None}
                 },
-                "multiqc_picard_HsMetrics.json": {
+                METRIC_FILES["picard_HsMetrics"]: {
                     "MEDIAN_TARGET_COVERAGE": {"condition": None},
                     "PCT_TARGET_BASES_50X": {"condition": None},
                     "PCT_TARGET_BASES_100X": {"condition": None},
@@ -76,7 +82,7 @@ METRICS = {
                 },
             },
             "gicfdna_3.1_hg19_design.bed": {
-                "multiqc_picard_HsMetrics.json": {
+                METRIC_FILES["picard_HsMetrics"]: {
                     "MEAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 500.0}
                     },
@@ -87,7 +93,7 @@ METRICS = {
                 }
             },
             "gmcksolid_4.1_hg19_design.bed": {
-                "multiqc_picard_HsMetrics.json": {
+                METRIC_FILES["picard_HsMetrics"]: {
                     "MEAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 500}
                     },
@@ -98,7 +104,7 @@ METRICS = {
                 }
             },
             "gmsmyeloid_5.2_hg19_design.bed": {
-                "multiqc_picard_HsMetrics.json": {
+                METRIC_FILES["picard_HsMetrics"]: {
                     "MEAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 1000}
                     },
@@ -109,7 +115,7 @@ METRICS = {
                 }
             },
             "lymphoma_6.1_hg19_design.bed": {
-                "multiqc_picard_HsMetrics.json": {
+                METRIC_FILES["picard_HsMetrics"]: {
                     "MEAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 1000}
                     },
@@ -120,7 +126,7 @@ METRICS = {
                 }
             },
             "gmslymphoid_7.1_hg19_design.bed": {
-                "multiqc_picard_HsMetrics.json": {
+                METRIC_FILES["picard_HsMetrics"]: {
                     "MEAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 1000}
                     },
@@ -131,7 +137,7 @@ METRICS = {
                 }
             },
             "twistexomerefseq_9.1_hg19_design.bed": {
-                "multiqc_picard_HsMetrics.json": {
+                METRIC_FILES["picard_HsMetrics"]: {
                     "MEAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 100}
                     },
@@ -143,8 +149,10 @@ METRICS = {
             },
         },
         "wgs": {
-            "multiqc_picard_insertSize.json": {"MEAN_INSERT_SIZE": {"condition": None}},
-            "multiqc_picard_dups.json": {"PERCENT_DUPLICATION": {"condition": None}},
+            METRIC_FILES["picard_insertSize"]: {
+                "MEAN_INSERT_SIZE": {"condition": None}
+            },
+            METRIC_FILES["picard_dups"]: {"PERCENT_DUPLICATION": {"condition": None}},
         },
     }
 }
