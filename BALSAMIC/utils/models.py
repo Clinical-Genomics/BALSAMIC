@@ -759,4 +759,4 @@ class QCCheckModel(BaseModel):
                 res = "passed" if metric.meets_condition else "failed"
                 metrics_json[sample_name][res].update({metric.name: metric.value})
 
-        return json.dumps(metrics_json, indent=4, sort_keys=True)
+        return metrics_json

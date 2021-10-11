@@ -117,7 +117,7 @@ def deliver(
     case_name = sample_config_dict["analysis"]["case_id"]
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
-    LOG.info("Creatiing delivery_report directory")
+    LOG.info("Creating delivery_report directory")
     os.makedirs(dst_directory, exist_ok=True)
 
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
@@ -152,12 +152,10 @@ def deliver(
         meta["case_name"] = case_id_map[1]
         meta["apptag"] = case_id_map[2]
 
-        collected_qc = json.loads(
-            get_qc_metrics_json(
-                sample_config_dict["analysis"]["result"],
-                sequencing_type,
-                get_capture_kit(sample_config_dict),
-            )
+        collected_qc = get_qc_metrics_json(
+            sample_config_dict["analysis"]["result"],
+            sequencing_type,
+            get_capture_kit(sample_config_dict),
         )
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
         balsamic_qc_report = os.path.join(

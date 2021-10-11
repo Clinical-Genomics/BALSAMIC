@@ -143,7 +143,7 @@ def test_get_qc_metrics_json_targeted(analysis_path):
     # THEN check if the obtained metrics are a valid JSON object
     try:
         assert sorted(
-            json.loads(get_qc_filtered_metrics_json(qc_metrics, "failed"))[
+            get_qc_filtered_metrics_json(qc_metrics, "failed")[
                 "concatenated_tumor"
             ].keys()
         ) == sorted(["FOLD_80_BASE_PENALTY", "PCT_OFF_BAIT"])
@@ -164,7 +164,7 @@ def test_get_qc_metrics_json_wgs(analysis_path):
     # THEN check if the obtained metrics are WGS specific
     try:
         assert sorted(
-            json.loads(get_qc_filtered_metrics_json(qc_metrics, "passed"))[
+            get_qc_filtered_metrics_json(qc_metrics, "passed")[
                 "concatenated_tumor"
             ].keys()
         ) == sorted(["MEAN_INSERT_SIZE", "PERCENT_DUPLICATION"])
@@ -176,15 +176,13 @@ def test_get_qc_filtered_metrics():
     """test filtered metric extraction from an already generated JSON object"""
 
     # GIVEN a JSON object
-    qc_metrics_json = json.dumps(
-        {
-            "sample_1": {"failed": {}, "passed": {"METRIC_1": 0.5}},
-            "sample_2": {
-                "failed": {"METRIC_1": 0.5},
-                "passed": {"METRIC_2": 0.5, "METRIC_3": 0.5},
-            },
-        }
-    )
+    qc_metrics_json = {
+        "sample_1": {"failed": {}, "passed": {"METRIC_1": 0.5}},
+        "sample_2": {
+            "failed": {"METRIC_1": 0.5},
+            "passed": {"METRIC_2": 0.5, "METRIC_3": 0.5},
+        },
+    }
 
     # GIVEN the expected output
     expected_output = {
@@ -196,19 +194,17 @@ def test_get_qc_filtered_metrics():
     qc_passed_metrics = get_qc_filtered_metrics_json(qc_metrics_json, "passed")
 
     # THEN check if the obtained metrics are the ones that passed the QC validation
-    assert json.loads(qc_passed_metrics).items() == expected_output.items()
+    assert qc_passed_metrics.items() == expected_output.items()
 
 
 def test_get_qc_filtered_metrics_empty():
     """test empty return when extracting filtered metrics"""
 
     # GIVEN a JSON object
-    qc_metrics_json = json.dumps(
-        {
-            "sample_1": {"failed": {}, "passed": {"METRIC_1": 0.5, "METRIC_2": 0.5}},
-            "sample_2": {"failed": {}, "passed": {"METRIC_2": 0.5}},
-        }
-    )
+    qc_metrics_json = {
+        "sample_1": {"failed": {}, "passed": {"METRIC_1": 0.5, "METRIC_2": 0.5}},
+        "sample_2": {"failed": {}, "passed": {"METRIC_2": 0.5}},
+    }
 
     # GIVEN the expected output
     expected_output = {}
@@ -217,5 +213,6 @@ def test_get_qc_filtered_metrics_empty():
     qc_failed_metrics = get_qc_filtered_metrics_json(qc_metrics_json, "failed")
 
     # THEN check if the are no output metrics
-    assert not json.loads(qc_failed_metrics)
-    assert json.loads(qc_failed_metrics).items() == expected_output.items()
+    assert (
+        not qc_failed_metrics and qc_failed_metrics.items() == expected_output.items()
+    )

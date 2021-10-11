@@ -511,7 +511,7 @@ def test_qc_check_model_get_json(qc_extracted_metrics):
     metrics_model = QCCheckModel(**qc_extracted_metrics)
 
     # THEN check if the extracted metrics and its structure meets the expected one
-    assert json.loads(metrics_model.get_json).items() == expected_output.items()
+    assert metrics_model.get_json.items() == expected_output.items()
 
 
 def test_qc_check_model_get_json_failed_metrics(qc_extracted_metrics):
@@ -535,4 +535,4 @@ def test_qc_check_model_get_json_failed_metrics(qc_extracted_metrics):
     metrics_model = QCCheckModel(**metrics_high_value)
 
     # THEN check if the extracted metrics and its structure meets the expected one
-    assert json.loads(metrics_model.get_json).items() == expected_output.items()
+    assert metrics_model.get_json.items() == expected_output.items()

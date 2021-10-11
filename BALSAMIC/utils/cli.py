@@ -223,7 +223,7 @@ def createDir(path, interm_path=[]):
 
 
 def write_json(json_out, output_config):
-
+    """Writes JSON format data to an output file"""
     try:
         with open(output_config, "w") as fn:
             json.dump(json_out, fn, indent=4)
