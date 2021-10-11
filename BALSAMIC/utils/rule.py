@@ -119,7 +119,7 @@ def get_capture_kit(config):
     """
 
     if config["analysis"]["sequencing_type"] != "wgs":
-        return os.path.basename(config["analysis"]["capture_kit"])
+        return os.path.basename(config["panel"]["capture_kit"])
     else:
         return None
 
