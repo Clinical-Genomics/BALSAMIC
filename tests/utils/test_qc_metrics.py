@@ -11,23 +11,14 @@ from BALSAMIC.utils.qc_metrics import (
 )
 
 
-def test_get_qc_available_panel_beds():
+def test_get_qc_available_panel_beds(qc_raw_targeted_metrics):
     """test extraction of the panel beds available for QC validation"""
-
-    # GIVEN quality control metrics
-    metrics = {
-        "common": {
-            "metrics_1.json": {"METRIC_1": 0.1, "METRIC_2": 0.2},
-        },
-        "panel_1.bed": {"metrics_1.json": {"METRIC_4": 0.4}},
-        "panel_2.bed": {"metrics_3.json": {"METRIC_5": 0.5}},
-    }
 
     # GIVEN an expected output
     expected_output = ["panel_1.bed", "panel_2.bed"]
 
     # WHEN calling the function
-    available_panel_beds = get_qc_available_panel_beds(metrics)
+    available_panel_beds = get_qc_available_panel_beds(qc_raw_targeted_metrics)
 
     # THEN check if the extracted bed file names correspond to the expected ones
     assert available_panel_beds == expected_output
@@ -117,20 +108,8 @@ def test_get_qc_metrics_dict(analysis_path, qc_metrics):
     assert metrics_dict.items() == expected_output.items()
 
 
-def test_merge_dicts():
-    """test dictionary merging"""
-
-    # GIVEN input dictionary
-    nested_dict = {
-        "common": {
-            "metrics_1.json": {"METRIC_1": 0.1, "METRIC_2": 0.2},
-            "metrics_2.json": {"METRIC_3": 0.3},
-        },
-        "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
-        "panel_2.bed": {  # Tests that the common metric condition is overwritten
-            "metrics_1.json": {"METRIC_1": 0.5}
-        },
-    }
+def test_merge_dicts(qc_raw_targeted_metrics):
+    """test dictionary merging and requirements overwriting by panel BED specific conditions"""
 
     # GIVEN an expected output
     expected_output = {
@@ -140,7 +119,11 @@ def test_merge_dicts():
 
     # WHEN calling the function
     merged_dict = merge_dicts(
-        nested_dict["common"], nested_dict["panel_1.bed"], nested_dict["panel_2.bed"]
+        qc_raw_targeted_metrics["common"],
+        qc_raw_targeted_metrics["panel_1.bed"],
+        qc_raw_targeted_metrics[  # Tests that the common metric condition is overwritten
+            "panel_2.bed"
+        ],
     )
 
     # THEN check if the extracted output meets the merged dictionary
@@ -155,9 +138,7 @@ def test_get_qc_metrics_json_targeted(analysis_path):
     capture_kit = "gicfdna_3.1_hg19_design.bed"
 
     # WHEN calling the function
-    qc_metrics = get_qc_metrics_json(
-        analysis_path, seq_type, capture_kit
-    )
+    qc_metrics = get_qc_metrics_json(analysis_path, seq_type, capture_kit)
 
     # THEN check if the obtained metrics are a valid JSON object
     try:
@@ -170,7 +151,7 @@ def test_get_qc_metrics_json_targeted(analysis_path):
         assert False
 
 
-def test_get_qc_metrics_json_WGS(analysis_path):
+def test_get_qc_metrics_json_wgs(analysis_path):
     """test JSON object generation for a custom bed"""
 
     # GIVEN a sequencing type
