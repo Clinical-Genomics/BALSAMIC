@@ -9,6 +9,7 @@ Added:
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 * Handling of QC metrics validation errors #783
+* Panel BED specific QC requierements #790
 
 Changed:
 ^^^^^^^^
