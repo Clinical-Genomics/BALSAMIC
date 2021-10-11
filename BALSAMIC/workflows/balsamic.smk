@@ -22,7 +22,7 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path, get_sequencing_type)
+                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
@@ -312,7 +312,8 @@ rule all:
     params:
         tmp_dir = tmp_dir,
         result_dir = result_dir,
-        sequencing_type = get_sequencing_type(config)
+        sequencing_type = get_sequencing_type(config),
+        panel_bed = get_capture_kit(config)
     run:
         import datetime
         import shutil
@@ -320,7 +321,7 @@ rule all:
         from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, get_qc_filtered_metrics_json
 
         # QC metrics extraction and validation
-        qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
+        qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type, params.panel_bed)
         if json.loads(get_qc_filtered_metrics_json(qc_metrics_summary, "failed")):
             LOG.error("QC metrics validation has failed. Metrics summary: \n{}".format(qc_metrics_summary))
             raise BalsamicError
