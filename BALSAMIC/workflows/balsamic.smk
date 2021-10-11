@@ -169,8 +169,18 @@ for m in MUTATION_TYPE:
                                              mutation_type=m,
                                              sequencing_type=config["analysis"]["sequencing_type"],
                                              mutation_class="somatic")
-
     somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
+
+# Collect only snv callers for calculating tmb
+somatic_caller_tmb = []
+for ws in ["BALSAMIC","Sentieon","Sentieon_umi"]:
+    somatic_caller_snv = get_variant_callers(config=config,
+                                           analysis_type=config['analysis']['analysis_type'],
+                                           workflow_solution=ws,
+                                           mutation_type="SNV",
+                                           sequencing_type=config["analysis"]["sequencing_type"],
+                                           mutation_class="somatic")
+    somatic_caller_tmb +=  somatic_caller_snv
 
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
@@ -219,7 +229,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
 
 #Calculate TMB per somatic variant caller
 analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
-                                        vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])))
+                                        vcf=get_vcf(config, somatic_caller_tmb, [config["analysis"]["case_id"]])))
 
 #Gather all the filtered and PASSed variants post annotation
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
