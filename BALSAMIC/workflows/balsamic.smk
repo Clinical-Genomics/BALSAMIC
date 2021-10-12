@@ -1,6 +1,5 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-import json
 import os
 import logging
 import tempfile
@@ -317,16 +316,15 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, get_qc_filtered_metrics_json
+        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
 
-        # QC metrics extraction and validation
-        qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
-        if json.loads(get_qc_filtered_metrics_json(qc_metrics_summary, "failed")):
-            LOG.error("QC metrics validation has failed. Metrics summary: \n{}".format(qc_metrics_summary))
+        # Save QC metrics to a JSON file
+        try:
+            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
+            write_json(qc_metrics_summary, str(output.qc_json_file))
+        except ValueError as val_exc:
+            LOG.error(val_exc)
             raise BalsamicError
-        else:
-            with open(str(output.qc_json_file), mode="w") as jsonFile:
-                jsonFile.write(get_qc_filtered_metrics_json(qc_metrics_summary, "passed"))
 
         # Delete a temporal directory tree
         try:
