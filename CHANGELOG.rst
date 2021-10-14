@@ -36,7 +36,7 @@ Fixed:
 * Fixed issue #782 for missing AF in the vcf INFO field
 * Fixed issues #748 #749 with correct sample names 
 * Fixed issue #767 for ascatngs hardcoded values
-
+* Fixed missing output option in bcftools filters for tnhaplotyper #793 
 
 [8.1.0]
 -------

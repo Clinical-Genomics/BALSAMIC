@@ -72,7 +72,7 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 
 tabix -p vcf -f {output.vcf_filtered};
 
-bcftools view -f PASS --threads {threads} -O z {output.vcf_pass} {output.vcf_filtered}
+bcftools view -f PASS --threads {threads} -O z -o {output.vcf_pass} {output.vcf_filtered}
 
 tabix -p vcf -f {output.vcf_pass}
     """
