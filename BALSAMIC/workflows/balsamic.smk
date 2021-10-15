@@ -1,6 +1,5 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-
 import os
 import logging
 import tempfile
@@ -271,7 +270,7 @@ if 'benchmark_plots' in config:
             # Delete previous plots after merging
             for plots in my_rule_plots:
                 plots.unlink()
-            
+
 
 
 if 'delivery' in config:
@@ -330,9 +329,12 @@ rule all:
         from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
 
         # Save QC metrics to a JSON file
-        qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
-        with open(str(output.qc_json_file), mode="w") as jsonFile:
-            jsonFile.write(qc_metrics_summary)
+        try:
+            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
+            write_json(qc_metrics_summary, str(output.qc_json_file))
+        except ValueError as val_exc:
+            LOG.error(val_exc)
+            raise BalsamicError
 
         # Delete a temporal directory tree
         try:
