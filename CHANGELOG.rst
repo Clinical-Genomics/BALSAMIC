@@ -9,6 +9,7 @@ Added:
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 * Delly is added as a submodule and removed from rest of the conda environments #787
+* Store research VCFs for all filtered and annotated VCF files
 
 
 Changed:
