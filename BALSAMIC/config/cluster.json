@@ -222,7 +222,7 @@
 	},
 	"vep_somatic": {
 		"time":"24:00:00",
-		"n": 16
+		"n": 24
 	},
 	"picard_umiaware": {
 		"time": "4:00:00",
