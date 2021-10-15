@@ -32,7 +32,7 @@ rule cnvkit_paired:
         tumor_name = "tumor.merged",
         min_mapq = params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
-        sample_id = "tumor_normal",
+        sample_id = "TUMOR",
         genome = GENOME_VERSION
     message:
         "Run CNVkit pipeline for sample {params.case_name} while tumor purity/ploidy calculated using PureCN"
@@ -183,6 +183,6 @@ bcftools sort \
 
 tabix -p vcf -f {output.vcf};
 
-echo -e \"TUMOR\\tNORMAL\" > {output.namemap};
+echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """

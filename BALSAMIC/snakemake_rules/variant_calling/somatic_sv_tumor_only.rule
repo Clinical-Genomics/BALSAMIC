@@ -57,7 +57,7 @@ rule delly_tumor_only:
         bamT = bam_dir + tumor_bam,
         excl = config["reference"]["delly_exclusion_converted"],
     output:
-        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
     benchmark:
         benchmark_dir + 'delly_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
@@ -75,15 +75,33 @@ rule delly_tumor_only:
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
-delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT}
-
-delly filter -p -f germline -o {params.tmpdir}/delly.filtered.bcf {params.tmpdir}/delly.bcf
-
-bcftools view -O z -o {output.final} {params.tmpdir}/delly.filtered.bcf
-
-tabix -p vcf -f {output.final};
+delly call -x {input.excl} -o {output.bcf} -g {input.fa} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
 rm -rf {params.tmpdir};
         """
+
+rule bcftools_bcf2vcf_delly:
+    input:
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+    output:
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "bcftools_bcf2vcf_delly")
+    message:
+        ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
+    shell:
+        """
+bcftools view -O z -o {output.vcf} {input.bcf};
+
+tabix -p vcf -f {output.vcf};
+        """
+
+
