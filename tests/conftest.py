@@ -540,3 +540,16 @@ def qc_extracted_metrics():
             ],
         }
     }
+
+
+@pytest.fixture(scope="session")
+def qc_raw_targeted_metrics():
+    """Raw metrics"""
+    return {
+        "default": {
+            "metrics_1.json": {"METRIC_1": 0.1, "METRIC_2": 0.2},
+            "metrics_2.json": {"METRIC_3": 0.3},
+        },
+        "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
+        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5}},
+    }

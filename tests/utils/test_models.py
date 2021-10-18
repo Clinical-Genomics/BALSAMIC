@@ -449,7 +449,7 @@ def test_qc_metrics_model_fail_validation():
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
         QCMetricsModel(**invalid_input)
-    assert f"field required" in str(input_exc.value)
+    assert "field required" in str(input_exc.value)
 
 
 def test_qc_check_model_passed_metrics(qc_extracted_metrics):
@@ -473,7 +473,7 @@ def test_qc_check_model_failed_metrics(qc_extracted_metrics):
     with pytest.raises(ValueError) as val_exc:
         QCCheckModel(**metrics_high_value)
     assert (
-        f"QC metric MEAN_INSERT_SIZE_1: 10.0 validation has failed (condition: lt 1.0)."
+        "QC metric MEAN_INSERT_SIZE_1: 10.0 validation has failed (condition: lt 1.0)"
         in str(val_exc.value)
     )
 
@@ -489,7 +489,7 @@ def test_qc_check_model_failed_multiple_metrics(qc_extracted_metrics):
     # THEN check that the model filters the metrics according to its norm
     with pytest.raises(ValueError) as val_exc:
         QCCheckModel(**metrics_high_value)
-    assert f"2 validation errors for QCCheckModel" in str(val_exc.value)
+    assert "2 validation errors for QCCheckModel" in str(val_exc.value)
 
 
 def test_qc_check_model_get_json(qc_extracted_metrics):
