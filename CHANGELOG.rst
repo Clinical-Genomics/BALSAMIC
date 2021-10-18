@@ -10,6 +10,7 @@ Added:
 * BALSAMIC quality control metrics extraction and validation #754
 * Delly is added as a submodule and removed from rest of the conda environments #787
 * Handling of QC metrics validation errors #783
+* Panel BED specific QC conditions #800
 
 Changed:
 ^^^^^^^^
