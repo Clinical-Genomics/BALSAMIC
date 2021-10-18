@@ -16,6 +16,7 @@ Changed:
 
 * refactored main workflow with more readible organization #614
 * refactored conda envs within container to be on base and container definition is uncoupled #759
+* BALSAMIC container python version fixed to 3.7.1 #801
 
 Removed:
 ^^^^^^^^
