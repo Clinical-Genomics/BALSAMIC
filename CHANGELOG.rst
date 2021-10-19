@@ -16,7 +16,6 @@ Changed:
 
 * refactored main workflow with more readible organization #614
 * refactored conda envs within container to be on base and container definition is uncoupled #759
-* BALSAMIC container python version fixed to 3.7.1 #801
 
 Removed:
 ^^^^^^^^
@@ -38,6 +37,7 @@ Fixed:
 * Fixed issues #748 #749 with correct sample names 
 * Fixed issue #767 for ascatngs hardcoded values
 * Fixed missing output option in bcftools filters for tnhaplotyper #793 
+* Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
 
 [8.1.0]
 -------
