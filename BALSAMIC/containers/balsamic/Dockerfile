@@ -12,7 +12,7 @@ ENV PATH="/opt/conda/bin/:${PATH}"
 ENV MUSL_LOCPATH="/usr/share/i18n/locales/musl"
 ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
-RUN apk add --no-cache bash gcc git zlib-dev musl-dev libintl libffi-dev openssl-dev
+RUN apk add --no-cache bash gcc git zlib-dev musl-dev libintl libffi-dev openssl-dev hdf5-dev
 
 # Locale installation
 RUN apk add --no-cache --virtual .locale_tmp cmake make gettext-dev && \
