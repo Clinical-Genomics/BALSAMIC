@@ -1,10 +1,13 @@
 import json
+import os
 
 from BALSAMIC.utils.qc_metrics import (
     get_qc_metrics_json,
     read_metrics,
     update_metrics_dict,
     get_qc_metrics_dict,
+    get_multiQC_data_source,
+    extract_metrics_delivery,
 )
 
 
@@ -107,3 +110,66 @@ def test_get_qc_metrics_json(analysis_path):
         assert True
     except TypeError:
         assert False
+
+
+def test_get_multiQC_data_source(analysis_path):
+    """test multiQC source extraction from the multiqc_data.json analysis file"""
+
+    # GIVEN input parameters
+    sample = "concatenated_normal_XXXXXX_R"
+    source_name_hs_metrics = "multiqc_picard_HsMetrics"
+    source_name_dup = "multiqc_picard_dups"
+
+    with open(
+        os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json"), "r"
+    ) as f:
+        raw_data = json.load(f)
+
+    # GIVEN an expected output
+    source_hs_metrics = "concatenated_normal_XXXXXX_R.umi.collect_hsmetric"
+    source_dup = "concatenated_normal_XXXXXX_R.sorted.mrkdup.txt"
+
+    # WHEN extracting the source of a specific sample and collection of metrics
+    out_source_HsMetrics = get_multiQC_data_source(
+        raw_data, sample, source_name_hs_metrics
+    )
+    data_source_dup = get_multiQC_data_source(raw_data, sample, source_name_dup)
+
+    # THEN check if the extracted source names correspond to the expected ones
+    assert source_hs_metrics == out_source_HsMetrics
+    assert source_dup == data_source_dup
+
+
+def test_extract_metrics_delivery(analysis_path):
+    """test output metrics retrieving"""
+
+    # GIVEN a sequencing type
+    seq_type = "targeted"
+
+    # GIVEN an expected output
+    n_metrics = 22
+
+    first_metric = {
+        "header": None,
+        "id": "normal",
+        "input": "concatenated_normal_XXXXXX_R.umi.collect_hsmetric",
+        "name": "PCT_OFF_BAIT",
+        "step": "multiqc_picard_HsMetrics",
+        "value": 0.401673,
+    }
+
+    last_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
+        "name": "PERCENT_DUPLICATION",
+        "step": "multiqc_picard_dups",
+        "value": 0.931044,
+    }
+
+    # WHEN calling the function
+    metrics = extract_metrics_delivery(analysis_path, seq_type)
+
+    # THEN check if the metrics are correctly retrieved
+    assert len(metrics) == n_metrics
+    assert first_metric in metrics and last_metric in metrics

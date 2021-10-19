@@ -26,6 +26,7 @@ from BALSAMIC.utils.models import (
     QCConditionModel,
     QCMetricsModel,
     QCCheckModel,
+    MetricsModel,
 )
 
 
@@ -536,3 +537,35 @@ def test_qc_check_model_get_json_failed_metrics(qc_extracted_metrics):
 
     # THEN check if the extracted metrics and its structure meets the expected one
     assert json.loads(metrics_model.get_json).items() == expected_output.items()
+
+
+def test_metrics_model_pass_validation():
+    """test MetricsModel attributes parsing"""
+
+    # GIVEN input attributes
+    metrics = {
+        "header": None,
+        "id": "005",
+        "input": "S1_005.sorted.mrkdup.txt",
+        "name": "MEAN_INSERT_SIZE",
+        "step": "multiqc_rule",
+        "value": 0.5,
+    }
+
+    # WHEN building the QC metrics model
+    metrics_model = MetricsModel(**metrics)
+
+    # THEN assert retrieved values from the created model
+    assert metrics_model.dict().items() == metrics.items()
+
+
+def test_metrics_model_fail_validation():
+    """test MetricsModel behaviour for an incorrect input"""
+
+    # GIVEN a non accepted input
+    invalid_input = {"name": "MEAN_INSERT_SIZE"}
+
+    # THEN the model raises an error due to an incomplete input
+    with pytest.raises(ValueError) as input_exc:
+        MetricsModel(**invalid_input)
+    assert f"field required" in str(input_exc.value)

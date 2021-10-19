@@ -1,8 +1,11 @@
 import json
 import os
 
-from BALSAMIC.constants.quality_check_reporting import METRICS
-from BALSAMIC.utils.models import QCCheckModel
+from BALSAMIC.constants.quality_check_reporting import (
+    METRICS,
+    METRICS_TO_DELIVER,
+)
+from BALSAMIC.utils.models import QCCheckModel, MetricsModel
 
 
 def read_metrics(analysis_path, file_name):
@@ -61,3 +64,56 @@ def get_qc_metrics_json(analysis_path, sequencing_type):
     )
 
     return qc_check_model.get_json
+
+
+def get_multiQC_data_source(data, sample, source_name):
+    """Extracts the metrics data source associated with sample and source names"""
+    source = source_name[:-1].split("_")
+
+    # Nested json fetching
+    for source_tool in data["report_data_sources"]:
+        for source_step in data["report_data_sources"][source_tool]:
+            if (
+                source[1].lower() in source_tool.lower()
+                and source[2].lower() in source_step.lower()
+            ):
+                try:
+                    return os.path.basename(
+                        data["report_data_sources"][source_tool][source_step][sample]
+                    )
+                except KeyError:
+                    # Deletes par orientation information from the sample name (insertSize metrics)
+                    sample = sample.rsplit("_", 1)[0]
+
+                    return os.path.basename(
+                        data["report_data_sources"][source_tool][source_step][sample]
+                    )
+
+
+def extract_metrics_delivery(analysis_path, sequencing_type):
+    """Extracts the output metrics to be delivered"""
+    with open(
+        os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json"), "r"
+    ) as f:
+        raw_data = json.load(f)
+
+    def extract(data, output_metrics, sample=None, source=None):
+        """Recursively fetch metrics information from nested multiQC JSON"""
+        if isinstance(data, dict):
+            for k in data:
+                if "umi" not in k:
+                    if k in METRICS_TO_DELIVER[sequencing_type]:
+                        output_metrics.append(
+                            MetricsModel(
+                                id=sample.split("_")[1],
+                                input=get_multiQC_data_source(raw_data, sample, source),
+                                name=k,
+                                step=source,
+                                value=data[k],
+                            ).dict()
+                        )
+                    extract(data[k], output_metrics, k, sample)
+
+        return output_metrics
+
+    return extract(raw_data["report_saved_raw_data"], [])
