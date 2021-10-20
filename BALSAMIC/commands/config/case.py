@@ -82,6 +82,13 @@ LOG = logging.getLogger(__name__)
     help="Path to BALSAMIC cache",
 )
 @click.option(
+    "--container-version",
+    show_default=True,
+    default=balsamic_version,
+    type=click.Choice(["develop", "master", balsamic_version]),
+    help="Container for BALSAMIC version to download",
+)
+@click.option(
     "--analysis-dir",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
@@ -141,6 +148,7 @@ def case_config(
     normal_sample_name,
     genome_version,
     balsamic_cache,
+    container_version,
 ):
 
     try:
@@ -159,6 +167,9 @@ def case_config(
     )
     with open(reference_config, "r") as f:
         reference_dict = json.load(f)["reference"]
+
+    if container_version:
+        balsamic_version = container_version
 
     config_collection_dict = BalsamicConfigModel(
         QC={
