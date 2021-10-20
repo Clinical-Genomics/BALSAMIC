@@ -66,7 +66,7 @@ def get_qc_metrics_json(analysis_path, sequencing_type):
     return qc_check_model.get_json
 
 
-def get_multiQC_data_source(data, sample, source_name):
+def get_multiqc_data_source(data, sample, source_name):
     """Extracts the metrics data source associated with sample and source names"""
     source = source_name[:-1].split("_")
 
@@ -90,7 +90,7 @@ def get_multiQC_data_source(data, sample, source_name):
                     )
 
 
-def extract_metrics_delivery(analysis_path, sequencing_type):
+def extract_metrics_for_delivery(analysis_path, sequencing_type):
     """Extracts the output metrics to be delivered"""
     with open(
         os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json"), "r"
@@ -106,7 +106,7 @@ def extract_metrics_delivery(analysis_path, sequencing_type):
                         output_metrics.append(
                             MetricsModel(
                                 id=sample.split("_")[1],
-                                input=get_multiQC_data_source(raw_data, sample, source),
+                                input=get_multiqc_data_source(raw_data, sample, source),
                                 name=k,
                                 step=source,
                                 value=data[k],

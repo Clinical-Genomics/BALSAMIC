@@ -17,7 +17,7 @@ from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, extract_metrics_delivery
+from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, extract_metrics_for_delivery
 from BALSAMIC.utils.qc_report import render_html, report_data_population
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
@@ -87,7 +87,7 @@ LOG = logging.getLogger(__name__)
     f"values are: {list(VCF_DICT.keys())}",
 )
 @click.option(
-    "--metrics-delivery",
+    "--metric-delivery",
     is_flag=True,
     help=f"Generates a YAML file of quality control metrics. "
     f"Currently retrieved metrics: {', '.join(list(set(METRICS_TO_DELIVER['targeted'] + METRICS_TO_DELIVER['wgs'])))}",
@@ -102,7 +102,7 @@ def deliver(
     disable_variant_caller,
     sample_id_map,
     case_id_map,
-    metrics_delivery,
+    metric_delivery,
 ):
     """
     cli for deliver sub-command.
@@ -270,20 +270,20 @@ def deliver(
     LOG.info(f"Housekeeper delivery file {delivery_file_name}")
 
     # Metrics delivery
-    if metrics_delivery:
-        out_metrics = extract_metrics_delivery(
+    if metric_delivery:
+        out_metrics = extract_metrics_for_delivery(
             sample_config_dict["analysis"]["result"], sequencing_type
         )
 
-        metrics_delivery_file_name = os.path.join(
+        metric_delivery_file_name = os.path.join(
             yaml_write_directory,
             sample_config_dict["analysis"]["case_id"] + "_metrics_deliverables.yaml",
         )
 
         with open(
-            metrics_delivery_file_name,
+            metric_delivery_file_name,
             "w",
         ) as fd:
             yaml.dump(out_metrics, fd, default_flow_style=False)
 
-        LOG.info(f"Metrics delivery file {metrics_delivery_file_name}")
+        LOG.info(f"Metrics delivery file {metric_delivery_file_name}")

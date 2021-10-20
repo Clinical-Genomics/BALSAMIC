@@ -6,8 +6,8 @@ from BALSAMIC.utils.qc_metrics import (
     read_metrics,
     update_metrics_dict,
     get_qc_metrics_dict,
-    get_multiQC_data_source,
-    extract_metrics_delivery,
+    get_multiqc_data_source,
+    extract_metrics_for_delivery,
 )
 
 
@@ -130,17 +130,17 @@ def test_get_multiQC_data_source(analysis_path):
     source_dup = "concatenated_normal_XXXXXX_R.sorted.mrkdup.txt"
 
     # WHEN extracting the source of a specific sample and collection of metrics
-    out_source_HsMetrics = get_multiQC_data_source(
+    out_source_hs_metrics = get_multiqc_data_source(
         raw_data, sample, source_name_hs_metrics
     )
-    data_source_dup = get_multiQC_data_source(raw_data, sample, source_name_dup)
+    data_source_dup = get_multiqc_data_source(raw_data, sample, source_name_dup)
 
     # THEN check if the extracted source names correspond to the expected ones
-    assert source_hs_metrics == out_source_HsMetrics
+    assert source_hs_metrics == out_source_hs_metrics
     assert source_dup == data_source_dup
 
 
-def test_extract_metrics_delivery(analysis_path):
+def test_extract_metrics_for_delivery(analysis_path):
     """test output metrics retrieving"""
 
     # GIVEN a sequencing type
@@ -168,7 +168,7 @@ def test_extract_metrics_delivery(analysis_path):
     }
 
     # WHEN calling the function
-    metrics = extract_metrics_delivery(analysis_path, seq_type)
+    metrics = extract_metrics_for_delivery(analysis_path, seq_type)
 
     # THEN check if the metrics are correctly retrieved
     assert len(metrics) == n_metrics
