@@ -162,14 +162,14 @@ def case_config(
         LOG.error(f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
         raise click.Abort()
 
+    if container_version:
+        balsamic_version = container_version
+
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
     with open(reference_config, "r") as f:
         reference_dict = json.load(f)["reference"]
-
-    if container_version:
-        balsamic_version = container_version
 
     config_collection_dict = BalsamicConfigModel(
         QC={
