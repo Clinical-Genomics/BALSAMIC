@@ -197,6 +197,9 @@ def initialize(
     - Pull container(s) for BALSAMIC according to matching version
     - Download and build a reference
     """
+    config_dict = dict()
+    config_dict["singularity"] = dict()
+
     LOG.info("BALSAMIC started with log level %s" % context.obj["loglevel"])
 
     if run_mode == "cluster" and not run_analysis:
@@ -211,8 +214,11 @@ def initialize(
 
     # resolve outdir to absolute path
     outdir = Path(outdir).resolve()
-
     container_outdir = Path(outdir, balsamic_version, "containers")
+    Path(container_outdir).mkdir(parents=True, exist_ok=True)
+    config_dict["singularity"]["image_path"] = container_outdir.as_posix()
+    config_dict["singularity"]["containers"] = dict() 
+
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
         docker_image_base_name = "release_v{}".format(container_version)
@@ -223,34 +229,15 @@ def initialize(
         container_stub_url = "{}:{}-{}".format(
             BALSAMIC_DOCKER_PATH, docker_image_base_name, image_suffix
         )
-        # Pull container
-        LOG.info("Singularity image source: {}".format(container_stub_url))
-
-        # Set container name according to above docker image name
-        Path(container_outdir).mkdir(parents=True, exist_ok=True)
-        image_name = Path(container_outdir, "{}.sif".format(image_suffix)).as_posix()
-        LOG.info("Image will be downloaded to {}".format(image_name))
-        LOG.info("Starting download. This process can take some time...")
-
-        cmd = ["singularity", "pull", "--name", f"{image_name}"]
-        if force:
-            cmd.append("--force")
-        cmd.append(container_stub_url)
-
-        LOG.info("The following command will run: {}".format(" ".join(cmd)))
-        if run_analysis:
-            subprocess.run(" ".join(cmd), shell=True)
+        config_dict["singularity"]["containers"][image_suffix] = container_stub_url 
 
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
 
     rule_directory = Path(__file__).parents[2]
 
-    config_dict = dict()
     config_dict["bioinfo_tools"] = BIOINFO_TOOL_ENV
     config_dict["rule_directory"] = rule_directory.as_posix() + "/"
-    config_dict["singularity"] = dict()
-    config_dict["singularity"]["image"] = container_outdir.as_posix()
 
     reference_outdir = Path(outdir, balsamic_version, genome_version)
     Path(reference_outdir).mkdir(parents=True, exist_ok=True)

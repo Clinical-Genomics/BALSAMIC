@@ -91,7 +91,8 @@ def create_md5(reference, check_md5):
             if os.path.isfile(value):
                 fh.write( get_md5(value) + ' ' + value + '\n')
 
-singularity_image = config['singularity']['image']
+singularity_image_path = config['singularity']['image_path']
+singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()] 
 
 ##########################################################
 # Generating Reference files for BALSAMIC pipeline
@@ -100,6 +101,7 @@ singularity_image = config['singularity']['image']
 
 rule all:
     input:
+        singularity_images,
         reference_genome = reference_genome_url.get_output_file,
         bwa_index = expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa']),
         refgenome_fai = reference_genome_url.get_output_file + ".fai",
@@ -172,6 +174,12 @@ rule all:
         with open(str(output.finished), mode='w') as finish_file:
             finish_file.write('%s\n' % today )
 
+rule download_container:
+    output: singularity_images
+    run:
+      for image_name, docker_path in config["singularity"]["containers"].items():
+          cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"], image_name, docker_path)
+
 
 ##########################################################
 # Download the reference genome, variant db 
@@ -217,6 +225,7 @@ rule download_reference:
 
 rule prepare_refgene:
     input:
+        singularity_images,
         refgene_txt = refgene_txt_url.get_output_file,
         refgene_sql = refgene_sql_url.get_output_file,
         accessible_regions  = access_regions_url.get_output_file,
@@ -228,7 +237,7 @@ rule prepare_refgene:
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
     shell:
         """
 header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
@@ -250,6 +259,7 @@ sed -i 's/chr//g' {input.accessible_regions};
 
 rule bgzip_tabix:
     input: 
+        singularity_images,
         os.path.join(vcf_dir, "{vcf}.vcf")
     params:
         type = 'vcf',
@@ -258,7 +268,7 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
     log:
         os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
     shell:
         """
 bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
@@ -271,12 +281,13 @@ bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
 
 rule bwa_index:
     input:
+        singularity_images,
         reference_genome_url.get_output_file
     output:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome_url.get_output_file + ".bwa_index.log"
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
     shell:
         """
 bwa index -a bwtsw {input} 2> {log};
@@ -288,12 +299,13 @@ bwa index -a bwtsw {input} 2> {log};
 
 rule samtools_index_fasta:
     input:
+        singularity_images,
         reference_genome_url.get_output_file
     output:
         reference_genome_url.get_output_file + ".fai"
     log:
         reference_genome_url.get_output_file + ".faidx.log"
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
     shell:
         """
 samtools faidx {input} 2> {log};
@@ -307,12 +319,13 @@ samtools faidx {input} 2> {log};
 
 rule picard_ref_dict:
     input:
+        singularity_images,
         reference_genome_url.get_output_file
     output:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
         reference_genome_url.get_output_file + ".ref_dict.log"
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     shell:
         """
 picard CreateSequenceDictionary REFERENCE={input} OUTPUT={output} 2> {log};
@@ -325,6 +338,8 @@ picard CreateSequenceDictionary REFERENCE={input} OUTPUT={output} 2> {log};
 ##########################################################
 
 rule vep_install:
+    input: 
+        singularity_images
     params:
         species = "homo_sapiens_merged",
         assembly = "GRCh37" if genome_ver == 'hg19' else "GRCh38",
@@ -333,7 +348,7 @@ rule vep_install:
         directory(vep_dir)
     log:
         os.path.join(vep_dir, "vep_install_cache.log")
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
     shell:
         """
 vep_install --SPECIES {params.species} \
@@ -347,12 +362,13 @@ vep_install --SPECIES {params.species} \
 
 rule prepare_delly_exclusion:
     input:
+        singularity_images,
         delly_exclusion = delly_exclusion_url.get_output_file,
     output:
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
     log:
         os.path.join(basedir, "genome", "delly_exclusion.log"),
-    singularity: Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     shell:
         """
 sed 's/chr//g' {input.delly_exclusion} > {output.delly_exclusion_converted} 2> {log}
