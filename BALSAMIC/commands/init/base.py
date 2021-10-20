@@ -217,7 +217,7 @@ def initialize(
     container_outdir = Path(outdir, balsamic_version, "containers")
     Path(container_outdir).mkdir(parents=True, exist_ok=True)
     config_dict["singularity"]["image_path"] = container_outdir.as_posix()
-    config_dict["singularity"]["containers"] = dict() 
+    config_dict["singularity"]["containers"] = dict()
 
     pattern = re.compile(r"^(\d+\.)?(\d+\.)?(\*|\d+)$")
     if pattern.findall(container_version):
@@ -229,7 +229,7 @@ def initialize(
         container_stub_url = "{}:{}-{}".format(
             BALSAMIC_DOCKER_PATH, docker_image_base_name, image_suffix
         )
-        config_dict["singularity"]["containers"][image_suffix] = container_stub_url 
+        config_dict["singularity"]["containers"][image_suffix] = container_stub_url
 
     config_path = Path(__file__).parents[2] / "config"
     config_path = config_path.absolute()
