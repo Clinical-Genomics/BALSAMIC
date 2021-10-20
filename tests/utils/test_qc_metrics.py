@@ -112,8 +112,8 @@ def test_get_qc_metrics_json(analysis_path):
         assert False
 
 
-def test_get_multiQC_data_source(analysis_path):
-    """test multiQC source extraction from the multiqc_data.json analysis file"""
+def test_get_multiqc_data_source(analysis_path):
+    """test multiQC source extraction from multiqc_data.json analysis file"""
 
     # GIVEN input parameters
     sample = "concatenated_normal_XXXXXX_R"
