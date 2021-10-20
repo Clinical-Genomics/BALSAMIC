@@ -77,13 +77,11 @@ def test_get_qc_metrics_dict(analysis_path, qc_metrics):
                 "name": "MEAN_INSERT_SIZE",
                 "value": 74.182602,
                 "condition": None,
-                "meets_condition": None,
             },
             {
                 "name": "MEAN_TARGET_COVERAGE",
                 "value": 832.13854,
                 "condition": {"norm": "gt", "threshold": 500.0},
-                "meets_condition": None,
             },
         ]
     }
@@ -106,7 +104,7 @@ def test_get_qc_metrics_json(analysis_path):
 
     # THEN check if the obtained metrics are a valid JSON object
     try:
-        json.loads(qc_metrics)
+        json.dumps(qc_metrics)
         assert True
     except TypeError:
         assert False

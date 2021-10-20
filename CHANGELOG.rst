@@ -9,7 +9,8 @@ Added:
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 * Delly is added as a submodule and removed from rest of the conda environments #787
-
+* Added `.,PASS` to all structural variant filter rules to resolve the issues with missing calls in filtered file
+* Handling of QC metrics validation errors #783
 
 Changed:
 ^^^^^^^^
@@ -36,7 +37,8 @@ Fixed:
 * Fixed issue #782 for missing AF in the vcf INFO field
 * Fixed issues #748 #749 with correct sample names 
 * Fixed issue #767 for ascatngs hardcoded values
-
+* Fixed missing output option in bcftools filters for tnhaplotyper #793 
+* Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
 
 [8.1.0]
 -------

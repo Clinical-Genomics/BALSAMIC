@@ -1,5 +1,5 @@
 import hashlib
-import json
+import logging
 import os
 from datetime import datetime
 from pathlib import Path
@@ -20,6 +20,8 @@ from BALSAMIC.constants.common import (
     VALID_OPS,
 )
 from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
+
+LOG = logging.getLogger(__name__)
 
 
 class VCFAttributes(BaseModel):
@@ -718,13 +720,11 @@ class QCMetricsModel(BaseModel):
         name: str (required); quality control metric name
         value: float (required); metrics value
         condition: QCConditionModel (optional); condition for QC validation
-        meets_condition: bool (optional); flag indicating whether the condition has been met
     """
 
     name: str
     value: float
     condition: Optional[QCConditionModel]
-    meets_condition: Optional[bool]
 
 
 class QCCheckModel(BaseModel):
@@ -732,34 +732,42 @@ class QCCheckModel(BaseModel):
 
     Attributes:
         metrics: Dict(sample_name, list(QCMetricsModel)) (required); quality control metric attributes
+
+    Raises:
+        ValueError: when a metric does not meet its validation requirements
     """
 
     metrics: Dict[str, List[QCMetricsModel]]
 
     @validator("metrics", each_item=True)
     def check_metric(cls, value):
-        """Checks if each metric meets its filtering condition and discretizes it"""
-        for i, metric in enumerate(value):
-            if metric.condition is None or VALID_OPS[metric.condition.norm](
-                metric.value, metric.condition.threshold
-            ):
-                value[i].meets_condition = True
+        """Checks if each metric meets its filtering condition"""
+        for metric in value:
+            if metric.condition is None:
+                continue
             else:
-                value[i].meets_condition = False
+                if not VALID_OPS[metric.condition.norm](
+                    metric.value, metric.condition.threshold
+                ):
+                    raise ValueError(
+                        f"QC metric {metric.name}: {metric.value} validation has failed "
+                        f"(condition: {metric.condition.norm} {metric.condition.threshold})."
+                    )
+
+            LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
 
         return value
 
     @property
     def get_json(self):
         """Restructures the metrics dictionary and returns a metric-value json object"""
-        metrics_json = {k: {"passed": {}, "failed": {}} for k in self.metrics}
+        metrics_json = {k: {} for k in self.metrics}
 
         for sample_name, metrics in self.metrics.items():
             for metric in metrics:
-                res = "passed" if metric.meets_condition else "failed"
-                metrics_json[sample_name][res].update({metric.name: metric.value})
+                metrics_json[sample_name].update({metric.name: metric.value})
 
-        return json.dumps(metrics_json, indent=4, sort_keys=True)
+        return metrics_json
 
 
 class MetricsModel(BaseModel):

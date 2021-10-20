@@ -160,10 +160,8 @@ def deliver(
         meta["case_name"] = case_id_map[1]
         meta["apptag"] = case_id_map[2]
 
-        collected_qc = json.loads(
-            get_qc_metrics_json(
-                sample_config_dict["analysis"]["result"], sequencing_type
-            )
+        collected_qc = get_qc_metrics_json(
+            sample_config_dict["analysis"]["result"], sequencing_type
         )
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
         balsamic_qc_report = os.path.join(
