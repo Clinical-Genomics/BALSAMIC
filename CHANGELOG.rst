@@ -38,6 +38,7 @@ Fixed:
 * Fixed issues #748 #749 with correct sample names 
 * Fixed issue #767 for ascatngs hardcoded values
 * Fixed missing output option in bcftools filters for tnhaplotyper #793 
+* Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
 
 [8.1.0]
 -------
