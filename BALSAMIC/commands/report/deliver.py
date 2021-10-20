@@ -261,27 +261,32 @@ def deliver(
             }
         )
 
+    # Add output metrics delivery to report
+    if metric_delivery:
+        metric_delivery_report = os.path.join(
+            yaml_write_directory, case_name + "_metrics_deliverables.yaml"
+        )
+        metrics = extract_metrics_for_delivery(
+            sample_config_dict["analysis"]["result"], sequencing_type
+        )
+
+        with open(metric_delivery_report, "w") as fn:
+            yaml.dump(metrics, fn, default_flow_style=False)
+
+        LOG.info(f"Created metrics delivery file: {metric_delivery_report}")
+
+        delivery_json["files"].append(
+            {
+                "path": metric_delivery_report,
+                "step": "balsamic_delivery",
+                "format": get_file_extension(metric_delivery_report),
+                "tag": ["balsamic-report"],
+                "id": case_name,
+            }
+        )
+
     write_json(delivery_json, delivery_file_name)
     with open(delivery_file_name + ".yaml", "w") as fn:
         yaml.dump(delivery_json, fn, default_flow_style=False)
 
     LOG.info(f"Housekeeper delivery file {delivery_file_name}")
-
-    # Metrics delivery
-    if metric_delivery:
-        out_metrics = extract_metrics_for_delivery(
-            sample_config_dict["analysis"]["result"], sequencing_type
-        )
-
-        metric_delivery_file_name = os.path.join(
-            yaml_write_directory,
-            sample_config_dict["analysis"]["case_id"] + "_metrics_deliverables.yaml",
-        )
-
-        with open(
-            metric_delivery_file_name,
-            "w",
-        ) as fd:
-            yaml.dump(out_metrics, fd, default_flow_style=False)
-
-        LOG.info(f"Metrics delivery file {metric_delivery_file_name}")
