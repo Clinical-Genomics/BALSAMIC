@@ -479,3 +479,64 @@ def sample_config():
     }
 
     return sample_config
+
+
+@pytest.fixture(scope="session")
+def analysis_path():
+    """Analysis test path"""
+    return "tests/test_data/qc_files/analysis"
+
+
+@pytest.fixture(scope="session")
+def qc_metrics():
+    """Sample data for QC model testing"""
+    return {
+        "qc": {
+            "targeted": {
+                "multiqc_picard_insertSize.json": {
+                    "MEAN_INSERT_SIZE": {"condition": None}
+                },
+                "multiqc_picard_HsMetrics.json": {
+                    "MEAN_TARGET_COVERAGE": {
+                        "condition": {"norm": "gt", "threshold": 500.0}
+                    }
+                },
+            },
+            "wgs": {
+                "multiqc_picard_insertSize.json": {
+                    "MEAN_INSERT_SIZE": {"condition": None}
+                },
+                "multiqc_picard_dups.json": {
+                    "PERCENT_DUPLICATION": {"condition": None}
+                },
+            },
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def qc_extracted_metrics():
+    """Extracted metrics for QC model testing"""
+    return {
+        "metrics": {
+            "sample_1": [
+                {
+                    "name": "MEAN_INSERT_SIZE_1",
+                    "value": 0.5,
+                    "condition": {"norm": "lt", "threshold": 1.0},
+                },
+                {
+                    "name": "MEAN_INSERT_SIZE_2",
+                    "value": 0.5,
+                    "condition": {"norm": "lt", "threshold": 1.0},
+                },
+            ],
+            "sample_2": [
+                {
+                    "name": "MEAN_INSERT_SIZE_1",
+                    "value": 0.5,
+                    "condition": {"norm": "lt", "threshold": 1.0},
+                },
+            ],
+        }
+    }

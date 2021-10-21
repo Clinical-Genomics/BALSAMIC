@@ -16,18 +16,19 @@ rule gatk_haplotypecaller:
         Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample = '{sample_type}'
+        sample = '{sample_type}',
+        gatk_path = '/opt/conda/opt/gatk-3.8' 
     threads:
         get_threads(cluster_config,'gatk_haplotypecaller')
     message:
-        ("Calling germline variants using gatk haplotypecaller for"
+        ("Calling germline variants using gatk haplotypecaller for "
          "targeted-panel sample {params.sample}")
     shell:
         """
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G {params.gatk_path}/GenomeAnalysisTK.jar \
 -T HaplotypeCaller \
 -R {input.fa} \
 -I {input.bam} \

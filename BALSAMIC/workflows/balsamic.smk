@@ -1,6 +1,5 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-
 import os
 import logging
 import tempfile
@@ -22,7 +21,7 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path)
+                                 get_threads, get_script_path, get_sequencing_type)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
@@ -106,6 +105,11 @@ if not Path(config["SENTIEON_EXEC"]).exists():
     LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
     raise BalsamicError
 
+# Add reference assembly if not defined for backward compatibility
+if 'genome_version' not in config["reference"]:
+    GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
+    LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
+
 # Add normal sample if analysis is paired
 germline_call_samples = ["tumor"]
 if config['analysis']['analysis_type'] == "paired":
@@ -164,8 +168,18 @@ for m in MUTATION_TYPE:
                                              mutation_type=m,
                                              sequencing_type=config["analysis"]["sequencing_type"],
                                              mutation_class="somatic")
-
     somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
+
+# Collect only snv callers for calculating tmb
+somatic_caller_tmb = []
+for ws in ["BALSAMIC","Sentieon","Sentieon_umi"]:
+    somatic_caller_snv = get_variant_callers(config=config,
+                                           analysis_type=config['analysis']['analysis_type'],
+                                           workflow_solution=ws,
+                                           mutation_type="SNV",
+                                           sequencing_type=config["analysis"]["sequencing_type"],
+                                           mutation_class="somatic")
+    somatic_caller_tmb +=  somatic_caller_snv
 
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
@@ -214,7 +228,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
 
 #Calculate TMB per somatic variant caller
 analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
-                                        vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]])))
+                                        vcf=get_vcf(config, somatic_caller_tmb, [config["analysis"]["case_id"]])))
 
 #Gather all the filtered and PASSed variants post annotation
 analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
@@ -256,7 +270,7 @@ if 'benchmark_plots' in config:
             # Delete previous plots after merging
             for plots in my_rule_plots:
                 plots.unlink()
-            
+
 
 
 if 'delivery' in config:
@@ -302,17 +316,32 @@ rule all:
     input:
         quality_control_results + analysis_specific_results
     output:
-        os.path.join(get_result_dir(config), "analysis_finish")
+        qc_json_file = os.path.join(get_result_dir(config), "qc", "qc_metrics_summary.json"),
+        finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
-        tmp_dir = tmp_dir
+        tmp_dir = tmp_dir,
+        result_dir = result_dir,
+        sequencing_type = get_sequencing_type(config)
     run:
         import datetime
         import shutil
 
+        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
+
+        # Save QC metrics to a JSON file
+        try:
+            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
+            write_json(qc_metrics_summary, str(output.qc_json_file))
+        except ValueError as val_exc:
+            LOG.error(val_exc)
+            raise BalsamicError
+
+        # Delete a temporal directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
-        with open(str(output[0]), mode='w') as finish_file:
-            finish_file.write('%s\n' % datetime.datetime.now())
+        # Finish timestamp file
+        with open(str(output.finish_file), mode="w") as finish_file:
+            finish_file.write("%s\n" % datetime.datetime.now())

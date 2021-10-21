@@ -103,6 +103,15 @@ def get_variant_callers(
     return list(valid_variant_callers)
 
 
+def get_sequencing_type(config):
+    """
+    input: sample config file from BALSAMIC
+    output: sequencing type string ("targeted" or "wgs")
+    """
+
+    return config["analysis"]["sequencing_type"]
+
+
 def get_sample_type(sample, bio_type):
     """
     input: sample dictionary from BALSAMIC's config file
