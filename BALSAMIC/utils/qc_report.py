@@ -50,7 +50,7 @@ def parse_collected_qc(collected_qc: dict, model_param: str, sample_id: str) -> 
 
     for qc_item, qc_value in REPORT_MODEL[model_param].items():
         decimal_point = qc_value["decimal"]
-        qc_to_report = collected_qc[sample_id]["passed"][qc_item]
+        qc_to_report = collected_qc[sample_id][qc_item]
         if "as_percent" in qc_value:
             qc_to_report = qc_to_report * 100
         qc_to_report = str(round(qc_to_report, decimal_point))

@@ -9,7 +9,8 @@ Added:
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 * Delly is added as a submodule and removed from rest of the conda environments #787
-
+* Added `.,PASS` to all structural variant filter rules to resolve the issues with missing calls in filtered file
+* Handling of QC metrics validation errors #783
 
 Changed:
 ^^^^^^^^
@@ -30,7 +31,7 @@ Fixed:
 * Pip installation failure inside balsamic container #758
 * Fixed issue #768 with missing ``vep_install`` command in container
 * Fixed issue #765 with correct input bam files for SV rules
-* Continuation of CNVkit even if ``PURECN`` fails #774 #775
+* Continuation of CNVkit even if ``PURECN`` fails and fix ``PureCN`` conda paths #774 #775
 * Locked version for ``cryptography`` package
 * Bumped version for ``bcftools`` in cnvkit container
 * Fixed issues #776 and #777 with correct install paths for gatk and manta
@@ -39,7 +40,7 @@ Fixed:
 * Fixed issue #767 for ascatngs hardcoded values
 * Fixed missing output option in bcftools filters for tnhaplotyper #793 
 * Fixed issue #795 with increasing resources for vep and filter SV prior to vep
-
+* Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
 
 [8.1.0]
 -------
