@@ -179,7 +179,7 @@ rule download_container:
     run:
       for image_name, docker_path in config["singularity"]["containers"].items():
           cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"], image_name, docker_path)
-
+	  shell(cmd)
 
 ##########################################################
 # Download the reference genome, variant db 
@@ -259,8 +259,8 @@ sed -i 's/chr//g' {input.accessible_regions};
 
 rule bgzip_tabix:
     input: 
-        singularity_images,
-        os.path.join(vcf_dir, "{vcf}.vcf")
+        singularity_img = singularity_images,
+        vcf = os.path.join(vcf_dir, "{vcf}.vcf")
     params:
         type = 'vcf',
     output:
@@ -271,7 +271,7 @@ rule bgzip_tabix:
     singularity: Path(singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
     shell:
         """
-bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
+bgzip {input.vcf} && tabix -p {params.type} {input.vcf}.gz 2> {log};
         """
 
 
@@ -281,8 +281,8 @@ bgzip {input} && tabix -p {params.type} {input}.gz 2> {log};
 
 rule bwa_index:
     input:
-        singularity_images,
-        reference_genome_url.get_output_file
+        singularity_img = singularity_images,
+        reference_genome = reference_genome_url.get_output_file
     output:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
@@ -290,7 +290,7 @@ rule bwa_index:
     singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
     shell:
         """
-bwa index -a bwtsw {input} 2> {log};
+bwa index -a bwtsw {input.reference_genome} 2> {log};
         """
 
 ##########################################################
@@ -299,8 +299,8 @@ bwa index -a bwtsw {input} 2> {log};
 
 rule samtools_index_fasta:
     input:
-        singularity_images,
-        reference_genome_url.get_output_file
+        singularity_img = singularity_images,
+        reference_genome = reference_genome_url.get_output_file
     output:
         reference_genome_url.get_output_file + ".fai"
     log:
@@ -308,7 +308,7 @@ rule samtools_index_fasta:
     singularity: Path(singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
     shell:
         """
-samtools faidx {input} 2> {log};
+samtools faidx {input.reference_genome} 2> {log};
         """
 
 
@@ -319,8 +319,8 @@ samtools faidx {input} 2> {log};
 
 rule picard_ref_dict:
     input:
-        singularity_images,
-        reference_genome_url.get_output_file
+        singularity_img = singularity_images,
+        reference_genome = reference_genome_url.get_output_file
     output:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
@@ -328,7 +328,7 @@ rule picard_ref_dict:
     singularity: Path(singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
     shell:
         """
-picard CreateSequenceDictionary REFERENCE={input} OUTPUT={output} 2> {log};
+picard CreateSequenceDictionary REFERENCE={input.reference_genome} OUTPUT={output} 2> {log};
         """
 
 
@@ -339,7 +339,7 @@ picard CreateSequenceDictionary REFERENCE={input} OUTPUT={output} 2> {log};
 
 rule vep_install:
     input: 
-        singularity_images
+        singularity_img = singularity_images
     params:
         species = "homo_sapiens_merged",
         assembly = "GRCh37" if genome_ver == 'hg19' else "GRCh38",
@@ -362,7 +362,7 @@ vep_install --SPECIES {params.species} \
 
 rule prepare_delly_exclusion:
     input:
-        singularity_images,
+        singularity_img = singularity_images,
         delly_exclusion = delly_exclusion_url.get_output_file,
     output:
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
