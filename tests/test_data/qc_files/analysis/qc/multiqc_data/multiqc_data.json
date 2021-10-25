@@ -2,34 +2,34 @@
     "report_data_sources": {
         "Picard": {
             "AlignmentSummaryMetrics": {
-                "concatenated_normal_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/bam/concatenated_normal_XXXXXX_R.sorted.alignmetric",
-                "concatenated_tumor_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.alignmetric"
+                "concatenated_normal_XXXXXX_R": "tests/test_data/bam/concatenated_normal_XXXXXX_R.sorted.alignmetric",
+                "concatenated_tumor_XXXXXX_R": "tests/test_data/bam/concatenated_tumor_XXXXXX_R.sorted.alignmetric"
             },
             "HsMetrics": {
-                "concatenated_normal_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/qc/umi_qc/concatenated_normal_XXXXXX_R.umi.collect_hsmetric",
-                "concatenated_tumor_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/qc/umi_qc/concatenated_tumor_XXXXXX_R.umi.collect_hsmetric"
+                "concatenated_normal_XXXXXX_R": "tests/test_data/qc/umi_qc/concatenated_normal_XXXXXX_R.umi.collect_hsmetric",
+                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc/umi_qc/concatenated_tumor_XXXXXX_R.umi.collect_hsmetric"
             },
             "InsertSizeMetrics": {
-                "concatenated_tumor_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
-                "concatenated_normal_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/bam/concatenated_normal_XXXXXX_R.sorted.insertsizemetric"
+                "concatenated_tumor_XXXXXX_R": "tests/test_data/bam/concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
+                "concatenated_normal_XXXXXX_R": "tests/test_data/bam/concatenated_normal_XXXXXX_R.sorted.insertsizemetric"
             },
             "DuplicationMetrics": {
-                "concatenated_normal_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/bam/concatenated_normal_XXXXXX_R.sorted.mrkdup.txt",
-                "concatenated_tumor_XXXXXX_R": "/home/proj/stage/cancer/cases/equalbug/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
+                "concatenated_normal_XXXXXX_R": "tests/test_data/bam/concatenated_normal_XXXXXX_R.sorted.mrkdup.txt",
+                "concatenated_tumor_XXXXXX_R": "tests/test_data/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
             }
         },
         "fastp": {
             "all_sections": {
-                "concatenated_tumor_XXXXXX_R_fastp": "/home/proj/stage/cancer/cases/equalbug/analysis/qc/fastp/concatenated_tumor_XXXXXX_R_fastp.json",
-                "concatenated_normal_XXXXXX_R_fastp": "/home/proj/stage/cancer/cases/equalbug/analysis/qc/fastp/concatenated_normal_XXXXXX_R_fastp.json"
+                "concatenated_tumor_XXXXXX_R_fastp": "tests/test_data/qc/fastp/concatenated_tumor_XXXXXX_R_fastp.json",
+                "concatenated_normal_XXXXXX_R_fastp": "tests/test_data/qc/fastp/concatenated_normal_XXXXXX_R_fastp.json"
             }
         },
         "FastQC": {
             "all_sections": {
-                "concatenated_normal_XXXXXX_R_1": "/home/proj/stage/cancer/cases/equalbug/analysis/fastqc/concatenated_normal_XXXXXX_R_1_fastqc.zip",
-                "concatenated_tumor_XXXXXX_R_1": "/home/proj/stage/cancer/cases/equalbug/analysis/fastqc/concatenated_tumor_XXXXXX_R_1_fastqc.zip",
-                "concatenated_tumor_XXXXXX_R_2": "/home/proj/stage/cancer/cases/equalbug/analysis/fastqc/concatenated_tumor_XXXXXX_R_2_fastqc.zip",
-                "concatenated_normal_XXXXXX_R_2": "/home/proj/stage/cancer/cases/equalbug/analysis/fastqc/concatenated_normal_XXXXXX_R_2_fastqc.zip"
+                "concatenated_normal_XXXXXX_R_1": "tests/test_data/fastqc/concatenated_normal_XXXXXX_R_1_fastqc.zip",
+                "concatenated_tumor_XXXXXX_R_1": "tests/test_data/fastqc/concatenated_tumor_XXXXXX_R_1_fastqc.zip",
+                "concatenated_tumor_XXXXXX_R_2": "tests/test_data/fastqc/concatenated_tumor_XXXXXX_R_2_fastqc.zip",
+                "concatenated_normal_XXXXXX_R_2": "tests/test_data/fastqc/concatenated_normal_XXXXXX_R_2_fastqc.zip"
             }
         }
     },
