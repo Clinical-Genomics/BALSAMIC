@@ -779,7 +779,7 @@ class DeliveryMetricModel(BaseModel):
         input: str (required); input file
         name: str (required); metric name
         step: str (required); step that generated the metric
-        value: str (required): metric value
+        value: float (required); metric value
     """
 
     header: Optional[str]
