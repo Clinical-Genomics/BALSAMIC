@@ -554,5 +554,5 @@ def qc_raw_targeted_metrics():
             "metrics_2.json": {"METRIC_3": 0.3},
         },
         "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
-        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5}},
+        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5, "METRIC_4": 0.4}},
     }

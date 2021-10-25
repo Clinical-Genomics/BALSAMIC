@@ -737,7 +737,6 @@ class QCMetricModel(BaseModel):
                 f"(Condition: {values['norm']} {values['threshold']})."
             )
 
-        print(f"QC metric {values['name']}: {values['value']} meets its condition.")
         LOG.info(f"QC metric {values['name']}: {values['value']} meets its condition.")
         return values
 

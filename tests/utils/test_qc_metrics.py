@@ -30,17 +30,14 @@ def test_merge_dicts(qc_raw_targeted_metrics):
 
     # GIVEN an expected output
     expected_output = {
-        "metrics_1.json": {"METRIC_1": 0.5, "METRIC_2": 0.2},
-        "metrics_2.json": {"METRIC_3": 0.3, "METRIC_4": 0.4},
+        "metrics_1.json": {"METRIC_1": 0.5, "METRIC_2": 0.2, "METRIC_4": 0.4},
+        "metrics_2.json": {"METRIC_3": 0.3},
     }
 
     # WHEN calling the function
     merged_dict = merge_dicts(
         qc_raw_targeted_metrics["default"],
-        qc_raw_targeted_metrics["panel_1.bed"],
-        qc_raw_targeted_metrics[  # Tests that the default metric condition is overwritten
-            "panel_2.bed"
-        ],
+        qc_raw_targeted_metrics["panel_2.bed"],
     )
 
     # THEN check if the extracted output meets the merged dictionary
