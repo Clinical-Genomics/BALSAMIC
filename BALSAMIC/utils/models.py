@@ -770,7 +770,7 @@ class QCCheckModel(BaseModel):
         return metrics_json
 
 
-class MetricsModel(BaseModel):
+class DeliveryMetricModel(BaseModel):
     """Defines the metric attributes model for delivery
 
     Attributes:

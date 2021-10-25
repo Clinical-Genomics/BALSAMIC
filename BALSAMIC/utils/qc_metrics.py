@@ -5,7 +5,7 @@ from BALSAMIC.constants.quality_check_reporting import (
     METRICS,
     METRICS_TO_DELIVER,
 )
-from BALSAMIC.utils.models import QCCheckModel, MetricsModel
+from BALSAMIC.utils.models import QCCheckModel, DeliveryMetricModel
 
 
 def read_metrics(analysis_path, file_name):
@@ -99,7 +99,7 @@ def extract_metrics_for_delivery(analysis_path, sequencing_type):
                 if "umi" not in k:
                     if k in METRICS_TO_DELIVER[sequencing_type]:
                         output_metrics.append(
-                            MetricsModel(
+                            DeliveryMetricModel(
                                 id=sample.split("_")[1],
                                 input=get_multiqc_data_source(raw_data, sample, source),
                                 name=k,
