@@ -20,7 +20,7 @@
 	"download_container": {
 		"n": 16,
 		"time": "4:00:00",
-		"mail_type": "FAIL",
-		"partition": "core"
+        "mail_type": "FAIL",
+        "partition": "core"
 	}
 }
