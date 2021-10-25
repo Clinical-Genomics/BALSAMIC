@@ -2,7 +2,7 @@ import json
 import os
 
 from BALSAMIC.constants.quality_check_reporting import METRICS
-from BALSAMIC.utils.models import QCCheckModel
+from BALSAMIC.utils.models import QCValidationModel
 
 
 def get_qc_available_panel_beds(metrics):
@@ -53,8 +53,15 @@ def update_metrics_dict(sample_id, metric, value, metrics_dict):
     if sample_name not in metrics_dict:
         metrics_dict[sample_name] = []
 
+    try:
+        norm = metric[1]["condition"]["norm"]
+        threshold = metric[1]["condition"]["threshold"]
+    except TypeError:
+        norm = None
+        threshold = None
+
     metrics_dict[sample_name].append(
-        {"name": metric[0], "value": value, "condition": metric[1]["condition"]}
+        {"name": metric[0], "norm": norm, "threshold": threshold, "value": value}
     )
 
     return metrics_dict
@@ -89,8 +96,8 @@ def get_qc_metrics_json(analysis_path, sequencing_type, panel_bed):
     else:
         metrics = METRICS["qc"][sequencing_type]
 
-    qc_check_model = QCCheckModel.parse_obj(
+    qc_model = QCValidationModel.parse_obj(
         {"metrics": get_qc_metrics_dict(analysis_path, metrics)}
     )
 
-    return qc_check_model.get_json
+    return qc_model.get_json

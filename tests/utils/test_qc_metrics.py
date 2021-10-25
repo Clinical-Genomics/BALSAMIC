@@ -111,13 +111,15 @@ def test_get_qc_metrics_dict(analysis_path, qc_metrics):
         "concatenated_tumor": [
             {
                 "name": "MEAN_INSERT_SIZE",
+                "norm": None,
+                "threshold": None,
                 "value": 74.182602,
-                "condition": None,
             },
             {
                 "name": "MEAN_TARGET_COVERAGE",
+                "norm": "gt",
+                "threshold": 500.0,
                 "value": 832.13854,
-                "condition": {"norm": "gt", "threshold": 500.0},
             },
         ]
     }
@@ -129,8 +131,30 @@ def test_get_qc_metrics_dict(analysis_path, qc_metrics):
     assert metrics_dict.items() == expected_output.items()
 
 
+def test_get_qc_metrics_json_wgs(analysis_path):
+    """test JSON object generation for a WGS run"""
+
+    # GIVEN a sequencing type
+    seq_type = "wgs"
+    capture_kit = None
+
+    # GIVEN retrieved WGS metrics
+    output_metrics = {
+        "concatenated_tumor": {
+            "MEAN_INSERT_SIZE": 74.182602,
+            "PERCENT_DUPLICATION": 0.718251,
+        }
+    }
+
+    # WHEN calling the function
+    qc_metrics = get_qc_metrics_json(analysis_path, seq_type, capture_kit)
+
+    # THEN check if the obtained metrics are WGS specific
+    assert qc_metrics.items() == output_metrics.items()
+
+
 def test_get_qc_metrics_json_targeted(analysis_path):
-    """test JSON object generation"""
+    """test JSON object generation for a custom bed file"""
 
     # GIVEN a sequencing type
     seq_type = "targeted"
@@ -141,22 +165,8 @@ def test_get_qc_metrics_json_targeted(analysis_path):
         get_qc_metrics_json(analysis_path, seq_type, capture_kit)
     except ValidationError as val_err:
         assert (
-            "QC metric MEAN_TARGET_COVERAGE: 832.13854 validation has failed (condition: gt 1000.0)"
-            in str(val_err)
+            "3 validation errors for QCValidationModel" in str(val_err)
+            and "MEAN_TARGET_COVERAGE" in str(val_err)
+            and "FOLD_80_BASE_PENALTY" in str(val_err)
+            and "PCT_OFF_BAIT" in str(val_err)
         )
-
-
-def test_get_qc_metrics_json_wgs(analysis_path):
-    """test JSON object generation for a custom bed"""
-
-    # GIVEN a sequencing type
-    seq_type = "wgs"
-    capture_kit = None
-
-    # WHEN calling the function
-    qc_metrics = get_qc_metrics_json(analysis_path, seq_type, capture_kit)
-
-    # THEN check if the obtained metrics are WGS specific
-    assert sorted(qc_metrics["concatenated_tumor"].keys()) == sorted(
-        ["MEAN_INSERT_SIZE", "PERCENT_DUPLICATION"]
-    )
