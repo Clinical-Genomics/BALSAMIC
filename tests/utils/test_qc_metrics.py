@@ -114,7 +114,7 @@ def test_get_multiqc_data_source(analysis_path):
     """test multiQC source extraction from multiqc_data.json analysis file"""
 
     # GIVEN input parameters
-    sample = "concatenated_normal_XXXXXX_R"
+    sample = "concatenated_tumor_XXXXXX_R"
     source_name_hs_metrics = "multiqc_picard_HsMetrics"
     source_name_dup = "multiqc_picard_dups"
 
@@ -124,18 +124,18 @@ def test_get_multiqc_data_source(analysis_path):
         raw_data = json.load(f)
 
     # GIVEN an expected output
-    source_hs_metrics = "concatenated_normal_XXXXXX_R.umi.collect_hsmetric"
-    source_dup = "concatenated_normal_XXXXXX_R.sorted.mrkdup.txt"
+    source_hs_metrics = "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric"
+    source_dup = "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
 
     # WHEN extracting the source of a specific sample and collection of metrics
     out_source_hs_metrics = get_multiqc_data_source(
         raw_data, sample, source_name_hs_metrics
     )
-    data_source_dup = get_multiqc_data_source(raw_data, sample, source_name_dup)
+    out_source_dup = get_multiqc_data_source(raw_data, sample, source_name_dup)
 
     # THEN check if the extracted source names correspond to the expected ones
     assert source_hs_metrics == out_source_hs_metrics
-    assert source_dup == data_source_dup
+    assert source_dup == out_source_dup
 
 
 def test_extract_metrics_for_delivery(analysis_path):
@@ -145,24 +145,33 @@ def test_extract_metrics_for_delivery(analysis_path):
     seq_type = "targeted"
 
     # GIVEN an expected output
-    n_metrics = 22
+    n_metrics = 11  # Number of expected metric
 
-    first_metric = {
+    hs_metric = {
         "header": None,
-        "id": "normal",
-        "input": "concatenated_normal_XXXXXX_R.umi.collect_hsmetric",
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
         "name": "PCT_OFF_BAIT",
         "step": "multiqc_picard_HsMetrics",
-        "value": 0.401673,
+        "value": 0.364546,
     }
 
-    last_metric = {
+    ins_size_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
+        "name": "MEAN_INSERT_SIZE",
+        "step": "multiqc_picard_insertSize",
+        "value": 201.813054,
+    }
+
+    dups_metric = {
         "header": None,
         "id": "tumor",
         "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
-        "value": 0.931044,
+        "value": 0.391429,
     }
 
     # WHEN calling the function
@@ -170,4 +179,20 @@ def test_extract_metrics_for_delivery(analysis_path):
 
     # THEN check if the metrics are correctly retrieved
     assert len(metrics) == n_metrics
-    assert first_metric in metrics and last_metric in metrics
+    assert (
+        hs_metric in metrics and ins_size_metric in metrics and dups_metric in metrics
+    )
+
+
+def test_extract_metrics_for_delivery_filtering_umi(analysis_path):
+    """test umi discarding when extracting metrics"""
+
+    # GIVEN a sequencing type
+    seq_type = "targeted"
+
+    # WHEN calling the function
+    metrics = extract_metrics_for_delivery(analysis_path, seq_type)
+
+    # THEN check if the umi samples are filtered out
+    for metric in metrics:
+        assert "umi" not in metric["input"]
