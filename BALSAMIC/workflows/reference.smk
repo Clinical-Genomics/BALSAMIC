@@ -136,9 +136,9 @@ rule all:
         os.path.join(basedir, "reference.json.log")
     run:
         import json
-        from datetime import date 
+        from datetime import datetime 
 
-        today = date.today().strftime('%d-%m-%Y')
+        today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         ref_json = dict()
         ref_json['reference'] = {
@@ -173,6 +173,10 @@ rule all:
 
         with open(str(output.finished), mode='w') as finish_file:
             finish_file.write('%s\n' % today )
+
+###########################################################
+# Download all singularity container images from dockerhub
+###########################################################
 
 rule download_container:
     output: singularity_images
@@ -222,6 +226,10 @@ rule download_reference:
             shell(cmd)
             ref.write_md5
 
+##########################################################
+# Preprocess refseq file by fetching relevant columns and 
+# standardize the chr column
+##########################################################
 
 rule prepare_refgene:
     input:
@@ -314,7 +322,6 @@ samtools faidx {input.reference_genome} 2> {log};
 
 ##########################################################
 # create reference dictionary using picard
-# 
 ##########################################################
 
 rule picard_ref_dict:
@@ -334,7 +341,7 @@ picard CreateSequenceDictionary REFERENCE={input.reference_genome} OUTPUT={outpu
 
 ##########################################################
 # ENSEMBL VEP - download and install vep package, 
-#                 cache coversion
+#                 cache conversion
 ##########################################################
 
 rule vep_install:
@@ -359,6 +366,9 @@ vep_install --SPECIES {params.species} \
 --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log}; 
         """
 
+##########################################################
+# Remove chr from delly exclusion
+##########################################################
 
 rule prepare_delly_exclusion:
     input:
