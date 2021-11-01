@@ -710,8 +710,8 @@ class QCMetricModel(BaseModel):
     """
 
     name: str
-    norm: Optional[str] = None
-    threshold: Optional[float] = None
+    norm: Optional[str] = ...
+    threshold: Optional[float] = ...
     value: float
 
     @root_validator(pre=True)
