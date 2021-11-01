@@ -277,7 +277,7 @@ def deliver(
 
         delivery_json["files"].append(
             {
-                "path": metric_delivery_report,
+                "path": Path(metric_delivery_report).resolve().as_posix(),
                 "step": "balsamic_delivery",
                 "format": get_file_extension(metric_delivery_report),
                 "tag": ["balsamic-metrics-report"],
