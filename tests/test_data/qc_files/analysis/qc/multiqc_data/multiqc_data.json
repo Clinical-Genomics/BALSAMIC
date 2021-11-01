@@ -1,14 +1,6 @@
 {
     "report_data_sources": {
-        "mosdepth": {
-            "genome_results": {
-                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.mosdepth.region.dist.txt"
-            }
-        },
         "Picard": {
-            "AlignmentSummaryMetrics": {
-                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.alignmetric"
-            },
             "HsMetrics": {
                 "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
                 "concatenated_tumor_XXXXXX_R.consensusfiltered.umi": "tests/test_data/qc_files/analysis/qc/umi_qc/concatenated_tumor_XXXXXX_R.umi.collect_hsmetric"
@@ -19,54 +11,9 @@
             "DuplicationMetrics": {
                 "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
             }
-        },
-        "fastp": {
-            "all_sections": {
-                "concatenated_tumor_XXXXXX_R_fastp": "tests/test_data/qc_files/analysis/qc/fastp/concatenated_tumor_XXXXXX_R_fastp.json"
-            }
-        },
-        "FastQC": {
-            "all_sections": {
-                "concatenated_tumor_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_2_fastqc.zip",
-                "concatenated_tumor_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_1_fastqc.zip"
-            }
         }
     },
     "report_saved_raw_data": {
-        "multiqc_picard_AlignmentSummaryMetrics": {
-            "concatenated_tumor_XXXXXX_R": {
-                "CATEGORY": "PAIR",
-                "TOTAL_READS": 95785560.0,
-                "PF_READS": 95785560.0,
-                "PCT_PF_READS": 1.0,
-                "PF_NOISE_READS": 0.0,
-                "PF_READS_ALIGNED": 95776253.0,
-                "PCT_PF_READS_ALIGNED": 0.999903,
-                "PF_ALIGNED_BASES": 12776845517.0,
-                "PF_HQ_ALIGNED_READS": 91961625.0,
-                "PF_HQ_ALIGNED_BASES": 12306213228.0,
-                "PF_HQ_ALIGNED_Q20_BASES": 12137491223.0,
-                "PF_HQ_MEDIAN_MISMATCHES": 0.0,
-                "PF_MISMATCH_RATE": 0.002676,
-                "PF_HQ_ERROR_RATE": 0.002576,
-                "PF_INDEL_RATE": 0.000398,
-                "MEAN_READ_LENGTH": 135.276914,
-                "READS_ALIGNED_IN_PAIRS": 95768864.0,
-                "PCT_READS_ALIGNED_IN_PAIRS": 0.999923,
-                "PF_READS_IMPROPER_PAIRS": 932683.0,
-                "PCT_PF_READS_IMPROPER_PAIRS": 0.009738,
-                "BAD_CYCLES": 0.0,
-                "STRAND_BALANCE": 0.499967,
-                "PCT_CHIMERAS": 0.012423,
-                "PCT_ADAPTER": 0.0,
-                "PCT_SOFTCLIP": 0.013578,
-                "PCT_HARDCLIP": 0.0,
-                "AVG_POS_3PRIME_SOFTCLIP_LENGTH": 5.641653,
-                "SAMPLE": "unknown",
-                "LIBRARY": "unknown",
-                "READ_GROUP": ""
-            }
-        },
         "multiqc_picard_HsMetrics": {
             "concatenated_tumor_XXXXXX_R": {
                 "BAIT_SET": "gmsmyeloid_5.2_hg19_design.bed",
@@ -259,57 +206,6 @@
                 "READS_IN_DUPLICATE_UNPAIRED": 5790.0,
                 "READS_UNMAPPED": 9307.0
             }
-        },
-        "multiqc_fastp": {
-            "concatenated_tumor_XXXXXX_R_fastp": {
-                "summary": {
-                    "before_filtering": {
-                        "total_reads": 95785560,
-                        "total_bases": 13436502727,
-                        "q20_bases": 13239620208,
-                        "q30_bases": 12822503917,
-                        "q20_rate": 0.985347,
-                        "q30_rate": 0.954304,
-                        "read1_mean_length": 140,
-                        "read2_mean_length": 140,
-                        "gc_content": 0.485769
-                    },
-                    "after_filtering": {
-                        "total_reads": 95785560,
-                        "total_bases": 12957574927,
-                        "q20_bases": 12764368913,
-                        "q30_bases": 12356648476,
-                        "q20_rate": 0.985089,
-                        "q30_rate": 0.953624,
-                        "read1_mean_length": 135,
-                        "read2_mean_length": 135,
-                        "gc_content": 0.487036
-                    }
-                },
-                "filtering_result": {
-                    "passed_filter_reads": 95785560,
-                    "low_quality_reads": 0,
-                    "too_many_N_reads": 0,
-                    "too_short_reads": 0,
-                    "too_long_reads": 0
-                }
-            }
         }
-    },
-    "config_analysis_dir_abs": [
-        "tests/test_data/qc_files/analysis"
-    ],
-    "config_analysis_dir": [
-        "tests/test_data/qc_files/analysis"
-    ],
-    "config_creation_date": "2021-07-12, 11:32",
-    "config_git_hash": null,
-    "config_intro_text": null,
-    "config_report_comment": null,
-    "config_report_header_info": null,
-    "config_script_path": "/opt/conda/envs/align_qc/lib/python3.6/site-packages/multiqc/utils",
-    "config_short_version": "1.9",
-    "config_subtitle": null,
-    "config_title": null,
-    "config_version": "1.9"
+    }
 }
