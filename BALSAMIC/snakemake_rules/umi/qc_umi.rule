@@ -6,7 +6,7 @@
 
 rule picard_umiaware:
     input:
-        bam = umi_dir + "{sample}.consensusfiltered.umi.bam"
+        bam = umi_dir + "{sample}_consensusfiltered_umi.bam"
     output:
         bam = umi_qc_dir + "{sample}.picard.umiaware.bam",
         duplicates = umi_qc_dir + "{sample}.umi.duplicatemetrics",
@@ -34,10 +34,10 @@ UMI_METRICS={output.umimetrics};
 
 rule picard_collecthsmetrics_umi:
     input:
-        fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
+        bam = umi_dir + "{sample}_consensusfiltered_umi.bam",
         bed = config["panel"]["capture_kit"],
-        bam = umi_dir + "{sample}.consensusfiltered.umi.bam",
-        fa = config["reference"]["reference_genome"]
+        fa = config["reference"]["reference_genome"],
+        fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
     output:
         mrkdup = umi_qc_dir + "{sample}.umi.collect_hsmetric"
     benchmark:
@@ -64,14 +64,16 @@ TI={input.bam}.picard.bedintervals \
 I={input.bam} \
 R={input.fa} \
 O={output.mrkdup} \
-COVERAGE_CAP=50000;
+COVERAGE_CAP=50000 \
+BAIT_SET_NAME={params.baitsetname} \
+METRIC_ACCUMULATION_LEVEL=ALL_READS;
         """
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
 
 
 rule samtools_view_calculatemeanfamilydepth_umi:
     input:
-        bam = umi_dir + "{sample}.consensusfiltered.umi.bam"
+        bam = umi_dir + "{sample}_consensusfiltered_umi.bam"
     output:
         temp_fl = temp (umi_qc_dir + "{sample}.umi.temp.fl"),
         totalsum = umi_qc_dir + "{sample}.umi.mean_family_depth"
