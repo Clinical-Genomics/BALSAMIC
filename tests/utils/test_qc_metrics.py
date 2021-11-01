@@ -113,10 +113,10 @@ def test_get_qc_metrics_dict(analysis_path, qc_metrics):
                 "value": 74.182602,
             },
             {
-                "name": "MEAN_TARGET_COVERAGE",
+                "name": "MEDIAN_TARGET_COVERAGE",
                 "norm": "gt",
                 "threshold": 500.0,
-                "value": 832.13854,
+                "value": 461.0,
             },
         ]
     }
@@ -136,12 +136,7 @@ def test_get_qc_metrics_json_wgs(analysis_path):
     capture_kit = None
 
     # GIVEN retrieved WGS metrics
-    output_metrics = {
-        "concatenated_tumor": {
-            "MEAN_INSERT_SIZE": 74.182602,
-            "PERCENT_DUPLICATION": 0.718251,
-        }
-    }
+    output_metrics = {"concatenated_tumor": {"FOLD_80_BASE_PENALTY": 1.238604}}
 
     # WHEN calling the function
     qc_metrics = get_qc_metrics_json(analysis_path, seq_type, capture_kit)
@@ -162,8 +157,7 @@ def test_get_qc_metrics_json_targeted(analysis_path):
         get_qc_metrics_json(analysis_path, seq_type, capture_kit)
     except ValidationError as val_err:
         assert (
-            "3 validation errors for QCValidationModel" in str(val_err)
-            and "MEAN_TARGET_COVERAGE" in str(val_err)
+            "2 validation errors for QCValidationModel" in str(val_err)
+            and "MEDIAN_TARGET_COVERAGE" in str(val_err)
             and "FOLD_80_BASE_PENALTY" in str(val_err)
-            and "PCT_OFF_BAIT" in str(val_err)
         )

@@ -497,7 +497,7 @@ def qc_metrics():
                     "MEAN_INSERT_SIZE": {"condition": None}
                 },
                 "multiqc_picard_HsMetrics.json": {
-                    "MEAN_TARGET_COVERAGE": {
+                    "MEDIAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 500.0}
                     }
                 },

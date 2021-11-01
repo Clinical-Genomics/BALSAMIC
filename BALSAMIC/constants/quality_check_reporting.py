@@ -54,6 +54,7 @@ METRIC_FILES = {
     "picard_insertSize": "multiqc_picard_insertSize.json",
     "picard_dups": "multiqc_picard_dups.json",
     "picard_HsMetrics": "multiqc_picard_HsMetrics.json",
+    "picard_wgsmetrics": "multiqc_picard_wgsmetrics.json",
 }
 
 METRICS = {
@@ -140,10 +141,9 @@ METRICS = {
             },
         },
         "wgs": {
-            METRIC_FILES["picard_insertSize"]: {
-                "MEAN_INSERT_SIZE": {"condition": None}
+            METRIC_FILES["picard_wgsmetrics"]: {
+                "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}}
             },
-            METRIC_FILES["picard_dups"]: {"PERCENT_DUPLICATION": {"condition": None}},
         },
     }
 }
