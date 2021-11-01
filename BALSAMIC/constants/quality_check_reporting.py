@@ -69,6 +69,11 @@ METRICS = {
                 },
                 METRIC_FILES["picard_HsMetrics"]: {
                     "MEDIAN_TARGET_COVERAGE": {"condition": None},
+                    "PCT_TARGET_BASES_50X": {"condition": None},
+                    "PCT_TARGET_BASES_100X": {"condition": None},
+                    "PCT_TARGET_BASES_250X": {"condition": None},
+                    "PCT_TARGET_BASES_500X": {"condition": None},
+                    "PCT_TARGET_BASES_1000X": {"condition": None},
                     "MEAN_TARGET_COVERAGE": {"condition": None},
                     "FOLD_80_BASE_PENALTY": {"condition": None},
                     "PCT_OFF_BAIT": {"condition": None},
