@@ -124,16 +124,12 @@ METRICS_TO_DELIVER = {
         "PERCENT_DUPLICATION",
         "MEAN_TARGET_COVERAGE",
         "MEDIAN_TARGET_COVERAGE",
-        "PCT_TARGET_BASES_50X",
-        "PCT_TARGET_BASES_100X",
-        "PCT_TARGET_BASES_250X",
-        "PCT_TARGET_BASES_500X",
-        "PCT_TARGET_BASES_1000X",
         "FOLD_80_BASE_PENALTY",
         "PCT_OFF_BAIT",
     ],
     "wgs": [
         "MEAN_INSERT_SIZE",
         "PERCENT_DUPLICATION",
+        "FOLD_80_BASE_PENALTY",
     ],
 }

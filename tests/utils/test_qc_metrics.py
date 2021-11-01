@@ -145,7 +145,7 @@ def test_extract_metrics_for_delivery(analysis_path):
     seq_type = "targeted"
 
     # GIVEN an expected output
-    n_metrics = 11  # Number of expected metric
+    n_metrics = 6  # Number of expected metric
 
     hs_metric = {
         "header": None,
