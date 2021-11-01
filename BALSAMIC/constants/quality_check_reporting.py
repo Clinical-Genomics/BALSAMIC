@@ -80,68 +80,62 @@ METRICS = {
             },
             "gicfdna_3.1_hg19_design.bed": {
                 METRIC_FILES["picard_HsMetrics"]: {
-                    "MEAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 500.0}
+                    "MEDIAN_TARGET_COVERAGE": {
+                        "condition": {"norm": "gt", "threshold": 1000}
                     },
                     "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.5}
+                        "condition": {"norm": "lt", "threshold": 1.6}
                     },
-                    "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.35}},
                 }
             },
             "gmcksolid_4.1_hg19_design.bed": {
                 METRIC_FILES["picard_HsMetrics"]: {
-                    "MEAN_TARGET_COVERAGE": {
+                    "MEDIAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 500}
                     },
                     "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.7}
+                        "condition": {"norm": "lt", "threshold": 1.8}
                     },
-                    "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.3}},
                 }
             },
             "gmsmyeloid_5.2_hg19_design.bed": {
                 METRIC_FILES["picard_HsMetrics"]: {
-                    "MEAN_TARGET_COVERAGE": {
+                    "MEDIAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 1000}
                     },
                     "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.5}
+                        "condition": {"norm": "lt", "threshold": 1.6}
                     },
-                    "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.4}},
                 }
             },
             "lymphoma_6.1_hg19_design.bed": {
                 METRIC_FILES["picard_HsMetrics"]: {
-                    "MEAN_TARGET_COVERAGE": {
+                    "MEDIAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 1000}
                     },
                     "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.5}
+                        "condition": {"norm": "lt", "threshold": 1.6}
                     },
-                    "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.35}},
                 }
             },
             "gmslymphoid_7.1_hg19_design.bed": {
                 METRIC_FILES["picard_HsMetrics"]: {
-                    "MEAN_TARGET_COVERAGE": {
+                    "MEDIAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 1000}
                     },
                     "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.5}
+                        "condition": {"norm": "lt", "threshold": 1.6}
                     },
-                    "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.35}},
                 }
             },
             "twistexomerefseq_9.1_hg19_design.bed": {
                 METRIC_FILES["picard_HsMetrics"]: {
-                    "MEAN_TARGET_COVERAGE": {
+                    "MEDIAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 100}
                     },
                     "FOLD_80_BASE_PENALTY": {
                         "condition": {"norm": "lt", "threshold": 1.8}
                     },
-                    "PCT_OFF_BAIT": {"condition": {"norm": "lt", "threshold": 0.25}},
                 }
             },
         },
