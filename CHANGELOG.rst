@@ -11,7 +11,7 @@ Added:
 * Delly is added as a submodule and removed from rest of the conda environments #787
 * Added `.,PASS` to all structural variant filter rules to resolve the issues with missing calls in filtered file
 * Handling of QC metrics validation errors #783
-* Metric extraction to a YAML file for Vogue #798
+* Metric extraction to a YAML file for Vogue #802
 
 Changed:
 ^^^^^^^^
