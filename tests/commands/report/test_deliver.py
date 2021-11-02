@@ -6,6 +6,7 @@ import logging
 
 def test_deliver_tumor_only_panel(
     invoke_cli,
+    environ,
     tumor_only_config,
     helpers,
     sentieon_install_dir,
@@ -17,7 +18,7 @@ def test_deliver_tumor_only_panel(
     actual_delivery_report = Path(helpers.delivery_dir, helpers.case_id + ".hk")
 
     with mock.patch.dict(
-        "os.environ",
+        environ,
         {
             "SENTIEON_LICENSE": sentieon_license,
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
@@ -45,6 +46,7 @@ def test_deliver_tumor_only_panel(
 
 def test_deliver_tumor_normal_panel(
     invoke_cli,
+    environ,
     tumor_normal_config,
     helpers,
     sentieon_install_dir,
@@ -81,7 +83,7 @@ def test_deliver_tumor_normal_panel(
     touch_temp_no_delivery_file.touch()
 
     with mock.patch.dict(
-        "os.environ",
+        environ,
         {
             "SENTIEON_LICENSE": sentieon_license,
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
@@ -109,6 +111,7 @@ def test_deliver_tumor_normal_panel(
 
 def test_deliver_metrics(
     invoke_cli,
+    environ,
     tumor_normal_config,
     helpers,
     sentieon_install_dir,
@@ -123,7 +126,7 @@ def test_deliver_metrics(
     )
 
     with mock.patch.dict(
-        "os.environ",
+        environ,
         {
             "SENTIEON_LICENSE": sentieon_license,
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,

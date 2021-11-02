@@ -128,8 +128,6 @@ METRICS_TO_DELIVER = {
         "PCT_OFF_BAIT",
     ],
     "wgs": [
-        "MEAN_INSERT_SIZE",
-        "PERCENT_DUPLICATION",
         "FOLD_80_BASE_PENALTY",
     ],
 }
