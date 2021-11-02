@@ -9,7 +9,7 @@ rule sentieon_umiextract:
         read1 = Path(fastq_dir + "{sample}_1.umi_optimized.fastq.gz").as_posix(),
         read2 = Path(fastq_dir + "{sample}_2.umi_optimized.fastq.gz").as_posix()
     output:
-        ds_umi = temp(umi_dir + "{sample}.umiextract.fastq.gz")
+        ds_umi = temp(umi_dir + "{sample}_umiextract.fastq.gz")
     benchmark:
         Path(benchmark_dir, "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
@@ -43,9 +43,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rule sentieon_bwa_umiextract:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fastq_umi = umi_dir + "{sample}.umiextract.fastq.gz"
+        fastq_umi = umi_dir + "{sample}_umiextract.fastq.gz"
     output:
-        align_umi = temp(umi_dir + "{sample}.align.umi.bam")
+        align_umi = temp(umi_dir + "{sample}_align_umi.bam")
     benchmark:
         Path(benchmark_dir, "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
