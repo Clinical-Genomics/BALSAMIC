@@ -67,8 +67,20 @@ NOTE: This process can take couple of hours
   # Note:
   # 1. COSMIC key is in variable $COSMIC_KEY
   # 2. For genome version hg38, set --genome-version to hg38
+  # 3. For using develop container version, set --container-version to develop
+  # 4. For submitting jobs to slurm cluster, use option --account
 
   balsamic init --outdir ~/balsamic_cache \
     --cosmic-key "${COSMIC_KEY}" \
     --genome-version hg19 \
-    --run-analysis
+    --run-analysis \
+    --account development
+
+  # Generate cache locally instead of slurm job submission
+  balsamic init --outdir ~/balsamic_cache \
+    --cosmic-key "${COSMIC_KEY}" \
+    --genome-version hg19 \
+    --run-analysis \
+    --run-mode local \
+    --snakemake-opt "--cores 16"
+
