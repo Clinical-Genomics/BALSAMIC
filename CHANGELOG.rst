@@ -42,6 +42,7 @@ Fixed:
 * Fixed missing output option in bcftools filters for tnhaplotyper #793 
 * Fixed issue #795 with increasing resources for vep and filter SV prior to vep
 * Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
+* Fixed badget for docker container master and develop status  
 
 [8.1.0]
 -------
