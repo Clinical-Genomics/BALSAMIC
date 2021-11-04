@@ -700,8 +700,8 @@ class QCMetricModel(BaseModel):
 
     Attributes:
         name: str (required); quality control metric name
-        norm: string (required but can take None as a value); validation condition
-        threshold: float (required but can take None as a value); validation cut off
+        norm: string (optional); validation condition
+        threshold: float (optional); validation cut off
         value: float (required); metrics value
 
     Raises:
