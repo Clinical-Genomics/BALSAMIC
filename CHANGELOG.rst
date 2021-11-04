@@ -45,6 +45,7 @@ Fixed:
 * Fixed issue #795 with increasing resources for vep and filter SV prior to vep
 * Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
 * Fixed badget for docker container master and develop status  
+* ReadtheDocs building failure due to dependencies, fixed by locking versions #773
 
 [8.1.0]
 -------
