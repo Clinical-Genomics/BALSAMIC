@@ -92,8 +92,7 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     is_flag=True,
     help=f"Generates a YAML file of quality control metrics. "
-    f"Currently retrieved metrics: {', '.join(list(set(METRICS_TO_DELIVER['targeted'] + METRICS_TO_DELIVER['wgs'])))}"
-    "--metric-delivery",
+    f"Currently retrieved metrics: {', '.join(list(set(METRICS_TO_DELIVER['targeted'] + METRICS_TO_DELIVER['wgs'])))}",
 )
 @click.pass_context
 def deliver(
