@@ -129,10 +129,10 @@ def deliver(
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
     LOG.info("Creating delivery_report directory")
-    os.makedirs(dst_directory, exist_ok=True)
+    Path.mkdir(Path(dst_directory), parents=True, exist_ok=True)
 
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
-    os.makedirs(yaml_write_directory, exist_ok=True)
+    Path.mkdir(Path(yaml_write_directory), parents=True, exist_ok=True)
 
     analysis_type = (
         analysis_type
