@@ -12,6 +12,7 @@ Added:
 * Delly is added as a submodule and removed from rest of the conda environments #787
 * Added `.,PASS` to all structural variant filter rules to resolve the issues with missing calls in filtered file
 * Handling of QC metrics validation errors #783
+* Github Action workflow that builds the docs using Sphinx #809
 
 Changed:
 ^^^^^^^^
@@ -44,6 +45,7 @@ Fixed:
 * Fixed issue #795 with increasing resources for vep and filter SV prior to vep
 * Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
 * Fixed badget for docker container master and develop status  
+* ReadtheDocs building failure due to dependencies, fixed by locking versions #773
 
 [8.1.0]
 -------
