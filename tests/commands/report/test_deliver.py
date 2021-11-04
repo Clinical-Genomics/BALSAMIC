@@ -139,7 +139,7 @@ def test_deliver_metrics(
                 "deliver",
                 "--sample-config",
                 tumor_normal_config,
-                "--metric-delivery",
+                "--qc-metrics",
             ]
         )
 
