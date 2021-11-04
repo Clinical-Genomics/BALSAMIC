@@ -283,7 +283,7 @@ def deliver(
                 "path": metric_delivery_report,
                 "step": "balsamic_delivery",
                 "format": get_file_extension(metric_delivery_report),
-                "tag": ["balsamic-metrics-report"],
+                "tag": ["balsamic-report"],
                 "id": case_name,
             }
         )
