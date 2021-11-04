@@ -1,8 +1,7 @@
 name: "Pull Request Docs Check"
-on:
-  pull_request:
-    paths:
-      - "docs/**"
+on: [pull_request]
+    #paths:
+    #  - "docs/**"
 jobs:
   docs:
     runs-on: ubuntu-latest
