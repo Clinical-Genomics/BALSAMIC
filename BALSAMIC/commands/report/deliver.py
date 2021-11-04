@@ -87,10 +87,13 @@ LOG = logging.getLogger(__name__)
     f"values are: {list(VCF_DICT.keys())}",
 )
 @click.option(
-    "--metric-delivery",
+    "--qc-metrics/--no-qc-metrics",
+    default=True,
+    show_default=True,
     is_flag=True,
     help=f"Generates a YAML file of quality control metrics. "
-    f"Currently retrieved metrics: {', '.join(list(set(METRICS_TO_DELIVER['targeted'] + METRICS_TO_DELIVER['wgs'])))}",
+    f"Currently retrieved metrics: {', '.join(list(set(METRICS_TO_DELIVER['targeted'] + METRICS_TO_DELIVER['wgs'])))}"
+    "--metric-delivery",
 )
 @click.pass_context
 def deliver(
@@ -102,7 +105,7 @@ def deliver(
     disable_variant_caller,
     sample_id_map,
     case_id_map,
-    metric_delivery,
+    qc_metrics,
 ):
     """
     cli for deliver sub-command.
@@ -262,7 +265,7 @@ def deliver(
         )
 
     # Add output metrics delivery to report
-    if metric_delivery:
+    if qc_metrics:
         metric_delivery_report = os.path.join(
             yaml_write_directory, case_name + "_metrics_deliverables.yaml"
         )
