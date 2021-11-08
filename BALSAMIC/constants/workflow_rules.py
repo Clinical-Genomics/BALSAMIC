@@ -129,5 +129,5 @@ DELIVERY_RULES = [
     "mergeBam_normal",
     "cnvkit_paired",
     "cnvkit_single",
-    "ascat_tumor_normal"
+    "ascat_tumor_normal",
 ]
