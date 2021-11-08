@@ -22,6 +22,7 @@ Changed:
 * refactored main workflow with more readible organization #614
 * refactored conda envs within container to be on base and container definition is uncoupled #759
 * renamed umi output file names to fix issue with picard HSmetrics #804
+* locked requirements for graphviz io 0.16 #811
 
 Removed:
 ^^^^^^^^
