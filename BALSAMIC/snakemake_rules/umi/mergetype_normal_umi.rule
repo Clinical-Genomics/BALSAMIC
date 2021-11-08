@@ -6,9 +6,9 @@
 rule mergeBam_normal_umiconsensus:
   input:
     fasta = config["reference"]["reference_genome"],
-    bam = expand(umi_dir + "{mysample}.consensusfiltered.umi.bam", mysample=normal_sample)
+    bam = expand(umi_dir + "{mysample}_consensusfiltered_umi.bam", mysample=normal_sample)
   output:
-    bam = umi_dir + "normal.umi_consensusfiltered.merged.bam"
+    bam = umi_dir + "normal_umi_consensusfiltered.merged.bam"
   benchmark:
     Path(benchmark_dir, 'mergeBam_normal_umiconsensus_' + "{mysample}.tsv".format(mysample=normal_sample)).as_posix()
   singularity:

@@ -1,5 +1,4 @@
 import copy
-import json
 import os
 import pytest
 
@@ -460,23 +459,23 @@ def test_qc_check_model_passed_metrics(qc_extracted_metrics):
     metrics_model = QCCheckModel(**qc_extracted_metrics)
 
     # THEN assert that the retrieved metric values meet their conditions
-    for sample_name, metrics in metrics_model.metrics.items():
-        for metric in metrics:
-            assert metric.meets_condition
+    assert metrics_model.metrics.items() == qc_extracted_metrics["metrics"].items()
 
 
 def test_qc_check_model_failed_metrics(qc_extracted_metrics):
     """test QCCheckModel for an overly restrictive metric condition"""
 
-    # GIVEN a metric with a value that does not meet the specified condition
+    # GIVEN input attributes with a value that does not meet the filtering condition
     metrics_high_value = copy.deepcopy(qc_extracted_metrics)
     metrics_high_value["metrics"]["sample_1"][0]["value"] = 10.0
 
-    # WHEN building the QC check model
-    metrics_model = QCCheckModel(**metrics_high_value)
-
     # THEN check that the model filters the metric according to its norm
-    assert not metrics_model.metrics["sample_1"][0].meets_condition
+    with pytest.raises(ValueError) as val_exc:
+        QCCheckModel(**metrics_high_value)
+    assert (
+        f"QC metric MEAN_INSERT_SIZE_1: 10.0 validation has failed (condition: lt 1.0)."
+        in str(val_exc.value)
+    )
 
 
 def test_qc_check_model_failed_multiple_metrics(qc_extracted_metrics):
@@ -487,52 +486,23 @@ def test_qc_check_model_failed_multiple_metrics(qc_extracted_metrics):
     metrics_high_value["metrics"]["sample_1"][0]["value"] = 10.0
     metrics_high_value["metrics"]["sample_2"][0]["value"] = 10.0
 
-    # WHEN building the QC check model
-    metrics_model = QCCheckModel(**metrics_high_value)
-
     # THEN check that the model filters the metrics according to its norm
-    assert not metrics_model.metrics["sample_1"][0].meets_condition
-    assert not metrics_model.metrics["sample_2"][0].meets_condition
+    with pytest.raises(ValueError) as val_exc:
+        QCCheckModel(**metrics_high_value)
+    assert f"2 validation errors for QCCheckModel" in str(val_exc.value)
 
 
 def test_qc_check_model_get_json(qc_extracted_metrics):
-    """test metric-value json extraction and metrics filtering for passing conditions"""
+    """test metric-value json extraction and metric filtering for passing conditions"""
 
     # GIVEN expected output
     expected_output = {
-        "sample_1": {
-            "failed": {},
-            "passed": {"MEAN_INSERT_SIZE_1": 0.5, "MEAN_INSERT_SIZE_2": 0.5},
-        },
-        "sample_2": {"failed": {}, "passed": {"MEAN_INSERT_SIZE_1": 0.5}},
+        "sample_1": {"MEAN_INSERT_SIZE_1": 0.5, "MEAN_INSERT_SIZE_2": 0.5},
+        "sample_2": {"MEAN_INSERT_SIZE_1": 0.5},
     }
 
     # WHEN building the QC check model
     metrics_model = QCCheckModel(**qc_extracted_metrics)
 
     # THEN check if the extracted metrics and its structure meets the expected one
-    assert json.loads(metrics_model.get_json).items() == expected_output.items()
-
-
-def test_qc_check_model_get_json_failed_metrics(qc_extracted_metrics):
-    """test metric-value json extraction and metrics filtering for failing values"""
-
-    # GIVEN input attributes that does not meet the specified conditions
-    metrics_high_value = copy.deepcopy(qc_extracted_metrics)
-    metrics_high_value["metrics"]["sample_1"][0]["value"] = 10.0
-    metrics_high_value["metrics"]["sample_2"][0]["value"] = 10.0
-
-    # GIVEN expected output
-    expected_output = {
-        "sample_1": {
-            "failed": {"MEAN_INSERT_SIZE_1": 10.0},
-            "passed": {"MEAN_INSERT_SIZE_2": 0.5},
-        },
-        "sample_2": {"failed": {"MEAN_INSERT_SIZE_1": 10.0}, "passed": {}},
-    }
-
-    # WHEN building the QC check model
-    metrics_model = QCCheckModel(**metrics_high_value)
-
-    # THEN check if the extracted metrics and its structure meets the expected one
-    assert json.loads(metrics_model.get_json).items() == expected_output.items()
+    assert metrics_model.get_json.items() == expected_output.items()
