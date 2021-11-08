@@ -6,6 +6,7 @@ Added:
 
 * Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
+* BALSAMIC reference generation via cluster submission for both reference and container #686 
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 * Delly is added as a submodule and removed from rest of the conda environments #787
@@ -26,6 +27,7 @@ Removed:
 * The option of running umiworkflow independently with balsamic command-line option "-a umi"
 * Removed source activate from reference and pon workflows #764
 
+
 Fixed:
 ^^^^^^
 
@@ -40,7 +42,9 @@ Fixed:
 * Fixed issues #748 #749 with correct sample names 
 * Fixed issue #767 for ascatngs hardcoded values
 * Fixed missing output option in bcftools filters for tnhaplotyper #793 
+* Fixed issue #795 with increasing resources for vep and filter SV prior to vep
 * Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
+* Fixed badget for docker container master and develop status  
 
 [8.1.0]
 -------

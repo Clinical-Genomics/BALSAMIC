@@ -33,7 +33,7 @@ def test_init_reference_write_json(
             "init",
             "-o",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "-v",
             test_container_version,
@@ -58,7 +58,7 @@ def test_init_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
             "init",
             "-o",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "-v",
             test_container_version,
@@ -69,6 +69,63 @@ def test_init_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
 
     # THEN it should create test_reference.json and exist with no error
     assert result.exit_code == 1
+
+
+def test_init_reference_click_abort(invoke_cli, tmp_path):
+    # Given test_reference output directory
+    test_container_version = "develop"
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    # WHEN running the command
+    result = invoke_cli(
+        [
+            "init",
+            "-o",
+            str(test_new_dir),
+            "--cosmic-key",
+            "secret_key",
+            "-v",
+            test_container_version,
+            "--run-analysis",
+        ]
+    )
+
+    # THEN it should exit code for not providing the run-mode
+    assert result.exit_code == 1
+
+
+def test_init_reference_mail_type(invoke_cli, tmp_path):
+    # Given test_reference output directory
+    test_container_version = "develop"
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    dummy_mail_type = "END"
+    dummy_mail_user = "dummy@gmail.com"
+
+    # WHEN running the command
+    result = invoke_cli(
+        [
+            "init",
+            "-o",
+            str(test_new_dir),
+            "--cosmic-key",
+            "secret_key",
+            "-v",
+            test_container_version,
+            "--run-analysis",
+            "--run-mode",
+            "local",
+            "--mail-type",
+            dummy_mail_type,
+            "--mail-user",
+            dummy_mail_user,
+        ]
+    )
+
+    # THEN it should exit code for not providing the run-mode
+    assert result.exit_code == 0
 
 
 def test_init_reference_graph_exception(invoke_cli, tmp_path):
@@ -83,7 +140,7 @@ def test_init_reference_graph_exception(invoke_cli, tmp_path):
                 "init",
                 "-o",
                 str(test_new_dir),
-                "-c",
+                "--cosmic-key",
                 "secret_key",
             ]
         )
@@ -103,7 +160,7 @@ def test_init_container_force_dry(invoke_cli, tmp_path):
             "init",
             "--outdir",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "--force",
             "-v",
@@ -127,7 +184,7 @@ def test_init_container_specific_tag(invoke_cli, tmp_path):
             "init",
             "--outdir",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "--container-version",
             dummy_tag,
@@ -152,9 +209,11 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
                 "init",
                 "--outdir",
                 str(test_new_dir),
-                "-c",
+                "--cosmic-key",
                 "secret_key",
                 "--run-analysis",
+                "--account",
+                "development",
             ]
         )
 
@@ -174,7 +233,7 @@ def test_init_container_wrong_tag(invoke_cli, tmp_path):
             "init",
             "--outdir",
             str(test_new_dir),
-            "-c",
+            "--cosmic-key",
             "secret_key",
             "--container-version",
             dummy_tag,
