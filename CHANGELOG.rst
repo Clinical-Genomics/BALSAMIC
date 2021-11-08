@@ -46,6 +46,7 @@ Fixed:
 * Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
 * Fixed badget for docker container master and develop status  
 * ReadtheDocs building failure due to dependencies, fixed by locking versions #773
+* Dev requirements installation for Sphinx docs (Github Action) #811
 
 [8.1.0]
 -------
