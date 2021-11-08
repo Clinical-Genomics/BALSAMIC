@@ -1,0 +1,19 @@
+name: "Pull Request Docs Check"
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout BALSAMIC
+      - name: Git checkout
+        id: git_checkout
+        uses: actions/checkout@v2
+      - name: Sphinx build action
+        id: sphinx_docs
+        uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs/"
+          build-command: "sphinx-build -T -E -b html -d _build/doctrees-readthedocs -D language=en . _build/html"

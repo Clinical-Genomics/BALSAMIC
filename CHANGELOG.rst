@@ -6,11 +6,13 @@ Added:
 
 * Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
+* BALSAMIC reference generation via cluster submission for both reference and container #686 
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 * Delly is added as a submodule and removed from rest of the conda environments #787
 * Added `.,PASS` to all structural variant filter rules to resolve the issues with missing calls in filtered file
 * Handling of QC metrics validation errors #783
+* Github Action workflow that builds the docs using Sphinx #809
 * Panel BED specific QC conditions #800
 
 Changed:
@@ -41,7 +43,10 @@ Fixed:
 * Fixed issues #748 #749 with correct sample names 
 * Fixed issue #767 for ascatngs hardcoded values
 * Fixed missing output option in bcftools filters for tnhaplotyper #793 
+* Fixed issue #795 with increasing resources for vep and filter SV prior to vep
 * Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
+* Fixed badget for docker container master and develop status  
+* ReadtheDocs building failure due to dependencies, fixed by locking versions #773
 
 [8.1.0]
 -------
@@ -59,7 +64,7 @@ Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
-* Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10 
+* Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10
 
 
 Fixed:
