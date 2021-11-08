@@ -139,6 +139,7 @@ rule ascat_tumor_normal:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("ascatNgs") + ".sif").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "ascat"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",
