@@ -63,6 +63,9 @@ def get_qc_metrics_json(analysis_path, sequencing_type):
 
 def get_multiqc_data_source(data, sample, source_name):
     """Extracts the metrics data source associated with sample and source names"""
+
+    # Splits multiqc_picard_dups into ['multiqc', 'picard', 'dup'] in order to retrieve the
+    # ["report_data_sources"]["Picard"]["DuplicationMetrics"] values from multiqc_data.json
     source = source_name[:-1].split("_")
 
     # Nested json fetching
