@@ -19,7 +19,7 @@ setup(
         "colorclass>=2.2.0",
         "coloredlogs>=14.0",
         "cyvcf2<0.10.0",
-        "graphviz>=0.14",
+        "graphviz==0.16",
         "gsutil==4.50",
         "jinja2>=2.11.2",
         "matplotlib>=3.3.0",

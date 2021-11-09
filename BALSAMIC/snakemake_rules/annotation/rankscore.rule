@@ -15,7 +15,6 @@ rule genmod_score_vardict:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name = "{case_name}"
   threads:
     get_threads(cluster_config, 'genmod_score_vardict')
