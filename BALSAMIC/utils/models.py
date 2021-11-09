@@ -705,7 +705,6 @@ class QCMetricModel(BaseModel):
         value: float (required); metrics value
 
     Raises:
-        ValidationError: when the specified norm is not supported
         ValueError: when a metric does not meet its validation requirements
     """
 
