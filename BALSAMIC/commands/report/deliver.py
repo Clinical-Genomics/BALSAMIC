@@ -15,7 +15,7 @@ from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
-from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.rule import get_result_dir, get_capture_kit
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, extract_metrics_for_delivery
 from BALSAMIC.utils.qc_report import render_html, report_data_population
@@ -163,7 +163,9 @@ def deliver(
         meta["apptag"] = case_id_map[2]
 
         collected_qc = get_qc_metrics_json(
-            sample_config_dict["analysis"]["result"], sequencing_type
+            sample_config_dict["analysis"]["result"],
+            sequencing_type,
+            get_capture_kit(sample_config_dict),
         )
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
         balsamic_qc_report = os.path.join(

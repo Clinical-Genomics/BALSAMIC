@@ -16,4 +16,5 @@ jobs:
         uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
+          pre-build-command: "pip install -r requirements-dev.txt"
           build-command: "sphinx-build -T -E -b html -d _build/doctrees-readthedocs -D language=en . _build/html"

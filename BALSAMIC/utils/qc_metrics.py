@@ -5,7 +5,33 @@ from BALSAMIC.constants.quality_check_reporting import (
     METRICS,
     METRICS_TO_DELIVER,
 )
-from BALSAMIC.utils.models import QCCheckModel, DeliveryMetricModel
+from BALSAMIC.utils.models import QCValidationModel, DeliveryMetricModel
+
+
+def get_qc_available_panel_beds(metrics):
+    """Returns available panel beds file names for QC validation"""
+    available_beds = []
+
+    for k in metrics:
+        if k != "default":
+            available_beds.append(k)
+
+    return available_beds
+
+
+def merge_dicts(*dicts):
+    """Merges multiple dictionaries integrating by common keys"""
+    merged_dict = {}
+
+    for d in dicts:
+        for key in d:
+            try:
+                # Overwrites the default values with panel specific ones
+                merged_dict[key].update(d[key])
+            except KeyError:
+                merged_dict[key] = d[key]
+
+    return merged_dict
 
 
 def read_metrics(analysis_path, file_name):
@@ -30,8 +56,15 @@ def update_metrics_dict(sample_id, metric, value, metrics_dict):
     if sample_name not in metrics_dict:
         metrics_dict[sample_name] = []
 
+    try:
+        norm = metric[1]["condition"]["norm"]
+        threshold = metric[1]["condition"]["threshold"]
+    except TypeError:
+        norm = None
+        threshold = None
+
     metrics_dict[sample_name].append(
-        {"name": metric[0], "value": value, "condition": metric[1]["condition"]}
+        {"name": metric[0], "norm": norm, "threshold": threshold, "value": value}
     )
 
     return metrics_dict
@@ -52,13 +85,25 @@ def get_qc_metrics_dict(analysis_path, requested_metrics):
     return metrics_dict
 
 
-def get_qc_metrics_json(analysis_path, sequencing_type):
+def get_qc_metrics_json(analysis_path, sequencing_type, panel_bed):
     """Extracts the metrics of interest and returns them as a json object"""
-    qc_check_model = QCCheckModel.parse_obj(
-        {"metrics": get_qc_metrics_dict(analysis_path, METRICS["qc"][sequencing_type])}
+    if sequencing_type != "wgs" and panel_bed in get_qc_available_panel_beds(
+        METRICS["qc"][sequencing_type]
+    ):
+        metrics = merge_dicts(
+            METRICS["qc"][sequencing_type]["default"],
+            METRICS["qc"][sequencing_type][panel_bed],
+        )
+    elif sequencing_type != "wgs":
+        metrics = METRICS["qc"][sequencing_type]["default"]
+    else:
+        metrics = METRICS["qc"][sequencing_type]
+
+    qc_model = QCValidationModel.parse_obj(
+        {"metrics": get_qc_metrics_dict(analysis_path, metrics)}
     )
 
-    return qc_check_model.get_json
+    return qc_model.get_json
 
 
 def get_multiqc_data_source(data, sample, source_name):

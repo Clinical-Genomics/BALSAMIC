@@ -503,7 +503,7 @@ def qc_metrics():
                     "MEAN_INSERT_SIZE": {"condition": None}
                 },
                 "multiqc_picard_HsMetrics.json": {
-                    "MEAN_TARGET_COVERAGE": {
+                    "MEDIAN_TARGET_COVERAGE": {
                         "condition": {"norm": "gt", "threshold": 500.0}
                     }
                 },
@@ -528,21 +528,37 @@ def qc_extracted_metrics():
             "sample_1": [
                 {
                     "name": "MEAN_INSERT_SIZE_1",
+                    "norm": "lt",
+                    "threshold": 1.0,
                     "value": 0.5,
-                    "condition": {"norm": "lt", "threshold": 1.0},
                 },
                 {
                     "name": "MEAN_INSERT_SIZE_2",
+                    "norm": "lt",
+                    "threshold": 1.0,
                     "value": 0.5,
-                    "condition": {"norm": "lt", "threshold": 1.0},
                 },
             ],
             "sample_2": [
                 {
                     "name": "MEAN_INSERT_SIZE_1",
+                    "norm": "lt",
+                    "threshold": 1.0,
                     "value": 0.5,
-                    "condition": {"norm": "lt", "threshold": 1.0},
                 },
             ],
         }
+    }
+
+
+@pytest.fixture(scope="session")
+def qc_raw_targeted_metrics():
+    """Raw metrics"""
+    return {
+        "default": {
+            "metrics_1.json": {"METRIC_1": 0.1, "METRIC_2": 0.2},
+            "metrics_2.json": {"METRIC_3": 0.3},
+        },
+        "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
+        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5, "METRIC_4": 0.4}},
     }
