@@ -9,6 +9,7 @@ import datetime
 import subprocess
 from pathlib import Path
 
+from BALSAMIC.constants.quality_check_reporting import METRICS_TO_DELIVER
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
@@ -16,7 +17,7 @@ from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.rule import get_result_dir, get_capture_kit
 from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
+from BALSAMIC.utils.qc_metrics import get_qc_metrics_json, extract_metrics_for_delivery
 from BALSAMIC.utils.qc_report import render_html, report_data_population
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
@@ -85,6 +86,14 @@ LOG = logging.getLogger(__name__)
     help=f"Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid "
     f"values are: {list(VCF_DICT.keys())}",
 )
+@click.option(
+    "--qc-metrics/--no-qc-metrics",
+    default=True,
+    show_default=True,
+    is_flag=True,
+    help=f"Generates a YAML file of quality control metrics. "
+    f"Currently retrieved metrics: {', '.join(list(set(METRICS_TO_DELIVER['targeted'] + METRICS_TO_DELIVER['wgs'])))}",
+)
 @click.pass_context
 def deliver(
     context,
@@ -95,6 +104,7 @@ def deliver(
     disable_variant_caller,
     sample_id_map,
     case_id_map,
+    qc_metrics,
 ):
     """
     cli for deliver sub-command.
@@ -118,10 +128,10 @@ def deliver(
     result_dir = get_result_dir(sample_config_dict)
     dst_directory = os.path.join(result_dir, "delivery_report")
     LOG.info("Creating delivery_report directory")
-    os.makedirs(dst_directory, exist_ok=True)
+    Path.mkdir(Path(dst_directory), parents=True, exist_ok=True)
 
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
-    os.makedirs(yaml_write_directory, exist_ok=True)
+    Path.mkdir(Path(yaml_write_directory), parents=True, exist_ok=True)
 
     analysis_type = (
         analysis_type
@@ -251,6 +261,30 @@ def deliver(
                 "step": "balsamic_delivery",
                 "format": get_file_extension(balsamic_qc_report),
                 "tag": ["coverage-qc-report"],
+                "id": case_name,
+            }
+        )
+
+    # Add output metrics delivery to report
+    if qc_metrics:
+        metric_delivery_report = os.path.join(
+            yaml_write_directory, case_name + "_metrics_deliverables.yaml"
+        )
+        metrics = extract_metrics_for_delivery(
+            sample_config_dict["analysis"]["result"], sequencing_type
+        )
+
+        with open(metric_delivery_report, "w") as fn:
+            yaml.dump(metrics, fn, default_flow_style=False)
+
+        LOG.info(f"Created metrics delivery file: {metric_delivery_report}")
+
+        delivery_json["files"].append(
+            {
+                "path": metric_delivery_report,
+                "step": "balsamic_delivery",
+                "format": get_file_extension(metric_delivery_report),
+                "tag": ["balsamic-report"],
                 "id": case_name,
             }
         )

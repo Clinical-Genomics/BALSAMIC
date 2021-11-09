@@ -749,3 +749,23 @@ class QCValidationModel(BaseModel):
                 metrics_json[sample_name].update({metric.name: metric.value})
 
         return metrics_json
+
+
+class DeliveryMetricModel(BaseModel):
+    """Defines the metric attributes model for delivery
+
+    Attributes:
+        header: str (optional); data
+        id: str (required); unique sample identifier (sample_id, case_id or project_id)
+        input: str (required); input file
+        name: str (required); metric name
+        step: str (required); step that generated the metric
+        value: float (required); metric value
+    """
+
+    header: Optional[str]
+    id: str
+    input: str
+    name: str
+    step: str
+    value: float

@@ -28,6 +28,12 @@ def invoke_cli(cli_runner):
 
 
 @pytest.fixture(scope="session")
+def environ():
+    """environment process"""
+    return "os.environ"
+
+
+@pytest.fixture(scope="session")
 def config_files():
     """dict: path of the config files"""
     return {

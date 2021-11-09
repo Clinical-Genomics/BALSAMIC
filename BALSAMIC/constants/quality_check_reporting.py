@@ -147,3 +147,17 @@ METRICS = {
         },
     }
 }
+
+METRICS_TO_DELIVER = {
+    "targeted": [
+        "MEAN_INSERT_SIZE",
+        "PERCENT_DUPLICATION",
+        "MEAN_TARGET_COVERAGE",
+        "MEDIAN_TARGET_COVERAGE",
+        "FOLD_80_BASE_PENALTY",
+        "PCT_OFF_BAIT",
+    ],
+    "wgs": [
+        "FOLD_80_BASE_PENALTY",
+    ],
+}

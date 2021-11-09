@@ -24,6 +24,7 @@ from BALSAMIC.utils.models import (
     ParamsVEP,
     QCMetricModel,
     QCValidationModel,
+    DeliveryMetricModel,
 )
 
 
@@ -478,3 +479,35 @@ def test_qc_validation_model_get_json(qc_extracted_metrics):
 
     # THEN check if the extracted metrics and its structure meets the expected one
     assert validation_model.get_json.items() == output_metrics.items()
+
+
+def test_delivery_metric_model_pass_validation():
+    """test DeliveryMetricModel attributes parsing"""
+
+    # GIVEN input attributes
+    metrics = {
+        "header": None,
+        "id": "005",
+        "input": "S1_005.sorted.mrkdup.txt",
+        "name": "MEAN_INSERT_SIZE",
+        "step": "multiqc_rule",
+        "value": 0.5,
+    }
+
+    # WHEN building the delivery metric model
+    metrics_model = DeliveryMetricModel(**metrics)
+
+    # THEN assert retrieved values from the created model
+    assert metrics_model.dict().items() == metrics.items()
+
+
+def test_delivery_metric_model_fail_validation():
+    """test DeliveryMetricModel behaviour for an incorrect input"""
+
+    # GIVEN a non accepted input
+    invalid_input = {"name": "MEAN_INSERT_SIZE"}
+
+    # THEN the model raises an error due to an incomplete input
+    with pytest.raises(ValueError) as input_exc:
+        DeliveryMetricModel(**invalid_input)
+    assert f"field required" in str(input_exc.value)

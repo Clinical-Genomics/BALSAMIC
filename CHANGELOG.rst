@@ -16,6 +16,7 @@ Added:
 * Github Action workflow that builds the docs using Sphinx #809
 * Zenodo integration to create citable link #813
 * Panel BED specific QC conditions #800
+* Metric extraction to a YAML file for Vogue #802
 
 Changed:
 ^^^^^^^^
