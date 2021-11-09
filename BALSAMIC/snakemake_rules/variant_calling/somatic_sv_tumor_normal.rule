@@ -109,7 +109,7 @@ rule bcftools_bcf2vcf_delly:
         ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
     shell:
         """
-bcftools view -O z -o {output.vcf} {input.bcf};
+bcftools view  --threads {threads} -f PASS -O z -o {output.vcf} {input.bcf};
 
 tabix -p vcf -f {output.vcf};
         """

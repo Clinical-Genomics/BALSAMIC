@@ -24,7 +24,7 @@ rule bcftools_filter_manta:
     "Filtering Manta results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """
 
@@ -40,6 +40,7 @@ rule bcftools_filter_delly:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
     case_name = "{case_name}",
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     var_caller = "delly"
   threads:
     get_threads(cluster_config, "bcftools_filter_delly")
@@ -47,7 +48,7 @@ rule bcftools_filter_delly:
     "Filtering Delly results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """
 
@@ -63,6 +64,7 @@ rule bcftools_filter_ascat:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
     case_name = "{case_name}",
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     var_caller = "ascat"
   threads:
     get_threads(cluster_config, "bcftools_filter_ascat")
@@ -70,6 +72,6 @@ rule bcftools_filter_ascat:
     "Filtering Ascat results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f PASS -o {output.vcf_sv_pass} -O z {input.vcf};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """
