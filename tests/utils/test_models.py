@@ -418,11 +418,10 @@ def test_qc_metric_model_norm_fail(qc_extracted_metrics):
     metric["norm"] = "higher"
 
     # THEN model raises an error due to a non accepted norm
-    with pytest.raises(ValueError) as norm_exc:
+    try:
         QCMetricModel(**metric)
-    assert f"{metric['norm']} is not a valid condition for QC filtering" in str(
-        norm_exc.value
-    )
+    except KeyError as key_exc:
+        assert metric["norm"] in str(key_exc)
 
 
 def test_qc_metric_model_condition_fail(qc_extracted_metrics):

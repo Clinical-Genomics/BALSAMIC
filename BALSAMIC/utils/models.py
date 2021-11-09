@@ -714,16 +714,6 @@ class QCMetricModel(BaseModel):
     threshold: Optional[float] = None
     value: float
 
-    @root_validator(pre=True)
-    def check_operator(cls, values):
-        """Validates if the retrieved norm is a valid operator"""
-        if values["norm"]:
-            assert (
-                values["norm"] in VALID_OPS
-            ), f"{values['norm']} is not a valid condition for QC filtering"
-
-        return values
-
     @root_validator()
     def check_metric(cls, values):
         """Checks if a metric meets its filtering condition"""
