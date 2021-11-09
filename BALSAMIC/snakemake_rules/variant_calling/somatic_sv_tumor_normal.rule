@@ -125,7 +125,7 @@ rule ascat_tumor_normal:
         gccorrection = config["reference"]["ascat_gccorrection"],
         chryloci= config["reference"]["ascat_chryloci"],
     output:
-        finalvcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        finalvcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz"),
         samplestatistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
         germlineplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
         rawprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
@@ -133,7 +133,7 @@ rule ascat_tumor_normal:
         tumorplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
         aspcfplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
         ascatprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
-        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
+        namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map"),
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
