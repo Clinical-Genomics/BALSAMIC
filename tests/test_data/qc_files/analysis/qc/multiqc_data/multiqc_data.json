@@ -1,0 +1,71 @@
+{
+    "report_data_sources": {
+        "Picard": {
+            "HsMetrics": {
+                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+                "concatenated_tumor_XXXXXX_R.consensusfiltered.umi": "tests/test_data/qc_files/analysis/qc/umi_qc/concatenated_tumor_XXXXXX_R.umi.collect_hsmetric"
+            },
+            "InsertSizeMetrics": {
+                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.insertsizemetric"
+            },
+            "DuplicationMetrics": {
+                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
+            }
+        }
+    },
+    "report_saved_raw_data": {
+        "multiqc_picard_HsMetrics": {
+            "concatenated_tumor_XXXXXX_R": {
+                "BAIT_SET": "gmsmyeloid_5.2_hg19_design.bed",
+                "PCT_OFF_BAIT": 0.364546,
+                "GENOME_SIZE": 3101804739.0,
+                "TOTAL_READS": 95785560.0,
+                "ON_TARGET_BASES": 1686109974.0,
+                "MEAN_TARGET_COVERAGE": 2314.698853,
+                "MEDIAN_TARGET_COVERAGE": 2393.0,
+                "MAX_TARGET_COVERAGE": 8654.0,
+                "MIN_TARGET_COVERAGE": 0.0,
+                "FOLD_80_BASE_PENALTY": 1.359189,
+                "AT_DROPOUT": 6.093115,
+                "GC_DROPOUT": 0.027402
+            },
+            "concatenated_tumor_XXXXXX_R.consensusfiltered.umi": {
+                "BAIT_SET": "concatenated_tumor_XXXXXX_R",
+                "PCT_OFF_BAIT": 0.13703,
+                "GENOME_SIZE": 3101804739.0,
+                "TOTAL_READS": 1914717.0,
+                "ON_TARGET_BASES": 164972431.0,
+                "MEAN_TARGET_COVERAGE": 226.474846,
+                "MEDIAN_TARGET_COVERAGE": 211.0,
+                "MAX_TARGET_COVERAGE": 1251.0,
+                "MIN_TARGET_COVERAGE": 0.0,
+                "FOLD_80_BASE_PENALTY": 1.742114,
+                "AT_DROPOUT": 12.048384,
+                "GC_DROPOUT": 0.150425
+            }
+        },
+        "multiqc_picard_insertSize": {
+            "concatenated_tumor_XXXXXX_R_FR": {
+                "SAMPLE_NAME": "concatenated_tumor_XXXXXX_R",
+                "MEDIAN_INSERT_SIZE": 186.0,
+                "MIN_INSERT_SIZE": 2.0,
+                "MAX_INSERT_SIZE": 242835911.0,
+                "MEAN_INSERT_SIZE": 201.813054,
+                "STANDARD_DEVIATION": 92.074428,
+                "READ_PAIRS": 47449397.0,
+                "PAIR_ORIENTATION": "FR"
+            }
+        },
+        "multiqc_picard_dups": {
+            "concatenated_tumor_XXXXXX_R": {
+                "LIBRARY": "Unknown Library",
+                "UNPAIRED_READS_EXAMINED": 7389.0,
+                "READ_PAIRS_EXAMINED": 47884432.0,
+                "UNMAPPED_READS": 9307.0,
+                "UNPAIRED_READ_DUPLICATES": 5790.0,
+                "READ_PAIR_DUPLICATES": 18741892.0,
+                "PERCENT_DUPLICATION": 0.391429
+            }
+        }
+    }
+}

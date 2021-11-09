@@ -35,7 +35,7 @@ Snakemake cli given that there is a proper config file created.
      - |test_status_badge|
    * - Container latest release status
      - |docker_latest_release_status|
-   * - Container master status 
+   * - Container master and develop status 
      - |docker_latest_build_status|
    * - Code coverage
      - |code_cov_badge|_
@@ -54,7 +54,7 @@ Snakemake cli given that there is a proper config file created.
 
 .. |test_status_badge| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/pytest_and_coveralls.yml/badge.svg
 
-.. |docker_latest_build_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push_master.yml/badge.svg 
+.. |docker_latest_build_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push.yml/badge.svg 
 
 .. |docker_latest_release_status| image:: https://github.com/Clinical-Genomics/BALSAMIC/actions/workflows/docker_build_push_release.yml/badge.svg?tag=v8.1.0 
   

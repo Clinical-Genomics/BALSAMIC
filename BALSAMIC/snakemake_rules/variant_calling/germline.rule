@@ -1,6 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
+
 rule gatk_haplotypecaller:
     input:
         fa = config["reference"]["reference_genome"],
@@ -13,21 +15,20 @@ rule gatk_haplotypecaller:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     params:
-        conda = config["bioinfo_tools"].get("gatk"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample = '{sample_type}'
+        sample = '{sample_type}',
+        gatk_path = '/opt/conda/opt/gatk-3.8' 
     threads:
         get_threads(cluster_config,'gatk_haplotypecaller')
     message:
-        ("Calling germline variants using gatk haplotypecaller for"
+        ("Calling germline variants using gatk haplotypecaller for "
          "targeted-panel sample {params.sample}")
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+java -jar -Djava.io.tmpdir={params.tmpdir} -Xms8G -Xmx32G {params.gatk_path}/GenomeAnalysisTK.jar \
 -T HaplotypeCaller \
 -R {input.fa} \
 -I {input.bam} \
@@ -49,13 +50,11 @@ rule haplotypecaller_merge:
         Path(singularity_image, config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix = tmp_dir),
-        conda = config["bioinfo_tools"].get("gatk"),
         sample = '{sample_type}'
     message:
         "Concatenate haplotyper outputs of multiple chr vcfs using bcftools for sample {params.sample}"
     shell:
         """
-source activate {params.conda};
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
@@ -65,43 +64,6 @@ tabix -f -p vcf {output};
 rm -rf {params.tmpdir};
         """
 
-
-rule manta_germline:
-    input:
-        fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample_type}.merged.bam",
-    output:
-        final = vcf_dir + "SV.germline.{sample_type}.manta_germline.vcf.gz",
-    benchmark:
-        Path(benchmark_dir, 'manta_germline_' + "{sample_type}.tsv").as_posix()
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
-    params:
-        conda = config["bioinfo_tools"].get("manta"),
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
-        sample = "{sample_type}"
-    threads:
-        get_threads(cluster_config,"manta_germline")
-    message:
-        "Calling germline variants using manta for sample {params.sample}"
-    shell:
-        """
-source activate {params.conda};
-
-configManta.py \
---bam={input.bam} \
---referenceFasta={input.fa} \
---runDir={params.tmpdir};
-
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
-
-cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
-
-tabix -p vcf -f {output.final};
-
-rm -rf {params.tmpdir};
-        """
 
 rule sentieon_DNAscope:
     input:

@@ -2,6 +2,8 @@
 # coding: utf-8
 # Rank variants according to a rankscore model
 
+
+
 rule genmod_score_vardict:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
@@ -13,8 +15,6 @@ rule genmod_score_vardict:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-    conda = config["bioinfo_tools"].get("genmod"),
     case_name = "{case_name}"
   threads:
     get_threads(cluster_config, 'genmod_score_vardict')
@@ -23,8 +23,6 @@ rule genmod_score_vardict:
     "and compress vcf using bcftools on {params.case_name}")
   shell:
     """
-source activate {params.conda};
-
 genmod score -r -c {input.rankscore} {input.vcf} | \
 bcftools view -o {output.vcf_pass} -O z;
 

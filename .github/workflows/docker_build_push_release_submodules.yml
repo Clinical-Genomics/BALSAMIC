@@ -1,5 +1,5 @@
 name: build and push container submodule
-# Tigger building and testing container only on pull requests
+# Trigger building and testing container only on pull requests
 on:
   push:
     tags:
@@ -9,6 +9,10 @@ jobs:
   main:
     name: Docker image build test
     runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false 
+      matrix:
+        container-name: [ascatNgs]
     steps:
       - name: Git checkout
         id: git_checkout
@@ -29,6 +33,6 @@ jobs:
         id: docker_build_and_push
         uses: docker/build-push-action@v2
         with:
-          context: submodules/ascatNgs
+          context: submodules/${{ matrix.container-name }}
           push: true
-          tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-ascatngs
+          tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}

@@ -19,7 +19,7 @@ setup(
         "colorclass>=2.2.0",
         "coloredlogs>=14.0",
         "cyvcf2<0.10.0",
-        "graphviz>=0.14",
+        "graphviz==0.16",
         "gsutil==4.50",
         "jinja2>=2.11.2",
         "matplotlib>=3.3.0",
@@ -36,7 +36,7 @@ setup(
         "h5py>=3.1.0",
         "PyPDF2>=1.26.0",
         "markdown==3.3.3",
-        "cryptography<3.4",
+        "cryptography==3.2.1",
     ],
     packages=find_packages(),
     package_data={

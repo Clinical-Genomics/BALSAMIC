@@ -16,7 +16,7 @@ from BALSAMIC.commands.plugins.base import plugins as plugins_command
 from BALSAMIC.utils.cli import add_doc as doc
 
 # Get version
-from BALSAMIC import __version__
+from BALSAMIC import __version__ as balsamic_version
 
 LOG = logging.getLogger(__name__)
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -25,17 +25,17 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 @click.group()
 @click.option(
     "--loglevel",
-    default="DEBUG",
+    default="INFO",
     type=click.Choice(LOG_LEVELS),
     help="Set the level of log output.",
     show_default=True,
 )
-@click.version_option(version=__version__)
+@click.version_option(version=balsamic_version)
 @click.pass_context
 @doc(
     """BALSAMIC {version}: Bioinformatic Analysis pipeLine for
         SomAtic MutatIons in Cancer""".format(
-        version=__version__
+        version=balsamic_version
     )
 )
 def cli(context, loglevel):
@@ -51,7 +51,7 @@ def cli(context, loglevel):
         level=loglevel,
         fmt="%(programname)s %(hostname)s %(asctime)s %(name)s pid:%(process)d [%(levelname)s] %(message)s",
     )
-    LOG.info("Running BALSAMIC version %s", __version__)
+    LOG.info("Running BALSAMIC version %s", balsamic_version)
 
     context.obj = {}
     context.obj["loglevel"] = loglevel

@@ -28,6 +28,12 @@ def invoke_cli(cli_runner):
 
 
 @pytest.fixture(scope="session")
+def environ():
+    """environment process"""
+    return "os.environ"
+
+
+@pytest.fixture(scope="session")
 def config_files():
     """dict: path of the config files"""
     return {
@@ -220,6 +226,7 @@ def tumor_normal_config(
     sample_fastq,
     analysis_dir,
     balsamic_cache,
+    background_variant_file,
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
@@ -261,6 +268,8 @@ def tumor_normal_config(
                 "ACC1",
                 "--normal-sample-name",
                 "ACC2",
+                "--background-variants",
+                background_variant_file,
             ],
         )
 
@@ -328,6 +337,7 @@ def tumor_only_config(
     tmpdir_factory,
     sample_fastq,
     balsamic_cache,
+    background_variant_file,
     analysis_dir,
     panel_bed_file,
     sentieon_license,
@@ -363,6 +373,8 @@ def tumor_only_config(
                 analysis_dir,
                 "--balsamic-cache",
                 balsamic_cache,
+                "--background-variants",
+                background_variant_file,
             ],
         )
 
@@ -402,55 +414,6 @@ def tumor_only_wgs_config(
             [
                 "config",
                 "case",
-                "-t",
-                tumor,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
-            ],
-        )
-
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_only_umi_config(
-    tmpdir_factory,
-    sample_fastq,
-    balsamic_cache,
-    analysis_dir,
-    panel_bed_file,
-    background_variant_file,
-    sentieon_license,
-    sentieon_install_dir,
-):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only with background variant file for umi workflow
-    """
-    case_id = "sample_tumor_only_umi"
-    tumor = sample_fastq["tumor"]
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "-p",
-                panel_bed_file,
-                "--background-variants",
-                background_variant_file,
                 "-t",
                 tumor,
                 "--case-id",
@@ -522,3 +485,80 @@ def sample_config():
     }
 
     return sample_config
+
+
+@pytest.fixture(scope="session")
+def analysis_path():
+    """Analysis test path"""
+    return "tests/test_data/qc_files/analysis"
+
+
+@pytest.fixture(scope="session")
+def qc_metrics():
+    """Sample data for QC model testing"""
+    return {
+        "qc": {
+            "targeted": {
+                "multiqc_picard_insertSize.json": {
+                    "MEAN_INSERT_SIZE": {"condition": None}
+                },
+                "multiqc_picard_HsMetrics.json": {
+                    "MEDIAN_TARGET_COVERAGE": {
+                        "condition": {"norm": "gt", "threshold": 500.0}
+                    }
+                },
+            },
+            "wgs": {
+                "multiqc_picard_insertSize.json": {
+                    "MEAN_INSERT_SIZE": {"condition": None}
+                },
+                "multiqc_picard_dups.json": {
+                    "PERCENT_DUPLICATION": {"condition": None}
+                },
+            },
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def qc_extracted_metrics():
+    """Extracted metrics for QC model testing"""
+    return {
+        "metrics": {
+            "sample_1": [
+                {
+                    "name": "MEAN_INSERT_SIZE_1",
+                    "norm": "lt",
+                    "threshold": 1.0,
+                    "value": 0.5,
+                },
+                {
+                    "name": "MEAN_INSERT_SIZE_2",
+                    "norm": "lt",
+                    "threshold": 1.0,
+                    "value": 0.5,
+                },
+            ],
+            "sample_2": [
+                {
+                    "name": "MEAN_INSERT_SIZE_1",
+                    "norm": "lt",
+                    "threshold": 1.0,
+                    "value": 0.5,
+                },
+            ],
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def qc_raw_targeted_metrics():
+    """Raw metrics"""
+    return {
+        "default": {
+            "metrics_1.json": {"METRIC_1": 0.1, "METRIC_2": 0.2},
+            "metrics_2.json": {"METRIC_3": 0.3},
+        },
+        "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
+        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5, "METRIC_4": 0.4}},
+    }

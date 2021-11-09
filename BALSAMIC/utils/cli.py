@@ -15,7 +15,7 @@ import snakemake
 import graphviz
 from colorclass import Color
 
-import BALSAMIC
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -223,7 +223,7 @@ def createDir(path, interm_path=[]):
 
 
 def write_json(json_out, output_config):
-
+    """Writes JSON format data to an output file"""
     try:
         with open(output_config, "w") as fn:
             json.dump(json_out, fn, indent=4)
@@ -262,8 +262,6 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
         snakefile = Path(p, "workflows", "reference.smk")
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
-    elif analysis_type == "umi":
-        snakefile = Path(p, "workflows", "UMIworkflow.smk")
 
     return str(snakefile)
 
@@ -595,7 +593,7 @@ def generate_graph(config_collection_dict, config_path):
     graph_title = "_".join(
         [
             "BALSAMIC",
-            BALSAMIC.__version__,
+            balsamic_version,
             config_collection_dict["analysis"]["case_id"],
         ]
     )

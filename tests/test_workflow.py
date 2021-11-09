@@ -90,26 +90,3 @@ def test_workflow_sentieon(
             config = workflow[1]
             snakefile = get_snakefile(analysis_type, sequencing_type)
             assert snakemake.snakemake(snakefile, configfiles=[config], dryrun=True)
-
-
-def test_umiworkflow_tumor_only(
-    tumor_only_umi_config, sentieon_install_dir, sentieon_license
-):
-    # GIVEN a sample config dict and snakefile
-    workflow = "umi"
-    snakefile = get_snakefile(workflow)
-    config_json = tumor_only_umi_config
-    config_tumorlod = "tests/test_data/references/tumorlod.json"
-
-    # WHEN invoking snakemake module with dryrun option
-    # THEN it should return true
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        assert snakemake.snakemake(
-            snakefile, configfiles=[config_json, config_tumorlod], dryrun=True
-        )

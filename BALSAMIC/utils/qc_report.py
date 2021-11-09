@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.constants import REPORT_MODEL
+from BALSAMIC.constants.quality_check_reporting import REPORT_MODEL
 
 
 def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> dict:
@@ -26,15 +26,16 @@ def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> 
         v[lang] for x, v in REPORT_MODEL["coverage"].items()
     ]
 
-    for lims_id, analysis_results in collected_qc.items():
+    for sample_id, analysis_results in collected_qc.items():
+        lims_id = sample_id.split("_")[1]
         sample_qc = [meta["sample_map"][lims_id], meta["sample_type"][lims_id]]
         sample_cov = [meta["sample_map"][lims_id], meta["sample_type"][lims_id]]
 
         sample_qc = sample_qc + parse_collected_qc(
-            collected_qc=collected_qc, model_param="qc", lims_id=lims_id
+            collected_qc=collected_qc, model_param="qc", sample_id=sample_id
         )
         sample_cov = sample_cov + parse_collected_qc(
-            collected_qc=collected_qc, model_param="coverage", lims_id=lims_id
+            collected_qc=collected_qc, model_param="coverage", sample_id=sample_id
         )
 
         meta["qc_table_content"][lims_id] = sample_qc
@@ -43,13 +44,13 @@ def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> 
     return meta
 
 
-def parse_collected_qc(collected_qc: dict, model_param: str, lims_id: str) -> list:
+def parse_collected_qc(collected_qc: dict, model_param: str, sample_id: str) -> list:
     """parses collect qc and returns model_param"""
     parsed_qc = list()
 
     for qc_item, qc_value in REPORT_MODEL[model_param].items():
         decimal_point = qc_value["decimal"]
-        qc_to_report = collected_qc[lims_id][qc_item]
+        qc_to_report = collected_qc[sample_id][qc_item]
         if "as_percent" in qc_value:
             qc_to_report = qc_to_report * 100
         qc_to_report = str(round(qc_to_report, decimal_point))

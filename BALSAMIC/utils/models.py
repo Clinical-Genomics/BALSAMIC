@@ -1,23 +1,27 @@
 import hashlib
+import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
 
-from pydantic import BaseModel, validator, Field, AnyUrl
+from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
-from BALSAMIC.utils.constants import (
+from BALSAMIC.constants.common import (
     BIOINFO_TOOL_ENV,
     SEQUENCING_TYPE,
     ANALYSIS_TYPES,
     WORKFLOW_SOLUTION,
     MUTATION_CLASS,
     MUTATION_TYPE,
-    VALID_GENOME_VER,
-    VALID_REF_FORMAT,
+    VALID_OPS,
 )
+from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
+
+LOG = logging.getLogger(__name__)
 
 
 class VCFAttributes(BaseModel):
@@ -61,12 +65,12 @@ class VarCallerFilter(BaseModel):
         description: str (required); comment section for description
     """
 
-    AD: VCFAttributes
+    AD: Optional[VCFAttributes]
     AF_min: Optional[VCFAttributes]
     AF_max: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: Optional[VCFAttributes]
-    pop_freq: VCFAttributes
+    pop_freq: Optional[VCFAttributes]
     strand_reads: Optional[VCFAttributes]
     qss: Optional[VCFAttributes]
     sor: Optional[VCFAttributes]
@@ -134,7 +138,7 @@ class VarcallerAttribute(BaseModel):
 
     @validator("workflow_solution", check_fields=False)
     def workflow_solution_literal(cls, value) -> str:
-        "Validate workflow solution"
+        """Validate workflow solution"""
         assert set(value).issubset(
             set(WORKFLOW_SOLUTION)
         ), f"{value} is not valid workflow solution."
@@ -142,7 +146,7 @@ class VarcallerAttribute(BaseModel):
 
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
-        "Validate analysis types"
+        """Validate analysis types"""
         assert set(value).issubset(
             set(ANALYSIS_TYPES)
         ), f"{value} is not a valid analysis type."
@@ -150,19 +154,19 @@ class VarcallerAttribute(BaseModel):
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
-        "Validate mutation class"
+        """Validate mutation class"""
         assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
-        "Validate mutation type"
+        """Validate mutation type"""
         assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
         return value
 
     @validator("sequencing_type", check_fields=False)
     def sequencing_type_literal(cls, value) -> str:
-        "Validate sequencing type"
+        """Validate sequencing type"""
         assert set(value).issubset(
             set(SEQUENCING_TYPE)
         ), f"{value} is not not a valid sequencing type."
@@ -689,3 +693,79 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
+
+
+class QCMetricModel(BaseModel):
+    """Defines the quality control metric model
+
+    Attributes:
+        name: str (required); quality control metric name
+        norm: string (optional); validation condition
+        threshold: float (optional); validation cut off
+        value: float (required); metrics value
+
+    Raises:
+        ValueError: when a metric does not meet its validation requirements
+    """
+
+    name: str
+    norm: Optional[str] = None
+    threshold: Optional[float] = None
+    value: float
+
+    @root_validator()
+    def check_metric(cls, values):
+        """Checks if a metric meets its filtering condition"""
+        if (
+            values["norm"]
+            and values["threshold"]
+            and not VALID_OPS[values["norm"]](values["value"], values["threshold"])
+        ):
+            raise ValueError(
+                f"QC metric {values['name']}: {values['value']} validation has failed. "
+                f"(Condition: {values['norm']} {values['threshold']})."
+            )
+
+        LOG.info(f"QC metric {values['name']}: {values['value']} meets its condition.")
+        return values
+
+
+class QCValidationModel(BaseModel):
+    """Defines the quality control validation model
+
+    Attributes:
+        metrics: Dict(sample_name, list(QCMetricModel)) (required); quality control metric attributes
+    """
+
+    metrics: Dict[str, List[QCMetricModel]]
+
+    @property
+    def get_json(self):
+        """Restructures the metrics dictionary and returns a metric-value json object"""
+        metrics_json = {k: {} for k in self.metrics}
+
+        for sample_name, metrics in self.metrics.items():
+            for metric in metrics:
+                metrics_json[sample_name].update({metric.name: metric.value})
+
+        return metrics_json
+
+
+class DeliveryMetricModel(BaseModel):
+    """Defines the metric attributes model for delivery
+
+    Attributes:
+        header: str (optional); data
+        id: str (required); unique sample identifier (sample_id, case_id or project_id)
+        input: str (required); input file
+        name: str (required); metric name
+        step: str (required); step that generated the metric
+        value: float (required); metric value
+    """
+
+    header: Optional[str]
+    id: str
+    input: str
+    name: str
+    step: str
+    value: float

@@ -1,3 +1,4 @@
+import copy
 import os
 import pytest
 
@@ -21,6 +22,9 @@ from BALSAMIC.utils.models import (
     ParamsCommon,
     ParamsVardict,
     ParamsVEP,
+    QCMetricModel,
+    QCValidationModel,
+    DeliveryMetricModel,
 )
 
 
@@ -392,3 +396,118 @@ def test_params_vep():
 
     # THEN assert values
     assert test_vep_built.vep_filters == "all defaults params"
+
+
+def test_qc_metric_model_pass(qc_extracted_metrics):
+    """test QCMetricModel attribute parsing and positive validation"""
+
+    # GIVEN input attributes
+    metric = qc_extracted_metrics["metrics"]["sample_1"][0]
+
+    # WHEN building the QC metric model
+    model = QCMetricModel(**metric)
+
+    # THEN assert retrieved values from the created model
+    assert model.dict().items() == metric.items()
+
+
+def test_qc_metric_model_norm_fail(qc_extracted_metrics):
+    """test QCMetricModel ValueError raising for an operator that it is not accepted"""
+
+    # GIVEN incorrect input attributes
+    metric = copy.deepcopy(qc_extracted_metrics["metrics"]["sample_1"][0])
+    metric["norm"] = "higher"
+
+    # THEN model raises an error due to a non accepted norm
+    try:
+        QCMetricModel(**metric)
+    except KeyError as key_exc:
+        assert metric["norm"] in str(key_exc)
+
+
+def test_qc_metric_model_condition_fail(qc_extracted_metrics):
+    """test QCMetricModel for an overly restrictive metric condition"""
+
+    # GIVEN input attributes with a value that does not meet the filtering condition
+    metric = copy.deepcopy(qc_extracted_metrics["metrics"]["sample_1"][0])
+    metric["value"] = 10.0
+
+    # THEN check that the model filters the metric according to its norm
+    with pytest.raises(ValueError) as val_exc:
+        QCMetricModel(**metric)
+    assert (
+        f"QC metric {metric['name']}: {metric['value']} validation has failed. "
+        f"(Condition: {metric['norm']} {metric['threshold']})" in str(val_exc.value)
+    )
+
+
+def test_qc_validation_model_pass(qc_extracted_metrics):
+    """test QCValidationModel attribute parsing and validation"""
+
+    # WHEN building the QC validation model
+    model = QCValidationModel(**qc_extracted_metrics)
+
+    # THEN assert retrieved values from the created model
+    assert model.dict().items() == qc_extracted_metrics.items()
+
+
+def test_qc_validation_model_condition_fail(qc_extracted_metrics):
+    """test QCValidationModel for multiple metrics with failing conditions"""
+
+    # GIVEN input attributes that does not meet the specified conditions
+    metrics = copy.deepcopy(qc_extracted_metrics)
+    metrics["metrics"]["sample_1"][0]["value"] = 10.0
+    metrics["metrics"]["sample_2"][0]["value"] = 10.0
+
+    # THEN check that the model filters the metrics according to its norm
+    with pytest.raises(ValueError) as val_exc:
+        QCValidationModel(**metrics)
+    assert "2 validation errors for QCValidationModel" in str(val_exc.value)
+
+
+def test_qc_validation_model_get_json(qc_extracted_metrics):
+    """test metric-value json extraction and metric filtering for passing conditions"""
+
+    # GIVEN expected output
+    output_metrics = {
+        "sample_1": {"MEAN_INSERT_SIZE_1": 0.5, "MEAN_INSERT_SIZE_2": 0.5},
+        "sample_2": {"MEAN_INSERT_SIZE_1": 0.5},
+    }
+
+    # WHEN building the QC validation model
+    validation_model = QCValidationModel(**qc_extracted_metrics)
+
+    # THEN check if the extracted metrics and its structure meets the expected one
+    assert validation_model.get_json.items() == output_metrics.items()
+
+
+def test_delivery_metric_model_pass_validation():
+    """test DeliveryMetricModel attributes parsing"""
+
+    # GIVEN input attributes
+    metrics = {
+        "header": None,
+        "id": "005",
+        "input": "S1_005.sorted.mrkdup.txt",
+        "name": "MEAN_INSERT_SIZE",
+        "step": "multiqc_rule",
+        "value": 0.5,
+    }
+
+    # WHEN building the delivery metric model
+    metrics_model = DeliveryMetricModel(**metrics)
+
+    # THEN assert retrieved values from the created model
+    assert metrics_model.dict().items() == metrics.items()
+
+
+def test_delivery_metric_model_fail_validation():
+    """test DeliveryMetricModel behaviour for an incorrect input"""
+
+    # GIVEN a non accepted input
+    invalid_input = {"name": "MEAN_INSERT_SIZE"}
+
+    # THEN the model raises an error due to an incomplete input
+    with pytest.raises(ValueError) as input_exc:
+        DeliveryMetricModel(**invalid_input)
+    assert f"field required" in str(input_exc.value)

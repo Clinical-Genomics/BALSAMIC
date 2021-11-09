@@ -13,11 +13,11 @@ from BALSAMIC.utils.cli import (
     create_fastq_symlink,
     generate_graph,
 )
-from BALSAMIC.utils.constants import (
+from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
-    VCF_DICT,
     BIOINFO_TOOL_ENV,
 )
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -82,6 +82,13 @@ LOG = logging.getLogger(__name__)
     help="Path to BALSAMIC cache",
 )
 @click.option(
+    "--container-version",
+    show_default=True,
+    default=balsamic_version,
+    type=click.Choice(["develop", "master", balsamic_version]),
+    help="Container for BALSAMIC version to download",
+)
+@click.option(
     "--analysis-dir",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
@@ -141,6 +148,7 @@ def case_config(
     normal_sample_name,
     genome_version,
     balsamic_cache,
+    container_version,
 ):
 
     try:
@@ -153,6 +161,9 @@ def case_config(
     except AttributeError:
         LOG.error(f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
         raise click.Abort()
+
+    if container_version:
+        balsamic_version = container_version
 
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"

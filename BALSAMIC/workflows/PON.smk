@@ -9,7 +9,8 @@ import os
 
 from BALSAMIC.utils.rule import (get_picard_mrkdup, get_threads, 
                                  get_result_dir, get_pon_samples)
-from BALSAMIC.utils.constants import (RULE_DIRECTORY, workflow_params)
+from BALSAMIC.constants.common import RULE_DIRECTORY
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
 shell.prefix("set -eo pipefail; ")
@@ -17,7 +18,7 @@ shell.prefix("set -eo pipefail; ")
 localrules: all
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(workflow_params)
+params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 fastq_dir = get_result_dir(config) + "/fastq/"
 qc_dir = get_result_dir(config) + "/qc/"
@@ -67,7 +68,6 @@ rule create_target:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix() 
     shell:
         """
-source activate varcall_cnvkit;
 cnvkit.py target {input.target_bait} --annotate {input.refFlat} --split -o {output.target_bed};
 cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtarget_bed};
         """
@@ -86,7 +86,6 @@ rule create_coverage:
         Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
     shell:
         """
-source activate varcall_cnvkit;
 cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn};
 cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn};
         """
@@ -104,6 +103,5 @@ rule create_reference:
         Path(benchmark_dir, "cnvkit.reference.tsv").as_posix()
     shell:
         """
-source activate varcall_cnvkit;
 cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn} && touch {output.txt} ;
         """

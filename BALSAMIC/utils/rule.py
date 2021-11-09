@@ -6,7 +6,7 @@ from pathlib import Path
 import snakemake
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import find_file_index
-from BALSAMIC.utils.constants import (
+from BALSAMIC.constants.common import (
     MUTATION_TYPE,
     MUTATION_CLASS,
     SEQUENCING_TYPE,
@@ -101,6 +101,27 @@ def get_variant_callers(
         ):
             valid_variant_callers.add(variant_caller_name)
     return list(valid_variant_callers)
+
+
+def get_sequencing_type(config):
+    """
+    input: sample config file from BALSAMIC
+    output: sequencing type string ("targeted" or "wgs")
+    """
+
+    return config["analysis"]["sequencing_type"]
+
+
+def get_capture_kit(config):
+    """
+    input: sample config file from BALSAMIC
+    output: panel bed name
+    """
+
+    if config["analysis"]["sequencing_type"] != "wgs":
+        return os.path.basename(config["panel"]["capture_kit"])
+    else:
+        return None
 
 
 def get_sample_type(sample, bio_type):
