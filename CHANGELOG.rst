@@ -14,7 +14,7 @@ Added:
 * Added `.,PASS` to all structural variant filter rules to resolve the issues with missing calls in filtered file
 * Handling of QC metrics validation errors #783
 * Github Action workflow that builds the docs using Sphinx #809
-
+* Zenodo integration to create citable link #813
 
 Changed:
 ^^^^^^^^
