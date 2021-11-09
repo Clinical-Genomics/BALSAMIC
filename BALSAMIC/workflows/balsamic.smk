@@ -21,7 +21,7 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path, get_sequencing_type)
+                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
@@ -321,7 +321,8 @@ rule all:
     params:
         tmp_dir = tmp_dir,
         result_dir = result_dir,
-        sequencing_type = get_sequencing_type(config)
+        sequencing_type = get_sequencing_type(config),
+        panel_bed = get_capture_kit(config)
     run:
         import datetime
         import shutil
@@ -330,7 +331,7 @@ rule all:
 
         # Save QC metrics to a JSON file
         try:
-            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type)
+            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type, params.panel_bed)
             write_json(qc_metrics_summary, str(output.qc_json_file))
         except ValueError as val_exc:
             LOG.error(val_exc)

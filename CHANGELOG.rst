@@ -15,6 +15,8 @@ Added:
 * Handling of QC metrics validation errors #783
 * Github Action workflow that builds the docs using Sphinx #809
 * Zenodo integration to create citable link #813
+* Panel BED specific QC conditions #800
+* Metric extraction to a YAML file for Vogue #802
 
 Changed:
 ^^^^^^^^
@@ -23,13 +25,13 @@ Changed:
 * refactored conda envs within container to be on base and container definition is uncoupled #759
 * renamed umi output file names to fix issue with picard HSmetrics #804
 * locked requirements for graphviz io 0.16 #811
+* QC metric validation is performed across all metrics of each of the samples #800
 
 Removed:
 ^^^^^^^^
 
 * The option of running umiworkflow independently with balsamic command-line option "-a umi"
 * Removed source activate from reference and pon workflows #764
-
 
 Fixed:
 ^^^^^^
@@ -67,7 +69,7 @@ Changed:
 ^^^^^^^^
 
 * Updated docs for git FAQs #731
-* Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10 
+* Rename panel of normal filename Clinical-Genomics/cgp-cancer-cnvcall#10
 
 
 Fixed:

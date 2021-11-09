@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
 
-from pydantic import BaseModel, validator, Field, AnyUrl
+from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
@@ -695,68 +695,49 @@ class BalsamicWorkflowConfig(BaseModel):
     tnscope_umi: UMIParamsTNscope
 
 
-class QCConditionModel(BaseModel):
-    """Defines the quality control filtering parameters
-
-    Attributes:
-        norm: string (optional); validation condition
-        threshold: float (optional); validation cut off
-    """
-
-    norm: str
-    threshold: float
-
-    @validator("norm")
-    def check_operator(cls, value) -> str:
-        """Validates if the retrieved norm is a valid operator"""
-        assert value in VALID_OPS, f"{value} is not a valid condition for QC filtering"
-        return value
-
-
-class QCMetricsModel(BaseModel):
-    """Defines the quality control metrics model
+class QCMetricModel(BaseModel):
+    """Defines the quality control metric model
 
     Attributes:
         name: str (required); quality control metric name
+        norm: string (optional); validation condition
+        threshold: float (optional); validation cut off
         value: float (required); metrics value
-        condition: QCConditionModel (optional); condition for QC validation
-    """
-
-    name: str
-    value: float
-    condition: Optional[QCConditionModel]
-
-
-class QCCheckModel(BaseModel):
-    """Defines the quality control validation model
-
-    Attributes:
-        metrics: Dict(sample_name, list(QCMetricsModel)) (required); quality control metric attributes
 
     Raises:
         ValueError: when a metric does not meet its validation requirements
     """
 
-    metrics: Dict[str, List[QCMetricsModel]]
+    name: str
+    norm: Optional[str] = None
+    threshold: Optional[float] = None
+    value: float
 
-    @validator("metrics", each_item=True)
-    def check_metric(cls, value):
-        """Checks if each metric meets its filtering condition"""
-        for metric in value:
-            if metric.condition is None:
-                continue
-            else:
-                if not VALID_OPS[metric.condition.norm](
-                    metric.value, metric.condition.threshold
-                ):
-                    raise ValueError(
-                        f"QC metric {metric.name}: {metric.value} validation has failed "
-                        f"(condition: {metric.condition.norm} {metric.condition.threshold})."
-                    )
+    @root_validator()
+    def check_metric(cls, values):
+        """Checks if a metric meets its filtering condition"""
+        if (
+            values["norm"]
+            and values["threshold"]
+            and not VALID_OPS[values["norm"]](values["value"], values["threshold"])
+        ):
+            raise ValueError(
+                f"QC metric {values['name']}: {values['value']} validation has failed. "
+                f"(Condition: {values['norm']} {values['threshold']})."
+            )
 
-            LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
+        LOG.info(f"QC metric {values['name']}: {values['value']} meets its condition.")
+        return values
 
-        return value
+
+class QCValidationModel(BaseModel):
+    """Defines the quality control validation model
+
+    Attributes:
+        metrics: Dict(sample_name, list(QCMetricModel)) (required); quality control metric attributes
+    """
+
+    metrics: Dict[str, List[QCMetricModel]]
 
     @property
     def get_json(self):
@@ -768,3 +749,23 @@ class QCCheckModel(BaseModel):
                 metrics_json[sample_name].update({metric.name: metric.value})
 
         return metrics_json
+
+
+class DeliveryMetricModel(BaseModel):
+    """Defines the metric attributes model for delivery
+
+    Attributes:
+        header: str (optional); data
+        id: str (required); unique sample identifier (sample_id, case_id or project_id)
+        input: str (required); input file
+        name: str (required); metric name
+        step: str (required); step that generated the metric
+        value: float (required); metric value
+    """
+
+    header: Optional[str]
+    id: str
+    input: str
+    name: str
+    step: str
+    value: float

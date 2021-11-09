@@ -112,6 +112,18 @@ def get_sequencing_type(config):
     return config["analysis"]["sequencing_type"]
 
 
+def get_capture_kit(config):
+    """
+    input: sample config file from BALSAMIC
+    output: panel bed name
+    """
+
+    if config["analysis"]["sequencing_type"] != "wgs":
+        return os.path.basename(config["panel"]["capture_kit"])
+    else:
+        return None
+
+
 def get_sample_type(sample, bio_type):
     """
     input: sample dictionary from BALSAMIC's config file

@@ -41,7 +41,7 @@ def scout(context, sample_config, snv_vcf, sv_vcf, customer_id, tumor, normal):
     result_dir = get_result_dir(sample_config)
     dst_directory = os.path.join(result_dir, "scout")
     if not os.path.exists(dst_directory):
-        LOG.debug("Creatiing delivery_report directory")
+        LOG.debug("Creating delivery_report directory")
         os.makedirs(dst_directory)
 
     scout_config_src = os.path.join(
