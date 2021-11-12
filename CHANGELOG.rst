@@ -1,3 +1,11 @@
+[8.2.1]
+-------
+
+Fixed:
+^^^^^^
+
+* ``cnvkit`` gender comparison operator bug #819
+
 [8.2.0]
 -------
 
@@ -53,8 +61,6 @@ Fixed:
 * ReadtheDocs building failure due to dependencies, fixed by locking versions #773
 * Dev requirements installation for Sphinx docs (Github Action) #812
 * Changed path for main Dockerfile version in ``.bumpversion.cfg``
-* ``cnvkit`` gender comparison operator bug #819
-
 
 [8.1.0]
 -------
