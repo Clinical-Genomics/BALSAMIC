@@ -118,7 +118,7 @@ if $purecn_status; then
 purity=$(awk -F\\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
 ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv)
 gender=$(awk -F\\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\")
-if $gender="?"; then gender="x"; fi
+if [ "$gender" = "?" ]; then gender="x"; fi
 fi
 
 # Call copy number variants from segmented log2 ratios
