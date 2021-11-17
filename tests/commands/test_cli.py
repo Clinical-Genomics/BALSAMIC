@@ -33,7 +33,7 @@ def test_config_case_missing_opt(invoke_cli):
     # WHEN invoking command with missing options
     result = invoke_cli(["config", "case"])
 
-    # THEN It should throw missiong option error
+    # THEN It should throw missing option error
     assert "Error: Missing option" in result.output
     assert result.exit_code == 2
 
@@ -42,7 +42,7 @@ def test_report_deliver(invoke_cli):
     # WHEN invoking command with missing options
     result = invoke_cli(["report", "deliver", "--help"])
 
-    # THEN It should throw missiong option error
+    # THEN It should throw missing option error
     assert result.exit_code == 0
 
 
@@ -50,7 +50,7 @@ def test_report_status(invoke_cli):
     # WHEN invoking command with missing options
     result = invoke_cli(["report", "status", "--help"])
 
-    # THEN It should throw missiong option error
+    # THEN It should throw missing option error
     assert result.exit_code == 0
 
 
@@ -67,7 +67,7 @@ def test_plugins_scout(invoke_cli):
     # WHEN invoking command with missing options
     result = invoke_cli(["plugins", "scout", "--help"])
 
-    # THEN It should throw missiong option error
+    # THEN It should throw missing option error
     assert result.exit_code == 0
 
 
@@ -97,7 +97,7 @@ def test_run_missing_opt(invoke_cli):
     # WHEN invoking run command with missing option
     result = invoke_cli(["run", "analysis"])
 
-    # THEN It should throw missiong option error
+    # THEN It should throw missing option error
     assert "Error: Missing option" in result.output
     assert result.exit_code == 2
 
