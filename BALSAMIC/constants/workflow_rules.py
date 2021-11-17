@@ -116,7 +116,6 @@ DELIVERY_RULES = [
     "multiqc",
     "vep_somatic",
     "vep_germline",
-    "vep_stat",
     "bcftools_filter_TNscope_umi_tumor_only",
     "bcftools_filter_TNscope_umi_tumor_normal",
     "bcftools_filter_vardict_tumor_only",
