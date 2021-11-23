@@ -13,10 +13,6 @@ Fixed:
 
 * ``cnvkit`` gender comparison operator bug #819
 
-Changed:
-^^^^^^^^
-* QC metrics delivery tag #820
-
 [8.2.0]
 -------
 
