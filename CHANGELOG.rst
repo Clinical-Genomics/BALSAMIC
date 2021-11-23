@@ -1,3 +1,11 @@
+[8.3.0]
+-------
+
+Added:
+^^^^^^
+
+* ``ascatNGS`` tumor normal delivery #810
+
 [8.2.1]
 -------
 
@@ -25,7 +33,6 @@ Added:
 * Zenodo integration to create citable link #813
 * Panel BED specific QC conditions #800
 * Metric extraction to a YAML file for Vogue #802
-* ``ascatNGS`` tumor normal delivery #810
 
 Changed:
 ^^^^^^^^
