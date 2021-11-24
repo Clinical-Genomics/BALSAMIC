@@ -1,3 +1,10 @@
+[X.X.X]
+-------
+
+Changed:
+^^^^^^^^
+* QC metrics delivery tag #820
+
 [8.2.1]
 -------
 
