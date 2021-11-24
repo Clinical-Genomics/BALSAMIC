@@ -4,12 +4,13 @@
 Changed:
 ^^^^^^^^
 * QC metrics delivery tag #820
+* Refactor tmb rule that contains redundant line #817
 
 [8.2.1]
 -------
 
 Fixed:
-^^^^^^
+^^^^^
 
 * ``cnvkit`` gender comparison operator bug #819
 
