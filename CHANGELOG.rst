@@ -1,5 +1,9 @@
 [X.X.X]
 -------
+Added:
+^^^^^^
+
+* ``ascatNGS`` tumor normal delivery #810
 
 Changed:
 ^^^^^^^^
