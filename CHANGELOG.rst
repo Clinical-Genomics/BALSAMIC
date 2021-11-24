@@ -10,7 +10,7 @@ Changed:
 -------
 
 Fixed:
-^^^^^
+^^^^^^
 
 * ``cnvkit`` gender comparison operator bug #819
 
