@@ -1,3 +1,15 @@
+[8.2.2]
+-------
+Added:
+^^^^^^
+
+* ``ascatNGS`` tumor normal delivery #810
+
+Changed:
+^^^^^^^^
+* QC metrics delivery tag #820
+* Refactor tmb rule that contains redundant line #817
+
 [8.2.1]
 -------
 
