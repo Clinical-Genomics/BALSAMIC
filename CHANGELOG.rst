@@ -1,10 +1,13 @@
 [X.X.X]
 -------
-
 Added:
 ^^^^^^
 
 * ``ascatNGS`` tumor normal delivery #810
+
+Changed:
+^^^^^^^^
+* QC metrics delivery tag #820
 
 [8.2.1]
 -------
