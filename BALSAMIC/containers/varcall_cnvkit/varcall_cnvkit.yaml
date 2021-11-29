@@ -9,7 +9,7 @@ dependencies:
   - conda-forge::r-optparse=1.7.1
   - bioconda::bioconductor-iranges=2.28.0
   - bioconda::bioconductor-genomeinfodb=1.30.0
-  - bioconda::bioconductor-genomicranges=1.46.1
+  - bioconda::bioconductor-genomicranges=1.46.0
   - bioconda::bioconductor-dnacopy=1.68.0
   - bioconda::bioconductor-variantannotation=1.40.0
   - bioconda::bioconductor-purecn=2.0.1
