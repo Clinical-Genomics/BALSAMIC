@@ -1,3 +1,14 @@
+[X.X.X]
+-------
+Fixed:
+^^^^^^
+
+* Add default for gender if ``purecn`` captures dual gender values #824 
+
+Changed:
+^^^^^^^^
+* Updated ``purecn`` and its dependencies to latest versions 
+
 [8.2.2]
 -------
 Added:
