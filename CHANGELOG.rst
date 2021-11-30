@@ -1,3 +1,11 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* ``ascatNgs`` PDF delivery (plots & statistics) #828
+
 [8.2.1]
 -------
 

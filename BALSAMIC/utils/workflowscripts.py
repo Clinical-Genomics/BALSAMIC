@@ -234,15 +234,3 @@ def save_ascat_output_pdf(output_path, data_path, *img_paths):
     pdf = add_images_PDF(pdf, *img_paths)
     pdf = add_table_PDF(pdf, data_path)
     pdf.output(output_path)
-
-
-save_ascat_output_pdf(
-    "/Users/vadym.ivanchuk/Desktop/ascat.output.pdf",
-    "/Users/vadym.ivanchuk/Desktop/vcf/CNV.somatic.fleetjay.ascat.samplestatistics.txt",
-    "/Users/vadym.ivanchuk/Desktop/vcf/CNV.somatic.fleetjay.ascat.sunrise.png",
-    "/Users/vadym.ivanchuk/Desktop/vcf/CNV.somatic.fleetjay.ascat.germline.png",
-    "/Users/vadym.ivanchuk/Desktop/vcf/CNV.somatic.fleetjay.ascat.tumor.png",
-    "/Users/vadym.ivanchuk/Desktop/vcf/CNV.somatic.fleetjay.ascat.ASPCF.png",
-    "/Users/vadym.ivanchuk/Desktop/vcf/CNV.somatic.fleetjay.ascat.rawprofile.png",
-    "/Users/vadym.ivanchuk/Desktop/vcf/CNV.somatic.fleetjay.ascat.ascatprofile.png",
-)
