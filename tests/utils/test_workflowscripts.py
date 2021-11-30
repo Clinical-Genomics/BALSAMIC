@@ -1,9 +1,16 @@
 from unittest import mock
 from pathlib import Path
 import pytest
+from fpdf import FPDF
 
 from BALSAMIC.utils.cli import generate_h5
-from BALSAMIC.utils.workflowscripts import plot_analysis
+from BALSAMIC.utils.workflowscripts import (
+    plot_analysis,
+    create_PDF,
+    add_images_PDF,
+    add_table_PDF,
+    save_ascat_output_pdf,
+)
 
 
 def test_plot_analysis(tmp_path_factory):
@@ -36,3 +43,58 @@ def test_plot_analysis_bad_h5(tmp_path_factory):
     actual_pdf_file = plot_analysis(dummy_log_file, dummy_h5, dummy_pdf_name)
 
     assert actual_pdf_file is None
+
+
+def test_create_PDF():
+    # WHEN creating a dummy FPDF file
+    pdf = create_PDF()
+
+    # THEN check if the pdf has been correctly created
+    assert isinstance(pdf, FPDF)
+
+
+def test_add_images_PDF():
+    # GIVEN ascatNGgs output PNG images
+    test_images_path = (
+        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.sunrise.png",
+        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.germline.png",
+    )
+
+    # WHEN calling the function
+    pdf = add_images_PDF(create_PDF(), test_images_path[0], test_images_path[1])
+
+    # THEN check if the images are appended to the PDF
+    assert isinstance(pdf, FPDF)
+    assert pdf.page_no() == 2
+
+
+def test_add_table_PDF():
+    # GIVEN ascatNGgs output sample statistics .txt
+    test_statistics_path = (
+        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.samplestatistics.txt"
+    )
+
+    # WHEN calling the function
+    pdf = add_table_PDF(create_PDF(), test_statistics_path)
+
+    # THEN check if the table is appended to the created PDF
+    assert isinstance(pdf, FPDF)
+    assert pdf.page_no() == 1
+
+
+def test_save_ascat_output_pdf(tmp_path):
+    # GIVEN ascatNGgs output files
+    test_paths = (
+        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.samplestatistics.txt",
+        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.sunrise.png",
+        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.germline.png",
+    )
+
+    # GIVEN the output path
+    output_path = tmp_path / "ascat.output.pdf"
+
+    # WHEN calling the function
+    save_ascat_output_pdf(output_path, test_paths[0], test_paths[1], test_paths[2])
+
+    # THEN check if the PDF is correctly created
+    assert Path(output_path).exists()
