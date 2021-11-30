@@ -6,6 +6,29 @@ Added:
 
 * ``ascatNgs`` PDF delivery (plots & statistics) #828
 
+[8.2.3]
+-------
+Fixed:
+^^^^^^
+
+* Add default for gender if ``purecn`` captures dual gender values #824 
+
+Changed:
+^^^^^^^^
+* Updated ``purecn`` and its dependencies to latest versions 
+
+[8.2.2]
+-------
+Added:
+^^^^^^
+
+* ``ascatNGS`` tumor normal delivery #810
+
+Changed:
+^^^^^^^^
+* QC metrics delivery tag #820
+* Refactor tmb rule that contains redundant line #817
+
 [8.2.1]
 -------
 
