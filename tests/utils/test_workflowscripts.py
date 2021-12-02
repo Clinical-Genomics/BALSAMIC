@@ -6,9 +6,9 @@ from fpdf import FPDF
 from BALSAMIC.utils.cli import generate_h5
 from BALSAMIC.utils.workflowscripts import (
     plot_analysis,
-    create_PDF,
-    add_images_PDF,
-    add_table_PDF,
+    create_pdf,
+    add_images_pdf,
+    add_table_pdf,
     save_ascat_output_pdf,
 )
 
@@ -45,15 +45,15 @@ def test_plot_analysis_bad_h5(tmp_path_factory):
     assert actual_pdf_file is None
 
 
-def test_create_PDF():
+def test_create_pdf():
     # WHEN creating a dummy FPDF file
-    pdf = create_PDF()
+    pdf = create_pdf()
 
     # THEN check if the pdf has been correctly created
     assert isinstance(pdf, FPDF)
 
 
-def test_add_images_PDF():
+def test_add_images_pdf():
     # GIVEN ascatNGgs output PNG images
     test_images_path = (
         "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.sunrise.png",
@@ -61,21 +61,21 @@ def test_add_images_PDF():
     )
 
     # WHEN calling the function
-    pdf = add_images_PDF(create_PDF(), test_images_path[0], test_images_path[1])
+    pdf = add_images_pdf(create_pdf(), test_images_path[0], test_images_path[1])
 
     # THEN check if the images are appended to the PDF
     assert isinstance(pdf, FPDF)
     assert pdf.page_no() == 2
 
 
-def test_add_table_PDF():
+def test_add_table_pdf():
     # GIVEN ascatNGgs output sample statistics .txt
     test_statistics_path = (
         "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.samplestatistics.txt"
     )
 
     # WHEN calling the function
-    pdf = add_table_PDF(create_PDF(), test_statistics_path)
+    pdf = add_table_pdf(create_pdf(), test_statistics_path)
 
     # THEN check if the table is appended to the created PDF
     assert isinstance(pdf, FPDF)

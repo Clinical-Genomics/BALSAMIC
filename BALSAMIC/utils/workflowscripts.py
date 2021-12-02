@@ -158,13 +158,13 @@ class PDF(FPDF):
         self.cell(0, 10, f"Page {self.page_no()}/{{nb}}", 0, 0, "C")
 
 
-def create_PDF():
+def create_pdf():
     pdf = PDF()
     pdf.alias_nb_pages(alias="{nb}")
     return pdf
 
 
-def add_images_PDF(pdf, *img_paths):
+def add_images_pdf(pdf, *img_paths):
     for path in img_paths:
         title = os.path.basename(path).replace(".png", "")
 
@@ -196,7 +196,7 @@ def add_images_PDF(pdf, *img_paths):
     return pdf
 
 
-def add_table_PDF(pdf, data_path):
+def add_table_pdf(pdf, data_path):
     with open(data_path) as data:
         data = data.readlines()
 
@@ -230,7 +230,7 @@ def add_table_PDF(pdf, data_path):
 
 
 def save_ascat_output_pdf(output_path, data_path, *img_paths):
-    pdf = create_PDF()
-    pdf = add_images_PDF(pdf, *img_paths)
-    pdf = add_table_PDF(pdf, data_path)
+    pdf = create_pdf()
+    pdf = add_images_pdf(pdf, *img_paths)
+    pdf = add_table_pdf(pdf, data_path)
     pdf.output(output_path)
