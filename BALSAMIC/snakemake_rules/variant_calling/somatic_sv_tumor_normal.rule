@@ -125,21 +125,20 @@ rule ascat_tumor_normal:
         gccorrection = config["reference"]["ascat_gccorrection"],
         chryloci= config["reference"]["ascat_chryloci"],
     output:
-        finalvcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz"),
-        samplestatistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        germlineplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
-        rawprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
-        sunriseplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
-        tumorplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
-        aspcfplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
-        ascatprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
-        namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map"),
+        final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        germline_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
+        raw_profile_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
+        sunrise_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
+        tumor_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
+        aspcf_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        ascat_profile_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("ascatNgs") + ".sif").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "ascat-ngs"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",
@@ -187,3 +186,32 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 
 rm -rf {params.tmpdir};
         """
+
+rule ascat_tumor_normal_merge_output:
+    input:
+        sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        ascat_profile_plot= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        raw_profile_plot= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
+        aspcf_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        tumor_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
+        germline_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
+        sunrise_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png"
+    output:
+        ascat_output_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"}
+    run:
+        from BALSAMIC.utils.workflowscripts import save_ascat_output_pdf
+
+        save_ascat_output_pdf(
+            output.ascat_output_pdf,
+            input.sample_statistics,
+            [
+                input.ascat_profile_plot,
+                input.raw_profile_plot,
+                input.aspcf_plot,
+                input.tumor_plot,
+                input.germline_plot,
+                input.sunrise_plot
+            ]
+        )

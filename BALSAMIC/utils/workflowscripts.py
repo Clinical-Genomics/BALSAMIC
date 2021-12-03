@@ -164,7 +164,7 @@ def create_pdf():
     return pdf
 
 
-def add_images_pdf(pdf, *img_paths):
+def add_images_pdf(pdf, img_paths):
     for path in img_paths:
         title = os.path.basename(path).replace(".png", "")
 
@@ -229,8 +229,8 @@ def add_table_pdf(pdf, data_path):
     return pdf
 
 
-def save_ascat_output_pdf(output_path, data_path, *img_paths):
+def save_ascat_output_pdf(output_path, data_path, img_paths):
     pdf = create_pdf()
-    pdf = add_images_pdf(pdf, *img_paths)
     pdf = add_table_pdf(pdf, data_path)
+    pdf = add_images_pdf(pdf, img_paths)
     pdf.output(output_path)
