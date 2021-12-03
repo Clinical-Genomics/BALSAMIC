@@ -164,23 +164,23 @@ ascat.pl \
   -tumour {input.bamT} \
   -normal {input.bamN};
 
-cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.finalvcf};
+cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.final_vcf};
 
-cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.samplestatistics};
+cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.sample_statistics};
 
-cp {params.tmpdir}/{params.tumor}.germline.png {output.germlineplot};
+cp {params.tmpdir}/{params.tumor}.germline.png {output.germline_plot};
 
-cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.rawprofileplot};
+cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.raw_profile_plot};
 
-cp {params.tmpdir}/{params.tumor}.sunrise.png {output.sunriseplot};
+cp {params.tmpdir}/{params.tumor}.sunrise.png {output.sunrise_plot};
 
-cp {params.tmpdir}/{params.tumor}.tumour.png {output.tumorplot};
+cp {params.tmpdir}/{params.tumor}.tumour.png {output.tumor_plot};
 
-cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascatprofileplot};
+cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascat_profile_plot};
 
-cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.aspcfplot};
+cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.aspcf_plot};
 
-tabix -p vcf -f {output.finalvcf};
+tabix -p vcf -f {output.final_vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
