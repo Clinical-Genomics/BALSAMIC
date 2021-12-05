@@ -127,12 +127,10 @@ rule ascat_tumor_normal:
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
         sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        germline_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
-        raw_profile_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
-        sunrise_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
-        tumor_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
-        aspcf_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
-        ascat_profile_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        ascat_plots= expand(
+            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+        ),
         namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
@@ -168,17 +166,17 @@ cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.final_vcf};
 
 cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.sample_statistics};
 
-cp {params.tmpdir}/{params.tumor}.germline.png {output.germline_plot};
+cp {params.tmpdir}/{params.tumor}.germline.png {output.ascat_plots[0]};
 
-cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.raw_profile_plot};
+cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.ascat_plots[1]};
 
-cp {params.tmpdir}/{params.tumor}.sunrise.png {output.sunrise_plot};
+cp {params.tmpdir}/{params.tumor}.sunrise.png {output.ascat_plots[2]};
 
-cp {params.tmpdir}/{params.tumor}.tumour.png {output.tumor_plot};
+cp {params.tmpdir}/{params.tumor}.tumour.png {output.ascat_plots[3]};
 
-cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascat_profile_plot};
+cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascat_plots[4]};
 
-cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.aspcf_plot};
+cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.ascat_plots[5]};
 
 tabix -p vcf -f {output.final_vcf};
 
@@ -190,28 +188,23 @@ rm -rf {params.tmpdir};
 rule ascat_tumor_normal_merge_output:
     input:
         sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        ascat_profile_plot= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
-        raw_profile_plot= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
-        aspcf_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
-        tumor_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
-        germline_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
-        sunrise_plot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png"
+        ascat_plots= expand(
+            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+        ),
     output:
         ascat_output_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"}
+    threads:
+        get_threads(cluster_config, "ascat_tumor_normal_merge_output")
+    message:
+        "Merge the ascatNgs output plots together with the sample statics into a single PDF"
     run:
         from BALSAMIC.utils.workflowscripts import save_ascat_output_pdf
 
         save_ascat_output_pdf(
             output.ascat_output_pdf,
             input.sample_statistics,
-            [
-                input.ascat_profile_plot,
-                input.raw_profile_plot,
-                input.aspcf_plot,
-                input.tumor_plot,
-                input.germline_plot,
-                input.sunrise_plot
-            ]
+            input.ascat_plots
         )
