@@ -200,7 +200,7 @@ rule ascat_tumor_normal_merge_output:
     threads:
         get_threads(cluster_config, "ascat_tumor_normal_merge_output")
     message:
-        "Merge the ascatNgs output plots together with the sample statics into a single PDF"
+        "Merge the ascatNgs output plots together with the sample statistics into a single PDF"
     shell:
         """
         python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
