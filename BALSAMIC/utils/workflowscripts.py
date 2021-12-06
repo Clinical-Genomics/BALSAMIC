@@ -171,14 +171,14 @@ def add_images_pdf(pdf, img_paths):
         if "sunrise" in title:
             page_orientation = "portrait"
             img_size = 500, 500
-            title_w_pos = 35
-            title_wh = 120, 10
+            title_w_pos = 25
+            title_wh = 140, 10
             img_xy = 10, 55
         else:
             page_orientation = "landscape"
             img_size = 800, 800
-            title_w_pos = 78
-            title_wh = 120, 10
+            title_w_pos = 68.5
+            title_wh = 140, 10
             img_xy = 5, 40
 
         pdf.add_page(orientation=page_orientation)
@@ -205,8 +205,8 @@ def add_table_pdf(pdf, data_path):
 
     # Title layout & styling
     title = os.path.basename(data_path).replace(".txt", "")
-    pdf.cell(35)
-    pdf.cell(120, 10, title, 1, 0, "C")
+    pdf.cell(25)
+    pdf.cell(140, 10, title, 1, 0, "C")
     pdf.cell(35, 25, ln=1)  # Post title indentation
 
     # Table layout & styling
