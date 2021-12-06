@@ -17,7 +17,7 @@ from BALSAMIC.utils.cli import generate_h5
 
 
 def plot_analysis(
-    log_file: Path, h5_file: Path, fig_name: Path
+        log_file: Path, h5_file: Path, fig_name: Path
 ) -> typing.Union[None, Path]:
     """
     plots analysis job.
@@ -149,9 +149,6 @@ def plot_analysis(
 
 
 class PDF(FPDF):
-    def header(self):
-        self.set_font("helvetica", "B", 15)
-
     def footer(self):
         self.set_y(-15)
         self.set_font("helvetica", "I", 8)
@@ -165,6 +162,8 @@ def create_pdf():
 
 
 def add_images_pdf(pdf, img_paths):
+    pdf.set_font("helvetica", "B", 15)
+
     for path in img_paths:
         title = os.path.basename(path).replace(".png", "")
 
@@ -172,14 +171,14 @@ def add_images_pdf(pdf, img_paths):
         if "sunrise" in title:
             page_orientation = "portrait"
             img_size = 500, 500
-            title_w_pos = 45
-            title_wh = 100, 10
+            title_w_pos = 35
+            title_wh = 120, 10
             img_xy = 10, 55
         else:
             page_orientation = "landscape"
             img_size = 800, 800
-            title_w_pos = 88
-            title_wh = 100, 10
+            title_w_pos = 78
+            title_wh = 120, 10
             img_xy = 5, 40
 
         pdf.add_page(orientation=page_orientation)
@@ -197,10 +196,12 @@ def add_images_pdf(pdf, img_paths):
 
 
 def add_table_pdf(pdf, data_path):
+
     with open(data_path) as data:
         data = data.readlines()
 
     pdf.add_page()
+    pdf.set_font("helvetica", "B", 15)
 
     # Title layout & styling
     title = os.path.basename(data_path).replace(".txt", "")

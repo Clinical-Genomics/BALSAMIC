@@ -166,17 +166,17 @@ cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.final_vcf};
 
 cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.sample_statistics};
 
-cp {params.tmpdir}/{params.tumor}.germline.png {output.ascat_plots[0]};
+cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascat_plots[0]};
 
 cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.ascat_plots[1]};
 
-cp {params.tmpdir}/{params.tumor}.sunrise.png {output.ascat_plots[2]};
+cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.ascat_plots[2]};
 
 cp {params.tmpdir}/{params.tumor}.tumour.png {output.ascat_plots[3]};
 
-cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascat_plots[4]};
+cp {params.tmpdir}/{params.tumor}.germline.png {output.ascat_plots[4]};
 
-cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.ascat_plots[5]};
+cp {params.tmpdir}/{params.tumor}.sunrise.png {output.ascat_plots[5]};
 
 tabix -p vcf -f {output.final_vcf};
 
