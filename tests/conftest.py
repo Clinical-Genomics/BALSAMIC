@@ -48,6 +48,20 @@ def config_files():
         "pon_fastq_path": "tests/test_data/fastq/",
     }
 
+@pytest.fixture(scope="session")
+def dog_config_files():
+    """dict: path of the config files"""
+    return {
+        "sample": "BALSAMIC/config/sample.json",
+        "analysis_paired": "BALSAMIC/config/analysis_paired.json",
+        "cluster_json": "BALSAMIC/config/cluster.json",
+        "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
+        "analysis_single": "BALSAMIC/config/analysis_single.json",
+        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
+        "panel_dog_bed_file": "tests/test_data/references/panel/panel_dog.bed",
+        "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
+        "pon_fastq_path": "tests/test_data/fastq/",
+    }
 
 @pytest.fixture(scope="session")
 def reference():
@@ -78,6 +92,23 @@ def reference():
         }
     }
 
+@pytest.fixture(scope="session")
+def reference_dog():
+    """reference json model"""
+    return {
+        "reference": {
+            "reference_genome": "tests/test_data/references/genome/canfam3_decoy.fasta",
+            "genome_chrom_size": "tests/test_data/references/genome/canfam3.chrom.sizes",
+            "refflat": "tests/test_data/references/genome/refGene_canfam3.flat",
+            "refGene": "tests/test_data/references/genome/refGene_canfam3.txt",
+            "exon_bed": "tests/test_data/references/genome/refGene_canfam3.flat.bed",
+            }
+    }
+
+@pytest.fixture(scope="session")
+def genome_version_dog():
+    """reference json model"""
+    return "canfam3"
 
 @pytest.fixture(scope="session")
 def pon_fastq_path():
@@ -88,6 +119,9 @@ def pon_fastq_path():
 def panel_bed_file():
     return "tests/test_data/references/panel/panel.bed"
 
+@pytest.fixture(scope="session")
+def panel_dog_bed_file():
+    return "tests/test_data/references/panel/panel_dog.bed"
 
 @pytest.fixture(scope="session")
 def background_variant_file():
@@ -166,6 +200,40 @@ def sample_fastq(tmp_path_factory):
         "normal": normalfastqr1.absolute().as_posix(),
     }
 
+@pytest.fixture(scope="session")
+def dog_sample_fastq(tmp_path_factory):
+    """
+    create sample fastq files
+    """
+    fastq_dir = tmp_path_factory.mktemp("fastq")
+    fastq_valid = fastq_dir / "dog_S1_R_1.fastq.gz"
+    fastq_invalid = fastq_dir / "sample.fastq.gz"
+
+    # dummy tumor fastq file
+    tumorfastqr1 = fastq_dir / "concatenated_tumor_XXXXXX_R_1.fastq.gz"
+    tumorfastqr2 = fastq_dir / "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+
+    # dummy normal fastq file
+    normalfastqr1 = fastq_dir / "concatenated_normal_XXXXXX_R_1.fastq.gz"
+    normalfastqr2 = fastq_dir / "concatenated_normal_XXXXXX_R_2.fastq.gz"
+
+    for fastq_file in (
+        fastq_valid,
+        fastq_invalid,
+        tumorfastqr1,
+        tumorfastqr2,
+        normalfastqr1,
+        normalfastqr2,
+    ):
+        fastq_file.touch()
+
+    return {
+        "fastq_valid": fastq_valid.absolute().as_posix(),
+        "fastq_invalid": fastq_invalid.absolute().as_posix(),
+        "tumor": tumorfastqr1.absolute().as_posix(),
+        "normal": normalfastqr1.absolute().as_posix(),
+    }
+
 
 @pytest.fixture(scope="session")
 def balsamic_cache(tmp_path_factory, reference):
@@ -187,6 +255,29 @@ def balsamic_cache(tmp_path_factory, reference):
     cache_reference_json.touch()
     with open(cache_reference_json, "w") as fp:
         json.dump(reference, fp)
+
+    return cache_dir.as_posix()
+
+@pytest.fixture(scope="session")
+def balsamic_cache_dog(tmp_path_factory, reference_dog):
+    """
+    Create singularity container
+    """
+
+    cache_dir = tmp_path_factory.mktemp("balsmic_coche")
+
+    cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
+    cache_container.mkdir(parents=True, exist_ok=True)
+    cache_container_example = cache_container / "example.sif"
+    cache_container_example.touch()
+
+    cache_reference = cache_dir / balsamic_version / "canfam3"
+    cache_reference.mkdir(parents=True, exist_ok=True)
+
+    cache_reference_json = cache_reference / "reference.json"
+    cache_reference_json.touch()
+    with open(cache_reference_json, "w") as fp:
+        json.dump(reference_dog, fp)
 
     return cache_dir.as_posix()
 
@@ -276,9 +367,68 @@ def tumor_normal_config(
     qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
     qc_dir.mkdir(parents=True, exist_ok=False)
     copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
-
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
+@pytest.fixture(scope="session")
+def tumor_normal_dog_config(
+    tmp_path_factory,
+    dog_sample_fastq,
+    analysis_dir,
+    balsamic_cache_dog,
+    background_variant_file,
+    panel_dog_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+    genome_version_dog
+):
+    """
+    invokes balsamic config sample -t xxx -n xxx to create sample config
+    for tumor-normal
+    """
+    case_id = "sample_tumor_normal"
+    tumor = dog_sample_fastq["tumor"]
+    normal = dog_sample_fastq["normal"]
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_dog_bed_file,
+                "-t",
+                tumor,
+                "-n",
+                normal,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache_dog,
+                "--tumor-sample-name",
+                "SRR13571581",
+                "--normal-sample-name",
+                "SRR13571580",
+                "--background-variants",
+                background_variant_file,
+                "--genome-version",
+                genome_version_dog,
+            ],
+        )
+
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir.mkdir(parents=True, exist_ok=False)
+    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 @pytest.fixture(name="helpers")
 def fixture_config_helpers():
@@ -384,6 +534,61 @@ def tumor_only_config(
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
+@pytest.fixture(scope="session")
+def tumor_only_dog_config(
+    tmpdir_factory,
+    dog_sample_fastq,
+    balsamic_cache_dog,
+    background_variant_file,
+    analysis_dir,
+    panel_dog_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+    genome_version_dog
+):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_id = "dog_sample_tumor_only"
+    tumor = dog_sample_fastq["tumor"]
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_dog_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache_dog,
+                "--background-variants",
+                background_variant_file,
+                "--genome-version",
+                genome_version_dog,
+            ],
+        )
+
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir.mkdir(parents=True, exist_ok=False)
+    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(
@@ -479,6 +684,18 @@ def sample_config():
                 "file_prefix": "S2_R",
                 "type": "normal",
                 "readpair_suffix": ["1", "2"],
+            },
+            "dog_S1_R": {
+                "file_prefix": "S1_R",
+                "sample_name" : "SRR13571581",
+                "type": "tumor",
+                "readpair_suffix": ["1", "2"]
+            },
+            "dog_S2_R": {
+                "file_prefix": "S2_R",
+                "sample_name" : "SRR13571580",
+                "type": "normal",
+                "readpair_suffix": ["1", "2"]
             },
         },
         "umiworkflow": "true",

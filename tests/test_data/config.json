@@ -85,6 +85,18 @@
             "sample_name" : "ACC2",
             "type": "normal",
             "readpair_suffix": ["1", "2"]
+        },
+        "dog_S1_R": {
+            "file_prefix": "S1_R",
+            "sample_name" : "SRR13571581",
+            "type": "tumor",
+            "readpair_suffix": ["1", "2"]
+        },
+        "dog_S2_R": {
+            "file_prefix": "S2_R",
+            "sample_name" : "SRR13571580",
+            "type": "normal",
+            "readpair_suffix": ["1", "2"]
         }
     },
     "reference": {

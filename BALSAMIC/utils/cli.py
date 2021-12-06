@@ -251,7 +251,7 @@ def get_schedulerpy():
     return scheduler
 
 
-def get_snakefile(analysis_type, sequencing_type="targeted"):
+def get_snakefile(analysis_type, reference_genome, sequencing_type="targeted"):
     """
     Return a string path for variant calling snakefile.
     """
@@ -259,7 +259,10 @@ def get_snakefile(analysis_type, sequencing_type="targeted"):
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
     if analysis_type == "generate_ref":
-        snakefile = Path(p, "workflows", "reference.smk")
+        if "canfam" in reference_genome:
+            snakefile = Path(p, "workflows", "reference-dog.smk")
+        else:
+            snakefile = Path(p, "workflows", "reference.smk")
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
 
@@ -583,6 +586,7 @@ def generate_graph(config_collection_dict, config_path):
         snakemake.snakemake(
             snakefile=get_snakefile(
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
+                reference_genome=config_collection_dict["reference"]["reference_genome"],
                 sequencing_type=config_collection_dict["analysis"]["sequencing_type"],
             ),
             dryrun=True,

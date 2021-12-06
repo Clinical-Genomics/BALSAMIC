@@ -1,0 +1,11 @@
+{
+    "reference": {
+        "reference_genome": "tests/test_data/references/genome/canfam3_decoy.fasta",
+        "genome_chrom_size": "tests/test_data/references/genome/canfam3.chrom.sizes",
+        "genome_chrom_size": "tests/test_data/references/genome/canfam3.chrom.sizes",
+        "refflat": "tests/test_data/references/genome/refGene_canfam3.flat",
+        "refGene": "tests/test_data/references/genome/refGene_canfam3.txt",
+        "exon_bed": "tests/test_data/references/genome/refGene_canfam3.flat.bed",
+        "access_regions": "tests/test_data/references/genome/access_5k_canfam3.txt"
+    }
+}

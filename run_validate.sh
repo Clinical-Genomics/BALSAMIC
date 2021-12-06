@@ -77,6 +77,8 @@ _cluster_config=BALSAMIC/config/cluster.json
 _balsamic_cache=/home/proj/stage/cancer/balsamic_cache
 _tumor_fastq=tests/test_data/fastq/S1_R_1.fastq.gz
 _normal_fastq=tests/test_data/fastq/S2_R_1.fastq.gz
+_dog_tumor_fastq=tests/test_data/fastq/dog_S1_R_1.fastq.gz
+_dog_normal_fastq=tests/test_data/fastq/dog_S2_R_1.fastq.gz
 _analysis_config=${_analysis_dir}'/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
 
 if [[ ! -z ${rFlag} ]]; then

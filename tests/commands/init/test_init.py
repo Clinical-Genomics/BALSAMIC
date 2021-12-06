@@ -45,6 +45,47 @@ def test_init_reference_write_json(
     assert Path(test_output_reference_pdf).exists()
     assert Path(test_output_reference_config).exists()
 
+def test_init_dog_reference_write_json(
+    invoke_cli,
+    tmp_path,
+    genome_version_dog,
+):
+    # Given test_reference.json
+    test_genome_version = "canfam3"
+    test_container_version = "develop"
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    # WHEN creating config.json in reference dir
+    test_output_reference_config = (
+        test_new_dir / balsamic_version / test_genome_version / "config.json"
+    )
+    test_output_reference_pdf = (
+        test_new_dir
+        / balsamic_version
+        / test_genome_version
+        / "generate_ref_worflow_graph.pdf"
+    )
+
+    result = invoke_cli(
+        [
+            "init",
+            "-o",
+            str(test_new_dir),
+            "--cosmic-key",
+            "secret_key",
+            "-v",
+            test_container_version,
+            "--genome-version",
+            genome_version_dog,
+        ]
+    )
+
+    # THEN output config and pdf file generate and command exit code 0
+    assert result.exit_code == 0
+    assert Path(test_output_reference_pdf).exists()
+    assert Path(test_output_reference_config).exists()
+
 
 def test_init_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
     # Given a path with no write permission

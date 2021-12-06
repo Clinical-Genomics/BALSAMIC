@@ -198,9 +198,14 @@ analysis_type = config['analysis']["analysis_type"]
 sequence_type = config['analysis']["sequencing_type"]
 
 for sub,value in SNAKEMAKE_RULES.items():
-  if sub in ["common", analysis_type + "_" + sequence_type]:
-    for module_name,module_rules in value.items():
-      rules_to_include.extend(module_rules)
+    if ('canfam' in config["reference"]["reference_genome"]):
+        if sub in [analysis_type + "_" + "canfam"]:
+            for module_name,module_rules in value.items():
+                rules_to_include.extend(module_rules)
+    else:
+        if sub in ["common", analysis_type + "_" + sequence_type]:
+            for module_name,module_rules in value.items():
+                rules_to_include.extend(module_rules)
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
@@ -311,6 +316,9 @@ if 'delivery' in config:
                                   config["analysis"]["case_id"] + "_delivery_ready.hk")
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
+
+if ('canfam' in sub for sub in config["reference"]):
+    analysis_specific_results = []
 
 rule all:
     input:

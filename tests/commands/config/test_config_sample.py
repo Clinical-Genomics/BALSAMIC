@@ -59,6 +59,65 @@ def test_tumor_normal_config(
     assert result.exit_code == 0
     assert Path(test_analysis_dir, case_id, case_id + ".json").exists()
 
+def test_dog_tumor_normal_config(
+    invoke_cli,
+    dog_sample_fastq,
+    tmp_path,
+    balsamic_cache_dog,
+    panel_dog_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+    genome_version_dog,
+):
+    # GIVEN a case ID, fastq files, and an analysis dir
+    test_analysis_dir = tmp_path / "test_analysis_dir"
+    test_analysis_dir.mkdir()
+    case_id = "sample_tumor_normal"
+    tumor = dog_sample_fastq["tumor"]
+    normal = dog_sample_fastq["normal"]
+
+    # test_analysis_dir = tmp_path / "test_analysis_dir"
+    # test_analysis_dir.mkdir()
+    # case_id = "sample_dog_tumor_normal"
+    # tumor = dog_sample_fastq["fastq_valid"]
+
+    # WHEN creating a case analysis
+    with mock.patch.dict(
+        "os.environ",
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        result = invoke_cli(
+            [
+                "config",
+                "case",
+                "-p",
+                panel_dog_bed_file,
+                "-t",
+                tumor,
+                "-n",
+                normal,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                test_analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache_dog,
+                "--tumor-sample-name",
+                "SRR13571581",
+                "--normal-sample-name",
+                "SRR13571580",
+                "--genome-version",
+                genome_version_dog,
+            ],
+        )
+
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(test_analysis_dir, case_id, case_id + ".json").exists()
+
 
 def test_tumor_only_config(
     invoke_cli,
@@ -106,17 +165,71 @@ def test_tumor_only_config(
     assert result.exit_code == 0
     assert Path(test_analysis_dir, case_id, case_id + ".json").exists()
 
+def test_dog_tumor_only_config(
+    invoke_cli,
+    dog_sample_fastq,
+    tmp_path,
+    balsamic_cache_dog,
+    panel_dog_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+    genome_version_dog,
+):
+    # GIVEN a case ID, fastq files, and an analysis dir
+    test_analysis_dir = tmp_path / "test_analysis_dir"
+    test_analysis_dir.mkdir()
+    case_id = "sample_dog_tumor_only"
+    tumor = dog_sample_fastq["fastq_valid"]
+
+    # WHEN creating a case analysis
+    with mock.patch.dict(
+        "os.environ",
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        result = invoke_cli(
+            [
+                "config",
+                "case",
+                "-p",
+                panel_dog_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                test_analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache_dog,
+                "--tumor-sample-name",
+                "SRR13571581",
+                "--genome-version",
+                genome_version_dog,
+            ],
+        )
+
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(test_analysis_dir, case_id, case_id + ".json").exists()
+
+
 
 def test_dag_graph_success(
     tumor_normal_wgs_config,
     tumor_only_config,
+    tumor_only_dog_config,
     tumor_normal_config,
+    tumor_normal_dog_config,
     tumor_only_wgs_config,
 ):
     # WHEN creating config using standard CLI input and setting Sentieon env vars
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_normal_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(open(tumor_normal_dog_config))["analysis"]["dag"]).exists()
     assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(open(tumor_only_dog_config))["analysis"]["dag"]).exists()
     assert Path(json.load(open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
     assert Path(json.load(open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
 

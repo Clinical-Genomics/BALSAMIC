@@ -58,10 +58,12 @@ LOG = logging.getLogger(__name__)
     help="Force re-downloading all containers",
 )
 @click.option("-c", "--cosmic-key", required=True, help="cosmic db authentication key")
+
+
 @click.option(
     "-s",
     "--snakefile",
-    default=get_snakefile("generate_ref"),
+    default=None,
     type=click.Path(),
     show_default=True,
     help="snakefile for reference generation",
@@ -77,7 +79,7 @@ LOG = logging.getLogger(__name__)
     "-g",
     "--genome-version",
     default="hg19",
-    type=click.Choice(["hg19", "hg38"]),
+    type=click.Choice(["hg19", "hg38", "canfam3"]),
     help=(
         "Genome version to prepare reference. Path to genome"
         "will be <outdir>/genome_version"
@@ -260,6 +262,9 @@ def initialize(
 
     write_json(config_dict, config_json)
     LOG.info("Reference generation workflow configured successfully - %s" % config_json)
+
+
+    snakefile = get_snakefile("generate_ref", genome_version)
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(
