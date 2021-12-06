@@ -196,7 +196,7 @@ rule ascat_tumor_normal_merge_output:
         ascat_output_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-        merge_ascat_output_script= get_script_path("merge_ascat_output.py"),
+        merge_ascat_output_script= get_script_path("create_pdf.py"),
     threads:
         get_threads(cluster_config, "ascat_tumor_normal_merge_output")
     message:

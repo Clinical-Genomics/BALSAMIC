@@ -1,6 +1,6 @@
 from fpdf import FPDF
 
-from BALSAMIC.assets.scripts.merge_ascat_output import (
+from BALSAMIC.assets.scripts.create_pdf import (
     create_pdf,
     add_images_pdf,
     add_table_pdf,
