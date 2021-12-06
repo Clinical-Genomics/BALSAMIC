@@ -7,13 +7,13 @@ from PIL import Image
 
 
 @click.command(
-    short_help="Merge the ascatNgs sample statistics and output plots into a single PDF",
+    short_help="Merge images and a txt file into a single PDF",
 )
 @click.argument("output", type=click.Path(exists=False))
 @click.argument("data", type=click.Path(exists=True))
-@click.argument("plots", nargs=-1, type=click.Path(exists=True))
-def save_ascat_output_pdf(output, data, plots):
-    pdf = create_pdf()
+@click.argument("images", nargs=-1, type=click.Path(exists=True))
+def create_pdf(output, data, plots):
+    pdf = generate_fpdf()
     pdf = add_table_pdf(pdf, data)
     pdf = add_images_pdf(pdf, plots)
     pdf.output(output)
@@ -26,7 +26,7 @@ class PDF(FPDF):
         self.cell(0, 10, f"Page {self.page_no()}/{{nb}}", 0, 0, "C")
 
 
-def create_pdf():
+def generate_fpdf():
     pdf = PDF()
     pdf.alias_nb_pages(alias="{nb}")
     return pdf
@@ -102,4 +102,4 @@ def add_table_pdf(pdf, data_path):
 
 
 if __name__ == "__main__":
-    save_ascat_output_pdf()
+    create_pdf()

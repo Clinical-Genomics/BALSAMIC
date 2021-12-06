@@ -1,15 +1,15 @@
 from fpdf import FPDF
 
 from BALSAMIC.assets.scripts.create_pdf import (
-    create_pdf,
+    generate_fpdf,
     add_images_pdf,
     add_table_pdf,
 )
 
 
-def test_create_pdf():
+def test_generate_fpdf():
     # WHEN creating a dummy FPDF file
-    pdf = create_pdf()
+    pdf = generate_fpdf()
 
     # THEN check if the pdf has been correctly created
     assert isinstance(pdf, FPDF)
@@ -23,7 +23,7 @@ def test_add_images_pdf():
     ]
 
     # WHEN calling the function
-    pdf = add_images_pdf(create_pdf(), test_images_path)
+    pdf = add_images_pdf(generate_fpdf(), test_images_path)
 
     # THEN check if the images are appended to the PDF
     assert isinstance(pdf, FPDF)
@@ -37,7 +37,7 @@ def test_add_table_pdf():
     )
 
     # WHEN calling the function
-    pdf = add_table_pdf(create_pdf(), test_statistics_path)
+    pdf = add_table_pdf(generate_fpdf(), test_statistics_path)
 
     # THEN check if the table is appended to the created PDF
     assert isinstance(pdf, FPDF)
