@@ -9,13 +9,13 @@ from PIL import Image
 @click.command(
     short_help="Merge images and a txt file into a single PDF",
 )
-@click.argument("output", type=click.Path(exists=False))
-@click.argument("data", type=click.Path(exists=True))
-@click.argument("images", nargs=-1, type=click.Path(exists=True))
-def create_pdf(output, data, plots):
+@click.argument("output", type=click.Path(exists=False), required=True)
+@click.argument("data", type=click.Path(exists=True), required=True)
+@click.argument("images", nargs=-1, type=click.Path(exists=True), required=True)
+def create_pdf(output, data, images):
     pdf = generate_fpdf()
     pdf = add_table_pdf(pdf, data)
-    pdf = add_images_pdf(pdf, plots)
+    pdf = add_images_pdf(pdf, images)
     pdf.output(output)
 
 
