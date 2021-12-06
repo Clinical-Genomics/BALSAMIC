@@ -425,9 +425,6 @@ def tumor_normal_dog_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
-    qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 @pytest.fixture(name="helpers")
@@ -582,10 +579,6 @@ def tumor_only_dog_config(
                 genome_version_dog,
             ],
         )
-
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
-    qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 

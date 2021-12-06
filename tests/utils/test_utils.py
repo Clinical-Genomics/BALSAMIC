@@ -422,7 +422,7 @@ def test_get_sample_type(sample_config):
     sample_id = get_sample_type(sample_config["samples"], bio_type)
 
     # THEN It should return the tumor samples id
-    assert sample_id == ["S1_R"]
+    assert sample_id == ["S1_R", "dog_S1_R"]
 
 
 def test_get_picard_mrkdup(sample_config):
