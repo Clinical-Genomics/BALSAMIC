@@ -195,16 +195,13 @@ rule ascat_tumor_normal_merge_output:
     output:
         ascat_output_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"}
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
+        merge_ascat_output_script= get_script_path("merge_ascat_output.py"),
     threads:
         get_threads(cluster_config, "ascat_tumor_normal_merge_output")
     message:
         "Merge the ascatNgs output plots together with the sample statics into a single PDF"
-    run:
-        from BALSAMIC.utils.workflowscripts import save_ascat_output_pdf
-
-        save_ascat_output_pdf(
-            output.ascat_output_pdf,
-            input.sample_statistics,
-            input.ascat_plots
-        )
+    shell:
+        """
+        python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
+        """
