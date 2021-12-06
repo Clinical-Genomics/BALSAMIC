@@ -1,3 +1,11 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* Added ``--hgsvg`` annotation to VEP
+
 [8.2.3]
 -------
 Fixed:
