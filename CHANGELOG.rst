@@ -4,7 +4,7 @@
 Added:
 ^^^^^^
 
-* ``--hgsvg`` annotation to VEP #830
+* ``--hgvsg`` annotation to VEP #830
 * ``ascatNgs`` PDF delivery (plots & statistics) #828
 
 [8.2.3]
