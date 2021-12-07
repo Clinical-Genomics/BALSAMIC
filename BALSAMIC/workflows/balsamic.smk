@@ -241,6 +241,9 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
         analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
                                           Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()])
 
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
+    analysis_specific_results.append(expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [config["analysis"]["case_id"]])))
+
 if 'benchmark_plots' in config:
     log_dir = config["analysis"]["log"]
     if not check_executable("sh5util"):
