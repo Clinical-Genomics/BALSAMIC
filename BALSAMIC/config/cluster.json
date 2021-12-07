@@ -251,5 +251,9 @@
 	"ascat_tumor_normal": {
 		"time": "8:00:00",
 		"n": 36
+	},
+	"ascat_tumor_normal_merge_output": {
+		"time": "00:15:00",
+		"n": 1
 	}
 }
