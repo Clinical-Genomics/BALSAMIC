@@ -125,21 +125,18 @@ rule ascat_tumor_normal:
         gccorrection = config["reference"]["ascat_gccorrection"],
         chryloci= config["reference"]["ascat_chryloci"],
     output:
-        finalvcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz"),
-        samplestatistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        germlineplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
-        rawprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
-        sunriseplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
-        tumorplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
-        aspcfplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
-        ascatprofileplot = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
-        namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map"),
+        final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        ascat_plots= expand(
+            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+        ),
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("ascatNgs") + ".sif").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "ascat-ngs"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",
@@ -165,25 +162,46 @@ ascat.pl \
   -tumour {input.bamT} \
   -normal {input.bamN};
 
-cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.finalvcf};
+cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.final_vcf};
 
-cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.samplestatistics};
+cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.sample_statistics};
 
-cp {params.tmpdir}/{params.tumor}.germline.png {output.germlineplot};
+cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascat_plots[0]};
 
-cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.rawprofileplot};
+cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.ascat_plots[1]};
 
-cp {params.tmpdir}/{params.tumor}.sunrise.png {output.sunriseplot};
+cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.ascat_plots[2]};
 
-cp {params.tmpdir}/{params.tumor}.tumour.png {output.tumorplot};
+cp {params.tmpdir}/{params.tumor}.tumour.png {output.ascat_plots[3]};
 
-cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascatprofileplot};
+cp {params.tmpdir}/{params.tumor}.germline.png {output.ascat_plots[4]};
 
-cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.aspcfplot};
+cp {params.tmpdir}/{params.tumor}.sunrise.png {output.ascat_plots[5]};
 
-tabix -p vcf -f {output.finalvcf};
+tabix -p vcf -f {output.final_vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
 rm -rf {params.tmpdir};
+        """
+
+rule ascat_tumor_normal_merge_output:
+    input:
+        sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        ascat_plots= expand(
+            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+        ),
+    output:
+        ascat_output_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
+        merge_ascat_output_script= get_script_path("create_pdf.py"),
+    threads:
+        get_threads(cluster_config, "ascat_tumor_normal_merge_output")
+    message:
+        "Merge the ascatNgs output plots together with the sample statistics into a single PDF"
+    shell:
+        """
+        python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
         """
