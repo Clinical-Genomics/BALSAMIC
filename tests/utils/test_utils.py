@@ -355,22 +355,26 @@ def test_get_snakefile():
     ]
 
     # WHEN asking to see snakefile for paired
-    for analysis_type, sequencing_type in workflow:
-        snakefile = get_snakefile(analysis_type, sequencing_type)
-        pipeline = ""
+    for reference_genome in ["hg19", "hg38", "canfam3"]:
+        for analysis_type, reference_genome, sequencing_type in workflow:
+            snakefile = get_snakefile(analysis_type, reference_genome, sequencing_type)
 
-        if sequencing_type in ["targeted", "wgs", "qc"]:
-            pipeline = "BALSAMIC/workflows/balsamic.smk"
-        elif analysis_type == "generate_ref":
-            pipeline = "BALSAMIC/workflows/reference.smk"
-        elif analysis_type == "pon":
-            pipeline = "BALSAMIC/workflows/PON.smk"
+            pipeline = ""
 
-        # THEN it should return the snakefile path
-        # THEN assert file exists
-        assert snakefile.startswith("/")
-        assert pipeline in snakefile
-        assert Path(snakefile).is_file()
+            if sequencing_type in ["targeted", "wgs", "qc"]:
+                pipeline = "BALSAMIC/workflows/balsamic.smk"
+            elif analysis_type == "generate_ref" and reference_genome != "canfam3":
+                pipeline = "BALSAMIC/workflows/reference.smk"
+            elif analysis_type == "generate_ref" and reference_genome == "canfam3":
+                pipeline = "BALSAMIC/workflows/reference-canfam3.smk"
+            elif analysis_type == "pon":
+                pipeline = "BALSAMIC/workflows/PON.smk"
+
+            # THEN it should return the snakefile path
+            # THEN assert file exists
+            assert snakefile.startswith("/")
+            assert pipeline in snakefile
+            assert Path(snakefile).is_file()
 
 
 def test_get_chrom(config_files):

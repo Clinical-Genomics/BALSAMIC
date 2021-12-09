@@ -1,6 +1,6 @@
 # reference related constants
 VALID_REF_FORMAT = ["fasta", "vcf", "text", "gtf", "gff"]
-VALID_GENOME_VER = ["hg19", "hg38"]
+VALID_GENOME_VER = ["hg19", "hg38", "canfam3"]
 
 # reference files
 REFERENCE_FILES = {
@@ -310,6 +310,40 @@ REFERENCE_FILES = {
             "genome_version": "hg19",
             "output_file": "clinvar.vcf",
             "output_path": "variants",
+        },
+    },
+    "canfam3": {
+        "reference_genome": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/bigZips/canFam3.fa.gz",
+            "file_type": "fasta",
+            "gzip": True,
+            "genome_version": "canfam3",
+            "output_file": "canFam3.fasta",
+            "output_path": "genome",
+        },
+        "refgene_txt": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/database/refGene.txt.gz",
+            "file_type": "text",
+            "gzip": True,
+            "genome_version": "canfam3",
+            "output_file": "refGene.txt",
+            "output_path": "genome",
+        },
+        "refgene_sql": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/database/refGene.sql",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "canfam3",
+            "output_file": "refGene.sql",
+            "output_path": "genome",
+        },
+        "genome_chrom_size": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/bigZips/canFam3.chrom.sizes",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "canfam3",
+            "output_file": "canfam3.chrom.sizes",
+            "output_path": "genome",
         },
     },
 }
