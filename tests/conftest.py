@@ -7,6 +7,8 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
+
+from BALSAMIC.utils.qc_metrics import get_qc_metrics
 from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
@@ -494,71 +496,32 @@ def analysis_path():
 
 
 @pytest.fixture(scope="session")
-def qc_metrics():
-    """Sample data for QC model testing"""
+def qc_requested_metrics():
+    """Raw requested metrics"""
     return {
-        "qc": {
-            "targeted": {
-                "multiqc_picard_insertSize.json": {
-                    "MEAN_INSERT_SIZE": {"condition": None}
-                },
-                "multiqc_picard_HsMetrics.json": {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 500.0}
-                    }
-                },
+        "targeted": {
+            "default": {
+                "METRIC_1": {"condition": None},
+                "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
             },
-            "wgs": {
-                "multiqc_picard_insertSize.json": {
-                    "MEAN_INSERT_SIZE": {"condition": None}
-                },
-                "multiqc_picard_dups.json": {
-                    "PERCENT_DUPLICATION": {"condition": None}
-                },
+            "panel_1.bed": {
+                "METRIC_3": {"condition": {"norm": "gt", "threshold": 3}},
             },
-        }
-    }
-
-
-@pytest.fixture(scope="session")
-def qc_extracted_metrics():
-    """Extracted metrics for QC model testing"""
-    return {
-        "metrics": {
-            "sample_1": [
-                {
-                    "name": "MEAN_INSERT_SIZE_1",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-                {
-                    "name": "MEAN_INSERT_SIZE_2",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-            ],
-            "sample_2": [
-                {
-                    "name": "MEAN_INSERT_SIZE_1",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-            ],
-        }
-    }
-
-
-@pytest.fixture(scope="session")
-def qc_raw_targeted_metrics():
-    """Raw metrics"""
-    return {
-        "default": {
-            "metrics_1.json": {"METRIC_1": 0.1, "METRIC_2": 0.2},
-            "metrics_2.json": {"METRIC_3": 0.3},
+            "panel_2.bed": {
+                "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
+                "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
+            },
         },
-        "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
-        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5, "METRIC_4": 0.4}},
+        "wgs": {
+            "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
+        },
     }
+
+
+@pytest.fixture(scope="session")
+def qc_extracted_metrics(analysis_path):
+    """Extracted and formatted QC metrics"""
+
+    return get_qc_metrics(
+        os.path.join(analysis_path, "qc", "tumor_metrics_deliverables.yaml")
+    )

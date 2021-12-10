@@ -5,9 +5,10 @@ from pathlib import Path
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.quality_check_reporting import REPORT_MODEL
+from BALSAMIC.utils.qc_metrics import get_qc_metric_value
 
 
-def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> dict:
+def report_data_population(collected_qc: list, meta: dict, lang: str = "sv") -> dict:
     """populates a metadata dictionary that contains qc and case/sample information"""
     meta = {
         **meta,
@@ -26,8 +27,8 @@ def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> 
         v[lang] for x, v in REPORT_MODEL["coverage"].items()
     ]
 
-    for sample_id, analysis_results in collected_qc.items():
-        lims_id = sample_id.split("_")[1]
+    for sample in collected_qc:
+        lims_id = sample["id"]
         sample_qc = [meta["sample_map"][lims_id], meta["sample_type"][lims_id]]
         sample_cov = [meta["sample_map"][lims_id], meta["sample_type"][lims_id]]
 
@@ -44,13 +45,13 @@ def report_data_population(collected_qc: dict, meta: dict, lang: str = "sv") -> 
     return meta
 
 
-def parse_collected_qc(collected_qc: dict, model_param: str, sample_id: str) -> list:
+def parse_collected_qc(collected_qc: list, model_param: str, sample_id: str) -> list:
     """parses collect qc and returns model_param"""
     parsed_qc = list()
 
     for qc_item, qc_value in REPORT_MODEL[model_param].items():
         decimal_point = qc_value["decimal"]
-        qc_to_report = collected_qc[sample_id][qc_item]
+        qc_to_report = get_qc_metric_value(collected_qc, sample_id, qc_item)
         if "as_percent" in qc_value:
             qc_to_report = qc_to_report * 100
         qc_to_report = str(round(qc_to_report, decimal_point))

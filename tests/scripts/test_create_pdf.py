@@ -62,8 +62,6 @@ def test_create_pdf(tmp_path, cli_runner):
     # GIVEN the output path
     output_path = tmp_path / "ascat.output.pdf"
 
-    print(output_path)
-
     # WHEN invoking the python script
     result = cli_runner.invoke(
         create_pdf, [str(output_path), statistics_path, plots_path[0], plots_path[1]]

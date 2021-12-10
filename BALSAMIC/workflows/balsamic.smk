@@ -19,9 +19,8 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
-                                 get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit)
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf,
+                                 get_picard_mrkdup, get_sample_type, get_sequencing_type, get_capture_kit)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
@@ -317,9 +316,9 @@ if 'delivery' in config:
 
 rule all:
     input:
-        quality_control_results + analysis_specific_results
+        quality_control_results + analysis_specific_results,
+        qc_yaml = os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml")
     output:
-        qc_json_file = os.path.join(get_result_dir(config), "qc", "qc_metrics_summary.json"),
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
         tmp_dir = tmp_dir,
@@ -330,12 +329,11 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
+        from BALSAMIC.utils.qc_metrics import validate_qc_metrics, get_qc_metrics
 
-        # Save QC metrics to a JSON file
+        # Perform validation of extracted QC metrics
         try:
-            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type, params.panel_bed)
-            write_json(qc_metrics_summary, str(output.qc_json_file))
+            validate_qc_metrics(get_qc_metrics(input.qc_yaml))
         except ValueError as val_exc:
             LOG.error(val_exc)
             raise BalsamicError
