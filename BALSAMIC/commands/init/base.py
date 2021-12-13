@@ -177,7 +177,6 @@ def initialize(
     container_version,
     force,
     cosmic_key,
-    snakefile,
     dagfile,
     genome_version,
     run_analysis,
