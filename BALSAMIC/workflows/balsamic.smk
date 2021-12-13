@@ -19,8 +19,9 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf,
-                                 get_picard_mrkdup, get_sample_type, get_sequencing_type, get_capture_kit)
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
+                                 get_vcf, get_picard_mrkdup, get_sample_type,
+                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
