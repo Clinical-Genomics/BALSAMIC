@@ -365,6 +365,7 @@ def test_umiparams_tnscope():
     assert test_tnscope_params_built.disable_detect == "abc"
     assert test_tnscope_params_built.padding == 30
 
+
 def test_params_vardict():
     """test UMIParamsVardict model for correct validation"""
 
