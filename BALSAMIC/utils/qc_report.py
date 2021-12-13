@@ -33,10 +33,10 @@ def report_data_population(collected_qc: list, meta: dict, lang: str = "sv") -> 
         sample_cov = [meta["sample_map"][lims_id], meta["sample_type"][lims_id]]
 
         sample_qc = sample_qc + parse_collected_qc(
-            collected_qc=collected_qc, model_param="qc", sample_id=sample_id
+            collected_qc=collected_qc, model_param="qc", sample_id=lims_id
         )
         sample_cov = sample_cov + parse_collected_qc(
-            collected_qc=collected_qc, model_param="coverage", sample_id=sample_id
+            collected_qc=collected_qc, model_param="coverage", sample_id=lims_id
         )
 
         meta["qc_table_content"][lims_id] = sample_qc
