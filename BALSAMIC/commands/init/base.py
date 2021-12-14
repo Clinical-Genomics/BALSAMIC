@@ -59,14 +59,6 @@ LOG = logging.getLogger(__name__)
 )
 @click.option("-c", "--cosmic-key", required=True, help="cosmic db authentication key")
 @click.option(
-    "-s",
-    "--snakefile",
-    default=None,
-    type=click.Path(),
-    show_default=True,
-    help="snakefile for reference generation",
-)
-@click.option(
     "-d",
     "--dagfile",
     default="generate_ref_worflow_graph",

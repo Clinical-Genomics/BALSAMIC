@@ -251,7 +251,7 @@ def get_schedulerpy():
     return scheduler
 
 
-def get_snakefile(analysis_type, reference_genome, sequencing_type="targeted"):
+def get_snakefile(analysis_type, reference_genome="hg19", sequencing_type="targeted"):
     """
     Return a string path for variant calling snakefile.
     """
