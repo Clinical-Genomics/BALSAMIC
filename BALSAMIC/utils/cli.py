@@ -259,7 +259,7 @@ def get_snakefile(analysis_type, reference_genome="hg19", sequencing_type="targe
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
     if analysis_type == "generate_ref":
-        if "canfam" in reference_genome:
+        if "canfam3" in reference_genome:
             snakefile = Path(p, "workflows", "reference-canfam3.smk")
         else:
             snakefile = Path(p, "workflows", "reference.smk")
