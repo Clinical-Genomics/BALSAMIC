@@ -35,6 +35,8 @@ def test_deliver_tumor_only_panel(
                 "tumor:tumor:KS454",
                 "--case-id-map",
                 "gmck-solid:KSK899:apptag",
+                "--disable-variant-caller",
+                "cnvkit",
             ]
         )
 
