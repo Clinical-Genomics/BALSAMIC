@@ -116,45 +116,12 @@ def test_get_multiqc_data_source(multiqc_data_path):
     assert source_dup == out_source_dup
 
 
-def test_get_multiqc_metrics(multiqc_data_path):
+def test_get_multiqc_metrics(multiqc_data_path, qc_extracted_metrics):
     """test metrics retrieval from the multiqc_data.json file"""
 
     # GIVEN a sequencing type and a capture kit
     seq_type = "targeted"
     capture_kit = "lymphoma_6.1_hg19_design.bed"
-
-    # GIVEN an expected output
-    n_metrics = 11  # Number of expected metric
-
-    hs_metric = {
-        "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
-        "name": "MEDIAN_TARGET_COVERAGE",
-        "step": "multiqc_picard_HsMetrics",
-        "value": 2393.0,
-        "condition": {"norm": "gt", "threshold": 1000.0},
-    }
-
-    ins_size_metric = {
-        "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
-        "name": "MEAN_INSERT_SIZE",
-        "step": "multiqc_picard_insertSize",
-        "value": 201.813054,
-        "condition": None,
-    }
-
-    dups_metric = {
-        "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
-        "name": "PERCENT_DUPLICATION",
-        "step": "multiqc_picard_dups",
-        "value": 0.391429,
-        "condition": None,
-    }
 
     # WHEN calling the function
     metrics = get_multiqc_metrics(
@@ -164,10 +131,7 @@ def test_get_multiqc_metrics(multiqc_data_path):
     )
 
     # THEN check if the metrics are correctly retrieved
-    assert len(metrics) == n_metrics
-    assert hs_metric in metrics
-    assert ins_size_metric in metrics
-    assert dups_metric in metrics
+    assert qc_extracted_metrics == metrics
 
 
 def test_get_multiqc_metrics_filtering_umi(multiqc_data_path):

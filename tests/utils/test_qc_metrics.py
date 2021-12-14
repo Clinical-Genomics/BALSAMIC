@@ -10,9 +10,6 @@ from BALSAMIC.utils.qc_metrics import (
 def test_get_qc_metrics(metrics_yaml_path):
     """test requested metric extraction from the saved YAML file"""
 
-    # GIVEN a metrics yaml file
-    metrics_yaml_path = os.path.join(metrics_yaml_path)
-
     # GIVEN an expected output
     n_metrics = 11  # Number of expected metric
 
