@@ -232,6 +232,7 @@ def tumor_normal_config(
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
+    metrics_yaml_path,
 ):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
@@ -281,7 +282,7 @@ def tumor_normal_config(
 
     # rename tumor_metrics_deliverables.yaml file to <case_id>_metrics_deliverables.yaml
     os.rename(
-        os.path.join(qc_dir, "tumor_metrics_deliverables.yaml"),
+        os.path.join(qc_dir, os.path.basename(metrics_yaml_path)),
         os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
     )
 
@@ -350,6 +351,7 @@ def tumor_only_config(
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
+    metrics_yaml_path,
 ):
     """
     invokes balsamic config sample -t xxx to create sample config
@@ -392,7 +394,7 @@ def tumor_only_config(
 
     # rename tumor_metrics_deliverables.yaml file to <case_id>_metrics_deliverables.yaml
     os.rename(
-        os.path.join(qc_dir, "tumor_metrics_deliverables.yaml"),
+        os.path.join(qc_dir, os.path.basename(metrics_yaml_path)),
         os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
     )
 
