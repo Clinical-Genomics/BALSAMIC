@@ -77,14 +77,11 @@ def test_get_qc_metric_value_invalid_metric(qc_extracted_metrics):
     sample_id = "tumor"
     metric_name = "NOT_A_METRIC"
 
-    # GIVEN an expected value
-    expected_value = None
-
     # WHEN calling the function
     metric_value = get_qc_metric_value(qc_extracted_metrics, sample_id, metric_name)
 
-    # THEN check if the retrieved value corresponds to the expected one
-    assert metric_value == expected_value
+    # THEN check if the retrieved value is None
+    assert metric_value is None
 
 
 def test_validate_qc_metrics(qc_extracted_metrics):
