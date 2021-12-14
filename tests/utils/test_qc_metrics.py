@@ -60,8 +60,25 @@ def test_get_qc_metric_value(qc_extracted_metrics):
     sample_id = "tumor"
     metric_name = "MEDIAN_TARGET_COVERAGE"
 
-    # GIVEN the expected value
+    # GIVEN an expected value
     expected_value = 2393.0
+
+    # WHEN calling the function
+    metric_value = get_qc_metric_value(qc_extracted_metrics, sample_id, metric_name)
+
+    # THEN check if the retrieved value corresponds to the expected one
+    assert metric_value == expected_value
+
+
+def test_get_qc_metric_value_invalid_metric(qc_extracted_metrics):
+    """test QC metric value extraction for an invalid metric name"""
+
+    # GIVEN the input parameters
+    sample_id = "tumor"
+    metric_name = "NOT_A_METRIC"
+
+    # GIVEN an expected value
+    expected_value = None
 
     # WHEN calling the function
     metric_value = get_qc_metric_value(qc_extracted_metrics, sample_id, metric_name)
