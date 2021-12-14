@@ -716,8 +716,8 @@ class MetricModel(BaseModel):
         input: str (required); input file
         name: str (required); metric name
         step: str (required); step that generated the metric
-        value: Any (required); metric value
-        condition: MetricConditionModel (required); metric validation condition
+        value: Any (required and can take None as a value); metric value
+        condition: MetricConditionModel (required and can take None as a value); metric validation condition
     """
 
     header: Optional[str]
@@ -725,8 +725,8 @@ class MetricModel(BaseModel):
     input: str
     name: str
     step: str
-    value: Any = Field(...)
-    condition: MetricConditionModel = None
+    value: Any = ...
+    condition: Optional[MetricConditionModel] = ...
 
 
 class MetricValidationModel(BaseModel):

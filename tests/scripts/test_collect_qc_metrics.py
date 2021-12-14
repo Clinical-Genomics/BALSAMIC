@@ -177,7 +177,7 @@ def test_get_multiqc_metrics_filtering_umi(analysis_path):
 
     # GIVEN a sequencing type and a capture kit
     seq_type = "targeted"
-    capture_kit = "lymphoma_6.1_hg19_design.bed"
+    capture_kit = None
 
     # WHEN calling the function
     metrics = get_multiqc_metrics(
