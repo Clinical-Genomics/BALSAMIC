@@ -334,7 +334,7 @@ REFERENCE_FILES = {
             "file_type": "text",
             "gzip": False,
             "genome_version": "canfam3",
-            "output_file": "refGene.sql",
+            "output_file": "canfam3_refGene.sql",
             "output_path": "genome",
         },
         "genome_chrom_size": {
