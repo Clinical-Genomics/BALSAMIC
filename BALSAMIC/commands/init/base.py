@@ -57,7 +57,15 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help="Force re-downloading all containers",
 )
-@click.option("-c", "--cosmic-key", required=True, help="cosmic db authentication key")
+@click.option("-c", "--cosmic-key", required=False, help="cosmic db authentication key")
+@click.option(
+    "-s",
+    "--snakefile",
+    default=None,
+    type=click.Path(),
+    show_default=True,
+    help="snakefile for reference generation",
+)
 @click.option(
     "-d",
     "--dagfile",
@@ -169,6 +177,7 @@ def initialize(
     container_version,
     force,
     cosmic_key,
+    snakefile,
     dagfile,
     genome_version,
     run_analysis,
@@ -201,6 +210,10 @@ def initialize(
         LOG.info(
             "slurm-account, qsub-account, or account is required for slurm run mode"
         )
+        raise click.Abort()
+
+    if genome_version in ["hg38", "hg19"] and not cosmic_key:
+        LOG.info("cosmic db authentication key required with hg38 and hg19")
         raise click.Abort()
 
     # resolve outdir to absolute path
@@ -252,7 +265,7 @@ def initialize(
     write_json(config_dict, config_json)
     LOG.info("Reference generation workflow configured successfully - %s" % config_json)
 
-    snakefile = get_snakefile("generate_ref", genome_version)
+    snakefile = snakefile if snakefile else get_snakefile("generate_ref", genome_version)
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(

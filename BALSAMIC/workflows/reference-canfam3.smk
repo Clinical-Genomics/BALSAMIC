@@ -27,18 +27,11 @@ genome_ver = config['genome_version']
 # essential path reference files
 basedir = os.path.join(config['output'])
 genome_dir = os.path.join(basedir, "genome")
-vcf_dir = os.path.join(basedir, "variants")
 
 # Set temporary dir environment variable
 os.environ['TMPDIR'] = basedir 
 
-# indexable VCF files
-# For future reference, if you delete this line pydantic fails in tests
-# Don't know why, but don't delete it and keep deepcopy /A&H
 REFERENCE_FILES = deepcopy(REFERENCE_MODEL)
-indexable_vcf_files = get_reference_output_files(REFERENCE_FILES[genome_ver],
-                                                 file_type='vcf',
-                                                 gzip = True)
 
 # intialize reference files
 REFERENCE_FILES[genome_ver]['basedir'] = basedir
@@ -145,20 +138,8 @@ rule download_reference:
             output_file = ref.get_output_file
             log_file = output_file + ".log"
 
-            if ref.url.scheme == "gs":
-                cmd = "export TMPDIR=/tmp; gsutil cp -L {} {} -".format(log_file, ref.url)
-            else:
-                cmd = "wget -a {} -O - {}".format(log_file, ref.url)
+            cmd = "wget -a {} -O - {}".format(log_file, ref.url)
 
-            if ref.secret:
-                try:
-                    response = requests.get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret })
-                    download_url = response.json()["url"]
-                except:
-                    LOG.error("Unable to download {}".format(ref.url))
-                    raise
-                cmd = "curl -o - '{}'".format(download_url)
-            
             if ref.gzip:
                 cmd += " | gunzip "
 
@@ -198,28 +179,6 @@ awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.r
 | cut -f 1-11 > {output.refflat};
 sed -i 's/chr//g' {input.refgene_txt};
         """
-
-##########################################################
-# bgzip and tabix the vcf files that are vcf
-##########################################################
-
-rule bgzip_tabix:
-    input: 
-        singularity_img = singularity_images,
-        vcf = os.path.join(vcf_dir, "{vcf}.vcf")
-    params:
-        type = 'vcf',
-    output:
-        os.path.join(vcf_dir, "{vcf}.vcf.gz"),
-        os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
-    log:
-        os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
-    shell:
-        """
-bgzip {input.vcf} && tabix -p {params.type} {input.vcf}.gz 2> {log};
-        """
-
 
 ##########################################################
 # Create BWA Index for reference genome

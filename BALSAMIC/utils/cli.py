@@ -250,7 +250,6 @@ def get_schedulerpy():
 
     return scheduler
 
-
 def get_snakefile(analysis_type, reference_genome="hg19", sequencing_type="targeted"):
     """
     Return a string path for variant calling snakefile.
@@ -258,15 +257,17 @@ def get_snakefile(analysis_type, reference_genome="hg19", sequencing_type="targe
 
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
+
     if analysis_type == "generate_ref":
-        if "canfam" in reference_genome:
+        snakefile = Path(p, "workflows", "reference.smk")
+        if "canfam3" in reference_genome:
             snakefile = Path(p, "workflows", "reference-canfam3.smk")
-        else:
-            snakefile = Path(p, "workflows", "reference.smk")
+            return str(snakefile)
+            
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
-    return str(snakefile)
 
+    return str(snakefile)
 
 def get_config(config_name):
     """
