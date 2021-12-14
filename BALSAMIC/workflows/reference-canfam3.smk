@@ -19,10 +19,7 @@ LOG = logging.getLogger(__name__)
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-
-
 genome_ver = config['genome_version']
-
 
 # essential path reference files
 basedir = os.path.join(config['output'])
