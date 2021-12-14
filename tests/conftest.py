@@ -508,6 +508,24 @@ def analysis_path():
 
 
 @pytest.fixture(scope="session")
+def multiqc_data_path(analysis_path):
+    """multiqc_data.json test path"""
+    return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
+
+
+@pytest.fixture(scope="session")
+def multiqc_data_path(analysis_path):
+    """multiqc_data.json test path"""
+    return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
+
+
+@pytest.fixture(scope="session")
+def metrics_yaml_path(analysis_path):
+    """tumor_metrics_deliverables.yaml test path"""
+    return os.path.join(analysis_path, "qc", "tumor_metrics_deliverables.yaml")
+
+
+@pytest.fixture(scope="session")
 def qc_requested_metrics():
     """Raw requested metrics"""
     return {
@@ -531,9 +549,6 @@ def qc_requested_metrics():
 
 
 @pytest.fixture(scope="session")
-def qc_extracted_metrics(analysis_path):
+def qc_extracted_metrics(metrics_yaml_path):
     """Extracted and formatted QC metrics"""
-
-    return get_qc_metrics(
-        os.path.join(analysis_path, "qc", "tumor_metrics_deliverables.yaml")
-    )
+    return get_qc_metrics(metrics_yaml_path)

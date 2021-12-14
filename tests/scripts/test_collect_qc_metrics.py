@@ -90,7 +90,7 @@ def test_get_requested_metrics_wgs(qc_requested_metrics):
     assert requested_metrics.items() == expected_output.items()
 
 
-def test_get_multiqc_data_source(analysis_path):
+def test_get_multiqc_data_source(multiqc_data_path):
     """test multiqc source extraction from multiqc_data.json analysis file"""
 
     # GIVEN input parameters and the multiqc data
@@ -98,9 +98,7 @@ def test_get_multiqc_data_source(analysis_path):
     source_name_hs_metrics = "multiqc_picard_HsMetrics"
     source_name_dup = "multiqc_picard_dups"
 
-    with open(
-        os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json"), "r"
-    ) as f:
+    with open(multiqc_data_path, "r") as f:
         multiqc_data = json.load(f)
 
     # GIVEN an expected output
@@ -118,7 +116,7 @@ def test_get_multiqc_data_source(analysis_path):
     assert source_dup == out_source_dup
 
 
-def test_get_multiqc_metrics(analysis_path):
+def test_get_multiqc_metrics(multiqc_data_path):
     """test metrics retrieval from the multiqc_data.json file"""
 
     # GIVEN a sequencing type and a capture kit
@@ -160,7 +158,7 @@ def test_get_multiqc_metrics(analysis_path):
 
     # WHEN calling the function
     metrics = get_multiqc_metrics(
-        os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json"),
+        multiqc_data_path,
         seq_type,
         capture_kit,
     )
@@ -172,7 +170,7 @@ def test_get_multiqc_metrics(analysis_path):
     assert dups_metric in metrics
 
 
-def test_get_multiqc_metrics_filtering_umi(analysis_path):
+def test_get_multiqc_metrics_filtering_umi(multiqc_data_path):
     """tests that UMI data is filtered out when extracting metrics"""
 
     # GIVEN a sequencing type and a capture kit
@@ -181,7 +179,7 @@ def test_get_multiqc_metrics_filtering_umi(analysis_path):
 
     # WHEN calling the function
     metrics = get_multiqc_metrics(
-        os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json"),
+        multiqc_data_path,
         seq_type,
         capture_kit,
     )
@@ -191,14 +189,11 @@ def test_get_multiqc_metrics_filtering_umi(analysis_path):
         assert "umi" not in metric["input"]
 
 
-def test_collect_qc_metrics(tmp_path, cli_runner):
+def test_collect_qc_metrics(tmp_path, multiqc_data_path, cli_runner):
     """tests qc metrics yaml file generation"""
 
     # GIVEN the output and multiqc metrics paths
     output_path = tmp_path / "tumor_metrics_deliverables.yaml"
-    multiqc_data_path = (
-        "tests/test_data/qc_files/analysis/qc/multiqc_data/multiqc_data.json"
-    )
 
     # GIVEN a sequencing type and a capture kit
     seq_type = "targeted"
@@ -210,7 +205,6 @@ def test_collect_qc_metrics(tmp_path, cli_runner):
         [str(output_path), multiqc_data_path, seq_type, capture_kit],
     )
 
-    print(str(output_path))
     # THEN check if the YAML is correctly created and there are no errors
     assert result.exit_code == 0
     assert Path(output_path).exists()
