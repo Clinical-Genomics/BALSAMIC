@@ -264,7 +264,7 @@ def get_snakefile(analysis_type, reference_genome="hg19", sequencing_type="targe
         if "canfam3" in reference_genome:
             snakefile = Path(p, "workflows", "reference-canfam3.smk")
             return str(snakefile)
-            
+
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
 
