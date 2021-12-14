@@ -208,7 +208,10 @@ for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
 
 # Define common and analysis specific outputs
-quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
+quality_control_results = [
+    result_dir + "qc/" + "multiqc_report.html",
+    os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
+]
 
 analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                     vcf=get_vcf(config, germline_caller, germline_call_samples)),
@@ -318,7 +321,6 @@ if 'delivery' in config:
 rule all:
     input:
         quality_control_results + analysis_specific_results,
-        qc_yaml = os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml")
     output:
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
@@ -334,7 +336,7 @@ rule all:
 
         # Perform validation of extracted QC metrics
         try:
-            validate_qc_metrics(get_qc_metrics(input.qc_yaml))
+            validate_qc_metrics(get_qc_metrics(input[1]))
         except ValueError as val_exc:
             LOG.error(val_exc)
             raise BalsamicError
