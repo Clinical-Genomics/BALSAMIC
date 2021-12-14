@@ -32,6 +32,41 @@
     threshold: 1.6
 - header: null
   id: tumor
+  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  name: PCT_TARGET_BASES_50X
+  step: multiqc_picard_HsMetrics
+  value: 1.0
+  condition: null
+- header: null
+  id: tumor
+  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  name: PCT_TARGET_BASES_100X
+  step: multiqc_picard_HsMetrics
+  value: 0.999987
+  condition: null
+- header: null
+  id: tumor
+  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  name: PCT_TARGET_BASES_250X
+  step: multiqc_picard_HsMetrics
+  value: 0.998445
+  condition: null
+- header: null
+  id: tumor
+  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  name: PCT_TARGET_BASES_500X
+  step: multiqc_picard_HsMetrics
+  value: 0.996675
+  condition: null
+- header: null
+  id: tumor
+  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  name: PCT_TARGET_BASES_1000X
+  step: multiqc_picard_HsMetrics
+  value: 0.992466
+  condition: null
+- header: null
+  id: tumor
   input: concatenated_tumor_XXXXXX_R.sorted.insertsizemetric
   name: MEAN_INSERT_SIZE
   step: multiqc_picard_insertSize

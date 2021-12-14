@@ -275,9 +275,15 @@ def tumor_normal_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
+
+    # rename tumor_metrics_deliverables.yaml file to <case_id>_metrics_deliverables.yaml
+    os.rename(
+        os.path.join(qc_dir, "tumor_metrics_deliverables.yaml"),
+        os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
+    )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -380,9 +386,15 @@ def tumor_only_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
+
+    # rename tumor_metrics_deliverables.yaml file to <case_id>_metrics_deliverables.yaml
+    os.rename(
+        os.path.join(qc_dir, "tumor_metrics_deliverables.yaml"),
+        os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
+    )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 

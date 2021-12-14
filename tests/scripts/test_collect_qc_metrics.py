@@ -126,7 +126,7 @@ def test_get_multiqc_metrics(analysis_path):
     capture_kit = "lymphoma_6.1_hg19_design.bed"
 
     # GIVEN an expected output
-    n_metrics = 6  # Number of expected metric
+    n_metrics = 11  # Number of expected metric
 
     hs_metric = {
         "header": None,

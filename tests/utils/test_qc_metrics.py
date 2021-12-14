@@ -16,7 +16,7 @@ def test_get_qc_metrics(analysis_path):
     )
 
     # GIVEN an expected output
-    n_metrics = 6  # Number of expected metric
+    n_metrics = 11  # Number of expected metric
 
     hs_metric = {
         "header": None,
