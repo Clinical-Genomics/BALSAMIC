@@ -153,10 +153,12 @@ def deliver(
         meta["apptag"] = case_id_map[2]
 
         collected_qc = get_qc_metrics(
-            sample_config_dict["analysis"]["result"]
-            + "/qc/"
-            + sample_config_dict["analysis"]["case_id"]
-            + "_metrics_deliverables.yaml"
+            os.path.join(
+                sample_config_dict["analysis"]["result"],
+                "qc",
+                sample_config_dict["analysis"]["case_id"]
+                + "_metrics_deliverables.yaml",
+            )
         )
         meta = report_data_population(collected_qc=collected_qc, meta=meta)
         balsamic_qc_report = os.path.join(

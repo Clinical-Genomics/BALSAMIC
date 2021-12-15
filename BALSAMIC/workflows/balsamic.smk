@@ -209,7 +209,7 @@ for r in rules_to_include:
 
 # Define common and analysis specific outputs
 quality_control_results = [
-    result_dir + "qc/" + "multiqc_report.html",
+    os.path.join(qc_dir, "multiqc_report.html"),
     os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
 ]
 
@@ -324,10 +324,7 @@ rule all:
     output:
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
-        tmp_dir = tmp_dir,
-        result_dir = result_dir,
-        sequencing_type = get_sequencing_type(config),
-        panel_bed = get_capture_kit(config)
+        tmp_dir = tmp_dir
     run:
         import datetime
         import shutil
