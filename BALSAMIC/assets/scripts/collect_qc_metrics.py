@@ -67,35 +67,14 @@ def get_qc_available_panel_beds(metrics):
     return available_beds
 
 
-def merge_dicts(*dicts):
-    """Merges multiple dictionaries integrating by common keys"""
-    merged_dict = {}
-
-    for d in dicts:
-        for key in d:
-            try:
-                # Overwrites the default values with panel specific ones
-                merged_dict[key].update(d[key])
-            except KeyError:
-                merged_dict[key] = d[key]
-
-    return merged_dict
-
-
 def get_requested_metrics(metrics, sequencing_type, capture_kit):
     """Parses the requested metrics and returns them as a dictionary"""
 
-    if sequencing_type != "wgs" and capture_kit in get_qc_available_panel_beds(
-        metrics[sequencing_type]
-    ):
-        requested_metrics = merge_dicts(
-            metrics[sequencing_type]["default"],
-            metrics[sequencing_type][capture_kit],
-        )
-    elif sequencing_type != "wgs":
+    requested_metrics = metrics[sequencing_type]
+    if capture_kit:
         requested_metrics = metrics[sequencing_type]["default"]
-    else:
-        requested_metrics = metrics[sequencing_type]
+        if capture_kit in get_qc_available_panel_beds(metrics[sequencing_type]):
+            requested_metrics.update(metrics[sequencing_type][capture_kit])
 
     return requested_metrics
 

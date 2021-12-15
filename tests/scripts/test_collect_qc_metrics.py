@@ -8,7 +8,6 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_multiqc_metrics,
     collect_qc_metrics,
     get_qc_available_panel_beds,
-    merge_dicts,
     get_requested_metrics,
 )
 
@@ -24,26 +23,6 @@ def test_get_qc_available_panel_beds(qc_requested_metrics):
 
     # THEN check if the extracted bed file names correspond to the expected ones
     assert available_panel_beds == expected_output
-
-
-def test_merge_dicts(qc_requested_metrics):
-    """test dictionary merging and requirements overwriting by panel BED specific conditions"""
-
-    # GIVEN an expected output
-    expected_output = {
-        "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
-        "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
-        "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
-    }
-
-    # WHEN calling the function
-    merged_dict = merge_dicts(
-        copy.deepcopy(qc_requested_metrics["targeted"]["default"]),
-        copy.deepcopy(qc_requested_metrics["targeted"]["panel_2.bed"]),
-    )
-
-    # THEN check if the extracted output corresponds to the merged dictionary
-    assert merged_dict.items() == expected_output.items()
 
 
 def test_get_requested_metrics_targeted(qc_requested_metrics):
