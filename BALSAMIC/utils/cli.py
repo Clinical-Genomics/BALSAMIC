@@ -691,3 +691,19 @@ def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
             os.symlink(pon_fastq, pon_sym_file)
         except FileExistsError:
             LOG.info(f"File {pon_sym_file} exists, skipping")
+
+
+def get_md5(filename):
+    hash_md5 = hashlib.md5()
+    with open(str(filename), "rb") as fh:
+        for chunk in iter(lambda: fh.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+def create_md5(reference, check_md5):
+    """create a md5 file for all reference data"""
+    with open(check_md5, "w") as fh:
+        for key, value in reference.items():
+            if os.path.isfile(value):
+                fh.write(get_md5(value) + " " + value + "\n")

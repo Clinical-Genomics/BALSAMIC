@@ -12,6 +12,9 @@ from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceMeta
 from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL 
+from BALSAMIC.utils.cli import get_md5
+from BALSAMIC.utils.cli import create_md5
+
 
 LOG = logging.getLogger(__name__)
 
@@ -75,21 +78,6 @@ check_md5 = os.path.join(basedir, "reference.json.md5")
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
-
-def get_md5(filename):
-    hash_md5 = hashlib.md5()
-    with open(str(filename), 'rb') as fh:
-        for chunk in iter(lambda: fh.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
-
-
-def create_md5(reference, check_md5):
-    """ create a md5 file for all reference data"""
-    with open(check_md5, 'w') as fh:
-        for key, value in reference.items():
-            if os.path.isfile(value):
-                fh.write( get_md5(value) + ' ' + value + '\n')
 
 singularity_image_path = config['singularity']['image_path']
 singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()] 

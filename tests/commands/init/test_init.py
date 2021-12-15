@@ -71,6 +71,53 @@ def test_init_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
     assert result.exit_code == 1
 
 
+def test_init_reference_no_cosmic_abort(tmp_path, invoke_cli):
+    # Given a path with no write permission
+    test_genome_version = "hg19"
+    test_container_version = "develop"
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    # WHEN invoking config sample
+    result = invoke_cli(
+        [
+            "init",
+            "-o",
+            str(test_new_dir),
+            "-v",
+            test_container_version,
+            "-g",
+            test_genome_version,
+        ]
+    )
+
+    # THEN it should create test_reference.json and exist with no error
+    assert result.exit_code == 1
+
+
+def test_init_reference_no_cosmic_run(tmp_path, invoke_cli):
+    # Given a path with no write permission
+    test_genome_version = "canfam3"
+    test_container_version = "develop"
+    test_new_dir = tmp_path / "test_reference_dir"
+    test_new_dir.mkdir()
+
+    # WHEN invoking config sample
+    result = invoke_cli(
+        [
+            "init",
+            "-o",
+            str(test_new_dir),
+            "-v",
+            test_container_version,
+            "-g",
+            test_genome_version,
+        ]
+    )
+
+    # THEN it should create test_reference.json and exist with no error
+    assert result.exit_code == 0
+
 def test_init_reference_click_abort(invoke_cli, tmp_path):
     # Given test_reference output directory
     test_container_version = "develop"
