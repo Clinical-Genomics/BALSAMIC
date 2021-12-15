@@ -118,6 +118,7 @@ def test_init_reference_no_cosmic_run(tmp_path, invoke_cli):
     # THEN it should create test_reference.json and exist with no error
     assert result.exit_code == 0
 
+
 def test_init_reference_click_abort(invoke_cli, tmp_path):
     # Given test_reference output directory
     test_container_version = "develop"
