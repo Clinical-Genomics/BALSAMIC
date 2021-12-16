@@ -13,7 +13,7 @@ from PyPDF2 import PdfFileMerger
 
 from BALSAMIC.utils.exc import BalsamicError
 
-from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5)
+from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5, read_yaml)
 
 from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
@@ -329,11 +329,11 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import validate_qc_metrics, get_qc_metrics
+        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
 
         # Perform validation of extracted QC metrics
         try:
-            validate_qc_metrics(get_qc_metrics(input[1]))
+            validate_qc_metrics(read_yaml(input[1]))
         except ValueError as val_exc:
             LOG.error(val_exc)
             raise BalsamicError

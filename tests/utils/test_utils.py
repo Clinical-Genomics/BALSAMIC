@@ -43,6 +43,7 @@ from BALSAMIC.utils.cli import (
     check_executable,
     job_id_dump_to_yaml,
     generate_h5,
+    read_yaml,
 )
 
 from BALSAMIC.utils.rule import (
@@ -541,6 +542,65 @@ def test_write_json_error(tmp_path):
         # WHEN passing a invalid dict
         # THEN It will raise the error
         assert write_json(ref_json, output_json)
+
+
+def test_read_yaml(metrics_yaml_path):
+    """test data extraction from a saved YAML file"""
+
+    # GIVEN an expected output
+    n_metrics = 11  # Number of expected metric
+
+    hs_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+        "name": "MEDIAN_TARGET_COVERAGE",
+        "step": "multiqc_picard_HsMetrics",
+        "value": 2393.0,
+        "condition": {"norm": "gt", "threshold": 1000.0},
+    }
+
+    ins_size_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
+        "name": "MEAN_INSERT_SIZE",
+        "step": "multiqc_picard_insertSize",
+        "value": 201.813054,
+        "condition": None,
+    }
+
+    dups_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
+        "name": "PERCENT_DUPLICATION",
+        "step": "multiqc_picard_dups",
+        "value": 0.391429,
+        "condition": None,
+    }
+
+    # WHEN calling the function
+    requested_metrics = read_yaml(metrics_yaml_path)
+
+    # THEN check if the data are correctly retrieved from the YAML
+    assert len(requested_metrics) == n_metrics
+    assert hs_metric in requested_metrics
+    assert ins_size_metric in requested_metrics
+    assert dups_metric in requested_metrics
+
+
+def test_read_yaml_error():
+    """test data extraction from an incorrect YAML path"""
+
+    # GIVEN an invalid path
+    yaml_path = "NOT_A_PATH"
+
+    # THEN assert that the FileNotFoundError is raised
+    try:
+        read_yaml(yaml_path)
+    except FileNotFoundError as file_exc:
+        assert f"The YAML file {yaml_path} was not found." in str(file_exc)
 
 
 def test_get_threads(config_files):

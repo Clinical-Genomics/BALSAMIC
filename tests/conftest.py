@@ -8,7 +8,7 @@ from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
 
-from BALSAMIC.utils.qc_metrics import get_qc_metrics
+from BALSAMIC.utils.cli import read_yaml
 from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
@@ -553,4 +553,4 @@ def qc_requested_metrics():
 @pytest.fixture(scope="session")
 def qc_extracted_metrics(metrics_yaml_path):
     """Extracted and formatted QC metrics"""
-    return get_qc_metrics(metrics_yaml_path)
+    return read_yaml(metrics_yaml_path)

@@ -9,12 +9,11 @@ import datetime
 import subprocess
 from pathlib import Path
 
-from BALSAMIC.utils.cli import get_file_extension
+from BALSAMIC.utils.cli import get_file_extension, read_yaml
 from BALSAMIC.utils.cli import write_json
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
-from BALSAMIC.utils.qc_metrics import get_qc_metrics
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.qc_report import render_html, report_data_population
@@ -152,7 +151,7 @@ def deliver(
         meta["case_name"] = case_id_map[1]
         meta["apptag"] = case_id_map[2]
 
-        collected_qc = get_qc_metrics(
+        collected_qc = read_yaml(
             os.path.join(
                 sample_config_dict["analysis"]["result"],
                 "qc",
