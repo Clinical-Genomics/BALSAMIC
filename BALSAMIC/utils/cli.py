@@ -695,7 +695,7 @@ def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
 
 
 def get_md5(filename):
-    hash_md5 = hashlib.md5()
+    hash_md5 = hashlib.sha512()
     with open(str(filename), "rb") as fh:
         for chunk in iter(lambda: fh.read(4096), b""):
             hash_md5.update(chunk)

@@ -213,7 +213,7 @@ def initialize(
         raise click.Abort()
 
     if genome_version in ["hg38", "hg19"] and not cosmic_key:
-        LOG.info("cosmic db authentication key required with hg38 and hg19")
+        LOG.error("cosmic db authentication key required with hg38 and hg19")
         raise click.Abort()
 
     # resolve outdir to absolute path
