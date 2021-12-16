@@ -959,7 +959,9 @@ def test_get_md5(tmp_path):
     # THEN md5 returned should be
     assert (
         get_md5(dummy_file)
-        == "3c81887c6df75174ca22807b534bc67fa06127297e7bfb307b52ea88417dcc5ef16f53f916f1eb956cd119813641a3f6048663862b9fabb2ed34ccf8bf5e54e4"
+        == "3c81887c6df75174ca22807b534bc67fa061\
+27297e7bfb307b52ea88417dcc5ef16f53f916f1eb956cd119813641\
+a3f6048663862b9fabb2ed34ccf8bf5e54e4"
     )
 
 
