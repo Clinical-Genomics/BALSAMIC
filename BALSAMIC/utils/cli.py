@@ -9,6 +9,7 @@ import subprocess
 from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
+import hashlib
 
 import yaml
 import snakemake
