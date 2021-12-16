@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
-import hashlib
+import zlib
 
 import yaml
 import snakemake
@@ -695,11 +695,14 @@ def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
 
 
 def get_md5(filename):
-    hash_md5 = hashlib.sha512()
-    with open(str(filename), "rb") as fh:
-        for chunk in iter(lambda: fh.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+    with open(filename, "rb") as fh:
+        hash = 0
+        while True:
+            s = fh.read(65536)
+            if not s:
+                break
+            hash = zlib.crc32(s, hash)
+    return "%08X" % (hash & 0xFFFFFFFF)
 
 
 def create_md5(reference, check_md5):

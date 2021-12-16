@@ -489,7 +489,7 @@ class ReferenceUrlsModel(BaseModel):
     @property
     def write_md5(self):
         """calculate md5 for first 4kb of file and write to file_name.md5"""
-        hash_md5 = hashlib.sha512()
+        hash_md5 = hashlib.md5()
         output_file = Path(self.output_path, self.output_file)
         if not output_file.is_file():
             raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
