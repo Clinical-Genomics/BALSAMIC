@@ -136,7 +136,7 @@ def test_collect_qc_metrics(tmp_path, multiqc_data_path, cli_runner):
     """tests qc metrics yaml file generation"""
 
     # GIVEN the output and multiqc metrics paths
-    output_path = tmp_path / "tumor_metrics_deliverables.yaml"
+    output_path = tmp_path / "sample_tumor_only_metrics_deliverables.yaml"
 
     # GIVEN a sequencing type and a capture kit
     seq_type = "targeted"

@@ -232,7 +232,6 @@ def tumor_normal_config(
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
-    metrics_yaml_path,
 ):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
@@ -279,12 +278,6 @@ def tumor_normal_config(
     qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
-
-    # rename tumor_metrics_deliverables.yaml file to <case_id>_metrics_deliverables.yaml
-    os.rename(
-        os.path.join(qc_dir, os.path.basename(metrics_yaml_path)),
-        os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
-    )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -351,7 +344,6 @@ def tumor_only_config(
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
-    metrics_yaml_path,
 ):
     """
     invokes balsamic config sample -t xxx to create sample config
@@ -391,12 +383,6 @@ def tumor_only_config(
     qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
-
-    # rename tumor_metrics_deliverables.yaml file to <case_id>_metrics_deliverables.yaml
-    os.rename(
-        os.path.join(qc_dir, os.path.basename(metrics_yaml_path)),
-        os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
-    )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -516,15 +502,11 @@ def multiqc_data_path(analysis_path):
 
 
 @pytest.fixture(scope="session")
-def multiqc_data_path(analysis_path):
-    """multiqc_data.json test path"""
-    return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
-
-
-@pytest.fixture(scope="session")
 def metrics_yaml_path(analysis_path):
-    """tumor_metrics_deliverables.yaml test path"""
-    return os.path.join(analysis_path, "qc", "tumor_metrics_deliverables.yaml")
+    """sample_tumor_only_metrics_deliverables.yaml test path"""
+    return os.path.join(
+        analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml"
+    )
 
 
 @pytest.fixture(scope="session")
