@@ -6,6 +6,11 @@ Changed:
 
 * Merge QC metric extraction workflows #833
 
+Removed
+^^^^^^^
+
+* ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
+
 [8.2.4]
 -------
 
