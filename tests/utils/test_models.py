@@ -349,6 +349,7 @@ def test_umiparams_tnscope():
         "min_tumorLOD": 6,
         "error_rate": 5,
         "prunefactor": 3,
+        "padding": 30,
         "disable_detect": "abc",
     }
 
@@ -362,6 +363,7 @@ def test_umiparams_tnscope():
     assert test_tnscope_params_built.error_rate == 5
     assert test_tnscope_params_built.prunefactor == 3
     assert test_tnscope_params_built.disable_detect == "abc"
+    assert test_tnscope_params_built.padding == 30
 
 
 def test_params_vardict():
