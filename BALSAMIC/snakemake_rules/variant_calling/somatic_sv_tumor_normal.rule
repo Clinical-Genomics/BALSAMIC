@@ -203,5 +203,5 @@ rule ascat_tumor_normal_merge_output:
         "Merge the ascatNgs output plots together with the sample statistics into a single PDF"
     shell:
         """
-        python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
+python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
         """

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import json
 import os
+from pathlib import Path
+from typing import List
 
 import click
 import yaml
@@ -17,8 +19,17 @@ from BALSAMIC.utils.models import MetricModel
 @click.argument("multiqc_data_path", type=click.Path(exists=True), required=True)
 @click.argument("sequencing_type", required=True)
 @click.argument("capture_kit", required=True)
-def collect_qc_metrics(output_path, multiqc_data_path, sequencing_type, capture_kit):
-    """Extracts the requested metrics and saves them to the output path"""
+def collect_qc_metrics(
+    output_path: Path, multiqc_data_path: Path, sequencing_type: str, capture_kit: str
+):
+    """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
+
+    Args:
+        output_path: Path; destination path for the extracted YAML formatted metrics
+        multiqc_data_path: Path; multiqc JSON path from which the metrics will be extracted
+        sequencing_type: str; analysis sequencing type
+        capture_kit: str; capture kit used for targeted analysis (None for WGS)
+    """
 
     with open(output_path, "w") as fn:
         yaml.dump(
@@ -29,35 +40,49 @@ def collect_qc_metrics(output_path, multiqc_data_path, sequencing_type, capture_
         )
 
 
-def get_multiqc_data_source(data, sample, source_name):
-    """Extracts the metrics data source associated with sample and source names"""
+def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
+    """Extracts the metrics data source associated with a specific sample and tool
 
-    # Splits multiqc_picard_dups into ['multiqc', 'picard', 'dup'] in order to retrieve the
+    Args:
+        multiqc_data: dict; raw data from the multiqc_data.json file
+        sample: str; sample ID
+        tool: str; QC analysis tools applied during the workflow (e.g. "multiqc_picard_dups")
+
+    Returns:
+        A source file that was used to produce a specific metric
+    """
+
+    # Use case: splits multiqc_picard_dups into ['multiqc', 'picard', 'dup'] in order to retrieve the
     # ["report_data_sources"]["Picard"]["DuplicationMetrics"] values from multiqc_data.json
-    source = source_name[:-1].split("_")
+    subtool_name = tool[:-1].split("_")
 
     # Nested json fetching
-    for source_tool in data["report_data_sources"]:
-        for source_step in data["report_data_sources"][source_tool]:
+    for source_tool in multiqc_data["report_data_sources"]:
+        # source_tool: Picard, fastp, FastQC, etc.
+        for source_subtool in multiqc_data["report_data_sources"][source_tool]:
+            # source_subtool (for Picard): AlignmentSummaryMetrics, HsMetrics, DuplicationMetric, etc.
             if (
-                source[1].lower() in source_tool.lower()
-                and source[2].lower() in source_step.lower()
+                subtool_name[1].lower() in source_tool.lower()
+                and subtool_name[2].lower() in source_subtool.lower()
             ):
                 try:
                     return os.path.basename(
-                        data["report_data_sources"][source_tool][source_step][sample]
+                        multiqc_data["report_data_sources"][source_tool][
+                            source_subtool
+                        ][sample]
                     )
                 except KeyError:
                     # Deletes par orientation information from the sample name (insertSize metrics)
                     sample = sample.rsplit("_", 1)[0]
-
                     return os.path.basename(
-                        data["report_data_sources"][source_tool][source_step][sample]
+                        multiqc_data["report_data_sources"][source_tool][
+                            source_subtool
+                        ][sample]
                     )
 
 
-def get_qc_available_panel_beds(metrics):
-    """Returns available panel bed file names"""
+def get_qc_available_panel_beds(metrics: List[str]) -> List[str]:
+    """Returns available panel bed file names from a list of requested metrics"""
     available_beds = []
 
     for k in metrics:
@@ -67,8 +92,10 @@ def get_qc_available_panel_beds(metrics):
     return available_beds
 
 
-def get_requested_metrics(metrics, sequencing_type, capture_kit):
-    """Parses the requested metrics and returns them as a dictionary"""
+def get_requested_metrics(
+    metrics: dict, sequencing_type: str, capture_kit: str
+) -> dict:
+    """Parses the defined and requested metrics and returns them as a dictionary"""
 
     requested_metrics = metrics[sequencing_type]
     if capture_kit:
@@ -79,8 +106,10 @@ def get_requested_metrics(metrics, sequencing_type, capture_kit):
     return requested_metrics
 
 
-def get_multiqc_metrics(multiqc_data_path, sequencing_type, capture_kit):
-    """Extracts the requested metrics from a multiqc JSON file"""
+def get_multiqc_metrics(
+    multiqc_data_path: Path, sequencing_type: str, capture_kit: str
+) -> dict:
+    """Extracts the requested metrics from a multiqc JSON file and returns them as a dictionary"""
 
     with open(multiqc_data_path, "r") as f:
         multiqc_data = json.load(f)
