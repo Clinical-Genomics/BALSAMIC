@@ -102,5 +102,5 @@ rule collect_custom_qc_metrics:
         "Extract the manually specified QC metric for validation and delivery"
     shell:
         """
-        python {params.collect_qc_metrics_script} {output.yaml} {input.json} {params.sequencing_type} {params.capture_kit}
+python {params.collect_qc_metrics_script} {output.yaml} {input.json} {params.sequencing_type} {params.capture_kit}
         """
