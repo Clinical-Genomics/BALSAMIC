@@ -1,5 +1,3 @@
-import os
-
 from BALSAMIC.utils.qc_metrics import (
     validate_qc_metrics,
     get_qc_metric_value,

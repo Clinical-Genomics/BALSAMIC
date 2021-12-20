@@ -1,6 +1,4 @@
-import copy
 import json
-import os
 from pathlib import Path
 
 from BALSAMIC.assets.scripts.collect_qc_metrics import (

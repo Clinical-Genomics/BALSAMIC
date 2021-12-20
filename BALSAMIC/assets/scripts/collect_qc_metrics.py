@@ -2,7 +2,7 @@
 import json
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import click
 import yaml
@@ -20,7 +20,10 @@ from BALSAMIC.utils.models import MetricModel
 @click.argument("sequencing_type", required=True)
 @click.argument("capture_kit", required=True)
 def collect_qc_metrics(
-    output_path: Path, multiqc_data_path: Path, sequencing_type: str, capture_kit: str
+    output_path: Path,
+    multiqc_data_path: Path,
+    sequencing_type: str,
+    capture_kit: Union[str, None],
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
 
@@ -93,7 +96,7 @@ def get_qc_available_panel_beds(metrics: List[str]) -> List[str]:
 
 
 def get_requested_metrics(
-    metrics: dict, sequencing_type: str, capture_kit: str
+    metrics: dict, sequencing_type: str, capture_kit: Union[str, None]
 ) -> dict:
     """Parses the defined and requested metrics and returns them as a dictionary"""
 
@@ -107,7 +110,7 @@ def get_requested_metrics(
 
 
 def get_multiqc_metrics(
-    multiqc_data_path: Path, sequencing_type: str, capture_kit: str
+    multiqc_data_path: Path, sequencing_type: str, capture_kit: Union[str, None]
 ) -> dict:
     """Extracts the requested metrics from a multiqc JSON file and returns them as a dictionary"""
 

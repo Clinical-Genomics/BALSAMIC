@@ -1,9 +1,11 @@
-import yaml
+from typing import Union
 
 from BALSAMIC.utils.models import MetricValidationModel
 
 
-def get_qc_metric_value(metrics: dict, sample_id: str, metric_name: str) -> float:
+def get_qc_metric_value(
+    metrics: dict, sample_id: str, metric_name: str
+) -> Union[float, None]:
     """Extracts the metrics value associated to a specific sample_id and metric_name"""
 
     for metric in metrics:
