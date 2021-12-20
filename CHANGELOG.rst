@@ -16,6 +16,16 @@ Removed
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
 
+[8.2.5]
+-------
+
+* balsamic.sif container installation during cache generation #841
+
+Fixed:
+^^^^^^
+
+* Execution of `create_pdf` python script inside the balsamic container #841
+
 [8.2.4]
 -------
 
