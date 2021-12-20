@@ -63,7 +63,6 @@ rule all:
         refseq_flat = refgene_txt_url.get_output_file.replace("txt", "flat"),
         refgene = refgene_txt_url.get_output_file,
         genome_chrom_size = genome_chrom_size_url.get_output_file,
-        
 
     output:
         finished = os.path.join(basedir,"reference.finished"),
