@@ -6,6 +6,15 @@ Added:
 
 * Call umi variants using TNscope in bed defined regions #821
 
+[8.2.5]
+-------
+
+* balsamic.sif container installation during cache generation #841
+
+Fixed:
+^^^^^^
+
+* Execution of `create_pdf` python script inside the balsamic container #841
 
 [8.2.4]
 -------

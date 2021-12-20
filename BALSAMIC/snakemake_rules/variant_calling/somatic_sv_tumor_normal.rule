@@ -115,8 +115,6 @@ tabix -p vcf -f {output.vcf};
         """
 
 
-
-
 rule ascat_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"] ,
@@ -185,6 +183,7 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
+
 rule ascat_tumor_normal_merge_output:
     input:
         sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
@@ -197,11 +196,13 @@ rule ascat_tumor_normal_merge_output:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         merge_ascat_output_script= get_script_path("create_pdf.py"),
+    singularity:
+        Path(singularity_image, "balsamic.sif").as_posix()
     threads:
         get_threads(cluster_config, "ascat_tumor_normal_merge_output")
     message:
         "Merge the ascatNgs output plots together with the sample statistics into a single PDF"
     shell:
         """
-        python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
+python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
         """
