@@ -9,7 +9,7 @@ Added:
 Fixed:
 ^^^^^^
 
-* Execution of Python scripts inside the balsamic container #841
+* Execution of `create_pdf` python script inside the balsamic container #841
 
 [8.2.4]
 -------
