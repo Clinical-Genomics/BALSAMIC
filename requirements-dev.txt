@@ -5,4 +5,3 @@ pylint
 black==21.7b0
 pillow>=8.4.0
 fpdf2>=2.4.6
-
