@@ -252,7 +252,7 @@ def get_schedulerpy():
     return scheduler
 
 
-def get_snakefile(analysis_type, reference_genome="hg19", sequencing_type="targeted"):
+def get_snakefile(analysis_type, reference_genome="hg19"):
     """
     Return a string path for variant calling snakefile.
     """
@@ -592,7 +592,6 @@ def generate_graph(config_collection_dict, config_path):
                 reference_genome=config_collection_dict["reference"][
                     "reference_genome"
                 ],
-                sequencing_type=config_collection_dict["analysis"]["sequencing_type"],
             ),
             dryrun=True,
             configfiles=[config_path],
@@ -696,13 +695,13 @@ def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
 
 def get_md5(filename):
     with open(filename, "rb") as fh:
-        hash = 0
+        hashed = 0
         while True:
             s = fh.read(65536)
             if not s:
                 break
-            hash = zlib.crc32(s, hash)
-    return "%08X" % (hash & 0xFFFFFFFF)
+            hashed = zlib.crc32(s, hashed)
+    return "%08X" % (hashed & 0xFFFFFFFF)
 
 
 def create_md5(reference, check_md5):

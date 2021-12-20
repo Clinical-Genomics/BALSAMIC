@@ -359,7 +359,7 @@ def test_get_snakefile():
     # WHEN asking to see snakefile for paired
     for reference_genome in ["hg19", "hg38", "canfam3"]:
         for analysis_type, sequencing_type in workflow:
-            snakefile = get_snakefile(analysis_type, reference_genome, sequencing_type)
+            snakefile = get_snakefile(analysis_type, reference_genome)
 
             pipeline = ""
 

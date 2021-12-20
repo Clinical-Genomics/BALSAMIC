@@ -92,5 +92,5 @@ def test_workflow_sentieon(
             analysis_type = workflow[0]
             config = workflow[1]
             reference_genome = "hg19"
-            snakefile = get_snakefile(analysis_type, reference_genome, sequencing_type)
+            snakefile = get_snakefile(analysis_type, reference_genome)
             assert snakemake.snakemake(snakefile, configfiles=[config], dryrun=True)

@@ -210,7 +210,6 @@ def analysis(
     resultpath = sample_config["analysis"]["result"]
     benchmarkpath = sample_config["analysis"]["benchmark"]
     case_name = sample_config["analysis"]["case_id"]
-    sequencing_type = sample_config["analysis"]["sequencing_type"]
 
     if run_analysis:
         # if not dry run, then create (new) log/script directory
