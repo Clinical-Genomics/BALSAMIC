@@ -617,6 +617,7 @@ class UMIParamsTNscope(BaseModel):
         init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
         error_rate: int (required); allow error-rate to consider in calling
         prunefactor: int (required); pruning factor in the kmer graph
+        padding: int(required); amount to pad bed interval regions
     """
 
     algo: str
@@ -624,6 +625,7 @@ class UMIParamsTNscope(BaseModel):
     min_tumorLOD: int
     error_rate: int
     prunefactor: int
+    padding: int
     disable_detect: str
 
 
