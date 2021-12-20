@@ -137,6 +137,7 @@ WORKFLOW_PARAMS = {
         "init_tumorLOD": 0.5,
         "error_rate": 5,
         "prunefactor": 3,
+        "padding": 100,
         "disable_detect": "sv",
     },
 }

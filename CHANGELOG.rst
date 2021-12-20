@@ -1,6 +1,11 @@
 [X.X.X]
 -------
 
+Added:
+^^^^^^
+
+* Call umi variants using TNscope in bed defined regions #821
+
 Changed:
 ^^^^^^^^
 
