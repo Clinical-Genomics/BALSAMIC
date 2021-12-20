@@ -77,7 +77,6 @@ def test_workflow_sentieon(
 ):
     # GIVEN a sample config dict and snakefile
     workflows = [("single", tumor_only_wgs_config), ("paired", tumor_normal_wgs_config)]
-    sequencing_type = "wgs"
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
