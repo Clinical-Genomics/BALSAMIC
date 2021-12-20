@@ -51,6 +51,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "varcall_cnvkit",
     "delly",
     "ascatNgs",
+    "balsamic",
 }
 
 BIOINFO_TOOL_ENV = {
