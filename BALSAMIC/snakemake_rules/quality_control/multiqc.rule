@@ -96,6 +96,8 @@ rule collect_custom_qc_metrics:
         sequencing_type = get_sequencing_type(config),
         capture_kit = get_capture_kit(config),
         housekeeper_id = {"id": config["analysis"]["case_id"],"tags": "qc-metrics-yaml"}
+    singularity:
+        Path(singularity_image, "balsamic.sif").as_posix()
     threads:
         get_threads(cluster_config, "collect_custom_qc_metrics")
     message:
