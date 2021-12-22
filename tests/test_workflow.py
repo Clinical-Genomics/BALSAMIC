@@ -11,8 +11,7 @@ def test_workflow_tumor_normal(
 ):
     # GIVEN a sample config dict and snakefile
     workflow = "paired"
-    reference_genome = "hg19"
-    snakefile = get_snakefile(workflow, reference_genome)
+    snakefile = get_snakefile(workflow)
     config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dryrun option
@@ -30,8 +29,7 @@ def test_workflow_tumor_normal(
 def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_license):
     # GIVEN a sample config dict and snakefile
     workflow = "single"
-    reference_genome = "hg19"
-    snakefile = get_snakefile(workflow, reference_genome)
+    snakefile = get_snakefile(workflow)
     config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dryrun option
@@ -51,8 +49,7 @@ def test_workflow_qc(
 ):
     # GIVEN a sample config dict and snakefile
     workflow = "qc"
-    reference_genome = "hg19"
-    snakefile = get_snakefile(workflow, reference_genome)
+    snakefile = get_snakefile(workflow)
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
@@ -77,6 +74,7 @@ def test_workflow_sentieon(
 ):
     # GIVEN a sample config dict and snakefile
     workflows = [("single", tumor_only_wgs_config), ("paired", tumor_normal_wgs_config)]
+    sequencing_type = "wgs"
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
@@ -90,6 +88,5 @@ def test_workflow_sentieon(
         for workflow in workflows:
             analysis_type = workflow[0]
             config = workflow[1]
-            reference_genome = "hg19"
-            snakefile = get_snakefile(analysis_type, reference_genome)
+            snakefile = get_snakefile(analysis_type, sequencing_type)
             assert snakemake.snakemake(snakefile, configfiles=[config], dryrun=True)
