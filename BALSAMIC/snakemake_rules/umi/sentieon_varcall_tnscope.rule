@@ -27,6 +27,7 @@ rule sentieon_tnscope_umi:
         init_tumor_lod = params.tnscope_umi.init_tumorLOD,
         error_rate = params.tnscope_umi.error_rate,
         prune_factor = params.tnscope_umi.prunefactor,
+        padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         pcr_model = params.common.pcr_model
     threads: 
@@ -44,6 +45,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -t {threads} \
 -r {input.ref_fa} \
 -i {input.bam} \
+--interval {input.bed} \
+--interval_padding {params.padding} \
 --algo {params.algo} \
 --tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \

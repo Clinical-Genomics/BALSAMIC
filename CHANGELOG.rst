@@ -4,13 +4,11 @@
 Added:
 ^^^^^^
 
-* Snakemake workflow to create canfam3 reference
+* Snakemake workflow to create canfam3 reference #843
+* Call umi variants using TNscope in bed defined regions #821
 
 [8.2.5]
 -------
-
-Added:
-^^^^^^
 
 * balsamic.sif container installation during cache generation #841
 
