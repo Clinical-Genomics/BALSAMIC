@@ -139,7 +139,8 @@ def deliver(
         else sample_config_dict["analysis"]["analysis_type"]
     )
     sequencing_type = sample_config_dict["analysis"]["sequencing_type"]
-    snakefile = get_snakefile(analysis_type, sequencing_type)
+    reference_genome = sample_config_dict["reference"]["reference_genome"]
+    snakefile = get_snakefile(analysis_type, reference_genome)
 
     balsamic_qc_report = None
     if sequencing_type != "wgs" and sample_id_map and case_id_map:

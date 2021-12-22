@@ -210,7 +210,6 @@ def analysis(
     resultpath = sample_config["analysis"]["result"]
     benchmarkpath = sample_config["analysis"]["benchmark"]
     case_name = sample_config["analysis"]["case_id"]
-    sequencing_type = sample_config["analysis"]["sequencing_type"]
 
     if run_analysis:
         # if not dry run, then create (new) log/script directory
@@ -252,9 +251,7 @@ def analysis(
         ).as_posix()
         + "/"
     )
-    balsamic_run.snakefile = (
-        snake_file if snake_file else get_snakefile(analysis_type, sequencing_type)
-    )
+    balsamic_run.snakefile = snake_file if snake_file else get_snakefile(analysis_type)
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config

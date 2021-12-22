@@ -4,6 +4,7 @@
 Added:
 ^^^^^^
 
+* Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
 
 [8.2.5]
