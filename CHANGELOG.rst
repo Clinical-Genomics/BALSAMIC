@@ -6,6 +6,19 @@ Added:
 
 * Snakemake workflow to create canfam3 reference
 
+[8.2.5]
+-------
+
+Added:
+^^^^^^
+
+* balsamic.sif container installation during cache generation #841
+
+Fixed:
+^^^^^^
+
+* Execution of `create_pdf` python script inside the balsamic container #841
+
 [8.2.4]
 -------
 
