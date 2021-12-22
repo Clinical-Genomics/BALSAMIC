@@ -1,11 +1,3 @@
-[X.X.X]
--------
-
-Added:
-^^^^^^
-
-* Snakemake workflow to create canfam3 reference
-
 [8.2.5]
 -------
 

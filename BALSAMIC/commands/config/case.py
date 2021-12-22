@@ -124,7 +124,7 @@ LOG = logging.getLogger(__name__)
     "-g",
     "--genome-version",
     default="hg19",
-    type=click.Choice(["hg19", "hg38", "canfam3"]),
+    type=click.Choice(["hg19", "hg38"]),
     help=(
         "Genome version to prepare reference. Path to genome"
         "will be <outdir>/genome_version"
