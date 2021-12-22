@@ -57,11 +57,11 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help="Force re-downloading all containers",
 )
-@click.option("-c", "--cosmic-key", required=True, help="cosmic db authentication key")
+@click.option("-c", "--cosmic-key", required=False, help="cosmic db authentication key")
 @click.option(
     "-s",
     "--snakefile",
-    default=get_snakefile("generate_ref"),
+    default=None,
     type=click.Path(),
     show_default=True,
     help="snakefile for reference generation",
@@ -77,7 +77,7 @@ LOG = logging.getLogger(__name__)
     "-g",
     "--genome-version",
     default="hg19",
-    type=click.Choice(["hg19", "hg38"]),
+    type=click.Choice(["hg19", "hg38", "canfam3"]),
     help=(
         "Genome version to prepare reference. Path to genome"
         "will be <outdir>/genome_version"
@@ -212,6 +212,10 @@ def initialize(
         )
         raise click.Abort()
 
+    if genome_version in ["hg38", "hg19"] and not cosmic_key:
+        LOG.error("cosmic db authentication key required with hg38 and hg19")
+        raise click.Abort()
+
     # resolve outdir to absolute path
     outdir = Path(outdir).resolve()
     container_outdir = Path(outdir, balsamic_version, "containers")
@@ -260,6 +264,10 @@ def initialize(
 
     write_json(config_dict, config_json)
     LOG.info("Reference generation workflow configured successfully - %s" % config_json)
+
+    snakefile = (
+        snakefile if snakefile else get_snakefile("generate_ref", genome_version)
+    )
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(
