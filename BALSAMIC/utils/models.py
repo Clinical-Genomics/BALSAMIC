@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 
 from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
 from pydantic.types import DirectoryPath, FilePath
@@ -697,64 +697,20 @@ class BalsamicWorkflowConfig(BaseModel):
     tnscope_umi: UMIParamsTNscope
 
 
-class QCMetricModel(BaseModel):
-    """Defines the quality control metric model
+class MetricConditionModel(BaseModel):
+    """Defines the metric condition model
 
     Attributes:
-        name: str (required); quality control metric name
         norm: string (optional); validation condition
         threshold: float (optional); validation cut off
-        value: float (required); metrics value
-
-    Raises:
-        ValueError: when a metric does not meet its validation requirements
     """
 
-    name: str
     norm: Optional[str] = None
     threshold: Optional[float] = None
-    value: float
-
-    @root_validator()
-    def check_metric(cls, values):
-        """Checks if a metric meets its filtering condition"""
-        if (
-            values["norm"]
-            and values["threshold"]
-            and not VALID_OPS[values["norm"]](values["value"], values["threshold"])
-        ):
-            raise ValueError(
-                f"QC metric {values['name']}: {values['value']} validation has failed. "
-                f"(Condition: {values['norm']} {values['threshold']})."
-            )
-
-        LOG.info(f"QC metric {values['name']}: {values['value']} meets its condition.")
-        return values
 
 
-class QCValidationModel(BaseModel):
-    """Defines the quality control validation model
-
-    Attributes:
-        metrics: Dict(sample_name, list(QCMetricModel)) (required); quality control metric attributes
-    """
-
-    metrics: Dict[str, List[QCMetricModel]]
-
-    @property
-    def get_json(self):
-        """Restructures the metrics dictionary and returns a metric-value json object"""
-        metrics_json = {k: {} for k in self.metrics}
-
-        for sample_name, metrics in self.metrics.items():
-            for metric in metrics:
-                metrics_json[sample_name].update({metric.name: metric.value})
-
-        return metrics_json
-
-
-class DeliveryMetricModel(BaseModel):
-    """Defines the metric attributes model for delivery
+class MetricModel(BaseModel):
+    """Defines the metric attributes model
 
     Attributes:
         header: str (optional); data
@@ -762,7 +718,8 @@ class DeliveryMetricModel(BaseModel):
         input: str (required); input file
         name: str (required); metric name
         step: str (required); step that generated the metric
-        value: float (required); metric value
+        value: Any (required and can take None as a value); metric value
+        condition: MetricConditionModel (required and can take None as a value); metric validation condition
     """
 
     header: Optional[str]
@@ -770,4 +727,34 @@ class DeliveryMetricModel(BaseModel):
     input: str
     name: str
     step: str
-    value: float
+    value: Any = ...
+    condition: Optional[MetricConditionModel] = ...
+
+
+class MetricValidationModel(BaseModel):
+    """Defines the metric validation model
+
+    Attributes:
+        metrics: List[MetricModel] (required); metric model to validate
+
+    Raises:
+        ValueError: when a metric does not meet its validation requirements
+    """
+
+    metrics: List[MetricModel]
+
+    @validator("metrics", each_item=True)
+    def check_squares(cls, metric):
+        """Checks if a metric meets its filtering condition"""
+
+        if metric.condition and not VALID_OPS[metric.condition.norm](
+            metric.value, metric.condition.threshold
+        ):
+            raise ValueError(
+                f"QC metric {metric.name}: {metric.value} validation has failed. "
+                f"(Condition: {metric.condition.norm} {metric.condition.threshold}, ID: {metric.id})."
+            )
+
+        LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
+
+        return metric

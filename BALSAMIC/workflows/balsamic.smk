@@ -13,7 +13,7 @@ from PyPDF2 import PdfFileMerger
 
 from BALSAMIC.utils.exc import BalsamicError
 
-from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5)
+from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5, read_yaml)
 
 from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
@@ -208,7 +208,10 @@ for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
 
 # Define common and analysis specific outputs
-quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
+quality_control_results = [
+    os.path.join(qc_dir, "multiqc_report.html"),
+    os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
+]
 
 analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                     vcf=get_vcf(config, germline_caller, germline_call_samples)),
@@ -317,25 +320,20 @@ if 'delivery' in config:
 
 rule all:
     input:
-        quality_control_results + analysis_specific_results
+        quality_control_results + analysis_specific_results,
     output:
-        qc_json_file = os.path.join(get_result_dir(config), "qc", "qc_metrics_summary.json"),
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
-        tmp_dir = tmp_dir,
-        result_dir = result_dir,
-        sequencing_type = get_sequencing_type(config),
-        panel_bed = get_capture_kit(config)
+        tmp_dir = tmp_dir
     run:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
+        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
 
-        # Save QC metrics to a JSON file
+        # Perform validation of extracted QC metrics
         try:
-            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type, params.panel_bed)
-            write_json(qc_metrics_summary, str(output.qc_json_file))
+            validate_qc_metrics(read_yaml(input[1]))
         except ValueError as val_exc:
             LOG.error(val_exc)
             raise BalsamicError

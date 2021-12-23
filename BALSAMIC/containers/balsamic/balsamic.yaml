@@ -7,6 +7,4 @@ dependencies:
   - conda-forge::python=3.7
   - conda-forge::pip
   - conda-forge::pygraphviz
-  - conda-forge::numpy
-  - conda-forge::click
   - conda-forge::pillow

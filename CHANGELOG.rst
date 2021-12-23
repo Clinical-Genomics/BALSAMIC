@@ -7,6 +7,16 @@ Added:
 * Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
 
+Changed:
+^^^^^^^^
+
+* Merge QC metric extraction workflows #833
+
+Removed
+^^^^^^^
+
+* ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
+
 [8.2.5]
 -------
 

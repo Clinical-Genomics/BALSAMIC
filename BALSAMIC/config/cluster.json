@@ -255,5 +255,9 @@
 	"ascat_tumor_normal_merge_output": {
 		"time": "00:15:00",
 		"n": 1
+	},
+	"collect_custom_qc_metrics": {
+		"time": "00:15:00",
+		"n": 1
 	}
 }

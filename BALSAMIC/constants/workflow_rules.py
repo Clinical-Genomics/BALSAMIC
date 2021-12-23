@@ -114,6 +114,7 @@ SNAKEMAKE_RULES = {
 DELIVERY_RULES = [
     "fastp",
     "multiqc",
+    "collect_custom_qc_metrics",
     "vep_somatic",
     "vep_germline",
     "tmb_calculation",

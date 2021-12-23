@@ -232,6 +232,15 @@ def write_json(json_out, output_config):
         raise error
 
 
+def read_yaml(yaml_path):
+    """Retrieves data from a yaml file"""
+    if Path(yaml_path).exists():
+        with open(yaml_path, "r") as fn:
+            return yaml.load(fn, Loader=yaml.SafeLoader)
+    else:
+        raise FileNotFoundError(f"The YAML file {yaml_path} was not found.")
+
+
 def iterdict(dic):
     """dictionary iteration - returns generator"""
     for key, value in dic.items():

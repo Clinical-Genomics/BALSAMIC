@@ -50,114 +50,45 @@ REPORT_MODEL = {
     },
 }
 
-METRIC_FILES = {
-    "picard_insertSize": "multiqc_picard_insertSize.json",
-    "picard_dups": "multiqc_picard_dups.json",
-    "picard_HsMetrics": "multiqc_picard_HsMetrics.json",
-    "picard_wgsmetrics": "multiqc_picard_wgsmetrics.json",
-}
-
 METRICS = {
-    "qc": {
-        "targeted": {
-            "default": {
-                METRIC_FILES["picard_insertSize"]: {
-                    "MEAN_INSERT_SIZE": {"condition": None},
-                },
-                METRIC_FILES["picard_dups"]: {
-                    "PERCENT_DUPLICATION": {"condition": None}
-                },
-                METRIC_FILES["picard_HsMetrics"]: {
-                    "MEDIAN_TARGET_COVERAGE": {"condition": None},
-                    "PCT_TARGET_BASES_50X": {"condition": None},
-                    "PCT_TARGET_BASES_100X": {"condition": None},
-                    "PCT_TARGET_BASES_250X": {"condition": None},
-                    "PCT_TARGET_BASES_500X": {"condition": None},
-                    "PCT_TARGET_BASES_1000X": {"condition": None},
-                    "MEAN_TARGET_COVERAGE": {"condition": None},
-                    "FOLD_80_BASE_PENALTY": {"condition": None},
-                    "PCT_OFF_BAIT": {"condition": None},
-                },
-            },
-            "gicfdna_3.1_hg19_design.bed": {
-                METRIC_FILES["picard_HsMetrics"]: {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 1000}
-                    },
-                    "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.6}
-                    },
-                }
-            },
-            "gmcksolid_4.1_hg19_design.bed": {
-                METRIC_FILES["picard_HsMetrics"]: {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 500}
-                    },
-                    "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.8}
-                    },
-                }
-            },
-            "gmsmyeloid_5.2_hg19_design.bed": {
-                METRIC_FILES["picard_HsMetrics"]: {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 1000}
-                    },
-                    "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.6}
-                    },
-                }
-            },
-            "lymphoma_6.1_hg19_design.bed": {
-                METRIC_FILES["picard_HsMetrics"]: {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 1000}
-                    },
-                    "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.6}
-                    },
-                }
-            },
-            "gmslymphoid_7.1_hg19_design.bed": {
-                METRIC_FILES["picard_HsMetrics"]: {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 1000}
-                    },
-                    "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.6}
-                    },
-                }
-            },
-            "twistexomerefseq_9.1_hg19_design.bed": {
-                METRIC_FILES["picard_HsMetrics"]: {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 100}
-                    },
-                    "FOLD_80_BASE_PENALTY": {
-                        "condition": {"norm": "lt", "threshold": 1.8}
-                    },
-                }
-            },
+    "targeted": {
+        "default": {
+            "MEAN_INSERT_SIZE": {"condition": None},
+            "PERCENT_DUPLICATION": {"condition": None},
+            "MEDIAN_TARGET_COVERAGE": {"condition": None},
+            "PCT_TARGET_BASES_50X": {"condition": None},
+            "PCT_TARGET_BASES_100X": {"condition": None},
+            "PCT_TARGET_BASES_250X": {"condition": None},
+            "PCT_TARGET_BASES_500X": {"condition": None},
+            "PCT_TARGET_BASES_1000X": {"condition": None},
+            "MEAN_TARGET_COVERAGE": {"condition": None},
+            "FOLD_80_BASE_PENALTY": {"condition": None},
+            "PCT_OFF_BAIT": {"condition": None},
         },
-        "wgs": {
-            METRIC_FILES["picard_wgsmetrics"]: {
-                "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}}
-            },
+        "gicfdna_3.1_hg19_design.bed": {
+            "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
+            "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
         },
-    }
-}
-
-METRICS_TO_DELIVER = {
-    "targeted": [
-        "MEAN_INSERT_SIZE",
-        "PERCENT_DUPLICATION",
-        "MEAN_TARGET_COVERAGE",
-        "MEDIAN_TARGET_COVERAGE",
-        "FOLD_80_BASE_PENALTY",
-        "PCT_OFF_BAIT",
-    ],
-    "wgs": [
-        "FOLD_80_BASE_PENALTY",
-    ],
+        "gmcksolid_4.1_hg19_design.bed": {
+            "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 500}},
+            "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}},
+        },
+        "gmsmyeloid_5.2_hg19_design.bed": {
+            "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
+            "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
+        },
+        "lymphoma_6.1_hg19_design.bed": {
+            "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
+            "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
+        },
+        "gmslymphoid_7.1_hg19_design.bed": {
+            "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
+            "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
+        },
+        "twistexomerefseq_9.1_hg19_design.bed": {
+            "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 100}},
+            "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}},
+        },
+    },
+    "wgs": {"FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}}},
 }
