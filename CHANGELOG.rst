@@ -6,6 +6,7 @@ Added:
 
 * Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
+* UMI duplication metrics to report in multiqc_picard_dups.json #844
 
 Changed:
 ^^^^^^^^
@@ -16,6 +17,7 @@ Removed
 ^^^^^^^
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
+* `fastp` module is broken in multiqc, excluded running it in multiqc 
 
 [8.2.5]
 -------
