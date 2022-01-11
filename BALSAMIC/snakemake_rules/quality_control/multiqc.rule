@@ -76,8 +76,7 @@ rule multiqc:
         dir_list = result_dir,
         qc_dir = qc_dir,
         case_name = config["analysis"]["case_id"],
-        exclude_module1 = "vep",
-        exclude_module2 = "fastp"
+        exclude_module = "vep"
     message:
         "Aggregrate quality metrics results using multiqc for sample {params.case_name}"
     shell:
@@ -85,8 +84,7 @@ rule multiqc:
 echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list;
 
 multiqc --force --outdir {params.qc_dir} \
---exclude {params.exclude_module1} \
---exclude {params.exclude_module2} \
+--exclude {params.exclude_module} \
 --data-format json \
 -l {params.qc_dir}/dir_list;
 
