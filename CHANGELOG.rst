@@ -17,7 +17,6 @@ Removed
 ^^^^^^^
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
-* `fastp` module is broken in multiqc, excluded running it in multiqc 
 
 [8.2.5]
 -------
