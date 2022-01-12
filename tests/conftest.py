@@ -7,6 +7,8 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
+
+from BALSAMIC.utils.cli import read_yaml
 from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
@@ -273,12 +275,11 @@ def tumor_normal_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
-
 
 @pytest.fixture(scope="session")
 def tumor_normal_qc_config(
@@ -433,13 +434,56 @@ def tumor_only_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
+@pytest.fixture(scope="session")
+def tumor_only_wgs_config(
+    tmp_path_factory,
+    sample_fastq,
+    analysis_dir,
+    balsamic_cache,
+    sentieon_license,
+    sentieon_install_dir,
+):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_id = "sample_tumor_only_wgs"
+    tumor = sample_fastq["tumor"]
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache,
+            ],
+        )
+
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
+    
 @pytest.fixture(scope="session")
 def tumor_only_qc_config(
     tmpdir_factory,
@@ -486,49 +530,6 @@ def tumor_only_qc_config(
             ],
         )
     return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_only_wgs_config(
-    tmp_path_factory,
-    sample_fastq,
-    analysis_dir,
-    balsamic_cache,
-    sentieon_license,
-    sentieon_install_dir,
-):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only
-    """
-    case_id = "sample_tumor_only_wgs"
-    tumor = sample_fastq["tumor"]
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "-t",
-                tumor,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
-            ],
-        )
-
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -597,66 +598,22 @@ def analysis_path():
 
 
 @pytest.fixture(scope="session")
-def qc_metrics():
-    """Sample data for QC model testing"""
-    return {
-        "qc": {
-            "targeted": {
-                "multiqc_picard_insertSize.json": {
-                    "MEAN_INSERT_SIZE": {"condition": None}
-                },
-                "multiqc_picard_HsMetrics.json": {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 500.0}
-                    }
-                },
-            },
-            "wgs": {
-                "multiqc_picard_insertSize.json": {
-                    "MEAN_INSERT_SIZE": {"condition": None}
-                },
-                "multiqc_picard_dups.json": {
-                    "PERCENT_DUPLICATION": {"condition": None}
-                },
-            },
-        }
-    }
+def multiqc_data_path(analysis_path):
+    """multiqc_data.json test path"""
+    return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
 
 
 @pytest.fixture(scope="session")
-def qc_extracted_metrics():
-    """Extracted metrics for QC model testing"""
-    return {
-        "metrics": {
-            "sample_1": [
-                {
-                    "name": "MEAN_INSERT_SIZE_1",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-                {
-                    "name": "MEAN_INSERT_SIZE_2",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-            ],
-            "sample_2": [
-                {
-                    "name": "MEAN_INSERT_SIZE_1",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-            ],
-        }
-    }
+def metrics_yaml_path(analysis_path):
+    """sample_tumor_only_metrics_deliverables.yaml test path"""
+    return os.path.join(
+        analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml"
+    )
 
 
 @pytest.fixture(scope="session")
-def qc_raw_targeted_metrics():
-    """Raw metrics"""
+def qc_requested_metrics():
+    """Raw requested metrics"""
     return {
         "targeted": {
             "default": {
@@ -675,6 +632,10 @@ def qc_raw_targeted_metrics():
         "wgs": {
             "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
         },
-        "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
-        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5, "METRIC_4": 0.4}},
     }
+
+
+@pytest.fixture(scope="session")
+def qc_extracted_metrics(metrics_yaml_path):
+    """Extracted and formatted QC metrics"""
+    return read_yaml(metrics_yaml_path)
