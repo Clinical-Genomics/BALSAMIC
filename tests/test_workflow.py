@@ -56,7 +56,6 @@ def test_workflow_qc_tumor_only(
     snakefile = get_snakefile(workflow, reference_genome)
     config_json = tumor_only_qc_config
 
-
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
@@ -88,6 +87,7 @@ def test_workflow_qc_normal(
         },
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
+
 
 def test_workflow_sentieon(
     tumor_normal_wgs_config,
