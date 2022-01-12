@@ -281,6 +281,7 @@ def tumor_normal_config(
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
+
 @pytest.fixture(scope="session")
 def tumor_normal_qc_config(
     tmp_path_factory,
@@ -483,7 +484,7 @@ def tumor_only_wgs_config(
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
-    
+
 @pytest.fixture(scope="session")
 def tumor_only_qc_config(
     tmpdir_factory,
