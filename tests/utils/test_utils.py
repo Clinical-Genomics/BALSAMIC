@@ -352,7 +352,8 @@ def test_get_snakefile():
         ("paired", "targeted"),
         ("single", "wgs"),
         ("single", "targeted"),
-        ("qc", ""),
+        ("qc_single", "targeted"),
+        ("qc_paired", "targeted"),
         ("generate_ref", ""),
         ("pon", ""),
     ]
@@ -363,8 +364,10 @@ def test_get_snakefile():
             snakefile = get_snakefile(analysis_type, reference_genome)
 
             pipeline = ""
-
-            if sequencing_type in ["targeted", "wgs", "qc"]:
+            if sequencing_type in ["targeted", "wgs"] and analysis_type in [
+                "single",
+                "paired",
+            ]:
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
             elif analysis_type == "generate_ref" and reference_genome != "canfam3":
                 pipeline = "BALSAMIC/workflows/reference.smk"
@@ -372,6 +375,8 @@ def test_get_snakefile():
                 pipeline = "BALSAMIC/workflows/reference-canfam3.smk"
             elif analysis_type == "pon":
                 pipeline = "BALSAMIC/workflows/PON.smk"
+            elif "qc" in analysis_type:
+                pipeline = "BALSAMIC/workflows/QC.smk"
 
             # THEN it should return the snakefile path
             # THEN assert file exists

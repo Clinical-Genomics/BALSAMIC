@@ -36,7 +36,7 @@ SENTIEON_TNSCOPE = Path(
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
-ANALYSIS_TYPES = ["paired", "single", "qc", "pon"]
+ANALYSIS_TYPES = ["paired", "single", "qc_paired", "qc_single", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 SEQUENCING_TYPE = ["wgs", "targeted"]
 
