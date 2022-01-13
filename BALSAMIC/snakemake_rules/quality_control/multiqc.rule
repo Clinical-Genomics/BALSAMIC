@@ -58,6 +58,7 @@ else:
 
     if config["umiworkflow"]:
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=config["samples"]))
         
 
 rule multiqc:
@@ -81,7 +82,12 @@ rule multiqc:
     shell:
         """
 echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list;
-multiqc --force --outdir {params.qc_dir} --exclude {params.exclude_module} --data-format json -l {params.qc_dir}/dir_list;
+
+multiqc --force --outdir {params.qc_dir} \
+--exclude {params.exclude_module} \
+--data-format json \
+-l {params.qc_dir}/dir_list;
+
 chmod -R 777 {params.qc_dir};
         """
 
