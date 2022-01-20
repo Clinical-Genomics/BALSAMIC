@@ -7,6 +7,7 @@ from pathlib import Path
 
 from BALSAMIC.utils.cli import create_pon_fastq_symlink
 
+qc_json = '_QC.json'
 
 def test_qc_normal_config(
     invoke_cli,
@@ -51,9 +52,9 @@ def test_qc_normal_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(test_analysis_dir, case_id, case_id + "_QC.json").exists()
+    assert Path(test_analysis_dir, case_id, case_id + qc_json).exists()
     # load json file and check if dag exists
-    qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + "_QC.json")))
+    qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + qc_json)))
     # assert if config json dag file is created
     assert Path(qc_config["analysis"]["dag"]).exists()
 
@@ -102,9 +103,9 @@ def test_qc_tumor_only_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(test_analysis_dir, case_id, case_id + "_QC.json").exists()
+    assert Path(test_analysis_dir, case_id, case_id + qc_json).exists()
     # load json file and check if dag exists
-    qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + "_QC.json")))
+    qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + qc_json)))
     # assert if config json dag file is created
     assert Path(qc_config["analysis"]["dag"]).exists()
 
