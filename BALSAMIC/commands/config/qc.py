@@ -22,7 +22,6 @@ from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
 
-
 @click.command(
     "qc",
     short_help="Create a sample config file from input sample data for QC analysis",
@@ -59,13 +58,6 @@ LOG = logging.getLogger(__name__)
     type=click.Path(exists=True, resolve_path=True),
     required=True,
     help="Path to BALSAMIC cache",
-)
-@click.option(
-    "--container-version",
-    show_default=True,
-    default=balsamic_version,
-    type=click.Choice(["develop", "master", balsamic_version]),
-    help="Container for BALSAMIC version to download",
 )
 @click.option(
     "--analysis-dir",
@@ -116,15 +108,14 @@ def qc_config(
     adapter_trim,
     quality_trim,
     panel_bed,
+    umiworkflow,
     analysis_dir,
     tumor,
     normal,
-    umiworkflow,
     tumor_sample_name,
     normal_sample_name,
     genome_version,
     balsamic_cache,
-    container_version,
 ):
 
     try:
@@ -137,9 +128,6 @@ def qc_config(
     except AttributeError:
         LOG.error(f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
         raise click.Abort()
-
-    if container_version:
-        balsamic_version = container_version
 
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
