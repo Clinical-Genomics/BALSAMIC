@@ -7,7 +7,8 @@ from pathlib import Path
 
 from BALSAMIC.utils.cli import create_pon_fastq_symlink
 
-qc_json = '_QC.json'
+qc_json = "_QC.json"
+
 
 def test_qc_normal_config(
     invoke_cli,
