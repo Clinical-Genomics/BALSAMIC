@@ -172,7 +172,7 @@ def qc_config(
         }
         if panel_bed
         else None,
-        umiworkflow = False,
+        umiworkflow=False,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("QC config file generated successfully")
 
