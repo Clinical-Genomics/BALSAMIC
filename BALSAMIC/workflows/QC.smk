@@ -9,25 +9,18 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
 
-from PyPDF2 import PdfFileMerger
-
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5)
 
 from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
-from BALSAMIC.utils.workflowscripts import plot_analysis
+from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
+                                 get_sample_type, get_picard_mrkdup, get_script_path,
+                                 get_threads, get_sequencing_type, get_capture_kit)
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
-                                 get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit)
-
-from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
-                                    RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
-from BALSAMIC.constants.variant_filters import COMMON_SETTINGS,VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS
-from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES 
+from BALSAMIC.constants.common import (RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
 
 shell.executable("/bin/bash")
@@ -45,20 +38,13 @@ fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
-vcf_dir = get_result_dir(config) + "/vcf/"
 qc_dir = get_result_dir(config) + "/qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
-
-umi_dir = get_result_dir(config) + "/umi/" 
-umi_qc_dir = qc_dir + "umi_qc/"
 
 singularity_image = config['singularity']['image']
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
-
-# Varcaller filter settings
-COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
@@ -79,28 +65,6 @@ case_id = config["analysis"]["case_id"]
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-# Find and set Sentieon binary and license server from env variables
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
-
-    if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
-    else:
-        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
-
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
-    
-except KeyError as error:
-    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-              "to run SENTIEON variant callers")
-    raise BalsamicError
-
-if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
-    raise BalsamicError
-
 # Add reference assembly if not defined for backward compatibility
 if 'genome_version' not in config["reference"]:
     GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
@@ -115,18 +79,12 @@ if config['panel']:
 if config["analysis"]["sequencing_type"] != "wgs":
     chromlist = config["panel"]["chrom"]
 
-background_variant_file = ""
-if "background_variants" in config:
-    background_variant_file = config["background_variants"]
-
 # Set temporary dir environment variable
-os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 analysis_type = config['analysis']["analysis_type"]
-rules_to_include = []
 
-rules_qc_single = [
+rules_to_include = [
                 "snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/quality_control/fastqc.rule",
                 "snakemake_rules/quality_control/multiqc.rule",
@@ -134,43 +92,12 @@ rules_qc_single = [
                 "snakemake_rules/quality_control/picard.rule",
                 "snakemake_rules/quality_control/sambamba_depth.rule",
                 "snakemake_rules/quality_control/mosdepth.rule",
-                "snakemake_rules/umi/qc_umi.rule",
-                "snakemake_rules/umi/mergetype_tumor_umi.rule",
-                "snakemake_rules/umi/generate_AF_tables.rule",
                 "snakemake_rules/align/bwa_mem.rule",
-                "snakemake_rules/umi/sentieon_umiextract.rule",
-                "snakemake_rules/umi/sentieon_consensuscall.rule",
 ]
-rules_qc_paired = [
-        "snakemake_rules/quality_control/fastp.rule",
-        "snakemake_rules/quality_control/fastqc.rule",
-        "snakemake_rules/quality_control/multiqc.rule",
-        "snakemake_rules/variant_calling/mergetype_tumor.rule",
-        "snakemake_rules/quality_control/picard.rule",
-        "snakemake_rules/quality_control/sambamba_depth.rule",
-        "snakemake_rules/quality_control/mosdepth.rule",
-        "snakemake_rules/umi/qc_umi.rule",
-        "snakemake_rules/umi/mergetype_tumor_umi.rule",
-        "snakemake_rules/variant_calling/mergetype_normal.rule",
-        "snakemake_rules/umi/mergetype_normal_umi.rule",
-        "snakemake_rules/umi/generate_AF_tables.rule",
-        "snakemake_rules/align/bwa_mem.rule",
-        "snakemake_rules/umi/sentieon_umiextract.rule",
-        "snakemake_rules/umi/sentieon_consensuscall.rule",
-        ]
-
-if "single" in analysis_type:
-    for r in rules_qc_single:
-        rules_to_include.append(r)
-        # include: Path(RULE_DIRECTORY, r).as_posix()
-else:
-    for r in rules_qc_paired:
-        rules_to_include.append(r)
-        # include: Path(RULE_DIRECTORY, r).as_posix()
-
+if "paired" in config['analysis']['analysis_type']:
+    rules_to_include.append("snakemake_rules/variant_calling/mergetype_normal.rule")
 
 # for r in rules_to_include:
-    # r
 for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
@@ -208,8 +135,6 @@ if 'benchmark_plots' in config:
             for plots in my_rule_plots:
                 plots.unlink()
 
-
-
 if 'delivery' in config:
     wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],
                      "case_name": config["analysis"]["case_id"],
@@ -217,10 +142,7 @@ if 'delivery' in config:
                      }
 
     if config['analysis']["analysis_type"] in ["paired", "single"]:
-        wildcard_dict.update({"var_type": ["CNV", "SNV", "SV"],
-                              "var_class": ["somatic", "germline"],
-                              "var_caller": somatic_caller + germline_caller,
-                              "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
+        wildcard_dict.update({"bedchrom": config["panel"]["chrom"] if "panel" in config else [],
                               })
 
     if 'rules_to_deliver' in config:

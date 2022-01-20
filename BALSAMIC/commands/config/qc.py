@@ -31,24 +31,7 @@ LOG = logging.getLogger(__name__)
     "--case-id",
     required=True,
     help="Sample id that is used for reporting, \
-              naming the analysis jobs, and analysis path",
-)
-@click.option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help=(
-        "UMI processing steps for samples with UMI tags."
-        "For WGS cases, UMI is always disabled."
-    ),
-)
-@click.option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=int,
-    help="Trim N bases from reads in fastq",
+         naming the analysis jobs, and analysis path",
 )
 @click.option(
     "--quality-trim/--no-quality-trim",
@@ -72,13 +55,6 @@ LOG = logging.getLogger(__name__)
     help="Panel bed file for variant calling.",
 )
 @click.option(
-    "-b",
-    "--background-variants",
-    type=click.Path(exists=True, resolve_path=True),
-    required=False,
-    help="Background set of valid variants for UMI",
-)
-@click.option(
     "--balsamic-cache",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
@@ -96,7 +72,7 @@ LOG = logging.getLogger(__name__)
     type=click.Path(exists=True, resolve_path=True),
     required=True,
     help="Root analysis path to store analysis logs and results. \
-                                     The final path will be analysis-dir/sample-id",
+          The final path will be analysis-dir/sample-id",
 )
 @click.option(
     "-t",
@@ -116,7 +92,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.option(
     "--umiworkflow/--no-umiworkflow",
-    default=True,
+    default=False,
     show_default=True,
     is_flag=True,
     help="Enable running UMI workflow",
@@ -137,12 +113,9 @@ LOG = logging.getLogger(__name__)
 def qc_config(
     context,
     case_id,
-    umi,
-    umi_trim_length,
     adapter_trim,
     quality_trim,
     panel_bed,
-    background_variants,
     analysis_dir,
     tumor,
     normal,
@@ -178,18 +151,15 @@ def qc_config(
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
-            "umi_trim": umi if panel_bed else False,
-            "umi_trim_length": umi_trim_length,
         },
         analysis={
             "case_id": case_id,
             "analysis_dir": analysis_dir,
-            "analysis_type": "qc_paired" if normal else "qc_single",
+            "analysis_type": "qc",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
-        background_variants=background_variants,
         samples=samples,
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
@@ -202,7 +172,7 @@ def qc_config(
         }
         if panel_bed
         else None,
-        umiworkflow=umiworkflow if panel_bed else False,
+        umiworkflow = False,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("QC config file generated successfully")
 
@@ -227,7 +197,7 @@ def qc_config(
     try:
         generate_graph(config_collection_dict, config_path)
         LOG.info(f"BALSAMIC QC Workflow has been configured successfully!")
-    except ValueError as e:
+    except ValueError:
         LOG.error(
             f'BALSAMIC QC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',
         )

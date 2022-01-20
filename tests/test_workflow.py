@@ -51,7 +51,7 @@ def test_workflow_qc_tumor_only(
 ):
 
     # GIVEN a sample config dict and snakefile
-    workflow = "qc_single"
+    workflow = "qc"
     reference_genome = "hg19"
     snakefile = get_snakefile(workflow, reference_genome)
     config_json = tumor_only_qc_config
@@ -72,7 +72,7 @@ def test_workflow_qc_normal(
     tumor_normal_qc_config, sentieon_install_dir, sentieon_license
 ):
     # GIVEN a sample config dict and snakefile
-    workflow = "qc_paired"
+    workflow = "qc"
     reference_genome = "hg19"
     snakefile = get_snakefile(workflow, reference_genome)
     config_json = tumor_normal_qc_config

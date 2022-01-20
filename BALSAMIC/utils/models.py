@@ -196,12 +196,11 @@ class AnalysisModel(BaseModel):
     Attributes:
 
         case_id : Field(required); string case identifier
-        analysis_type : Field(required); string literal [single, paired, pon, qc_paired, qc_single]
+        analysis_type : Field(required); string literal [single, paired, pon, qc]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
             pon : panel of normal analysis
-            qc_single : QC analysis only if only tumor samples are provided
-            qc_paired : QC analysis only if both tumor and normal samples are provided
+            qc : QC analysis only
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
@@ -217,7 +216,7 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When analysis_type is set to any value other than [single, paired, pon, qc_paired, qc_single]
+            When analysis_type is set to any value other than [single, paired, pon, qc]
             When sequencing_type is set to any value other than [wgs, targeted]
     """
 
