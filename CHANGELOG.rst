@@ -12,6 +12,7 @@ Changed:
 ^^^^^^^^
 
 * Merge QC metric extraction workflows #833
+* ``ascat``, ``delly``, ``manta``, ``TNscope_umi`` and ``tnhaplotyper`` filtered file tags #848
 
 Removed
 ^^^^^^^
@@ -20,6 +21,9 @@ Removed
 
 [8.2.5]
 -------
+
+Added:
+^^^^^^
 
 * balsamic.sif container installation during cache generation #841
 
