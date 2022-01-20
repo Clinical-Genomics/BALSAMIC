@@ -7,8 +7,6 @@ from pathlib import Path
 
 from BALSAMIC.utils.cli import create_pon_fastq_symlink
 
-qc_json = "_QC.json"
-
 
 def test_qc_normal_config(
     invoke_cli,
@@ -16,8 +14,6 @@ def test_qc_normal_config(
     tmp_path,
     balsamic_cache,
     panel_bed_file,
-    sentieon_license,
-    sentieon_install_dir,
 ):
     # GIVEN a case ID, fastq files, and an analysis dir
     test_analysis_dir = tmp_path / "test_analysis_dir"
@@ -29,10 +25,6 @@ def test_qc_normal_config(
     # WHEN creating a case analysis
     with mock.patch.dict(
         "os.environ",
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
     ):
         result = invoke_cli(
             [
@@ -59,11 +51,11 @@ def test_qc_normal_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(test_analysis_dir, case_id, case_id + qc_json).exists()
+    assert Path(test_analysis_dir, case_id, case_id + "_QC.json").exists()
     # load json file and check if dag exists
-    pon_config = json.load(open(Path(test_analysis_dir, case_id, case_id + qc_json)))
+    qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + "_QC.json")))
     # assert if config json dag file is created
-    assert Path(pon_config["analysis"]["dag"]).exists()
+    assert Path(qc_config["analysis"]["dag"]).exists()
 
 
 def test_qc_tumor_only_config(
@@ -110,9 +102,9 @@ def test_qc_tumor_only_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(test_analysis_dir, case_id, case_id + qc_json).exists()
+    assert Path(test_analysis_dir, case_id, case_id + "_QC.json").exists()
     # load json file and check if dag exists
-    qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + qc_json)))
+    qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + "_QC.json")))
     # assert if config json dag file is created
     assert Path(qc_config["analysis"]["dag"]).exists()
 
