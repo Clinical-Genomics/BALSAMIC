@@ -299,9 +299,7 @@ def tumor_normal_qc_config(
     tumor = sample_fastq["tumor"]
     normal = sample_fastq["normal"]
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON
-    ):
+    with mock.patch.dict(MOCKED_OS_ENVIRON):
         runner = CliRunner()
         runner.invoke(
             cli,

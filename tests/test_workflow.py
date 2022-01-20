@@ -46,9 +46,7 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_l
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_tumor_only(
-    tumor_only_qc_config
-):
+def test_workflow_qc_tumor_only(tumor_only_qc_config):
 
     # GIVEN a sample config dict and snakefile
     workflow = "qc"
@@ -64,9 +62,7 @@ def test_workflow_qc_tumor_only(
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_normal(
-    tumor_normal_qc_config
-):
+def test_workflow_qc_normal(tumor_normal_qc_config):
     # GIVEN a sample config dict and snakefile
     workflow = "qc"
     reference_genome = "hg19"
