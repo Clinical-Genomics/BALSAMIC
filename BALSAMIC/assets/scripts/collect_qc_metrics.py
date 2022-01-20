@@ -23,7 +23,7 @@ def collect_qc_metrics(
     output_path: Path,
     multiqc_data_path: Path,
     sequencing_type: str,
-    capture_kit: Union[str, None],
+    capture_kit: str,
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
 
@@ -31,16 +31,28 @@ def collect_qc_metrics(
         output_path: Path; destination path for the extracted YAML formatted metrics
         multiqc_data_path: Path; multiqc JSON path from which the metrics will be extracted
         sequencing_type: str; analysis sequencing type
-        capture_kit: str; capture kit used for targeted analysis (None for WGS)
+        capture_kit: str; capture kit used for targeted analysis ("None" for WGS)
     """
 
     with open(output_path, "w") as fn:
         yaml.dump(
-            get_multiqc_metrics(multiqc_data_path, sequencing_type, capture_kit),
+            get_multiqc_metrics(
+                multiqc_data_path,
+                sequencing_type,
+                capture_kit_resolve_type(capture_kit),
+            ),
             fn,
             sort_keys=False,
             default_flow_style=False,
         )
+
+
+def capture_kit_resolve_type(capture_kit: str):
+    """Resolves the capture_kit type (NoneType or String)"""
+    if capture_kit == "None":
+        return None
+    else:
+        return capture_kit
 
 
 def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
