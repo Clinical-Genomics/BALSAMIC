@@ -290,8 +290,6 @@ def tumor_normal_qc_config(
     balsamic_cache,
     background_variant_file,
     panel_bed_file,
-    sentieon_license,
-    sentieon_install_dir,
 ):
     """
     invokes balsamic config sample -t xxx -n xxx to create sample config
@@ -302,11 +300,7 @@ def tumor_normal_qc_config(
     normal = sample_fastq["normal"]
 
     with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
+        MOCKED_OS_ENVIRON
     ):
         runner = CliRunner()
         runner.invoke(
@@ -330,8 +324,6 @@ def tumor_normal_qc_config(
                 "ACC1",
                 "--normal-sample-name",
                 "ACC2",
-                "--background-variants",
-                background_variant_file,
             ],
         )
     return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
@@ -490,11 +482,8 @@ def tumor_only_qc_config(
     tmpdir_factory,
     sample_fastq,
     balsamic_cache,
-    background_variant_file,
     analysis_dir,
     panel_bed_file,
-    sentieon_license,
-    sentieon_install_dir,
 ):
     """
     invokes balsamic config sample -t xxx to create sample config
@@ -505,10 +494,6 @@ def tumor_only_qc_config(
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
     ):
         runner = CliRunner()
         runner.invoke(
@@ -526,8 +511,6 @@ def tumor_only_qc_config(
                 analysis_dir,
                 "--balsamic-cache",
                 balsamic_cache,
-                "--background-variants",
-                background_variant_file,
             ],
         )
     return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
