@@ -49,8 +49,8 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
+    vcf_filtered_tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
+    vcf_pass_tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -69,11 +69,11 @@ grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
 | bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered} -O z;
+| bcftools view -o {output.vcf_filtered_tnhaplotyper} -O z;
 
-tabix -p vcf -f {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_filtered_tnhaplotyper};
 
-bcftools view -f PASS --threads {threads} -O z -o {output.vcf_pass} {output.vcf_filtered}
+bcftools view -f PASS --threads {threads} -O z -o {output.vcf_pass_tnhaplotyper} {output.vcf_filtered_tnhaplotyper}
 
-tabix -p vcf -f {output.vcf_pass}
+tabix -p vcf -f {output.vcf_pass_tnhaplotyper}
     """

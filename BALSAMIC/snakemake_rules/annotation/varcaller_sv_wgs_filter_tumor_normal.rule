@@ -33,7 +33,7 @@ rule bcftools_filter_delly:
   input:
     vcf = vep_dir + "SV.somatic.{case_name}.delly.all.vcf.gz",
   output:
-    vcf_sv_pass = vep_dir + "SV.somatic.{case_name}.delly.all.filtered.pass.vcf.gz",
+    vcf_sv_pass_delly = vep_dir + "SV.somatic.{case_name}.delly.all.filtered.pass.vcf.gz",
   benchmark:
     benchmark_dir + "bcftools_filter_delly_SV.somatic.{case_name}.delly.vep.tsv"
   singularity:
@@ -48,8 +48,8 @@ rule bcftools_filter_delly:
     "Filtering Delly results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
-tabix -p vcf -f {output.vcf_sv_pass};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass_delly} -O z {input.vcf};
+tabix -p vcf -f {output.vcf_sv_pass_delly};
     """
 
 
@@ -57,7 +57,7 @@ rule bcftools_filter_ascat:
   input:
     vcf = vep_dir + "CNV.somatic.{case_name}.ascat.all.vcf.gz",
   output:
-    vcf_sv_pass = vep_dir + "CNV.somatic.{case_name}.ascat.all.filtered.pass.vcf.gz",
+    vcf_sv_pass_ascat = vep_dir + "CNV.somatic.{case_name}.ascat.all.filtered.pass.vcf.gz",
   benchmark:
     benchmark_dir + "bcftools_filter_ascat_CNV.somatic.{case_name}.ascat.vep.tsv"
   singularity:
@@ -72,6 +72,6 @@ rule bcftools_filter_ascat:
     "Filtering Ascat results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
-tabix -p vcf -f {output.vcf_sv_pass};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass_ascat} -O z {input.vcf};
+tabix -p vcf -f {output.vcf_sv_pass_ascat};
     """

@@ -7,11 +7,11 @@
 
 rule bcftools_filter_manta:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.manta.all.vcf.gz",
+    vcf = vep_dir + "SV.somatic.{case_name}.manta.all.vcf.gz",
   output:
-    vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.manta.all.filtered.pass.vcf.gz",
+    vcf_sv_pass = vep_dir + "SV.somatic.{case_name}.manta.all.filtered.pass.vcf.gz",
   benchmark:
-    Path(benchmark_dir, 'bcftools_filter_manta_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_manta_' + "SV.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
@@ -54,11 +54,11 @@ tabix -p vcf -f {output.vcf_sv_pass};
 
 rule bcftools_filter_delly:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.delly.all.vcf.gz",
+    vcf = vep_dir + "SV.somatic.{case_name}.delly.all.vcf.gz",
   output:
-    vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.delly.all.filtered.pass.vcf.gz",
+    vcf_sv_pass_delly = vep_dir + "SV.somatic.{case_name}.delly.all.filtered.pass.vcf.gz",
   benchmark:
-    benchmark_dir + 'bcftools_filter_' + "{var_type}.somatic.{case_name}.delly.vep.tsv"
+    benchmark_dir + 'bcftools_filter_' + "SV.somatic.{case_name}.delly.vep.tsv"
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix() 
   params:
@@ -70,6 +70,6 @@ rule bcftools_filter_delly:
     "Filtering Delly results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
-tabix -p vcf -f {output.vcf_sv_pass};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass_delly} -O z {input.vcf};
+tabix -p vcf -f {output.vcf_sv_pass_delly};
     """
