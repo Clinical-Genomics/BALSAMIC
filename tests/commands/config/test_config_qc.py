@@ -212,39 +212,6 @@ def test_qc_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file):
     assert result.exit_code == 2
 
 
-def test_qc_tumor_only_umi_config_background_file(
-    invoke_cli, sample_fastq, analysis_dir, balsamic_cache, panel_bed_file
-):
-
-    # GIVEN CLI arguments including a background variant file
-    case_id = "sample_umi_tumor_only"
-    tumor = sample_fastq["tumor"]
-    background_file = "tests/test_data/references/panel/background_variants.txt"
-    background_variant_file = background_file
-
-    result = invoke_cli(
-        [
-            "config",
-            "qc",
-            "-p",
-            panel_bed_file,
-            "-t",
-            tumor,
-            "--case-id",
-            case_id,
-            "--analysis-dir",
-            analysis_dir,
-            "--background-variants",
-            background_variant_file,
-            "--balsamic-cache",
-            balsamic_cache,
-        ],
-    )
-    # THEN program exits and checks for filepath
-    assert result.exit_code == 0
-    assert Path(background_variant_file).exists()
-
-
 def test_config_qc_graph_failed(
     invoke_cli, sample_fastq, analysis_dir, balsamic_cache, panel_bed_file
 ):
