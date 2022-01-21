@@ -143,7 +143,7 @@ def test_get_multiqc_metrics_filtering_umi(multiqc_data_path):
 
 
 def test_collect_qc_metrics_targeted(tmp_path, multiqc_data_path, cli_runner):
-    """tests qc metrics yaml file generation for targeted"""
+    """tests qc metrics yaml file generation for targeted analysis"""
 
     # GIVEN the output and multiqc metrics paths
     output_path = tmp_path / "sample_tumor_only_metrics_deliverables.yaml"
