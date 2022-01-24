@@ -204,6 +204,7 @@ class AnalysisModel(BaseModel):
             wgs : if whole genome sequencing was performed
         analysis_dir : Field(required); existing path where to save files
         fastq_path : Field(optional); Path where fastq files will be stored
+        pon_cnn: Field(optional); Path where PON reference .cnn file is stored
         script : Field(optional); Path where snakemake scripts will be stored
         log : Field(optional); Path where logs will be saved
         result : Field(optional); Path where BALSAMIC output will be stored
@@ -223,6 +224,7 @@ class AnalysisModel(BaseModel):
     sequencing_type: str
     analysis_dir: DirectoryPath
     fastq_path: Optional[DirectoryPath]
+    pon_cnn: Optional[FilePath]
     script: Optional[DirectoryPath]
     log: Optional[DirectoryPath]
     result: Optional[DirectoryPath]
@@ -272,6 +274,12 @@ class AnalysisModel(BaseModel):
             + "/"
         )
 
+    @validator("pon_cnn")
+    def pon_abspath_as_str(cls, value):
+        if value:
+            return Path(value).resolve().as_posix()
+        return None
+	
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
         return (
