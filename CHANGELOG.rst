@@ -7,6 +7,7 @@ Added:
 * Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
+* Option to use PON reference in cnv calling for TGA tumor-only cases  
 
 Changed:
 ^^^^^^^^
@@ -17,6 +18,7 @@ Removed
 ^^^^^^^
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
+* Unused pon option for SNV calling with TNhaplotyper tumor-only 
 
 [8.2.5]
 -------
