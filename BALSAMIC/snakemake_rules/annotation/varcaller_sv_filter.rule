@@ -33,7 +33,7 @@ rule bcftools_filter_cnvkit:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.cnvkit.all.vcf.gz",
   output:
-    vcf_sv_pass = vep_dir + "{var_type}.somatic.{case_name}.cnvkit.all.filtered.pass.vcf.gz",
+    vcf_cnv_pass = vep_dir + "{var_type}.somatic.{case_name}.cnvkit.all.filtered.pass.vcf.gz",
   benchmark:
     benchmark_dir + 'bcftools_filter_' + "{var_type}.somatic.{case_name}.cnvkit.vep.tsv"
   singularity:
@@ -47,8 +47,8 @@ rule bcftools_filter_cnvkit:
     "Filtering CNVkit results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
-tabix -p vcf -f {output.vcf_sv_pass};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_cnv_pass} -O z {input.vcf};
+tabix -p vcf -f {output.vcf_cnv_pass};
     """
 
 
