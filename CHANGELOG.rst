@@ -14,6 +14,10 @@ Changed:
 * Merge QC metric extraction workflows #833
 * ``ascat``, ``delly``, ``manta``, ``TNscope_umi`` and ``tnhaplotyper`` filtered file tags #849
 
+Fixed:
+^^^^^^
+* ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
+
 Removed
 ^^^^^^^
 
