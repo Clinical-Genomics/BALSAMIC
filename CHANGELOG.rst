@@ -13,6 +13,10 @@ Changed:
 
 * Merge QC metric extraction workflows #833
 
+Fixed:
+^^^^^^
+* ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
+
 Removed
 ^^^^^^^
 
