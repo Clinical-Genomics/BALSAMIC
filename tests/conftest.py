@@ -47,6 +47,7 @@ def config_files():
         "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
         "panel_bed_file": "tests/test_data/references/panel/panel.bed",
         "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
+        "pon_cnn_file": "tests/test_data/references/panel/test_panel_ponn.cnn",
         "pon_fastq_path": "tests/test_data/fastq/",
     }
 
@@ -95,6 +96,10 @@ def panel_bed_file():
 def background_variant_file():
     return "tests/test_data/references/panel/background_variants.txt"
 
+
+@pytest.fixture(scope="session")
+def pon_cnn_file():
+    return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
 @pytest.fixture(scope="session")
 def sentieon_license(tmp_path_factory):
@@ -344,6 +349,7 @@ def tumor_only_config(
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
+    pon_cnn_file
 ):
     """
     invokes balsamic config sample -t xxx to create sample config
@@ -377,6 +383,8 @@ def tumor_only_config(
                 balsamic_cache,
                 "--background-variants",
                 background_variant_file,
+                "--pon-cnn",
+                pon_cnn_file
             ],
         )
 
