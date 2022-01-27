@@ -15,7 +15,9 @@ Changed:
 
 Fixed:
 ^^^^^^
+
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
+* QC metric validation for different panel bed version #855
 
 Removed
 ^^^^^^^
