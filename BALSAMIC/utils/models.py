@@ -279,7 +279,7 @@ class AnalysisModel(BaseModel):
         if value:
             return Path(value).resolve().as_posix()
         return None
-	
+
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
         return (
