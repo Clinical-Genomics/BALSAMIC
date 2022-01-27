@@ -65,27 +65,27 @@ METRICS = {
             "FOLD_80_BASE_PENALTY": {"condition": None},
             "PCT_OFF_BAIT": {"condition": None},
         },
-        "gicfdna_3.1_hg19_design.bed": {
+        "gicfdna": {
             "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
             "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
         },
-        "gmcksolid_4.1_hg19_design.bed": {
+        "gmcksolid": {
             "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 500}},
             "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}},
         },
-        "gmsmyeloid_5.2_hg19_design.bed": {
+        "gmsmyeloid": {
             "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
             "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
         },
-        "lymphoma_6.1_hg19_design.bed": {
+        "lymphoma": {
             "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
             "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
         },
-        "gmslymphoid_7.1_hg19_design.bed": {
+        "gmslymphoid": {
             "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 1000}},
             "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.6}},
         },
-        "twistexomerefseq_9.1_hg19_design.bed": {
+        "twistexome": {
             "MEDIAN_TARGET_COVERAGE": {"condition": {"norm": "gt", "threshold": 100}},
             "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}},
         },

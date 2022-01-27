@@ -96,15 +96,15 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                     )
 
 
-def get_qc_available_panel_beds(metrics: List[str]) -> List[str]:
-    """Returns available panel bed file names from a list of requested metrics"""
-    available_beds = []
+def get_qc_supported_capture_kit(capture_kit, metrics: List[str]) -> str:
+    """Returns a BALSAMIC supported panel bed name associated to a specific capture_kit parameter"""
+    available_panel_beds = []
 
     for k in metrics:
         if k != "default":
-            available_beds.append(k)
+            available_panel_beds.append(k)
 
-    return available_beds
+    return next((i for i in available_panel_beds if i in capture_kit), None)
 
 
 def get_requested_metrics(
@@ -115,8 +115,11 @@ def get_requested_metrics(
     requested_metrics = metrics[sequencing_type]
     if capture_kit:
         requested_metrics = metrics[sequencing_type]["default"]
-        if capture_kit in get_qc_available_panel_beds(metrics[sequencing_type]):
-            requested_metrics.update(metrics[sequencing_type][capture_kit])
+        supported_capture_kit = get_qc_supported_capture_kit(
+            capture_kit, metrics[sequencing_type]
+        )
+        if supported_capture_kit:
+            requested_metrics.update(metrics[sequencing_type][supported_capture_kit])
 
     return requested_metrics
 
