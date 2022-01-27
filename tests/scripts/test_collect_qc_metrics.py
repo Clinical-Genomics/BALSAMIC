@@ -15,7 +15,7 @@ def test_capture_kit_resolve_type():
     """test capture_kit type"""
 
     # GIVEN an expected output
-    capture_kit = "panel_1_v1.0_hg19_design.bed"
+    capture_kit = "panel.bed"
 
     # THEN check if the extracted capture kit is correctly formatted
     assert capture_kit_resolve_type("None") is None
