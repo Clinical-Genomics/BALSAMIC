@@ -84,8 +84,8 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.vcf.gz",
   output:
-    vcf_filtered_tnscope_umi = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.vcf.gz",
-    vcf_pass_tnscope_umi = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
+    vcf_filtered_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.vcf.gz",
+    vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_normal' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -102,11 +102,11 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
     """
 bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered_tnscope_umi} -O z;
+| bcftools view -o {output.vcf_filtered_TNscope_umi} -O z;
 
-tabix -p vcf -f {output.vcf_filtered_tnscope_umi};
+tabix -p vcf -f {output.vcf_filtered_TNscope_umi};
 
-bcftools view -f PASS -o {output.vcf_pass_tnscope_umi} -O z {output.vcf_filtered_tnscope_umi};
+bcftools view -f PASS -o {output.vcf_pass_TNscope_umi} -O z {output.vcf_filtered_TNscope_umi};
 
-tabix -p vcf -f {output.vcf_pass_tnscope_umi};
+tabix -p vcf -f {output.vcf_pass_TNscope_umi};
     """
