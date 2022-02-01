@@ -7,6 +7,7 @@ Added:
 * Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
+* QC default validation conditions (for not defined capture kits) #855
 
 Changed:
 ^^^^^^^^

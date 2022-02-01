@@ -45,13 +45,13 @@ def test_get_requested_metrics_targeted(qc_requested_metrics):
 
     # GIVEN a sequencing type and a capture kit
     seq_type = "targeted"
-    capture_kit = "panel_1_v1.0_hg19_design.bed"
+    capture_kit = "panel_2_v1.0_hg19_design.bed"
 
     # GIVEN the expected output
     expected_output = {
-        "METRIC_1": {"condition": None},
-        "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
-        "METRIC_3": {"condition": {"norm": "gt", "threshold": 3}},
+        "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
+        "METRIC_2": {"condition": {"norm": "gt", "threshold": 22}},
+        "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
     }
 
     # WHEN calling the function
