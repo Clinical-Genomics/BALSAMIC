@@ -42,9 +42,9 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered_tnscope} -O z;
+| bcftools view -o {output.vcf_filtered} -O z;
 
-tabix -p vcf -f {output.vcf_filtered_tnscope};
+tabix -p vcf -f {output.vcf_filtered};
     """
 
 
