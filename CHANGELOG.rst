@@ -12,7 +12,7 @@ Changed:
 ^^^^^^^^
 
 * Merge QC metric extraction workflows #833
-* ``ascat``, ``delly``, ``manta``, ``cnvkit``, ``TNscope_umi`` and ``tnhaplotyper`` filtered file tags #849
+* ``ascat``, ``delly``, ``manta``, ``cnvkit``, ``TNscope_umi``, ``tnhaplotyper``, ``vardict``, ``tnscope`` filtered file tags #849
 
 Fixed:
 ^^^^^^
