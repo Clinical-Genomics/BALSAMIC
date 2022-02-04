@@ -42,9 +42,9 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered} -O z;
+| bcftools view -o {output.vcf_filtered_tnscope} -O z;
 
-tabix -p vcf -f {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_filtered_tnscope};
     """
 
 
@@ -100,8 +100,8 @@ rule bcftools_intersect_tumor_only:
     tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.all.filtered.vcf.gz",
     tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz"
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.vcf.gz",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
+    vcf_filtered_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.vcf.gz",
+    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
   benchmark:
     Path(benchmark_dir, 'bcftools_intersect_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -118,13 +118,13 @@ rule bcftools_intersect_tumor_only:
     """
 bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z;
 
-cp {params.vcf_dir}/0002.vcf.gz {output.vcf_filtered};
+cp {params.vcf_dir}/0002.vcf.gz {output.vcf_filtered_tnscope};
 
-tabix -p vcf -f {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_filtered_tnscope};
 
-bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass_tnscope} -O z {output.vcf_filtered_tnscope};
 
-tabix -p vcf -f {output.vcf_pass};
+tabix -p vcf -f {output.vcf_pass_tnscope};
 
 rm -r {params.vcf_dir}         
     """
