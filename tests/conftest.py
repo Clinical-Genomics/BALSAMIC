@@ -518,11 +518,12 @@ def qc_requested_metrics():
                 "METRIC_1": {"condition": None},
                 "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
             },
-            "panel_1.bed": {
+            "panel_1": {
                 "METRIC_3": {"condition": {"norm": "gt", "threshold": 3}},
             },
-            "panel_2.bed": {
+            "panel_2": {
                 "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
+                "METRIC_2": {"condition": {"norm": "gt", "threshold": 22}},
                 "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
             },
         },

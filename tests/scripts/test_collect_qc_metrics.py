@@ -5,7 +5,7 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_multiqc_data_source,
     get_multiqc_metrics,
     collect_qc_metrics,
-    get_qc_available_panel_beds,
+    get_qc_supported_capture_kit,
     get_requested_metrics,
     capture_kit_resolve_type,
 )
@@ -22,17 +22,22 @@ def test_capture_kit_resolve_type():
     assert capture_kit_resolve_type(capture_kit) == capture_kit
 
 
-def test_get_qc_available_panel_beds(qc_requested_metrics):
-    """test extraction of capture kits available for analysis"""
+def test_get_qc_supported_capture_kit(qc_requested_metrics):
+    """test extraction of the capture kit name available for analysis"""
+
+    # GIVEN a capture kit
+    capture_kit = "panel_1_v1.0_hg19_design.bed"
 
     # GIVEN an expected output
-    expected_output = ["panel_1.bed", "panel_2.bed"]
+    expected_output = "panel_1"
 
     # WHEN calling the function
-    available_panel_beds = get_qc_available_panel_beds(qc_requested_metrics["targeted"])
+    supported_capture_kit = get_qc_supported_capture_kit(
+        capture_kit, qc_requested_metrics["targeted"]
+    )
 
-    # THEN check if the extracted bed file names correspond to the expected ones
-    assert available_panel_beds == expected_output
+    # THEN check if the extracted bed file name corresponds to the expected one
+    assert supported_capture_kit == expected_output
 
 
 def test_get_requested_metrics_targeted(qc_requested_metrics):
@@ -40,13 +45,13 @@ def test_get_requested_metrics_targeted(qc_requested_metrics):
 
     # GIVEN a sequencing type and a capture kit
     seq_type = "targeted"
-    capture_kit = "panel_1.bed"
+    capture_kit = "panel_2_v1.0_hg19_design.bed"
 
     # GIVEN the expected output
     expected_output = {
-        "METRIC_1": {"condition": None},
-        "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
-        "METRIC_3": {"condition": {"norm": "gt", "threshold": 3}},
+        "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
+        "METRIC_2": {"condition": {"norm": "gt", "threshold": 22}},
+        "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
     }
 
     # WHEN calling the function
