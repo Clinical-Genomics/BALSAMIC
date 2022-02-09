@@ -25,6 +25,14 @@ Removed
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
 
+[8.2.6]
+-------
+
+Fixes:
+^^^^^^
+
+* Set right qos in scheduler command #856
+
 [8.2.5]
 -------
 

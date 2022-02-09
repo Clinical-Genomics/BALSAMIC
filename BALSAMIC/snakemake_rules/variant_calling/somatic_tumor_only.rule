@@ -4,7 +4,7 @@
 def get_pon(config):
     """ return pon cli string, complete with file """
     if "PON" in config["analysis"]:
-        return os.path.abspth(config["analysis"]["PON"])
+        return os.path.abspath(config["analysis"]["PON"])
     else:
         return None
 
