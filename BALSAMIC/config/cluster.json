@@ -56,10 +56,10 @@
 		"time": "12:00:00",
 		"n": 10
 	},
-    "fastqc":{
-        "time": "12:00:00",
-        "n": 5
-    },
+	"fastqc":{
+		"time": "12:00:00",
+		"n": 5
+	},
 	"gatk_haplotypecaller": {
 		"time": "03:00:00",
 		"n": 10
