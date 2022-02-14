@@ -56,6 +56,10 @@
 		"time": "12:00:00",
 		"n": 10
 	},
+    "fastqc":{
+        "time": "12:00:00",
+        "n": 5
+    },
 	"gatk_haplotypecaller": {
 		"time": "03:00:00",
 		"n": 10
@@ -215,10 +219,6 @@
 	"sentieon_tnscope_umi": {
 		"time": "4:00:00",
 		"n": 12
-	},
-	"vep_umi": {
-		"time":"4:00:00",
-		"n": 10
 	},
 	"vep_somatic": {
 		"time":"24:00:00",
