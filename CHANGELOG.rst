@@ -1,3 +1,11 @@
+[8.2.7]
+-------
+
+Fixes:
+^^^^^^
+* Fixes fastqc timeout issues for wgs cases #861
+
+
 [8.2.6]
 -------
 
