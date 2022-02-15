@@ -222,7 +222,11 @@
 	},
 	"vep_somatic": {
 		"time":"24:00:00",
-		"n": 24
+		"n": 18
+	},
+	"vep_germline": {
+		"time":"18:00:00",
+		"n": 18
 	},
 	"picard_umiaware": {
 		"time": "4:00:00",
