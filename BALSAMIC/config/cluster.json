@@ -222,7 +222,7 @@
 	},
 	"vep_somatic": {
 		"time":"24:00:00",
-		"n": 20
+		"n": 24
 	},
 	"vep_germline": {
 		"time":"06:00:00",
