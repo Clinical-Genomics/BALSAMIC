@@ -4,7 +4,7 @@
 Fixes:
 ^^^^^^
 * Fixes fastqc timeout issues for wgs cases #861
-
+* Fix cluster configuration for vep and vcfanno #857
 
 [8.2.6]
 -------
