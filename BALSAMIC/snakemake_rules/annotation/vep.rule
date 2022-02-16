@@ -26,7 +26,7 @@ rule vep_somatic:
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
-    get_threads(cluster_config, "vep")
+    get_threads(cluster_config, "vep_somatic")
   message:
     "Running vep annotation on {params.message_text}" 
   shell:
@@ -35,9 +35,9 @@ vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf={params.tmpvcf};
 export PERL5LIB=;
 
-vcfanno --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
+vcfanno -p {threads} --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
 | bcftools reheader --threads {threads} -s {input.header} \
-| bcftools view -O z -o $tmpvcf ;
+| bcftools view --threads {threads} -O z -o $tmpvcf ;
 
 vep \
 --dir $vep_path \
@@ -132,7 +132,7 @@ rule vep_germline:
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
-    get_threads(cluster_config, 'vep')
+    get_threads(cluster_config, 'vep_germline')
   message:
     "Running vep annotation on {params.sample}"
   shell:

@@ -25,6 +25,14 @@ Removed
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
 
+[8.2.7]
+-------
+
+Fixes:
+^^^^^^
+* Fixes fastqc timeout issues for wgs cases #861
+* Fix cluster configuration for vep and vcfanno #857
+
 [8.2.6]
 -------
 
