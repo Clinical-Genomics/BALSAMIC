@@ -35,7 +35,7 @@ vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf={params.tmpvcf};
 export PERL5LIB=;
 
-GOGC=10000 vcfanno -p {threads} --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
+GOGC=500 vcfanno -p {threads} --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
 | bcftools reheader --threads {threads} -s {input.header} \
 | bcftools --threads {threads} view -O z -o $tmpvcf ;
 
