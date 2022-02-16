@@ -37,7 +37,7 @@ export PERL5LIB=;
 
 GOGC=500 vcfanno -p {threads} --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
 | bcftools reheader --threads {threads} -s {input.header} \
-| bcftools  view --threads {threads} -O z -o $tmpvcf ;
+| bcftools view --threads {threads} -O z -o $tmpvcf ;
 
 vep \
 --dir $vep_path \
