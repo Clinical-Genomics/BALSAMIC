@@ -3,12 +3,11 @@
 
 Added:
 ^^^^^^
-
+* Added the readthedocs page for BALSAMIC variant-calling filters #867
 
 
 [8.2.7]
 -------
-* Added the readthedocs page for BALSAMIC variant-calling filters #867 
 
 Fixes:
 ^^^^^^
