@@ -136,7 +136,7 @@ DELIVERY_RULES = [
     "mergeBam_normal",
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
-	"cnvkit_paired",
+    "cnvkit_paired",
     "cnvkit_single",
     "ascat_tumor_normal_merge_output",
 ]
