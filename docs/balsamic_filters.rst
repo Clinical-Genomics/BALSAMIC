@@ -2,7 +2,7 @@
 BALSAMIC Variant Calling Algorithms
 ***********************************
 
-In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis
+In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis,
 for eg: `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)`. Various filters are applied at different levels to report high-confidence variant calls.
 `Pre-call filtering` is where the variant-calling tool decides not to emit a variant line to the VCF file.
 `Post-call filtering` is where a variant is emitted along with ancillary metrics, such as quality and depth, which are then used for further filtering.
