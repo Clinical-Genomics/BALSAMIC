@@ -13,13 +13,13 @@ For example:
 ..  figure:: images/vcf_filters.png
     :width: 500px
 
-    Pre-call filters applied by the `Vardict` variant-calleer is listed out in the VCF header
+    Pre-call filters applied by the `Vardict` variant-caller is listed out in the VCF header
 
 
 In the VCF file, `FILTER` status is `PASS` if this position has passed all filters, i.e., a call is made at this position. Otherwise,
 if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g., `p8;pSTD` might
 indicate that at this site, the mean position in reads less than 8 and position in reads has a standard deviation of 0.
-In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.$case_id.vardict.all.vcf.gz`)
+In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)
 
 ..  figure:: images/filter_status.png
     :width: 500px
@@ -30,7 +30,7 @@ In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.$case_id
 
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
-In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.$case_id.vardict.all.filtered.pass.vcf.gz`)
+In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)
 
 **Targeted Genome Analysis**
 #############################
