@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.9.2-alpine
+FROM continuumio/miniconda3:4.10.3-alpine
 
 LABEL base_image="continuumio/miniconda3:4.9.2-alpine"
 LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
