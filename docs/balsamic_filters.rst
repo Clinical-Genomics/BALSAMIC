@@ -21,7 +21,7 @@ if the site has not passed all filters, a semicolon-separated list of codes for 
 indicate that at this site, the mean position in reads less than 8 and position in reads has a standard deviation of 0.
 In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.$case_id.vardict.all.vcf.gz`)
 
-..  figure:: images/filter_status1.png
+..  figure:: images/filter_status.png
     :width: 500px
 
     Vardict Variant calls with different 'FILTER' status underlined in white line (`NM4.5`, `PASS`, `p8;pSTD`)
