@@ -3,21 +3,30 @@ BALSAMIC Variant Calling Algorithms
 ***********************************
 
 In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis,
-for eg: `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)`. Various filters are applied at different levels to report high-confidence variant calls.
-`Pre-call filtering` is where the variant-calling tool decides not to emit a variant line to the VCF file.
-`Post-call filtering` is where a variant is emitted along with ancillary metrics, such as quality and depth, which are then used for further filtering.
+for eg: `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)`. Various filters (Pre-call filtering and Post-call filtering) are applied at different levels to report high-confidence variant calls.
 
+* **Pre-call filtering** is where the variant-calling tool decides not to emit a variant line to the VCF file, if the default filters did not pass the criteria. The set of default filters differs between the various variant-calling algorithms.
 
-More information about the pre-call filters used by the variant callers is detailed in the VCF header.
+To know more about the pre-call filters used by the variant callers, please have a look at the VCF header of the particular variant-calling results.
+For example:
 
-.. figure:: images/vcf_filters.png
+..  figure:: images/vcf_filters.png
+    :width: 500px
+
+    Pre-call filters applied by the `Vardict` variant-calleer is listed out in the VCF header
+
 
 In the VCF file, `FILTER` status is `PASS` if this position has passed all filters, i.e., a call is made at this position. Otherwise,
 if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g., `p8;pSTD` might
 indicate that at this site, the mean position in reads less than 8 and position in reads has a standard deviation of 0.
 In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.$case_id.vardict.all.vcf.gz`)
 
-.. figure:: images/filter_status.png
+..  figure:: images/filter_status1.png
+    :width: 500px
+
+    Vardict Variant calls with different 'FILTER' status underlined in white line (`NM4.5`, `PASS`, `p8;pSTD`)
+
+* **Post-call filtering** is where a variant is emitted along with ancillary metrics, such as quality and depth, which are then used for further filtering.
 
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
@@ -38,7 +47,7 @@ The results of `Vardict` variant calling are further post-filtered based on seve
 These high-confidence variant calls are the final list of variants uploaded to Scout or available in the Caesar VCF file.
 
 **Vardict_filtering**
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 Following are the set of criterias applied for filtering vardict results. Applies for both tumor-normal and tumor-only samples
 
 *Mean Mapping Quality (MQ)*: Refers to the root mean square (RMS) mapping quality of all the reads spanning the given variant site.
@@ -71,20 +80,21 @@ Following are the set of criterias applied for filtering vardict results. Applie
 ::
 
     GNOMADAF_popmax <= 0.005  (or) GNOMADAF_popmax == "."
+
 *Additionally, for tumor-normal cases; the variant is excluded if it marked as 'germline' in the `STATUS` column of vcf file.*
 
 **Whole Genome Sequencing (WGS)**
 **********************************
 
 **Sentieon's TNscope**
-======================
+=======================
 
 BALSAMIC utilizes `TNscope` algorithm for the variant calling of somatic SNV/INDELS in WGS samples.
 The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algorithm performs the somatic variant calling on the tumor-normal or the tumor-only samples, using a Haplotyper algorithm.
 The mathematical model of `TNscope` is based on `Mutect` with improved accuracy and performance.
 
 **TNscope filtering (Tumor_normal)**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
 
@@ -112,7 +122,7 @@ The mathematical model of `TNscope` is based on `Mutect` with improved accuracy 
     GNOMADAF_popmax <= 0.001 (or) GNOMADAF_popmax == "."
 
 **TNscope filtering (tumor_only)**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
 
@@ -164,7 +174,7 @@ The mathematical model of `TNscope` is based on `Mutect` with improved accuracy 
 **************************************************
 
 **Sentieon's TNscope**
-=====================
+=======================
 `UMI workflow <https://balsamic.readthedocs.io/en/latest/FAQs.html>`_ performs the variant calling of SNVs/INDELS using the `TNscope` algorithm from UMI consensus-called reads.
 The following filter applies for both tumor-normal and tumor-only samples.
 
