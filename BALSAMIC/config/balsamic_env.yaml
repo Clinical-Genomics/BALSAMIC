@@ -30,4 +30,6 @@ vcf_merge:
 delly:
   - delly
 ascatNgs:
-  -ascat
+  - ascat
+vcf2cytosure:
+  - vcf2cytosure

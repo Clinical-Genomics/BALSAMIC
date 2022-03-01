@@ -13,5 +13,5 @@ RUN apk add --no-cache bash gcc git python3
 
 RUN cd /opt \
     && git clone https://github.com/NBISweden/vcf2cytosure.git \
-    && cd vcf2cytosure/ \
-    && pip install --no-cache-dir .
+    && cd /opt/vcf2cytosure \
+    && pip install -e .
