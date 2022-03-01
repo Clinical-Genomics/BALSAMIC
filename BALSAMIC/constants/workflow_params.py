@@ -86,9 +86,9 @@ VCF_DICT = {
         "workflow_solution": ["BALSAMIC"],
     },
     "svdb": {
-        "mutation":"somatic",
+        "mutation": "somatic",
         "type": "SV",
-        "analysis_type": ["paired","single"],
+        "analysis_type": ["paired", "single"],
         "sequencing_type": ["wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
