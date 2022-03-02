@@ -8,7 +8,7 @@ rule sentieon_consensuscall_umi:
     input:
         sam_consensus = umi_dir + "{sample}_align_umi.bam"
     output:
-        fastq_consensus = umi_dir + "{sample}_consensuscall_umi.fastq.gz"
+        fastq_consensus = temp(umi_dir + "{sample}_consensuscall_umi.fastq.gz")
     benchmark:
         Path(benchmark_dir, "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
     params:
@@ -94,7 +94,7 @@ rule sentieon_consensusfilter_umi:
     input:
         umi_dir + "{case_name}_consensuscalled_umi.bam"
     output:
-        umi_dir + "{case_name}_consensusfiltered_umi.bam"
+        temp(umi_dir + "{case_name}_consensusfiltered_umi.bam")
     benchmark:
         Path(benchmark_dir, "sentieon_consensusfilter_umi_{case_name}.tsv").as_posix()
     singularity:

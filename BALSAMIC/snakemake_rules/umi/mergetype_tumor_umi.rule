@@ -8,7 +8,7 @@ rule mergeBam_tumor_umiconsensus:
         fasta = config["reference"]["reference_genome"],
         bam = expand(umi_dir + "{mysample}_consensusfiltered_umi.bam", mysample = tumor_sample)
     output:
-        bam = temp(umi_dir + "tumor_umi_consensusfiltered.merged.bam"),
+        bam = umi_dir + "tumor_umi_consensusfiltered.merged.bam",
         cram = umi_dir + "tumor_umi_consensusfiltered.merged.cram"
     benchmark:
         Path(benchmark_dir,'mergeBam_tumor_umiconsensus_' + "{mysample}.tsv".format(mysample=tumor_sample)).as_posix()
