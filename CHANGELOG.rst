@@ -8,7 +8,7 @@ Added:
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
 * QC default validation conditions (for not defined capture kits) #855
-
+* SVDB to the varcall_py36 container
 Changed:
 ^^^^^^^^
 

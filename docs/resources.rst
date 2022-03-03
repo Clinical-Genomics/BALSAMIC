@@ -143,7 +143,7 @@ Methods and tools
 #. **Delly2**\ : An integrated structural variant prediction method that can discover, genotype and visualize deletions, tandem duplications, inversions and translocations https://github.com/dellytools/delly
 #. **PLINK**\ : PLINK: Whole genome data analysis toolset https://www.cog-genomics.org/plink2
 #. **freebayes**\ : a haplotype-based variant detector. https://github.com/ekg/freebayes
-#. **ASCAT**\ : Allele-Specific Copy Number Analysis of Tumors, tumor purity and ploidy https://github.com/Crick-CancerGenomics/ascat 
+#. **AscatNGS**\ : Allele-Specific Copy Number Analysis of Tumors, tumor purity and ploidy https://github.com/cancerit/ascatNgs
 #. **MutationalPatterns**\ : R package for extracting and visualizing mutational patterns in base substitution catalogues https://github.com/UMCUGenetics/MutationalPatterns
 #. **desconstructSigs**\ : identification of mutational signatures within a single tumor sample https://github.com/raerose01/deconstructSigs
 #. **treeOmics**\ : Decrypting somatic mutation patterns to reveal the evolution of cancer
@@ -190,3 +190,4 @@ Methods and tools
 #. **msisensor**\ : microsatellite instability detection using paired tumor-normal https://github.com/ding-lab/msisensor
 #. **MOSAIC**\ : MicrOSAtellite Instability Classifier https://github.com/ronaldhause/mosaic
 #. **MANTIS**\ : Microsatellite Analysis for Normal-Tumor InStability https://github.com/OSU-SRLab/MANTIS
+#. **SBDB**\ : A toolkit for constricting and querying structural variant databases https://github.com/J35P312/SVDB
