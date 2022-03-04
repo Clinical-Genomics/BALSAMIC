@@ -7,11 +7,14 @@ LABEL about.license="MIT License (MIT)"
 LABEL about.maintainer="Ashwini Jeggari ashwini dot jeggari at scilifelab dot se"
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-ENV PATH="/opt/vcf2cytosure/bin:${PATH}"
+ARG CONTAINER_NAME
+ENV PATH="/opt/${CONTAINER_NAME}/bin:${PATH}"
+ENV PYTHONPATH="/opt/${CONTAINER_NAME}"
+
 
 RUN apk add --no-cache bash gcc git python3
 
 RUN cd /opt \
     && git clone https://github.com/NBISweden/vcf2cytosure.git \
-    && cd /opt/vcf2cytosure \
-    && pip install -e .
+    && cd /opt/${CONTAINER_NAME}/  \
+    && pip install --no-cache-dir .
