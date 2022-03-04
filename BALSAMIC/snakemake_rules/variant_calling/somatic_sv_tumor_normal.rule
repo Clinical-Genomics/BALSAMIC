@@ -206,3 +206,30 @@ rule ascat_tumor_normal_merge_output:
         """
 python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
         """
+
+rule svdb_merge_tumor_normal:
+    input:
+        manta_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
+        delly_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+    output:
+        svdb_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
+    benchmark:
+        Path(benchmark_dir, 'svdb_merge_tumor_normal_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+    params:
+        tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal"),
+        case_name = config["analysis"]["case_id"],
+        var_caller = "svdb"
+    threads:
+        get_threads(cluster_config, "svdb_merge_tumor_normal")
+    message:
+        "Merging Manta and Delly results for PASS variants using svdb for sample '{params.case_name}' "
+    shell:
+        """
+svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 --vcf {input.manta_vcf}:manta {input.delly_vcf}:delly --priority manta,delly | bgzip -l 9 -c  > {output.svdb_vcf}
+
+echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
+        """
