@@ -1,6 +1,6 @@
 appdirs==1.4.4
 configargparse==1.5.3
-docutils>=0.14
+docutils>=0.14,<0.18
 recommonmark==0.7.1
 sphinx==4.2.0
 sphinx-argparse==0.3.1
