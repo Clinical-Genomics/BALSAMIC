@@ -1,3 +1,10 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+* Project requirements (setup.py) to build the docs
+
 [8.2.8]
 -------
 
