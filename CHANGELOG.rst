@@ -7,7 +7,7 @@ Added:
 * Generate cram from umi-consensus called bam files #865
 
 Changed:
-^^^^^^
+^^^^^^^^
 * Updated the bioinfo tools version numbers in BALSAMIC readthedocs #867
 
 [8.2.7]
