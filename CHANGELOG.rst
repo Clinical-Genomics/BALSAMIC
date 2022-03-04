@@ -1,10 +1,14 @@
-[X.X.X]
+[8.2.8]
 -------
 
 Added:
 ^^^^^^
 * Added the readthedocs page for BALSAMIC variant-calling filters #867
+* Generate cram from umi-consensus called bam files #865
 
+Changed:
+^^^^^^
+* Updated the bioinfo tools version numbers in BALSAMIC readthedocs #867
 
 [8.2.7]
 -------
