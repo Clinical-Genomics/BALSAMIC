@@ -1,3 +1,13 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* Generate cram from umi-consensus called bam files #865
+
+
+
 [8.2.7]
 -------
 
