@@ -5,6 +5,10 @@ Added:
 ^^^^^^
 * Project requirements (setup.py) to build the docs
 
+Changed:
+^^^^^^^^
+* Sphinx version fixed to <18.0
+
 [8.2.8]
 -------
 
