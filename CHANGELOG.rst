@@ -4,7 +4,7 @@
 Added:
 ^^^^^^
 * Added the readthedocs page for BALSAMIC variant-calling filters #867
-* Project requirements (setup.py) to build the docs
+* Project requirements (setup.py) to build the docs #874 
 * Generate cram from umi-consensus called bam files #865
 
 Changed:
