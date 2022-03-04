@@ -19,3 +19,5 @@ python:
     - requirements: requirements-dev.txt
     - method: pip
       path: .
+    - method: setuptools
+      path: .

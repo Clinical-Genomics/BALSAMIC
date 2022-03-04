@@ -4,11 +4,14 @@
 Added:
 ^^^^^^
 * Added the readthedocs page for BALSAMIC variant-calling filters #867
+* Project requirements (setup.py) to build the docs #874 
 * Generate cram from umi-consensus called bam files #865
 
 Changed:
 ^^^^^^^^
 * Updated the bioinfo tools version numbers in BALSAMIC readthedocs #867
+* Sphinx version fixed to <0.18 #874
+* Sphinx GitHub action triggers only on master branch PRs
 
 [8.2.7]
 -------
