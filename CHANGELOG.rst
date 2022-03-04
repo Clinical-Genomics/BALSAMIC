@@ -10,7 +10,7 @@ Added:
 Changed:
 ^^^^^^^^
 * Updated the bioinfo tools version numbers in BALSAMIC readthedocs #867
-* Sphinx version fixed to <0.18
+* Sphinx version fixed to <0.18 #874
 * Sphinx GitHub action triggers only on master branch PRs
 
 [8.2.7]
