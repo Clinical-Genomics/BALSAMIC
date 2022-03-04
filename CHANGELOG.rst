@@ -1,12 +1,14 @@
-[X.X.X]
+[8.2.8]
 -------
 
 Added:
 ^^^^^^
-
+* Added the readthedocs page for BALSAMIC variant-calling filters #867
 * Generate cram from umi-consensus called bam files #865
 
-
+Changed:
+^^^^^^^^
+* Updated the bioinfo tools version numbers in BALSAMIC readthedocs #867
 
 [8.2.7]
 -------
@@ -328,7 +330,7 @@ Removed:
 * Removed redundant genome version from ``reference.json``
 
 [7.1.10]
--------
+--------
 
 Fixed:
 ^^^^^^
@@ -419,7 +421,7 @@ Changed:
 -------
 
 Fixed:
-^^^^^
+^^^^^^
 
 * ``assets`` path is now added to bind path
 
@@ -427,7 +429,7 @@ Fixed:
 -------
 
 Fixed:
-^^^^^
+^^^^^^
 
 * umi_workflow config json is set as true for panel and wgs as false.
 * Rename umiconsensus bam file headers from {samplenames} to TUMOR/NORMAL. 
@@ -438,7 +440,7 @@ Fixed:
 -------
 
 Fixed:
-^^^^^
+^^^^^^
 
 * Moved all requirements to setup.py, and added all package_data there. Clean up unused files.
 
