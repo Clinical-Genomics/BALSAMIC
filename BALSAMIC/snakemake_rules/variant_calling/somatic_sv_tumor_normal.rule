@@ -229,7 +229,10 @@ rule svdb_merge_tumor_normal:
         "Merging Manta and Delly results for PASS variants using svdb for sample '{params.case_name}' "
     shell:
         """
-svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 --vcf {input.manta_vcf}:manta {input.delly_vcf}:delly --priority manta,delly | bgzip -l 9 -c  > {output.svdb_vcf}
+svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 \
+--vcf {input.manta_vcf}:manta {input.delly_vcf}:delly \
+--priority manta,delly | \
+bgzip -l 9 -c  > {output.svdb_vcf}
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
         """
