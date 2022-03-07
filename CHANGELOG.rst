@@ -13,6 +13,10 @@ Changed:
 * Sphinx version fixed to <0.18 #874
 * Sphinx GitHub action triggers only on master branch PRs
 
+Fixes:
+^^^^^^
+* numpy mock import for READTHEDOCS environment #874
+
 [8.2.7]
 -------
 
