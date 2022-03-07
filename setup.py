@@ -9,7 +9,7 @@ with open(os.path.join(here, "BALSAMIC", "__version__.py")) as f:
     exec(f.read(), about)
 
 # Requirements
-install_requires = [
+requirements = [
     "click>=7.1.2",
     "colorclass>=2.2.0",
     "coloredlogs>=14.0",
@@ -35,7 +35,7 @@ install_requires = [
 
 # The C libraries required to build numpy are not available on RTD
 if not os.getenv("READTHEDOCS"):
-    install_requires.append(
+    requirements.append(
         "numpy>=1.19.2",
     )
 
@@ -45,7 +45,7 @@ setup(
     url="https://github.com/Clinical-Genomics/BALSAMIC",
     author="Hassan Foroughi Asl",
     author_email="hassan.foroughi@scilifelab.se",
-    install_requires=install_requires,
+    install_requires=requirements,
     packages=find_packages(),
     package_data={
         "": [
