@@ -12,6 +12,7 @@ Changed:
 * Updated the bioinfo tools version numbers in BALSAMIC readthedocs #867
 * Sphinx version fixed to <0.18 #874
 * Sphinx GitHub action triggers only on master branch PRs
+* VAF filter for reporting somatic variants (Vardict) is minimised to 0.7% from 1% #876
 
 Fixes:
 ^^^^^^

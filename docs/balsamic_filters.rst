@@ -19,7 +19,9 @@ For example:
 In the VCF file, `FILTER` status is `PASS` if this position has passed all filters, i.e., a call is made at this position. Otherwise,
 if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g., `p8;pSTD` might
 indicate that at this site, the mean position in reads is less than 8 and position in reads has a standard deviation of 0.
-In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)
+
+.. important::
+    In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)
 
 ..  figure:: images/filter_status.png
     :width: 500px
@@ -30,7 +32,9 @@ In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID
 
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
-In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)
+.. important::
+
+    In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)
 
 **Targeted Genome Analysis**
 #############################
@@ -72,8 +76,12 @@ Following are the set of criterias applied for filtering vardict results. Applie
 
 ::
 
-    Minimum AF >= 0.01
+    Minimum AF >= 0.007
     Maximum AF < 1
+
+.. attention::
+
+    BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
@@ -81,7 +89,9 @@ Following are the set of criterias applied for filtering vardict results. Applie
 
     GNOMADAF_popmax <= 0.005  (or) GNOMADAF_popmax == "."
 
-*Additionally, for tumor-normal cases; the variant is excluded if it marked as 'germline' in the `STATUS` column of vcf file.*
+.. important::
+
+    Additionally, for tumor-normal cases; the variant is excluded if it marked as 'germline' in the `STATUS` column of vcf file.
 
 **Whole Genome Sequencing (WGS)**
 **********************************
