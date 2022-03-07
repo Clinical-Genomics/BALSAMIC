@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "bcftools" "vcfanno" "genmod" "vep" "vep_install" )
+valid_commands=( "pip" "vcf2cytosure" )
 
 for valid_command in "${valid_commands[@]}"
 do

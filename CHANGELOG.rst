@@ -8,11 +8,14 @@ Added:
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
 * QC default validation conditions (for not defined capture kits) #855
+* Docker container for vcf2cytosure #858
 * SVDB to the varcall_py36 container
+
 Changed:
 ^^^^^^^^
 
 * Merge QC metric extraction workflows #833
+* Changed the base-image for balsamic container to 4.10.3-alpine #869
 
 Fixed:
 ^^^^^^
