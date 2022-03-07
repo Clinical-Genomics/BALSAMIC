@@ -88,7 +88,6 @@ rule bcftools_filter_svdb:
   params:
     case_name = "{case_name}",
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    var_caller = "svdb"
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb")
   message:
