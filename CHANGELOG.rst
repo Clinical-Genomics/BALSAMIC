@@ -14,6 +14,10 @@ Changed:
 * Sphinx GitHub action triggers only on master branch PRs
 * VAF filter for reporting somatic variants (Vardict) is minimised to 0.7% from 1% #876
 
+Fixes:
+^^^^^^
+* numpy mock import for READTHEDOCS environment #874
+
 [8.2.7]
 -------
 
