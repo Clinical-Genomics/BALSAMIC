@@ -222,7 +222,6 @@ rule svdb_merge_tumor_normal:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
-        var_caller = "svdb"
     threads:
         get_threads(cluster_config, "svdb_merge_tumor_normal")
     message:
