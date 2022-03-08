@@ -51,3 +51,26 @@ rule bcftools_filter_delly:
 bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass} -O z {input.vcf};
 tabix -p vcf -f {output.vcf_sv_pass};
     """
+
+rule bcftools_filter_svdb:
+  input:
+    vcf = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
+  output:
+    vcf_sv_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.vcf.gz",
+  benchmark:
+    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.vep.tsv"
+  singularity:
+    Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    case_name = "{case_name}",
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+  threads:
+    get_threads(cluster_config, "bcftools_filter_svdb")
+  message:
+    "Filtering svdb merged Manta and Delly results for PASS variants using bcftools for sample '{params.case_name}' "
+  shell:
+    """
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass_svdb} -O z {input.vcf};
+
+tabix -p vcf -f {output.vcf_sv_pass_svdb};
+    """

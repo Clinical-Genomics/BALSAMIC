@@ -187,6 +187,7 @@ class VCFModel(BaseModel):
     TNscope_umi: VarcallerAttribute
     delly: VarcallerAttribute
     ascat: VarcallerAttribute
+    svdb: VarcallerAttribute
 
 
 class AnalysisModel(BaseModel):

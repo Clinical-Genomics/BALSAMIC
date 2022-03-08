@@ -73,6 +73,10 @@
         "ascat": {
             "mutation": "somatic",
             "type": "SV"
+        },
+        "svdb": {
+            "mutation": "somatic",
+            "type": "SV"
         }
     }
 }
