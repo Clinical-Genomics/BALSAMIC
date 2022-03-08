@@ -10,12 +10,13 @@ Added:
 * QC default validation conditions (for not defined capture kits) #855
 * SVDB to the varcall_py36 container #871
 * SVDB to WGS workflow #871
-
+* Docker container for vcf2cytosure #858
 
 Changed:
 ^^^^^^^^
 
 * Merge QC metric extraction workflows #833
+* Changed the base-image for balsamic container to 4.10.3-alpine #869
 
 Fixed:
 ^^^^^^

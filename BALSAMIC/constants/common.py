@@ -79,6 +79,7 @@ BIOINFO_TOOL_ENV = {
     "delly": "delly",
     "ascatNgs": "ascatNgs",
     "sentieon": "sentieon",
+    "vcf2cytosure": "vcf2cytosure",
 }
 
 VALID_OPS = {
