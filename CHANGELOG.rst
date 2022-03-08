@@ -10,6 +10,7 @@ Added:
 * QC default validation conditions (for not defined capture kits) #855
 * Docker container for vcf2cytosure #858
 * SVDB to the varcall_py36 container
+* Snakemake rule for creating `.cgh` files from CNV outputs 
 
 Changed:
 ^^^^^^^^
