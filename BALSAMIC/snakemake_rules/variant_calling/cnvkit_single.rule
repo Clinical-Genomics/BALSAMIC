@@ -82,6 +82,7 @@ if [[ ! -f "{params.pon}" ]]; then
 cnvkit.py reference --output {params.cnv_dir}/FlatReference.cnn --fasta {input.fasta} --targets {params.cnv_dir}/targets.bed --antitargets {params.cnv_dir}/antitarget_bed;
 cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn {params.cnv_dir}/tumor.antitargetcoverage.cnn {params.cnv_dir}/FlatReference.cnn  --output {output.cnr};
 else
+echo "PON reference exists- Using it for coverage correction"
 cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn {params.cnv_dir}/tumor.antitargetcoverage.cnn {params.pon} --output {output.cnr};
 fi
 
