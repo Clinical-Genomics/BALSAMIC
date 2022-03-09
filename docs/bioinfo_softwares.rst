@@ -2,7 +2,7 @@
 Workflow
 ========
 
-BALSAMIC ( **version** = 8.2.7 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 8.2.8 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 
