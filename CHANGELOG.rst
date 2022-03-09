@@ -8,9 +8,11 @@ Added:
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
 * QC default validation conditions (for not defined capture kits) #855
-* SVDB to the varcall_py36 container #871
-* SVDB to WGS workflow #871
+* SVdb to the varcall_py36 container #871
+* SVdb to WGS workflow #871
 * Docker container for vcf2cytosure #858
+* SVdb to TGA workflow #871 
+
 
 Changed:
 ^^^^^^^^
