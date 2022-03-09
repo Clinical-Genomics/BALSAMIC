@@ -8,8 +8,9 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/variant_calling/mergetype_tumor.rule",
         ],
         "align": [],
-        "varcall": ["snakemake_rules/variant_calling/germline_sv.rule",
-                    "snakemake_rules/variant_calling/convert_vcf2cgh.rule"
+        "varcall": [
+            "snakemake_rules/variant_calling/germline_sv.rule",
+            "snakemake_rules/variant_calling/convert_vcf2cgh.rule",
         ],
         "annotate": ["snakemake_rules/annotation/vep.rule"],
     },
