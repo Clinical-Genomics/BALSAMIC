@@ -137,6 +137,8 @@ DELIVERY_RULES = [
     "genmod_score_vardict",
     "mergeBam_tumor",
     "mergeBam_normal",
+    "mergeBam_tumor_umiconsensus",
+    "mergeBam_normal_umiconsensus",
     "cnvkit_paired",
     "cnvkit_single",
     "convert_vcf2cgh",

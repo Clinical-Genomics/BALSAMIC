@@ -16,11 +16,7 @@ Frequently Asked Questions (FAQs)
 
 .. figure:: images/UMI.png
 
-    Figure1: Design of UMI adapters in the library preparation. Ref_ 
-
-.. _Ref: https://plone.bcgsc.ca/services/solseq/duplex-umi-documents/idt_analysisguideline_varcall-umis-dupseqadapters/
-
-__ Ref_
+    Figure1: Design of UMI adapters in the library preparation. `Ref <https://plone.bcgsc.ca/services/solseq/duplex-umi-documents/idt_analysisguideline_varcall-umis-dupseqadapters/>`_
 
 
 **How is the UMIworkflow implemented**
@@ -57,10 +53,8 @@ The `umi consensus` tool will merge overlapping read pairs when it can, but it i
 Mainly to reduce the calling of false-positive variants. Consensus filtering is based on the setting of minimum raw reads (MinR) supporting each UMI group.  By default, `MinR` is set as 3,1,1, meaning that the minimum number of raw reads in both strands should be greater than 1 and the sum of both strands is greater than 3.   The default `3,1,1` is a good starting point at lower coverages. This setting can be further adjusted accordingly at higher coverages or if finding false-positive calls due to consensus reads with little read support.
 
 **How is the performance of other variant callers for analysing UMI datasets**
-UMI workflow is validated with two datasets (SeraCare and HapMap). The Vardict failed to call the true reference variants while the TNscope performed better. A more detailed analysis is summarized here_. 
+UMI workflow is validated with two datasets (SeraCare and HapMap). The Vardict failed to call the true reference variants while the TNscope performed better. A more detailed analysis is summarized `here <https://drive.google.com/file/d/1Y1kNPE5u9VvykjmNhG4RydVMUyezbqh5/view?usp=sharing>`_
 
-.. _here: https://drive.google.com/file/d/1Y1kNPE5u9VvykjmNhG4RydVMUyezbqh5/view?usp=sharing
-__ here_
 We are still investigating other UMI-aware variant callers and maybe in the future, if something works better, additional varcallers will be added to the UMIworkflow.
 
 **Git Related Questions**
@@ -107,10 +101,8 @@ Make a pull request to master at this point. After pull request is approved and 
 
 **How to generate reference files for ascatNGS**
 
-Detailed information is available from ascatNGS_ documentation
+Detailed information is available from `ascatNGS <https://github.com/cancerit/ascatNgs>`_ documentation
 
-.. _ascatNGS: https://github.com/cancerit/ascatNgs
-__ ascatNGS_
 Briefly, ascatNGS needs gender loci file if gender information for the input sample is not available. The second file is *SnpGcCorrections.tsv*, which is prepared from the 1000 genome SNP panel.
 
 1. **Gender loci file:**
@@ -126,19 +118,16 @@ GRCh37d5_Y.loci contains the following contents:
 
 2. **GC correction file:**
 
-First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is available from ascatNGS-reference-files_ (Human reference files from 1000 genomes VCFs)
+First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is available from `ascatNGS-reference-files <https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs>`_ (Human reference files from 1000 genomes VCFs)
 
-.. _ascatNGS-reference-files : https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs
-
-
-.. code:: console
+.. code-block::
 
     export TG_DATA=ftp://ftp.ensembl.org/pub/grch37/release-83/variation/vcf/homo_sapiens/1000GENOMES-phase_3.vcf.gz
 
 
 Followed by:
 
-.. code:: console
+.. code-block::
 
     curl -sSL $TG_DATA | zgrep -F 'E_Multiple_observations' | grep -F 'TSA=SNV' |\
     perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/);\
@@ -149,7 +138,7 @@ Followed by:
 
 --or--
 
-.. code:: console
+.. code-block::
 
     curl -sSL $TG_DATA | zgrep -F 'E_Multiple_observations' | grep -F 'TSA=SNV' |\
     perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/); $F[7]=~m/MAF=([^;]+)/;\
@@ -157,13 +146,9 @@ Followed by:
     printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];'\
     > SnpPositions_GRCh37_1000g.tsv
 
-Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv* file, more details see ascatNGS-convert-snppositions_
+Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv* file, more details see `ascatNGS-convert-snppositions <https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv>`_
 
-.. _ascatNGS-convert-snppositions: https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv
-
-
-
-.. code:: console
+.. code-block::
 
     ascatSnpPanelGcCorrections.pl genome.fa SnpPositions.tsv > SnpGcCorrections.tsv
 

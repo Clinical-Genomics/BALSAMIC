@@ -1,5 +1,5 @@
 [X.X.X]
--------
+=======
 
 Added:
 ^^^^^^
@@ -8,11 +8,12 @@ Added:
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
 * QC default validation conditions (for not defined capture kits) #855
-* SVDB to the varcall_py36 container #871
-* SVDB to WGS workflow #871
+* SVdb to the varcall_py36 container #871
+* SVdb to WGS workflow #871
 * Docker container for vcf2cytosure #858
 * SVDB to the varcall_py36 container
 * Snakemake rule for creating `.cgh` files from CNV outputs 
+* SVdb to TGA workflow #871 
 
 
 Changed:
@@ -31,6 +32,27 @@ Removed
 ^^^^^^^
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
+
+[8.2.8]
+--------
+
+Added:
+^^^^^^
+
+* Added the readthedocs page for BALSAMIC variant-calling filters #867
+* Project requirements (setup.py) to build the docs #874 
+* Generate cram from umi-consensus called bam files #865
+
+Changed:
+^^^^^^^^
+* Updated the bioinfo tools version numbers in BALSAMIC readthedocs #867
+* Sphinx version fixed to <0.18 #874
+* Sphinx GitHub action triggers only on master branch PRs
+* VAF filter for reporting somatic variants (Vardict) is minimised to 0.7% from 1% #876
+
+Fixes:
+^^^^^^
+* cyvcf2 mock import for READTHEDOCS environment #874
 
 [8.2.7]
 -------
@@ -348,7 +370,7 @@ Removed:
 * Removed redundant genome version from ``reference.json``
 
 [7.1.10]
--------
+--------
 
 Fixed:
 ^^^^^^
@@ -439,7 +461,7 @@ Changed:
 -------
 
 Fixed:
-^^^^^
+^^^^^^
 
 * ``assets`` path is now added to bind path
 
@@ -447,7 +469,7 @@ Fixed:
 -------
 
 Fixed:
-^^^^^
+^^^^^^
 
 * umi_workflow config json is set as true for panel and wgs as false.
 * Rename umiconsensus bam file headers from {samplenames} to TUMOR/NORMAL. 
@@ -458,7 +480,7 @@ Fixed:
 -------
 
 Fixed:
-^^^^^
+^^^^^^
 
 * Moved all requirements to setup.py, and added all package_data there. Clean up unused files.
 
