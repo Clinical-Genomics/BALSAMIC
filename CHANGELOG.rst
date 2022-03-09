@@ -16,7 +16,7 @@ Changed:
 
 Fixes:
 ^^^^^^
-* numpy mock import for READTHEDOCS environment #874
+* cyvcf2 mock import for READTHEDOCS environment #874
 
 [8.2.7]
 -------

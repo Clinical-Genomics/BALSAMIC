@@ -13,12 +13,12 @@ requirements = [
     "click>=7.1.2",
     "colorclass>=2.2.0",
     "coloredlogs>=14.0",
-    "cyvcf2<0.10.0",
     "graphviz==0.16",
     "gsutil==4.50",
     "jinja2>=2.11.2",
     "matplotlib>=3.3.0",
     "networkx>=2.4",
+    "numpy>=1.19.2",
     "pandas>1.1.0",
     "psutil>=5.7.0",
     "pydantic>=1.5.1",
@@ -35,9 +35,7 @@ requirements = [
 
 # The C libraries required to build numpy are not available on RTD
 if not os.getenv("READTHEDOCS"):
-    requirements.append(
-        "numpy>=1.19.2",
-    )
+    requirements.extend(["cyvcf2<0.10.0"])
 
 setup(
     name="BALSAMIC",
