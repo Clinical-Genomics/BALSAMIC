@@ -16,6 +16,7 @@
    :hidden:
    :maxdepth: 1
 
+   balsamic_filters
    bioinfo_softwares
 
 
