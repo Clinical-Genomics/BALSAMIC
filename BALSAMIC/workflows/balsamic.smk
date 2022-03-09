@@ -222,7 +222,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.append(expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
-    analysis_specific_results(expand(vcf_dir + "CNV.somatic.{case_name}.vcf2cytosure.cgh"), case_name=config["analysis"]["case_id"])
+    analysis_specific_results.append(expand(vcf_dir + "CNV.somatic.{case_name}.vcf2cytosure.cgh", case_name=config["analysis"]["case_id"]))
 
     analysis_specific_results.append(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config["samples"]))
 
@@ -322,7 +322,7 @@ if 'delivery' in config:
 
 rule all:
     input:
-        quality_control_results + analysis_specific_results,
+        quality_control_results + analysis_specific_results
     output:
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
