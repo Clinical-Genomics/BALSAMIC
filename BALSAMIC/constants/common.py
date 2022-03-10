@@ -52,7 +52,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "delly",
     "ascatNgs",
     "balsamic",
-    "vcf2cytosure"
+    "vcf2cytosure",
 }
 
 BIOINFO_TOOL_ENV = {
