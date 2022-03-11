@@ -2,22 +2,22 @@
 # coding: utf-8
 
 
-rule convert_vcf2cgh:
+rule vcf2cytosure_cnvkit:
     input:
         cnv_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz",
         cnv_cnr = cnv_dir + "tumor.merged" + ".cnr"
     output:
         cgh_file = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".vcf2cytosure.cgh"
     benchmark:
-        Path(benchmark_dir, 'convert_vcf2cgh.' + config["analysis"]["case_id"] + ".vcf2cytosure.tsv").as_posix()
+        Path(benchmark_dir, 'vcf2cytosure_cnvkit.' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
     threads:
-        get_threads(cluster_config, "convert_vcf2cgh")
+        get_threads(cluster_config, "vcf2cytosure_cnvkit")
     params:
         case_name = config["analysis"]["case_id"],
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
-    message: "Convert VCF file with SV/CNVs to the .CGH format using vcf2cytosure for sample {params.case_name}"
+    message: "Convert VCF file with CNVs to the .CGH format using vcf2cytosure for sample {params.case_name}"
     shell:
         """
 vcf2cytosure --vcf {input.cnv_vcf} --cn {input.cnv_cnr} --out {output.cgh_file} --bins 1
