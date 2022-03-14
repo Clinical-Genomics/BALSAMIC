@@ -209,8 +209,12 @@ python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sampl
 
 rule svdb_merge_tumor_normal:
     input:
-        manta_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
-        delly_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        vcf = expand(
+                vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
+                caller=somatic_caller_sv) +
+              expand(
+                vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
+                caller=somatic_caller_cnv)
     output:
         svdb_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
@@ -222,6 +226,8 @@ rule svdb_merge_tumor_normal:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
+        vcf= lambda wildcards, input:[input[index] + ":" + sv_callers[index] for index in range(0,len(input))],
+        svdb_priority= ",".join(sv_callers)
     threads:
         get_threads(cluster_config, "svdb_merge_tumor_normal")
     message:
@@ -229,9 +235,9 @@ rule svdb_merge_tumor_normal:
     shell:
         """
 svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 \
---vcf {input.manta_vcf}:manta {input.delly_vcf}:delly \
---priority manta,delly | \
-bgzip -l 9 -c  > {output.svdb_vcf}
+--vcf {params.vcf} \
+--priority {params.svdb_priority} | \
+bgzip -l 9 -c  > {output.svdb_vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
         """
