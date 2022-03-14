@@ -226,7 +226,7 @@ rule svdb_merge_tumor_normal:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
-        vcf = get_svdb_input(input, svdb_sv_callers_to_merge_prio),
+        vcf= lambda wildcards, input:[input[index] + ":" + svdb_sv_callers_to_merge_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_sv_callers_to_merge_prio)
     threads:
         get_threads(cluster_config, "svdb_merge_tumor_normal")

@@ -103,13 +103,6 @@ def get_variant_callers(
     return list(valid_variant_callers)
 
 
-def get_svdb_input(input_vcf, sv_callers):
-    input = input_vcf
-    return lambda wildcards, input: [
-        input[index] + ":" + sv_callers[index] for index in range(0, len(sv_callers))
-    ]
-
-
 def get_sequencing_type(config):
     """
     input: sample config file from BALSAMIC
