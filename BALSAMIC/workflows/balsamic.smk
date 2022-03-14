@@ -186,7 +186,7 @@ somatic_caller_cnv = get_variant_callers(config=config,
                                             sequencing_type=config["analysis"]["sequencing_type"],
                                             mutation_class="somatic")
 somatic_caller_sv.remove("svdb")
-sv_callers = somatic_caller_sv + somatic_caller_cnv
+svdb_sv_callers_to_merge_prio = somatic_caller_sv + somatic_caller_cnv
 
 # Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
