@@ -102,8 +102,12 @@ def get_variant_callers(
             valid_variant_callers.append(variant_caller_name)
     return list(valid_variant_callers)
 
+
 def get_svdb_input(input, callers):
-    return lambda wildcards, input:[input[index] + ":" + callers[index] for index in range(0,len(input))]
+    return lambda wildcards, input: [
+        input[index] + ":" + callers[index] for index in range(0, len(input))
+    ]
+
 
 def get_sequencing_type(config):
     """
