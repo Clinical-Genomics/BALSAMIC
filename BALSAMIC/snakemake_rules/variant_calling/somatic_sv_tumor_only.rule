@@ -122,8 +122,8 @@ rule svdb_merge_tumor_only:
     params:
         tumor = get_sample_type(config["samples"], "tumor"),
         case_name = config["analysis"]["case_id"],
-        vcf= lambda wildcards, input:[input[index] + ":" + svdb_sv_callers_to_merge_prio[index] for index in range(0,len(input))],
-        svdb_priority= ",".join(svdb_sv_callers_to_merge_prio)
+        vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
+        svdb_priority= ",".join(svdb_callers_prio)
     threads:
         get_threads(cluster_config, "svdb_merge_tumor_only")
     message:
