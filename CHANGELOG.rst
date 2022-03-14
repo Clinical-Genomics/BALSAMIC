@@ -11,7 +11,6 @@ Added:
 * SVdb to the varcall_py36 container #871
 * SVdb to WGS workflow #871
 * Docker container for vcf2cytosure #858
-* SVDB to the varcall_py36 container
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
 
