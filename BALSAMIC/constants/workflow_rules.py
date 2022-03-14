@@ -38,6 +38,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
+            "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
     },
     "paired_targeted": {
@@ -70,6 +71,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
     },
     "single_wgs": {
@@ -139,5 +141,6 @@ DELIVERY_RULES = [
     "mergeBam_normal_umiconsensus",
     "cnvkit_paired",
     "cnvkit_single",
+    "vcf2cytosure_convert",
     "ascat_tumor_normal_merge_output",
 ]
