@@ -103,9 +103,10 @@ def get_variant_callers(
     return list(valid_variant_callers)
 
 
-def get_svdb_input(input, callers):
+def get_svdb_input(input_vcf, sv_callers):
+    input = input_vcf
     return lambda wildcards, input: [
-        input[index] + ":" + callers[index] for index in range(0, len(input))
+        input[index] + ":" + sv_callers[index] for index in range(0, len(sv_callers))
     ]
 
 
