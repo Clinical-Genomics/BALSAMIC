@@ -137,15 +137,7 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "--mail-type",
     type=click.Choice(
-        [
-            "NONE",
-            "BEGIN",
-            "END",
-            "FAIL",
-            "REQUEUE",
-            "ALL",
-            "TIME_LIMIT",
-        ]
+        ["NONE", "BEGIN", "END", "FAIL", "REQUEUE", "ALL", "TIME_LIMIT",]
     ),
     help=(
         "cluster mail type to send out email. This will "

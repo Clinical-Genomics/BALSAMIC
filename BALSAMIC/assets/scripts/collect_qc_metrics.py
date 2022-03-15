@@ -12,18 +12,13 @@ from BALSAMIC.constants.quality_check_reporting import METRICS
 from BALSAMIC.utils.models import MetricModel
 
 
-@click.command(
-    short_help="Extract the manually specified QC metrics",
-)
+@click.command(short_help="Extract the manually specified QC metrics",)
 @click.argument("output_path", type=click.Path(exists=False), required=True)
 @click.argument("multiqc_data_path", type=click.Path(exists=True), required=True)
 @click.argument("sequencing_type", required=True)
 @click.argument("capture_kit", required=True)
 def collect_qc_metrics(
-    output_path: Path,
-    multiqc_data_path: Path,
-    sequencing_type: str,
-    capture_kit: str,
+    output_path: Path, multiqc_data_path: Path, sequencing_type: str, capture_kit: str,
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
 

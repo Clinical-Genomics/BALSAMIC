@@ -59,9 +59,7 @@ def status(context, sample_config, show_only_missing, print_files):
     if os.path.isfile(os.path.join(result_dir, "analysis_finish")):
         snakemake.snakemake(
             snakefile=snakefile,
-            config={
-                "benchmark_plots": "True",
-            },
+            config={"benchmark_plots": "True",},
             dryrun=True,
             configfiles=[sample_config],
             quiet=True,

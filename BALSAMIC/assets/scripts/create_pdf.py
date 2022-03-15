@@ -6,9 +6,7 @@ from fpdf import FPDF
 from PIL import Image
 
 
-@click.command(
-    short_help="Merge images and a txt file into a single PDF",
-)
+@click.command(short_help="Merge images and a txt file into a single PDF",)
 @click.argument("output", type=click.Path(exists=False), required=True)
 @click.argument("data", type=click.Path(exists=True), required=True)
 @click.argument("images", nargs=-1, type=click.Path(exists=True), required=True)

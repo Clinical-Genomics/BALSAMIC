@@ -193,10 +193,7 @@ def case_config(
         bioinfo_tools_version=get_bioinfo_tools_version(
             BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
         ),
-        panel={
-            "capture_kit": panel_bed,
-            "chrom": get_panel_chrom(panel_bed),
-        }
+        panel={"capture_kit": panel_bed, "chrom": get_panel_chrom(panel_bed),}
         if panel_bed
         else None,
         umiworkflow=umiworkflow if panel_bed else False,

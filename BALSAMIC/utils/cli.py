@@ -608,11 +608,7 @@ def generate_graph(config_collection_dict, config_path):
         )
 
     graph_title = "_".join(
-        [
-            "BALSAMIC",
-            balsamic_version,
-            config_collection_dict["analysis"]["case_id"],
-        ]
+        ["BALSAMIC", balsamic_version, config_collection_dict["analysis"]["case_id"],]
     )
     graph_dot = "".join(graph_dot).replace(
         "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'

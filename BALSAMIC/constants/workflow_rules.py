@@ -9,8 +9,10 @@ SNAKEMAKE_RULES = {
         ],
         "align": [],
         "varcall": ["snakemake_rules/variant_calling/germline_sv.rule"],
-        "annotate": ["snakemake_rules/annotation/vep.rule",
-        "snakemake_rules/annotation/varcaller_sv_filter.rule"],
+        "annotate": [
+            "snakemake_rules/annotation/vep.rule",
+            "snakemake_rules/annotation/varcaller_sv_filter.rule",
+        ],
     },
     "single_targeted": {
         "qc": [
