@@ -33,7 +33,6 @@ indicate that at this site, the mean position in reads is less than 8 and positi
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
 .. important::
-
     In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)
 
 **Targeted Genome Analysis**
@@ -80,7 +79,6 @@ Following are the set of criterias applied for filtering vardict results. Applie
     Maximum AF < 1
 
 .. attention::
-
     BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
@@ -90,7 +88,6 @@ Following are the set of criterias applied for filtering vardict results. Applie
     GNOMADAF_popmax <= 0.005  (or) GNOMADAF_popmax == "."
 
 .. important::
-
     Additionally, for tumor-normal cases; the variant is excluded if it marked as 'germline' in the `STATUS` column of vcf file.
 
 **Whole Genome Sequencing (WGS)**
@@ -186,6 +183,31 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 =======================
 `UMI workflow <https://balsamic.readthedocs.io/en/latest/FAQs.html>`_ performs the variant calling of SNVs/INDELS using the `TNscope` algorithm from UMI consensus-called reads.
 The following filter applies for both tumor-normal and tumor-only samples.
+
+**Pre-call Filters**
+
+*minreads*: Filtering of consensus called reads based on the minimum reads supporting each UMI tag group
+
+::
+
+    minreads = 3,1,1
+
+Which means that at least `3` UMI tag groups should be ideally considered from both DNA strands, where a minimum of atleast `1` UMI tag group should exist in each of the single-stranded consensus reads.
+
+*min_init_tumor_lod* : Log odds is the likelihood that the candidate mutation is real over the likelihood that the candidate mutation is a sequencing error before any read-based filters are applied.
+minimum log odds for the candidate selection. TNscope default: `4`
+
+::
+
+    min_init_tumor_lod = 0.5
+
+*min_tumor_lod* : minimum log odds in the final call of variants. TNscope default: `6.3`
+
+::
+
+    min_tumor_lod = 4.0
+
+**Post-call Filters**
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
