@@ -9,7 +9,8 @@ SNAKEMAKE_RULES = {
         ],
         "align": [],
         "varcall": ["snakemake_rules/variant_calling/germline_sv.rule"],
-        "annotate": ["snakemake_rules/annotation/vep.rule"],
+        "annotate": ["snakemake_rules/annotation/vep.rule",
+        "snakemake_rules/annotation/varcaller_sv_filter.rule"],
     },
     "single_targeted": {
         "qc": [
@@ -36,7 +37,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
-            "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
@@ -69,7 +69,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
-            "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
@@ -89,7 +88,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule",
-            "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_only.rule",
         ],
     },
     "paired_wgs": {
@@ -107,7 +105,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
-            "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_normal.rule",
         ],
     },
 }
