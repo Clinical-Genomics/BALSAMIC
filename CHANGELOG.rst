@@ -1,3 +1,11 @@
+[8.2.9]
+-------
+
+Added:
+^^^^^^
+* Added slurm qos tag `express` #885
+
+
 [8.2.8]
 -------
 
