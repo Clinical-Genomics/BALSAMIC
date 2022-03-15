@@ -9,6 +9,6 @@ dependencies:
   - bioconda::gatk=3.8
   - bioconda::vardict=2019.06.04=pl526_0
   - bioconda::vardict-java=1.7
-  - bioconda::svdb=2.5.0
+  - bioconda::svdb=2.5.1
   - conda-forge::libiconv
   - conda-forge::r-base=3.6.3

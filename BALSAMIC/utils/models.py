@@ -176,16 +176,16 @@ class VarcallerAttribute(BaseModel):
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
-    manta: VarcallerAttribute
-    cnvkit: VarcallerAttribute
     vardict: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnhaplotyper: VarcallerAttribute
-    manta_germline: VarcallerAttribute
     haplotypecaller: VarcallerAttribute
     TNscope_umi: VarcallerAttribute
+    manta_germline: VarcallerAttribute
+    manta: VarcallerAttribute
     delly: VarcallerAttribute
+    cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
     svdb: VarcallerAttribute
 

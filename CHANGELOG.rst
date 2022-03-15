@@ -13,7 +13,7 @@ Added:
 * Docker container for vcf2cytosure #858
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
-
+* SVdb merge SV and CNV #871
 
 Changed:
 ^^^^^^^^

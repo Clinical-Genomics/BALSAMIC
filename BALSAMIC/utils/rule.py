@@ -75,7 +75,7 @@ def get_variant_callers(
         WorkflowRunError if values are not valid
     """
 
-    valid_variant_callers = set()
+    valid_variant_callers = list()
     if mutation_type not in MUTATION_TYPE:
         raise WorkflowRunError(f"{mutation_type} is not a valid mutation type.")
 
@@ -99,7 +99,7 @@ def get_variant_callers(
             and workflow_solution in variant_caller_params.get("workflow_solution")
             and sequencing_type in variant_caller_params.get("sequencing_type")
         ):
-            valid_variant_callers.add(variant_caller_name)
+            valid_variant_callers.append(variant_caller_name)
     return list(valid_variant_callers)
 
 

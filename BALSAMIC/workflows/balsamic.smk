@@ -130,6 +130,8 @@ os.environ['TMPDIR'] = get_result_dir(config)
 # Extract variant callers for the workflow
 germline_caller = []
 somatic_caller = []
+somatic_caller_cnv = []
+somatic_caller_sv = []
 for m in MUTATION_TYPE:
     germline_caller_balsamic = get_variant_callers(config=config,
                                             analysis_type=config['analysis']['analysis_type'],
@@ -169,6 +171,22 @@ for m in MUTATION_TYPE:
                                              sequencing_type=config["analysis"]["sequencing_type"],
                                              mutation_class="somatic")
     somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
+
+somatic_caller_sv = get_variant_callers(config=config,
+                                            analysis_type=config['analysis']['analysis_type'],
+                                            workflow_solution="BALSAMIC",
+                                            mutation_type="SV",
+                                            sequencing_type=config["analysis"]["sequencing_type"],
+                                            mutation_class="somatic")
+
+somatic_caller_cnv = get_variant_callers(config=config,
+                                            analysis_type=config['analysis']['analysis_type'],
+                                            workflow_solution="BALSAMIC",
+                                            mutation_type="CNV",
+                                            sequencing_type=config["analysis"]["sequencing_type"],
+                                            mutation_class="somatic")
+somatic_caller_sv.remove("svdb")
+svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
 
 # Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
