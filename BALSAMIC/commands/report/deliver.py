@@ -203,7 +203,8 @@ def deliver(
     delivery_file_name = os.path.join(yaml_write_directory, case_name + ".hk")
 
     delivery_file_ready = os.path.join(
-        yaml_write_directory, case_name + "_delivery_ready.hk",
+        yaml_write_directory,
+        case_name + "_delivery_ready.hk",
     )
     with open(delivery_file_ready, "r") as fn:
         delivery_file_ready_dict = json.load(fn)

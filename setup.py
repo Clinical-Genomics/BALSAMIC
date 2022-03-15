@@ -62,5 +62,7 @@ setup(
     },
     include_package_data=True,
     zip_safe=False,
-    entry_points={"console_scripts": ["balsamic=BALSAMIC.commands.base:cli"],},
+    entry_points={
+        "console_scripts": ["balsamic=BALSAMIC.commands.base:cli"],
+    },
 )

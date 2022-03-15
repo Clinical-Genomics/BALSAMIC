@@ -118,7 +118,11 @@ def test_get_multiqc_metrics(multiqc_data_path, qc_extracted_metrics):
     capture_kit = "lymphoma_6.1_hg19_design.bed"
 
     # WHEN calling the function
-    metrics = get_multiqc_metrics(multiqc_data_path, seq_type, capture_kit,)
+    metrics = get_multiqc_metrics(
+        multiqc_data_path,
+        seq_type,
+        capture_kit,
+    )
 
     # THEN check if the metrics are correctly retrieved
     assert qc_extracted_metrics == metrics
@@ -132,7 +136,11 @@ def test_get_multiqc_metrics_filtering_umi(multiqc_data_path):
     capture_kit = None
 
     # WHEN calling the function
-    metrics = get_multiqc_metrics(multiqc_data_path, seq_type, capture_kit,)
+    metrics = get_multiqc_metrics(
+        multiqc_data_path,
+        seq_type,
+        capture_kit,
+    )
 
     # THEN check if the UMI samples are filtered out
     for metric in metrics:

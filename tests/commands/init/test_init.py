@@ -8,7 +8,8 @@ from BALSAMIC import __version__ as balsamic_version
 
 
 def test_init_reference_write_json(
-    invoke_cli, tmp_path,
+    invoke_cli,
+    tmp_path,
 ):
     # Given test_reference.json
     test_genome_version = "hg19"
@@ -183,7 +184,13 @@ def test_init_reference_graph_exception(invoke_cli, tmp_path):
     with mock.patch.object(graphviz, "Source") as mocked:
         mocked.return_value = None
         result = invoke_cli(
-            ["init", "-o", str(test_new_dir), "--cosmic-key", "secret_key",]
+            [
+                "init",
+                "-o",
+                str(test_new_dir),
+                "--cosmic-key",
+                "secret_key",
+            ]
         )
 
     assert result.exit_code == 1
