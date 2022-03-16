@@ -31,6 +31,7 @@ Removed
 ^^^^^^^
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
+* SV and CNV callers from annotation and filtering #871
 
 [8.2.8]
 --------

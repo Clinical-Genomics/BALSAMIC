@@ -9,7 +9,10 @@ SNAKEMAKE_RULES = {
         ],
         "align": [],
         "varcall": ["snakemake_rules/variant_calling/germline_sv.rule"],
-        "annotate": ["snakemake_rules/annotation/vep.rule"],
+        "annotate": [
+            "snakemake_rules/annotation/vep.rule",
+            "snakemake_rules/annotation/varcaller_sv_filter.rule",
+        ],
     },
     "single_targeted": {
         "qc": [
@@ -36,7 +39,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
-            "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
@@ -69,7 +71,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
-            "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
@@ -89,7 +90,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule",
-            "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_only.rule",
         ],
     },
     "paired_wgs": {
@@ -107,7 +107,6 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
-            "snakemake_rules/annotation/varcaller_sv_wgs_filter_tumor_normal.rule",
         ],
     },
 }
@@ -128,10 +127,7 @@ DELIVERY_RULES = [
     "bcftools_filter_tnscope_tumor_normal",
     "bcftools_filter_tnhaplotyper_tumor_only",
     "bcftools_filter_tnhaplotyper_tumor_normal",
-    "bcftools_filter_manta",
-    "bcftools_filter_delly",
-    "bcftools_filter_ascat",
-    "bcftools_filter_cnvkit",
+    "bcftools_filter_svdb",
     "bcftools_intersect_tumor_only",
     "bcftools_filter_TNscope_umi_tumor_only",
     "genmod_score_vardict",

@@ -188,6 +188,10 @@ somatic_caller_cnv = get_variant_callers(config=config,
 somatic_caller_sv.remove("svdb")
 svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
 
+for var_caller in svdb_callers_prio:
+    if var_caller in somatic_caller:
+        somatic_caller.remove(var_caller)
+
 # Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
 for ws in ["BALSAMIC","Sentieon","Sentieon_umi"]:
