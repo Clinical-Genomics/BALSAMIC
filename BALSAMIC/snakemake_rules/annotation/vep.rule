@@ -3,32 +3,31 @@
 # VEP annotation module. Annotate all VCFs generated through VEP
 
 
-
-rule vep_somatic:
+rule vep_somatic_snv:
   input:
-    vcf = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz",
-    header = vcf_dir + "{var_type}.somatic.{case_name}.{var_caller}.sample_name_map",
+    vcf = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
+    header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
-    vcf_summary = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
-    bcftools_stats = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.stats"
+    vcf_all = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf_summary = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
+    bcftools_stats = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.stats"
   benchmark:
-    Path(benchmark_dir, "vep_somatic_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
-    message_text = "{var_type}.somatic.{case_name}.{var_caller}.vcf.gz", 
-    tmpvcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
+    tmpvcf = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
     vcfanno_toml = VCFANNO_TOML,
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_somatic")
   message:
-    "Running vep annotation on {params.message_text}" 
+    "Running vep annotation on {params.message_text}"
   shell:
     """
 vep_path=$(dirname $(readlink -f $(which vep)));
@@ -37,6 +36,55 @@ export PERL5LIB=;
 
 vcfanno -p {threads} --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
 | bcftools reheader --threads {threads} -s {input.header} \
+| bcftools view --threads {threads} -O z -o $tmpvcf ;
+
+vep \
+--dir $vep_path \
+--dir_cache {params.vep_cache} \
+--dir_plugins $vep_path \
+--input_file $tmpvcf \
+--output_file {output.vcf_all} \
+--fork {threads} \
+{params.vep_defaults} \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
+
+tabix -p vcf -f {output.vcf_all};
+
+bcftools stats {output.vcf_all} > {output.bcftools_stats};
+
+rm $tmpvcf;
+    """
+
+rule vep_somatic_SV:
+  input:
+    vcf = vcf_dir + "SV.somatic.{case_name}.{var_caller}.vcf.gz",
+    header = vcf_dir + "SV.somatic.{case_name}.{var_caller}.sample_name_map",
+    cosmic = config["reference"]["cosmic"]
+  output:
+    vcf_all = vep_dir + "SV.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf_summary = vep_dir + "SV.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
+    bcftools_stats = vep_dir + "SV.somatic.{case_name}.{var_caller}.all.stats"
+  benchmark:
+    Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.{var_caller}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
+    message_text = "SV.somatic.{case_name}.{var_caller}.vcf.gz",
+    tmpvcf = vep_dir + "SV.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    vep_cache = config["reference"]["vep"],
+    vep_defaults = params.vep.vep_filters
+  threads:
+    get_threads(cluster_config, "vep_somatic")
+  message:
+    "Running vep annotation on {params.message_text}"
+  shell:
+    """
+vep_path=$(dirname $(readlink -f $(which vep)));
+tmpvcf={params.tmpvcf};
+export PERL5LIB=;
+
+bcftools reheader --threads {threads} -s {input.header} {input.vcf} \
 | bcftools view --threads {threads} -O z -o $tmpvcf ;
 
 vep \
