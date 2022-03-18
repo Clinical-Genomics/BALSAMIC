@@ -25,7 +25,7 @@ rule vep_somatic_snv:
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
-    get_threads(cluster_config, "vep_somatic")
+    get_threads(cluster_config, "vep_somatic_snv")
   message:
     "Running vep annotation on {params.message_text}"
   shell:
@@ -55,27 +55,27 @@ bcftools stats {output.vcf_all} > {output.bcftools_stats};
 rm $tmpvcf;
     """
 
-rule vep_somatic_SV:
+rule vep_somatic_sv:
   input:
-    vcf = vcf_dir + "SV.somatic.{case_name}.{var_caller}.vcf.gz",
-    header = vcf_dir + "SV.somatic.{case_name}.{var_caller}.sample_name_map",
+    vcf = vcf_dir + "SV.somatic.{case_name}.svdb.vcf.gz",
+    header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = vep_dir + "SV.somatic.{case_name}.{var_caller}.all.vcf.gz",
-    vcf_summary = vep_dir + "SV.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
-    bcftools_stats = vep_dir + "SV.somatic.{case_name}.{var_caller}.all.stats"
+    vcf_all = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
+    vcf_summary = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz_summary.html",
+    bcftools_stats = vep_dir + "SV.somatic.{case_name}.svdb.all.stats"
   benchmark:
-    Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.svdb.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
-    message_text = "SV.somatic.{case_name}.{var_caller}.vcf.gz",
-    tmpvcf = vep_dir + "SV.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    message_text = "SV.somatic.{case_name}.svdb.vcf.gz",
+    tmpvcf = vep_dir + "SV.somatic.{case_name}.svdb.tmp.vcf.gz",
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
-    get_threads(cluster_config, "vep_somatic")
+    get_threads(cluster_config, "vep_somatic_sv")
   message:
     "Running vep annotation on {params.message_text}"
   shell:
@@ -103,7 +103,6 @@ bcftools stats {output.vcf_all} > {output.bcftools_stats};
 
 rm $tmpvcf;
     """
-
 
 rule tmb_calculation:
   input:

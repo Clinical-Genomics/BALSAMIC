@@ -220,8 +220,12 @@
 		"time": "4:00:00",
 		"n": 12
 	},
-	"vep_somatic": {
+	"vep_somatic_snv": {
 		"time":"18:00:00",
+		"n": 24
+	},
+	"vep_somatic_sv": {
+		"time":"12:00:00",
 		"n": 24
 	},
 	"vep_germline": {
