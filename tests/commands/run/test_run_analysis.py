@@ -92,3 +92,17 @@ def test_run_analysis_create_dir(invoke_cli, tumor_only_config):
         )
         # THEN it should abort with error
         assert Path(re.sub("/$", ".1/", log_dir)).exists()
+
+
+def test_run_analysis_pon_cnn(invoke_cli, tumor_only_config):
+    # GIVEN a tumor-only config file with pon-file
+
+    with open(tumor_only_config) as fh:
+        tumor_config = json.load(fh)
+    pon_file = tumor_config["analysis"]["pon_cnn"]
+    bind_path = list()
+    if "pon_cnn" in tumor_config:
+        bind_path.append(tumor_config.get("pon_cnn"))
+
+    assert Path(pon_file).exists()
+    assert Path(bind_path) == str(Path(pon_file))
