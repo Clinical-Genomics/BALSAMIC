@@ -52,6 +52,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "delly",
     "ascatNgs",
     "balsamic",
+    "vcf2cytosure",
 }
 
 BIOINFO_TOOL_ENV = {
@@ -72,12 +73,14 @@ BIOINFO_TOOL_ENV = {
     "tabix": "varcall_py36",
     "gatk": "varcall_py36",
     "vardict": "varcall_py36",
+    "svdb": "varcall_py36",
     "strelka": "varcall_py27",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "delly",
     "ascatNgs": "ascatNgs",
     "sentieon": "sentieon",
+    "vcf2cytosure": "vcf2cytosure",
 }
 
 VALID_OPS = {

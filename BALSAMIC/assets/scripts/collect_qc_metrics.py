@@ -23,7 +23,7 @@ def collect_qc_metrics(
     output_path: Path,
     multiqc_data_path: Path,
     sequencing_type: str,
-    capture_kit: Union[str, None],
+    capture_kit: str,
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
 
@@ -31,16 +31,28 @@ def collect_qc_metrics(
         output_path: Path; destination path for the extracted YAML formatted metrics
         multiqc_data_path: Path; multiqc JSON path from which the metrics will be extracted
         sequencing_type: str; analysis sequencing type
-        capture_kit: str; capture kit used for targeted analysis (None for WGS)
+        capture_kit: str; capture kit used for targeted analysis ("None" for WGS)
     """
 
     with open(output_path, "w") as fn:
         yaml.dump(
-            get_multiqc_metrics(multiqc_data_path, sequencing_type, capture_kit),
+            get_multiqc_metrics(
+                multiqc_data_path,
+                sequencing_type,
+                capture_kit_resolve_type(capture_kit),
+            ),
             fn,
             sort_keys=False,
             default_flow_style=False,
         )
+
+
+def capture_kit_resolve_type(capture_kit: str):
+    """Resolves the capture_kit type (NoneType or String)"""
+    if capture_kit == "None":
+        return None
+    else:
+        return capture_kit
 
 
 def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
@@ -84,15 +96,15 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                     )
 
 
-def get_qc_available_panel_beds(metrics: List[str]) -> List[str]:
-    """Returns available panel bed file names from a list of requested metrics"""
-    available_beds = []
+def get_qc_supported_capture_kit(capture_kit, metrics: List[str]) -> str:
+    """Returns a BALSAMIC supported panel bed name associated to a specific capture_kit parameter"""
+    available_panel_beds = []
 
     for k in metrics:
         if k != "default":
-            available_beds.append(k)
+            available_panel_beds.append(k)
 
-    return available_beds
+    return next((i for i in available_panel_beds if i in capture_kit), None)
 
 
 def get_requested_metrics(
@@ -103,8 +115,11 @@ def get_requested_metrics(
     requested_metrics = metrics[sequencing_type]
     if capture_kit:
         requested_metrics = metrics[sequencing_type]["default"]
-        if capture_kit in get_qc_available_panel_beds(metrics[sequencing_type]):
-            requested_metrics.update(metrics[sequencing_type][capture_kit])
+        supported_capture_kit = get_qc_supported_capture_kit(
+            capture_kit, metrics[sequencing_type]
+        )
+        if supported_capture_kit:
+            requested_metrics.update(metrics[sequencing_type][supported_capture_kit])
 
     return requested_metrics
 

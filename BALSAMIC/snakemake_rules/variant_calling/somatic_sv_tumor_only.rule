@@ -104,4 +104,35 @@ bcftools view  --threads {threads} -f PASS -O z -o {output.vcf} {input.bcf};
 tabix -p vcf -f {output.vcf};
         """
 
-
+rule svdb_merge_tumor_only:
+    input:
+        vcf = expand(
+                vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
+                caller=somatic_caller_sv) +
+              expand(
+                vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
+                caller=somatic_caller_cnv)
+    output:
+        svdb_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
+    benchmark:
+        Path(benchmark_dir, 'svdb_merge_tumor_only_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+    params:
+        tumor = get_sample_type(config["samples"], "tumor"),
+        case_name = config["analysis"]["case_id"],
+        vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
+        svdb_priority= ",".join(svdb_callers_prio)
+    threads:
+        get_threads(cluster_config, "svdb_merge_tumor_only")
+    message:
+        "Merging Manta and Delly results for PASS variants using svdb for sample '{params.case_name}' "
+    shell:
+        """
+svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 \
+--vcf {params.vcf} \
+--priority {params.svdb_priority} | \
+bgzip -l 9 -c > {output.svdb_vcf};
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+        """

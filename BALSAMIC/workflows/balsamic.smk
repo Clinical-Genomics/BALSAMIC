@@ -130,6 +130,8 @@ os.environ['TMPDIR'] = get_result_dir(config)
 # Extract variant callers for the workflow
 germline_caller = []
 somatic_caller = []
+somatic_caller_cnv = []
+somatic_caller_sv = []
 for m in MUTATION_TYPE:
     germline_caller_balsamic = get_variant_callers(config=config,
                                             analysis_type=config['analysis']['analysis_type'],
@@ -169,6 +171,26 @@ for m in MUTATION_TYPE:
                                              sequencing_type=config["analysis"]["sequencing_type"],
                                              mutation_class="somatic")
     somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
+
+somatic_caller_sv = get_variant_callers(config=config,
+                                            analysis_type=config['analysis']['analysis_type'],
+                                            workflow_solution="BALSAMIC",
+                                            mutation_type="SV",
+                                            sequencing_type=config["analysis"]["sequencing_type"],
+                                            mutation_class="somatic")
+
+somatic_caller_cnv = get_variant_callers(config=config,
+                                            analysis_type=config['analysis']['analysis_type'],
+                                            workflow_solution="BALSAMIC",
+                                            mutation_type="CNV",
+                                            sequencing_type=config["analysis"]["sequencing_type"],
+                                            mutation_class="somatic")
+somatic_caller_sv.remove("svdb")
+svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
+
+for var_caller in svdb_callers_prio:
+    if var_caller in somatic_caller:
+        somatic_caller.remove(var_caller)
 
 # Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
@@ -221,6 +243,10 @@ analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
 if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.append(expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
+
+    analysis_specific_results.append(expand(vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh", 
+                                            case_name=config["analysis"]["case_id"],
+                                            var_caller=["cnvkit"]))
 
     analysis_specific_results.append(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config["samples"]))
 
@@ -320,7 +346,7 @@ if 'delivery' in config:
 
 rule all:
     input:
-        quality_control_results + analysis_specific_results,
+        quality_control_results + analysis_specific_results
     output:
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:

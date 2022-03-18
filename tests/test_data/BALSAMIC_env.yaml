@@ -24,3 +24,4 @@ D_BALSAMIC-py36_test:
 - pindel
 - multiqc
 - bedtools
+- svdb

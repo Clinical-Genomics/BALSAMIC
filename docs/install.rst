@@ -7,7 +7,7 @@ This section describes steps to install BALSAMIC (**version** = 4.1.0)
 
 
 Software Requirements
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 - Conda >=version 4.5.0: For detailed software and python requirements please see ``setup.py`` and ``BALSAMIC/conda/balsamic.yaml``
 - Singularity >=version 3.0.0: BALSAMIC uses singularity to run vairous parts of the workflow. 

@@ -56,6 +56,10 @@
 		"time": "12:00:00",
 		"n": 10
 	},
+	"fastqc":{
+		"time": "12:00:00",
+		"n": 5
+	},
 	"gatk_haplotypecaller": {
 		"time": "03:00:00",
 		"n": 10
@@ -216,13 +220,13 @@
 		"time": "4:00:00",
 		"n": 12
 	},
-	"vep_umi": {
-		"time":"4:00:00",
-		"n": 10
-	},
 	"vep_somatic": {
-		"time":"24:00:00",
+		"time":"18:00:00",
 		"n": 24
+	},
+	"vep_germline": {
+		"time":"06:00:00",
+		"n": 10
 	},
 	"picard_umiaware": {
 		"time": "4:00:00",
@@ -259,5 +263,17 @@
 	"collect_custom_qc_metrics": {
 		"time": "00:15:00",
 		"n": 1
+	},
+	"svdb_merge_tumor_normal": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"svdb_merge_tumor_only": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"bcftools_filter_svdb": {
+		"time": "01:00:00",
+		"n": 8
 	}
 }

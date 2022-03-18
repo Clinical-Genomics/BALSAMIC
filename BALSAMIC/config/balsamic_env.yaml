@@ -19,6 +19,7 @@ varcall_py36:
   - gatk
   - vardict
   - libiconv
+  - svdb
 varcall_py27:
   - strelka
   - manta
@@ -30,4 +31,6 @@ vcf_merge:
 delly:
   - delly
 ascatNgs:
-  -ascat
+  - ascat
+vcf2cytosure:
+  - vcf2cytosure

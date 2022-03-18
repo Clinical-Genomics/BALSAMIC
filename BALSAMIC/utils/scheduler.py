@@ -234,6 +234,8 @@ def main(args=None):
             scheduler_cmd.acctg_freq = "{}={}".format(
                 args.slurm_profiler, args.slurm_profiler_interval
             )  # "--profile task --acctg-freq=task=15"
+        if args.qos:
+            scheduler_cmd.qos = args.qos
     elif args.profile == "qsub":
         jobid = "${JOB_ID}"
         scheduler_cmd = QsubScheduler()

@@ -75,7 +75,7 @@ VCF_DICT = {
         "mutation": "somatic",
         "type": "SV",
         "analysis_type": ["paired", "single"],
-        "sequencing_type": ["wgs", "targeted"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
     "ascat": {
@@ -83,6 +83,13 @@ VCF_DICT = {
         "type": "CNV",
         "analysis_type": ["paired"],
         "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
+    "svdb": {
+        "mutation": "somatic",
+        "type": "SV",
+        "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
 }
@@ -118,7 +125,7 @@ WORKFLOW_PARAMS = {
         "column_info": "-c 1 -S 2 -E 3 -g 4",
     },
     "vep": {
-        "vep_filters": "--compress_output bgzip --vcf --everything --hgvsg --allow_non_variant --dont_skip --buffer_size 20000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
+        "vep_filters": "--compress_output bgzip --vcf --everything --hgvsg --allow_non_variant --dont_skip --buffer_size 30000 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     },
     "umicommon": {
         "align_header": "'@RG\\tID:{sample}\\tSM:{sample}\\tLB:TargetPanel\\tPL:ILLUMINA'",
