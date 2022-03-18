@@ -9,7 +9,7 @@ rule vep_somatic_snv:
     header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf_all = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz"),
     vcf_summary = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz_summary.html",
     bcftools_stats = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.stats"
   benchmark:
@@ -60,7 +60,7 @@ rule vep_somatic_sv:
     header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
+    vcf_all = temp(vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz"),
     vcf_summary = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz_summary.html",
     bcftools_stats = vep_dir + "SV.somatic.{case_name}.svdb.all.stats"
   benchmark:
