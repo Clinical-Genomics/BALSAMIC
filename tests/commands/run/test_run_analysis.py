@@ -105,4 +105,3 @@ def test_run_analysis_pon_cnn(invoke_cli, tumor_only_config):
         bind_path.append(tumor_config.get("pon_cnn"))
 
     assert Path(pon_file).exists()
-    assert Path(bind_path) == str(Path(pon_file))
