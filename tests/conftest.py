@@ -101,6 +101,7 @@ def background_variant_file():
 def pon_cnn_file():
     return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
+
 @pytest.fixture(scope="session")
 def sentieon_license(tmp_path_factory):
     """
@@ -349,7 +350,7 @@ def tumor_only_config(
     panel_bed_file,
     sentieon_license,
     sentieon_install_dir,
-    pon_cnn_file
+    pon_cnn_file,
 ):
     """
     invokes balsamic config sample -t xxx to create sample config
@@ -384,7 +385,7 @@ def tumor_only_config(
                 "--background-variants",
                 background_variant_file,
                 "--pon-cnn",
-                pon_cnn_file
+                pon_cnn_file,
             ],
         )
 
@@ -464,7 +465,6 @@ def sample_config():
             "config_creation_date": "yyyy-mm-dd xx",
             "BALSAMIC_version": "2.9.8",
             "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
-            "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn"
         },
         "vcf": {
             "manta": {"mutation": "somatic", "type": "SV"},
