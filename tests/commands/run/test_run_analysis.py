@@ -101,5 +101,8 @@ def test_run_analysis_ponpath(invoke_cli, tumor_only_pon_config, pon_cnn):
     with open(tumor_only_pon_config) as fh:
         sample_config = json.load(fh)
 
+    ponn_cnn_tmp_file = sample_config["analysis"].get("pon_cnn")
+
     # THEN it checks for existence of paths
-    assert pon_cnn in sample_config["analysis"].get("pon_cnn")
+    assert pon_cnn in ponn_cnn_tmp_file
+    assert Path(ponn_cnn_tmp_file).exists()
