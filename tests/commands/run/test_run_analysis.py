@@ -94,15 +94,19 @@ def test_run_analysis_create_dir(invoke_cli, tumor_only_config):
         assert Path(re.sub("/$", ".1/", log_dir)).exists()
 
 
-def test_run_analysis_ponpath(invoke_cli, tumor_only_pon_config, pon_cnn):
+def test_run_analysis_ponpath(invoke_cli, tumor_only_pon_config):
     # GIVEN a tumor-only with pon file in the config file
     # WHEN running analysis
 
     with open(tumor_only_pon_config) as fh:
         sample_config = json.load(fh)
 
-    ponn_cnn_tmp_file = sample_config["analysis"].get("pon_cnn")
+    bind_path = ["/path_to_dummy/ash/"]
+    pon_fl = sample_config["analysis"]["pon_cnn"]
+    pon_path = Path(pon_fl).resolve()
+    if "pon_cnn" in sample_config["analysis"]:
+        bind_path.append(sample_config["analysis"].get("pon_cnn"))
 
     # THEN it checks for existence of paths
-    assert pon_cnn in ponn_cnn_tmp_file
-    assert Path(ponn_cnn_tmp_file).exists()
+    assert pon_path.exists()
+    assert str(pon_path) in bind_path
