@@ -511,7 +511,6 @@ def sample_config():
             "config_creation_date": "yyyy-mm-dd xx",
             "BALSAMIC_version": "2.9.8",
             "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
-            "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
         },
         "vcf": {
             "manta": {"mutation": "somatic", "type": "SV"},
