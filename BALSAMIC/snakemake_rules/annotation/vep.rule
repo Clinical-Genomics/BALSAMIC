@@ -58,7 +58,6 @@ rule vep_somatic_sv:
   input:
     vcf = vcf_dir + "SV.somatic.{case_name}.svdb.vcf.gz",
     header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
-    cosmic = config["reference"]["cosmic"]
   output:
     vcf_all = temp(vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz"),
     vcf_summary = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz_summary.html",
@@ -82,9 +81,8 @@ vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf={params.tmpvcf};
 export PERL5LIB=;
 
-bcftools reheader --threads {threads} -s {input.header} {input.vcf} \
-| bcftools view --threads {threads} -O z -o $tmpvcf ;
-
+bcftools reheader --threads {threads} -s {input.header} {input.vcf} | \
+bcftools view --threads {threads} -O v | \
 vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
@@ -93,13 +91,11 @@ vep \
 --output_file {output.vcf_all} \
 --fork {threads} \
 {params.vep_defaults} \
---custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
 
 tabix -p vcf -f {output.vcf_all};
 
 bcftools stats {output.vcf_all} > {output.bcftools_stats};
 
-rm $tmpvcf;
     """
 
 rule tmb_calculation:
