@@ -93,6 +93,7 @@ def test_run_analysis_create_dir(invoke_cli, tumor_only_config):
         # THEN it should abort with error
         assert Path(re.sub("/$", ".1/", log_dir)).exists()
 
+
 def test_run_analysis_ponpath(invoke_cli, tumor_only_pon_config):
     # GIVEN a tumor-only with pon file in the config file
     # WHEN running analysis
@@ -109,4 +110,3 @@ def test_run_analysis_ponpath(invoke_cli, tumor_only_pon_config):
     # THEN it checks for existence of paths
     assert pon_path.exists()
     assert str(pon_path) in bind_path
-
