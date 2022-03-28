@@ -3,8 +3,8 @@
 
 
 def get_pon_cnn(config):
-    if "pon_cnn" in config["analysis"]:
-        return os.path.abspath(config["analysis"]["pon_cnn"])
+    if "pon_cnn" in config["panel"]:
+        return os.path.abspath(config["panel"]["pon_cnn"])
     else:
         return None
 

@@ -102,10 +102,11 @@ def test_run_analysis_ponpath(invoke_cli, tumor_only_pon_config):
         sample_config = json.load(fh)
 
     bind_path = ["/path_to_dummy/ash/"]
-    pon_fl = sample_config["analysis"]["pon_cnn"]
+    pon_fl = sample_config["panel"].get("pon_cnn")
     pon_path = Path(pon_fl).resolve()
-    if "pon_cnn" in sample_config["analysis"]:
-        bind_path.append(sample_config["analysis"].get("pon_cnn"))
+
+    if "pon_cnn" in sample_config["panel"]:
+        bind_path.append(str(pon_path))
 
     # THEN it checks for existence of paths
     assert pon_path.exists()

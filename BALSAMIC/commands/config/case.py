@@ -190,7 +190,6 @@ def case_config(
             "analysis_dir": analysis_dir,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
-            "pon_cnn": pon_cnn,
         },
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
@@ -204,6 +203,7 @@ def case_config(
         panel={
             "capture_kit": panel_bed,
             "chrom": get_panel_chrom(panel_bed),
+            "pon_cnn": pon_cnn,
         }
         if panel_bed
         else None,
