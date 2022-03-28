@@ -10,7 +10,6 @@ rule vep_somatic_snv:
     cosmic = config["reference"]["cosmic"]
   output:
     vcf_all = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz"),
-    bcftools_stats = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.stats"
   benchmark:
     Path(benchmark_dir, "vep_somatic_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
@@ -49,8 +48,6 @@ vep \
 
 tabix -p vcf -f {output.vcf_all};
 
-bcftools stats {output.vcf_all} > {output.bcftools_stats};
-
 rm $tmpvcf;
     """
 
@@ -60,7 +57,6 @@ rule vep_somatic_sv:
     header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
   output:
     vcf_all = temp(vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz"),
-    bcftools_stats = vep_dir + "SV.somatic.{case_name}.svdb.all.stats"
   benchmark:
     Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.svdb.tsv").as_posix()
   singularity:
@@ -90,9 +86,6 @@ vep \
 {params.vep_defaults} \
 
 tabix -p vcf -f {output.vcf_all};
-
-bcftools stats {output.vcf_all} > {output.bcftools_stats};
-
     """
 
 rule tmb_calculation:
