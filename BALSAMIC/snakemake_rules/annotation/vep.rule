@@ -79,7 +79,6 @@ rule vep_somatic_sv:
   shell:
     """
 vep_path=$(dirname $(readlink -f $(which vep)));
-tmpvcf={params.tmpvcf};
 export PERL5LIB=;
 
 bcftools reheader --threads {threads} -s {input.header} {input.vcf} | \
@@ -88,7 +87,6 @@ vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
---input_file $tmpvcf \
 --output_file {output.vcf_all} \
 --fork {threads} \
 {params.vep_defaults} \
