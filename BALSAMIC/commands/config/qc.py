@@ -61,6 +61,13 @@ LOG = logging.getLogger(__name__)
     help="Path to BALSAMIC cache",
 )
 @click.option(
+    "--container-version",
+    show_default=True,
+    default=balsamic_version,
+    type=click.Choice(["develop", "master", balsamic_version]),
+    help="Container for BALSAMIC version to download",
+)
+@click.option(
     "--analysis-dir",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
@@ -82,6 +89,23 @@ LOG = logging.getLogger(__name__)
     required=False,
     multiple=True,
     help="Fastq files for normal sample.",
+)
+@click.option(
+    "--umi/--no-umi",
+    default=True,
+    show_default=True,
+    is_flag=True,
+    help=(
+        "UMI processing steps for samples with UMI tags."
+        "For WGS cases, UMI is always disabled."
+    ),
+)
+@click.option(
+    "--umi-trim-length",
+    default=5,
+    show_default=True,
+    type=int,
+    help="Trim N bases from reads in fastq",
 )
 @click.option(
     "--umiworkflow/--no-umiworkflow",
@@ -106,17 +130,20 @@ LOG = logging.getLogger(__name__)
 def qc_config(
     context,
     case_id,
+    umi,
+    umi_trim_length,
     adapter_trim,
     quality_trim,
     panel_bed,
-    umiworkflow,
     analysis_dir,
     tumor,
     normal,
+    umiworkflow,
     tumor_sample_name,
     normal_sample_name,
     genome_version,
     balsamic_cache,
+    container_version,
 ):
 
     try:
@@ -140,6 +167,8 @@ def qc_config(
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
+            "umi_trim": umi if panel_bed else False,
+            "umi_trim_length": umi_trim_length,
         },
         analysis={
             "case_id": case_id,
@@ -161,7 +190,7 @@ def qc_config(
         }
         if panel_bed
         else None,
-        umiworkflow=False,
+        umiworkflow=umiworkflow if panel_bed else False,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("QC config file generated successfully")
 

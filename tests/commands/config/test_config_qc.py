@@ -233,15 +233,5 @@ def test_config_qc_graph_failed(
                 balsamic_cache,
             ],
         )
-    
+
     assert case_result.exit_code == 1
-
-
-def test_config_qc_graph_value_error():
-    config_collection_dict = {}
-    config_path = ''
-    with pytest.raises(ValueError):
-
-        generate_graph(config_collection_dict, config_path)
-
-    # assert case_result.exit_code == 1
