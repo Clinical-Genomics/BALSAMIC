@@ -5,8 +5,6 @@ import logging
 from unittest import mock
 from pathlib import Path
 import pytest
-
-
 from BALSAMIC.utils.cli import generate_graph
 
 qc_json = "_QC.json"
@@ -60,7 +58,7 @@ def test_qc_normal_config(
     qc_config = json.load(open(Path(test_analysis_dir, case_id, case_id + qc_json)))
     # assert if config json dag file is created
     assert Path(qc_config["analysis"]["dag"]).exists()
-
+    assert "BALSAMIC QC Workflow has been configured successfully!" in result.output
 
 def test_qc_tumor_only_config(
     invoke_cli,
@@ -127,7 +125,6 @@ def test_qc_config_bad_filename(
 
     case_id1 = "faulty_tumor"
     tumor = Path(faulty_fastq_dir / fastq_file_name_tumor).as_posix()
-
     # Invoke CLI command using file as argument
     case_result = invoke_cli(
         [
@@ -235,3 +232,34 @@ def test_config_qc_graph_failed(
         )
 
     assert case_result.exit_code == 1
+
+
+
+
+def test_config_qc_graph_failed_value_error(
+    invoke_cli, sample_fastq, analysis_dir, balsamic_cache, panel_bed_file
+):
+    # GIVEN an analysis config
+    case_id = "sample_tumor_only"
+    tumor = sample_fastq["tumor"]
+
+    with mock.patch.object(graphviz, "Source", side_effect=ValueError) as mocked:
+        mocked.return_value = None
+        case_result = invoke_cli(
+            [
+                "config",
+                "qc",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache,
+            ],
+        )
+
+    assert "BALSAMIC QC dag graph generation failed" in case_result.output
