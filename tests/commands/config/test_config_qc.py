@@ -4,8 +4,10 @@ import graphviz
 import logging
 from unittest import mock
 from pathlib import Path
+import pytest
 
-from BALSAMIC.utils.cli import create_pon_fastq_symlink
+
+from BALSAMIC.utils.cli import generate_graph
 
 qc_json = "_QC.json"
 
@@ -183,7 +185,7 @@ def test_qc_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file):
     # GIVEN a case ID, fastq files, and an analysis dir
     test_analysis_dir = tmp_path / "test_analysis_dir"
     test_analysis_dir.mkdir()
-    case_id = "sample_pon"
+    case_id = "sample_qc"
 
     # WHEN creating a case analysis
     result = invoke_cli(
@@ -231,5 +233,15 @@ def test_config_qc_graph_failed(
                 balsamic_cache,
             ],
         )
-
+    
     assert case_result.exit_code == 1
+
+
+def test_config_qc_graph_value_error():
+    config_collection_dict = {}
+    config_path = ''
+    with pytest.raises(ValueError):
+
+        generate_graph(config_collection_dict, config_path)
+
+    # assert case_result.exit_code == 1
