@@ -60,6 +60,7 @@ def test_qc_normal_config(
     assert Path(qc_config["analysis"]["dag"]).exists()
     assert "BALSAMIC QC Workflow has been configured successfully!" in result.output
 
+
 def test_qc_tumor_only_config(
     invoke_cli,
     sample_fastq,
@@ -232,8 +233,6 @@ def test_config_qc_graph_failed(
         )
 
     assert case_result.exit_code == 1
-
-
 
 
 def test_config_qc_graph_failed_value_error(
