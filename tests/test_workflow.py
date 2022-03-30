@@ -47,7 +47,7 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_l
 
 
 def test_workflow_qc_tumor_only(tumor_only_qc_config):
-
+    
     # GIVEN a sample config dict and snakefile
     workflow = "qc"
     reference_genome = "hg19"
