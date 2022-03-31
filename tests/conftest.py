@@ -574,38 +574,6 @@ def sample_config():
 
 
 @pytest.fixture(scope="session")
-def config_collection_dict():
-    config_collection_dict = BalsamicConfigModel(
-        QC={
-            "quality_trim": quality_trim,
-            "adapter_trim": adapter_trim,
-        },
-        analysis={
-            "case_id": case_id,
-            "analysis_dir": analysis_dir,
-            "analysis_type": "qc",
-            "sequencing_type": "targeted" if panel_bed else "wgs",
-        },
-        reference=reference_dict,
-        singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
-        samples=samples,
-        vcf=VCF_DICT,
-        bioinfo_tools=BIOINFO_TOOL_ENV,
-        bioinfo_tools_version=get_bioinfo_tools_version(
-            BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
-        ),
-        panel={
-            "capture_kit": panel_bed,
-            "chrom": get_panel_chrom(panel_bed),
-        }
-        if panel_bed
-        else None,
-        umiworkflow=False,
-    ).dict(by_alias=True, exclude_none=True)
-    LOG.info("QC config file generated successfully")
-
-
-@pytest.fixture(scope="session")
 def analysis_path():
     """Analysis test path"""
     return "tests/test_data/qc_files/analysis"
