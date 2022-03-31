@@ -146,6 +146,9 @@ def qc_config(
     container_version,
 ):
 
+    if container_version:
+        balsamic_version = container_version
+
     try:
         samples = get_sample_dict(
             tumor=tumor,
@@ -156,9 +159,6 @@ def qc_config(
     except AttributeError:
         LOG.error(f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
         raise click.Abort()
-
-    if container_version:
-        balsamic_version = container_version
 
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
