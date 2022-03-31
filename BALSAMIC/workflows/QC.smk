@@ -105,36 +105,6 @@ LOG.info(f"The following rules will be included in the workflow: {rules_to_inclu
 # Define common and analysis specific outputs
 quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
 
-if 'benchmark_plots' in config:
-    log_dir = config["analysis"]["log"]
-    if not check_executable("sh5util"):
-        LOG.warning("sh5util executable does not exist. Won't be able to plot analysis")
-    else:
-        # Make individual plot per job
-        for log_file in Path(log_dir).glob("*.err"):
-            log_file_list = log_file.name.split(".")
-            job_name = ".".join(log_file_list[0:4]) 
-            job_id = log_file_list[4].split("_")[1]
-            h5_file = generate_h5(job_name, job_id, log_file.parent)
-            benchmark_plot = Path(benchmark_dir, job_name + ".pdf")
-
-            log_file_plot = plot_analysis(log_file, h5_file, benchmark_plot)
-            logging.debug("Plot file for {} available at: {}".format(log_file.as_posix(), log_file_plot))
-
-        # Merge plots into one based on rule name
-        for my_rule in vars(rules).keys():
-            my_rule_pdf = PdfFileMerger()
-            my_rule_plots = list()
-            for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
-                my_rule_pdf.append(plots.as_posix())
-                my_rule_plots.append(plots)
-            my_rule_pdf.write(Path(benchmark_dir, my_rule+".pdf").as_posix())
-            my_rule_pdf.close()
-
-            # Delete previous plots after merging
-            for plots in my_rule_plots:
-                plots.unlink()
-
 if 'delivery' in config:
     wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],
                      "case_name": config["analysis"]["case_id"],
