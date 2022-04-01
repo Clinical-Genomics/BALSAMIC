@@ -13,13 +13,13 @@ from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5)
 
-from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
+from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
 from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
                                  get_sample_type, get_picard_mrkdup, get_script_path,
                                  get_threads, get_sequencing_type, get_capture_kit)
 
-from BALSAMIC.constants.common import (RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
+from BALSAMIC.constants.common import (RULE_DIRECTORY);
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
 

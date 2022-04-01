@@ -17,7 +17,6 @@ from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
 )
-from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -107,13 +106,6 @@ LOG = logging.getLogger(__name__)
     type=int,
     help="Trim N bases from reads in fastq",
 )
-@click.option(
-    "--umiworkflow/--no-umiworkflow",
-    default=False,
-    show_default=True,
-    is_flag=True,
-    help="Enable running UMI workflow",
-)
 @click.option("--tumor-sample-name", help="Tumor sample name")
 @click.option("--normal-sample-name", help="Normal sample name")
 @click.option(
@@ -138,7 +130,6 @@ def qc_config(
     analysis_dir,
     tumor,
     normal,
-    umiworkflow,
     tumor_sample_name,
     normal_sample_name,
     genome_version,
@@ -182,7 +173,6 @@ def qc_config(
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         samples=samples,
-        vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
@@ -193,7 +183,6 @@ def qc_config(
         }
         if panel_bed
         else None,
-        umiworkflow=umiworkflow if panel_bed else False,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("QC config file generated successfully")
 
