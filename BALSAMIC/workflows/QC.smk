@@ -70,9 +70,6 @@ if 'genome_version' not in config["reference"]:
     GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
     LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
 
-# Create list of chromosomes in panel for panel only variant calling to be used in rules
-if config["analysis"]["sequencing_type"] != "wgs":
-    chromlist = config["panel"]["chrom"]
 
 # Set temporary dir environment variable
 os.environ['TMPDIR'] = get_result_dir(config)
