@@ -11,8 +11,8 @@ Added:
 * SVdb to the varcall_py36 container #871
 * SVdb to WGS workflow #871
 * Docker container for vcf2cytosure #858
-* Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
-* SVdb to TGA workflow #871 
+* Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858
+* SVdb to TGA workflow #871
 * SVdb merge SV and CNV #871
 
 Changed:
@@ -42,7 +42,7 @@ Added:
 ^^^^^^
 
 * Added the readthedocs page for BALSAMIC variant-calling filters #867
-* Project requirements (setup.py) to build the docs #874 
+* Project requirements (setup.py) to build the docs #874
 * Generate cram from umi-consensus called bam files #865
 
 Changed:
@@ -96,11 +96,11 @@ Added:
 Fixed:
 ^^^^^^
 
-* Add default for gender if ``purecn`` captures dual gender values #824 
+* Add default for gender if ``purecn`` captures dual gender values #824
 
 Changed:
 ^^^^^^^^
-* Updated ``purecn`` and its dependencies to latest versions 
+* Updated ``purecn`` and its dependencies to latest versions
 
 [8.2.2]
 -------
@@ -130,7 +130,7 @@ Added:
 
 * Added various basic filters to all variant callers irregardless of their delivery status #750
 * BALSAMIC container #728
-* BALSAMIC reference generation via cluster submission for both reference and container #686 
+* BALSAMIC reference generation via cluster submission for both reference and container #686
 * Container specific tests #770
 * BALSAMIC quality control metrics extraction and validation #754
 * Delly is added as a submodule and removed from rest of the conda environments #787
@@ -168,12 +168,12 @@ Fixed:
 * Bumped version for ``bcftools`` in cnvkit container
 * Fixed issues #776 and #777 with correct install paths for gatk and manta
 * Fixed issue #782 for missing AF in the vcf INFO field
-* Fixed issues #748 #749 with correct sample names 
+* Fixed issues #748 #749 with correct sample names
 * Fixed issue #767 for ascatngs hardcoded values
-* Fixed missing output option in bcftools filters for tnhaplotyper #793 
+* Fixed missing output option in bcftools filters for tnhaplotyper #793
 * Fixed issue #795 with increasing resources for vep and filter SV prior to vep
 * Building ``wheel`` for ``cryptography`` bug inside BALSAMIC container #801
-* Fixed badget for docker container master and develop status  
+* Fixed badget for docker container master and develop status
 * ReadtheDocs building failure due to dependencies, fixed by locking versions #773
 * Dev requirements installation for Sphinx docs (Github Action) #812
 * Changed path for main Dockerfile version in ``.bumpversion.cfg``
@@ -187,7 +187,7 @@ Added:
 * Workflow to check PR tiltes to make easier to tell PR intents #724
 * ``bcftools stats``  to calculate Ti/Tv for all post annotate germline and somatic calls #93
 * Added reference download date to ``reference.json`` #726
-* ``ascatngs`` hg38 references to constants #683 
+* ``ascatngs`` hg38 references to constants #683
 * Added ClinVar as a source to download and to be annotated with VCFAnno #737
 
 Changed:
@@ -249,7 +249,7 @@ Added:
 * Individual rules (i.e. ngs filters) for cnv and sv callers. Only Manta will be delivered and added to the list of output files. #708
 * Added "targeted" and "wgs" tags to variant callers to provide another layer of separation. #708
 * ``manta`` convert inversion #709
-* Sentieon version to bioinformatic tool version parsing #685 
+* Sentieon version to bioinformatic tool version parsing #685
 * added ``CITATION.cff`` to cite BALSAMIC
 
 
@@ -258,9 +258,9 @@ Changed:
 
 * Upgrade to latest sentieon version 202010.02
 * New name ``MarkDuplicates`` to ``picard_markduplicates`` in ``bwa_mem`` rule and ``cluster.json``
-* New name rule ``GATK_contest`` to ``gatk_contest`` 
+* New name rule ``GATK_contest`` to ``gatk_contest``
 * Avoid running pytest github actions workflow on ``docs/**`` and ``CHANGELOG.rst`` changes
-* Updated ``snakemake`` to ``v6.5.3`` #501 
+* Updated ``snakemake`` to ``v6.5.3`` #501
 * Update ``GNOMAD`` URL
 * Split Tumor-only ``cnvkit batch`` into individual commands
 * Improved TMB calculation issue #51
@@ -278,7 +278,7 @@ Fixed:
 * post-processing of the umi consensus in handling BI tags
 * vcf-filtered-clinical tag files will have all variants including PASS
 * Refactor snakemake ``annotate`` rules according to snakemake etiquette #636
-* Refactor snakemake ``align`` rules according to snakemake etiquette #636 
+* Refactor snakemake ``align`` rules according to snakemake etiquette #636
 * Refactor snakemake ``fastqc`` ``vep`` contest and ``mosdepth`` rules according to ``snakemake`` etiquette #636
 * Order of columns in QC and coverage report issue #601
 * ``delly`` not showing in workflow at runtime #644
@@ -474,7 +474,7 @@ Fixed:
 ^^^^^^
 
 * umi_workflow config json is set as true for panel and wgs as false.
-* Rename umiconsensus bam file headers from {samplenames} to TUMOR/NORMAL. 
+* Rename umiconsensus bam file headers from {samplenames} to TUMOR/NORMAL.
 * Documentation autobuild on RTFD
 
 
@@ -498,7 +498,7 @@ Removed
 Fixed
 ^^^^^
 
-* Fixed issue 577 with missing ``tumor.merged.bam`` and ``normal.merged.bam`` 
+* Fixed issue 577 with missing ``tumor.merged.bam`` and ``normal.merged.bam``
 * Issue 448 with lingering tmp_dir. It is not deleted after analysis is properly finished.
 
 Changed
@@ -558,7 +558,7 @@ Changed
 * Update FastQC to 0.11.9 PR #532
 * Update BCFTools to 1.11 PR #537
 * Update Samtools to 1.11 PR #537
-* Increase resources and runtime for various workflows in PRs #482 
+* Increase resources and runtime for various workflows in PRs #482
 * Python package dependenicies versions fixed in PR #480
 * QoL changes to workflow in series of PR #471
 * Series of documentation updates in PRs #489 #553
