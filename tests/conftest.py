@@ -12,7 +12,6 @@ from BALSAMIC.utils.cli import read_yaml
 from .helpers import ConfigHelper
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.models import BalsamicConfigModel
 
 MOCKED_OS_ENVIRON = "os.environ"
 
