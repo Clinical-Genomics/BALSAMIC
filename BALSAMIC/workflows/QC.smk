@@ -106,10 +106,6 @@ if 'delivery' in config:
                      "allow_missing": True
                      }
 
-    if config['analysis']["analysis_type"] in ["paired", "single"]:
-        wildcard_dict.update({"bedchrom": config["panel"]["chrom"] if "panel" in config else [],
-                              })
-
     if 'rules_to_deliver' in config:
         rules_to_deliver = config['rules_to_deliver'].split(",")
     else:
