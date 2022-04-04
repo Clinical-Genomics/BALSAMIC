@@ -14,7 +14,7 @@ Added:
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
 * SVdb merge SV and CNV #871
-
+* bcftools counts to varcall filter rules #871
 Changed:
 ^^^^^^^^
 
@@ -26,7 +26,7 @@ Fixed:
 
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
 * QC metric validation for different panel bed version #855
-* bcftools_stats moved from vep to filter rules #898 
+* bcftools_stats from vep #898 
 
 Removed
 ^^^^^^^
