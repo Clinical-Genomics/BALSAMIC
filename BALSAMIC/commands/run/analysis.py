@@ -106,7 +106,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.option(
     "--qos",
-    type=click.Choice(["low", "normal", "high"]),
+    type=click.Choice(["low", "normal", "high", "express"]),
     show_default=True,
     default="low",
     help="QOS for sbatch jobs. Passed to " + get_schedulerpy(),
