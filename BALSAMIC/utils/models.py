@@ -418,7 +418,7 @@ class BalsamicConfigModel(BaseModel):
     """
 
     QC: QCModel
-    vcf: VCFModel
+    vcf: Optional[VCFModel]
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
