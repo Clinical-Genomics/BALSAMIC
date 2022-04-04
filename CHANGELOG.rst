@@ -20,7 +20,7 @@ Changed:
 
 * Merge QC metric extraction workflows #833
 * Changed the base-image for balsamic container to 4.10.3-alpine #869
-* updated SVdb to 2.6.0
+* updated SVdb to 2.6.0 #871
 
 
 Fixed:
