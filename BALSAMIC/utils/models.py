@@ -352,6 +352,7 @@ class PanelModel(BaseModel):
     Attributes:
         capture_kit : Field(str(Path)); string representation of path to PANEL BED file
         chrom : Field(list(str)); list of chromosomes in PANEL BED
+        pon_cnn: Field(optional); Path where PON reference .cnn file is stored
 
     Raises:
         ValueError:
@@ -361,10 +362,17 @@ class PanelModel(BaseModel):
 
     capture_kit: Optional[FilePath]
     chrom: Optional[List[str]]
+    pon_cnn: Optional[FilePath]
 
     @validator("capture_kit")
     def path_as_abspath_str(cls, value):
         return Path(value).resolve().as_posix()
+
+    @validator("pon_cnn")
+    def pon_abspath_as_str(cls, value):
+        if value:
+            return Path(value).resolve().as_posix()
+        return None
 
 
 class PonBalsamicConfigModel(BaseModel):

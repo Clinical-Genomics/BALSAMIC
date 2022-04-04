@@ -7,6 +7,7 @@ Added:
 * Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
+* Option to use PON reference in cnv calling for TGA tumor-only cases
 * QC default validation conditions (for not defined capture kits) #855
 * SVdb to the varcall_py36 container #871
 * SVdb to WGS workflow #871
@@ -33,6 +34,7 @@ Removed
 ^^^^^^^
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
+* Unused pon option for SNV calling with TNhaplotyper tumor-only
 * SV and CNV callers from annotation and filtering #871
 * vcfanno from SV annotation
 

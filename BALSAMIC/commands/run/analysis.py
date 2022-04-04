@@ -238,6 +238,8 @@ def analysis(
         bind_path.append(sample_config.get("panel").get("capture_kit"))
     if "background_variants" in sample_config:
         bind_path.append(sample_config.get("background_variants"))
+    if "pon_cnn" in sample_config:
+        bind_path.append(sample_config.get("panel").get("pon_cnn"))
     bind_path.append(BALSAMIC_SCRIPTS)
     bind_path.append(sample_config["analysis"]["analysis_dir"])
     bind_path.extend(get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
