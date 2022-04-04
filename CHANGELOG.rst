@@ -1,13 +1,24 @@
-[8.2.9]
+[X.X.X]
 -------
+
 
 Added:
 ^^^^^^
 * Added slurm qos tag `express` #885
+* Included more text about UMI-workflow variant calling settings to the readthedocs #888
+* Automate balsamic version for readthedocs install page #888
 
 
 [8.2.8]
 -------
+
+Added:
+^^^^^^
+* Included more text about UMI-workflow variant calling settings to the readthedocs
+
+Fixes:
+^^^^^^
+* Automate balsamic version for readthedocs install page
 
 Added:
 ^^^^^^
