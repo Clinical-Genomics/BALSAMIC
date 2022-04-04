@@ -4,6 +4,8 @@
 Added:
 ^^^^^^
 
+* Added slurm qos tag `express` #885
+* Included more text about UMI-workflow variant calling settings to the readthedocs #888
 * Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
@@ -22,11 +24,11 @@ Changed:
 * Merge QC metric extraction workflows #833
 * Changed the base-image for balsamic container to 4.10.3-alpine #869
 * updated SVdb to 2.6.0 #871
-
+* Upgrade black to 22.3.0
 
 Fixed:
 ^^^^^^
-
+* Automate balsamic version for readthedocs install page #888
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
 * QC metric validation for different panel bed version #855
 
@@ -38,12 +40,12 @@ Removed
 * SV and CNV callers from annotation and filtering #871
 * vcfanno from SV annotation
 
+
 [8.2.8]
 --------
 
 Added:
 ^^^^^^
-
 * Added the readthedocs page for BALSAMIC variant-calling filters #867
 * Project requirements (setup.py) to build the docs #874 
 * Generate cram from umi-consensus called bam files #865
