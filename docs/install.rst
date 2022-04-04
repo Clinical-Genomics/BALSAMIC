@@ -2,7 +2,7 @@
 Installation
 ============
 
-This section describes steps to install BALSAMIC (**version** = 4.1.0)
+This section describes steps to install BALSAMIC (**version** = 8.2.8)
 
 
 

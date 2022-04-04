@@ -1,5 +1,18 @@
+[8.2.9]
+-------
+
+
+
 [8.2.8]
 -------
+
+Added:
+^^^^^^
+* Included more text about UMI-workflow variant calling settings to the readthedocs
+
+Fixes:
+^^^^^^
+* Automate balsamic version for readthedocs install page
 
 Added:
 ^^^^^^
