@@ -10,7 +10,7 @@ rule bcftools_filter_vardict_tumor_only:
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.vcf.gz",
     vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
-    bcftools_stats = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.stats"
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_vardict_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -45,7 +45,7 @@ bcftools view -f PASS -o {output.vcf_pass_vardict} -O z {output.vcf_filtered};
 
 tabix -p vcf -f {output.vcf_pass_vardict};
 
-bcftools stats {output.vcf_pass_vardict} > {output.bcftools_stats};
+bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts};
     """
 
 
@@ -55,7 +55,7 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
     vcf_pass_tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
-    bcftools_stats = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.stats"
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -80,7 +80,7 @@ bcftools view -f PASS -o {output.vcf_pass_tnhaplotyper} -O z {output.vcf_filtere
 
 tabix -p vcf -f {output.vcf_pass_tnhaplotyper};
 
-bcftools stats {output.vcf_pass_tnhaplotyper} > {output.bcftools_stats};
+bcftools +counts {output.vcf_pass_tnhaplotyper} > {output.bcftools_counts};
     """
 
 
@@ -90,7 +90,7 @@ rule bcftools_filter_TNscope_umi_tumor_only:
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.vcf.gz",
     vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
-    bcftools_stats = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.stats"
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -115,5 +115,5 @@ bcftools view -f PASS -o {output.vcf_pass_TNscope_umi} -O z {output.vcf_filtered
 
 tabix -p vcf -f {output.vcf_pass_TNscope_umi};
 
-bcftools stats {output.vcf_pass_TNscope_umi} > {output.bcftools_stats};
+bcftools +counts {output.vcf_pass_TNscope_umi} > {output.bcftools_counts};
     """

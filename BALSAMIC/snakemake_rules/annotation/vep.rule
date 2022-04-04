@@ -151,7 +151,7 @@ rule vep_germline:
     cosmic = config["reference"]["cosmic"]
   output:
     vcf_all = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
-    bcftools_stats = vep_dir + "{var_type}.germline.{sample}.{var_caller}.all.stats"
+    bcftools_counts = vep_dir + "{var_type}.germline.{sample}.{var_caller}.all.stats"
   benchmark:
     Path(benchmark_dir, "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv").as_posix()
   singularity:
@@ -182,5 +182,5 @@ vep \
 
 tabix -p vcf -f {output.vcf_all};
 
-bcftools stats {output.vcf_all} > {output.bcftools_stats};
+bcftools +counts {output.vcf_all} > {output.bcftools_counts};
     """
