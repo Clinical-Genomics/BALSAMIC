@@ -84,10 +84,13 @@ rules_to_include = [
                 "snakemake_rules/quality_control/picard.rule",
                 "snakemake_rules/quality_control/sambamba_depth.rule",
                 "snakemake_rules/quality_control/mosdepth.rule",
-                "snakemake_rules/align/bwa_mem.rule",
+                "snakemake_rules/align/bwa_mem.rule"
 ]
+
 if "paired" in config['analysis']['analysis_type']:
     rules_to_include.append("snakemake_rules/variant_calling/mergetype_normal.rule")
+
+
 
 # for r in rules_to_include:
 for r in rules_to_include:

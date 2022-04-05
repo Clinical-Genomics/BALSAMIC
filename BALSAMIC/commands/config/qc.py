@@ -168,7 +168,7 @@ def qc_config(
         analysis={
             "case_id": case_id,
             "analysis_dir": analysis_dir,
-            "analysis_type": "qc",
+            "analysis_type": "qc_panel",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
         reference=reference_dict,
