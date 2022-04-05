@@ -11,10 +11,6 @@
 		"time": "00:15:00",
 		"n": 1
 	},
-	"BaseRecalibrator": {
-		"time": "15:00:00",
-		"n": 10
-	},
 	"CollectAlignmentSummaryMetrics": {
 		"time": "03:30:00",
 		"n": 8
@@ -34,10 +30,6 @@
 	"picard_markduplicates": {
 		"time": "03:30:00",
 		"n": 8
-	},
-	"RealignerTargetCreator": {
-		"time": "10:00:00",
-		"n": 10
 	},
 	"bwa_mem": {
 		"time": "08:00:00",
@@ -99,18 +91,6 @@
 	"multiqc": {
 		"time": "00:15:00",
 		"n": 4
-	},
-	"mutect2_merge": {
-		"time": "01:30:00",
-		"n": 8
-	},
-	"mutect2_tumor_normal": {
-		"time": "24:00:00",
-		"n": 12
-	},
-	"mutect2_tumor_only": {
-		"time": "24:00:00",
-		"n": 12
 	},
 	"sambamba_exon_depth": {
 		"time": "02:30:00",
@@ -178,14 +158,6 @@
 	},
 	"somatic_snv_indel_vcf_merge": {
 		"time": "06:00:00",
-		"n": 10
-	},
-	"strelka_germline": {
-		"time": "08:00:00",
-		"n": 10
-	},
-	"strelka_tumor_normal": {
-		"time": "10:00:00",
 		"n": 10
 	},
 	"vardict_merge": {
