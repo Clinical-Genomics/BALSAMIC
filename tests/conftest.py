@@ -304,7 +304,7 @@ def tumor_normal_qc_config(
             cli,
             [
                 "config",
-                "qc",
+                "qc_panel",
                 "-p",
                 panel_bed_file,
                 "-t",
@@ -497,7 +497,7 @@ def tumor_only_qc_config(
             cli,
             [
                 "config",
-                "qc",
+                "qc_panel",
                 "-p",
                 panel_bed_file,
                 "-t",
