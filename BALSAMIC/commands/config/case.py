@@ -76,6 +76,12 @@ LOG = logging.getLogger(__name__)
     help="Background set of valid variants for UMI",
 )
 @click.option(
+    "--pon-cnn",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Panel of normal reference (.cnn) for cnvkit",
+)
+@click.option(
     "--balsamic-cache",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
@@ -140,6 +146,7 @@ def case_config(
     quality_trim,
     panel_bed,
     background_variants,
+    pon_cnn,
     analysis_dir,
     tumor,
     normal,
@@ -196,6 +203,7 @@ def case_config(
         panel={
             "capture_kit": panel_bed,
             "chrom": get_panel_chrom(panel_bed),
+            "pon_cnn": pon_cnn,
         }
         if panel_bed
         else None,
