@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command(
-    "qc",
+    "qc_panel",
     short_help="Create a sample config file from input sample data for QC analysis",
 )
 @click.option(
