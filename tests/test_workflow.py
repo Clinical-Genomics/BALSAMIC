@@ -49,7 +49,7 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_l
 def test_workflow_qc_tumor_only(tumor_only_qc_config):
 
     # GIVEN a sample config dict and snakefile
-    workflow = "qc"
+    workflow = "qc_panel"
     reference_genome = "hg19"
     snakefile = get_snakefile(workflow, reference_genome)
     config_json = tumor_only_qc_config
@@ -65,7 +65,7 @@ def test_workflow_qc_tumor_only(tumor_only_qc_config):
 def test_workflow_qc_tumor_only_canfam(tumor_only_qc_config):
 
     # GIVEN a sample config dict and snakefile
-    workflow = "qc"
+    workflow = "qc_panel"
     reference_genome = "canfam3"
     snakefile = get_snakefile(workflow, reference_genome)
     config_json = tumor_only_qc_config
@@ -80,7 +80,7 @@ def test_workflow_qc_tumor_only_canfam(tumor_only_qc_config):
 
 def test_workflow_qc_normal(tumor_normal_qc_config):
     # GIVEN a sample config dict and snakefile
-    workflow = "qc"
+    workflow = "qc_panel"
     reference_genome = "hg19"
     snakefile = get_snakefile(workflow, reference_genome)
     config_json = tumor_normal_qc_config
@@ -95,7 +95,7 @@ def test_workflow_qc_normal(tumor_normal_qc_config):
 
 def test_workflow_qc_normal_canfam3(tumor_normal_qc_config):
     # GIVEN a sample config dict and snakefile
-    workflow = "qc"
+    workflow = "qc_panel"
     reference_genome = "canfam3"
     snakefile = get_snakefile(workflow, reference_genome)
     config_json = tumor_normal_qc_config

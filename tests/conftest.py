@@ -497,48 +497,13 @@ def tumor_only_qc_config(
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
-    ):      
+    ):
         runner = CliRunner()
         runner.invoke(
             cli,
             [
                 "config",
                 "qc_panel",
-            ],
-        )
-    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
-  
-@pytest.fixture(scope="session")
-def tumor_only_pon_config(
-    tmp_path_factory,
-    sample_fastq,
-    balsamic_cache,
-    analysis_dir,
-    panel_bed_file,
-    sentieon_license,
-    sentieon_install_dir,
-    pon_cnn,
-    ):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only
-    """
-    case_id = "sample_tumor_only_pon"
-    tumor = sample_fastq["tumor"]
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-          {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-  "case",
                 "-p",
                 panel_bed_file,
                 "-t",
@@ -549,12 +514,52 @@ def tumor_only_pon_config(
                 analysis_dir,
                 "--balsamic-cache",
                 balsamic_cache,
-  
-  
-  
-  
-  
-  
+            ],
+        )
+    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_only_pon_config(
+    tmp_path_factory,
+    sample_fastq,
+    balsamic_cache,
+    analysis_dir,
+    panel_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+    pon_cnn,
+):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_id = "sample_tumor_only_pon"
+    tumor = sample_fastq["tumor"]
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache,
                 "--pon-cnn",
                 pon_cnn,
             ],

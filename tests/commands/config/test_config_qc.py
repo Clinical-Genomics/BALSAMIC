@@ -31,7 +31,7 @@ def test_qc_normal_config(
         result = invoke_cli(
             [
                 "config",
-                "qc",
+                "qc_panel",
                 "-p",
                 panel_bed_file,
                 "-t",
@@ -87,7 +87,7 @@ def test_qc_tumor_only_config(
         result = invoke_cli(
             [
                 "config",
-                "qc",
+                "qc_panel",
                 "-p",
                 panel_bed_file,
                 "-t",
@@ -130,7 +130,7 @@ def test_qc_config_bad_filename(
     case_result = invoke_cli(
         [
             "config",
-            "qc",
+            "qc_panel",
             "-t",
             tumor,
             "-p",
@@ -162,7 +162,7 @@ def test_qc_run_without_permissions(
     result = invoke_cli(
         [
             "config",
-            "qc",
+            "qc_panel",
             "-p",
             panel_bed_file,
             "-t",
@@ -189,7 +189,7 @@ def test_qc_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file):
     result = invoke_cli(
         [
             "config",
-            "qc",
+            "qc_panel",
             "--case-id",
             case_id,
             "-p",
@@ -218,7 +218,7 @@ def test_config_qc_graph_failed(
         case_result = invoke_cli(
             [
                 "config",
-                "qc",
+                "qc_panel",
                 "-p",
                 panel_bed_file,
                 "-t",
@@ -247,7 +247,7 @@ def test_config_qc_graph_failed_value_error(
         case_result = invoke_cli(
             [
                 "config",
-                "qc",
+                "qc_panel",
                 "-p",
                 panel_bed_file,
                 "-t",
