@@ -17,6 +17,7 @@
    :maxdepth: 1
 
    balsamic_filters
+   balsamic_methods
    bioinfo_softwares
 
 
