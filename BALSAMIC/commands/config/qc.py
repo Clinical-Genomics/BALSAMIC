@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 @click.command(
     "qc_panel",
-    short_help="Create a sample config file from input sample data for QC analysis",
+    short_help="Create a sample config file for panel cases to perform QC",
 )
 @click.option(
     "--case-id",
@@ -95,10 +95,7 @@ LOG = logging.getLogger(__name__)
     default=True,
     show_default=True,
     is_flag=True,
-    help=(
-        "UMI processing steps for samples with UMI tags."
-        "For WGS cases, UMI is always disabled."
-    ),
+    help=("UMI processing steps for samples with UMI tags."),
 )
 @click.option(
     "--umi-trim-length",

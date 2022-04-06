@@ -277,7 +277,7 @@ def get_snakefile(analysis_type, reference_genome="hg19"):
 
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
-    if "qc" in analysis_type:
+    if "qc_panel" in analysis_type:
         snakefile = Path(p, "workflows", "QC.smk")
 
     return str(snakefile)
