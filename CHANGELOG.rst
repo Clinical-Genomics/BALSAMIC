@@ -15,6 +15,7 @@ Added:
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
 * SVdb merge SV and CNV #871
+* Readthedocs for BALSAMIC method descriptions #892
 
 Changed:
 ^^^^^^^^
