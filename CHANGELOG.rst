@@ -1,4 +1,4 @@
-[X.X.X]
+[8.2.9]
 -------
 
 
@@ -6,7 +6,7 @@ Added:
 ^^^^^^
 * Added slurm qos tag `express` #885
 * Included more text about UMI-workflow variant calling settings to the readthedocs #888
-
+* Extend QCModel to include `n_base_limit` which outputs in config json `QC` dict
 
 Fixes:
 ^^^^^^
@@ -14,8 +14,8 @@ Fixes:
 
 Changed:
 ^^^^^^^^
-Upgrade black to 22.3.0
-
+* Upgrade black to 22.3.0
+* fastp default setting of `n_base_limit` is changed to `50` from `5`
 
 
 [8.2.8]
@@ -48,7 +48,6 @@ Fixes:
 
 [8.2.7]
 -------
-
 Fixes:
 ^^^^^^
 * Fixes fastqc timeout issues for wgs cases #861
