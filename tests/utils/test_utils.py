@@ -352,7 +352,7 @@ def test_get_snakefile():
         ("paired", "targeted"),
         ("single", "wgs"),
         ("single", "targeted"),
-        ("qc", "targeted"),
+        ("qc_panel", "targeted"),
         ("generate_ref", ""),
         ("pon", ""),
     ]
