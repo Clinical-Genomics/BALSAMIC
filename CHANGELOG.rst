@@ -1,7 +1,6 @@
 [8.2.9]
 -------
 
-
 Added:
 ^^^^^^
 * Added slurm qos tag `express` #885
@@ -16,7 +15,6 @@ Changed:
 ^^^^^^^^
 * Upgrade black to 22.3.0
 * fastp default setting of `n_base_limit` is changed to `50` from `5`
-
 
 [8.2.8]
 -------
