@@ -39,7 +39,8 @@ Removed
 * Unused pon option for SNV calling with TNhaplotyper tumor-only
 * SV and CNV callers from annotation and filtering #871
 * vcfanno from SV annotation
-
+* Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
+* Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
 
 [8.2.8]
 --------
