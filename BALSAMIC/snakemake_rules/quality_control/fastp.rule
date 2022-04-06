@@ -6,7 +6,7 @@ if 'quality_trim' in config['QC'].keys():
     fastp_param_adapter = list()
     fastp_param_umi = list()
     if config['QC']['quality_trim']:
-        fastp_param_qc.extend(["--trim_tail1", "1", "--n_base_limit", "5",
+        fastp_param_qc.extend(["--trim_tail1", "1", "--n_base_limit", "50",
                             "--length_required", config["QC"]["min_seq_length"],
                             "--low_complexity_filter", "--trim_poly_g"])
     else:

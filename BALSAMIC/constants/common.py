@@ -74,7 +74,6 @@ BIOINFO_TOOL_ENV = {
     "gatk": "varcall_py36",
     "vardict": "varcall_py36",
     "svdb": "varcall_py36",
-    "strelka": "varcall_py27",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "delly",
