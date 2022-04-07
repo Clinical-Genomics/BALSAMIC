@@ -10,6 +10,7 @@ Added:
 Fixes:
 ^^^^^^
 * Automate balsamic version for readthedocs install page #888
+* bcftools version locked at `1.10`
 
 Changed:
 ^^^^^^^^
