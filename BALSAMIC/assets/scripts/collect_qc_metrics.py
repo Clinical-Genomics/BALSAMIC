@@ -152,7 +152,7 @@ def get_multiqc_metrics(
                                 input=get_multiqc_data_source(
                                     multiqc_data, sample, source
                                 ),
-                                name=k if "FastQC" not in k else "PERCENT_DUPLICATION",
+                                name=k,
                                 step=source,
                                 value=data[k],
                                 condition=requested_metrics[k]["condition"],
