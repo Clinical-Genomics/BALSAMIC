@@ -11,6 +11,10 @@ Fixes:
 
 * bcftools version locked at `1.10` #909
 
+Changed:
+^^^^^^^^
+* base image of balsamic container to `4.10.3-alphine` #909
+
 
 [8.2.9]
 -------
