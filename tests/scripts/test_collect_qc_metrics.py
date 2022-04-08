@@ -184,8 +184,6 @@ def test_collect_qc_metrics_wgs(tmp_path, multiqc_data_path, cli_runner):
         [str(output_path), multiqc_data_path, seq_type, capture_kit],
     )
 
-    print(output_path)
-
     # THEN check if the YAML is correctly created and there are no errors
     assert result.exit_code == 0
     assert Path(output_path).exists()
