@@ -744,7 +744,7 @@ class MetricModel(BaseModel):
         """Updates the name if the source is FastQC"""
 
         if "fastqc-percent_duplicates" in name:
-            return "PERCENT_DUPLICATION_R_" + values["input"].split("_")[-2]
+            return "PERCENT_DUPLICATION_R" + values["input"].split("_")[-2]
 
         return name
 
