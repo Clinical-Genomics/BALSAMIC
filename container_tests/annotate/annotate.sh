@@ -3,13 +3,14 @@
 
 valid_commands=( "bcftools" "vcfanno" "vcf2cytosure" "genmod" "vep" "vep_install" )
 
-for valid_command in "${valid_commands[@]}"
+for tool in ${valid_commands[@]}
 do
-  if ! command -v "${valid_command}" &> /dev/null
-  then
-    echo "${valid_command} could not be found"
-    exit 1
-  else
-    echo "${valid_command} command is found and valid"
-  fi
+	tool_msg=`$tool --help 2>&1 | grep 'No'`
+	if [[ -z $tool_msg ]]; then 
+		echo "$tool command exists and works";
+	else 
+		echo "$tool command doesnt work";
+		exit 1;
+	fi
 done
+
