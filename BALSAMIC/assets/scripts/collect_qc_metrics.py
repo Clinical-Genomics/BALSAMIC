@@ -144,7 +144,7 @@ def get_multiqc_metrics(
         if isinstance(data, dict):
             for k in data:
                 # Ignore UMI and reverse reads metrics
-                if "umi" not in k and "R_2" not in str(sample):
+                if "umi" not in k:
                     if k in requested_metrics:
                         output_metrics.append(
                             MetricModel(
