@@ -746,6 +746,8 @@ class MetricModel(BaseModel):
         if "fastqc-percent_duplicates" in name:
             return "PERCENT_DUPLICATION_R_" + values["input"].split("_")[-2]
 
+        return name
+
 
 class MetricValidationModel(BaseModel):
     """Defines the metric validation model
