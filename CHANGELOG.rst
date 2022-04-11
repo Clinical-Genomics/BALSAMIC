@@ -17,7 +17,7 @@ Added:
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
 * SVdb merge SV and CNV #871
-* WGS metrics to be extracted and stored to <case>_metrics_deliverables.yaml file #907
+* Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
 
 Changed:
 ^^^^^^^^
