@@ -598,8 +598,6 @@ def sample_config():
         "vcf": {
             "manta": {"mutation": "somatic", "type": "SV"},
             "vardict": {"mutation": "somatic", "type": "SNV"},
-            "pindel": {"mutation": "somatic", "type": "SV"},
-            "strelka": {"mutation": "somatic", "type": "SNV"},
             "mutect": {"mutation": "somatic", "type": "SNV"},
             "tnscope": {"mutation": "somatic", "type": "SNV"},
             "tnsnv": {"mutation": "somatic", "type": "SNV"},
@@ -607,7 +605,6 @@ def sample_config():
             "dnascope": {"mutation": "germline", "type": "SNV"},
             "manta_germline": {"mutation": "germline", "type": "SV"},
             "haplotypecaller": {"mutation": "germline", "type": "SNV"},
-            "strelka_germline": {"mutation": "germline", "type": "SNV"},
         },
         "samples": {
             "S1_R": {

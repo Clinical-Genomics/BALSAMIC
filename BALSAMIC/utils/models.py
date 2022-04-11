@@ -90,6 +90,7 @@ class QCModel(BaseModel):
         umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
         min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
         umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+        n_base_limit : Field(str(int)); supports filtering by limiting the N base number
 
     Raises:
         ValueError:
@@ -105,8 +106,9 @@ class QCModel(BaseModel):
     umi_trim: bool = False
     min_seq_length: int = 25
     umi_trim_length: int = 5
+    n_base_limit: int = 50
 
-    @validator("min_seq_length", "umi_trim_length")
+    @validator("min_seq_length", "umi_trim_length", "n_base_limit")
     def coerce_int_as_str(cls, value):
         return str(value)
 
