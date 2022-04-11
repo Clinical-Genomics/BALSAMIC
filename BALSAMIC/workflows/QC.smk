@@ -136,23 +136,18 @@ rule all:
     input:
         quality_control_results
     output:
-        qc_json_file = os.path.join(get_result_dir(config), "qc", "qc_metrics_summary.json"),
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
         tmp_dir = tmp_dir,
-        result_dir = result_dir,
-        sequencing_type = get_sequencing_type(config),
-        panel_bed = get_capture_kit(config)
     run:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import get_qc_metrics_json
+        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
 
         # Save QC metrics to a JSON file
         try:
-            qc_metrics_summary = get_qc_metrics_json(params.result_dir, params.sequencing_type, params.panel_bed)
-            write_json(qc_metrics_summary, str(output.qc_json_file))
+            validate_qc_metrics(read_yaml(input[1]))
         except ValueError as val_exc:
             LOG.error(val_exc)
             raise BalsamicError
