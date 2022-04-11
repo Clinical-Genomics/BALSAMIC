@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "bcftools" "vcfanno" "genmod" "vep" "vep_install")
+valid_commands=( "bcftools" "vcfanno" "genmod" "vep" "vep_install" "vcf2cytosure" )
 
 for tool in "${valid_commands[@]}"
 do
@@ -9,7 +9,7 @@ do
         echo "$tool command not found in the container"
         exit 1;
     else
-        tool_msg=$($tool 2>&1 | grep 'No')
+        tool_msg=$($tool --help 2>&1 | grep -iw 'No\|Error')
         if [[ -z $tool_msg ]];then
             echo "$tool command found and \"$tool --help\" command executes"
         else
