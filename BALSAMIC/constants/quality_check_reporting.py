@@ -94,7 +94,6 @@ METRICS = {
         "MEAN_INSERT_SIZE": {"condition": None},
         "MEDIAN_COVERAGE": {"condition": None},
         "FastQC_mqc-generalstats-fastqc-percent_duplicates": {"condition": None},
-        "PCT_5X": {"condition": None},
         "PCT_15X": {"condition": None},
         "PCT_30X": {"condition": None},
         "PCT_60X": {"condition": None},
