@@ -47,6 +47,7 @@ def config_files():
         "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
         "panel_bed_file": "tests/test_data/references/panel/panel.bed",
         "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
+        "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
         "pon_fastq_path": "tests/test_data/fastq/",
     }
 
@@ -94,6 +95,11 @@ def panel_bed_file():
 @pytest.fixture(scope="session")
 def background_variant_file():
     return "tests/test_data/references/panel/background_variants.txt"
+
+
+@pytest.fixture(scope="session")
+def pon_cnn():
+    return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
 
 @pytest.fixture(scope="session")
@@ -336,7 +342,7 @@ def tumor_normal_wgs_config(
 
 @pytest.fixture(scope="session")
 def tumor_only_config(
-    tmpdir_factory,
+    tmp_path_factory,
     sample_fastq,
     balsamic_cache,
     background_variant_file,
@@ -431,6 +437,55 @@ def tumor_only_wgs_config(
 
 
 @pytest.fixture(scope="session")
+def tumor_only_pon_config(
+    tmp_path_factory,
+    sample_fastq,
+    balsamic_cache,
+    analysis_dir,
+    panel_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+    pon_cnn,
+):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_id = "sample_tumor_only_pon"
+    tumor = sample_fastq["tumor"]
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--pon-cnn",
+                pon_cnn,
+            ],
+        )
+
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
+
+@pytest.fixture(scope="session")
 def sample_config():
     """
     sample config dict to test workflow utils
@@ -460,8 +515,6 @@ def sample_config():
         "vcf": {
             "manta": {"mutation": "somatic", "type": "SV"},
             "vardict": {"mutation": "somatic", "type": "SNV"},
-            "pindel": {"mutation": "somatic", "type": "SV"},
-            "strelka": {"mutation": "somatic", "type": "SNV"},
             "mutect": {"mutation": "somatic", "type": "SNV"},
             "tnscope": {"mutation": "somatic", "type": "SNV"},
             "tnsnv": {"mutation": "somatic", "type": "SNV"},
@@ -469,7 +522,6 @@ def sample_config():
             "dnascope": {"mutation": "germline", "type": "SNV"},
             "manta_germline": {"mutation": "germline", "type": "SV"},
             "haplotypecaller": {"mutation": "germline", "type": "SNV"},
-            "strelka_germline": {"mutation": "germline", "type": "SNV"},
         },
         "samples": {
             "S1_R": {

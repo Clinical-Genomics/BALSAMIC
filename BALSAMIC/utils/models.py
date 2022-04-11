@@ -90,6 +90,7 @@ class QCModel(BaseModel):
         umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
         min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
         umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+        n_base_limit : Field(str(int)); supports filtering by limiting the N base number
 
     Raises:
         ValueError:
@@ -105,8 +106,9 @@ class QCModel(BaseModel):
     umi_trim: bool = False
     min_seq_length: int = 25
     umi_trim_length: int = 5
+    n_base_limit: int = 50
 
-    @validator("min_seq_length", "umi_trim_length")
+    @validator("min_seq_length", "umi_trim_length", "n_base_limit")
     def coerce_int_as_str(cls, value):
         return str(value)
 
@@ -352,6 +354,7 @@ class PanelModel(BaseModel):
     Attributes:
         capture_kit : Field(str(Path)); string representation of path to PANEL BED file
         chrom : Field(list(str)); list of chromosomes in PANEL BED
+        pon_cnn: Field(optional); Path where PON reference .cnn file is stored
 
     Raises:
         ValueError:
@@ -361,10 +364,17 @@ class PanelModel(BaseModel):
 
     capture_kit: Optional[FilePath]
     chrom: Optional[List[str]]
+    pon_cnn: Optional[FilePath]
 
     @validator("capture_kit")
     def path_as_abspath_str(cls, value):
         return Path(value).resolve().as_posix()
+
+    @validator("pon_cnn")
+    def pon_abspath_as_str(cls, value):
+        if value:
+            return Path(value).resolve().as_posix()
+        return None
 
 
 class PonBalsamicConfigModel(BaseModel):

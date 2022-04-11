@@ -1,6 +1,5 @@
 D_BALSAMIC-py27_test:
 - python
-- strelka
 - manta
 - bcftools
 - tabix
@@ -21,7 +20,6 @@ D_BALSAMIC-py36_test:
 - ensembl-vep
 - cnvkit
 - cutadapt
-- pindel
 - multiqc
 - bedtools
 - svdb
