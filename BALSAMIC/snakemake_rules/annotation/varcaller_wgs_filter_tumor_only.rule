@@ -55,7 +55,6 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
     vcf_pass_tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -94,7 +93,6 @@ bcftools view -f PASS --threads {threads} -O z -o {output.vcf_pass_tnhaplotyper}
 
 tabix -p vcf -f {output.vcf_pass_tnhaplotyper}
 
-bcftools +counts {output.vcf_pass_tnhaplotyper} > {output.bcftools_counts};
     """
 
 
