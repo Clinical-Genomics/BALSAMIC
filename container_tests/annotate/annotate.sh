@@ -9,7 +9,7 @@ do
         echo "$tool command not found in the container"
         exit 1;
     else
-        tool_msg=`$tool 2>&1 | grep 'No'`
+        tool_msg=$($tool 2>&1 | grep 'No')
         if [[ -z $tool_msg ]];then
             echo "$tool command found and \"$tool --help\" command executes"
         else

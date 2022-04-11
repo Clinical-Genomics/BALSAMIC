@@ -5,7 +5,6 @@ Added:
 ^^^^^^
 * `libopenblas=0.3.20` dependency to annotate container for fixing bcftools #909
 
-
 Fixes:
 ^^^^^^
 
@@ -18,7 +17,7 @@ Changed:
 
 Removed:
 ^^^^^^^^
-* Removed failed `vcf2cytsure` installation from annotate container #909
+* Removed failed `vcf2cytosure` installation from annotate container #909
 
 [8.2.9]
 -------
