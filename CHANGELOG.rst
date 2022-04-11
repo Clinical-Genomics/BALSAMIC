@@ -14,7 +14,11 @@ Fixes:
 Changed:
 ^^^^^^^^
 * base image of balsamic container to `4.10.3-alphine` #909
+* Replaced annotate container tests with new code #909
 
+Removed:
+^^^^^^^^
+* Removed failed `vcf2cytsure` installation from annotate container #909
 
 [8.2.9]
 -------
