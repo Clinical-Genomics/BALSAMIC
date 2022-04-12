@@ -35,7 +35,7 @@ and promptly quality controlled using CollectMultipleMetrics and CollectWgsMetri
 Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`7`.
 For each sample, small somatic mutations were called using Sentieon TNscope and TNhaplotyper :superscript:`16`.
 For tumor-only samples, in order to reduce the number of variants the common variants from TNscope and TNhaplotyper were merged using bcftools.
-The called-variants were also further second filtered using the criteria (**link**)
+The called-variants were also further second filtered using the criteria (**link**).
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 The variant calls from Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
 Copy number aberrations were called using ascatNgs v4.5.0` :superscript:`17`.
@@ -77,7 +77,7 @@ We used three commercially available products from SeraCare [Material numbers: 0
 9. Chen, X. et al. (2016) Manta: rapid detection of structural variants and indels for germline and cancer sequencing applications. Bioinformatics, 32, 1220-1222. doi:10.1093/bioinformatics/btv710
 10. Tobias Rausch, Thomas Zichner, Andreas Schlattl, Adrian M. Stuetz, Vladimir Benes, Jan O. Korbel. DELLY: structural variant discovery by integrated paired-end and split-read analysis. Bioinformatics. 2012 Sep 15;28(18):i333-i339. https://doi.org/10.1093/bioinformatics/bts378
 11. Talevich, E, Shain, A.H, Botton, T, & Bastian, B.C. CNVkit: Genome-wide copy number detection and visualization from targeted sequencing. PLOS Computational Biology. 2016, 12(4):e1004873. https://doi.org/10.1371/journal.pcbi.1004873
-12. **SVDB citation**
+12. Jesper Eisfeldt et.al. TIDDIT, an efficient and comprehensive structural variant caller for massive parallel sequencing data. F1000 research. 2017. doi: 10.12688/f1000research.11168.2
 13. McLaren W, Gil L, Hunt SE, et al. The Ensembl Variant Effect Predictor. Genome Biology. 2016;17(1):122.
 14. Pedersen BS, Layer RM, Quinlan AR. Vcfanno: fast, flexible annotation of genetic variants. Genome Biology. 2016;17(1):118. doi:10.1186/s13059-016-0973-5
 15. Donald Freed, Rafael Aldana, Jessica A. Weber, Jeremy S. Edwards. The Sentieon Genomics Tools - A fast and accurate solution to variant calling from next-generation sequence data. Bioinformatics. 2016, Volume 32,Issue 8. https://doi.org/10.1093/bioinformatics/btv710
