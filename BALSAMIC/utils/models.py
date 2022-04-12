@@ -741,6 +741,15 @@ class MetricModel(BaseModel):
     value: Any = ...
     condition: Optional[MetricConditionModel] = ...
 
+    @validator("name")
+    def validate_name(cls, name, values):
+        """Updates the name if the source is FastQC"""
+
+        if "fastqc-percent_duplicates" in name:
+            return "PERCENT_DUPLICATION_R" + values["input"].split("_")[-2]
+
+        return name
+
 
 class MetricValidationModel(BaseModel):
     """Defines the metric validation model
@@ -755,7 +764,7 @@ class MetricValidationModel(BaseModel):
     metrics: List[MetricModel]
 
     @validator("metrics", each_item=True)
-    def check_squares(cls, metric):
+    def validate_metrics(cls, metric):
         """Checks if a metric meets its filtering condition"""
 
         if metric.condition and not VALID_OPS[metric.condition.norm](
