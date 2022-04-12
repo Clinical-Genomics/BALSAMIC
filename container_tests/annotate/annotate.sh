@@ -3,13 +3,18 @@
 
 valid_commands=( "bcftools" "vcfanno" "genmod" "vep" "vep_install" )
 
-for valid_command in "${valid_commands[@]}"
+for tool in "${valid_commands[@]}"
 do
-  if ! command -v "${valid_command}" &> /dev/null
-  then
-    echo "${valid_command} could not be found"
-    exit 1
-  else
-    echo "${valid_command} command is found and valid"
-  fi
+    if ! command -v "${tool}"  &> /dev/null; then
+        echo "$tool command not found in the container"
+        exit 1;
+    else
+        tool_msg=$($tool --help 2>&1 | grep -iw 'No\|Error')
+        if [[ -z $tool_msg ]];then
+            echo "$tool command found and \"$tool --help\" command executes"
+        else
+            echo "$tool found in the container but \"$tool --help\" command not executing"
+            exit 1;
+        fi
+    fi
 done

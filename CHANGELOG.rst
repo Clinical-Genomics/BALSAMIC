@@ -40,6 +40,26 @@ Removed
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
 
+[8.2.10]
+--------
+
+Added:
+^^^^^^
+* `libopenblas=0.3.20` dependency to annotate container for fixing bcftools #909
+
+Fixes:
+^^^^^^
+
+* bcftools version locked at `1.10` #909
+
+Changed:
+^^^^^^^^
+* base image of balsamic container to `4.10.3-alphine` #909
+* Replaced annotate container tests with new code #909
+
+Removed:
+^^^^^^^^
+* Removed failed `vcf2cytosure` installation from annotate container #909
 
 [8.2.9]
 -------
