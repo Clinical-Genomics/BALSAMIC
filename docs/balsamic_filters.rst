@@ -129,6 +129,9 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 **TNscope filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Only those variants that scored as `PASS` in TNscope raw vcf file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz` were considered
+and filtered for wgs interval regions collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
+The resultant variants were further filtered using the following criteria:
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the variant call
 
@@ -174,6 +177,59 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 ::
 
     SOR < 3
+
+
+**TNhaplotyper filtering (tumor_only)**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Only those variants that scored as `PASS` in TNhaplotyper raw vcf file `SNV.somatic.$CASE_ID.tnhaplotyper.all.vcf.gz` were considered
+and filtered for wgs interval regions collected from gatk_bundles (gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list).
+The resultant variants were further filtered using the following criteria:
+
+
+*Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
+
+::
+
+    DP(tumor) >= 10 || DP(normal) >= 10
+
+*Allelic Depth (AD)*: Total reads supporting the ALT allele in tumor sample
+
+::
+
+    AD(tumor) >= 3
+
+*Allelic Frequency (AF)*: Fraction of the reads supporting the alternate allele
+
+::
+
+    Minimum AF(tumor) >= 0.05
+    Maximum AF(tumor) < 1
+
+*GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
+
+::
+
+    GNOMADAF_popmax <= 0.001 (or) GNOMADAF_popmax == "."
+
+*Normalized base quality scores*:  The sum of base quality scores for each allele (QSS) is divided by the allelic depth of alt and ref alleles (AD)
+
+::
+
+    SUM(QSS)/SUM(AD) >= 20
+
+*Read Counts*: Count of reads in a given (F1R2, F2R1) pair orientation supporting the alternate allele and reference alleles
+
+::
+
+    ALT_F1R2 > 0, ALT_F2R1 > 0
+    REF_F1R2 > 0, REF_F2R1 > 0
+
+
+**Merging of TNscope and TNhaplotyper results (tumor_only)**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+For tumor-only samples, in order to reduce the number of reported somatic variants,
+the results of `TNscope filtering (tumor_only)`_ and `TNhaplotyper filtering (tumor_only)`_ filtered results were merged by bcftools intersect
+functionality. Only those variants called by both callers were confidently reported as the final filtered list of variants.
 
 
 **Target Genome Analysis with UMI's into account**
