@@ -34,8 +34,8 @@ Duplicated reads were marked using Picard tools MarkDuplicate v2.25.0 :superscri
 and promptly quality controlled using CollectMultipleMetrics and CollectWgsMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`7`.
 For each sample, small somatic mutations were called using Sentieon TNscope and TNhaplotyper :superscript:`16`.
-For tumor-only samples, in order to reduce the number of variants the common variants from TNscope and TNhaplotyper were merged using bcftools.
-The called-variants were also further second filtered using the criteria (**link**).
+The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
+For tumor-only samples, in order to reduce the number of variants; the filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 The variant calls from Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
 Copy number aberrations were called using ascatNgs v4.5.0` :superscript:`17`.
