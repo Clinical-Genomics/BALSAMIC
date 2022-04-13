@@ -109,7 +109,7 @@ To the variants in TNscope raw vcf file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz
 
 ::
 
-    DP(tumor) >= 10 || DP(normal) >= 10
+    DP(tumor) >= 10 (or) DP(normal) >= 10
 
 *Allelic Depth (AD)*: Total reads supporting the ALT allele in the tumor sample
 
@@ -190,7 +190,7 @@ and the following filters are applied. The variants that scored as `PASS` are co
 
 ::
 
-    DP(tumor) >= 10 || DP(normal) >= 10
+    DP(tumor) >= 10 (or) DP(normal) >= 10
 
 *Allelic Depth (AD)*: Total reads supporting the ALT allele in the tumor sample
 
@@ -229,7 +229,8 @@ and the following filters are applied. The variants that scored as `PASS` are co
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 For tumor-only samples, to reduce the number of reported somatic variants,
 `TNscope filtering (tumor_only)`_ and `TNhaplotyper filtering (tumor_only)`_ results are merged using the `bcftools` intersect
-functionality. Only those variants called by both callers are confidently reported as the final filtered list of variants (`SNV.somatic.{CASE_ID}.tnscope.all.filtered.pass.vcf.gz`)
+functionality. Only those variants called by both callers are confidently reported as the final filtered list of variants (`SNV.somatic.{CASE_ID}.tnscope.all.filtered.pass.vcf.gz`).
+This is the vcf file that is either uploaded to scout or delivered via caesar to the customer.
 
 
 **Target Genome Analysis with UMI's into account**
@@ -251,13 +252,13 @@ The following filter applies for both tumor-normal and tumor-only samples.
 It means that at least `3` UMI tag groups should be ideally considered from both DNA strands, where a minimum of at least `1` UMI tag group should exist in each of the single-stranded consensus reads.
 
 *min_init_tumor_lod*: Log odds is the likelihood that the candidate mutation is real over the likelihood that the candidate mutation is a sequencing error before any read-based filters are applied.
-Minimum log-odds for the candidate selection. TNscope default: `4`
+Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-workflow we reduced this setting to `0.5`
 
 ::
 
     min_init_tumor_lod = 0.5
 
-*min_tumor_lod*: minimum log odds in the final call of variants. TNscope default: `6.3`
+*min_tumor_lod*: minimum log odds in the final call of variants. TNscope default: `6.3`. In our UMI-workflow we reduced this setting to `4.0`
 
 ::
 

@@ -13,13 +13,13 @@ The resulted SAM files were converted to BAM files and sorted using samtools v1.
 Duplicated reads were marked using Picard tools MarkDuplicate v2.25.0 :superscript:`6`
 and promptly quality controlled using CollectHsMetrics, CollectInsertSizeMetrics and CollectAlignmentSummaryMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`7`.
-Small somatic mutations were called for each sample using VarDict v2019.06.04 :superscript:`8`.
+Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict v2019.06.04 :superscript:`8`.
 Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using criteria
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the vcf file were reported.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 Copy number aberrations were called using CNVkit v0.9.4 :superscript:`11`.
-The variant calls from CNVkit,Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
+The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
 All variants were annotated using Ensembl VEP v100.2 :superscript:`13`. Vcfanno v0.3.3 :superscript:`14` annotated variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 
 Whole Genome Analysis
@@ -32,11 +32,11 @@ The resulted SAM files were converted to BAM files and sorted using samtools v1.
 Duplicated reads were marked using Picard tools MarkDuplicate v2.25.0 :superscript:`6`
 and promptly quality controlled using CollectMultipleMetrics and CollectWgsMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`7`.
-Small somatic mutations were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
+Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
 The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
-Copy number aberrations were called using ascatNgs v4.5.0` :superscript:`17`.
+Copy number aberrations were called using ascatNgs v4.5.0 :superscript:`17`.
 The structural variant calls from Manta, Delly and ascatNgs merged using SVDB v2.6.0 :superscript:`12`
 All variants were finally annotated using Ensembl VEP v100.2 :superscript:`13`. Vcfanno v0.3.3 :superscript:`14`
 was used to annotate variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
