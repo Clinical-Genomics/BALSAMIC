@@ -16,6 +16,7 @@ Added:
 * SVdb to TGA workflow #871 
 * SVdb merge SV and CNV #871
 * Readthedocs for BALSAMIC method descriptions #892
+* Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
 
 Changed:
 ^^^^^^^^
