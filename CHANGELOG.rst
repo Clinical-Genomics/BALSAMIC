@@ -15,6 +15,7 @@ Added:
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
 * SVdb merge SV and CNV #871
+* bcftools counts to varcall filter rules #898
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
 
 Changed:
@@ -39,6 +40,7 @@ Removed
 * vcfanno from SV annotation
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
+* bcftools_stats from vep #898
 
 [8.2.10]
 --------
