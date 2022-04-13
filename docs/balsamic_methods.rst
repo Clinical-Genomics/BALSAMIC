@@ -5,15 +5,15 @@ BALSAMIC METHODS
 Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze each of the FASTQ files.
-In summary, we first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
-Adapter sequences and low quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
+BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze the data from raw FASTQ files.
+We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
+Adapter sequences and low-quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using BWA MEM v0.7.15 :superscript:`4`.
 The resulted SAM files were converted to BAM files and sorted using samtools v1.12 :superscript:`5`.
 Duplicated reads were marked using Picard tools MarkDuplicate v2.25.0 :superscript:`6`
 and promptly quality controlled using CollectHsMetrics, CollectInsertSizeMetrics and CollectAlignmentSummaryMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`7`.
-For each sample, small somatic mutations were called using VarDict v2019.06.04 :superscript:`8`.
+Small somatic mutations were called for each sample using VarDict v2019.06.04 :superscript:`8`.
 Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using criteria
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the vcf file were reported.
@@ -25,17 +25,17 @@ and vcfanno v0.3.3 :superscript:`14` to annotate variants for their population a
 
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
-BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze each of the FASTQ files.
-In summary, we first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
-Adapter sequences and low quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
+BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze the data from raw FASTQ files.
+We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
+Adapter sequences and low-quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
 The resulted SAM files were converted to BAM files and sorted using samtools v1.12 :superscript:`5`.
 Duplicated reads were marked using Picard tools MarkDuplicate v2.25.0 :superscript:`6`
 and promptly quality controlled using CollectMultipleMetrics and CollectWgsMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`7`.
-For each sample, small somatic mutations were called using Sentieon TNscope and TNhaplotyper :superscript:`16`.
+Small somatic mutations were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
-For tumor-only samples, in order to reduce the number of variants; the filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality.
+The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 The variant calls from Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
 Copy number aberrations were called using ascatNgs v4.5.0` :superscript:`17`.
@@ -47,19 +47,19 @@ was used to annotate variants for their population allele frequency from gnomAD 
 UMI Data Analysis
 =============================
 
-BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze each of the FASTQ files.
-In summary, we first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
+BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze the data from raw FASTQ files.
+We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
-UMI tag extraction and consensus generation was performed using Sentieon tools v202010.02 :superscript:`15`.
+UMI tag extraction and consensus generation were performed using Sentieon tools v202010.02 :superscript:`15`.
 The alignment of UMI extracted and consensus called reads to the human reference genome (hg19) was done by bwa-mem and
 samtools using Sentieon utils. Consensus reads were filtered based on the number of minimum reads supporting each UMI tag group.
 We applied a criteria filter of minimum reads `3,1,1`. It means that at least three UMI tag groups should be ideally considered from both DNA strands,
-where a minimum of at least one UMI tag group should exist in each of the single-stranded consensus reads.
+where a minimum of at least one UMI tag group should exist in each single-stranded consensus read.
 The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.25.0 :superscript:`5`. Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`6`.
 For each sample, somatic mutations were called using Sentieon TNscope :superscript:`16`, with non-default parameters for passing the final list of variants
 (--min_tumor_allele_frac 0.0005, --filter_t_alt_frac 0.0005, --min_init_tumor_lod 0.5, min_tumor_lod 4, --max_error_per_read 5  --pcr_indel_model NONE, GNOMADAF_popmax <= 0.001).
 All variants were finally annotated using Ensembl VEP v100.2 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
-For exact parameters used for each of the software, please refer to  https://github.com/Clinical-Genomics/BALSAMIC.
+For exact parameters used for each software, please refer to  https://github.com/Clinical-Genomics/BALSAMIC.
 We used three commercially available products from SeraCare [Material numbers: 0710-067110 :superscript:`19`, 0710-067211 :superscript:`20`, 0710-067312 :superscript:`21`] for validating the efficiency of the UMI workflow in identifying 14 mutation sites at known allelic frequencies.
 
 
@@ -82,7 +82,7 @@ We used three commercially available products from SeraCare [Material numbers: 0
 14. Pedersen BS, Layer RM, Quinlan AR. Vcfanno: fast, flexible annotation of genetic variants. Genome Biology. 2016;17(1):118. doi:10.1186/s13059-016-0973-5
 15. Donald Freed, Rafael Aldana, Jessica A. Weber, Jeremy S. Edwards. The Sentieon Genomics Tools - A fast and accurate solution to variant calling from next-generation sequence data. Bioinformatics. 2016, Volume 32,Issue 8. https://doi.org/10.1093/bioinformatics/btv710
 16. Donald Freed, Renke Pan, Rafael Aldana. TNscope: Accurate Detection of Somatic Mutations with Haplotype-based Variant Candidate Detection and Machine Learning Filtering. bioRvix. doi: https://doi.org/10.1101/250647
-17. Keiran MR, Peter VL, David CW, David J, Andrew M, Adam PB , Jon WT, Patrick T, Serena Nik-Zainal, Peter J C. ascatNgs: Identifying Somatically Acquired Copy-Number Alterations from Whole-Genome Sequencing Data. Curr Protoc Bioinformatics. 2016. DOI:  https://doi.org/10.1002/cpbi.17
+17. Keiran MR, Peter VL, David CW, David J, Andrew M, Adam PB , Jon WT, Patrick T, Serena Nik-Zainal, Peter J C. ascatNgs: Identifying Somatically Acquired Copy-Number Alterations from Whole-Genome Sequencing Data. Curr Protoc Bioinformatics. 2016. doi:https://doi.org/10.1002/cpbi.17
 18. Karczewski, K.J., Francioli, L.C., Tiao, G. et al. The mutational constraint spectrum quantified from variation in 141,456 humans. Nature 581, 434–443 (2020). https://doi.org/10.1038/s41586-020-2308-7
 19. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF1-0710-0671/
 20. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF05-0710-0672/
