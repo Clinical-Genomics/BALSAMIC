@@ -3,9 +3,9 @@ BALSAMIC Variant Calling Algorithms
 ***********************************
 
 In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis,
-for eg: `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)`. Various filters (Pre-call filtering and Post-call filtering) are applied at different levels to report high-confidence variant calls.
+eg: `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)`. Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
 
-* **Pre-call filtering** is where the variant-calling tool decides not to call a variant line to the VCF file, if the default filters did not pass the criteria. The set of default filters differs between the various variant-calling algorithms.
+**Pre-call filtering** is where the variant-calling tool decides not to call a variant line to the VCF file if the default filters did not pass the criteria. The set of default filters differs between the various variant-calling algorithms.
 
 To know more about the pre-call filters used by the variant callers, please have a look at the VCF header of the particular variant-calling results.
 For example:
@@ -13,22 +13,25 @@ For example:
 ..  figure:: images/vcf_filters.png
     :width: 500px
 
-    Pre-call filters applied by the `Vardict` variant-caller is listed out in the VCF header
+    Pre-call filters applied by the `Vardict` variant-caller is listed in the VCF header.
 
 
-In the VCF file, `FILTER` status is `PASS` if this position has passed all filters, i.e., a call is made at this position. Otherwise,
+In the VCF file, the `FILTER` status is `PASS` if this position has passed all filters, i.e., a call is made at this position. Otherwise,
 if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g., `p8;pSTD` might
 indicate that at this site, the mean position in reads is less than 8 and position in reads has a standard deviation of 0.
 
-.. important::
+.. note::
+
     In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)
+
 
 ..  figure:: images/filter_status.png
     :width: 500px
 
     Vardict Variant calls with different 'FILTER' status underlined in white line (`NM4.5`, `PASS`, `p8;pSTD`)
 
-* **Post-call filtering** is where a variant is further filtered with criteria such as quality, depth, VAF etc with more stringent thresholds.
+
+**Post-call filtering** is where a variant is further filtered with quality, depth, VAF, etc., with more stringent thresholds.
 
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
@@ -41,7 +44,6 @@ For `Post-call filtering`, in BALSAMIC we have applied various filtering criteri
 Somatic Callers for reporting SNVs/INDELS
 ******************************************
 
-
 **Vardict**
 ===========
 
@@ -51,7 +53,7 @@ These high-confidence variant calls are the final list of variants uploaded to S
 
 **Vardict_filtering**
 ^^^^^^^^^^^^^^^^^^^^^^
-Following are the set of criterias applied for filtering vardict results. Applies for both tumor-normal and tumor-only samples
+Following is the set of criteria applied for filtering vardict results. It is used for both tumor-normal and tumor-only samples.
 
 *Mean Mapping Quality (MQ)*: Refers to the root mean square (RMS) mapping quality of all the reads spanning the given variant site.
 
@@ -88,7 +90,7 @@ Following are the set of criterias applied for filtering vardict results. Applie
     GNOMADAF_popmax <= 0.005  (or) GNOMADAF_popmax == "."
 
 .. important::
-    Additionally, for tumor-normal cases; the variant is excluded if it marked as 'germline' in the `STATUS` column of vcf file.
+    Additionally, the variant is excluded for tumor-normal cases if marked as 'germline' in the `STATUS` column of the vcf file.
 
 **Whole Genome Sequencing (WGS)**
 **********************************
@@ -96,11 +98,12 @@ Following are the set of criterias applied for filtering vardict results. Applie
 **Sentieon's TNscope**
 =======================
 
-BALSAMIC utilizes `TNscope` algorithm for the variant calling of somatic SNV/INDELS in WGS samples.
+BALSAMIC utilizes the `TNscope` algorithm for the variant calling of somatic SNV/INDELS in WGS samples.
 The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algorithm performs the somatic variant calling on the tumor-normal or the tumor-only samples, using a Haplotyper algorithm.
 
 **TNscope filtering (Tumor_normal)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To the variants in TNscope raw vcf file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz`, the following filters are applied and those that scored as `PASS` are considered to the final vcf file `SNV.somatic.$CASE_ID.tnscope.all.filtered.pass.vcf.gz`.
 
 *Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
 
@@ -108,7 +111,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     DP(tumor) >= 10 || DP(normal) >= 10
 
-*Allelic Depth (AD)*: Total reads supporting the ALT allele in tumor sample
+*Allelic Depth (AD)*: Total reads supporting the ALT allele in the tumor sample
 
 ::
 
@@ -129,9 +132,8 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 **TNscope filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Only those variants that scored as `PASS` in TNscope raw vcf file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz` were considered
-and filtered for wgs interval regions collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
-The resultant variants were further filtered using the following criteria:
+The variants in TNscope raw vcf file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz` are filtered for WGS interval regions; collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
+and following filters are applied. The variants that scored as `PASS` are considered for `**Merging of TNscope and TNhaplotyper results (tumor_only)**`_
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the variant call
 
@@ -139,7 +141,7 @@ The resultant variants were further filtered using the following criteria:
 
     DP(tumor) >= 10
 
-*Allelic Depth (AD)*: Total reads supporting the ALT allele in tumor sample
+*Allelic Depth (AD)*: Total reads supporting the ALT allele in the tumor sample
 
 ::
 
@@ -181,10 +183,8 @@ The resultant variants were further filtered using the following criteria:
 
 **TNhaplotyper filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Only those variants that scored as `PASS` in TNhaplotyper raw vcf file `SNV.somatic.$CASE_ID.tnhaplotyper.all.vcf.gz` were considered
-and filtered for wgs interval regions collected from gatk_bundles (gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list).
-The resultant variants were further filtered using the following criteria:
-
+The variants in TNhaplotyper raw vcf file `SNV.somatic.$CASE_ID.tnhaplotyper.all.vcf.gz` are filtered for WGS interval regions; collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
+and the following filters are applied. The variants that scored as `PASS` are considered for `Merging of TNscope and TNhaplotyper results (tumor_only)`_
 
 *Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
 
@@ -192,7 +192,7 @@ The resultant variants were further filtered using the following criteria:
 
     DP(tumor) >= 10 || DP(normal) >= 10
 
-*Allelic Depth (AD)*: Total reads supporting the ALT allele in tumor sample
+*Allelic Depth (AD)*: Total reads supporting the ALT allele in the tumor sample
 
 ::
 
@@ -227,9 +227,9 @@ The resultant variants were further filtered using the following criteria:
 
 **Merging of TNscope and TNhaplotyper results (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-For tumor-only samples, in order to reduce the number of reported somatic variants,
-the results of `TNscope filtering (tumor_only)`_ and `TNhaplotyper filtering (tumor_only)`_ filtered results were merged by bcftools intersect
-functionality. Only those variants called by both callers were confidently reported as the final filtered list of variants.
+For tumor-only samples, to reduce the number of reported somatic variants,
+`TNscope filtering (tumor_only)`_ and `TNhaplotyper filtering (tumor_only)`_ results are merged using the `bcftools` intersect
+functionality. Only those variants called by both callers are confidently reported as the final filtered list of variants (`SNV.somatic.{CASE_ID}.tnscope.all.filtered.pass.vcf.gz`)
 
 
 **Target Genome Analysis with UMI's into account**
@@ -248,16 +248,16 @@ The following filter applies for both tumor-normal and tumor-only samples.
 
     minreads = 3,1,1
 
-Which means that at least `3` UMI tag groups should be ideally considered from both DNA strands, where a minimum of atleast `1` UMI tag group should exist in each of the single-stranded consensus reads.
+It means that at least `3` UMI tag groups should be ideally considered from both DNA strands, where a minimum of at least `1` UMI tag group should exist in each of the single-stranded consensus reads.
 
-*min_init_tumor_lod* : Log odds is the likelihood that the candidate mutation is real over the likelihood that the candidate mutation is a sequencing error before any read-based filters are applied.
-minimum log odds for the candidate selection. TNscope default: `4`
+*min_init_tumor_lod*: Log odds is the likelihood that the candidate mutation is real over the likelihood that the candidate mutation is a sequencing error before any read-based filters are applied.
+Minimum log-odds for the candidate selection. TNscope default: `4`
 
 ::
 
     min_init_tumor_lod = 0.5
 
-*min_tumor_lod* : minimum log odds in the final call of variants. TNscope default: `6.3`
+*min_tumor_lod*: minimum log odds in the final call of variants. TNscope default: `6.3`
 
 ::
 
