@@ -17,6 +17,7 @@ Added:
 * SVdb merge SV and CNV #871
 * Readthedocs for BALSAMIC method descriptions #892
 * Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
+* bcftools counts to varcall filter rules #898
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
 
 Changed:
@@ -41,6 +42,7 @@ Removed
 * vcfanno from SV annotation
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
+* bcftools_stats from vep #898
 
 [8.2.10]
 --------

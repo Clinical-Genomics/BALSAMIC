@@ -6,7 +6,8 @@ rule bcftools_filter_svdb:
   input:
     vcf = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
   output:
-    vcf_sv_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.vcf.gz",
+    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.stats"
   benchmark:
     benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.vep.tsv"
   singularity:
@@ -20,7 +21,9 @@ rule bcftools_filter_svdb:
     "Filtering svdb merged Manta and Delly results for PASS variants using bcftools for sample '{params.case_name}' "
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_sv_pass_svdb} -O z {input.vcf};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb} -O z {input.vcf};
 
-tabix -p vcf -f {output.vcf_sv_pass_svdb};
+tabix -p vcf -f {output.vcf_pass_svdb};
+
+bcftools +counts {output.vcf_pass_svdb} > {output.bcftools_counts};
     """
