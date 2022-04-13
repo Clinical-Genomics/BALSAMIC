@@ -90,5 +90,14 @@ METRICS = {
             "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}},
         },
     },
-    "wgs": {"FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}}},
+    "wgs": {
+        "MEAN_INSERT_SIZE": {"condition": None},
+        "MEDIAN_COVERAGE": {"condition": None},
+        "FastQC_mqc-generalstats-fastqc-percent_duplicates": {"condition": None},
+        "PCT_15X": {"condition": None},
+        "PCT_30X": {"condition": None},
+        "PCT_60X": {"condition": None},
+        "PCT_100X": {"condition": None},
+        "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}},
+    },
 }
