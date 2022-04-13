@@ -117,7 +117,7 @@ sentieon-tools
 svdb
 ~~~~
 :Source code: `Github` `<https://github.com/J35P312/SVDB>`_
-:Article: `` `<>`_
+:Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
 :Version: `2.6.0`
 
 tabix
