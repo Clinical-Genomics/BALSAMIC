@@ -14,14 +14,14 @@ Duplicated reads were marked using Picard tools MarkDuplicate v2.25.0 :superscri
 and promptly quality controlled using CollectHsMetrics, CollectInsertSizeMetrics and CollectAlignmentSummaryMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`7`.
 Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict v2019.06.04 :superscript:`8`.
-Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using criteria
+Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using the criteria
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 Copy number aberrations were called using CNVkit v0.9.4 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
 All variants were annotated using Ensembl VEP v100.2 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
-to annotate somatic variants to report for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
@@ -38,9 +38,9 @@ The called-variants were also further second filtered using the criteria (DP(tum
 The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 Copy number aberrations were called using ascatNgs v4.5.0 :superscript:`17` for tumor-normal samples.
-The structural variant calls from Manta, Delly and ascatNgs merged using SVDB v2.6.0 :superscript:`12`
+The structural variant calls from Manta, Delly and ascatNgs were merged using SVDB v2.6.0 :superscript:`12`
 All variants were finally annotated using Ensembl VEP v100.2 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
-to annotate somatic variants to report for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 
 =============================
 UMI Data Analysis
