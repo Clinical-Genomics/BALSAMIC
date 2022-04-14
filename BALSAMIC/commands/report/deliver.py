@@ -5,7 +5,6 @@ import json
 import yaml
 import click
 import snakemake
-import datetime
 import subprocess
 from pathlib import Path
 
@@ -31,25 +30,6 @@ LOG = logging.getLogger(__name__)
     "-s",
     required=True,
     help="Sample config file. Output of balsamic config sample",
-)
-@click.option(
-    "--sample-id-map",
-    required=False,
-    help=(
-        "Separated internal sample ID with external ID. Use comma for"
-        "multiple samples. These IDs MUST exist in sample-config."
-        "Syntax: internal_id:sample_type:external_id"
-        ". e.g. ACC1:tumor:KS454,ACC2:normal:KS556"
-    ),
-)
-@click.option(
-    "--case-id-map",
-    required=False,
-    help=(
-        "Separated internal case ID with external ID."
-        "Syntax: gene_panel_name:external_id"
-        ". e.g. gmck-solid:KSK899:apptag"
-    ),
 )
 @click.option(
     "-a",
@@ -91,8 +71,6 @@ def deliver(
     rules_to_deliver,
     delivery_mode,
     disable_variant_caller,
-    sample_id_map,
-    case_id_map,
 ):
     """
     cli for deliver sub-command.
