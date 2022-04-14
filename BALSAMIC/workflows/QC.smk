@@ -143,15 +143,6 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
-
-        # Save QC metrics to a JSON file
-        try:
-            validate_qc_metrics(read_yaml(input[1]))
-        except ValueError as val_exc:
-            LOG.error(val_exc)
-            raise BalsamicError
-
         # Delete a temporal directory tree
         try:
             shutil.rmtree(params.tmp_dir)
