@@ -30,6 +30,7 @@ Fixed:
 * Automate balsamic version for readthedocs install page #888
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
 * QC metric validation for different panel bed version #855
+* Fixed development version of ``fpdf2`` to ``2.4.6`` #878
 
 Removed
 ^^^^^^^
