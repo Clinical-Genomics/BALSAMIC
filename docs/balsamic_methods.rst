@@ -16,7 +16,7 @@ Results of the quality controlled steps were summarized by MultiQC v1.11 :supers
 Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict v2019.06.04 :superscript:`8`.
 Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using criteria
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005*).
-Only those variants that fulfilled the filtering criteria and scored as `PASS` in the vcf file were reported.
+Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 Copy number aberrations were called using CNVkit v0.9.4 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.

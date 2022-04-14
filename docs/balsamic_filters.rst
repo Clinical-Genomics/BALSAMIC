@@ -3,7 +3,7 @@ BALSAMIC Variant Calling Algorithms
 ***********************************
 
 In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis,
-eg: `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`. Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
+e.g.: `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`. Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
 
 **Pre-call filtering** is where the variant-calling tool decides not to add a variant to the VCF file if the default filters of the variant-caller did not pass the filter criteria. The set of default filters differs between the various variant-calling algorithms.
 
@@ -16,10 +16,10 @@ For example:
     Pre-call filters applied by the `Vardict` variant-caller is listed in the VCF header.
 
 
-In the VCF file, the `FILTER` status is `PASS` if this position has passed all filters, i.e., a call is made at this position. Otherwise,
-if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g., `p8;pSTD` might
-indicate that at this site, the mean position in reads is less than 8 and position in reads has a standard deviation of 0.
-More information about the default parameters/filters can be found in the documentation of the variant-caller.
+In the VCF file, the `FILTER` status is `PASS` if this position has passed all filters, i.e., a call is made at this position. Contrary,
+if the site has not passed any of the filters, a semicolon-separated list of those failed filter(s) will be appended to the `FILTER` column instead of `PASS`. E.g., `p8;pSTD` might
+indicate that at this site, the mean position in reads is less than 8, and the position in reads has a standard deviation of 0.
+
 
 .. note::
 
@@ -36,7 +36,7 @@ More information about the default parameters/filters can be found in the docume
 
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
-.. important::
+.. note::
     In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)
 
 **Targeted Genome Analysis**
@@ -104,7 +104,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 **TNscope filtering (Tumor_normal)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The following filters are applied to the variants in TNscope raw vcf file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz` and the variants scored as `PASS` are included in the final vcf file `SNV.somatic.$CASE_ID.tnscope.all.filtered.pass.vcf.gz`.
+The following filters are applied to the variants in TNscope raw VCF file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz` and the variants scored as `PASS` are included in the final vcf file `SNV.somatic.$CASE_ID.tnscope.all.filtered.pass.vcf.gz`.
 
 *Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
 
@@ -133,7 +133,7 @@ The following filters are applied to the variants in TNscope raw vcf file `SNV.s
 
 **TNscope filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The somatic variants in TNscope raw vcf file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz` are filtered out for the genomic regions that are not reliable (eg: centromeric regions, non-chromosome contigs) to enhance the computation time. This WGS interval region file is collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
+The somatic variants in TNscope raw VCF file `SNV.somatic.$CASE_ID.tnscope.all.vcf.gz` are filtered out for the genomic regions that are not reliable (eg: centromeric regions, non-chromosome contigs) to enhance the computation time. This WGS interval region file is collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
 and following filters are applied. The variants that scored as `PASS` are considered for `**Merging of TNscope and TNhaplotyper results (tumor_only)**`_
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the variant call
@@ -184,7 +184,7 @@ and following filters are applied. The variants that scored as `PASS` are consid
 
 **TNhaplotyper filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The somatic variants in TNhaplotyper raw vcf file `SNV.somatic.$CASE_ID.tnhaplotyper.all.vcf.gz` are filtered out for the genomic regions that are not reliable (eg: centromeric regions, non-chromosome contigs) to enhance the computation time. This WGS interval region file is collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
+The somatic variants in TNhaplotyper raw VCF file `SNV.somatic.$CASE_ID.tnhaplotyper.all.vcf.gz` are filtered out for the genomic regions that are not reliable (eg: centromeric regions, non-chromosome contigs) to enhance the computation time. This WGS interval region file is collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
 and following filters are applied. The variants that scored as `PASS` are considered for `**Merging of TNscope and TNhaplotyper results (tumor_only)**`_
 
 
