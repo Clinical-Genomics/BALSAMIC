@@ -8,7 +8,7 @@ from pathlib import Path
 from copy import deepcopy
 
 from BALSAMIC.utils.rule import get_script_path
-from BALSAMIC.utils.rule import get_reference_output_files 
+from BALSAMIC.utils.rule import get_reference_output_files
 from BALSAMIC.utils.models import ReferenceMeta
 from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL
 from BALSAMIC.utils.cli import get_md5
@@ -27,7 +27,7 @@ basedir = os.path.join(config['output'])
 genome_dir = os.path.join(basedir, "genome")
 
 # Set temporary dir environment variable
-os.environ['TMPDIR'] = basedir 
+os.environ['TMPDIR'] = basedir
 
 REFERENCE_FILES = deepcopy(REFERENCE_MODEL)
 
@@ -36,7 +36,7 @@ REFERENCE_FILES[genome_ver]['basedir'] = basedir
 reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES[genome_ver])
 reference_genome_url = reference_file_model.reference_genome
 genome_chrom_size_url = reference_file_model.genome_chrom_size
-refgene_txt_url = reference_file_model.refgene_txt 
+refgene_txt_url = reference_file_model.refgene_txt
 refgene_sql_url = reference_file_model.refgene_sql
 
 check_md5 = os.path.join(basedir, "reference.json.md5")
@@ -45,11 +45,11 @@ shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 singularity_image_path = config['singularity']['image_path']
-singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()] 
+singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()]
 
 ##########################################################
 # Generating Reference files for BALSAMIC pipeline
-# Writing reference json file 
+# Writing reference json file
 ##########################################################
 
 rule all:
@@ -71,7 +71,7 @@ rule all:
         os.path.join(basedir, "reference.json.log")
     run:
         import json
-        from datetime import datetime 
+        from datetime import datetime
 
         today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -87,7 +87,7 @@ rule all:
 
         with open(str(output.reference_json), "w") as fh:
             json.dump(ref_json, fh, indent=4)
-        
+
         create_md5(ref_json['reference'], output.check_md5)
 
         with open(str(output.finished), mode='w') as finish_file:
@@ -105,7 +105,7 @@ rule download_container:
 	  shell(cmd)
 
 ##########################################################
-# Download the reference genome, variant db 
+# Download the reference genome, variant db
 ##########################################################
 download_content = [reference_genome_url,  genome_chrom_size_url, refgene_txt_url, refgene_sql_url]
 
@@ -129,7 +129,7 @@ rule download_reference:
             ref.write_md5
 
 ##########################################################
-# Preprocess refseq file by fetching relevant columns and 
+# Preprocess refseq file by fetching relevant columns and
 # standardize the chr column
 ##########################################################
 
@@ -146,7 +146,7 @@ rule prepare_refgene:
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
     shell:
         """
 header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
@@ -158,7 +158,6 @@ header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
 
 awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt} \
 | cut -f 1-11 > {output.refflat};
-sed -i 's/chr//g' {input.refgene_txt};
         """
 
 ##########################################################
@@ -173,7 +172,7 @@ rule bwa_index:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome_url.get_output_file + ".bwa_index.log"
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     shell:
         """
 bwa index -a bwtsw {input.reference_genome} 2> {log};
@@ -191,7 +190,7 @@ rule samtools_index_fasta:
         reference_genome_url.get_output_file + ".fai"
     log:
         reference_genome_url.get_output_file + ".faidx.log"
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     shell:
         """
 samtools faidx {input.reference_genome} 2> {log};
@@ -210,7 +209,7 @@ rule picard_ref_dict:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
         reference_genome_url.get_output_file + ".ref_dict.log"
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     shell:
         """
 picard CreateSequenceDictionary REFERENCE={input.reference_genome} OUTPUT={output} 2> {log};
