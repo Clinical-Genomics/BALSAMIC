@@ -41,6 +41,8 @@ Removed
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
 * bcftools_stats from vep #898
+* QC delivery report workflow (generating the ``<case>_qc_report.html`` file) #878
+* ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command #878
 
 [8.2.10]
 --------
