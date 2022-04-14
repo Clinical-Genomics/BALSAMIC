@@ -20,7 +20,8 @@ Only those variants that fulfilled the filtering criteria and scored as `PASS` i
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
 Copy number aberrations were called using CNVkit v0.9.4 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
-All variants were annotated using Ensembl VEP v100.2 :superscript:`13`. Vcfanno v0.3.3 :superscript:`14` annotated variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+All variants were annotated using Ensembl VEP v100.2 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
+to annotate somatic variants to report for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
@@ -36,10 +37,10 @@ Small somatic mutations (SNVs and INDELs) were called for each sample using Sent
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
 The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
 Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
-Copy number aberrations were called using ascatNgs v4.5.0 :superscript:`17`.
+Copy number aberrations were called using ascatNgs v4.5.0 :superscript:`17` for tumor-normal samples.
 The structural variant calls from Manta, Delly and ascatNgs merged using SVDB v2.6.0 :superscript:`12`
-All variants were finally annotated using Ensembl VEP v100.2 :superscript:`13`. Vcfanno v0.3.3 :superscript:`14`
-was used to annotate variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+All variants were finally annotated using Ensembl VEP v100.2 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
+to annotate somatic variants to report for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 
 =============================
 UMI Data Analysis
@@ -56,7 +57,7 @@ where a minimum of at least one UMI tag group should exist in each single-strand
 The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.25.0 :superscript:`5`. Results of the quality controlled steps were summarized by MultiQC v1.11 :superscript:`6`.
 For each sample, somatic mutations were called using Sentieon TNscope :superscript:`16`, with non-default parameters for passing the final list of variants
 (--min_tumor_allele_frac 0.0005, --filter_t_alt_frac 0.0005, --min_init_tumor_lod 0.5, min_tumor_lod 4, --max_error_per_read 5  --pcr_indel_model NONE, GNOMADAF_popmax <= 0.001).
-All variants were finally annotated using Ensembl VEP v100.2 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+All variants were finally annotated using Ensembl VEP v100.2 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 For exact parameters used for each software, please refer to  https://github.com/Clinical-Genomics/BALSAMIC.
 We used three commercially available products from SeraCare [Material numbers: 0710-067110 :superscript:`19`, 0710-067211 :superscript:`20`, 0710-067312 :superscript:`21`] for validating the efficiency of the UMI workflow in identifying 14 mutation sites at known allelic frequencies.
 
