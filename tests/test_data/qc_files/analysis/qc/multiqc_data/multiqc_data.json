@@ -11,6 +11,14 @@
             "DuplicationMetrics": {
                 "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
             }
+        },
+        "FastQC": {
+            "all_sections": {
+                "concatenated_tumor_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_2_fastqc.zip",
+                "concatenated_normal_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_normal_XXXXXX_R_1_fastqc.zip",
+                "concatenated_normal_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_normal_XXXXXX_R_2_fastqc.zip",
+                "concatenated_tumor_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_1_fastqc.zip"
+            }
         }
     },
     "report_saved_raw_data": {
@@ -75,6 +83,24 @@
                 "UNPAIRED_READ_DUPLICATES": 5790.0,
                 "READ_PAIR_DUPLICATES": 18741892.0,
                 "PERCENT_DUPLICATION": 0.391429
+            }
+        },
+        "multiqc_general_stats": {
+            "concatenated_tumor_XXXXXX_R_2": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 15.03521942842923,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 600529762.0
+            },
+            "concatenated_normal_XXXXXX_R_1": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 14.426654287440797,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 464581551.0
+            },
+            "concatenated_normal_XXXXXX_R_2": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 14.214689357571501,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 464581551.0
+            },
+            "concatenated_tumor_XXXXXX_R_1": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 15.213739762327492,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 600529762.0
             }
         }
     }

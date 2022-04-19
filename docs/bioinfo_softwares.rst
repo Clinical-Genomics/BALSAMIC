@@ -2,7 +2,7 @@
 Workflow
 ========
 
-BALSAMIC ( **version** = 8.2.9 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 8.2.10 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 
@@ -113,6 +113,12 @@ sentieon-tools
 :Source code: `Commercial Tool` `<https://www.sentieon.com/>`_
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
 :Version: `202010.02`
+
+svdb
+~~~~
+:Source code: `Github` `<https://github.com/J35P312/SVDB>`_
+:Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
+:Version: `2.6.0`
 
 tabix
 ~~~~~

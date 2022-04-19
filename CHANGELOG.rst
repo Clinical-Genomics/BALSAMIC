@@ -15,6 +15,11 @@ Added:
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858
 * SVdb to TGA workflow #871
 * SVdb merge SV and CNV #871
+* Readthedocs for BALSAMIC method descriptions #892
+* Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
+* bcftools counts to varcall filter rules #898
+* Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
+* ascatNGS copynumber file #897
 
 Changed:
 ^^^^^^^^
@@ -29,6 +34,7 @@ Fixed:
 * Automate balsamic version for readthedocs install page #888
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
 * QC metric validation for different panel bed version #855
+* Fixed development version of ``fpdf2`` to ``2.4.6`` #878
 
 Removed
 ^^^^^^^
@@ -39,7 +45,30 @@ Removed
 * vcfanno from SV annotation
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
+* bcftools_stats from vep #898
+* QC delivery report workflow (generating the ``<case>_qc_report.html`` file) #878
+* ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command #878
 
+[8.2.10]
+--------
+
+Added:
+^^^^^^
+* `libopenblas=0.3.20` dependency to annotate container for fixing bcftools #909
+
+Fixes:
+^^^^^^
+
+* bcftools version locked at `1.10` #909
+
+Changed:
+^^^^^^^^
+* base image of balsamic container to `4.10.3-alphine` #909
+* Replaced annotate container tests with new code #909
+
+Removed:
+^^^^^^^^
+* Removed failed `vcf2cytosure` installation from annotate container #909
 
 [8.2.9]
 -------

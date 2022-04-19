@@ -7,8 +7,7 @@ from typing import List, Union
 import click
 import yaml
 
-from BALSAMIC.constants.quality_check_reporting import METRICS
-
+from BALSAMIC.constants.qc_metrics import METRICS
 from BALSAMIC.utils.models import MetricModel
 
 
@@ -49,6 +48,7 @@ def collect_qc_metrics(
 
 def capture_kit_resolve_type(capture_kit: str):
     """Resolves the capture_kit type (NoneType or String)"""
+
     if capture_kit == "None":
         return None
     else:
@@ -67,9 +67,12 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
         A source file that was used to produce a specific metric
     """
 
-    # Use case: splits multiqc_picard_dups into ['multiqc', 'picard', 'dup'] in order to retrieve the
-    # ["report_data_sources"]["Picard"]["DuplicationMetrics"] values from multiqc_data.json
-    subtool_name = tool[:-1].split("_")
+    if tool == "multiqc_general_stats":
+        subtool_name = ["multiqc", "FastQC", "all_sections"]
+    else:
+        # Use case: splits multiqc_picard_dups into ['multiqc', 'picard', 'dup'] in order to retrieve the
+        # ["report_data_sources"]["Picard"]["DuplicationMetrics"] values from multiqc_data.json
+        subtool_name = tool[:-1].split("_")
 
     # Nested json fetching
     for source_tool in multiqc_data["report_data_sources"]:
@@ -139,6 +142,7 @@ def get_multiqc_metrics(
 
         if isinstance(data, dict):
             for k in data:
+                # Ignore UMI and reverse reads metrics
                 if "umi" not in k:
                     if k in requested_metrics:
                         output_metrics.append(
