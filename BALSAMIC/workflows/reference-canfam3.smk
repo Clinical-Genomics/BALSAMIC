@@ -154,9 +154,9 @@ header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
 | csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 \
 | csvformat -T \
 | bedtools expand -c 2,3 \
-| awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed};
+| awk '$1~/chr[1-9]/ && $1!~/[_]/' | sort -k1,1 -k2,2n > {output.bed};
 
-awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt} \
+awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"chr\",$3); $1=$13; print }}' {input.refgene_txt} \
 | cut -f 1-11 > {output.refflat};
         """
 
