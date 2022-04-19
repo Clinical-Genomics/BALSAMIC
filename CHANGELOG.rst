@@ -19,6 +19,7 @@ Added:
 * Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
 * bcftools counts to varcall filter rules #898
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
+* ascatNGS copynumber file #897
 
 Changed:
 ^^^^^^^^

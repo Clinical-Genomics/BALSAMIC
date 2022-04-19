@@ -4,4 +4,4 @@ coveralls
 pylint
 black==22.3.0
 pillow>=8.4.0
-fpdf2>=2.4.6
+fpdf2==2.4.6
