@@ -20,7 +20,7 @@ Added:
 * bcftools counts to varcall filter rules #898
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
 * ascatNGS copynumber file #897
-* ReadtheDocs for BALSAMIC annotation resources
+* ReadtheDocs for BALSAMIC annotation resources #916
 
 Changed:
 ^^^^^^^^
