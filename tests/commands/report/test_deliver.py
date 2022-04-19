@@ -31,10 +31,6 @@ def test_deliver_tumor_only_panel(
                 "deliver",
                 "--sample-config",
                 tumor_only_config,
-                "--sample-id-map",
-                "tumor:tumor:KS454",
-                "--case-id-map",
-                "gmck-solid:KSK899:apptag",
                 "--disable-variant-caller",
                 "cnvkit",
             ]
@@ -93,16 +89,7 @@ def test_deliver_tumor_normal_panel(
     ), caplog.at_level(logging.DEBUG):
         # WHEN running analysis
         result = invoke_cli(
-            [
-                "report",
-                "deliver",
-                "--sample-config",
-                tumor_normal_config,
-                "--sample-id-map",
-                "tumor:tumor:KS454,normal:normal:KS999",
-                "--case-id-map",
-                "gmck-solid:KSK899:apptag",
-            ]
+            ["report", "deliver", "--sample-config", tumor_normal_config]
         )
 
         # THEN it should run without any error

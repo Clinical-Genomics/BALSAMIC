@@ -33,6 +33,7 @@ Fixed:
 * Automate balsamic version for readthedocs install page #888
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
 * QC metric validation for different panel bed version #855
+* Fixed development version of ``fpdf2`` to ``2.4.6`` #878
 
 Removed
 ^^^^^^^
@@ -44,6 +45,8 @@ Removed
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
 * bcftools_stats from vep #898
+* QC delivery report workflow (generating the ``<case>_qc_report.html`` file) #878
+* ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command #878
 
 [8.2.10]
 --------
