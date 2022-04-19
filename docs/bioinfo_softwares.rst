@@ -114,6 +114,12 @@ sentieon-tools
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
 :Version: `202010.02`
 
+svdb
+~~~~
+:Source code: `Github` `<https://github.com/J35P312/SVDB>`_
+:Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
+:Version: `2.6.0`
+
 tabix
 ~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/tabix>`_

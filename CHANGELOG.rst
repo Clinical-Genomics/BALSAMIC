@@ -15,6 +15,8 @@ Added:
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
 * SVdb merge SV and CNV #871
+* Readthedocs for BALSAMIC method descriptions #892
+* Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
 * bcftools counts to varcall filter rules #898
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
 
