@@ -22,14 +22,6 @@
             "mutation": "somatic",
             "type": "SNV"
         },
-        "pindel": {
-            "mutation": "somatic",
-            "type": "SV"
-        },
-        "strelka": {
-            "mutation": "somatic",
-            "type": "SNV"
-        },
         "mutect": {
             "mutation": "somatic",
             "type": "SNV"
@@ -55,10 +47,6 @@
               "type": "SV"
         }, 
         "haplotypecaller": {
-            "mutation": "germline",
-            "type": "SNV"
-        },
-        "strelka_germline": {
             "mutation": "germline",
             "type": "SNV"
         },

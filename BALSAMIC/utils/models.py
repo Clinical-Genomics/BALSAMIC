@@ -90,6 +90,7 @@ class QCModel(BaseModel):
         umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
         min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
         umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
+        n_base_limit : Field(str(int)); supports filtering by limiting the N base number
 
     Raises:
         ValueError:
@@ -105,8 +106,9 @@ class QCModel(BaseModel):
     umi_trim: bool = False
     min_seq_length: int = 25
     umi_trim_length: int = 5
+    n_base_limit: int = 50
 
-    @validator("min_seq_length", "umi_trim_length")
+    @validator("min_seq_length", "umi_trim_length", "n_base_limit")
     def coerce_int_as_str(cls, value):
         return str(value)
 
@@ -739,6 +741,15 @@ class MetricModel(BaseModel):
     value: Any = ...
     condition: Optional[MetricConditionModel] = ...
 
+    @validator("name")
+    def validate_name(cls, name, values):
+        """Updates the name if the source is FastQC"""
+
+        if "fastqc-percent_duplicates" in name:
+            return "PERCENT_DUPLICATION_R" + values["input"].split("_")[-2]
+
+        return name
+
 
 class MetricValidationModel(BaseModel):
     """Defines the metric validation model
@@ -753,7 +764,7 @@ class MetricValidationModel(BaseModel):
     metrics: List[MetricModel]
 
     @validator("metrics", each_item=True)
-    def check_squares(cls, metric):
+    def validate_metrics(cls, metric):
         """Checks if a metric meets its filtering condition"""
 
         if metric.condition and not VALID_OPS[metric.condition.norm](

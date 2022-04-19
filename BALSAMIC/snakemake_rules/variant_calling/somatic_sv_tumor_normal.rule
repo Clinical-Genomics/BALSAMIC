@@ -124,6 +124,7 @@ rule ascat_tumor_normal:
         chryloci= config["reference"]["ascat_chryloci"],
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".copynumber.txt.gz",
         sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
         ascat_plots= expand(
             vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
@@ -161,6 +162,8 @@ ascat.pl \
   -normal {input.bamN};
 
 cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.final_vcf};
+
+cp {params.tmpdir}/{params.tumor}.copynumber.txt.gz {output.ascat_copynumber}
 
 cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.sample_statistics};
 
@@ -231,7 +234,7 @@ rule svdb_merge_tumor_normal:
     threads:
         get_threads(cluster_config, "svdb_merge_tumor_normal")
     message:
-        "Merging Manta and Delly results for PASS variants using svdb for sample '{params.case_name}' "
+        "Merging SV and CNV results for all variants using svdb for sample '{params.case_name}' "
     shell:
         """
 svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 \

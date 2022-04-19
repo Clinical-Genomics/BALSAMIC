@@ -232,7 +232,12 @@ def test_varcallerfilter():
 def test_qc_model():
     # GIVEN valid input arguments
     # THEN we can successully create a config dict
-    valid_args = {"umi_trim": True, "min_seq_length": 25, "umi_trim_length": 5}
+    valid_args = {
+        "umi_trim": True,
+        "min_seq_length": 25,
+        "umi_trim_length": 5,
+        "n_base_limit": 50,
+    }
     assert QCModel.parse_obj(valid_args)
 
 

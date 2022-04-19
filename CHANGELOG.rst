@@ -4,8 +4,6 @@
 Added:
 ^^^^^^
 
-* Added slurm qos tag `express` #885
-* Included more text about UMI-workflow variant calling settings to the readthedocs #888
 * Snakemake workflow to create canfam3 reference #843
 * Call umi variants using TNscope in bed defined regions #821
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
@@ -17,6 +15,11 @@ Added:
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858 
 * SVdb to TGA workflow #871 
 * SVdb merge SV and CNV #871
+* Readthedocs for BALSAMIC method descriptions #892
+* Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
+* bcftools counts to varcall filter rules #898
+* Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
+* ascatNGS copynumber file #897
 
 Changed:
 ^^^^^^^^
@@ -24,13 +27,13 @@ Changed:
 * Merge QC metric extraction workflows #833
 * Changed the base-image for balsamic container to 4.10.3-alpine #869
 * updated SVdb to 2.6.0 #871
-* Upgrade black to 22.3.0
 
 Fixed:
 ^^^^^^
 * Automate balsamic version for readthedocs install page #888
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
 * QC metric validation for different panel bed version #855
+* Fixed development version of ``fpdf2`` to ``2.4.6`` #878
 
 Removed
 ^^^^^^^
@@ -39,7 +42,51 @@ Removed
 * Unused pon option for SNV calling with TNhaplotyper tumor-only
 * SV and CNV callers from annotation and filtering #871
 * vcfanno from SV annotation
+* Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
+* Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
+* bcftools_stats from vep #898
+* QC delivery report workflow (generating the ``<case>_qc_report.html`` file) #878
+* ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command #878
 
+[8.2.10]
+--------
+
+Added:
+^^^^^^
+* `libopenblas=0.3.20` dependency to annotate container for fixing bcftools #909
+
+Fixes:
+^^^^^^
+
+* bcftools version locked at `1.10` #909
+
+Changed:
+^^^^^^^^
+* base image of balsamic container to `4.10.3-alphine` #909
+* Replaced annotate container tests with new code #909
+
+Removed:
+^^^^^^^^
+* Removed failed `vcf2cytosure` installation from annotate container #909
+
+[8.2.9]
+-------
+
+Added:
+^^^^^^
+
+* Added slurm qos tag `express` #885
+* Included more text about UMI-workflow variant calling settings to the readthedocs #888
+* Extend QCModel to include `n_base_limit` which outputs in config json `QC` dict
+
+Fixes:
+^^^^^^
+* Automate balsamic version for readthedocs install page #888
+
+Changed:
+^^^^^^^^
+* Upgrade black to 22.3.0
+* fastp default setting of `n_base_limit` is changed to `50` from `5`
 
 [8.2.8]
 --------
@@ -63,7 +110,6 @@ Fixes:
 
 [8.2.7]
 -------
-
 Fixes:
 ^^^^^^
 * Fixes fastqc timeout issues for wgs cases #861
