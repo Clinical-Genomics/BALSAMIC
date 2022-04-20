@@ -198,10 +198,11 @@ class AnalysisModel(BaseModel):
     Attributes:
 
         case_id : Field(required); string case identifier
-        analysis_type : Field(required); string literal [single, paired, pon]
+        analysis_type : Field(required); string literal [single, paired, pon, qc_panel]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
             pon : panel of normal analysis
+            qc_panel : QC analysis only
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
@@ -217,7 +218,7 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When analysis_type is set to any value other than [single, paired, qc, pon]
+            When analysis_type is set to any value other than [single, paired, pon, qc_panel]
             When sequencing_type is set to any value other than [wgs, targeted]
     """
 
@@ -427,7 +428,7 @@ class BalsamicConfigModel(BaseModel):
     """
 
     QC: QCModel
-    vcf: VCFModel
+    vcf: Optional[VCFModel]
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]

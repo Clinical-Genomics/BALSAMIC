@@ -27,7 +27,7 @@ from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
 from BALSAMIC.constants.variant_filters import COMMON_SETTINGS,VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS
-from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES 
+from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 
 
 shell.executable("/bin/bash")
@@ -51,7 +51,7 @@ vep_dir = get_result_dir(config) + "/vep/"
 qc_dir = get_result_dir(config) + "/qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
-umi_dir = get_result_dir(config) + "/umi/" 
+umi_dir = get_result_dir(config) + "/umi/"
 umi_qc_dir = qc_dir + "umi_qc/"
 
 singularity_image = config['singularity']['image']
@@ -95,7 +95,7 @@ try:
 
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
-    
+
 except KeyError as error:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
               "to run SENTIEON variant callers")
@@ -147,7 +147,7 @@ for m in MUTATION_TYPE:
                                            sequencing_type=config["analysis"]["sequencing_type"],
                                            mutation_class="germline")
 
-    germline_caller = germline_caller + germline_caller_balsamic + germline_caller_sentieon 
+    germline_caller = germline_caller + germline_caller_balsamic + germline_caller_sentieon
 
 
     somatic_caller_balsamic = get_variant_callers(config=config,
@@ -244,7 +244,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.append(expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
                                            vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
 
-    analysis_specific_results.append(expand(vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh", 
+    analysis_specific_results.append(expand(vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
                                             case_name=config["analysis"]["case_id"],
                                             var_caller=["cnvkit"]))
 
@@ -281,7 +281,7 @@ if 'benchmark_plots' in config:
         # Make individual plot per job
         for log_file in Path(log_dir).glob("*.err"):
             log_file_list = log_file.name.split(".")
-            job_name = ".".join(log_file_list[0:4]) 
+            job_name = ".".join(log_file_list[0:4])
             job_id = log_file_list[4].split("_")[1]
             h5_file = generate_h5(job_name, job_id, log_file.parent)
             benchmark_plot = Path(benchmark_dir, job_name + ".pdf")
