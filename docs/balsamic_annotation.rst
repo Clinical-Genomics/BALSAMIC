@@ -86,7 +86,7 @@ The values for `ORIGIN` are described below:
    * - COSMIC_STRAND
      - strand
    * - COSMIC_CNT
-     - number of samples with this mutation
+     - number of samples with this mutation in the ´COSMIC´ database
    * - COSMIC_AA
      - peptide annotation
 
