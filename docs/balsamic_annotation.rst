@@ -2,7 +2,7 @@
 BALSAMIC Annotation Resources
 ***********************************
 
-BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep`` and ``vcfanno``. Somatic structural variants (SVs), somatic copy-number variants (CNVs) and germline single nucleotide variants are annotated using only ``ensembl-vep``. All SVs and CNVs are merged using ``SVDB`` before annotation for `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)` analyses types.
+BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep`` and ``vcfanno``. Somatic structural variants (SVs), somatic copy-number variants (CNVs) and germline single nucleotide variants are annotated using only ``ensembl-vep``. All SVs and CNVs are merged using ``SVDB`` before annotating for `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)` analyses.
 
 `BALSAMIC` adds the following annotation from `gnomAD` database using ``vcfanno``.
 
