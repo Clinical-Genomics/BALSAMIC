@@ -7,8 +7,7 @@ from typing import List, Union
 import click
 import yaml
 
-from BALSAMIC.constants.quality_check_reporting import METRICS
-
+from BALSAMIC.constants.qc_metrics import METRICS
 from BALSAMIC.utils.models import MetricModel
 
 
