@@ -26,7 +26,7 @@ BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep
    * - VCF tag
      - description
    * - CLNACC
-     - calculated by self of overlapping values
+     - Variant Accession and Versions
    * - CLNREVSTAT
      - ClinVar review status for the Variation ID
    * - CLNSIG
