@@ -136,6 +136,7 @@ rule ascat_tumor_normal:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("ascatNgs") + ".sif").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",
@@ -195,9 +196,9 @@ rule ascat_tumor_normal_merge_output:
             output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
         ),
     output:
-        ascat_output_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
+        ascat_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
         merge_ascat_output_script= get_script_path("create_pdf.py"),
     singularity:
         Path(singularity_image, "balsamic.sif").as_posix()
@@ -207,7 +208,7 @@ rule ascat_tumor_normal_merge_output:
         "Merge the ascatNgs output plots together with the sample statistics into a single PDF"
     shell:
         """
-python {params.merge_ascat_output_script} {output.ascat_output_pdf} {input.sample_statistics} {input.ascat_plots}
+python {params.merge_ascat_output_script} {output.ascat_pdf} {input.sample_statistics} {input.ascat_plots}
         """
 
 rule svdb_merge_tumor_normal:

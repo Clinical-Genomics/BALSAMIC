@@ -82,7 +82,6 @@ rule fastp:
     singularity: 
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix() 
     params:
-        housekeeper_id = {"id": "{sample}", "tags": "quality-trimmed-fastq"},
         tmpdir = tmp_dir,
         umi = " ".join(fastp_param_umi),
         minimum_length = config["QC"]["min_seq_length"],

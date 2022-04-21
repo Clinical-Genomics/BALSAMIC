@@ -9,7 +9,7 @@ rule vep_somatic_snv:
     header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz"),
+    vcf_all = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
   benchmark:
     Path(benchmark_dir, "vep_somatic_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
@@ -56,7 +56,7 @@ rule vep_somatic_sv:
     vcf = vcf_dir + "SV.somatic.{case_name}.svdb.vcf.gz",
     header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
   output:
-    vcf_all = temp(vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz"),
+    vcf_all_svdb = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
   benchmark:
     Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.svdb.tsv").as_posix()
   singularity:
@@ -81,11 +81,11 @@ vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
---output_file {output.vcf_all} \
+--output_file {output.vcf_all_svdb} \
 --fork {threads} \
 {params.vep_defaults} \
 
-tabix -p vcf -f {output.vcf_all};
+tabix -p vcf -f {output.vcf_all_svdb};
     """
 
 rule tmb_calculation:
@@ -156,7 +156,7 @@ rule vep_germline:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
-    housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "annotated-germline"},
     sample = '{sample}',
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters

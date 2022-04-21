@@ -63,7 +63,6 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name =  '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_normal')
