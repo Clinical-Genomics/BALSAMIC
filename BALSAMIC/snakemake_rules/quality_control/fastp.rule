@@ -32,8 +32,8 @@ rule fastp_umi:
         read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
         read2=config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
     output:
-        read1 = fastq_dir + "{sample}_1.umi_optimized.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.umi_optimized.fastq.gz",
+        read1 = temp(fastq_dir + "{sample}_1.umi_optimized.fastq.gz"),
+        read2 = temp(fastq_dir + "{sample}_2.umi_optimized.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp_umi.json",
         html = qc_dir + "fastp/{sample}_fastp_umi.html",
     benchmark:
@@ -73,8 +73,8 @@ rule fastp:
         read1 = fastq_dir + "{sample}_1.umi_optimized.fastq.gz",
         read2 = fastq_dir + "{sample}_2.umi_optimized.fastq.gz"
     output:
-        read1 = fastq_dir + "{sample}_1.fp.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.fp.fastq.gz",
+        read1 = temp(fastq_dir + "{sample}_1.fp.fastq.gz"),
+        read2 = temp(fastq_dir + "{sample}_2.fp.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:
