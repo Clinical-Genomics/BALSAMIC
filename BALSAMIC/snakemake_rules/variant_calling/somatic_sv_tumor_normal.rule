@@ -124,7 +124,7 @@ rule ascat_tumor_normal:
         chryloci= config["reference"]["ascat_chryloci"],
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
-        ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".copynumber.txt.gz",
+        ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.copynumber.txt.gz",
         sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
         ascat_plots= expand(
             vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",

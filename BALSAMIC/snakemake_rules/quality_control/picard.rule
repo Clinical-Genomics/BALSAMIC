@@ -1,7 +1,10 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-
+if "canfam3" in config['reference']['reference_genome']:
+    memory = "20g"
+else:
+    memory = "16g"
 
 rule picard_CollectHsMetrics:
     input:
@@ -16,7 +19,7 @@ rule picard_CollectHsMetrics:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
-        mem = "16g",
+        mem = memory,
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample = '{sample}'
@@ -103,7 +106,7 @@ rule picard_CollectInsertSizeMetrics:
         "Calculating picard InsertSize metrics for sample '{params.sample}'"
     shell:
         """
-mkdir -p {params.tmpdir}; 
+mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
