@@ -126,10 +126,12 @@ rule ascat_tumor_normal:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
         ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.copynumber.txt.gz",
         sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        ascat_plots= expand(
-            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
-            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
-        ),
+        plot_ascat_profile = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        plot_raw_profile = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
+        plot_aspcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        plot_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
+        plot_germline = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
+        plot_sunrise = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
         namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
@@ -168,17 +170,17 @@ cp {params.tmpdir}/{params.tumor}.copynumber.txt.gz {output.ascat_copynumber}
 
 cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.sample_statistics};
 
-cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.ascat_plots[0]};
+cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.plot_ascat_profile};
 
-cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.ascat_plots[1]};
+cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.plot_raw_profile};
 
-cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.ascat_plots[2]};
+cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.plot_aspcf};
 
-cp {params.tmpdir}/{params.tumor}.tumour.png {output.ascat_plots[3]};
+cp {params.tmpdir}/{params.tumor}.tumour.png {output.plot_tumor};
 
-cp {params.tmpdir}/{params.tumor}.germline.png {output.ascat_plots[4]};
+cp {params.tmpdir}/{params.tumor}.germline.png {output.plot_germline};
 
-cp {params.tmpdir}/{params.tumor}.sunrise.png {output.ascat_plots[5]};
+cp {params.tmpdir}/{params.tumor}.sunrise.png {output.plot_sunrise};
 
 tabix -p vcf -f {output.final_vcf};
 
