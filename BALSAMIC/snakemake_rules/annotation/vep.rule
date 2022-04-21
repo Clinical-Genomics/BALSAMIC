@@ -62,7 +62,6 @@ rule vep_somatic_sv:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     message_text = "SV.somatic.{case_name}.svdb.vcf.gz",
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters

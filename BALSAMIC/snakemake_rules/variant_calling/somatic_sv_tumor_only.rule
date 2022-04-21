@@ -120,6 +120,7 @@ rule svdb_merge_tumor_only:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tumor = get_sample_type(config["samples"], "tumor"),
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
