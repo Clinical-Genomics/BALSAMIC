@@ -9,13 +9,12 @@ rule vep_somatic_snv:
     header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vcf_all = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz"),
   benchmark:
     Path(benchmark_dir, "vep_somatic_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
     tmpvcf = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
@@ -56,7 +55,7 @@ rule vep_somatic_sv:
     vcf = vcf_dir + "SV.somatic.{case_name}.svdb.vcf.gz",
     header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
   output:
-    vcf_all_svdb = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
+    vcf_all = temp(vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz"),
   benchmark:
     Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.svdb.tsv").as_posix()
   singularity:
@@ -80,11 +79,11 @@ vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
---output_file {output.vcf_all_svdb} \
+--output_file {output.vcf_all} \
 --fork {threads} \
 {params.vep_defaults} \
 
-tabix -p vcf -f {output.vcf_all_svdb};
+tabix -p vcf -f {output.vcf_all};
     """
 
 rule tmb_calculation:
