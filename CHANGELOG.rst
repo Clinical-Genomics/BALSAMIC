@@ -29,6 +29,7 @@ Changed:
 * Changed the base-image for balsamic container to 4.10.3-alpine #869
 * Updated SVdb to 2.6.0 #871
 * Upgrade black to 22.3.0
+* Changed the base-image for containers `align_qc` `annotate` `coverage_qc` `varcall_cnvkit` `varcall_py27` `varcall_py36` to 4.10.3-alphine
 
 Fixed:
 ^^^^^^
