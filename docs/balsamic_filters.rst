@@ -125,7 +125,7 @@ Following is the set of criteria applied for filtering vardict results. It is us
 **********************************
 
 **Sentieon's TNscope**
-======================nimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)=
+=======================
 
 BALSAMIC utilizes the `TNscope` algorithm for calling somatic SNVs and INDELS in WGS samples.
 The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algorithm performs the somatic variant calling on the tumor-normal or the tumor-only samples, using a Haplotyper algorithm.
