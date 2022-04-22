@@ -53,8 +53,6 @@ def test_deliver_tumor_only_panel_files(
     sentieon_install_dir,
     sentieon_license,
     caplog,
-    multiqc_data_path,
-    metrics_yaml_path,
 ):
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_only_config)
