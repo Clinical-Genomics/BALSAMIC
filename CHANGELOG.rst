@@ -29,7 +29,7 @@ Changed:
 * Changed the base-image for balsamic container to 4.10.3-alpine #869
 * Updated SVdb to 2.6.0 #871
 * Upgrade black to 22.3.0
-* updated delly to 0.9.1
+* updated delly to 0.9.1 #920
 
 Fixed:
 ^^^^^^
