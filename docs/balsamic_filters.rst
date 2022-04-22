@@ -40,15 +40,15 @@ For `Post-call filtering`, in BALSAMIC we have applied various filtering criteri
     In BALSAMIC, this VCF file is named as `*.all.filtered.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.vcf.gz`)
 
 
-Only those variants that fulfill the pre-call and post-call filters are scored as `PASS` in the `STATUS` column of the VCF file. We filter those `PASS` variants and delivered as final list of variants to the customer either via scout or caesar
+Only those variants that fulfill the pre-call and post-call filters are scored as `PASS` in the `STATUS` column of the VCF file. We filter those `PASS` variants and deliver a final list of variants to the customer either via `Scout` or `Caesar`
 
 .. note::
     In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`) 
 
 
 .. list-table:: Description of VCF files
-      :widths: 30 50 20
-   :header-rows: 1
+    :widths: 30 50 20
+    :header-rows: 1
 
    * - VCF file name
      - Description
