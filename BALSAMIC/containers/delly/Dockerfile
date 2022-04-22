@@ -27,14 +27,13 @@ RUN apt-get update && apt-get install -y \
 
 # set environment
 ENV BOOST_ROOT /usr
+ENV PATH="/opt/delly/bin:${PATH}"
 
 # install delly
 RUN cd /opt \
     && git clone --recursive https://github.com/dellytools/delly.git \
     && cd /opt/delly/ \
     && git checkout v0.9.1 \
-    && make STATIC=1 PARALLEL=1 all \
+    && make STATIC=1 all \
     && make install \
 
-ENV PATH="/opt/delly/bin:${PATH}"
-ENV OMP_NUM_THREADS 2
