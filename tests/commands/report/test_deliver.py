@@ -105,7 +105,7 @@ def test_deliver_tumor_only_panel_files(
         # THEN all the expected files and tags should be included in the report
         for file in report:
             assert os.path.basename(file["path"]) in delivery_files
-            assert file["tag"] in compound_tags
+            assert file["tag"] in compound_tags or file["tag"][::-1] in compound_tags
 
 
 def test_deliver_tumor_normal_panel(
