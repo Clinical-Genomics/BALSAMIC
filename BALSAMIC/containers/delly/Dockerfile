@@ -33,14 +33,6 @@ RUN cd /opt \
     && git clone --recursive https://github.com/dellytools/delly.git \
     && cd /opt/delly/ \
     && git checkout v0.9.1 \
-    && make STATIC=1 PARALLEL=1 all \
+    && make STATIC=1 all \
     && make install \
 
-FROM alpine:latest
-RUN mkdir -p /opt/delly/bin
-WORKDIR /opt/delly/bin
-COPY --from=0 /opt/delly/bin/delly .
-WORKDIR /root/
-ENV PATH="/opt/delly/bin:${PATH}"
-ENV OMP_NUM_THREADS 2
-CMD ["/bin/sh"]
