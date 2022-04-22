@@ -27,7 +27,6 @@ RUN apt-get update && apt-get install -y \
 
 # set environment
 ENV BOOST_ROOT /usr
-ENV PATH="/opt/delly/bin:${PATH}"
 
 # install delly
 RUN cd /opt \
@@ -38,5 +37,10 @@ RUN cd /opt \
     && make install \
 
 FROM alpine:latest
+RUN mkdir -p /opt/delly/bin
+WORKDIR /opt/delly/bin
+COPY --from=0 /opt/delly/bin/delly .
+WORKDIR /root/
+ENV PATH="/opt/delly/bin:${PATH}"
 ENV OMP_NUM_THREADS 2
 CMD ["/bin/sh"]
