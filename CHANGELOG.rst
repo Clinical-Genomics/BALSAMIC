@@ -29,6 +29,7 @@ Changed:
 * Changed the base-image for balsamic container to 4.10.3-alpine #869
 * Updated SVdb to 2.6.0 #871
 * Upgrade black to 22.3.0
+* For UMI workflow, post filter `gnomad_pop_freq` value is changed from `0.005` to `0.02`
 
 Fixed:
 ^^^^^^
