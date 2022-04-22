@@ -37,7 +37,35 @@ indicate that at this site, the mean position in reads is less than 8, and the p
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
 .. note::
-    In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)
+    In BALSAMIC, this VCF file is named as `*.all.filtered.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.vcf.gz`)
+
+
+Only those variants that fulfill the pre-call and post-call filters are scored as `PASS` in the `STATUS` column of the VCF file. We filter those `PASS` variants and delivered as final list of variants to the customer either via scout or caesar
+
+.. note::
+    In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`) 
+
+
+.. list-table:: Description of VCF files
+      :widths: 30 50 20
+   :header-rows: 1
+
+   * - VCF file name
+     - Description
+     - Delivered to the customer
+   * - .vcf.gz 
+     - Unannotated VCF file with pre-call filters included in the STATUS column
+     - Yes (Caesar)
+   * - .all.vcf.gz 
+     - Annotated VCF file with pre-call filters included in the STATUS column
+     - No
+   * - .all.filtered.vcf.gz
+     - Annotated VCF file with pre-call and post-call filters included in the STATUS column 
+     - No
+   * - .all.filtered.pass.vcf.gz
+     - Annotated and filtered VCF file by excluding all filters that did not meet the pre and post-call filters. Includes only variants with the `PASS` STATUS   
+     - Yes (Caesar and Scout)
+
 
 **Targeted Genome Analysis**
 #############################
@@ -97,7 +125,7 @@ Following is the set of criteria applied for filtering vardict results. It is us
 **********************************
 
 **Sentieon's TNscope**
-=======================
+======================nimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)=
 
 BALSAMIC utilizes the `TNscope` algorithm for calling somatic SNVs and INDELS in WGS samples.
 The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algorithm performs the somatic variant calling on the tumor-normal or the tumor-only samples, using a Haplotyper algorithm.
@@ -265,10 +293,25 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 
     min_tumor_lod = 4.0
 
+*min_tumor_allele_frac*: Set the minimum tumor AF to be considered as potential variant site.
+
+::
+
+    min_tumor_allele_frac = 0.0005
+
+*interval_padding*:  Amount to pad all intervals in the given target bed file regions
+
+::
+    interval_padding = 100
+
 **Post-call Filters**
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
 ::
 
-    GNOMADAF_popmax <= 0.001 (or) GNOMADAF_popmax == "."
+    GNOMADAF_popmax <= 0.02 (or) GNOMADAF_popmax == "."
+
+.. attention::
+   BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02
+
