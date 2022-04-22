@@ -120,7 +120,6 @@ DELIVERY_RULES = [
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
     "vep_germline",
-    "tmb_calculation",
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
     "sentieon_TNscope_tumor_only",
