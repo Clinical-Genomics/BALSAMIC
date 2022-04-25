@@ -6,7 +6,7 @@ dependencies:
   - bioconda::bwa=0.7.17
   - bioconda::fastqc=0.11.9
   - bioconda::samtools=1.15.1
-  - bioconda::tabix=1.15.1
+  - bioconda::tabix=1.11
   - bioconda::picard=2.27.1
   - bioconda::multiqc=1.12
   - bioconda::fastp=0.23.2
