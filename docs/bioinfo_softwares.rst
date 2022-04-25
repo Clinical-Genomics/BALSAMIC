@@ -28,19 +28,13 @@ bwa
 ~~~
 :Source code: `GitHub` `<https://github.com/lh3/bwa>`_
 :Article: `Bioinformatics` `<https://arxiv.org/abs/1303.3997>`_
-:Version: `0.7.15`
+:Version: `0.7.17`
 
 cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
 :Article: `PLOS Computational Biology` `<http://dx.doi.org/10.1371/journal.pcbi.1004873>`_
 :Version: `0.9.4`
-
-csvkit
-~~~~~~
-:Source code: `GitHub` `<https://github.com/wireservice/csvkit>`_
-:Article: `-`
-:Version: `1.0.4`
 
 delly
 ~~~~~~~
@@ -58,7 +52,7 @@ fastp
 ~~~~~
 :Source code: `GitHub` `<https://github.com/OpenGene/fastp>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/bty560>`_
-:Version: `0.20.1`
+:Version: `0.23.2`
 
 fastqc
 ~~~~~~
@@ -82,7 +76,7 @@ multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
 :Article: `Bioinformatics` `<http://dx.doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.11`
+:Version: `1.12`
 
 mosdepth
 ~~~~~~~~
@@ -94,7 +88,7 @@ picard
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/broadinstitute/picard>`_
 :Article: `-`
-:Version: `2.25.0`
+:Version: `2.27.1`
 
 sambamba
 ~~~~~~~~
@@ -106,7 +100,7 @@ samtools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/samtools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/19505943/>`_
-:Version: `1.12`
+:Version: `1.15.1`
 
 sentieon-tools
 ~~~~~~~~~~~~~~
@@ -124,7 +118,7 @@ tabix
 ~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/tabix>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/27/5/718/262743>`_
-:Version: `0.2.6`
+:Version: `1.11`
 
 vardict
 ~~~~~~~
