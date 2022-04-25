@@ -47,8 +47,8 @@ Only those variants that fulfill the pre-call and post-call filters are scored a
 
 
 .. list-table:: Description of VCF files
-    :widths: 30 50 20
-    :header-rows: 1
+   :widths: 30 50 20
+   :header-rows: 1
 
    * - VCF file name
      - Description
@@ -63,7 +63,7 @@ Only those variants that fulfill the pre-call and post-call filters are scored a
      - Annotated VCF file with pre-call and post-call filters included in the STATUS column 
      - No
    * - .all.filtered.pass.vcf.gz
-     - Annotated and filtered VCF file by excluding all filters that did not meet the pre and post-call filters. Includes only variants with the `PASS` STATUS   
+     - Annotated and filtered VCF file by excluding all filters that did not meet the pre and post-call filter criteria. Includes only variants with the `PASS` STATUS
      - Yes (Caesar and Scout)
 
 
