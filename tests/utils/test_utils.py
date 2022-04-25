@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import pytest
 import sys
@@ -59,7 +60,9 @@ from BALSAMIC.utils.rule import (
     get_threads,
     get_delivery_id,
     get_reference_output_files,
+    get_rule_output,
 )
+from tests.helpers import Map
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -1045,3 +1048,32 @@ def test_create_md5(tmp_path):
 
     # THEN md5 file exists
     assert dummy_file.exists()
+
+
+def test_get_rule_output(snakemake_fastqc_rule):
+    """Tests retrieval of existing output files from a specific workflow"""
+
+    # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
+    rules = snakemake_fastqc_rule
+    rule_name = "fastqc"
+    output_file_wildcards = {
+        "sample": ["concatenated_tumor_XXXXXX_R", "tumor", "normal"],
+        "case_name": "sample_tumor_only",
+    }
+
+    # THEN retrieve the output files
+    output_files = get_rule_output(rules, rule_name, output_file_wildcards)
+
+    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
+    assert len(output_files) == 2
+    for file in output_files:
+        # Expected file names
+        assert (
+            os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_1.fastq.gz"
+            or os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+        )
+        # Expected tags
+        assert (
+            file[3] == "1,fastqc,quality-trimmed-seq-fastqc"
+            or file[3] == "2,fastqc,quality-trimmed-seq-fastqc"
+        )
