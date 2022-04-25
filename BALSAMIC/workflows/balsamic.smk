@@ -235,10 +235,9 @@ quality_control_results = [
     os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
 ]
 
-analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
-                                    vcf=get_vcf(config, germline_caller, germline_call_samples)),
-                             expand(vep_dir + "{vcf}.all.vcf.gz",
-                                    vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))]
+analysis_specific_results = [
+    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, germline_call_samples))
+]
 
 if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.append(expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
