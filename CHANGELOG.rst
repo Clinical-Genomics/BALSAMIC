@@ -30,6 +30,7 @@ Changed:
 * Updated SVdb to 2.6.0 #871
 * Upgrade black to 22.3.0
 * For UMI workflow, post filter `gnomad_pop_freq` value is changed from `0.005` to `0.02`
+* updated delly to 0.9.1 #920
 
 Fixed:
 ^^^^^^
