@@ -236,7 +236,7 @@ quality_control_results = [
 ]
 
 analysis_specific_results = [
-    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, germline_call_samples))
+    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, germline_call_samples))
 ]
 
 if config["analysis"]["sequencing_type"] != "wgs":
