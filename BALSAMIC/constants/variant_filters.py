@@ -47,6 +47,11 @@ SENTIEON_VARCALL_SETTINGS = {
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
     },
+    "pop_freq_umi": {
+        "tag_value": 0.02,
+        "filter_name": "balsamic_umi_high_pop_freq",
+        "field": "INFO",
+    },
     "qss": {
         "tag_value": 20,
         "filter_name": "balsamic_low_quality_scores",
