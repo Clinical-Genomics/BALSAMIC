@@ -299,8 +299,7 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 
     min_tumor_allele_frac = 0.0005
 
-*interval_padding*:  Amount to pad all intervals in the given target bed file regions
-
+*interval_padding*:  Adding an extra 100bp to each end of the target region in the bed file before variant calling.
 ::
     interval_padding = 100
 
@@ -313,5 +312,5 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
     GNOMADAF_popmax <= 0.02 (or) GNOMADAF_popmax == "."
 
 .. attention::
-   BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02
+   BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.
 
