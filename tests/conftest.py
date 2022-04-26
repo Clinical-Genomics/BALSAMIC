@@ -600,11 +600,9 @@ def sample_config():
             "vardict": {"mutation": "somatic", "type": "SNV"},
             "mutect": {"mutation": "somatic", "type": "SNV"},
             "tnscope": {"mutation": "somatic", "type": "SNV"},
-            "tnsnv": {"mutation": "somatic", "type": "SNV"},
             "tnhaplotyper": {"mutation": "somatic", "type": "SNV"},
             "dnascope": {"mutation": "germline", "type": "SNV"},
             "manta_germline": {"mutation": "germline", "type": "SV"},
-            "haplotypecaller": {"mutation": "germline", "type": "SNV"},
         },
         "samples": {
             "S1_R": {
