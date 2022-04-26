@@ -30,9 +30,9 @@ Changed:
 * Updated SVdb to 2.6.0 #871
 * Upgrade black to 22.3.0
 * updated delly to 0.9.1 #920
-* container base_image (align_qc, coverage_qc) to 4.10.3-alpine #921
-* update container (align_qc, coverage_qc) bioinfo tool versions  #921
-* update tool versions (align_qc, coverage_qc) in methods and softwares docs #921
+* container base_image (align_qc, coverage_qc, varcall_cnvkit) to 4.10.3-alpine #921
+* update container (align_qc, coverage_qc, varcall_cnvkit) bioinfo tool versions  #921
+* update tool versions (align_qc, coverage_qc, varcall_cnvkit) in methods and softwares docs #921
 
 Fixed:
 ^^^^^^

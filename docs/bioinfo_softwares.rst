@@ -16,7 +16,7 @@ bcftools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/bcftools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/21903627/>`_
-:Version: `>1.9`
+:Version: `>1.10`
 
 bedtools
 ~~~~~~~~
@@ -34,7 +34,7 @@ cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
 :Article: `PLOS Computational Biology` `<http://dx.doi.org/10.1371/journal.pcbi.1004873>`_
-:Version: `0.9.4`
+:Version: `0.9.9`
 
 delly
 ~~~~~~~
