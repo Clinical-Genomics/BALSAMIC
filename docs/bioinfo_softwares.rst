@@ -82,7 +82,7 @@ mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/34/5/867/4583630?login=true>`_
-:Version: `0.2.9`
+:Version: `0.3.3`
 
 picard
 ~~~~~~
@@ -94,7 +94,7 @@ sambamba
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/biod/sambamba>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25697820/>`_
-:Version: `0.6.6`
+:Version: `0.8.2`
 
 samtools
 ~~~~~~~~
