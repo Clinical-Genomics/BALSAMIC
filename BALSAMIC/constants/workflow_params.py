@@ -64,13 +64,6 @@ VCF_DICT = {
         "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
-    "haplotypecaller": {
-        "mutation": "germline",
-        "type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "sequencing_type": ["targeted"],
-        "workflow_solution": ["BALSAMIC"],
-    },
     "delly": {
         "mutation": "somatic",
         "type": "SV",
