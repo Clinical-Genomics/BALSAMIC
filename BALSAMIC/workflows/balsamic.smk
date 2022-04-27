@@ -235,7 +235,10 @@ quality_control_results = [
     os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
 ]
 
-analysis_specific_results = []
+analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
+                                    vcf=get_vcf(config, germline_caller, germline_call_samples)),
+                             expand(vcf_dir + "{vcf}.vcf.gz",
+                                    vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))]
 
 if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.append(expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
@@ -300,9 +303,6 @@ if 'benchmark_plots' in config:
             for plots in my_rule_plots:
                 plots.unlink()
 
-
-raw_vcfs = expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, germline_call_samples))
-
 if 'delivery' in config:
     wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],
                      "case_name": config["analysis"]["case_id"],
@@ -341,17 +341,6 @@ if 'delivery' in config:
                                   config["analysis"]["case_id"] + "_delivery_ready.hk")
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
-
-
-    delivered_raw_vcfs = []
-    for vcf_file in raw_vcfs:
-        for file_to_deliver in output_files_ready:
-            if os.path.basename(vcf_file) == os.path.basename(file_to_deliver["path"]):
-                delivered_raw_vcfs.append(vcf_file)
-
-    raw_vcfs = delivered_raw_vcfs
-
-analysis_specific_results.append(raw_vcfs)
 
 rule all:
     input:
