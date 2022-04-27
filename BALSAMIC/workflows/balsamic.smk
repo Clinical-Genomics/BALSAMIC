@@ -310,8 +310,8 @@ if 'delivery' in config:
                      }
 
     if config['analysis']["analysis_type"] in ["paired", "single"]:
-        wildcard_dict.update({"var_type": ["CNV", "SNV", "SV"],
-                              "var_class": ["somatic", "germline"],
+        wildcard_dict.update({"var_type": ["SNV"],
+                              "var_class": ["somatic"],
                               "var_caller": somatic_caller + germline_caller,
                               "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
                               })
