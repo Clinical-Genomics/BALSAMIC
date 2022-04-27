@@ -237,7 +237,7 @@ quality_control_results = [
 
 analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                     vcf=get_vcf(config, germline_caller, germline_call_samples)),
-                             expand(vcf_dir + "{vcf}.vcf.gz",
+                             expand(vep_dir + "{vcf}.all.vcf.gz",
                                     vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))]
 
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -309,10 +309,10 @@ if 'delivery' in config:
                      "allow_missing": True
                      }
 
-    if config['analysis']["analysis_type"] in ["single"]:
-        wildcard_dict.update({"var_type": ["SNV"],
-                              "var_class": ["germline"],
-                              "var_caller": germline_caller,
+    if config['analysis']["analysis_type"] in ["paired", "single"]:
+        wildcard_dict.update({"var_type": ["CNV", "SNV", "SV"],
+                              "var_class": ["somatic", "germline"],
+                              "var_caller": somatic_caller + germline_caller,
                               "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
                               })
 
