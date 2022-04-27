@@ -235,6 +235,13 @@ quality_control_results = [
     os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
 ]
 
+somatic_caller.remove("tnhaplotyper")
+somatic_caller.remove("ascat")
+somatic_caller.remove("manta")
+somatic_caller.remove("delly")
+somatic_caller.remove("cnvkit")
+germline_caller.remove("haplotypecaller")
+
 analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                     vcf=get_vcf(config, germline_caller, germline_call_samples)),
                              expand(vep_dir + "{vcf}.all.vcf.gz",
