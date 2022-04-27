@@ -188,9 +188,10 @@ class VCFModel(BaseModel):
     TNscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
     manta: VarcallerAttribute
-    delly: VarcallerAttribute
+    dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
+    dellycnv: VarcallerAttribute
     svdb: VarcallerAttribute
 
 
@@ -538,6 +539,7 @@ class ReferenceMeta(BaseModel):
         rankscore: ReferenceUrlsModel. Optional rankscore model
         access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
         delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
+        delly_mappability: ReferenceUrlsModel. Optional field for genome mappability
         ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
@@ -560,6 +562,9 @@ class ReferenceMeta(BaseModel):
     rankscore: Optional[ReferenceUrlsModel]
     access_regions: Optional[ReferenceUrlsModel]
     delly_exclusion: Optional[ReferenceUrlsModel]
+    delly_mappability: Optional[ReferenceUrlsModel]
+    delly_mappability_gindex: Optional[ReferenceUrlsModel]
+    delly_mappability_findex: Optional[ReferenceUrlsModel]
     ascat_gccorrection: Optional[ReferenceUrlsModel]
     ascat_chryloci: Optional[ReferenceUrlsModel]
     clinvar: Optional[ReferenceUrlsModel]
