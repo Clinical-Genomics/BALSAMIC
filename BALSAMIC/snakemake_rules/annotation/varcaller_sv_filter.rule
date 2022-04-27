@@ -18,7 +18,7 @@ rule bcftools_filter_svdb:
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb")
   message:
-    "Filtering svdb merged Manta and Delly results for PASS variants using bcftools for sample '{params.case_name}' "
+    "Filtering merged structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb} -O z {input.vcf};

@@ -66,6 +66,9 @@ refgene_sql_url = reference_file_model.refgene_sql
 rankscore_url = reference_file_model.rankscore
 access_regions_url = reference_file_model.access_regions
 delly_exclusion_url = reference_file_model.delly_exclusion
+delly_mappability_url = reference_file_model.delly_mappability
+delly_mappability_gindex_url = reference_file_model.delly_mappability_gindex
+delly_mappability_findex_url = reference_file_model.delly_mappability_findex
 ascat_gccorrection_url = reference_file_model.ascat_gccorrection
 ascat_chryloci_url = reference_file_model.ascat_chryloci
 clinvar_url = reference_file_model.clinvar
@@ -112,6 +115,9 @@ rule all:
         access_regions = access_regions_url.get_output_file,
         delly_exclusion = delly_exclusion_url.get_output_file,
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
+        delly_mappability= delly_mappability_url.get_output_file,
+        delly_mappability_gindex= delly_mappability_gindex_url.get_output_file,
+        delly_mappability_findex= delly_mappability_findex_url.get_output_file,
         ascat_gccorrection = ascat_gccorrection_url.get_output_file,
         ascat_chryloci = ascat_chryloci_url.get_output_file,
         clinvar = clinvar_url.get_output_file + ".gz",
@@ -147,6 +153,7 @@ rule all:
             "access_regions": input.access_regions,
             "delly_exclusion" : input.delly_exclusion,
             "delly_exclusion_converted" : input.delly_exclusion_converted,
+            "delly_mappability": input.delly_mappability,
             "ascat_gccorrection" : input.ascat_gccorrection,
             "ascat_chryloci" : input.ascat_chryloci,
             "clinvar": input.clinvar,
@@ -180,7 +187,8 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
                     cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url,
-                    delly_exclusion_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url]
+                    delly_exclusion_url, delly_mappability_url, delly_mappability_gindex_url,
+                    delly_mappability_findex_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url]
 
 rule download_reference:
     output:

@@ -5,7 +5,7 @@ BALSAMIC METHODS
 Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 8.2.10) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using BWA MEM v0.7.15 :superscript:`4`.
@@ -17,7 +17,7 @@ Small somatic mutations (SNVs and INDELs) were called for each sample using VarD
 Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using the criteria
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
-Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
+Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.9.1 :superscript:`10`.
 Copy number aberrations were called using CNVkit v0.9.4 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
 All variants were annotated using Ensembl VEP v100.2 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
@@ -25,7 +25,7 @@ to annotate somatic variants for their population allele frequency from gnomAD v
 
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
-BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 8.2.10) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
@@ -36,7 +36,7 @@ Results of the quality controlled steps were summarized by MultiQC v1.11 :supers
 Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
 The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
-Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.8.7 :superscript:`10`.
+Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.9.1 :superscript:`10`.
 Copy number aberrations were called using ascatNgs v4.5.0 :superscript:`17` for tumor-normal samples.
 The structural variant calls from Manta, Delly and ascatNgs were merged using SVDB v2.6.0 :superscript:`12`
 All variants were finally annotated using Ensembl VEP v100.2 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
@@ -46,7 +46,7 @@ to annotate somatic variants for their population allele frequency from gnomAD v
 UMI Data Analysis
 =============================
 
-BALSAMIC :superscript:`1` (**version** = 8.2.8) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 8.2.10) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.20.1 :superscript:`3`.
 UMI tag extraction and consensus generation were performed using Sentieon tools v202010.02 :superscript:`15`.
@@ -65,7 +65,7 @@ We used three commercially available products from SeraCare [Material numbers: 0
 **References**
 ~~~~~~~~~~~~~~~~
 
-1. Foroughi-Asl, H., Jeggari, A., Maqbool, K., Ivanchuk, V., Elhami, K., & Wirta, V. BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (Version v8.2.8) [Computer software]. https://github.com/Clinical-Genomics/BALSAMIC
+1. Foroughi-Asl, H., Jeggari, A., Maqbool, K., Ivanchuk, V., Elhami, K., & Wirta, V. BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (Version v8.2.10) [Computer software]. https://github.com/Clinical-Genomics/BALSAMIC
 2. Babraham Bioinformatics - FastQC A Quality Control tool for High Throughput Sequence Data. Accessed June 22, 2020. https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 3. Chen S, Zhou Y, Chen Y, Gu J. fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics. 2018;34(17):i884-i890. doi:10.1093/bioinformatics/bty560
 4. Li H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. arXiv:1303.3997v2 [q-bio.GN]

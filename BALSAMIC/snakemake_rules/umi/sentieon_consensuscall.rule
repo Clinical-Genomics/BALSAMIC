@@ -22,7 +22,7 @@ rule sentieon_consensuscall_umi:
     threads: 
         get_threads(cluster_config, "sentieon_consensuscall_umi")
     message: 
-        "Consensus molecule creation using sentieon for sample {params.sample_id}"
+        "Calling consensus molecules using sentieon for {params.sample_id}"
     shell:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
@@ -63,7 +63,7 @@ rule sentieon_bwa_umiconsensus:
     threads: 
         get_threads(cluster_config, "sentieon_bwa_umiconsensus")
     message:
-         "Mapping of consensus reads with the sentieon bwa mem, sorting for sample {params.sample_id}"
+         "Mapping consensus reads and sorting using sentieon bwa-mem for {params.sample_id}"
     shell:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
@@ -106,7 +106,7 @@ rule sentieon_consensusfilter_umi:
     threads:
         get_threads(cluster_config, "sentieon_consensusfilter_umi")
     message:
-        "Filtering consensus reads based on XZ tag for sample {params.sample_id}"
+        "Filtering consensus reads based on XZ tag for {params.sample_id}"
     shell:
         """
 samtools view -h {input} | \

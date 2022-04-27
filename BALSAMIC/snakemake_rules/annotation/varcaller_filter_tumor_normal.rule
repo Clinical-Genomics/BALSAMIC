@@ -28,7 +28,7 @@ rule bcftools_filter_vardict_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_vardict_tumor_normal')
   message:
-    "Filtering vardict tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering vardict tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -68,7 +68,7 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_normal')
   message:
-    "Filtering tnhaplotyper tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering tnhaplotyper tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -102,7 +102,7 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_normal')
   message:
-    "Filtering TNscope_umi tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
