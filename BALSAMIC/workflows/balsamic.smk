@@ -237,43 +237,45 @@ quality_control_results = [
     os.path.join(qc_dir, "multiqc_data/multiqc_data.json")
 ]
 
-analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
-                                    vcf=get_vcf(config, germline_caller, germline_call_samples)),
-                             expand(vcf_dir + "{vcf}.vcf.gz",
-                                    vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))]
+# Analysis results
+analysis_specific_results = []
 
+# Germline SNVs/SVs
+analysis_specific_results.extend(
+    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, germline_call_samples))
+)
+
+# Raw VCFs
+analysis_specific_results.extend(
+    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))
+)
+
+# Filtered and passed post annotation VCFs
+analysis_specific_results.extend(
+    expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))
+)
+
+# AscatNgs
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
+    analysis_specific_results.extend(
+        expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [config["analysis"]["case_id"]]))
+    )
+    analysis_specific_results.extend(
+        expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [config["analysis"]["case_id"]]))
+    )
+
+# CNVkit & vcf2cytosure
 if config["analysis"]["sequencing_type"] != "wgs":
-    analysis_specific_results.append(expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz",
-                                           vcf=get_vcf(config, ["vardict"], [config["analysis"]["case_id"]])))
-
-    analysis_specific_results.append(expand(vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
-                                            case_name=config["analysis"]["case_id"],
-                                            var_caller=["cnvkit"]))
-
-    analysis_specific_results.append(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config["samples"]))
-
-    if background_variant_file:
-        analysis_specific_results.extend([expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
-                                      case_name=config["analysis"]["case_id"],
-                                      var_caller=["TNscope_umi"])]),
-
-#Calculate TMB per somatic variant caller
-analysis_specific_results.extend(expand(vep_dir + "{vcf}.balsamic_stat",
-                                        vcf=get_vcf(config, somatic_caller_tmb, [config["analysis"]["case_id"]])))
-
-#Gather all the filtered and PASSed variants post annotation
-analysis_specific_results.extend([expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz",
-                                        vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))])
+    analysis_specific_results.append(cnv_dir + "tumor.merged.cns")
+    analysis_specific_results.extend(expand(cnv_dir + "tumor.merged-{plot}", plot=["diagram.pdf", "scatter.pdf"]))
+    analysis_specific_results.append(cnv_dir + case_id +".gene_metrics")
+    analysis_specific_results.extend(expand(
+        vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
+        case_name=config["analysis"]["case_id"],
+        var_caller=["cnvkit"]
+    ))
 
 LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
-
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
-    if "dragen" in config:
-        analysis_specific_results.extend([Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
-                                          Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()])
-
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
-    analysis_specific_results.append(expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [config["analysis"]["case_id"]])))
 
 if 'benchmark_plots' in config:
     log_dir = config["analysis"]["log"]
