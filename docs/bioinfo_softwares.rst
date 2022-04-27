@@ -100,7 +100,7 @@ samtools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/samtools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/19505943/>`_
-:Version: `1.15.1`
+:Version: `>1.11`
 
 sentieon-tools
 ~~~~~~~~~~~~~~
