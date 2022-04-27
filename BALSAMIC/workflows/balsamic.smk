@@ -40,6 +40,11 @@ logging.getLogger("filelock").setLevel("WARN")
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
+# Set case id/name
+case_id = config["analysis"]["case_id"]
+
+# Directories
+analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
@@ -50,7 +55,6 @@ vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 qc_dir = get_result_dir(config) + "/qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
-
 umi_dir = get_result_dir(config) + "/umi/"
 umi_qc_dir = qc_dir + "umi_qc/"
 
@@ -75,9 +79,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
 tumor_sample = get_sample_type(config["samples"], "tumor")[0]
 if config['analysis']['analysis_type'] == "paired":
     normal_sample = get_sample_type(config["samples"], "normal")[0]
-
-# Set case id/name
-case_id = config["analysis"]["case_id"]
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -231,11 +232,10 @@ for r in rules_to_include:
 
 # Define common and analysis specific outputs
 quality_control_results = [
+    os.path.join(qc_dir,case_id + "_metrics_deliverables.yaml"),
     os.path.join(qc_dir, "multiqc_report.html"),
-    os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
+    os.path.join(qc_dir, "multiqc_data/multiqc_data.json")
 ]
-
-somatic_caller.remove("tnhaplotyper")
 
 analysis_specific_results = [expand(vep_dir + "{vcf}.vcf.gz",
                                     vcf=get_vcf(config, germline_caller, germline_call_samples)),
