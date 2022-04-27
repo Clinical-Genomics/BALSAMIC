@@ -163,7 +163,7 @@ rule vep_germline:
   threads:
     get_threads(cluster_config, 'vep_germline')
   message:
-    "Running vep annotation for germline variants on {params.sample}"
+    "Running vep annotation on germline variants for {params.sample}"
   shell:
       """
 vep_path=$(dirname $(readlink -f $(which vep)));
