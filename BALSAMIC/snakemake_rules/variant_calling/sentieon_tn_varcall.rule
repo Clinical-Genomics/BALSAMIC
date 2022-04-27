@@ -24,7 +24,7 @@ rule sentieon_base_calibration:
     threads:
         get_threads(cluster_config, 'sentieon_base_calibration')
     message:
-        "Base recalibration using Sentieon tools for sample {params.sample}"
+        "Base recalibration using Sentieon tools for {params.sample}"
     shell:
         """
 mkdir -p {params.tmpdir};

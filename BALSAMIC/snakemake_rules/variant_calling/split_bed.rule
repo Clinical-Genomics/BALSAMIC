@@ -19,8 +19,7 @@ rule bedtools_splitbed_by_chrom:
         split_bed_dir = vcf_dir + "split_bed/",
         origin_bed = capture_kit,
     message:
-        ("Capturing reference genome chromosome size and splitting the panel bed per chromosome"
-         "Extend the region by 100bp on each direction, sort and merge the overlapping intervals using bedtools")
+        ("Splitting the panel bed per chromosome, flanking regions by 100bp and merging into single VCF using bedtools")
     shell:
         """
 mkdir -p {params.tmpdir};

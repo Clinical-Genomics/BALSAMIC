@@ -9,18 +9,19 @@ Added:
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
 * Option to use PON reference in cnv calling for TGA tumor-only cases
 * QC default validation conditions (for not defined capture kits) #855
-* SVdb to the varcall_py36 container #871
-* SVdb to WGS workflow #871
+* SVdb to the varcall_py36 container #872
+* SVdb to WGS workflow #873
 * Docker container for vcf2cytosure #858
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858
-* SVdb to TGA workflow #871
-* SVdb merge SV and CNV #871
+* SVdb to TGA workflow #879
+* SVdb merge SV and CNV #886
 * Readthedocs for BALSAMIC method descriptions #892
 * Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
 * bcftools counts to varcall filter rules #898
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
-* ascatNGS copynumber file #897
+* ascatNGS copynumber file #914
 * ReadtheDocs for BALSAMIC annotation resources #916
+* Delly CNV for tumor only workflow 
 
 Changed:
 ^^^^^^^^
@@ -44,8 +45,8 @@ Removed
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
 * Unused pon option for SNV calling with TNhaplotyper tumor-only
-* SV and CNV callers from annotation and filtering #871
-* vcfanno from SV annotation
+* SV and CNV callers from annotation and filtering #889
+* vcfanno and COSMIC from SV annotation #891
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
 * bcftools_stats from vep #898
