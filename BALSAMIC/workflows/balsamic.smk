@@ -309,10 +309,10 @@ if 'delivery' in config:
                      "allow_missing": True
                      }
 
-    if config['analysis']["analysis_type"] in ["paired", "single"]:
+    if config['analysis']["analysis_type"] in ["single"]:
         wildcard_dict.update({"var_type": ["SNV"],
-                              "var_class": ["somatic"],
-                              "var_caller": somatic_caller + germline_caller,
+                              "var_class": ["germline"],
+                              "var_caller": germline_caller,
                               "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
                               })
 
