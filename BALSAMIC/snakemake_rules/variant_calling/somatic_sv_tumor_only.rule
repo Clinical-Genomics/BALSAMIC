@@ -50,17 +50,16 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
       """
 
-
-rule delly_tumor_only:
+rule delly_sv_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = bam_dir + tumor_bam,
         excl = config["reference"]["delly_exclusion_converted"],
     output:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
+        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",
     benchmark:
-        benchmark_dir + 'delly_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'delly_sv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
@@ -71,8 +70,7 @@ rule delly_tumor_only:
     threads:
         get_threads(cluster_config, "delly_tumor_only")
     message:
-        ("Calling structural variants using delly for {params.case_name},"
-        "filter somatic variants and finally convert from bcf to compressed vcf file")
+        ("Calling structural variants using delly for {params.case_name}")
     shell:
         """
 delly call -x {input.excl} -o {output.bcf} -g {input.fa} {input.bamT}
@@ -82,11 +80,44 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
+rule delly_cnv_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = bam_dir + tumor_bam,
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        map = config["reference"]["delly_mappability"],
+    output:
+        cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
+    benchmark:
+        benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        runmode = "local",
+        tumor = "TUMOR",
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "delly_tumor_only")
+    message:
+        ("Calling copy number variants using delly for {params.case_name}")
+    shell:
+        """
+delly cnv -m {input.map} -g {input.fa} -o {output.cnv} -l {input.bcf} {input.bamT}
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
 rule bcftools_bcf2vcf_delly:
     input:
-        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        bcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        bcf_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
     output:
-        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        vcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.vcf.gz",
+        vcf_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
     benchmark:
         Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
@@ -96,12 +127,16 @@ rule bcftools_bcf2vcf_delly:
     threads:
         get_threads(cluster_config, "bcftools_bcf2vcf_delly")
     message:
-        ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
+        ("Converting BCF from delly to VCF for {params.case_name}")
     shell:
         """
-bcftools view  --threads {threads} -f PASS -O z -o {output.vcf} {input.bcf};
+bcftools view  --threads {threads} -f PASS -O z -o {output.vcf_sv} {input.bcf_sv};
 
-tabix -p vcf -f {output.vcf};
+bcftools view --threads {threads} -f PASS -O z -o {output.vcf_cnv} {input.bcf_cnv}
+
+tabix -p vcf -f {output.vcf_sv};
+
+tabix -p vcf -f {output.vcf_cnv}
         """
 
 rule svdb_merge_tumor_only:
@@ -128,7 +163,7 @@ rule svdb_merge_tumor_only:
     threads:
         get_threads(cluster_config, "svdb_merge_tumor_only")
     message:
-        "Merging Manta and Delly results for PASS variants using svdb for sample '{params.case_name}' "
+        "Merging structural and copy number variants using SVDB for {params.case_name}"
     shell:
         """
 svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 \

@@ -25,7 +25,7 @@ rule vardict_tumor_normal:
     threads:
         get_threads(cluster_config, "vardict_tumor_normal")
     message:
-        "Calling variants using vardict for sample {params.case_name}"
+        "Calling variants using vardict for {params.case_name}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -64,8 +64,7 @@ rule vardict_merge:
     threads:
         get_threads(cluster_config,"vardict_merge")
     message:
-        ("Merging all chromosomes vardict results into "
-        "single vcf using bcftools for sample {params.case_name}")
+        ("Merging multiple VCFs from vardict into single VCF using bcftools for {params.case_name}")
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -104,7 +103,7 @@ rule sentieon_TNhaplotyper:
     threads:
         get_threads(cluster_config, 'sentieon_TNhaplotyper')
     message:
-        "Calling variants using TNhaplotyper for sample {params.case_name}"
+        "Calling single nucleotide variants using TNhaplotyper for {params.case_name}"
     shell:
         """
 mkdir -p {params.tmpdir}; 

@@ -26,7 +26,7 @@ rule bcftools_filter_tnscope_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_normal')
   message:
-    "Filtering wgs tumor-normal tnscope annotated variants using bcftools on {params.case_name}"
+    "Filtering WGS tumor-normal tnscope annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -64,7 +64,7 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
   threads: 
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_normal')
   message:
-    "Filtering wgs tumor-normal tnhaplotyper annotated variants using bcftools on {params.case_name}"
+    "Filtering WGS tumor-normal tnhaplotyper annotated variants using bcftools for {params.case_name}"
   shell:
     """
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed

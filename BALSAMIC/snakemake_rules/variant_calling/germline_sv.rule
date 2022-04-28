@@ -20,7 +20,7 @@ rule manta_germline:
     threads:
         get_threads(cluster_config,"manta_germline")
     message:
-        "Calling germline variants using manta for sample {params.sample}"
+        "Calling germline variants using manta for {params.sample}"
     shell:
         """
 configManta.py \

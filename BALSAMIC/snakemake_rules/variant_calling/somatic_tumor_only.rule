@@ -22,7 +22,7 @@ rule vardict_tumor_only:
     threads:
         get_threads(cluster_config, "vardict_tumor_only")
     message:
-        "Calling variants using vardict for sample {params.case_name}"
+        "Calling single nucleotide variants using vardict for {params.case_name}"
     shell:
         """
 export PERL5LIB=;
@@ -65,8 +65,7 @@ rule vardict_merge:
     threads:
         get_threads(cluster_config,"vardict_merge")
     message:
-        ("Merging all chromosomes vardict results into "
-         "single vcf using bcftools for sample {params.case_name}")
+        ("Merging multiple VCFs from vardict into single VCF using bcftools for {params.case_name}")
     shell:
         """
 mkdir -p {params.tmpdir};

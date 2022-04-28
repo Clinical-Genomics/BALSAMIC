@@ -31,7 +31,7 @@ rule sentieon_base_calibration:
     threads:
         get_threads(cluster_config, 'sentieon_base_calibration')
     message:
-        "Base recalibration using sentieon tools for sample {params.sample}"
+        "Recalibrating bases using sentieon tools for {params.sample}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -96,7 +96,7 @@ rule sentieon_TNhaplotyper_tumor_only:
     threads:
         get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
     message:
-        "Calling SNVs using sentieon TNhaplotyper for sample {params.case_name}"
+        "Calling SNVs using sentieon TNhaplotyper for {params.case_name}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -146,7 +146,7 @@ rule sentieon_TNscope_tumor_only:
     threads:
         get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     message:
-        "Calling SNVs using sentieon TNscope for sample {params.case_name}"
+        "Calling SNVs using sentieon TNscope for {params.case_name}"
     shell:
         """
 mkdir -p {params.tmpdir};

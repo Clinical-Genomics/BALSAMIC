@@ -27,7 +27,7 @@ rule bcftools_filter_tnscope_tumor_only:
   threads: 
     get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_only')
   message:
-    "Filtering wgs tumor-only tnscope annotated variants using bcftools on {params.case_name}"
+    "Filtering WGS tumor-only tnscope annotated variants using bcftools for {params.case_name}"
   shell:
     """
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
@@ -70,7 +70,7 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
   threads: 
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_only')
   message:
-    "Filtering wgs tumor-only tnhaplotyper annotated variants using bcftools on {params.case_name}"
+    "Filtering WGS tumor-only tnhaplotyper annotated variants using bcftools for {params.case_name}"
   shell:
     """
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed

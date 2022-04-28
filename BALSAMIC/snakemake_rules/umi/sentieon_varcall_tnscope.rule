@@ -34,7 +34,7 @@ rule sentieon_tnscope_umi:
     threads: 
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message: 
-        "Calling SNVs using TNscope for sample {params.tumor}"
+        "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
         """
 mkdir -p {params.tmpdir};

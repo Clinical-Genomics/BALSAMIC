@@ -28,7 +28,7 @@ rule bcftools_filter_vardict_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_vardict_tumor_normal')
   message:
-    "Filtering vardict tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering vardict tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -67,7 +67,7 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_normal')
   message:
-    "Filtering tnhaplotyper tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering tnhaplotyper tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -95,13 +95,13 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
+    pop_freq = [SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name =  '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_normal')
   message:
-    "Filtering TNscope_umi tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \

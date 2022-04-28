@@ -54,8 +54,7 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-
-rule delly_tumor_normal:
+rule delly_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = bam_dir + normal_bam,
@@ -63,9 +62,9 @@ rule delly_tumor_normal:
         excl = config["reference"]["delly_exclusion_converted"],
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.sample_name_map",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",
     benchmark:
-        Path(benchmark_dir, 'delly_tumor_normal_' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir, 'delly_sv_tumor_normal_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
@@ -91,12 +90,11 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-
 rule bcftools_bcf2vcf_delly:
     input:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
     output:
-        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.vcf.gz",
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.vcf.gz",
     benchmark:
         Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
@@ -106,14 +104,13 @@ rule bcftools_bcf2vcf_delly:
     threads:
         get_threads(cluster_config, "bcftools_bcf2vcf_delly")
     message:
-        ("Convert bcf to vcf for structural variants called using delly for {params.case_name}")
+        ("Converting BCF from delly to VCF for {params.case_name}")
     shell:
         """
 bcftools view  --threads {threads} -f PASS -O z -o {output.vcf} {input.bcf};
 
 tabix -p vcf -f {output.vcf};
         """
-
 
 rule ascat_tumor_normal:
     input:
@@ -142,12 +139,12 @@ rule ascat_tumor_normal:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",
-        genome = GENOME_VERSION
+        genome = GENOME_VERSION,
+        case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")
     message:
-        ("Call copy number variants using ascatNGS for {input.bamT} vs {input.bamN} files then "
-        "filter somatic variants and finally convert to compressed vcf file")
+        ("Calling copy number variants using ascatNGS for {params.case_name}")
     shell:
         """
 export LD_LIBRARY_PATH=:/opt/wtsi-cgp/lib;
@@ -189,7 +186,6 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-
 rule ascat_tumor_normal_merge_output:
     input:
         sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
@@ -207,7 +203,7 @@ rule ascat_tumor_normal_merge_output:
     threads:
         get_threads(cluster_config, "ascat_tumor_normal_merge_output")
     message:
-        "Merge the ascatNgs output plots together with the sample statistics into a single PDF"
+        "Merging the output plots and the sample statistics from ascatNGS into a single PDF"
     shell:
         """
 python {params.merge_ascat_output_script} {output.ascat_pdf} {input.sample_statistics} {input.ascat_plots}
@@ -238,7 +234,7 @@ rule svdb_merge_tumor_normal:
     threads:
         get_threads(cluster_config, "svdb_merge_tumor_normal")
     message:
-        "Merging SV and CNV results for all variants using svdb for sample '{params.case_name}' "
+        "Merging structural and copy number variants using SVDB for {params.case_name}"
     shell:
         """
 svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 \
