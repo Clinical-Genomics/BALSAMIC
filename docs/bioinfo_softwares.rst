@@ -16,7 +16,7 @@ bcftools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/bcftools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/21903627/>`_
-:Version: `>1.10`
+:Version: `>=1.10`
 
 bedtools
 ~~~~~~~~
@@ -46,7 +46,7 @@ ensembl-vep
 ~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/Ensembl/ensembl-vep>`_
 :Article: `Genome Biology` `<https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0974-4>`_
-:Version: `100.2`
+:Version: `104.3`
 
 fastp
 ~~~~~
