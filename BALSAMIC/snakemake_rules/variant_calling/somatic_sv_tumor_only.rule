@@ -105,9 +105,7 @@ rule delly_cnv_tumor_only:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
         """
-delly cnv -a -m {input.map} -g {input.fa} -c {output.rd} {input.bamT}
-
-delly cnv -m {input.map} -g {input.fa} -o {output.cnv} -l {input.bcf} {input.bamT}
+delly cnv -m {input.map} -g {input.fa} -c {output.rd} -o {output.cnv} -l {input.bcf} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
