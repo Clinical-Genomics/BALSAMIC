@@ -247,33 +247,58 @@ analysis_specific_results.extend(
 
 # Raw VCFs
 analysis_specific_results.extend(
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))
+    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
 # Filtered and passed post annotation VCFs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [config["analysis"]["case_id"]]))
+    expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
+
+# TMB
+analysis_specific_results.extend(
+    expand(vep_dir + "{vcf}.balsamic_stat", vcf=get_vcf(config, somatic_caller_tmb, [case_id]))
+)
+
+# TGA specific files
+if config["analysis"]["sequencing_type"] != "wgs":
+    # CNVkit
+    analysis_specific_results.append(cnv_dir + "tumor.merged.cns")
+    analysis_specific_results.extend(expand(cnv_dir + "tumor.merged-{plot}", plot=["diagram.pdf", "scatter.pdf"]))
+    analysis_specific_results.append(cnv_dir + case_id +".gene_metrics")
+    # vcf2cytosure
+    analysis_specific_results.extend(expand(
+        vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
+        case_name=case_id,
+        var_caller=["cnvkit"]
+    ))
+    # VarDict
+    analysis_specific_results.extend(
+        expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
+    )
+    # UMI
+    analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
+    if background_variant_file:
+        analysis_specific_results.extend(
+            expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["TNscope_umi"])
+        )
 
 # AscatNgs
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [config["analysis"]["case_id"]]))
+        expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [config["analysis"]["case_id"]]))
+        expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
 
-# CNVkit & vcf2cytosure
-if config["analysis"]["sequencing_type"] != "wgs":
-    analysis_specific_results.append(cnv_dir + "tumor.merged.cns")
-    analysis_specific_results.extend(expand(cnv_dir + "tumor.merged-{plot}", plot=["diagram.pdf", "scatter.pdf"]))
-    analysis_specific_results.append(cnv_dir + case_id +".gene_metrics")
-    analysis_specific_results.extend(expand(
-        vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
-        case_name=config["analysis"]["case_id"],
-        var_caller=["cnvkit"]
-    ))
+# Dragen
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
+    if "dragen" in config:
+        analysis_specific_results.extend([
+            Path(result_dir, "dragen", "SNV.somatic." + case_id + ".dragen_tumor.bam").as_posix(),
+            Path(result_dir, "dragen", "SNV.somatic." + case_id + ".dragen.vcf.gz").as_posix()
+        ])
 
 LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
 
@@ -308,17 +333,19 @@ if 'benchmark_plots' in config:
                 plots.unlink()
 
 if 'delivery' in config:
-    wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],
-                     "case_name": config["analysis"]["case_id"],
-                     "allow_missing": True
-                     }
+    wildcard_dict = {
+        "sample": list(config["samples"].keys())+["tumor", "normal"],
+        "case_name": case_id,
+        "allow_missing": True
+    }
 
     if config['analysis']["analysis_type"] in ["paired", "single"]:
-        wildcard_dict.update({"var_type": ["CNV", "SNV", "SV"],
-                              "var_class": ["somatic", "germline"],
-                              "var_caller": somatic_caller + germline_caller,
-                              "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
-                              })
+        wildcard_dict.update({
+            "var_type": ["CNV", "SNV", "SV"],
+            "var_class": ["somatic", "germline"],
+            "var_caller": somatic_caller + germline_caller,
+            "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
+        })
 
     if 'rules_to_deliver' in config:
         rules_to_deliver = config['rules_to_deliver'].split(",")
@@ -340,9 +367,7 @@ if 'delivery' in config:
         output_files_ready.extend(files_to_deliver)
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
-    delivery_ready = os.path.join(get_result_dir(config),
-                                  "delivery_report",
-                                  config["analysis"]["case_id"] + "_delivery_ready.hk")
+    delivery_ready = os.path.join(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk")
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
 
@@ -361,7 +386,7 @@ rule all:
 
         # Perform validation of extracted QC metrics
         try:
-            validate_qc_metrics(read_yaml(input[1]))
+            validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
             LOG.error(val_exc)
             raise BalsamicError
