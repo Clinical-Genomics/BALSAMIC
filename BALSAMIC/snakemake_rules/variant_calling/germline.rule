@@ -19,7 +19,7 @@ rule sentieon_DNAscope:
     threads:
         get_threads(cluster_config, 'sentieon_DNAscope')
     message:
-        "Calling germline variants using Sentieon DNAscope for sample {params.sample}"
+        "Calling germline variants using Sentieon DNAscope for {params.sample}"
     shell:
         """
 mkdir -p {params.tmpdir};

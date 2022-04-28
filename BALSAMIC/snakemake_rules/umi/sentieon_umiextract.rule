@@ -22,7 +22,7 @@ rule sentieon_umiextract:
     threads:
         get_threads(cluster_config, "sentieon_umiextract")
     message: 
-        "UMI tag extraction using sentieon for sample {params.sample_id}"
+        "Extracing UMI tags using sentieon for {params.sample_id}"
     shell:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
@@ -59,7 +59,7 @@ rule sentieon_bwa_umiextract:
     threads: 
         get_threads(cluster_config, "sentieon_bwa_umiextract")
     message: 
-        "Aligning of UMI extracted reads with sentieon bwa mem, sorting for sample {params.sample_id}"
+        "Aligning UMI extracted reads and sorting using sentieon bwa-mem for {params.sample_id}"
     shell:
         """
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1

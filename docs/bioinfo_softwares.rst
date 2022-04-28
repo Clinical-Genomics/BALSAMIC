@@ -46,7 +46,7 @@ delly
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/dellytools/delly>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/28/18/i333/245403>`_
-:Version: `0.8.7`
+:Version: `0.9.1`
 
 ensembl-vep
 ~~~~~~~~~~~

@@ -46,9 +46,13 @@
             "mutation": "somatic",
             "type": "SNV"
         },
-        "delly":{
+        "dellysv":{
             "mutation": "somatic",
             "type": "SV"
+        },
+        "dellycnv":{
+            "mutation": "somatic",
+            "type": "CNV"
         },
         "ascat": {
             "mutation": "somatic",

@@ -66,7 +66,7 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_only')
   message:
-    "Filtering tnhaplotyper tumor-only annotated variants using bcftools on {params.case_name}"
+    "Filtering tnhaplotyper tumor-only annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -100,7 +100,7 @@ rule bcftools_filter_TNscope_umi_tumor_only:
   threads:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_only')
   message:
-    "Filtering TNscope_umi tumor-only annotated variants using bcftools on {params.case_name}"
+    "Filtering TNscope_umi tumor-only annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \

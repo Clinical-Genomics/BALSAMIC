@@ -21,12 +21,14 @@ rule mergeBam_normal_umiconsensus:
   threads:
     get_threads(cluster_config, "mergeBam_normal_umiconsensus")
   message:
-    ("Replace ReadGroups using picard for normal sample {params.sample} "
-    "and convert bam to cram format")
+    ("Replacing ReadGroups using picard and converting from bam to cram format for {params.sample}")
   shell:
         """
 picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
+
 samtools index {output.bam};
+
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 
+
 samtools index {output.cram}; 
         """
