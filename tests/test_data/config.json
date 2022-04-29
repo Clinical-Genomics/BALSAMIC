@@ -24,34 +24,10 @@
             "merged": "manta_germline.vcf.gz",
             "type": "SV"
         },
-        "strelka_germline": {
-            "default": ["variants.vcf.gz", "germline.S1.vcf.gz"],
-            "mutation": "germline",
-            "merged": "strelka_germline.vcf.gz",
-            "type": "SNV"
-        },
-        "strelka": {
-            "default": ["somatic.snvs.vcf.gz", "somatic.indels.vcf.gz"],
-            "mutation": "somatic",
-            "merged": "strelka.vcf.gz",
-            "type": "SNV"
-        },
         "mutect": {
             "default": "mutect.vcf.gz",
             "mutation": "somatic",
             "merged": "mutect.vcf.gz",
-            "type": "SNV"
-        },
-        "freebayes": {
-            "default": "freebayes.vcf.gz",
-            "mutation": "germline",
-            "merged": "freebayes.vcf.gz",
-            "type": "SNV"
-        },
-        "haplotypecaller": {
-            "default": "haplotypecaller.vcf.gz",
-            "mutation": "germline",
-            "merged": "haplotypecaller.vcf.gz",
             "type": "SNV"
         },
         "vardict": {
