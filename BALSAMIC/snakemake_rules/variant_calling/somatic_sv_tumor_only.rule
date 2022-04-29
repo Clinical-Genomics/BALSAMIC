@@ -88,6 +88,7 @@ rule delly_cnv_tumor_only:
         map = config["reference"]["delly_mappability"],
     output:
         cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        rd = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.cov.gz",
         namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
     benchmark:
         benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
@@ -104,7 +105,7 @@ rule delly_cnv_tumor_only:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
         """
-delly cnv -m {input.map} -g {input.fa} -o {output.cnv} -l {input.bcf} {input.bamT}
+delly cnv -m {input.map} -g {input.fa} -c {output.rd} -o {output.cnv} -l {input.bcf} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 

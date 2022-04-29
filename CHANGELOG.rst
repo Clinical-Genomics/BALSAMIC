@@ -21,7 +21,8 @@ Added:
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
 * ascatNGS copynumber file #914
 * ReadtheDocs for BALSAMIC annotation resources #916
-* Delly CNV for tumor only workflow 
+* Delly CNV for tumor only workflow #923
+* Delly CNV Read-depth profiles for tumor only workflows #924
 
 Changed:
 ^^^^^^^^
