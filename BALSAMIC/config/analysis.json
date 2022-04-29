@@ -30,10 +30,6 @@
             "mutation": "somatic",
             "type": "SNV"
         },
-        "tnsnv": {
-            "mutation": "somatic",
-            "type": "SNV"
-        },
         "tnhaplotyper": {
             "mutation": "somatic",
             "type": "SNV"
@@ -46,10 +42,6 @@
               "mutation": "germline",
               "type": "SV"
         }, 
-        "haplotypecaller": {
-            "mutation": "germline",
-            "type": "SNV"
-        },
         "vcfmerge":{
             "mutation": "somatic",
             "type": "SNV"

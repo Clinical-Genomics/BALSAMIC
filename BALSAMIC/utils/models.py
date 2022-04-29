@@ -184,7 +184,6 @@ class VCFModel(BaseModel):
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnhaplotyper: VarcallerAttribute
-    haplotypecaller: VarcallerAttribute
     TNscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
     manta: VarcallerAttribute
