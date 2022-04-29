@@ -19,7 +19,7 @@ rule bcftools_query_generatebackgroundaf_umitable:
     threads: 
         get_threads(cluster_config, "bcftools_query_generatebackgroundaf_umitable")
     message: 
-        "Creating Allelic frequency table from VCF file for sample {params.case_name}"
+        "Creating Allelic frequency table from VCF file for {params.case_name}"
     shell:
         """
 bcftools query \

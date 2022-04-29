@@ -56,6 +56,7 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
+        pop_freq_umi: VCFAttributes (optional); maximum gnomad_af for UMI workflow
         strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
         sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
@@ -71,6 +72,7 @@ class VarCallerFilter(BaseModel):
     MQ: Optional[VCFAttributes]
     DP: Optional[VCFAttributes]
     pop_freq: Optional[VCFAttributes]
+    pop_freq_umi: Optional[VCFAttributes]
     strand_reads: Optional[VCFAttributes]
     qss: Optional[VCFAttributes]
     sor: Optional[VCFAttributes]
@@ -186,9 +188,10 @@ class VCFModel(BaseModel):
     TNscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
     manta: VarcallerAttribute
-    delly: VarcallerAttribute
+    dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
+    dellycnv: VarcallerAttribute
     svdb: VarcallerAttribute
 
 
@@ -536,6 +539,7 @@ class ReferenceMeta(BaseModel):
         rankscore: ReferenceUrlsModel. Optional rankscore model
         access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
         delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
+        delly_mappability: ReferenceUrlsModel. Optional field for genome mappability
         ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
@@ -558,6 +562,9 @@ class ReferenceMeta(BaseModel):
     rankscore: Optional[ReferenceUrlsModel]
     access_regions: Optional[ReferenceUrlsModel]
     delly_exclusion: Optional[ReferenceUrlsModel]
+    delly_mappability: Optional[ReferenceUrlsModel]
+    delly_mappability_gindex: Optional[ReferenceUrlsModel]
+    delly_mappability_findex: Optional[ReferenceUrlsModel]
     ascat_gccorrection: Optional[ReferenceUrlsModel]
     ascat_chryloci: Optional[ReferenceUrlsModel]
     clinvar: Optional[ReferenceUrlsModel]
