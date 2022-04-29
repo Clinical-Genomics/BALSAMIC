@@ -129,6 +129,7 @@ DELIVERY_RULES = [
     "sentieon_tnscope_umi_tn",
     "ascat_tumor_normal",
     "ascat_tumor_normal_merge_output",
+    "delly_cnv_tumor_only",
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",

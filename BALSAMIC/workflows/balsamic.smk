@@ -292,6 +292,12 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
         expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
 
+# Delly CNV
+if config['analysis']['analysis_type'] == "single":
+    analysis_specific_results.extend(
+        expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
+    )
+
 # Dragen
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
     if "dragen" in config:
