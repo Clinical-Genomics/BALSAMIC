@@ -53,6 +53,7 @@ Removed
 * bcftools_stats from vep #898
 * QC delivery report workflow (generating the ``<case>_qc_report.html`` file) #878
 * ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command #878
+* Removed `gatk_haplotypecaller` for reporting panel germline variants #918 
 
 [8.2.10]
 --------
