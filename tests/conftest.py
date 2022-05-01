@@ -645,6 +645,12 @@ def metrics_yaml_path(analysis_path):
 
 
 @pytest.fixture(scope="session")
+def bcftools_counts_path(analysis_path):
+    """svdb.all.filtered.pass.stats test path"""
+    return os.path.join(analysis_path, "SNV.somatic.case.svdb.all.filtered.pass.stats")
+
+
+@pytest.fixture(scope="session")
 def qc_requested_metrics():
     """Raw requested metrics"""
     return {
