@@ -254,7 +254,7 @@ def test_collect_qc_metrics_counts(
 
     # GIVEN a sequencing type and a capture kit
     seq_type = "targeted"
-    capture_kit = "lymphoma_6.1_hg19_design.bed"
+    capture_kit = "gmsmyeloid_5.2_hg19_design.bed"
 
     # WHEN invoking the python script
     result = cli_runner.invoke(
