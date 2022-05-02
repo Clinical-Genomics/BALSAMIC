@@ -58,17 +58,17 @@ def test_deliver_tumor_normal_panel(
     # Actual delivery files dummies with and without index
     cnv_result_dir = Path(helpers.result_dir, "cnv")
     cnv_result_dir.mkdir(parents=True, exist_ok=True)
-    actual_delivery_file = Path(cnv_result_dir, "tumor.merged.cnr")
+    actual_delivery_file = Path(cnv_result_dir, "tumor.merged.cns")
     actual_delivery_file.touch()
 
     vep_result_dir = Path(helpers.result_dir, "vep")
     vep_result_dir.mkdir(parents=True, exist_ok=True)
     touch_vcf_delivery_file = Path(
-        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz"
+        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.vcf.gz"
     )
     touch_vcf_delivery_file.touch()
     touch_vcf_delivery_file_index = Path(
-        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz.tbi"
+        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.vcf.gz.tbi"
     )
     touch_vcf_delivery_file_index.touch()
 

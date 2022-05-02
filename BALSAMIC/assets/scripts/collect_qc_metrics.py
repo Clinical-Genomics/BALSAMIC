@@ -51,8 +51,8 @@ def capture_kit_resolve_type(capture_kit: str):
 
     if capture_kit == "None":
         return None
-    else:
-        return capture_kit
+
+    return capture_kit
 
 
 def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:

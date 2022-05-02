@@ -87,8 +87,8 @@ rule delly_cnv_tumor_only:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         map = config["reference"]["delly_mappability"],
     output:
-        cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        rd = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.cov.gz",
+        cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
         namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
     benchmark:
         benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
@@ -96,6 +96,7 @@ rule delly_cnv_tumor_only:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
         runmode = "local",
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
@@ -105,7 +106,7 @@ rule delly_cnv_tumor_only:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
         """
-delly cnv -m {input.map} -g {input.fa} -c {output.rd} -o {output.cnv} -l {input.bcf} {input.bamT}
+delly cnv -m {input.map} -g {input.fa} -c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
@@ -149,13 +150,14 @@ rule svdb_merge_tumor_only:
                 vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
                 caller=somatic_caller_cnv)
     output:
-        svdb_vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
+        vcf_svdb = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
     benchmark:
         Path(benchmark_dir, 'svdb_merge_tumor_only_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tumor = get_sample_type(config["samples"], "tumor"),
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
@@ -169,6 +171,8 @@ rule svdb_merge_tumor_only:
 svdb --merge --no_intra --bnd_distance 5000 --overlap 0.80 \
 --vcf {params.vcf} \
 --priority {params.svdb_priority} | \
-bgzip -l 9 -c > {output.svdb_vcf};
+bgzip -l 9 -c > {output.vcf_svdb};
+tabix -p vcf -f {output.vcf_svdb};
+
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
         """
