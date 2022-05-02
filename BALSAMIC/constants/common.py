@@ -63,7 +63,6 @@ BIOINFO_TOOL_ENV = {
     "picard": "align_qc",
     "multiqc": "align_qc",
     "fastp": "align_qc",
-    "csvkit": "align_qc",
     "ensembl-vep": "annotate",
     "genmod": "annotate",
     "vcfanno": "annotate",
