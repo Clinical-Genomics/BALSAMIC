@@ -44,8 +44,7 @@ rule cnvkit_single:
         genome_version = GENOME_VERSION,
         pon = " " if get_pon_cnn(config) is None else get_pon_cnn(config)
     message:
-        ("Run CNVkit pipeline for sample {params.case_name},"
-        "while tumor purity/ploidy calculated using PureCN")
+        ("Calling CNVs using CNVkit and calculating tumor purity/ploidy using PureCN for {params.case_name}")
     shell:
       """
 mkdir -p {params.tmpdir};

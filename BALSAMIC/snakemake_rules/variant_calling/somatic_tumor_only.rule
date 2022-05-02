@@ -22,7 +22,7 @@ rule vardict_tumor_only:
     threads:
         get_threads(cluster_config, "vardict_tumor_only")
     message:
-        "Calling variants using vardict for sample {params.case_name}"
+        "Calling single nucleotide variants using vardict for {params.case_name}"
     shell:
         """
 export PERL5LIB=;
@@ -53,19 +53,19 @@ rule vardict_merge:
     output:
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map",
         yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
     benchmark:
         Path(benchmark_dir, 'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"],
     threads:
         get_threads(cluster_config,"vardict_merge")
     message:
-        ("Merging all chromosomes vardict results into "
-         "single vcf using bcftools for sample {params.case_name}")
+        ("Merging multiple VCFs from vardict into single VCF using bcftools for {params.case_name}")
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -73,12 +73,12 @@ export TMPDIR={params.tmpdir};
 
 bcftools concat {input} \
 | bcftools sort --temp-dir {params.tmpdir} - \
-| bgzip > {output.vcf};
-tabix -f -p vcf {output.vcf}; 
+| bgzip > {output.vcf_vardict};
+tabix -f -p vcf {output.vcf_vardict}; 
 
 echo -e \"{params.case_name}\\tTUMOR\" > {output.namemap};
 echo -e \"{params.case_name}\" > {output.namemap}.tumor; 
-echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf} }} }} }}' > {output.yaml};
+echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf_vardict} }} }} }}' > {output.yaml};
         """
 
 

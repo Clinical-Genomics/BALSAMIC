@@ -20,7 +20,7 @@ rule bcftools_view_split_variant:
     threads:
         get_threads(cluster_config, 'bcftools_view_split_variant')
     message:
-        "Split tnscope snv and sv variants using bcftools for sample {params.case_name}"
+        "Split tnscope snv and sv variants using bcftools for {params.case_name}"
     shell:
         """
 export TMPDIR={params.tmpdir};

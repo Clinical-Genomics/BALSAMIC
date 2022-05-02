@@ -56,6 +56,7 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad_af
+        pop_freq_umi: VCFAttributes (optional); maximum gnomad_af for UMI workflow
         strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
         sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
@@ -71,6 +72,7 @@ class VarCallerFilter(BaseModel):
     MQ: Optional[VCFAttributes]
     DP: Optional[VCFAttributes]
     pop_freq: Optional[VCFAttributes]
+    pop_freq_umi: Optional[VCFAttributes]
     strand_reads: Optional[VCFAttributes]
     qss: Optional[VCFAttributes]
     sor: Optional[VCFAttributes]
@@ -182,13 +184,13 @@ class VCFModel(BaseModel):
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnhaplotyper: VarcallerAttribute
-    haplotypecaller: VarcallerAttribute
     TNscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
     manta: VarcallerAttribute
-    delly: VarcallerAttribute
+    dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
+    dellycnv: VarcallerAttribute
     svdb: VarcallerAttribute
 
 
@@ -198,10 +200,11 @@ class AnalysisModel(BaseModel):
     Attributes:
 
         case_id : Field(required); string case identifier
-        analysis_type : Field(required); string literal [single, paired, pon]
+        analysis_type : Field(required); string literal [single, paired, pon, qc_panel]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
             pon : panel of normal analysis
+            qc_panel : QC analysis only
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
@@ -217,7 +220,7 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When analysis_type is set to any value other than [single, paired, qc, pon]
+            When analysis_type is set to any value other than [single, paired, pon, qc_panel]
             When sequencing_type is set to any value other than [wgs, targeted]
     """
 
@@ -427,7 +430,7 @@ class BalsamicConfigModel(BaseModel):
     """
 
     QC: QCModel
-    vcf: VCFModel
+    vcf: Optional[VCFModel]
     analysis: AnalysisModel
     samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
@@ -535,6 +538,7 @@ class ReferenceMeta(BaseModel):
         rankscore: ReferenceUrlsModel. Optional rankscore model
         access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
         delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
+        delly_mappability: ReferenceUrlsModel. Optional field for genome mappability
         ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
@@ -557,6 +561,9 @@ class ReferenceMeta(BaseModel):
     rankscore: Optional[ReferenceUrlsModel]
     access_regions: Optional[ReferenceUrlsModel]
     delly_exclusion: Optional[ReferenceUrlsModel]
+    delly_mappability: Optional[ReferenceUrlsModel]
+    delly_mappability_gindex: Optional[ReferenceUrlsModel]
+    delly_mappability_findex: Optional[ReferenceUrlsModel]
     ascat_gccorrection: Optional[ReferenceUrlsModel]
     ascat_chryloci: Optional[ReferenceUrlsModel]
     clinvar: Optional[ReferenceUrlsModel]

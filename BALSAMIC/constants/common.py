@@ -36,7 +36,7 @@ SENTIEON_TNSCOPE = Path(
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
-ANALYSIS_TYPES = ["paired", "single", "qc", "pon"]
+ANALYSIS_TYPES = ["paired", "single", "qc_panel", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 SEQUENCING_TYPE = ["wgs", "targeted"]
 
@@ -63,7 +63,6 @@ BIOINFO_TOOL_ENV = {
     "picard": "align_qc",
     "multiqc": "align_qc",
     "fastp": "align_qc",
-    "csvkit": "align_qc",
     "ensembl-vep": "annotate",
     "genmod": "annotate",
     "vcfanno": "annotate",

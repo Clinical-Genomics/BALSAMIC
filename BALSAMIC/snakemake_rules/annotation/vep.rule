@@ -15,7 +15,6 @@ rule vep_somatic_snv:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
     tmpvcf = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
@@ -25,7 +24,7 @@ rule vep_somatic_snv:
   threads:
     get_threads(cluster_config, "vep_somatic_snv")
   message:
-    "Running vep annotation on {params.message_text}"
+    "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:
     """
 vep_path=$(dirname $(readlink -f $(which vep)));
@@ -62,14 +61,13 @@ rule vep_somatic_sv:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     message_text = "SV.somatic.{case_name}.svdb.vcf.gz",
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_somatic_sv")
   message:
-    "Running vep annotation on {params.message_text}"
+    "Running vep annotation for structural and copy number variants on {params.message_text}"
   shell:
     """
 vep_path=$(dirname $(readlink -f $(which vep)));
@@ -100,13 +98,12 @@ rule tmb_calculation:
   params:
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
-    housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.all",
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
   threads:
     get_threads(cluster_config, "vep")
   message:
-    "Calculating TMB for {params.message_text}" 
+    "Calculating TMB score for {params.message_text}"
   shell:
     """
 mkdir -p {params.tmpdir};
@@ -156,14 +153,14 @@ rule vep_germline:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
-    housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "annotated-germline"},
     sample = '{sample}',
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')
   message:
-    "Running vep annotation on {params.sample}"
+    "Running vep annotation on germline variants for {params.sample}"
   shell:
       """
 vep_path=$(dirname $(readlink -f $(which vep)));
