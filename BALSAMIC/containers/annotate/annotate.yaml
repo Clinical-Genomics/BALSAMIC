@@ -1,13 +1,11 @@
 channels:
-  - anaconda
   - defaults
-  - conda-forge
 
 dependencies:
   - anaconda::python=3.7
-  - bioconda::ensembl-vep=100.2
-  - bioconda::bcftools=1.10
   - conda-forge::libopenblas=0.3.20
+  - bioconda::ensembl-vep=104.3
+  - bioconda::bcftools=1.10
   - bioconda::vcfanno=0.3.3
   - anaconda::gxx_linux-64=7.3.0
   - anaconda::pip=20.2.4
