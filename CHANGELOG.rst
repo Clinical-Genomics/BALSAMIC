@@ -33,6 +33,9 @@ Changed:
 * Upgrade black to 22.3.0
 * For UMI workflow, post filter `gnomad_pop_freq` value is changed from `0.005` to `0.02` #919
 * updated delly to 0.9.1 #920
+* container base_image (align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py36) to 4.10.3-alpine #921
+* update container (align_qc, annotate, coverage_qc, varcall_cnvkit,varcall_py36) bioinfo tool versions  #921
+* update tool versions (align_qc, annotate, coverage_qc, varcall_cnvkit) in methods and softwares docs #921
 
 Fixed:
 ^^^^^^
