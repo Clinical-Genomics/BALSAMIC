@@ -15,7 +15,6 @@ rule vep_somatic_snv:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
     tmpvcf = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
@@ -62,7 +61,6 @@ rule vep_somatic_sv:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": "{case_name}", "tags": "annotated-somatic"},
     message_text = "SV.somatic.{case_name}.svdb.vcf.gz",
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
@@ -100,7 +98,6 @@ rule tmb_calculation:
   params:
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
-    housekeeper_id = {"id": "{case_name}", "tags": "stat-somatic"},
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.all",
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
   threads:
@@ -156,7 +153,7 @@ rule vep_germline:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
   params:
-    housekeeper_id = {"id": "{sample}", "tags": "annotated-germline"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "annotated-germline"},
     sample = '{sample}',
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters

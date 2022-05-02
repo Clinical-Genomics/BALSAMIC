@@ -127,12 +127,13 @@ rule sentieon_TNscope_tumor_only:
         bam = expand(bam_dir + "tumor.merged.bam"),
         recal = expand(bam_dir + "tumor.merged.recal_data.table")
     output:
-        vcf = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
         namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, "sentieon_TNscope_tumor_only_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR", 
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"], 
@@ -162,7 +163,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --tumor_sample {params.tumor} {params.pon} \
 --dbsnp {input.dbsnp} \
 --pcr_indel_mode {params.pcr_model} \
-{params.tumor_options} {output.vcf};
+{params.tumor_options} {output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap_snv};
 

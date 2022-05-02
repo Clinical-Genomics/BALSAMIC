@@ -9,7 +9,7 @@ from functools import partial
 from click.testing import CliRunner
 
 from BALSAMIC.utils.cli import read_yaml
-from .helpers import ConfigHelper
+from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
 
@@ -673,3 +673,49 @@ def qc_requested_metrics():
 def qc_extracted_metrics(metrics_yaml_path):
     """Extracted and formatted QC metrics"""
     return read_yaml(metrics_yaml_path)
+
+
+@pytest.fixture(scope="function")
+def snakemake_fastqc_rule(tumor_only_config, helpers):
+    """FastQC snakemake mock rule"""
+
+    helpers.read_config(tumor_only_config)
+    fastq_path = os.path.join(
+        helpers.analysis_dir,
+        helpers.case_id,
+        "analysis",
+        "fastq",
+        "concatenated_tumor_XXXXXX_R_{read}.fastq.gz",
+    )
+
+    return Map(
+        {
+            "fastqc": Map(
+                {
+                    "params": Map(
+                        {
+                            "housekeeper_id": {
+                                "id": "sample_tumor_only",
+                                "tags": "quality-trimmed-seq",
+                            }
+                        }
+                    ),
+                    "output": Map(
+                        {
+                            "_names": Map({"fastqc": fastq_path}),
+                            "fastqc": fastq_path,
+                        }
+                    ),
+                    "rule": Map(
+                        {
+                            "name": "fastq",
+                            "output": [
+                                fastq_path,
+                            ],
+                            "temp_output": set(),
+                        }
+                    ),
+                }
+            )
+        }
+    )
