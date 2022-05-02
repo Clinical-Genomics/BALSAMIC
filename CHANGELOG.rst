@@ -37,6 +37,7 @@ Changed:
 * container base_image (align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py36) to 4.10.3-alpine #921
 * update container (align_qc, annotate, coverage_qc, varcall_cnvkit,varcall_py36) bioinfo tool versions  #921
 * update tool versions (align_qc, annotate, coverage_qc, varcall_cnvkit) in methods and softwares docs #921
+* Updated the list of files to be stored and delivered #848
 * Moved ``collect_custom_qc_metrics`` rule from ``multiqc.rule`` #925
 
 Fixed:
@@ -45,6 +46,7 @@ Fixed:
 * ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
 * QC metric validation for different panel bed version #855
 * Fixed development version of ``fpdf2`` to ``2.4.6`` #878
+* Added missing svdb index file #848
 
 Removed
 ^^^^^^^
