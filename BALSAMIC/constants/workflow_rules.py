@@ -5,6 +5,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/fastp.rule",
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
+            "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/variant_calling/mergetype_tumor.rule",
         ],
         "align": [],

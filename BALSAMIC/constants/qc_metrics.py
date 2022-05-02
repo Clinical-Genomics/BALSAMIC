@@ -48,4 +48,5 @@ METRICS = {
         "PCT_100X": {"condition": None},
         "FOLD_80_BASE_PENALTY": {"condition": {"norm": "lt", "threshold": 1.8}},
     },
+    "variants": {"NUMBER_OF_SITES": {"condition": {"norm": "lt", "threshold": 10000}}},
 }
