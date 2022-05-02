@@ -17,7 +17,7 @@ rule vcf2cytosure_convert:
     params:
         case_name = config["analysis"]["case_id"],
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
-    message: "Convert VCF file with CNVs to the .CGH format using vcf2cytosure for sample {params.case_name}"
+    message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
     shell:
         """
 vcf2cytosure --vcf {input.cnv_vcf} --cn {input.cnv_cnr} --out {output.cgh_file} --bins 1

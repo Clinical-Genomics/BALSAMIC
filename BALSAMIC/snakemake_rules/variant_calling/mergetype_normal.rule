@@ -26,7 +26,7 @@ rule mergeBam_normal:
   threads:
     get_threads(cluster_config, "mergeBam_normal")
   message:
-    "Replace bam header using Picard tools for normal sample {params.sample}"
+    "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
 picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 

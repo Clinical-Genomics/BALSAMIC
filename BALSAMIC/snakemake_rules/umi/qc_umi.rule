@@ -18,7 +18,7 @@ rule picard_umiaware:
     threads:
         get_threads(cluster_config, "picard_umiaware")
     message:
-        "Picard Umiaware mark dups for sample {params.sample_id}"
+        "Marking duplicates using Picardtools with UmiAware for {params.sample_id}"
     shell:
         """
 picard UmiAwareMarkDuplicatesWithMateCigar \
@@ -47,7 +47,7 @@ rule picard_collecthsmetrics_umi:
     threads: 
         get_threads(cluster_config, "CollectHsMetrics")
     message:
-        "Collect HSmetrics using Picardtools for {params.sample_id}"
+        "Collecting HSmetrics using Picardtools for {params.sample_id}"
     shell:
         """
 picard BedToIntervalList \

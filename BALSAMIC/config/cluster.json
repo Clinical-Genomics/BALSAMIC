@@ -52,14 +52,6 @@
 		"time": "12:00:00",
 		"n": 5
 	},
-	"gatk_haplotypecaller": {
-		"time": "03:00:00",
-		"n": 10
-	},
-	"haplotypecaller_merge": {
-		"time": "01:30:00",
-		"n": 8
-	},
 	"manta_germline": {
 		"time": "05:00:00",
 		"n": 16
@@ -125,14 +117,6 @@
 		"n": 24
 	},
 	"sentieon_TNscope_tumor_only": {
-		"time": "24:00:00",
-		"n": 24
-	},
-	"sentieon_TNsnv": {
-		"time": "24:00:00",
-		"n": 24
-	},
-	"sentieon_TNsnv_tumor_only": {
 		"time": "24:00:00",
 		"n": 24
 	},

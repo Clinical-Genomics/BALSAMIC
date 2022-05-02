@@ -30,12 +30,12 @@ rule sentieon_tnscope_umi_tn:
         pcr_model = params.common.pcr_model,
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
-        normal = "NORMAL"
+        normal = "NORMAL",
+        case_name= config["analysis"]["case_id"]
     threads: 
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message: 
-        "Calling SNVs using TNscope for sample: {params.tumor}"
-        " versus sample {params.normal}"
+        "Calling single nucleotide variants using TNscope for {params.case_name}"
     shell:
         """
 mkdir -p {params.tmpdir};

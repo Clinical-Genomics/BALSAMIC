@@ -75,6 +75,9 @@ def reference():
             "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
             "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
             "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
+            "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
+            "delly_mappability_gindex": "tests/test_data/references/genome/delly_mappability.gz.gzi",
+            "delly_mappability_findex": "tests/test_data/references/genome/delly_mappability.fai",
             "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
             "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
@@ -600,11 +603,9 @@ def sample_config():
             "vardict": {"mutation": "somatic", "type": "SNV"},
             "mutect": {"mutation": "somatic", "type": "SNV"},
             "tnscope": {"mutation": "somatic", "type": "SNV"},
-            "tnsnv": {"mutation": "somatic", "type": "SNV"},
             "tnhaplotyper": {"mutation": "somatic", "type": "SNV"},
             "dnascope": {"mutation": "germline", "type": "SNV"},
             "manta_germline": {"mutation": "germline", "type": "SV"},
-            "haplotypecaller": {"mutation": "germline", "type": "SNV"},
         },
         "samples": {
             "S1_R": {

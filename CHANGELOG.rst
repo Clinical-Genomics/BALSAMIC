@@ -9,18 +9,20 @@ Added:
 * UMI duplication metrics to report in multiqc_picard_dups.json #844
 * Option to use PON reference in cnv calling for TGA tumor-only cases
 * QC default validation conditions (for not defined capture kits) #855
-* SVdb to the varcall_py36 container #871
-* SVdb to WGS workflow #871
+* SVdb to the varcall_py36 container #872
+* SVdb to WGS workflow #873
 * Docker container for vcf2cytosure #858
 * Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858
-* SVdb to TGA workflow #871
-* SVdb merge SV and CNV #871
+* SVdb to TGA workflow #879
+* SVdb merge SV and CNV #886
 * Readthedocs for BALSAMIC method descriptions #892
 * Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
 * bcftools counts to varcall filter rules #898
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
-* ascatNGS copynumber file #897
+* ascatNGS copynumber file #914
 * ReadtheDocs for BALSAMIC annotation resources #916
+* Delly CNV for tumor only workflow #923
+* Delly CNV Read-depth profiles for tumor only workflows #924
 * New metric to be extracted and validated: ``NUMBER_OF_SITES`` (``bcftools`` counts) #898
 
 Changed:
@@ -30,7 +32,11 @@ Changed:
 * Changed the base-image for balsamic container to 4.10.3-alpine #869
 * Updated SVdb to 2.6.0 #871
 * Upgrade black to 22.3.0
+* For UMI workflow, post filter `gnomad_pop_freq` value is changed from `0.005` to `0.02` #919
 * updated delly to 0.9.1 #920
+* container base_image (align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py36) to 4.10.3-alpine #921
+* update container (align_qc, annotate, coverage_qc, varcall_cnvkit,varcall_py36) bioinfo tool versions  #921
+* update tool versions (align_qc, annotate, coverage_qc, varcall_cnvkit) in methods and softwares docs #921
 
 Fixed:
 ^^^^^^
@@ -44,13 +50,14 @@ Removed
 
 * ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
 * Unused pon option for SNV calling with TNhaplotyper tumor-only
-* SV and CNV callers from annotation and filtering #871
-* vcfanno from SV annotation
+* SV and CNV callers from annotation and filtering #889
+* vcfanno and COSMIC from SV annotation #891
 * Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
 * Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
 * bcftools_stats from vep #898
 * QC delivery report workflow (generating the ``<case>_qc_report.html`` file) #878
 * ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command #878
+* Removed `gatk_haplotypecaller` for reporting panel germline variants #918 
 
 [8.2.10]
 --------
