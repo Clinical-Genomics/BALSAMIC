@@ -2,6 +2,7 @@
 # coding: utf-8
 
 multiqc_input = [bam_dir + "tumor.merged.bam"]
+bcftools_counts_input = [vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.all.filtered.pass.stats"]
 
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(bam_dir + "normal.merged.bam")
@@ -30,6 +31,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     if config['analysis']['analysis_type'] == "paired":
         multiqc_input.append(bam_dir+"normal.merged.recal_data.table")
 
+    # bcftools counts
+    bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.all.filtered.pass.stats")
 
 else:
     # fastqc metrics
@@ -56,10 +59,16 @@ else:
     # samtools metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt", sample=config["samples"], stats=['flagstats', 'idxstats', 'stats']))
 
+    # bcftools counts
+    bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.all.filtered.pass.stats")
+
     if config["umiworkflow"]:
+        # UMI picard metrics
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=config["samples"]))
-        
+
+        # bcftools counts
+        bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".TNscope_umi.all.filtered.pass.stats")
 
 rule multiqc:
     input:
@@ -94,6 +103,7 @@ chmod -R 777 {params.qc_dir};
 
 rule collect_custom_qc_metrics:
     input:
+        bcftools_counts = bcftools_counts_input,
         json = qc_dir + "multiqc_data/multiqc_data.json"
     output:
         yaml = qc_dir + config["analysis"]["case_id"] + "_metrics_deliverables.yaml"
@@ -110,5 +120,5 @@ rule collect_custom_qc_metrics:
         "Extract the manually specified QC metric for validation and delivery"
     shell:
         """
-python {params.collect_qc_metrics_script} {output.yaml} {input.json} {params.sequencing_type} {params.capture_kit}
+python {params.collect_qc_metrics_script} {output.yaml} {input.json} {input.bcftools_counts} {params.sequencing_type} {params.capture_kit}
         """
