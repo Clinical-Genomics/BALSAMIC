@@ -1,4 +1,5 @@
 import json
+import os.path
 from pathlib import Path
 
 from BALSAMIC.assets.scripts.collect_qc_metrics import (
@@ -8,6 +9,8 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_qc_supported_capture_kit,
     get_requested_metrics,
     capture_kit_resolve_type,
+    extract_number_variants,
+    get_variant_metrics,
 )
 
 
@@ -147,6 +150,58 @@ def test_get_multiqc_metrics_filtering_umi(multiqc_data_path):
         assert "umi" not in metric["input"]
 
 
+def test_extract_number_variants():
+    """tests number of variants formatting"""
+
+    # GIVEN a raw input list of variant metrics
+    counts = [
+        "Number of samples: 2",
+        "Number of SNPs:    111",
+        "Number of INDELs:  14",
+        "Number of MNPs:    0",
+        "Number of sites:   125",
+        "",
+    ]
+
+    # GIVEN an expected output after arranging the input list
+    expected_variants_metrics = {
+        "NUMBER_OF_SAMPLES": 2,
+        "NUMBER_OF_SNPS": 111,
+        "NUMBER_OF_INDELS": 14,
+        "NUMBER_OF_MNPS": 0,
+        "NUMBER_OF_SITES": 125,
+    }
+
+    # WHEN performing the extraction of variant metrics
+    variant_metrics = extract_number_variants(counts)
+
+    # THEN verify that the number of variants has been correctly retrieved
+    assert expected_variants_metrics == variant_metrics
+
+
+def test_get_variant_metrics(bcftools_counts_path):
+    """tests variant metrics retrieval"""
+
+    # GIVEN an SVDB bcftools counts path
+
+    # GIVEN an expected MetricsModel dictionary
+    expected_output_metris = {
+        "header": None,
+        "id": "case",
+        "input": os.path.basename(bcftools_counts_path),
+        "name": "NUMBER_OF_SITES",
+        "step": "collect_custom_qc_metrics",
+        "value": 125,
+        "condition": {"norm": "lt", "threshold": 10000.0},
+    }
+
+    # WHEN extracting the number of variants
+    output_metrics = get_variant_metrics(bcftools_counts_path)
+
+    # THEN check that the output metrics has been correctly shaped
+    assert expected_output_metris == output_metrics[0]
+
+
 def test_collect_qc_metrics_targeted(tmp_path, multiqc_data_path, cli_runner):
     """tests qc metrics yaml file generation for targeted analysis"""
 
@@ -182,6 +237,37 @@ def test_collect_qc_metrics_wgs(tmp_path, multiqc_data_path, cli_runner):
     result = cli_runner.invoke(
         collect_qc_metrics,
         [str(output_path), multiqc_data_path, seq_type, capture_kit],
+    )
+
+    # THEN check if the YAML is correctly created and there are no errors
+    assert result.exit_code == 0
+    assert Path(output_path).exists()
+
+
+def test_collect_qc_metrics_counts(
+    tmp_path, multiqc_data_path, bcftools_counts_path, cli_runner
+):
+    """tests qc metrics yaml file generation for targeted analysis and providing a bcftools counts path"""
+
+    # GIVEN the output, multiqc metrics and bcftools counts paths
+    output_path = tmp_path / "sample_tumor_only_metrics_deliverables.yaml"
+
+    # GIVEN a sequencing type and a capture kit
+    seq_type = "targeted"
+    capture_kit = "gmsmyeloid_5.2_hg19_design.bed"
+
+    # WHEN invoking the python script
+    result = cli_runner.invoke(
+        collect_qc_metrics,
+        [
+            str(output_path),
+            multiqc_data_path,
+            bcftools_counts_path,  # multiple counts path regarding different variant callers
+            bcftools_counts_path,
+            bcftools_counts_path,
+            seq_type,
+            capture_kit,
+        ],
     )
 
     # THEN check if the YAML is correctly created and there are no errors

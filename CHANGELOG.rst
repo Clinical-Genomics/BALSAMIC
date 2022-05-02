@@ -23,6 +23,7 @@ Added:
 * ReadtheDocs for BALSAMIC annotation resources #916
 * Delly CNV for tumor only workflow #923
 * Delly CNV Read-depth profiles for tumor only workflows #924
+* New metric to be extracted and validated: ``NUMBER_OF_SITES`` (``bcftools`` counts) #925
 
 Changed:
 ^^^^^^^^
@@ -37,6 +38,7 @@ Changed:
 * update container (align_qc, annotate, coverage_qc, varcall_cnvkit,varcall_py36) bioinfo tool versions  #921
 * update tool versions (align_qc, annotate, coverage_qc, varcall_cnvkit) in methods and softwares docs #921
 * Updated the list of files to be stored and delivered #848
+* Moved ``collect_custom_qc_metrics`` rule from ``multiqc.rule`` #925
 
 Fixed:
 ^^^^^^
