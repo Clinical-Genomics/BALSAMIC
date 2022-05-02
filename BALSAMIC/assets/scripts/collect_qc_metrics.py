@@ -178,6 +178,7 @@ def extract_number_variants(counts: list) -> dict:
     variant_metrics = dict()
 
     for count in counts:
+        # Transforms string "Number of sites:   125" into a key value object {"NUMBER_OF_SITES": 125}
         count = count.split(":")
         if len(count) > 1:
             variant_metrics.update(
