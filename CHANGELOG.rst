@@ -21,6 +21,7 @@ Added:
 * Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
 * ascatNGS copynumber file #897
 * ReadtheDocs for BALSAMIC annotation resources #916
+* New metric to be extracted and validated: ``NUMBER_OF_SITES`` (``bcftools`` counts) #898
 
 Changed:
 ^^^^^^^^
