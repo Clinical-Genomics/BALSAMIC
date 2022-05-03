@@ -22,8 +22,9 @@ indicate that at this site, the mean position in reads is less than 8, and the p
 
 
 .. note::
-
     In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)
+..
+
 
 
 ..  figure:: images/filter_status.png
@@ -38,13 +39,13 @@ For `Post-call filtering`, in BALSAMIC we have applied various filtering criteri
 
 .. note::
     In BALSAMIC, this VCF file is named as `*.all.filtered.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.vcf.gz`)
-
+..
 
 Only those variants that fulfill the pre-call and post-call filters are scored as `PASS` in the `STATUS` column of the VCF file. We filter those `PASS` variants and deliver a final list of variants to the customer either via `Scout` or `Caesar`
 
 .. note::
     In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`) 
-
+..
 
 .. list-table:: Description of VCF files
    :widths: 30 50 20
@@ -111,6 +112,7 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
 .. attention::
     BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)
+..
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
@@ -313,4 +315,4 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 
 .. attention::
    BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.
-
+..

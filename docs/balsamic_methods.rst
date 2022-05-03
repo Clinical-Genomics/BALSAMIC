@@ -25,6 +25,7 @@ to annotate somatic variants for their population allele frequency from gnomAD v
 
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
+
 BALSAMIC :superscript:`1` (**version** = 8.2.10) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
@@ -42,9 +43,8 @@ The structural variant calls from Manta, Delly and ascatNgs were merged using SV
 All variants were finally annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
 to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 
-=============================
 UMI Data Analysis
-=============================
+~~~~~~~~~~~~~~~~~~~~~
 
 BALSAMIC :superscript:`1` (**version** = 8.2.10) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
