@@ -9,7 +9,8 @@ rule bcftools_filter_vardict_tumor_normal:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.vcf.gz",
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.vcf.gz",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
+    vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_vardict_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -27,7 +28,7 @@ rule bcftools_filter_vardict_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_vardict_tumor_normal')
   message:
-    "Filtering vardict tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering vardict tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -42,9 +43,11 @@ bcftools view {input.vcf} \
 
 tabix -p vcf -f {output.vcf_filtered};
 
-bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass_vardict} -O z {output.vcf_filtered};
 
-tabix -p vcf -f {output.vcf_pass};
+tabix -p vcf -f {output.vcf_pass_vardict};
+
+bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts};
     """
 
 
@@ -53,19 +56,18 @@ rule bcftools_filter_tnhaplotyper_tumor_normal:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
+    vcf_pass_tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_normal' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name =  '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnhaplotyper_tumor_normal')
   message:
-    "Filtering tnhaplotyper tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering tnhaplotyper tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -74,9 +76,10 @@ bcftools view {input.vcf} \
 
 tabix -p vcf -f {output.vcf_filtered};
 
-bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass_tnhaplotyper} -O z {output.vcf_filtered};
 
-tabix -p vcf -f {output.vcf_pass};
+tabix -p vcf -f {output.vcf_pass_tnhaplotyper};
+
     """
 
 
@@ -85,19 +88,20 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.vcf.gz",
   output:
     vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.vcf.gz",
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
+    vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_normal' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    pop_freq = [COMMON_FILTERS.pop_freq.tag_value, COMMON_FILTERS.pop_freq.filter_name],
+    pop_freq = [SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name =  '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_normal')
   message:
-    "Filtering TNscope_umi tumor-normal annotated variants using bcftools on {params.case_name}"
+    "Filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -106,7 +110,9 @@ bcftools view {input.vcf} \
 
 tabix -p vcf -f {output.vcf_filtered};
 
-bcftools view -f PASS -o {output.vcf_pass} -O z {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass_TNscope_umi} -O z {output.vcf_filtered};
 
-tabix -p vcf -f {output.vcf_pass};
+tabix -p vcf -f {output.vcf_pass_TNscope_umi};
+
+bcftools +counts {output.vcf_pass_TNscope_umi} > {output.bcftools_counts};
     """

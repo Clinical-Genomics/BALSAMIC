@@ -9,6 +9,7 @@ import subprocess
 from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
+import zlib
 
 import yaml
 import snakemake
@@ -231,6 +232,15 @@ def write_json(json_out, output_config):
         raise error
 
 
+def read_yaml(yaml_path):
+    """Retrieves data from a yaml file"""
+    if Path(yaml_path).exists():
+        with open(yaml_path, "r") as fn:
+            return yaml.load(fn, Loader=yaml.SafeLoader)
+    else:
+        raise FileNotFoundError(f"The YAML file {yaml_path} was not found.")
+
+
 def iterdict(dic):
     """dictionary iteration - returns generator"""
     for key, value in dic.items():
@@ -251,17 +261,24 @@ def get_schedulerpy():
     return scheduler
 
 
-def get_snakefile(analysis_type, sequencing_type="targeted"):
+def get_snakefile(analysis_type, reference_genome="hg19"):
     """
     Return a string path for variant calling snakefile.
     """
 
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
+
     if analysis_type == "generate_ref":
         snakefile = Path(p, "workflows", "reference.smk")
+        if "canfam3" in reference_genome:
+            snakefile = Path(p, "workflows", "reference-canfam3.smk")
+            return str(snakefile)
+
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
+    if "qc_panel" in analysis_type:
+        snakefile = Path(p, "workflows", "QC.smk")
 
     return str(snakefile)
 
@@ -583,7 +600,9 @@ def generate_graph(config_collection_dict, config_path):
         snakemake.snakemake(
             snakefile=get_snakefile(
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
-                sequencing_type=config_collection_dict["analysis"]["sequencing_type"],
+                reference_genome=config_collection_dict["reference"][
+                    "reference_genome"
+                ],
             ),
             dryrun=True,
             configfiles=[config_path],
@@ -683,3 +702,22 @@ def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
             os.symlink(pon_fastq, pon_sym_file)
         except FileExistsError:
             LOG.info(f"File {pon_sym_file} exists, skipping")
+
+
+def get_md5(filename):
+    with open(filename, "rb") as fh:
+        hashed = 0
+        while True:
+            s = fh.read(65536)
+            if not s:
+                break
+            hashed = zlib.crc32(s, hashed)
+    return "%08X" % (hashed & 0xFFFFFFFF)
+
+
+def create_md5(reference, check_md5):
+    """create a md5 file for all reference data"""
+    with open(check_md5, "w") as fh:
+        for key, value in reference.items():
+            if os.path.isfile(value):
+                fh.write(get_md5(value) + " " + value + "\n")

@@ -1,6 +1,14 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
+def get_pon_cnn(config):
+    if "pon_cnn" in config["panel"]:
+        return os.path.abspath(config["panel"]["pon_cnn"])
+    else:
+        return None
+
+
 rule cnvkit_single:
     input:
         access_bed = config["reference"]["access_regions"],
@@ -33,10 +41,10 @@ rule cnvkit_single:
         min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
-        genome_version = GENOME_VERSION
+        genome_version = GENOME_VERSION,
+        pon = " " if get_pon_cnn(config) is None else get_pon_cnn(config)
     message:
-        ("Run CNVkit pipeline for sample {params.case_name},"
-        "while tumor purity/ploidy calculated using PureCN")
+        ("Calling CNVs using CNVkit and calculating tumor purity/ploidy using PureCN for {params.case_name}")
     shell:
       """
 mkdir -p {params.tmpdir};
@@ -66,18 +74,17 @@ cnvkit.py coverage {input.bamT} \
 --processes {threads} \
 --output {params.cnv_dir}/tumor.antitargetcoverage.cnn;
 
-# Compile a coverage reference from the given list of files
-cnvkit.py reference --output {params.cnv_dir}/FlatReference.cnn \
---fasta {input.fasta} \
---targets {params.cnv_dir}/targets.bed \
---antitargets {params.cnv_dir}/antitarget_bed;
 
 # Combine the uncorrected target and antitarget coverage tables (.cnn) and 
 # correct for biases in regional coverage and GC content, according to the given reference
-cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn \
-{params.cnv_dir}/tumor.antitargetcoverage.cnn \
-{params.cnv_dir}/FlatReference.cnn \
---output {output.cnr};
+if [[ ! -f "{params.pon}" ]]; then
+cnvkit.py reference --output {params.cnv_dir}/FlatReference.cnn --fasta {input.fasta} --targets {params.cnv_dir}/targets.bed --antitargets {params.cnv_dir}/antitarget_bed;
+cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn {params.cnv_dir}/tumor.antitargetcoverage.cnn {params.cnv_dir}/FlatReference.cnn  --output {output.cnr};
+else
+echo "PON reference exists- Using it for coverage correction"
+cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn {params.cnv_dir}/tumor.antitargetcoverage.cnn {params.pon} --output {output.cnr};
+fi
+
 
 # Infer copy number segments from the given coverage table 
 # segmentattion methods (-m): cbs: reccommended for mid-size target panels and exomes

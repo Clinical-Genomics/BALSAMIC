@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import os
-import hashlib
 import logging
 from pathlib import Path
 
@@ -12,6 +11,9 @@ from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files 
 from BALSAMIC.utils.models import ReferenceMeta
 from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL 
+from BALSAMIC.utils.cli import get_md5
+from BALSAMIC.utils.cli import create_md5
+
 
 LOG = logging.getLogger(__name__)
 
@@ -64,6 +66,9 @@ refgene_sql_url = reference_file_model.refgene_sql
 rankscore_url = reference_file_model.rankscore
 access_regions_url = reference_file_model.access_regions
 delly_exclusion_url = reference_file_model.delly_exclusion
+delly_mappability_url = reference_file_model.delly_mappability
+delly_mappability_gindex_url = reference_file_model.delly_mappability_gindex
+delly_mappability_findex_url = reference_file_model.delly_mappability_findex
 ascat_gccorrection_url = reference_file_model.ascat_gccorrection
 ascat_chryloci_url = reference_file_model.ascat_chryloci
 clinvar_url = reference_file_model.clinvar
@@ -75,21 +80,6 @@ check_md5 = os.path.join(basedir, "reference.json.md5")
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
-
-def get_md5(filename):
-    hash_md5 = hashlib.md5()
-    with open(str(filename), 'rb') as fh:
-        for chunk in iter(lambda: fh.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
-
-
-def create_md5(reference, check_md5):
-    """ create a md5 file for all reference data"""
-    with open(check_md5, 'w') as fh:
-        for key, value in reference.items():
-            if os.path.isfile(value):
-                fh.write( get_md5(value) + ' ' + value + '\n')
 
 singularity_image_path = config['singularity']['image_path']
 singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()] 
@@ -125,6 +115,9 @@ rule all:
         access_regions = access_regions_url.get_output_file,
         delly_exclusion = delly_exclusion_url.get_output_file,
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
+        delly_mappability= delly_mappability_url.get_output_file,
+        delly_mappability_gindex= delly_mappability_gindex_url.get_output_file,
+        delly_mappability_findex= delly_mappability_findex_url.get_output_file,
         ascat_gccorrection = ascat_gccorrection_url.get_output_file,
         ascat_chryloci = ascat_chryloci_url.get_output_file,
         clinvar = clinvar_url.get_output_file + ".gz",
@@ -160,6 +153,7 @@ rule all:
             "access_regions": input.access_regions,
             "delly_exclusion" : input.delly_exclusion,
             "delly_exclusion_converted" : input.delly_exclusion_converted,
+            "delly_mappability": input.delly_mappability,
             "ascat_gccorrection" : input.ascat_gccorrection,
             "ascat_chryloci" : input.ascat_chryloci,
             "clinvar": input.clinvar,
@@ -193,7 +187,8 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     wgs_calling_url, genome_chrom_size_url,
                     gnomad_url, gnomad_tbi_url,
                     cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url,
-                    delly_exclusion_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url]
+                    delly_exclusion_url, delly_mappability_url, delly_mappability_gindex_url,
+                    delly_mappability_findex_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url]
 
 rule download_reference:
     output:

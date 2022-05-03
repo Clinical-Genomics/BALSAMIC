@@ -11,10 +11,6 @@
 		"time": "00:15:00",
 		"n": 1
 	},
-	"BaseRecalibrator": {
-		"time": "15:00:00",
-		"n": 10
-	},
 	"CollectAlignmentSummaryMetrics": {
 		"time": "03:30:00",
 		"n": 8
@@ -34,10 +30,6 @@
 	"picard_markduplicates": {
 		"time": "03:30:00",
 		"n": 8
-	},
-	"RealignerTargetCreator": {
-		"time": "10:00:00",
-		"n": 10
 	},
 	"bwa_mem": {
 		"time": "08:00:00",
@@ -59,14 +51,6 @@
 	"fastqc":{
 		"time": "12:00:00",
 		"n": 5
-	},
-	"gatk_haplotypecaller": {
-		"time": "03:00:00",
-		"n": 10
-	},
-	"haplotypecaller_merge": {
-		"time": "01:30:00",
-		"n": 8
 	},
 	"manta_germline": {
 		"time": "05:00:00",
@@ -99,18 +83,6 @@
 	"multiqc": {
 		"time": "00:15:00",
 		"n": 4
-	},
-	"mutect2_merge": {
-		"time": "01:30:00",
-		"n": 8
-	},
-	"mutect2_tumor_normal": {
-		"time": "24:00:00",
-		"n": 12
-	},
-	"mutect2_tumor_only": {
-		"time": "24:00:00",
-		"n": 12
 	},
 	"sambamba_exon_depth": {
 		"time": "02:30:00",
@@ -148,14 +120,6 @@
 		"time": "24:00:00",
 		"n": 24
 	},
-	"sentieon_TNsnv": {
-		"time": "24:00:00",
-		"n": 24
-	},
-	"sentieon_TNsnv_tumor_only": {
-		"time": "24:00:00",
-		"n": 24
-	},
 	"sentieon_align_sort": {
 		"time": "24:00:00",
 		"n": 24
@@ -178,14 +142,6 @@
 	},
 	"somatic_snv_indel_vcf_merge": {
 		"time": "06:00:00",
-		"n": 10
-	},
-	"strelka_germline": {
-		"time": "08:00:00",
-		"n": 10
-	},
-	"strelka_tumor_normal": {
-		"time": "10:00:00",
 		"n": 10
 	},
 	"vardict_merge": {
@@ -220,8 +176,12 @@
 		"time": "4:00:00",
 		"n": 12
 	},
-	"vep_somatic": {
+	"vep_somatic_snv": {
 		"time":"18:00:00",
+		"n": 24
+	},
+	"vep_somatic_sv": {
+		"time":"12:00:00",
 		"n": 24
 	},
 	"vep_germline": {
@@ -259,5 +219,21 @@
 	"ascat_tumor_normal_merge_output": {
 		"time": "00:15:00",
 		"n": 1
+	},
+	"collect_custom_qc_metrics": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"svdb_merge_tumor_normal": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"svdb_merge_tumor_only": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"bcftools_filter_svdb": {
+		"time": "01:00:00",
+		"n": 8
 	}
 }

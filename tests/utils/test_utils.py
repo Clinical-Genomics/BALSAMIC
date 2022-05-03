@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import pytest
 import sys
@@ -43,6 +44,9 @@ from BALSAMIC.utils.cli import (
     check_executable,
     job_id_dump_to_yaml,
     generate_h5,
+    get_md5,
+    create_md5,
+    read_yaml,
 )
 
 from BALSAMIC.utils.rule import (
@@ -56,7 +60,9 @@ from BALSAMIC.utils.rule import (
     get_threads,
     get_delivery_id,
     get_reference_output_files,
+    get_rule_output,
 )
+from tests.helpers import Map
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -184,7 +190,7 @@ def test_get_bioinfo_tools_version():
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert set(observed_versions).issubset(set(["1.12", "1.11", "1.9"]))
+    assert set(observed_versions).issubset(set(["1.15.1", "1.12", "1.11", "1.9"]))
 
 
 def test_get_delivery_id():
@@ -349,28 +355,36 @@ def test_get_snakefile():
         ("paired", "targeted"),
         ("single", "wgs"),
         ("single", "targeted"),
-        ("qc", ""),
+        ("qc_panel", "targeted"),
         ("generate_ref", ""),
         ("pon", ""),
     ]
 
     # WHEN asking to see snakefile for paired
-    for analysis_type, sequencing_type in workflow:
-        snakefile = get_snakefile(analysis_type, sequencing_type)
-        pipeline = ""
+    for reference_genome in ["hg19", "hg38", "canfam3"]:
+        for analysis_type, sequencing_type in workflow:
+            snakefile = get_snakefile(analysis_type, reference_genome)
 
-        if sequencing_type in ["targeted", "wgs", "qc"]:
-            pipeline = "BALSAMIC/workflows/balsamic.smk"
-        elif analysis_type == "generate_ref":
-            pipeline = "BALSAMIC/workflows/reference.smk"
-        elif analysis_type == "pon":
-            pipeline = "BALSAMIC/workflows/PON.smk"
+            pipeline = ""
+            if sequencing_type in ["targeted", "wgs"] and analysis_type in [
+                "single",
+                "paired",
+            ]:
+                pipeline = "BALSAMIC/workflows/balsamic.smk"
+            elif analysis_type == "generate_ref" and reference_genome != "canfam3":
+                pipeline = "BALSAMIC/workflows/reference.smk"
+            elif analysis_type == "generate_ref" and reference_genome == "canfam3":
+                pipeline = "BALSAMIC/workflows/reference-canfam3.smk"
+            elif analysis_type == "pon":
+                pipeline = "BALSAMIC/workflows/PON.smk"
+            elif "qc" in analysis_type:
+                pipeline = "BALSAMIC/workflows/QC.smk"
 
-        # THEN it should return the snakefile path
-        # THEN assert file exists
-        assert snakefile.startswith("/")
-        assert pipeline in snakefile
-        assert Path(snakefile).is_file()
+            # THEN it should return the snakefile path
+            # THEN assert file exists
+            assert snakefile.startswith("/")
+            assert pipeline in snakefile
+            assert Path(snakefile).is_file()
 
 
 def test_get_chrom(config_files):
@@ -541,6 +555,65 @@ def test_write_json_error(tmp_path):
         # WHEN passing a invalid dict
         # THEN It will raise the error
         assert write_json(ref_json, output_json)
+
+
+def test_read_yaml(metrics_yaml_path):
+    """test data extraction from a saved YAML file"""
+
+    # GIVEN an expected output
+    n_metrics = 11  # Number of expected metric
+
+    hs_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+        "name": "MEDIAN_TARGET_COVERAGE",
+        "step": "multiqc_picard_HsMetrics",
+        "value": 2393.0,
+        "condition": {"norm": "gt", "threshold": 1000.0},
+    }
+
+    ins_size_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
+        "name": "MEAN_INSERT_SIZE",
+        "step": "multiqc_picard_insertSize",
+        "value": 201.813054,
+        "condition": None,
+    }
+
+    dups_metric = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
+        "name": "PERCENT_DUPLICATION",
+        "step": "multiqc_picard_dups",
+        "value": 0.391429,
+        "condition": None,
+    }
+
+    # WHEN calling the function
+    requested_metrics = read_yaml(metrics_yaml_path)
+
+    # THEN check if the data are correctly retrieved from the YAML
+    assert len(requested_metrics) == n_metrics
+    assert hs_metric in requested_metrics
+    assert ins_size_metric in requested_metrics
+    assert dups_metric in requested_metrics
+
+
+def test_read_yaml_error():
+    """test data extraction from an incorrect YAML path"""
+
+    # GIVEN an invalid path
+    yaml_path = "NOT_A_PATH"
+
+    # THEN assert that the FileNotFoundError is raised
+    try:
+        read_yaml(yaml_path)
+    except FileNotFoundError as file_exc:
+        assert f"The YAML file {yaml_path} was not found." in str(file_exc)
 
 
 def test_get_threads(config_files):
@@ -940,3 +1013,67 @@ def test_generate_h5_capture_no_output(tmp_path):
         actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
 
     assert actual_output == None
+
+
+def test_get_md5(tmp_path):
+
+    # GIVEN a dummy file
+    dummy_dir = tmp_path / "md5"
+    dummy_dir.mkdir()
+    dummy_file = dummy_dir / "dummy_file.dump"
+    dummy_file.write_text("Awesome Text")
+
+    # THEN md5 returned should be
+    assert get_md5(dummy_file) == "3945B39E"
+
+
+def test_create_md5(tmp_path):
+
+    # GIVEN a path to a md5 file and reference dummy files
+    ref_dir = tmp_path / "references"
+    ref_dir.mkdir()
+    dummy_ref_file1 = ref_dir / "reference_file1.dump"
+    dummy_ref_file1.write_text("Test reference1")
+    dummy_ref_file2 = ref_dir / "reference_file2.dump"
+    dummy_ref_file2.write_text("Test reference2")
+    dummy_reference_dict = {
+        "reference_dummy1": str(dummy_ref_file1),
+        "reference_dummy2": str(dummy_ref_file2),
+    }
+    dummy_dir = tmp_path / "md5"
+    dummy_dir.mkdir()
+    dummy_file = dummy_dir / "dummy_file.dump"
+
+    create_md5(dummy_reference_dict, dummy_file)
+
+    # THEN md5 file exists
+    assert dummy_file.exists()
+
+
+def test_get_rule_output(snakemake_fastqc_rule):
+    """Tests retrieval of existing output files from a specific workflow"""
+
+    # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
+    rules = snakemake_fastqc_rule
+    rule_name = "fastqc"
+    output_file_wildcards = {
+        "sample": ["concatenated_tumor_XXXXXX_R", "tumor", "normal"],
+        "case_name": "sample_tumor_only",
+    }
+
+    # THEN retrieve the output files
+    output_files = get_rule_output(rules, rule_name, output_file_wildcards)
+
+    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
+    assert len(output_files) == 2
+    for file in output_files:
+        # Expected file names
+        assert (
+            os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_1.fastq.gz"
+            or os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+        )
+        # Expected tags
+        assert (
+            file[3] == "1,fastqc,quality-trimmed-seq-fastqc"
+            or file[3] == "2,fastqc,quality-trimmed-seq-fastqc"
+        )

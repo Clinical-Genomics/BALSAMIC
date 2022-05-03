@@ -2,8 +2,6 @@
 # coding: utf-8
 
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
-
-
 rule picard_umiaware:
     input:
         bam = umi_dir + "{sample}_consensusfiltered_umi.bam"
@@ -20,7 +18,7 @@ rule picard_umiaware:
     threads:
         get_threads(cluster_config, "picard_umiaware")
     message:
-        "Picard Umiaware mark dups for sample {params.sample_id}"
+        "Marking duplicates using Picardtools with UmiAware for {params.sample_id}"
     shell:
         """
 picard UmiAwareMarkDuplicatesWithMateCigar \
@@ -29,9 +27,8 @@ O={output.bam} \
 M={output.duplicates} \
 UMI_METRICS={output.umimetrics};
         """
+
 ## CollectHSmetrics - median target coverage-required
-
-
 rule picard_collecthsmetrics_umi:
     input:
         bam = umi_dir + "{sample}_consensusfiltered_umi.bam",
@@ -50,7 +47,7 @@ rule picard_collecthsmetrics_umi:
     threads: 
         get_threads(cluster_config, "CollectHsMetrics")
     message:
-        "Collect HSmetrics using Picardtools for {params.sample_id}"
+        "Collecting HSmetrics using Picardtools for {params.sample_id}"
     shell:
         """
 picard BedToIntervalList \
@@ -68,9 +65,8 @@ COVERAGE_CAP=50000 \
 BAIT_SET_NAME={params.baitsetname} \
 METRIC_ACCUMULATION_LEVEL=ALL_READS;
         """
+
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
-
-
 rule samtools_view_calculatemeanfamilydepth_umi:
     input:
         bam = umi_dir + "{sample}_consensusfiltered_umi.bam"

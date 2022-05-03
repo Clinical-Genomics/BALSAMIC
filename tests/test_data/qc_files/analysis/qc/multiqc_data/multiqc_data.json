@@ -11,6 +11,14 @@
             "DuplicationMetrics": {
                 "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
             }
+        },
+        "FastQC": {
+            "all_sections": {
+                "concatenated_tumor_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_2_fastqc.zip",
+                "concatenated_normal_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_normal_XXXXXX_R_1_fastqc.zip",
+                "concatenated_normal_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_normal_XXXXXX_R_2_fastqc.zip",
+                "concatenated_tumor_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_1_fastqc.zip"
+            }
         }
     },
     "report_saved_raw_data": {
@@ -27,7 +35,12 @@
                 "MIN_TARGET_COVERAGE": 0.0,
                 "FOLD_80_BASE_PENALTY": 1.359189,
                 "AT_DROPOUT": 6.093115,
-                "GC_DROPOUT": 0.027402
+                "GC_DROPOUT": 0.027402,
+                "PCT_TARGET_BASES_50X": 1.0,
+                "PCT_TARGET_BASES_100X": 0.999987,
+                "PCT_TARGET_BASES_250X": 0.998445,
+                "PCT_TARGET_BASES_500X": 0.996675,
+                "PCT_TARGET_BASES_1000X": 0.992466
             },
             "concatenated_tumor_XXXXXX_R.consensusfiltered.umi": {
                 "BAIT_SET": "concatenated_tumor_XXXXXX_R",
@@ -41,7 +54,12 @@
                 "MIN_TARGET_COVERAGE": 0.0,
                 "FOLD_80_BASE_PENALTY": 1.742114,
                 "AT_DROPOUT": 12.048384,
-                "GC_DROPOUT": 0.150425
+                "GC_DROPOUT": 0.150425,
+                "PCT_TARGET_BASES_50X": 0.999866,
+                "PCT_TARGET_BASES_100X": 0.99819,
+                "PCT_TARGET_BASES_250X": 0.996568,
+                "PCT_TARGET_BASES_500X": 0.994423,
+                "PCT_TARGET_BASES_1000X": 0.984181
             }
         },
         "multiqc_picard_insertSize": {
@@ -65,6 +83,24 @@
                 "UNPAIRED_READ_DUPLICATES": 5790.0,
                 "READ_PAIR_DUPLICATES": 18741892.0,
                 "PERCENT_DUPLICATION": 0.391429
+            }
+        },
+        "multiqc_general_stats": {
+            "concatenated_tumor_XXXXXX_R_2": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 15.03521942842923,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 600529762.0
+            },
+            "concatenated_normal_XXXXXX_R_1": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 14.426654287440797,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 464581551.0
+            },
+            "concatenated_normal_XXXXXX_R_2": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 14.214689357571501,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 464581551.0
+            },
+            "concatenated_tumor_XXXXXX_R_1": {
+                "FastQC_mqc-generalstats-fastqc-percent_duplicates": 15.213739762327492,
+                "FastQC_mqc-generalstats-fastqc-total_sequences": 600529762.0
             }
         }
     }

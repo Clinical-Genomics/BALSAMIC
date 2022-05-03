@@ -7,7 +7,9 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
-from .helpers import ConfigHelper
+
+from BALSAMIC.utils.cli import read_yaml
+from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
 
@@ -45,6 +47,7 @@ def config_files():
         "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
         "panel_bed_file": "tests/test_data/references/panel/panel.bed",
         "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
+        "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
         "pon_fastq_path": "tests/test_data/fastq/",
     }
 
@@ -72,6 +75,9 @@ def reference():
             "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
             "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
             "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
+            "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
+            "delly_mappability_gindex": "tests/test_data/references/genome/delly_mappability.gz.gzi",
+            "delly_mappability_findex": "tests/test_data/references/genome/delly_mappability.fai",
             "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
             "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
@@ -92,6 +98,11 @@ def panel_bed_file():
 @pytest.fixture(scope="session")
 def background_variant_file():
     return "tests/test_data/references/panel/background_variants.txt"
+
+
+@pytest.fixture(scope="session")
+def pon_cnn():
+    return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
 
 @pytest.fixture(scope="session")
@@ -273,11 +284,55 @@ def tumor_normal_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_normal_qc_config(
+    tmp_path_factory,
+    sample_fastq,
+    analysis_dir,
+    balsamic_cache,
+    panel_bed_file,
+):
+    """
+    invokes balsamic config sample -t xxx -n xxx to create sample config
+    for tumor-normal
+    """
+    case_id = "sample_tumor_normal"
+    tumor = sample_fastq["tumor"]
+    normal = sample_fastq["normal"]
+
+    with mock.patch.dict(MOCKED_OS_ENVIRON):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "qc_panel",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "-n",
+                normal,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                "ACC1",
+                "--normal-sample-name",
+                "ACC2",
+            ],
+        )
+    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
 
 
 @pytest.fixture(name="helpers")
@@ -334,7 +389,7 @@ def tumor_normal_wgs_config(
 
 @pytest.fixture(scope="session")
 def tumor_only_config(
-    tmpdir_factory,
+    tmp_path_factory,
     sample_fastq,
     balsamic_cache,
     background_variant_file,
@@ -378,9 +433,9 @@ def tumor_only_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc", "multiqc_data")
+    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/multiqc_data/", qc_dir.as_posix())
+    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
@@ -429,6 +484,94 @@ def tumor_only_wgs_config(
 
 
 @pytest.fixture(scope="session")
+def tumor_only_qc_config(
+    tmpdir_factory,
+    sample_fastq,
+    balsamic_cache,
+    analysis_dir,
+    panel_bed_file,
+):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_id = "sample_tumor_only"
+    tumor = sample_fastq["tumor"]
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "qc_panel",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache,
+            ],
+        )
+    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_only_pon_config(
+    tmp_path_factory,
+    sample_fastq,
+    balsamic_cache,
+    analysis_dir,
+    panel_bed_file,
+    sentieon_license,
+    sentieon_install_dir,
+    pon_cnn,
+):
+    """
+    invokes balsamic config sample -t xxx to create sample config
+    for tumor only
+    """
+    case_id = "sample_tumor_only_pon"
+    tumor = sample_fastq["tumor"]
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "-t",
+                tumor,
+                "--case-id",
+                case_id,
+                "--analysis-dir",
+                analysis_dir,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--pon-cnn",
+                pon_cnn,
+            ],
+        )
+
+    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+
+
+@pytest.fixture(scope="session")
 def sample_config():
     """
     sample config dict to test workflow utils
@@ -458,16 +601,11 @@ def sample_config():
         "vcf": {
             "manta": {"mutation": "somatic", "type": "SV"},
             "vardict": {"mutation": "somatic", "type": "SNV"},
-            "pindel": {"mutation": "somatic", "type": "SV"},
-            "strelka": {"mutation": "somatic", "type": "SNV"},
             "mutect": {"mutation": "somatic", "type": "SNV"},
             "tnscope": {"mutation": "somatic", "type": "SNV"},
-            "tnsnv": {"mutation": "somatic", "type": "SNV"},
             "tnhaplotyper": {"mutation": "somatic", "type": "SNV"},
             "dnascope": {"mutation": "germline", "type": "SNV"},
             "manta_germline": {"mutation": "germline", "type": "SV"},
-            "haplotypecaller": {"mutation": "germline", "type": "SNV"},
-            "strelka_germline": {"mutation": "germline", "type": "SNV"},
         },
         "samples": {
             "S1_R": {
@@ -494,71 +632,98 @@ def analysis_path():
 
 
 @pytest.fixture(scope="session")
-def qc_metrics():
-    """Sample data for QC model testing"""
-    return {
-        "qc": {
-            "targeted": {
-                "multiqc_picard_insertSize.json": {
-                    "MEAN_INSERT_SIZE": {"condition": None}
-                },
-                "multiqc_picard_HsMetrics.json": {
-                    "MEDIAN_TARGET_COVERAGE": {
-                        "condition": {"norm": "gt", "threshold": 500.0}
-                    }
-                },
-            },
-            "wgs": {
-                "multiqc_picard_insertSize.json": {
-                    "MEAN_INSERT_SIZE": {"condition": None}
-                },
-                "multiqc_picard_dups.json": {
-                    "PERCENT_DUPLICATION": {"condition": None}
-                },
-            },
-        }
-    }
+def multiqc_data_path(analysis_path):
+    """multiqc_data.json test path"""
+    return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
 
 
 @pytest.fixture(scope="session")
-def qc_extracted_metrics():
-    """Extracted metrics for QC model testing"""
-    return {
-        "metrics": {
-            "sample_1": [
-                {
-                    "name": "MEAN_INSERT_SIZE_1",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-                {
-                    "name": "MEAN_INSERT_SIZE_2",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-            ],
-            "sample_2": [
-                {
-                    "name": "MEAN_INSERT_SIZE_1",
-                    "norm": "lt",
-                    "threshold": 1.0,
-                    "value": 0.5,
-                },
-            ],
-        }
-    }
+def metrics_yaml_path(analysis_path):
+    """sample_tumor_only_metrics_deliverables.yaml test path"""
+    return os.path.join(
+        analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml"
+    )
 
 
 @pytest.fixture(scope="session")
-def qc_raw_targeted_metrics():
-    """Raw metrics"""
+def bcftools_counts_path(analysis_path):
+    """svdb.all.filtered.pass.stats test path"""
+    return os.path.join(
+        analysis_path, "vep", "SNV.somatic.case.svdb.all.filtered.pass.stats"
+    )
+
+
+@pytest.fixture(scope="session")
+def qc_requested_metrics():
+    """Raw requested metrics"""
     return {
-        "default": {
-            "metrics_1.json": {"METRIC_1": 0.1, "METRIC_2": 0.2},
-            "metrics_2.json": {"METRIC_3": 0.3},
+        "targeted": {
+            "default": {
+                "METRIC_1": {"condition": None},
+                "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
+            },
+            "panel_1": {
+                "METRIC_3": {"condition": {"norm": "gt", "threshold": 3}},
+            },
+            "panel_2": {
+                "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
+                "METRIC_2": {"condition": {"norm": "gt", "threshold": 22}},
+                "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
+            },
         },
-        "panel_1.bed": {"metrics_2.json": {"METRIC_4": 0.4}},
-        "panel_2.bed": {"metrics_1.json": {"METRIC_1": 0.5, "METRIC_4": 0.4}},
+        "wgs": {
+            "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
+        },
     }
+
+
+@pytest.fixture(scope="session")
+def qc_extracted_metrics(metrics_yaml_path):
+    """Extracted and formatted QC metrics"""
+    return read_yaml(metrics_yaml_path)
+
+
+@pytest.fixture(scope="function")
+def snakemake_fastqc_rule(tumor_only_config, helpers):
+    """FastQC snakemake mock rule"""
+
+    helpers.read_config(tumor_only_config)
+    fastq_path = os.path.join(
+        helpers.analysis_dir,
+        helpers.case_id,
+        "analysis",
+        "fastq",
+        "concatenated_tumor_XXXXXX_R_{read}.fastq.gz",
+    )
+
+    return Map(
+        {
+            "fastqc": Map(
+                {
+                    "params": Map(
+                        {
+                            "housekeeper_id": {
+                                "id": "sample_tumor_only",
+                                "tags": "quality-trimmed-seq",
+                            }
+                        }
+                    ),
+                    "output": Map(
+                        {
+                            "_names": Map({"fastqc": fastq_path}),
+                            "fastqc": fastq_path,
+                        }
+                    ),
+                    "rule": Map(
+                        {
+                            "name": "fastq",
+                            "output": [
+                                fastq_path,
+                            ],
+                            "temp_output": set(),
+                        }
+                    ),
+                }
+            )
+        }
+    )

@@ -36,7 +36,7 @@ SENTIEON_TNSCOPE = Path(
 # Analysis related constants
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
-ANALYSIS_TYPES = ["paired", "single", "qc", "pon"]
+ANALYSIS_TYPES = ["paired", "single", "qc_panel", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 SEQUENCING_TYPE = ["wgs", "targeted"]
 
@@ -52,6 +52,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "delly",
     "ascatNgs",
     "balsamic",
+    "vcf2cytosure",
 }
 
 BIOINFO_TOOL_ENV = {
@@ -62,7 +63,6 @@ BIOINFO_TOOL_ENV = {
     "picard": "align_qc",
     "multiqc": "align_qc",
     "fastp": "align_qc",
-    "csvkit": "align_qc",
     "ensembl-vep": "annotate",
     "genmod": "annotate",
     "vcfanno": "annotate",
@@ -72,12 +72,13 @@ BIOINFO_TOOL_ENV = {
     "tabix": "varcall_py36",
     "gatk": "varcall_py36",
     "vardict": "varcall_py36",
-    "strelka": "varcall_py27",
+    "svdb": "varcall_py36",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "delly",
     "ascatNgs": "ascatNgs",
     "sentieon": "sentieon",
+    "vcf2cytosure": "vcf2cytosure",
 }
 
 VALID_OPS = {

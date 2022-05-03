@@ -71,11 +71,18 @@ VCF_DICT = {
         "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"],
     },
-    "delly": {
+    "dellysv": {
         "mutation": "somatic",
         "type": "SV",
         "analysis_type": ["paired", "single"],
-        "sequencing_type": ["wgs", "targeted"],
+        "sequencing_type": ["targeted", "wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
+    "dellycnv": {
+        "mutation": "somatic",
+        "type": "CNV",
+        "analysis_type": ["single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
     "ascat": {
@@ -83,6 +90,13 @@ VCF_DICT = {
         "type": "CNV",
         "analysis_type": ["paired"],
         "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
+    "svdb": {
+        "mutation": "somatic",
+        "type": "SV",
+        "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
 }
@@ -137,6 +151,7 @@ WORKFLOW_PARAMS = {
         "init_tumorLOD": 0.5,
         "error_rate": 5,
         "prunefactor": 3,
+        "padding": 100,
         "disable_detect": "sv",
     },
 }

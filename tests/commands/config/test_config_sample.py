@@ -249,3 +249,35 @@ def test_config_graph_failed(
         )
 
     assert case_result.exit_code == 1
+
+
+def test_pon_cnn_file(
+    invoke_cli, sample_fastq, analysis_dir, balsamic_cache, panel_bed_file
+):
+
+    # GIVEN CLI arguments including optional pon reference '.cnn' file
+    case_id = "test_sample_cnv"
+    tumor = sample_fastq["tumor"]
+    pon_file = "tests/test_data/references/panel/test_panel_ponn.cnn"
+
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "-p",
+            panel_bed_file,
+            "-t",
+            tumor,
+            "--case-id",
+            case_id,
+            "--analysis-dir",
+            analysis_dir,
+            "--pon-cnn",
+            pon_file,
+            "--balsamic-cache",
+            balsamic_cache,
+        ],
+    )
+    # THEN program exits and checks for filepath
+    assert result.exit_code == 0
+    assert Path(pon_file).exists()

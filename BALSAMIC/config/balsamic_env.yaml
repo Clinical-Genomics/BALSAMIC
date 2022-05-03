@@ -6,7 +6,6 @@ align_qc:
   - picard
   - multiqc
   - fastp
-  - csvkit
 annotate:
   - ensembl-vep
   - vcfanno
@@ -19,8 +18,8 @@ varcall_py36:
   - gatk
   - vardict
   - libiconv
+  - svdb
 varcall_py27:
-  - strelka
   - manta
 varcall_cnvkit:
   - cnvkit
@@ -30,4 +29,6 @@ vcf_merge:
 delly:
   - delly
 ascatNgs:
-  -ascat
+  - ascat
+vcf2cytosure:
+  - vcf2cytosure

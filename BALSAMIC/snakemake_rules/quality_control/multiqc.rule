@@ -30,7 +30,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     if config['analysis']['analysis_type'] == "paired":
         multiqc_input.append(bam_dir+"normal.merged.recal_data.table")
 
-
 else:
     # fastqc metrics
     multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
@@ -57,10 +56,9 @@ else:
     multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt", sample=config["samples"], stats=['flagstats', 'idxstats', 'stats']))
 
     if config["umiworkflow"]:
+        # UMI picard metrics
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
-        
-
-
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=config["samples"]))
 
 rule multiqc:
     input:
@@ -83,6 +81,11 @@ rule multiqc:
     shell:
         """
 echo -e \"{params.dir_list}\" > {params.qc_dir}/dir_list;
-multiqc --force --outdir {params.qc_dir} --exclude {params.exclude_module} --data-format json -l {params.qc_dir}/dir_list;
+
+multiqc --force --outdir {params.qc_dir} \
+--exclude {params.exclude_module} \
+--data-format json \
+-l {params.qc_dir}/dir_list;
+
 chmod -R 777 {params.qc_dir};
         """

@@ -12,11 +12,12 @@ rule sentieon_tnscope_umi:
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".TNscope_umi.vcf.gz",
+        vcf_tnscope_umi = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".TNscope_umi.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".TNscope_umi.sample_name_map"
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
@@ -27,12 +28,13 @@ rule sentieon_tnscope_umi:
         init_tumor_lod = params.tnscope_umi.init_tumorLOD,
         error_rate = params.tnscope_umi.error_rate,
         prune_factor = params.tnscope_umi.prunefactor,
+        padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         pcr_model = params.common.pcr_model
     threads: 
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message: 
-        "Calling SNVs using TNscope for sample {params.tumor}"
+        "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -44,6 +46,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -t {threads} \
 -r {input.ref_fa} \
 -i {input.bam} \
+--interval {input.bed} \
+--interval_padding {params.padding} \
 --algo {params.algo} \
 --tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
@@ -55,7 +59,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --max_error_per_read {params.error_rate} \
 --pcr_indel_model {params.pcr_model} \
 --prune_factor {params.prune_factor} \
-{output.vcf};
+{output.vcf_tnscope_umi};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
         """
