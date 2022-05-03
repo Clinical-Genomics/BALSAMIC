@@ -302,7 +302,9 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
     min_tumor_allele_frac = 0.0005
 
 *interval_padding*:  Adding an extra 100bp to each end of the target region in the bed file before variant calling.
+
 ::
+
     interval_padding = 100
 
 **Post-call Filters**
