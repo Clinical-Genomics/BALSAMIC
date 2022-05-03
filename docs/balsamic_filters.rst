@@ -21,7 +21,7 @@ if the site has not passed any of the filters, a semicolon-separated list of tho
 indicate that at this site, the mean position in reads is less than 8, and the position in reads has a standard deviation of 0.
 
 
-*Note:**
+**Note:**
 **In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)**
 
 
