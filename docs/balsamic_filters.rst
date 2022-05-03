@@ -21,9 +21,8 @@ if the site has not passed any of the filters, a semicolon-separated list of tho
 indicate that at this site, the mean position in reads is less than 8, and the position in reads has a standard deviation of 0.
 
 
-.. note::
-    In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)
-..
+*Note:**
+**In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)**
 
 
 
@@ -37,15 +36,14 @@ indicate that at this site, the mean position in reads is less than 8, and the p
 
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
-.. note::
-    In BALSAMIC, this VCF file is named as `*.all.filtered.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.vcf.gz`)
-..
+**Note:**
+**In BALSAMIC, this VCF file is named as `*.all.filtered.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.vcf.gz`)**
+
 
 Only those variants that fulfill the pre-call and post-call filters are scored as `PASS` in the `STATUS` column of the VCF file. We filter those `PASS` variants and deliver a final list of variants to the customer either via `Scout` or `Caesar`
 
-.. note::
-    In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`) 
-..
+**Note:**
+**In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)**
 
 .. list-table:: Description of VCF files
    :widths: 30 50 20
@@ -110,9 +108,9 @@ Following is the set of criteria applied for filtering vardict results. It is us
     Minimum AF >= 0.007
     Maximum AF < 1
 
-.. attention::
-    BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)
-..
+**Attention:**
+**BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)**
+
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
@@ -120,8 +118,8 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
     GNOMADAF_popmax <= 0.005  (or) GNOMADAF_popmax == "."
 
-.. important::
-    Additionally, the variant is excluded for tumor-normal cases if marked as 'germline' in the `STATUS` column of the VCF file.
+**Note:**
+**Additionally, the variant is excluded for tumor-normal cases if marked as 'germline' in the `STATUS` column of the VCF file.**
 
 **Whole Genome Sequencing (WGS)**
 **********************************
@@ -315,6 +313,6 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 
     GNOMADAF_popmax <= 0.02 (or) GNOMADAF_popmax == "."
 
-.. attention::
-   BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.
-..
+**Attention:**
+**BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.**
+
