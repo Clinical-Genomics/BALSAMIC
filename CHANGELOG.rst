@@ -1,3 +1,11 @@
+[9.0.1]
+-------
+
+Fixed:
+^^^^^^
+* Revert `csvkit` tool in align_qc container 
+
+
 [9.0.0]
 --------
 
