@@ -3,8 +3,7 @@
 
 Fixed:
 ^^^^^^
-* Revert `csvkit` tool in align_qc container 
-
+* Revert `csvkit` tool in align_qc container #928 
 
 [9.0.0]
 --------
