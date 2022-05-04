@@ -10,4 +10,7 @@ dependencies:
   - bioconda::picard=2.27.1
   - bioconda::multiqc=1.12
   - bioconda::fastp=0.23.2
+  - conda-forge::csvkit=1.0.7
+  - conda-forge::libiconv=1.16
+  - conda-forge::fontconfig=2.14.0
   - conda-forge::r-base=4.1.3

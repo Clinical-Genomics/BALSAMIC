@@ -6,6 +6,7 @@ align_qc:
   - picard
   - multiqc
   - fastp
+  - csvkit
 annotate:
   - ensembl-vep
   - vcfanno
