@@ -4,6 +4,7 @@
 Fixed:
 ^^^^^^
 * Revert `csvkit` tool in align_qc container #928 
+* Automatic version update for balsamic methods #930
 
 [9.0.0]
 --------
