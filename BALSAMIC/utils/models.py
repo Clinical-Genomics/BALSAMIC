@@ -209,9 +209,9 @@ class AnalysisModel(BaseModel):
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
-         analysis_workflow: Field(required); string literal [balsamic, balsamic_umi]
+         analysis_workflow: Field(required); string literal [balsamic, balsamic-umi]
              balsamic: execute balsamic workflow
-             balsamic_umi: execute balsamic along with UMIworkflow for panels
+             balsamic-umi: execute balsamic along with UMIworkflow for panels
          analysis_dir : Field(required); existing path where to save files
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
@@ -226,7 +226,7 @@ class AnalysisModel(BaseModel):
         ValueError:
             When analysis_type is set to any value other than [single, paired, pon, qc_panel]
             When sequencing_type is set to any value other than [wgs, targeted]
-             When analysis_workflow is set to any other than [balsamic, balsamic_umi]
+            When analysis_workflow is set to any other than [balsamic, balsamic-umi]
     """
 
     case_id: str

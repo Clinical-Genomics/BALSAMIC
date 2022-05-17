@@ -134,12 +134,12 @@ LOG = logging.getLogger(__name__)
     "--analysis-workflow",
     default="balsamic",
     show_default=True,
-    type=click.Choice(["balsamic", "balsamic_umi"]),
+    type=click.Choice(["balsamic", "balsamic-umi"]),
     help=(
         'Analysis workflow to run. By default: "balsamic" only '
         "workflow will be running. If you want to run both "
         "balsamic and UMI workflow together for panel data; "
-        'choose "balsamic_umi" option '
+        'choose "balsamic-umi" option '
     ),
 )
 @click.pass_context
