@@ -3,8 +3,8 @@
 
 Fixed:
 ^^^^^^
-* Revert `csvkit` tool in align_qc container #928 
-* Automatic version update for balsamic methods #930
+* Revert `csvkit` tool in align_qc container https://github.com/Clinical-Genomics/BALSAMIC/pull/928 
+* Automatic version update for balsamic methods https://github.com/Clinical-Genomics/BALSAMIC/pull/930
 
 [9.0.0]
 --------
@@ -12,63 +12,63 @@ Fixed:
 Added:
 ^^^^^^
 
-* Snakemake workflow to create canfam3 reference #843
-* Call umi variants using TNscope in bed defined regions #821
-* UMI duplication metrics to report in multiqc_picard_dups.json #844
-* Option to use PON reference in cnv calling for TGA tumor-only cases
-* QC default validation conditions (for not defined capture kits) #855
-* SVdb to the varcall_py36 container #872
-* SVdb to WGS workflow #873
-* Docker container for vcf2cytosure #858
-* Snakemake rule for creating `.cgh` files from `CNVkit` outputs #858
-* SVdb to TGA workflow #879
-* SVdb merge SV and CNV #886
-* Readthedocs for BALSAMIC method descriptions #892
-* Readthedocs for BALSAMIC variant filters for WGS somatic callers #892
-* bcftools counts to varcall filter rules #898
-* Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` #907
-* ascatNGS copynumber file #914
-* ReadtheDocs for BALSAMIC annotation resources #916
-* Delly CNV for tumor only workflow #923
-* Delly CNV Read-depth profiles for tumor only workflows #924
-* New metric to be extracted and validated: ``NUMBER_OF_SITES`` (``bcftools`` counts) #925
+* Snakemake workflow to create canfam3 reference https://github.com/Clinical-Genomics/BALSAMIC/pull/843
+* Call umi variants using TNscope in bed defined regions https://github.com/Clinical-Genomics/BALSAMIC/issues/821
+* UMI duplication metrics to report in multiqc_picard_dups.json https://github.com/Clinical-Genomics/BALSAMIC/issues/844
+* Option to use PON reference in cnv calling for TGA tumor-only cases https://github.com/Clinical-Genomics/BALSAMIC/pull/851
+* QC default validation conditions (for not defined capture kits) https://github.com/Clinical-Genomics/BALSAMIC/pull/855
+* SVdb to the varcall_py36 container https://github.com/Clinical-Genomics/BALSAMIC/pull/872
+* SVdb to WGS workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/873
+* Docker container for vcf2cytosure https://github.com/Clinical-Genomics/BALSAMIC/pull/869
+* Snakemake rule for creating `.cgh` files from `CNVkit` outputs https://github.com/Clinical-Genomics/BALSAMIC/pull/880
+* SVdb to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/879
+* SVdb merge SV and CNV https://github.com/Clinical-Genomics/BALSAMIC/pull/886
+* Readthedocs for BALSAMIC method descriptions https://github.com/Clinical-Genomics/BALSAMIC/pull/906
+* Readthedocs for BALSAMIC variant filters for WGS somatic callers https://github.com/Clinical-Genomics/BALSAMIC/pull/906
+* bcftools counts to varcall filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/899
+* Additional WGS metrics to be stored in ``<case>_metrics_deliverables.yaml`` https://github.com/Clinical-Genomics/BALSAMIC/pull/907
+* ascatNGS copynumber file https://github.com/Clinical-Genomics/BALSAMIC/pull/914
+* ReadtheDocs for BALSAMIC annotation resources https://github.com/Clinical-Genomics/BALSAMIC/pull/916
+* Delly CNV for tumor only workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/923
+* Delly CNV Read-depth profiles for tumor only workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/924
+* New metric to be extracted and validated: ``NUMBER_OF_SITES`` (``bcftools`` counts) https://github.com/Clinical-Genomics/BALSAMIC/pull/925
 
 Changed:
 ^^^^^^^^
 
-* Merge QC metric extraction workflows #833
-* Changed the base-image for balsamic container to 4.10.3-alpine #869
-* Updated SVdb to 2.6.0 #871
-* Upgrade black to 22.3.0
-* For UMI workflow, post filter `gnomad_pop_freq` value is changed from `0.005` to `0.02` #919
-* updated delly to 0.9.1 #920
-* container base_image (align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py36) to 4.10.3-alpine #921
-* update container (align_qc, annotate, coverage_qc, varcall_cnvkit,varcall_py36) bioinfo tool versions  #921
-* update tool versions (align_qc, annotate, coverage_qc, varcall_cnvkit) in methods and softwares docs #921
-* Updated the list of files to be stored and delivered #848
-* Moved ``collect_custom_qc_metrics`` rule from ``multiqc.rule`` #925
+* Merge QC metric extraction workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/833
+* Changed the base-image for balsamic container to 4.10.3-alpine https://github.com/Clinical-Genomics/BALSAMIC/pull/869
+* Updated SVdb to 2.6.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/901
+* Upgrade black to 22.3.0 
+* For UMI workflow, post filter `gnomad_pop_freq` value is changed from `0.005` to `0.02` https://github.com/Clinical-Genomics/BALSAMIC/pull/919
+* updated delly to 0.9.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/920
+* container base_image (align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py36) to 4.10.3-alpine https://github.com/Clinical-Genomics/BALSAMIC/pull/921
+* update container (align_qc, annotate, coverage_qc, varcall_cnvkit,varcall_py36) bioinfo tool versions  https://github.com/Clinical-Genomics/BALSAMIC/pull/921
+* update tool versions (align_qc, annotate, coverage_qc, varcall_cnvkit) in methods and softwares docs https://github.com/Clinical-Genomics/BALSAMIC/pull/921
+* Updated the list of files to be stored and delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/915
+* Moved ``collect_custom_qc_metrics`` rule from ``multiqc.rule`` https://github.com/Clinical-Genomics/BALSAMIC/pull/925
 
 Fixed:
 ^^^^^^
-* Automate balsamic version for readthedocs install page #888
-* ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument #850
-* QC metric validation for different panel bed version #855
-* Fixed development version of ``fpdf2`` to ``2.4.6`` #878
-* Added missing svdb index file #848
+* Automate balsamic version for readthedocs install page https://github.com/Clinical-Genomics/BALSAMIC/pull/888
+* ``collect_qc_metrics.py`` failing for WGS cases with empty ``capture_kit`` argument https://github.com/Clinical-Genomics/BALSAMIC/pull/850
+* QC metric validation for different panel bed version https://github.com/Clinical-Genomics/BALSAMIC/pull/855
+* Fixed development version of ``fpdf2`` to ``2.4.6`` https://github.com/Clinical-Genomics/BALSAMIC/issues/878
+* Added missing svdb index file https://github.com/Clinical-Genomics/BALSAMIC/issues/848
 
 Removed
 ^^^^^^^
 
-* ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command #833
-* Unused pon option for SNV calling with TNhaplotyper tumor-only
-* SV and CNV callers from annotation and filtering #889
-* vcfanno and COSMIC from SV annotation #891
-* Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config
-* Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC 
-* bcftools_stats from vep #898
-* QC delivery report workflow (generating the ``<case>_qc_report.html`` file) #878
-* ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command #878
-* Removed `gatk_haplotypecaller` for reporting panel germline variants #918 
+* ``--qc-metrics/--no-qc-metrics`` flag from the ``balsamic report deliver`` command https://github.com/Clinical-Genomics/BALSAMIC/pull/833
+* Unused pon option for SNV calling with TNhaplotyper tumor-only https://github.com/Clinical-Genomics/BALSAMIC/pull/851
+* SV and CNV callers from annotation and filtering https://github.com/Clinical-Genomics/BALSAMIC/pull/889
+* vcfanno and COSMIC from SV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/891
+* Removed `MSK_impact` and `MSK_impact_noStrelka` json files from config https://github.com/Clinical-Genomics/BALSAMIC/pull/903
+* Cleanup of `strelka`, `pindel` , `mutect2` variables from BALSAMIC https://github.com/Clinical-Genomics/BALSAMIC/pull/903
+* bcftools_stats from vep https://github.com/Clinical-Genomics/BALSAMIC/issues/898
+* QC delivery report workflow (generating the ``<case>_qc_report.html`` file) https://github.com/Clinical-Genomics/BALSAMIC/issues/878
+* ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command https://github.com/Clinical-Genomics/BALSAMIC/issues/878
+* Removed `gatk_haplotypecaller` for reporting panel germline variants https://github.com/Clinical-Genomics/BALSAMIC/issues/918 
 
 [8.2.10]
 --------
