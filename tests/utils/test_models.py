@@ -261,7 +261,7 @@ def test_analysis_model():
         "analysis_type": "paired",
         "sequencing_type": "targeted",
         "analysis_dir": "tests/test_data",
-        "umiworkflow": "true",
+        "analysis_workflow": "balsamic_umi",
     }
     # THEN we can successully create a config dict
     assert AnalysisModel.parse_obj(valid_args)
@@ -272,6 +272,7 @@ def test_analysis_model():
         "analysis_type": "odd",
         "sequencing_type": "wrong",
         "analysis_dir": "tests/test_data",
+        "analysis_workflow": "umi",
     }
     # THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
