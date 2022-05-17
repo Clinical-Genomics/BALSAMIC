@@ -284,7 +284,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
         expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
     )
     # UMI
-    if config["analysis"]["analysis_workflow"]=="balsamic_umi":
+    if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
         if background_variant_file:
             analysis_specific_results.extend(

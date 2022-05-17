@@ -55,7 +55,7 @@ else:
     # samtools metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt", sample=config["samples"], stats=['flagstats', 'idxstats', 'stats']))
 
-    if config["analysis"]["analysis_workflow"]=="balsamic_umi":
+    if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         # UMI picard metrics
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=config["samples"]))
