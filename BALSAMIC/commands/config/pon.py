@@ -119,7 +119,7 @@ def pon_config(
             "analysis_dir": analysis_dir,
             "analysis_type": "pon",
             "analysis_workflow": "balsamic",
-	     "sequencing_type": "targeted" if panel_bed else "wgs",
+            "sequencing_type": "targeted" if panel_bed else "wgs",
         },
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
