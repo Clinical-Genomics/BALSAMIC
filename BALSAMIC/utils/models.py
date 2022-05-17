@@ -14,6 +14,7 @@ from BALSAMIC.constants.common import (
     BIOINFO_TOOL_ENV,
     SEQUENCING_TYPE,
     ANALYSIS_TYPES,
+    ANALYSIS_WORKFLOW,
     WORKFLOW_SOLUTION,
     MUTATION_CLASS,
     MUTATION_TYPE,
@@ -125,7 +126,7 @@ class VarcallerAttribute(BaseModel):
         mutation_type: str of mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
-        sequencing_type: list of str for workflows
+       sequencing_type: list of str for workflows
 
     Raises:
         ValueError:
@@ -208,7 +209,10 @@ class AnalysisModel(BaseModel):
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
-        analysis_dir : Field(required); existing path where to save files
+         analysis_workflow: Field(required); string literal [balsamic, balsamic_umi]
+             balsamic: execute balsamic workflow
+             balsamic_umi: execute balsamic along with UMIworkflow for panels
+         analysis_dir : Field(required); existing path where to save files
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
         log : Field(optional); Path where logs will be saved
@@ -222,11 +226,13 @@ class AnalysisModel(BaseModel):
         ValueError:
             When analysis_type is set to any value other than [single, paired, pon, qc_panel]
             When sequencing_type is set to any value other than [wgs, targeted]
+             When analysis_workflow is set to any other than [balsamic, balsamic_umi]
     """
 
     case_id: str
     analysis_type: str
     sequencing_type: str
+    analysis_workflow: str
     analysis_dir: DirectoryPath
     fastq_path: Optional[DirectoryPath]
     script: Optional[DirectoryPath]
@@ -255,6 +261,15 @@ class AnalysisModel(BaseModel):
         if value not in balsamic_sequencing_types:
             raise ValueError(
                 f"Provided sequencing type ({value}) not supported in BALSAMIC!"
+            )
+        return value
+
+    @validator("analysis_workflow", check_fields=True)
+    def analysis_workflow_literal(cls, value) -> str:
+        balsamic_analysis_workflow = ANALYSIS_WORKFLOW
+        if value not in balsamic_analysis_workflow:
+            raise ValueError(
+                f"Provided analysis workflow ({value} not supported in BALSAMIC"
             )
         return value
 
@@ -426,7 +441,6 @@ class BalsamicConfigModel(BaseModel):
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-        umiworkflow : Field(bool); whether UMI workflow to run in parallel
     """
 
     QC: QCModel
@@ -439,7 +453,6 @@ class BalsamicConfigModel(BaseModel):
     bioinfo_tools: dict
     bioinfo_tools_version: dict
     panel: Optional[PanelModel]
-    umiworkflow: bool
 
     @validator("reference")
     def abspath_as_str(cls, value):
