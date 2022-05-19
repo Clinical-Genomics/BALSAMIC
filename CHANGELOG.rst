@@ -1,3 +1,17 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* New option `analysis-workflow` to balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/932
+
+
+Changed:
+^^^^^^^^
+* UMI-workflow for panel cases to be run only with `balsamic-umi` flag https://github.com/Clinical-Genomics/BALSAMIC/issues/896
+
+
 [9.0.1]
 -------
 
