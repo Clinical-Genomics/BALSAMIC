@@ -126,7 +126,7 @@ class VarcallerAttribute(BaseModel):
         mutation_type: str of mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
-       sequencing_type: list of str for workflows
+        sequencing_type: list of str for workflows
 
     Raises:
         ValueError:
