@@ -34,11 +34,12 @@ SENTIEON_TNSCOPE = Path(
 )
 
 # Analysis related constants
+ANALYSIS_TYPES = ["paired", "single", "qc_panel", "pon"]
+ANALYSIS_WORKFLOW = ["balsamic", "balsamic-umi"]
+SEQUENCING_TYPE = ["wgs", "targeted"]
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
-ANALYSIS_TYPES = ["paired", "single", "qc_panel", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
-SEQUENCING_TYPE = ["wgs", "targeted"]
 
 
 # list of bioinfo tools for each conda env
