@@ -208,6 +208,10 @@ class AnalysisModel(BaseModel):
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
+        analysis_workflow: Field(required); string literal [balsamic, balsamic-umi]
+            balsamic: execute balsamic workflow
+            balsamic-umi: execute balsamic along with UMIworkflow for panels
+        analysis_dir : Field(required); existing path where to save files
         analysis_dir : Field(required); existing path where to save files
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
@@ -227,6 +231,7 @@ class AnalysisModel(BaseModel):
     case_id: str
     analysis_type: str
     sequencing_type: str
+    analysis_workflow: str
     analysis_dir: DirectoryPath
     fastq_path: Optional[DirectoryPath]
     script: Optional[DirectoryPath]
@@ -239,6 +244,15 @@ class AnalysisModel(BaseModel):
 
     class Config:
         validate_all = True
+
+    @validator("analysis_workflow", check_fields=True)
+    def analysis_workflow_literal(cls, value) -> str:
+        balsamic_analysis_workflow = ANALYSIS_WORKFLOW
+        if value not in balsamic_analysis_workflow:
+            raise ValueError(
+                f"Provided analysis workflow ({value} not supported in BALSAMIC"
+            )
+        return value
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
