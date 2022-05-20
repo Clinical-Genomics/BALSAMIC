@@ -213,8 +213,6 @@ if "disable_variant_caller" in config:
         if var_caller in germline_caller:
             germline_caller.remove(var_caller)
 
-LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
-LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
 
 rules_to_include = []
 analysis_type = config['analysis']["analysis_type"]
@@ -225,6 +223,13 @@ for sub,value in SNAKEMAKE_RULES.items():
     for module_name,module_rules in value.items():
       rules_to_include.extend(module_rules)
 
+if config["analysis"]["analysis_workflow"] == "balsamic":
+    rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
+    somatic_caller = [var_caller for var_caller in somatic_caller if "umi" not in var_caller]
+    somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
+
+LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
+LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
 for r in rules_to_include:
@@ -277,11 +282,12 @@ if config["analysis"]["sequencing_type"] != "wgs":
         expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
     )
     # UMI
-    analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
-    if background_variant_file:
-        analysis_specific_results.extend(
-            expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["TNscope_umi"])
-        )
+    if config["analysis"]["analysis_workflow"] == "balsamic-umi":
+        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
+        if background_variant_file:
+            analysis_specific_results.extend(
+                expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",case_name=case_id,var_caller=["TNscope_umi"])
+            )
 
 # AscatNgs
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
