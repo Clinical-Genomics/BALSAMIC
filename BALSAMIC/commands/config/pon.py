@@ -118,6 +118,7 @@ def pon_config(
             "case_id": case_id,
             "analysis_dir": analysis_dir,
             "analysis_type": "pon",
+            "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
         reference=reference_dict,
