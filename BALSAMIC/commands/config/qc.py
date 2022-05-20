@@ -166,6 +166,7 @@ def qc_config(
             "case_id": case_id,
             "analysis_dir": analysis_dir,
             "analysis_type": "qc_panel",
+            "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
         reference=reference_dict,
@@ -181,7 +182,6 @@ def qc_config(
         }
         if panel_bed
         else None,
-        umiworkflow=False,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("QC config file generated successfully")
 
