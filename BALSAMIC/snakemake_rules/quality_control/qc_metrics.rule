@@ -9,7 +9,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 else:
     bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.all.filtered.pass.stats")
 
-    if config["umiworkflow"]:
+    if config["analysis"]["analysis_workflow"] == "balsamic-umi":
         # bcftools counts
         bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".TNscope_umi.all.filtered.pass.stats")
 
