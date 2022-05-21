@@ -124,6 +124,19 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help="Enable running UMI workflow",
 )
+@click.option(
+    "-w",
+    "--analysis-workflow",
+    default="balsamic",
+    show_default=True,
+    type=click.Choice(["balsamic", "balsamic-umi"]),
+    help=(
+        'Analysis workflow to run. By default: "balsamic" only '
+        "workflow will be running. If you want to run both "
+        "balsamic and UMI workflow together for panel data; "
+        'choose "balsamic-umi" option '
+    ),
+)
 @click.option("--tumor-sample-name", help="Tumor sample name")
 @click.option("--normal-sample-name", help="Normal sample name")
 @click.option(
@@ -151,6 +164,7 @@ def case_config(
     tumor,
     normal,
     umiworkflow,
+    analysis_workflow,
     tumor_sample_name,
     normal_sample_name,
     genome_version,
