@@ -201,16 +201,16 @@ class AnalysisModel(BaseModel):
     Attributes:
 
         case_id : Field(required); string case identifier
-        analysis_type : Field(required); string literal [single, paired, pon, qc_panel]
+        analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
             pon : panel of normal analysis
-            qc_panel : QC analysis only
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
-         analysis_workflow: Field(required); string literal [balsamic, balsamic-umi]
+         analysis_workflow: Field(required); string literal [balsamic, balsamic-qc, balsamic-umi]
              balsamic: execute balsamic workflow
+             balsamic-qc: execute balsamic qc-only workflow
              balsamic-umi: execute balsamic along with UMIworkflow for panels
          analysis_dir : Field(required); existing path where to save files
         fastq_path : Field(optional); Path where fastq files will be stored
@@ -224,9 +224,9 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When analysis_type is set to any value other than [single, paired, pon, qc_panel]
+            When analysis_type is set to any value other than [single, paired, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
-            When analysis_workflow is set to any other than [balsamic, balsamic-umi]
+            When analysis_workflow is set to any other than [balsamic, balsamic-qc, balsamic-umi]
     """
 
     case_id: str

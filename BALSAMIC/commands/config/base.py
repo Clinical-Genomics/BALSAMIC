@@ -3,7 +3,6 @@ import click
 
 from BALSAMIC.commands.config.case import case_config as case_command
 from BALSAMIC.commands.config.pon import pon_config as pon_command
-from BALSAMIC.commands.config.qc import qc_config as qc_command
 
 
 @click.group()
@@ -15,4 +14,3 @@ def config(context):
 
 config.add_command(case_command)
 config.add_command(pon_command)
-config.add_command(qc_command)
