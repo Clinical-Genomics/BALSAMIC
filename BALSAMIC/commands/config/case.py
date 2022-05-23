@@ -136,6 +136,19 @@ LOG = logging.getLogger(__name__)
         "will be <outdir>/genome_version"
     ),
 )
+@click.option(
+    "-w",
+    "--analysis-workflow",
+    default="balsamic",
+    show_default=True,
+    type=click.Choice(["balsamic", "balsamic-umi"]),
+    help=(
+        'Analysis workflow to run. By default: "balsamic" only '
+        "workflow will be running. If you want to run both "
+        "balsamic and UMI workflow together for panel data; "
+        'choose "balsamic-umi" option '
+    ),
+)
 @click.pass_context
 def case_config(
     context,
@@ -156,6 +169,7 @@ def case_config(
     genome_version,
     balsamic_cache,
     container_version,
+    analysis_workflow
 ):
 
     try:
