@@ -10,13 +10,15 @@ Changed:
 ^^^^^^^^
 
 * UMI-workflow for panel cases to be run only with `balsamic-umi` flag https://github.com/Clinical-Genomics/BALSAMIC/issues/896
-* QC-workflow for panel cases to be run only with `balsamic-qc`
 * Update `codecov` action version to @v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/941
+* QC-workflow for panel cases to be run only with `balsamic-qc`
 * `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary
 
 
 Fixed:
 ^^^^^^
+
+* GENOME_VERSION set to the different genome_version options, not always hg19 any more
 
 Removed
 ^^^^^^^
