@@ -66,7 +66,8 @@ if len(cluster_config.keys()) == 0:
     cluster_config = config
 
 # Add reference assembly if not defined for backward compatibility
-if 'genome_version' not in config["reference"]:
+references = [ "hg19", "hg38", "canfam3" ]
+if any(ref in config["reference"]["reference_genome"] for ref in references):
     GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
     LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
 
