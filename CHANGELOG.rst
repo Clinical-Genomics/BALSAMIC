@@ -4,7 +4,7 @@
 Changed:
 ^^^^^^^^
 
-* Update `codecov` action version to @v2 #941
+* Update `codecov` action version to @v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/941
 
 [9.0.1]
 -------
