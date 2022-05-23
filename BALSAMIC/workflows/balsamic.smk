@@ -106,11 +106,15 @@ if not Path(config["SENTIEON_EXEC"]).exists():
     LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
     raise BalsamicError
 
-# Add reference assembly if not defined for backward compatibility
-references = [ "hg19", "hg38", "canfam3" ]
-if any(ref in config["reference"]["reference_genome"] for ref in references):
-    GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
-    LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
+if "hg38" in config["reference"]["reference_genome"]:
+    GENOME_VERSION = "hg38"
+elif "canfam3" in config["reference"]["reference_genome"]:
+    GENOME_VERSION = "canfam3"
+else:
+    GENOME_VERSION = "hg19"
+
+LOG.info('Genome version set to %s', GENOME_VERSION)
+
 
 # Add normal sample if analysis is paired
 germline_call_samples = ["tumor"]
