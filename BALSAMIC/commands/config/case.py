@@ -169,7 +169,7 @@ def case_config(
     genome_version,
     balsamic_cache,
     container_version,
-    analysis_workflow
+    analysis_workflow,
 ):
 
     try:
