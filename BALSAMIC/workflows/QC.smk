@@ -65,11 +65,14 @@ case_id = config["analysis"]["case_id"]
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-# Add reference assembly if not defined for backward compatibility
-references = [ "hg19", "hg38", "canfam3" ]
-if any(ref in config["reference"]["reference_genome"] for ref in references):
-    GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
-    LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
+if "hg38" in config["reference"]["reference_genome"]:
+    GENOME_VERSION = "hg38"
+elif "canfam3" in config["reference"]["reference_genome"]:
+    GENOME_VERSION = "canfam3"
+else:
+    GENOME_VERSION = "hg19"
+
+LOG.info('Genome version set to %s', GENOME_VERSION)
 
 
 # Set temporary dir environment variable
