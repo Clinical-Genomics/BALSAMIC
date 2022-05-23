@@ -6,17 +6,18 @@ Added:
 
 * New option `analysis-workflow` to balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/932
 
-
 Changed:
 ^^^^^^^^
-* UMI-workflow for panel cases to be run only with `balsamic-umi` flag https://github.com/Clinical-Genomics/BALSAMIC/issues/896
 
+* UMI-workflow for panel cases to be run only with `balsamic-umi` flag https://github.com/Clinical-Genomics/BALSAMIC/issues/896
+* Update `codecov` action version to @v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/941
 
 [9.0.1]
 -------
 
 Fixed:
 ^^^^^^
+
 * Revert `csvkit` tool in align_qc container https://github.com/Clinical-Genomics/BALSAMIC/pull/928 
 * Automatic version update for balsamic methods https://github.com/Clinical-Genomics/BALSAMIC/pull/930
 
