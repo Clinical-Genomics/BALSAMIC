@@ -1,3 +1,11 @@
+[X.X.X]
+-------
+
+Changed:
+^^^^^^^^
+
+* Update `codecov` action version to @v2
+
 [9.0.1]
 -------
 
