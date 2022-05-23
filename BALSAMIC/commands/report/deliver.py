@@ -32,19 +32,6 @@ LOG = logging.getLogger(__name__)
     help="Sample config file. Output of balsamic config sample",
 )
 @click.option(
-    "-w",
-    "--analysis-workflow",
-    default="balsamic",
-    show_default=True,
-    type=click.Choice(["balsamic", "balsamic-umi", "balsamic-qc"]),
-    help=(
-        'Analysis workflow to run. By default: "balsamic" only '
-        "workflow will be running. If you want to run both "
-        "balsamic and UMI workflow together for panel data; "
-        'choose "balsamic-umi" option '
-    ),
-)
-@click.option(
     "-a",
     "--analysis-type",
     required=False,
@@ -80,7 +67,6 @@ LOG = logging.getLogger(__name__)
 def deliver(
     context,
     sample_config,
-    analysis_workflow,
     analysis_type,
     rules_to_deliver,
     delivery_mode,
@@ -119,6 +105,7 @@ def deliver(
         else sample_config_dict["analysis"]["analysis_type"]
     )
     reference_genome = sample_config_dict["reference"]["reference_genome"]
+    analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
     snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
 
     report_file_name = os.path.join(
