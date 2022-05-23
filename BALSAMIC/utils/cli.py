@@ -601,7 +601,9 @@ def generate_graph(config_collection_dict, config_path):
         snakemake.snakemake(
             snakefile=get_snakefile(
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
-                analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+                analysis_workflow=config_collection_dict["analysis"][
+                    "analysis_workflow"
+                ],
                 reference_genome=config_collection_dict["reference"][
                     "reference_genome"
                 ],
