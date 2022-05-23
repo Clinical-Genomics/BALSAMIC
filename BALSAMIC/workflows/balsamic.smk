@@ -178,7 +178,6 @@ for m in MUTATION_TYPE:
                                              mutation_class="somatic")
     somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
 
-
 somatic_caller_sv = get_variant_callers(config=config,
                                             analysis_type=config['analysis']['analysis_type'],
                                             workflow_solution="BALSAMIC",
