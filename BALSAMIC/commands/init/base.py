@@ -266,7 +266,7 @@ def initialize(
     LOG.info("Reference generation workflow configured successfully - %s" % config_json)
 
     snakefile = (
-        snakefile if snakefile else get_snakefile("generate_ref", genome_version)
+        snakefile if snakefile else get_snakefile("generate_ref", "balsamic", genome_version)
     )
 
     with CaptureStdout() as graph_dot:
