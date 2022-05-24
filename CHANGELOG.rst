@@ -18,7 +18,7 @@ Changed:
 Fixed:
 ^^^^^^
 
-* GENOME_VERSION set to the different genome_version options, not always hg19 any more
+* GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"], not always hg19 any more
 
 Removed
 ^^^^^^^

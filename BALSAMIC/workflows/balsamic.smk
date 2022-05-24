@@ -107,13 +107,13 @@ if not Path(config["SENTIEON_EXEC"]).exists():
     raise BalsamicError
 
 if "hg38" in config["reference"]["reference_genome"]:
-    GENOME_VERSION = "hg38"
+    config["reference"]["genome_version"] = "hg38"
 elif "canfam3" in config["reference"]["reference_genome"]:
-    GENOME_VERSION = "canfam3"
+    config["reference"]["genome_version"] = "canfam3"
 else:
-    GENOME_VERSION = "hg19"
+    config["reference"]["genome_version"] = "hg19"
 
-LOG.info('Genome version set to %s', GENOME_VERSION)
+LOG.info('Genome version set to %s', config["reference"]["genome_version"])
 
 
 # Add normal sample if analysis is paired

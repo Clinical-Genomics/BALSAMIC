@@ -7,7 +7,7 @@ tumor_bam = "tumor.merged.bam"
 rule manta_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = bam_dir + normal_bam, 
+        bamN = bam_dir + normal_bam,
         bamT = bam_dir + tumor_bam,
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
@@ -43,7 +43,7 @@ python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 {params.manta_install_path}/libexec/convertInversion.py \
   $samtools_path \
   {input.fa} \
-  {params.tmpdir}/results/variants/somaticSV.vcf.gz > {params.tmpdir}/results/variants/somaticSV_converted.vcf; 
+  {params.tmpdir}/results/variants/somaticSV.vcf.gz > {params.tmpdir}/results/variants/somaticSV_converted.vcf;
 
 bgzip -l 9 -c {params.tmpdir}/results/variants/somaticSV_converted.vcf > {output.final};
 
@@ -139,7 +139,7 @@ rule ascat_tumor_normal:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",
-        genome = GENOME_VERSION,
+        genome = config["reference"]["genome_version"],
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")
