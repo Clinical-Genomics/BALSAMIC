@@ -11,21 +11,21 @@ Changed:
 
 * UMI-workflow for panel cases to be run only with `balsamic-umi` flag https://github.com/Clinical-Genomics/BALSAMIC/issues/896
 * Update `codecov` action version to @v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/941
-* QC-workflow for panel cases to be run only with `balsamic-qc`
-* `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary
+* QC-workflow for panel cases to be run only with `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 
 
 Fixed:
 ^^^^^^
 
-* GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"], not always hg19 any more
+* GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"] https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 
 Removed
 ^^^^^^^
 
-* Removed `qc_panel` config in favor of standard config
-* Removed cli `--analysis_type` for `balsamic report deliver` command and `balsamic run analysis`
-* Removed `analysis_type`: `qc_panel` and replace the trigger for QC workflow by `analysis_workflow`: `balsamic-qc`
+* Removed `qc_panel` config in favor of standard config https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* Removed cli `--analysis_type` for `balsamic report deliver` command and `balsamic run analysis` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* Removed `analysis_type`: `qc_panel` and replace the trigger for QC workflow by `analysis_workflow`: `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 
 [9.0.1]
 -------
