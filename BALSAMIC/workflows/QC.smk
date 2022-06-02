@@ -88,7 +88,8 @@ rules_to_include = [
                 "snakemake_rules/quality_control/picard.rule",
                 "snakemake_rules/quality_control/sambamba_depth.rule",
                 "snakemake_rules/quality_control/mosdepth.rule",
-                "snakemake_rules/align/bwa_mem.rule"
+                "snakemake_rules/align/bwa_mem.rule",
+                "snakemake_rules/quality_control/qc_metrics.rule"
 ]
 
 if "paired" in config['analysis']['analysis_type']:
@@ -102,7 +103,10 @@ for r in rules_to_include:
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
 # Define common and analysis specific outputs
-quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
+quality_control_results = [
+    os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
+    os.path.join(qc_dir, "multiqc_report.html"),
+]
 
 if 'delivery' in config:
     wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],
