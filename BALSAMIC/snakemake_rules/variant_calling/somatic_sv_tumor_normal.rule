@@ -112,7 +112,7 @@ rule delly_cnv_tumor_normal:
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
     threads:
-        get_threads(cluster_config, "delly_tumor_only")
+        get_threads(cluster_config, "delly_tumor_normal")
     message:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
@@ -254,7 +254,7 @@ rule tiddit_sv_tumor_normal:
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
     threads:
-        get_threads(cluster_config, "tiddit_tumor_only")
+        get_threads(cluster_config, "tiddit_sv_tumor_normal")
     message:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:
@@ -284,10 +284,6 @@ tabix -p vcf -f {output.vcf};
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
 rm -rf {params.tmpdir};
-
-#python TIDDIT.py --sv -p 6 --p_ratio 0.10 --bam tumor.bam -o tumor --ref reference.fasta grep -E "#|PASS" tumor.vcf > tumor.pass.vcf
-#python TIDDIT.py --sv -p 6 --bam normal.bam -o normal --ref reference.fasta grep -E "#|PASS" normal.vcf > normal.pass.vcf
-#svdb --merge --pass_only --notag --vcf tumor.pass.vcf normal.pass.vcf --bnd_distance 500 --overlap 0.6 > Tumor_normal.vcf
         """
 
 rule bcftools_process_SV_CNV:
@@ -301,14 +297,14 @@ rule bcftools_process_SV_CNV:
         delly_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
         ascat_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
     benchmark:
-        Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir, 'bcftools_process_SV_CNV_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         case_name = config["analysis"]["case_id"],
-        process_cnv= get_script_path("process_CNV.py"),
+        process_cnv = get_script_path("process_CNV.py"),
     threads:
-        get_threads(cluster_config, "bcftools_bcf2vcf_delly")
+        get_threads(cluster_config, "bcftools_process_SV_CNV")
     message:
         ("Processing SVs and CNVs for {params.case_name}")
     shell:
@@ -317,15 +313,17 @@ bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.dell
 
 bcftools view --threads {threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
 
-python process_cnv -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
+python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
 
-python process_cnv -f {input.ascat_cnv} -c delly | bgzip -l 9 -c > {output.ascat_cnv};
+python {params.process_cnv} -f {input.ascat_cnv} -c ascat | bgzip -l 9 -c > {output.ascat_cnv};
 
 tabix -p vcf -f {output.delly_sv};
 
 tabix -p vcf -f {output.delly_cnv};
 
 tabix -p vcf -f {output.ascat_cnv};
+
+rm {input.ascat_cnv};
         """
 
 rule svdb_merge_tumor_normal:

@@ -9,7 +9,7 @@ if config["analysis"]["sequencing_type"] != 'wgs':
         output:
             cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf2cytosure.cgh"
         benchmark:
-            Path(benchmark_dir, 'vcf2cytosure_convert.' + config["analysis"]["case_id"] + ".tsv").as_posix()
+            Path(benchmark_dir, 'vcf2cytosure_convert_' + config["analysis"]["case_id"] + ".tsv").as_posix()
         singularity:
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         threads:
@@ -31,7 +31,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         output:
             cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tumor.vcf2cytosure.cgh"
         benchmark:
-            Path(benchmark_dir, 'vcf2cytosure_convert.' + config["analysis"]["case_id"] + ".tsv").as_posix()
+            Path(benchmark_dir, 'vcf2cytosure_convert_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
         singularity:
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         threads:
@@ -56,7 +56,7 @@ elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["anal
             cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tumor.vcf2cytosure.cgh",
             cgh_normal = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".normal.vcf2cytosure.cgh",
         benchmark:
-            Path(benchmark_dir, 'vcf2cytosure_convert.' + config["analysis"]["case_id"] + ".tsv").as_posix()
+            Path(benchmark_dir, 'vcf2cytosure_convert_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
         singularity:
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         threads:

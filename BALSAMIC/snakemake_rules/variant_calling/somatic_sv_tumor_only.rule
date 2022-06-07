@@ -160,14 +160,14 @@ rule bcftools_process_SV_CNV:
         cnv = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tmpdellyCNV.vcf.gz"),
         delly_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
     benchmark:
-        Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir, 'bcftools_process_SV_CNV_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         case_name = config["analysis"]["case_id"],
         process_cnv = get_script_path("process_CNV.py"),
     threads:
-        get_threads(cluster_config, "bcftools_bcf2vcf_delly")
+        get_threads(cluster_config, "bcftools_process_SV_CNV")
     message:
         ("Converting BCF from delly to VCF for {params.case_name}")
     shell:
@@ -176,7 +176,7 @@ bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.dell
 
 bcftools view --threads {threads} -f PASS -O z -o {output.cnv} {input.delly_cnv};
 
-python process_cnv -f {output.cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
+python {params.process_cnv} -f {output.cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
 
 tabix -p vcf -f {output.delly_sv};
 
