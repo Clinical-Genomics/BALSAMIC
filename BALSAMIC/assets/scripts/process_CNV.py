@@ -70,6 +70,7 @@ def main(vcf_file, cnv_caller, tumor_sample, normal_sample):
         logging.error("Please provide ascat or delly VCF file for CNVs")
         sys.exit()
 
+
 # get VCF header
 def get_header(vcf):
     vcf_header = vcf.header
@@ -81,9 +82,11 @@ def get_header(vcf):
     del_line = vcfpy.header.HeaderLine("ALT=<ID", 'DEL,Description="Deletion">')
     vcf_header.add_line(del_line)
 
+
 # Write variants
 def write_sv(sv):
     print(*sv, sep="\t")
+
 
 # get INFO from VCF
 def get_info(sv, svtype):
@@ -104,6 +107,7 @@ def get_info(sv, svtype):
     )
     return info
 
+
 # get genotype calls
 def get_calls(sv):
     calls = ""
@@ -118,6 +122,7 @@ def get_calls(sv):
         calls += "\t"
     calls = calls.rstrip()
     return calls
+
 
 # Process variants
 def get_sv(sv, caller, samples, tumor, normal):

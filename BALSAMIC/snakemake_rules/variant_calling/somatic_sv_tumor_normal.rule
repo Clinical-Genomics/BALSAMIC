@@ -244,7 +244,7 @@ rule tiddit_sv_tumor_normal:
         cov_normal_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".normal.tiddit_cov.bed",
         namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
     benchmark:
-        benchmark_dir + 'tiddit_sv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'tiddit_sv_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
     params:
