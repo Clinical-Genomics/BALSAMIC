@@ -5,7 +5,7 @@ Added:
 ^^^^^^
 
 * New option `analysis-workflow` to balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/932
-* vcf2cytosure for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/
+* vcf2cytosure, Delly CNV for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 
 Changed:
 ^^^^^^^^
