@@ -3,6 +3,7 @@ channels:
 
 dependencies:
   - anaconda::python=3.8
+  - anaconda::click=8.0.4
   - bioconda::bcftools=1.11
   - bioconda::tabix=0.2.6
   - bioconda::samtools=1.11
@@ -10,5 +11,8 @@ dependencies:
   - bioconda::vardict=2019.06.04
   - bioconda::vardict-java=1.8.3
   - bioconda::svdb=2.6.0
+  - bioconda::vcfpy=0.13.4
+  - bioconda::bwa=0.7.17
+  - bioconda::tiddit=3.0.0
   - conda-forge::libiconv
   - conda-forge::r-base=4.1.1

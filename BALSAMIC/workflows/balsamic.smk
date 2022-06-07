@@ -290,7 +290,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
                 expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["TNscope_umi"])
         )
 
-# AscatNgs
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [case_id]))
@@ -298,12 +297,24 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
+    analysis_specific_results.extend(expand(
+        vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
+        case_name=case_id,
+        sample_type=["tumor","normal"]
+    ))
 
-# Delly CNV
+if config['analysis']['sequencing_type'] == "wgs" and config['analysis']['analysis_type'] == 'single':
+    analysis_specific_results.extend(expand(
+        vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
+        case_name=case_id,
+        sample_type=["tumor"]
+    ))
+
 if config['analysis']['analysis_type'] == "single":
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
     )
+
 
 # Dragen
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
