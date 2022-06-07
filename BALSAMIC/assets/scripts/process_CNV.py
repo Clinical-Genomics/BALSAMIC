@@ -112,7 +112,7 @@ def get_calls(sv):
                 CALL[key] = ",".join(map(str, value))
             else:
                 CALL[key] = value
-        calls += str(':'.join(map(str, CALL.values())))
+        calls += str(":".join(map(str, CALL.values())))
         calls += "\t"
     calls = calls.rstrip()
     return calls
