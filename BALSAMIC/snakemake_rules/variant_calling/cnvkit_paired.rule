@@ -22,7 +22,7 @@ rule cnvkit_paired:
     benchmark:
         Path(benchmark_dir + "cnvkit_paired_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix() 
+        Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix()
     params:
         cnv_dir = cnv_dir,
         purecn_dir = cnv_dir + "PureCN",
@@ -33,7 +33,7 @@ rule cnvkit_paired:
         min_mapq = params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
-        genome = GENOME_VERSION
+        genome = config["reference"]["genome_version"]
     message:
         "Calling CNVs using CNVkit and calculating tumor purity/ploidy using PureCN for {params.case_name}"
     shell:
@@ -90,7 +90,7 @@ cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn \
 {params.cnv_dir}/tumor.antitargetcoverage.cnn \
 {params.cnv_dir}/normalReference.cnn \
 --output {output.cnr};
-       
+
 # Infer copy number segments from the given coverage table
 # segmentattion methods (-m): cbs: reccommended for mid-size target panels and exomes
 # drop bins with 0  read depth and bins whose log2 values deviating from avg
@@ -113,7 +113,7 @@ gender="x"; purity="0.02"; ploidy=2;
 # if purecn runs succesfully: update gender, purity and ploidy values
 purecn_status="true"
 
-{{ 
+{{
 Rscript $PURECN \
 --out {params.purecn_dir} \
 --sampleid {params.sample_id} \
@@ -129,7 +129,7 @@ Rscript $PURECN \
 if $purecn_status; then
 purity=$(awk -F\\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
 ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv)
-gender=$(awk -F\\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\"); 
+gender=$(awk -F\\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\");
 if [[ "$gender" = "?" || "$gender" =~ "coverage" ]]; then gender="x"; fi
 fi
 

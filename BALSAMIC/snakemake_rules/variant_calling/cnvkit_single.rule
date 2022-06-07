@@ -20,7 +20,7 @@ rule cnvkit_single:
     output:
         cns = cnv_dir + "tumor.merged" + ".cns",
         cnr = cnv_dir + "tumor.merged" + ".cnr",
-        diagram = cnv_dir + "tumor.merged" + "-diagram.pdf", 
+        diagram = cnv_dir + "tumor.merged" + "-diagram.pdf",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
         scatter = cnv_dir + "tumor.merged" + "-scatter.pdf",
@@ -29,8 +29,8 @@ rule cnvkit_single:
     benchmark:
         Path(benchmark_dir, 'cnvkit_single_' + config["analysis"]["case_id"] + ".cnvkit_single.tsv").as_posix()
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix() 
-    threads: 
+        Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix()
+    threads:
         get_threads(cluster_config, "cnvkit_single")
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
@@ -41,7 +41,7 @@ rule cnvkit_single:
         min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
-        genome_version = GENOME_VERSION,
+        genome_version = config["reference"]["genome_version"],
         pon = " " if get_pon_cnn(config) is None else get_pon_cnn(config)
     message:
         ("Calling CNVs using CNVkit and calculating tumor purity/ploidy using PureCN for {params.case_name}")
@@ -75,7 +75,7 @@ cnvkit.py coverage {input.bamT} \
 --output {params.cnv_dir}/tumor.antitargetcoverage.cnn;
 
 
-# Combine the uncorrected target and antitarget coverage tables (.cnn) and 
+# Combine the uncorrected target and antitarget coverage tables (.cnn) and
 # correct for biases in regional coverage and GC content, according to the given reference
 if [[ ! -f "{params.pon}" ]]; then
 cnvkit.py reference --output {params.cnv_dir}/FlatReference.cnn --fasta {input.fasta} --targets {params.cnv_dir}/targets.bed --antitargets {params.cnv_dir}/antitarget_bed;
@@ -86,7 +86,7 @@ cnvkit.py fix {params.cnv_dir}/tumor.targetcoverage.cnn {params.cnv_dir}/tumor.a
 fi
 
 
-# Infer copy number segments from the given coverage table 
+# Infer copy number segments from the given coverage table
 # segmentattion methods (-m): cbs: reccommended for mid-size target panels and exomes
 # drop bins with 0  read depth and bins whose log2 values deviating from avg
 cnvkit.py segment {output.cnr} \
@@ -147,7 +147,7 @@ cnvkit.py diagram {output.cnr} \
 --segment  {output.cns} \
 --output {output.diagram};
 
-# Identify targeted genes with copy number gain or loss 
+# Identify targeted genes with copy number gain or loss
 cnvkit.py genemetrics {output.cnr} \
 --segment {output.cns} \
 --drop-low-coverage  \
@@ -172,11 +172,11 @@ tabix -p vcf -f {params.cnv_dir}/{params.tumor_name}.vcf.gz;
 bcftools sort \
 -o {output.vcf} \
 --temp-dir {params.tmpdir} \
--O z {params.cnv_dir}/{params.tumor_name}.vcf.gz; 
+-O z {params.cnv_dir}/{params.tumor_name}.vcf.gz;
 
 tabix -p vcf -f {output.vcf};
 
-echo -e \"TUMOR\\tTUMOR\" > {output.namemap}; 
+echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
 
 rm -rf {params.tmpdir};
       """

@@ -65,10 +65,14 @@ case_id = config["analysis"]["case_id"]
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-# Add reference assembly if not defined for backward compatibility
-if 'genome_version' not in config["reference"]:
-    GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
-    LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
+if "hg38" in config["reference"]["reference_genome"]:
+    config["reference"]["genome_version"] = "hg38"
+elif "canfam3" in config["reference"]["reference_genome"]:
+    config["reference"]["genome_version"] = "canfam3"
+else:
+    config["reference"]["genome_version"] = "hg19"
+
+LOG.info('Genome version set to %s', config["reference"]["genome_version"])
 
 
 # Set temporary dir environment variable
@@ -84,7 +88,8 @@ rules_to_include = [
                 "snakemake_rules/quality_control/picard.rule",
                 "snakemake_rules/quality_control/sambamba_depth.rule",
                 "snakemake_rules/quality_control/mosdepth.rule",
-                "snakemake_rules/align/bwa_mem.rule"
+                "snakemake_rules/align/bwa_mem.rule",
+                "snakemake_rules/quality_control/qc_metrics.rule"
 ]
 
 if "paired" in config['analysis']['analysis_type']:
@@ -98,7 +103,10 @@ for r in rules_to_include:
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
 # Define common and analysis specific outputs
-quality_control_results = [result_dir + "qc/" + "multiqc_report.html"]
+quality_control_results = [
+    os.path.join(qc_dir, case_id + "_metrics_deliverables.yaml"),
+    os.path.join(qc_dir, "multiqc_report.html"),
+]
 
 if 'delivery' in config:
     wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],

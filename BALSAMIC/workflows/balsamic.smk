@@ -106,10 +106,18 @@ if not Path(config["SENTIEON_EXEC"]).exists():
     LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
     raise BalsamicError
 
-# Add reference assembly if not defined for backward compatibility
-if 'genome_version' not in config["reference"]:
-    GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
-    LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
+if "hg38" in config["reference"]["reference_genome"]:
+    config["reference"]["genome_version"] = "hg38"
+elif "canfam3" in config["reference"]["reference_genome"]:
+    config["reference"]["genome_version"] = "canfam3"
+    LOG.error("The main BALSAMIC workflow is not compatible with the canfam3 genome version "
+             "use '--analysis-workflow balsamic-qc' instead")
+    raise BalsamicError
+else:
+    config["reference"]["genome_version"] = "hg19"
+
+LOG.info('Genome version set to %s', config["reference"]["genome_version"])
+
 
 # Add normal sample if analysis is paired
 germline_call_samples = ["tumor"]
