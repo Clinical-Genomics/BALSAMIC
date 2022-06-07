@@ -63,7 +63,7 @@ def main(vcf_file, cnv_caller, tumor_sample, normal_sample):
                 SV = get_sv(sv, cnv_caller, samples, tumor, normal)
                 write_sv(SV)
         except:
-            sys.exit('Please provide valid VCF file')
+            sys.exit("Please provide valid VCF file")
     else:
         print("Please provide ascat or delly VCF file for CNVs")
         sys.exit()
