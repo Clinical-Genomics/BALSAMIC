@@ -11,8 +11,8 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     else:
         bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.all.filtered.pass.stats")
 
-    if config["analysis"]["analysis_workflow"]=="balsamic-umi":
-        bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.all.filtered.pass.stats")
+if config["analysis"]["analysis_workflow"] == "balsamic-umi":
+    bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.all.filtered.pass.stats")
 
 rule collect_custom_qc_metrics:
     input:
