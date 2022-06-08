@@ -130,6 +130,9 @@ DELIVERY_RULES = [
     "ascat_tumor_normal",
     "ascat_tumor_normal_merge_output",
     "delly_cnv_tumor_only",
+    "delly_cnv_tumor_normal",
+    "tiddit_sv_tumor_only",
+    "tiddit_sv_tumor_normal"
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",

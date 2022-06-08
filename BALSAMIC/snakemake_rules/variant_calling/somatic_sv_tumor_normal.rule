@@ -107,7 +107,6 @@ rule delly_cnv_tumor_normal:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
-        runmode = "local",
         normal = "NORMAL",
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
@@ -249,7 +248,7 @@ rule tiddit_sv_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
         tumor = "TUMOR",
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"]

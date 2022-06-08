@@ -20,7 +20,7 @@ if config["analysis"]["sequencing_type"] != 'wgs':
         message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
         shell:
             """
-    vcf2cytosure --vcf {input.cnvkit_vcf} --cn {input.cnvkit_cnr} --out {output.cgh_tumor} --bins 1
+vcf2cytosure --vcf {input.cnvkit_vcf} --cn {input.cnvkit_cnr} --out {output.cgh_tumor} --bins 1
             """
 
 elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'single':
@@ -42,7 +42,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
         shell:
             """
-    vcf2cytosure --vcf {input.delly_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --bins 20
+vcf2cytosure --vcf {input.delly_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --bins 20
             """
 
 elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["analysis_type"] == "paired":
@@ -67,9 +67,9 @@ elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["anal
         message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
         shell:
             """
-    grep -E "#|PASS" {input.ascat_vcf} | bgzip -l 9 -c > {output.ascat_vcf};
+grep -E "#|PASS" {input.ascat_vcf} | bgzip -l 9 -c > {output.ascat_vcf};
         
-    vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --bins 20
+vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --bins 20
     
-    vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_normal} --out {output.cgh_normal} --bins 20
+vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_normal} --out {output.cgh_normal} --bins 20
             """
