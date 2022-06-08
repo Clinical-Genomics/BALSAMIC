@@ -291,50 +291,6 @@ def tumor_normal_config(
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
-@pytest.fixture(scope="session")
-def tumor_normal_qc_config(
-    tmp_path_factory,
-    sample_fastq,
-    analysis_dir,
-    balsamic_cache,
-    panel_bed_file,
-):
-    """
-    invokes balsamic config sample -t xxx -n xxx to create sample config
-    for tumor-normal
-    """
-    case_id = "sample_tumor_normal"
-    tumor = sample_fastq["tumor"]
-    normal = sample_fastq["normal"]
-
-    with mock.patch.dict(MOCKED_OS_ENVIRON):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "qc_panel",
-                "-p",
-                panel_bed_file,
-                "-t",
-                tumor,
-                "-n",
-                normal,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                "ACC1",
-                "--normal-sample-name",
-                "ACC2",
-            ],
-        )
-    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
-
-
 @pytest.fixture(name="helpers")
 def fixture_config_helpers():
     """Helper fixture for case config files"""
@@ -481,45 +437,6 @@ def tumor_only_wgs_config(
         )
 
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_only_qc_config(
-    tmpdir_factory,
-    sample_fastq,
-    balsamic_cache,
-    analysis_dir,
-    panel_bed_file,
-):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only
-    """
-    case_id = "sample_tumor_only"
-    tumor = sample_fastq["tumor"]
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "qc_panel",
-                "-p",
-                panel_bed_file,
-                "-t",
-                tumor,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
-            ],
-        )
-    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
 
 
 @pytest.fixture(scope="session")

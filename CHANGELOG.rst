@@ -11,6 +11,21 @@ Changed:
 
 * UMI-workflow for panel cases to be run only with `balsamic-umi` flag https://github.com/Clinical-Genomics/BALSAMIC/issues/896
 * Update `codecov` action version to @v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/941
+* QC-workflow for panel cases to be run only with `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+
+Fixed:
+^^^^^^
+
+* GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"] https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+
+Removed
+^^^^^^^
+
+* Removed `qc_panel` config in favor of standard config https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* Removed cli `--analysis_type` for `balsamic report deliver` command and `balsamic run analysis` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* Removed `analysis_type`: `qc_panel` and replace the trigger for QC workflow by `analysis_workflow`: `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 
 [9.0.1]
 -------
@@ -18,7 +33,7 @@ Changed:
 Fixed:
 ^^^^^^
 
-* Revert `csvkit` tool in align_qc container https://github.com/Clinical-Genomics/BALSAMIC/pull/928 
+* Revert `csvkit` tool in align_qc container https://github.com/Clinical-Genomics/BALSAMIC/pull/928
 * Automatic version update for balsamic methods https://github.com/Clinical-Genomics/BALSAMIC/pull/930
 
 [9.0.0]
@@ -54,7 +69,7 @@ Changed:
 * Merge QC metric extraction workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/833
 * Changed the base-image for balsamic container to 4.10.3-alpine https://github.com/Clinical-Genomics/BALSAMIC/pull/869
 * Updated SVdb to 2.6.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/901
-* Upgrade black to 22.3.0 
+* Upgrade black to 22.3.0
 * For UMI workflow, post filter `gnomad_pop_freq` value is changed from `0.005` to `0.02` https://github.com/Clinical-Genomics/BALSAMIC/pull/919
 * updated delly to 0.9.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/920
 * container base_image (align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py36) to 4.10.3-alpine https://github.com/Clinical-Genomics/BALSAMIC/pull/921
@@ -83,7 +98,7 @@ Removed
 * bcftools_stats from vep https://github.com/Clinical-Genomics/BALSAMIC/issues/898
 * QC delivery report workflow (generating the ``<case>_qc_report.html`` file) https://github.com/Clinical-Genomics/BALSAMIC/issues/878
 * ``--sample-id-map`` and ``--case-id-map`` flags from the ``balsamic report deliver`` command https://github.com/Clinical-Genomics/BALSAMIC/issues/878
-* Removed `gatk_haplotypecaller` for reporting panel germline variants https://github.com/Clinical-Genomics/BALSAMIC/issues/918 
+* Removed `gatk_haplotypecaller` for reporting panel germline variants https://github.com/Clinical-Genomics/BALSAMIC/issues/918
 
 [8.2.10]
 --------

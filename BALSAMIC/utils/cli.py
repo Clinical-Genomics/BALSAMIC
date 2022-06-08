@@ -261,7 +261,7 @@ def get_schedulerpy():
     return scheduler
 
 
-def get_snakefile(analysis_type, reference_genome="hg19"):
+def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome="hg19"):
     """
     Return a string path for variant calling snakefile.
     """
@@ -277,7 +277,8 @@ def get_snakefile(analysis_type, reference_genome="hg19"):
 
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
-    if "qc_panel" in analysis_type:
+
+    if "balsamic-qc" in analysis_workflow:
         snakefile = Path(p, "workflows", "QC.smk")
 
     return str(snakefile)
@@ -600,6 +601,9 @@ def generate_graph(config_collection_dict, config_path):
         snakemake.snakemake(
             snakefile=get_snakefile(
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
+                analysis_workflow=config_collection_dict["analysis"][
+                    "analysis_workflow"
+                ],
                 reference_genome=config_collection_dict["reference"][
                     "reference_genome"
                 ],

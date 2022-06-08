@@ -12,7 +12,8 @@ def test_workflow_tumor_normal(
     # GIVEN a sample config dict and snakefile
     workflow = "paired"
     reference_genome = "hg19"
-    snakefile = get_snakefile(workflow, reference_genome)
+    analysis_workflow = "balsamic"
+    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
     config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dryrun option
@@ -31,7 +32,8 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_l
     # GIVEN a sample config dict and snakefile
     workflow = "single"
     reference_genome = "hg19"
-    snakefile = get_snakefile(workflow, reference_genome)
+    analysis_workflow = "balsamic"
+    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
     config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dryrun option
@@ -46,13 +48,14 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_l
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_tumor_only(tumor_only_qc_config):
+def test_workflow_qc_tumor_only(tumor_only_config):
 
     # GIVEN a sample config dict and snakefile
-    workflow = "qc_panel"
+    workflow = "single"
     reference_genome = "hg19"
-    snakefile = get_snakefile(workflow, reference_genome)
-    config_json = tumor_only_qc_config
+    analysis_workflow = "balsamic-qc"
+    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
@@ -62,13 +65,14 @@ def test_workflow_qc_tumor_only(tumor_only_qc_config):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_tumor_only_canfam(tumor_only_qc_config):
+def test_workflow_qc_tumor_only_canfam(tumor_only_config):
 
     # GIVEN a sample config dict and snakefile
-    workflow = "qc_panel"
+    workflow = "single"
     reference_genome = "canfam3"
-    snakefile = get_snakefile(workflow, reference_genome)
-    config_json = tumor_only_qc_config
+    analysis_workflow = "balsamic-qc"
+    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
@@ -78,12 +82,13 @@ def test_workflow_qc_tumor_only_canfam(tumor_only_qc_config):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_normal(tumor_normal_qc_config):
+def test_workflow_qc_normal(tumor_normal_config):
     # GIVEN a sample config dict and snakefile
-    workflow = "qc_panel"
+    workflow = "paired"
     reference_genome = "hg19"
-    snakefile = get_snakefile(workflow, reference_genome)
-    config_json = tumor_normal_qc_config
+    analysis_workflow = "balsamic-qc"
+    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
@@ -93,12 +98,13 @@ def test_workflow_qc_normal(tumor_normal_qc_config):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_normal_canfam3(tumor_normal_qc_config):
+def test_workflow_qc_normal_canfam3(tumor_normal_config):
     # GIVEN a sample config dict and snakefile
-    workflow = "qc_panel"
+    workflow = "paired"
     reference_genome = "canfam3"
-    snakefile = get_snakefile(workflow, reference_genome)
-    config_json = tumor_normal_qc_config
+    analysis_workflow = "balsamic-qc"
+    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
@@ -130,5 +136,8 @@ def test_workflow_sentieon(
             analysis_type = workflow[0]
             config = workflow[1]
             reference_genome = "hg19"
-            snakefile = get_snakefile(analysis_type, reference_genome)
+            analysis_workflow = "balsamic"
+            snakefile = get_snakefile(
+                analysis_type, analysis_workflow, reference_genome
+            )
             assert snakemake.snakemake(snakefile, configfiles=[config], dryrun=True)

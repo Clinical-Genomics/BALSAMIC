@@ -351,25 +351,29 @@ def test_get_script_path():
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
     workflow = [
-        ("paired", "wgs"),
-        ("paired", "targeted"),
-        ("single", "wgs"),
-        ("single", "targeted"),
-        ("qc_panel", "targeted"),
-        ("generate_ref", ""),
-        ("pon", ""),
+        ("paired", "balsamic"),
+        ("single", "balsamic"),
+        ("generate_ref", "balsamic"),
+        ("pon", "balsamic"),
+        ("paired", "balsamic-qc"),
+        ("single", "balsamic-qc"),
+        ("paired", "balsamic-umi"),
+        ("single", "balsamic-umi"),
     ]
 
     # WHEN asking to see snakefile for paired
     for reference_genome in ["hg19", "hg38", "canfam3"]:
-        for analysis_type, sequencing_type in workflow:
-            snakefile = get_snakefile(analysis_type, reference_genome)
+        for analysis_type, analysis_workflow in workflow:
+            snakefile = get_snakefile(
+                analysis_type, analysis_workflow, reference_genome
+            )
 
             pipeline = ""
-            if sequencing_type in ["targeted", "wgs"] and analysis_type in [
-                "single",
-                "paired",
-            ]:
+            if (
+                analysis_type in ["single", "paired"]
+                and analysis_workflow != "balsamic-qc"
+                and analysis_workflow != "balsamic-umi"
+            ):
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
             elif analysis_type == "generate_ref" and reference_genome != "canfam3":
                 pipeline = "BALSAMIC/workflows/reference.smk"
@@ -377,7 +381,7 @@ def test_get_snakefile():
                 pipeline = "BALSAMIC/workflows/reference-canfam3.smk"
             elif analysis_type == "pon":
                 pipeline = "BALSAMIC/workflows/PON.smk"
-            elif "qc" in analysis_type:
+            elif analysis_workflow == "balsamic-qc":
                 pipeline = "BALSAMIC/workflows/QC.smk"
 
             # THEN it should return the snakefile path

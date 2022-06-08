@@ -28,17 +28,6 @@ LOG = logging.getLogger(__name__)
     "analysis", short_help="Run the analysis on a provided sample config-file"
 )
 @click.option(
-    "-a",
-    "--analysis-type",
-    required=False,
-    type=click.Choice(ANALYSIS_TYPES),
-    help=(
-        "Type of analysis to run from input config file."
-        "By default it will read from config file, but it"
-        "will override config file if it is set here."
-    ),
-)
-@click.option(
     "-S",
     "--snake-file",
     type=click.Path(),
@@ -177,7 +166,6 @@ def analysis(
     mail_type,
     mail_user,
     account,
-    analysis_type,
     qos,
     profile,
     disable_variant_caller,
@@ -227,8 +215,9 @@ def analysis(
         os.makedirs(scriptpath, exist_ok=True)
         os.makedirs(benchmarkpath, exist_ok=True)
 
-    if not analysis_type:
-        analysis_type = sample_config["analysis"]["analysis_type"]
+    analysis_type = sample_config["analysis"]["analysis_type"]
+    analysis_workflow = sample_config["analysis"]["analysis_workflow"]
+    reference_genome = sample_config["reference"]["reference_genome"]
 
     # Singularity bind path
     bind_path = list()
@@ -253,7 +242,11 @@ def analysis(
         ).as_posix()
         + "/"
     )
-    balsamic_run.snakefile = snake_file if snake_file else get_snakefile(analysis_type)
+    balsamic_run.snakefile = (
+        snake_file
+        if snake_file
+        else get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    )
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config

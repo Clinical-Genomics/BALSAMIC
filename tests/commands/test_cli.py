@@ -85,7 +85,6 @@ def test_run_analysis(invoke_cli):
     result = invoke_cli(["run", "analysis", "--help"])
 
     # THEN it should show all params without error
-    assert "--analysis-type" in result.output
     assert "--snake-file" in result.output
     assert "--sample-config" in result.output
     assert "--run-mode" in result.output
