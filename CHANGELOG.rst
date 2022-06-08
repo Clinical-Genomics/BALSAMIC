@@ -5,6 +5,8 @@ Added:
 ^^^^^^
 
 * New option `analysis-workflow` to balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/932
+* New python script to edit INFO tags in `vardict` and `tnscope_umi` VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/948
+* Added `cyvcf2` and `click` tools to the `annotate` container https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 
 Changed:
 ^^^^^^^^
@@ -14,6 +16,7 @@ Changed:
 * QC-workflow for panel cases to be run only with `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* UMI output filename `TNscope_umi` is changed to `tnscope_umi` https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 
 Fixed:
 ^^^^^^
