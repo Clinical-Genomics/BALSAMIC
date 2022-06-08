@@ -11,7 +11,7 @@ else:
 
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         # bcftools counts
-        bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".TNscope_umi.all.filtered.pass.stats")
+        bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.all.filtered.pass.stats")
 
 rule collect_custom_qc_metrics:
     input:
