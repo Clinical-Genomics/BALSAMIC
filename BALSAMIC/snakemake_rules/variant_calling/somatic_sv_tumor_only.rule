@@ -64,7 +64,6 @@ rule delly_sv_tumor_only:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        runmode = "local",
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
     threads:
@@ -97,7 +96,6 @@ rule delly_cnv_tumor_only:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
-        runmode = "local",
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
     threads:
@@ -113,32 +111,74 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
-rule bcftools_bcf2vcf_delly:
+rule tiddit_sv_tumor_only:
     input:
-        bcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        bcf_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        fa = config["reference"]["reference_genome"],
+        bamT = bam_dir + tumor_bam,
     output:
-        vcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.vcf.gz",
-        vcf_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
+        cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
+        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
     benchmark:
-        Path(benchmark_dir, 'bcftools_bcf2vcf_delly_' + config["analysis"]["case_id"] + ".tsv")
+        benchmark_dir + 'tiddit_sv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+        tumor = "TUMOR",
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "tiddit_tumor_only")
+    message:
+        ("Calling structural variants using tiddit for {params.case_name}")
+    shell:
+        """
+tiddit --cov -z 500 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor}_cov &
+
+tiddit --sv -p 6 -r 6 -z 1000 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor};
+
+grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf | bgzip -l 9 -c > {output.vcf};
+
+tabix -p vcf -f {output.vcf};
+
+cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
+rule bcftools_process_SV_CNV:
+    input:
+        delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        delly_cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+    output:
+        delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.vcf.gz",
+        cnv = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tmpdellyCNV.vcf.gz"),
+        delly_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, 'bcftools_process_SV_CNV_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-        case_name = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"],
+        process_cnv = get_script_path("process_CNV.py"),
     threads:
-        get_threads(cluster_config, "bcftools_bcf2vcf_delly")
+        get_threads(cluster_config, "bcftools_process_SV_CNV")
     message:
         ("Converting BCF from delly to VCF for {params.case_name}")
     shell:
         """
-bcftools view  --threads {threads} -f PASS -O z -o {output.vcf_sv} {input.bcf_sv};
+bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
 
-bcftools view --threads {threads} -f PASS -O z -o {output.vcf_cnv} {input.bcf_cnv}
+bcftools view --threads {threads} -f PASS -O z -o {output.cnv} {input.delly_cnv};
 
-tabix -p vcf -f {output.vcf_sv};
+python {params.process_cnv} -f {output.cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
 
-tabix -p vcf -f {output.vcf_cnv}
+tabix -p vcf -f {output.delly_sv};
+
+tabix -p vcf -f {output.delly_cnv};
         """
 
 rule svdb_merge_tumor_only:
