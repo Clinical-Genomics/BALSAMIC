@@ -9,3 +9,4 @@ dependencies:
   - bioconda::vcfanno=0.3.3
   - anaconda::gxx_linux-64=7.3.0
   - anaconda::pip=20.2.4
+  - anaconda::click=8.0.4
