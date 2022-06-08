@@ -30,7 +30,6 @@ from cyvcf2 import VCF, Writer
     required=True,
     help="Variant caller that generated the VCF file",
 )
-
 def edit_vcf_info(input_vcf, output_vcf, variant_caller):
     """Add variant-caller text to the INFO field in the VCF file"""
     vcf = VCF(input_vcf)
