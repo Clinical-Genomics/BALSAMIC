@@ -8,6 +8,7 @@ Added:
 * New python script to edit INFO tags in `vardict` and `tnscope_umi` VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 * Added `cyvcf2` and `click` tools to the `annotate` container https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 * Delly TIDDIT and vcf2cytosure for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
+* `Delly` `TIDDIT` `vcf2cytosure` and method to process SVs and CNVs for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 
 Changed:
 ^^^^^^^^
@@ -18,6 +19,8 @@ Changed:
 * `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * UMI output filename `TNscope_umi` is changed to `tnscope_umi` https://github.com/Clinical-Genomics/BALSAMIC/pull/948
+* Update `delly` to v1.0.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/950
+
 
 Fixed:
 ^^^^^^
