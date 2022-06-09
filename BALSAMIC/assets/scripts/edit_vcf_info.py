@@ -47,7 +47,7 @@ def edit_vcf_info(input_vcf, output_vcf, variant_caller):
     with gzip.open(output_vcf, "wb"):
         for variant in vcf:
             variant.INFO["FOUND_IN"] = variant_caller + "|" + output_vcf
-        new_vcf.write_record(variant)
+            new_vcf.write_record(variant)
     new_vcf.close()
     vcf.close()
 
