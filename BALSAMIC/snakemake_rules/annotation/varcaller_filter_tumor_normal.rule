@@ -30,8 +30,8 @@ rule bcftools_filter_vardict_tumor_normal:
   threads:
     get_threads(cluster_config, 'bcftools_filter_vardict_tumor_normal')
   message:
-    "Filtering vardict tumor-normal annotated variants using bcftools "
-    "and editing final VCF for {params.case_name} "
+    "Filtering vardict tumor-normal annotated variants using bcftools and "
+    "adding FOUND_IN tags to the output VCF for {params.case_name} "
   shell:
     """
 bcftools view {input.vcf} \
@@ -114,7 +114,7 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_normal')
   message:
     "Filtering TNscope_umi tumor-normal annotated variants using bcftools and "
-    "editing final VCF files for {params.case_name} "
+    "adding FOUND_IN tags to the output VCF file for {params.case_name} "
   shell:
     """
 bcftools view {input.vcf} \
