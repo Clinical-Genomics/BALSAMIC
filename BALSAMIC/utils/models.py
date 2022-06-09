@@ -192,6 +192,7 @@ class VCFModel(BaseModel):
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
     dellycnv: VarcallerAttribute
+    tiddit: VarcallerAttribute
     svdb: VarcallerAttribute
 
 

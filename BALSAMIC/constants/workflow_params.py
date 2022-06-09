@@ -78,6 +78,13 @@ VCF_DICT = {
         "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
+    "tiddit": {
+        "mutation": "somatic",
+        "type": "SV",
+        "analysis_type": ["single", "paired"],
+        "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
     "dellycnv": {
         "mutation": "somatic",
         "type": "CNV",
