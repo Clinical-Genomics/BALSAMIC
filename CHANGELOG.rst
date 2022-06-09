@@ -6,6 +6,7 @@ Added:
 
 * New option `analysis-workflow` to balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/932
 * `Delly` `TIDDIT` `vcf2cytosure` and method to process SVs and CNVs for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
+* SV and CNV analysis and `TIDDIT` to balsamic ReadtheDocs
 
 Changed:
 ^^^^^^^^
@@ -16,7 +17,7 @@ Changed:
 * `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * Update `delly` to v1.0.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/950
-
+* Update versions of `delly` in ReadtheDocs
 
 Fixed:
 ^^^^^^
