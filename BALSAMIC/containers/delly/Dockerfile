@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     libncurses-dev \
     liblzma-dev \
     zlib1g-dev \
+    bcftools \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -34,7 +35,7 @@ ENV OMP_NUM_THREADS 2
 RUN cd /opt \
     && git clone --recursive https://github.com/dellytools/delly.git \
     && cd /opt/delly/ \
-    && git checkout v0.9.1 \
+    && git checkout v1.0.3 \
     && make STATIC=1 PARALLEL=1 all \
     && make install \
 
