@@ -104,7 +104,7 @@ rule bcftools_filter_TNscope_umi_tumor_only:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     pop_freq = [SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name =  '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
