@@ -8,7 +8,7 @@ VARCALL_PARAMS = {
 
 # Configuration of VCF settings
 VCF_DICT = {
-    "TNscope_umi": {
+    "tnscope_umi": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["single", "paired"],
