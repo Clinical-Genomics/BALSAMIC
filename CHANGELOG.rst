@@ -15,6 +15,7 @@ Changed:
 * QC-workflow for panel cases to be run only with `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* QC criteria for `panel` and `wgs` analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 
 Fixed:
 ^^^^^^
@@ -27,6 +28,7 @@ Removed
 * Removed `qc_panel` config in favor of standard config https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * Removed cli `--analysis_type` for `balsamic report deliver` command and `balsamic run analysis` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * Removed `analysis_type`: `qc_panel` and replace the trigger for QC workflow by `analysis_workflow`: `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* Outdated balsamic report files (`balsamic_report.html` & `balsamic_report.md`) https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 
 [9.0.1]
 -------
