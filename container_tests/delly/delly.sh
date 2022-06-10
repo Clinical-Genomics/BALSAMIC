@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "delly" )
+valid_commands=( "delly" "bcftools" )
 
 for valid_command in "${valid_commands[@]}"
 do
