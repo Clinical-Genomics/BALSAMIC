@@ -9,6 +9,7 @@ Added:
 * Added `cyvcf2` and `click` tools to the `annotate` container https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 * Delly TIDDIT and vcf2cytosure for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 * `Delly` `TIDDIT` `vcf2cytosure` and method to process SVs and CNVs for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
+* Gender to `config.json` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
 
 Changed:
 ^^^^^^^^
