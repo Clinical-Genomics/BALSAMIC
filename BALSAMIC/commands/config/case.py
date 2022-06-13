@@ -16,6 +16,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
+    GENDER_OPTIONS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.models import BalsamicConfigModel
@@ -29,6 +30,14 @@ LOG = logging.getLogger(__name__)
     required=True,
     help="Sample id that is used for reporting, \
               naming the analysis jobs, and analysis path",
+)
+@click.option(
+    "--gender",
+    required=False,
+    default="female",
+    show_default=True,
+    type=click.Choice(GENDER_OPTIONS),
+    help="Case associated gender",
 )
 @click.option(
     "--umi/--no-umi",
@@ -146,6 +155,7 @@ LOG = logging.getLogger(__name__)
 def case_config(
     context,
     case_id,
+    gender,
     umi,
     umi_trim_length,
     adapter_trim,
@@ -193,6 +203,7 @@ def case_config(
         },
         analysis={
             "case_id": case_id,
+            "gender": gender,
             "analysis_dir": analysis_dir,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
