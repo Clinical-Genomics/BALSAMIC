@@ -10,9 +10,8 @@ _nocol='\033[0m';
 
 function usage() {
   echo $"
-USAGE: [ -a <T|TN> -c _condaenv -m <run|config|all> -t <panel|WGS> -r ]
+USAGE: [ -c _condaenv -m <run|config|all> -t <panel|WGS> -r ]
   
-  -a [required] T: Tumor only, TN: tumor normal
   -c Conda environment where BALSAMIC is installed. If not specified, it will use current environment.
   -m [required] config: only create config file, run: create config file and start analysis
   -t [required] panel: target sequencing workflow (also includes WES), WGS: whole genome sequencing workflow
@@ -104,7 +103,6 @@ balsamic_run() {
   balsamic --loglevel INFO run analysis \
     -s ${_analysis_config} \
     -c ${_cluster_config} \
-    -a qc \
     --benchmark \
     --account development ${_run_analysis}
 }
