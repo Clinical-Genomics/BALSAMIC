@@ -10,6 +10,7 @@ Added:
 * Delly TIDDIT and vcf2cytosure for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 * `Delly` `TIDDIT` `vcf2cytosure` and method to process SVs and CNVs for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 * Gender to `config.json` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
+* Provided gender as input for `vcf2cyosure` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
 
 Changed:
 ^^^^^^^^
@@ -21,7 +22,7 @@ Changed:
 * `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * UMI output filename `TNscope_umi` is changed to `tnscope_umi` https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 * Update `delly` to v1.0.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/950
-
+* Provided gender as input for `cnvkit` rule instead of output gender from `PureCN` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
 
 Fixed:
 ^^^^^^
