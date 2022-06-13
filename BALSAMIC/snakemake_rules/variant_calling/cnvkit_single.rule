@@ -40,6 +40,7 @@ rule cnvkit_single:
         cnv_dir = cnv_dir,
         min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
+        gender = config["analysis"]["gender"],
         sample_id = "TUMOR",
         genome_version = config["reference"]["genome_version"],
         pon = " " if get_pon_cnn(config) is None else get_pon_cnn(config)
@@ -103,9 +104,9 @@ cnvkit.py export seg {params.cnv_dir}/tumor.initial.cns \
 mkdir -p {params.purecn_dir}
 
 # Set default values to run by cnvkit call
-gender="x"; purity="0.02"; ploidy=2;
+purity="0.02"; ploidy=2;
 
-# if purecn runs succesffully, update gender, purity and ploidy values
+# if purecn runs succesffully, update purity and ploidy values
 purecn_status="true"
 
 {{
@@ -123,15 +124,13 @@ Rscript $PURECN \
 
 if $purecn_status; then
 purity=$(awk -F\\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
-ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv)
-gender=$(awk -F\\, 'NR>1 {{print $4}}' {params.purecn_dir}/{params.sample_id}.csv | tr '[:upper:]' '[:lower:]' | tr -d \\")
-if [[ "$gender" = "?" || "$gender" =~ "coverage" ]]; then gender="x"; fi
+ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv);
 fi
 
 # Call copy number variants from segmented log2 ratios
 cnvkit.py call {params.cnv_dir}/tumor.initial.cns \
 --vcf {input.snv_vcf} \
---sample-sex $gender \
+--sample-sex {params.gender} \
 --method clonal \
 --purity $purity \
 --ploidy $ploidy \
@@ -151,7 +150,7 @@ cnvkit.py diagram {output.cnr} \
 cnvkit.py genemetrics {output.cnr} \
 --segment {output.cns} \
 --drop-low-coverage  \
---sample-sex $gender \
+--sample-sex {params.gender} \
 --output {output.gene_metrics};
 
 # List the genenames that contain a possibe copy number breakpoint.
@@ -162,7 +161,7 @@ cnvkit.py breaks {output.cnr} {output.cns} \
 cnvkit.py export vcf {output.cns} \
 --cnr {output.cnr} \
 --output {params.cnv_dir}/{params.tumor_name}.vcf \
---sample-sex $gender \
+--sample-sex {params.gender} \
 --sample-id {params.sample_id};
 
 bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf;
