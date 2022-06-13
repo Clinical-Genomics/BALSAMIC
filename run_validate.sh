@@ -71,7 +71,7 @@ _cluster_config=BALSAMIC/config/cluster.json
 _balsamic_cache=/home/proj/stage/cancer/balsamic_cache
 _tumor_fastq=tests/test_data/fastq/S1_R_1.fastq.gz
 _normal_fastq=tests/test_data/fastq/S2_R_1.fastq.gz
-_analysis_config=${_analysis_dir}'/'${ngstype}'/'{ngstype}'.json'
+_analysis_config=${_analysis_dir}'/'${_ngstype}'/'${_ngstype}'.json'
 
 if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
@@ -82,7 +82,7 @@ set -x
   balsamic --loglevel INFO config case \
     -t ${_tumor_fastq} \
     ${_normal_option} \
-    --case-id ${ngstype} \
+    --case-id ${_ngstype} \
     --analysis-dir ${_analysis_dir} \
     ${_panel_option} \
     --balsamic-cache ${_balsamic_cache}
