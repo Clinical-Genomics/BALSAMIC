@@ -136,6 +136,8 @@ DELIVERY_RULES = [
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
+    "vcf2cytosure_convert_tumor_only",
+    "vcf2cytosure_convert_tumor_normal",
     "bcftools_filter_svdb",
     "bcftools_intersect_tumor_only",
     "bcftools_filter_tnscope_tumor_normal",
