@@ -2,6 +2,8 @@ import json
 import os.path
 from pathlib import Path
 
+import yaml
+
 from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_multiqc_data_source,
     get_multiqc_metrics,
@@ -192,7 +194,7 @@ def test_get_variant_metrics(bcftools_counts_path):
         "name": "NUMBER_OF_SITES",
         "step": "collect_custom_qc_metrics",
         "value": 125,
-        "condition": {"norm": "lt", "threshold": 10000.0},
+        "condition": {"norm": "lt", "threshold": 50000.0},
     }
 
     # WHEN extracting the number of variants

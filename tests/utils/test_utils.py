@@ -565,16 +565,16 @@ def test_read_yaml(metrics_yaml_path):
     """test data extraction from a saved YAML file"""
 
     # GIVEN an expected output
-    n_metrics = 11  # Number of expected metric
+    n_metrics = 12  # Number of expected metric
 
-    hs_metric = {
+    dropout_metric = {
         "header": None,
         "id": "tumor",
         "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
-        "name": "MEDIAN_TARGET_COVERAGE",
+        "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
-        "value": 2393.0,
-        "condition": {"norm": "gt", "threshold": 1000.0},
+        "value": 0.027402,
+        "condition": {"norm": "lt", "threshold": 1.0},
     }
 
     ins_size_metric = {
@@ -602,7 +602,7 @@ def test_read_yaml(metrics_yaml_path):
 
     # THEN check if the data are correctly retrieved from the YAML
     assert len(requested_metrics) == n_metrics
-    assert hs_metric in requested_metrics
+    assert dropout_metric in requested_metrics
     assert ins_size_metric in requested_metrics
     assert dups_metric in requested_metrics
 
