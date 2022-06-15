@@ -66,6 +66,6 @@ METRICS = {
         "FOLD_80_BASE_PENALTY": {"condition": None},
     },
     "variants": {
-        "NUMBER_OF_SITES": {"condition": {"norm": "lt", "threshold": 10000}},
+        "NUMBER_OF_SITES": {"condition": {"norm": "lt", "threshold": 50000}},
     },
 }

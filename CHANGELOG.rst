@@ -16,7 +16,7 @@ Changed:
 * `get_snakefile` function takes the argument `analysis_workflow` to trigger the QC workflow when necessary https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * Update `delly` to v1.0.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/950
-* QC criteria for `panel` and `wgs` analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/952
+* Update QC criteria for `panel` and `wgs` analysis, and increase the number of variants failing threshold https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 
 Fixed:
 ^^^^^^
