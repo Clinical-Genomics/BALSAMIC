@@ -295,7 +295,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
         analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
         if background_variant_file:
             analysis_specific_results.extend(
-                expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["TNscope_umi"])
+                expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])
         )
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
