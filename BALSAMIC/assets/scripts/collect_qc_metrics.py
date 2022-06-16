@@ -7,12 +7,12 @@ import click
 import yaml
 
 from BALSAMIC.constants.qc_metrics import METRICS
-from BALSAMIC.utils.cli import read_json
 from BALSAMIC.utils.models import MetricModel
 from BALSAMIC.utils.rule import (
     get_capture_kit,
     get_sequencing_type,
     get_sample_type_from_prefix,
+    read_json,
 )
 
 
