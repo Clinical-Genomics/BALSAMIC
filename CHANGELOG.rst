@@ -9,6 +9,7 @@ Added:
 * Added `cyvcf2` and `click` tools to the `annotate` container https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 * Delly TIDDIT and vcf2cytosure for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 * `Delly` `TIDDIT` `vcf2cytosure` and method to process SVs and CNVs for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
+* SV and CNV analysis and `TIDDIT` to balsamic ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/951
 
 Changed:
 ^^^^^^^^
@@ -20,7 +21,7 @@ Changed:
 * `bcftools_counts` input depending on `analysis_workflow` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * UMI output filename `TNscope_umi` is changed to `tnscope_umi` https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 * Update `delly` to v1.0.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/950
-
+* Update versions of `delly` in ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/951
 
 Fixed:
 ^^^^^^
