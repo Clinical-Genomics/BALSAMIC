@@ -17,7 +17,7 @@ Small somatic mutations (SNVs and INDELs) were called for each sample using VarD
 Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using the criteria
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
-Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.9.1 :superscript:`10`.
+Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v1.0.3 :superscript:`10`.
 Copy number aberrations were called using CNVkit v0.9.9 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
 All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
@@ -37,11 +37,11 @@ Results of the quality controlled steps were summarized by MultiQC v1.12 :supers
 Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
 The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
-Structural variants were called using Manta v1.6.0 :superscript:`9` and Delly v0.9.1 :superscript:`10`.
-Copy number aberrations were called using ascatNgs v4.5.0 :superscript:`17` for tumor-normal samples.
-The structural variant calls from Manta, Delly and ascatNgs were merged using SVDB v2.6.0 :superscript:`12`
+Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.0.0 :superscript:`12.
+Copy number aberrations were called using ascatNgs v4.5.0 :superscript:`17` and Delly v1.0.3 :superscript:`10` for tumor-normal samples. For tumor-only samples Delly v1.0.3 :superscript:`10` was used to identify copy number variants.
+The structural variant calls from Manta, Delly, TIDDIT and ascatNgs (tumor-normal) were merged using SVDB v2.6.0 :superscript:`12`
 All variants were finally annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
-to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
 
 UMI Data Analysis
 ~~~~~~~~~~~~~~~~~~~~~
