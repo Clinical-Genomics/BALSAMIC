@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import click
 import yaml
@@ -132,25 +132,46 @@ def get_requested_metrics(config: dict, metrics: dict) -> dict:
 
 def get_metric_condition(
     config: dict, requested_metrics: dict, sample: str, metric: str
-):
+) -> Optional[dict]:
     """Returns a condition associated to a sample and sequencing type"""
 
+    sequencing_type = get_sequencing_type(config)
     try:
         sample_type = get_sample_type_from_prefix(config, sample)
     except KeyError:
         # Deletes par orientation information from the sample name (insertSize metrics)
         sample_type = get_sample_type_from_prefix(config, sample.rsplit("_", 1)[0])
 
-    sequencing_type = get_sequencing_type(config)
-    if sequencing_type == "targeted":
-        return requested_metrics[metric]["condition"]
-    else:
-        if metric == "PCT_60X" and sample_type == "tumor":
-            return requested_metrics[metric]["condition"]
-        elif metric == "PCT_15X" and sample_type == "normal":
-            return requested_metrics[metric]["condition"]
+    req_metrics = requested_metrics[metric]["condition"]
+    if sequencing_type == "wgs" and (
+        (metric == "PCT_60X" and sample_type == "normal")
+        or (metric == "PCT_15X" and sample_type == "tumor")
+    ):
+        req_metrics = None
 
-    return None
+    return req_metrics
+
+
+def get_metric_condition(
+    config: dict, requested_metrics: dict, sample: str, metric: str
+) -> Optional[dict]:
+    """Returns a condition associated to a sample and sequencing type"""
+
+    sequencing_type = get_sequencing_type(config)
+    try:
+        sample_type = get_sample_type_from_prefix(config, sample)
+    except KeyError:
+        # Deletes par orientation information from the sample name (insertSize metrics)
+        sample_type = get_sample_type_from_prefix(config, sample.rsplit("_", 1)[0])
+
+    req_metrics = requested_metrics[metric]["condition"]
+    if sequencing_type == "wgs" and (
+        (metric == "PCT_60X" and sample_type == "normal")
+        or (metric == "PCT_15X" and sample_type == "tumor")
+    ):
+        req_metrics = None
+
+    return req_metrics
 
 
 def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:

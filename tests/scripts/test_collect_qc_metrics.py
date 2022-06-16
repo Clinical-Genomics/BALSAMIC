@@ -13,6 +13,7 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_requested_metrics,
     extract_number_variants,
     get_variant_metrics,
+    get_metric_condition,
 )
 
 
@@ -73,6 +74,59 @@ def test_get_requested_metrics_wgs(config_dict, qc_requested_metrics):
 
     # THEN check if the requested metrics are WGS specific
     assert requested_metrics.items() == expected_output.items()
+
+
+def test_get_metric_condition(config_dict, qc_requested_metrics):
+    """test metric condition extraction for WGS"""
+
+    # GIVEN a config_dict
+    config = copy.deepcopy(config_dict)
+    seq_type = "wgs"
+    config["analysis"]["sequencing_type"] = seq_type
+    config["panel"] = None
+
+    # GIVEN a specific sample & metric name
+    sample = "concatenated_tumor_XXXXXX_R"
+    metric = "METRIC_1"
+
+    # GIVEN an expected output
+    expected_output = {"norm": "gt", "threshold": 1}
+
+    # WHEN calling the function
+    metric_condition = get_metric_condition(
+        config, qc_requested_metrics[seq_type], sample, metric
+    )
+
+    # THEN check if the requested metrics has been correctly identified
+    assert metric_condition.items() == expected_output.items()
+
+
+def test_get_metric_condition_pct_wgs(config_dict):
+    """test metric condition extraction for WGS"""
+
+    # GIVEN a config_dict
+    config = copy.deepcopy(config_dict)
+    seq_type = "wgs"
+    config["analysis"]["sequencing_type"] = seq_type
+    config["panel"] = None
+
+    # GIVEN a specific sample & metric name
+    sample = "concatenated_tumor_XXXXXX_R"
+    metric = "PCT_60X"
+
+    # GIVEN the requested metric
+    req_metric = {
+        "PCT_60X": {"condition": {"norm": "gt", "threshold": 1}},
+    }
+
+    # GIVEN an expected output
+    expected_output = {"norm": "gt", "threshold": 1}
+
+    # WHEN calling the function
+    metric_condition = get_metric_condition(config, req_metric, sample, metric)
+
+    # THEN check if the requested metrics has been correctly identified
+    assert metric_condition.items() == expected_output.items()
 
 
 def test_get_multiqc_data_source(multiqc_data_path):
