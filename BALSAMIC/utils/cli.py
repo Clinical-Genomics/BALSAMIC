@@ -232,7 +232,7 @@ def write_json(json_out, output_config):
         raise error
 
 
-def read_json(json_path):
+def read_json(json_path) -> dict:
     if Path(json_path).exists():
         with open(json_path, "r") as fn:
             return json.load(fn)

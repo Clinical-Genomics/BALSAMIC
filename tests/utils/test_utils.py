@@ -47,6 +47,7 @@ from BALSAMIC.utils.cli import (
     get_md5,
     create_md5,
     read_yaml,
+    read_json,
 )
 
 from BALSAMIC.utils.rule import (
@@ -61,6 +62,7 @@ from BALSAMIC.utils.rule import (
     get_delivery_id,
     get_reference_output_files,
     get_rule_output,
+    get_sample_type_from_prefix,
 )
 from tests.helpers import Map
 
@@ -559,6 +561,34 @@ def test_write_json_error(tmp_path):
         # WHEN passing a invalid dict
         # THEN It will raise the error
         assert write_json(ref_json, output_json)
+
+
+def test_read_json(config_path):
+    """test data extraction from a BALSAMIC config JSON file"""
+
+    # GIVEN a config path
+
+    # WHEN calling the function
+    config_dict = read_json(config_path)
+
+    # THEN the config.json file should be correctly parsed
+    assert type(config_dict) is dict
+
+
+def test_read_json_error():
+    """test data extraction from a BALSAMIC config JSON file for an ivalid path"""
+
+    # GIVEN an incorrect config path
+    config_path = "/not/a/path"
+
+    # WHEN calling the function
+
+    # THEN an error should raise due to an invalid file path
+    try:
+        read_json(config_path)
+        assert False
+    except FileNotFoundError as file_exc:
+        assert f"The JSON file {config_path} was not found" in str(file_exc)
 
 
 def test_read_yaml(metrics_yaml_path):
@@ -1081,3 +1111,18 @@ def test_get_rule_output(snakemake_fastqc_rule):
             file[3] == "1,fastqc,quality-trimmed-seq-fastqc"
             or file[3] == "2,fastqc,quality-trimmed-seq-fastqc"
         )
+
+
+def test_get_sample_type_from_prefix(config_dict):
+    """Test sample type extraction from a extracted config file"""
+
+    # GIVEN a config dictionary
+
+    # GIVEN a sample name
+    sample = "concatenated_tumor_XXXXXX_R"
+
+    # WHEN calling the function
+    sample_type = get_sample_type_from_prefix(config_dict, sample)
+
+    # THEN the retrieved sample type should match the expected one
+    assert sample_type == "tumor"
