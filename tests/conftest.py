@@ -8,8 +8,7 @@ from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
 
-from BALSAMIC.utils.cli import read_yaml
-from BALSAMIC.utils.io import read_json
+from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version

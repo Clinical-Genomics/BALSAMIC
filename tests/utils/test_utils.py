@@ -24,7 +24,6 @@ from BALSAMIC.utils.cli import (
     iterdict,
     get_snakefile,
     createDir,
-    write_json,
     get_config,
     recursive_default_dict,
     create_pon_fastq_symlink,
@@ -45,9 +44,8 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_md5,
     create_md5,
-    read_yaml,
 )
-from BALSAMIC.utils.io import read_json
+from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
 from BALSAMIC.utils.rule import (
     get_chrom,

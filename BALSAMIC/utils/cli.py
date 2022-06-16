@@ -223,24 +223,6 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def write_json(json_out, output_config):
-    """Writes JSON format data to an output file"""
-    try:
-        with open(output_config, "w") as fn:
-            json.dump(json_out, fn, indent=4)
-    except OSError as error:
-        raise error
-
-
-def read_yaml(yaml_path):
-    """Retrieves data from a yaml file"""
-    if Path(yaml_path).exists():
-        with open(yaml_path, "r") as fn:
-            return yaml.load(fn, Loader=yaml.SafeLoader)
-    else:
-        raise FileNotFoundError(f"The YAML file {yaml_path} was not found.")
-
-
 def iterdict(dic):
     """dictionary iteration - returns generator"""
     for key, value in dic.items():

@@ -13,7 +13,8 @@ from PyPDF2 import PdfFileMerger
 
 from BALSAMIC.utils.exc import BalsamicError
 
-from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5, read_yaml)
+from BALSAMIC.utils.cli import (check_executable, generate_h5)
+from BALSAMIC.utils.io import write_json, read_yaml
 
 from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
