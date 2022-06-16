@@ -20,7 +20,7 @@ def write_json(json_out, output_config):
         with open(output_config, "w") as fn:
             json.dump(json_out, fn, indent=4)
     except OSError as error:
-        raise error
+        raise OSError(f"Error while writing JSON file: {output_config}, error: {error}")
 
 
 def read_yaml(yaml_path):
