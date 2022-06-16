@@ -416,26 +416,6 @@ def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
     return " ".join(shellcmd.split())
 
 
-def merge_json(*args):
-    """
-    Take a list of json files and merges them together
-    Input: list of json file
-    Output: dictionary of merged json
-    """
-
-    json_out = dict()
-    for json_file in args:
-        try:
-            if isinstance(json_file, dict):
-                json_out = {**json_out, **json_file}
-            else:
-                with open(json_file) as fn:
-                    json_out = {**json_out, **json.load(fn)}
-        except OSError as error:
-            raise error
-    return json_out
-
-
 def validate_fastq_pattern(sample):
     """Finds the correct filename prefix from file path, and returns it.
     An error is raised if sample name has invalid pattern"""

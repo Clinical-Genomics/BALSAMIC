@@ -32,7 +32,6 @@ from BALSAMIC.utils.cli import (
     get_file_status_string,
     get_from_two_key,
     find_file_index,
-    merge_json,
     validate_fastq_pattern,
     get_panel_chrom,
     create_fastq_symlink,
@@ -799,29 +798,6 @@ def test_singularity_shellcmd_cmd_not_exist():
             cmd=dummy_command,
             bind_paths=[dummy_path_1, dummy_path_2],
         )
-
-
-def test_merge_json(reference, config_files):
-    # GIVEN a dict and json file
-    json_file = config_files["sample"]
-
-    # WHEN passing dict and json file to merge
-    merge_dict = merge_json(reference, json_file)
-
-    # THEN It will merge both the data and return dict
-    assert isinstance(merge_dict, dict)
-    assert "samples" in merge_dict
-    assert "reference" in merge_dict
-
-
-def test_merge_json_error(reference):
-    with pytest.raises(Exception, match=r"No such file or directory"):
-        # GIVEN a dict and invalid json file path
-        json_file = "reference.json"
-
-        # WHEN passing python dict and invalid json path
-        # THEN it should throw OSError as FileNotFoundError
-        assert merge_json(reference, json_file)
 
 
 def test_validate_fastq_pattern():
