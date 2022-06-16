@@ -440,6 +440,27 @@ def test_metric_model_pass_validation():
     assert metric_model.dict().items() == metrics.items()
 
 
+def test_metric_model_duplication_refactoring():
+    """test MetricModel duplications param refactoring"""
+
+    # GIVEN input attributes
+    metrics = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R_1_fastqc.zip",
+        "name": "FastQC_mqc-generalstats-fastqc-percent_duplicates",
+        "step": "multiqc_general_stats",
+        "value": 21.517800000611373,
+        "condition": None,
+    }
+
+    # WHEN building the metric model
+    metric_model = MetricModel(**metrics)
+
+    # THEN assert retrieved values from the created model
+    assert metric_model.name == "PERCENT_DUPLICATION_R1"
+
+
 def test_metric_model_fail_validation():
     """test MetricModel behaviour for an incorrect input"""
 
