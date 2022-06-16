@@ -9,7 +9,7 @@ from functools import partial
 from click.testing import CliRunner
 
 from BALSAMIC.utils.cli import read_yaml
-from BALSAMIC.utils.rule import read_json
+from BALSAMIC.utils.io import read_json
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version

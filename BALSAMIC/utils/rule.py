@@ -1,7 +1,5 @@
-import json
 import os
 import re
-import yaml
 import logging
 from pathlib import Path
 import snakemake
@@ -17,14 +15,6 @@ from BALSAMIC.constants.common import (
 from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
 
 LOG = logging.getLogger(__name__)
-
-
-def read_json(json_path) -> dict:
-    if Path(json_path).exists():
-        with open(json_path, "r") as fn:
-            return json.load(fn)
-    else:
-        raise FileNotFoundError(f"The JSON file {json_path} was not found.")
 
 
 def get_chrom(panelfile):

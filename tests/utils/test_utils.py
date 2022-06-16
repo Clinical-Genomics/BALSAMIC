@@ -48,6 +48,7 @@ from BALSAMIC.utils.cli import (
     create_md5,
     read_yaml,
 )
+from BALSAMIC.utils.io import read_json
 
 from BALSAMIC.utils.rule import (
     get_chrom,
@@ -62,7 +63,6 @@ from BALSAMIC.utils.rule import (
     get_reference_output_files,
     get_rule_output,
     get_sample_type_from_prefix,
-    read_json,
 )
 from tests.helpers import Map
 
