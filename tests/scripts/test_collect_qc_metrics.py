@@ -1,3 +1,4 @@
+import copy
 import json
 import os.path
 from pathlib import Path
@@ -10,21 +11,9 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     collect_qc_metrics,
     get_qc_supported_capture_kit,
     get_requested_metrics,
-    capture_kit_resolve_type,
     extract_number_variants,
     get_variant_metrics,
 )
-
-
-def test_capture_kit_resolve_type():
-    """test capture_kit type"""
-
-    # GIVEN an expected output
-    capture_kit = "panel.bed"
-
-    # THEN check if the extracted capture kit is correctly formatted
-    assert capture_kit_resolve_type("None") is None
-    assert capture_kit_resolve_type(capture_kit) == capture_kit
 
 
 def test_get_qc_supported_capture_kit(qc_requested_metrics):
@@ -45,12 +34,12 @@ def test_get_qc_supported_capture_kit(qc_requested_metrics):
     assert supported_capture_kit == expected_output
 
 
-def test_get_requested_metrics_targeted(qc_requested_metrics):
+def test_get_requested_metrics_targeted(config_dict, qc_requested_metrics):
     """test retrieval of the requested targeted metrics"""
 
-    # GIVEN a sequencing type and a capture kit
-    seq_type = "targeted"
-    capture_kit = "panel_2_v1.0_hg19_design.bed"
+    # GIVEN a config_dict
+    config = copy.deepcopy(config_dict)
+    config["panel"]["capture_kit"] = "tests/panel/panel_2_v1.0_hg19_design.bed"
 
     # GIVEN the expected output
     expected_output = {
@@ -60,20 +49,19 @@ def test_get_requested_metrics_targeted(qc_requested_metrics):
     }
 
     # WHEN calling the function
-    requested_metrics = get_requested_metrics(
-        qc_requested_metrics, seq_type, capture_kit
-    )
+    requested_metrics = get_requested_metrics(config, qc_requested_metrics)
 
     # THEN check if the requested targeted metrics are correctly retrieved
     assert requested_metrics.items() == expected_output.items()
 
 
-def test_get_requested_metrics_wgs(qc_requested_metrics):
+def test_get_requested_metrics_wgs(config_dict, qc_requested_metrics):
     """test extraction of the requested WGS metrics"""
 
-    # GIVEN a sequencing type and a capture kit
-    seq_type = "wgs"
-    capture_kit = None
+    # GIVEN a config_dict
+    config = copy.deepcopy(config_dict)
+    config["analysis"]["sequencing_type"] = "wgs"
+    config["panel"] = None
 
     # GIVEN the expected output
     expected_output = {
@@ -81,9 +69,7 @@ def test_get_requested_metrics_wgs(qc_requested_metrics):
     }
 
     # WHEN calling the function
-    requested_metrics = get_requested_metrics(
-        qc_requested_metrics, seq_type, capture_kit
-    )
+    requested_metrics = get_requested_metrics(config, qc_requested_metrics)
 
     # THEN check if the requested metrics are WGS specific
     assert requested_metrics.items() == expected_output.items()
@@ -115,37 +101,27 @@ def test_get_multiqc_data_source(multiqc_data_path):
     assert source_dup == out_source_dup
 
 
-def test_get_multiqc_metrics(multiqc_data_path, qc_extracted_metrics):
+def test_get_multiqc_metrics(config_dict, multiqc_data_dict, qc_extracted_metrics):
     """test metrics retrieval from the multiqc_data.json file"""
 
-    # GIVEN a sequencing type and a capture kit
-    seq_type = "targeted"
-    capture_kit = "lymphoma_6.1_hg19_design.bed"
+    # GIVEN a config_dict
+    config = copy.deepcopy(config_dict)
+    config["panel"]["capture_kit"] = "tests/panel/lymphoma_6.1_hg19_design.bed"
 
     # WHEN calling the function
-    metrics = get_multiqc_metrics(
-        multiqc_data_path,
-        seq_type,
-        capture_kit,
-    )
+    metrics = get_multiqc_metrics(config, multiqc_data_dict)
 
     # THEN check if the metrics are correctly retrieved
     assert qc_extracted_metrics == metrics
 
 
-def test_get_multiqc_metrics_filtering_umi(multiqc_data_path):
+def test_get_multiqc_metrics_filtering_umi(config_dict, multiqc_data_dict):
     """tests that UMI data is filtered out when extracting metrics"""
 
-    # GIVEN a sequencing type and a capture kit
-    seq_type = "targeted"
-    capture_kit = None
+    # GIVEN a config_dict
 
     # WHEN calling the function
-    metrics = get_multiqc_metrics(
-        multiqc_data_path,
-        seq_type,
-        capture_kit,
-    )
+    metrics = get_multiqc_metrics(config_dict, multiqc_data_dict)
 
     # THEN check if the UMI samples are filtered out
     for metric in metrics:
@@ -204,41 +180,20 @@ def test_get_variant_metrics(bcftools_counts_path):
     assert expected_output_metris == output_metrics[0]
 
 
-def test_collect_qc_metrics_targeted(tmp_path, multiqc_data_path, cli_runner):
+def test_collect_qc_metrics_targeted(
+    tmp_path, config_path, multiqc_data_path, cli_runner
+):
     """tests qc metrics yaml file generation for targeted analysis"""
 
     # GIVEN the output and multiqc metrics paths
-    output_path = tmp_path / "sample_tumor_only_metrics_deliverables.yaml"
+    output_path = str(tmp_path / "sample_tumor_only_metrics_deliverables.yaml")
 
-    # GIVEN a sequencing type and a capture kit
-    seq_type = "targeted"
-    capture_kit = "lymphoma_6.1_hg19_design.bed"
+    # GIVEN a config path
 
     # WHEN invoking the python script
     result = cli_runner.invoke(
         collect_qc_metrics,
-        [str(output_path), multiqc_data_path, seq_type, capture_kit],
-    )
-
-    # THEN check if the YAML is correctly created and there are no errors
-    assert result.exit_code == 0
-    assert Path(output_path).exists()
-
-
-def test_collect_qc_metrics_wgs(tmp_path, multiqc_data_path, cli_runner):
-    """tests qc metrics yaml file generation for wgs analysis"""
-
-    # GIVEN the output and multiqc metrics paths
-    output_path = tmp_path / "sample_tumor_only_wgs_metrics_deliverables.yaml"
-
-    # GIVEN a sequencing type and a capture kit
-    seq_type = "wgs"
-    capture_kit = "None"
-
-    # WHEN invoking the python script
-    result = cli_runner.invoke(
-        collect_qc_metrics,
-        [str(output_path), multiqc_data_path, seq_type, capture_kit],
+        [config_path, output_path, multiqc_data_path],
     )
 
     # THEN check if the YAML is correctly created and there are no errors
@@ -247,28 +202,25 @@ def test_collect_qc_metrics_wgs(tmp_path, multiqc_data_path, cli_runner):
 
 
 def test_collect_qc_metrics_counts(
-    tmp_path, multiqc_data_path, bcftools_counts_path, cli_runner
+    tmp_path, config_path, multiqc_data_path, bcftools_counts_path, cli_runner
 ):
     """tests qc metrics yaml file generation for targeted analysis and providing a bcftools counts path"""
 
     # GIVEN the output, multiqc metrics and bcftools counts paths
-    output_path = tmp_path / "sample_tumor_only_metrics_deliverables.yaml"
+    output_path = str(tmp_path / "sample_tumor_only_metrics_deliverables.yaml")
 
-    # GIVEN a sequencing type and a capture kit
-    seq_type = "targeted"
-    capture_kit = "gmsmyeloid_5.2_hg19_design.bed"
+    # GIVEN a config path
 
     # WHEN invoking the python script
     result = cli_runner.invoke(
         collect_qc_metrics,
         [
-            str(output_path),
+            config_path,
+            output_path,
             multiqc_data_path,
             bcftools_counts_path,  # multiple counts path regarding different variant callers
             bcftools_counts_path,
             bcftools_counts_path,
-            seq_type,
-            capture_kit,
         ],
     )
 

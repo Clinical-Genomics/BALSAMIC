@@ -232,6 +232,14 @@ def write_json(json_out, output_config):
         raise error
 
 
+def read_json(json_path):
+    if Path(json_path).exists():
+        with open(json_path, "r") as fn:
+            return json.load(fn)
+    else:
+        raise FileNotFoundError(f"The JSON file {json_path} was not found.")
+
+
 def read_yaml(yaml_path):
     """Retrieves data from a yaml file"""
     if Path(yaml_path).exists():
