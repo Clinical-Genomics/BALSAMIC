@@ -34,6 +34,7 @@ SENTIEON_TNSCOPE = Path(
 )
 
 # Analysis related constants
+GENDER_OPTIONS = ["female", "male"]
 ANALYSIS_TYPES = ["paired", "single", "pon"]
 ANALYSIS_WORKFLOW = ["balsamic", "balsamic-qc", "balsamic-umi"]
 SEQUENCING_TYPE = ["wgs", "targeted"]

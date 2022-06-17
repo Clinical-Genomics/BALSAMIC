@@ -19,6 +19,7 @@ from BALSAMIC.constants.common import (
     MUTATION_CLASS,
     MUTATION_TYPE,
     VALID_OPS,
+    GENDER_OPTIONS,
 )
 from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
@@ -202,6 +203,7 @@ class AnalysisModel(BaseModel):
     Attributes:
 
         case_id : Field(required); string case identifier
+        gender: Field(required); string case gender
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
             paired : if both tumor and normal samples are provided
@@ -225,12 +227,14 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
+            When gender is set to any other than [female, male]
             When analysis_type is set to any value other than [single, paired, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
             When analysis_workflow is set to any other than [balsamic, balsamic-qc, balsamic-umi]
     """
 
     case_id: str
+    gender: str
     analysis_type: str
     sequencing_type: str
     analysis_workflow: str
@@ -246,6 +250,14 @@ class AnalysisModel(BaseModel):
 
     class Config:
         validate_all = True
+
+    @validator("gender")
+    def gender_literal(cls, value) -> str:
+        if value not in GENDER_OPTIONS:
+            raise ValueError(
+                f"Provided gender type ({value}) is not supported in BALSAMIC!"
+            )
+        return value
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
