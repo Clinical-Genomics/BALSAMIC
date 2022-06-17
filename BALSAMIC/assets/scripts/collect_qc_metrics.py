@@ -92,7 +92,7 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                         ][sample]
                     )
                 except KeyError:
-                    # Deletes par orientation information from the sample name (insertSize metrics)
+                    # Deletes pair orientation information from the sample name (insertSize metrics)
                     sample = sample.rsplit("_", 1)[0]
                     return os.path.basename(
                         multiqc_data["report_data_sources"][source_tool][
@@ -139,7 +139,7 @@ def get_metric_condition(
     try:
         sample_type = get_sample_type_from_prefix(config, sample)
     except KeyError:
-        # Deletes par orientation information from the sample name (insertSize metrics)
+        # Deletes pair orientation information from the sample name (insertSize metrics)
         sample_type = get_sample_type_from_prefix(config, sample.rsplit("_", 1)[0])
 
     req_metrics = requested_metrics[metric]["condition"]
