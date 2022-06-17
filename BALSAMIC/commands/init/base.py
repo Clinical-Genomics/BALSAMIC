@@ -15,7 +15,6 @@ from BALSAMIC.constants.common import (
     VALID_CONTAINER_CONDA_NAME,
 )
 from BALSAMIC.utils.cli import (
-    write_json,
     CaptureStdout,
     get_snakefile,
     SnakeMake,
@@ -24,6 +23,7 @@ from BALSAMIC.utils.cli import (
     # job_id_dump_to_yaml,
 )
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
 

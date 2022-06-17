@@ -8,13 +8,12 @@ import snakemake
 import subprocess
 from pathlib import Path
 
-from BALSAMIC.utils.cli import get_file_extension, read_yaml
-from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
+from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
 

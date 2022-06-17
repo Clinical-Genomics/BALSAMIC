@@ -25,11 +25,14 @@ Changed:
 * Update `delly` to v1.0.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/950
 * Update versions of `delly` in ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/951
 * Provided gender as input for `ascat` and `cnvkit` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
+* Update QC criteria for panel and wgs analysis according to https://github.com/Clinical-Genomics/project-planning/issues/338#issuecomment-1132643330. https://github.com/Clinical-Genomics/BALSAMIC/pull/952
+* For uploads to scout, increasing the number of variants failing threshold from 10000 to 50000 https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 
 Fixed:
 ^^^^^^
 
 * GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"] https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* `run_validate.sh` script https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 
 Removed
 ^^^^^^^
@@ -37,6 +40,7 @@ Removed
 * Removed `qc_panel` config in favor of standard config https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * Removed cli `--analysis_type` for `balsamic report deliver` command and `balsamic run analysis` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * Removed `analysis_type`: `qc_panel` and replace the trigger for QC workflow by `analysis_workflow`: `balsamic-qc` https://github.com/Clinical-Genomics/BALSAMIC/pull/942
+* Outdated balsamic report files (`balsamic_report.html` & `balsamic_report.md`) https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 
 [9.0.1]
 -------

@@ -10,19 +10,30 @@ _nocol='\033[0m';
 
 function usage() {
   echo $"
-USAGE: [ -c _condaenv -m <run|config|all> -t <panel|WGS> -r ]
-  
+USAGE: [ -a <T|TN> -c _condaenv -m <run|config|all> -t <panel|WGS> -r ]
+
+  -w Analysis workflow: balsamic [default option], balsamic-umi or balsamic-qc
+  -a [required] T: Tumor only, TN: tumor normal
   -c Conda environment where BALSAMIC is installed. If not specified, it will use current environment.
   -m [required] config: only create config file, run: create config file and start analysis
   -t [required] panel: target sequencing workflow (also includes WES), WGS: whole genome sequencing workflow
   -d Analysis dir path, if it doesn't exist it will be created
   -r Flag. Set to submit jobs instead of running in dry mode
   -h Show this help and exit
-" 
+"
 }
 
-while getopts ":a:m:c:t:d:r" opt; do
+while getopts ":w:a:m:c:t:d:r" opt; do
   case ${opt} in
+    w)
+      _analysis_workflow=${OPTARG}
+      echo "analysis workflow set to" "${OPTARG}"
+      ;;
+    a)
+      _analysis=${OPTARG}
+      echo "analysis set to" "${OPTARG}"
+      [[ $_analysis == 'T' || $_analysis == 'TN' ]] || ( usage >&2; exit 1)
+      ;;
     c)
       _condaenv=${OPTARG}
       echo "conda environment set to" "${OPTARG}"
@@ -67,22 +78,34 @@ fi
 mkdir -p ${_analysis_dir}
 
 _genome_ver=hg19
+_workflow=balsamic
 _cluster_config=BALSAMIC/config/cluster.json
 _balsamic_cache=/home/proj/stage/cancer/balsamic_cache
 _tumor_fastq=tests/test_data/fastq/S1_R_1.fastq.gz
 _normal_fastq=tests/test_data/fastq/S2_R_1.fastq.gz
-_analysis_config=${_analysis_dir}'/'${_ngstype}'/'${_ngstype}'.json'
+_analysis_config=${_analysis_dir}'/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
+
+if [[ ! -z ${_analysis_workflow} ]]; then
+  _workflow=${_analysis_workflow}
+fi
 
 if [[ ! -z ${rFlag} ]]; then
   _run_analysis="-r"
 fi
 
+if [[ ${_analysis} == "TN" ]]; then
+  _normal_option="-n ${_normal_fastq}"
+else
+  _normal_option=" "
+fi
+
 function balsamic_config() {
 set -x
   balsamic --loglevel INFO config case \
+    -w ${_workflow} \
     -t ${_tumor_fastq} \
     ${_normal_option} \
-    --case-id ${_ngstype} \
+    --case-id ${_analysis}_${_ngstype} \
     --analysis-dir ${_analysis_dir} \
     ${_panel_option} \
     --balsamic-cache ${_balsamic_cache}
