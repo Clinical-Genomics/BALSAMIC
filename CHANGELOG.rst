@@ -25,7 +25,8 @@ Changed:
 * Update `delly` to v1.0.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/950
 * Update versions of `delly` in ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/951
 * Provided gender as input for `ascat` and `cnvkit` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
-* Update QC criteria for `panel` and `wgs` analysis, and increase the number of variants failing threshold https://github.com/Clinical-Genomics/BALSAMIC/pull/952
+* Update QC criteria for panel and wgs analysis according to https://github.com/Clinical-Genomics/project-planning/issues/338#issuecomment-1132643330. https://github.com/Clinical-Genomics/BALSAMIC/pull/952
+* For uploads to scout, increasing the number of variants failing threshold from 10000 to 50000 https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 
 Fixed:
 ^^^^^^
