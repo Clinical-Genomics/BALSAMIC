@@ -86,7 +86,7 @@ _normal_fastq=tests/test_data/fastq/S2_R_1.fastq.gz
 _analysis_config=${_analysis_dir}'/'${_analysis}_${_ngstype}'/'${_analysis}_${_ngstype}'.json'
 
 if [[ ! -z ${_analysis_workflow} ]]; then
-  _workflow="${_analysis_workflow}"
+  _workflow=${_analysis_workflow}
 fi
 
 if [[ ! -z ${rFlag} ]]; then
