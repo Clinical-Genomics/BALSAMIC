@@ -262,7 +262,7 @@ tiddit --cov -z 500 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{para
 
 tiddit --cov -z 500 --ref {input.fa} --bam {input.bamN} -o {params.tmpdir}/{params.normal}_cov &
 
-tiddit --sv -p 6 -r 6 -z 100 --p-ratio 0.10 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor} &
+tiddit --sv -p 6 -r 6 -z 100 --p_ratio 0.10 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor} &
 
 tiddit --sv -p 3 -r 3 --ref {input.fa} --bam {input.bamN} -o {params.tmpdir}/{params.normal};
 
