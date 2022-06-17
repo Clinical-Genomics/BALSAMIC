@@ -73,7 +73,7 @@ SNAKEMAKE_RULES = {
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
-	     "snakemake_rules/annotation/vcfheader_rename.rule"
+            "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
     "single_wgs": {
@@ -108,7 +108,7 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
-	     "snakemake_rules/annotation/vcfheader_rename.rule"
+            "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
 }
