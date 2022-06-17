@@ -27,7 +27,7 @@ Fixed:
 ^^^^^^
 
 * GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"] https://github.com/Clinical-Genomics/BALSAMIC/pull/942
-* Somatic SV tumor normal rules
+* Somatic SV tumor normal rules https://github.com/Clinical-Genomics/BALSAMIC/pull/959
 
 Removed
 ^^^^^^^
