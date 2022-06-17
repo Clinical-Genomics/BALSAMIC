@@ -258,6 +258,7 @@ def test_analysis_model():
     # GIVEN valid input arguments
     valid_args = {
         "case_id": "case_id",
+        "gender": "female",
         "analysis_type": "paired",
         "sequencing_type": "targeted",
         "analysis_dir": "tests/test_data",
@@ -269,6 +270,7 @@ def test_analysis_model():
     # GIVEN invalid input arguments
     invalid_args = {
         "case_id": "case_id",
+        "gender": "unknown",
         "analysis_type": "odd",
         "sequencing_type": "wrong",
         "analysis_dir": "tests/test_data",
