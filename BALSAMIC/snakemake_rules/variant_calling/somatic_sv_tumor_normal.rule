@@ -127,6 +127,8 @@ delly cnv -u -v {params.tmpdir}/{params.tumor}.bcf -m {input.map} -g {input.fa} 
 bcftools merge -m id -O b -o {params.tmpdir}/{params.tumor}_{params.normal}.bcf \
 {params.tmpdir}/{params.tumor}.bcf {params.tmpdir}/{params.normal}.bcf; 
 
+bcftools index {params.tmpdir}/{params.tumor}_{params.normal}.bcf; 
+
 delly classify -p -f somatic -o {output.cnv_delly} -s {params.tmpdir}/samples.tsv \
 {params.tmpdir}/{params.tumor}_{params.normal}.bcf ;
 
@@ -285,44 +287,77 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-rule bcftools_process_SV_CNV:
-    input:
-        delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        delly_cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        ascat_cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
-    output:
-        delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.vcf.gz",
-        tmp_delly_cnv = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tmpdellyCNV.vcf.gz"),
-        delly_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
-        ascat_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
-    benchmark:
-        Path(benchmark_dir, 'bcftools_process_SV_CNV_' + config["analysis"]["case_id"] + ".tsv")
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    params:
-        case_name = config["analysis"]["case_id"],
-        process_cnv = get_script_path("process_CNV.py"),
-    threads:
-        get_threads(cluster_config, "bcftools_process_SV_CNV")
-    message:
-        ("Processing SVs and CNVs for {params.case_name}")
-    shell:
+if config["analysis"]["sequencing_type"] != 'wgs':
+    rule bcftools_process_SV_CNV:
+        input:
+            delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            delly_cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        output:
+            delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.vcf.gz",
+            tmp_delly_cnv = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tmpdellyCNV.vcf.gz"),
+            delly_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
+        benchmark:
+            Path(benchmark_dir, 'bcftools_process_SV_CNV_' + config["analysis"]["case_id"] + ".tsv")
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+        params:
+            case_name = config["analysis"]["case_id"],
+            process_cnv = get_script_path("process_CNV.py"),
+        threads:
+            get_threads(cluster_config, "bcftools_process_SV_CNV")
+        message:
+            ("Processing SVs and CNVs for {params.case_name}")
+        shell:
+            """
+    bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
+
+    bcftools view --threads {threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
+
+    python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
+
+    tabix -p vcf -f {output.delly_sv};
+
+    tabix -p vcf -f {output.delly_cnv};
         """
-bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
+elif config["analysis"]["sequencing_type"] == "wgs":
+    rule bcftools_process_SV_CNV:
+        input:
+            delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            delly_cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            ascat_cnv = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
+        output:
+            delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.vcf.gz",
+            tmp_delly_cnv = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tmpdellyCNV.vcf.gz"),
+            delly_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
+            ascat_cnv= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+        benchmark:
+            Path(benchmark_dir, 'bcftools_process_SV_CNV_' + config["analysis"]["case_id"] + ".tsv")
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+        params:
+            case_name = config["analysis"]["case_id"],
+            process_cnv = get_script_path("process_CNV.py"),
+        threads:
+            get_threads(cluster_config, "bcftools_process_SV_CNV")
+        message:
+            ("Processing SVs and CNVs for {params.case_name}")
+        shell:
+            """
+    bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
 
-bcftools view --threads {threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
+    bcftools view --threads {threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
 
-python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
+    python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
 
-python {params.process_cnv} -f {input.ascat_cnv} -c ascat | bgzip -l 9 -c > {output.ascat_cnv};
+    python {params.process_cnv} -f {input.ascat_cnv} -c ascat | bgzip -l 9 -c > {output.ascat_cnv};
 
-tabix -p vcf -f {output.delly_sv};
+    tabix -p vcf -f {output.delly_sv};
 
-tabix -p vcf -f {output.delly_cnv};
+    tabix -p vcf -f {output.delly_cnv};
 
-tabix -p vcf -f {output.ascat_cnv};
+    tabix -p vcf -f {output.ascat_cnv};
 
-rm {input.ascat_cnv};
+    rm {input.ascat_cnv};
         """
 
 rule svdb_merge_tumor_normal:
