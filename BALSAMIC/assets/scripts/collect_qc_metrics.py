@@ -1,45 +1,48 @@
 #!/usr/bin/env python
-import json
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional
 
 import click
 import yaml
 
 from BALSAMIC.constants.qc_metrics import METRICS
+from BALSAMIC.utils.io import read_json
 from BALSAMIC.utils.models import MetricModel
+from BALSAMIC.utils.rule import (
+    get_capture_kit,
+    get_sequencing_type,
+    get_sample_type_from_prefix,
+)
 
 
 @click.command(
     short_help="Extract the manually specified QC metrics",
 )
+@click.argument("config_path", type=click.Path(exists=True), required=True)
 @click.argument("output_path", type=click.Path(exists=False), required=True)
 @click.argument("multiqc_data_path", type=click.Path(exists=True), required=True)
 @click.argument("counts_path", nargs=-1, type=click.Path(exists=True), required=False)
-@click.argument("sequencing_type", required=True)
-@click.argument("capture_kit", required=True)
 def collect_qc_metrics(
+    config_path: Path,
     output_path: Path,
     multiqc_data_path: Path,
     counts_path: List[Path],
-    sequencing_type: str,
-    capture_kit: str,
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
 
     Args:
+        config_path: Path; case config file path
         output_path: Path; destination path for the extracted YAML formatted metrics
         multiqc_data_path: Path; multiqc JSON path from which the metrics will be extracted
         counts_path: Path; list of variant caller specific files containing the number of variants
-        sequencing_type: str; analysis sequencing type
-        capture_kit: str; capture kit used for targeted analysis ("None" for WGS)
     """
 
+    config = read_json(config_path)
+    multiqc_data = read_json(multiqc_data_path)
+
     # MultiQC metrics
-    metrics = get_multiqc_metrics(
-        multiqc_data_path, sequencing_type, capture_kit_resolve_type(capture_kit)
-    )
+    metrics = get_multiqc_metrics(config, multiqc_data)
 
     # Number of variants
     for count in counts_path:
@@ -52,15 +55,6 @@ def collect_qc_metrics(
             sort_keys=False,
             default_flow_style=False,
         )
-
-
-def capture_kit_resolve_type(capture_kit: str):
-    """Resolves the capture_kit type (NoneType or String)"""
-
-    if capture_kit == "None":
-        return None
-
-    return capture_kit
 
 
 def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
@@ -98,7 +92,7 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                         ][sample]
                     )
                 except KeyError:
-                    # Deletes par orientation information from the sample name (insertSize metrics)
+                    # Deletes pair orientation information from the sample name (insertSize metrics)
                     sample = sample.rsplit("_", 1)[0]
                     return os.path.basename(
                         multiqc_data["report_data_sources"][source_tool][
@@ -118,32 +112,50 @@ def get_qc_supported_capture_kit(capture_kit, metrics: List[str]) -> str:
     return next((i for i in available_panel_beds if i in capture_kit), None)
 
 
-def get_requested_metrics(
-    metrics: dict, analysis_type: str, capture_kit: Union[str, None]
-) -> dict:
+def get_requested_metrics(config: dict, metrics: dict) -> dict:
     """Parses the defined and requested metrics and returns them as a dictionary"""
 
-    requested_metrics = metrics[analysis_type]
+    sequencing_type = get_sequencing_type(config)
+    capture_kit = get_capture_kit(config)
+
+    requested_metrics = metrics[sequencing_type]
     if capture_kit:
-        requested_metrics = metrics[analysis_type]["default"]
+        requested_metrics = metrics[sequencing_type]["default"]
         supported_capture_kit = get_qc_supported_capture_kit(
-            capture_kit, metrics[analysis_type]
+            capture_kit, metrics[sequencing_type]
         )
         if supported_capture_kit:
-            requested_metrics.update(metrics[analysis_type][supported_capture_kit])
+            requested_metrics.update(metrics[sequencing_type][supported_capture_kit])
 
     return requested_metrics
 
 
-def get_multiqc_metrics(
-    multiqc_data_path: Path, sequencing_type: str, capture_kit: Union[str, None]
-) -> list:
+def get_metric_condition(
+    config: dict, requested_metrics: dict, sample: str, metric: str
+) -> Optional[dict]:
+    """Returns a condition associated to a sample and sequencing type"""
+
+    sequencing_type = get_sequencing_type(config)
+    try:
+        sample_type = get_sample_type_from_prefix(config, sample)
+    except KeyError:
+        # Deletes pair orientation information from the sample name (insertSize metrics)
+        sample_type = get_sample_type_from_prefix(config, sample.rsplit("_", 1)[0])
+
+    req_metrics = requested_metrics[metric]["condition"]
+    if sequencing_type == "wgs" and (
+        (metric == "PCT_60X" and sample_type == "normal")
+        or (metric == "PCT_15X" and sample_type == "tumor")
+    ):
+        req_metrics = None
+
+    return req_metrics
+
+
+def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
     """Extracts and returns the requested metrics from a multiqc JSON file"""
 
-    with open(multiqc_data_path, "r") as f:
-        multiqc_data = json.load(f)
-
-    requested_metrics = get_requested_metrics(METRICS, sequencing_type, capture_kit)
+    requested_metrics = get_requested_metrics(config, METRICS)
 
     def extract(data, output_metrics, sample=None, source=None):
         """Recursively fetch metrics data from a nested multiqc JSON"""
@@ -162,7 +174,12 @@ def get_multiqc_metrics(
                                 name=k,
                                 step=source,
                                 value=data[k],
-                                condition=requested_metrics[k]["condition"],
+                                condition=get_metric_condition(
+                                    config,
+                                    requested_metrics,
+                                    sample,
+                                    k,
+                                ),
                             ).dict()
                         )
                     extract(data[k], output_metrics, k, sample)
@@ -197,7 +214,7 @@ def get_variant_metrics(counts_path: list) -> list:
         counts = input_file.read().split("\n")
 
     variant_metrics = extract_number_variants(counts)
-    requested_metrics = get_requested_metrics(METRICS, "variants", None)
+    requested_metrics = METRICS["variants"]
     for metric in requested_metrics:
         output_metrics.append(
             MetricModel(

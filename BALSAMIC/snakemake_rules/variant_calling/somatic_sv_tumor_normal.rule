@@ -143,7 +143,6 @@ rule ascat_tumor_normal:
         bamN = bam_dir + normal_bam,
         bamT = bam_dir + tumor_bam,
         gccorrection = config["reference"]["ascat_gccorrection"],
-        chryloci= config["reference"]["ascat_chryloci"],
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
         ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.copynumber.txt.gz",
@@ -165,7 +164,8 @@ rule ascat_tumor_normal:
         tumor = "TUMOR",
         normal = "NORMAL",
         genome = config["reference"]["genome_version"],
-        case_name = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"],
+        gender = config["analysis"]["gender"]
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")
     message:
@@ -173,6 +173,8 @@ rule ascat_tumor_normal:
     shell:
         """
 export LD_LIBRARY_PATH=:/opt/wtsi-cgp/lib;
+
+if [[ "{params.gender}" = "female" ]]; then gender="XX"; else gender="XY"; fi
 
 ascat.pl \
   -protocol WGS \
@@ -182,7 +184,7 @@ ascat.pl \
   -reference {input.fa} \
   -snp_gc {input.gccorrection} \
   -outdir {params.tmpdir} \
-  -gender L -locus {input.chryloci} \
+  -gender $gender \
   -tumour {input.bamT} \
   -normal {input.bamN};
 
