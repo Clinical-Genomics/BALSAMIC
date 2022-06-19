@@ -33,6 +33,7 @@ Fixed:
 
 * GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"] https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `run_validate.sh` script https://github.com/Clinical-Genomics/BALSAMIC/pull/952
+* Somatic SV tumor normal rules https://github.com/Clinical-Genomics/BALSAMIC/pull/959
 
 Removed
 ^^^^^^^
