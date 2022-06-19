@@ -321,7 +321,7 @@ if config["analysis"]["sequencing_type"] != 'wgs':
 
     tabix -p vcf -f {output.delly_cnv};
         """
-elif config["analysis"]["sequencing_type"] == "wgs":
+else:
     rule bcftools_process_SV_CNV:
         input:
             delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
