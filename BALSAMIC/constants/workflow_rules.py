@@ -73,6 +73,7 @@ SNAKEMAKE_RULES = {
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
     "single_wgs": {
@@ -107,6 +108,7 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
 }
@@ -120,6 +122,7 @@ DELIVERY_RULES = [
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
     "vep_germline",
+    "vcfheader_rename_germline",
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
     "sentieon_TNscope_tumor_only",
