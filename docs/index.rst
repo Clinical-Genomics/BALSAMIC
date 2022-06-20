@@ -16,8 +16,9 @@
    :hidden:
    :maxdepth: 1
 
-   balsamic_annotation
    balsamic_filters
+   balsamic_sv_cnv
+   balsamic_annotation
    balsamic_methods
    bioinfo_softwares
 
