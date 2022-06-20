@@ -56,10 +56,23 @@ The copy number variants, identified using ascatNgs and `dellycnv`, are converte
         tumor-normal
      - WGS
         tumor-only
-   * - manta, dellysv, cnvkit, dellycnv
-     - manta, dellysv, cnvkit, dellycnv
-     - manta, dellysv, ascat, dellycnv,tiddit
-     - manta, dellysv, dellycnv, tiddit
+   * - | 1. manta
+       | 2. dellysv
+       | 3. cnvkit
+       | 4. dellycnv
+     - | 1. manta
+       | 2. dellysv
+       | 3. cnvkit
+       | 4. dellycnv
+     - | 1. manta
+       | 2. dellysv
+       | 3. ascat
+       | 4. dellycnv
+       | 5. tiddit
+     - | 1. manta
+       | 2. dellysv
+       | 3. dellycnv
+       | 4. tiddit
 
 
 The merged `*.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
