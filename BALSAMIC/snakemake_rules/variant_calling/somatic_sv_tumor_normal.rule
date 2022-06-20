@@ -185,6 +185,7 @@ ascat.pl \
   -snp_gc {input.gccorrection} \
   -outdir {params.tmpdir} \
   -gender $gender \
+  -genderChr Y \
   -tumour {input.bamT} \
   -normal {input.bamN};
 
