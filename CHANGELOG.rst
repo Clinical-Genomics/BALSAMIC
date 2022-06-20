@@ -6,7 +6,7 @@ Added:
 
 * New option `analysis-workflow` to balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/932
 * New python script to edit INFO tags in `vardict` and `tnscope_umi` VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/948
-* Added `cyvcf2` and `click` tools to the `annotate` container https://github.com/Clinical-Genomics/BALSAMIC/pull/948
+* Added `cyvcf2` and `click` tools to the `varcallpy3` container https://github.com/Clinical-Genomics/BALSAMIC/pull/948
 * Delly TIDDIT and vcf2cytosure for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 * `Delly` `TIDDIT` `vcf2cytosure` and method to process SVs and CNVs for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/947
 * SV and CNV analysis and `TIDDIT` to balsamic ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/951
