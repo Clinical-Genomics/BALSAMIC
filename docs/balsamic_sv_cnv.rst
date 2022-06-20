@@ -40,7 +40,7 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - somatic
      - SV
 
-The links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://github.com/Clinical-Genomics/BALSAMIC/blob/master/docs/bioinfo_softwares.rst>`_.
+For further details about a specific caller, the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://github.com/Clinical-Genomics/BALSAMIC/blob/master/docs/bioinfo_softwares.rst>`_.
 
 The copy number variants, identified using ascatNgs and `dellycnv`, are converted to deletion and duplications before they are merged using `SVDB` with `--bnd_distance = 5000` and  `--overlap = 0.80`. `SVDB` priorityzes the merging of variants from SV and CNV callers to fetch position and genotype information,  in the following order:
 
@@ -64,7 +64,7 @@ The copy number variants, identified using ascatNgs and `dellycnv`, are converte
 
 The merged `*.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
 
-The following command can be used to fetch the variants identified by specific caller from merge structural and copy number.
+The following command can be used to fetch the variants identified by specific caller from merged structural and copy number variants.
 
 ::
 
