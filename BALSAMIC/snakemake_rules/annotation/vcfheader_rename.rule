@@ -25,7 +25,7 @@ echo -e \"{params.sample_name}\\t{params.lims_name}\" > {output.namemap};
 
 bcftools reheader \
 -s {output.namemap} {input.vcf} \
--o {output.vcf};
+-o {output.vcf_dnascope};
 
-tabix -p vcf -f {output.vcf}
+tabix -p vcf -f {output.vcf_dnascope}
         """
