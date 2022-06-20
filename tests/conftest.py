@@ -8,7 +8,7 @@ from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
 
-from BALSAMIC.utils.cli import read_yaml
+from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
@@ -83,6 +83,16 @@ def reference():
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
         }
     }
+
+
+@pytest.fixture(scope="session")
+def config_path():
+    return "tests/test_data/config.json"
+
+
+@pytest.fixture(scope="session")
+def config_dict(config_path):
+    return read_json(config_path)
 
 
 @pytest.fixture(scope="session")
@@ -552,6 +562,12 @@ def analysis_path():
 def multiqc_data_path(analysis_path):
     """multiqc_data.json test path"""
     return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
+
+
+@pytest.fixture(scope="session")
+def multiqc_data_dict(multiqc_data_path):
+    """multiqc_data.json test path"""
+    return read_json(multiqc_data_path)
 
 
 @pytest.fixture(scope="session")

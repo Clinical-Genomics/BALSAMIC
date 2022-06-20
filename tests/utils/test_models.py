@@ -442,6 +442,27 @@ def test_metric_model_pass_validation():
     assert metric_model.dict().items() == metrics.items()
 
 
+def test_metric_model_duplication_refactoring():
+    """test MetricModel duplications param refactoring"""
+
+    # GIVEN input attributes
+    metrics = {
+        "header": None,
+        "id": "tumor",
+        "input": "concatenated_tumor_XXXXXX_R_1_fastqc.zip",
+        "name": "FastQC_mqc-generalstats-fastqc-percent_duplicates",
+        "step": "multiqc_general_stats",
+        "value": 21.517800000611373,
+        "condition": None,
+    }
+
+    # WHEN building the metric model
+    metric_model = MetricModel(**metrics)
+
+    # THEN assert retrieved values from the created model
+    assert metric_model.name == "PERCENT_DUPLICATION_R1"
+
+
 def test_metric_model_fail_validation():
     """test MetricModel behaviour for an incorrect input"""
 
@@ -469,14 +490,14 @@ def test_metric_validation_model_fail(qc_extracted_metrics):
 
     # GIVEN input attributes with a value that does not meet the filtering condition
     metrics = copy.deepcopy(qc_extracted_metrics)
-    metrics[3]["value"] = 2.0
+    metrics[4]["value"] = 2.0  # GC_DROPOUT set to 2.0 (failing condition)
 
     # THEN check that the model filters the metric according to its norm
     with pytest.raises(ValueError) as val_exc:
         MetricValidationModel(metrics=metrics)
     assert (
-        f"QC metric {metrics[3]['name']}: {metrics[3]['value']} validation has failed. "
-        f"(Condition: {metrics[3]['condition']['norm']} {metrics[3]['condition']['threshold']}, ID: {metrics[3]['id']})"
+        f"QC metric {metrics[4]['name']}: {metrics[4]['value']} validation has failed. "
+        f"(Condition: {metrics[4]['condition']['norm']} {metrics[4]['condition']['threshold']}, ID: {metrics[4]['id']})"
         in str(val_exc.value)
     )
 
@@ -486,15 +507,15 @@ def test_multiple_metric_validation_model_fail(qc_extracted_metrics):
 
     # GIVEN input attributes that does not meet the specified conditions
     metrics = copy.deepcopy(qc_extracted_metrics)
-    metrics[2]["value"] = 999.0
-    metrics[3]["value"] = 2
+    metrics[4]["value"] = 2.0  # GC_DROPOUT set to 2.0 (failing condition)
+    metrics[8]["value"] = 0.5  # PCT_TARGET_BASES_500X set to 50% (failing condition)
 
     # THEN check that the model filters the metrics according to its norm
     with pytest.raises(ValueError) as val_exc:
         MetricValidationModel(metrics=metrics)
     assert "2 validation errors for MetricValidationModel" in str(val_exc.value)
-    assert metrics[2]["name"] in str(val_exc.value)
-    assert metrics[3]["name"] in str(val_exc.value)
+    assert metrics[4]["name"] in str(val_exc.value)
+    assert metrics[8]["name"] in str(val_exc.value)
 
 
 def test_metric_validation_model_norm_fail(qc_extracted_metrics):
@@ -502,10 +523,10 @@ def test_metric_validation_model_norm_fail(qc_extracted_metrics):
 
     # GIVEN a metric with an incorrect norm attribute
     metrics = copy.deepcopy(qc_extracted_metrics)
-    metrics[3]["condition"]["norm"] = "lower"
+    metrics[4]["condition"]["norm"] = "lower"
 
     # THEN model raises an error due to a non accepted norm
     try:
         MetricValidationModel(metrics=metrics)
     except KeyError as key_exc:
-        assert metrics[3]["condition"]["norm"] in str(key_exc)
+        assert metrics[4]["condition"]["norm"] in str(key_exc)
