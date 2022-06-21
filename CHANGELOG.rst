@@ -12,6 +12,7 @@ Added:
 * SV and CNV analysis and `TIDDIT` to balsamic ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/951
 * Gender to `config.json` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
 * Provided gender as input for `vcf2cyosure` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
+* SV CNV doc to balsamic READTHEDOCS https://github.com/Clinical-Genomics/BALSAMIC/pull/960
 * Germline normal SNV VCF file header renaming to be compatible with genotype uploads https://github.com/Clinical-Genomics/BALSAMIC/issues/882
 
 Changed:
