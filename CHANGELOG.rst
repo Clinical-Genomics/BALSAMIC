@@ -12,9 +12,8 @@ Added:
 * SV and CNV analysis and `TIDDIT` to balsamic ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/951
 * Gender to `config.json` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
 * Provided gender as input for `vcf2cyosure` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
-* Germline normal SNV VCF file header renaming to be compatible with genotype uploads https://github.com/Clinical-Genomics/BALSAMIC/issues/882 
 * SV CNV doc to balsamic READTHEDOCS https://github.com/Clinical-Genomics/BALSAMIC/pull/960
-
+* Germline normal SNV VCF file header renaming to be compatible with genotype uploads https://github.com/Clinical-Genomics/BALSAMIC/issues/882
 
 Changed:
 ^^^^^^^^
@@ -37,6 +36,7 @@ Fixed:
 * GENOME_VERSION set to the different genome_version options and replaced with config["reference"]["genome_version"] https://github.com/Clinical-Genomics/BALSAMIC/pull/942
 * `run_validate.sh` script https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 * Somatic SV tumor normal rules https://github.com/Clinical-Genomics/BALSAMIC/pull/959
+* Missing `genderChr` flag for `ascat_tumor_normal` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/963
 
 Removed
 ^^^^^^^

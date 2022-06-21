@@ -179,6 +179,7 @@ if [[ "{params.gender}" = "female" ]]; then gender="XX"; else gender="XY"; fi
 ascat.pl \
   -protocol WGS \
   -species human \
+  -genderChr Y \
   -assembly {params.genome} \
   -cpus {threads} \
   -reference {input.fa} \
