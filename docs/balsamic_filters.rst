@@ -1,5 +1,5 @@
 ***********************************
-Variant Calling Algorithms
+Calling and Filtering Variants
 ***********************************
 
 In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis,
