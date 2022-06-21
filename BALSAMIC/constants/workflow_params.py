@@ -88,7 +88,7 @@ VCF_DICT = {
     "dellycnv": {
         "mutation": "somatic",
         "type": "CNV",
-        "analysis_type": ["single"],
+        "analysis_type": ["single", "paired"],
         "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
