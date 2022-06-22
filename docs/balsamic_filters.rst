@@ -1,9 +1,53 @@
 ***********************************
-Calling and filtering Variants
+Calling and filtering variants
 ***********************************
 
-In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis,
-e.g.: `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`. Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
+In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants summarized in the table below. The choice of these tools differs between the type of analysis,
+e.g.: `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`.
+
+
+.. list-table:: SNV and small-Indel callers
+   :widths: 23 27 25 25 25
+   :header-rows: 1
+
+   * - Variant caller
+     - Sequencing type
+     - Analysis type
+     - Somatic/Germline
+     - Variant type
+   * - DNAScope
+     - WGS
+     - tumor-normal, tumor-only
+     - germline
+     - SNVs, InDels
+   * - TNhaplotyper
+     - TGA, WES, WGS :superscript:`1`
+     - tumor-normal, tumor-only
+     - somatic
+     - SNVs, InDels
+   * - TNScope :superscript:`2`
+     - WGS
+     - tumor-normal, tumor-only
+     - somatic
+     - SNVs, InDels
+   * - TNScope_umi
+     - TGA, WGS
+     - tumor-normal, tumor-only
+     - somatic, germline
+     - SNVs, InDels
+   * - VarDict
+     - TGA, WGS
+     - tumor-normal, tumor-only
+     - somatic
+     - SNVs, InDels
+
+:superscript:`1` TNhaplotyper is only executed for tumor-only if a WGS case is being analysed
+
+:superscript:`2` TNScope output is being merged with TNhaplotyper calls for TO-WGS analysis
+
+
+
+Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
 
 **Pre-call filtering** is where the variant-calling tool decides not to add a variant to the VCF file if the default filters of the variant-caller did not pass the filter criteria. The set of default filters differs between the various variant-calling algorithms.
 
