@@ -25,7 +25,6 @@
    bioinfo_softwares
 
 
-
 .. toctree::
     :caption: Development guide
     :name: development_guide
@@ -37,4 +36,4 @@
     README
     semver
     FAQs
-   resources
+    resources
