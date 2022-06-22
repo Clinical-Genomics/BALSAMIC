@@ -11,8 +11,8 @@
 
 
 .. toctree::
-   :caption: Resources 
-   :name: resources 
+   :caption: Tools and Resources
+   :name: tools and resources
    :hidden:
    :maxdepth: 1
 
@@ -21,6 +21,7 @@
    balsamic_annotation
    balsamic_methods
    bioinfo_softwares
+   resources
 
 
 .. toctree::
@@ -38,7 +39,6 @@
     :maxdepth: 1
 
     history
-    resources
 
 .. toctree::
     :caption: Development guide
