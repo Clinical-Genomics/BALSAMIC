@@ -6,7 +6,7 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
 
 
 .. list-table:: SNV and small-Indel callers
-   :widths: 23 27 25 25 25
+   :widths: 22 27 25 20 20
    :header-rows: 1
 
    * - Variant caller
@@ -18,27 +18,27 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - WGS
      - tumor-normal, tumor-only
      - germline
-     - SNVs, InDels
+     - SNV, InDel
    * - TNhaplotyper
      - TGA, WES, WGS :superscript:`1`
      - tumor-normal, tumor-only
      - somatic
-     - SNVs, InDels
+     - SNV, InDel
    * - TNScope :superscript:`2`
      - WGS
      - tumor-normal, tumor-only
      - somatic
-     - SNVs, InDels
+     - SNV, InDel
    * - TNScope_umi
      - TGA, WGS
      - tumor-normal, tumor-only
      - somatic, germline
-     - SNVs, InDels
+     - SNV, InDel
    * - VarDict
      - TGA, WGS
      - tumor-normal, tumor-only
      - somatic
-     - SNVs, InDels
+     - SNV, InDel
 
 :superscript:`1` TNhaplotyper is only executed for tumor-only if a WGS case is being analysed
 
