@@ -37,6 +37,7 @@ Fixed:
 * `run_validate.sh` script https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 * Somatic SV tumor normal rules https://github.com/Clinical-Genomics/BALSAMIC/pull/959
 * Missing `genderChr` flag for `ascat_tumor_normal` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/963
+* Command in vcf2cyosure rule and updated ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/965
 
 Removed
 ^^^^^^^
