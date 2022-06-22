@@ -42,6 +42,8 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://github.com/Clinical-Genomics/BALSAMIC/blob/master/docs/bioinfo_softwares.rst>`_.
 
+It mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+
 The copy number variants, identified using ascatNgs and `dellycnv`, are converted to deletion and duplications before they are merged using `SVDB` with `--bnd_distance = 5000` (distance between end points for the variants from different callers) and  `--overlap = 0.80` (percentage for overlapping bases for the variants from different callers). `SVDB` prioritizes the merging of variants from SV and CNV callers to fetch position and genotype information,  in the following order:
 
 .. list-table:: SVDB merge caller priority order
@@ -92,20 +94,9 @@ The following command can be used to fetch the variants identified by a specific
 
 Detailed information is available from `ascatNGS <https://github.com/cancerit/ascatNgs>`_ documentation
 
-Briefly, ascatNGS needs gender loci file if gender information for the input sample is not available. The second file is *SnpGcCorrections.tsv*, which is prepared from the 1000 genome SNP panel.
+The file *SnpGcCorrections.tsv* prepared from the 1000 genome SNP panel.
 
-1. **Gender loci file:**
-
-GRCh37d5_Y.loci contains the following contents:
-
-.. line-block::
-    Y	4546684
-    Y	2934912
-    Y	4550107
-    Y	4549638
-
-
-2. **GC correction file:**
+**GC correction file:**
 
 First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is available from `ascatNGS-reference-files <https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs>`_ (Human reference files from 1000 genomes VCFs)
 
