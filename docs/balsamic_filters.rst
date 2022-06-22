@@ -2,8 +2,7 @@
 Calling and filtering variants
 ***********************************
 
-In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants summarized in the table below. The choice of these tools differs between the type of analysis,
-e.g.: `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`.
+In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants summarized in the table below. The choice of these tools differs between the type of analysis, `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`.
 
 
 .. list-table:: SNV and small-Indel callers
