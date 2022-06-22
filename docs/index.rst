@@ -21,9 +21,8 @@
    balsamic_sv_cnv
    balsamic_annotation
    balsamic_methods
-   bioinfo_softwares
    history
-   resources
+   bioinfo_softwares
 
 
 
@@ -38,3 +37,4 @@
     README
     semver
     FAQs
+   resources
