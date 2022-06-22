@@ -1,5 +1,5 @@
 =========
-Build Doc
+Build doc
 =========
 
 Following steps explains how to build documents locally.

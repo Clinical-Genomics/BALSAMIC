@@ -1,5 +1,5 @@
 =============
-CLI reference
+CLI usage
 =============
 
 .. click:: BALSAMIC.commands.base:cli

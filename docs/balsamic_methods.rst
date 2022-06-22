@@ -1,6 +1,6 @@
-========
-Methods
-========
+===================
+Method description
+===================
 
 Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
