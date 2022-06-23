@@ -1,5 +1,5 @@
 ************************************
-Structural and copy-number variants
+Structural and Copy Number variants
 ************************************
 
 Depending on the sequencing type, BALSAMIC is currently running the following structural and copy number variant callers:
