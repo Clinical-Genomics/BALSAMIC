@@ -1,5 +1,5 @@
 =================================
-List of bioinformatics software
+Tools and software
 =================================
 
 BALSAMIC ( **version** = 9.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
