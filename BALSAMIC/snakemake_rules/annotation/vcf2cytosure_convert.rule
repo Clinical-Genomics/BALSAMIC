@@ -71,6 +71,8 @@ elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["anal
         shell:
             """
 zgrep -E "#|PASS" {input.ascat_vcf} | bgzip -l 9 -c > {output.ascat_vcf};
+       
+tabix -p vcf -f  {output.ascat_vcf}
         
 vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --sex {params.gender} --bins 20
     

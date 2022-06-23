@@ -1,6 +1,6 @@
-================
-Other resources
-================
+===============================
+References and other resources
+===============================
 
 
 *Main resources including knowledge base and databases necessary for pipeline development*
