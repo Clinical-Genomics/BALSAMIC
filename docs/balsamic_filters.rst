@@ -14,7 +14,7 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - Analysis type
      - Somatic/Germline
      - Variant type
-   * - DNAScope
+   * - DNAscope
      - WGS
      - tumor-normal, tumor-only
      - germline
@@ -24,7 +24,7 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - tumor-normal, tumor-only
      - somatic
      - SNV, InDel
-   * - TNScope :superscript:`2`
+   * - TNscope :superscript:`2`
      - WGS
      - tumor-normal, tumor-only
      - somatic
@@ -42,7 +42,7 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
 
 :superscript:`1` TNhaplotyper is only executed for tumor-only if a WGS case is being analysed
 
-:superscript:`2` TNScope output is being merged with TNhaplotyper calls for TO-WGS analysis
+:superscript:`2` TNscope output is being merged with TNhaplotyper calls for TO-WGS analysis
 
 
 
