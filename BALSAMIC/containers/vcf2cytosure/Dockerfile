@@ -22,6 +22,6 @@ RUN cd /opt \
     && cd /opt/${CONTAINER_NAME}/  \
     && pip install --no-cache-dir .
 
-RUN cd /${WORK_DIR}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 RUN rm -rf /${WORK_DIR} && conda clean --all --yes
