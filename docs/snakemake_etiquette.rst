@@ -1,5 +1,5 @@
 ===================
-Snakemake Etiquette
+Snakemake etiquette
 ===================
 
 The bioinformatics core analysis in BALSAMIC is defined by set of rules written as a Snakemake rules (``*.rule``) and Snakemake

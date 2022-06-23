@@ -1,9 +1,52 @@
 ***********************************
-Calling and Filtering Variants
+Calling and filtering variants
 ***********************************
 
-In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants. Also, the choice of these tools differs between the type of analysis,
-e.g.: `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`. Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
+In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germline variants summarized in the table below. The choice of these tools differs between the type of analysis, `Target Genome Analysis (TGA)` or analysis of `Whole Genome Sequencing (WGS)`.
+
+
+.. list-table:: SNV and small-Indel callers
+   :widths: 22 27 25 20 20
+   :header-rows: 1
+
+   * - Variant caller
+     - Sequencing type
+     - Analysis type
+     - Somatic/Germline
+     - Variant type
+   * - DNAscope
+     - WGS
+     - tumor-normal, tumor-only
+     - germline
+     - SNV, InDel
+   * - TNhaplotyper
+     - TGA, WES, WGS :superscript:`1`
+     - tumor-normal, tumor-only
+     - somatic
+     - SNV, InDel
+   * - TNscope :superscript:`2`
+     - WGS
+     - tumor-normal, tumor-only
+     - somatic
+     - SNV, InDel
+   * - TNScope_umi
+     - TGA, WGS
+     - tumor-normal, tumor-only
+     - somatic, germline
+     - SNV, InDel
+   * - VarDict
+     - TGA, WGS
+     - tumor-normal, tumor-only
+     - somatic
+     - SNV, InDel
+
+:superscript:`1` TNhaplotyper is only executed for tumor-only if a WGS case is being analysed
+
+:superscript:`2` TNscope output is being merged with TNhaplotyper calls for TO-WGS analysis
+
+
+
+Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
 
 **Pre-call filtering** is where the variant-calling tool decides not to add a variant to the VCF file if the default filters of the variant-caller did not pass the filter criteria. The set of default filters differs between the various variant-calling algorithms.
 

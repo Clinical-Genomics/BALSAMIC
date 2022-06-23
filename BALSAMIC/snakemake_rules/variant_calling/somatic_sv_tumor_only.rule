@@ -19,7 +19,7 @@ rule manta_tumor_only:
         runmode = "local",
         tumor = get_sample_type(config["samples"], "tumor"),
         case_name = config["analysis"]["case_id"],
-        manta_install_path= "/opt/conda/share/manta-1.6.0-1"
+        manta_install_path= "/opt/conda/share/manta-1.6.0-2"
     threads:
         get_threads(cluster_config, "manta_tumor_only")
     message:

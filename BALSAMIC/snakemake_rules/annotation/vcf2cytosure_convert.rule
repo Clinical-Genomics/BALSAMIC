@@ -70,7 +70,7 @@ elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["anal
         message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
         shell:
             """
-grep -E "#|PASS" {input.ascat_vcf} | bgzip -l 9 -c > {output.ascat_vcf};
+zgrep -E "#|PASS" {input.ascat_vcf} | bgzip -l 9 -c > {output.ascat_vcf};
         
 vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --sex {params.gender} --bins 20
     

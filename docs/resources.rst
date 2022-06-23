@@ -1,10 +1,7 @@
-===============
+================
 Other resources
-===============
+================
 
-
-Resources
----------
 
 *Main resources including knowledge base and databases necessary for pipeline development*
 
