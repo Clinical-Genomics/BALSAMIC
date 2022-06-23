@@ -23,6 +23,7 @@
    balsamic_methods
    history
    bioinfo_softwares
+   resources
 
 
 .. toctree::
@@ -36,4 +37,3 @@
     README
     semver
     FAQs
-    resources
