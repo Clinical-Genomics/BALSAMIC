@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "pip" "vcf2cytosure" )
+valid_commands=( "pip" "vcf2cytosure tabix" )
 
 for valid_command in "${valid_commands[@]}"
 do
