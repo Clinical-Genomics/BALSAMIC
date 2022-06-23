@@ -15,7 +15,7 @@ ENV PYTHONPATH="/opt/${CONTAINER_NAME}"
 
 COPY . /${WORK_DIR}
 
-RUN apk add --no-cache bash gcc git python3
+RUN apk add --no-cache bash gcc git python3 gzip
 
 RUN cd /opt \
     && git clone https://github.com/NBISweden/vcf2cytosure.git \
