@@ -39,7 +39,7 @@ Fixed:
 * Somatic SV tumor normal rules https://github.com/Clinical-Genomics/BALSAMIC/pull/959
 * Missing `genderChr` flag for `ascat_tumor_normal` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/963
 * Command in vcf2cytosure rule and updated ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/966
-* Missing name `analysis_dir` in QC.smk
+* Missing name `analysis_dir` in QC.smk https://github.com/Clinical-Genomics/BALSAMIC/pull/970
 
 Removed
 ^^^^^^^

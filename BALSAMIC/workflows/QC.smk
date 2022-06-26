@@ -35,7 +35,7 @@ tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 case_id = config["analysis"]["case_id"]
-analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
+analysis_dir = config["analysis"]["analysis_dir"] + "/" + case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
