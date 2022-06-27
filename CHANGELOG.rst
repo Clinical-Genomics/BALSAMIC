@@ -14,6 +14,7 @@ Added:
 * Provided gender as input for `vcf2cyosure` https://github.com/Clinical-Genomics/BALSAMIC/pull/955
 * SV CNV doc to balsamic READTHEDOCS https://github.com/Clinical-Genomics/BALSAMIC/pull/960
 * Germline normal SNV VCF file header renaming to be compatible with genotype uploads https://github.com/Clinical-Genomics/BALSAMIC/issues/882
+* Add tabix and gzip to vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/969
 
 Changed:
 ^^^^^^^^
@@ -37,6 +38,8 @@ Fixed:
 * `run_validate.sh` script https://github.com/Clinical-Genomics/BALSAMIC/pull/952
 * Somatic SV tumor normal rules https://github.com/Clinical-Genomics/BALSAMIC/pull/959
 * Missing `genderChr` flag for `ascat_tumor_normal` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/963
+* Command in vcf2cytosure rule and updated ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/966
+* Missing name `analysis_dir` in QC.smk https://github.com/Clinical-Genomics/BALSAMIC/pull/970
 * Remove `sample_type` wildcard from the `vcfheader_rename_germline` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/971
 
 Removed

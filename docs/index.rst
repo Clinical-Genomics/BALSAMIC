@@ -8,11 +8,12 @@
 
    install
    user_guide
+   cli_package
 
 
 .. toctree::
-   :caption: Resources 
-   :name: resources 
+   :caption: Detailed documentation
+   :name: detailed documentation
    :hidden:
    :maxdepth: 1
 
@@ -20,25 +21,10 @@
    balsamic_sv_cnv
    balsamic_annotation
    balsamic_methods
+   history
    bioinfo_softwares
+   resources
 
-
-.. toctree::
-   :caption: CLI reference 
-   :name: api_cli_reference
-   :hidden:
-   :maxdepth: 1
-
-   cli_package
- 
-.. toctree::
-    :caption: Other Info
-    :name: other_info 
-    :hidden:
-    :maxdepth: 1
-
-    history
-    resources
 
 .. toctree::
     :caption: Development guide

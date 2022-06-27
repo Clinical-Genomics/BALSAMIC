@@ -1,5 +1,5 @@
 ************************************
-Structural and Copy Number Variants
+Structural and Copy Number variants
 ************************************
 
 Depending on the sequencing type, BALSAMIC is currently running the following structural and copy number variant callers:
@@ -42,6 +42,8 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://github.com/Clinical-Genomics/BALSAMIC/blob/master/docs/bioinfo_softwares.rst>`_.
 
+It mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+
 The copy number variants, identified using ascatNgs and `dellycnv`, are converted to deletion and duplications before they are merged using `SVDB` with `--bnd_distance = 5000` (distance between end points for the variants from different callers) and  `--overlap = 0.80` (percentage for overlapping bases for the variants from different callers). `SVDB` prioritizes the merging of variants from SV and CNV callers to fetch position and genotype information,  in the following order:
 
 .. list-table:: SVDB merge caller priority order
@@ -82,3 +84,51 @@ The following command can be used to fetch the variants identified by a specific
 ::
 
   zgrep -E "#|<Caller>" <*.svdb.vcf.gz>
+
+
+
+**Genome Reference Files**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**How to generate genome reference files for ascatNGS**
+
+Detailed information is available from `ascatNGS <https://github.com/cancerit/ascatNgs>`_ documentation
+
+The file *SnpGcCorrections.tsv* prepared from the 1000 genome SNP panel.
+
+**GC correction file:**
+
+First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is available from `ascatNGS-reference-files <https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs>`_ (Human reference files from 1000 genomes VCFs)
+
+.. code-block::
+
+    export TG_DATA=ftp://ftp.ensembl.org/pub/grch37/release-83/variation/vcf/homo_sapiens/1000GENOMES-phase_3.vcf.gz
+
+
+Followed by:
+
+.. code-block::
+
+    curl -sSL $TG_DATA | zgrep -F 'E_Multiple_observations' | grep -F 'TSA=SNV' |\
+    perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/);\
+    next if($F[0] eq $l_c && $F[1]-1000 < $l_p); $F[7]=~m/MAF=([^;]+)/;\
+    next if($1 < 0.05); printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1];\
+    $l_c=$F[0]; $l_p=$F[1];' > SnpPositions_GRCh37_1000g.tsv
+
+
+--or--
+
+.. code-block::
+
+    curl -sSL $TG_DATA | zgrep -F 'E_Multiple_observations' | grep -F 'TSA=SNV' |\
+    perl -ane 'next if($F[0] !~ m/^\d+$/ && $F[0] !~ m/^[XY]$/); $F[7]=~m/MAF=([^;]+)/;\
+    next if($1 < 0.05); next if($F[0] eq $l_c && $F[1]-1000 < $l_p);\
+    printf "%s\t%s\t%d\n", $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];'\
+    > SnpPositions_GRCh37_1000g.tsv
+
+Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv* file, more details see `ascatNGS-convert-snppositions <https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv>`_
+
+.. code-block::
+
+    ascatSnpPanelGcCorrections.pl genome.fa SnpPositions.tsv > SnpGcCorrections.tsv
+
