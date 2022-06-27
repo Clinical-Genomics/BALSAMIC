@@ -1,6 +1,6 @@
-========
-Workflow
-========
+=================================
+Tools and software
+=================================
 
 BALSAMIC ( **version** = 9.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
@@ -40,7 +40,7 @@ delly
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/dellytools/delly>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/28/18/i333/245403>`_
-:Version: `0.9.1`
+:Version: `1.0.3`
 
 ensembl-vep
 ~~~~~~~~~~~
@@ -115,10 +115,16 @@ svdb
 :Version: `2.6.0`
 
 tabix
-~~~~~
+~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/tabix>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/27/5/718/262743>`_
 :Version: `1.11`
+
+tiddit
+~~~~~~
+:Source code: `Github` `<https://github.com/SciLifeLab/TIDDIT>`_
+:Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
+:Version: `3.0.0`
 
 vardict
 ~~~~~~~

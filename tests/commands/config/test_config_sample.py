@@ -44,6 +44,8 @@ def test_tumor_normal_config(
                 normal,
                 "--case-id",
                 case_id,
+                "--gender",
+                "male",
                 "--analysis-dir",
                 test_analysis_dir,
                 "--balsamic-cache",

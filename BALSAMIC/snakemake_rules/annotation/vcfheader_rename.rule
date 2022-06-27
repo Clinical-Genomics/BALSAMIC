@@ -1,0 +1,30 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule vcfheader_rename_germline:
+    input:
+        vcf = vep_dir + "SNV.germline.normal.dnascope.vcf.gz"
+    output:
+        namemap = vep_dir + "genotype_normal_samplenames.tsv",
+        vcf_dnascope = vep_dir + "SNV.genotype.normal.dnascope.vcf.gz"
+    benchmark:
+        Path(benchmark_dir, "vcfheader_rename_germline_normal.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "genotype"},
+        sample_name = "NORMAL",
+        lims_name = lims_id["normal"]
+    message:
+        "Renaming header in DNAscope germline VCF output from {params.sample_name} to {params.lims_name}"
+    shell:
+        """
+echo -e \"{params.sample_name}\\t{params.lims_name}\" > {output.namemap};
+
+bcftools reheader \
+-s {output.namemap} {input.vcf} \
+-o {output.vcf_dnascope};
+
+tabix -p vcf -f {output.vcf_dnascope}
+        """

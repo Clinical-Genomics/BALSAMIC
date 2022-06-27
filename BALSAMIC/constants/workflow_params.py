@@ -8,7 +8,7 @@ VARCALL_PARAMS = {
 
 # Configuration of VCF settings
 VCF_DICT = {
-    "TNscope_umi": {
+    "tnscope_umi": {
         "mutation": "somatic",
         "type": "SNV",
         "analysis_type": ["single", "paired"],
@@ -78,10 +78,17 @@ VCF_DICT = {
         "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
+    "tiddit": {
+        "mutation": "somatic",
+        "type": "SV",
+        "analysis_type": ["single", "paired"],
+        "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
     "dellycnv": {
         "mutation": "somatic",
         "type": "CNV",
-        "analysis_type": ["single"],
+        "analysis_type": ["single", "paired"],
         "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },

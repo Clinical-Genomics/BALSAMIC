@@ -23,6 +23,8 @@ def test_pon_config(
             "pon",
             "--case-id",
             case_id,
+            "--gender",
+            "male",
             "-p",
             panel_bed_file,
             "--analysis-dir",

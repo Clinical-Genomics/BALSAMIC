@@ -8,7 +8,7 @@ from pathlib import Path
 from functools import partial
 from click.testing import CliRunner
 
-from BALSAMIC.utils.cli import read_yaml
+from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
@@ -83,6 +83,16 @@ def reference():
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
         }
     }
+
+
+@pytest.fixture(scope="session")
+def config_path():
+    return "tests/test_data/config.json"
+
+
+@pytest.fixture(scope="session")
+def config_dict(config_path):
+    return read_json(config_path)
 
 
 @pytest.fixture(scope="session")
@@ -291,50 +301,6 @@ def tumor_normal_config(
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
-@pytest.fixture(scope="session")
-def tumor_normal_qc_config(
-    tmp_path_factory,
-    sample_fastq,
-    analysis_dir,
-    balsamic_cache,
-    panel_bed_file,
-):
-    """
-    invokes balsamic config sample -t xxx -n xxx to create sample config
-    for tumor-normal
-    """
-    case_id = "sample_tumor_normal"
-    tumor = sample_fastq["tumor"]
-    normal = sample_fastq["normal"]
-
-    with mock.patch.dict(MOCKED_OS_ENVIRON):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "qc_panel",
-                "-p",
-                panel_bed_file,
-                "-t",
-                tumor,
-                "-n",
-                normal,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                "ACC1",
-                "--normal-sample-name",
-                "ACC2",
-            ],
-        )
-    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
-
-
 @pytest.fixture(name="helpers")
 def fixture_config_helpers():
     """Helper fixture for case config files"""
@@ -484,45 +450,6 @@ def tumor_only_wgs_config(
 
 
 @pytest.fixture(scope="session")
-def tumor_only_qc_config(
-    tmpdir_factory,
-    sample_fastq,
-    balsamic_cache,
-    analysis_dir,
-    panel_bed_file,
-):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only
-    """
-    case_id = "sample_tumor_only"
-    tumor = sample_fastq["tumor"]
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "qc_panel",
-                "-p",
-                panel_bed_file,
-                "-t",
-                tumor,
-                "--case-id",
-                case_id,
-                "--analysis-dir",
-                analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
-            ],
-        )
-    return Path(analysis_dir, case_id, case_id + "_QC.json").as_posix()
-
-
-@pytest.fixture(scope="session")
 def tumor_only_pon_config(
     tmp_path_factory,
     sample_fastq,
@@ -635,6 +562,12 @@ def analysis_path():
 def multiqc_data_path(analysis_path):
     """multiqc_data.json test path"""
     return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
+
+
+@pytest.fixture(scope="session")
+def multiqc_data_dict(multiqc_data_path):
+    """multiqc_data.json test path"""
+    return read_json(multiqc_data_path)
 
 
 @pytest.fixture(scope="session")

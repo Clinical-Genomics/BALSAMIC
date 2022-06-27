@@ -13,6 +13,7 @@ SNAKEMAKE_RULES = {
         "annotate": [
             "snakemake_rules/annotation/vep.rule",
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
+            "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
     },
     "single_targeted": {
@@ -41,7 +42,6 @@ SNAKEMAKE_RULES = {
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
-            "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],
     },
     "paired_targeted": {
@@ -73,7 +73,7 @@ SNAKEMAKE_RULES = {
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
-            "snakemake_rules/annotation/vcf2cytosure_convert.rule",
+            "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
     "single_wgs": {
@@ -108,6 +108,7 @@ SNAKEMAKE_RULES = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
 }
@@ -121,6 +122,7 @@ DELIVERY_RULES = [
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
     "vep_germline",
+    "vcfheader_rename_germline",
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
     "sentieon_TNscope_tumor_only",
@@ -131,9 +133,14 @@ DELIVERY_RULES = [
     "ascat_tumor_normal",
     "ascat_tumor_normal_merge_output",
     "delly_cnv_tumor_only",
+    "delly_cnv_tumor_normal",
+    "tiddit_sv_tumor_only",
+    "tiddit_sv_tumor_normal",
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
+    "vcf2cytosure_convert_tumor_only",
+    "vcf2cytosure_convert_tumor_normal",
     "bcftools_filter_svdb",
     "bcftools_intersect_tumor_only",
     "bcftools_filter_tnscope_tumor_normal",

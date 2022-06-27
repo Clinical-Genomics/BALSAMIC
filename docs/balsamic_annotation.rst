@@ -1,5 +1,5 @@
 ***********************************
-BALSAMIC Annotation Resources
+Annotation resources
 ***********************************
 
 BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep`` and ``vcfanno``. Somatic structural variants (SVs), somatic copy-number variants (CNVs) and germline single nucleotide variants are annotated using only ``ensembl-vep``. All SVs and CNVs are merged using ``SVDB`` before annotating for `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)` analyses.
@@ -234,6 +234,7 @@ The following annotations are added by `ensembl-vep`.
      - Reference allele from input
    * - REFSEQ_MATCH
      - | the RefSeq transcript match status; contains a number of flags indicating whether this RefSeq transcript matches the underlying reference sequence and/or an Ensembl transcript (more information):
+
        - rseq_3p_mismatch: signifies a mismatch between the RefSeq transcript and the underlying primary genome assembly sequence. Specifically, there is a mismatch in the 3' UTR of the RefSeq model with respect to the primary genome assembly (e.g. GRCh37/GRCh38).
        - rseq_5p_mismatch: signifies a mismatch between the RefSeq transcript and the underlying primary genome assembly sequence. Specifically, there is a mismatch in the 5' UTR of the RefSeq model with respect to the primary genome assembly.
        - rseq_cds_mismatch: signifies a mismatch between the RefSeq transcript and the underlying primary genome assembly sequence. Specifically, there is a mismatch in the CDS of the RefSeq model with respect to the primary genome assembly.

@@ -50,6 +50,10 @@
             "mutation": "somatic",
             "type": "SV"
         },
+        "tiddit":{
+            "mutation": "somatic",
+            "type": "SV"
+        },
         "dellycnv":{
             "mutation": "somatic",
             "type": "CNV"

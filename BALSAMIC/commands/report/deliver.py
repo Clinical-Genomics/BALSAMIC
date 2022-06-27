@@ -8,13 +8,12 @@ import snakemake
 import subprocess
 from pathlib import Path
 
-from BALSAMIC.utils.cli import get_file_extension, read_yaml
-from BALSAMIC.utils.cli import write_json
+from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.cli import SnakeMake
 from BALSAMIC.utils.cli import convert_deliverables_tags
+from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
 
@@ -30,17 +29,6 @@ LOG = logging.getLogger(__name__)
     "-s",
     required=True,
     help="Sample config file. Output of balsamic config sample",
-)
-@click.option(
-    "-a",
-    "--analysis-type",
-    required=False,
-    type=click.Choice(["qc", "paired", "single"]),
-    help=(
-        "Type of analysis to run from input config file."
-        "By default it will read from config file, but it will override config file"
-        "if it is set here."
-    ),
 )
 @click.option(
     "-r",
@@ -67,7 +55,6 @@ LOG = logging.getLogger(__name__)
 def deliver(
     context,
     sample_config,
-    analysis_type,
     rules_to_deliver,
     delivery_mode,
     disable_variant_caller,
@@ -99,13 +86,10 @@ def deliver(
     yaml_write_directory = os.path.join(result_dir, "delivery_report")
     Path.mkdir(Path(yaml_write_directory), parents=True, exist_ok=True)
 
-    analysis_type = (
-        analysis_type
-        if analysis_type
-        else sample_config_dict["analysis"]["analysis_type"]
-    )
+    analysis_type = sample_config_dict["analysis"]["analysis_type"]
+    analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
     reference_genome = sample_config_dict["reference"]["reference_genome"]
-    snakefile = get_snakefile(analysis_type, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
 
     report_file_name = os.path.join(
         yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"

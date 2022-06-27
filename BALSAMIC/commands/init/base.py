@@ -15,7 +15,6 @@ from BALSAMIC.constants.common import (
     VALID_CONTAINER_CONDA_NAME,
 )
 from BALSAMIC.utils.cli import (
-    write_json,
     CaptureStdout,
     get_snakefile,
     SnakeMake,
@@ -24,6 +23,7 @@ from BALSAMIC.utils.cli import (
     # job_id_dump_to_yaml,
 )
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
 
@@ -266,7 +266,9 @@ def initialize(
     LOG.info("Reference generation workflow configured successfully - %s" % config_json)
 
     snakefile = (
-        snakefile if snakefile else get_snakefile("generate_ref", genome_version)
+        snakefile
+        if snakefile
+        else get_snakefile("generate_ref", "balsamic", genome_version)
     )
 
     with CaptureStdout() as graph_dot:

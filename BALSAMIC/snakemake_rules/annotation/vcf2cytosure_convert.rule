@@ -1,24 +1,80 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+if config["analysis"]["sequencing_type"] != 'wgs':
+    rule vcf2cytosure_convert:
+        input:
+            cnvkit_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz",
+            cnvkit_cnr = cnv_dir + "tumor.merged" + ".cnr"
+        output:
+            cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf2cytosure.cgh"
+        benchmark:
+            Path(benchmark_dir, 'vcf2cytosure_convert_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
+        threads:
+            get_threads(cluster_config, "vcf2cytosure_convert")
+        params:
+            case_name = config["analysis"]["case_id"],
+            gender = config["analysis"]["gender"],
+            housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
+        message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
+        shell:
+            """
+vcf2cytosure --vcf {input.cnvkit_vcf} --cn {input.cnvkit_cnr} --out {output.cgh_tumor} --sex {params.gender} --bins 1
+            """
 
-rule vcf2cytosure_convert:
-    input:
-        cnv_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz",
-        cnv_cnr = cnv_dir + "tumor.merged" + ".cnr"
-    output:
-        cgh_file = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf2cytosure.cgh"
-    benchmark:
-        Path(benchmark_dir, 'vcf2cytosure_convert.' + config["analysis"]["case_id"] + ".tsv").as_posix()
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "vcf2cytosure_convert")
-    params:
-        case_name = config["analysis"]["case_id"],
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
-    message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
-    shell:
-        """
-vcf2cytosure --vcf {input.cnv_vcf} --cn {input.cnv_cnr} --out {output.cgh_file} --bins 1
-        """
+elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'single':
+    rule vcf2cytosure_convert_tumor_only:
+        input:
+            delly_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
+            tiddit_cov_tumor = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
+        output:
+            cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tumor.vcf2cytosure.cgh"
+        benchmark:
+            Path(benchmark_dir, 'vcf2cytosure_convert_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
+        threads:
+            get_threads(cluster_config, "vcf2cytosure_convert")
+        params:
+            case_name = config["analysis"]["case_id"],
+            gender = config["analysis"]["gender"],
+            housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
+        message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
+        shell:
+            """
+vcf2cytosure --vcf {input.delly_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --sex {params.gender} --bins 20
+            """
+
+elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["analysis_type"] == "paired":
+    rule vcf2cytosure_convert_tumor_normal:
+        input:
+            ascat_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
+            tiddit_cov_tumor = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
+            tiddit_cov_normal = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".normal.tiddit_cov.bed",
+        output:
+            ascat_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".filtered.ascat.vcf.gz",
+            cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tumor.vcf2cytosure.cgh",
+            cgh_normal = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".normal.vcf2cytosure.cgh",
+        benchmark:
+            Path(benchmark_dir, 'vcf2cytosure_convert_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
+        threads:
+            get_threads(cluster_config, "vcf2cytosure_convert")
+        params:
+            case_name = config["analysis"]["case_id"],
+            gender= config["analysis"]["gender"],
+            housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
+        message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
+        shell:
+            """
+zgrep -E "#|PASS" {input.ascat_vcf} | bgzip -l 9 -c > {output.ascat_vcf};
+       
+tabix -p vcf -f  {output.ascat_vcf}
+        
+vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_tumor} --out {output.cgh_tumor} --sex {params.gender} --bins 20
+    
+vcf2cytosure --vcf {output.ascat_vcf} --coverage {input.tiddit_cov_normal} --out {output.cgh_normal} --sex {params.gender} --bins 20
+            """

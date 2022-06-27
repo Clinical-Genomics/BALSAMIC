@@ -24,7 +24,6 @@ from BALSAMIC.utils.cli import (
     iterdict,
     get_snakefile,
     createDir,
-    write_json,
     get_config,
     recursive_default_dict,
     create_pon_fastq_symlink,
@@ -32,7 +31,6 @@ from BALSAMIC.utils.cli import (
     get_file_status_string,
     get_from_two_key,
     find_file_index,
-    merge_json,
     validate_fastq_pattern,
     get_panel_chrom,
     create_fastq_symlink,
@@ -46,8 +44,8 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_md5,
     create_md5,
-    read_yaml,
 )
+from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
 from BALSAMIC.utils.rule import (
     get_chrom,
@@ -61,6 +59,7 @@ from BALSAMIC.utils.rule import (
     get_delivery_id,
     get_reference_output_files,
     get_rule_output,
+    get_sample_type_from_prefix,
 )
 from tests.helpers import Map
 
@@ -351,25 +350,29 @@ def test_get_script_path():
 def test_get_snakefile():
     # GIVEN analysis_type for snakemake workflow
     workflow = [
-        ("paired", "wgs"),
-        ("paired", "targeted"),
-        ("single", "wgs"),
-        ("single", "targeted"),
-        ("qc_panel", "targeted"),
-        ("generate_ref", ""),
-        ("pon", ""),
+        ("paired", "balsamic"),
+        ("single", "balsamic"),
+        ("generate_ref", "balsamic"),
+        ("pon", "balsamic"),
+        ("paired", "balsamic-qc"),
+        ("single", "balsamic-qc"),
+        ("paired", "balsamic-umi"),
+        ("single", "balsamic-umi"),
     ]
 
     # WHEN asking to see snakefile for paired
     for reference_genome in ["hg19", "hg38", "canfam3"]:
-        for analysis_type, sequencing_type in workflow:
-            snakefile = get_snakefile(analysis_type, reference_genome)
+        for analysis_type, analysis_workflow in workflow:
+            snakefile = get_snakefile(
+                analysis_type, analysis_workflow, reference_genome
+            )
 
             pipeline = ""
-            if sequencing_type in ["targeted", "wgs"] and analysis_type in [
-                "single",
-                "paired",
-            ]:
+            if (
+                analysis_type in ["single", "paired"]
+                and analysis_workflow != "balsamic-qc"
+                and analysis_workflow != "balsamic-umi"
+            ):
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
             elif analysis_type == "generate_ref" and reference_genome != "canfam3":
                 pipeline = "BALSAMIC/workflows/reference.smk"
@@ -377,7 +380,7 @@ def test_get_snakefile():
                 pipeline = "BALSAMIC/workflows/reference-canfam3.smk"
             elif analysis_type == "pon":
                 pipeline = "BALSAMIC/workflows/PON.smk"
-            elif "qc" in analysis_type:
+            elif analysis_workflow == "balsamic-qc":
                 pipeline = "BALSAMIC/workflows/QC.smk"
 
             # THEN it should return the snakefile path
@@ -557,20 +560,48 @@ def test_write_json_error(tmp_path):
         assert write_json(ref_json, output_json)
 
 
+def test_read_json(config_path):
+    """test data extraction from a BALSAMIC config JSON file"""
+
+    # GIVEN a config path
+
+    # WHEN calling the function
+    config_dict = read_json(config_path)
+
+    # THEN the config.json file should be correctly parsed
+    assert type(config_dict) is dict
+
+
+def test_read_json_error():
+    """test data extraction from a BALSAMIC config JSON file for an ivalid path"""
+
+    # GIVEN an incorrect config path
+    config_path = "/not/a/path"
+
+    # WHEN calling the function
+
+    # THEN an error should raise due to an invalid file path
+    try:
+        read_json(config_path)
+        assert False
+    except FileNotFoundError as file_exc:
+        assert f"The JSON file {config_path} was not found" in str(file_exc)
+
+
 def test_read_yaml(metrics_yaml_path):
     """test data extraction from a saved YAML file"""
 
     # GIVEN an expected output
-    n_metrics = 11  # Number of expected metric
+    n_metrics = 12  # Number of expected metric
 
-    hs_metric = {
+    dropout_metric = {
         "header": None,
         "id": "tumor",
         "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
-        "name": "MEDIAN_TARGET_COVERAGE",
+        "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
-        "value": 2393.0,
-        "condition": {"norm": "gt", "threshold": 1000.0},
+        "value": 0.027402,
+        "condition": {"norm": "lt", "threshold": 1.0},
     }
 
     ins_size_metric = {
@@ -598,7 +629,7 @@ def test_read_yaml(metrics_yaml_path):
 
     # THEN check if the data are correctly retrieved from the YAML
     assert len(requested_metrics) == n_metrics
-    assert hs_metric in requested_metrics
+    assert dropout_metric in requested_metrics
     assert ins_size_metric in requested_metrics
     assert dups_metric in requested_metrics
 
@@ -765,29 +796,6 @@ def test_singularity_shellcmd_cmd_not_exist():
             cmd=dummy_command,
             bind_paths=[dummy_path_1, dummy_path_2],
         )
-
-
-def test_merge_json(reference, config_files):
-    # GIVEN a dict and json file
-    json_file = config_files["sample"]
-
-    # WHEN passing dict and json file to merge
-    merge_dict = merge_json(reference, json_file)
-
-    # THEN It will merge both the data and return dict
-    assert isinstance(merge_dict, dict)
-    assert "samples" in merge_dict
-    assert "reference" in merge_dict
-
-
-def test_merge_json_error(reference):
-    with pytest.raises(Exception, match=r"No such file or directory"):
-        # GIVEN a dict and invalid json file path
-        json_file = "reference.json"
-
-        # WHEN passing python dict and invalid json path
-        # THEN it should throw OSError as FileNotFoundError
-        assert merge_json(reference, json_file)
 
 
 def test_validate_fastq_pattern():
@@ -1077,3 +1085,18 @@ def test_get_rule_output(snakemake_fastqc_rule):
             file[3] == "1,fastqc,quality-trimmed-seq-fastqc"
             or file[3] == "2,fastqc,quality-trimmed-seq-fastqc"
         )
+
+
+def test_get_sample_type_from_prefix(config_dict):
+    """Test sample type extraction from a extracted config file"""
+
+    # GIVEN a config dictionary
+
+    # GIVEN a sample name
+    sample = "concatenated_tumor_XXXXXX_R"
+
+    # WHEN calling the function
+    sample_type = get_sample_type_from_prefix(config_dict, sample)
+
+    # THEN the retrieved sample type should match the expected one
+    assert sample_type == "tumor"

@@ -16,6 +16,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
+    GENDER_OPTIONS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.models import BalsamicConfigModel
@@ -29,6 +30,14 @@ LOG = logging.getLogger(__name__)
     required=True,
     help="Sample id that is used for reporting, \
               naming the analysis jobs, and analysis path",
+)
+@click.option(
+    "--gender",
+    required=False,
+    default="female",
+    show_default=True,
+    type=click.Choice(GENDER_OPTIONS),
+    help="Case associated gender",
 )
 @click.option(
     "--umi/--no-umi",
@@ -117,13 +126,6 @@ LOG = logging.getLogger(__name__)
     multiple=True,
     help="Fastq files for normal sample.",
 )
-@click.option(
-    "--umiworkflow/--no-umiworkflow",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Enable running UMI workflow",
-)
 @click.option("--tumor-sample-name", help="Tumor sample name")
 @click.option("--normal-sample-name", help="Normal sample name")
 @click.option(
@@ -136,10 +138,24 @@ LOG = logging.getLogger(__name__)
         "will be <outdir>/genome_version"
     ),
 )
+@click.option(
+    "-w",
+    "--analysis-workflow",
+    default="balsamic",
+    show_default=True,
+    type=click.Choice(["balsamic", "balsamic-umi", "balsamic-qc"]),
+    help=(
+        'Analysis workflow to run. By default: "balsamic" only '
+        "workflow will be running. If you want to run both "
+        "balsamic and UMI workflow together for panel data; "
+        'choose "balsamic-umi" option '
+    ),
+)
 @click.pass_context
 def case_config(
     context,
     case_id,
+    gender,
     umi,
     umi_trim_length,
     adapter_trim,
@@ -150,12 +166,12 @@ def case_config(
     analysis_dir,
     tumor,
     normal,
-    umiworkflow,
     tumor_sample_name,
     normal_sample_name,
     genome_version,
     balsamic_cache,
     container_version,
+    analysis_workflow,
 ):
 
     try:
@@ -187,9 +203,11 @@ def case_config(
         },
         analysis={
             "case_id": case_id,
+            "gender": gender,
             "analysis_dir": analysis_dir,
             "analysis_type": "paired" if normal else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
+            "analysis_workflow": analysis_workflow,
         },
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
@@ -207,7 +225,6 @@ def case_config(
         }
         if panel_bed
         else None,
-        umiworkflow=umiworkflow if panel_bed else False,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("Config file generated successfully")
 

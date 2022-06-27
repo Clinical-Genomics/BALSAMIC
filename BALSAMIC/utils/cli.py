@@ -223,24 +223,6 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def write_json(json_out, output_config):
-    """Writes JSON format data to an output file"""
-    try:
-        with open(output_config, "w") as fn:
-            json.dump(json_out, fn, indent=4)
-    except OSError as error:
-        raise error
-
-
-def read_yaml(yaml_path):
-    """Retrieves data from a yaml file"""
-    if Path(yaml_path).exists():
-        with open(yaml_path, "r") as fn:
-            return yaml.load(fn, Loader=yaml.SafeLoader)
-    else:
-        raise FileNotFoundError(f"The YAML file {yaml_path} was not found.")
-
-
 def iterdict(dic):
     """dictionary iteration - returns generator"""
     for key, value in dic.items():
@@ -261,7 +243,7 @@ def get_schedulerpy():
     return scheduler
 
 
-def get_snakefile(analysis_type, reference_genome="hg19"):
+def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome="hg19"):
     """
     Return a string path for variant calling snakefile.
     """
@@ -277,7 +259,8 @@ def get_snakefile(analysis_type, reference_genome="hg19"):
 
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
-    if "qc_panel" in analysis_type:
+
+    if "balsamic-qc" in analysis_workflow:
         snakefile = Path(p, "workflows", "QC.smk")
 
     return str(snakefile)
@@ -413,26 +396,6 @@ def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
     shellcmd = "singularity exec {} {}".format(singularity_bind_path, cmd)
 
     return " ".join(shellcmd.split())
-
-
-def merge_json(*args):
-    """
-    Take a list of json files and merges them together
-    Input: list of json file
-    Output: dictionary of merged json
-    """
-
-    json_out = dict()
-    for json_file in args:
-        try:
-            if isinstance(json_file, dict):
-                json_out = {**json_out, **json_file}
-            else:
-                with open(json_file) as fn:
-                    json_out = {**json_out, **json.load(fn)}
-        except OSError as error:
-            raise error
-    return json_out
 
 
 def validate_fastq_pattern(sample):
@@ -600,6 +563,9 @@ def generate_graph(config_collection_dict, config_path):
         snakemake.snakemake(
             snakefile=get_snakefile(
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
+                analysis_workflow=config_collection_dict["analysis"][
+                    "analysis_workflow"
+                ],
                 reference_genome=config_collection_dict["reference"][
                     "reference_genome"
                 ],

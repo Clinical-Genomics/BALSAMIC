@@ -34,19 +34,20 @@ SENTIEON_TNSCOPE = Path(
 )
 
 # Analysis related constants
+GENDER_OPTIONS = ["female", "male"]
+ANALYSIS_TYPES = ["paired", "single", "pon"]
+ANALYSIS_WORKFLOW = ["balsamic", "balsamic-qc", "balsamic-umi"]
+SEQUENCING_TYPE = ["wgs", "targeted"]
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
-ANALYSIS_TYPES = ["paired", "single", "qc_panel", "pon"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
-SEQUENCING_TYPE = ["wgs", "targeted"]
-
 
 # list of bioinfo tools for each conda env
 VALID_CONTAINER_CONDA_NAME = {
     "align_qc",
     "annotate",
     "coverage_qc",
-    "varcall_py36",
+    "varcall_py3",
     "varcall_py27",
     "varcall_cnvkit",
     "delly",
@@ -69,11 +70,12 @@ BIOINFO_TOOL_ENV = {
     "vcfanno": "annotate",
     "sambamba": "coverage_qc",
     "mosdepth": "coverage_qc",
-    "bcftools": "varcall_py36",
-    "tabix": "varcall_py36",
-    "gatk": "varcall_py36",
-    "vardict": "varcall_py36",
-    "svdb": "varcall_py36",
+    "bcftools": "varcall_py3",
+    "tabix": "varcall_py3",
+    "gatk": "varcall_py3",
+    "vardict": "varcall_py3",
+    "svdb": "varcall_py3",
+    "tiddit": "varcall_py3",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "delly",

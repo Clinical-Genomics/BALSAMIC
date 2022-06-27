@@ -13,7 +13,8 @@ from PyPDF2 import PdfFileMerger
 
 from BALSAMIC.utils.exc import BalsamicError
 
-from BALSAMIC.utils.cli import (write_json, check_executable, generate_h5, read_yaml)
+from BALSAMIC.utils.cli import (check_executable, generate_h5)
+from BALSAMIC.utils.io import write_json, read_yaml
 
 from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
@@ -80,6 +81,11 @@ tumor_sample = get_sample_type(config["samples"], "tumor")[0]
 if config['analysis']['analysis_type'] == "paired":
     normal_sample = get_sample_type(config["samples"], "normal")[0]
 
+# Get sample unique names for tumor or normal
+lims_id = {'normal': [], 'tumor': []}
+for sample, sample_info in config["samples"].items():
+    lims_id[sample_info["type"]].append(sample_info["sample_name"])
+
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config
@@ -106,10 +112,18 @@ if not Path(config["SENTIEON_EXEC"]).exists():
     LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
     raise BalsamicError
 
-# Add reference assembly if not defined for backward compatibility
-if 'genome_version' not in config["reference"]:
-    GENOME_VERSION = 'hg19' ## if hg19 convention works, replace accordingly
-    LOG.info('Genome version was not found in config. Setting it to %s', GENOME_VERSION)
+if "hg38" in config["reference"]["reference_genome"]:
+    config["reference"]["genome_version"] = "hg38"
+elif "canfam3" in config["reference"]["reference_genome"]:
+    config["reference"]["genome_version"] = "canfam3"
+    LOG.error("The main BALSAMIC workflow is not compatible with the canfam3 genome version "
+             "use '--analysis-workflow balsamic-qc' instead")
+    raise BalsamicError
+else:
+    config["reference"]["genome_version"] = "hg19"
+
+LOG.info('Genome version set to %s', config["reference"]["genome_version"])
+
 
 # Add normal sample if analysis is paired
 germline_call_samples = ["tumor"]
@@ -213,9 +227,6 @@ if "disable_variant_caller" in config:
         if var_caller in germline_caller:
             germline_caller.remove(var_caller)
 
-LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
-LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
-
 rules_to_include = []
 analysis_type = config['analysis']["analysis_type"]
 sequence_type = config['analysis']["sequencing_type"]
@@ -225,7 +236,16 @@ for sub,value in SNAKEMAKE_RULES.items():
     for module_name,module_rules in value.items():
       rules_to_include.extend(module_rules)
 
+if config["analysis"]["analysis_workflow"] == "balsamic":
+    rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
+    somatic_caller = [var_caller for var_caller in somatic_caller if "umi" not in var_caller]
+    somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
+
+
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
+LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
+LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
+
 
 for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
@@ -244,6 +264,10 @@ analysis_specific_results = []
 analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, germline_call_samples))
 )
+
+# Germline SNVs specifically for genotype
+if config["analysis"]["analysis_type"]=="paired":
+    analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
 
 # Raw VCFs
 analysis_specific_results.extend(
@@ -277,13 +301,13 @@ if config["analysis"]["sequencing_type"] != "wgs":
         expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
     )
     # UMI
-    analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
-    if background_variant_file:
-        analysis_specific_results.extend(
-            expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["TNscope_umi"])
+    if config["analysis"]["analysis_workflow"]=="balsamic-umi":
+        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
+        if background_variant_file:
+            analysis_specific_results.extend(
+                expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])
         )
 
-# AscatNgs
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [case_id]))
@@ -291,12 +315,35 @@ if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analys
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
+    analysis_specific_results.extend(
+        expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
+    )
+    analysis_specific_results.extend(expand(
+        vcf_dir + "SV.somatic.{case_name}.{sample_type}.tiddit_cov.bed",
+        case_name=case_id,
+        sample_type=["tumor", "normal"]
+    ))
+    analysis_specific_results.extend(expand(
+        vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
+        case_name=case_id,
+        sample_type=["tumor","normal"]
+    ))
 
-# Delly CNV
+if config['analysis']['sequencing_type'] == "wgs" and config['analysis']['analysis_type'] == 'single':
+    analysis_specific_results.extend(expand(
+        vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
+        case_name=case_id,
+        sample_type=["tumor"]
+    ))
+
 if config['analysis']['analysis_type'] == "single":
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
     )
+    analysis_specific_results.extend(expand(
+        vcf_dir + "SV.somatic.{case_name}.tumor.tiddit_cov.bed",
+        case_name=case_id,
+    ))
 
 # Dragen
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":

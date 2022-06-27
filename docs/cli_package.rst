@@ -1,7 +1,7 @@
 =============
-CLI reference
+CLI usage
 =============
 
 .. click:: BALSAMIC.commands.base:cli
    :prog: BALSAMIC
-   :show-nested:
+   :nested: full

@@ -23,11 +23,14 @@ rule bcftools_filter_vardict_tumor_only:
     AF_min = [VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
     AF_max = [VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
     pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
-    case_name =  '{case_name}'
+    case_name =  '{case_name}',
+    edit_vcf_script = get_script_path("edit_vcf_info.py"),
+    variant_caller = "vardict"
   threads:
     get_threads(cluster_config, 'bcftools_filter_vardict_tumor_only')
   message:
-    "Filtering vardict tumor-only annotated variants using bcftools on {params.case_name}"
+    "Filtering vardict tumor-only annotated variants using bcftools and  "
+    "adding FOUND_IN tags to the output VCF for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -41,11 +44,18 @@ bcftools view {input.vcf} \
 
 tabix -p vcf -f {output.vcf_filtered};
 
-bcftools view -f PASS -o {output.vcf_pass_vardict} -O z {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass_vardict}.temp -O z {output.vcf_filtered};
+
+python {params.edit_vcf_script} \
+--input_vcf {output.vcf_pass_vardict}.temp \
+--output_vcf {output.vcf_pass_vardict} \
+--variant_caller {params.variant_caller};
 
 tabix -p vcf -f {output.vcf_pass_vardict};
 
 bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts};
+
+rm {output.vcf_pass_vardict}.temp;
     """
 
 
@@ -83,23 +93,26 @@ tabix -p vcf -f {output.vcf_pass_tnhaplotyper};
 
 rule bcftools_filter_TNscope_umi_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.vcf.gz",
-    vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.TNscope_umi.all.filtered.pass.stats"
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.filtered.vcf.gz",
+    vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     pop_freq = [SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-    case_name =  '{case_name}'
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    case_name =  '{case_name}',
+    edit_vcf_script = get_script_path("edit_vcf_info.py"),
+    variant_caller = "tnscope_umi"
   threads:
-    get_threads(cluster_config, 'bcftools_filter_TNscope_umi_tumor_only')
+    get_threads(cluster_config, 'bcftools_filter_tnscope_umi_tumor_only')
   message:
-    "Filtering TNscope_umi tumor-only annotated variants using bcftools for {params.case_name}"
+    "Filtering tnscope_umi tumor-only annotated variants using bcftools and  "
+    "adding FOUND_IN tags to the output VCF for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf} \
@@ -108,9 +121,16 @@ bcftools view {input.vcf} \
 
 tabix -p vcf -f {output.vcf_filtered};
 
-bcftools view -f PASS -o {output.vcf_pass_TNscope_umi} -O z {output.vcf_filtered};
+bcftools view -f PASS -o {output.vcf_pass_TNscope_umi}.temp -O z {output.vcf_filtered};
+
+python {params.edit_vcf_script} \
+--input_vcf {output.vcf_pass_TNscope_umi}.temp \
+--output_vcf {output.vcf_pass_TNscope_umi} \
+--variant_caller {params.variant_caller};
 
 tabix -p vcf -f {output.vcf_pass_TNscope_umi};
 
 bcftools +counts {output.vcf_pass_TNscope_umi} > {output.bcftools_counts};
+    
+rm {output.vcf_pass_TNscope_umi}.temp;
     """

@@ -1,6 +1,5 @@
 import os
 import re
-import yaml
 import logging
 from pathlib import Path
 import snakemake
@@ -13,7 +12,7 @@ from BALSAMIC.constants.common import (
     WORKFLOW_SOLUTION,
     ANALYSIS_TYPES,
 )
-from BALSAMIC.utils.exc import WorkflowRunError
+from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
 
 LOG = logging.getLogger(__name__)
 
@@ -135,6 +134,20 @@ def get_sample_type(sample, bio_type):
         if sample[sample_id]["type"] == bio_type:
             type_id.append(sample_id)
     return type_id
+
+
+def get_sample_type_from_prefix(config, sample):
+    """
+    input: case config file from BALSAMIC
+    output: sample type
+    """
+
+    try:
+        return config["samples"][sample]["type"]
+    except KeyError:
+        raise KeyError(
+            f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
+        )
 
 
 def get_result_dir(config):

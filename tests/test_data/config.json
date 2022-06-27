@@ -40,6 +40,7 @@
     "analysis": {
         "case_id": "id1",
         "analysis_type": "paired",
+        "sequencing_type": "targeted",
         "analysis_dir": "tests/test_data/",
         "fastq_path": "tests/test_data/fastq/",
         "script": "tests/test_data/id1/scripts/",
@@ -50,14 +51,14 @@
         "dag": "tests/test_data/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
     },
     "samples": {
-        "S1_R": {
-            "file_prefix": "S1_R",
+        "concatenated_tumor_XXXXXX_R": {
+            "file_prefix": "concatenated_tumor_XXXXXX_R",
             "sample_name" : "ACC1",
             "type": "tumor",
             "readpair_suffix": ["1", "2"]
         },
-        "S2_R": {
-            "file_prefix": "S2_R",
+        "concatenated_normal_XXXXXX_R": {
+            "file_prefix": "concatenated_normal_XXXXXX_R",
             "sample_name" : "ACC2",
             "type": "normal",
             "readpair_suffix": ["1", "2"]
