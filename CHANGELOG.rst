@@ -40,7 +40,7 @@ Fixed:
 * Missing `genderChr` flag for `ascat_tumor_normal` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/963
 * Command in vcf2cytosure rule and updated ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/966
 * Missing name `analysis_dir` in QC.smk https://github.com/Clinical-Genomics/BALSAMIC/pull/970
-* Remove `sample_type` wildcard from the `vcfheader_rename_germline` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/971
+* Remove `sample_type` wildcard from the `vcfheader_rename_germline` rule and change genotype file name https://github.com/Clinical-Genomics/BALSAMIC/pull/971
 
 Removed
 ^^^^^^^
