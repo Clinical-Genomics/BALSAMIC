@@ -267,7 +267,7 @@ analysis_specific_results.extend(
 
 # Germline SNVs specifically for genotype
 if config["analysis"]["analysis_type"]=="paired":
-    analysis_specific_results.extend(expand(vep_dir + "SNV.genotype.{sample_type}.dnascope.vcf.gz", sample_type=["normal"]))
+    analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
 
 # Raw VCFs
 analysis_specific_results.extend(

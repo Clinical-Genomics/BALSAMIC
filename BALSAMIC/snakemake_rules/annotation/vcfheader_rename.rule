@@ -4,16 +4,16 @@
 
 rule vcfheader_rename_germline:
     input:
-        vcf = vep_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz"
+        vcf = vep_dir + "SNV.germline.normal.dnascope.vcf.gz"
     output:
-        namemap = vep_dir + "genotype_{sample_type}_samplenames.tsv",
-        vcf_dnascope = vep_dir + "SNV.genotype.{sample_type}.dnascope.vcf.gz"
+        namemap = vep_dir + "genotype_normal_samplenames.tsv",
+        vcf_dnascope = vep_dir + "SNV.genotype.normal.dnascope.vcf.gz"
     benchmark:
-        Path(benchmark_dir, "vcfheader_rename_germline_{sample_type}.tsv").as_posix()
+        Path(benchmark_dir, "vcfheader_rename_germline_normal.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-        housekeeper_id = {"id": '{sample_type}', "tags": "genotype"},
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "genotype"},
         sample_name = "NORMAL",
         lims_name = lims_id["normal"]
     message:
