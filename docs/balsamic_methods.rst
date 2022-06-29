@@ -37,7 +37,7 @@ Results of the quality controlled steps were summarized by MultiQC v1.12 :supers
 Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
 The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
-Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.0.0 :superscript:`12.
+Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.0.0 :superscript:`12`.
 Copy number variations (CNV) were called using ascatNgs v4.5.0 :superscript:`17` and Delly v1.0.3 :superscript:`10` and converted from CNV to deletions (DEL) and duplications (DUP).
 The structural variant (SV) calls from Manta, Delly, TIDDIT and ascatNgs (tumor-normal) were merged using SVDB v2.6.0 :superscript:`12`
 All variants were finally annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
