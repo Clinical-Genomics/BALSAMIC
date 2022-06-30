@@ -11,7 +11,7 @@ Fixed:
 Changed:
 ^^^^^^^^
 
-* Cluster configuration for SV rules https://github.com/Clinical-Genomics/BALSAMIC/pull/973
+* Time allocation in cluster configuration for SV rules https://github.com/Clinical-Genomics/BALSAMIC/pull/973
 
 
 
