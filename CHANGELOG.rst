@@ -1,5 +1,22 @@
+[10.0.1]
+---------
+
+Fixed:
+^^^^^^
+
+* Command and condition for TIDDIT and fixed ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/973
+* ReadtheDocs and updated the header https://github.com/Clinical-Genomics/BALSAMIC/pull/973
+
+
+Changed:
+^^^^^^^^
+
+* Time allocation in cluster configuration for SV rules https://github.com/Clinical-Genomics/BALSAMIC/pull/973
+
+
+
 [10.0.0]
--------
+---------
 
 Added:
 ^^^^^^
