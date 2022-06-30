@@ -1,3 +1,13 @@
+[10.0.1]
+---------
+
+Fixed:
+^^^^^^
+
+* Command and condition for TIDDIT and fixed ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/973
+
+
+
 [10.0.0]
 ---------
 
@@ -41,7 +51,6 @@ Fixed:
 * Command in vcf2cytosure rule and updated ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/966
 * Missing name `analysis_dir` in QC.smk https://github.com/Clinical-Genomics/BALSAMIC/pull/970
 * Remove `sample_type` wildcard from the `vcfheader_rename_germline` rule and change genotype file name https://github.com/Clinical-Genomics/BALSAMIC/pull/971
-* Command and condition for TIDDIT and fixed ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/973
 
 Removed
 ^^^^^^^
