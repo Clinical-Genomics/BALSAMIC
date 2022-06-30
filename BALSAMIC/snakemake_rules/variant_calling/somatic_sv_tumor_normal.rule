@@ -258,7 +258,7 @@ rule tiddit_sv_tumor_normal:
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
     threads:
-        get_threads(cluster_config, "tiddit_sv_tumor_normal")
+        get_threads(cluster_config, "tiddit_tumor_normal")
     message:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:
