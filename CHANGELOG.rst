@@ -1,3 +1,11 @@
+[10.0.2]
+---------
+
+Fixed:
+^^^^^^
+
+* TIDDIT delivery rule names (undo changes made in Balsamic 10.0.1)
+
 [10.0.1]
 ---------
 
