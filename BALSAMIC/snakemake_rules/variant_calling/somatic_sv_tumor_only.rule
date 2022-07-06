@@ -111,7 +111,7 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
-rule tiddit_tumor_only:
+rule tiddit_sv_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = bam_dir + tumor_bam,
@@ -120,7 +120,7 @@ rule tiddit_tumor_only:
         cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
         namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
     benchmark:
-        benchmark_dir + 'tiddit_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'tiddit_sv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
     params:
@@ -129,7 +129,7 @@ rule tiddit_tumor_only:
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
     threads:
-        get_threads(cluster_config, "tiddit_tumor_only")
+        get_threads(cluster_config, "tiddit_sv_tumor_only")
     message:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:

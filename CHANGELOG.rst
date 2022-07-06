@@ -1,3 +1,11 @@
+[10.0.2]
+---------
+
+Fixed:
+^^^^^^
+
+* TIDDIT delivery rule names (undo rule name changes made in Balsamic 10.0.1) https://github.com/Clinical-Genomics/BALSAMIC/pull/977
+
 [10.0.1]
 ---------
 

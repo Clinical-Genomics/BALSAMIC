@@ -237,7 +237,7 @@ rule ascat_tumor_normal_merge_output:
 python {params.merge_ascat_output_script} {output.ascat_pdf} {input.sample_statistics} {input.ascat_plots}
         """
 
-rule tiddit_tumor_normal:
+rule tiddit_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = bam_dir + normal_bam,
@@ -248,7 +248,7 @@ rule tiddit_tumor_normal:
         cov_normal_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".normal.tiddit_cov.bed",
         namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
     benchmark:
-        benchmark_dir + 'tiddit_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'tiddit_sv_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
     params:
@@ -258,7 +258,7 @@ rule tiddit_tumor_normal:
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
     threads:
-        get_threads(cluster_config, "tiddit_tumor_normal")
+        get_threads(cluster_config, "tiddit_sv_tumor_normal")
     message:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:
