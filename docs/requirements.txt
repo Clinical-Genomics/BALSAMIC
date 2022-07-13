@@ -1,10 +1,11 @@
 appdirs==1.4.4
 configargparse==1.5.3
-docutils>=0.14,<0.18
-recommonmark==0.7.1
-sphinx==4.2.0
+docutils<0.18,>0.14
+recommonmark==0.5.0
+sphinx==5.0.2
 sphinx-argparse==0.3.1
-sphinx-click==3.0.2
+sphinx-click==4.3.0
 sphinx_rtd_theme==1.0.0
 sphinxcontrib-napoleon==0.7
-furo==2021.10.9
+furo==2022.6.21
+cyvcf2==0.30.15
