@@ -8,7 +8,7 @@ Create a conda environment:
 
 .. code-block::
 
-   conda create -n balsamic_doc -c bioconda -c conda-forge python=3.6 pip
+   conda create -n balsamic_doc -c bioconda -c conda-forge python=3.6 pip pygraphviz
    conda activate balsamic_doc
 
 Install Sphinx and extensions:
