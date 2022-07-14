@@ -48,7 +48,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Modules to be mocked up
-autodoc_mock_imports = ["cyvcf2"]
+# autodoc_mock_imports = ["cyvcf2"]
 
 # -- Options for HTML output -------------------------------------------------
 

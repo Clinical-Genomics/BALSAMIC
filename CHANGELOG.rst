@@ -5,6 +5,7 @@ Fixed:
 ^^^^^^
 
 * TIDDIT delivery rule names (undo rule name changes made in Balsamic 10.0.1) https://github.com/Clinical-Genomics/BALSAMIC/pull/977
+* BALSAMIC readthedocs CLI documentation generation  https://github.com/Clinical-Genomics/BALSAMIC/issues/965
 
 [10.0.1]
 ---------
