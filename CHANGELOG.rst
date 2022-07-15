@@ -1,3 +1,16 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+* Use of PON reference, if exists for CNVkit tumor-normal analysis
+
+Changed:
+^^^^^^^^
+
+* Added version number to the PON reference filename (`.cnn`) 
+
 [10.0.2]
 ---------
 
