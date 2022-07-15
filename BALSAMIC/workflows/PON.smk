@@ -31,6 +31,7 @@ access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
 benchmark_dir = config["analysis"]["benchmark"]
+version = "v1"
 
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
@@ -42,8 +43,8 @@ panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
 coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
-pon_reference = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.cnn")
-pon_finish = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference.done")
+pon_reference = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference_" + version + ".cnn")
+pon_finish = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_PON_reference_"+ version +".done")
 
 config["rules"] = ["snakemake_rules/quality_control/fastp.rule", 
                    "snakemake_rules/align/bwa_mem.rule"]
