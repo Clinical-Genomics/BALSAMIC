@@ -541,7 +541,7 @@ def test_analysis_pon_model():
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": "tests/test_data",
+        "analysis_dir": "tests/pon/test_data",
         "analysis_workflow": "balsamic",
         "PON_version": "v1",
     }
