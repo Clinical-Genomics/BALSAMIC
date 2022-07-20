@@ -43,7 +43,7 @@ panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
 coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
-pon_reference = expand(cnv_dir + panel_name + "_" + "_CNVkit_PON_reference_" + version + ".cnn")
+pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
 pon_finish = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_CNVkit_PON_reference_"+ version +".done")
 
 config["rules"] = ["snakemake_rules/quality_control/fastp.rule",
