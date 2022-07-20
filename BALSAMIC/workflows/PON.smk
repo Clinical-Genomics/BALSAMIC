@@ -7,7 +7,7 @@ import tempfile
 import os
 
 
-from BALSAMIC.utils.rule import (get_picard_mrkdup, get_threads, 
+from BALSAMIC.utils.rule import (get_picard_mrkdup, get_threads,
                                  get_result_dir, get_pon_samples)
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
@@ -31,7 +31,7 @@ access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
 benchmark_dir = config["analysis"]["benchmark"]
-version = "v1"
+version = config["analysis"]["PON_version"]
 
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
@@ -46,14 +46,14 @@ baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_CNVkit_PON_reference_" + version + ".cnn")
 pon_finish = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_CNVkit_PON_reference_"+ version +".done")
 
-config["rules"] = ["snakemake_rules/quality_control/fastp.rule", 
+config["rules"] = ["snakemake_rules/quality_control/fastp.rule",
                    "snakemake_rules/align/bwa_mem.rule"]
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
 
 rule all:
-    input: pon_finish 
+    input: pon_finish
 
 rule create_target:
     input:
@@ -66,7 +66,7 @@ rule create_target:
     singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
-        Path(benchmark_dir, "cnvkit.targets.tsv").as_posix() 
+        Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
     shell:
         """
 cnvkit.py target {input.target_bait} --annotate {input.refFlat} --split -o {output.target_bed};

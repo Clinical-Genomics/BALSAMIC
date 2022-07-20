@@ -90,6 +90,13 @@ LOG = logging.getLogger(__name__)
         "will be <outdir>/genome_version"
     ),
 )
+@click.option(
+    "-v",
+    "--version",
+    default="v1",
+    type=str,
+    help="Version of the PON file to be generated",
+)
 @click.pass_context
 def pon_config(
     context,
@@ -103,6 +110,7 @@ def pon_config(
     adapter_trim,
     genome_version,
     balsamic_cache,
+    version,
 ):
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
@@ -121,6 +129,7 @@ def pon_config(
             "case_id": case_id,
             "analysis_dir": analysis_dir,
             "analysis_type": "pon",
+            "PON_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },

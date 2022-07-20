@@ -25,6 +25,7 @@ from BALSAMIC.utils.models import (
     MetricModel,
     MetricConditionModel,
     MetricValidationModel,
+    AnalysisPonModel,
 )
 
 
@@ -530,3 +531,38 @@ def test_metric_validation_model_norm_fail(qc_extracted_metrics):
         MetricValidationModel(metrics=metrics)
     except KeyError as key_exc:
         assert metrics[4]["condition"]["norm"] in str(key_exc)
+
+
+def test_analysis_pon_model():
+    """Tests PON model parsing"""
+
+    # GIVEN valid input arguments
+    valid_args = {
+        "case_id": "case_id",
+        "analysis_type": "pon",
+        "sequencing_type": "targeted",
+        "analysis_dir": "tests/test_data",
+        "analysis_workflow": "balsamic",
+        "PON_version": "v1",
+    }
+
+    # THEN we can successfully create a config dict
+    assert AnalysisPonModel.parse_obj(valid_args)
+
+    # GIVEN an invalid version argument
+    invalid_args = {
+        "case_id": "case_id",
+        "analysis_type": "pon",
+        "sequencing_type": "targeted",
+        "analysis_dir": "tests/test_data",
+        "analysis_workflow": "balsamic",
+        "PON_version": "v01",
+    }
+
+    # THEN should trigger ValueError
+    with pytest.raises(ValueError) as excinfo:
+        AnalysisPonModel.parse_obj(invalid_args)
+        assert (
+            f"The provided version {invalid_args['PON_version']} does not follow the defined syntax (v<int>)"
+            in excinfo.value
+        )
