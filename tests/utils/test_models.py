@@ -533,7 +533,7 @@ def test_metric_validation_model_norm_fail(qc_extracted_metrics):
         assert metrics[4]["condition"]["norm"] in str(key_exc)
 
 
-def test_analysis_pon_model():
+def test_analysis_pon_model(test_data_dir):
     """Tests PON model parsing"""
 
     # GIVEN valid input arguments
@@ -541,7 +541,7 @@ def test_analysis_pon_model():
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": "tests/pon/test_data",
+        "analysis_dir": test_data_dir,
         "analysis_workflow": "balsamic",
         "PON_version": "v1",
     }
@@ -554,7 +554,7 @@ def test_analysis_pon_model():
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": "tests/pon/test_data",
+        "analysis_dir": test_data_dir,
         "analysis_workflow": "balsamic",
         "PON_version": "v01",
     }
