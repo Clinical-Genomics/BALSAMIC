@@ -17,7 +17,6 @@ from BALSAMIC.utils.models import PonBalsamicConfigModel
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
-    GENDER_OPTIONS,
 )
 
 LOG = logging.getLogger(__name__)
@@ -25,14 +24,6 @@ LOG = logging.getLogger(__name__)
 
 @click.command("pon", short_help="Create a sample config file for PON analysis")
 @click.option("--case-id", required=True, help="Sample id used for reporting analysis")
-@click.option(
-    "--gender",
-    required=False,
-    default="female",
-    show_default=True,
-    type=click.Choice(GENDER_OPTIONS),
-    help="Case associated gender",
-)
 @click.option(
     "--umi/--no-umi",
     default=True,
@@ -103,7 +94,6 @@ LOG = logging.getLogger(__name__)
 def pon_config(
     context,
     case_id,
-    gender,
     analysis_dir,
     fastq_path,
     panel_bed,
@@ -129,7 +119,6 @@ def pon_config(
         },
         analysis={
             "case_id": case_id,
-            "gender": gender,
             "analysis_dir": analysis_dir,
             "analysis_type": "pon",
             "analysis_workflow": "balsamic",
