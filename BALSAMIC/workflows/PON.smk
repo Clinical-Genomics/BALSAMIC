@@ -20,10 +20,11 @@ localrules: all
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
-fastq_dir = get_result_dir(config) + "/fastq/"
-qc_dir = get_result_dir(config) + "/qc/"
-bam_dir =  get_result_dir(config) + "/bam/"
-cnv_dir =  get_result_dir(config) + "/cnv/"
+analysis_dir = get_result_dir(config)
+fastq_dir = analysis_dir + "/fastq/"
+qc_dir = analysis_dir + "/qc/"
+bam_dir =  analysis_dir + "/bam/"
+cnv_dir =  analysis_dir + "/cnv/"
 
 reffasta = config["reference"]["reference_genome"]
 refflat = config["reference"]["refflat"]
@@ -33,7 +34,7 @@ singularity_image = config["singularity"]["image"]
 benchmark_dir = config["analysis"]["benchmark"]
 version = config["analysis"]["PON_version"]
 
-tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
+tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 picarddup = get_picard_mrkdup(config)
@@ -44,7 +45,7 @@ panel_name = os.path.split(target_bed)[1].replace('.bed','')
 coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
-pon_finish = expand(cnv_dir + panel_name + "_" + config["analysis"]["case_id"] + "_CNVkit_PON_reference_"+ version +".done")
+pon_finish = expand(analysis_dir + "/" + panel_name + "_" + config["analysis"]["case_id"] + "_CNVkit_PON_reference_"+ version +".done")
 
 config["rules"] = ["snakemake_rules/quality_control/fastp.rule",
                    "snakemake_rules/align/bwa_mem.rule"]
