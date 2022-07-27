@@ -45,7 +45,7 @@ panel_name = os.path.split(target_bed)[1].replace('.bed','')
 coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
-pon_finish = expand(analysis_dir + "/" + panel_name + "_" + config["analysis"]["case_id"] + "_CNVkit_PON_reference_"+ version +".done")
+pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
 
 config["rules"] = ["snakemake_rules/quality_control/fastp.rule",
                    "snakemake_rules/align/bwa_mem.rule"]
@@ -54,7 +54,16 @@ for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
 
 rule all:
-    input: pon_finish
+    input:
+        ref_cnn = pon_reference
+    output:
+        pon_finish_file = pon_finish
+    run:
+        import datetime
+
+        # PON finish timestamp file
+        with open(str(output.pon_finish_file), mode="w") as finish_file:
+            finish_file.write("%s\n" % datetime.datetime.now())
 
 rule create_target:
     input:
@@ -98,12 +107,11 @@ rule create_reference:
         ref = reffasta
     output:
         ref_cnn = pon_reference,
-        txt = pon_finish
     singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
         Path(benchmark_dir, "cnvkit.reference.tsv").as_posix()
     shell:
         """
-cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn} && touch {output.txt} ;
+cnvkit.py reference {input.cnn} --fasta {input.ref} -o {output.ref_cnn} ;
         """
