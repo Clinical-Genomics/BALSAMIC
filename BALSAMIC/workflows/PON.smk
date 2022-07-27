@@ -106,7 +106,7 @@ rule create_reference:
         cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=samples, prefix=["target","antitarget"]),
         ref = reffasta
     output:
-        ref_cnn = pon_reference,
+        ref_cnn = pon_reference
     singularity:
         Path(singularity_image, "varcall_cnvkit.sif").as_posix()
     benchmark:
