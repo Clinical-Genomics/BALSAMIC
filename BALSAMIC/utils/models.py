@@ -349,12 +349,12 @@ class AnalysisPonModel(AnalysisModel):
     """Pydantic model containing PON workflow variables
 
     Attributes:
-        PON_version: Field(str); version of the PON generated file
+        pon_version: Field(str); version of the PON generated file
     """
 
-    PON_version: str
+    pon_version: str
 
-    @validator("PON_version")
+    @validator("pon_version")
     def validate_pon_version(cls, value):
         """Checks that the version matches the following syntax: v<int>"""
 

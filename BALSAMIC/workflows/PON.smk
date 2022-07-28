@@ -32,7 +32,7 @@ access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
 benchmark_dir = config["analysis"]["benchmark"]
-version = config["analysis"]["PON_version"]
+version = config["analysis"]["pon_version"]
 
 tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)

@@ -543,7 +543,7 @@ def test_analysis_pon_model(test_data_dir):
         "sequencing_type": "targeted",
         "analysis_dir": test_data_dir,
         "analysis_workflow": "balsamic",
-        "PON_version": "v1",
+        "pon_version": "v1",
     }
 
     # THEN we can successfully create a config dict
@@ -556,13 +556,13 @@ def test_analysis_pon_model(test_data_dir):
         "sequencing_type": "targeted",
         "analysis_dir": test_data_dir,
         "analysis_workflow": "balsamic",
-        "PON_version": "v01",
+        "pon_version": "v01",
     }
 
     # THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
         AnalysisPonModel.parse_obj(invalid_args)
         assert (
-            f"The provided version {invalid_args['PON_version']} does not follow the defined syntax (v<int>)"
+            f"The provided version {invalid_args['pon_version']} does not follow the defined syntax (v<int>)"
             in excinfo.value
         )
