@@ -4,12 +4,18 @@
 Added:
 ^^^^^^
 
-* Use of PON reference, if exists for CNVkit tumor-normal analysis
+* Use of PON reference, if exists for CNVkit tumor-normal analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/982
+* Added PON version to CLI and config.json https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 
 Changed:
 ^^^^^^^^
 
-* Added version number to the PON reference filename (`.cnn`) 
+* Added version number to the PON reference filename (`.cnn`) https://github.com/Clinical-Genomics/BALSAMIC/pull/982
+
+Removed
+^^^^^^^
+
+* case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 
 [10.0.2]
 ---------

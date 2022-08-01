@@ -86,6 +86,11 @@ def reference():
 
 
 @pytest.fixture(scope="session")
+def test_data_dir():
+    return "tests/test_data"
+
+
+@pytest.fixture(scope="session")
 def config_path():
     return "tests/test_data/config.json"
 

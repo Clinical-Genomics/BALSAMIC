@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
@@ -234,8 +235,8 @@ class AnalysisModel(BaseModel):
     """
 
     case_id: str
-    gender: str
     analysis_type: str
+    gender: Optional[str]
     sequencing_type: str
     analysis_workflow: str
     analysis_dir: DirectoryPath
@@ -251,20 +252,20 @@ class AnalysisModel(BaseModel):
     class Config:
         validate_all = True
 
-    @validator("gender")
-    def gender_literal(cls, value) -> str:
-        if value not in GENDER_OPTIONS:
-            raise ValueError(
-                f"Provided gender type ({value}) is not supported in BALSAMIC!"
-            )
-        return value
-
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
         balsamic_analysis_types = ANALYSIS_TYPES
         if value not in balsamic_analysis_types:
             raise ValueError(
                 f"Provided analysis type ({value}) not supported in BALSAMIC!"
+            )
+        return value
+
+    @validator("gender")
+    def gender_literal(cls, value, values) -> Optional[str]:
+        if value not in GENDER_OPTIONS and values.get("analysis_type") != "pon":
+            raise ValueError(
+                f"Provided gender type ({value}) is not supported in BALSAMIC!"
             )
         return value
 
@@ -342,6 +343,28 @@ class AnalysisModel(BaseModel):
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
         return datetime.now().strftime("%Y-%m-%d %H:%M")
+
+
+class AnalysisPonModel(AnalysisModel):
+    """Pydantic model containing PON workflow variables
+
+    Attributes:
+        pon_version: Field(str); version of the PON generated file
+    """
+
+    pon_version: str
+
+    @validator("pon_version")
+    def validate_pon_version(cls, value):
+        """Checks that the version matches the following syntax: v<int>"""
+
+        match = re.fullmatch("^v[1-9]\d*$", value)
+        if not match:
+            raise ValueError(
+                f"The provided version ({value}) does not follow the defined syntax (v<int>)"
+            )
+
+        return value
 
 
 class SampleInstanceModel(BaseModel):
@@ -422,7 +445,7 @@ class PonBalsamicConfigModel(BaseModel):
     """
 
     QC: QCModel
-    analysis: AnalysisModel
+    analysis: AnalysisPonModel
     reference: Dict[str, Path]
     singularity: DirectoryPath
     bioinfo_tools: dict
