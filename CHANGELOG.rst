@@ -11,7 +11,7 @@ Changed:
 ^^^^^^^^
 
 * Added version number to the PON reference filename (`.cnn`) https://github.com/Clinical-Genomics/BALSAMIC/pull/982
-* Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, delly to v1.1.3, vcf2cytosure to v0.8
+* Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, `delly` to v1.1.3, `vcf2cytosure` to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/987
 
 Removed
 ^^^^^^^
