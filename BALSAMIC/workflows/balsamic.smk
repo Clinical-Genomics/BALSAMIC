@@ -218,6 +218,12 @@ for ws in ["BALSAMIC","Sentieon","Sentieon_umi"]:
                                            mutation_class="somatic")
     somatic_caller_tmb +=  somatic_caller_snv
 
+
+# Remove TNhaplotyer for WGS-TN analysis
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
+    somatic_caller.remove("tnhaplotyper")
+    somatic_caller_tmb.remove("tnhaplotyper")
+
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
     variant_callers_to_remove = config["disable_variant_caller"].split(",")
