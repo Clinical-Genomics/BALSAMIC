@@ -20,6 +20,7 @@ RUN apk add --no-cache bash gcc git python3 gzip
 RUN cd /opt \
     && git clone https://github.com/NBISweden/vcf2cytosure.git \
     && cd /opt/${CONTAINER_NAME}/  \
+    && git checkout v0.8 \
     && pip install --no-cache-dir .
 
 RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
