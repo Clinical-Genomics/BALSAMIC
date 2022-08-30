@@ -17,6 +17,7 @@ Removed
 ^^^^^^^
 
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
+* TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
 
 [10.0.2]
 ---------
