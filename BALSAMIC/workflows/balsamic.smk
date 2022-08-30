@@ -219,7 +219,7 @@ for ws in ["BALSAMIC","Sentieon","Sentieon_umi"]:
     somatic_caller_tmb +=  somatic_caller_snv
 
 
-# Remove TNhaplotyer for WGS-TN analysis
+# Remove TNhaplotyper for WGS-TN analyses
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     somatic_caller.remove("tnhaplotyper")
     somatic_caller_tmb.remove("tnhaplotyper")
