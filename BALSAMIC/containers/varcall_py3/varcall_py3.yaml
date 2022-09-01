@@ -14,5 +14,6 @@ dependencies:
   - bioconda::vcfpy=0.13.4
   - bioconda::bwa=0.7.17
   - bioconda::tiddit=3.3.0
+  - bioconda::cnvpytor=1.2.1
   - conda-forge::libiconv
   - conda-forge::r-base=4.1.1
