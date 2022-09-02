@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "bcftools" "samtools" "tabix" "vardict" "vardict-java" "svdb" "bwa" "tiddit")
+valid_commands=( "bcftools" "samtools" "tabix" "vardict" "vardict-java" "svdb" "bwa" "tiddit" "cnvpytor")
 
 for valid_command in "${valid_commands[@]}"
 do
