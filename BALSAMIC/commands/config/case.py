@@ -132,37 +132,37 @@ LOG = logging.getLogger(__name__)
     "--clinical-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF of clinical SNV observations (WGS analysis workflow)",
+    help="VCF path of clinical SNV observations (WGS analysis workflow)",
 )
 @click.option(
     "--clinical-sv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF of clinical SV observations (WGS analysis workflow)",
+    help="VCF path of clinical SV observations (WGS analysis workflow)",
 )
 @click.option(
     "--cancer-snv-normal-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF of cancer SNV normal observations (WGS analysis workflow)",
+    help="VCF path of cancer SNV normal observations (WGS analysis workflow)",
 )
 @click.option(
     "--cancer-snv-tumor-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF of cancer SNV tumor observations (WGS analysis workflow)",
+    help="VCF path of cancer SNV tumor observations (WGS analysis workflow)",
 )
 @click.option(
     "--cancer-sv-normal-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF of cancer SV normal observations (WGS analysis workflow)",
+    help="VCF path of cancer SV normal observations (WGS analysis workflow)",
 )
 @click.option(
     "--cancer-sv-tumor-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF of cancer SV tumor observations (WGS analysis workflow)",
+    help="VCF path of cancer SV tumor observations (WGS analysis workflow)",
 )
 @click.option(
     "-g",
