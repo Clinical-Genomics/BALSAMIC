@@ -7,6 +7,8 @@ Added:
 * Use of PON reference, if exists for CNVkit tumor-normal analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/982
 * Added PON version to CLI and config.json https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * `cnvpytor` to varcallpy3 container https://github.com/Clinical-Genomics/BALSAMIC/pull/991
+* `loqusDB` dump files to the config through the balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/992
+
 
 
 Changed:
