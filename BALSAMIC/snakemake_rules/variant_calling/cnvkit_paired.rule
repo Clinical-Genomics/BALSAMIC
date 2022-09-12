@@ -45,11 +45,6 @@ mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export PURECN='/opt/conda/lib/R/library/PureCN/extdata/PureCN.R'
 
-
-bcftools merge -O z /home/proj/production/cancer/cases/properpigeon/analysis/vcf/SNV.germline.tumor.dnascope.vcf.gz /home/proj/production/cancer/cases/properpigeon/analysis/vcf/SNV.germline.normal.dnascope.vcf.gz -o SNV.germline.dnascope.vcf.gz
-
-
-
 # merge the tumor and normal VCF 
 bcftools merge \
 -O z -o {params.tmpdir}/SNV.merged.vcf.gz \
