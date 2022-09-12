@@ -16,7 +16,7 @@ rule cnvkit_single:
         baits_bed = config["panel"]["capture_kit"],
         fasta = config["reference"]["reference_genome"],
         refflat = config["reference"]["refflat"],
-        snv_vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz"
+        snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
     output:
         cns = cnv_dir + "tumor.merged" + ".cns",
         cnr = cnv_dir + "tumor.merged" + ".cnr",

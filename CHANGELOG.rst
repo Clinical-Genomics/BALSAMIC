@@ -1,3 +1,9 @@
+[X.X.X]
+
+Fixed:
+
+* Input VCF files for cnvkit rules and cnvkit command
+
 [10.0.2]
 ---------
 
