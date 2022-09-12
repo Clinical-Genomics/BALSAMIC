@@ -149,6 +149,72 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
+rule cnvpytor_cnv_tumor_only:
+    input:
+        bamT = bam_dir + tumor_bam,
+        vcfT = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        map = config["reference"]["delly_mappability"],
+    output:
+        cnv_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.vcf.gz",
+        circular_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.circular.png",
+        scattter_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.scatter.png",
+        namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.sample_name_map",
+    benchmark:
+        benchmark_dir + 'cnvpytor_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("cnvpytor") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+        tumor = "TUMOR",
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "cnvpytor_tumor_only")
+    message:
+        ("Calling copy number variants using cnvpytor for {params.case_name}")
+    shell:
+        """
+export tumor={params.tumor};
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -rd {input.bamT};
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -his 1000 10000 100000;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor  -partition 1000 10000 100000;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -snp {input.vcfT} -sample {params.tumor};
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -mask_snps;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -baf 10000 100000;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -call 1000 10000 100000 1> {params.tmpdir}/{params.tumor}.pytor {params.tmpdir}/{params.tumor}.call
+
+echo -e \"set print_filename $tumor.vcf\\n\
+set Q0_range -1 0.5\\nset p_range 0 0.0001\\n\
+set p_N 0 0.5\\nprint calls\" > {params.tmpdir}/{params.tumor}.out.sh;
+
+echo -e \"set rd_use_mask\\nset markersize 1\\nset grid vertical\\n\
+set output_filename $tumor.png\\nmanhattan\\ncircular\" > {params.tmpdir}/{params.tumor}.plot.sh;
+
+cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
+-view 100000 < {params.tmpdir}/{params.tumor}.plot.sh;
+
+for binsize in 1000 10000 100000; do cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
+-view $binsize < {params.tmpdir}/{params.tumor}.out.sh;done;
+
+cp {params.tmpdir}/{params.tumor}.cnvpytor.circular.png {output.circular_cnvpytor};
+
+cp {params.tmpdir}/{params.tumor}.cnvpytor.circular.png {output.circular_cnvpytor};
+
+cp {params.tmpdir}/{params.tumor}.vcf {output.cnv_cnvpytor};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
+
 rule bcftools_process_SV_CNV:
     input:
         delly_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",

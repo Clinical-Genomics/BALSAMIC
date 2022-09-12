@@ -99,6 +99,13 @@ VCF_DICT = {
         "sequencing_type": ["wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
+    "cnvpytor": {
+        "mutation": "somatic",
+        "type": "CNV",
+        "analysis_type": ["single"],
+        "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
     "svdb": {
         "mutation": "somatic",
         "type": "SV",

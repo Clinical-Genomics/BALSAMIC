@@ -62,6 +62,10 @@
             "mutation": "somatic",
             "type": "SV"
         },
+        "cnvpytor": {
+            "mutation": "somatic",
+            "type": "CNV"
+        },
         "svdb": {
             "mutation": "somatic",
             "type": "SV"
