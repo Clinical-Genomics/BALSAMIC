@@ -141,28 +141,22 @@ LOG = logging.getLogger(__name__)
     help="VCF path of clinical SV observations (WGS analysis workflow)",
 )
 @click.option(
-    "--cancer-snv-normal-observations",
+    "--cancer-all-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
     help="VCF path of cancer SNV normal observations (WGS analysis workflow)",
 )
 @click.option(
-    "--cancer-snv-tumor-observations",
+    "--cancer-somatic-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
     help="VCF path of cancer SNV tumor observations (WGS analysis workflow)",
 )
 @click.option(
-    "--cancer-sv-normal-observations",
+    "--cancer-somatic-sv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF path of cancer SV normal observations (WGS analysis workflow)",
-)
-@click.option(
-    "--cancer-sv-tumor-observations",
-    type=click.Path(exists=True, resolve_path=True),
-    required=False,
-    help="VCF path of cancer SV tumor observations (WGS analysis workflow)",
+    help="VCF path of cancer SV observations (WGS analysis workflow)",
 )
 @click.option(
     "-g",
@@ -206,10 +200,9 @@ def case_config(
     normal_sample_name,
     clinical_snv_observations,
     clinical_sv_observations,
-    cancer_snv_normal_observations,
-    cancer_snv_tumor_observations,
-    cancer_sv_normal_observations,
-    cancer_sv_tumor_observations,
+    cancer_all_snv_observations,
+    cancer_somatic_snv_observations,
+    cancer_somatic_sv_observations,
     genome_version,
     balsamic_cache,
     container_version,
@@ -240,10 +233,9 @@ def case_config(
         variants_observations = {
             "clinical_snv_observations": clinical_snv_observations,
             "clinical_sv_observations": clinical_sv_observations,
-            "cancer_snv_normal_observations": cancer_snv_normal_observations,
-            "cancer_snv_tumor_observations": cancer_snv_tumor_observations,
-            "cancer_sv_normal_observations": cancer_sv_normal_observations,
-            "cancer_sv_tumor_observations": cancer_sv_tumor_observations,
+            "cancer_all_snv_observations": cancer_all_snv_observations,
+            "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
+            "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         }
         reference_dict.update(
             {
