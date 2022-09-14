@@ -48,7 +48,6 @@ export PURECN='/opt/conda/lib/R/library/PureCN/extdata/PureCN.R'
 # merge the tumor and normal VCF 
 bcftools merge \
 -O z -o {params.tmpdir}/SNV.merged.vcf.gz \
---temp-dir {params.tmpdir} \
 -O z {input.snv_vcf_tumor} {input.snv_vcf_normal};
 
 tabix -p vcf -f {params.tmpdir}/SNV.merged.vcf.gz;
