@@ -9,7 +9,7 @@ Added:
 * `cnvpytor` to varcallpy3 container https://github.com/Clinical-Genomics/BALSAMIC/pull/991
 * R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/996
 * Missing R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/997
-
+* add rlang to cnvkit container
 
 Changed:
 ^^^^^^^^
