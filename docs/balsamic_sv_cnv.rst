@@ -39,11 +39,6 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - tumor-normal, tumor-only
      - somatic
      - SV
-   * - CNVpytor
-     - WGS
-     - tumor-only
-     - somatic
-     - SV
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
