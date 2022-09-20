@@ -2,7 +2,7 @@
 
 Fixed:
 
-* Input VCF files for cnvkit rules and cnvkit command
+* Input VCF files for cnvkit rules, cnvkit command and container https://github.com/Clinical-Genomics/BALSAMIC/pull/995
 
 [10.0.2]
 ---------
