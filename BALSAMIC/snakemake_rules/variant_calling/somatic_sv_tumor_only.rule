@@ -188,7 +188,7 @@ cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -mask_
 
 cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -baf 10000 100000;
 
-cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -call 1000 10000 100000 1> {params.tmpdir}/{params.tumor}.pytor {params.tmpdir}/{params.tumor}.call
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -call 1000 10000 100000 1> {params.tmpdir}/{params.tumor}.call
 
 echo -e \"set print_filename $tumor.vcf\\n\
 set Q0_range -1 0.5\\nset p_range 0 0.0001\\n\

@@ -39,6 +39,11 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - tumor-normal, tumor-only
      - somatic
      - SV
+   * - CNVpytor
+     - WGS
+     - tumor-only
+     - somatic
+     - CNV
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
@@ -75,6 +80,8 @@ The copy number variants, identified using ascatNgs and `dellycnv`, are converte
        | 2. dellysv
        | 3. dellycnv
        | 4. tiddit
+       | 5. cnvpytor
+
 
 
 The merged `*.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
