@@ -203,9 +203,9 @@ cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
 for binsize in 1000 10000 100000; do cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
 -view $binsize < {params.tmpdir}/{params.tumor}.out.sh;done;
 
-cp {params.tmpdir}/{params.tumor}.cnvpytor.circular.png {output.circular_cnvpytor};
+cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scattter_cnvpytor};
 
-cp {params.tmpdir}/{params.tumor}.cnvpytor.circular.png {output.circular_cnvpytor};
+cp {params.tmpdir}/{params.tumor}.circular.0001.png {output.circular_cnvpytor};
 
 cp {params.tmpdir}/{params.tumor}.vcf {output.cnv_cnvpytor};
 
