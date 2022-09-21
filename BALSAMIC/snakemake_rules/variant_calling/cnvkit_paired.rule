@@ -9,7 +9,8 @@ rule cnvkit_paired:
         bamT = bam_dir + "tumor.merged" + ".bam",
         baits_bed = config["panel"]["capture_kit"],
         refflat = config["reference"]["refflat"],
-        snv_vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz"
+        snv_vcf_tumor = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
+        snv_vcf_normal = vcf_dir + "SNV.germline.normal.dnascope.vcf.gz",
     output:
         cnr = cnv_dir + "tumor.merged" + ".cnr",
         cns = cnv_dir + "tumor.merged" + ".cns",
@@ -33,7 +34,8 @@ rule cnvkit_paired:
         min_mapq = params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         gender = config["analysis"]["gender"],
-        sample_id = "TUMOR",
+        tumor_sample_id = "TUMOR",
+        normal_sample_id = "NORMAL",
         genome = config["reference"]["genome_version"]
     message:
         "Calling CNVs using CNVkit and calculating tumor purity/ploidy using PureCN for {params.case_name}"
@@ -42,6 +44,13 @@ rule cnvkit_paired:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export PURECN='/opt/conda/lib/R/library/PureCN/extdata/PureCN.R'
+
+# merge the tumor and normal VCF 
+bcftools merge \
+-O z -o {params.tmpdir}/SNV.merged.vcf.gz \
+-O z {input.snv_vcf_tumor} {input.snv_vcf_normal};
+
+tabix -p vcf -f {params.tmpdir}/SNV.merged.vcf.gz;
 
 # create target and anti-target bed files
 cnvkit.py target {input.baits_bed} \
@@ -117,10 +126,10 @@ purecn_status="true"
 {{
 Rscript $PURECN \
 --out {params.purecn_dir} \
---sampleid {params.sample_id} \
+--sampleid {params.tumor_sample_id} \
 --tumor {output.cnr} \
 --segfile {params.cnv_dir}/tumor.seg \
---vcf  {input.snv_vcf} \
+--vcf  {params.tmpdir}/SNV.merged.vcf.gz \
 --genome {params.genome} \
 --funsegmentation Hclust \
 --force --postoptimize \
@@ -128,18 +137,20 @@ Rscript $PURECN \
 }} || purecn_status="false"
 
 if $purecn_status; then
-purity=$(awk -F\\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.sample_id}.csv)
-ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.sample_id}.csv);
+purity=$(awk -F\\, 'NR>1 {{print $2}}' {params.purecn_dir}/{params.tumor_sample_id}.csv)
+ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {params.purecn_dir}/{params.tumor_sample_id}.csv);
 fi
 
 
 # Call copy number variants from segmented log2 ratios
 cnvkit.py call {params.cnv_dir}/tumor.initial.cns \
---vcf {input.snv_vcf} \
+--vcf {params.tmpdir}/SNV.merged.vcf.gz \
 --sample-sex {params.gender} \
 --method clonal \
 --purity $purity \
 --ploidy $ploidy \
+--sample-id {params.tumor_sample_id} \
+--normal-id {params.normal_sample_id} \
 --output {output.cns};
 
 # Plot bin-level log2 coverages and segmentation calls
@@ -168,7 +179,7 @@ cnvkit.py breaks {output.cnr} {output.cns} \
 cnvkit.py export vcf {output.cns} \
 --cnr {output.cnr} \
 -o {params.cnv_dir}/{params.tumor_name}.vcf \
---sample-id {params.sample_id} \
+--sample-id {params.tumor_sample_id} \
 --sample-sex {params.gender};
 
 bgzip -f {params.cnv_dir}/{params.tumor_name}.vcf;
