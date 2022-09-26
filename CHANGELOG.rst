@@ -1,6 +1,14 @@
-[10.0.3]
-
+[10.0.4]
+---------
 Fixed:
+^^^^^^
+
+* Increase sambamba_exon_depth rule run time https://github.com/Clinical-Genomics/BALSAMIC/pull/1001
+
+[10.0.3]
+---------
+Fixed:
+^^^^^^
 
 * Input VCF files for cnvkit rules, cnvkit command and container https://github.com/Clinical-Genomics/BALSAMIC/pull/995
 
