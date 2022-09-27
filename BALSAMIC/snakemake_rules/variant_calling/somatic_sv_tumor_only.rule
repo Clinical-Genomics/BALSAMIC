@@ -209,7 +209,7 @@ cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scattter_cnvpytor};
 
 cp {params.tmpdir}/{params.tumor}.circular.0001.png {output.circular_cnvpytor};
 
-cp {params.tmpdir}/{params.tumor}.vcf {output.cnv_cnvpytor};
+bgzip -c -l 9 {params.tmpdir}/{params.tumor}.vcf > {output.cnv_cnvpytor};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 

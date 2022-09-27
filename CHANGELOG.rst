@@ -8,6 +8,9 @@ Added:
 * Added PON version to CLI and config.json https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * `cnvpytor` to varcallpy3 container https://github.com/Clinical-Genomics/BALSAMIC/pull/991
 * `cnvpytor` for tumor only workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/994
+* R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/996
+* Missing R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/997
+* add rlang to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/998
 
 Changed:
 ^^^^^^^^
