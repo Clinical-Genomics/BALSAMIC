@@ -176,6 +176,8 @@ rule cnvpytor_cnv_tumor_only:
         """
 export tumor={params.tumor};
 
+export tumor_file={params.tmpdir}/$tumor
+
 cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -rd {input.bamT};
 
 cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -his 1000 10000 100000;
@@ -190,12 +192,12 @@ cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -baf 1
 
 cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -call 1000 10000 100000 1> {params.tmpdir}/{params.tumor}.call
 
-echo -e \"set print_filename $tumor.vcf\\n\
+echo -e \"set print_filename $tumor_file.vcf\\n\
 set Q0_range -1 0.5\\nset p_range 0 0.0001\\n\
 set p_N 0 0.5\\nprint calls\" > {params.tmpdir}/{params.tumor}.out.sh;
 
 echo -e \"set rd_use_mask\\nset markersize 1\\nset grid vertical\\n\
-set output_filename $tumor.png\\nmanhattan\\ncircular\" > {params.tmpdir}/{params.tumor}.plot.sh;
+set output_filename $tumor_file.png\\nmanhattan\\ncircular\" > {params.tmpdir}/{params.tumor}.plot.sh;
 
 cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
 -view 100000 < {params.tmpdir}/{params.tumor}.plot.sh;
