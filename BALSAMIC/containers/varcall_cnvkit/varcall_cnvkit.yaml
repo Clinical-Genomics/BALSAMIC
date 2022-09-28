@@ -15,6 +15,5 @@ dependencies:
   - bioconda::bioconductor-dnacopy=1.68.0
   - bioconda::bioconductor-variantannotation=1.40.0
   - bioconda::bioconductor-purecn=2.0.2
-  - bioconda::bioconductor-variantannotation=1.40.0
   - bioconda::bcftools=1.15
   - bioconda::tabix=1.11

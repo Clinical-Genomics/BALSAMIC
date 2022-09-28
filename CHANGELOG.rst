@@ -23,6 +23,20 @@ Removed
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
 
+[10.0.4]
+---------
+Fixed:
+^^^^^^
+
+* Increase sambamba_exon_depth rule run time https://github.com/Clinical-Genomics/BALSAMIC/pull/1001
+
+[10.0.3]
+---------
+Fixed:
+^^^^^^
+
+* Input VCF files for cnvkit rules, cnvkit command and container https://github.com/Clinical-Genomics/BALSAMIC/pull/995
+
 [10.0.2]
 ---------
 
