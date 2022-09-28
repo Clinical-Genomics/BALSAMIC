@@ -236,6 +236,10 @@
 		"time": "12:00:00",
 		"n": 24
 	},
+	"cnvpytor_sv_tumor_normal": {
+		"time": "05:00:00",
+		"n": 24
+	},
 	"bcftools_process_SV_CNV": {
 		"time": "01:00:00",
 		"n": 8
