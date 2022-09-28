@@ -2,7 +2,7 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 10.0.3 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 10.0.4 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 
