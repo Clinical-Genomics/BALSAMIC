@@ -6,6 +6,7 @@ dependencies:
   - conda-forge::libopenblas=0.3.20
   - bioconda::ensembl-vep=104.3
   - bioconda::bcftools=1.10
+  - bioconda::bedtools=2.30.0
   - bioconda::vcfanno=0.3.3
   - anaconda::gxx_linux-64=7.3.0
   - anaconda::pip=20.2.4
