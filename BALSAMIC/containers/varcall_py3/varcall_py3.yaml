@@ -7,7 +7,6 @@ dependencies:
   - bioconda::bcftools=1.11
   - bioconda::tabix=0.2.6
   - bioconda::samtools=1.11
-  - bioconda::bedtools=2.30.0
   - bioconda::gatk=3.8
   - bioconda::vardict=2019.06.04
   - bioconda::vardict-java=1.8.3

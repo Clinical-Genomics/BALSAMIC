@@ -17,16 +17,6 @@ ARG CONTAINER_NAME
 # Copy all project files
 COPY . /${WORK_DIR}
 
-RUN apk add --no-cache make
-
-RUN cd /opt \
-    && git clone https://github.com/lgmgeo/AnnotSV.git \
-    && cd /opt/AnnotSV/  \
-    && git checkout v3.1.3 \
-    && make PREFIX=. install \
-    && export ANNOTSV=/opt/AnnotSV
-
-
 RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 # Clean work environment
