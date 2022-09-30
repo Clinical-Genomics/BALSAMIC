@@ -17,6 +17,8 @@ ARG CONTAINER_NAME
 # Copy all project files
 COPY . /${WORK_DIR}
 
+RUN apk add --no-cache make
+
 RUN cd /opt \
     && git clone https://github.com/lgmgeo/AnnotSV.git \
     && cd /opt/AnnotSV/  \
