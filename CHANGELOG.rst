@@ -11,6 +11,9 @@ Added:
 * R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/996
 * Missing R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/997
 * add rlang to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/998
+* AnnotSV to varcall_py3 container
+
+
 
 Changed:
 ^^^^^^^^
