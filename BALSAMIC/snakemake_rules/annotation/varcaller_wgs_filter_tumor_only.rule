@@ -9,7 +9,9 @@ rule bcftools_filter_tnscope_tumor_only:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.all.filtered.vcf.gz",
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.vcf.gz",
+    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -44,6 +46,8 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools view -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
+
+bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts};
     """
 
 
@@ -91,42 +95,4 @@ bcftools view -f PASS --threads {threads} -O z -o {output.vcf_pass_tnhaplotyper}
 
 tabix -p vcf -f {output.vcf_pass_tnhaplotyper}
 
-    """
-
-
-rule bcftools_intersect_tumor_only:
-  input:
-    tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope_isec.all.filtered.vcf.gz",
-    tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz"
-  output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.vcf.gz",
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.stats"
-  benchmark:
-    Path(benchmark_dir, 'bcftools_intersect_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
-  singularity:
-    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-  params:
-    vcf_dir = vep_dir + "sentieon_callers_intersect",
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    case_name = '{case_name}'
-  threads: 
-    get_threads(cluster_config, 'bcftools_intersect_tumor_only')
-  message:
-    "Retrieving common annotated variants between tnscope and tnhaplotyper using bcftools for {params.case_name}"
-  shell:
-    """
-bcftools isec {input.tnscope} {input.tnhaplotyper} -p {params.vcf_dir} -O z;
-
-cp {params.vcf_dir}/0002.vcf.gz {output.vcf_filtered};
-
-tabix -p vcf -f {output.vcf_filtered};
-
-bcftools view -f PASS -o {output.vcf_pass_tnscope} -O z {output.vcf_filtered};
-
-tabix -p vcf -f {output.vcf_pass_tnscope};
-
-bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts};
-
-rm -r {params.vcf_dir}         
     """
