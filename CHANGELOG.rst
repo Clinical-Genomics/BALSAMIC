@@ -12,6 +12,7 @@ Added:
 * Missing R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/997
 * add rlang to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/998
 * AnnotSV and bedtools to annotate container https://github.com/Clinical-Genomics/BALSAMIC/pull/1005
+* cosmic to TNscope
 
 Changed:
 ^^^^^^^^
@@ -24,6 +25,7 @@ Removed
 
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
+* TNhaplotyper for tumor only WGS analysis
 
 [10.0.4]
 ---------

@@ -124,6 +124,7 @@ rule sentieon_TNscope_tumor_only:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
+        cosmic = config["reference"]["cosmic"],
         bam = expand(bam_dir + "tumor.merged.bam"),
         recal = expand(bam_dir + "tumor.merged.recal_data.table")
     output:
@@ -162,6 +163,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo TNscope \
 --tumor_sample {params.tumor} {params.pon} \
 --dbsnp {input.dbsnp} \
+--cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \
 {params.tumor_options} {output.vcf_tnscope};
 
