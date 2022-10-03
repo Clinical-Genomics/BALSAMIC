@@ -12,6 +12,7 @@ Added:
 * Missing R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/997
 * add rlang to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/998
 * AnnotSV and bedtools to annotate container https://github.com/Clinical-Genomics/BALSAMIC/pull/1005
+* `loqusDB` dump files to the config through the balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/992
 
 Changed:
 ^^^^^^^^
