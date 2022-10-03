@@ -7,9 +7,12 @@ Added:
 * Use of PON reference, if exists for CNVkit tumor-normal analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/982
 * Added PON version to CLI and config.json https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * `cnvpytor` to varcallpy3 container https://github.com/Clinical-Genomics/BALSAMIC/pull/991
+* `cnvpytor` for tumor only workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/994
+* R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/996
+* Missing R packages to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/997
+* add rlang to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/998
+* AnnotSV and bedtools to annotate container https://github.com/Clinical-Genomics/BALSAMIC/pull/1005
 * `loqusDB` dump files to the config through the balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/992
-
-
 
 Changed:
 ^^^^^^^^
@@ -22,6 +25,20 @@ Removed
 
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
+
+[10.0.4]
+---------
+Fixed:
+^^^^^^
+
+* Increase sambamba_exon_depth rule run time https://github.com/Clinical-Genomics/BALSAMIC/pull/1001
+
+[10.0.3]
+---------
+Fixed:
+^^^^^^
+
+* Input VCF files for cnvkit rules, cnvkit command and container https://github.com/Clinical-Genomics/BALSAMIC/pull/995
 
 [10.0.2]
 ---------

@@ -195,6 +195,7 @@ class VCFModel(BaseModel):
     ascat: VarcallerAttribute
     dellycnv: VarcallerAttribute
     tiddit: VarcallerAttribute
+    cnvpytor: VarcallerAttribute
     svdb: VarcallerAttribute
 
 
