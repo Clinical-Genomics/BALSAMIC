@@ -21,7 +21,7 @@ rule bcftools_filter_tnscope_tumor_normal:
     AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
     AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_normal')
