@@ -9,7 +9,6 @@ rule bcftools_filter_tnscope_tumor_only:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.vcf.gz",
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
     bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.stats"
   benchmark:
@@ -44,9 +43,9 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered} -O z;
+| bcftools view  -f PASS  -o {output.vcf_pass_tnscope} -O z;
 
-tabix -p vcf -f {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_pass_tnscope};
 
 bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts};
     """

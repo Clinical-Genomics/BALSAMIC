@@ -8,7 +8,6 @@ rule bcftools_filter_tnscope_tumor_normal:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.vcf.gz",
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
     bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.stats"
   benchmark:
@@ -35,11 +34,7 @@ bcftools view {input.vcf} \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered} -O z;
-
-tabix -p vcf -f {output.vcf_filtered};
-
-bcftools view -f PASS -o {output.vcf_pass_tnscope} -O z {output.vcf_filtered};
+| bcftools view -f PASS -o {output.vcf_pass_tnscope} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 
