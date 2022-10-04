@@ -13,6 +13,7 @@ Added:
 * add rlang to cnvkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/998
 * AnnotSV and bedtools to annotate container https://github.com/Clinical-Genomics/BALSAMIC/pull/1005
 * cosmicdb to TNscope for tumor only and tumor normal workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
+* `loqusDB` dump files to the config through the balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/992
 
 Changed:
 ^^^^^^^^

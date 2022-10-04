@@ -129,6 +129,36 @@ LOG = logging.getLogger(__name__)
 @click.option("--tumor-sample-name", help="Tumor sample name")
 @click.option("--normal-sample-name", help="Normal sample name")
 @click.option(
+    "--clinical-snv-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of clinical SNV observations (WGS analysis workflow)",
+)
+@click.option(
+    "--clinical-sv-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of clinical SV observations (WGS analysis workflow)",
+)
+@click.option(
+    "--cancer-all-snv-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of cancer SNV normal observations (WGS analysis workflow)",
+)
+@click.option(
+    "--cancer-somatic-snv-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of cancer SNV tumor observations (WGS analysis workflow)",
+)
+@click.option(
+    "--cancer-somatic-sv-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of cancer SV observations (WGS analysis workflow)",
+)
+@click.option(
     "-g",
     "--genome-version",
     default="hg19",
@@ -168,6 +198,11 @@ def case_config(
     normal,
     tumor_sample_name,
     normal_sample_name,
+    clinical_snv_observations,
+    clinical_sv_observations,
+    cancer_all_snv_observations,
+    cancer_somatic_snv_observations,
+    cancer_somatic_sv_observations,
     genome_version,
     balsamic_cache,
     container_version,
@@ -193,6 +228,22 @@ def case_config(
     )
     with open(reference_config, "r") as f:
         reference_dict = json.load(f)["reference"]
+
+    if not panel_bed:
+        variants_observations = {
+            "clinical_snv_observations": clinical_snv_observations,
+            "clinical_sv_observations": clinical_sv_observations,
+            "cancer_all_snv_observations": cancer_all_snv_observations,
+            "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
+            "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
+        }
+        reference_dict.update(
+            {
+                observations: path
+                for observations, path in variants_observations.items()
+                if path is not None
+            }
+        )
 
     config_collection_dict = BalsamicConfigModel(
         QC={
