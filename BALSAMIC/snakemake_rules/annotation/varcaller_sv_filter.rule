@@ -14,7 +14,7 @@ rule bcftools_filter_svdb:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     case_name = "{case_name}",
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb")
   message:

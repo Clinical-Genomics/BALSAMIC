@@ -68,6 +68,7 @@ rule sentieon_TNscope:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
+        cosmic = config["reference"]["cosmic"],
         bamT = expand(bam_dir + "tumor.merged.bam"),
         bamN = expand(bam_dir + "normal.merged.bam"),
         recalT = expand(bam_dir + "tumor.merged.recal_data.table"),
@@ -115,6 +116,7 @@ intermediate_vcf={params.tmpdir}/tn_sentieon_varcall_file
 --tumor_sample {params.tumor} \
 --normal_sample {params.normal} \
 --dbsnp {input.dbsnp} \
+--cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \
 {params.tumor_options} \
 {params.normal_options} $intermediate_vcf;
