@@ -8,8 +8,8 @@ rule bcftools_view_split_variant:
         ref = config["reference"]["reference_genome"],
         vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-        vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-        vcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+        vcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
         Path(benchmark_dir,'bcftools_view_split_variant_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     singularity:

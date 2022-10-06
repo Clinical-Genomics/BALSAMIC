@@ -272,12 +272,12 @@ if config["analysis"]["analysis_type"]=="paired":
 
 # Raw VCFs
 analysis_specific_results.extend(
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(vcf_dir + "{vcf}.research.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
 # Filtered and passed post annotation VCFs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(vep_dir + "{vcf}.research.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
 # TMB
@@ -299,7 +299,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     ))
     # VarDict
     analysis_specific_results.extend(
-        expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
+        expand(vep_dir + "{vcf}.research.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
     )
     # UMI
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":

@@ -81,11 +81,11 @@ def test_status_analysis_finish(
     vep_result_dir = Path(helpers.result_dir, "vep")
     vep_result_dir.mkdir(parents=True, exist_ok=True)
     touch_vcf_delivery_file = Path(
-        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz"
+        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.research.vcf.gz"
     )
     touch_vcf_delivery_file.touch()
     touch_vcf_delivery_file_index = Path(
-        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.all.vcf.gz.tbi"
+        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.research.vcf.gz.tbi"
     )
     touch_vcf_delivery_file_index.touch()
 

@@ -5,11 +5,11 @@
 
 rule vep_somatic_snv:
   input:
-    vcf = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
+    vcf_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.all.vcf.gz"),
+    vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz"),
   benchmark:
     Path(benchmark_dir, "vep_somatic_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
@@ -17,7 +17,7 @@ rule vep_somatic_snv:
   params:
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
-    tmpvcf = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.vcf.gz",
+    tmpvcf_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz",
     vcfanno_toml = VCFANNO_TOML,
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
@@ -28,40 +28,40 @@ rule vep_somatic_snv:
   shell:
     """
 vep_path=$(dirname $(readlink -f $(which vep)));
-tmpvcf={params.tmpvcf};
+tmpvcf_research={params.tmpvcf_research};
 export PERL5LIB=;
 
-vcfanno -p {threads} --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf} \
+vcfanno -p {threads} --base-path {params.ref_path} {params.vcfanno_toml} {input.vcf_research} \
 | bcftools reheader --threads {threads} -s {input.header} \
-| bcftools view --threads {threads} -O z -o $tmpvcf ;
+| bcftools view --threads {threads} -O z -o $tmpvcf_research ;
 
 vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
---input_file $tmpvcf \
---output_file {output.vcf_all} \
+--input_file $tmpvcf_research \
+--output_file {output.vcf_research} \
 --fork {threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
 
-tabix -p vcf -f {output.vcf_all};
+tabix -p vcf -f {output.vcf_research};
 
-rm $tmpvcf;
+rm $tmpvcf_research;
     """
 
 rule vep_somatic_sv:
   input:
-    vcf = vcf_dir + "SV.somatic.{case_name}.svdb.vcf.gz",
+    vcf_research = vcf_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz",
     header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
   output:
-    vcf_all = temp(vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz"),
+    vcf_research = temp(vep_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz"),
   benchmark:
     Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.svdb.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    message_text = "SV.somatic.{case_name}.svdb.vcf.gz",
+    message_text = "SV.somatic.{case_name}.svdb.research.vcf.gz",
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
@@ -73,22 +73,22 @@ rule vep_somatic_sv:
 vep_path=$(dirname $(readlink -f $(which vep)));
 export PERL5LIB=;
 
-bcftools reheader --threads {threads} -s {input.header} {input.vcf} | \
+bcftools reheader --threads {threads} -s {input.header} {input.vcf_research} | \
 bcftools view --threads {threads} -O v | \
 vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
---output_file {output.vcf_all} \
+--output_file {output.vcf_research} \
 --fork {threads} \
 {params.vep_defaults} \
 
-tabix -p vcf -f {output.vcf_all};
+tabix -p vcf -f {output.vcf_research};
     """
 
 rule tmb_calculation:
   input:
-    vep = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.all.vcf.gz",
+    vep_research = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.research.vcf.gz",
   output:
     tmb = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.balsamic_stat"
   benchmark:
@@ -98,7 +98,7 @@ rule tmb_calculation:
   params:
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
-    message_text = "{var_type}.somatic.{case_name}.{var_caller}.all",
+    message_text = "{var_type}.somatic.{case_name}.{var_caller}.research",
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
   threads:
     get_threads(cluster_config, "vep")
@@ -115,12 +115,12 @@ echo -e '##INFO=<ID=AF_TUMOR,Number=1,Type=Float,Description="Allele Frequency o
 
 bcftools query -s TUMOR \
 -f '%CHROM\\t%POS\\t[%AF]\\n' \
-{input.vep} \
+{input.vep_research} \
 | bgzip -c > {params.tmpdir}/tumor.txt.gz;
 
 tabix -f -s1 -b2 -e2 {params.tmpdir}/tumor.txt.gz;
 
-bcftools view -s TUMOR {input.vep} \
+bcftools view -s TUMOR {input.vep_research} \
 | bcftools annotate -s TUMOR \
 -a {params.tmpdir}/tumor.txt.gz \
 -h {params.tmpdir}/vcf_header \

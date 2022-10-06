@@ -6,11 +6,11 @@
 
 rule bcftools_filter_tnscope_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.stats"
+    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
