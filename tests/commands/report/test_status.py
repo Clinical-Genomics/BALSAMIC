@@ -85,7 +85,8 @@ def test_status_analysis_finish(
     )
     touch_vcf_delivery_file.touch()
     touch_vcf_delivery_file_index = Path(
-        vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.research.vcf.gz.tbi"
+        vep_result_dir,
+        "SNV.somatic." + helpers.case_id + ".vardict.research.vcf.gz.tbi",
     )
     touch_vcf_delivery_file_index.touch()
 
