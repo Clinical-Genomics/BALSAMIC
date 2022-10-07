@@ -31,6 +31,7 @@ requirements = [
     "PyPDF2>=1.26.0",
     "markdown==3.3.3",
     "cryptography==3.2.1",
+    "tabulate"=="3.8.1",
 ]
 
 # The C libraries required to build numpy are not available on RTD
