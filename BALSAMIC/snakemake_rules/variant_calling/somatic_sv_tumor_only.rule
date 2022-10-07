@@ -152,7 +152,7 @@ rm -rf {params.tmpdir};
 rule cnvpytor_cnv_tumor_only:
     input:
         bamT = bam_dir + tumor_bam,
-        vcfT = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+        vcfT = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         map = config["reference"]["delly_mappability"],
     output:
         cnv_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.vcf.gz",
