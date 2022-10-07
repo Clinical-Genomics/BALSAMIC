@@ -34,7 +34,7 @@ Fixed:
 ^^^^^^
 
 * Increase sambamba_exon_depth rule run time https://github.com/Clinical-Genomics/BALSAMIC/pull/1001
-* test_workflow.py
+* Python packages causing test_workflow.py to fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1008
 
 [10.0.3]
 ---------
