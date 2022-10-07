@@ -4,6 +4,6 @@ channels:
   - defaults
 
 dependencies:
-  - conda-forge::python=3.7 
+  - conda-forge::python=3.10.4
   - conda-forge::pip
   - conda-forge::pygraphviz
