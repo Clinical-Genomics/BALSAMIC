@@ -431,7 +431,10 @@ rule all:
     output:
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
-        tmp_dir = tmp_dir
+        tmp_dir = tmp_dir,
+        case_name = config["analysis"]["case_id"],
+    message:
+        "Finalizing analysis for {params.case_name}",
     run:
         import datetime
         import shutil
