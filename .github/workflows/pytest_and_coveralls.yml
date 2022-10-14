@@ -11,14 +11,12 @@ on:
 jobs:
   pytest_coveralls:
     name: run PyTest
-    runs-on: ubuntu-18.04
-    strategy:
-      fail-fast: false
+    runs-on: ubuntu-latest
     steps:
       # Checkout BALSAMIC
       - name: Git checkout
         id: git_checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       # Get branch name
       - name: Get branch name
         id: get_branch_name
@@ -38,7 +36,7 @@ jobs:
         run: |
           conda activate balsamic
           pip install --no-cache-dir .
-      # Install pytest coveralls dependencies 
+      # Install pytest coveralls dependencies
       - name: Install PyTest and Coveralls
         id: install_pytest
         shell: bash -l {0}
@@ -57,7 +55,7 @@ jobs:
           SENTIEON_INSTALL_DIR: dummy_install_dir
       # Run Codecov
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml

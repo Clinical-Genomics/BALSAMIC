@@ -4,6 +4,8 @@
 Changed:
 ^^^^^^^^
 * Update `vcf2cytosure` version to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/1010
+* Update GitHub action images to `ubuntu-latest` https://github.com/Clinical-Genomics/BALSAMIC/pull/1010
+* Update GitHub actions to their latest versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1010
 
 [10.0.4]
 ---------
