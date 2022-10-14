@@ -1,3 +1,10 @@
+[10.0.5]
+--------
+
+Changed:
+^^^^^^^^
+* Updated vcf2cytosure version to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/1010
+
 [10.0.4]
 ---------
 Fixed:
