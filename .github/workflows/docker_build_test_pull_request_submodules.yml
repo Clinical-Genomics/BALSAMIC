@@ -10,9 +10,9 @@ on:
 jobs:
   main:
     name: Docker image build test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
-      fail-fast: false 
+      fail-fast: false
       matrix:
         container-name: [ascatNgs]
     steps:

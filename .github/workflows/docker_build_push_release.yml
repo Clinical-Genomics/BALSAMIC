@@ -7,7 +7,7 @@ on:
 jobs:
   main:
     name: Docker image build push
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
       matrix:
