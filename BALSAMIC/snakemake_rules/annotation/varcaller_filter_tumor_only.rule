@@ -6,17 +6,17 @@
 
 rule bcftools_filter_vardict_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.vcf.gz",
-    vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.vardict.all.filtered.pass.stats"
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.vcf.gz",
+    vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_vardict_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
     AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
     DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],
@@ -61,10 +61,10 @@ rm {output.vcf_pass_vardict}.temp;
 
 rule bcftools_filter_tnhaplotyper_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.research.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.vcf.gz",
-    vcf_pass_tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.all.filtered.pass.vcf.gz",
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.research.filtered.vcf.gz",
+    vcf_pass_tnhaplotyper = vep_dir + "{var_type}.somatic.{case_name}.tnhaplotyper.research.filtered.pass.vcf.gz",
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnhaplotyper_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -93,18 +93,18 @@ tabix -p vcf -f {output.vcf_pass_tnhaplotyper};
 
 rule bcftools_filter_TNscope_umi_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.filtered.vcf.gz",
-    vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.all.filtered.pass.stats"
+    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.vcf.gz",
+    vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     pop_freq = [SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name =  '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"

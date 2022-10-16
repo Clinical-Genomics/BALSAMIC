@@ -50,7 +50,7 @@ rule vardict_merge:
     input:
         expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
     output:
-        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
         yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
     params:
@@ -89,7 +89,7 @@ rule sentieon_TNhaplotyper:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
     output:
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.research.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     benchmark:
         Path(benchmark_dir + 'sentieon_TNhaplotyper_' + config["analysis"]["case_id"] + ".tsv").as_posix()

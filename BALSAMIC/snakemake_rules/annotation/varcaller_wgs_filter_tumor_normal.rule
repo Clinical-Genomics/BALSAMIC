@@ -6,19 +6,15 @@
 
 rule bcftools_filter_tnscope_tumor_normal:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.all.filtered.pass.stats"
+    vcf_research_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
-    DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
-    AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
-    AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
     pop_freq = [SENTIEON_CALLER.pop_freq.tag_value, SENTIEON_CALLER.pop_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name = '{case_name}'
@@ -29,14 +25,10 @@ rule bcftools_filter_tnscope_tumor_normal:
   shell:
     """
 bcftools view {input.vcf} \
-| bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AF[0] <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -f PASS -o {output.vcf_pass_tnscope} -O z;
+| bcftools view -f PASS -o {output.vcf_research_pass_tnscope} -O z;
 
-tabix -p vcf -f {output.vcf_pass_tnscope};
+tabix -p vcf -f {output.vcf_research_pass_tnscope};
 
-bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts};
+bcftools +counts {output.vcf_research_pass_tnscope} > {output.bcftools_counts};
     """

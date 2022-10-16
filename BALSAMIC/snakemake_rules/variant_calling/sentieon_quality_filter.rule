@@ -1,0 +1,80 @@
+
+
+if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'single':
+    rule bcftools_quality_filter_tnscope_tumor_only:
+      input:
+        vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        wgs_calling_file = config["reference"]["wgs_calling_interval"],
+      output:
+        vcf_snv_research = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+      benchmark:
+        Path(benchmark_dir, 'bcftools_quality_filter_tnscope_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+      singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+      params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
+        AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
+        AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
+        AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
+        strand_reads = [SENTIEON_CALLER.strand_reads.tag_value, SENTIEON_CALLER.strand_reads.filter_name],
+        qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
+        sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
+        case_name = config["analysis"]["case_id"],
+      threads: 
+        get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_only')
+      message:
+        "Filtering WGS tumor-only tnscope variants using bcftools for {params.case_name}"
+      shell:
+          """
+export TMPDIR={params.tmpdir};
+mkdir -p {params.tmpdir};
+
+grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
+
+bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv} \
+| bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
+| bcftools view -f PASS -O z -o {output.vcf_snv_research};
+
+tabix -p vcf -f {output.vcf_snv_research};
+          """
+
+elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'paired':
+    rule bcftools_quality_filter_tnscope_tumor_normal:
+      input:
+        vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        wgs_calling_file = config["reference"]["wgs_calling_interval"],
+      output:
+        vcf_snv_research = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+      benchmark:
+        Path(benchmark_dir, 'bcftools_quality_filter_tnscope_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+      singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+      params:
+        AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
+        DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
+        AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
+        AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
+        case_name = config["analysis"]["case_id"],
+      threads:
+        get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_normal')
+      message:
+        "Filtering WGS tumor-normal tnscope variants using bcftools for {params.case_name}"
+      shell:
+          """
+bcftools view {input.vcf_snv} \
+| bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AF[0] <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools view -f PASS -O z -o {output.vcf_snv_research}; 
+
+tabix -p vcf -f {output.vcf_snv_research};
+          """
+

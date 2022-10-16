@@ -4,10 +4,10 @@
 
 rule bcftools_filter_svdb:
   input:
-    vcf = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
+    vcf = vep_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz",
   output:
-    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.stats"
+    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"
   benchmark:
     benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.vep.tsv"
   singularity:

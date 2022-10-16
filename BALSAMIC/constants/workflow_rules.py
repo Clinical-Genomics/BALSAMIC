@@ -9,7 +9,10 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/variant_calling/mergetype_tumor.rule",
         ],
         "align": [],
-        "varcall": ["snakemake_rules/variant_calling/germline_sv.rule"],
+        "varcall": [
+            "snakemake_rules/variant_calling/germline_sv.rule",
+            "snakemake_rules/variant_calling/sentieon_quality_filter.rule",
+        ],
         "annotate": [
             "snakemake_rules/annotation/vep.rule",
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
