@@ -16,7 +16,7 @@ rule bcftools_filter_vardict_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
     AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
     DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],
@@ -106,7 +106,7 @@ rule bcftools_filter_TNscope_umi_tumor_normal:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     pop_freq = [SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name =  '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
