@@ -3,7 +3,6 @@
 
 Added:
 ^^^^^^
-
 * Use of PON reference, if exists for CNVkit tumor-normal analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/982
 * Added PON version to CLI and config.json https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * `cnvpytor` to varcallpy3 container https://github.com/Clinical-Genomics/BALSAMIC/pull/991
@@ -17,24 +16,30 @@ Added:
 
 Changed:
 ^^^^^^^^
-
 * Added version number to the PON reference filename (`.cnn`) https://github.com/Clinical-Genomics/BALSAMIC/pull/982
 * Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, `delly` to v1.1.3, `vcf2cytosure` to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/987
 
 Removed
 ^^^^^^^
-
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
 * TNhaplotyper for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
 
+[10.0.5]
+--------
+
+Changed:
+^^^^^^^^
+* Update `vcf2cytosure` version to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/1010
+* Update GitHub action images to `ubuntu-20.04` https://github.com/Clinical-Genomics/BALSAMIC/pull/1010
+* Update GitHub actions to their latest versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1010
+
 [10.0.4]
 ---------
+
 Fixed:
 ^^^^^^
-
-* Increase sambamba_exon_depth rule run time https://github.com/Clinical-Genomics/BALSAMIC/pull/1001
-* Python packages causing test_workflow.py to fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1008
+* Increase `sambamba_exon_depth` rule run time https://github.com/Clinical-Genomics/BALSAMIC/pull/1001
 
 [10.0.3]
 ---------

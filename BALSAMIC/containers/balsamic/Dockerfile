@@ -6,7 +6,7 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
-LABEL about.version="10.0.4"
+LABEL about.version="10.0.5"
 
 ENV PATH="/opt/conda/bin/:${PATH}"
 ENV MUSL_LOCPATH="/usr/share/i18n/locales/musl"
