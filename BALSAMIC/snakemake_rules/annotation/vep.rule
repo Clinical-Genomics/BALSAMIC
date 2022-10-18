@@ -16,7 +16,6 @@ rule vep_somatic_snv:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
     tmpvcf_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz",
     vcfanno_annotations= dump_toml(annotations),

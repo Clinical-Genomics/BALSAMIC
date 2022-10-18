@@ -91,7 +91,7 @@ if "clinical_snv_observations" in config["reference"]:
             'names': ["Frq", "Obs", "Hom"]
         }]
     }
-    annotations.append(clinical_observations)\
+    annotations.append(clinical_observations)
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
