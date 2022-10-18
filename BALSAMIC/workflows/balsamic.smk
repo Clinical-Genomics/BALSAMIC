@@ -22,10 +22,11 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit)
+                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit,
+                                 get_clinical_observations, get_annotation, dump_toml)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
-                                    RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
+                                    RULE_DIRECTORY, MUTATION_TYPE);
 from BALSAMIC.constants.variant_filters import COMMON_SETTINGS,VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
@@ -58,8 +59,34 @@ qc_dir = get_result_dir(config) + "/qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 umi_dir = get_result_dir(config) + "/umi/"
 umi_qc_dir = qc_dir + "umi_qc/"
-
 singularity_image = config['singularity']['image']
+
+# vcfanno annotations
+gnomad = get_annotation(
+    Path(config["reference"]["gnomad_variant"]).as_posix(),
+    ["AF", "AF_popmax"],
+    ["self", "self"],
+    ["GNOMADAF", "GNOMADAF_popmax"]
+)
+clinvar = get_annotation(
+    Path(config["reference"]["clinvar"]).as_posix(),
+    ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"],
+    ["self", "self", "self", "self", "self", "self"],
+    ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"]
+)
+
+if "clinical_snv_observations" in config["reference"]:
+    clinical_observations_path = get_clinical_observations(config)
+    clinical_observations = get_annotation(
+        clinical_observations_path,
+        ["Frq", "Obs", "Hom"],
+        ["self", "self", "self"],
+        ["Frq", "Obs", "Hom"]
+    )
+    annotations = [gnomad, clinvar, clinical_observations]
+else:
+    clinical_observations = None
+    annotations = [gnomad, clinvar]
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
