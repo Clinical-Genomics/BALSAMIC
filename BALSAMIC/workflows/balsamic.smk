@@ -23,7 +23,7 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
                                  get_threads, get_script_path, get_sequencing_type, get_capture_kit,
-                                 get_clinical_observations, get_annotation, dump_toml)
+                                 get_clinical_observations, dump_toml)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, MUTATION_TYPE);
@@ -62,30 +62,36 @@ umi_qc_dir = qc_dir + "umi_qc/"
 singularity_image = config['singularity']['image']
 
 # vcfanno annotations
-gnomad = get_annotation(
-    Path(config["reference"]["gnomad_variant"]).as_posix(),
-    ["AF", "AF_popmax"],
-    ["self", "self"],
-    ["GNOMADAF", "GNOMADAF_popmax"]
-)
-clinvar = get_annotation(
-    Path(config["reference"]["clinvar"]).as_posix(),
-    ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"],
-    ["self", "self", "self", "self", "self", "self"],
-    ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"]
-)
+gnomad = {
+    'annotation': [{
+    'file': Path(config["reference"]["gnomad_variant"]).as_posix(),
+    'fields': ["AF", "AF_popmax"],
+    'ops': ["self", "self"],
+    'names': ["GNOMADAF", "GNOMADAF_popmax"]
+    }]
+}
+
+clinvar = {
+    'annotation': [{
+    'file': Path(config["reference"]["clinvar"]).as_posix(),
+    'fields': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"],
+    'ops': ["self", "self", "self", "self", "self", "self"],
+    'names': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"]
+    }]
+}
+
+annotations = [gnomad, clinvar]
 
 if "clinical_snv_observations" in config["reference"]:
-    clinical_observations_path = get_clinical_observations(config)
-    clinical_observations = get_annotation(
-        clinical_observations_path,
-        ["Frq", "Obs", "Hom"],
-        ["self", "self", "self"],
-        ["Frq", "Obs", "Hom"]
-    )
-    annotations = [gnomad, clinvar, clinical_observations]
-else:
-    annotations = [gnomad, clinvar]
+    clinical_observations = {
+        'annotation': [{
+            'file': get_clinical_observations(config),
+            'fields': ["Frq", "Obs", "Hom"],
+            'ops': ["self", "self", "self"],
+            'names': ["Frq", "Obs", "Hom"]
+        }]
+    }
+    annotations.append(clinical_observations)\
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)

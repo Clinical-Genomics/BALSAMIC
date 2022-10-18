@@ -360,13 +360,6 @@ def get_clinical_observations(config):
         return None
 
 
-def get_annotation(file, fields, ops, names):
-    annotation = {
-        "annotation": [{"file": file, "fields": fields, "ops": ops, "names": names}]
-    }
-    return annotation
-
-
 def get_toml(annotation):
     toml_annotation = toml.dumps(annotation)
     return toml_annotation
