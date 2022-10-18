@@ -356,8 +356,6 @@ def get_pon_samples(fastq_dir):
 def get_clinical_observations(config):
     if "clinical_snv_observations" in config["reference"]:
         return Path(config["reference"]["clinical_snv_observations"]).as_posix()
-    else:
-        return None
 
 
 def get_toml(annotation):
