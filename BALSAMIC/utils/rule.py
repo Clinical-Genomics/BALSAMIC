@@ -364,9 +364,7 @@ def get_clinical_observations(config):
         return Path(config["reference"]["clinical_snv_observations"]).as_posix()
 
 
-def get_toml(
-        annotation: dict
-) -> dict:
+def get_toml(annotation: dict) -> dict:
     """Returns annotation in toml format
 
     Args:
@@ -379,9 +377,7 @@ def get_toml(
     return toml_annotation
 
 
-def dump_toml(
-        annotations: list
-) -> list:
+def dump_toml(annotations: list) -> list:
     """Returns list of converted annotation in toml format
 
     Args:
