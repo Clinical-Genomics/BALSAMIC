@@ -19,7 +19,7 @@ rule vep_somatic_snv:
     ref_path = Path(config["reference"]["gnomad_variant"]).parent.as_posix(),
     message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
     tmpvcf_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz",
-    toml_annotations= dump_toml(annotations),
+    vcfanno_annotations= dump_toml(annotations),
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
@@ -32,7 +32,7 @@ vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf_research={params.tmpvcf_research};
 export PERL5LIB=;
 
-echo \'{params.toml_annotations}\' > {output.vcfanno_toml};
+echo \'{params.vcfanno_annotations}\' > {output.vcfanno_toml};
 
 vcfanno -p {threads} {output.vcfanno_toml} {input.vcf_research} \
 | bcftools reheader --threads {threads} -s {input.header} \

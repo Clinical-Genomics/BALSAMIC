@@ -85,7 +85,6 @@ if "clinical_snv_observations" in config["reference"]:
     )
     annotations = [gnomad, clinvar, clinical_observations]
 else:
-    clinical_observations = None
     annotations = [gnomad, clinvar]
 
 # picarddup flag
