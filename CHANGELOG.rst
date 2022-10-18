@@ -14,12 +14,12 @@ Added:
 * cosmicdb to TNscope for tumor only and tumor normal workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
 * `loqusDB` dump files to the config through the balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/992
 * Pre-annotation quality filters for SNVs annd added `research` to output files https://github.com/Clinical-Genomics/BALSAMIC/pull/1007 
-* snv_clinical_observations to svn_somatic annotation using vcfanno 
+* snv_clinical_observations to svn_somatic annotation and method for vcfanno config https://github.com/Clinical-Genomics/BALSAMIC/pull/1012 
 Changed:
 ^^^^^^^^
 * Added version number to the PON reference filename (`.cnn`) https://github.com/Clinical-Genomics/BALSAMIC/pull/982
 * Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, `delly` to v1.1.3, `vcf2cytosure` to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/987
-* toml config file for vcfanno
+* toml config file for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
 
 Removed
 ^^^^^^^
