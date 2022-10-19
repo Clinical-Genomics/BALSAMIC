@@ -353,7 +353,7 @@ def get_pon_samples(fastq_dir):
     return samples
 
 
-def get_clinical_observations(config):
+def get_clinical_observations(config: dict) -> str:
     """Returns path for clinical observations
 
     Args:
