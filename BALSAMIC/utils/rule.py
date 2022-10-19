@@ -376,8 +376,7 @@ def get_toml(annotation: dict) -> str:
     Returns:
         toml_annotation: a string in toml format
     """
-    toml_annotation = toml.dumps(annotation)
-    return toml_annotation
+    return toml.dumps(annotation)
 
 
 def dump_toml(annotations: list) -> str:
