@@ -354,7 +354,10 @@ def get_pon_samples(fastq_dir):
 
 
 def get_clinical_observations(config):
-    """Returns path for clinical observations if provided
+    """Returns path for clinical observations
+
+    Args:
+        congig: a config dictionary
 
     Returns:
         Path for clinical_snv_observations vcf file
@@ -364,27 +367,27 @@ def get_clinical_observations(config):
         return Path(config["reference"]["clinical_snv_observations"]).as_posix()
 
 
-def get_toml(annotation: dict) -> dict:
+def get_toml(annotation: dict) -> str:
     """Returns annotation in toml format
 
     Args:
-        annotation: a dict containing annotation resource for vcfanno
+        annotation: a dict containing annotation resource
 
     Returns:
-        toml_annotation: a toml formatted annotation
+        toml_annotation: a string in toml format
     """
     toml_annotation = toml.dumps(annotation)
     return toml_annotation
 
 
-def dump_toml(annotations: list) -> list:
+def dump_toml(annotations: list) -> str:
     """Returns list of converted annotation in toml format
 
     Args:
-        annotations: a list of toml formatted annotations
+        annotations: a list of toml
 
     Returns:
-        toml_annotation: a toml formatted list of annotations for vcfanno
+        toml_annotation: a string of toml annotation resources
     """
     toml_annotations = ""
     for annotation in annotations:
