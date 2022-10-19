@@ -32,6 +32,7 @@ requirements = [
     "markdown==3.3.3",
     "cryptography==3.2.1",
     "tabulate==0.8.10",
+    "toml==0.10.2",
 ]
 
 # The C libraries required to build numpy are not available on RTD

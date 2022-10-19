@@ -1,5 +1,6 @@
 import os
 import re
+import toml
 import logging
 from pathlib import Path
 import snakemake
@@ -350,3 +351,43 @@ def get_pon_samples(fastq_dir):
         (f.split("_1"))[0] for f in os.listdir(fastq_dir) if f.endswith("_R_1.fastq.gz")
     ]
     return samples
+
+
+def get_clinical_observations(config: dict) -> str:
+    """Returns path for clinical observations
+
+    Args:
+        congig: a config dictionary
+
+    Returns:
+        Path for clinical_snv_observations vcf file
+
+    """
+    return Path(config["reference"]["clinical_snv_observations"]).as_posix()
+
+
+def get_toml(annotation: dict) -> str:
+    """Returns annotation in toml format
+
+    Args:
+        annotation: a dict containing annotation resource
+
+    Returns:
+        toml_annotation: a string in toml format
+    """
+    return toml.dumps(annotation)
+
+
+def dump_toml(annotations: list) -> str:
+    """Returns list of converted annotation in toml format
+
+    Args:
+        annotations: a list of toml
+
+    Returns:
+        toml_annotation: a string of toml annotation resources
+    """
+    toml_annotations = ""
+    for annotation in annotations:
+        toml_annotations += get_toml(annotation)
+    return toml_annotations
