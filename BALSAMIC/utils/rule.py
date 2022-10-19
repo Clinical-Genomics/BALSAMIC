@@ -363,8 +363,7 @@ def get_clinical_observations(config: dict) -> str:
         Path for clinical_snv_observations vcf file
 
     """
-    if "clinical_snv_observations" in config["reference"]:
-        return Path(config["reference"]["clinical_snv_observations"]).as_posix()
+    return Path(config["reference"]["clinical_snv_observations"]).as_posix()
 
 
 def get_toml(annotation: dict) -> str:
