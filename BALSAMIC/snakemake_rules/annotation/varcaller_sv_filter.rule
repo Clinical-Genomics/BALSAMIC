@@ -9,7 +9,7 @@ rule bcftools_filter_sv_research:
     vcf_pass_svdb_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
     bcftools_counts_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"
   benchmark:
-    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.research.tsv"
+    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.research.filtered.tsv"
   singularity:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -36,7 +36,7 @@ rule bcftools_filter_sv_clinical:
     vcf_pass_svdb_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.stats"
   benchmark:
-    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.clinical.tsv"
+    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.clinical.filtered.tsv"
   singularity:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
