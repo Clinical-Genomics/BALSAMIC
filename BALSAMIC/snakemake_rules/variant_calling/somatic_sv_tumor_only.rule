@@ -258,7 +258,7 @@ rule svdb_merge_tumor_only:
                 vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
                 caller=somatic_caller_cnv)
     output:
-        vcf_svdb = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+        vcf_svdb = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
     benchmark:
         Path(benchmark_dir, 'svdb_merge_tumor_only_' + config["analysis"]["case_id"] + ".tsv")
