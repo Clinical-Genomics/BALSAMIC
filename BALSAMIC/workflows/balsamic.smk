@@ -23,7 +23,7 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
                                  get_threads, get_script_path, get_sequencing_type, get_capture_kit,
-                                 get_clinical_observations, dump_toml)
+                                 get_clinical_snv_observations, get_clinical_sv_observations, dump_toml)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
                                     RULE_DIRECTORY, MUTATION_TYPE);
@@ -83,15 +83,22 @@ clinvar = {
 annotations = [gnomad, clinvar]
 
 if "clinical_snv_observations" in config["reference"]:
-    clinical_observations = {
+    clinical_snv = {
         'annotation': [{
-            'file': get_clinical_observations(config),
+            'file': get_clinical_snv_observations(config),
             'fields': ["Frq", "Obs", "Hom"],
             'ops': ["self", "self", "self"],
             'names': ["Frq", "Obs", "Hom"]
         }]
     }
-    annotations.append(clinical_observations)
+    annotations.append(clinical_snv)
+
+
+if "clinical_sv_observations" in config["reference"]:
+    clinical_sv = get_clinical_sv_observations(config)
+else:
+    clinical_sv = ""
+
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)

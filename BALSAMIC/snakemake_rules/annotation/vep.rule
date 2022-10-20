@@ -88,6 +88,39 @@ vep \
 tabix -p vcf -f {output.vcf_research};
     """
 
+rule svdb_query_somatic_sv:
+    input:
+        vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+        clinical_observations = clinical_sv
+    output:
+        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, 'svdb_query_somatic_sv_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+    params:
+        tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal"),
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config, "svdb_query_somatic_sv")
+    message:
+        "Annotating structural and copy number variants using SVDB for {params.case_name}"
+    shell:
+        """
+if [[ -f "{input.clinical_sv}" ]]; then
+svdb --query --bnd_distance 5000 --overlap 0.80 \
+--in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq clin_frq \
+--db {input.clinical_sv} --query_vcf {input.vcf_sv_research} > {output.vcf_sv_clinical}
+else
+cp {input.clinical_sv} {output.clinical_sv_clinical}
+fi
+
+bgzip -l 9 -c  > {output.vcf_sv_clinical};
+
+tabix -p vcf -f {output.vcf_sv_clinical};
+        """
+
 rule tmb_calculation:
   input:
     vep_research = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.research.vcf.gz",

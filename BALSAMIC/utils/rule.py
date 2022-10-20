@@ -353,8 +353,8 @@ def get_pon_samples(fastq_dir):
     return samples
 
 
-def get_clinical_observations(config: dict) -> str:
-    """Returns path for clinical observations
+def get_clinical_snv_observations(config: dict) -> str:
+    """Returns path for clinical snv observations
 
     Args:
         congig: a config dictionary
@@ -364,6 +364,19 @@ def get_clinical_observations(config: dict) -> str:
 
     """
     return Path(config["reference"]["clinical_snv_observations"]).as_posix()
+
+
+def get_clinical_sv_observations(config: dict) -> str:
+    """Returns path for clinical sv observations
+
+    Args:
+        congig: a config dictionary
+
+    Returns:
+        Path for clinical_sv_observations vcf file
+
+    """
+    return Path(config["reference"]["clinical_sv_observations"]).as_posix()
 
 
 def get_toml(annotation: dict) -> str:
