@@ -82,7 +82,7 @@ def reference():
             "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
             "clinical_snv_observations": "tests/test_data/references/genome/clinical_snv_variants.vcf.gz",
-            "clinical_sv_observations": "tests/test_data/references/genome/clinical_sv_variants.vcf.gz"
+            "clinical_sv_observations": "tests/test_data/references/genome/clinical_sv_variants.vcf.gz",
         }
     }
 
