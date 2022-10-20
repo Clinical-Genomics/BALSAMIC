@@ -314,10 +314,17 @@ analysis_specific_results.extend(
     expand(vcf_dir + "{vcf}.research.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
-# Filtered and passed post annotation VCFs
+# Filtered and passed post annotation research VCFs
 analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.research.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
+
+if config["analysis"]["sequencing_type"] == "wgs":
+    # Filtered and passed post annotation clinical VCFs
+    analysis_specific_results.extend(
+        expand(vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    )
+
 
 # TMB
 analysis_specific_results.extend(
