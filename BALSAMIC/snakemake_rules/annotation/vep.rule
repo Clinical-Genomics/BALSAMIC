@@ -93,7 +93,7 @@ rule svdb_query_somatic_sv:
         vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
         clinical_sv_observations = clinical_sv
     output:
-        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf",
+        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
     benchmark:
         Path(benchmark_dir, 'svdb_query_somatic_sv_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
@@ -102,6 +102,7 @@ rule svdb_query_somatic_sv:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
+        tmpvcf_clinical = temp(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
     threads:
         get_threads(cluster_config, "svdb_query_somatic_sv")
     message:
@@ -111,12 +112,15 @@ rule svdb_query_somatic_sv:
 if [[ -f "{input.clinical_sv_observations}" ]]; then
 svdb --query --bnd_distance 5000 --overlap 0.80 \
 --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq clin_frq \
---db {input.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {output.vcf_sv_clinical}
-else
-cp {input.vcf_sv_research} {output.vcf_sv_clinical}
-fi
+--db {input.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.tmpvcf_clinical}
 
-bgzip -l 9 -c  > {output.vcf_sv_clinical};
+bgzip -l 9 -c {params.tmpvcf_clinical} > {output.vcf_sv_clinical};
+
+else
+
+cp {input.vcf_sv_research} {output.vcf_sv_clinical}
+
+fi
 
 tabix -p vcf -f {output.vcf_sv_clinical};
         """
