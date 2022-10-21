@@ -93,7 +93,7 @@ rule svdb_query_somatic_sv:
         vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
         clinical_sv_observations = clinical_sv
     output:
-        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
+        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf",
     benchmark:
         Path(benchmark_dir, 'svdb_query_somatic_sv_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
