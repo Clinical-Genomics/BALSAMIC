@@ -14,7 +14,9 @@ Added:
 * cosmicdb to TNscope for tumor only and tumor normal workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
 * `loqusDB` dump files to the config through the balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/992
 * Pre-annotation quality filters for SNVs annd added `research` to output files https://github.com/Clinical-Genomics/BALSAMIC/pull/1007 
-* snv_clinical_observations to svn_somatic annotation and method for vcfanno config https://github.com/Clinical-Genomics/BALSAMIC/pull/1012 
+* Annotation of snv_clinical_observations for somatic snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1012 
+* Annotation of sv_clinical_observations  for somatic sv and SV CNV filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1013
+  
 Changed:
 ^^^^^^^^
 * Added version number to the PON reference filename (`.cnn`) https://github.com/Clinical-Genomics/BALSAMIC/pull/982

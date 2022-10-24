@@ -12,6 +12,7 @@ SNAKEMAKE_RULES = {
         "varcall": [
             "snakemake_rules/variant_calling/germline_sv.rule",
             "snakemake_rules/variant_calling/sentieon_quality_filter.rule",
+            "snakemake_rules/variant_calling/somatic_sv_quality_filter.rule",
         ],
         "annotate": [
             "snakemake_rules/annotation/vep.rule",

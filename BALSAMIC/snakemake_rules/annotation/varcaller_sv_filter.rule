@@ -2,14 +2,14 @@
 # coding: utf-8
 # NGS filters for merged SVs and CNVs
 
-rule bcftools_filter_svdb:
+rule bcftools_filter_sv_research:
   input:
-    vcf = vep_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz",
+    vcf_sv_research = vep_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz",
   output:
-    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"
+    vcf_pass_svdb_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
+    bcftools_counts_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"
   benchmark:
-    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.vep.tsv"
+    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.research.filtered.tsv"
   singularity:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -18,12 +18,39 @@ rule bcftools_filter_svdb:
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb")
   message:
-    "Filtering merged structural and copy number variants using bcftools for {params.case_name}"
+    "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb} -O z {input.vcf};
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb_research} -O z {input.vcf_sv_research};
 
-tabix -p vcf -f {output.vcf_pass_svdb};
+tabix -p vcf -f {output.vcf_pass_svdb_research};
 
-bcftools +counts {output.vcf_pass_svdb} > {output.bcftools_counts};
+bcftools +counts {output.vcf_pass_svdb_research} > {output.bcftools_counts_research};
+    """
+
+
+rule bcftools_filter_sv_clinical:
+  input:
+    vcf_sv_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.vcf.gz",
+  output:
+    vcf_pass_svdb_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.vcf.gz",
+    bcftools_counts_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.stats"
+  benchmark:
+    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.clinical.filtered.tsv"
+  singularity:
+    Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    case_name = "{case_name}",
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+  threads:
+    get_threads(cluster_config, "bcftools_filter_svdb")
+  message:
+    "Filtering merged clinical structural and copy number variants using bcftools for {params.case_name}"
+  shell:
+    """
+bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb_clinical} -O z {input.vcf_sv_clinical};
+
+tabix -p vcf -f {output.vcf_pass_svdb_clinical};
+
+bcftools +counts {output.vcf_pass_svdb_clinical} > {output.bcftools_counts_clinical};
     """

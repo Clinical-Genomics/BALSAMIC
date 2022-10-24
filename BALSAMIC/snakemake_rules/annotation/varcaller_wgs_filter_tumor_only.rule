@@ -4,15 +4,15 @@
 
 
 
-rule bcftools_filter_tnscope_tumor_only:
+rule bcftools_filter_tnscope_research_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
+    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_interval"]
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
+    vcf_pass_tnscope_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
+    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
   benchmark:
-    Path(benchmark_dir, 'bcftools_filter_tnscope_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_tnscope_research_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -34,7 +34,7 @@ rule bcftools_filter_tnscope_tumor_only:
     """
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
-bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf} \
+bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv_research} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
@@ -43,11 +43,40 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view  -f PASS  -o {output.vcf_pass_tnscope} -O z;
+| bcftools view  -f PASS  -o {output.vcf_pass_tnscope_research} -O z;
 
-tabix -p vcf -f {output.vcf_pass_tnscope};
+tabix -p vcf -f {output.vcf_pass_tnscope_research};
 
-bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts};
+bcftools +counts {output.vcf_pass_tnscope_research} > {output.bcftools_counts_research};
     """
 
+rule bcftools_filter_tnscope_clinical_tumor_only:
+  input:
+    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
+    wgs_calling_file = config["reference"]["wgs_calling_interval"]
+  output:
+    vcf_pass_tnscope_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
+    bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
+  benchmark:
+    Path(benchmark_dir, 'bcftools_filter_tnscope_clinical_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+    case_name = '{case_name}'
+  threads:
+    get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_only')
+  message:
+    "Filtering WGS tumor-only tnscope annotated variants using bcftools for {params.case_name}"
+  shell:
+    """
+grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
+
+bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv_research} \
+| bcftools view  -f PASS  -o {output.vcf_pass_tnscope_clinical} -O z;
+
+tabix -p vcf -f {output.vcf_pass_tnscope_clinical};
+
+bcftools +counts {output.vcf_pass_tnscope_clinical} > {output.bcftools_counts_clinical};
+    """
 
