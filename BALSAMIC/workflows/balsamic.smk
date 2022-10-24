@@ -93,11 +93,9 @@ if "clinical_snv_observations" in config["reference"]:
     }
     annotations.append(clinical_snv)
 
-
+clinical_sv = ""
 if "clinical_sv_observations" in config["reference"]:
     clinical_sv = get_clinical_sv_observations(config)
-else:
-    clinical_sv = ""
 
 
 # picarddup flag
