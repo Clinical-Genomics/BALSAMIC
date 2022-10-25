@@ -81,8 +81,10 @@ def reference():
             "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
             "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
-            "clinical_snv_observations": "tests/test_data/references/genome/clinical_snv_variants.vcf.gz",
-            "clinical_sv_observations": "tests/test_data/references/genome/clinical_sv_variants.vcf.gz",
+            "clinical_snv_observations": "tests/test_data/references/variants/clinical_snv_variants.vcf.gz",
+            "clinical_sv_observations": "tests/test_data/references/variants/clinical_sv_variants.vcf.gz",
+            "swegen_snv_frequency": "tests/test_data/references/variants/swegen_snv.vcf.gz",
+            "swegen_sv_frequency": "tests/test_data/references/variants/swegen_sv.vcf.gz",
         }
     }
 
