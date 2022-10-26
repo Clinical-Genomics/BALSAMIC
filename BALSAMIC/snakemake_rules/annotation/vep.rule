@@ -86,12 +86,8 @@ cp {input.vcf_snv_research} {output.vcf_snv_clinical};
 
 fi
 
-
 tabix -p vcf -f {output.vcf_snv_clinical};
-
-
     """
-
 
 rule vep_somatic_sv:
   input:
@@ -143,7 +139,7 @@ rule annotate_swegen_frequency_somatic_sv:
         normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         swegen_sv_frequency = swegen_sv,
-        tmp_vcf_clinical = temp(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
+        tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
     threads:
         get_threads(cluster_config, "annotate_swegen_frequency_somatic_sv")
     message:
@@ -166,8 +162,6 @@ fi
 tabix -p vcf -f {output.vcf_sv_clinical};
         """
 
-
-
 rule annotate_clinical_observation_somatic_sv:
     input:
         vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.swegen.vcf.gz",
@@ -182,7 +176,7 @@ rule annotate_clinical_observation_somatic_sv:
         normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         clinical_sv_observations = clinical_sv,
-        tmp_vcf_clinical = temp(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
+        tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
     threads:
         get_threads(cluster_config, "svdb_query_somatic_sv")
     message:
