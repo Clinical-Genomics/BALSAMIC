@@ -4,7 +4,7 @@
 
 rule bcftools_filter_sv_research:
   input:
-    vcf_sv_research = vep_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz",
+    vcf_sv_research = vep_dir + "SV.somatic.{case_name}.svdb.research.swegen.vcf.gz",
   output:
     vcf_pass_svdb_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
     bcftools_counts_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"

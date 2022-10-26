@@ -87,7 +87,7 @@ cp {input.vcf_snv_research} {output.vcf_snv_clinical};
 fi
 
 
-tabix -p vcf -f {output.vcf_clinical};
+tabix -p vcf -f {output.vcf_snv_clinical};
 
 
     """
