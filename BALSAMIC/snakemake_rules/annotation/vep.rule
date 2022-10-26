@@ -150,10 +150,10 @@ rule annotate_swegen_frequency_somatic_sv:
         "Annotating structural and copy number variants with swegen frequency using SVDB for {params.case_name}",
     shell:
         """
-if [[ -f "{input.swegen_sv_frequency}" ]]; then
+if [[ -f "{params.swegen_sv_frequency}" ]]; then
 svdb --query --bnd_distance 5000 --overlap 0.80 \
 --in_occ OCC --out_occ swegen_obs --in_frq FRQ --out_frq swegen_frq \
---db {input.swegen_sv_frequency} --query_vcf {input.vcf_sv_research} > {params.tmp_vcf_clinical};
+--db {params.swegen_sv_frequency} --query_vcf {input.vcf_sv_research} > {params.tmp_vcf_clinical};
 
 bgzip -l 9 -c {params.tmp_vcf_clinical} > {output.vcf_sv_clinical};
 
@@ -189,10 +189,10 @@ rule annotate_clinical_observation_somatic_sv:
         "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
     shell:
         """
-if [[ -f "{input.clinical_sv_observations}" ]]; then
+if [[ -f "{params.clinical_sv_observations}" ]]; then
 svdb --query --bnd_distance 5000 --overlap 0.80 \
 --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq clin_frq \
---db {input.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.tmp_vcf_clinical}
+--db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.tmp_vcf_clinical}
 
 bgzip -l 9 -c {params.tmp_vcf_clinical} > {output.vcf_sv_clinical};
 
