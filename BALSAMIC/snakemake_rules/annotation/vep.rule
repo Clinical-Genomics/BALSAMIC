@@ -159,7 +159,7 @@ bgzip -l 9 -c {params.tmp_vcf_clinical} > {output.vcf_sv_clinical};
 
 else
 
-cp {input.vcf_sv_research} {output.vcf_sv_clinical}
+cp {input.vcf_sv_research} {output.vcf_sv_clinical};
 
 fi
 
@@ -196,9 +196,9 @@ svdb --query --bnd_distance 5000 --overlap 0.80 \
 
 bgzip -l 9 -c {params.tmp_vcf_clinical} > {output.vcf_sv_clinical};
 
-elif [[ -f "{input.clinical_sv_observations}" ]]; then
+else
 
-cp {input.vcf_sv_research} {output.vcf_sv_clinical}
+cp {input.vcf_sv_research} {output.vcf_sv_clinical};
 
 fi
 
