@@ -16,7 +16,7 @@ Added:
 * Pre-annotation quality filters for SNVs annd added `research` to output files https://github.com/Clinical-Genomics/BALSAMIC/pull/1007 
 * Annotation of snv_clinical_observations for somatic snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1012 
 * Annotation of sv_clinical_observations  for somatic sv and SV CNV filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1013
-* Swegen SNV and SV frequency database for WGS
+* Swegen SNV and SV frequency database for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1014
 
 Changed:
 ^^^^^^^^
