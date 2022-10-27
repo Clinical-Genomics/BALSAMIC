@@ -71,7 +71,7 @@ clinical_sv = ""
 swegen_sv = ""
 
 # vcfanno annotations
-gnomad = {
+research_annotations.append( {
     'annotation': [{
     'file': Path(config["reference"]["gnomad_variant"]).as_posix(),
     'fields': ["AF", "AF_popmax"],
@@ -79,8 +79,9 @@ gnomad = {
     'names': ["GNOMADAF", "GNOMADAF_popmax"]
     }]
 }
+)
 
-clinvar = {
+research_annotations.append( {
     'annotation': [{
     'file': Path(config["reference"]["clinvar"]).as_posix(),
     'fields': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"],
@@ -88,12 +89,10 @@ clinvar = {
     'names': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"]
     }]
 }
-
-research_annotations = [gnomad, clinvar]
-
+)
 
 if "swegen_snv_frequency" in config["reference"]:
-    swegen_snv = {
+    research_annotations.append( {
         'annotation': [{
             'file': get_swegen_snv(config),
             'fields': ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
@@ -101,11 +100,10 @@ if "swegen_snv_frequency" in config["reference"]:
             'names': ["SwegenAF", "SwegenAC_Hom", "SwegenAC_Het", "SwegenAC_Hemi"]
         }]
     }
-    research_annotations.append(swegen_snv)
-
+    )
 
 if "clinical_snv_observations" in config["reference"]:
-    clinical_snv = {
+    clinical_annotations.append( {
         'annotation': [{
             'file': get_clinical_snv_observations(config),
             'fields': ["Frq", "Obs", "Hom"],
@@ -113,8 +111,8 @@ if "clinical_snv_observations" in config["reference"]:
             'names': ["Frq", "Obs", "Hom"]
         }]
     }
+    )
     clinical_snv_obs = get_clinical_snv_observations(config)
-    clinical_annotations.append(clinical_snv)
 
 
 if "clinical_sv_observations" in config["reference"]:
