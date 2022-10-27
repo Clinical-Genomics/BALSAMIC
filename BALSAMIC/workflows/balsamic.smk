@@ -65,6 +65,7 @@ singularity_image = config['singularity']['image']
 
 research_annotations = []
 clinical_annotations = []
+clinical_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
 swegen_sv = ""
@@ -112,6 +113,7 @@ if "clinical_snv_observations" in config["reference"]:
             'names': ["Frq", "Obs", "Hom"]
         }]
     }
+    clinical_snv_obs = get_clinical_snv_observations(config)
     clinical_annotations.append(clinical_snv)
 
 
