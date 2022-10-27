@@ -3,22 +3,22 @@
 # VEP annotation module. Annotate all VCFs generated through VEP
 
 
-rule vep_somatic_snv:
+rule vep_somatic_research_snv:
   input:
-    vcf_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+    vcf_snv_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz"),
-    vcfanno_toml= vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno.toml"
+    vcf_snv_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz"),
+    vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
   benchmark:
-    Path(benchmark_dir, "vep_somatic_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_research_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    message_text = "SNV.somatic.{case_name}.{var_caller}.vcf.gz",
+    message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmpvcf_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz",
-    vcfanno_annotations= dump_toml(annotations),
+    vcfanno_research_annotations = dump_toml(research_annotations),
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
@@ -31,9 +31,9 @@ vep_path=$(dirname $(readlink -f $(which vep)));
 tmpvcf_research={params.tmpvcf_research};
 export PERL5LIB=;
 
-echo \'{params.vcfanno_annotations}\' > {output.vcfanno_toml};
+echo \'{params.vcfanno_research_annotations}\' > {output.vcfanno_research_toml};
 
-vcfanno -p {threads} {output.vcfanno_toml} {input.vcf_research} \
+vcfanno -p {threads} {output.vcfanno_research_toml} {input.vcf_snv_research} \
 | bcftools reheader --threads {threads} -s {input.header} \
 | bcftools view --threads {threads} -O z -o $tmpvcf_research ;
 
@@ -42,14 +42,52 @@ vep \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
 --input_file $tmpvcf_research \
---output_file {output.vcf_research} \
+--output_file {output.vcf_snv_research} \
 --fork {threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
 
-tabix -p vcf -f {output.vcf_research};
+tabix -p vcf -f {output.vcf_snv_research};
 
 rm $tmpvcf_research;
+    """
+
+rule vep_somatic_clinical_snv:
+  input:
+    vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+    header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
+  output:
+    vcf_snv_clinical = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz"),
+    vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
+  benchmark:
+    Path(benchmark_dir, "vep_somatic_clinical_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    message_text = "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
+    clinical_snv = clinical_snv_obs,
+    vcfanno_clinical_annotations = dump_toml(clinical_annotations),
+  threads:
+    get_threads(cluster_config, "vep_somatic_snv")
+  message:
+    "Running vep annotation for single nuceotide variants on {params.message_text}"
+  shell:
+    """
+if [[ -f {params.clinical_snv} ]]; then
+
+echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
+
+vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} \
+| bcftools reheader --threads {threads} -s {input.header} \
+| bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical} ;
+
+else
+
+cp {input.vcf_snv_research} {output.vcf_snv_clinical};
+
+fi
+
+tabix -p vcf -f {output.vcf_snv_clinical};
     """
 
 rule vep_somatic_sv:
@@ -88,37 +126,74 @@ vep \
 tabix -p vcf -f {output.vcf_research};
     """
 
-rule svdb_query_somatic_sv:
+rule annotate_swegen_frequency_somatic_sv:
     input:
         vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
-        clinical_sv_observations = clinical_sv
     output:
-        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
+        vcf_sv_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.swegen.vcf.gz"),
     benchmark:
-        Path(benchmark_dir, 'svdb_query_somatic_sv_' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir, 'annotate_swegen_frequency_somatic_sv_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
         tumor = get_sample_type(config["samples"], "tumor"),
         normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
-        tmpvcf_clinical = temp(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
+        swegen_sv_frequency = swegen_sv,
+        tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
     threads:
-        get_threads(cluster_config, "svdb_query_somatic_sv")
+        get_threads(cluster_config, "annotate_swegen_frequency_somatic_sv")
     message:
-        "Annotating structural and copy number variants using SVDB for {params.case_name}"
+        "Annotating structural and copy number variants with swegen frequency using SVDB for {params.case_name}",
     shell:
         """
-if [[ -f "{input.clinical_sv_observations}" ]]; then
+if [[ -f "{params.swegen_sv_frequency}" ]]; then
 svdb --query --bnd_distance 5000 --overlap 0.80 \
---in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq clin_frq \
---db {input.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.tmpvcf_clinical}
+--in_occ OCC --out_occ swegen_obs --in_frq FRQ --out_frq swegen_frq \
+--db {params.swegen_sv_frequency} --query_vcf {input.vcf_sv_research} > {params.tmp_vcf_clinical};
 
-bgzip -l 9 -c {params.tmpvcf_clinical} > {output.vcf_sv_clinical};
+bgzip -l 9 -c {params.tmp_vcf_clinical} > {output.vcf_sv_clinical};
 
 else
 
-cp {input.vcf_sv_research} {output.vcf_sv_clinical}
+cp {input.vcf_sv_research} {output.vcf_sv_clinical};
+
+fi
+
+tabix -p vcf -f {output.vcf_sv_clinical};
+        """
+
+rule annotate_clinical_observation_somatic_sv:
+    input:
+        vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.swegen.vcf.gz",
+    output:
+        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, 'annotate_clinical_observation_somatic_sv_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+    params:
+        tumor = get_sample_type(config["samples"], "tumor"),
+        normal = get_sample_type(config["samples"], "normal"),
+        case_name = config["analysis"]["case_id"],
+        clinical_sv_observations = clinical_sv,
+        tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
+    threads:
+        get_threads(cluster_config, "svdb_query_somatic_sv")
+    message:
+        "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
+    shell:
+        """
+if [[ -f "{params.clinical_sv_observations}" ]]; then
+svdb --query --bnd_distance 5000 --overlap 0.80 \
+--in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq clin_frq \
+--db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.tmp_vcf_clinical}
+
+bgzip -l 9 -c {params.tmp_vcf_clinical} > {output.vcf_sv_clinical};
+
+else
+
+cp {input.vcf_sv_research} {output.vcf_sv_clinical};
 
 fi
 
