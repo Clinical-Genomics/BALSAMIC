@@ -19,7 +19,7 @@ requirements = [
     "matplotlib==3.5.2",
     "networkx>=2.6.3",
     "numpy>=1.21.6",
-    "pandas>=1.3.5",
+    "pandas>=1.1.0",
     "psutil>=5.7.0",
     "pydantic>=1.9.0",
     "pygments>=2.6.1",

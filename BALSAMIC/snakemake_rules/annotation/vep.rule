@@ -208,7 +208,7 @@ rule tmb_calculation:
   benchmark:
     Path(benchmark_dir, "vep_stat_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
-    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
@@ -256,25 +256,25 @@ rm -r {params.tmpdir};
     """
 
 
-rule vep_germline:
+rule vep_germline_tumor:
   input:
-    vcf = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
+    vcf = vcf_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_all = vep_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
+    vcf_tumor = vep_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_germline_{var_type}.germline.{sample}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_germline_{var_type}.germline.tumor.{var_caller}.tsv").as_posix()
   singularity:
-    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "annotated-germline"},
-    sample = '{sample}',
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
+    sample = 'tumor',
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')
   message:
-    "Running vep annotation on germline variants for {params.sample}"
+    "Running vep annotation on germline variants for {params.sample} sample"
   shell:
       """
 vep_path=$(dirname $(readlink -f $(which vep)));
@@ -285,11 +285,50 @@ vep \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
 --input_file {input.vcf} \
---output_file {output.vcf_all} \
+--output_file {output.vcf_tumor} \
 --fork {threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA;
 
-tabix -p vcf -f {output.vcf_all};
+tabix -p vcf -f {output.vcf_tumor};
+
+    """
+
+
+rule vep_germline_normal:
+  input:
+    vcf = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
+    cosmic = config["reference"]["cosmic"]
+  output:
+    vcf_normal = vep_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, "vep_germline_{var_type}.germline.normal.{var_caller}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
+    sample = 'normal',
+    vep_cache = config["reference"]["vep"],
+    vep_defaults = params.vep.vep_filters
+  threads:
+    get_threads(cluster_config, 'vep_germline')
+  message:
+    "Running vep annotation on germline variants for {params.sample} sample"
+  shell:
+      """
+vep_path=$(dirname $(readlink -f $(which vep)));
+export PERL5LIB=;
+
+vep \
+--dir $vep_path \
+--dir_cache {params.vep_cache} \
+--dir_plugins $vep_path \
+--input_file {input.vcf} \
+--output_file {output.vcf_normal} \
+--fork {threads} \
+{params.vep_defaults} \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA;
+
+tabix -p vcf -f {output.vcf_normal};
 
     """
