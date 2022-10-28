@@ -297,7 +297,7 @@ tabix -p vcf -f {output.vcf_tumor};
 
 rule vep_germline_normal:
   input:
-    vcf = vcf_dir + "{var_type}.germline.{sample}.{var_caller}.vcf.gz",
+    vcf = vcf_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
     cosmic = config["reference"]["cosmic"]
   output:
     vcf_normal = vep_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
