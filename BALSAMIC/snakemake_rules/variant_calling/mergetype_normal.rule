@@ -22,15 +22,23 @@ rule mergeBam_normal:
   params:
     housekeeper_id = {"id": normal_sample, "tags": "normal"},
     picard = params.common.picard_RG_normal,
-    sample = normal_sample
+    sample = normal_sample,
+    tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
   threads:
     get_threads(cluster_config, "mergeBam_normal")
   message:
     "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
-picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
+samtools collate --threads {threads} -Ou {input.bam} {params.tmpdir}/{params.sample} |\
+samtools fixmate - - |\
+samtools sort --threads {threads} -O BAM -o {params.tmpdir}/normal.fixed.bam -;
+
+picard AddOrReplaceReadGroups {params.picard} INPUT={params.tmpdir}/normal.fixed.bam OUTPUT={output.bam}; 
+
 samtools index {output.bam}; 
+
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 
+
 samtools index {output.cram}; 
     """
