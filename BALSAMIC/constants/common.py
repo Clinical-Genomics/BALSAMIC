@@ -49,6 +49,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "ascatNgs",
     "balsamic",
     "vcf2cytosure",
+    "somalier",
 }
 
 BIOINFO_TOOL_ENV = {
@@ -78,6 +79,7 @@ BIOINFO_TOOL_ENV = {
     "ascatNgs": "ascatNgs",
     "sentieon": "sentieon",
     "vcf2cytosure": "vcf2cytosure",
+    "somalier": "somalier",
 }
 
 VALID_OPS = {
