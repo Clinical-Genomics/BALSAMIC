@@ -181,6 +181,14 @@ REFERENCE_FILES = {
             "output_file": "clinvar.vcf",
             "output_path": "variants",
         },
+        "somalier_sites": {
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/cancer/references/hg38.somalier.sites.vcf.gz",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "hg38.somalier.sites.vcf.gz",
+            "output_path": "genome",
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -358,6 +366,14 @@ REFERENCE_FILES = {
             "genome_version": "hg19",
             "output_file": "clinvar.vcf",
             "output_path": "variants",
+        },
+        "somalier_sites": {
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/cancer/references/GRCh37.somalier.sites.vcf.gz",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "GRCh37.somalier.sites.vcf.gz",
+            "output_path": "genome",
         },
     },
     "canfam3": {
