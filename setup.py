@@ -10,15 +10,15 @@ with open(os.path.join(here, "BALSAMIC", "__version__.py")) as f:
 
 # Requirements
 requirements = [
-    "click==8.1.3",
+    "click==8.0.4",
     "colorclass>=2.2.0",
     "coloredlogs>=14.0",
     "graphviz==0.16",
     "gsutil==4.50",
     "jinja2>=2.11.2",
-    "matplotlib==3.5.2",
-    "networkx>=2.6.3",
-    "numpy>=1.21.6",
+    "matplotlib==3.3.4",
+    "networkx>=2.5.1",
+    "numpy>=1.19.5",
     "pandas>=1.1.0",
     "psutil>=5.7.0",
     "pydantic>=1.9.0",
@@ -27,7 +27,7 @@ requirements = [
     "six>=1.12.0",
     "snakemake==6.5.3",
     "yapf>=0.30.0",
-    "h5py>=3.6.0",
+    "h5py>=3.1.0",
     "PyPDF2>=1.26.0",
     "markdown==3.3.3",
     "cryptography==3.2.1",
