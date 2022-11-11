@@ -6,13 +6,13 @@ rule somalier_extract_normal:
     input:
         bamN = bam_dir + "normal.merged.bam",
         fa = config["reference"]["reference_genome"],
-        ref_sites = config["reference"]["somalier_sites"], # TODO CHANGE REF
+        ref_sites = config["reference"]["somalier_sites"],
     output:
         somalierN = qc_dir + "somalier/NORMAL.somalier"
     benchmark:
         Path(benchmark_dir,'somalier_extract_normal.tsv').as_posix()
     singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix() # TODO CHECK CONTAINER
+        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
     params:
         outdir = qc_dir + "somalier/",
         case_name=config["analysis"]["case_id"],
@@ -22,7 +22,7 @@ rule somalier_extract_normal:
         "Running somalier extract for {params.case_name}"
     shell:
         """
-        somalier extract  --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamN} >{log} 2>&1;
+        somalier extract --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamN} ;
         """
 
 
@@ -30,13 +30,13 @@ rule somalier_extract_tumor:
     input:
         bamT=bam_dir + "tumor.merged.bam",
         fa = config["reference"]["reference_genome"],
-        ref_sites = config["reference"]["somalier_sites"], # TODO CHANGE REF
+        ref_sites = config["reference"]["somalier_sites"],
     output:
         somalierT = qc_dir + "somalier/TUMOR.somalier"
     benchmark:
         Path(benchmark_dir,'somalier_extract_tumorl.tsv').as_posix()
     singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix() # TODO CHECK CONTAINER
+        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
     params:
         outdir = qc_dir + "somalier/",
         case_name=config["analysis"]["case_id"],
@@ -46,7 +46,7 @@ rule somalier_extract_tumor:
         "Running somalier extract for {params.case_name}"
     shell:
         """
-        somalier extract  --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamT} >{log} 2>&1;
+        somalier extract  --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamT} ;
         """
 
 
@@ -61,7 +61,7 @@ rule somalier_relate:
     benchmark:
         Path(benchmark_dir,'somalier_relate.tsv').as_posix()
     singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix() # TODO CHECK CONTAINER
+        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
     params:
         outprefix = qc_dir + "somalier/somalier",
     threads:
@@ -70,5 +70,5 @@ rule somalier_relate:
         "Running somalier relate for {params.case_name}"
     shell:
         """
-        somalier relate -o {params.outprefix} {input.somalierN} {input.somalierT} 
+        somalier relate -o {params.outprefix} {input.somalierN} {input.somalierT}  
         """
