@@ -1,0 +1,2 @@
+#sample_a	sample_b	relatedness	ibs0	ibs2	hom_concordance	hets_a	hets_b	hets_ab	shared_hetshom_alts_a	hom_alts_b	shared_hom_alts	n	x_ibs0	x_ibs2	expected_relatedness
+id1_NORMAL	id1_TUMOR	1.000	0	1896	1.000	566	566	1132	566	725	725	7251896	0	36	-1.0

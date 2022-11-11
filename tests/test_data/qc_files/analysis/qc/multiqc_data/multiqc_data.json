@@ -19,6 +19,11 @@
                 "concatenated_normal_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_normal_XXXXXX_R_2_fastqc.zip",
                 "concatenated_tumor_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_1_fastqc.zip"
             }
+        },
+        "Somalier": {
+            "all_sections": {
+                "id1_NORMAL*id1_TUMOR": "tests/test_data/somalier/somalier.pairs.tsv"
+            }
         }
     },
     "report_saved_raw_data": {
