@@ -12,7 +12,7 @@ from BALSAMIC.utils.models import MetricModel
 from BALSAMIC.utils.rule import (
     get_capture_kit,
     get_sequencing_type,
-    get_sample_type_from_prefix,
+    get_sample_type_from_prefix, get_analysis_type,
 )
 
 
@@ -47,6 +47,11 @@ def collect_qc_metrics(
     # Number of variants
     for count in counts_path:
         metrics += get_variant_metrics(count)
+
+    # Relatedness
+    analysis_type = get_analysis_type(config)
+    if analysis_type == "paired":
+        metrics += get_relatedness_metrics(multiqc_data)
 
     with open(output_path, "w") as fn:
         yaml.dump(
@@ -99,6 +104,34 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                             source_subtool
                         ][sample]
                     )
+
+
+def get_relatedness_metrics(multiqc_data: dict) -> list:
+    """Retrieves the relatedness metrics and returns them as a MetricModel list."""
+    source_tool = "Somalier"
+    metric = "relatedness"
+    step = "multiqc_somalier"
+
+    # Somalier doesn't input the sample name but {$case_id}_{[NORMAL|TUMOR]},
+    # where [NORMAL|TUMOR] is the sample group in the bam file
+    for sample in multiqc_data["report_data_sources"][source_tool]["all_sections"]:
+        if "*" in sample:
+            data_source = os.path.basename(multiqc_data["report_data_sources"][source_tool]["all_sections"][sample])
+            metric_value = multiqc_data["report_saved_raw_data"][step][sample][metric]
+            case_id = sample.split("_")[0]
+
+        output_metrics = list(
+            MetricModel(
+                id=case_id,
+                input=data_source,
+                name=metric,
+                step=step,
+                value=metric_value,
+                condition=METRICS["paired"]["RELATEDNESS"]["condition"],
+            ).dict()
+        )
+
+    return output_metrics
 
 
 def get_qc_supported_capture_kit(capture_kit, metrics: List[str]) -> str:

@@ -112,6 +112,15 @@ def get_sequencing_type(config):
     return config["analysis"]["sequencing_type"]
 
 
+def get_analysis_type(config):
+    """
+    input: sample config file from BALSAMIC
+    output: analysis type string ("paired" or "single")
+    """
+
+    return config["analysis"]["analysis_type"]
+
+
 def get_capture_kit(config):
     """
     input: sample config file from BALSAMIC
