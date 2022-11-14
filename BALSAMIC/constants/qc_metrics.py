@@ -70,5 +70,5 @@ METRICS = {
     },
     "paired": {
         "RELATEDNESS": {"condition": {"norm": "gt", "threshold": 0.80}},
-    }
+    },
 }

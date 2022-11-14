@@ -12,7 +12,8 @@ from BALSAMIC.utils.models import MetricModel
 from BALSAMIC.utils.rule import (
     get_capture_kit,
     get_sequencing_type,
-    get_sample_type_from_prefix, get_analysis_type,
+    get_sample_type_from_prefix,
+    get_analysis_type,
 )
 
 
@@ -92,17 +93,13 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
             ):
                 try:
                     return os.path.basename(
-                        multiqc_data["report_data_sources"][source_tool][
-                            source_subtool
-                        ][sample]
+                        multiqc_data["report_data_sources"][source_tool][source_subtool][sample]
                     )
                 except KeyError:
                     # Deletes pair orientation information from the sample name (insertSize metrics)
                     sample = sample.rsplit("_", 1)[0]
                     return os.path.basename(
-                        multiqc_data["report_data_sources"][source_tool][
-                            source_subtool
-                        ][sample]
+                        multiqc_data["report_data_sources"][source_tool][source_subtool][sample]
                     )
 
 
@@ -116,7 +113,9 @@ def get_relatedness_metrics(multiqc_data: dict) -> list:
     # where [NORMAL|TUMOR] is the sample group in the bam file
     for sample in multiqc_data["report_data_sources"][source_tool]["all_sections"]:
         if "*" in sample:
-            data_source = os.path.basename(multiqc_data["report_data_sources"][source_tool]["all_sections"][sample])
+            data_source = os.path.basename(
+                multiqc_data["report_data_sources"][source_tool]["all_sections"][sample]
+            )
             metric_value = multiqc_data["report_saved_raw_data"][step][sample][metric]
             case_id = sample.split("_")[0]
 
@@ -154,9 +153,7 @@ def get_requested_metrics(config: dict, metrics: dict) -> dict:
     requested_metrics = metrics[sequencing_type]
     if capture_kit:
         requested_metrics = metrics[sequencing_type]["default"]
-        supported_capture_kit = get_qc_supported_capture_kit(
-            capture_kit, metrics[sequencing_type]
-        )
+        supported_capture_kit = get_qc_supported_capture_kit(capture_kit, metrics[sequencing_type])
         if supported_capture_kit:
             requested_metrics.update(metrics[sequencing_type][supported_capture_kit])
 
@@ -201,9 +198,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                         output_metrics.append(
                             MetricModel(
                                 id=sample.split("_")[1],
-                                input=get_multiqc_data_source(
-                                    multiqc_data, sample, source
-                                ),
+                                input=get_multiqc_data_source(multiqc_data, sample, source),
                                 name=k,
                                 step=source,
                                 value=data[k],
