@@ -13,7 +13,7 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_requested_metrics,
     extract_number_variants,
     get_variant_metrics,
-    get_metric_condition,
+    get_metric_condition, get_relatedness_metrics,
 )
 
 
@@ -281,3 +281,26 @@ def test_collect_qc_metrics_counts(
     # THEN check if the YAML is correctly created and there are no errors
     assert result.exit_code == 0
     assert Path(output_path).exists()
+
+
+def test_get_relatedness_metrics(multiqc_data_dict):
+    """tests relatedness metrics retrieval"""
+
+    # GIVEN a multiqc_data_dict
+
+    # GIVEN an expected MetricsModel dictionary
+    expected_output_metris = {
+        "header": None,
+        "id": "case",
+        "input": "somalier.pairs.tsv",
+        "name": "RELATEDNESS",
+        "step": "collect_custom_qc_metrics",
+        "value": 1,
+        "condition": {"norm": "gt", "threshold": 0.80},
+    }
+
+    # WHEN extracting the number of variants
+    output_metrics = get_relatedness_metrics(multiqc_data_dict)
+
+    # THEN check that the output metrics has been correctly shaped
+    assert expected_output_metris == output_metrics[0]
