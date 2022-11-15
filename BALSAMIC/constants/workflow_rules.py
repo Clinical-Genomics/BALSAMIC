@@ -4,7 +4,6 @@ SNAKEMAKE_RULES = {
         "qc": [
             "snakemake_rules/quality_control/fastp.rule",
             "snakemake_rules/quality_control/fastqc.rule",
-            "snakemake_rules/quality_control/somalier.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/variant_calling/mergetype_tumor.rule",
         ],
@@ -57,6 +56,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/mosdepth.rule",
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/variant_calling/mergetype_normal.rule",
+            "snakemake_rules/quality_control/somalier.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/mergetype_normal_umi.rule",
             "snakemake_rules/quality_control/contest.rule",
@@ -104,6 +104,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/variant_calling/mergetype_normal.rule",
+            "snakemake_rules/quality_control/somalier.rule",
         ],
         "align": ["snakemake_rules/align/sentieon_alignment.rule"],
         "varcall": [
