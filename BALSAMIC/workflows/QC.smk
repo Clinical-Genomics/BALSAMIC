@@ -97,7 +97,9 @@ rules_to_include = [
 
 if "paired" in config['analysis']['analysis_type']:
     rules_to_include.append("snakemake_rules/variant_calling/mergetype_normal.rule")
-    rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
+    # Somalier only implemented for hg38 and hg19
+    if "hg" not in config["reference"]["reference_genome"]:
+        rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
 
 
 # for r in rules_to_include:
