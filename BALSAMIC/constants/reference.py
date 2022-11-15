@@ -182,7 +182,7 @@ REFERENCE_FILES = {
             "output_path": "variants",
         },
         "somalier_sites": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/cancer/references/hg38.somalier.sites.vcf.gz",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/blob/87f22d3f458569afbcb4d7f1588468d21d1751fb/cancer/references/hg38.somalier.sites.vcf.gz",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
@@ -368,7 +368,7 @@ REFERENCE_FILES = {
             "output_path": "variants",
         },
         "somalier_sites": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/cancer/references/GRCh37.somalier.sites.vcf.gz",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/blob/87f22d3f458569afbcb4d7f1588468d21d1751fb/cancer/references/GRCh37.somalier.sites.vcf.gz",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg19",
