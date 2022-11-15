@@ -50,8 +50,9 @@ def collect_qc_metrics(
         metrics += get_variant_metrics(count)
 
     # Relatedness
-    analysis_type = get_analysis_type(config)
-    if analysis_type == "paired":
+    # analysis_type = get_analysis_type(config)
+    # if analysis_type == "paired":
+    if multiqc_data["report_data_sources"]["Somalier"]:
         metrics += get_relatedness_metrics(multiqc_data)
 
     with open(output_path, "w") as fn:
