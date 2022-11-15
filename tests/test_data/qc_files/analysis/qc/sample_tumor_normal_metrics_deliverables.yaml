@@ -166,5 +166,7 @@
   name: RELATEDNESS
   step: multiqc_somalier
   value: 1
-  condition: null
+  condition:
+    norm: gt
+    threshold: 0.80
 
