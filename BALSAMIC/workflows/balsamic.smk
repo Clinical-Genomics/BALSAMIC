@@ -97,7 +97,7 @@ if "swegen_snv_frequency" in config["reference"]:
             'file': get_swegen_snv(config),
             'fields': ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
             'ops': ["self", "self", "self","self"],
-            'names': ["SwegenAF", "SwegenAC_Hom", "SwegenAC_Het", "SwegenAC_Hemi"]
+            'names': ["SWEGENAF", "SWEGENAAC_Hom", "SWEGENAAC_Het", "SWEGENAAC_Hemi"]
         }]
     }
     )
