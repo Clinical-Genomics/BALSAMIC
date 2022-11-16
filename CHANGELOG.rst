@@ -28,7 +28,8 @@ Changed:
 
 Fixed:
 ^^^^^^
-* Reverted `pandas` version (from `1.3.5` to `1.1.0`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+* Reverted `pandas` version (from `1.3.5` to `1.1.5`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+* If statement in `vep_somatic_clinical_snv` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
 
 Removed:
 ^^^^^^^
