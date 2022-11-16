@@ -29,7 +29,7 @@ Changed:
 Fixed:
 ^^^^^^
 * Reverted `pandas` version (from `1.3.5` to `1.1.0`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
-* samtools command in merge bam and names in toml for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/10
+* samtools command in merge bam and names in toml for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1020
 
 Removed:
 ^^^^^^^
