@@ -24,6 +24,7 @@ Changed:
 * Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, `delly` to v1.1.3, `vcf2cytosure` to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/987
 * toml config file for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
 * Split `vep_germline` rule into `tumor` and `normal` https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+* Fix mate in realined bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
 
 Fixed:
 ^^^^^^
