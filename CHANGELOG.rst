@@ -13,8 +13,8 @@ Added:
 * AnnotSV and bedtools to annotate container https://github.com/Clinical-Genomics/BALSAMIC/pull/1005
 * cosmicdb to TNscope for tumor only and tumor normal workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
 * `loqusDB` dump files to the config through the balsamic config case CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/992
-* Pre-annotation quality filters for SNVs annd added `research` to output files https://github.com/Clinical-Genomics/BALSAMIC/pull/1007 
-* Annotation of snv_clinical_observations for somatic snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1012 
+* Pre-annotation quality filters for SNVs annd added `research` to output files https://github.com/Clinical-Genomics/BALSAMIC/pull/1007
+* Annotation of snv_clinical_observations for somatic snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
 * Annotation of sv_clinical_observations  for somatic sv and SV CNV filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1013
 * Swegen SNV and SV frequency database for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1014
 
@@ -23,9 +23,14 @@ Changed:
 * Added version number to the PON reference filename (`.cnn`) https://github.com/Clinical-Genomics/BALSAMIC/pull/982
 * Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, `delly` to v1.1.3, `vcf2cytosure` to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/987
 * toml config file for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
+* Split `vep_germline` rule into `tumor` and `normal` https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
 * Fix mate in realined bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
 
-Removed
+Fixed:
+^^^^^^
+* Reverted `pandas` version (from `1.3.5` to `1.1.0`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+
+Removed:
 ^^^^^^^
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
