@@ -34,6 +34,8 @@ samtools collate --threads {threads} -Ou {input.bam} {params.tmpdir}/{params.sam
 samtools fixmate - - |\
 samtools sort --threads {threads} -O BAM -o {params.tmpdir}/tumor.fixed.bam -;
 
+samtools index {params.tmpdir}/tumor.fixed.bam;
+
 picard AddOrReplaceReadGroups {params.picard} INPUT={params.tmpdir}/tumor.fixed.bam OUTPUT={output.bam}; 
 
 samtools index {output.bam}; 

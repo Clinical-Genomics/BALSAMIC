@@ -26,7 +26,7 @@ rule bcftools_filter_tnscope_research_tumor_normal:
     """
 bcftools view {input.vcf_snv_research} \
 | bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -f PASS -o {output.vcf_pass_tnscope_research} -O z;
+| bcftools view -f PASS,triallelic_site -o {output.vcf_pass_tnscope_research} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_research};
 
@@ -54,7 +54,7 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
   shell:
     """
 bcftools view {input.vcf_snv_clinical} \
-| bcftools view -f PASS -o {output.vcf_pass_tnscope_clinical} -O z;
+| bcftools view -f PASS,triallelic_site -o {output.vcf_pass_tnscope_clinical} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_clinical};
 
