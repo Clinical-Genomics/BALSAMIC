@@ -25,7 +25,7 @@ Changed:
 * toml config file for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
 * Split `vep_germline` rule into `tumor` and `normal` https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
 * Fix mate in realined bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
-* Removed `tnhaplotyper` https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
+* Extract number of variants from clinical files https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
 
 Fixed:
 ^^^^^^
@@ -35,8 +35,9 @@ Fixed:
 Removed:
 ^^^^^^^
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
-* TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
-* TNhaplotyper for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
+* `TNhaplotyper` for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
+* `TNhaplotyper` for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
+* `TNhaplotyper` for TGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
 
 [10.0.5]
 --------
