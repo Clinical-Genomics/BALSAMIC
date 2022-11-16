@@ -43,7 +43,7 @@ bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view  -f PASS  -o {output.vcf_pass_tnscope_research} -O z;
+| bcftools view  -f PASS,triallelic_site  -o {output.vcf_pass_tnscope_research} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_research};
 
@@ -73,7 +73,7 @@ rule bcftools_filter_tnscope_clinical_tumor_only:
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv_clinical} \
-| bcftools view  -f PASS  -o {output.vcf_pass_tnscope_clinical} -O z;
+| bcftools view  -f PASS,triallelic_site  -o {output.vcf_pass_tnscope_clinical} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_clinical};
 

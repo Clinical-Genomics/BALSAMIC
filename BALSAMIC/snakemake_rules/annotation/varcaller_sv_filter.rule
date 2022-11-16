@@ -21,7 +21,7 @@ rule bcftools_filter_sv_research:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb_research} -O z {input.vcf_sv_research};
+bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb_research} -O z {input.vcf_sv_research};
 
 tabix -p vcf -f {output.vcf_pass_svdb_research};
 
@@ -48,7 +48,7 @@ rule bcftools_filter_sv_clinical:
     "Filtering merged clinical structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb_clinical} -O z {input.vcf_sv_clinical};
+bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb_clinical} -O z {input.vcf_sv_clinical};
 
 tabix -p vcf -f {output.vcf_pass_svdb_clinical};
 

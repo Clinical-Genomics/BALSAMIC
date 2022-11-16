@@ -17,6 +17,7 @@ Added:
 * Annotation of snv_clinical_observations for somatic snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
 * Annotation of sv_clinical_observations  for somatic sv and SV CNV filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1013
 * Swegen SNV and SV frequency database for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1014
+* triallelic_sites and variants with MaxDepth to the VCFs https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
 
 Changed:
 ^^^^^^^^
@@ -29,7 +30,7 @@ Changed:
 Fixed:
 ^^^^^^
 * Reverted `pandas` version (from `1.3.5` to `1.1.0`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
-* samtools command in merge bam and names in toml for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/10
+* samtools command in merge bam and names in toml for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1020
 
 Removed:
 ^^^^^^^
