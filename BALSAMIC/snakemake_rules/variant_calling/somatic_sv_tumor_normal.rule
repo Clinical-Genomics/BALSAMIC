@@ -225,7 +225,7 @@ rule ascat_tumor_normal_merge_output:
         ascat_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-        merge_ascat_output_script= get_script_path("generate_cnv_report.py"),
+        generate_cnv_report_script= get_script_path("generate_cnv_report.py"),
     singularity:
         Path(singularity_image, "balsamic.sif").as_posix()
     threads:
@@ -234,7 +234,7 @@ rule ascat_tumor_normal_merge_output:
         "Merging the output plots and the sample statistics from ascatNGS into a single PDF"
     shell:
         """
-python {params.merge_ascat_output_script} {output.ascat_pdf} {input.sample_statistics} {input.ascat_plots}
+python {params.generate_cnv_report_script} {input.sample_statistics} {input.ascat_plots} --output {output.ascat_pdf} 
         """
 
 rule tiddit_sv_tumor_normal:
