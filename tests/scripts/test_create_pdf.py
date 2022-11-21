@@ -2,11 +2,11 @@ from pathlib import Path
 
 from fpdf import FPDF
 
-from BALSAMIC.assets.scripts.create_pdf import (
+from BALSAMIC.assets.scripts.generate_cnv_report import (
     generate_fpdf,
     add_images_pdf,
     add_table_pdf,
-    create_pdf,
+    generate_cnv_report,
 )
 
 
@@ -47,7 +47,7 @@ def test_add_table_pdf():
     assert pdf.page_no() == 1
 
 
-def test_create_pdf(tmp_path, cli_runner):
+def test_generate_cnv_report(tmp_path, cli_runner):
     # GIVEN ascatNGgs output statistics
     statistics_path = (
         "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.samplestatistics.txt"
@@ -64,7 +64,8 @@ def test_create_pdf(tmp_path, cli_runner):
 
     # WHEN invoking the python script
     result = cli_runner.invoke(
-        create_pdf, [str(output_path), statistics_path, plots_path[0], plots_path[1]]
+        generate_cnv_report,
+        [str(output_path), statistics_path, plots_path[0], plots_path[1]],
     )
 
     # THEN check if the PDF is correctly created and there is no errors

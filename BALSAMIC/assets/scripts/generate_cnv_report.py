@@ -12,7 +12,7 @@ from PIL import Image
 @click.argument("output", type=click.Path(exists=False), required=True)
 @click.argument("data", type=click.Path(exists=True), required=True)
 @click.argument("images", nargs=-1, type=click.Path(exists=True), required=True)
-def create_pdf(output, data, images):
+def generate_cnv_report(output, data, images):
     pdf = generate_fpdf()
     pdf = add_table_pdf(pdf, data)
     pdf = add_images_pdf(pdf, images)
@@ -102,4 +102,4 @@ def add_table_pdf(pdf, data_path):
 
 
 if __name__ == "__main__":
-    create_pdf()
+    generate_cnv_report()
