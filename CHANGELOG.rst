@@ -18,6 +18,7 @@ Added:
 * Annotation of sv_clinical_observations  for somatic sv and SV CNV filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1013
 * Swegen SNV and SV frequency database for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1014
 * triallelic_sites and variants with MaxDepth to the VCFs https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
+* CNVpytor plots into the CNV PDF report https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
 
 Changed:
 ^^^^^^^^
