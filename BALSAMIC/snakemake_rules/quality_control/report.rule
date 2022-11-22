@@ -30,5 +30,5 @@ rule cnv_report:
         "Generating CNV report PDF"
     shell:
         """
-python {params.cnv_report_script} {input.statistics} {input.plots} --output {output.cnv_report_pdf} 
+python {params.cnv_report_script} {input.plots}  --statistics {input.statistics} --output {output.cnv_report_pdf} 
         """

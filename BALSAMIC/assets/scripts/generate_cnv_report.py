@@ -10,10 +10,10 @@ from PIL import Image
 
 
 @click.command(short_help="Merge statistics and plots into a single CNV report")
-@click.argument("statistics", nargs=1, type=click.Path(exists=True), required=False)
 @click.argument("plots", nargs=-1, type=click.Path(exists=True), required=False)
-@click.option("-o", "--output", type=click.Path(exists=False), required=True)
-def generate_cnv_report(statistics: Path, plots: List[Path], output: Path) -> None:
+@click.option("--statistics", type=click.Path(exists=True), required=False)
+@click.option("--output", type=click.Path(exists=False), required=True)
+def generate_cnv_report(plots: List[Path], statistics: Path, output: Path) -> None:
     """Generate a CNV report given a set of statistic files and a list of plots."""
     pdf: PDF = get_pdf_instance()
     pdf: PDF = add_data_to_pdf(pdf=pdf, data_path=statistics) if statistics else pdf

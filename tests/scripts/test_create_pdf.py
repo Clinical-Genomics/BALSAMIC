@@ -52,14 +52,42 @@ def test_add_plots_to_pdf():
     assert pdf.page_no() == len(plot_paths)
 
 
-def test_generate_cnv_report(tmp_path, cli_runner):
-    """Test generation of a PDF report."""
+def test_generate_cnv_report_tumor_normal(tmp_path, cli_runner):
+    """Test generation of a PDF report for a WGS TN case."""
 
     # GIVEN dummy input data and plots
     statistics_path = "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.samplestatistics.txt"
     plot_paths = [
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.germline.png",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.sunrise.png",
+    ]
+
+    # GIVEN the output path
+    output_path: Path = Path(tmp_path, "report.pdf")
+
+    # WHEN invoking the python script
+    result = cli_runner.invoke(
+        generate_cnv_report,
+        [
+            "--statistics",
+            statistics_path,
+            plot_paths[0],
+            plot_paths[1],
+            "--output",
+            output_path,
+        ],
+    )
+
+    # THEN check if the PDF is correctly created and there is no errors
+    assert result.exit_code == 0
+    assert Path(output_path).exists()
+
+
+def test_generate_cnv_report_tumor_only(tmp_path, cli_runner):
+    """Test generation of a PDF report for a WGS TO case."""
+
+    # GIVEN dummy input data and plots
+    plot_paths = [
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_only_wgs.cnvpytor.circular.png",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_only_wgs.cnvpytor.scatter.png",
     ]
@@ -71,11 +99,8 @@ def test_generate_cnv_report(tmp_path, cli_runner):
     result = cli_runner.invoke(
         generate_cnv_report,
         [
-            statistics_path,
             plot_paths[0],
             plot_paths[1],
-            plot_paths[2],
-            plot_paths[3],
             "--output",
             output_path,
         ],
