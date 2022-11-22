@@ -118,7 +118,7 @@ def get_relatedness_metrics(multiqc_data: dict) -> list:
                 multiqc_data["report_data_sources"][source_tool]["all_sections"][sample]
             )
             metric_value = multiqc_data["report_saved_raw_data"][step][sample][metric]
-            case_id = re.sub(r"_[(TUMOR)(NORMAL)].*", "", sample)
+            case_id = re.sub(r"_NORMAL.*|_TUMOR.*", "", sample)
 
         output_metrics = MetricModel(
             id=case_id,
