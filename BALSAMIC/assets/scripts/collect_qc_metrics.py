@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import click
 import yaml
+import re
 
 from BALSAMIC.constants.qc_metrics import METRICS
 from BALSAMIC.utils.io import read_json
@@ -117,7 +118,7 @@ def get_relatedness_metrics(multiqc_data: dict) -> list:
                 multiqc_data["report_data_sources"][source_tool]["all_sections"][sample]
             )
             metric_value = multiqc_data["report_saved_raw_data"][step][sample][metric]
-            case_id = sample.split("_")[0]
+            case_id = re.sub(r"_[(TUMOR)(NORMAL)].*", "", sample)
 
         output_metrics = MetricModel(
             id=case_id,

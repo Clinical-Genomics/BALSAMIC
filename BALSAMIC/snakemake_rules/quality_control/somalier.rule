@@ -14,8 +14,8 @@ rule somalier_extract_normal:
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
     params:
-        outdir = qc_dir + "somalier/",
-        case_name=config["analysis"]["case_id"],
+        outdir = Path(qc_dir,'somalier').as_posix(),
+        case_name = config["analysis"]["case_id"],
     threads:
         get_threads(cluster_config,"somalier_extract_normal")
     message:
