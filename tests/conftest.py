@@ -6,6 +6,8 @@ from unittest import mock
 from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
+
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
 from BALSAMIC.utils.io import read_json, read_yaml
@@ -534,15 +536,7 @@ def sample_config():
             "BALSAMIC_version": "2.9.8",
             "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
         },
-        "vcf": {
-            "manta": {"mutation": "somatic", "type": "SV"},
-            "vardict": {"mutation": "somatic", "type": "SNV"},
-            "mutect": {"mutation": "somatic", "type": "SNV"},
-            "tnscope": {"mutation": "somatic", "type": "SNV"},
-            "tnhaplotyper": {"mutation": "somatic", "type": "SNV"},
-            "dnascope": {"mutation": "germline", "type": "SNV"},
-            "manta_germline": {"mutation": "germline", "type": "SV"},
-        },
+        "vcf": VCF_DICT,
         "samples": {
             "S1_R": {
                 "file_prefix": "S1_R",

@@ -73,7 +73,7 @@ rule vep_somatic_clinical_snv:
     "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:
     """
-if [[ -f {params.clinical_snv} ]]; then
+if [[ -f "{params.clinical_snv}" ]]; then
 
 echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
 
