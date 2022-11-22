@@ -38,7 +38,7 @@ rule somalier_extract_tumor:
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
     params:
-        outdir = qc_dir + "somalier/",
+        outdir = Path(qc_dir,'somalier').as_posix(),
         case_name=config["analysis"]["case_id"],
     threads:
         get_threads(cluster_config,"somalier_extract_tumor")
@@ -63,7 +63,8 @@ rule somalier_relate:
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
     params:
-        outprefix = qc_dir + "somalier/somalier",
+        outprefix = Path(qc_dir,'somalier', 'somalier').as_posix(),
+        case_name=config["analysis"]["case_id"],
     threads:
         get_threads(cluster_config,"somalier_relate")
     message:
