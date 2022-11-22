@@ -154,9 +154,7 @@ class VarcallerAttribute(BaseModel):
     @validator("analysis_type", check_fields=False)
     def annotation_type_literal(cls, value) -> str:
         """Validate analysis types"""
-        assert set(value).issubset(
-            set(ANALYSIS_TYPES)
-        ), f"{value} is not a valid analysis type."
+        assert set(value).issubset(set(ANALYSIS_TYPES)), f"{value} is not a valid analysis type."
         return value
 
     @validator("mutation", check_fields=False)
@@ -257,35 +255,27 @@ class AnalysisModel(BaseModel):
     def analysis_type_literal(cls, value) -> str:
         balsamic_analysis_types = ANALYSIS_TYPES
         if value not in balsamic_analysis_types:
-            raise ValueError(
-                f"Provided analysis type ({value}) not supported in BALSAMIC!"
-            )
+            raise ValueError(f"Provided analysis type ({value}) not supported in BALSAMIC!")
         return value
 
     @validator("gender")
     def gender_literal(cls, value, values) -> Optional[str]:
         if value not in GENDER_OPTIONS and values.get("analysis_type") != "pon":
-            raise ValueError(
-                f"Provided gender type ({value}) is not supported in BALSAMIC!"
-            )
+            raise ValueError(f"Provided gender type ({value}) is not supported in BALSAMIC!")
         return value
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
         balsamic_sequencing_types = SEQUENCING_TYPE
         if value not in balsamic_sequencing_types:
-            raise ValueError(
-                f"Provided sequencing type ({value}) not supported in BALSAMIC!"
-            )
+            raise ValueError(f"Provided sequencing type ({value}) not supported in BALSAMIC!")
         return value
 
     @validator("analysis_workflow", check_fields=True)
     def analysis_workflow_literal(cls, value) -> str:
         balsamic_analysis_workflow = ANALYSIS_WORKFLOW
         if value not in balsamic_analysis_workflow:
-            raise ValueError(
-                f"Provided analysis workflow ({value} not supported in BALSAMIC"
-            )
+            raise ValueError(f"Provided analysis workflow ({value} not supported in BALSAMIC")
         return value
 
     @validator("analysis_dir")
@@ -294,42 +284,27 @@ class AnalysisModel(BaseModel):
 
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
-        return (
-            Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
-            + "/"
-        )
+        return Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix() + "/"
 
     @validator("fastq_path")
     def parse_analysis_to_fastq_path(cls, value, values, **kwargs) -> str:
         return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "analysis", "fastq"
-            ).as_posix()
+            Path(values.get("analysis_dir"), values.get("case_id"), "analysis", "fastq").as_posix()
             + "/"
         )
 
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
-        return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "scripts"
-            ).as_posix()
-            + "/"
-        )
+        return Path(values.get("analysis_dir"), values.get("case_id"), "scripts").as_posix() + "/"
 
     @validator("result")
     def parse_analysis_to_result_path(cls, value, values, **kwargs) -> str:
-        return Path(
-            values.get("analysis_dir"), values.get("case_id"), "analysis"
-        ).as_posix()
+        return Path(values.get("analysis_dir"), values.get("case_id"), "analysis").as_posix()
 
     @validator("benchmark")
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
         return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "benchmarks"
-            ).as_posix()
-            + "/"
+            Path(values.get("analysis_dir"), values.get("case_id"), "benchmarks").as_posix() + "/"
         )
 
     @validator("dag")
@@ -392,9 +367,7 @@ class SampleInstanceModel(BaseModel):
     def sample_type_literal(cls, value):
         balsamic_sample_types = ["tumor", "normal"]
         if value not in balsamic_sample_types:
-            raise ValueError(
-                f"Provided sample type ({value}) not supported in BALSAMIC!"
-            )
+            raise ValueError(f"Provided sample type ({value}) not supported in BALSAMIC!")
         return value
 
     @validator("sample_name")
@@ -627,9 +600,7 @@ class ReferenceMeta(BaseModel):
             output_value = value
         else:
             if "output_path" in value:
-                value["output_path"] = Path(
-                    values["basedir"], value["output_path"]
-                ).as_posix()
+                value["output_path"] = Path(values["basedir"], value["output_path"]).as_posix()
                 output_value = ReferenceUrlsModel.parse_obj(value)
             else:
                 output_value = value

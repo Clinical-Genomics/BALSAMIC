@@ -39,13 +39,7 @@ def get_vcf(config, var_caller, sample):
     for v in var_caller:
         for s in sample:
             vcf.append(
-                config["vcf"][v]["type"]
-                + "."
-                + config["vcf"][v]["mutation"]
-                + "."
-                + s
-                + "."
-                + v
+                config["vcf"][v]["type"] + "." + config["vcf"][v]["mutation"] + "." + s + "." + v
             )
     return vcf
 
@@ -232,9 +226,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             # Do not store file if it is a temp() output
             if file_to_store in temp_files:
                 LOG.debug(
-                    "File is tagged as temporary file in the workflow: {}".format(
-                        file_to_store
-                    )
+                    "File is tagged as temporary file in the workflow: {}".format(file_to_store)
                 )
                 continue
 
@@ -256,9 +248,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             # from another rule. example: vep_somatic might pick up ngs_filter_vardict files
             pattern = re.compile(r"{([^}\.[!:]+)")
             if pattern.findall(delivery_id):
-                LOG.error(
-                    "Problem in pattern matching the following: {}".format(delivery_id)
-                )
+                LOG.error("Problem in pattern matching the following: {}".format(delivery_id))
                 continue
 
             # Create a composit tag from housekeeper tag and named output
@@ -304,9 +294,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
     return output_files
 
 
-def get_delivery_id(
-    id_candidate: str, file_to_store: str, tags: list, output_file_wildcards: dict
-):
+def get_delivery_id(id_candidate: str, file_to_store: str, tags: list, output_file_wildcards: dict):
     """resolve delivery id from file_to_store, tags, and output_file_wildcards
 
     This function will get a filename, a list of tags, and an id_candidate. id_candidate should be form of a fstring.
@@ -356,9 +344,7 @@ def get_pon_samples(fastq_dir):
     """Given dirpath containing list of PON fastq files
     Returns list of sample names
     """
-    samples = [
-        (f.split("_1"))[0] for f in os.listdir(fastq_dir) if f.endswith("_R_1.fastq.gz")
-    ]
+    samples = [(f.split("_1"))[0] for f in os.listdir(fastq_dir) if f.endswith("_R_1.fastq.gz")]
     return samples
 
 
