@@ -121,7 +121,7 @@ bcftools view {input.vcf} \
 
 tabix -p vcf -f {output.vcf_filtered};
 
-bcftools view -f PASS -o {output.vcf_pass_TNscope_umi}.temp -O z {output.vcf_filtered};
+bcftools view -f PASS,triallelic_site -o {output.vcf_pass_TNscope_umi}.temp -O z {output.vcf_filtered};
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_TNscope_umi}.temp \

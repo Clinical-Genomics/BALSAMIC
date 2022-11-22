@@ -26,7 +26,7 @@ rule bcftools_filter_tnscope_research_tumor_normal:
     """
 bcftools view {input.vcf_snv_research} \
 | bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -f PASS -o {output.vcf_pass_tnscope_research} -O z;
+| bcftools view -f PASS,triallelic_site -o {output.vcf_pass_tnscope_research} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_research};
 
@@ -36,7 +36,7 @@ bcftools +counts {output.vcf_pass_tnscope_research} > {output.bcftools_counts_re
 
 rule bcftools_filter_tnscope_clinical_tumor_normal:
   input:
-    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
+    vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
   output:
     vcf_pass_tnscope_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
@@ -53,8 +53,8 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     "Filtering WGS tumor-normal tnscope annotated clinical variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view {input.vcf_snv_research} \
-| bcftools view -f PASS -o {output.vcf_pass_tnscope_clinical} -O z;
+bcftools view {input.vcf_snv_clinical} \
+| bcftools view -f PASS,triallelic_site -o {output.vcf_pass_tnscope_clinical} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_clinical};
 

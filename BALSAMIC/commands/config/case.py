@@ -159,6 +159,18 @@ LOG = logging.getLogger(__name__)
     help="VCF path of cancer SV observations (WGS analysis workflow)",
 )
 @click.option(
+    "--swegen-snv",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of Swegen SNV frequency database (WGS analysis workflow)",
+)
+@click.option(
+    "--swegen-sv",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of Swegen SV frequency database (WGS analysis workflow)",
+)
+@click.option(
     "-g",
     "--genome-version",
     default="hg19",
@@ -203,6 +215,8 @@ def case_config(
     cancer_all_snv_observations,
     cancer_somatic_snv_observations,
     cancer_somatic_sv_observations,
+    swegen_snv,
+    swegen_sv,
     genome_version,
     balsamic_cache,
     container_version,
@@ -236,6 +250,8 @@ def case_config(
             "cancer_all_snv_observations": cancer_all_snv_observations,
             "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
             "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
+            "swegen_snv_frequency": swegen_snv,
+            "swegen_sv_frequency": swegen_sv,
         }
         reference_dict.update(
             {

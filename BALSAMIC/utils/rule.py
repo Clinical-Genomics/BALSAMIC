@@ -366,7 +366,7 @@ def get_clinical_snv_observations(config: dict) -> str:
     """Returns path for clinical snv observations
 
     Args:
-        congig: a config dictionary
+        config: a config dictionary
 
     Returns:
         Path for clinical_snv_observations vcf file
@@ -375,17 +375,43 @@ def get_clinical_snv_observations(config: dict) -> str:
     return Path(config["reference"]["clinical_snv_observations"]).as_posix()
 
 
+def get_swegen_snv(config: dict) -> str:
+    """Returns path for swegen snv frequencies
+
+    Args:
+        config: a config dictionary
+
+    Returns:
+        Path for swegen_snv vcf file
+
+    """
+    return Path(config["reference"]["swegen_snv_frequency"]).as_posix()
+
+
 def get_clinical_sv_observations(config: dict) -> str:
     """Returns path for clinical sv observations
 
     Args:
-        congig: a config dictionary
+        config: a config dictionary
 
     Returns:
         Path for clinical_sv_observations vcf file
 
     """
     return Path(config["reference"]["clinical_sv_observations"]).as_posix()
+
+
+def get_swegen_sv(config: dict) -> str:
+    """Returns path for swegen sv frequencies
+
+    Args:
+        config: a config dictionary
+
+    Returns:
+        Path for swegen_sv vcf file
+
+    """
+    return Path(config["reference"]["swegen_sv_frequency"]).as_posix()
 
 
 def get_toml(annotation: dict) -> str:

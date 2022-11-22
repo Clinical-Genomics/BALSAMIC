@@ -23,10 +23,11 @@ from BALSAMIC.utils.workflowscripts import plot_analysis
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
                                  get_vcf, get_picard_mrkdup, get_sample_type,
                                  get_threads, get_script_path, get_sequencing_type, get_capture_kit,
-                                 get_clinical_snv_observations, get_clinical_sv_observations, dump_toml)
+                                 get_clinical_snv_observations, get_clinical_sv_observations,
+                                 get_swegen_snv, get_swegen_sv, dump_toml)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
-                                    RULE_DIRECTORY, MUTATION_TYPE);
+                                       RULE_DIRECTORY, MUTATION_TYPE);
 from BALSAMIC.constants.variant_filters import COMMON_SETTINGS,VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
@@ -61,8 +62,16 @@ umi_dir = get_result_dir(config) + "/umi/"
 umi_qc_dir = qc_dir + "umi_qc/"
 singularity_image = config['singularity']['image']
 
+
+research_annotations = []
+clinical_annotations = []
+clinical_snv_obs = ""
+swegen_snv = ""
+clinical_sv = ""
+swegen_sv = ""
+
 # vcfanno annotations
-gnomad = {
+research_annotations.append( {
     'annotation': [{
     'file': Path(config["reference"]["gnomad_variant"]).as_posix(),
     'fields': ["AF", "AF_popmax"],
@@ -70,8 +79,9 @@ gnomad = {
     'names': ["GNOMADAF", "GNOMADAF_popmax"]
     }]
 }
+)
 
-clinvar = {
+research_annotations.append( {
     'annotation': [{
     'file': Path(config["reference"]["clinvar"]).as_posix(),
     'fields': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"],
@@ -79,11 +89,21 @@ clinvar = {
     'names': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"]
     }]
 }
+)
 
-annotations = [gnomad, clinvar]
+if "swegen_snv_frequency" in config["reference"]:
+    research_annotations.append( {
+        'annotation': [{
+            'file': get_swegen_snv(config),
+            'fields': ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
+            'ops': ["self", "self", "self","self"],
+            'names': ["SWEGENAF", "SWEGENAAC_Hom", "SWEGENAAC_Het", "SWEGENAAC_Hemi"]
+        }]
+    }
+    )
 
 if "clinical_snv_observations" in config["reference"]:
-    clinical_snv = {
+    clinical_annotations.append( {
         'annotation': [{
             'file': get_clinical_snv_observations(config),
             'fields': ["Frq", "Obs", "Hom"],
@@ -91,11 +111,16 @@ if "clinical_snv_observations" in config["reference"]:
             'names': ["Frq", "Obs", "Hom"]
         }]
     }
-    annotations.append(clinical_snv)
+    )
+    clinical_snv_obs = get_clinical_snv_observations(config)
 
-clinical_sv = ""
+
 if "clinical_sv_observations" in config["reference"]:
     clinical_sv = get_clinical_sv_observations(config)
+
+
+if "swegen_sv_frequency" in config["reference"]:
+    swegen_sv = get_swegen_sv(config)
 
 
 # picarddup flag
