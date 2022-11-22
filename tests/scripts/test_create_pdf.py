@@ -25,7 +25,7 @@ def test_add_data_to_pdf():
     # GIVEN a PDF instance and an output sample statistics .txt file
     pdf: PDF = get_pdf_instance()
     statistics_path = (
-        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.samplestatistics.txt"
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.ascat.samplestatistics.txt"
     )
 
     # WHEN generating the PDF with the statistics
@@ -42,8 +42,10 @@ def test_add_plots_to_pdf():
     # GIVEN a PDF instance and some dummy PNG plots
     pdf: PDF = get_pdf_instance()
     plot_paths = [
-        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.sunrise.png",
-        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.germline.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.ascat.sunrise.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.ascat.germline.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.cnvpytor.circular.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.cnvpytor.scatter.png",
     ]
 
     # WHEN adding the plots to a PDF instance
@@ -59,15 +61,17 @@ def test_generate_cnv_report(tmp_path, cli_runner):
 
     # GIVEN dummy input data and plots
     statistics_path = (
-        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.samplestatistics.txt"
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.ascat.samplestatistics.txt"
     )
     plot_paths = [
-        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.germline.png",
-        "tests/test_data/ascat_output/CNV.somatic.SAMPLE.ascat.sunrise.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.ascat.germline.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.ascat.sunrise.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.cnvpytor.circular.png",
+        "tests/test_data/cnv_report/CNV.somatic.SAMPLE.cnvpytor.scatter.png",
     ]
 
     # GIVEN the output path
-    output_path: Path = Path(tmp_path, "ascat.output.pdf")
+    output_path: Path = Path(tmp_path, "report.pdf")
 
     # WHEN invoking the python script
     result = cli_runner.invoke(
@@ -76,10 +80,15 @@ def test_generate_cnv_report(tmp_path, cli_runner):
             statistics_path,
             plot_paths[0],
             plot_paths[1],
+            plot_paths[2],
+            plot_paths[3],
             "--output",
             output_path,
         ],
     )
+    import os
+
+    os.system(f"open {output_path}")
 
     # THEN check if the PDF is correctly created and there is no errors
     assert result.exit_code == 0

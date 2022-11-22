@@ -101,6 +101,7 @@ SNAKEMAKE_RULES = {
         "qc": [
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
+            "snakemake_rules/quality_control/report.rule",
             "snakemake_rules/variant_calling/mergetype_normal.rule",
         ],
         "align": ["snakemake_rules/align/sentieon_alignment.rule"],
@@ -136,7 +137,7 @@ DELIVERY_RULES = [
     "sentieon_tnscope_umi",
     "sentieon_tnscope_umi_tn",
     "ascat_tumor_normal",
-    "ascat_tumor_normal_merge_output",
+    "cnv_report",
     "delly_cnv_tumor_only",
     "delly_cnv_tumor_normal",
     "tiddit_sv_tumor_only",

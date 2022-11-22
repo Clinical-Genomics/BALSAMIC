@@ -214,29 +214,6 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-rule ascat_tumor_normal_merge_output:
-    input:
-        sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
-        ascat_plots= expand(
-            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
-            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
-        ),
-    output:
-        ascat_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.output.pdf"
-    params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-        generate_cnv_report_script= get_script_path("generate_cnv_report.py"),
-    singularity:
-        Path(singularity_image, "balsamic.sif").as_posix()
-    threads:
-        get_threads(cluster_config, "ascat_tumor_normal_merge_output")
-    message:
-        "Merging the output plots and the sample statistics from ascatNGS into a single PDF"
-    shell:
-        """
-python {params.generate_cnv_report_script} {input.sample_statistics} {input.ascat_plots} --output {output.ascat_pdf} 
-        """
-
 rule tiddit_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],

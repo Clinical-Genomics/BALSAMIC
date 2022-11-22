@@ -1,0 +1,33 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt"
+ascat_plots = expand(
+    vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+    output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+)
+cnvpytor_plots = expand(
+    vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
+    output_suffix=["circular", "scatter"]
+)
+
+rule cnv_report:
+    input:
+        statistics = sample_statistics,
+        ascat_plots=ascat_plots,
+        cnvpytor_plots = cnvpytor_plots
+    output:
+        cnv_report_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.pdf"
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+        cnv_report_script= get_script_path("generate_cnv_report.py"),
+    singularity:
+        Path(singularity_image, "balsamic.sif").as_posix()
+    threads:
+        get_threads(cluster_config, "cnv_report")
+    message:
+        "Generating CNV report PDF"
+    shell:
+        """
+python {params.cnv_report_script} {input.statistics} {input.ascat_plots} {input.cnvpytor_plots} --output {output.cnv_report_pdf} 
+        """
