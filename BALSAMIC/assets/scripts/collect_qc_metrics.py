@@ -119,16 +119,14 @@ def get_relatedness_metrics(multiqc_data: dict) -> list:
             metric_value = multiqc_data["report_saved_raw_data"][step][sample][metric]
             case_id = sample.split("_")[0]
 
-        output_metrics = list(
-            MetricModel(
-                id=case_id,
-                input=data_source,
-                name=metric,
-                step=step,
-                value=metric_value,
-                condition=METRICS["paired"]["RELATEDNESS"]["condition"],
-            ).dict()
-        )
+        output_metrics = MetricModel(
+            id=case_id,
+            input=data_source,
+            name=metric.upper(),
+            step=step,
+            value=metric_value,
+            condition=METRICS["paired"]["RELATEDNESS"]["condition"],
+        ).dict()
 
     return output_metrics
 
