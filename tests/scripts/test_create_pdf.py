@@ -60,6 +60,8 @@ def test_generate_cnv_report_tumor_normal(tmp_path, cli_runner):
     plot_paths = [
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.germline.png",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.sunrise.png",
+        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_only_wgs.cnvpytor.circular.png",
+        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_only_wgs.cnvpytor.scatter.png",
     ]
 
     # GIVEN the output path
@@ -73,6 +75,8 @@ def test_generate_cnv_report_tumor_normal(tmp_path, cli_runner):
             statistics_path,
             plot_paths[0],
             plot_paths[1],
+            plot_paths[2],
+            plot_paths[3],
             "--output",
             output_path,
         ],
