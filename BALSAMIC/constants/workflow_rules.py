@@ -84,6 +84,7 @@ SNAKEMAKE_RULES = {
         "qc": [
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
+            "snakemake_rules/quality_control/report.rule",
         ],
         "align": ["snakemake_rules/align/sentieon_alignment.rule"],
         "varcall": [

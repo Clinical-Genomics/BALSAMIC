@@ -42,8 +42,6 @@ def test_add_plots_to_pdf():
     plot_paths = [
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.sunrise.png",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.germline.png",
-        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.cnvpytor.circular.png",
-        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.cnvpytor.scatter.png",
     ]
 
     # WHEN adding the plots to a PDF instance
@@ -62,8 +60,8 @@ def test_generate_cnv_report(tmp_path, cli_runner):
     plot_paths = [
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.germline.png",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.sunrise.png",
-        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.cnvpytor.circular.png",
-        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.cnvpytor.scatter.png",
+        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_only_wgs.cnvpytor.circular.png",
+        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_only_wgs.cnvpytor.scatter.png",
     ]
 
     # GIVEN the output path
