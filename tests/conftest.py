@@ -359,6 +359,10 @@ def tumor_normal_wgs_config(
             ],
         )
 
+    vcf_dir = Path(analysis_dir, case_id, "analysis", "vcf")
+    vcf_dir.mkdir(parents=True, exist_ok=False)
+    copy_tree("tests/test_data/cnv_report/", vcf_dir.as_posix())
+
     return Path(analysis_dir, case_id, case_id + ".json").as_posix()
 
 
