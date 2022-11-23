@@ -24,7 +24,7 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
       threads: 
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_only')
       message:
-        "Filtering WGS tumor-only tnscope variants using bcftools for {params.case_name}"
+        "Quality filtering WGS tumor-only tnscope variants using bcftools for {params.case_name}"
       shell:
           """
 export TMPDIR={params.tmpdir};
@@ -65,7 +65,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
       threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_normal')
       message:
-        "Filtering WGS tumor-normal tnscope variants using bcftools for {params.case_name}"
+        "Quality filtering WGS tumor-normal tnscope variants using bcftools for {params.case_name}"
       shell:
           """
 bcftools view {input.vcf_snv} \
@@ -77,4 +77,126 @@ bcftools view {input.vcf_snv} \
 
 tabix -p vcf -f {output.vcf_snv_research};
           """
+
+if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'single':
+
+  rule bcftools_quality_filter_vardict_tumor_only:
+    input:
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    output:
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      MQ=[VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
+      AD=[VARDICT.AD.tag_value, VARDICT.AD.filter_name],
+      DP=[VARDICT.DP.tag_value, VARDICT.DP.filter_name],
+      AF_min=[VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
+      AF_max=[VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
+      case_name = config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')
+    message:
+      "Quality filtering vardict tumor-only annotated variants using bcftools for {params.case_name}"
+    shell:
+      """
+bcftools view {input.vcf} | \
+bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' | \
+bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
+bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
+bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
+bcftools filter --include 'INFO/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' | \
+bcftools view -f PASS -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_filtered};
+      """
+
+
+  rule bcftools_quality_filter_TNscope_umi_tumor_only:
+    input:
+      vcf= vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+    output:
+      vcf_filtered = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz"
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_TNscope_umi_tumor_only' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      case_name = config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,'bcftools_quality_filter_tnscope_umi_tumor_only')
+    message:
+      "Quality filtering tnscope_umi tumor-only variants using bcftools for {params.case_name}"
+    shell:
+      """
+bcftools view {input.vcf} | \
+bcftools view  -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_pass_TNscope_umi};
+      """
+
+
+
+elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':
+
+  rule bcftools_quality_filter_vardict_tumor_normal:
+    input:
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    output:
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      MQ=[VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
+      AD=[VARDICT.AD.tag_value, VARDICT.AD.filter_name],
+      DP=[VARDICT.DP.tag_value, VARDICT.DP.filter_name],
+      AF_min=[VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
+      AF_max=[VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
+      possible_germline="balsamic_possible_germline",
+      case_name = config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_normal')
+    message:
+      "Quality filtering vardict tumor-normal variants using bcftools for {params.case_name} "
+    shell:
+      """
+bcftools view {input.vcf} | \
+bcftools filter --include 'SMPL_MIN(FMT/MQ) >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode + | \
+bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
+bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
+bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
+bcftools filter --include 'INFO/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' | \
+bcftools filter --exclude 'INFO/STATUS ~ "germline/i"' --soft-filter '{params.possible_germline}' --mode '+' | \
+bcftools view -f PASS -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_filtered};
+      """
+
+
+  rule bcftools_quality_filter_TNscope_umi_tumor_normal:
+    input:
+      vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+    output:
+      vcf_filtered = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz",
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_TNscope_umi_tumor_normal' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      case_name = config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,'bcftools_quality_filter_TNscope_umi_tumor_normal')
+    message:
+      "Quality filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name} "
+    shell:
+      """
+bcftools view {input.vcf} | \
+bcftools view -o {output.vcf_filtered} -O z;
+
+tabix -p vcf -f {output.vcf_filtered};
+      """
 

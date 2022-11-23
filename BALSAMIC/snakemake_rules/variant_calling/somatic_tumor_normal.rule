@@ -50,7 +50,7 @@ rule vardict_merge:
     input:
         expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
     output:
-        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
         yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
     params:
