@@ -26,18 +26,21 @@ Changed:
 * Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, `delly` to v1.1.3, `vcf2cytosure` to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/987
 * toml config file for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
 * Split `vep_germline` rule into `tumor` and `normal` https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
-* Fix mate in realined bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
+* Extract number of variants from clinical files https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
 
 Fixed:
 ^^^^^^
-* Reverted `pandas` version (from `1.3.5` to `1.1.0`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+* Reverted `pandas` version (from `1.3.5` to `1.1.5`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+* Mate in realigned bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
 * samtools command in merge bam and names in toml for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1020
+* If statement in `vep_somatic_clinical_snv` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
 
 Removed:
 ^^^^^^^
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
-* TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
-* TNhaplotyper for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
+* `TNhaplotyper` for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
+* `TNhaplotyper` for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
+* `TNhaplotyper` for TGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
 
 [10.0.5]
 --------
