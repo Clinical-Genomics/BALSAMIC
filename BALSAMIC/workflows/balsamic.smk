@@ -344,7 +344,7 @@ analysis_specific_results.extend(
 
 if config["analysis"]["sequencing_type"] == "wgs":
     # CNV report
-    analysis_specific_results.extend(expand(vcf_dir + "CNV.somatic.{case_name}.report.pdf", case_name=case_id))
+    analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
     # Filtered and passed post annotation clinical VCFs
     analysis_specific_results.extend(
         expand(vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
