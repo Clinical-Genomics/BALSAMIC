@@ -78,7 +78,7 @@ bcftools view {input.vcf_snv} \
 tabix -p vcf -f {output.vcf_snv_research};
           """
 
-elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'single':
+if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'single':
 
   rule bcftools_quality_filter_vardict_tumor_only:
     input:

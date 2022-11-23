@@ -9,10 +9,10 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     if config["analysis"]["sequencing_type"] == 'wgs':
         bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.clinical.filtered.pass.stats")
     else:
-        bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.filtered.pass.stats")
+        bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.clinical.filtered.pass.stats")
 
 if config["analysis"]["analysis_workflow"] == "balsamic-umi":
-    bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.research.filtered.pass.stats")
+    bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.clinical.filtered.pass.stats")
 
 rule collect_custom_qc_metrics:
     input:
