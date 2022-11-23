@@ -417,8 +417,8 @@ def test_get_chrom(config_files):
 
 
 def test_get_vcf(sample_config):
-    # GIVEN a sample_config dict, varinat callers list
-    variant_callers = ["mutect", "vardict", "manta"]
+    # GIVEN a sample_config dict and a variant callers list
+    variant_callers = ["tnscope", "vardict", "manta"]
 
     # WHEN passing args to that function
     vcf_list = get_vcf(
@@ -426,9 +426,19 @@ def test_get_vcf(sample_config):
     )
 
     # THEN It should return the list of vcf file names
-    assert any("mutect" in vcf_name for vcf_name in vcf_list)
+    assert any("tnscope" in vcf_name for vcf_name in vcf_list)
     assert any("vardict" in vcf_name for vcf_name in vcf_list)
     assert any("manta" in vcf_name for vcf_name in vcf_list)
+
+
+def test_get_vcf_invalid_variant_caller(sample_config):
+    # GIVEN a sample_config dict and an incorrect variant callers list
+    variant_callers = ["vardict", "manta", "tnhaplotyper"]
+
+    # WHEN passing args to that function
+    with pytest.raises(KeyError):
+        # THEN a key error should be raised for a not supported caller
+        get_vcf(sample_config, variant_callers, [sample_config["analysis"]["case_id"]])
 
 
 def test_get_sample_type(sample_config):
