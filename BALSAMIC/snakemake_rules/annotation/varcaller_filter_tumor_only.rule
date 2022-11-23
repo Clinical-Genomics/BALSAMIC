@@ -4,24 +4,18 @@
 
 
 
-rule bcftools_filter_vardict_tumor_only:
+rule bcftools_filter_vardict_research_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.vcf.gz",
+    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.vcf.gz",
-    vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.stats"
+    vcf_filtered_research = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.stats"
   benchmark:
-    Path(benchmark_dir, 'bcftools_filter_vardict_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_vardict_research_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-    MQ = [VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
-    AD = [VARDICT.AD.tag_value, VARDICT.AD.filter_name],
-    DP = [VARDICT.DP.tag_value, VARDICT.DP.filter_name],
-    AF_min = [VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
-    AF_max = [VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
     pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
     case_name =  '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
@@ -29,33 +23,26 @@ rule bcftools_filter_vardict_tumor_only:
   threads:
     get_threads(cluster_config, 'bcftools_filter_vardict_tumor_only')
   message:
-    "Filtering vardict tumor-only annotated variants using bcftools and  "
+    "Filtering vardict tumor-only annotated research variants using bcftools and  "
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
   shell:
     """
-bcftools view {input.vcf} \
-| bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' \
-| bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
-| bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
-| bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools filter --include 'INFO/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
-| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered} -O z;
+bcftools view {input.vcf_snv_research} | \
+bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools view -f PASS -o {output.vcf_filtered_research}.temp -O z;
 
-tabix -p vcf -f {output.vcf_filtered};
-
-bcftools view -f PASS -o {output.vcf_pass_vardict}.temp -O z {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_filtered_research}.temp;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_pass_vardict}.temp \
---output_vcf {output.vcf_pass_vardict} \
+--input_vcf {output.vcf_filtered_research}.temp \
+--output_vcf {output.vcf_filtered_research} \
 --variant_caller {params.variant_caller};
 
-tabix -p vcf -f {output.vcf_pass_vardict};
+tabix -p vcf -f {output.vcf_filtered_research};
 
-bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts};
+bcftools +counts {output.vcf_filtered_research} > {output.bcftools_counts_research};
 
-rm {output.vcf_pass_vardict}.temp;
+rm {output.vcf_filtered_research}.temp;
     """
 
 
@@ -91,15 +78,14 @@ tabix -p vcf -f {output.vcf_pass_tnhaplotyper};
     """
 
 
-rule bcftools_filter_TNscope_umi_tumor_only:
+rule bcftools_filter_TNscope_umi_research_tumor_only:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.vcf.gz",
+    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.vcf.gz",
   output:
-    vcf_filtered = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.vcf.gz",
-    vcf_pass_TNscope_umi = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.pass.stats"
+    vcf_filtered_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.pass.vcf.gz",
+    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.research.filtered.pass.stats"
   benchmark:
-    Path(benchmark_dir, 'bcftools_filter_TNscope_umi_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_TNscope_umi_research_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -111,26 +97,108 @@ rule bcftools_filter_TNscope_umi_tumor_only:
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_umi_tumor_only')
   message:
-    "Filtering tnscope_umi tumor-only annotated variants using bcftools and  "
+    "Filtering tnscope_umi tumor-only annotated research variants using bcftools and  "
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
   shell:
     """
-bcftools view {input.vcf} \
-| bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered} -O z;
+bcftools view {input.vcf_snv_research} | \
+bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools view -f PASS,triallelic_site -o {output.vcf_filtered_research}.temp -O z;
 
-tabix -p vcf -f {output.vcf_filtered};
-
-bcftools view -f PASS,triallelic_site -o {output.vcf_pass_TNscope_umi}.temp -O z {output.vcf_filtered};
+tabix -p vcf -f {output.vcf_filtered_research}.temp;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_pass_TNscope_umi}.temp \
---output_vcf {output.vcf_pass_TNscope_umi} \
+--input_vcf {output.vcf_filtered_research}.temp \
+--output_vcf {output.vcf_filtered_research} \
 --variant_caller {params.variant_caller};
 
-tabix -p vcf -f {output.vcf_pass_TNscope_umi};
+tabix -p vcf -f {output.vcf_filtered_research};
 
-bcftools +counts {output.vcf_pass_TNscope_umi} > {output.bcftools_counts};
+bcftools +counts {output.vcf_filtered_research} > {output.bcftools_counts_research};
     
-rm {output.vcf_pass_TNscope_umi}.temp;
+rm {output.vcf_filtered_research}.temp;
+    """
+
+
+rule bcftools_filter_vardict_clinical_tumor_only:
+  input:
+    vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.vcf.gz",
+  output:
+    vcf_filtered_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.filtered.pass.vcf.gz",
+    bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.filtered.pass.stats"
+  benchmark:
+    Path(benchmark_dir, 'bcftools_filter_vardict_clinical_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
+    case_name =  '{case_name}',
+    edit_vcf_script = get_script_path("edit_vcf_info.py"),
+    variant_caller = "vardict"
+  threads:
+    get_threads(cluster_config, 'bcftools_filter_vardict_tumor_only')
+  message:
+    "Filtering vardict tumor-only annotated clinical variants using bcftools and  "
+    "adding FOUND_IN tags to the output VCF for {params.case_name}"
+  shell:
+    """
+bcftools view {input.vcf_snv_clinical} | \
+bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools view -f PASS -o {output.vcf_filtered_clinical}.temp -O z;
+
+tabix -p vcf -f {output.vcf_filtered_clinical}.temp;
+
+python {params.edit_vcf_script} \
+--input_vcf {output.vcf_filtered_clinical}.temp \
+--output_vcf {output.vcf_filtered_clinical} \
+--variant_caller {params.variant_caller};
+
+tabix -p vcf -f {output.vcf_filtered_clinical};
+
+bcftools +counts {output.vcf_filtered_clinical} > {output.bcftools_counts_clinical};
+
+rm {output.vcf_filtered_clinical}.temp;
+    """
+
+
+rule bcftools_filter_TNscope_umi_clinical_tumor_only:
+  input:
+    vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.clinical.vcf.gz",
+  output:
+    vcf_filtered_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.clinical.filtered.pass.vcf.gz",
+    bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.clinical.filtered.pass.stats"
+  benchmark:
+    Path(benchmark_dir,'bcftools_filter_TNscope_umi_clinical_tumor_only' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+    Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    pop_freq=[SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
+    housekeeper_id={"id": config["analysis"]["case_id"], "tags": "clinical"},
+    case_name='{case_name}',
+    edit_vcf_script=get_script_path("edit_vcf_info.py"),
+    variant_caller="tnscope_umi"
+  threads:
+    get_threads(cluster_config,'bcftools_filter_tnscope_umi_tumor_only')
+  message:
+    "Filtering tnscope_umi tumor-only annotated clinical variants using bcftools and  "
+    "adding FOUND_IN tags to the output VCF for {params.case_name}"
+  shell:
+    """
+bcftools view {input.vcf_snv_clinical} | \
+bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools view -f PASS,triallelic_site -o {output.vcf_filtered_clinical}.temp -O z;
+
+tabix -p vcf -f {output.vcf_filtered_clinical}.temp;
+
+python {params.edit_vcf_script} \
+--input_vcf {output.vcf_filtered_clinical}.temp \
+--output_vcf {output.vcf_filtered_clinical} \
+--variant_caller {params.variant_caller};
+
+tabix -p vcf -f {output.vcf_filtered_clinical};
+
+bcftools +counts {output.vcf_filtered_clinical} > {output.bcftools_counts_clinical};
+
+rm {output.vcf_filtered_clinical}.temp;
     """
