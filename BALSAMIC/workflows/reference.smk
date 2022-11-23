@@ -122,7 +122,7 @@ rule all:
         ascat_gccorrection = ascat_gccorrection_url.get_output_file,
         ascat_chryloci = ascat_chryloci_url.get_output_file,
         clinvar = clinvar_url.get_output_file + ".gz",
-        somalier_sites = somalier_sites_url.get_output_file,
+        somalier_sites = somalier_sites_url.get_output_file + ".gz",
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
