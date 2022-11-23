@@ -53,7 +53,7 @@ rule vardict_merge:
     output:
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map",
         yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
-        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz"
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
     benchmark:
         Path(benchmark_dir, 'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
