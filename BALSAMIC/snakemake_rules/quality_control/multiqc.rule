@@ -31,7 +31,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     if config['analysis']['analysis_type'] == "paired":
         multiqc_input.append(bam_dir+"normal.merged.recal_data.table")
 
-
 else:
     # fastqc metrics
     multiqc_input.extend(expand(fastqc_dir + "{sample}_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
