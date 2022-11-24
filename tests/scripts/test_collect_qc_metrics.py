@@ -284,15 +284,17 @@ def test_get_relatedness_metrics(multiqc_data_dict):
     # GIVEN a multiqc_data_dict
 
     # GIVEN an expected MetricsModel dictionary
-    expected_output_metris = {
-        "header": None,
-        "id": "id1",
-        "input": "somalier.pairs.tsv",
-        "name": "RELATEDNESS",
-        "step": "multiqc_somalier",
-        "value": 1,
-        "condition": {"norm": "gt", "threshold": 0.80},
-    }
+    expected_output_metris = [
+        {
+            "header": None,
+            "id": "id1",
+            "input": "somalier.pairs.tsv",
+            "name": "RELATEDNESS",
+            "step": "multiqc_somalier",
+            "value": 1,
+            "condition": {"norm": "gt", "threshold": 0.80},
+        }
+    ]
 
     # WHEN extracting the number of variants
     output_metrics = get_relatedness_metrics(multiqc_data_dict)
