@@ -19,7 +19,7 @@ rule somalier_extract_normal:
     threads:
         get_threads(cluster_config,"somalier_extract_normal")
     message:
-        "Running somalier extract for {params.case_name}"
+        "Running somalier extract for normal sample of {params.case_name}"
     shell:
         """
         somalier extract --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamN} ;
@@ -43,7 +43,7 @@ rule somalier_extract_tumor:
     threads:
         get_threads(cluster_config,"somalier_extract_tumor")
     message:
-        "Running somalier extract for {params.case_name}"
+        "Running somalier extract for tumor sample of {params.case_name}"
     shell:
         """
         somalier extract  --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamT} ;
