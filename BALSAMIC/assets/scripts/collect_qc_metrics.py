@@ -129,7 +129,7 @@ def get_relatedness_metrics(multiqc_data: dict) -> list:
         condition=METRICS["paired"]["RELATEDNESS"]["condition"],
     ).dict()
 
-    return output_metrics
+    return [output_metrics]
 
 
 def get_qc_supported_capture_kit(capture_kit, metrics: List[str]) -> str:
