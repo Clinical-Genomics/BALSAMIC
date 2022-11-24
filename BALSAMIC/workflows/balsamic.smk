@@ -203,17 +203,16 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # CNV report input files
-cnv_statistics = []
-cnv_plots = []
+cnv_data_paths = []
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
-    cnv_statistics.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
-    cnv_plots.extend(expand(
+    cnv_data_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
+    cnv_data_paths.extend(expand(
         vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
         output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
     ))
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
-    cnv_plots.extend(expand(
+    cnv_data_paths.extend(expand(
         vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
         output_suffix=["circular", "scatter"]
     ))

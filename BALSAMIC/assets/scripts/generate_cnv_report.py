@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import click
 
@@ -10,13 +10,13 @@ from PIL import Image
 
 
 @click.command(short_help="Merge statistics and plots into a single CNV report")
-@click.argument("plots", nargs=-1, type=click.Path(exists=True), required=False)
-@click.option("--statistics", type=click.Path(exists=True), required=False)
+@click.argument("data_paths", nargs=-1, type=click.Path(exists=True), required=False)
 @click.option("--output", type=click.Path(exists=False), required=True)
-def generate_cnv_report(plots: List[Path], statistics: Path, output: Path) -> None:
+def generate_cnv_report(data_paths: List[Path], output: Path) -> None:
     """Generate a CNV report given a set of statistic files and a list of plots."""
     pdf: PDF = get_pdf_instance()
-    pdf: PDF = add_data_to_pdf(pdf=pdf, data_path=statistics) if statistics else pdf
+    statistics, plots = get_pdf_data(data_paths)
+    pdf: PDF = add_data_to_pdf(pdf=pdf, data_paths=statistics) if statistics else pdf
     pdf: PDF = add_plots_to_pdf(pdf=pdf, plot_paths=plots) if plots else pdf
     pdf.output(output)
 
@@ -38,36 +38,37 @@ def get_pdf_instance() -> PDF:
     return pdf
 
 
-def add_data_to_pdf(pdf: PDF, data_path: Path) -> PDF:
+def add_data_to_pdf(pdf: PDF, data_paths: List[Path]) -> PDF:
     """Add statistics to a PDF instance."""
-    with open(data_path) as data:
-        data = data.readlines()
-    pdf.add_page()
-    pdf.set_font("helvetica", "B", 15)
-    # Title layout & styling
-    title: str = os.path.basename(data_path).replace(".txt", "")
-    pdf.cell(25)
-    pdf.cell(140, 10, title, 1, 0, "C")
-    pdf.cell(35, 25, ln=1)  # Post title indentation
-    # Table layout & styling
-    pdf.set_font("Times", size=11)
-    line_height = pdf.font_size * 2.5
-    col_width = pdf.epw / 4  # Even distribution of the content
-    for row in data:
-        pdf.cell(45)
-        for statistic in row.split():
-            pdf.multi_cell(
-                col_width,
-                line_height,
-                statistic,
-                align="C",
-                border=1,
-                ln=3,
-                max_line_height=pdf.font_size,
-            )
-        pdf.ln(line_height)
+    for data_path in data_paths:
+        with open(data_path) as data:
+            data = data.readlines()
+        pdf.add_page()
+        pdf.set_font("helvetica", "B", 15)
+        # Title layout & styling
+        title: str = os.path.basename(data_path).replace(".txt", "")
+        pdf.cell(25)
+        pdf.cell(140, 10, title, 1, 0, "C")
+        pdf.cell(35, 25, ln=1)  # Post title indentation
+        # Table layout & styling
+        pdf.set_font("Times", size=11)
+        line_height = pdf.font_size * 2.5
+        col_width = pdf.epw / 4  # Even distribution of the content
+        for row in data:
+            pdf.cell(45)
+            for statistic in row.split():
+                pdf.multi_cell(
+                    col_width,
+                    line_height,
+                    statistic,
+                    align="C",
+                    border=1,
+                    ln=3,
+                    max_line_height=pdf.font_size,
+                )
+            pdf.ln(line_height)
 
-    return pdf
+        return pdf
 
 
 def add_plots_to_pdf(pdf: PDF, plot_paths: List[Path]) -> PDF:
@@ -104,6 +105,18 @@ def add_plots_to_pdf(pdf: PDF, plot_paths: List[Path]) -> PDF:
         pdf.image(img, img_xy[0], img_xy[1])
 
     return pdf
+
+
+def get_pdf_data(data_paths: List[Path]) -> Tuple[List[Path], List[Path]]:
+    """Return"""
+    statistics = []
+    plots = []
+    for path in data_paths:
+        if Path(path).suffix == ".txt":
+            statistics.append(path)
+        if Path(path).suffix == ".png":
+            plots.append(path)
+    return statistics, plots
 
 
 if __name__ == "__main__":

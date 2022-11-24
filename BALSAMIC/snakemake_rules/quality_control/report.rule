@@ -3,8 +3,7 @@
 
 rule cnv_report:
     input:
-        statistics = cnv_statistics,
-        plots = cnv_plots
+        cnv_data= cnv_data_paths
     output:
         cnv_report_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.pdf"
     params:
@@ -18,9 +17,5 @@ rule cnv_report:
         "Generating CNV report PDF"
     shell:
         """
-if [[ -z "{input.statistics}" ]]; then
-python {params.cnv_report_script} {input.plots} --output {output.cnv_report_pdf}
-else
-python {params.cnv_report_script} {input.plots} --statistics {input.statistics} --output {output.cnv_report_pdf}
-fi;
+python {params.cnv_report_script} {input.cnv_data} --output {output.cnv_report_pdf}
         """

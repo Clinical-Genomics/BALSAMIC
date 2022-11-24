@@ -6,7 +6,23 @@ from BALSAMIC.assets.scripts.generate_cnv_report import (
     add_plots_to_pdf,
     generate_cnv_report,
     PDF,
+    get_pdf_data,
 )
+
+
+def test_get_pdf_data():
+    """Test pdf data extraction from a list of files."""
+
+    # GIVEN a list of input files
+    data_paths = ["statistics.txt", "plot_0.png", "plot_1.png"]
+
+    # WHEN retrieving the statistics and plots tuple
+    statistics, plots = get_pdf_data(data_paths)
+
+    # THEN the expected files should be returned
+    assert data_paths[0] in statistics
+    assert data_paths[1] in plots
+    assert data_paths[2] in plots
 
 
 def test_get_pdf_instance():
@@ -24,10 +40,12 @@ def test_add_data_to_pdf():
 
     # GIVEN a PDF instance and an output sample statistics .txt file
     pdf: PDF = get_pdf_instance()
-    statistics_path = "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.samplestatistics.txt"
+    statistics_paths = [
+        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.samplestatistics.txt"
+    ]
 
     # WHEN generating the PDF with the statistics
-    pdf: PDF = add_data_to_pdf(pdf=pdf, data_path=statistics_path)
+    pdf: PDF = add_data_to_pdf(pdf=pdf, data_paths=statistics_paths)
 
     # THEN check if the statistics are appended to the created PDF
     assert isinstance(pdf, PDF)
@@ -56,8 +74,8 @@ def test_generate_cnv_report_tumor_normal(tmp_path, cli_runner):
     """Test generation of a PDF report for a WGS TN case."""
 
     # GIVEN dummy input data and plots
-    statistics_path = "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.samplestatistics.txt"
-    plot_paths = [
+    data_paths = [
+        "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.samplestatistics.txt",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.germline.png",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_normal_wgs.ascat.sunrise.png",
         "tests/test_data/cnv_report/CNV.somatic.sample_tumor_only_wgs.cnvpytor.circular.png",
@@ -71,12 +89,11 @@ def test_generate_cnv_report_tumor_normal(tmp_path, cli_runner):
     result = cli_runner.invoke(
         generate_cnv_report,
         [
-            "--statistics",
-            statistics_path,
-            plot_paths[0],
-            plot_paths[1],
-            plot_paths[2],
-            plot_paths[3],
+            data_paths[0],
+            data_paths[1],
+            data_paths[2],
+            data_paths[3],
+            data_paths[4],
             "--output",
             output_path,
         ],
