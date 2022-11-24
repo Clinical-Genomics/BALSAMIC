@@ -279,12 +279,12 @@ def test_collect_qc_metrics_counts(
 
 
 def test_get_relatedness_metrics(multiqc_data_dict):
-    """tests relatedness metrics retrieval"""
+    """Tests relatedness metrics retrieval."""
 
     # GIVEN a multiqc_data_dict
 
     # GIVEN an expected MetricsModel dictionary
-    expected_output_metris = [
+    expected_relatedness_metric = [
         {
             "header": None,
             "id": "id1",
@@ -296,8 +296,8 @@ def test_get_relatedness_metrics(multiqc_data_dict):
         }
     ]
 
-    # WHEN extracting the number of variants
-    output_metrics = get_relatedness_metrics(multiqc_data_dict)
+    # WHEN extracting the relatedness metric
+    relatedness_metric = get_relatedness_metrics(multiqc_data_dict)
 
-    # THEN check that the output metrics has been correctly shaped
-    assert expected_output_metris == output_metrics
+    # THEN check that the relatedness metrics has been correctly shaped
+    assert expected_relatedness_metric == relatedness_metric
