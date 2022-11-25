@@ -52,5 +52,3 @@ RUN cd /somalier &&  \
     rm -rf /somalier && somalier --help
 
 ENV somalier_ancestry_labels /ancestry_labels-1kg.tsv
-
-RUN rm /var/cache/apk/*
