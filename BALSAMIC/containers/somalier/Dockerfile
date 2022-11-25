@@ -10,7 +10,7 @@ ARG nim_version=1.6.6
 
 ENV CFLAGS="-fPIC -O3"
 
-RUN apk add wget git autoconf tar xz xz-dev bzip2-dev curl curl-dev bash libzip-dev cmake openblas-dev build-base
+RUN apk add --no-cache wget git autoconf tar xz xz-dev bzip2-dev curl curl-dev bash libzip-dev cmake openblas-dev build-base
 
 RUN mkdir -p /usr/local/include && \
     git clone --depth 1 https://github.com/ebiggers/libdeflate.git && \
@@ -53,3 +53,4 @@ RUN cd /somalier &&  \
 
 ENV somalier_ancestry_labels /ancestry_labels-1kg.tsv
 
+RUN rm /var/cache/apk/*
