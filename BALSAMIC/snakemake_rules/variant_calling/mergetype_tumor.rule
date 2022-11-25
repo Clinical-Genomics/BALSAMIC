@@ -31,8 +31,9 @@ rule mergeBam_tumor:
   shell:
     """
 samtools collate --threads {threads} -Ou {input.bam} {params.tmpdir}/{params.sample} |\
-samtools fixmate -r --threads {threads} - - |\
-samtools sort --threads {threads} -O BAM -o {params.tmpdir}/tumor.fixed.bam -;
+samtools fixmate --threads {threads} - - |\
+samtools sort --threads {threads}  - |\
+samtools view --threads {threads} -F 4 -O BAM -o {params.tmpdir}/tumor.fixed.bam -;
 
 samtools index {params.tmpdir}/tumor.fixed.bam;
 
