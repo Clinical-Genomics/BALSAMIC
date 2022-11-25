@@ -36,7 +36,7 @@ samtools sort --threads {threads} -O BAM -o {params.tmpdir}/tumor.fixed.bam -;
 
 samtools index {params.tmpdir}/tumor.fixed.bam;
 
-samtools view --threads {threads} -F 4 -O BAM -o {params.tmpdir}/tumor.fixed.m.bam {params.tmpdir}/tumor.fixed.bam;
+samtools view --threads {threads} -b -F 4 -o {params.tmpdir}/tumor.fixed.bam > {params.tmpdir}/tumor.fixed.m.bam;
 
 samtools index {params.tmpdir}/tumor.fixed.m.bam;
 
