@@ -94,7 +94,9 @@ def test_get_metric_condition(config_dict, qc_requested_metrics):
     expected_output = {"norm": "gt", "threshold": 1}
 
     # WHEN calling the function
-    metric_condition = get_metric_condition(config, qc_requested_metrics[seq_type], sample, metric)
+    metric_condition = get_metric_condition(
+        config, qc_requested_metrics[seq_type], sample, metric
+    )
 
     # THEN check if the requested metrics has been correctly identified
     assert metric_condition.items() == expected_output.items()
@@ -144,7 +146,9 @@ def test_get_multiqc_data_source(multiqc_data_path):
     source_dup = "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
 
     # WHEN extracting the source of a specific sample and collection of metrics
-    out_source_hs_metrics = get_multiqc_data_source(multiqc_data, sample, source_name_hs_metrics)
+    out_source_hs_metrics = get_multiqc_data_source(
+        multiqc_data, sample, source_name_hs_metrics
+    )
     out_source_dup = get_multiqc_data_source(multiqc_data, sample, source_name_dup)
 
     # THEN check if the extracted source names correspond to the expected ones
@@ -231,7 +235,9 @@ def test_get_variant_metrics(bcftools_counts_path):
     assert expected_output_metris == output_metrics[0]
 
 
-def test_collect_qc_metrics_targeted(tmp_path, config_path, multiqc_data_path, cli_runner):
+def test_collect_qc_metrics_targeted(
+    tmp_path, config_path, multiqc_data_path, cli_runner
+):
     """tests qc metrics yaml file generation for targeted analysis"""
 
     # GIVEN the output and multiqc metrics paths

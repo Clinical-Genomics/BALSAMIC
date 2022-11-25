@@ -20,7 +20,8 @@ RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
 
 # Sentieon specific
 SENTIEON_DNASCOPE = Path(
-    BALSAMIC_BASE_DIR / "assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model"
+    BALSAMIC_BASE_DIR
+    / "assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model"
 ).as_posix()
 SENTIEON_TNSCOPE = Path(
     BALSAMIC_BASE_DIR

@@ -583,13 +583,17 @@ def multiqc_data_dict(multiqc_data_path):
 @pytest.fixture(scope="session")
 def metrics_yaml_path(analysis_path):
     """sample_tumor_only_metrics_deliverables.yaml test path"""
-    return os.path.join(analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml")
+    return os.path.join(
+        analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml"
+    )
 
 
 @pytest.fixture(scope="session")
 def bcftools_counts_path(analysis_path):
     """svdb.all.filtered.pass.stats test path"""
-    return os.path.join(analysis_path, "vep", "SNV.somatic.case.svdb.all.filtered.pass.stats")
+    return os.path.join(
+        analysis_path, "vep", "SNV.somatic.case.svdb.all.filtered.pass.stats"
+    )
 
 
 @pytest.fixture(scope="session")
