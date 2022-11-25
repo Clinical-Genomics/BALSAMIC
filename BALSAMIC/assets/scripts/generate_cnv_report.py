@@ -103,7 +103,7 @@ def add_plots_to_pdf(pdf: PDF, plot_paths: List[Path]) -> PDF:
             img_size = (800, 800) if "scatter" != plot_name else (650, 650)
             title_w_pos = 68.5
             title_wh = 140, 10
-            img_xy = (5, 40) if "scatter" != plot_name else (25, 20)
+            img_xy = (5, 40) if "scatter" != plot_name else (25, 23)
 
         pdf.add_page(orientation=page_orientation)
 
