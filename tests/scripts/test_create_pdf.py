@@ -10,6 +10,16 @@ from BALSAMIC.assets.scripts.generate_cnv_report import (
 )
 
 
+def test_get_pdf_instance():
+    """Test FPDF instance generation."""
+
+    # WHEN creating a dummy FPDF file
+    pdf: PDF = get_pdf_instance()
+
+    # THEN check if the PDF has been correctly created
+    assert isinstance(pdf, PDF)
+
+
 def test_get_pdf_data():
     """Test pdf data extraction from a list of files."""
 
@@ -23,16 +33,6 @@ def test_get_pdf_data():
     assert data_paths[0] in statistics
     assert data_paths[1] in plots
     assert data_paths[2] in plots
-
-
-def test_get_pdf_instance():
-    """Test FPDF instance generation."""
-
-    # WHEN creating a dummy FPDF file
-    pdf: PDF = get_pdf_instance()
-
-    # THEN check if the PDF has been correctly created
-    assert isinstance(pdf, PDF)
 
 
 def test_add_data_to_pdf():

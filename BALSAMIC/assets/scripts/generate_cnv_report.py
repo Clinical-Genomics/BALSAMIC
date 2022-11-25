@@ -38,6 +38,18 @@ def get_pdf_instance() -> PDF:
     return pdf
 
 
+def get_pdf_data(data_paths: List[Path]) -> Tuple[List[Path], List[Path]]:
+    """Return"""
+    statistics = []
+    plots = []
+    for path in data_paths:
+        if Path(path).suffix == ".txt":
+            statistics.append(path)
+        if Path(path).suffix == ".png":
+            plots.append(path)
+    return statistics, plots
+
+
 def add_data_to_pdf(pdf: PDF, data_paths: List[Path]) -> PDF:
     """Add statistics to a PDF instance."""
     for data_path in data_paths:
@@ -105,18 +117,6 @@ def add_plots_to_pdf(pdf: PDF, plot_paths: List[Path]) -> PDF:
         pdf.image(img, img_xy[0], img_xy[1])
 
     return pdf
-
-
-def get_pdf_data(data_paths: List[Path]) -> Tuple[List[Path], List[Path]]:
-    """Return"""
-    statistics = []
-    plots = []
-    for path in data_paths:
-        if Path(path).suffix == ".txt":
-            statistics.append(path)
-        if Path(path).suffix == ".png":
-            plots.append(path)
-    return statistics, plots
 
 
 if __name__ == "__main__":
