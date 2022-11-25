@@ -66,7 +66,7 @@
 	},
 	"mergeBam_normal": {
 		"time": "10:00:00",
-		"n": 16
+		"n": 24
 	},
 	"mergeBam_normal_gatk": {
 		"time": "04:30:00",
@@ -74,7 +74,7 @@
 	},
 	"mergeBam_tumor": {
 		"time": "10:00:00",
-		"n": 16
+		"n": 24
 	},
 	"mergeBam_tumor_gatk": {
 		"time": "04:30:00",

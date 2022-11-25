@@ -31,12 +31,12 @@ rule mergeBam_normal:
   shell:
     """
 samtools collate --threads {threads} -Ou {input.bam} {params.tmpdir}/{params.sample} |\
-samtools fixmate - - |\
+samtools fixmate -r --threads {threads} - - |\
 samtools sort --threads {threads} -O BAM -o {params.tmpdir}/normal.fixed.bam -;
 
 samtools index {params.tmpdir}/normal.fixed.bam;
 
-picard AddOrReplaceReadGroups {params.picard} INPUT={params.tmpdir}/normal.fixed.bam OUTPUT={output.bam}; 
+picard AddOrReplaceReadGroups {params.picard} -INPUT {params.tmpdir}/normal.fixed.bam -OUTPUT {output.bam}; 
 
 samtools index {output.bam}; 
 
