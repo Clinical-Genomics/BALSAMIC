@@ -127,8 +127,6 @@ DELIVERY_RULES = [
     "sentieon_tnscope_umi",
     "sentieon_tnscope_umi_tn",
     "ascat_tumor_normal",
-    "delly_cnv_tumor_only",
-    "delly_cnv_tumor_normal",
     "tiddit_sv_tumor_only",
     "tiddit_sv_tumor_normal",
     "cnvkit_single",
@@ -159,4 +157,7 @@ DELIVERY_RULES = [
     "svdb_merge_tumor_normal",
     "bcftools_filter_sv_research",
     "bcftools_filter_sv_clinical",
+    # CNVs
+    "delly_cnv_tumor_only",
+    "delly_cnv_tumor_normal",
 ]
