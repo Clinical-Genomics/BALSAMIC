@@ -212,7 +212,7 @@
 		"time": "12:00:00",
 		"n": 36
 	},
-	"ascat_tumor_normal_merge_output": {
+	"cnv_report": {
 		"time": "00:15:00",
 		"n": 1
 	},

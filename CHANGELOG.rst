@@ -19,7 +19,9 @@ Added:
 * Swegen SNV and SV frequency database for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1014
 * triallelic_sites and variants with MaxDepth to the VCFs https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
 * Clinical VCF for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1024
- 
+* CNVpytor plots into the CNV PDF report https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
+* Research and clinical housekeeper tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
+
 Changed:
 ^^^^^^^^
 * Added version number to the PON reference filename (`.cnn`) https://github.com/Clinical-Genomics/BALSAMIC/pull/982
