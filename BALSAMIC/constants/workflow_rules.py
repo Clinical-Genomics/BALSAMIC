@@ -121,9 +121,6 @@ SNAKEMAKE_RULES = {
 
 
 DELIVERY_RULES = [
-    "vep_germline_tumor",
-    "vep_germline_normal",
-    "vcfheader_rename_germline",
     "sentieon_TNscope_tumor_only",
     "sentieon_TNscope",
     "vardict_merge",
@@ -153,6 +150,10 @@ DELIVERY_RULES = [
     "mergeBam_normal",
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
+    # Germline
+    "vep_germline_tumor",
+    "vep_germline_normal",
+    "vcfheader_rename_germline",
     # SVs
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
