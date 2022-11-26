@@ -124,10 +124,6 @@ DELIVERY_RULES = [
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
-    "sentieon_tnscope_umi",
-    "sentieon_tnscope_umi_tn",
-    "bcftools_filter_TNscope_umi_tumor_only",
-    "bcftools_filter_TNscope_umi_tumor_normal",
     # QC
     "multiqc",
     "collect_custom_qc_metrics",
@@ -153,6 +149,12 @@ DELIVERY_RULES = [
     "bcftools_filter_vardict_research_tumor_normal",
     "bcftools_filter_vardict_clinical_tumor_only",
     "bcftools_filter_vardict_clinical_tumor_normal",
+    "sentieon_tnscope_umi",
+    "sentieon_tnscope_umi_tn",
+    "bcftools_filter_TNscope_umi_research_tumor_only",
+    "bcftools_filter_TNscope_umi_research_tumor_normal",
+    "bcftools_filter_TNscope_umi_clinical_tumor_only",
+    "bcftools_filter_TNscope_umi_clinical_tumor_normal",
     # SVs
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
