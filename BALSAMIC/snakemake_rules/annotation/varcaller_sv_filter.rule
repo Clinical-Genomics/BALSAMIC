@@ -6,8 +6,8 @@ rule bcftools_filter_sv_research:
   input:
     vcf_sv_research = vep_dir + "SV.somatic.{case_name}.svdb.research.swegen.vcf.gz",
   output:
-    vcf_pass_svdb_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
-    bcftools_counts_research = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"
+    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"
   benchmark:
     benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.research.filtered.tsv"
   singularity:
@@ -21,11 +21,11 @@ rule bcftools_filter_sv_research:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb_research} -O z {input.vcf_sv_research};
+bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb} -O z {input.vcf_sv_research};
 
-tabix -p vcf -f {output.vcf_pass_svdb_research};
+tabix -p vcf -f {output.vcf_pass_svdb};
 
-bcftools +counts {output.vcf_pass_svdb_research} > {output.bcftools_counts_research};
+bcftools +counts {output.vcf_pass_svdb} > {output.bcftools_counts};
     """
 
 
@@ -33,8 +33,8 @@ rule bcftools_filter_sv_clinical:
   input:
     vcf_sv_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.vcf.gz",
   output:
-    vcf_pass_svdb_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.vcf.gz",
-    bcftools_counts_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.stats"
+    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.stats"
   benchmark:
     benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.clinical.filtered.tsv"
   singularity:
@@ -48,9 +48,9 @@ rule bcftools_filter_sv_clinical:
     "Filtering merged clinical structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb_clinical} -O z {input.vcf_sv_clinical};
+bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb} -O z {input.vcf_sv_clinical};
 
-tabix -p vcf -f {output.vcf_pass_svdb_clinical};
+tabix -p vcf -f {output.vcf_pass_svdb};
 
-bcftools +counts {output.vcf_pass_svdb_clinical} > {output.bcftools_counts_clinical};
+bcftools +counts {output.vcf_pass_svdb} > {output.bcftools_counts};
     """
