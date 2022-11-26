@@ -31,16 +31,12 @@ rule mergeBam_tumor:
   shell:
     """
 samtools collate --threads {threads} -Ou {input.bam} {params.tmpdir}/{params.sample} |\
-samtools fixmate --threads {threads} - - |\
+samtools fixmate - - |\
 samtools sort --threads {threads} -O BAM -o {params.tmpdir}/tumor.fixed.bam -;
 
 samtools index {params.tmpdir}/tumor.fixed.bam;
 
-samtools view --threads {threads} -b -F 4 {params.tmpdir}/tumor.fixed.bam > {params.tmpdir}/tumor.fixed.m.bam ;
-
-samtools index {params.tmpdir}/tumor.fixed.m.bam;
-
-picard AddOrReplaceReadGroups {params.picard} -INPUT {params.tmpdir}/tumor.fixed.m.bam -OUTPUT {output.bam}; 
+picard AddOrReplaceReadGroups {params.picard} INPUT={params.tmpdir}/tumor.fixed.bam OUTPUT={output.bam}; 
 
 samtools index {output.bam}; 
 

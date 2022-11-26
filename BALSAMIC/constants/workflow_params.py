@@ -115,20 +115,20 @@ WORKFLOW_PARAMS = {
         "min_mapq": "20",
         "picard_RG_normal": " ".join(
             [
-                "-RGPU ILLUMINAi",
-                "-RGID NORMAL",
-                "-RGSM NORMAL",
-                "-RGPL ILLUMINAi",
-                "-RGLB ILLUMINAi",
+                "RGPU=ILLUMINAi",
+                "RGID=NORMAL",
+                "RGSM=NORMAL",
+                "RGPL=ILLUMINAi",
+                "RGLB=ILLUMINAi",
             ]
         ),
         "picard_RG_tumor": " ".join(
             [
-                "-RGPU ILLUMINAi",
-                "-RGID TUMOR",
-                "-RGSM TUMOR",
-                "-RGPL ILLUMINAi",
-                "-RGLB ILLUMINAi",
+                "RGPU=ILLUMINAi",
+                "RGID=TUMOR",
+                "RGSM=TUMOR",
+                "RGPL=ILLUMINAi",
+                "RGLB=ILLUMINAi",
             ]
         ),
     },
