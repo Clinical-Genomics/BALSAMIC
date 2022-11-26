@@ -8,7 +8,7 @@ rule bcftools_filter_vardict_research_tumor_only:
   input:
     vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.vcf.gz",
   output:
-    vcf_filtered_research = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+    vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
     bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_vardict_research_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
@@ -17,7 +17,7 @@ rule bcftools_filter_vardict_research_tumor_only:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
-    case_name =  '{case_name}',
+    case_name = '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "vardict"
   threads:
@@ -29,20 +29,20 @@ rule bcftools_filter_vardict_research_tumor_only:
     """
 bcftools view {input.vcf_snv_research} | \
 bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view -f PASS -o {output.vcf_filtered_research}.temp -O z;
+bcftools view -f PASS -o {output.vcf_pass_vardict}.temp -O z;
 
-tabix -p vcf -f {output.vcf_filtered_research}.temp;
+tabix -p vcf -f {output.vcf_pass_vardict}.temp;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_filtered_research}.temp \
---output_vcf {output.vcf_filtered_research} \
+--input_vcf {output.vcf_pass_vardict}.temp \
+--output_vcf {output.vcf_pass_vardict} \
 --variant_caller {params.variant_caller};
 
-tabix -p vcf -f {output.vcf_filtered_research};
+tabix -p vcf -f {output.vcf_pass_vardict};
 
-bcftools +counts {output.vcf_filtered_research} > {output.bcftools_counts_research};
+bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts_research};
 
-rm {output.vcf_filtered_research}.temp;
+rm {output.vcf_pass_vardict}.temp;
     """
 
 
@@ -124,7 +124,7 @@ rule bcftools_filter_vardict_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.vcf.gz",
   output:
-    vcf_filtered_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.filtered.pass.vcf.gz",
+    vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_vardict_clinical_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
@@ -133,7 +133,7 @@ rule bcftools_filter_vardict_clinical_tumor_only:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     pop_freq = [VARDICT.pop_freq.tag_value, VARDICT.pop_freq.filter_name],
-    case_name =  '{case_name}',
+    case_name = '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "vardict"
   threads:
@@ -145,20 +145,20 @@ rule bcftools_filter_vardict_clinical_tumor_only:
     """
 bcftools view {input.vcf_snv_clinical} | \
 bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view -f PASS -o {output.vcf_filtered_clinical}.temp -O z;
+bcftools view -f PASS -o {output.vcf_pass_vardict}.temp -O z;
 
-tabix -p vcf -f {output.vcf_filtered_clinical}.temp;
+tabix -p vcf -f {output.vcf_pass_vardict}.temp;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_filtered_clinical}.temp \
---output_vcf {output.vcf_filtered_clinical} \
+--input_vcf {output.vcf_pass_vardict}.temp \
+--output_vcf {output.vcf_pass_vardict} \
 --variant_caller {params.variant_caller};
 
-tabix -p vcf -f {output.vcf_filtered_clinical};
+tabix -p vcf -f {output.vcf_pass_vardict};
 
-bcftools +counts {output.vcf_filtered_clinical} > {output.bcftools_counts_clinical};
+bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts_clinical};
 
-rm {output.vcf_filtered_clinical}.temp;
+rm {output.vcf_pass_vardict}.temp;
     """
 
 

@@ -121,12 +121,9 @@ SNAKEMAKE_RULES = {
 
 
 DELIVERY_RULES = [
-    "vardict_merge",
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
-    "bcftools_filter_vardict_tumor_only",
-    "bcftools_filter_vardict_tumor_normal",
     "sentieon_tnscope_umi",
     "sentieon_tnscope_umi_tn",
     "bcftools_filter_TNscope_umi_tumor_only",
@@ -151,6 +148,11 @@ DELIVERY_RULES = [
     "bcftools_filter_tnscope_clinical_tumor_normal",
     "vcf2cytosure_convert_tumor_only",
     "vcf2cytosure_convert_tumor_normal",
+    "vardict_merge",
+    "bcftools_filter_vardict_research_tumor_only",
+    "bcftools_filter_vardict_research_tumor_normal",
+    "bcftools_filter_vardict_clinical_tumor_only",
+    "bcftools_filter_vardict_clinical_tumor_normal",
     # SVs
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
