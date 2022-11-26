@@ -34,6 +34,7 @@ Fixed:
 * Mate in realigned bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
 * samtools command in merge bam and names in toml for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1020
 * If statement in `vep_somatic_clinical_snv` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
+* Invalid flag second of pair validation error https://github.com/Clinical-Genomics/BALSAMIC/pull/1025
 
 Removed:
 ^^^^^^^
