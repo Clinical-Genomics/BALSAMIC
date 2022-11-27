@@ -719,6 +719,7 @@ class ParamsCommon(BaseModel):
         pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
         align_header: str (required); header line appended to the aligned BAM output
         min_mapq: int (required); minimum mapping quality score. Eg: 20- probability of mapping random read at 99% accuracy
+        picard_fixmate: str (required), fix read mate information in bam file
         picard_RG_normal: str (required); replace readgroups in normal bam file
         picard_RG_tumor: str (required); replace readgroups in tumor bam file
     """
@@ -726,6 +727,7 @@ class ParamsCommon(BaseModel):
     align_header: str
     pcr_model: str
     min_mapq: int
+    picard_fixmate: str
     picard_RG_normal: str
     picard_RG_tumor: str
 
