@@ -13,7 +13,7 @@ rule mergeBam_normal:
     fasta = config["reference"]["reference_genome"],
     bam = bam_dir + normal_bam 
   output:
-    bam = bam_dir + "normal.merged.bam", 
+    bam = bam_dir + "normal.merged.bam",
     cram = bam_dir + "normal.merged.cram",
   benchmark:
     Path(benchmark_dir,'mergeBam_normal_' + "{mysample}.tsv".format(mysample=normal_sample)).as_posix()
@@ -31,23 +31,23 @@ rule mergeBam_normal:
     "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
-picard FixMateInformation {params.picard_fixmateinfo} |\
--TMP_DIR {params.tmpdir} |\
--INPUT {input.bam} |\
+picard FixMateInformation {params.picard_fixmateinfo} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {input.bam} \
 -OUTPUT {params.tmpdir}/normal.fixed.bam;
 
-samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/normal.fixed.bam |\
+samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/normal.fixed.bam \
 -o {params.tmpdir}/normal.fixed.um.bam;
 
 samtools index {params.tmpdir}/normal.fixed.um.bam;
 
-samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/normal.fixed.bam |\
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/normal.fixed.bam \
 -o {params.tmpdir}/normal.fixed.m.bam;
 
 samtools index {params.tmpdir}/normal.fixed.m.bam;
 
-picard AddOrReplaceReadGroups {params.picard_rg} |\
--INPUT {params.tmpdir}/normal.fixed.m.bam |\
+picard AddOrReplaceReadGroups {params.picard_rg} \
+-INPUT {params.tmpdir}/normal.fixed.m.bam \
 -OUTPUT {output.bam}; 
 
 samtools index {output.bam}; 

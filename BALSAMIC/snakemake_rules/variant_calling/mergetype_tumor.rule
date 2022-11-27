@@ -31,23 +31,23 @@ rule mergeBam_tumor:
     "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
-picard FixMateInformation {params.picard_fixmateinfo} |\
--TMP_DIR {params.tmpdir} |\
--INPUT {input.bam} |\
+picard FixMateInformation {params.picard_fixmateinfo} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {input.bam} \
 -OUTPUT {params.tmpdir}/tumor.fixed.bam;
 
-samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/tumor.fixed.bam |\
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/tumor.fixed.bam \
 -o {params.tmpdir}/tumor.fixed.um.bam ;
 
 samtools index {params.tmpdir}/tumor.fixed.um.bam;
 
-samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/tumor.fixed.bam |\
+samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/tumor.fixed.bam \
 -o {params.tmpdir}/tumor.fixed.m.bam;
 
 samtools index {params.tmpdir}/tumor.fixed.m.bam;
 
-picard AddOrReplaceReadGroups {params.picard_rg} |\
--INPUT {params.tmpdir}/tumor.fixed.m.bam |\
+picard AddOrReplaceReadGroups {params.picard_rg} \
+-INPUT {params.tmpdir}/tumor.fixed.m.bam \
 -OUTPUT {output.bam}; 
 
 samtools index {output.bam}; 
