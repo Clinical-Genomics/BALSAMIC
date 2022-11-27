@@ -21,15 +21,15 @@ rule bcftools_filter_vardict_research_tumor_only:
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "vardict"
   threads:
-    get_threads(cluster_config, 'bcftools_filter_vardict_tumor_only')
+    get_threads(cluster_config, 'bcftools_filter_vardict_research_tumor_only')
   message:
     "Filtering vardict tumor-only annotated research variants using bcftools and  "
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
   shell:
     """
 bcftools view {input.vcf_snv_research} | \
-bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view -f PASS -o {output.vcf_pass_vardict}.temp -O z;
+bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools view --threads {threads} -f PASS -o {output.vcf_pass_vardict}.temp -O z;
 
 tabix -p vcf -f {output.vcf_pass_vardict}.temp;
 
@@ -67,7 +67,7 @@ rule bcftools_filter_tnhaplotyper_tumor_only:
     """
 bcftools view {input.vcf} \
 | bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' \
-| bcftools view -o {output.vcf_filtered} -O z;
+| bcftools view --threads {threads} -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
 
@@ -95,7 +95,7 @@ rule bcftools_filter_TNscope_umi_research_tumor_only:
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
   threads:
-    get_threads(cluster_config, 'bcftools_filter_tnscope_umi_tumor_only')
+    get_threads(cluster_config, 'bcftools_filter_tnscope_umi_research_tumor_only')
   message:
     "Filtering tnscope_umi tumor-only annotated research variants using bcftools and  "
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
@@ -103,7 +103,7 @@ rule bcftools_filter_TNscope_umi_research_tumor_only:
     """
 bcftools view {input.vcf_snv_research} | \
 bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp -O z;
+bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_umi}.temp;
 
@@ -137,7 +137,7 @@ rule bcftools_filter_vardict_clinical_tumor_only:
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "vardict"
   threads:
-    get_threads(cluster_config, 'bcftools_filter_vardict_tumor_only')
+    get_threads(cluster_config, 'bcftools_filter_vardict_clinical_tumor_only')
   message:
     "Filtering vardict tumor-only annotated clinical variants using bcftools and  "
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
@@ -145,7 +145,7 @@ rule bcftools_filter_vardict_clinical_tumor_only:
     """
 bcftools view {input.vcf_snv_clinical} | \
 bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view -f PASS -o {output.vcf_pass_vardict}.temp -O z;
+bcftools view --threads {threads} -f PASS -o {output.vcf_pass_vardict}.temp -O z;
 
 tabix -p vcf -f {output.vcf_pass_vardict}.temp;
 
@@ -187,7 +187,7 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_only:
     """
 bcftools view {input.vcf_snv_clinical} | \
 bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp -O z;
+bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_umi}.temp;
 
