@@ -13,7 +13,7 @@ rule mergeBam_normal:
     fasta = config["reference"]["reference_genome"],
     bam = bam_dir + normal_bam 
   output:
-    bam = bam_dir + "normal.merged.bam", 
+    bam = bam_dir + "normal.merged.bam",
     cram = bam_dir + "normal.merged.cram",
   benchmark:
     Path(benchmark_dir,'mergeBam_normal_' + "{mysample}.tsv".format(mysample=normal_sample)).as_posix()
@@ -21,7 +21,8 @@ rule mergeBam_normal:
     Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": normal_sample, "tags": "normal"},
-    picard = params.common.picard_RG_normal,
+    picard_fixmateinfo = params.common.picard_fixmate,
+    picard_rg = params.common.picard_RG_normal,
     sample = normal_sample,
     tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
   threads:
@@ -30,17 +31,24 @@ rule mergeBam_normal:
     "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
-samtools collate --threads {threads} -Ou {input.bam} {params.tmpdir}/{params.sample} |\
-samtools fixmate --threads {threads} - - |\
-samtools sort --threads {threads} -O BAM -o {params.tmpdir}/normal.fixed.bam -;
+picard FixMateInformation {params.picard_fixmateinfo} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {input.bam} \
+-OUTPUT {params.tmpdir}/normal.fixed.bam;
 
-samtools index {params.tmpdir}/normal.fixed.bam;
+samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/normal.fixed.bam \
+-o {params.tmpdir}/normal.fixed.um.bam;
 
-samtools view --threads {threads} -b -F 4 {params.tmpdir}/normal.fixed.bam > {params.tmpdir}/normal.fixed.m.bam;
+samtools index {params.tmpdir}/normal.fixed.um.bam;
+
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/normal.fixed.bam \
+-o {params.tmpdir}/normal.fixed.m.bam;
 
 samtools index {params.tmpdir}/normal.fixed.m.bam;
 
-picard AddOrReplaceReadGroups {params.picard} -INPUT {params.tmpdir}/normal.fixed.m.bam -OUTPUT {output.bam}; 
+picard AddOrReplaceReadGroups {params.picard_rg} \
+-INPUT {params.tmpdir}/normal.fixed.m.bam \
+-OUTPUT {output.bam}; 
 
 samtools index {output.bam}; 
 

@@ -113,6 +113,14 @@ WORKFLOW_PARAMS = {
         "pcr_model": "NONE",
         "align_header": "'@RG\\tID:{sample}\\tSM:{sample}\\tPL:ILLUMINAi'",
         "min_mapq": "20",
+        "picard_fixmate": " ".join(
+            [
+                "-ADD_MATE_CIGAR true",
+                "-MAX_RECORDS_IN_RAM 10000000",
+                "-CREATE_INDEX true",
+                "-CREATE_MD5_FILE true",
+            ]
+        ),
         "picard_RG_normal": " ".join(
             [
                 "-RGPU ILLUMINAi",
@@ -120,6 +128,9 @@ WORKFLOW_PARAMS = {
                 "-RGSM NORMAL",
                 "-RGPL ILLUMINAi",
                 "-RGLB ILLUMINAi",
+                "-MAX_RECORDS_IN_RAM 10000000",
+                "-CREATE_INDEX true",
+                "-CREATE_MD5_FILE true",
             ]
         ),
         "picard_RG_tumor": " ".join(
@@ -129,6 +140,9 @@ WORKFLOW_PARAMS = {
                 "-RGSM TUMOR",
                 "-RGPL ILLUMINAi",
                 "-RGLB ILLUMINAi",
+                "-MAX_RECORDS_IN_RAM 10000000",
+                "-CREATE_INDEX true",
+                "-CREATE_MD5_FILE true",
             ]
         ),
     },

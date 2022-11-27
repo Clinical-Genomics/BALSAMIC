@@ -21,7 +21,8 @@ rule mergeBam_tumor:
     Path(singularity_image, config[ "bioinfo_tools" ].get("picard") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
-    picard = params.common.picard_RG_tumor,
+    picard_fixmateinfo = params.common.picard_fixmate,
+    picard_rg = params.common.picard_RG_tumor,
     sample = tumor_sample,
     tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
   threads:
@@ -30,17 +31,24 @@ rule mergeBam_tumor:
     "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
-samtools collate --threads {threads} -Ou {input.bam} {params.tmpdir}/{params.sample} |\
-samtools fixmate --threads {threads} - - |\
-samtools sort --threads {threads} -O BAM -o {params.tmpdir}/tumor.fixed.bam -;
+picard FixMateInformation {params.picard_fixmateinfo} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {input.bam} \
+-OUTPUT {params.tmpdir}/tumor.fixed.bam;
 
-samtools index {params.tmpdir}/tumor.fixed.bam;
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/tumor.fixed.bam \
+-o {params.tmpdir}/tumor.fixed.um.bam ;
 
-samtools view --threads {threads} -b -F 4 {params.tmpdir}/tumor.fixed.bam > {params.tmpdir}/tumor.fixed.m.bam ;
+samtools index {params.tmpdir}/tumor.fixed.um.bam;
+
+samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/tumor.fixed.bam \
+-o {params.tmpdir}/tumor.fixed.m.bam;
 
 samtools index {params.tmpdir}/tumor.fixed.m.bam;
 
-picard AddOrReplaceReadGroups {params.picard} -INPUT {params.tmpdir}/tumor.fixed.m.bam -OUTPUT {output.bam}; 
+picard AddOrReplaceReadGroups {params.picard_rg} \
+-INPUT {params.tmpdir}/tumor.fixed.m.bam \
+-OUTPUT {output.bam}; 
 
 samtools index {output.bam}; 
 
