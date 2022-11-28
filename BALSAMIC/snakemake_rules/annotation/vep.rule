@@ -22,7 +22,7 @@ rule vep_somatic_research_snv:
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
-    get_threads(cluster_config, "vep_somatic_snv")
+    get_threads(cluster_config, "vep_somatic_research_snv")
   message:
     "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:

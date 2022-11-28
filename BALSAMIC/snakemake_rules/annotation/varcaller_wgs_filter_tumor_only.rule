@@ -20,7 +20,7 @@ rule bcftools_filter_tnscope_research_tumor_only:
     housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"},
     case_name = '{case_name}'
   threads: 
-    get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_only')
+    get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_only')
   message:
     "Filtering WGS tumor-only tnscope annotated research variants using bcftools for {params.case_name}"
   shell:
@@ -29,7 +29,7 @@ grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv_research} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view  -f PASS,triallelic_site  -o {output.vcf_filtered_research} -O z;
+bcftools view --threads {threads}  -f PASS,triallelic_site  -o {output.vcf_filtered_research} -O z;
 
 tabix -p vcf -f {output.vcf_filtered_research};
 
@@ -52,7 +52,7 @@ rule bcftools_filter_tnscope_clinical_tumor_only:
     housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
     case_name = '{case_name}'
   threads:
-    get_threads(cluster_config, 'bcftools_filter_tnscope_tumor_only')
+    get_threads(cluster_config, 'bcftools_filter_tnscope_clinical_tumor_only')
   message:
     "Filtering WGS tumor-only tnscope annotated clinical variants using bcftools for {params.case_name}"
   shell:
@@ -61,7 +61,7 @@ grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
 bcftools view -f PASS --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv_clinical} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools view  -f PASS,triallelic_site  -o {output.vcf_filtered_clinical} -O z;
+bcftools view --threads {threads}  -f PASS,triallelic_site  -o {output.vcf_filtered_clinical} -O z;
 
 tabix -p vcf -f {output.vcf_filtered_clinical};
 
