@@ -26,7 +26,8 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_swegen_sv, dump_toml)
 
 from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE)
-from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS)
+from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
+                                                SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 
@@ -128,6 +129,7 @@ picarddup = get_picard_mrkdup(config)
 COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
 VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
+SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)

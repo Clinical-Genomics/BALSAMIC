@@ -67,8 +67,36 @@ SENTIEON_VARCALL_SETTINGS = {
         "filter_name": "balsamic_high_strand_oddsratio",
         "field": "INFO",
     },
+    "swegen_snv_freq": {
+        "tag_value": 0.01,
+        "filter_name": "SWEGENAF",
+        "field": "INFO",
+    },
+    "loqusdb_clinical_snv_freq": {
+        "tag_value": 0.01,
+        "filter_name": "Frq",
+        "field": "INFO",
+    },
     "varcaller_name": "sentieon",
     "filter_type": "general",
     "analysis_type": "tumor_only",
     "description": "General purpose filters used for filtering tnscope and tnhaplotyper",
+}
+
+# Configuration for SVDB settings:
+SVDB_FILTER_SETTINGS = {
+    "swegen_sv_freq": {
+        "tag_value": 0.02,
+        "filter_name": "SWEGENAF",
+        "field": "INFO",
+    },
+    "loqusdb_clinical_sv_freq": {
+        "tag_value": 0.02,
+        "filter_name": "Frq",
+        "field": "INFO",
+    },
+    "varcaller_name": "svdb",
+    "filter_type": "general",
+    "analysis_type": "tumor_only,tumor_normal",
+    "description": "General purpose filters used for filtering svdb merged sv",
 }
