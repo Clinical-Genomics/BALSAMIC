@@ -26,6 +26,16 @@ VARDICT_SETTINGS = {
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
     },
+    "swegen_snv_freq": {
+        "tag_value": 0.01,
+        "filter_name": "SWEGENAF",
+        "field": "INFO",
+    },
+    "loqusdb_clinical_snv_freq": {
+        "tag_value": 0.01,
+        "filter_name": "Frq",
+        "field": "INFO",
+    },
     "varcaller_name": "VarDict",
     "filter_type": "general",
     "analysis_type": "tumor_only",

@@ -14,6 +14,7 @@ rule bcftools_filter_sv_research:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     case_name = "{case_name}",
+    swegen_freq = [SVDB_FILTERS.swegen_sv_freq.tag_value, SVDB_FILTERS.swegen_sv_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb_research")
@@ -21,7 +22,11 @@ rule bcftools_filter_sv_research:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb} -O z {input.vcf_sv_research};
+bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_research} |\
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools view --threads {threads} -f .,PASS,MaxDepth  -O z -o {output.vcf_pass_svdb};
+
+
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 
@@ -41,6 +46,8 @@ rule bcftools_filter_sv_clinical:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     case_name = "{case_name}",
+    swegen_freq = [SVDB_FILTERS.swegen_sv_freq.tag_value, SVDB_FILTERS.swegen_sv_freq.filter_name],
+    loqusdb_clinical_freq = [SVDB_FILTERS.loqusdb_clinical_sv_freq.tag_value, SVDB_FILTERS.loqusdb_clinical_sv_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb_clinical")
@@ -48,7 +55,10 @@ rule bcftools_filter_sv_clinical:
     "Filtering merged clinical structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb} -O z {input.vcf_sv_clinical};
+bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_clinical} |\
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
+bcftools view --threads {threads} -f .,PASS,MaxDepth  -O z -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 
