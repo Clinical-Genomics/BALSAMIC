@@ -243,23 +243,22 @@ def case_config(
     with open(reference_config, "r") as f:
         reference_dict = json.load(f)["reference"]
 
-    if not panel_bed:
-        variants_observations = {
-            "clinical_snv_observations": clinical_snv_observations,
-            "clinical_sv_observations": clinical_sv_observations,
-            "cancer_all_snv_observations": cancer_all_snv_observations,
-            "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
-            "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
-            "swegen_snv_frequency": swegen_snv,
-            "swegen_sv_frequency": swegen_sv,
+    variants_observations = {
+        "clinical_snv_observations": clinical_snv_observations,
+        "clinical_sv_observations": clinical_sv_observations,
+        "cancer_all_snv_observations": cancer_all_snv_observations,
+        "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
+        "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
+        "swegen_snv_frequency": swegen_snv,
+        "swegen_sv_frequency": swegen_sv,
+    }
+    reference_dict.update(
+        {
+            observations: path
+            for observations, path in variants_observations.items()
+            if path is not None
         }
-        reference_dict.update(
-            {
-                observations: path
-                for observations, path in variants_observations.items()
-                if path is not None
-            }
-        )
+    )
 
     config_collection_dict = BalsamicConfigModel(
         QC={
