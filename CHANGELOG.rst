@@ -19,6 +19,9 @@ Added:
 * Annotation of sv_clinical_observations  for somatic sv and SV CNV filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1013
 * Swegen SNV and SV frequency database for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1014
 * triallelic_sites and variants with MaxDepth to the VCFs https://github.com/Clinical-Genomics/BALSAMIC/pull/1021
+* Clinical VCF for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1024
+* CNVpytor plots into the CNV PDF report https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
+* Research and clinical housekeeper tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
 
 Changed:
 ^^^^^^^^
@@ -26,18 +29,23 @@ Changed:
 * Update `TIDDIT` to v3.3.0, `SVDB` to v2.6.4, `delly` to v1.1.3, `vcf2cytosure` to v0.8 https://github.com/Clinical-Genomics/BALSAMIC/pull/987
 * toml config file for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1012
 * Split `vep_germline` rule into `tumor` and `normal` https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
-* Fix mate in realined bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
+* Extract number of variants from clinical files https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
 
 Fixed:
 ^^^^^^
-* Reverted `pandas` version (from `1.3.5` to `1.1.0`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+* Reverted `pandas` version (from `1.3.5` to `1.1.5`) https://github.com/Clinical-Genomics/BALSAMIC/pull/1018
+* Mate in realigned bam file https://github.com/Clinical-Genomics/BALSAMIC/pull/1019
 * samtools command in merge bam and names in toml for vcfanno https://github.com/Clinical-Genomics/BALSAMIC/pull/1020
+* If statement in `vep_somatic_clinical_snv` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
+* Invalid flag second of pair validation error https://github.com/Clinical-Genomics/BALSAMIC/pull/1025
+* Invalid flag second of pair validation error using picardtools https://github.com/Clinical-Genomics/BALSAMIC/pull/1027
 
 Removed:
 ^^^^^^^
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
-* TNhaplotyper for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
-* TNhaplotyper for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
+* `TNhaplotyper` for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
+* `TNhaplotyper` for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
+* `TNhaplotyper` for TGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
 
 [10.0.5]
 --------

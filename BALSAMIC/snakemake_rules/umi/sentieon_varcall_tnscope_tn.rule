@@ -12,7 +12,7 @@ rule sentieon_tnscope_umi_tn:
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf_tnscope_umi = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz",
+        vcf_tnscope_umi = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.sample_name_map"
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()

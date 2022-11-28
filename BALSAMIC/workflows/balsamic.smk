@@ -20,16 +20,14 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
-                                 get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit,
-                                 get_clinical_snv_observations, get_clinical_sv_observations,
-                                 get_swegen_snv, get_swegen_sv, dump_toml)
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+                                 get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
+                                 get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
+                                 get_swegen_sv, dump_toml)
 
-from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
-                                       RULE_DIRECTORY, MUTATION_TYPE);
-from BALSAMIC.constants.variant_filters import COMMON_SETTINGS,VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS
+from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE)
+from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS)
+from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 
 
@@ -204,6 +202,21 @@ if "background_variants" in config:
 os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
+# CNV report input files
+cnv_data_paths = []
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
+    cnv_data_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
+    cnv_data_paths.extend(expand(
+        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+        output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+    ))
+
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
+    cnv_data_paths.extend(expand(
+        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
+        output_suffix=["circular", "scatter"]
+    ))
+
 # Extract variant callers for the workflow
 germline_caller = []
 somatic_caller = []
@@ -342,17 +355,21 @@ analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.research.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
-if config["analysis"]["sequencing_type"] == "wgs":
-    # Filtered and passed post annotation clinical VCFs
-    analysis_specific_results.extend(
-        expand(vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
-    )
+# Filtered and passed post annotation clinical VCFs
+analysis_specific_results.extend(
+    expand(vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+)
 
 
 # TMB
 analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.balsamic_stat", vcf=get_vcf(config, somatic_caller_tmb, [case_id]))
 )
+
+# WGS specific files
+if config["analysis"]["sequencing_type"] == "wgs":
+    # CNV report
+    analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -380,13 +397,10 @@ if config["analysis"]["sequencing_type"] != "wgs":
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [case_id]))
-    )
-    analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
+        expand(vcf_dir + "{vcf}.cov.gz", vcf=get_vcf(config,["dellycnv"],[case_id]))
     )
     analysis_specific_results.extend(expand(
         vcf_dir + "SV.somatic.{case_name}.{sample_type}.tiddit_cov.bed",
