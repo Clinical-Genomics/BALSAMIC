@@ -40,7 +40,8 @@ Fixed:
 * If statement in `vep_somatic_clinical_snv` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
 * Invalid flag second of pair validation error https://github.com/Clinical-Genomics/BALSAMIC/pull/1025
 * Invalid flag second of pair validation error using picardtools https://github.com/Clinical-Genomics/BALSAMIC/pull/1027
-
+* Samtools command for mergetype tumor https://github.com/Clinical-Genomics/BALSAMIC/pull/10
+  
 Removed:
 ^^^^^^^
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983

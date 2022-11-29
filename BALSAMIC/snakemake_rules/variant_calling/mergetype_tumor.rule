@@ -36,12 +36,12 @@ picard -Xmx150g FixMateInformation {params.picard_fixmateinfo} \
 -INPUT {input.bam} \
 -OUTPUT {params.tmpdir}/tumor.fixed.bam;
 
-samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/tumor.fixed.bam \
+samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/tumor.fixed.bam \
 -o {params.tmpdir}/tumor.fixed.um.bam ;
 
 samtools index {params.tmpdir}/tumor.fixed.um.bam;
 
-samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/tumor.fixed.bam \
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/tumor.fixed.bam \
 -o {params.tmpdir}/tumor.fixed.m.bam;
 
 samtools index {params.tmpdir}/tumor.fixed.m.bam;
