@@ -253,3 +253,52 @@ The following annotations are added by `ensembl-vep`.
      - indicating if the transcript is the MANE Select or MANE Plus Clinical transcript for the gene.
    * - miRNA
      - Reports where the variant lies in the miRNA secondary structure.
+
+
+`BALSAMIC` adds the following annotation from `Swegen` database using ``vcfanno`` for SNVs and SVDB for SVs.
+
+.. list-table:: Swegen SNV
+   :widths: 50 150 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+     - variant type
+   * - SWEGENAF
+     - allele frequency from 1000 Swedish genomes project
+     - SNV, SV
+   * - SWEGENAAC_Hom
+     - allele counts of homozygous variants
+     - SNV
+   * - SWEGENAAC_Het
+     - allele counts of heterozygous variants
+     - SNV
+   * - SWEGENAAC_Hemi
+     - allele counts of hemizygous variants
+     - SNV
+   * - swegen_obs
+     - allele count
+     - SV
+
+`BALSAMIC` adds the following annotation from database of normal `Clinical` samples using ``vcfanno`` for SNVs and SVDB for SVs.
+
+.. list-table:: Clinical Normal samples SNV
+   :widths: 50 150 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+     - variant type
+   * - Frq
+     - Frequency of observation of the variants from normal `Clinical` samples
+     - SNV, SV
+   * - Obs
+     - allele counts of the variant in normal `Clinical` samples
+     - SNV
+   * - Hom
+     - allele counts of the homozygous variant in normal `Clinical` samples
+     - SNV
+   * - clin_obs
+     - allele counts
+     - SV
+

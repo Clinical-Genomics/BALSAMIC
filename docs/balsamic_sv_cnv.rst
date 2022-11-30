@@ -84,7 +84,24 @@ The copy number variants, identified using ascatNgs and `dellycnv`, are converte
 
 
 
-The merged `*.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
+The merged `SNV.somatic.<CASE_ID>.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
+The SweGen and frequencies and the frequency of observed structural variants from clinical normal samples are annotated using `SVDB`.
+
+The following filter applies for both tumor-normal and tumor-only samples in addition to caller specific filters.
+
+*SWEGENAF*: SweGen Allele Frequency
+
+::
+
+    SWEGENAF <= 0.02  (or) SWEGENAF == "."
+
+*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+
+::
+
+    Frq <= 0.02  (or) Frq == "."
+
+The variants scored as `PASS` or `MaxDepth` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
 
 The following command can be used to fetch the variants identified by a specific caller from merged structural and copy number variants.
 
@@ -139,3 +156,5 @@ Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv
 
     ascatSnpPanelGcCorrections.pl genome.fa SnpPositions.tsv > SnpGcCorrections.tsv
 
+**Attention:**
+**BALSAMIC >= v11.0.0 removes unmapped reads from the bam and cram files for all the workflows.**

@@ -23,6 +23,7 @@ Added:
 * Research and clinical housekeeper tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
 * Cluster configuration for rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1028
 * Variant filteration using loqusDB and Swegen annotations https://github.com/Clinical-Genomics/BALSAMIC/pull/1029
+* Annotation resources to readsthedocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1031
 
 Changed:
 ^^^^^^^^
@@ -45,7 +46,7 @@ Fixed:
 * Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1032
 
 Removed:
-^^^^^^^
+^^^^^^^^
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * `TNhaplotyper` for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
 * `TNhaplotyper` for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006

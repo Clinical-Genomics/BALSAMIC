@@ -49,6 +49,7 @@ samtools index {params.tmpdir}/tumor.fixed.m.bam;
 picard -Xmx150g AddOrReplaceReadGroups {params.picard_rg} \
 -TMP_DIR {params.tmpdir} \
 -INPUT {params.tmpdir}/tumor.fixed.m.bam \
+-TMP_DIR {params.tmpdir} \
 -OUTPUT {output.bam}; 
 
 samtools index {output.bam}; 
