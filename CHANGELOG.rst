@@ -41,7 +41,7 @@ Fixed:
 * Invalid flag second of pair validation error https://github.com/Clinical-Genomics/BALSAMIC/pull/1025
 * Invalid flag second of pair validation error using picardtools https://github.com/Clinical-Genomics/BALSAMIC/pull/1027
 * Samtools command for mergetype tumor https://github.com/Clinical-Genomics/BALSAMIC/pull/1030
-* Picard command and params for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/103
+* Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1031
 
 Removed:
 ^^^^^^^

@@ -46,7 +46,7 @@ rule fastp_umi:
         adapter = " ".join(fastp_param_adapter),
         sample_name = "{sample}",
     threads:
-        get_threads(cluster_config, 'fastp')
+        get_threads(cluster_config, 'fastp_umi')
     message:
         "Quality control and trimming input fastq for {params.sample_name}"
     shell:
