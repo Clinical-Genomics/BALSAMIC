@@ -137,7 +137,9 @@ DELIVERY_RULES = [
     # SNVs
     "sentieon_TNscope_tumor_only",
     "sentieon_TNscope",
+    "bcftools_filter_tnscope_research_tumor_only",
     "bcftools_filter_tnscope_research_tumor_normal",
+    "bcftools_filter_tnscope_clinical_tumor_only",
     "bcftools_filter_tnscope_clinical_tumor_normal",
     "vardict_merge",
     "bcftools_filter_vardict_research_tumor_only",
