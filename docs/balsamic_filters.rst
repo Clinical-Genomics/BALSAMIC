@@ -174,7 +174,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 **TNscope filtering (Tumor_normal)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The following filters are applied to the variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all.vcf.gz`). The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.all.filtered.pass.vcf.gz`).
+The following filters are applied to the variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all.vcf.gz`). The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
 
 *Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
 
@@ -214,7 +214,7 @@ The following filters are applied to the variants in TNscope raw VCF file (`SNV.
 **TNscope filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The somatic variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all.vcf.gz`) are filtered out for the genomic regions that are not reliable (eg: centromeric regions, non-chromosome contigs) to enhance the computation time. This WGS interval region file is collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
-and following filters are applied. The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.all.filtered.pass.vcf.gz`).
+and following filters are applied. The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the variant call
 
