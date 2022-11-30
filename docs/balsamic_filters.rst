@@ -161,6 +161,18 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
     GNOMADAF_popmax <= 0.005  (or) GNOMADAF_popmax == "."
 
+*SWEGENAF*: SweGen Allele Frequency
+
+::
+
+    SWEGENAF <= 0.01  (or) SWEGENAF == "."
+
+*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+
+::
+
+    Frq <= 0.01  (or) Frq == "."
+
 **Note:**
 **Additionally, the variant is excluded for tumor-normal cases if marked as 'germline' in the `STATUS` column of the VCF file.**
 
@@ -202,10 +214,20 @@ The following filters are applied to the variants in TNscope raw VCF file (`SNV.
 
     GNOMADAF_popmax <= 0.001 (or) GNOMADAF_popmax == "."
 
+::
+
+    SWEGENAF <= 0.01  (or) SWEGENAF == "."
+
+*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+
+::
+
+    Frq <= 0.01  (or) Frq == "."
+
 **TNscope filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The somatic variants in TNscope raw VCF file (`SNV.somatic.$CASE_ID.tnscope.all.vcf.gz`) are filtered out for the genomic regions that are not reliable (eg: centromeric regions, non-chromosome contigs) to enhance the computation time. This WGS interval region file is collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
-and following filters are applied. The variants that scored as `PASS` are considered for `Merging of TNscope and TNhaplotyper results (tumor_only)`_
+and following filters are applied. The variants scored as `PASS` are included in the final vcf file (`SNV.somatic.$CASE_ID.tnscope.all.filtered.pass.vcf.gz`).
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the variant call
 
@@ -237,6 +259,16 @@ and following filters are applied. The variants that scored as `PASS` are consid
 
 ::
 
+    SWEGENAF <= 0.01  (or) SWEGENAF == "."
+
+*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+
+::
+
+    Frq <= 0.01  (or) Frq == "."
+
+::
+
     SUM(QSS)/SUM(AD) >= 20
 
 *Read Counts*: Count of reads in a given (F1R2, F2R1) pair orientation supporting the alternate allele and reference alleles
@@ -251,59 +283,6 @@ and following filters are applied. The variants that scored as `PASS` are consid
 ::
 
     SOR < 3
-
-
-**TNhaplotyper filtering (tumor_only)**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The somatic variants in TNhaplotyper raw VCF file (`SNV.somatic.$CASE_ID.tnhaplotyper.all.vcf.gz`) are filtered out for the genomic regions that are not reliable (eg: centromeric regions, non-chromosome contigs) to enhance the computation time. This WGS interval region file is collected from gatk_bundles `<gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list>`_
-and following filters are applied. The variants that scored as `PASS` are considered for `Merging of TNscope and TNhaplotyper results (tumor_only)`_
-
-
-*Total Depth (DP)*: Refers to the overall read depth from all target samples supporting the variant call
-
-::
-
-    DP(tumor) >= 10 (or) DP(normal) >= 10
-
-*Allelic Depth (AD)*: Total reads supporting the ALT allele in the tumor sample
-
-::
-
-    AD(tumor) >= 3
-
-*Allelic Frequency (AF)*: Fraction of the reads supporting the alternate allele
-
-::
-
-    Minimum AF(tumor) >= 0.05
-    Maximum AF(tumor) < 1
-
-*GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
-
-::
-
-    GNOMADAF_popmax <= 0.001 (or) GNOMADAF_popmax == "."
-
-*Normalized base quality scores*:  The sum of base quality scores for each allele (QSS) is divided by the allelic depth of alt and ref alleles (AD)
-
-::
-
-    SUM(QSS)/SUM(AD) >= 20
-
-*Read Counts*: Count of reads in a given (F1R2, F2R1) pair orientation supporting the alternate allele and reference alleles
-
-::
-
-    ALT_F1R2 > 0, ALT_F2R1 > 0
-    REF_F1R2 > 0, REF_F2R1 > 0
-
-
-**Merging of TNscope and TNhaplotyper results (tumor_only)**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The filtered somatic variants from `TNscope filtering (tumor_only)`_ and `TNhaplotyper filtering (tumor_only)`_ are merged using the `bcftools` intersect command to reduce the number of reported somatic variants for tumor-only samples.
-Next, the somatic variants that are called by both variant-callers are reported as the final filtered list of variants (`SNV.somatic.{CASE_ID}.tnscope.all.filtered.pass.vcf.gz`).
-The final VCF constitutes a high confidence set of somatic variants, which is delivered to the customer either by scout or caesar filesystem.
 
 **Target Genome Analysis with UMI's into account**
 **************************************************
@@ -356,6 +335,21 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 
     GNOMADAF_popmax <= 0.02 (or) GNOMADAF_popmax == "."
 
+*SWEGENAF*: SweGen Allele Frequency
+
+::
+
+    SWEGENAF <= 0.01  (or) SWEGENAF == "."
+
+*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+
+::
+
+    Frq <= 0.01  (or) Frq == "."
+
+
 **Attention:**
 **BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.**
+**BALSAMIC >= v11.0.0 removes unmapped reads from the bam and cram files for all the workflows.**
+
 

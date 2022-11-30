@@ -139,3 +139,5 @@ Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv
 
     ascatSnpPanelGcCorrections.pl genome.fa SnpPositions.tsv > SnpGcCorrections.tsv
 
+**Attention:**
+**BALSAMIC >= v11.0.0 removes unmapped reads from the bam and cram files for all the workflows.**
