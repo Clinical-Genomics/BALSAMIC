@@ -189,7 +189,7 @@ def test_get_bioinfo_tools_version():
 
     # THEN assert it is a dictionary and versions are correct
     assert isinstance(bioinfo_tools_dict, dict)
-    assert set(observed_versions).issubset(set(["1.15.1", "1.12", "1.11", "1.9"]))
+    assert set(observed_versions).issubset(set(["1.15.1", "1.12", "1.13", "1.9"]))
 
 
 def test_get_delivery_id():
