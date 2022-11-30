@@ -35,9 +35,8 @@ The resulted SAM files were converted to BAM files and sorted using samtools v1.
 Duplicated reads were marked using Picard tools MarkDuplicate v2.27.1 :superscript:`6`. The unmapped reads are removed
 and promptly quality controlled using CollectMultipleMetrics and CollectWgsMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`7`.
-Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
+Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
-The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
 Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.1.3 :superscript:`10` and TIDDIT v3.3.0 :superscript:`12`.
 Copy number variations (CNV) were called using ascatNgs v4.5.0 :superscript:`17` (tumor-normal), Delly v1.1.3 :superscript:`10` and CNVpytor v1.2.1 :superscript:`22` (tumor-only) and converted from CNV to deletions (DEL) and duplications (DUP).
 The structural variant (SV) calls from Manta, Delly, TIDDIT ascatNgs (tumor-normal) and CNVpytor (tumor-only) were merged using SVDB v2.6.4 :superscript:`12`

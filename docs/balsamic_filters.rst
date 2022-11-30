@@ -19,12 +19,7 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - tumor-normal, tumor-only
      - germline
      - SNV, InDel
-   * - TNhaplotyper
-     - TGA, WES, WGS :superscript:`1`
-     - tumor-normal, tumor-only
-     - somatic
-     - SNV, InDel
-   * - TNscope :superscript:`2`
+   * - TNscope
      - WGS
      - tumor-normal, tumor-only
      - somatic
@@ -39,11 +34,6 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - tumor-normal, tumor-only
      - somatic
      - SNV, InDel
-
-:superscript:`1` TNhaplotyper is only executed for tumor-only if a WGS case is being analysed
-
-:superscript:`2` TNscope output is being merged with TNhaplotyper calls for TO-WGS analysis
-
 
 
 Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
@@ -65,7 +55,7 @@ indicate that at this site, the mean position in reads is less than 8, and the p
 
 
 **Note:**
-**In BALSAMIC, this VCF file is named as `*.all.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.vcf.gz`)**
+**In BALSAMIC, this VCF file is named as `*.<research/clinical>.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.<research/clinical>.vcf.gz`)**
 
 
 
@@ -80,13 +70,13 @@ indicate that at this site, the mean position in reads is less than 8, and the p
 For `Post-call filtering`, in BALSAMIC we have applied various filtering criteria (`Vardict_filtering`_, `TNscope filtering (Tumor_normal)`_ ) depending on the analysis-type (TGS/WGS) and sample-type(tumor-only/tumor-normal).
 
 **Note:**
-**In BALSAMIC, this VCF file is named as `*.all.filtered.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.vcf.gz`)**
+**In BALSAMIC, this VCF file is named as `*.<research/clinical>.filtered.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.<research/clinical>.filtered.vcf.gz`)**
 
 
 Only those variants that fulfill the pre-call and post-call filters are scored as `PASS` in the `STATUS` column of the VCF file. We filter those `PASS` variants and deliver a final list of variants to the customer either via `Scout` or `Caesar`
 
 **Note:**
-**In BALSAMIC, this VCF file is named as `*.all.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.all.filtered.pass.vcf.gz`)**
+**In BALSAMIC, this VCF file is named as `*.<research/clinical>.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.<research/clinical>.filtered.pass.vcf.gz`)**
 
 .. list-table:: Description of VCF files
    :widths: 30 50 20
@@ -98,13 +88,10 @@ Only those variants that fulfill the pre-call and post-call filters are scored a
    * - .vcf.gz 
      - Unannotated VCF file with pre-call filters included in the STATUS column
      - Yes (Caesar)
-   * - .all.vcf.gz 
+   * - .<research/clinical>.vcf.gz
      - Annotated VCF file with pre-call filters included in the STATUS column
      - No
-   * - .all.filtered.vcf.gz
-     - Annotated VCF file with pre-call and post-call filters included in the STATUS column 
-     - No
-   * - .all.filtered.pass.vcf.gz
+   * - .<research/clinical>.filtered.pass.vcf.gz
      - Annotated and filtered VCF file by excluding all filters that did not meet the pre and post-call filter criteria. Includes only variants with the `PASS` STATUS
      - Yes (Caesar and Scout)
 
