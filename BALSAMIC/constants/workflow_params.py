@@ -128,7 +128,7 @@ WORKFLOW_PARAMS = {
                 "-RGSM NORMAL",
                 "-RGPL ILLUMINAi",
                 "-RGLB ILLUMINAi",
-                "-MAX_RECORDS_IN_RAM 10000000",
+                "-MAX_RECORDS_IN_RAM 1000000",
                 "-CREATE_INDEX true",
                 "-CREATE_MD5_FILE true",
             ]
@@ -140,7 +140,7 @@ WORKFLOW_PARAMS = {
                 "-RGSM TUMOR",
                 "-RGPL ILLUMINAi",
                 "-RGLB ILLUMINAi",
-                "-MAX_RECORDS_IN_RAM 10000000",
+                "-MAX_RECORDS_IN_RAM 1000000",
                 "-CREATE_INDEX true",
                 "-CREATE_MD5_FILE true",
             ]
