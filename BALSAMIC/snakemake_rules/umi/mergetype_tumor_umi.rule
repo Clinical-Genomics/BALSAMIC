@@ -18,13 +18,18 @@ rule mergeBam_tumor_umiconsensus:
         picard = params.common.picard_RG_tumor,
         sample = tumor_sample,
         housekeeper_id = {"id": tumor_sample, "tags": "umi_tumor"},
+        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
     threads: 
         get_threads(cluster_config, "mergeBam_tumor_umiconsensus")
     message:
         ("Replacing ReadGroups using picard and converting from bam to cram for {params.sample}")
     shell:
         """
-picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam};
+picard AddOrReplaceReadGroups {params.picard} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {input.bam} \
+-OUTPUT {output.bam};
+
 samtools index {output.bam};
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 
 samtools index {output.cram}; 
