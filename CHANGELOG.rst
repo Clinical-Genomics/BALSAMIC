@@ -42,6 +42,7 @@ Fixed:
 * Invalid flag second of pair validation error using picardtools https://github.com/Clinical-Genomics/BALSAMIC/pull/1027
 * Samtools command for mergetype tumor https://github.com/Clinical-Genomics/BALSAMIC/pull/1030
 * `varcall_py3` container building https://github.com/Clinical-Genomics/BALSAMIC/pull/1033
+* Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1032
 
 Removed:
 ^^^^^^^
