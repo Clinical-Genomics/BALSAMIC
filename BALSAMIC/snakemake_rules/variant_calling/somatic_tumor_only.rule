@@ -57,7 +57,7 @@ rule vardict_merge:
     benchmark:
         Path(benchmark_dir, 'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
