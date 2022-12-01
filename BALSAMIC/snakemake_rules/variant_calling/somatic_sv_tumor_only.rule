@@ -79,37 +79,72 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
-rule delly_cnv_tumor_only:
-    input:
-        fa = config["reference"]["reference_genome"],
-        bamT = bam_dir + tumor_bam,
-        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        map = config["reference"]["delly_mappability"],
-    output:
-        cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
-        namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
-    benchmark:
-        benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
-    params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
-        tumor = "TUMOR",
-        case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_only")
-    message:
-        ("Calling copy number variants using delly for {params.case_name}")
-    shell:
-        """
+if config["analysis"]["sequencing_type"] == 'wgs':
+    rule delly_cnv_tumor_only:
+        input:
+            fa = config["reference"]["reference_genome"],
+            bamT = bam_dir + tumor_bam,
+            bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            map = config["reference"]["delly_mappability"],
+        output:
+            cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
+            namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
+        benchmark:
+            benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+        params:
+            tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+            housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+            tumor = "TUMOR",
+            case_name = config["analysis"]["case_id"]
+        threads:
+            get_threads(cluster_config, "delly_tumor_only")
+        message:
+            ("Calling copy number variants using delly for {params.case_name}")
+        shell:
+            """
 delly cnv -m {input.map} -g {input.fa} -c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
+    
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+    
+rm -rf {params.tmpdir};
+            """
+
+else:
+    rule delly_cnv_tumor_only:
+        input:
+            fa=config["reference"]["reference_genome"],
+            bamT=bam_dir + tumor_bam,
+            bcf=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            map=config["reference"]["delly_mappability"],
+            baits_bed = config["panel"]["capture_kit"],
+        output:
+            cnv_delly=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            rd_delly=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
+            namemap=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
+        benchmark:
+            benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        singularity:
+            Path(singularity_image,config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+        params:
+            tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+            housekeeper_id={"id": config["analysis"]["case_id"], "tags": "clinical"},
+            tumor="TUMOR",
+            case_name=config["analysis"]["case_id"]
+        threads:
+            get_threads(cluster_config,"delly_tumor_only")
+        message:
+            ("Calling copy number variants using delly for {params.case_name}")
+        shell:
+            """
+delly cnv -m {input.map} -g {input.fa} -b {input.baits_bed} -c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
 rm -rf {params.tmpdir};
-        """
+            """
 
 rule tiddit_sv_tumor_only:
     input:
