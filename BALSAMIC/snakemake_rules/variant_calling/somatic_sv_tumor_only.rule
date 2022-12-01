@@ -139,7 +139,8 @@ else:
             ("Calling copy number variants using delly for {params.case_name}")
         shell:
             """
-delly cnv -m {input.map} -g {input.fa} -b {input.baits_bed} -c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
+delly cnv  -i 10000 -m {input.map} -g {input.fa} -b {input.baits_bed} \
+-c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 
