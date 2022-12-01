@@ -35,7 +35,7 @@ ENV OMP_NUM_THREADS 2
 RUN cd /opt \
     && git clone --recursive https://github.com/dellytools/delly.git \
     && cd /opt/delly/ \
-    && git checkout v1.1.3 \
+    && git checkout v1.0.3 \
     && make STATIC=1 PARALLEL=1 all \
     && make install \
 

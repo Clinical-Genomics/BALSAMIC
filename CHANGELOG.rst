@@ -24,6 +24,7 @@ Added:
 * Cluster configuration for rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1028
 * Variant filteration using loqusDB and Swegen annotations https://github.com/Clinical-Genomics/BALSAMIC/pull/1029
 * Annotation resources to readsthedocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1031
+* Delly CNV rules for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/103
 
 Changed:
 ^^^^^^^^
