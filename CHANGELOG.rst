@@ -24,6 +24,8 @@ Added:
 * Cluster configuration for rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1028
 * Variant filteration using loqusDB and Swegen annotations https://github.com/Clinical-Genomics/BALSAMIC/pull/1029
 * Annotation resources to readsthedocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1031
+* Delly CNV rules for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/103
+* cnvpytor container and removed cnvpytor from varcallpy3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1037
 
 Changed:
 ^^^^^^^^
@@ -42,7 +44,7 @@ Fixed:
 * Invalid flag second of pair validation error https://github.com/Clinical-Genomics/BALSAMIC/pull/1025
 * Invalid flag second of pair validation error using picardtools https://github.com/Clinical-Genomics/BALSAMIC/pull/1027
 * Samtools command for mergetype tumor https://github.com/Clinical-Genomics/BALSAMIC/pull/1030
-* `varcall_py3` container building https://github.com/Clinical-Genomics/BALSAMIC/pull/1033
+* `varcall_py3` container building https://github.com/Clinical-Genomics/BALSAMIC/pull/1036
 * Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1032
 * `bcftools` in `varcall_py3` https://github.com/Clinical-Genomics/BALSAMIC/pull/1035
 

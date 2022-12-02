@@ -21,7 +21,6 @@ varcall_py3:
   - libiconv
   - svdb
   - tiddit
-  - cnvpytor
 varcall_py27:
   - manta
 varcall_cnvkit:
@@ -35,3 +34,5 @@ ascatNgs:
   - ascat
 vcf2cytosure:
   - vcf2cytosure
+cnvpytor:
+  - cnvpytor
