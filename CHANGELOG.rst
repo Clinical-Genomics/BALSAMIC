@@ -25,6 +25,7 @@ Added:
 * Variant filteration using loqusDB and Swegen annotations https://github.com/Clinical-Genomics/BALSAMIC/pull/1029
 * Annotation resources to readsthedocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1031
 * Delly CNV rules for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/103
+* cnvpytor container and removed cnvpytor from varcallpy3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1037
 
 Changed:
 ^^^^^^^^
