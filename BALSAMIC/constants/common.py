@@ -49,6 +49,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "ascatNgs",
     "balsamic",
     "vcf2cytosure",
+    "cnvpytor",
 }
 
 BIOINFO_TOOL_ENV = {
@@ -71,7 +72,7 @@ BIOINFO_TOOL_ENV = {
     "vardict": "varcall_py3",
     "svdb": "varcall_py3",
     "tiddit": "varcall_py3",
-    "cnvpytor": "varcall_py3",
+    "cnvpytor": "cnvpytor",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "delly",
