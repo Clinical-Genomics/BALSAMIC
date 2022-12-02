@@ -4,7 +4,6 @@ LABEL base.image="continuumio/miniconda3:4.10.3-alpine"
 LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
 LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
-LABEL about.maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
 ENV PATH="/opt/conda/bin/:${PATH}"
