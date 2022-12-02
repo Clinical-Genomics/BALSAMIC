@@ -46,7 +46,7 @@ Fixed:
 * Samtools command for mergetype tumor https://github.com/Clinical-Genomics/BALSAMIC/pull/1030
 * `varcall_py3` container building https://github.com/Clinical-Genomics/BALSAMIC/pull/1036
 * Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1032
-* `bcftools` in `varcall_py3` https://github.com/Clinical-Genomics/BALSAMIC/pull/1035
+* Set channels in `varcall_py3` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1035
 
 Removed:
 ^^^^^^^^
