@@ -81,7 +81,7 @@
 		"n": 8
 	},
 	"mergeBam_tumor": {
-		"time": "10:00:00",
+		"time": "24:00:00",
 		"n": 36
 	},
 	"mergeBam_tumor_gatk": {
