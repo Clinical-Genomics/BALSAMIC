@@ -47,6 +47,7 @@ Fixed:
 * `varcall_py3` container building https://github.com/Clinical-Genomics/BALSAMIC/pull/1036
 * Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1032
 * Set channels in `varcall_py3` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1035
+* Delly command for tumor-normal analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1039
 
 Removed:
 ^^^^^^^^

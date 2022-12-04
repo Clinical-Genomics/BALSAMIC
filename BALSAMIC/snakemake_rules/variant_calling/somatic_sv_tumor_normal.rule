@@ -171,7 +171,7 @@ echo -e \"{params.tumor}\\ttumor\\n{params.normal}\\tcontrol\" > {params.tmpdir}
 delly cnv -u -z 10000 -i 10000 -m {input.map} -g {input.fa}  -b {input.baits_bed} -c {output.rd_delly} \
 -o {params.tmpdir}/{params.tumor}.bcf {input.bamT};
 
-delly cnv -u -v {params.tmpdir}/{params.tumor}.bcf -m {input.map} -g {input.fa}  -b {input.baits_bed}\
+delly cnv -u -v {params.tmpdir}/{params.tumor}.bcf -m {input.map} -g {input.fa} -b {input.baits_bed} \
 -o {params.tmpdir}/{params.normal}.bcf {input.bamN};
 
 bcftools merge -m id -O b -o {params.tmpdir}/{params.tumor}_{params.normal}.bcf \
