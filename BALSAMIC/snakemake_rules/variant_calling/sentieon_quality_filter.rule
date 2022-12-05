@@ -134,7 +134,7 @@ tabix -p vcf -f {output.vcf_filtered};
 bcftools view {input.vcf} | \
 bcftools view  -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
 
-tabix -p vcf -f {output.vcf_pass_TNscope_umi};
+tabix -p vcf -f {output.vcf_filtered};
       """
 
 

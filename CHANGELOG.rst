@@ -48,6 +48,7 @@ Fixed:
 * Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1032
 * Set channels in `varcall_py3` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1035
 * Delly command for tumor-normal analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1039
+* tabix command in bcftools_quality_filter_TNscope_umi_tumor_only rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1040
 
 Removed:
 ^^^^^^^^
