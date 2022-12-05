@@ -80,7 +80,6 @@ rule sentieon_TNscope:
     benchmark:
         Path(benchmark_dir, 'sentieon_TNscope_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",

@@ -8,13 +8,14 @@ rule bcftools_view_split_variant:
         ref = config["reference"]["reference_genome"],
         vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-        vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-        vcf_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_tnscope_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
         Path(benchmark_dir,'bcftools_view_split_variant_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"]
     threads:
@@ -26,9 +27,9 @@ rule bcftools_view_split_variant:
 export TMPDIR={params.tmpdir};
 mkdir -p {params.tmpdir};
 
-bcftools view --include 'INFO/SVTYPE=="."' -O z -o {output.vcf_snv} {input.vcf}; 
-tabix -p vcf -f {output.vcf_snv};
+bcftools view --include 'INFO/SVTYPE=="."' -O z -o {output.vcf_tnscope} {input.vcf}; 
+tabix -p vcf -f {output.vcf_tnscope};
 
-bcftools view --include 'INFO/SVTYPE!="."' -O z -o {output.vcf_sv} {input.vcf}; 
-tabix -p vcf -f {output.vcf_sv};
+bcftools view --include 'INFO/SVTYPE!="."' -O z -o {output.vcf_tnscope_sv} {input.vcf}; 
+tabix -p vcf -f {output.vcf_tnscope_sv};
         """
