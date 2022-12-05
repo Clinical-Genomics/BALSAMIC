@@ -3,7 +3,7 @@
 
 Fixed:
 ^^^^^^
-* Incorrect raw `TNscope` VCF delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/1041
+* Incorrect raw `TNscope` VCF delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/1042
 
 [11.0.0]
 --------
