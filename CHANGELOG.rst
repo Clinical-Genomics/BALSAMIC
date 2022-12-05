@@ -1,5 +1,12 @@
+[11.0.1]
+--------
+
+Fixed:
+^^^^^^
+* Incorrect raw `TNscope` VCF delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/1042
+
 [11.0.0]
--------
+--------
 
 Added:
 ^^^^^^
