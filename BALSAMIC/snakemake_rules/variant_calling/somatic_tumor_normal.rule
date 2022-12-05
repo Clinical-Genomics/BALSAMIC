@@ -60,7 +60,7 @@ rule vardict_merge:
     benchmark:
         Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     threads:
         get_threads(cluster_config,"vardict_merge")
     message:
@@ -89,7 +89,7 @@ rule sentieon_TNhaplotyper:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
     output:
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.research.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
     benchmark:
         Path(benchmark_dir + 'sentieon_TNhaplotyper_' + config["analysis"]["case_id"] + ".tsv").as_posix()

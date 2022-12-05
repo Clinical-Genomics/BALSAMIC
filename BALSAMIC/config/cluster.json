@@ -41,7 +41,7 @@
 	},
 	"dragen_align_call_tumor_only": {
 		"time": "10:00:00",
-		"n": 24,
+		"n": 36,
 		"partition": "dragen"
 	},
 	"cnvkit_single": {
@@ -51,6 +51,14 @@
 	"fastqc":{
 		"time": "12:00:00",
 		"n": 5
+	},
+	"fastp":{
+		"time": "12:00:00",
+		"n": 8
+	},
+	"fastp_umi":{
+		"time": "24:00:00",
+		"n": 8
 	},
 	"manta_germline": {
 		"time": "05:00:00",
@@ -65,16 +73,16 @@
 		"n": 12
 	},
 	"mergeBam_normal": {
-		"time": "10:00:00",
-		"n": 16
+		"time": "12:00:00",
+		"n": 36
 	},
 	"mergeBam_normal_gatk": {
 		"time": "04:30:00",
 		"n": 8
 	},
 	"mergeBam_tumor": {
-		"time": "10:00:00",
-		"n": 16
+		"time": "30:00:00",
+		"n": 36
 	},
 	"mergeBam_tumor_gatk": {
 		"time": "04:30:00",
@@ -98,47 +106,43 @@
 	},
 	"sentieon_DNAscope": {
 		"time": "24:00:00",
-		"n": 24
-	},
-	"sentieon_TN_corealign": {
-		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_TNhaplotyper": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_TNhaplotyper_tumor_only": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_TNscope": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_TNscope_tumor_only": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_align_sort": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_base_calibration": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_dedup": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_realign": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_filter_TNscope": {
 		"time": "24:00:00",
-		"n": 24
+		"n": 36
 	},
 	"somatic_snv_indel_vcf_merge": {
 		"time": "06:00:00",
@@ -158,15 +162,15 @@
 	},
 	"sentieon_bwa_umiextract": {
 		"time": "8:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_consensuscall_umi": {
 		"time": "6:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_bwa_umiconsensus": {
 		"time": "8:00:00",
-		"n": 24
+		"n": 36
 	},
 	"sentieon_consensusfilter_umi": {
 		"time": "4:00:00",
@@ -176,16 +180,20 @@
 		"time": "4:00:00",
 		"n": 12
 	},
-	"vep_somatic_snv": {
-		"time":"18:00:00",
-		"n": 24
+	"vep_somatic_research_snv": {
+		"time": "18:00:00",
+		"n": 36
+	},
+	"vep_somatic_clinical_snv": {
+		"time": "18:00:00",
+		"n" : 36
 	},
 	"vep_somatic_sv": {
-		"time":"12:00:00",
-		"n": 24
+		"time": "12:00:00",
+		"n": 36
 	},
 	"vep_germline": {
-		"time":"06:00:00",
+		"time": "06:00:00",
 		"n": 10
 	},
 	"picard_umiaware": {
@@ -216,7 +224,7 @@
 		"time": "12:00:00",
 		"n": 36
 	},
-	"ascat_tumor_normal_merge_output": {
+	"cnv_report": {
 		"time": "00:15:00",
 		"n": 1
 	},
@@ -240,6 +248,10 @@
 		"time": "12:00:00",
 		"n": 24
 	},
+	"cnvpytor_sv_tumor_normal": {
+		"time": "05:00:00",
+		"n": 24
+	},
 	"bcftools_process_SV_CNV": {
 		"time": "01:00:00",
 		"n": 8
@@ -248,8 +260,64 @@
 		"time": "02:00:00",
 		"n": 8
 	},
-	"bcftools_filter_svdb": {
+	"bcftools_filter_svdb_research": {
+		"time": "02:00:00",
+		"n": 8
+	},
+	"bcftools_filter_svdb_clinical": {
 		"time": "01:00:00",
+		"n": 8
+	},
+	"vcfheader_rename_germline": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_research_tumor_only": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_clinical_tumor_only": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_research_tumor_normal": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_clinical_tumor_normal": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_research_tumor_only": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_clinical_tumor_only": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_umi_research_tumor_only": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_umi_tumor_only": {
+		"time": ":03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_research_tumor_normal": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_clinical_tumor_normal": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_TNscope_umi_research_tumor_normal": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_TNscope_umi_clinical_tumor_normal": {
+		"time": "03:00:00",
 		"n": 8
 	}
 }

@@ -10,28 +10,29 @@ with open(os.path.join(here, "BALSAMIC", "__version__.py")) as f:
 
 # Requirements
 requirements = [
-    "click>=7.1.2",
+    "click==8.1.3",
     "colorclass>=2.2.0",
     "coloredlogs>=14.0",
     "graphviz==0.16",
     "gsutil==4.50",
     "jinja2>=2.11.2",
-    "matplotlib>=3.3.0",
-    "networkx>=2.4",
-    "numpy>=1.19.2",
-    "pandas>1.1.0",
+    "matplotlib==3.5.2",
+    "networkx>=2.6.3",
+    "numpy>=1.21.6",
+    "pandas>=1.1.5",
     "psutil>=5.7.0",
-    "pydantic>=1.5.1",
+    "pydantic>=1.9.0",
     "pygments>=2.6.1",
     "pyyaml>=5.3.1",
     "six>=1.12.0",
     "snakemake==6.5.3",
     "yapf>=0.30.0",
-    "h5py>=3.1.0",
+    "h5py>=3.6.0",
     "PyPDF2>=1.26.0",
     "markdown==3.3.3",
     "cryptography==3.2.1",
     "tabulate==0.8.10",
+    "toml==0.10.2",
 ]
 
 # The C libraries required to build numpy are not available on RTD

@@ -11,6 +11,7 @@ References and other resources
 #. **COSMIC**\ : http://cancer.sanger.ac.uk/cosmic
 #. **dbSNP**\ :  Database of single nucleotide polymorphisms (SNPs) and multiple small-scale variations that include insertions/deletions, microsatellites, and non-polymorphic variants. https://www.ncbi.nlm.nih.gov/snp/ Download link: ftp://ftp.ncbi.nlm.nih.gov/snp/organisms/human_9606_b150_GRCh38p7/VCF/All_20170710.vcf.gz
 #. **ClinVar**\ : ClinVar aggregates information about genomic variation and its relationship to human health. https://www.ncbi.nlm.nih.gov/clinvar/ Download link: ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar_20171029.vcf.gz
+#. **SweGen**\ : This dataset contains whole-genome variant frequencies for 1000 Swedish individuals generated within the SweGen project. Download link:  https://swefreq.nbis.se/
 #. **ExAC**\ : The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate and harmonize exome sequencing data from a wide variety of large-scale sequencing projects, and to make summary data available for the wider scientific community. http://exac.broadinstitute.org/ Download link: ftp://ftp.broadinstitute.org/pub/ExAC_release/release1/ExAC.r1.sites.vep.vcf.gz
 #. **GTEx**\ : The Genotype-Tissue Expression (GTEx) project aims to provide to the scientific community a resource with which to study human gene expression and regulation and its relationship to genetic variation. https://gtexportal.org/static/ Download URL by applying through: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v6.p1
 #. **OMIM**\ : OMIM®, Online Mendelian Inheritance in Man®, An Online Catalog of Human Genes and Genetic Disorders. https://www.omim.org/ Download link: https://omim.org/downloads/ (registration required) 
@@ -100,7 +101,6 @@ Methods and tools
 * **peddy**\ : Pedersen, B. S., & Quinlan, A. R. (2017). Who’s Who? Detecting and Resolving Sample Anomalies in Human DNA Sequencing Studies with Peddy. American Journal of Human Genetics, 100(3), 406–413. https://doi.org/10.1016/j.ajhg.2017.01.017
 * **GQT**\ : Layer, R. M., Kindlon, N., Karczewski, K. J., & Quinlan, A. R. (2015). Efficient genotype compression and analysis of large genetic-variation data sets. Nature Methods, 13(1). https://doi.org/10.1038/nmeth.3654
 
-
 *Tool sets and softwares required at various steps of pipeline development*
 
 
@@ -165,6 +165,7 @@ Methods and tools
 #. **vtools**\ : variant tools is a software tool for the manipulation, annotation, selection, simulation, and analysis of variants in the context of next-gen sequencing analysis. http://varianttools.sourceforge.net/Main/HomePage
 #. **vt**\ : A variant tool set that discovers short variants from Next Generation Sequencing data. https://genome.sph.umich.edu/wiki/Vt and https://github.com/atks/vt
 #. **CNVnator**\ : a tool for CNV discovery and genotyping from depth-of-coverage by mapped reads. https://github.com/abyzovlab/CNVnator
+#.  **CNVpytor**\ : a tool for copy number variation detection and analysis from read depth and allele imbalance in whole-genome sequencing. https://github.com/abyzovlab/CNVpytor
 #. **SvABA**\ : Structural variation and indel detection by local assembly. https://github.com/walaj/svaba
 #. **indelope**\ : find indels and SVs too small for structural variant callers and too large for GATK. https://github.com/brentp/indelope
 #. **peddy**\ : peddy compares familial-relationships and sexes as reported in a PED/FAM file with those inferred from a VCF. https://github.com/brentp/peddy

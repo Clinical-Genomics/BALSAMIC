@@ -2,26 +2,63 @@
 # coding: utf-8
 # NGS filters for merged SVs and CNVs
 
-rule bcftools_filter_svdb:
+rule bcftools_filter_sv_research:
   input:
-    vcf = vep_dir + "SV.somatic.{case_name}.svdb.all.vcf.gz",
+    vcf_sv_research = vep_dir + "SV.somatic.{case_name}.svdb.research.swegen.vcf.gz",
   output:
-    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.vcf.gz",
-    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.all.filtered.pass.stats"
+    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.research.filtered.pass.stats"
   benchmark:
-    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.vep.tsv"
+    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.research.filtered.tsv"
   singularity:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     case_name = "{case_name}",
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    swegen_freq = [SVDB_FILTERS.swegen_sv_freq.tag_value, SVDB_FILTERS.swegen_sv_freq.filter_name],
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
   threads:
-    get_threads(cluster_config, "bcftools_filter_svdb")
+    get_threads(cluster_config, "bcftools_filter_svdb_research")
   message:
-    "Filtering merged structural and copy number variants using bcftools for {params.case_name}"
+    "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb} -O z {input.vcf};
+bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_research} |\
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools view --threads {threads} -f .,PASS,MaxDepth  -O z -o {output.vcf_pass_svdb};
+
+
+
+tabix -p vcf -f {output.vcf_pass_svdb};
+
+bcftools +counts {output.vcf_pass_svdb} > {output.bcftools_counts};
+    """
+
+
+rule bcftools_filter_sv_clinical:
+  input:
+    vcf_sv_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.vcf.gz",
+  output:
+    vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.vcf.gz",
+    bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.stats"
+  benchmark:
+    benchmark_dir + "bcftools_filter_svdb_SV.somatic.{case_name}.svdb.clinical.filtered.tsv"
+  singularity:
+    Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+    case_name = "{case_name}",
+    swegen_freq = [SVDB_FILTERS.swegen_sv_freq.tag_value, SVDB_FILTERS.swegen_sv_freq.filter_name],
+    loqusdb_clinical_freq = [SVDB_FILTERS.loqusdb_clinical_sv_freq.tag_value, SVDB_FILTERS.loqusdb_clinical_sv_freq.filter_name],
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+  threads:
+    get_threads(cluster_config, "bcftools_filter_svdb_clinical")
+  message:
+    "Filtering merged clinical structural and copy number variants using bcftools for {params.case_name}"
+  shell:
+    """
+bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_clinical} |\
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
+bcftools view --threads {threads} -f .,PASS,MaxDepth  -O z -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 

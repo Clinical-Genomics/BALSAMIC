@@ -21,16 +21,40 @@ rule mergeBam_tumor:
     Path(singularity_image, config[ "bioinfo_tools" ].get("picard") + ".sif").as_posix()
   params:
     housekeeper_id = {"id": tumor_sample, "tags": "tumor"},
-    picard = params.common.picard_RG_tumor,
-    sample = tumor_sample
+    picard_fixmateinfo = params.common.picard_fixmate,
+    picard_rg = params.common.picard_RG_tumor,
+    sample = tumor_sample,
+    tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
   threads:
     get_threads(cluster_config, "mergeBam_tumor")
   message:
     "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
-picard AddOrReplaceReadGroups {params.picard} INPUT={input.bam} OUTPUT={output.bam}; 
+picard -Xmx150g FixMateInformation {params.picard_fixmateinfo} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {input.bam} \
+-OUTPUT {params.tmpdir}/tumor.fixed.bam;
+
+samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/tumor.fixed.bam \
+-o {params.tmpdir}/tumor.fixed.um.bam ;
+
+samtools index {params.tmpdir}/tumor.fixed.um.bam;
+
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/tumor.fixed.bam \
+-o {params.tmpdir}/tumor.fixed.m.bam;
+
+samtools index {params.tmpdir}/tumor.fixed.m.bam;
+
+picard -Xmx150g AddOrReplaceReadGroups {params.picard_rg} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {params.tmpdir}/tumor.fixed.m.bam \
+-TMP_DIR {params.tmpdir} \
+-OUTPUT {output.bam}; 
+
 samtools index {output.bam}; 
+
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {output.bam}; 
+
 samtools index {output.cram}; 
     """

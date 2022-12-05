@@ -31,9 +31,9 @@ rule sentieon_tnscope_umi:
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         pcr_model = params.common.pcr_model
-    threads: 
+    threads:
         get_threads(cluster_config, "sentieon_tnscope_umi")
-    message: 
+    message:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
         """

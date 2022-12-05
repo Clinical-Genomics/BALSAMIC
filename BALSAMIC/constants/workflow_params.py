@@ -22,13 +22,6 @@ VCF_DICT = {
         "sequencing_type": ["wgs"],
         "workflow_solution": ["Sentieon"],
     },
-    "tnhaplotyper": {
-        "mutation": "somatic",
-        "type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "sequencing_type": ["targeted", "wgs"],
-        "workflow_solution": ["Sentieon"],
-    },
     "dnascope": {
         "mutation": "germline",
         "type": "SNV",
@@ -99,6 +92,13 @@ VCF_DICT = {
         "sequencing_type": ["wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
+    "cnvpytor": {
+        "mutation": "somatic",
+        "type": "CNV",
+        "analysis_type": ["single"],
+        "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
     "svdb": {
         "mutation": "somatic",
         "type": "SV",
@@ -113,22 +113,36 @@ WORKFLOW_PARAMS = {
         "pcr_model": "NONE",
         "align_header": "'@RG\\tID:{sample}\\tSM:{sample}\\tPL:ILLUMINAi'",
         "min_mapq": "20",
+        "picard_fixmate": " ".join(
+            [
+                "-ADD_MATE_CIGAR true",
+                "-MAX_RECORDS_IN_RAM 10000000",
+                "-CREATE_INDEX true",
+                "-CREATE_MD5_FILE true",
+            ]
+        ),
         "picard_RG_normal": " ".join(
             [
-                "RGPU=ILLUMINAi",
-                "RGID=NORMAL",
-                "RGSM=NORMAL",
-                "RGPL=ILLUMINAi",
-                "RGLB=ILLUMINAi",
+                "-RGPU ILLUMINAi",
+                "-RGID NORMAL",
+                "-RGSM NORMAL",
+                "-RGPL ILLUMINAi",
+                "-RGLB ILLUMINAi",
+                "-MAX_RECORDS_IN_RAM 1000000",
+                "-CREATE_INDEX true",
+                "-CREATE_MD5_FILE true",
             ]
         ),
         "picard_RG_tumor": " ".join(
             [
-                "RGPU=ILLUMINAi",
-                "RGID=TUMOR",
-                "RGSM=TUMOR",
-                "RGPL=ILLUMINAi",
-                "RGLB=ILLUMINAi",
+                "-RGPU ILLUMINAi",
+                "-RGID TUMOR",
+                "-RGSM TUMOR",
+                "-RGPL ILLUMINAi",
+                "-RGLB ILLUMINAi",
+                "-MAX_RECORDS_IN_RAM 1000000",
+                "-CREATE_INDEX true",
+                "-CREATE_MD5_FILE true",
             ]
         ),
     },

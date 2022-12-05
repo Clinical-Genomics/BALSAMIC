@@ -8,7 +8,7 @@ def test_edit_vcf_info(tmp_path, cli_runner):
 
     # GIVEN input VCF file path, path to output file and varaintcaller name
     input_vcf_path = (
-        "tests/test_data/references/vep/test.vardict.all.filtered.pass.vcf.gz"
+        "tests/test_data/references/vep/test.vardict.research.filtered.pass.vcf.gz"
     )
     output_vcf_path = tmp_path / "edited_vcf.gz"
     varcaller = "newcaller"

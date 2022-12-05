@@ -1,0 +1,7 @@
+channels:
+  - defaults
+
+dependencies:
+  - anaconda::python=3.7
+  - bioconda::tabix=1.11
+  - bioconda::cnvpytor=1.2.1

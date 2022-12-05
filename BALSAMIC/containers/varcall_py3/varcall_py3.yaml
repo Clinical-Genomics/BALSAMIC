@@ -1,18 +1,21 @@
 channels:
+  - conda-forge
+  - bioconda
   - defaults
 
 dependencies:
   - anaconda::python=3.8
   - anaconda::click=8.0.4
-  - bioconda::bcftools=1.11
-  - bioconda::tabix=0.2.6
-  - bioconda::samtools=1.11
+  - bioconda::bcftools=1.15
+  - bioconda::tabix=1.11
+  - bioconda::samtools=1.15
   - bioconda::gatk=3.8
   - bioconda::vardict=2019.06.04
   - bioconda::vardict-java=1.8.3
-  - bioconda::svdb=2.6.0
+  - bioconda::svdb=2.8.1
   - bioconda::vcfpy=0.13.4
+  - bioconda::cyvcf2=0.30.16
   - bioconda::bwa=0.7.17
-  - bioconda::tiddit=3.0.0
+  - bioconda::tiddit=3.3.2
   - conda-forge::libiconv
   - conda-forge::r-base=4.1.1

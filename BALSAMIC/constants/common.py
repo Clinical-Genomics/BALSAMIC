@@ -18,11 +18,6 @@ CONTAINERS_CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "containers").as_posix()
 # Path to rule files to be accessed by Snakemake
 RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
 
-# Path to vcfanno toml files
-VCFANNO_TOML = Path(
-    BALSAMIC_BASE_DIR / "assets" / "vcfanno" / "vcfanno.toml"
-).as_posix()
-
 # Sentieon specific
 SENTIEON_DNASCOPE = Path(
     BALSAMIC_BASE_DIR
@@ -54,6 +49,7 @@ VALID_CONTAINER_CONDA_NAME = {
     "ascatNgs",
     "balsamic",
     "vcf2cytosure",
+    "cnvpytor",
 }
 
 BIOINFO_TOOL_ENV = {
@@ -76,6 +72,7 @@ BIOINFO_TOOL_ENV = {
     "vardict": "varcall_py3",
     "svdb": "varcall_py3",
     "tiddit": "varcall_py3",
+    "cnvpytor": "cnvpytor",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
     "delly": "delly",

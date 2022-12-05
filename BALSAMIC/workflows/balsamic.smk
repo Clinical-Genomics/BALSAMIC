@@ -20,14 +20,15 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir,
-                                 get_vcf, get_picard_mrkdup, get_sample_type,
-                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit)
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+                                 get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
+                                 get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
+                                 get_swegen_sv, dump_toml)
 
-from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE,
-                                    RULE_DIRECTORY, VCFANNO_TOML, MUTATION_TYPE);
-from BALSAMIC.constants.variant_filters import COMMON_SETTINGS,VARDICT_SETTINGS,SENTIEON_VARCALL_SETTINGS;
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS
+from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE)
+from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
+                                                SVDB_FILTER_SETTINGS)
+from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 
 
@@ -58,8 +59,68 @@ qc_dir = get_result_dir(config) + "/qc/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 umi_dir = get_result_dir(config) + "/umi/"
 umi_qc_dir = qc_dir + "umi_qc/"
-
 singularity_image = config['singularity']['image']
+
+
+research_annotations = []
+clinical_annotations = []
+clinical_snv_obs = ""
+swegen_snv = ""
+clinical_sv = ""
+swegen_sv = ""
+
+# vcfanno annotations
+research_annotations.append( {
+    'annotation': [{
+    'file': Path(config["reference"]["gnomad_variant"]).as_posix(),
+    'fields': ["AF", "AF_popmax"],
+    'ops': ["self", "self"],
+    'names': ["GNOMADAF", "GNOMADAF_popmax"]
+    }]
+}
+)
+
+research_annotations.append( {
+    'annotation': [{
+    'file': Path(config["reference"]["clinvar"]).as_posix(),
+    'fields': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"],
+    'ops': ["self", "self", "self", "self", "self", "self"],
+    'names': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"]
+    }]
+}
+)
+
+if "swegen_snv_frequency" in config["reference"]:
+    research_annotations.append( {
+        'annotation': [{
+            'file': get_swegen_snv(config),
+            'fields': ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
+            'ops': ["self", "self", "self","self"],
+            'names': ["SWEGENAF", "SWEGENAAC_Hom", "SWEGENAAC_Het", "SWEGENAAC_Hemi"]
+        }]
+    }
+    )
+
+if "clinical_snv_observations" in config["reference"]:
+    clinical_annotations.append( {
+        'annotation': [{
+            'file': get_clinical_snv_observations(config),
+            'fields': ["Frq", "Obs", "Hom"],
+            'ops': ["self", "self", "self"],
+            'names': ["Frq", "Obs", "Hom"]
+        }]
+    }
+    )
+    clinical_snv_obs = get_clinical_snv_observations(config)
+
+
+if "clinical_sv_observations" in config["reference"]:
+    clinical_sv = get_clinical_sv_observations(config)
+
+
+if "swegen_sv_frequency" in config["reference"]:
+    swegen_sv = get_swegen_sv(config)
+
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
@@ -68,6 +129,7 @@ picarddup = get_picard_mrkdup(config)
 COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
 VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
+SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
@@ -141,6 +203,21 @@ if "background_variants" in config:
 # Set temporary dir environment variable
 os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
+
+# CNV report input files
+cnv_data_paths = []
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
+    cnv_data_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
+    cnv_data_paths.extend(expand(
+        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+        output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+    ))
+
+if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
+    cnv_data_paths.extend(expand(
+        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
+        output_suffix=["circular", "scatter"]
+    ))
 
 # Extract variant callers for the workflow
 germline_caller = []
@@ -218,6 +295,7 @@ for ws in ["BALSAMIC","Sentieon","Sentieon_umi"]:
                                            mutation_class="somatic")
     somatic_caller_tmb +=  somatic_caller_snv
 
+
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
     variant_callers_to_remove = config["disable_variant_caller"].split(",")
@@ -271,18 +349,29 @@ if config["analysis"]["analysis_type"]=="paired":
 
 # Raw VCFs
 analysis_specific_results.extend(
-    expand(vcf_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(vcf_dir + "{vcf}.research.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
-# Filtered and passed post annotation VCFs
+# Filtered and passed post annotation research VCFs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.all.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(vep_dir + "{vcf}.research.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
+
+# Filtered and passed post annotation clinical VCFs
+analysis_specific_results.extend(
+    expand(vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+)
+
 
 # TMB
 analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.balsamic_stat", vcf=get_vcf(config, somatic_caller_tmb, [case_id]))
 )
+
+# WGS specific files
+if config["analysis"]["sequencing_type"] == "wgs":
+    # CNV report
+    analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -298,7 +387,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     ))
     # VarDict
     analysis_specific_results.extend(
-        expand(vep_dir + "{vcf}.all.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
+        expand(vep_dir + "{vcf}.research.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
     )
     # UMI
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
@@ -310,13 +399,10 @@ if config["analysis"]["sequencing_type"] != "wgs":
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.output.pdf", vcf=get_vcf(config, ["ascat"], [case_id]))
-    )
-    analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
+        expand(vcf_dir + "{vcf}.cov.gz", vcf=get_vcf(config,["dellycnv"],[case_id]))
     )
     analysis_specific_results.extend(expand(
         vcf_dir + "SV.somatic.{case_name}.{sample_type}.tiddit_cov.bed",
@@ -430,7 +516,10 @@ rule all:
     output:
         finish_file = os.path.join(get_result_dir(config), "analysis_finish")
     params:
-        tmp_dir = tmp_dir
+        tmp_dir = tmp_dir,
+        case_name = config["analysis"]["case_id"],
+    message:
+        "Finalizing analysis for {params.case_name}",
     run:
         import datetime
         import shutil

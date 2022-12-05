@@ -17,7 +17,6 @@ from BALSAMIC.utils.models import PonBalsamicConfigModel
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
-    GENDER_OPTIONS,
 )
 
 LOG = logging.getLogger(__name__)
@@ -25,14 +24,6 @@ LOG = logging.getLogger(__name__)
 
 @click.command("pon", short_help="Create a sample config file for PON analysis")
 @click.option("--case-id", required=True, help="Sample id used for reporting analysis")
-@click.option(
-    "--gender",
-    required=False,
-    default="female",
-    show_default=True,
-    type=click.Choice(GENDER_OPTIONS),
-    help="Case associated gender",
-)
 @click.option(
     "--umi/--no-umi",
     default=True,
@@ -99,11 +90,17 @@ LOG = logging.getLogger(__name__)
         "will be <outdir>/genome_version"
     ),
 )
+@click.option(
+    "-v",
+    "--version",
+    default="v1",
+    type=str,
+    help="Version of the PON file to be generated",
+)
 @click.pass_context
 def pon_config(
     context,
     case_id,
-    gender,
     analysis_dir,
     fastq_path,
     panel_bed,
@@ -113,6 +110,7 @@ def pon_config(
     adapter_trim,
     genome_version,
     balsamic_cache,
+    version,
 ):
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
@@ -129,9 +127,9 @@ def pon_config(
         },
         analysis={
             "case_id": case_id,
-            "gender": gender,
             "analysis_dir": analysis_dir,
             "analysis_type": "pon",
+            "pon_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },

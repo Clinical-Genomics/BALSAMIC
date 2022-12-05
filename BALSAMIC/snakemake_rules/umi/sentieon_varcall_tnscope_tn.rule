@@ -33,9 +33,9 @@ rule sentieon_tnscope_umi_tn:
         tumor = "TUMOR",
         normal = "NORMAL",
         case_name= config["analysis"]["case_id"]
-    threads: 
+    threads:
         get_threads(cluster_config, "sentieon_tnscope_umi")
-    message: 
+    message:
         "Calling single nucleotide variants using TNscope for {params.case_name}"
     shell:
         """

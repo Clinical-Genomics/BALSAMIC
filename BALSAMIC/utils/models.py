@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
@@ -57,11 +58,15 @@ class VarCallerFilter(BaseModel):
         AF_max: VCFAttributes (optional); maximum allelic fraction
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
-        pop_freq: VCFAttributes (optional); maximum gnomad_af
+        pop_freq: VCFAttributes (optional); maximum gnomad allele frequency
         pop_freq_umi: VCFAttributes (optional); maximum gnomad_af for UMI workflow
         strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
         sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
+        swegen_snv_freq: VCFAttributes (optional); maximum swegen snv allele frequency
+        swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
+        loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
+        loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
         varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
         analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
@@ -78,6 +83,10 @@ class VarCallerFilter(BaseModel):
     strand_reads: Optional[VCFAttributes]
     qss: Optional[VCFAttributes]
     sor: Optional[VCFAttributes]
+    swegen_snv_freq: Optional[VCFAttributes]
+    swegen_sv_freq: Optional[VCFAttributes]
+    loqusdb_clinical_snv_freq: Optional[VCFAttributes]
+    loqusdb_clinical_sv_freq: Optional[VCFAttributes]
     varcaller_name: str
     filter_type: str
     analysis_type: str
@@ -185,7 +194,6 @@ class VCFModel(BaseModel):
     vardict: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
-    tnhaplotyper: VarcallerAttribute
     tnscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
     manta: VarcallerAttribute
@@ -194,6 +202,7 @@ class VCFModel(BaseModel):
     ascat: VarcallerAttribute
     dellycnv: VarcallerAttribute
     tiddit: VarcallerAttribute
+    cnvpytor: VarcallerAttribute
     svdb: VarcallerAttribute
 
 
@@ -234,8 +243,8 @@ class AnalysisModel(BaseModel):
     """
 
     case_id: str
-    gender: str
     analysis_type: str
+    gender: Optional[str]
     sequencing_type: str
     analysis_workflow: str
     analysis_dir: DirectoryPath
@@ -251,20 +260,20 @@ class AnalysisModel(BaseModel):
     class Config:
         validate_all = True
 
-    @validator("gender")
-    def gender_literal(cls, value) -> str:
-        if value not in GENDER_OPTIONS:
-            raise ValueError(
-                f"Provided gender type ({value}) is not supported in BALSAMIC!"
-            )
-        return value
-
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
         balsamic_analysis_types = ANALYSIS_TYPES
         if value not in balsamic_analysis_types:
             raise ValueError(
                 f"Provided analysis type ({value}) not supported in BALSAMIC!"
+            )
+        return value
+
+    @validator("gender")
+    def gender_literal(cls, value, values) -> Optional[str]:
+        if value not in GENDER_OPTIONS and values.get("analysis_type") != "pon":
+            raise ValueError(
+                f"Provided gender type ({value}) is not supported in BALSAMIC!"
             )
         return value
 
@@ -342,6 +351,28 @@ class AnalysisModel(BaseModel):
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
         return datetime.now().strftime("%Y-%m-%d %H:%M")
+
+
+class AnalysisPonModel(AnalysisModel):
+    """Pydantic model containing PON workflow variables
+
+    Attributes:
+        pon_version: Field(str); version of the PON generated file
+    """
+
+    pon_version: str
+
+    @validator("pon_version")
+    def validate_pon_version(cls, value):
+        """Checks that the version matches the following syntax: v<int>"""
+
+        match = re.fullmatch("^v[1-9]\d*$", value)
+        if not match:
+            raise ValueError(
+                f"The provided version ({value}) does not follow the defined syntax (v<int>)"
+            )
+
+        return value
 
 
 class SampleInstanceModel(BaseModel):
@@ -422,7 +453,7 @@ class PonBalsamicConfigModel(BaseModel):
     """
 
     QC: QCModel
-    analysis: AnalysisModel
+    analysis: AnalysisPonModel
     reference: Dict[str, Path]
     singularity: DirectoryPath
     bioinfo_tools: dict
@@ -696,6 +727,7 @@ class ParamsCommon(BaseModel):
         pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
         align_header: str (required); header line appended to the aligned BAM output
         min_mapq: int (required); minimum mapping quality score. Eg: 20- probability of mapping random read at 99% accuracy
+        picard_fixmate: str (required), fix read mate information in bam file
         picard_RG_normal: str (required); replace readgroups in normal bam file
         picard_RG_tumor: str (required); replace readgroups in tumor bam file
     """
@@ -703,6 +735,7 @@ class ParamsCommon(BaseModel):
     align_header: str
     pcr_model: str
     min_mapq: int
+    picard_fixmate: str
     picard_RG_normal: str
     picard_RG_tumor: str
 

@@ -20,6 +20,7 @@
    balsamic_filters
    balsamic_sv_cnv
    balsamic_annotation
+   balsamic_pon
    balsamic_methods
    history
    bioinfo_softwares
@@ -32,7 +33,7 @@
     :hidden:
     :maxdepth: 1
 
-    git_etiquette 
+    git_etiquette
     snakemake_etiquette
     README
     semver

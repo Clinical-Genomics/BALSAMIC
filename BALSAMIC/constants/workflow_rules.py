@@ -9,7 +9,11 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/variant_calling/mergetype_tumor.rule",
         ],
         "align": [],
-        "varcall": ["snakemake_rules/variant_calling/germline_sv.rule"],
+        "varcall": [
+            "snakemake_rules/variant_calling/germline_sv.rule",
+            "snakemake_rules/variant_calling/sentieon_quality_filter.rule",
+            "snakemake_rules/variant_calling/somatic_sv_quality_filter.rule",
+        ],
         "annotate": [
             "snakemake_rules/annotation/vep.rule",
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
@@ -80,6 +84,7 @@ SNAKEMAKE_RULES = {
         "qc": [
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
+            "snakemake_rules/quality_control/report.rule",
         ],
         "align": ["snakemake_rules/align/sentieon_alignment.rule"],
         "varcall": [
@@ -97,6 +102,7 @@ SNAKEMAKE_RULES = {
         "qc": [
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
+            "snakemake_rules/quality_control/report.rule",
             "snakemake_rules/variant_calling/mergetype_normal.rule",
         ],
         "align": ["snakemake_rules/align/sentieon_alignment.rule"],
@@ -115,37 +121,51 @@ SNAKEMAKE_RULES = {
 
 
 DELIVERY_RULES = [
+    # QC
     "multiqc",
     "collect_custom_qc_metrics",
+    "cnv_report",
+    # Alignment
     "mergeBam_tumor",
     "mergeBam_normal",
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
-    "vep_germline",
+    # Germline
+    "vep_germline_tumor",
+    "vep_germline_normal",
     "vcfheader_rename_germline",
-    "svdb_merge_tumor_only",
-    "svdb_merge_tumor_normal",
+    # SNVs
     "sentieon_TNscope_tumor_only",
     "sentieon_TNscope",
+    "bcftools_filter_tnscope_research_tumor_only",
+    "bcftools_filter_tnscope_research_tumor_normal",
+    "bcftools_filter_tnscope_clinical_tumor_only",
+    "bcftools_filter_tnscope_clinical_tumor_normal",
     "vardict_merge",
+    "bcftools_filter_vardict_research_tumor_only",
+    "bcftools_filter_vardict_research_tumor_normal",
+    "bcftools_filter_vardict_clinical_tumor_only",
+    "bcftools_filter_vardict_clinical_tumor_normal",
     "sentieon_tnscope_umi",
     "sentieon_tnscope_umi_tn",
-    "ascat_tumor_normal",
-    "ascat_tumor_normal_merge_output",
-    "delly_cnv_tumor_only",
-    "delly_cnv_tumor_normal",
+    "bcftools_filter_TNscope_umi_research_tumor_only",
+    "bcftools_filter_TNscope_umi_research_tumor_normal",
+    "bcftools_filter_TNscope_umi_clinical_tumor_only",
+    "bcftools_filter_TNscope_umi_clinical_tumor_normal",
+    # SVs
+    "svdb_merge_tumor_only",
+    "svdb_merge_tumor_normal",
+    "bcftools_filter_sv_research",
+    "bcftools_filter_sv_clinical",
     "tiddit_sv_tumor_only",
     "tiddit_sv_tumor_normal",
+    # CNVs
+    "delly_cnv_tumor_only",
+    "delly_cnv_tumor_normal",
+    "ascat_tumor_normal",
+    "vcf2cytosure_convert_tumor_only",
+    "vcf2cytosure_convert_tumor_normal",
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
-    "vcf2cytosure_convert_tumor_only",
-    "vcf2cytosure_convert_tumor_normal",
-    "bcftools_filter_svdb",
-    "bcftools_intersect_tumor_only",
-    "bcftools_filter_tnscope_tumor_normal",
-    "bcftools_filter_vardict_tumor_only",
-    "bcftools_filter_vardict_tumor_normal",
-    "bcftools_filter_TNscope_umi_tumor_only",
-    "bcftools_filter_TNscope_umi_tumor_normal",
 ]

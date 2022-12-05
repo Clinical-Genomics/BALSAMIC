@@ -34,3 +34,5 @@ ascatNgs:
   - ascat
 vcf2cytosure:
   - vcf2cytosure
+cnvpytor:
+  - cnvpytor

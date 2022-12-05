@@ -10,18 +10,19 @@ We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using BWA MEM v0.7.17 :superscript:`4`.
 The resulted SAM files were converted to BAM files and sorted using samtools v1.15.1 :superscript:`5`.
-Duplicated reads were marked using Picard tools MarkDuplicate v2.27.1 :superscript:`6`
+Duplicated reads were marked using Picard tools MarkDuplicate v2.27.1 :superscript:`6`. The unmapped reads are removed
 and promptly quality controlled using CollectHsMetrics, CollectInsertSizeMetrics and CollectAlignmentSummaryMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`7`.
 Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict v2019.06.04 :superscript:`8`.
 Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using the criteria
-(*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005*).
+(*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
-Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` and Delly v1.0.3 :superscript:`10`.
+Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` and Dellyv1.0.3 :superscript:`10`.
 Copy number variations (CNV) were called using CNVkit v0.9.9 :superscript:`11`.
-The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.6.0 :superscript:`12`.
+The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.8.1 :superscript:`12`.
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from normal samples.
 All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
-to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, SweGen :superscript:`22` and frequency of observed variants in normal samples.
 
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
@@ -31,17 +32,17 @@ We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
 The resulted SAM files were converted to BAM files and sorted using samtools v1.15.1 :superscript:`5`.
-Duplicated reads were marked using Picard tools MarkDuplicate v2.27.1 :superscript:`6`
+Duplicated reads were marked using Picard tools MarkDuplicate v2.27.1 :superscript:`6`. The unmapped reads are removed
 and promptly quality controlled using CollectMultipleMetrics and CollectWgsMetrics functionalities.
 Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`7`.
-Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope and TNhaplotyper :superscript:`16`.
+Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
-The filtered variants from TNscope and TNhaplotyper were merged using bcftools isec functionality to reduce the number of variants for tumor-only samples.
-Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.0.0 :superscript:`12`.
-Copy number variations (CNV) were called using ascatNgs v4.5.0 :superscript:`17` and Delly v1.0.3 :superscript:`10` and converted from CNV to deletions (DEL) and duplications (DUP).
-The structural variant (SV) calls from Manta, Delly, TIDDIT and ascatNgs (tumor-normal) were merged using SVDB v2.6.0 :superscript:`12`
-All variants were finally annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
-to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.3.2 :superscript:`12`.
+Copy number variations (CNV) were called using ascatNgs v4.5.0 :superscript:`17` (tumor-normal), Delly v1.0.3 :superscript:`10` and CNVpytor v1.2.1 :superscript:`22` (tumor-only) and converted from CNV to deletions (DEL) and duplications (DUP).
+The structural variant (SV) calls from Manta, Delly, TIDDIT ascatNgs (tumor-normal) and CNVpytor (tumor-only) were merged using SVDB v2.8.1 :superscript:`12`
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from normal samples.
+All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
+to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, SweGen :superscript:`22`  and frequency of observed variants in normal samples.
 
 UMI Data Analysis
 ~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +58,8 @@ where a minimum of at least one UMI tag group should exist in each single-strand
 The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.27.1 :superscript:`5`. Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`6`.
 For each sample, somatic mutations were called using Sentieon TNscope :superscript:`16`, with non-default parameters for passing the final list of variants
 (--min_tumor_allele_frac 0.0005, --filter_t_alt_frac 0.0005, --min_init_tumor_lod 0.5, min_tumor_lod 4, --max_error_per_read 5  --pcr_indel_model NONE, GNOMADAF_popmax <= 0.02).
-All variants were finally annotated using Ensembl VEP v104.3 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`.
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from normal samples.
+All variants were annotated using Ensembl VEP v104.3 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, SweGen :superscript:`22` and frequency of observed variants in normal samples.
 For exact parameters used for each software, please refer to  https://github.com/Clinical-Genomics/BALSAMIC.
 We used three commercially available products from SeraCare [Material numbers: 0710-067110 :superscript:`19`, 0710-067211 :superscript:`20`, 0710-067312 :superscript:`21`] for validating the efficiency of the UMI workflow in identifying 14 mutation sites at known allelic frequencies.
 
@@ -86,3 +88,5 @@ We used three commercially available products from SeraCare [Material numbers: 0
 19. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF1-0710-0671/
 20. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF05-0710-0672/
 21. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF01-0710-0673/
+22. Ameur, A., Dahlberg, J., Olason, P. et al. SweGen: a whole-genome data resource of genetic variability in a cross-section of the Swedish population. Eur J Hum Genet 25, 1253–1260 (2017). https://doi.org/10.1038/ejhg.2017.130
+23. Milovan Suvakov, Arijit Panda, Colin Diesh, Ian Holmes, Alexej Abyzov, CNVpytor: a tool for copy number variation detection and analysis from read depth and allele imbalance in whole-genome sequencing, GigaScience, Volume 10, Issue 11, November 2021, giab074, https://doi.org/10.1093/gigascience/giab074
