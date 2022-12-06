@@ -1,3 +1,10 @@
+[11.0.2]
+--------
+
+Fixed:
+^^^^^^
+* `balsamic init` command (filled tmp directory) https://github.com/Clinical-Genomics/BALSAMIC/pull/1043
+
 [11.0.1]
 --------
 
