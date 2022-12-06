@@ -179,10 +179,15 @@ rule download_container:
         tmpdir = basedir,
         mem_mb = 81920,
         disk_mb= 81920,
+    params:
+        dir=basedir,
+        image_path=config["singularity"]["image_path"],
     run:
-      for image_name, docker_path in config["singularity"]["containers"].items():
-          cmd = "SINGULARITY_LOCALCACHEDIR={}; SINGULARITY_TMPDIR={}; export SINGULARITY_LOCALCACHEDIR; export SINGULARITY_TMPDIR; singularity pull {}/{}.sif {}".format(basedir, basedir, config["singularity"]["image_path"], image_name, docker_path)
-	  shell(cmd)
+        for image_name, docker_path in config["singularity"]["containers"].items():
+            cmd = f"SINGULARITY_LOCALCACHEDIR={params.dir}; SINGULARITY_TMPDIR={params.dir}; "
+            f"export SINGULARITY_LOCALCACHEDIR; export SINGULARITY_TMPDIR; "
+            f"singularity pull {params.image_path}/{image_name}.sif {docker_path}"
+            shell(cmd)
 
 ##########################################################
 # Download the reference genome, variant db
