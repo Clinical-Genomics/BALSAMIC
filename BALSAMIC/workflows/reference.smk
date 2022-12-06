@@ -174,11 +174,11 @@ rule all:
 
 rule download_container:
     output: singularity_images
-    threads: 8
+    threads: 16
     resources:
         tmpdir = basedir,
-        mem_mb = 40960,
-        disk_mb= 40960,
+        mem_mb = 81920,
+        disk_mb= 81920,
     run:
       for image_name, docker_path in config["singularity"]["containers"].items():
           cmd = "SINGULARITY_LOCALCACHEDIR={}; SINGULARITY_TMPDIR={}; export SINGULARITY_LOCALCACHEDIR; export SINGULARITY_TMPDIR; singularity pull {}/{}.sif {}".format(basedir, basedir, config["singularity"]["image_path"], image_name, docker_path)
@@ -198,11 +198,11 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
 rule download_reference:
     output:
         expand("{output}", output=[ref.get_output_file for ref in download_content])
-    threads: 8
+    threads: 16
     resources:
         tmpdir = basedir,
-        mem_mb = 40960,
-        disk_mb= 40960,
+        mem_mb = 81920,
+        disk_mb= 81920,
     run:
         import requests
 
