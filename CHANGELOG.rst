@@ -1,4 +1,4 @@
-[11.0.2]
+[11.0.3]
 
 Changed:
 ^^^^^^^^
@@ -7,6 +7,7 @@ Changed:
 Fixed:
 ^^^^^^
 * MacDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/1051
+* triallelic_site in quality filter for SNV https://github.com/Clinical-Genomics/BALSAMIC/pull/1052
 
 [11.0.1]
 --------
