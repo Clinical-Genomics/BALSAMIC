@@ -1,7 +1,7 @@
 [X.X.X]
 
 Fixed:
-* MacDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/10
+* MacDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/1051
 
 [11.0.1]
 --------
