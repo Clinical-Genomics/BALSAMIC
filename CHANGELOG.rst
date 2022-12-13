@@ -1,3 +1,10 @@
+[11.0.X]
+--------
+
+Changed:
+^^^^^^^^
+* Code owners https://github.com/Clinical-Genomics/BALSAMIC/pull/1050
+
 [11.0.1]
 --------
 
