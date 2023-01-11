@@ -10,6 +10,7 @@ from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
 import zlib
+from typing import Dict
 
 import yaml
 import snakemake
@@ -506,12 +507,22 @@ def get_bioinfo_tools_version(
 
 
 def get_sample_dict(
+    tumor_sample_name: str = None, normal_sample_name: str = None
+) -> Dict[str, dict]:
+    """Returns a sample dictionary given the names of the tumor and/or normal samples."""
+    sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
+    if normal_sample_name:
+        sample_dict.update({normal_sample_name: {"type": "normal"}})
+    return sample_dict
+
+
+def get_concatenated_sample_dict(
     tumor: str,
     normal: str,
     tumor_sample_name: str = None,
     normal_sample_name: str = None,
 ) -> dict:
-    """Concatenates sample dicts for all provided files"""
+    """Concatenates sample dicts for all provided files."""
     samples = {}
     if normal:
         for sample in normal:
