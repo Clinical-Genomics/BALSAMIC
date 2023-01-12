@@ -10,7 +10,7 @@ from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
 import zlib
-from typing import Dict
+from typing import Dict, Optional
 
 import yaml
 import snakemake
@@ -507,7 +507,7 @@ def get_bioinfo_tools_version(
 
 
 def get_sample_dict(
-    tumor_sample_name: str = None, normal_sample_name: str = None
+    tumor_sample_name: str, normal_sample_name: Optional[str]
 ) -> Dict[str, dict]:
     """Returns a sample dictionary given the names of the tumor and/or normal samples."""
     sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}

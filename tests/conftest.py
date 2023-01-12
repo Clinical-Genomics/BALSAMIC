@@ -7,6 +7,8 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 
+from _pytest.tmpdir import TempPathFactory
+
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
@@ -16,6 +18,12 @@ from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
 
 MOCKED_OS_ENVIRON = "os.environ"
+
+
+@pytest.fixture(scope="session")
+def case_id() -> str:
+    """Mock case ID."""
+    return "case_id"
 
 
 @pytest.fixture
@@ -151,16 +159,11 @@ def sentieon_install_dir(tmp_path_factory):
     return sentieon_install_dir.as_posix()
 
 
-@pytest.fixture(scope="session")
-def no_write_perm_path(tmp_path_factory):
-    """
-    A path with no write permission
-    """
-    # create a conda_env directory
-    bad_perm_path = tmp_path_factory.mktemp("bad_perm_path")
-
-    Path(bad_perm_path).chmod(0o444)
-
+@pytest.fixture()
+def no_write_perm_path(tmp_path_factory) -> str:
+    """A path with no write permissions."""
+    bad_perm_path: Path = tmp_path_factory.mktemp("bad_perm_path")
+    bad_perm_path.chmod(0o444)
     return bad_perm_path.as_posix()
 
 
@@ -224,13 +227,18 @@ def balsamic_cache(tmp_path_factory, reference):
 
 
 @pytest.fixture(scope="session")
-def analysis_dir(tmp_path_factory):
-    """
-    Creates and returns analysis directory
-    """
+def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
+    """Creates and returns the directory where the case analysis will be saved."""
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
-
     return analysis_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir(analysis_dir: str, case_id: str) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
+    fastq_dir.mkdir(parents=True)
+    return fastq_dir.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -254,22 +262,17 @@ ls -l # dummy command
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(
-    tmp_path_factory,
-    sample_fastq,
-    analysis_dir,
-    balsamic_cache,
-    background_variant_file,
-    panel_bed_file,
-    sentieon_license,
-    sentieon_install_dir,
+    analysis_dir: str,
+    balsamic_cache: str,
+    background_variant_file: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
-    """
-    invokes balsamic config sample -t xxx -n xxx to create sample config
-    for tumor-normal
-    """
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
     case_id = "sample_tumor_normal"
-    tumor = sample_fastq["tumor"]
-    normal = sample_fastq["normal"]
+    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -286,22 +289,20 @@ def tumor_normal_config(
                 "case",
                 "-p",
                 panel_bed_file,
-                "-t",
-                tumor,
-                "-n",
-                normal,
                 "--case-id",
                 case_id,
                 "--analysis-dir",
                 analysis_dir,
+                "--fastq-path",
+                fastq_dir,
+                "--background-variants",
+                background_variant_file,
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
                 "ACC1",
                 "--normal-sample-name",
                 "ACC2",
-                "--background-variants",
-                background_variant_file,
             ],
         )
 
@@ -320,20 +321,15 @@ def fixture_config_helpers():
 
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(
-    tmp_path_factory,
-    sample_fastq,
-    analysis_dir,
-    balsamic_cache,
-    sentieon_license,
-    sentieon_install_dir,
+    analysis_dir: str,
+    balsamic_cache: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
-    """
-    invokes balsamic config sample -t xxx -n xxx to create sample config
-    for tumor-normal
-    """
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
     case_id = "sample_tumor_normal_wgs"
-    tumor = sample_fastq["tumor"]
-    normal = sample_fastq["normal"]
+    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -348,16 +344,18 @@ def tumor_normal_wgs_config(
             [
                 "config",
                 "case",
-                "-t",
-                tumor,
-                "-n",
-                normal,
                 "--case-id",
                 case_id,
-                "--balsamic-cache",
-                balsamic_cache,
                 "--analysis-dir",
                 analysis_dir,
+                "--fastq-path",
+                fastq_dir,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                "ACC1",
+                "--normal-sample-name",
+                "ACC2",
             ],
         )
 
@@ -366,21 +364,17 @@ def tumor_normal_wgs_config(
 
 @pytest.fixture(scope="session")
 def tumor_only_config(
-    tmp_path_factory,
-    sample_fastq,
-    balsamic_cache,
-    background_variant_file,
-    analysis_dir,
-    panel_bed_file,
-    sentieon_license,
-    sentieon_install_dir,
+    balsamic_cache: str,
+    analysis_dir: str,
+    panel_bed_file: str,
+    background_variant_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only
-    """
+    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
     case_id = "sample_tumor_only"
-    tumor = sample_fastq["tumor"]
+    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -395,18 +389,20 @@ def tumor_only_config(
             [
                 "config",
                 "case",
-                "-p",
-                panel_bed_file,
-                "-t",
-                tumor,
                 "--case-id",
                 case_id,
                 "--analysis-dir",
                 analysis_dir,
+                "--fastq-path",
+                fastq_dir,
+                "-p",
+                panel_bed_file,
                 "--balsamic-cache",
                 balsamic_cache,
                 "--background-variants",
                 background_variant_file,
+                "--tumor-sample-name",
+                "ACC1",
             ],
         )
 
@@ -419,19 +415,15 @@ def tumor_only_config(
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(
-    tmp_path_factory,
-    sample_fastq,
-    analysis_dir,
-    balsamic_cache,
-    sentieon_license,
-    sentieon_install_dir,
+    analysis_dir: str,
+    balsamic_cache: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only
-    """
+    """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
     case_id = "sample_tumor_only_wgs"
-    tumor = sample_fastq["tumor"]
+    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -446,14 +438,16 @@ def tumor_only_wgs_config(
             [
                 "config",
                 "case",
-                "-t",
-                tumor,
                 "--case-id",
                 case_id,
                 "--analysis-dir",
                 analysis_dir,
+                "--fastq-path",
+                fastq_dir,
                 "--balsamic-cache",
                 balsamic_cache,
+                "--tumor-sample-name",
+                "ACC1",
             ],
         )
 
@@ -462,21 +456,17 @@ def tumor_only_wgs_config(
 
 @pytest.fixture(scope="session")
 def tumor_only_pon_config(
-    tmp_path_factory,
-    sample_fastq,
-    balsamic_cache,
-    analysis_dir,
-    panel_bed_file,
-    sentieon_license,
-    sentieon_install_dir,
-    pon_cnn,
+    balsamic_cache: str,
+    analysis_dir: str,
+    panel_bed_file: str,
+    pon_cnn: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
-    """
-    invokes balsamic config sample -t xxx to create sample config
-    for tumor only
-    """
+    """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
     case_id = "sample_tumor_only_pon"
-    tumor = sample_fastq["tumor"]
+    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -491,18 +481,20 @@ def tumor_only_pon_config(
             [
                 "config",
                 "case",
-                "-p",
-                panel_bed_file,
-                "-t",
-                tumor,
                 "--case-id",
                 case_id,
                 "--analysis-dir",
                 analysis_dir,
-                "--balsamic-cache",
-                balsamic_cache,
+                "--fastq-path",
+                fastq_dir,
+                "-p",
+                panel_bed_file,
                 "--pon-cnn",
                 pon_cnn,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                "ACC1",
             ],
         )
 

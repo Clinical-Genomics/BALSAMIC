@@ -115,8 +115,10 @@ LOG = logging.getLogger(__name__)
     help="Root analysis path to store analysis logs and results. \
                                      The final path will be analysis-dir/sample-id",
 )
-@click.option("--tumor-sample-name", help="Tumor sample name")
-@click.option("--normal-sample-name", help="Normal sample name")
+@click.option("--tumor-sample-name", type=str, required=True, help="Tumor sample name")
+@click.option(
+    "--normal-sample-name", type=str, required=False, help="Normal sample name"
+)
 @click.option(
     "--clinical-snv-observations",
     type=click.Path(exists=True, resolve_path=True),

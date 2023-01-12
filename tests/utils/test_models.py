@@ -12,14 +12,13 @@ from BALSAMIC.utils.models import (
     VarcallerAttribute,
     AnalysisModel,
     SampleInstanceModel,
+    ConcatenatedSampleInstanceModel,
     ReferenceUrlsModel,
     ReferenceMeta,
-    BalsamicWorkflowConfig,
     UMIParamsCommon,
     UMIParamsUMIextract,
     UMIParamsConsensuscall,
     UMIParamsTNscope,
-    ParamsCommon,
     ParamsVardict,
     ParamsVEP,
     MetricModel,
@@ -27,6 +26,7 @@ from BALSAMIC.utils.models import (
     MetricValidationModel,
     AnalysisPonModel,
 )
+from tests.conftest import analysis_dir
 
 
 def test_referencemeta():
@@ -255,17 +255,21 @@ def test_varcaller_attribute():
         assert "not a valid argument" in excinfo.value
 
 
-def test_analysis_model():
+def test_analysis_model(analysis_dir: str, fastq_dir: str):
+    """Test analysis model instantiation."""
+
     # GIVEN valid input arguments
     valid_args = {
         "case_id": "case_id",
         "gender": "female",
         "analysis_type": "paired",
         "sequencing_type": "targeted",
-        "analysis_dir": "tests/test_data",
+        "analysis_dir": analysis_dir,
+        "fastq_path": fastq_dir,
         "analysis_workflow": "balsamic-umi",
     }
-    # THEN we can successully create a config dict
+
+    # THEN we can successfully create a config dict
     assert AnalysisModel.parse_obj(valid_args)
 
     # GIVEN invalid input arguments
@@ -277,6 +281,7 @@ def test_analysis_model():
         "analysis_dir": "tests/test_data",
         "analysis_workflow": "umi",
     }
+
     # THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
         AnalysisModel.parse_obj(invalid_args)
@@ -284,10 +289,24 @@ def test_analysis_model():
 
 
 def test_sample_instance_model():
+    """Test sample instance model initialisation."""
+
+    # GIVEN a samples dictionary
+    samples: dict = {"ACC1": {"type": "tumor"}, "ACC2": {"type": "normal"}}
+
+    # WHEN parsing the samples dictionary
+    sample: SampleInstanceModel = SampleInstanceModel.parse_obj(samples["ACC1"])
+
+    # THEN the sample model should be correctly initialised
+    assert sample
+    assert samples["ACC1"] == sample.dict()
+
+
+def test_concatenated_sample_instance_model():
     # GIVEN valid input arguments
     valid_args = {"file_prefix": "S2_R", "type": "normal", "sample_name": "S2"}
     # THEN we can successully create a config dict
-    assert SampleInstanceModel.parse_obj(valid_args)
+    assert ConcatenatedSampleInstanceModel.parse_obj(valid_args)
 
     # GIVEN invalid input arguments
     invalid_args = {
@@ -296,7 +315,7 @@ def test_sample_instance_model():
     }
     # THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
-        SampleInstanceModel.parse_obj(invalid_args)
+        ConcatenatedSampleInstanceModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
 
 
@@ -533,15 +552,16 @@ def test_metric_validation_model_norm_fail(qc_extracted_metrics):
         assert metrics[4]["condition"]["norm"] in str(key_exc)
 
 
-def test_analysis_pon_model(test_data_dir):
-    """Tests PON model parsing"""
+def test_analysis_pon_model(analysis_dir: str, fastq_dir: str):
+    """Tests PON model parsing."""
 
     # GIVEN valid input arguments
     valid_args = {
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": test_data_dir,
+        "analysis_dir": analysis_dir,
+        "fastq_path": fastq_dir,
         "analysis_workflow": "balsamic",
         "pon_version": "v1",
     }
@@ -554,7 +574,8 @@ def test_analysis_pon_model(test_data_dir):
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": test_data_dir,
+        "analysis_dir": analysis_dir,
+        "fastq_path": fastq_dir,
         "analysis_workflow": "balsamic",
         "pon_version": "v01",
     }
