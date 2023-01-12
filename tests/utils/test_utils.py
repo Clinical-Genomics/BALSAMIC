@@ -557,21 +557,20 @@ def test_write_json(tmp_path, reference):
     assert len(list(tmp.iterdir())) == 1
 
 
-def test_write_json_error(tmp_path):
-    with pytest.raises(Exception, match=r"Is a directory"):
-        # GIVEN a invalid dict
-        ref_json = {"path": "this_path", "reference": ""}
-        tmp = tmp_path / "tmp"
-        tmp.mkdir()
-        output_json = tmp / "/"
+def test_write_json_error(tmp_path: Path):
+    """Test JSON write error."""
 
-        # WHEN passing a invalid dict
-        # THEN It will raise the error
-        assert write_json(ref_json, output_json)
+    # GIVEN a dictionary to be saved in a JSON file
+    ref_json = {"case": "/path/to/case", "reference": "/path/to/reference"}
+
+    # GIVEN a directory as the output file
+    with pytest.raises(Exception, match=r"Is a directory"):
+        # THEN an exception should be raised
+        assert write_json(ref_json, tmp_path)
 
 
 def test_read_json(config_path):
-    """test data extraction from a BALSAMIC config JSON file"""
+    """Test data extraction from a BALSAMIC config JSON file."""
 
     # GIVEN a config path
 
@@ -583,7 +582,7 @@ def test_read_json(config_path):
 
 
 def test_read_json_error():
-    """test data extraction from a BALSAMIC config JSON file for an ivalid path"""
+    """Test data extraction from a BALSAMIC config JSON file for an invalid path."""
 
     # GIVEN an incorrect config path
     config_path = "/not/a/path"
@@ -599,7 +598,7 @@ def test_read_json_error():
 
 
 def test_read_yaml(metrics_yaml_path):
-    """test data extraction from a saved YAML file"""
+    """Test data extraction from a saved YAML file."""
 
     # GIVEN an expected output
     n_metrics = 12  # Number of expected metric
@@ -645,7 +644,7 @@ def test_read_yaml(metrics_yaml_path):
 
 
 def test_read_yaml_error():
-    """test data extraction from an incorrect YAML path"""
+    """Test data extraction from an incorrect YAML path."""
 
     # GIVEN an invalid path
     yaml_path = "NOT_A_PATH"

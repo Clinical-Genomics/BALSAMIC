@@ -255,7 +255,7 @@ def test_varcaller_attribute():
         assert "not a valid argument" in excinfo.value
 
 
-def test_analysis_model(analysis_dir: str, fastq_dir: str):
+def test_analysis_model(test_data_dir: str):
     """Test analysis model instantiation."""
 
     # GIVEN valid input arguments
@@ -264,8 +264,8 @@ def test_analysis_model(analysis_dir: str, fastq_dir: str):
         "gender": "female",
         "analysis_type": "paired",
         "sequencing_type": "targeted",
-        "analysis_dir": analysis_dir,
-        "fastq_path": fastq_dir,
+        "analysis_dir": test_data_dir,
+        "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic-umi",
     }
 
@@ -552,7 +552,7 @@ def test_metric_validation_model_norm_fail(qc_extracted_metrics):
         assert metrics[4]["condition"]["norm"] in str(key_exc)
 
 
-def test_analysis_pon_model(analysis_dir: str, fastq_dir: str):
+def test_analysis_pon_model(test_data_dir: str):
     """Tests PON model parsing."""
 
     # GIVEN valid input arguments
@@ -560,8 +560,8 @@ def test_analysis_pon_model(analysis_dir: str, fastq_dir: str):
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": analysis_dir,
-        "fastq_path": fastq_dir,
+        "analysis_dir": test_data_dir,
+        "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic",
         "pon_version": "v1",
     }
@@ -574,8 +574,8 @@ def test_analysis_pon_model(analysis_dir: str, fastq_dir: str):
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": analysis_dir,
-        "fastq_path": fastq_dir,
+        "analysis_dir": test_data_dir,
+        "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic",
         "pon_version": "v01",
     }
