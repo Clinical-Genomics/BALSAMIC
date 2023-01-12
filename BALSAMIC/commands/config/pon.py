@@ -128,6 +128,7 @@ def pon_config(
         analysis={
             "case_id": case_id,
             "analysis_dir": analysis_dir,
+            "fastq_path": fastq_path,
             "analysis_type": "pon",
             "pon_version": version,
             "analysis_workflow": "balsamic",
@@ -142,19 +143,6 @@ def pon_config(
         panel={"capture_kit": panel_bed} if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("PON config file generated successfully")
-
-    Path.mkdir(
-        Path(config_collection_dict["analysis"]["fastq_path"]),
-        parents=True,
-        exist_ok=True,
-    )
-    LOG.info("fastq directories created successfully")
-
-    create_pon_fastq_symlink(
-        pon_fastqs=fastq_path,
-        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
-    )
-    LOG.info(f"fastqs symlinks generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + "_PON" + ".json")
     with open(config_path, "w+") as fh:

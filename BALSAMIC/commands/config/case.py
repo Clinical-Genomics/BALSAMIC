@@ -248,8 +248,8 @@ def case_config(
         analysis={
             "case_id": case_id,
             "gender": gender,
-            "fastq_path": fastq_path,
             "analysis_dir": analysis_dir,
+            "fastq_path": fastq_path,
             "analysis_type": "paired" if normal_sample_name else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,

@@ -268,7 +268,7 @@ def tumor_normal_config(
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-):
+) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
     case_id = "sample_tumor_normal"
     fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
@@ -325,7 +325,7 @@ def tumor_normal_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-):
+) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
     case_id = "sample_tumor_normal_wgs"
     fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
@@ -370,7 +370,7 @@ def tumor_only_config(
     background_variant_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-):
+) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
     case_id = "sample_tumor_only"
     fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
@@ -419,7 +419,7 @@ def tumor_only_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-):
+) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
     case_id = "sample_tumor_only_wgs"
     fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
@@ -462,7 +462,7 @@ def tumor_only_pon_config(
     pon_cnn: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-):
+) -> str:
     """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
     case_id = "sample_tumor_only_pon"
     fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
