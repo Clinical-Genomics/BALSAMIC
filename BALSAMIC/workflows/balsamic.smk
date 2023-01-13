@@ -48,7 +48,7 @@ case_id = config["analysis"]["case_id"]
 # Directories
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
+concatenated_fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
@@ -146,7 +146,7 @@ if config['analysis']['analysis_type'] == "paired":
 # Get sample unique names for tumor or normal
 lims_id = {'normal': [], 'tumor': []}
 for sample, sample_info in config["samples"].items():
-    lims_id[sample_info["type"]].append(sample_info["sample_name"])
+    lims_id[sample_info["type"]].append(sample)
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:

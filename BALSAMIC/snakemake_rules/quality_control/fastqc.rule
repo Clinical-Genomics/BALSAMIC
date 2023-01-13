@@ -6,11 +6,11 @@
 
 rule fastqc:
     input:
-        read1 = fastq_dir + "{sample}_1.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.fastq.gz",
+        fastq_r1 = fastq_dir + "{sample}_R_1.fastq.gz",
+        fastq_r2 = fastq_dir + "{sample}_R_2.fastq.gz",
     output:
-        read1 = fastqc_dir + "{sample}_1_fastqc.zip",
-        read2 = fastqc_dir + "{sample}_2_fastqc.zip"
+        fastqc_r1 = fastqc_dir + "{sample}_R_1_fastqc.zip",
+        fastqc_r2 = fastqc_dir + "{sample}_R_2_fastqc.zip"
     benchmark:
         Path(benchmark_dir, "fastqc_{sample}.tsv").as_posix()
     singularity:
@@ -27,11 +27,11 @@ rule fastqc:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.read1} \
+fastqc --threads {threads} {input.fastq_r1} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
     
-fastqc --threads {threads} {input.read2} \
+fastqc --threads {threads} {input.fastq_r2} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
         """

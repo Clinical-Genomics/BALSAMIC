@@ -3,22 +3,19 @@ import os
 import logging
 import subprocess
 import json
-import yaml
 import click
 
 from pathlib import Path
 
-# CLI commands and decorators
 from BALSAMIC.utils.cli import (
     createDir,
     get_schedulerpy,
     get_snakefile,
     SnakeMake,
     get_config,
-    get_fastq_bind_path,
     job_id_dump_to_yaml,
 )
-from BALSAMIC.constants.common import ANALYSIS_TYPES, BALSAMIC_SCRIPTS
+from BALSAMIC.constants.common import BALSAMIC_SCRIPTS
 from BALSAMIC.constants.workflow_params import VCF_DICT
 
 LOG = logging.getLogger(__name__)
@@ -231,7 +228,7 @@ def analysis(
         bind_path.append(sample_config.get("panel").get("pon_cnn"))
     bind_path.append(BALSAMIC_SCRIPTS)
     bind_path.append(sample_config["analysis"]["analysis_dir"])
-    bind_path.extend(get_fastq_bind_path(sample_config["analysis"]["fastq_path"]))
+    bind_path.extend(sample_config["analysis"]["result"] + "/fastq/")
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
