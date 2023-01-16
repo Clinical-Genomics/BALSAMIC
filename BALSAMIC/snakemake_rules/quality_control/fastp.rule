@@ -73,8 +73,8 @@ rule fastp:
         fastq_r1 = concatenated_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz",
         fastq_r2 = concatenated_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"
     output:
-        fastq_r1 = temp(fastq_dir + "{sample}_R_1.fp.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{sample}_R_2.fp.fastq.gz"),
+        fastq_r1 = temp(concatenated_fastq_dir + "{sample}_R_1.fp.fastq.gz"),
+        fastq_r2 = temp(concatenated_fastq_dir + "{sample}_R_2.fp.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:

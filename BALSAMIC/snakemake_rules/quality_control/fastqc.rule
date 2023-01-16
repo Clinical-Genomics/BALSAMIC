@@ -6,8 +6,8 @@
 
 rule fastqc:
     input:
-        fastq_r1 = fastq_dir + "{sample}_R_1.fastq.gz",
-        fastq_r2 = fastq_dir + "{sample}_R_2.fastq.gz",
+        fastq_r1 = concatenated_fastq_dir + "{sample}_R_1.fastq.gz",
+        fastq_r2 = concatenated_fastq_dir + "{sample}_R_2.fastq.gz",
     output:
         fastqc_r1 = fastqc_dir + "{sample}_R_1_fastqc.zip",
         fastqc_r2 = fastqc_dir + "{sample}_R_2_fastqc.zip"
