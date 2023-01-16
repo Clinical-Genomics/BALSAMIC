@@ -3,10 +3,16 @@
 
 rule concatenate_read_1:
     output:
-        fastq_r1 = concatenated_fastq_dir + "concatenated_{sample}_R_1.fastq.gz",
+        fastq_r1 = concatenated_fastq_dir + "concatenated_{sample}_R_1.fastq.gz"
+    benchmark:
+        Path(benchmark_dir, "concatenate_read_1" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, "balsamic.sif").as_posix()
     params:
         fastq_dir = config["analysis"]["fastq_path"],
         sample = "{sample}"
+    threads:
+        get_threads(cluster_config, 'concatenate')
     message:
         "Read 1 FASTQ concatenation."
     shell:
@@ -17,10 +23,16 @@ rule concatenate_read_1:
 
 rule concatenate_read_2:
     output:
-        fastq_r2 = concatenated_fastq_dir + "concatenated_{sample}_R_2.fastq.gz",
+        fastq_r2 = concatenated_fastq_dir + "concatenated_{sample}_R_2.fastq.gz"
+    benchmark:
+        Path(benchmark_dir, "concatenate_read_2" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, "balsamic.sif").as_posix()
     params:
         fastq_dir = config["analysis"]["fastq_path"],
         sample = "{sample}"
+    threads:
+        get_threads(cluster_config, 'concatenate')
     message:
         "Read 2 FASTQ concatenation for {params.sample}."
     shell:
