@@ -47,8 +47,11 @@ baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
 pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
 
-config["rules"] = ["snakemake_rules/quality_control/fastp.rule",
-                   "snakemake_rules/align/bwa_mem.rule"]
+config["rules"] = [
+    "snakemake_rules/concatenation/concatenation.rule",
+    "snakemake_rules/quality_control/fastp.rule",
+    "snakemake_rules/align/bwa_mem.rule",
+]
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
