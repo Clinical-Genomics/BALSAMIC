@@ -21,7 +21,7 @@ localrules: all
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 analysis_dir = get_result_dir(config)
-fastq_dir = analysis_dir + "/fastq/"
+concatenated_fastq_dir = get_result_dir(config) + "/fastq/"
 qc_dir = analysis_dir + "/qc/"
 bam_dir =  analysis_dir + "/bam/"
 cnv_dir =  analysis_dir + "/cnv/"
@@ -38,11 +38,10 @@ tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), exist_ok=True)
 
 picarddup = get_picard_mrkdup(config)
-samples = get_pon_samples(fastq_dir)
 
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
-coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
+coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=config["samples"], cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
 pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
@@ -106,7 +105,7 @@ cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn}
 
 rule create_reference:
     input:
-        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=samples, prefix=["target","antitarget"]),
+        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config["samples"], prefix=["target", "antitarget"]),
         ref = reffasta
     output:
         ref_cnn = pon_reference
