@@ -1,3 +1,12 @@
+[X.X.X]
+
+Fixed:
+^^^^^^
+* Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/105 
+
+
+
+
 [11.0.2]
 
 Changed:
