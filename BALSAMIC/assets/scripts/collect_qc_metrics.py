@@ -167,7 +167,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                     if k in requested_metrics:
                         output_metrics.append(
                             MetricModel(
-                                id=sample.split("_")[1],
+                                id=sample,
                                 input=get_multiqc_data_source(
                                     multiqc_data, sample, source
                                 ),

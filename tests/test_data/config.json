@@ -51,17 +51,11 @@
         "dag": "tests/test_data/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
     },
     "samples": {
-        "concatenated_tumor_XXXXXX_R": {
-            "file_prefix": "concatenated_tumor_XXXXXX_R",
-            "sample_name" : "ACC1",
+        "ACC1": {
             "type": "tumor",
-            "readpair_suffix": ["1", "2"]
         },
-        "concatenated_normal_XXXXXX_R": {
-            "file_prefix": "concatenated_normal_XXXXXX_R",
-            "sample_name" : "ACC2",
+        "ACC2": {
             "type": "normal",
-            "readpair_suffix": ["1", "2"]
         }
     },
     "reference": {
