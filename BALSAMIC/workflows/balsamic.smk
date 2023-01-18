@@ -143,11 +143,6 @@ tumor_sample = get_sample_type(config["samples"], "tumor")[0]
 if config['analysis']['analysis_type'] == "paired":
     normal_sample = get_sample_type(config["samples"], "normal")[0]
 
-# Get sample unique names for tumor or normal
-lims_id = {'normal': [], 'tumor': []}
-for sample, sample_info in config["samples"].items():
-    lims_id[sample_info["type"]].append(sample)
-
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config
