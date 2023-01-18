@@ -177,12 +177,12 @@ def sample_fastq(tmp_path_factory):
     fastq_invalid = fastq_dir / "sample.fastq.gz"
 
     # dummy tumor fastq file
-    tumorfastqr1 = fastq_dir / "concatenated_tumor_XXXXXX_R_1.fastq.gz"
-    tumorfastqr2 = fastq_dir / "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+    tumorfastqr1 = fastq_dir / "concatenated_ACC1_R_1.fastq.gz"
+    tumorfastqr2 = fastq_dir / "concatenated_ACC1_R_2.fastq.gz"
 
     # dummy normal fastq file
-    normalfastqr1 = fastq_dir / "concatenated_normal_XXXXXX_R_1.fastq.gz"
-    normalfastqr2 = fastq_dir / "concatenated_normal_XXXXXX_R_2.fastq.gz"
+    normalfastqr1 = fastq_dir / "concatenated_ACC2_R_1.fastq.gz"
+    normalfastqr2 = fastq_dir / "concatenated_ACC2_R_2.fastq.gz"
 
     for fastq_file in (
         fastq_valid,
@@ -621,7 +621,7 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
         helpers.case_id,
         "analysis",
         "fastq",
-        "concatenated_tumor_XXXXXX_R_{read}.fastq.gz",
+        "concatenated_ACC1_R_1.fastq.gz",
     )
 
     return Map(

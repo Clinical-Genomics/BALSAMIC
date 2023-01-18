@@ -606,7 +606,7 @@ def test_read_yaml(metrics_yaml_path):
     dropout_metric = {
         "header": None,
         "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+        "input": "ACC1.sorted.mrkdup.hsmetric",
         "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
         "value": 0.027402,
@@ -616,7 +616,7 @@ def test_read_yaml(metrics_yaml_path):
     ins_size_metric = {
         "header": None,
         "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
+        "input": "ACC1.sorted.insertsizemetric",
         "name": "MEAN_INSERT_SIZE",
         "step": "multiqc_picard_insertSize",
         "value": 201.813054,
@@ -626,7 +626,7 @@ def test_read_yaml(metrics_yaml_path):
     dups_metric = {
         "header": None,
         "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
+        "input": "ACC1.sorted.mrkdup.txt",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
         "value": 0.391429,
@@ -1074,7 +1074,7 @@ def test_get_rule_output(snakemake_fastqc_rule):
     rules = snakemake_fastqc_rule
     rule_name = "fastqc"
     output_file_wildcards = {
-        "sample": ["concatenated_tumor_XXXXXX_R", "tumor", "normal"],
+        "sample": ["ACC1", "tumor", "normal"],
         "case_name": "sample_tumor_only",
     }
 
@@ -1086,8 +1086,8 @@ def test_get_rule_output(snakemake_fastqc_rule):
     for file in output_files:
         # Expected file names
         assert (
-            os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_1.fastq.gz"
-            or os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+            os.path.basename(file[0]) == "concatenated_ACC1_R_1.fastq.gz"
+            or os.path.basename(file[0]) == "concatenated_ACC1_R_2.fastq.gz"
         )
         # Expected tags
         assert (
@@ -1102,7 +1102,7 @@ def test_get_sample_type_from_prefix(config_dict):
     # GIVEN a config dictionary
 
     # GIVEN a sample name
-    sample = "concatenated_tumor_XXXXXX_R"
+    sample = "ACC1"
 
     # WHEN calling the function
     sample_type = get_sample_type_from_prefix(config_dict, sample)

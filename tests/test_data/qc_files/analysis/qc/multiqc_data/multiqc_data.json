@@ -2,28 +2,28 @@
     "report_data_sources": {
         "Picard": {
             "HsMetrics": {
-                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
-                "concatenated_tumor_XXXXXX_R.consensusfiltered.umi": "tests/test_data/qc_files/analysis/qc/umi_qc/concatenated_tumor_XXXXXX_R.umi.collect_hsmetric"
+                "ACC1": "tests/test_data/qc_files/analysis/bam/ACC1.sorted.mrkdup.hsmetric",
+                "ACC1.consensusfiltered.umi": "tests/test_data/qc_files/analysis/qc/umi_qc/ACC1.umi.collect_hsmetric"
             },
             "InsertSizeMetrics": {
-                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.insertsizemetric"
+                "ACC1": "tests/test_data/qc_files/analysis/bam/ACC1.sorted.insertsizemetric"
             },
             "DuplicationMetrics": {
-                "concatenated_tumor_XXXXXX_R": "tests/test_data/qc_files/analysis/bam/concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
+                "ACC1": "tests/test_data/qc_files/analysis/bam/ACC1.sorted.mrkdup.txt"
             }
         },
         "FastQC": {
             "all_sections": {
-                "concatenated_tumor_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_2_fastqc.zip",
-                "concatenated_normal_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_normal_XXXXXX_R_1_fastqc.zip",
-                "concatenated_normal_XXXXXX_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_normal_XXXXXX_R_2_fastqc.zip",
-                "concatenated_tumor_XXXXXX_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_tumor_XXXXXX_R_1_fastqc.zip"
+                "ACC1_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC1_R_2_fastqc.zip",
+                "ACC2_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC2_R_1_fastqc.zip",
+                "ACC2_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC2_R_2_fastqc.zip",
+                "ACC1_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC1_R_1_fastqc.zip"
             }
         }
     },
     "report_saved_raw_data": {
         "multiqc_picard_HsMetrics": {
-            "concatenated_tumor_XXXXXX_R": {
+            "ACC1": {
                 "BAIT_SET": "gmsmyeloid_5.2_hg19_design.bed",
                 "PCT_OFF_BAIT": 0.364546,
                 "GENOME_SIZE": 3101804739.0,
@@ -42,8 +42,8 @@
                 "PCT_TARGET_BASES_500X": 0.996675,
                 "PCT_TARGET_BASES_1000X": 0.992466
             },
-            "concatenated_tumor_XXXXXX_R.consensusfiltered.umi": {
-                "BAIT_SET": "concatenated_tumor_XXXXXX_R",
+            "ACC1.consensusfiltered.umi": {
+                "BAIT_SET": "ACC1",
                 "PCT_OFF_BAIT": 0.13703,
                 "GENOME_SIZE": 3101804739.0,
                 "TOTAL_READS": 1914717.0,
@@ -63,8 +63,8 @@
             }
         },
         "multiqc_picard_insertSize": {
-            "concatenated_tumor_XXXXXX_R_FR": {
-                "SAMPLE_NAME": "concatenated_tumor_XXXXXX_R",
+            "ACC1_FR": {
+                "SAMPLE_NAME": "ACC1",
                 "MEDIAN_INSERT_SIZE": 186.0,
                 "MIN_INSERT_SIZE": 2.0,
                 "MAX_INSERT_SIZE": 242835911.0,
@@ -75,7 +75,7 @@
             }
         },
         "multiqc_picard_dups": {
-            "concatenated_tumor_XXXXXX_R": {
+            "ACC1": {
                 "LIBRARY": "Unknown Library",
                 "UNPAIRED_READS_EXAMINED": 7389.0,
                 "READ_PAIRS_EXAMINED": 47884432.0,
@@ -86,19 +86,19 @@
             }
         },
         "multiqc_general_stats": {
-            "concatenated_tumor_XXXXXX_R_2": {
+            "ACC1_R_2": {
                 "FastQC_mqc-generalstats-fastqc-percent_duplicates": 15.03521942842923,
                 "FastQC_mqc-generalstats-fastqc-total_sequences": 600529762.0
             },
-            "concatenated_normal_XXXXXX_R_1": {
+            "ACC2_R_1": {
                 "FastQC_mqc-generalstats-fastqc-percent_duplicates": 14.426654287440797,
                 "FastQC_mqc-generalstats-fastqc-total_sequences": 464581551.0
             },
-            "concatenated_normal_XXXXXX_R_2": {
+            "ACC2_R_2": {
                 "FastQC_mqc-generalstats-fastqc-percent_duplicates": 14.214689357571501,
                 "FastQC_mqc-generalstats-fastqc-total_sequences": 464581551.0
             },
-            "concatenated_tumor_XXXXXX_R_1": {
+            "ACC1_R_1": {
                 "FastQC_mqc-generalstats-fastqc-percent_duplicates": 15.213739762327492,
                 "FastQC_mqc-generalstats-fastqc-total_sequences": 600529762.0
             }

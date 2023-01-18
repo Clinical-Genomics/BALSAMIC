@@ -448,7 +448,7 @@ def test_metric_model_pass_validation():
     metrics = {
         "header": None,
         "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+        "input": "ACC1.sorted.mrkdup.hsmetric",
         "name": "MEDIAN_TARGET_COVERAGE",
         "step": "multiqc_picard_HsMetrics",
         "value": 2393.0,
@@ -469,7 +469,7 @@ def test_metric_model_duplication_refactoring():
     metrics = {
         "header": None,
         "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R_1_fastqc.zip",
+        "input": "concatenated_ACC1_R_1_fastqc.zip",
         "name": "FastQC_mqc-generalstats-fastqc-percent_duplicates",
         "step": "multiqc_general_stats",
         "value": 21.517800000611373,
