@@ -31,7 +31,7 @@ rule mergeBam_normal:
     "Replacing bam header using Picardtools for {params.sample}"
   shell:
     """
-picard FixMateInformation {params.picard_fixmateinfo} \
+picard -Xmx150g FixMateInformation {params.picard_fixmateinfo} \
 -TMP_DIR {params.tmpdir} \
 -INPUT {input.bam} \
 -OUTPUT {params.tmpdir}/normal.fixed.bam;
@@ -46,7 +46,8 @@ samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/normal.fixed.bam \
 
 samtools index {params.tmpdir}/normal.fixed.m.bam;
 
-picard AddOrReplaceReadGroups {params.picard_rg} \
+picard -Xmx150g AddOrReplaceReadGroups {params.picard_rg} \
+-TMP_DIR {params.tmpdir} \
 -INPUT {params.tmpdir}/normal.fixed.m.bam \
 -OUTPUT {output.bam}; 
 

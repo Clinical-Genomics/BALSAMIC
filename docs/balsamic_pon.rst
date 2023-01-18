@@ -24,17 +24,17 @@ When creating a new PON reference file, the next steps have to be followed:
 
     One needs to fetch normal samples coming from the same origin, tissue or blood
 
-2. Generate the ``<case_id>_PON.json`` configuration file:
+2. Generate the ``<CASE_ID>_PON.json`` configuration file:
 
 .. code-block::
 
-    balsamic config pon --case-id <case_id> --balsamic-cache </path/reference_cache/> --analysis-dir </path/analysis/> --fastq-path </path/fastq/> --panel-bed </path/panel.bed>
+    balsamic config pon --case-id <CASE_ID> --balsamic-cache </path/reference_cache/> --analysis-dir </path/analysis/> --fastq-path </path/fastq/> --panel-bed </path/panel.bed>
 
 3. Run the BALSAMIC PON workflow:
 
 .. code-block::
 
-    balsamic run analysis -s </path/analysis/<case_id>/<case_id>_PON.json -r
+    balsamic run analysis -s </path/analysis/<CASE_ID>/<CASE_ID>_PON.json -r
 
 
 4. Check for the PON reference finish and output files:
@@ -51,7 +51,7 @@ BALSAMIC can use a PON reference file if its provided while running CNVkit analy
 
 .. code-block::
 
-    balsamic config case --case-id <case_id> --pon-cnn /path/analysis/cnv/<panel_name>_CNVkit_PON_reference_<version>.cnn --balsamic-cache </path/reference_cache/> --analysis-dir </path/analysis/> --panel-bed </path/panel.bed> --tumor-path </path/tumor.fastq>
+    balsamic config case --case-id <CASE_ID> --pon-cnn /path/analysis/cnv/<panel_name>_CNVkit_PON_reference_<version>.cnn --balsamic-cache </path/reference_cache/> --analysis-dir </path/analysis/> --panel-bed </path/panel.bed> --tumor-path </path/tumor.fastq>
 
 
 .. note::

@@ -58,11 +58,15 @@ class VarCallerFilter(BaseModel):
         AF_max: VCFAttributes (optional); maximum allelic fraction
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
-        pop_freq: VCFAttributes (optional); maximum gnomad_af
+        pop_freq: VCFAttributes (optional); maximum gnomad allele frequency
         pop_freq_umi: VCFAttributes (optional); maximum gnomad_af for UMI workflow
         strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
         sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
+        swegen_snv_freq: VCFAttributes (optional); maximum swegen snv allele frequency
+        swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
+        loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
+        loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
         varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
         analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
@@ -79,6 +83,10 @@ class VarCallerFilter(BaseModel):
     strand_reads: Optional[VCFAttributes]
     qss: Optional[VCFAttributes]
     sor: Optional[VCFAttributes]
+    swegen_snv_freq: Optional[VCFAttributes]
+    swegen_sv_freq: Optional[VCFAttributes]
+    loqusdb_clinical_snv_freq: Optional[VCFAttributes]
+    loqusdb_clinical_sv_freq: Optional[VCFAttributes]
     varcaller_name: str
     filter_type: str
     analysis_type: str

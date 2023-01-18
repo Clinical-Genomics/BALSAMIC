@@ -87,7 +87,7 @@ rule sentieon_TNhaplotyper_tumor_only:
         Path(benchmark_dir, "sentieon_TNhaplotyper_tumor_only_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = "TUMOR", 
+        tumor = "TUMOR",
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
         pcr_model = params.common.pcr_model,
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -134,10 +134,9 @@ rule sentieon_TNscope_tumor_only:
     benchmark:
         Path(benchmark_dir, "sentieon_TNscope_tumor_only_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = "TUMOR", 
-        tumor_options = VARCALL_PARAMS["tnscope"]["tumor"], 
+        tumor = "TUMOR",
+        tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
         pcr_model = params.common.pcr_model,
         sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],

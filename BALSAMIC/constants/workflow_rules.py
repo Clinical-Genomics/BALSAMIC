@@ -137,9 +137,10 @@ DELIVERY_RULES = [
     "vep_germline_normal",
     "vcfheader_rename_germline",
     # SNVs
-    "sentieon_TNscope_tumor_only",
-    "sentieon_TNscope",
+    "bcftools_view_split_variant",
+    "bcftools_filter_tnscope_research_tumor_only",
     "bcftools_filter_tnscope_research_tumor_normal",
+    "bcftools_filter_tnscope_clinical_tumor_only",
     "bcftools_filter_tnscope_clinical_tumor_normal",
     "vardict_merge",
     "bcftools_filter_vardict_research_tumor_only",

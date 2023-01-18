@@ -1,5 +1,22 @@
-[X.X.X]
--------
+[11.0.2]
+
+Changed:
+^^^^^^^^
+* Code owners https://github.com/Clinical-Genomics/BALSAMIC/pull/1050
+
+Fixed:
+^^^^^^
+* MacDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/1051
+
+[11.0.1]
+--------
+
+Fixed:
+^^^^^^
+* Incorrect raw `TNscope` VCF delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/1042
+
+[11.0.0]
+--------
 
 Added:
 ^^^^^^
@@ -22,6 +39,11 @@ Added:
 * Clinical VCF for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1024
 * CNVpytor plots into the CNV PDF report https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
 * Research and clinical housekeeper tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1023
+* Cluster configuration for rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1028
+* Variant filteration using loqusDB and Swegen annotations https://github.com/Clinical-Genomics/BALSAMIC/pull/1029
+* Annotation resources to readsthedocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1031
+* Delly CNV rules for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/103
+* cnvpytor container and removed cnvpytor from varcallpy3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1037
 
 Changed:
 ^^^^^^^^
@@ -39,9 +61,15 @@ Fixed:
 * If statement in `vep_somatic_clinical_snv` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1022
 * Invalid flag second of pair validation error https://github.com/Clinical-Genomics/BALSAMIC/pull/1025
 * Invalid flag second of pair validation error using picardtools https://github.com/Clinical-Genomics/BALSAMIC/pull/1027
+* Samtools command for mergetype tumor https://github.com/Clinical-Genomics/BALSAMIC/pull/1030
+* `varcall_py3` container building https://github.com/Clinical-Genomics/BALSAMIC/pull/1036
+* Picard and fastp commands params and cluster config for umi workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1032
+* Set channels in `varcall_py3` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1035
+* Delly command for tumor-normal analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1039
+* tabix command in bcftools_quality_filter_TNscope_umi_tumor_only rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1040
 
 Removed:
-^^^^^^^
+^^^^^^^^
 * case ID from the PON `.cnn` output file https://github.com/Clinical-Genomics/BALSAMIC/pull/983
 * `TNhaplotyper` for paired WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/988
 * `TNhaplotyper` for tumor only WGS analysis https://github.com/Clinical-Genomics/BALSAMIC/pull/1006
