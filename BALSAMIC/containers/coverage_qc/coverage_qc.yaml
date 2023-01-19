@@ -12,7 +12,7 @@ dependencies:
   - certifi=2022.9.24=py39h06a4308_0
   - cffi=1.14.6=py39h400218f_0
   - chardet=4.0.0=py39h06a4308_1003
-  - conda=4.10.3=py39h06a430conda8_0
+  - conda=4.10.3=py39h06a4308_0
   - conda-package-handling=1.7.3=py39h27cfd23_1
   - cryptography=3.4.7=py39hd23ed53_0
   - htslib=1.15.1=h9753748_0
