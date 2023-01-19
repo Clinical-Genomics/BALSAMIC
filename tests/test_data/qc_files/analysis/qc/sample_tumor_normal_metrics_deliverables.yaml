@@ -1,19 +1,19 @@
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: PCT_OFF_BAIT
   step: multiqc_picard_HsMetrics
   value: 0.161185
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: MEAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
   value: 636.23177
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: MEDIAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
@@ -22,7 +22,7 @@
     norm: gt
     threshold: 500.0
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: FOLD_80_BASE_PENALTY
   step: multiqc_picard_HsMetrics
@@ -31,56 +31,56 @@
     norm: lt
     threshold: 1.8
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_50X
   step: multiqc_picard_HsMetrics
   value: 0.998388
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_100X
   step: multiqc_picard_HsMetrics
   value: 0.99497
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_250X
   step: multiqc_picard_HsMetrics
   value: 0.965738
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_500X
   step: multiqc_picard_HsMetrics
   value: 0.679445
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_1000X
   step: multiqc_picard_HsMetrics
   value: 0.085208
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: PCT_OFF_BAIT
   step: multiqc_picard_HsMetrics
   value: 0.158226
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: MEAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
   value: 888.343586
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: MEDIAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
@@ -89,7 +89,7 @@
     norm: gt
     threshold: 500.0
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: FOLD_80_BASE_PENALTY
   step: multiqc_picard_HsMetrics
@@ -98,63 +98,63 @@
     norm: lt
     threshold: 1.8
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_50X
   step: multiqc_picard_HsMetrics
   value: 0.998554
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_100X
   step: multiqc_picard_HsMetrics
   value: 0.997177
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_250X
   step: multiqc_picard_HsMetrics
   value: 0.979764
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_500X
   step: multiqc_picard_HsMetrics
   value: 0.874594
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.hsmetric
   name: PCT_TARGET_BASES_1000X
   step: multiqc_picard_HsMetrics
   value: 0.304354
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.insertsizemetric
   name: MEAN_INSERT_SIZE
   step: multiqc_picard_insertSize
   value: 125.819455
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.insertsizemetric
   name: MEAN_INSERT_SIZE
   step: multiqc_picard_insertSize
   value: 131.280203
   condition: null
 - header: null
-  id: tumor
+  id: ACC1
   input: ACC1.sorted.mrkdup.txt
   name: PERCENT_DUPLICATION
   step: multiqc_picard_dups
   value: 0.356228
   condition: null
 - header: null
-  id: normal
+  id: ACC2
   input: ACC2.sorted.mrkdup.txt
   name: PERCENT_DUPLICATION
   step: multiqc_picard_dups

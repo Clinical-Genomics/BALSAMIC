@@ -605,7 +605,7 @@ def test_read_yaml(metrics_yaml_path):
 
     dropout_metric = {
         "header": None,
-        "id": "tumor",
+        "id": "ACC1",
         "input": "ACC1.sorted.mrkdup.hsmetric",
         "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
@@ -615,7 +615,7 @@ def test_read_yaml(metrics_yaml_path):
 
     ins_size_metric = {
         "header": None,
-        "id": "tumor",
+        "id": "ACC1",
         "input": "ACC1.sorted.insertsizemetric",
         "name": "MEAN_INSERT_SIZE",
         "step": "multiqc_picard_insertSize",
@@ -625,7 +625,7 @@ def test_read_yaml(metrics_yaml_path):
 
     dups_metric = {
         "header": None,
-        "id": "tumor",
+        "id": "ACC1",
         "input": "ACC1.sorted.mrkdup.txt",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
@@ -930,22 +930,13 @@ def test_convert_deliverables_tags():
                 "path_index": [],
                 "step": "fastp",
                 "tag": "ACC1,json,quality-trimmed-fastq-json",
-                "id": "tumor",
+                "id": "ACC1",
                 "format": "json",
             },
         ]
     }
 
-    sample_config_dict = {
-        "samples": {
-            "S1_R": {
-                "file_prefix": "S1_R",
-                "sample_name": "ACC1",
-                "type": "tumor",
-                "readpair_suffix": ["1", "2"],
-            },
-        },
-    }
+    sample_config_dict = {"samples": {"ACC1": {"type": "tumor"}}}
 
     # WHEN running convert function
     delivery_json = convert_deliverables_tags(

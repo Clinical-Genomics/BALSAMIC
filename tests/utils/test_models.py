@@ -447,7 +447,7 @@ def test_metric_model_pass_validation():
     # GIVEN input attributes
     metrics = {
         "header": None,
-        "id": "tumor",
+        "id": "ACC1",
         "input": "ACC1.sorted.mrkdup.hsmetric",
         "name": "MEDIAN_TARGET_COVERAGE",
         "step": "multiqc_picard_HsMetrics",
@@ -468,7 +468,7 @@ def test_metric_model_duplication_refactoring():
     # GIVEN input attributes
     metrics = {
         "header": None,
-        "id": "tumor",
+        "id": "ACC1",
         "input": "concatenated_ACC1_R_1_fastqc.zip",
         "name": "FastQC_mqc-generalstats-fastqc-percent_duplicates",
         "step": "multiqc_general_stats",
@@ -487,7 +487,7 @@ def test_metric_model_fail_validation():
     """test MetricModel behaviour for an incorrect input"""
 
     # GIVEN a non accepted input
-    invalid_input = {"header": None, "id": "tumor"}
+    invalid_input = {"header": None, "id": "ACC1"}
 
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
