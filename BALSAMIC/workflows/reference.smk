@@ -72,6 +72,7 @@ delly_mappability_findex_url = reference_file_model.delly_mappability_findex
 ascat_gccorrection_url = reference_file_model.ascat_gccorrection
 ascat_chryloci_url = reference_file_model.ascat_chryloci
 clinvar_url = reference_file_model.clinvar
+somalier_sites_url = reference_file_model.somalier_sites
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
@@ -121,6 +122,7 @@ rule all:
         ascat_gccorrection = ascat_gccorrection_url.get_output_file,
         ascat_chryloci = ascat_chryloci_url.get_output_file,
         clinvar = clinvar_url.get_output_file + ".gz",
+        somalier_sites = somalier_sites_url.get_output_file + ".gz",
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -157,6 +159,7 @@ rule all:
             "ascat_gccorrection" : input.ascat_gccorrection,
             "ascat_chryloci" : input.ascat_chryloci,
             "clinvar": input.clinvar,
+            "somalier_sites": input.somalier_sites,
             "reference_access_date": today,
         }
 
@@ -188,7 +191,8 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     gnomad_url, gnomad_tbi_url,
                     cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url,
                     delly_exclusion_url, delly_mappability_url, delly_mappability_gindex_url,
-                    delly_mappability_findex_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url]
+                    delly_mappability_findex_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url,
+                    somalier_sites_url]
 
 rule download_reference:
     output:

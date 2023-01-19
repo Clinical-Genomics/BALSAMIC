@@ -1,3 +1,11 @@
+[11.1.0]
+--------
+
+Added:
+^^^^^^
+* Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
+
+
 [11.0.2]
 
 Changed:

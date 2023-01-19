@@ -45,8 +45,7 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     is_flag=True,
     help=(
-        "UMI processing steps for samples with UMI tags."
-        "For WGS cases, UMI is always disabled."
+        "UMI processing steps for samples with UMI tags. For WGS cases, UMI is always disabled."
     ),
 )
 @click.option(
@@ -176,8 +175,7 @@ LOG = logging.getLogger(__name__)
     default="hg19",
     type=click.Choice(["hg19", "hg38", "canfam3"]),
     help=(
-        "Genome version to prepare reference. Path to genome"
-        "will be <outdir>/genome_version"
+        "Genome version to prepare reference. Path to genome will be <outdir>/genome_version"
     ),
 )
 @click.option(
