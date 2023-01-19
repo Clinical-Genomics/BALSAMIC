@@ -1,3 +1,9 @@
+[X.X.X]
+
+Fixed:
+^^^^^^
+* test_write_json failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
+
 [11.0.2]
 
 Changed:
