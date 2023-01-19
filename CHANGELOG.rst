@@ -1,3 +1,10 @@
+[11.0.3]
+
+Changed:
+^^^^^^^^
+* Update env requirements for containers https://github.com/Clinical-Genomics/BALSAMIC/pull/1062
+
+
 [11.0.2]
 
 Changed:
