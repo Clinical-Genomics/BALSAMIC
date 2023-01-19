@@ -616,23 +616,20 @@ def get_fastq_bind_path(fastq_path: Path) -> list():
 
 
 def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> dict:
-    """Replaces values of file_prefix with sample_name in deliverables dict"""
+    """Replaces values of sammple_type with sample_name in deliverables dict"""
 
     for delivery_file in delivery_json["files"]:
         file_tags = delivery_file["tag"].split(",")
         for sample in sample_config_dict["samples"]:
-            file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
-            sample_name = sample_config_dict["samples"][sample]["sample_name"]
             sample_type = sample_config_dict["samples"][sample]["type"]
-            if file_prefix == delivery_file["id"]:
-                delivery_file["id"] = sample_name
+            if sample == delivery_file["id"]:
                 for tag_index, tag in enumerate(file_tags):
-                    if tag == file_prefix or tag == file_prefix.replace("_", "-"):
-                        file_tags[tag_index] = sample_name
-                if sample_name not in file_tags:
-                    file_tags.append(sample_name)
+                    if tag == sample or tag == sample.replace("_", "-"):
+                        file_tags[tag_index] = sample
+                if sample not in file_tags:
+                    file_tags.append(sample)
             if sample_type == delivery_file["id"]:
-                delivery_file["id"] = sample_name
+                delivery_file["id"] = sample
             if sample_type in file_tags:
                 file_tags.remove(sample_type)
         delivery_file["tag"] = list(set(file_tags))
