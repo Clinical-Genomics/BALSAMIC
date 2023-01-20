@@ -232,7 +232,6 @@ wildcard_constraints:
 rule download_reference:
     output:
         os.path.join("{ref_subdir}","{downloaded_file}"),
-    retries: 1
     run:
         download_reference_file({output})
 
