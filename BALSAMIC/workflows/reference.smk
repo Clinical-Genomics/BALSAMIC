@@ -224,14 +224,16 @@ def download_reference_file(output_file):
     ref.write_md5
 
 ref_subdirs = set([ref.output_path for ref in download_content])
+ref_files = set([ref.output_file for ref in download_content])
 
 wildcard_constraints:
     ref_subdir="|".join(ref_subdirs),
+    ref_file = "|".join(ref_files),
 
 
 rule download_reference:
     output:
-        os.path.join("{ref_subdir}","{downloaded_file}"),
+        os.path.join("{ref_subdir}","{ref_file}"),
     run:
         download_reference_file({output})
 
