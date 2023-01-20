@@ -34,7 +34,7 @@ benchmark_dir = config["analysis"]["benchmark"]
 version = config["analysis"]["pon_version"]
 
 tmp_dir = os.path.join(analysis_dir, "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 picarddup = get_picard_mrkdup(config)
 

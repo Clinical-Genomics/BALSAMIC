@@ -40,7 +40,7 @@ logging.getLogger("filelock").setLevel("WARN")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Set case id/name
 case_id = config["analysis"]["case_id"]
