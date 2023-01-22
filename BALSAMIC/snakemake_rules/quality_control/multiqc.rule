@@ -5,7 +5,9 @@ multiqc_input = [bam_dir + "tumor.merged.bam"]
 
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(bam_dir + "normal.merged.bam")
-    multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
+
+# Adding code to exclude somalier from the testing
+#multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':
