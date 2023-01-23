@@ -21,9 +21,39 @@ MOCKED_OS_ENVIRON = "os.environ"
 
 
 @pytest.fixture(scope="session")
-def case_id() -> str:
-    """Mock case ID."""
-    return "case_id"
+def case_id_tumor_only() -> str:
+    """Mock TGA tumor-only case ID."""
+    return "sample_tumor_only"
+
+
+@pytest.fixture(scope="session")
+def case_id_tumor_only_pon() -> str:
+    """Mock TGA PON tumor-only case ID."""
+    return "sample_tumor_only_pon"
+
+
+@pytest.fixture(scope="session")
+def case_id_tumor_only_umi() -> str:
+    """Mock TGA PON tumor-only case ID."""
+    return "sample_tumor_only_umi"
+
+
+@pytest.fixture(scope="session")
+def case_id_tumor_normal() -> str:
+    """Mock TGA tumor-normal case ID."""
+    return "sample_tumor_normal"
+
+
+@pytest.fixture(scope="session")
+def case_id_tumor_only_wgs() -> str:
+    """Mock WGS tumor-only case ID."""
+    return "sample_tumor_only_wgs"
+
+
+@pytest.fixture(scope="session")
+def case_id_tumor_normal_wgs() -> str:
+    """Mock WGS tumor-normal case ID."""
+    return "sample_tumor_normal_wgs"
 
 
 @pytest.fixture
@@ -234,10 +264,58 @@ def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
 
 
 @pytest.fixture(scope="session")
-def fastq_dir(analysis_dir: str, case_id: str) -> str:
+def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
     """Creates and returns the directory containing the FASTQs."""
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True)
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the analysis fastq path folder with the concatenated fastq files
+    concatenated_fastq_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "fastq")
+    concatenated_fastq_dir.mkdir(parents=True, exist_ok=True)
+    for read in [1, 2]:
+        Path(concatenated_fastq_dir, f"concatenated_ACC1_R_{read}.fastq.gz").touch()
+
+    return fastq_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+    return fastq_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_umi, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+    return fastq_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+    return fastq_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_wgs, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+    return fastq_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_wgs, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
     return fastq_dir.as_posix()
 
 
@@ -262,7 +340,9 @@ ls -l # dummy command
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(
+    case_id_tumor_normal: str,
     analysis_dir: str,
+    fastq_dir_tumor_normal: str,
     balsamic_cache: str,
     background_variant_file: str,
     panel_bed_file: str,
@@ -270,9 +350,6 @@ def tumor_normal_config(
     sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
-    case_id = "sample_tumor_normal"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -290,11 +367,11 @@ def tumor_normal_config(
                 "-p",
                 panel_bed_file,
                 "--case-id",
-                case_id,
+                case_id_tumor_normal,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_normal,
                 "--background-variants",
                 background_variant_file,
                 "--balsamic-cache",
@@ -306,11 +383,13 @@ def tumor_normal_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
+    qc_dir = Path(analysis_dir, case_id_tumor_normal, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+    return Path(
+        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
+    ).as_posix()
 
 
 @pytest.fixture(name="helpers")
@@ -321,15 +400,14 @@ def fixture_config_helpers():
 
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(
+    case_id_tumor_normal_wgs: str,
     analysis_dir: str,
+    fastq_dir_tumor_normal_wgs: str,
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
-    case_id = "sample_tumor_normal_wgs"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -345,11 +423,11 @@ def tumor_normal_wgs_config(
                 "config",
                 "case",
                 "--case-id",
-                case_id,
+                case_id_tumor_normal_wgs,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_normal_wgs,
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
@@ -359,22 +437,23 @@ def tumor_normal_wgs_config(
             ],
         )
 
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+    return Path(
+        analysis_dir, case_id_tumor_normal_wgs, case_id_tumor_normal_wgs + ".json"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
 def tumor_only_config(
+    case_id_tumor_only: str,
     balsamic_cache: str,
     analysis_dir: str,
+    fastq_dir_tumor_only: str,
     panel_bed_file: str,
     background_variant_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
-    case_id = "sample_tumor_only"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -390,11 +469,11 @@ def tumor_only_config(
                 "config",
                 "case",
                 "--case-id",
-                case_id,
+                case_id_tumor_only,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_only,
                 "-p",
                 panel_bed_file,
                 "--balsamic-cache",
@@ -406,24 +485,25 @@ def tumor_only_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id, "analysis", "qc")
+    qc_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "qc")
     qc_dir.mkdir(parents=True, exist_ok=False)
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+    return Path(
+        analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(
+    case_id_tumor_only_wgs: str,
     analysis_dir: str,
+    fastq_dir_tumor_only_wgs: str,
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
-    case_id = "sample_tumor_only_wgs"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -439,11 +519,11 @@ def tumor_only_wgs_config(
                 "config",
                 "case",
                 "--case-id",
-                case_id,
+                case_id_tumor_only_wgs,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_only_wgs,
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
@@ -451,22 +531,23 @@ def tumor_only_wgs_config(
             ],
         )
 
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+    return Path(
+        analysis_dir, case_id_tumor_only_wgs, case_id_tumor_only_wgs + ".json"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
 def tumor_only_pon_config(
-    balsamic_cache: str,
+    case_id_tumor_only_pon: str,
     analysis_dir: str,
+    fastq_dir_tumor_only_pon: str,
     panel_bed_file: str,
     pon_cnn: str,
+    balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
-    case_id = "sample_tumor_only_pon"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -482,11 +563,11 @@ def tumor_only_pon_config(
                 "config",
                 "case",
                 "--case-id",
-                case_id,
+                case_id_tumor_only_pon,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_only_pon,
                 "-p",
                 panel_bed_file,
                 "--pon-cnn",
@@ -498,7 +579,9 @@ def tumor_only_pon_config(
             ],
         )
 
-    return Path(analysis_dir, case_id, case_id + ".json").as_posix()
+    return Path(
+        analysis_dir, case_id_tumor_only_pon, case_id_tumor_only_pon + ".json"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -621,7 +704,7 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
         helpers.case_id,
         "analysis",
         "fastq",
-        "concatenated_ACC1_R_1.fastq.gz",
+        "concatenated_ACC1_R_{read}.fastq.gz",
     )
 
     return Map(

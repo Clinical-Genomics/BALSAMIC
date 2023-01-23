@@ -10,8 +10,10 @@ from tests.conftest import MOCKED_OS_ENVIRON
 
 
 def test_tumor_normal_config(
+    case_id_tumor_normal: str,
     invoke_cli,
     analysis_dir: str,
+    fastq_dir_tumor_normal: str,
     balsamic_cache: str,
     panel_bed_file: str,
     sentieon_license: str,
@@ -20,9 +22,6 @@ def test_tumor_normal_config(
     """Test tumor normal balsamic config case command."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
-    case_id: str = "sample_tumor_normal"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # WHEN creating a case analysis
     with mock.patch.dict(
@@ -37,13 +36,13 @@ def test_tumor_normal_config(
                 "config",
                 "case",
                 "--case-id",
-                case_id,
+                case_id_tumor_normal,
                 "--gender",
                 "male",
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_normal,
                 "-p",
                 panel_bed_file,
                 "--balsamic-cache",
@@ -57,12 +56,16 @@ def test_tumor_normal_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(analysis_dir, case_id, case_id + ".json").exists()
+    assert Path(
+        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
+    ).exists()
 
 
 def test_tumor_only_config(
     invoke_cli,
+    case_id_tumor_only: str,
     analysis_dir: str,
+    fastq_dir_tumor_only: str,
     balsamic_cache: str,
     panel_bed_file: str,
     sentieon_license: str,
@@ -71,9 +74,6 @@ def test_tumor_only_config(
     """Test tumor only balsamic config case command."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
-    case_id = "sample_tumor_only"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # WHEN creating a case analysis
     with mock.patch.dict(
@@ -88,11 +88,11 @@ def test_tumor_only_config(
                 "config",
                 "case",
                 "--case-id",
-                case_id,
+                case_id_tumor_only,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_only,
                 "-p",
                 panel_bed_file,
                 "--balsamic-cache",
@@ -104,12 +104,13 @@ def test_tumor_only_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(analysis_dir, case_id, case_id + ".json").exists()
+    assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
 
 
 def test_run_without_permissions(
     invoke_cli,
-    fastq_dir: str,
+    case_id_tumor_only: str,
+    fastq_dir_tumor_only: str,
     no_write_perm_path: str,
     panel_bed_file: str,
     balsamic_cache: str,
@@ -117,18 +118,18 @@ def test_run_without_permissions(
     """Test balsamic config case with no write permissions to the analysis directory."""
 
     # GIVEN CLI arguments including an analysis_dir without write permissions
-    case_id = "sample_tumor_only"
 
+    # WHEN invoking the config case command
     result = invoke_cli(
         [
             "config",
             "case",
             "--case-id",
-            case_id,
+            case_id_tumor_only,
             "--analysis-dir",
             no_write_perm_path,
             "--fastq-path",
-            fastq_dir,
+            fastq_dir_tumor_only,
             "-p",
             panel_bed_file,
             "--balsamic-cache",
@@ -144,7 +145,9 @@ def test_run_without_permissions(
 
 def test_tumor_only_umi_config_background_file(
     invoke_cli,
+    case_id_tumor_only_umi: str,
     analysis_dir: str,
+    fastq_dir_tumor_only_umi: str,
     balsamic_cache: str,
     panel_bed_file: str,
     background_variant_file: str,
@@ -152,22 +155,20 @@ def test_tumor_only_umi_config_background_file(
     """Test balsamic umi config case providing a background variants file."""
 
     # GIVEN CLI arguments including a background variant file
-    case_id = "sample_umi_tumor_only"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
+    # WHEN invoking the config case command
     result = invoke_cli(
         [
             "config",
             "case",
             "--case-id",
-            case_id,
+            case_id_tumor_only_umi,
             "--analysis-workflow",
             "balsamic-umi",
             "--analysis-dir",
             analysis_dir,
             "--fastq-path",
-            fastq_dir,
+            fastq_dir_tumor_only_umi,
             "-p",
             panel_bed_file,
             "--background-variants",
@@ -198,6 +199,7 @@ def test_pon_cnn_file(
     fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
+    # WHEN invoking the config case command
     result = invoke_cli(
         [
             "config",
@@ -242,14 +244,16 @@ def test_dag_graph_success(
 
 
 def test_config_graph_failed(
-    invoke_cli, analysis_dir: str, balsamic_cache: str, panel_bed_file: str
+    invoke_cli,
+    case_id_tumor_only: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
 ):
     """Test DAG graph building failure."""
 
     # GIVEN an analysis config
-    case_id = "sample_tumor_only"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # GIVEN an empty graphviz instance
     with mock.patch.object(graphviz, "Source") as mocked:
@@ -259,11 +263,11 @@ def test_config_graph_failed(
                 "config",
                 "case",
                 "--case-id",
-                case_id,
+                case_id_tumor_only,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir,
+                fastq_dir_tumor_only,
                 "-p",
                 panel_bed_file,
                 "--balsamic-cache",

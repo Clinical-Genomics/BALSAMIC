@@ -1059,7 +1059,7 @@ def test_create_md5(tmp_path):
 
 
 def test_get_rule_output(snakemake_fastqc_rule):
-    """Tests retrieval of existing output files from a specific workflow"""
+    """Tests retrieval of existing output files from a specific workflow."""
 
     # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
     rules = snakemake_fastqc_rule
@@ -1077,8 +1077,8 @@ def test_get_rule_output(snakemake_fastqc_rule):
     for file in output_files:
         # Expected file names
         assert (
-            os.path.basename(file[0]) == "concatenated_ACC1_R_1.fastq.gz"
-            or os.path.basename(file[0]) == "concatenated_ACC1_R_2.fastq.gz"
+            Path(file[0]).name == "concatenated_ACC1_R_1.fastq.gz"
+            or Path(file[0]).name == "concatenated_ACC1_R_2.fastq.gz"
         )
         # Expected tags
         assert (
@@ -1088,7 +1088,7 @@ def test_get_rule_output(snakemake_fastqc_rule):
 
 
 def test_get_sample_type_from_prefix(config_dict):
-    """Test sample type extraction from a extracted config file"""
+    """Test sample type extraction from a extracted config file."""
 
     # GIVEN a config dictionary
 
