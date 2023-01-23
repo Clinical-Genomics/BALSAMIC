@@ -19,6 +19,11 @@
                 "ACC2_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC2_R_2_fastqc.zip",
                 "ACC1_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC1_R_1_fastqc.zip"
             }
+        },
+        "Somalier": {
+            "all_sections": {
+                "id1_NORMAL*id1_TUMOR": "tests/test_data/somalier/somalier.pairs.tsv"
+            }
         }
     },
     "report_saved_raw_data": {
@@ -101,6 +106,25 @@
             "ACC1_R_1": {
                 "FastQC_mqc-generalstats-fastqc-percent_duplicates": 15.213739762327492,
                 "FastQC_mqc-generalstats-fastqc-total_sequences": 600529762.0
+            }
+        },
+        "multiqc_somalier": {
+            "id1_NORMAL*id1_TUMOR": {
+                "relatedness": 1.0,
+                "ibs0": 0.0,
+                "ibs2": 1896.0,
+                "hom_concordance": 1.0,
+                "hets_a": 566.0,
+                "hets_b": 566.0,
+                "hets_ab": 1132.0,
+                "shared_hets": 566.0,
+                "hom_alts_a": 725.0,
+                "hom_alts_b": 725.0,
+                "shared_hom_alts": 725.0,
+                "n": 1896.0,
+                "x_ibs0": 0.0,
+                "x_ibs2": 36.0,
+                "expected_relatedness": -1.0
             }
         }
     }

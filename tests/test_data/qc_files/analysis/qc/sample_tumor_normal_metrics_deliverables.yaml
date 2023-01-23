@@ -160,3 +160,13 @@
   step: multiqc_picard_dups
   value: 0.255692
   condition: null
+- header: null
+  id: id1
+  input: somalier.pairs.tsv
+  name: RELATEDNESS
+  step: multiqc_somalier
+  value: 1
+  condition:
+    norm: gt
+    threshold: 0.80
+

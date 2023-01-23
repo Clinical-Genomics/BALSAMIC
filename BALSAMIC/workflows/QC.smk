@@ -99,6 +99,10 @@ rules_to_include = [
 if "paired" in config['analysis']['analysis_type']:
     rules_to_include.append("snakemake_rules/variant_calling/mergetype_normal.rule")
 
+    # Somalier only implemented for hg38 and hg19
+    if "canfam3" not in config["reference"]["reference_genome"]:
+        rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
+
 for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
