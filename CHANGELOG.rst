@@ -5,6 +5,11 @@ Added:
 ^^^^^^
 * Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
 
+Changed:
+^^^^^^^^
+* Parallelize download of reference files https://github.com/Clinical-Genomics/BALSAMIC/pull/1065
+
+
 Fixed:
 ^^^^^^
 * test_write_json failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
