@@ -11,7 +11,7 @@ rule sentieon_align_sort:
         fastq_r2 = Path(concatenated_fastq_dir, "{sample}_R_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = Path(bam_dir, "{sample}.bam").as_posix()
+        bamout = Path(bam_dir, "{sample}.aligned.bam").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_align_sort_{sample}.tsv").as_posix()
     params:
@@ -46,7 +46,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_dedup:
     input:
-        bam = Path(bam_dir, "{sample}.bam").as_posix(),
+        bam = Path(bam_dir, "{sample}.aligned.bam").as_posix(),
     output:
         bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
