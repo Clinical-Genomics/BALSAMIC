@@ -184,7 +184,7 @@ def download_container_file(output_file):
     shell(cmd)
 
 rule download_container:
-    output: Path("singularity_image_path", "{container_image}" + ".sif").as_posix(),
+    output: Path(singularity_image_path, "{container_image}" + ".sif").as_posix(),
     run:
       download_container_file(output[0])
 
