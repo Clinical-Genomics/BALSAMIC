@@ -235,7 +235,7 @@ rule download_reference:
     output:
         os.path.join("{ref_subdir}","{ref_file}"),
     run:
-        download_reference_file({output})
+        download_reference_file(output[0])
 
 
 
