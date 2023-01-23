@@ -174,13 +174,19 @@ rule all:
 ###########################################################
 # Download all singularity container images from dockerhub
 ###########################################################
+wildcard_constraints:
+    container_image = "|".join(list(config["singularity"]["containers"])),
+
+def download_container_file(output_file):
+    image_name = Path(output_file).stem
+    docker_path = config["singularity"]["containers"][image_name]
+    cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"],image_name,docker_path)
+    shell(cmd)
 
 rule download_container:
-    output: singularity_images
+    output: Path("singularity_image_path", "{container_image}" + ".sif").as_posix(),
     run:
-      for image_name, docker_path in config["singularity"]["containers"].items():
-          cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"], image_name, docker_path)
-	  shell(cmd)
+      download_container_file(output[0])
 
 ##########################################################
 # Download the reference genome, variant db 
