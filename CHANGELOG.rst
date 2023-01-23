@@ -1,3 +1,10 @@
+[11.2.0]
+--------
+
+Added:
+^^^^^^
+* Concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
+
 [11.1.0]
 --------
 

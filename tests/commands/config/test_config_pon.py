@@ -1,4 +1,3 @@
-import os
 import json
 import graphviz
 import logging
