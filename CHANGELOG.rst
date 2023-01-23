@@ -7,6 +7,7 @@ Added:
 
 Changed:
 ^^^^^^^^
+* Parallelize download of reference files https://github.com/Clinical-Genomics/BALSAMIC/pull/1065
 * Parallelize download of container images https://github.com/Clinical-Genomics/BALSAMIC/pull/1068
 
 Fixed:
