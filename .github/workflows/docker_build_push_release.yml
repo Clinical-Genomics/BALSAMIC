@@ -33,6 +33,5 @@ jobs:
         with:
           file: BALSAMIC/containers/${{ matrix.container-name }}/Dockerfile
           push: true
-          provenance: false
           tags: clinicalgenomics/balsamic:release_${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
           build-args: CONTAINER_NAME=${{ matrix.container-name }}
