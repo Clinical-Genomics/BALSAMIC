@@ -2,12 +2,12 @@ name: build test container submodule
 # Trigger building and testing container only on pull requests
 on:
   push:
-    branches-ignore:
+    branches:
       - master
       - develop
 jobs:
   main:
-    name: Docker image build test
+    name: Docker image build
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false

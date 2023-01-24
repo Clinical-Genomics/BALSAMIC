@@ -14,7 +14,7 @@ Fixed:
 ^^^^^^
 * `test_write_json` failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
 * Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
-* Added buildx module to all GitHub Action workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
+* Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
 
 
 [11.0.2]
