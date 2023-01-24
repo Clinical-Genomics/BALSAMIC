@@ -5,6 +5,9 @@ on:
     branches:
       - master
       - develop
+  pull-request:
+    branches:
+      - '*'
 jobs:
   main:
     name: Docker image build push
