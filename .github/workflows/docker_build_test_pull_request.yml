@@ -37,6 +37,7 @@ jobs:
           push: false
           tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
           build-args: CONTAINER_NAME=${{ matrix.container-name }}
+          provenance: false
       - name: Test container
         id: docker_test_container
         shell: bash
