@@ -12,7 +12,8 @@ Changed:
 
 Fixed:
 ^^^^^^
-* test_write_json failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
+* `test_write_json` failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
+* Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
 
 [11.0.2]
 
