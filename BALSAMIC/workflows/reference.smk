@@ -177,7 +177,7 @@ rule all:
 wildcard_constraints:
     container_image = "|".join(list(config["singularity"]["containers"])),
 
-def download_container_file(output_file):
+def download_container_file(output_file: str):
     image_name = Path(output_file).stem
     docker_path = config["singularity"]["containers"][image_name]
     cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"],image_name,docker_path)
@@ -186,7 +186,7 @@ def download_container_file(output_file):
 rule download_container:
     output: Path(singularity_image_path, "{container_image}" + ".sif").as_posix(),
     run:
-      download_container_file(output[0])
+      download_container_file(output_file=output[0])
 
 ##########################################################
 # Download the reference genome, variant db 
@@ -202,7 +202,7 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
 
 download_dict = dict([(ref.get_output_file, ref) for ref in download_content])
 
-def download_reference_file(output_file):
+def download_reference_file(output_file: str):
     import requests
 
     ref = download_dict[output_file]
@@ -241,7 +241,7 @@ rule download_reference:
     output:
         Path("{ref_subdir}","{ref_file}").as_posix(),
     run:
-        download_reference_file(output[0])
+        download_reference_file(output_file=output[0])
 
 
 
