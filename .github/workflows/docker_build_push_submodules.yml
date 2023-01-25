@@ -36,3 +36,4 @@ jobs:
           context: submodules/${{ matrix.container-name }}
           push: true
           tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
+          provenance: false
