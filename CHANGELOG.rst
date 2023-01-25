@@ -1,8 +1,20 @@
-[11.0.3]
+[11.1.0]
+
+Added:
+^^^^^^
+* Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
 
 Changed:
 ^^^^^^^^
+* Parallelize download of reference files https://github.com/Clinical-Genomics/BALSAMIC/pull/1065
+* Parallelize download of container images https://github.com/Clinical-Genomics/BALSAMIC/pull/1068
 * Update env requirements for containers https://github.com/Clinical-Genomics/BALSAMIC/pull/1062
+
+Fixed:
+^^^^^^
+* `test_write_json` failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
+* Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
+* Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
 
 
 [11.0.2]
