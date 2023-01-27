@@ -291,15 +291,32 @@ def test_analysis_model(test_data_dir: str):
 def test_sample_instance_model():
     """Test sample instance model initialisation."""
 
-    # GIVEN a samples dictionary
-    samples: dict = {"ACC1": {"type": "tumor"}, "ACC2": {"type": "normal"}}
+    # GIVEN a sample dictionary
+    tumor_sample: dict = {"ACC1": {"type": "tumor"}}
 
-    # WHEN parsing the samples dictionary
-    sample: SampleInstanceModel = SampleInstanceModel.parse_obj(samples["ACC1"])
+    # WHEN parsing the sample dictionary
+    sample: SampleInstanceModel = SampleInstanceModel.parse_obj(tumor_sample["ACC1"])
 
     # THEN the sample model should be correctly initialised
-    assert sample
-    assert samples["ACC1"] == sample.dict()
+    assert sample.dict() == tumor_sample["ACC1"]
+
+
+def test_sample_instance_model_error():
+    """Test sample instance model error raise."""
+
+    # GIVEN a sample dictionary with an invalid sample type
+    sample_type: str = "affected"
+    samples: dict = {"ACC1": {"type": sample_type}}
+
+    # WHEN parsing the sample dictionary
+
+    # THEN a ValueError should be triggered
+    with pytest.raises(ValueError) as exc:
+        SampleInstanceModel.parse_obj(samples["ACC1"])
+        assert (
+            f"The provided sample type ({sample_type}) is not supported in BALSAMIC"
+            in exc.value
+        )
 
 
 def test_concatenated_sample_instance_model():
