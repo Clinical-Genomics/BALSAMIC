@@ -388,41 +388,6 @@ class SampleInstanceModel(BaseModel):
         return value
 
 
-class ConcatenatedSampleInstanceModel(BaseModel):
-    """Holds attributes for samples used in analysis.
-
-    Attributes:
-        file_prefix : Field(str); basename of sample pair
-        sample_type : Field(str; alias=type); type of sample [tumor, normal]
-        sample_name : Field(str); Internal ID of sample to use in deliverables
-        readpair_suffix : Field(List); currently always set to [1, 2]
-
-    Raises:
-        ValueError:
-            When sample_type is set ot any value other than [tumor, normal]
-
-    """
-
-    file_prefix: str
-    sample_name: Optional[str]
-    sample_type: str = Field(alias="type")
-    readpair_suffix: List[str] = ["1", "2"]
-
-    @validator("sample_type")
-    def sample_type_literal(cls, value):
-        if value not in SAMPLE_TYPE:
-            raise ValueError(
-                f"Provided sample type ({value}) not supported in BALSAMIC!"
-            )
-        return value
-
-    @validator("sample_name")
-    def set_sample_id_if_missing_value(cls, value, values, **kwargs):
-        if value:
-            return value
-        return values.get("file_prefix")
-
-
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided
     Attributes:

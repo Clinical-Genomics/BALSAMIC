@@ -12,7 +12,6 @@ from BALSAMIC.utils.models import (
     VarcallerAttribute,
     AnalysisModel,
     SampleInstanceModel,
-    ConcatenatedSampleInstanceModel,
     ReferenceUrlsModel,
     ReferenceMeta,
     UMIParamsCommon,
@@ -317,23 +316,6 @@ def test_sample_instance_model_error():
             f"The provided sample type ({sample_type}) is not supported in BALSAMIC"
             in exc.value
         )
-
-
-def test_concatenated_sample_instance_model():
-    # GIVEN valid input arguments
-    valid_args = {"file_prefix": "S2_R", "type": "normal", "sample_name": "S2"}
-    # THEN we can successully create a config dict
-    assert ConcatenatedSampleInstanceModel.parse_obj(valid_args)
-
-    # GIVEN invalid input arguments
-    invalid_args = {
-        "file_prefix": "S2_R",
-        "type": "fungal",
-    }
-    # THEN should trigger ValueError
-    with pytest.raises(ValueError) as excinfo:
-        ConcatenatedSampleInstanceModel.parse_obj(invalid_args)
-        assert "not supported" in excinfo.value
 
 
 def test_umiparams_common():
