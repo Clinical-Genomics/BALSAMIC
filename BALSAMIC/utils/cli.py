@@ -516,41 +516,6 @@ def get_sample_dict(
     return sample_dict
 
 
-def get_concatenated_sample_dict(
-    tumor: str,
-    normal: str,
-    tumor_sample_name: str = None,
-    normal_sample_name: str = None,
-) -> dict:
-    """Concatenates sample dicts for all provided files."""
-    samples = {}
-    if normal:
-        for sample in normal:
-            key, val = get_sample_names(sample, "normal")
-            samples[key] = val
-            samples[key]["sample_name"] = normal_sample_name
-
-    for sample in tumor:
-        key, val = get_sample_names(sample, "tumor")
-        samples[key] = val
-        samples[key]["sample_name"] = tumor_sample_name
-    return samples
-
-
-def get_sample_names(filename, sample_type):
-    """Creates a dict with sample prefix, sample type, and readpair suffix"""
-    file_str = validate_fastq_pattern(filename)
-    if file_str:
-        return (
-            file_str,
-            {
-                "file_prefix": file_str,
-                "type": sample_type,
-                "readpair_suffix": ["1", "2"],
-            },
-        )
-
-
 def create_fastq_symlink(casefiles, symlink_dir: Path):
     """Creates symlinks for provided files in analysis/fastq directory.
     Identifies file prefix pattern, and also creates symlinks for the

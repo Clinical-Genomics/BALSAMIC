@@ -60,7 +60,6 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_prefix,
 )
-from tests.helpers import Map
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
