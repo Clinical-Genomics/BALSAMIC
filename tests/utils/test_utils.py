@@ -918,6 +918,14 @@ def test_convert_deliverables_tags():
                 "format": "fastq.gz",
             },
             {
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_2.fp.fastq.gz",
+                "path_index": [],
+                "step": "fastp",
+                "tag": "read2,quality-trimmed-fastq-read1",
+                "id": "ACC1",
+                "format": "fastq.gz",
+            },
+            {
                 "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/ACC1.fastp.json",
                 "path_index": [],
                 "step": "fastp",
