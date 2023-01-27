@@ -913,7 +913,7 @@ def test_convert_deliverables_tags():
                 "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_1.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "read1,quality-trimmed-fastq-read1,tumor",
+                "tag": "ACC1,read1,quality-trimmed-fastq-read1",
                 "id": "ACC1",
                 "format": "fastq.gz",
             },
