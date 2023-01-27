@@ -616,7 +616,7 @@ def get_fastq_bind_path(fastq_path: Path) -> list():
 
 
 def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> dict:
-    """Replaces values of sammple_type with sample_name in deliverables dict"""
+    """Replaces values of sample_type with sample_name in deliverables dict."""
 
     for delivery_file in delivery_json["files"]:
         file_tags = delivery_file["tag"].split(",")

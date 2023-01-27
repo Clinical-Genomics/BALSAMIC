@@ -904,6 +904,7 @@ def test_create_pon_fastq_symlink_file_exist_error(tmpdir_factory, caplog):
 
 
 def test_convert_deliverables_tags():
+    """Test generation of delivery tags."""
 
     # GIVEN a deliverables dict and a sample config dict
     delivery_json = {
@@ -921,20 +922,19 @@ def test_convert_deliverables_tags():
                 "path_index": [],
                 "step": "fastp",
                 "tag": "ACC1,json,quality-trimmed-fastq-json,tumor",
-                "id": "ACC1",
+                "id": "tumor",
                 "format": "json",
             },
         ]
     }
-
     sample_config_dict = {"samples": {"ACC1": {"type": "tumor"}}}
 
-    # WHEN running convert function
-    delivery_json = convert_deliverables_tags(
+    # WHEN running the convert function
+    delivery_json: dict = convert_deliverables_tags(
         delivery_json=delivery_json, sample_config_dict=sample_config_dict
     )
 
-    # Prefix strings should be replaced with sample name
+    # THEN prefix strings should be replaced with sample name
     for delivery_file in delivery_json["files"]:
         assert delivery_file["id"] == "ACC1"
         assert "ACC1" in delivery_file["tag"]
