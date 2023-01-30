@@ -12,7 +12,7 @@ rule concatenate_read_1:
         fastq_dir = config["analysis"]["fastq_path"],
         sample = "{sample}"
     threads:
-        get_threads(cluster_config, 'concatenate')
+        get_threads(cluster_config, "concatenate")
     message:
         "Read 1 FASTQ concatenation."
     shell:
@@ -32,7 +32,7 @@ rule concatenate_read_2:
         fastq_dir = config["analysis"]["fastq_path"],
         sample = "{sample}"
     threads:
-        get_threads(cluster_config, 'concatenate')
+        get_threads(cluster_config, "concatenate")
     message:
         "Read 2 FASTQ concatenation for {params.sample}."
     shell:
