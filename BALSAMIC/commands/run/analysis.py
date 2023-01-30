@@ -218,6 +218,7 @@ def analysis(
 
     # Singularity bind path
     bind_path = list()
+    bind_path.append(sample_config["analysis"]["fastq_path"])
     bind_path.append(str(Path(__file__).parents[2] / "assets"))
     bind_path.append(os.path.commonpath(sample_config["reference"].values()))
     if "panel" in sample_config:
@@ -228,7 +229,6 @@ def analysis(
         bind_path.append(sample_config.get("panel").get("pon_cnn"))
     bind_path.append(BALSAMIC_SCRIPTS)
     bind_path.append(sample_config["analysis"]["analysis_dir"])
-    bind_path.extend(sample_config["analysis"]["result"] + "/fastq/")
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
