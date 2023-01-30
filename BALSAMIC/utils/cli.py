@@ -402,7 +402,7 @@ def validate_fastq_pattern(sample):
     """Finds the correct filename prefix from file path, and returns it.
     An error is raised if sample name has invalid pattern"""
 
-    fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
+    fq_pattern = re.compile(r".fastq.gz$")
     sample_basename = Path(sample).name
 
     file_str = sample_basename[0 : (fq_pattern.search(sample_basename).span()[0] + 1)]
