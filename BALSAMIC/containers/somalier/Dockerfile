@@ -10,6 +10,10 @@ ARG nim_version=1.6.6
 
 ENV CFLAGS="-fPIC -O3"
 
+RUN adduser -D defaultuser
+
+USER defaultuser
+
 RUN apk add --no-cache wget git autoconf tar xz xz-dev bzip2-dev curl curl-dev bash libzip-dev cmake openblas-dev build-base
 
 RUN mkdir -p /usr/local/include && \
