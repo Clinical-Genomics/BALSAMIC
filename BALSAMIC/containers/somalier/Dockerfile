@@ -10,10 +10,6 @@ ARG nim_version=1.6.6
 
 ENV CFLAGS="-fPIC -O3"
 
-RUN adduser -D defaultuser
-
-USER defaultuser
-
 RUN apk add --no-cache wget git autoconf tar xz xz-dev bzip2-dev curl curl-dev bash libzip-dev cmake openblas-dev build-base
 
 RUN mkdir -p /usr/local/include && \
@@ -56,3 +52,8 @@ RUN cd /somalier &&  \
     rm -rf /somalier && somalier --help
 
 ENV somalier_ancestry_labels /ancestry_labels-1kg.tsv
+
+RUN adduser -D defaultuser
+
+USER defaultuser
+
