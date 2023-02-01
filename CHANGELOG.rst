@@ -2,12 +2,30 @@
 
 Fixed:
 ^^^^^^
-* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/10
+* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/1081
 
 Added:
 ^^^^^^
-* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/ 
+* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083 
 
+[11.1.0]
+--------
+
+Added:
+^^^^^^
+* Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
+
+Changed:
+^^^^^^^^
+* Parallelize download of reference files https://github.com/Clinical-Genomics/BALSAMIC/pull/1065
+* Parallelize download of container images https://github.com/Clinical-Genomics/BALSAMIC/pull/1068
+
+Fixed:
+^^^^^^
+* `test_write_json` failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
+* Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
+* Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
+* Change user in somalier container to defaultuser https://github.com/Clinical-Genomics/BALSAMIC/pull/1080
 
 [11.0.2]
 
