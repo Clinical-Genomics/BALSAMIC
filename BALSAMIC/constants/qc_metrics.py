@@ -68,4 +68,7 @@ METRICS = {
     "variants": {
         "NUMBER_OF_SITES": {"condition": {"norm": "lt", "threshold": 50000}},
     },
+    "paired": {
+        "RELATEDNESS": {"condition": {"norm": "gt", "threshold": 0.80}},
+    },
 }

@@ -599,6 +599,7 @@ class ReferenceMeta(BaseModel):
         ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
+        somalier_sites: ReferenceUrlsModel. Optional field for somalier sites vcf
     """
 
     basedir: str = ""
@@ -624,6 +625,7 @@ class ReferenceMeta(BaseModel):
     ascat_gccorrection: Optional[ReferenceUrlsModel]
     ascat_chryloci: Optional[ReferenceUrlsModel]
     clinvar: Optional[ReferenceUrlsModel]
+    somalier_sites: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):
