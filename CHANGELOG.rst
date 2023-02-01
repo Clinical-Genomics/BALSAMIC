@@ -2,6 +2,7 @@
 
 Fixed:
 ^^^^^^
+* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/1081
 * Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/1060 
 
 
