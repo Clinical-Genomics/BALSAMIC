@@ -248,7 +248,7 @@
 		"time": "12:00:00",
 		"n": 24
 	},
-	"cnvpytor_sv_tumor_normal": {
+	"cnvpytor_tumor_only": {
 		"time": "05:00:00",
 		"n": 24
 	},

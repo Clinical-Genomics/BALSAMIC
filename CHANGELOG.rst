@@ -2,9 +2,11 @@
 
 Fixed:
 ^^^^^^
-* Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/105 
+* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/10
 
-
+Added:
+^^^^^^
+* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/ 
 
 
 [11.0.2]
@@ -15,7 +17,7 @@ Changed:
 
 Fixed:
 ^^^^^^
-* MacDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/1051
+* MaxDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/1051
 
 [11.0.1]
 --------
