@@ -9,6 +9,7 @@ Changed:
 ^^^^^^^^
 * Parallelize download of reference files https://github.com/Clinical-Genomics/BALSAMIC/pull/1065
 * Parallelize download of container images https://github.com/Clinical-Genomics/BALSAMIC/pull/1068
+* Changed git actions to build docker containers only if the `containers` directory is modified: https://github.com/Clinical-Genomics/BALSAMIC/pull/1084
 
 Fixed:
 ^^^^^^
