@@ -4,7 +4,8 @@ on:
   push:
     tags:
       - "**"
-
+    paths:
+      - BALSAMIC/containers/
 jobs:
   main:
     name: Docker image build
