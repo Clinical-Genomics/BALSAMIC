@@ -1,11 +1,3 @@
-[X.X.X]
-
-Fixed:
-^^^^^^
-* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/1081
-* Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/1060 
-
-
 [11.1.0]
 --------
 
@@ -26,6 +18,7 @@ Fixed:
 * Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
 * Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
 * Change user in somalier container to defaultuser https://github.com/Clinical-Genomics/BALSAMIC/pull/1080
+* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/1081
 
 [11.0.2]
 --------
