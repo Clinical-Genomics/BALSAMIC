@@ -4,6 +4,7 @@
 Added:
 ^^^^^^
 * Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
+* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083 
 
 Changed:
 ^^^^^^^^
