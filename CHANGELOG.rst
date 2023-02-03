@@ -1,19 +1,10 @@
-[X.X.X]
-
-Fixed:
-^^^^^^
-* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/1081
-
-Added:
-^^^^^^
-* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083 
-
 [11.1.0]
 --------
 
 Added:
 ^^^^^^
 * Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
+* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083 
 
 Changed:
 ^^^^^^^^
