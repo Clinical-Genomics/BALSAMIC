@@ -12,12 +12,14 @@ Changed:
 
 Fixed:
 ^^^^^^
+* triallelic_site in quality filter for SNV https://github.com/Clinical-Genomics/BALSAMIC/pull/1052
 * `test_write_json` failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
 * Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
 * Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
 * Change user in somalier container to defaultuser https://github.com/Clinical-Genomics/BALSAMIC/pull/1080
 
 [11.0.2]
+--------
 
 Changed:
 ^^^^^^^^
@@ -25,7 +27,7 @@ Changed:
 
 Fixed:
 ^^^^^^
-* MacDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/1051
+* MaxDepth in quality filter for SV https://github.com/Clinical-Genomics/BALSAMIC/pull/1051
 
 [11.0.1]
 --------
