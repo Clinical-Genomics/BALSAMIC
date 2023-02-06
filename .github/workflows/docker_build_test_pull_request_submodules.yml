@@ -8,7 +8,7 @@ on:
     tags-ignore:
       - "**"
     paths:
-      - BALSAMIC/containers/
+      - 'BALSAMIC/containers/**'
 jobs:
   main:
     name: Docker image build test
