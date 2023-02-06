@@ -174,13 +174,19 @@ rule all:
 ###########################################################
 # Download all singularity container images from dockerhub
 ###########################################################
+wildcard_constraints:
+    container_image = "|".join(list(config["singularity"]["containers"])),
+
+def download_container_file(output_file: str):
+    image_name = Path(output_file).stem
+    docker_path = config["singularity"]["containers"][image_name]
+    cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"],image_name,docker_path)
+    shell(cmd)
 
 rule download_container:
-    output: singularity_images
+    output: Path(singularity_image_path, "{container_image}" + ".sif").as_posix(),
     run:
-      for image_name, docker_path in config["singularity"]["containers"].items():
-          cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"], image_name, docker_path)
-	  shell(cmd)
+      download_container_file(output_file=output[0])
 
 ##########################################################
 # Download the reference genome, variant db 
@@ -194,36 +200,51 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     delly_mappability_findex_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url,
                     somalier_sites_url]
 
+download_dict = dict([(ref.get_output_file, ref) for ref in download_content])
+
+def download_reference_file(output_file: str):
+    import requests
+
+    ref = download_dict[output_file]
+    log_file = output_file + ".log"
+
+    if ref.url.scheme == "gs":
+        cmd = "export TMPDIR=/tmp; gsutil cp -L {} {} -".format(log_file,ref.url)
+    else:
+        cmd = "wget -a {} -O - {}".format(log_file,ref.url)
+
+    if ref.secret:
+        try:
+            response = requests.get(ref.url,headers={'Authorization': 'Basic %s' % ref.secret})
+            download_url = response.json()["url"]
+        except:
+            LOG.error("Unable to download {}".format(ref.url))
+            raise
+        cmd = "curl -o - '{}'".format(download_url)
+
+    if ref.gzip:
+        cmd += " | gunzip "
+
+    cmd += " > {}".format(output_file)
+    shell(cmd)
+    ref.write_md5
+
+ref_subdirs = set([ref.output_path for ref in download_content])
+ref_files = set([ref.output_file for ref in download_content])
+
+wildcard_constraints:
+    ref_subdir="|".join(ref_subdirs),
+    ref_file = "|".join(ref_files),
+
+
 rule download_reference:
     output:
-        expand("{output}", output=[ref.get_output_file for ref in download_content])
+        Path("{ref_subdir}","{ref_file}").as_posix(),
     run:
-        import requests
+        download_reference_file(output_file=output[0])
 
-        for ref in download_content:
-            output_file = ref.get_output_file
-            log_file = output_file + ".log"
 
-            if ref.url.scheme == "gs":
-                cmd = "export TMPDIR=/tmp; gsutil cp -L {} {} -".format(log_file, ref.url)
-            else:
-                cmd = "wget -a {} -O - {}".format(log_file, ref.url)
 
-            if ref.secret:
-                try:
-                    response = requests.get(ref.url, headers={'Authorization': 'Basic %s' % ref.secret })
-                    download_url = response.json()["url"]
-                except:
-                    LOG.error("Unable to download {}".format(ref.url))
-                    raise
-                cmd = "curl -o - '{}'".format(download_url)
-            
-            if ref.gzip:
-                cmd += " | gunzip "
-
-            cmd += " > {}".format(output_file)
-            shell(cmd)
-            ref.write_md5
 
 ##########################################################
 # Preprocess refseq file by fetching relevant columns and 

@@ -134,7 +134,7 @@ REFERENCE_FILES = {
             "output_path": "genome",
         },
         "delly_mappability": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/86aab2d10c5ffc009bc8c68ad077ab7283d8fe06/cancer/references/GRCh38.delly.blacklist.gz",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/GRCh38.delly.blacklist.gz",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
@@ -142,7 +142,7 @@ REFERENCE_FILES = {
             "output_path": "genome",
         },
         "delly_mappability_gindex": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/86aab2d10c5ffc009bc8c68ad077ab7283d8fe06/cancer/references/GRCh38.delly.blacklist.gz.gzi",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/GRCh38.delly.blacklist.gz.gzi",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
@@ -150,7 +150,7 @@ REFERENCE_FILES = {
             "output_path": "genome",
         },
         "delly_mappability_findex": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/86aab2d10c5ffc009bc8c68ad077ab7283d8fe06/cancer/references/GRCh38.delly.blacklist.gz.fai",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/GRCh38.delly.blacklist.gz.fai",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
@@ -166,7 +166,7 @@ REFERENCE_FILES = {
             "output_path": "genome",
         },
         "ascat_chryloci": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/35465e2644f76f2d59427a9b379d34ecea71f259/cancer/references/hg38_Y.loci",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/hg38_Y.loci",
             "file_type": "text",
             "gzip": False,
             "genome_version": "hg38",
