@@ -3,17 +3,22 @@
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 
+def get_mapping(wcs):
+    fastqpatterns = []
+    for fastqpattern in fastq_dict[f"{wcs.sample_type}"]["fastqpair_patterns"]:
+        fastqpatterns.append(fastqpattern)
+    return expand(Path(bam_dir, "{fastqpattern}.bam").as_posix(), fastqpattern=fastqpatterns)
 
 rule sentieon_align_sort:
     input:
         ref = config["reference"]["reference_genome"],
-        read1 = Path(fastq_dir, "{sample}_1.fp.fastq.gz").as_posix(),
-        read2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
+        read1 = Path(fastq_dir, "{fastqpattern}_1.fp.fastq.gz").as_posix(),
+        read2 = Path(fastq_dir, "{fastqpattern}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = Path(bam_dir, "{sample}.bam").as_posix()
+        bamout = Path(bam_dir, "{fastqpattern}.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_align_sort_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_align_sort_{fastqpattern}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         header = params.common.align_header,
@@ -32,7 +37,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem -M \
--R {params.header} \
+-R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.sample_id}\\tPL:ILLUMINA \
 -t {threads} \
 -K 50000000 \
 {input.ref} {input.read1} {input.read2} \
@@ -43,16 +48,15 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --sam2bam -i -;
         """
 
-
 rule sentieon_dedup:
     input:
-        bam = Path(bam_dir, "{sample}.bam").as_posix(),
+        bamfiles = get_mapping
     output:
-        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
-        score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
-        metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
+        bam = Path(bam_dir, "{sample}_{sample_type}.dedup.bam").as_posix(),
+        score = Path(bam_dir, "{sample}_{sample_type}.dedup.score").as_posix(),
+        metrics = Path(bam_dir, "{sample}_{sample_type}.dedup.metrics").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_dedup_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_dedup_{sample_type}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -69,16 +73,18 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
+shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
+
 {params.sentieon_exec} driver \
 -t {threads} \
--i {input.bam} \
+-i {input.bamfiles} \
 --algo LocusCollector \
 --fun score_info \
 {output.score};
 
 {params.sentieon_exec} driver \
 -t {threads} \
--i {input.bam} \
+-i {input.bamfiles} \
 --algo Dedup \
 --rmdup \
 --score_info {output.score} \
@@ -92,9 +98,9 @@ rule sentieon_realign:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
-        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix()
+        bam = Path(bam_dir, "{sample}_{sample_type}.dedup.bam").as_posix()
     output:
-        bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix()
+        bam = Path(bam_dir, "{sample}_{sample_type}.dedup.realign.bam").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_realign_{sample}.tsv").as_posix()
     params:
@@ -121,4 +127,25 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -k {input.mills} \
 -k {input.indel_1kg} \
 {output}; 
+        """
+
+rule rename_bam_tumor:
+    input:
+        bam = Path(bam_dir, "{sample}_tumor.dedup.realign.bam").as_posix()
+    output:
+        bam = bam_dir + "tumor.merged.bam"
+    shell:
+        """
+mv {input.bam} {output.bam}
+mv {input.bam}.bai {output.bam}.bai
+        """
+rule rename_bam_normal:
+    input:
+        bam = Path(bam_dir, "{sample}_normal.dedup.realign.bam").as_posix()
+    output:
+        bam = bam_dir + "normal.merged.bam"
+    shell:
+        """
+mv {input.bam} {output.bam}
+mv {input.bam}.bai {output.bam}.bai
         """
