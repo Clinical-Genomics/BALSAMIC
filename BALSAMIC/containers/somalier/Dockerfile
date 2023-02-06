@@ -51,7 +51,6 @@ RUN cd /somalier &&  \
     cp scripts/ancestry-labels-1kg.tsv / && \
     rm -rf /somalier && somalier --help
 
-
 ENV somalier_ancestry_labels /ancestry_labels-1kg.tsv
 
 RUN adduser -D defaultuser
