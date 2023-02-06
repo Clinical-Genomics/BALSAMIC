@@ -26,7 +26,7 @@ Fixed:
 * Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
 * Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
 * Change user in somalier container to defaultuser https://github.com/Clinical-Genomics/BALSAMIC/pull/1080
-* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMMIC/pull/1081
+* Reference files for hg38 https://github.com/Clinical-Genomics/BALSAMIC/pull/1081
 
 [11.0.2]
 --------
