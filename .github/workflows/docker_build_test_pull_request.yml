@@ -2,7 +2,7 @@ name: Build and test container
 # Trigger building and testing container only on pull requests
 on:
   push:
-    branches-ignore:
+    branches:
       - master
       - develop
     tags-ignore:

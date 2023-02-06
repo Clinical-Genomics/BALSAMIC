@@ -2,7 +2,7 @@ name: build test container submodule
 # Trigger building and testing container only on pull requests
 on:
   push:
-    branches-ignore:
+    branches:
       - master
       - develop
     tags-ignore:
