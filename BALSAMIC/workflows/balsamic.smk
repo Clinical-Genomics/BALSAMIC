@@ -3,6 +3,7 @@
 import os
 import logging
 import tempfile
+import glob
 
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
@@ -48,7 +49,8 @@ case_id = config["analysis"]["case_id"]
 # Directories
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
+tumor_fastq_dir = get_result_dir(config) + "/fastq/tumor"
+normal_fastq_dir = get_result_dir(config) + "/fastq/normal"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
@@ -68,6 +70,59 @@ clinical_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
 swegen_sv = ""
+
+
+# Sample names for tumor or normal
+tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+if config['analysis']['analysis_type'] == "paired":
+    normal_sample = get_sample_type(config["samples"], "normal")[0]
+
+# Get sample unique names for tumor or normal
+lims_id = {'normal': [], 'tumor': []}
+for sample, sample_info in config["samples"].items():
+    lims_id[sample_info["type"]].append(sample_info["sample_name"])
+
+
+# Prepare fastq_dict
+fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz", "_1.fasterq", "_R1_001.fasterq"]
+revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz", "_2.fasterq", "_R2_001.fasterq"]
+
+fastq_dict = {}
+fastq_dict["normal"] = {}
+fastq_dict["normal"]["fastqpair_patterns"] = {}
+
+fastq_dict["tumor"] = {}
+fastq_dict["tumor"]["fastqpair_patterns"] = {}
+
+# Prepare Normal Fastq Variables
+for fwdpattern in fwdpatterns:
+    normal_fwd_fastqs = glob.glob(f"{normal_fastq_dir}/*{fwdpattern}")
+    if normal_fwd_fastqs:
+        for normal_fwd_fastq in normal_fwd_fastqs:
+            fastqpair_pattern = os.path.basename(normal_fwd_fastq).replace(fwdpattern, "")
+            fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern] = {}
+            fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = normal_fwd_fastq
+for revpattern in revpatterns:
+    normal_rev_fastqs = glob.glob(f"{normal_fastq_dir}/*{revpattern}")
+    if normal_rev_fastqs:
+        for normal_rev_fastq in normal_rev_fastqs:
+            fastqpair_pattern = os.path.basename(normal_rev_fastq).replace(revpattern, "")
+            fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = normal_rev_fastq
+
+# Prepare Tumor Fastq Variables
+for fwdpattern in fwdpatterns:
+    tumor_fwd_fastqs = glob.glob(f"{tumor_fastq_dir}/*{fwdpattern}")
+    if tumor_fwd_fastqs:
+        for tumor_fwd_fastq in tumor_fwd_fastqs:
+            fastqpair_pattern = os.path.basename(tumor_fwd_fastq).replace(fwdpattern, "")
+            fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern] = {}
+            fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = tumor_fwd_fastq
+for revpattern in revpatterns:
+    tumor_rev_fastqs = glob.glob(f"{tumor_fastq_dir}/*{revpattern}")
+    if tumor_rev_fastqs:
+        for tumor_rev_fastq in tumor_rev_fastqs:
+            fastqpair_pattern = os.path.basename(tumor_rev_fastq).replace(revpattern, "")
+            fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = tumor_rev_fastq
 
 # vcfanno annotations
 research_annotations.append( {
@@ -138,15 +193,6 @@ params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
-# Sample names for tumor or normal
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
-if config['analysis']['analysis_type'] == "paired":
-    normal_sample = get_sample_type(config["samples"], "normal")[0]
-
-# Get sample unique names for tumor or normal
-lims_id = {'normal': [], 'tumor': []}
-for sample, sample_info in config["samples"].items():
-    lims_id[sample_info["type"]].append(sample_info["sample_name"])
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
