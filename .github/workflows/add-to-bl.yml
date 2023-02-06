@@ -1,0 +1,16 @@
+name: Add new issues to the backlog
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/add-to-project@v0.4.0
+        with:
+          project-url: https://github.com/orgs/Clinical-Genomics/projects/45
+          github-token: ${{ secrets.REPO_AND_PROJECT_PAT }}
