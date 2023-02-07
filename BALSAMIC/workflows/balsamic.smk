@@ -21,7 +21,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+from BALSAMIC.utils.rule import (get_fastq_dict, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
                                  get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
@@ -83,45 +83,14 @@ for sample, sample_info in config["samples"].items():
 
 
 # Prepare fastq_dict
-fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz"]
-revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz"]
-
 fastq_dict = {}
-fastq_dict["normal"] = {}
-fastq_dict["normal"]["fastqpair_patterns"] = {}
+if lims_id["normal"]:
+    fastq_dict["normal"] = get_fastq_dict(normal_sample, "normal", fastq_dir)
+if lims_id["tumor"]:
+    fastq_dict["tumor"] = get_fastq_dict(tumor_sample, "tumor", fastq_dir)
 
-fastq_dict["tumor"] = {}
-fastq_dict["tumor"]["fastqpair_patterns"] = {}
 
-# Prepare Normal Fastq Variables
-for fwdpattern in fwdpatterns:
-    normal_fwd_fastqs = glob.glob(f"{fastq_dir}/*{normal_sample}*{fwdpattern}")
-    if normal_fwd_fastqs:
-        for normal_fwd_fastq in normal_fwd_fastqs:
-            fastqpair_pattern = os.path.basename(normal_fwd_fastq).replace(fwdpattern, "")
-            fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern] = {}
-            fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = normal_fwd_fastq
-for revpattern in revpatterns:
-    normal_rev_fastqs = glob.glob(f"{fastq_dir}/*{normal_sample}*{revpattern}")
-    if normal_rev_fastqs:
-        for normal_rev_fastq in normal_rev_fastqs:
-            fastqpair_pattern = os.path.basename(normal_rev_fastq).replace(revpattern, "")
-            fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = normal_rev_fastq
 
-# Prepare Tumor Fastq Variables
-for fwdpattern in fwdpatterns:
-    tumor_fwd_fastqs = glob.glob(f"{fastq_dir}/*{tumor_sample}*{fwdpattern}")
-    if tumor_fwd_fastqs:
-        for tumor_fwd_fastq in tumor_fwd_fastqs:
-            fastqpair_pattern = os.path.basename(tumor_fwd_fastq).replace(fwdpattern, "")
-            fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern] = {}
-            fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = tumor_fwd_fastq
-for revpattern in revpatterns:
-    tumor_rev_fastqs = glob.glob(f"{fastq_dir}/*{tumor_sample}*{revpattern}")
-    if tumor_rev_fastqs:
-        for tumor_rev_fastq in tumor_rev_fastqs:
-            fastqpair_pattern = os.path.basename(tumor_rev_fastq).replace(revpattern, "")
-            fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = tumor_rev_fastq
 
 # vcfanno annotations
 research_annotations.append( {
