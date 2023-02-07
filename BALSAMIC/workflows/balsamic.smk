@@ -85,9 +85,9 @@ for sample, sample_info in config["samples"].items():
 # Prepare fastq_dict
 fastq_dict = {}
 if lims_id["normal"]:
-    fastq_dict["normal"] = get_fastq_dict(normal_sample, "normal", fastq_dir)
+    fastq_dict[normal_sample] = get_fastq_dict(normal_sample, fastq_dir)
 if lims_id["tumor"]:
-    fastq_dict["tumor"] = get_fastq_dict(tumor_sample, "tumor", fastq_dir)
+    fastq_dict[tumor_sample] = get_fastq_dict(tumor_sample, fastq_dir)
 
 
 

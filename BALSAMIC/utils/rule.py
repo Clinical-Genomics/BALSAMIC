@@ -160,7 +160,7 @@ def get_sample_type_from_prefix(config, sample):
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
 
-def get_fastq_dict(samplename, sampletype, fastq_dir):
+def get_fastq_dict(samplename, fastq_dir):
     # Prepare fastq_dict
     fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz"]
     revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz"]
@@ -174,14 +174,14 @@ def get_fastq_dict(samplename, sampletype, fastq_dir):
         if fwd_fastqs:
             for fwd_fastq in fwd_fastqs:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwdpattern, "")
-                fastq_dict[sampletype]["fastqpair_patterns"][fastqpair_pattern] = {}
-                fastq_dict[sampletype]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = fwd_fastq
+                fastq_dict["fastqpair_patterns"][fastqpair_pattern] = {}
+                fastq_dict["fastqpair_patterns"][fastqpair_pattern]["fwd"] = fwd_fastq
     for revpattern in revpatterns:
         rev_fastqs = glob.glob(f"{fastq_dir}/*{samplename}*{revpattern}")
         if rev_fastqs:
             for rev_fastq in rev_fastqs:
                 fastqpair_pattern = os.path.basename(rev_fastq).replace(revpattern, "")
-                fastq_dict[sampletype]["fastqpair_patterns"][fastqpair_pattern]["rev"] = rev_fastq
+                fastq_dict["fastqpair_patterns"][fastqpair_pattern]["rev"] = rev_fastq
 
     return fastq_dict
 
