@@ -3,25 +3,34 @@
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 
+def get_fwd_read(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]:
+            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
+
+def get_rev_read(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]:
+            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
 
 rule fastqc:
     input:
-        read1 = fastq_dir + "{sample}_1.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.fastq.gz",
+        read1=get_fwd_read,
+        read2=get_rev_read
     output:
-        read1 = fastqc_dir + "{sample}_1_fastqc.zip",
-        read2 = fastqc_dir + "{sample}_2_fastqc.zip"
+        fastqc1 = fastqc_dir + "{fastqpattern}_1_fastqc.zip",
+        fastqc2 = fastqc_dir + "{fastqpattern}_2_fastqc.zip"
     benchmark:
-        Path(benchmark_dir, "fastqc_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "fastqc_{fastqpattern}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
         fastqc_dir = fastqc_dir,
-        sample = "{sample}",
+        fastqpattern = "{fastqpattern}",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     threads: get_threads(cluster_config, "fastqc")
     message:
-        "Running FastQC on {params.sample}"
+        "Running FastQC on {params.fastqpattern}"
     shell:
         """
 mkdir -p {params.tmpdir};
