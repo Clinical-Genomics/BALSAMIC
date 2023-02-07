@@ -11,6 +11,8 @@ import logging
 
 from pathlib import Path
 
+from _pytest.logging import LogCaptureFixture
+
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
@@ -25,7 +27,6 @@ from BALSAMIC.utils.cli import (
     createDir,
     get_config,
     recursive_default_dict,
-    create_pon_fastq_symlink,
     convert_defaultdict_to_regular_dict,
     get_file_status_string,
     get_from_two_key,
@@ -44,7 +45,7 @@ from BALSAMIC.utils.cli import (
     get_md5,
     create_md5,
 )
-from BALSAMIC.utils.io import read_json, write_json, read_yaml
+from BALSAMIC.utils.io import read_json, write_json, read_yaml, remove_symlinks
 
 from BALSAMIC.utils.rule import (
     get_chrom,
@@ -651,7 +652,7 @@ def test_read_yaml_error():
     try:
         read_yaml(yaml_path)
     except FileNotFoundError as file_exc:
-        assert f"The YAML file {yaml_path} was not found." in str(file_exc)
+        assert f"The YAML file {yaml_path} was not found" in str(file_exc)
 
 
 def test_get_threads(config_files):
@@ -883,25 +884,6 @@ def test_get_fastq_bind_path(tmpdir_factory):
     assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
 
 
-def test_create_pon_fastq_symlink_file_exist_error(tmpdir_factory, caplog):
-    # GIVEN a list of valid fastq file names for cnv pon
-    fastq_files = [
-        "case1_R_1.fastq.gz",
-    ]
-
-    # WHEN files are created, and symlinks are made in symlink directory
-    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
-    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-
-    for fastq_file in fastq_files:
-        Path(symlink_from_path, fastq_file).touch()
-        Path(symlink_to_path, fastq_file).touch()
-
-    with caplog.at_level(logging.INFO):
-        create_pon_fastq_symlink(symlink_from_path, symlink_to_path)
-        assert "exists, skipping" in caplog.text
-
-
 def test_convert_deliverables_tags():
     """Test generation of delivery tags."""
 
@@ -1098,3 +1080,18 @@ def test_get_sample_type_from_prefix(config_dict):
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == "tumor"
+
+
+def test_remove_symlinks(fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture):
+    """Test remove symlinks from a directory."""
+
+    # GIVEN a list of linked files
+    for file in Path(fastq_dir).iterdir():
+        Path(tmp_path, file.name).symlink_to(file)
+
+    # WHEN removing the symbolic links
+    remove_symlinks(tmp_path, "*.fastq.gz")
+
+    # THEN the temp directory should not contain any linked files
+    for file in Path(tmp_path).iterdir():
+        assert not file.is_symlink()

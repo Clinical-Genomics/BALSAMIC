@@ -56,6 +56,16 @@ def case_id_tumor_normal_wgs() -> str:
     return "sample_tumor_normal_wgs"
 
 
+@pytest.fixture(scope="session")
+def fastq_dir(case_id_tumor_only: str, analysis_dir: str):
+    """Mock FastQ directory."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+    Path(fastq_dir, f"ACC1_R_1.fastq.gz").touch()
+    Path(fastq_dir, f"ACC1_R_2.fastq.gz").touch()
+    return fastq_dir.as_posix()
+
+
 @pytest.fixture
 def cli_runner():
     """click - cli testing"""
@@ -196,41 +206,6 @@ def no_write_perm_path(tmp_path_factory) -> str:
     bad_perm_path: Path = tmp_path_factory.mktemp("bad_perm_path")
     bad_perm_path.chmod(0o444)
     return bad_perm_path.as_posix()
-
-
-@pytest.fixture(scope="session")
-def sample_fastq(tmp_path_factory):
-    """
-    create sample fastq files
-    """
-    fastq_dir = tmp_path_factory.mktemp("fastq")
-    fastq_valid = fastq_dir / "S1_R_1.fastq.gz"
-    fastq_invalid = fastq_dir / "sample.fastq.gz"
-
-    # dummy tumor fastq file
-    tumorfastqr1 = fastq_dir / "concatenated_ACC1_R_1.fastq.gz"
-    tumorfastqr2 = fastq_dir / "concatenated_ACC1_R_2.fastq.gz"
-
-    # dummy normal fastq file
-    normalfastqr1 = fastq_dir / "concatenated_ACC2_R_1.fastq.gz"
-    normalfastqr2 = fastq_dir / "concatenated_ACC2_R_2.fastq.gz"
-
-    for fastq_file in (
-        fastq_valid,
-        fastq_invalid,
-        tumorfastqr1,
-        tumorfastqr2,
-        normalfastqr1,
-        normalfastqr2,
-    ):
-        fastq_file.touch()
-
-    return {
-        "fastq_valid": fastq_valid.absolute().as_posix(),
-        "fastq_invalid": fastq_invalid.absolute().as_posix(),
-        "tumor": tumorfastqr1.absolute().as_posix(),
-        "normal": normalfastqr1.absolute().as_posix(),
-    }
 
 
 @pytest.fixture(scope="session")

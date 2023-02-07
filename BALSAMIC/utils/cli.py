@@ -632,17 +632,6 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
         yaml.dump({case_name: jobid_list}, jobid_out)
 
 
-def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
-    for fastq_name in os.listdir(pon_fastqs):
-        pon_fastq = Path(pon_fastqs, fastq_name).as_posix()
-        pon_sym_file = Path(symlink_dir, fastq_name).as_posix()
-        try:
-            LOG.info(f"Creating symlink {fastq_name} -> {pon_sym_file}")
-            os.symlink(pon_fastq, pon_sym_file)
-        except FileExistsError:
-            LOG.info(f"File {pon_sym_file} exists, skipping")
-
-
 def get_md5(filename):
     with open(filename, "rb") as fh:
         hashed = 0

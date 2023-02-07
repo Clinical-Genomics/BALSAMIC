@@ -18,7 +18,7 @@ from BALSAMIC.constants.common import (
     GENDER_OPTIONS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.io import write_json
+from BALSAMIC.utils.io import write_json, remove_symlinks
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -275,8 +275,9 @@ def case_config(
     LOG.info("Config file generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + ".json")
-    write_json(config_collection_dict, config_path)
+    write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
+    remove_symlinks(directory=fastq_path, pattern="*.fastq.gz")
 
     try:
         generate_graph(config_collection_dict, config_path)

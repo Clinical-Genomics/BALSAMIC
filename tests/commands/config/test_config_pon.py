@@ -4,8 +4,6 @@ import logging
 from unittest import mock
 from pathlib import Path
 
-from BALSAMIC.utils.cli import create_pon_fastq_symlink
-
 
 def test_pon_config(
     invoke_cli,
@@ -71,21 +69,6 @@ def test_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file)
     # THEN a config should not be created and exit
     assert "Error: Missing option" in result.output
     assert result.exit_code == 2
-
-
-def test_create_pon_fastq_symlink(tmp_path_factory, caplog):
-    pon_symlink_from = tmp_path_factory.mktemp("pon_symlink_from")
-    pon_symlink_to = tmp_path_factory.mktemp("pon_symlink_to")
-    files = ["normal1_R_1.fastq.gz", "normal1_R_2.fastq.gz"]
-    ponfiles = [Path(pon_symlink_from, x) for x in files]
-    for ponfile in ponfiles:
-        ponfile.touch()
-    with caplog.at_level(logging.INFO):
-        create_pon_fastq_symlink(pon_symlink_from, pon_symlink_to)
-        # THEN destination should have files
-        assert len(list(Path(pon_symlink_to).rglob("*.fastq.gz"))) == 2
-        # THEN exception triggers log message containing "skipping"
-        assert "skipping" not in caplog.text
 
 
 def test_pon_config_graph(

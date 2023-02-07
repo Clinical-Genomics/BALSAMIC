@@ -6,12 +6,7 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.cli import (
-    create_fastq_symlink,
-    generate_graph,
-    get_bioinfo_tools_version,
-    create_pon_fastq_symlink,
-)
+from BALSAMIC.utils.cli import generate_graph, get_bioinfo_tools_version
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
 from BALSAMIC.constants.common import (

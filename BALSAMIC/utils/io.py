@@ -1,9 +1,13 @@
 """Input/Output utils file."""
 
 import json
+import logging
+import shutil
 from pathlib import Path
 
 import yaml
+
+LOG = logging.getLogger(__name__)
 
 
 def read_json(json_path: str) -> dict:
@@ -12,7 +16,7 @@ def read_json(json_path: str) -> dict:
         with open(json_path, "r") as fn:
             return json.load(fn)
     else:
-        raise FileNotFoundError(f"The JSON file {json_path} was not found.")
+        raise FileNotFoundError(f"The JSON file {json_path} was not found")
 
 
 def write_json(json_obj: dict, path: str) -> None:
@@ -30,4 +34,14 @@ def read_yaml(yaml_path: str) -> dict:
         with open(yaml_path, "r") as fn:
             return yaml.load(fn, Loader=yaml.SafeLoader)
     else:
-        raise FileNotFoundError(f"The YAML file {yaml_path} was not found.")
+        raise FileNotFoundError(f"The YAML file {yaml_path} was not found")
+
+
+def remove_symlinks(directory: Path, pattern: str) -> None:
+    """Remove symbolic links from an input directory by file pattern."""
+    for file in Path(directory).glob(pattern):
+        if file.is_symlink():
+            link: Path = file.resolve()
+            file.unlink()
+            shutil.copy(link.absolute().as_posix(), file.absolute().as_posix())
+    LOG.info(f"Symlinks removed from {directory}")
