@@ -49,8 +49,7 @@ case_id = config["analysis"]["case_id"]
 # Directories
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-tumor_fastq_dir = get_result_dir(config) + "/fastq/tumor"
-normal_fastq_dir = get_result_dir(config) + "/fastq/normal"
+fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
@@ -96,14 +95,14 @@ fastq_dict["tumor"]["fastqpair_patterns"] = {}
 
 # Prepare Normal Fastq Variables
 for fwdpattern in fwdpatterns:
-    normal_fwd_fastqs = glob.glob(f"{normal_fastq_dir}/*{fwdpattern}")
+    normal_fwd_fastqs = glob.glob(f"{fastq_dir}/*{fwdpattern}")
     if normal_fwd_fastqs:
         for normal_fwd_fastq in normal_fwd_fastqs:
             fastqpair_pattern = os.path.basename(normal_fwd_fastq).replace(fwdpattern, "")
             fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern] = {}
             fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = normal_fwd_fastq
 for revpattern in revpatterns:
-    normal_rev_fastqs = glob.glob(f"{normal_fastq_dir}/*{revpattern}")
+    normal_rev_fastqs = glob.glob(f"{fastq_dir}/*{revpattern}")
     if normal_rev_fastqs:
         for normal_rev_fastq in normal_rev_fastqs:
             fastqpair_pattern = os.path.basename(normal_rev_fastq).replace(revpattern, "")
@@ -111,14 +110,14 @@ for revpattern in revpatterns:
 
 # Prepare Tumor Fastq Variables
 for fwdpattern in fwdpatterns:
-    tumor_fwd_fastqs = glob.glob(f"{tumor_fastq_dir}/*{fwdpattern}")
+    tumor_fwd_fastqs = glob.glob(f"{fastq_dir}/*{fwdpattern}")
     if tumor_fwd_fastqs:
         for tumor_fwd_fastq in tumor_fwd_fastqs:
             fastqpair_pattern = os.path.basename(tumor_fwd_fastq).replace(fwdpattern, "")
             fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern] = {}
             fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = tumor_fwd_fastq
 for revpattern in revpatterns:
-    tumor_rev_fastqs = glob.glob(f"{tumor_fastq_dir}/*{revpattern}")
+    tumor_rev_fastqs = glob.glob(f"{fastq_dir}/*{revpattern}")
     if tumor_rev_fastqs:
         for tumor_rev_fastq in tumor_rev_fastqs:
             fastqpair_pattern = os.path.basename(tumor_rev_fastq).replace(revpattern, "")
