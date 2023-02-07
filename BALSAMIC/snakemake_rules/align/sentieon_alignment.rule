@@ -12,7 +12,7 @@ def get_mapping(wcs):
     fastqpatterns = []
     for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
         fastqpatterns.append(fastqpattern)
-    return expand(Path(bam_dir, "{fastqpattern}.bam").as_posix(), fastqpattern=fastqpatterns)
+    return expand(bam_dir + "{fastqpattern}.bam", fastqpattern=fastqpatterns)
 
 
 rule sentieon_align_sort:
