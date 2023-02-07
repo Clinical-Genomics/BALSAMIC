@@ -1090,7 +1090,7 @@ def test_remove_symlinks(fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixtu
         Path(tmp_path, file.name).symlink_to(file)
 
     # WHEN removing the symbolic links
-    remove_symlinks(tmp_path, "*.fastq.gz")
+    remove_symlinks(str(tmp_path), "*.fastq.gz")
 
     # THEN the temp directory should not contain any linked files
     for file in Path(tmp_path).iterdir():
