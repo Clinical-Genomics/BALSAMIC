@@ -5,7 +5,7 @@
 
 def get_samplename(wcs):
     for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
             return sample
 
 def get_mapping(wcs):
