@@ -83,8 +83,8 @@ for sample, sample_info in config["samples"].items():
 
 
 # Prepare fastq_dict
-fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz", "_1.fasterq", "_R1_001.fasterq"]
-revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz", "_2.fasterq", "_R2_001.fasterq"]
+fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz"]
+revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz"]
 
 fastq_dict = {}
 fastq_dict["normal"] = {}
