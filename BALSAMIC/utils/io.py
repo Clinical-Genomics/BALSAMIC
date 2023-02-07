@@ -1,4 +1,4 @@
-"""Input/Output utils file"""
+"""Input/Output utils file."""
 
 import json
 from pathlib import Path
@@ -6,7 +6,8 @@ from pathlib import Path
 import yaml
 
 
-def read_json(json_path) -> dict:
+def read_json(json_path: str) -> dict:
+    """Read JSON file and return a dictionary."""
     if Path(json_path).exists():
         with open(json_path, "r") as fn:
             return json.load(fn)
@@ -14,17 +15,17 @@ def read_json(json_path) -> dict:
         raise FileNotFoundError(f"The JSON file {json_path} was not found.")
 
 
-def write_json(json_out, output_config):
-    """Writes JSON format data to an output file"""
+def write_json(json_obj: dict, path: str) -> None:
+    """Write JSON format data to an output file."""
     try:
-        with open(output_config, "w") as fn:
-            json.dump(json_out, fn, indent=4)
+        with open(path, "w") as fn:
+            json.dump(json_obj, fn, indent=4)
     except OSError as error:
-        raise OSError(f"Error while writing JSON file: {output_config}, error: {error}")
+        raise OSError(f"Error while writing JSON file: {path}, error: {error}")
 
 
-def read_yaml(yaml_path):
-    """Retrieves data from a yaml file"""
+def read_yaml(yaml_path: str) -> dict:
+    """Read data from a yaml file."""
     if Path(yaml_path).exists():
         with open(yaml_path, "r") as fn:
             return yaml.load(fn, Loader=yaml.SafeLoader)

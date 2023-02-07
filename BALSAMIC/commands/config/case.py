@@ -18,6 +18,7 @@ from BALSAMIC.constants.common import (
     GENDER_OPTIONS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
@@ -274,8 +275,7 @@ def case_config(
     LOG.info("Config file generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + ".json")
-    with open(config_path, "w+") as fh:
-        fh.write(json.dumps(config_collection_dict, indent=4))
+    write_json(config_collection_dict, config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
     try:
