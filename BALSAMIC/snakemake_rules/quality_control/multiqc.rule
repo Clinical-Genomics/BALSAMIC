@@ -12,7 +12,7 @@ if config['analysis']['analysis_type'] == "paired":
 def get_fastqpatterns():
     fastqpatterns = []
     for sample in fastq_dict:
-        for fastqpattern in fastq_dict[sample]:
+        for fastqpattern in fastq_dict[sample]["fastqpair_patterns"]:
             fastqpatterns.append(fastqpattern)
     return fastqpatterns
 
