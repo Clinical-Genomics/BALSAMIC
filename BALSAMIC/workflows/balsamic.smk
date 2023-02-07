@@ -91,7 +91,6 @@ if lims_id["tumor"]:
 
 
 
-
 # vcfanno annotations
 research_annotations.append( {
     'annotation': [{
