@@ -49,11 +49,11 @@ rule fastp_umi:
         tmpdir = tmp_dir,
         qc = " ".join(fastp_param_qc),
         adapter = " ".join(fastp_param_adapter),
-        sample_name = "{sample}",
+        fastqpattern = "{fastqpattern}",
     threads:
         get_threads(cluster_config, 'fastp_umi')
     message:
-        "Quality control and trimming input fastq for {params.sample_name}"
+        "Quality control and trimming input fastq for {params.fastqpattern}"
     shell:
         """
 export TMPDIR={params.tmpdir};
@@ -90,7 +90,7 @@ rule fastp:
         tmpdir = tmp_dir,
         umi = " ".join(fastp_param_umi),
         minimum_length = config["QC"]["min_seq_length"],
-        sample_name = "{fastqpattern}",
+        fastqpattern = "{fastqpattern}",
     threads:
         get_threads(cluster_config, 'fastp')
     message:
