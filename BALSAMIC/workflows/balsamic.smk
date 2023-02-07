@@ -332,6 +332,13 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller = [var_caller for var_caller in somatic_caller if "umi" not in var_caller]
     somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
 
+# Adding code for testing, removing merge_bam from wgs analysis
+if sequence_type == "wgs":
+    if "snakemake_rules/quality_control/mergetype_tumor.rule" in rules_to_include:
+        rules_to_include.remove("snakemake_rules/quality_control/mergetype_tumor.rule")
+    if "snakemake_rules/quality_control/mergetype_normal.rule" in rules_to_include:
+        rules_to_include.remove("snakemake_rules/quality_control/mergetype_normal.rule")
+
 # Added code for testing, removing somalier because it had errors
 if "snakemake_rules/quality_control/somalier.rule" in rules_to_include:
     rules_to_include.remove("snakemake_rules/quality_control/somalier.rule")
