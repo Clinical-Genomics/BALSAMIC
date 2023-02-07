@@ -3,11 +3,17 @@
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 
+def get_samplename(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]:
+            return sample
+
 def get_mapping(wcs):
     fastqpatterns = []
-    for fastqpattern in fastq_dict[f"{wcs.sample_type}"]["fastqpair_patterns"]:
+    for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
         fastqpatterns.append(fastqpattern)
     return expand(Path(bam_dir, "{fastqpattern}.bam").as_posix(), fastqpattern=fastqpatterns)
+
 
 rule sentieon_align_sort:
     input:
@@ -24,11 +30,12 @@ rule sentieon_align_sort:
         header = params.common.align_header,
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id = "{sample}"
+        sample_id = get_samplename,
+        fastqpattern = "{fastqpattern}"
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
     message:
-        "Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample: {params.sample_id}"
+        "Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample: {params.sample_id}, {params.fastqpattern}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -52,11 +59,11 @@ rule sentieon_dedup:
     input:
         bamfiles = get_mapping
     output:
-        bam = Path(bam_dir, "{sample}_{sample_type}.dedup.bam").as_posix(),
-        score = Path(bam_dir, "{sample}_{sample_type}.dedup.score").as_posix(),
-        metrics = Path(bam_dir, "{sample}_{sample_type}.dedup.metrics").as_posix()
+        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
+        score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
+        metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_dedup_{sample_type}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_dedup_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -98,9 +105,9 @@ rule sentieon_realign:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
-        bam = Path(bam_dir, "{sample}_{sample_type}.dedup.bam").as_posix()
+        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix()
     output:
-        bam = Path(bam_dir, "{sample}_{sample_type}.dedup.realign.bam").as_posix()
+        bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_realign_{sample}.tsv").as_posix()
     params:
@@ -139,6 +146,7 @@ rule rename_bam_tumor:
 mv {input.bam} {output.bam}
 mv {input.bam}.bai {output.bam}.bai
         """
+
 rule rename_bam_normal:
     input:
         bam = Path(bam_dir, "{sample}_normal.dedup.realign.bam").as_posix()
