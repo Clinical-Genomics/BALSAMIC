@@ -336,11 +336,11 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
 print(rules_to_include)
 print(sequence_type)
 if sequence_type == "wgs":
-    if "snakemake_rules/quality_control/mergetype_tumor.rule" in rules_to_include:
-        rules_to_include.remove("snakemake_rules/quality_control/mergetype_tumor.rule")
+    if "snakemake_rules/variant_calling/mergetype_tumor.rule" in rules_to_include:
+        rules_to_include.remove("snakemake_rules/variant_calling/mergetype_tumor.rule")
         print("removed mergetype_tumor, for testing")
-    if "snakemake_rules/quality_control/mergetype_normal.rule" in rules_to_include:
-        rules_to_include.remove("snakemake_rules/quality_control/mergetype_normal.rule")
+    if "snakemake_rules/variant_calling/mergetype_normal.rule" in rules_to_include:
+        rules_to_include.remove("snakemake_rules/variant_calling/mergetype_normal.rule")
         print("removed mergetype_normal, for testing")
 
 # Added code for testing, removing somalier because it had errors
