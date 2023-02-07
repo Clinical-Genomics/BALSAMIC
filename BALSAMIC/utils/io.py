@@ -41,7 +41,8 @@ def remove_symlinks(directory: Path, pattern: str) -> None:
     """Remove symbolic links from an input directory by file pattern."""
     for file in Path(directory).glob(pattern):
         if file.is_symlink():
+            LOG.info(f"Removing symlink from {file.as_posix()}")
             link: Path = file.resolve()
             file.unlink()
             shutil.copy(link.absolute().as_posix(), file.absolute().as_posix())
-    LOG.info(f"Symlinks removed from {directory}")
+    LOG.info(f"Symlinks removed from {directory.as_posix()}")

@@ -7,6 +7,7 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.cli import generate_graph, get_bioinfo_tools_version
+from BALSAMIC.utils.io import write_json, remove_symlinks
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
 from BALSAMIC.constants.common import (
@@ -140,9 +141,9 @@ def pon_config(
     LOG.info("PON config file generated successfully")
 
     config_path = Path(analysis_dir) / case_id / (case_id + "_PON" + ".json")
-    with open(config_path, "w+") as fh:
-        fh.write(json.dumps(config_collection_dict, indent=4))
+    write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"PON config file saved successfully - {config_path}")
+    remove_symlinks(directory=fastq_path, pattern="*.fastq.gz")
 
     try:
         generate_graph(config_collection_dict, config_path)
