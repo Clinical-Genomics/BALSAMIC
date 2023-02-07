@@ -5,12 +5,12 @@
 
 def get_fwd_read(wcs):
     for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
             return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
 
 def get_rev_read(wcs):
     for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
             return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
 
 rule fastqc:
