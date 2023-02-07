@@ -31,20 +31,22 @@ rule bcftools_filter_vardict_research_tumor_normal:
 bcftools view {input.vcf_snv_research} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view -f PASS -o {output.vcf_pass_vardict}.temp -O z;
-
-tabix -p vcf -f {output.vcf_pass_vardict}.temp;
+bcftools view -f PASS -o {output.vcf_pass_vardict}.temp1 -O z;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_pass_vardict}.temp \
---output_vcf {output.vcf_pass_vardict} \
+--input_vcf {output.vcf_pass_vardict}.temp1 \
+--output_vcf {output.vcf_pass_vardict}.temp2 \
 --variant_caller {params.variant_caller};
+
+bgzip -@ {threads} -l 9 -c {output.vcf_pass_vardict}.temp2 > {output.vcf_pass_vardict}
 
 tabix -p vcf -f {output.vcf_pass_vardict};
 
 bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts_research};
     
-rm {output.vcf_pass_vardict}.temp;
+rm {output.vcf_pass_vardict}.temp1;
+
+rm {output.vcf_pass_vardict}.temp2;
     """
 
 
@@ -107,20 +109,22 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
 bcftools view  -f PASS,triallelic_site --threads {threads} {input.vcf_snv_research} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp -O z;
-
-tabix -p vcf -f {output.vcf_pass_tnscope_umi}.temp;
+bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_pass_tnscope_umi}.temp \
---output_vcf {output.vcf_pass_tnscope_umi} \
+--input_vcf {output.vcf_pass_tnscope_umi}.temp1 \
+--output_vcf {output.vcf_pass_tnscope_umi}.temp2 \
 --variant_caller {params.variant_caller};
+
+bgzip -@ {threads} -l 9 -c {output.vcf_pass_tnscope_umi}.temp2 > {output.vcf_pass_tnscope_umi}
 
 tabix -p vcf -f {output.vcf_pass_tnscope_umi};
 
 bcftools +counts {output.vcf_pass_tnscope_umi} > {output.bcftools_counts_research};
 
-rm {output.vcf_pass_tnscope_umi}.temp;
+rm {output.vcf_pass_tnscope_umi}.temp1;
+
+rm {output.vcf_pass_tnscope_umi}.temp2;
     """
 
 
@@ -153,20 +157,22 @@ bcftools view {input.vcf_snv_clinical} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f PASS -o {output.vcf_pass_vardict}.temp -O z;
-
-tabix -p vcf -f {output.vcf_pass_vardict}.temp;
+bcftools view --threads {threads} -f PASS -o {output.vcf_pass_vardict}.temp1 -O z;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_pass_vardict}.temp \
---output_vcf {output.vcf_pass_vardict} \
+--input_vcf {output.vcf_pass_vardict}.temp1 \
+--output_vcf {output.vcf_pass_vardict}.temp2 \
 --variant_caller {params.variant_caller};
+
+bgzip -@ {threads} -l 9 -c {output.vcf_pass_vardict}.temp2 > {output.vcf_pass_vardict}
 
 tabix -p vcf -f {output.vcf_pass_vardict};
 
 bcftools +counts {output.vcf_pass_vardict} > {output.bcftools_counts_clinical};
 
-rm {output.vcf_pass_vardict}.temp;
+rm {output.vcf_pass_vardict}.temp1;
+
+rm {output.vcf_pass_vardict}.temp2;
     """
 
 
@@ -199,18 +205,20 @@ bcftools view  -f PASS,triallelic_site --threads {threads} {input.vcf_snv_clinic
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp -O z;
-
-tabix -p vcf -f {output.vcf_pass_tnscope_umi}.temp;
+bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_pass_tnscope_umi}.temp \
---output_vcf {output.vcf_pass_tnscope_umi} \
+--input_vcf {output.vcf_pass_tnscope_umi}.temp1 \
+--output_vcf {output.vcf_pass_tnscope_umi}.temp2 \
 --variant_caller {params.variant_caller};
+
+bgzip -@ {threads} -l 9 -c {output.vcf_pass_tnscope_umi}.temp2 > {output.vcf_pass_tnscope_umi}
 
 tabix -p vcf -f {output.vcf_pass_tnscope_umi};
 
 bcftools +counts {output.vcf_pass_tnscope_umi} > {output.bcftools_counts_clinical};
 
-rm {output.vcf_pass_tnscope_umi}.temp;
+rm {output.vcf_pass_tnscope_umi}.temp1;
+
+rm {output.vcf_pass_tnscope_umi}.temp2;
     """

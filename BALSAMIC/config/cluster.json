@@ -248,7 +248,7 @@
 		"time": "12:00:00",
 		"n": 24
 	},
-	"cnvpytor_sv_tumor_normal": {
+	"cnvpytor_tumor_only": {
 		"time": "05:00:00",
 		"n": 24
 	},
@@ -319,5 +319,17 @@
 	"bcftools_filter_TNscope_umi_clinical_tumor_normal": {
 		"time": "03:00:00",
 		"n": 8
+	},
+	"somalier_extract_normal": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"somalier_extract_tumor": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"somalier_relate": {
+		"time": "01:00:00",
+		"n": 1
 	}
 }

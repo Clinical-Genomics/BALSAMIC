@@ -1,0 +1,75 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule somalier_extract_normal:
+    input:
+        bamN = bam_dir + "normal.merged.bam",
+        fa = config["reference"]["reference_genome"],
+        ref_sites = config["reference"]["somalier_sites"],
+    output:
+        somalierN = qc_dir + "somalier/NORMAL.somalier"
+    benchmark:
+        Path(benchmark_dir,'somalier_extract_normal.tsv').as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
+    params:
+        outdir = Path(qc_dir,'somalier').as_posix(),
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config,"somalier_extract_normal")
+    message:
+        "Running somalier extract for normal sample of {params.case_name}"
+    shell:
+        """
+        somalier extract --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamN} ;
+        """
+
+
+rule somalier_extract_tumor:
+    input:
+        bamT=bam_dir + "tumor.merged.bam",
+        fa = config["reference"]["reference_genome"],
+        ref_sites = config["reference"]["somalier_sites"],
+    output:
+        somalierT = qc_dir + "somalier/TUMOR.somalier"
+    benchmark:
+        Path(benchmark_dir,'somalier_extract_tumorl.tsv').as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
+    params:
+        outdir = Path(qc_dir,'somalier').as_posix(),
+        case_name=config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config,"somalier_extract_tumor")
+    message:
+        "Running somalier extract for tumor sample of {params.case_name}"
+    shell:
+        """
+        somalier extract  --sample-prefix={params.case_name}_ -d {params.outdir} --sites {input.ref_sites} -f {input.fa} {input.bamT} ;
+        """
+
+
+rule somalier_relate:
+    input:
+        somalierN = qc_dir + "somalier/NORMAL.somalier",
+        somalierT = qc_dir + "somalier/TUMOR.somalier"
+    output:
+        html = qc_dir + "somalier/somalier.html",
+        pairs = qc_dir + "somalier/somalier.pairs.tsv",
+        samples = qc_dir + "somalier/somalier.samples.tsv"
+    benchmark:
+        Path(benchmark_dir,'somalier_relate.tsv').as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("somalier") + ".sif").as_posix()
+    params:
+        outprefix = Path(qc_dir,'somalier', 'somalier').as_posix(),
+        case_name=config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config,"somalier_relate")
+    message:
+        "Running somalier relate for {params.case_name}"
+    shell:
+        """
+        somalier relate -o {params.outprefix} {input.somalierN} {input.somalierT}  
+        """

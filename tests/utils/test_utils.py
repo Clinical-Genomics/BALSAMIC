@@ -563,11 +563,10 @@ def test_write_json_error(tmp_path):
         ref_json = {"path": "this_path", "reference": ""}
         tmp = tmp_path / "tmp"
         tmp.mkdir()
-        output_json = tmp / "/"
 
         # WHEN passing a invalid dict
         # THEN It will raise the error
-        assert write_json(ref_json, output_json)
+        assert write_json(ref_json, tmp)
 
 
 def test_read_json(config_path):
