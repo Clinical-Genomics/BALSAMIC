@@ -138,7 +138,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule rename_bam_tumor:
     input:
-        bam = Path(bam_dir, "{sample}_tumor.dedup.realign.bam").as_posix()
+        bam = Path(bam_dir, "{sample}.dedup.realign.bam".format(tumor = tumor_sample)).as_posix()
     output:
         bam = bam_dir + "tumor.merged.bam"
     shell:
@@ -149,7 +149,7 @@ mv {input.bam}.bai {output.bam}.bai
 
 rule rename_bam_normal:
     input:
-        bam = Path(bam_dir, "{sample}_normal.dedup.realign.bam").as_posix()
+        bam = Path(bam_dir, "{sample}.dedup.realign.bam".format(tumor = normal_sample)).as_posix()
     output:
         bam = bam_dir + "normal.merged.bam"
     shell:
