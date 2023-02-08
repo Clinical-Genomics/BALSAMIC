@@ -40,13 +40,17 @@ fastqc --threads {threads} {input.read1} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
 
-mv {params.fastqc_dir}/{input.read1}_fastqc.zip {params.fastqc_dir}/{wildcards.fastqpattern}_1_fastqc.zip ;
-mv {params.fastqc_dir}/{input.read1}_fastqc.html {params.fastqc_dir}/{wildcards.fastqpattern}_1_fastqc.html ;
+read1name=$(basename {input.read1})
+
+mv {params.fastqc_dir}/${read1name}_fastqc.zip {params.fastqc_dir}/{wildcards.fastqpattern}_1_fastqc.zip ;
+mv {params.fastqc_dir}/${read1name}_fastqc.html {params.fastqc_dir}/{wildcards.fastqpattern}_1_fastqc.html ;
  
 fastqc --threads {threads} {input.read2} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
 
-mv {params.fastqc_dir}/{input.read2}_fastqc.zip {params.fastqc_dir}/{wildcards.fastqpattern}_2_fastqc.zip ;
-mv {params.fastqc_dir}/{input.read2}_fastqc.html {params.fastqc_dir}/{wildcards.fastqpattern}_2_fastqc.html ;
+read2name=$(basename {input.read2})
+
+mv {params.fastqc_dir}/${read2name}_fastqc.zip {params.fastqc_dir}/{wildcards.fastqpattern}_2_fastqc.zip ;
+mv {params.fastqc_dir}/${read2name}_fastqc.html {params.fastqc_dir}/{wildcards.fastqpattern}_2_fastqc.html ;
         """
