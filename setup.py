@@ -30,7 +30,7 @@ requirements = [
     "h5py>=3.6.0",
     "PyPDF2>=1.26.0",
     "markdown==3.3.3",
-    "cryptography==3.2.1",
+    "cryptography==39.0.1",
     "tabulate==0.8.10",
     "toml==0.10.2",
 ]
