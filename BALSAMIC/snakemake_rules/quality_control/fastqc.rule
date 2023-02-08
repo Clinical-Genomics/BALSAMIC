@@ -3,54 +3,37 @@
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 
-def get_fwd_read(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
-
-def get_rev_read(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
+def get_samplereads(wcs):
+    fastq_list = []
+    for fastq_pattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
+        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["fwd"])
+        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["rev"])
+    return fastq_list
 
 rule fastqc:
     input:
-        read1=get_fwd_read,
-        read2=get_rev_read
+        samplereads=get_samplereads
     output:
-        fastqc1 = fastqc_dir + "{fastqpattern}_1_fastqc.zip",
-        fastqc2 = fastqc_dir + "{fastqpattern}_2_fastqc.zip"
+        fastqccomplete = fastqc_dir + "{sample}_fastqc.completed",
     benchmark:
-        Path(benchmark_dir, "fastqc_{fastqpattern}.tsv").as_posix()
+        Path(benchmark_dir, "fastqc_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
         fastqc_dir = fastqc_dir,
-        fastqpattern = "{fastqpattern}",
+        sample_id = "{sample}",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     threads: get_threads(cluster_config, "fastqc")
     message:
-        "Running FastQC on {params.fastqpattern}"
+        "Running FastQC on {params.sample_id}"
     shell:
         """
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.read1} \
+fastqc --threads {threads} {input.samplereads} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
-
-read1name=$(basename {input.read1})
-
-mv {params.fastqc_dir}/${read1name}_fastqc.zip {params.fastqc_dir}/{wildcards.fastqpattern}_1_fastqc.zip ;
-mv {params.fastqc_dir}/${read1name}_fastqc.html {params.fastqc_dir}/{wildcards.fastqpattern}_1_fastqc.html ;
  
-fastqc --threads {threads} {input.read2} \
---dir {params.tmpdir} \
---outdir {params.fastqc_dir};
-
-read2name=$(basename {input.read2})
-
-mv {params.fastqc_dir}/${read2name}_fastqc.zip {params.fastqc_dir}/{wildcards.fastqpattern}_2_fastqc.zip ;
-mv {params.fastqc_dir}/${read2name}_fastqc.html {params.fastqc_dir}/{wildcards.fastqpattern}_2_fastqc.html ;
+echo "Ran FastQC on {input.samplereads}" >> {output.fastqccomplete}
         """

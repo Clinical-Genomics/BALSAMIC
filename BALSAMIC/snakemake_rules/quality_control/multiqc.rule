@@ -24,7 +24,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
                                "quality_by_cycle_metrics", "quality_by_cycle.pdf",
                                "quality_distribution_metrics", "quality_distribution.pdf"]
     # fastqc metrics
-    multiqc_input.extend(expand(fastqc_dir + "{fastqpattern}_{read_num}_fastqc.zip", fastqpattern=get_fastqpatterns() ,read_num=[1, 2]))
+    multiqc_input.extend(expand(fastqc_dir + "{sample}_fastqc.completed", sample=config["samples"]))
+
 
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.json", fastqpattern=get_fastqpatterns()))
