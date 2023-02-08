@@ -8,6 +8,10 @@ def get_samplename(wcs):
         if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
             return sample
 
+def get_sampletype(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
+            return fastq_dict[sample]["sampletype"]
 def get_mapping(wcs):
     fastqpatterns = []
     for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
@@ -31,11 +35,12 @@ rule sentieon_align_sort:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = get_samplename,
+        sample_type = get_sampletype,
         fastqpattern = "{fastqpattern}"
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
     message:
-        "Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample: {params.sample_id}, {params.fastqpattern}"
+        "Align fastq reads using sentieon bwa-mem and sort reads using samtools for sampletype: {params.sample_type} : {params.sample_id}, {params.fastqpattern}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -44,7 +49,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem -M \
--R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.sample_id}\\tPL:ILLUMINA' \
+-R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
 -t {threads} \
 -K 50000000 \
 {input.ref} {input.read1} {input.read2} \
