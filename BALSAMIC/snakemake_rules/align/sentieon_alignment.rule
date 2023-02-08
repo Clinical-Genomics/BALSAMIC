@@ -24,7 +24,7 @@ rule sentieon_align_sort:
     output:
         bamout = Path(bam_dir, "{sample}_align_sort_{fastqpattern}.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_align_sort_{fastqpattern}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_align_sort_{sample}_{fastqpattern}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         header = params.common.align_header,
