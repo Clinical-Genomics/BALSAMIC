@@ -1,10 +1,17 @@
+[X.X.X]
+--------
+
+Fixed:
+^^^^^^
+* Update cryptography version (39.0.1) due to security alert https://github.com/Clinical-Genomics/BALSAMIC/pull/1087
+
 [11.1.0]
 --------
 
 Added:
 ^^^^^^
 * Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
-* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083 
+* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083
 
 Changed:
 ^^^^^^^^
@@ -14,7 +21,7 @@ Changed:
 Fixed:
 ^^^^^^
 * triallelic_site in quality filter for SNV https://github.com/Clinical-Genomics/BALSAMIC/pull/1052
-* Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/1060 
+* Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/1060
 * `test_write_json` failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
 * Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
 * Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
