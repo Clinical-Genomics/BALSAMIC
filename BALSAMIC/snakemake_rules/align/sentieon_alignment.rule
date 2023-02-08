@@ -84,14 +84,14 @@ shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
 
 {params.sentieon_exec} driver \
 -t {threads} \
--i {input.bamfiles} \
+-i $shellbamfiles \
 --algo LocusCollector \
 --fun score_info \
 {output.score};
 
 {params.sentieon_exec} driver \
 -t {threads} \
--i {input.bamfiles} \
+-i $shellbamfiles \
 --algo Dedup \
 --rmdup \
 --score_info {output.score} \
