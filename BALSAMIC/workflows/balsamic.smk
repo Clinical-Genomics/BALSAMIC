@@ -87,9 +87,11 @@ fastq_dict = {}
 if lims_id["normal"]:
     normal_sample = lims_id["normal"][0]
     fastq_dict[normal_sample] = get_fastq_dict(normal_sample, fastq_dir)
+    fastq_dict[normal_sample]["sampletype"] = "NORMAL"
 if lims_id["tumor"]:
     tumor_sample = lims_id["tumor"][0]
     fastq_dict[tumor_sample] = get_fastq_dict(tumor_sample, fastq_dir)
+    fastq_dict[tumor_sample]["sampletype"] = "TUMOR"
 
 
 
