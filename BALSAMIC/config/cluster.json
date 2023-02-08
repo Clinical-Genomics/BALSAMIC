@@ -50,15 +50,15 @@
 	},
 	"fastqc":{
 		"time": "12:00:00",
-		"n": 5
+		"n": 2
 	},
 	"fastp":{
 		"time": "12:00:00",
-		"n": 8
+		"n": 4
 	},
 	"fastp_umi":{
 		"time": "24:00:00",
-		"n": 8
+		"n": 4
 	},
 	"manta_germline": {
 		"time": "05:00:00",
@@ -126,7 +126,7 @@
 	},
 	"sentieon_align_sort": {
 		"time": "24:00:00",
-		"n": 36
+		"n": 12
 	},
 	"sentieon_base_calibration": {
 		"time": "24:00:00",
