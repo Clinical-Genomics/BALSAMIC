@@ -18,5 +18,5 @@ authors:
 - family-names: "Wirta"
   given-names: "Valtteri"
 title: "BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer"
-version: v11.0.2
+version: v11.1.0
 url: "https://github.com/Clinical-Genomics/BALSAMIC"
