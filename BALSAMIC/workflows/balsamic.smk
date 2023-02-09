@@ -75,7 +75,7 @@ swegen_sv = ""
 # Prepare fastq_dict
 fastq_dict = {}
 for sample in config["samples"]:
-    sampletype = config[sample]["type"]
+    sampletype = config["samples"][sample]["type"]
     if sampletype == "tumor":
         tumor_sample = sample
         fastq_dict[tumor_sample] = get_fastq_dict(tumor_sample, fastqinput_dir)
