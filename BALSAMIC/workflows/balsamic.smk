@@ -41,7 +41,7 @@ logging.getLogger("filelock").setLevel("WARN")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Set case id/name
 case_id = config["analysis"]["case_id"]
@@ -49,6 +49,7 @@ case_id = config["analysis"]["case_id"]
 # Directories
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
+fastqinput_dir = config["analysis"]["fastq_path"]
 fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
@@ -81,16 +82,15 @@ lims_id = {'normal': [], 'tumor': []}
 for sample, sample_info in config["samples"].items():
     lims_id[sample_info["type"]].append(sample_info["sample_name"])
 
-
 # Prepare fastq_dict
 fastq_dict = {}
 if lims_id["normal"]:
     normal_sample = lims_id["normal"][0]
-    fastq_dict[normal_sample] = get_fastq_dict(normal_sample, fastq_dir)
+    fastq_dict[normal_sample] = get_fastq_dict(normal_sample, fastqinput_dir)
     fastq_dict[normal_sample]["sampletype"] = "NORMAL"
 if lims_id["tumor"]:
     tumor_sample = lims_id["tumor"][0]
-    fastq_dict[tumor_sample] = get_fastq_dict(tumor_sample, fastq_dir)
+    fastq_dict[tumor_sample] = get_fastq_dict(tumor_sample, fastqinput_dir)
     fastq_dict[tumor_sample]["sampletype"] = "TUMOR"
 
 

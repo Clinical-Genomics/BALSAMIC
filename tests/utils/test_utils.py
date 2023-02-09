@@ -1,5 +1,4 @@
 import json
-import os
 import subprocess
 import pytest
 import sys
@@ -11,6 +10,8 @@ from unittest import mock
 import logging
 
 from pathlib import Path
+
+from _pytest.logging import LogCaptureFixture
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
@@ -26,7 +27,6 @@ from BALSAMIC.utils.cli import (
     createDir,
     get_config,
     recursive_default_dict,
-    create_pon_fastq_symlink,
     convert_defaultdict_to_regular_dict,
     get_file_status_string,
     get_from_two_key,
@@ -45,7 +45,7 @@ from BALSAMIC.utils.cli import (
     get_md5,
     create_md5,
 )
-from BALSAMIC.utils.io import read_json, write_json, read_yaml
+from BALSAMIC.utils.io import read_json, write_json, read_yaml, remove_symlinks
 
 from BALSAMIC.utils.rule import (
     get_chrom,
@@ -61,7 +61,6 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_prefix,
 )
-from tests.helpers import Map
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -557,20 +556,20 @@ def test_write_json(tmp_path, reference):
     assert len(list(tmp.iterdir())) == 1
 
 
-def test_write_json_error(tmp_path):
-    with pytest.raises(Exception, match=r"Is a directory"):
-        # GIVEN a invalid dict
-        ref_json = {"path": "this_path", "reference": ""}
-        tmp = tmp_path / "tmp"
-        tmp.mkdir()
+def test_write_json_error(tmp_path: Path):
+    """Test JSON write error."""
 
-        # WHEN passing a invalid dict
-        # THEN It will raise the error
-        assert write_json(ref_json, tmp)
+    # GIVEN a dictionary to be saved in a JSON file
+    ref_json = {"case": "/path/to/case", "reference": "/path/to/reference"}
+
+    # GIVEN a directory as the output file
+    with pytest.raises(Exception, match=r"Is a directory"):
+        # THEN an exception should be raised
+        assert write_json(ref_json, tmp_path)
 
 
 def test_read_json(config_path):
-    """test data extraction from a BALSAMIC config JSON file"""
+    """Test data extraction from a BALSAMIC config JSON file."""
 
     # GIVEN a config path
 
@@ -582,7 +581,7 @@ def test_read_json(config_path):
 
 
 def test_read_json_error():
-    """test data extraction from a BALSAMIC config JSON file for an ivalid path"""
+    """Test data extraction from a BALSAMIC config JSON file for an invalid path."""
 
     # GIVEN an incorrect config path
     config_path = "/not/a/path"
@@ -598,15 +597,15 @@ def test_read_json_error():
 
 
 def test_read_yaml(metrics_yaml_path):
-    """test data extraction from a saved YAML file"""
+    """Test data extraction from a saved YAML file."""
 
     # GIVEN an expected output
     n_metrics = 12  # Number of expected metric
 
     dropout_metric = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+        "id": "ACC1",
+        "input": "ACC1.sorted.mrkdup.hsmetric",
         "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
         "value": 0.027402,
@@ -615,8 +614,8 @@ def test_read_yaml(metrics_yaml_path):
 
     ins_size_metric = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
+        "id": "ACC1",
+        "input": "ACC1.sorted.insertsizemetric",
         "name": "MEAN_INSERT_SIZE",
         "step": "multiqc_picard_insertSize",
         "value": 201.813054,
@@ -625,8 +624,8 @@ def test_read_yaml(metrics_yaml_path):
 
     dups_metric = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
+        "id": "ACC1",
+        "input": "ACC1.sorted.mrkdup.txt",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
         "value": 0.391429,
@@ -644,7 +643,7 @@ def test_read_yaml(metrics_yaml_path):
 
 
 def test_read_yaml_error():
-    """test data extraction from an incorrect YAML path"""
+    """Test data extraction from an incorrect YAML path."""
 
     # GIVEN an invalid path
     yaml_path = "NOT_A_PATH"
@@ -653,7 +652,7 @@ def test_read_yaml_error():
     try:
         read_yaml(yaml_path)
     except FileNotFoundError as file_exc:
-        assert f"The YAML file {yaml_path} was not found." in str(file_exc)
+        assert f"The YAML file {yaml_path} was not found" in str(file_exc)
 
 
 def test_get_threads(config_files):
@@ -885,74 +884,46 @@ def test_get_fastq_bind_path(tmpdir_factory):
     assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
 
 
-def test_create_pon_fastq_symlink_file_exist_error(tmpdir_factory, caplog):
-    # GIVEN a list of valid fastq file names for cnv pon
-    fastq_files = [
-        "case1_R_1.fastq.gz",
-    ]
-
-    # WHEN files are created, and symlinks are made in symlink directory
-    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
-    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-
-    for fastq_file in fastq_files:
-        Path(symlink_from_path, fastq_file).touch()
-        Path(symlink_to_path, fastq_file).touch()
-
-    with caplog.at_level(logging.INFO):
-        create_pon_fastq_symlink(symlink_from_path, symlink_to_path)
-        assert "exists, skipping" in caplog.text
-
-
 def test_convert_deliverables_tags():
+    """Test generation of delivery tags."""
 
     # GIVEN a deliverables dict and a sample config dict
     delivery_json = {
         "files": [
             {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_1.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "read2,quality-trimmed-fastq-read2,tumor",
-                "id": "S1_R",
+                "tag": "ACC1,read1,quality-trimmed-fastq-read1",
+                "id": "ACC1",
                 "format": "fastq.gz",
             },
             {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_2.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "S1_R,json,quality-trimmed-fastq-json",
-                "id": "S1_R",
-                "format": "json",
+                "tag": "read2,quality-trimmed-fastq-read1",
+                "id": "ACC1",
+                "format": "fastq.gz",
             },
             {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S2_R_fastp.json",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/ACC1.fastp.json",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "ACC1,json,quality-trimmed-fastq-json",
+                "tag": "ACC1,json,quality-trimmed-fastq-json,tumor",
                 "id": "tumor",
                 "format": "json",
             },
         ]
     }
+    sample_config_dict = {"samples": {"ACC1": {"type": "tumor"}}}
 
-    sample_config_dict = {
-        "samples": {
-            "S1_R": {
-                "file_prefix": "S1_R",
-                "sample_name": "ACC1",
-                "type": "tumor",
-                "readpair_suffix": ["1", "2"],
-            },
-        },
-    }
-
-    # WHEN running convert function
-    delivery_json = convert_deliverables_tags(
+    # WHEN running the convert function
+    delivery_json: dict = convert_deliverables_tags(
         delivery_json=delivery_json, sample_config_dict=sample_config_dict
     )
 
-    # Prefix strings should be replaced with sample name
+    # THEN prefix strings should be replaced with sample name
     for delivery_file in delivery_json["files"]:
         assert delivery_file["id"] == "ACC1"
         assert "ACC1" in delivery_file["tag"]
@@ -1068,13 +1039,13 @@ def test_create_md5(tmp_path):
 
 
 def test_get_rule_output(snakemake_fastqc_rule):
-    """Tests retrieval of existing output files from a specific workflow"""
+    """Tests retrieval of existing output files from a specific workflow."""
 
     # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
     rules = snakemake_fastqc_rule
     rule_name = "fastqc"
     output_file_wildcards = {
-        "sample": ["concatenated_tumor_XXXXXX_R", "tumor", "normal"],
+        "sample": ["ACC1", "tumor", "normal"],
         "case_name": "sample_tumor_only",
     }
 
@@ -1086,8 +1057,8 @@ def test_get_rule_output(snakemake_fastqc_rule):
     for file in output_files:
         # Expected file names
         assert (
-            os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_1.fastq.gz"
-            or os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+            Path(file[0]).name == "concatenated_ACC1_R_1.fastq.gz"
+            or Path(file[0]).name == "concatenated_ACC1_R_2.fastq.gz"
         )
         # Expected tags
         assert (
@@ -1097,15 +1068,30 @@ def test_get_rule_output(snakemake_fastqc_rule):
 
 
 def test_get_sample_type_from_prefix(config_dict):
-    """Test sample type extraction from a extracted config file"""
+    """Test sample type extraction from a extracted config file."""
 
     # GIVEN a config dictionary
 
     # GIVEN a sample name
-    sample = "concatenated_tumor_XXXXXX_R"
+    sample = "ACC1"
 
     # WHEN calling the function
     sample_type = get_sample_type_from_prefix(config_dict, sample)
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == "tumor"
+
+
+def test_remove_symlinks(fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture):
+    """Test remove symlinks from a directory."""
+
+    # GIVEN a list of linked files
+    for file in Path(fastq_dir).iterdir():
+        Path(tmp_path, file.name).symlink_to(file)
+
+    # WHEN removing the symbolic links
+    remove_symlinks(str(tmp_path), "*.fastq.gz")
+
+    # THEN the temp directory should not contain any linked files
+    for file in Path(tmp_path).iterdir():
+        assert not file.is_symlink()

@@ -10,6 +10,7 @@ from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
 import zlib
+from typing import Dict, Optional
 
 import yaml
 import snakemake
@@ -506,38 +507,13 @@ def get_bioinfo_tools_version(
 
 
 def get_sample_dict(
-    tumor: str,
-    normal: str,
-    tumor_sample_name: str = None,
-    normal_sample_name: str = None,
-) -> dict:
-    """Concatenates sample dicts for all provided files"""
-    samples = {}
-    if normal:
-        for sample in normal:
-            key, val = get_sample_names(sample, "normal")
-            samples[key] = val
-            samples[key]["sample_name"] = normal_sample_name
-
-    for sample in tumor:
-        key, val = get_sample_names(sample, "tumor")
-        samples[key] = val
-        samples[key]["sample_name"] = tumor_sample_name
-    return samples
-
-
-def get_sample_names(filename, sample_type):
-    """Creates a dict with sample prefix, sample type, and readpair suffix"""
-    file_str = validate_fastq_pattern(filename)
-    if file_str:
-        return (
-            file_str,
-            {
-                "file_prefix": file_str,
-                "type": sample_type,
-                "readpair_suffix": ["1", "2"],
-            },
-        )
+    tumor_sample_name: str, normal_sample_name: Optional[str]
+) -> Dict[str, dict]:
+    """Returns a sample dictionary given the names of the tumor and/or normal samples."""
+    sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
+    if normal_sample_name:
+        sample_dict.update({normal_sample_name: {"type": "normal"}})
+    return sample_dict
 
 
 def create_fastq_symlink(casefiles, symlink_dir: Path):
@@ -605,23 +581,20 @@ def get_fastq_bind_path(fastq_path: Path) -> list():
 
 
 def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> dict:
-    """Replaces values of file_prefix with sample_name in deliverables dict"""
+    """Replaces values of sample_type with sample_name in deliverables dict."""
 
     for delivery_file in delivery_json["files"]:
         file_tags = delivery_file["tag"].split(",")
         for sample in sample_config_dict["samples"]:
-            file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
-            sample_name = sample_config_dict["samples"][sample]["sample_name"]
             sample_type = sample_config_dict["samples"][sample]["type"]
-            if file_prefix == delivery_file["id"]:
-                delivery_file["id"] = sample_name
+            if sample == delivery_file["id"]:
                 for tag_index, tag in enumerate(file_tags):
-                    if tag == file_prefix or tag == file_prefix.replace("_", "-"):
-                        file_tags[tag_index] = sample_name
-                if sample_name not in file_tags:
-                    file_tags.append(sample_name)
+                    if tag == sample or tag == sample.replace("_", "-"):
+                        file_tags[tag_index] = sample
+                if sample not in file_tags:
+                    file_tags.append(sample)
             if sample_type == delivery_file["id"]:
-                delivery_file["id"] = sample_name
+                delivery_file["id"] = sample
             if sample_type in file_tags:
                 file_tags.remove(sample_type)
         delivery_file["tag"] = list(set(file_tags))
@@ -657,17 +630,6 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
     with open(job_id_dump, "r") as jobid_in, open(job_id_yaml, "w") as jobid_out:
         jobid_list = jobid_in.read().splitlines()
         yaml.dump({case_name: jobid_list}, jobid_out)
-
-
-def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
-    for fastq_name in os.listdir(pon_fastqs):
-        pon_fastq = Path(pon_fastqs, fastq_name).as_posix()
-        pon_sym_file = Path(symlink_dir, fastq_name).as_posix()
-        try:
-            LOG.info(f"Creating symlink {fastq_name} -> {pon_sym_file}")
-            os.symlink(pon_fastq, pon_sym_file)
-        except FileExistsError:
-            LOG.info(f"File {pon_sym_file} exists, skipping")
 
 
 def get_md5(filename):

@@ -14,12 +14,10 @@ from BALSAMIC.utils.models import (
     SampleInstanceModel,
     ReferenceUrlsModel,
     ReferenceMeta,
-    BalsamicWorkflowConfig,
     UMIParamsCommon,
     UMIParamsUMIextract,
     UMIParamsConsensuscall,
     UMIParamsTNscope,
-    ParamsCommon,
     ParamsVardict,
     ParamsVEP,
     MetricModel,
@@ -27,6 +25,7 @@ from BALSAMIC.utils.models import (
     MetricValidationModel,
     AnalysisPonModel,
 )
+from tests.conftest import analysis_dir
 
 
 def test_referencemeta():
@@ -255,17 +254,21 @@ def test_varcaller_attribute():
         assert "not a valid argument" in excinfo.value
 
 
-def test_analysis_model():
+def test_analysis_model(test_data_dir: str):
+    """Test analysis model instantiation."""
+
     # GIVEN valid input arguments
     valid_args = {
         "case_id": "case_id",
         "gender": "female",
         "analysis_type": "paired",
         "sequencing_type": "targeted",
-        "analysis_dir": "tests/test_data",
+        "analysis_dir": test_data_dir,
+        "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic-umi",
     }
-    # THEN we can successully create a config dict
+
+    # THEN we can successfully create a config dict
     assert AnalysisModel.parse_obj(valid_args)
 
     # GIVEN invalid input arguments
@@ -277,6 +280,7 @@ def test_analysis_model():
         "analysis_dir": "tests/test_data",
         "analysis_workflow": "umi",
     }
+
     # THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
         AnalysisModel.parse_obj(invalid_args)
@@ -284,20 +288,34 @@ def test_analysis_model():
 
 
 def test_sample_instance_model():
-    # GIVEN valid input arguments
-    valid_args = {"file_prefix": "S2_R", "type": "normal", "sample_name": "S2"}
-    # THEN we can successully create a config dict
-    assert SampleInstanceModel.parse_obj(valid_args)
+    """Test sample instance model initialisation."""
 
-    # GIVEN invalid input arguments
-    invalid_args = {
-        "file_prefix": "S2_R",
-        "type": "fungal",
-    }
-    # THEN should trigger ValueError
-    with pytest.raises(ValueError) as excinfo:
-        SampleInstanceModel.parse_obj(invalid_args)
-        assert "not supported" in excinfo.value
+    # GIVEN a sample dictionary
+    tumor_sample: dict = {"ACC1": {"type": "tumor"}}
+
+    # WHEN parsing the sample dictionary
+    sample: SampleInstanceModel = SampleInstanceModel.parse_obj(tumor_sample["ACC1"])
+
+    # THEN the sample model should be correctly initialised
+    assert sample.dict() == tumor_sample["ACC1"]
+
+
+def test_sample_instance_model_error():
+    """Test sample instance model error raise."""
+
+    # GIVEN a sample dictionary with an invalid sample type
+    sample_type: str = "affected"
+    samples: dict = {"ACC1": {"type": sample_type}}
+
+    # WHEN parsing the sample dictionary
+
+    # THEN a ValueError should be triggered
+    with pytest.raises(ValueError) as exc:
+        SampleInstanceModel.parse_obj(samples["ACC1"])
+        assert (
+            f"The provided sample type ({sample_type}) is not supported in BALSAMIC"
+            in exc.value
+        )
 
 
 def test_umiparams_common():
@@ -428,8 +446,8 @@ def test_metric_model_pass_validation():
     # GIVEN input attributes
     metrics = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+        "id": "ACC1",
+        "input": "ACC1.sorted.mrkdup.hsmetric",
         "name": "MEDIAN_TARGET_COVERAGE",
         "step": "multiqc_picard_HsMetrics",
         "value": 2393.0,
@@ -449,8 +467,8 @@ def test_metric_model_duplication_refactoring():
     # GIVEN input attributes
     metrics = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R_1_fastqc.zip",
+        "id": "ACC1",
+        "input": "concatenated_ACC1_R_1_fastqc.zip",
         "name": "FastQC_mqc-generalstats-fastqc-percent_duplicates",
         "step": "multiqc_general_stats",
         "value": 21.517800000611373,
@@ -468,7 +486,7 @@ def test_metric_model_fail_validation():
     """test MetricModel behaviour for an incorrect input"""
 
     # GIVEN a non accepted input
-    invalid_input = {"header": None, "id": "tumor"}
+    invalid_input = {"header": None, "id": "ACC1"}
 
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
@@ -533,8 +551,8 @@ def test_metric_validation_model_norm_fail(qc_extracted_metrics):
         assert metrics[4]["condition"]["norm"] in str(key_exc)
 
 
-def test_analysis_pon_model(test_data_dir):
-    """Tests PON model parsing"""
+def test_analysis_pon_model(test_data_dir: str):
+    """Tests PON model parsing."""
 
     # GIVEN valid input arguments
     valid_args = {
@@ -542,6 +560,7 @@ def test_analysis_pon_model(test_data_dir):
         "analysis_type": "pon",
         "sequencing_type": "targeted",
         "analysis_dir": test_data_dir,
+        "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic",
         "pon_version": "v1",
     }
@@ -555,6 +574,7 @@ def test_analysis_pon_model(test_data_dir):
         "analysis_type": "pon",
         "sequencing_type": "targeted",
         "analysis_dir": test_data_dir,
+        "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic",
         "pon_version": "v01",
     }

@@ -32,12 +32,12 @@ logging.getLogger("filelock").setLevel("WARN")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 case_id = config["analysis"]["case_id"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" + case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
+concatenated_fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
@@ -84,6 +84,7 @@ os.environ['TMPDIR'] = get_result_dir(config)
 analysis_type = config['analysis']["analysis_type"]
 
 rules_to_include = [
+                "snakemake_rules/concatenation/concatenation.rule",
                 "snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/quality_control/fastqc.rule",
                 "snakemake_rules/quality_control/multiqc.rule",
@@ -97,12 +98,11 @@ rules_to_include = [
 
 if "paired" in config['analysis']['analysis_type']:
     rules_to_include.append("snakemake_rules/variant_calling/mergetype_normal.rule")
+
     # Somalier only implemented for hg38 and hg19
     if "canfam3" not in config["reference"]["reference_genome"]:
         rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
 
-
-# for r in rules_to_include:
 for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")

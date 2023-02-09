@@ -14,7 +14,7 @@ rule fastqc:
     input:
         samplereads=get_samplereads
     output:
-        fastqccomplete = fastqc_dir + "{sample}_fastqc.completed",
+        fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
     benchmark:
         Path(benchmark_dir, "fastqc_{sample}.tsv").as_posix()
     singularity:

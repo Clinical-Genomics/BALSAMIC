@@ -1,5 +1,5 @@
 {
-    "concatenated_neatlyfastraven_XXXXXX_R": {
+    "ACC00000A01": {
         "BAIT_SET": "gmslymphoid_7.1_hg19_design.bed",
         "GENOME_SIZE": 3101804739.0,
         "BAIT_TERRITORY": 1199545.0,
@@ -89,7 +89,7 @@
         "LIBRARY": "",
         "READ_GROUP": ""
     },
-    "concatenated_easilyusefulorca_XXXXXX_R": {
+    "ACC00000A02": {
         "BAIT_SET": "gmslymphoid_7.1_hg19_design.bed",
         "GENOME_SIZE": 3101804739.0,
         "BAIT_TERRITORY": 1199545.0,

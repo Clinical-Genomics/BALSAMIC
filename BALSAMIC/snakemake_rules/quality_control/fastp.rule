@@ -47,7 +47,7 @@ rule fastp_umi:
         html = qc_dir + "fastp/{fastqpattern}_fastp_umi.html",
     benchmark:
         Path(benchmark_dir, "fastp_umi" + "{fastqpattern}.tsv").as_posix()
-    singularity: 
+    singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
@@ -64,10 +64,10 @@ export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {input.read1} \
---in2 {input.read2} \
---out1 {output.read1} \
---out2 {output.read2} \
+--in1 {input.fastq_r1} \
+--in2 {input.fastq_r2} \
+--out1 {output.fastq_r1} \
+--out2 {output.fastq_r2} \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
@@ -89,7 +89,7 @@ rule fastp:
     benchmark:
         Path(benchmark_dir, "fastp_" + "{fastqpattern}.tsv").as_posix()
     singularity: 
-        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix() 
+        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
         umi = " ".join(fastp_param_umi),
@@ -105,10 +105,10 @@ export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {input.read1} \
---in2 {input.read2} \
---out1 {output.read1} \
---out2 {output.read2} \
+--in1 {input.fastq_r1} \
+--in2 {input.fastq_r2} \
+--out1 {output.fastq_r1} \
+--out2 {output.fastq_r2} \
 --json {output.json} \
 --html {output.html} \
 --disable_adapter_trimming \

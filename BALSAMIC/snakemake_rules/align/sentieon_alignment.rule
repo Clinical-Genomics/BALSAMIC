@@ -52,7 +52,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
 -t {threads} \
 -K 50000000 \
-{input.ref} {input.read1} {input.read2} \
+{input.ref} {input.fastq_r1} {input.fastq_r2} \
 | {params.sentieon_exec} util sort \
 -o {output.bamout} \
 -t {threads} \

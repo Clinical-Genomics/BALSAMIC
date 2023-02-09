@@ -9,7 +9,7 @@ from BALSAMIC.utils.rule import get_result_dir
 shell.prefix("set -eo pipefail; ")
 
 rule_dir = config["rule_directory"]
-fastq_dir = config["analysis"]["fastq_path"]
+fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 cutadapt_dir = get_result_dir(config) + "/cutadapt/"
@@ -18,15 +18,15 @@ result_dir = get_result_dir(config) + "/"
 vcf_dir = get_result_dir(config) + "/vcf/"
 vep_dir = get_result_dir(config) + "/vep/"
 
-SENTIEON_LICENSE = "10.10.10.1:8990"  
+SENTIEON_LICENSE = "10.10.10.1:8990"
 SENTIEON_INSTALL_DIR="/home/proj/development/cancer/sentieon/sentieon-genomics-201808.03"
 
 include:
-  rule_dir + "snakemake_rules/sentieon/sentieon.rule" 
+  rule_dir + "snakemake_rules/sentieon/sentieon.rule"
 
 rule all:
   input:
-    expand(bam_dir + "{sample}.bam", sample=config["samples"]),
+    expand(bam_dir + "{sample}.aligned.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.recal_data.table", sample=config["samples"]),

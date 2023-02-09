@@ -378,16 +378,6 @@ def get_reference_output_files(
     return ref_vcf_list
 
 
-def get_pon_samples(fastq_dir):
-    """Given dirpath containing list of PON fastq files
-    Returns list of sample names
-    """
-    samples = [
-        (f.split("_1"))[0] for f in os.listdir(fastq_dir) if f.endswith("_R_1.fastq.gz")
-    ]
-    return samples
-
-
 def get_clinical_snv_observations(config: dict) -> str:
     """Returns path for clinical snv observations
 
