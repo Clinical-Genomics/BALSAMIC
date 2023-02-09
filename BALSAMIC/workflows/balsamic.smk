@@ -72,27 +72,18 @@ clinical_sv = ""
 swegen_sv = ""
 
 
-# Sample names for tumor or normal
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
-if config['analysis']['analysis_type'] == "paired":
-    normal_sample = get_sample_type(config["samples"], "normal")[0]
-
-# Get sample unique names for tumor or normal
-lims_id = {'normal': [], 'tumor': []}
-for sample, sample_info in config["samples"].items():
-    lims_id[sample_info["type"]].append(sample_info["sample_name"])
-
 # Prepare fastq_dict
 fastq_dict = {}
-if lims_id["normal"]:
-    normal_sample = lims_id["normal"][0]
-    fastq_dict[normal_sample] = get_fastq_dict(normal_sample, fastqinput_dir)
-    fastq_dict[normal_sample]["sampletype"] = "NORMAL"
-if lims_id["tumor"]:
-    tumor_sample = lims_id["tumor"][0]
-    fastq_dict[tumor_sample] = get_fastq_dict(tumor_sample, fastqinput_dir)
-    fastq_dict[tumor_sample]["sampletype"] = "TUMOR"
-
+for sample in config["samples"]:
+    sampletype = config[sample]["type"]
+    if sampletype == "tumor":
+        tumor_sample = sample
+        fastq_dict[tumor_sample] = get_fastq_dict(tumor_sample, fastqinput_dir)
+        fastq_dict[tumor_sample]["sampletype"] = "TUMOR"
+    else:
+        normal_sample = sample
+        fastq_dict[normal_sample] = get_fastq_dict(normal_sample,fastqinput_dir)
+        fastq_dict[normal_sample]["sampletype"] = "NORMAL"
 
 
 # vcfanno annotations
