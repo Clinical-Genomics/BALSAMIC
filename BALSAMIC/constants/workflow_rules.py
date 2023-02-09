@@ -1,7 +1,6 @@
 # Define set of rules
 SNAKEMAKE_RULES = {
     "common": {
-        "concatenate": ["snakemake_rules/concatenation/concatenation.rule"],
         "qc": [
             "snakemake_rules/quality_control/fastp.rule",
             "snakemake_rules/quality_control/fastqc.rule",
