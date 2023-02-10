@@ -38,11 +38,11 @@ if 'quality_trim' in config['QC'].keys():
 
 rule fastp_umi:
     input:
-        read1=get_fwd_read,
-        read2=get_rev_read
+        fastq_r1=get_fwd_read,
+        fastq_r2=get_rev_read
     output:
-        read1 = temp(fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz"),
-        read2 = temp(fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"),
+        fastq_r1 = temp(fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"),
         json = qc_dir + "fastp/{fastqpattern}_fastp_umi.json",
         html = qc_dir + "fastp/{fastqpattern}_fastp_umi.html",
     benchmark:
@@ -79,11 +79,11 @@ fastp \
 
 rule fastp:
     input:
-        read1 = fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz",
-        read2 = fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"
+        fastq_r1 = fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz",
+        fastq_r2 = fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"
     output:
-        read1 = temp(fastq_dir + "{fastqpattern}_1.fp.fastq.gz"),
-        read2 = temp(fastq_dir + "{fastqpattern}_2.fp.fastq.gz"),
+        fastq_r1 = temp(fastq_dir + "{fastqpattern}_1.fp.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{fastqpattern}_2.fp.fastq.gz"),
         json = qc_dir + "fastp/{fastqpattern}_fastp.json",
         html = qc_dir + "fastp/{fastqpattern}_fastp.html"
     benchmark:
