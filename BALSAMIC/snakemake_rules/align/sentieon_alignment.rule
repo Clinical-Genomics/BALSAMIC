@@ -22,8 +22,8 @@ def get_mapping(wcs):
 rule sentieon_align_sort:
     input:
         ref = config["reference"]["reference_genome"],
-        read1 = Path(fastq_dir, "{fastqpattern}_1.fp.fastq.gz").as_posix(),
-        read2 = Path(fastq_dir, "{fastqpattern}_2.fp.fastq.gz").as_posix(),
+        fastq_r1 = Path(fastq_dir, "{fastqpattern}_1.fp.fastq.gz").as_posix(),
+        fastq_r2 = Path(fastq_dir, "{fastqpattern}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bamout = Path(bam_dir, "{sample}_align_sort_{fastqpattern}.bam").as_posix()
