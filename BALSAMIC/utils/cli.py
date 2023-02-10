@@ -280,25 +280,6 @@ def get_config(config_name):
         raise FileNotFoundError(f"Config for {config_name} was not found.")
 
 
-def recursive_default_dict():
-    """
-    Recursivly create defaultdict.
-    """
-    return collections.defaultdict(recursive_default_dict)
-
-
-def convert_defaultdict_to_regular_dict(inputdict: dict):
-    """
-    Recursively convert defaultdict to dict.
-    """
-    if isinstance(inputdict, collections.defaultdict):
-        inputdict = {
-            key: convert_defaultdict_to_regular_dict(value)
-            for key, value in inputdict.items()
-        }
-    return inputdict
-
-
 def find_file_index(file_path):
     indexible_files = {
         ".bam": [".bam.bai", ".bai"],
@@ -330,25 +311,6 @@ def get_file_extension(file_path):
         _, file_extension = os.path.splitext(file_path)
 
     return file_extension[1:]
-
-
-def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
-    """
-    Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
-
-    from_key and by_key should both exist
-    """
-
-    matching_value = default
-    if (
-        from_key in input_dict
-        and by_key in input_dict
-        and by_value in input_dict[from_key]
-    ):
-        idx = input_dict[from_key].index(by_value)
-        matching_value = input_dict[by_key][idx]
-
-    return matching_value
 
 
 def get_file_status_string(file_to_check):
@@ -516,22 +478,6 @@ def get_sample_dict(
     return sample_dict
 
 
-def create_fastq_symlink(casefiles, symlink_dir: Path):
-    """Creates symlinks for provided files in analysis/fastq directory.
-    Identifies file prefix pattern, and also creates symlinks for the
-    second read file, if needed"""
-
-    for filename in casefiles:
-        parent_dir = Path(filename).parents[0]
-        file_str = validate_fastq_pattern(filename)
-        for f in parent_dir.rglob(f"*{file_str}*.fastq.gz"):
-            try:
-                LOG.info(f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
-                Path(symlink_dir, f.name).symlink_to(f)
-            except FileExistsError:
-                LOG.info(f"File {symlink_dir / f.name} exists, skipping")
-
-
 def generate_graph(config_collection_dict, config_path):
     """Generate DAG graph using snakemake stdout output"""
 
@@ -568,16 +514,6 @@ def generate_graph(config_collection_dict, config_path):
         engine="dot",
     )
     graph_obj.render(cleanup=True)
-
-
-def get_fastq_bind_path(fastq_path: Path) -> list():
-    """Takes a path with symlinked fastq files.
-    Returns unique paths to parent directories for singulatiry bind
-    """
-    parents = set()
-    for fastq_file_path in Path(fastq_path).iterdir():
-        parents.add(Path(fastq_file_path).resolve().parent.as_posix())
-    return list(parents)
 
 
 def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> dict:
