@@ -328,20 +328,15 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
 
 # Adding code for testing, removing merge_bam from wgs analysis
-print(rules_to_include)
-print(sequence_type)
 if sequence_type == "wgs":
     if "snakemake_rules/variant_calling/mergetype_tumor.rule" in rules_to_include:
         rules_to_include.remove("snakemake_rules/variant_calling/mergetype_tumor.rule")
-        print("removed mergetype_tumor, for testing")
     if "snakemake_rules/variant_calling/mergetype_normal.rule" in rules_to_include:
         rules_to_include.remove("snakemake_rules/variant_calling/mergetype_normal.rule")
-        print("removed mergetype_normal, for testing")
 
 # Added code for testing, removing somalier because it had errors
 if "snakemake_rules/quality_control/somalier.rule" in rules_to_include:
     rules_to_include.remove("snakemake_rules/quality_control/somalier.rule")
-    print("removed somalier, for testing")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
