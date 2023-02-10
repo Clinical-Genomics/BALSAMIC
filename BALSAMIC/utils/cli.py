@@ -478,8 +478,17 @@ def get_sample_dict(
     return sample_dict
 
 
+def get_pon_sample_dict(directory: str) -> Dict[str, dict]:
+    """Returns a PON sample dictionary."""
+    sample_dict: Dict[str, dict] = {}
+    for file in Path(directory).glob("*.fastq.gz"):
+        sample_name: str = file.name.split("_")[-4]
+        sample_dict.update({sample_name: {"type": "normal"}})
+    return sample_dict
+
+
 def generate_graph(config_collection_dict, config_path):
-    """Generate DAG graph using snakemake stdout output"""
+    """Generate DAG graph using snakemake stdout output."""
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(

@@ -21,6 +21,18 @@ MOCKED_OS_ENVIRON = "os.environ"
 
 
 @pytest.fixture(scope="session")
+def tumor_sample_name() -> str:
+    """Mock tumor sample name."""
+    return "ACC1"
+
+
+@pytest.fixture(scope="session")
+def normal_sample_name() -> str:
+    """Mock normal sample name."""
+    return "ACC2"
+
+
+@pytest.fixture(scope="session")
 def case_id_tumor_only() -> str:
     """Mock TGA tumor-only case ID."""
     return "sample_tumor_only"
@@ -61,8 +73,10 @@ def fastq_dir(case_id_tumor_only: str, analysis_dir: str):
     """Mock FastQ directory."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
-    Path(fastq_dir, f"ACC1_R_1.fastq.gz").touch()
-    Path(fastq_dir, f"ACC1_R_2.fastq.gz").touch()
+    Path(fastq_dir, f"ACC1_XXXXX_R_1.fastq.gz").touch()
+    Path(fastq_dir, f"ACC1_XXXXX_R_2.fastq.gz").touch()
+    Path(fastq_dir, f"ACC2_XXXXX_R_1.fastq.gz").touch()
+    Path(fastq_dir, f"ACC2_XXXXX_R_2.fastq.gz").touch()
     return fastq_dir.as_posix()
 
 
@@ -317,6 +331,8 @@ ls -l # dummy command
 @pytest.fixture(scope="session")
 def tumor_normal_config(
     case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     balsamic_cache: str,
@@ -353,9 +369,9 @@ def tumor_normal_config(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
                 "--normal-sample-name",
-                "ACC2",
+                normal_sample_name,
             ],
         )
 
@@ -377,6 +393,8 @@ def fixture_config_helpers():
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(
     case_id_tumor_normal_wgs: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_normal_wgs: str,
     balsamic_cache: str,
@@ -407,9 +425,9 @@ def tumor_normal_wgs_config(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
                 "--normal-sample-name",
-                "ACC2",
+                normal_sample_name,
             ],
         )
 
@@ -421,6 +439,7 @@ def tumor_normal_wgs_config(
 @pytest.fixture(scope="session")
 def tumor_only_config(
     case_id_tumor_only: str,
+    tumor_sample_name: str,
     balsamic_cache: str,
     analysis_dir: str,
     fastq_dir_tumor_only: str,
@@ -457,7 +476,7 @@ def tumor_only_config(
                 "--background-variants",
                 background_variant_file,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
             ],
         )
 
@@ -473,6 +492,7 @@ def tumor_only_config(
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(
     case_id_tumor_only_wgs: str,
+    tumor_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_only_wgs: str,
     balsamic_cache: str,
@@ -503,7 +523,7 @@ def tumor_only_wgs_config(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
             ],
         )
 
@@ -515,6 +535,7 @@ def tumor_only_wgs_config(
 @pytest.fixture(scope="session")
 def tumor_only_pon_config(
     case_id_tumor_only_pon: str,
+    tumor_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_only_pon: str,
     panel_bed_file: str,
@@ -551,7 +572,7 @@ def tumor_only_pon_config(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
             ],
         )
 

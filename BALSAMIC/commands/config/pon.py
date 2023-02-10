@@ -6,7 +6,11 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.cli import generate_graph, get_bioinfo_tools_version
+from BALSAMIC.utils.cli import (
+    generate_graph,
+    get_bioinfo_tools_version,
+    get_pon_sample_dict,
+)
 from BALSAMIC.utils.io import write_json, remove_symlinks
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
@@ -130,6 +134,7 @@ def pon_config(
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
+        samples=get_pon_sample_dict(fastq_path),
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         bioinfo_tools=BIOINFO_TOOL_ENV,

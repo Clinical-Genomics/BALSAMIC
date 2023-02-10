@@ -39,6 +39,8 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_md5,
     create_md5,
+    get_sample_dict,
+    get_pon_sample_dict,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml, remove_symlinks
 
@@ -978,6 +980,43 @@ def test_get_sample_type_from_prefix(config_dict):
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == "tumor"
+
+
+def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str):
+    """Tests sample dictionary retrieval."""
+
+    # GIVEN a tumor and a normal sample names
+
+    # GIVEN the expected dictionary output
+    samples_expected: dict = {
+        tumor_sample_name: {"type": "tumor"},
+        normal_sample_name: {"type": "normal"},
+    }
+
+    # WHEN getting the sample dictionary
+    samples: dict = get_sample_dict(
+        tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
+    )
+
+    # THEN the dictionary should be correctly formatted
+    assert samples == samples_expected
+
+
+def test_get_pon_sample_dict(
+    fastq_dir: str, tumor_sample_name: str, normal_sample_name: str
+):
+    """Tests sample PON dictionary retrieval."""
+
+    # GIVEN a FASTQ directory
+
+    # GIVEN the expected sample dictionary
+    samples_expected: dict = {"ACC1": {"type": "normal"}, "ACC2": {"type": "normal"}}
+
+    # WHEN retrieving PON samples
+    samples: dict = get_pon_sample_dict(fastq_dir)
+
+    # THEN the samples should be retrieved from the FASTQ directory
+    assert samples == samples_expected
 
 
 def test_remove_symlinks(fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture):
