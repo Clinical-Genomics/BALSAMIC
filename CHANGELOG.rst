@@ -1,9 +1,9 @@
-[11.1.0]
+[11.2.0]
 --------
 
 Fixed:
 ^^^^^^
-* Number of variants are increased with triallelic_site https://github.com/Clinical-Genomics/BALSAMIC/pull/
+* Number of variants are increased with triallelic_site https://github.com/Clinical-Genomics/BALSAMIC/pull/1089
 
 [11.1.0]
 --------

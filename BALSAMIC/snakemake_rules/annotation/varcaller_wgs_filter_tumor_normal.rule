@@ -28,7 +28,7 @@ rule bcftools_filter_tnscope_research_tumor_normal:
 bcftools view  -f PASS,triallelic_site --threads {threads} {input.vcf_snv_research} |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope} -O z;
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 
@@ -62,7 +62,7 @@ bcftools view  -f PASS,triallelic_site --threads {threads} {input.vcf_snv_clinic
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f PASS,triallelic_site -o {output.vcf_pass_tnscope} -O z;
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 
