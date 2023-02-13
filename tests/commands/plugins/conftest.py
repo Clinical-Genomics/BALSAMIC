@@ -7,8 +7,8 @@ def input_file():
 
 
 @pytest.fixture
-def output_file():
-    return "tests/test_data/vcf_tables/test_createVCF_output.vcf.gz"
+def output_file(tmp_path):
+    return tmp_path / "test_createVCF_output.vcf.gz"
 
 
 @pytest.fixture
