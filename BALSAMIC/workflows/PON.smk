@@ -6,7 +6,7 @@ import glob
 import tempfile
 import os
 
-from BALSAMIC.utils.cli import get_pon_sample_dict
+
 from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
@@ -20,7 +20,6 @@ localrules: all
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 analysis_dir = get_result_dir(config)
-fastq_dir = config["analysis"]["fastq_path"]
 concatenated_fastq_dir = analysis_dir + "/fastq/"
 qc_dir = analysis_dir + "/qc/"
 bam_dir =  analysis_dir + "/bam/"
@@ -38,11 +37,10 @@ tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 picarddup = get_picard_mrkdup(config)
-samples = get_pon_sample_dict(concatenated_fastq_dir)
 
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
-coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
+coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=config["samples"], cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
 pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
@@ -106,7 +104,7 @@ cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn}
 
 rule create_reference:
     input:
-        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=samples, prefix=["target", "antitarget"]),
+        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config["samples"], prefix=["target", "antitarget"]),
         ref = reffasta
     output:
         ref_cnn = pon_reference
