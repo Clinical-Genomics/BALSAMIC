@@ -6,6 +6,14 @@ Fixed:
 * Update cryptography version (39.0.1) due to security alert https://github.com/Clinical-Genomics/BALSAMIC/pull/1087
 * Pytest file saved in balsamic directory https://github.com/git statusClinical-Genomics/BALSAMIC/pull/1093
 
+
+[11.2.0]
+--------
+
+Fixed:
+^^^^^^
+* Number of variants are increased with triallelic_site https://github.com/Clinical-Genomics/BALSAMIC/pull/1089
+
 [11.1.0]
 --------
 
