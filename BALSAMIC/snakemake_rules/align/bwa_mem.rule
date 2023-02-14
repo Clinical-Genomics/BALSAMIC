@@ -3,12 +3,11 @@
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 
-
 rule bwa_mem:
     input:
         fa = config["reference"]["reference_genome"],
-        fastq_r1 = Path(concatenated_fastq_dir, "{sample}_R_1.fp.fastq.gz").as_posix(),
-        fastq_r2 = Path(concatenated_fastq_dir, "{sample}_R_2.fp.fastq.gz").as_posix(),
+        fastq_r1 = Path(fastq_dir, "{fastqpattern}_1.fp.fastq.gz").as_posix(),
+        fastq_r2 = Path(fastq_dir, "{fastqpattern}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
@@ -48,7 +47,7 @@ rm -rf {params.tmpdir};
 
 rule picard_markduplicates:
     input:
-        Path(bam_dir, "{sample}.sorted.bam").as_posix()
+        bamfiles = get_mapping
     output:
         mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
         picard_stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix(),
@@ -73,9 +72,11 @@ rule picard_markduplicates:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
+shellbamfiles=$(echo {input.bamfiles} | sed 's/ / I=/g') ;
+
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
 MarkDuplicates \
-INPUT={input} \
+I=$shellbamfiles \
 OUTPUT={output.mrkdup} \
 VALIDATION_STRINGENCY=SILENT \
 MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
