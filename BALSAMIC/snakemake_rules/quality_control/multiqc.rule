@@ -3,22 +3,19 @@
 
 multiqc_input = [bam_dir + "tumor.merged.bam"]
 
-if config['analysis']['analysis_type'] == "paired":
-    multiqc_input.append(bam_dir + "normal.merged.bam")
-    multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
+# fastqc metrics
+multiqc_input.extend(
+    expand(fastqc_dir + "concatenated_{sample}_R_{read_num}_fastqc.zip",sample=config["samples"],read_num=[1, 2])
+)
+# fastp metrics
+multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json",sample=config["samples"]))
+multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html",sample=config["samples"]))
 
 if config["analysis"]["sequencing_type"] == 'wgs':
     picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics",
                                "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics",
                                "quality_by_cycle_metrics", "quality_by_cycle.pdf",
                                "quality_distribution_metrics", "quality_distribution.pdf"]
-    # fastqc metrics
-    multiqc_input.extend(expand(fastqc_dir + "{sample}_R_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
-
-    # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=config["samples"]))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=config["samples"]))
-
     # Picard metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_picard_wgs_metrics.txt", sample=config["samples"]))
     multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}", sample=config["samples"], metrics_wc=picard_metrics_wildcard))
@@ -31,14 +28,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
         multiqc_input.append(bam_dir+"normal.merged.recal_data.table")
 
 else:
-    # fastqc metrics
-    multiqc_input.extend(expand(fastqc_dir + "{sample}_R_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
-
-    # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=config["samples"]))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=config["samples"]))
-
-    # picard metrics
+    # Picard metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]))
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]))
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]))
@@ -59,6 +49,11 @@ else:
         # UMI picard metrics
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=config["samples"]))
+
+if config['analysis']['analysis_type'] == "paired":
+    multiqc_input.append(bam_dir + "normal.merged.bam")
+    multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
+
 
 rule multiqc:
     input:

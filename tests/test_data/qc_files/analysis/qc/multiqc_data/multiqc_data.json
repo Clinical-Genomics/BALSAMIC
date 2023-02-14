@@ -14,10 +14,10 @@
         },
         "FastQC": {
             "all_sections": {
-                "ACC1_R_1": "tests/test_data/qc_files/analysis/fastqc/ACC1_R_1_fastqc.zip",
-                "ACC1_R_2": "tests/test_data/qc_files/analysis/fastqc/ACC1_R_2_fastqc.zip",
-                "ACC2_R_1": "tests/test_data/qc_files/analysis/fastqc/ACC2_R_1_fastqc.zip",
-                "ACC2_R_2": "tests/test_data/qc_files/analysis/fastqc/ACC2_R_2_fastqc.zip"
+                "ACC1_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC1_R_1_fastqc.zip",
+                "ACC1_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC1_R_2_fastqc.zip",
+                "ACC2_R_1": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC2_R_1_fastqc.zip",
+                "ACC2_R_2": "tests/test_data/qc_files/analysis/fastqc/concatenated_ACC2_R_2_fastqc.zip"
             }
         },
         "Somalier": {

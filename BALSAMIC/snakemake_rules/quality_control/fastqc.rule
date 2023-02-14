@@ -5,9 +5,9 @@ rule fastqc:
     input:
         fastq = concatenated_fastq_dir + "concatenated_{sample}_R_{read}.fastq.gz",
     output:
-        fastqc = fastqc_dir + "{sample}_R_{read}_fastqc.zip",
+        fastqc = fastqc_dir + "concatenated_{sample}_R_{read}_fastqc.zip",
     benchmark:
-        Path(benchmark_dir, "fastqc_{sample}_R_{read}.tsv").as_posix()
+        Path(benchmark_dir, "concatenated_fastqc_{sample}_R_{read}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
