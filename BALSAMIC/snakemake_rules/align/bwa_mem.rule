@@ -10,7 +10,7 @@ rule bwa_mem:
         fastq_r2 = Path(fastq_dir, "{fastqpattern}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
+        bamout = temp(Path(bam_dir, "{sample}_align_sort_{fastqpattern}.bam").as_posix())
     benchmark:
         Path(benchmark_dir, "bwa_mem_{sample}.tsv").as_posix()
     singularity:
