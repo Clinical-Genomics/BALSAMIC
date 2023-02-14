@@ -185,6 +185,21 @@ def get_fastq_dict(samplename, fastq_dir):
 
     return fastq_dict
 
+def get_samplename(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
+            return sample
+
+def get_sampletype(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
+            return fastq_dict[sample]["sampletype"]
+def get_mapping(wcs):
+    fastqpatterns = []
+    for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
+        fastqpatterns.append(fastqpattern)
+    return expand(bam_dir + "{sample}_align_sort_{fastqpattern}.bam", sample=f"{wcs.sample}" , fastqpattern=fastqpatterns)
+
 
 def get_result_dir(config):
     """
