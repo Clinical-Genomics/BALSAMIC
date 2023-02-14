@@ -36,7 +36,7 @@
 		"n": 16
 	},
 	"concatenate": {
-		"time": "01:00:00",
+		"time": "00:30:00",
 		"n": 1
 	},
 	"cnvkit_paired": {

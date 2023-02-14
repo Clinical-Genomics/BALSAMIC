@@ -3,7 +3,7 @@
 
 rule fastqc:
     input:
-        fastq = concatenated_fastq_dir + "concatenated_{sample}_R_{read}.fastq.gz",
+        fastq = analysis_fastq_dir + "concatenated_{sample}_R_{read}.fastq.gz",
     output:
         fastqc = fastqc_dir + "concatenated_{sample}_R_{read}_fastqc.zip",
     benchmark:

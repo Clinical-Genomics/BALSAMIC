@@ -19,8 +19,9 @@ localrules: all
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
+fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = get_result_dir(config)
-concatenated_fastq_dir = analysis_dir + "/fastq/"
+analysis_fastq_dir = analysis_dir + "/fastq/"
 qc_dir = analysis_dir + "/qc/"
 bam_dir =  analysis_dir + "/bam/"
 cnv_dir =  analysis_dir + "/cnv/"

@@ -29,11 +29,11 @@ if 'quality_trim' in config['QC'].keys():
 
 rule fastp_umi:
     input:
-        fastq_r1 = concatenated_fastq_dir + "concatenated_{sample}_R_1.fastq.gz",
-        fastq_r2 = concatenated_fastq_dir + "concatenated_{sample}_R_2.fastq.gz"
+        fastq_r1 = analysis_fastq_dir + "concatenated_{sample}_R_1.fastq.gz",
+        fastq_r2 = analysis_fastq_dir + "concatenated_{sample}_R_2.fastq.gz"
     output:
-        fastq_r1 = temp(concatenated_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz"),
-        fastq_r2 = temp(concatenated_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"),
+        fastq_r1 = temp(analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz"),
+        fastq_r2 = temp(analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp_umi.json",
         html = qc_dir + "fastp/{sample}_fastp_umi.html",
     benchmark:
@@ -70,11 +70,11 @@ fastp \
 
 rule fastp:
     input:
-        fastq_r1 = concatenated_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz",
-        fastq_r2 = concatenated_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"
+        fastq_r1 = analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz",
+        fastq_r2 = analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"
     output:
-        fastq_r1 = temp(concatenated_fastq_dir + "{sample}_R_1.fp.fastq.gz"),
-        fastq_r2 = temp(concatenated_fastq_dir + "{sample}_R_2.fp.fastq.gz"),
+        fastq_r1 = temp(analysis_fastq_dir + "{sample}_R_1.fp.fastq.gz"),
+        fastq_r2 = temp(analysis_fastq_dir + "{sample}_R_2.fp.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:

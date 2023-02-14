@@ -37,7 +37,7 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 case_id = config["analysis"]["case_id"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" + case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-concatenated_fastq_dir = get_result_dir(config) + "/fastq/"
+analysis_fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
