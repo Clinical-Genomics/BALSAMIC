@@ -10,7 +10,7 @@ from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
 import zlib
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 import yaml
 import snakemake
@@ -594,3 +594,13 @@ def create_md5(reference, check_md5):
         for key, value in reference.items():
             if os.path.isfile(value):
                 fh.write(get_md5(value) + " " + value + "\n")
+
+
+def get_input_files_path(directory: str) -> str:
+    """Return input files path."""
+    input_files: List[Path] = [
+        file.absolute() for file in Path(directory).glob("*.fastq.gz")
+    ]
+    if not input_files or not input_files[0].is_symlink():
+        return directory
+    return os.path.commonpath([file.resolve().as_posix() for file in input_files])

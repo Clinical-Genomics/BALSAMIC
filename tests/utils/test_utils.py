@@ -41,8 +41,9 @@ from BALSAMIC.utils.cli import (
     create_md5,
     get_sample_dict,
     get_pon_sample_dict,
+    get_input_files_path,
 )
-from BALSAMIC.utils.io import read_json, write_json, read_yaml, remove_symlinks
+from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
 from BALSAMIC.utils.rule import (
     get_chrom,
@@ -1019,16 +1020,29 @@ def test_get_pon_sample_dict(
     assert samples == samples_expected
 
 
-def test_remove_symlinks(fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture):
+def test_get_input_files_path(fastq_dir: str, caplog: LogCaptureFixture):
+    """Test get unlinked input files directory."""
+
+    # GIVEN an input fast path
+
+    # WHEN  extracting the input files common path
+    input_directory: str = get_input_files_path(fastq_dir)
+
+    # THEN the fastq directory should be returned
+    assert input_directory == fastq_dir
+
+
+def test_get_input_symlinked_files_path(
+    fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture
+):
     """Test remove symlinks from a directory."""
 
-    # GIVEN a list of linked files
+    # GIVEN a temporary fast path containing symlinked files
     for file in Path(fastq_dir).iterdir():
         Path(tmp_path, file.name).symlink_to(file)
 
-    # WHEN removing the symbolic links
-    remove_symlinks(str(tmp_path), "*.fastq.gz")
+    # WHEN  extracting the input files common path
+    input_directory: str = get_input_files_path(str(tmp_path))
 
-    # THEN the temp directory should not contain any linked files
-    for file in Path(tmp_path).iterdir():
-        assert not file.is_symlink()
+    # THEN the real fastq directory should be returned
+    assert input_directory == fastq_dir
