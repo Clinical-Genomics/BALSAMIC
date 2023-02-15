@@ -43,15 +43,15 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
 else:
     # fastqc metrics
-    multiqc_input.extend(expand(fastqc_dir + "{sample}_R_{read_num}_fastqc.zip", sample=config["samples"], read_num=[1, 2]))
+    multiqc_input.extend(expand(fastqc_dir + "{sample}_fastqc.completed", sample=config["samples"]))
 
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=config["samples"]))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=config["samples"]))
+    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.json", fastqpattern=get_fastqpatterns()))
+    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.html", fastqpattern=get_fastqpatterns()))
 
     # picard metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted.insertsizemetric", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted.alignmetric", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{fastqpattern}.sorted.insertsizemetric", fastqpattern=get_fastqpatterns()))
+    multiqc_input.extend(expand(bam_dir + "{fastqpattern}.sorted.alignmetric", fastqpattern=get_fastqpatterns()))
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]))
 
     # sambamba metrics
