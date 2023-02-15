@@ -596,11 +596,14 @@ def create_md5(reference, check_md5):
                 fh.write(get_md5(value) + " " + value + "\n")
 
 
-def get_input_files_path(directory: str) -> str:
+def get_input_files_path(directory: str) -> List[str]:
     """Return input files path."""
     input_files: List[Path] = [
         file.absolute() for file in Path(directory).glob("*.fastq.gz")
     ]
     if not input_files or not input_files[0].is_symlink():
-        return directory
-    return os.path.commonpath([file.resolve().as_posix() for file in input_files])
+        return [directory]
+    linked_directory = os.path.commonpath(
+        [file.resolve().as_posix() for file in input_files]
+    )
+    return [directory, linked_directory]

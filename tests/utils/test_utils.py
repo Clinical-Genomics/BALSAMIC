@@ -1026,10 +1026,11 @@ def test_get_input_files_path(fastq_dir: str, caplog: LogCaptureFixture):
     # GIVEN an input fast path
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_input_files_path(fastq_dir)
+    input_directories: list = get_input_files_path(fastq_dir)
 
     # THEN the fastq directory should be returned
-    assert input_directory == fastq_dir
+    assert len(input_directories) == 1
+    assert fastq_dir in input_directories
 
 
 def test_get_input_symlinked_files_path(
@@ -1042,7 +1043,9 @@ def test_get_input_symlinked_files_path(
         Path(tmp_path, file.name).symlink_to(file)
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_input_files_path(str(tmp_path))
+    input_directory: list = get_input_files_path(str(tmp_path))
 
     # THEN the real fastq directory should be returned
-    assert input_directory == fastq_dir
+    assert len(input_directory) == 2
+    assert fastq_dir in input_directory
+    assert str(tmp_path) in input_directory
