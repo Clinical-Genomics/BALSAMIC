@@ -18,12 +18,14 @@ rule bwa_mem:
     params:
         bam_header = params.common.align_header,
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample_id = "{sample}"
+        sample_id=get_samplename,
+        sample_type=get_sampletype,
+        fastqpattern="{fastqpattern}"
     threads:
         get_threads(cluster_config, "bwa_mem")
     message:
         ("Align fastq files with bwa-mem to reference genome and "
-        "sort using samtools for sample: {params.sample_id}")
+        "sort using samtools for sampletype: {params.sample_type} : {params.sample_id}, {params.fastqpattern}")
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -31,7 +33,7 @@ export TMPDIR={params.tmpdir};
 
 bwa mem \
 -t {threads} \
--R {params.bam_header}  \
+-R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA'  \
 -M \
 -v 1 \
 {input.fa} {input.fastq_r1} {input.fastq_r2} \
@@ -49,7 +51,7 @@ rule picard_markduplicates:
     input:
         bamfiles = get_mapping
     output:
-        mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup  + ".bam").as_posix(),
+        mrkdup = Path(bam_dir, "{sample}.sorted." + picarddup + ".bam").as_posix(),
         picard_stats = Path(bam_dir, "{sample}.sorted." + picarddup + ".txt").as_posix(),
         flagstats = Path(bam_dir, "{sample}.samtools.flagstats.txt").as_posix(),
         idxstats = Path(bam_dir, "{sample}.samtools.idxstats.txt").as_posix(),
