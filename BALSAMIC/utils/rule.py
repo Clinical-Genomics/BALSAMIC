@@ -198,7 +198,7 @@ def get_mapping(wcs):
     fastqpatterns = []
     for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
         fastqpatterns.append(fastqpattern)
-    return expand(bam_dir + "{sample}_align_sort_{fastqpattern}.bam", sample=f"{wcs.sample}" , fastqpattern=fastqpatterns)
+    return expand(bam_dir + "{fastqpattern}_align_sort.bam", fastqpattern=fastqpatterns)
 
 
 def get_result_dir(config):
