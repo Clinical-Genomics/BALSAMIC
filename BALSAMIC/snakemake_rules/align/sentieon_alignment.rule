@@ -11,9 +11,9 @@ rule sentieon_align_sort:
         fastq_r2 = Path(fastq_dir, "{fastqpattern}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = Path(bam_dir, "{sample}_align_sort_{fastqpattern}.bam").as_posix()
+        bamout = Path(bam_dir, "{fastqpattern}_align_sort.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_align_sort_{sample}_{fastqpattern}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_align_sort_{fastqpattern}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         header = params.common.align_header,
