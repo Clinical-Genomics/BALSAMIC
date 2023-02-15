@@ -8,7 +8,7 @@ def input_file():
 
 @pytest.fixture
 def output_file(tmp_path):
-    return tmp_path / "test_createVCF_output.vcf.gz"
+    return Path(tmp_path, "test_createVCF_output.vcf.gz").as_posix()
 
 
 @pytest.fixture
