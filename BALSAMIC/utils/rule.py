@@ -212,12 +212,12 @@ def get_final_tumor_bam(wcs):
     if config["analysis"]["sequencing_type"] == 'wgs':
         return "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
     else:
-        return = "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
+        return "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
 def get_final_normal_bam(wcs):
     if config["analysis"]["sequencing_type"] == 'wgs':
-        return = "{normal}.dedup.realign.bam".format(normal=normal_sample)
+        return "{normal}.dedup.realign.bam".format(normal=normal_sample)
     else:
-        return = "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
+        return "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
 
 def get_result_dir(config):
     """
