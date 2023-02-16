@@ -9,13 +9,6 @@ if config['analysis']['analysis_type'] == "paired":
 # Adding code to exclude somalier from the testing
 #multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
 
-def get_fastqpatterns():
-    fastqpatterns = []
-    for sample in fastq_dict:
-        for fastqpattern in fastq_dict[sample]["fastqpair_patterns"]:
-            fastqpatterns.append(fastqpattern)
-    return fastqpatterns
-
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':

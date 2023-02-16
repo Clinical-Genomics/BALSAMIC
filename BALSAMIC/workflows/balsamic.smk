@@ -33,6 +33,12 @@ from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 
 # Define Snakemake Rule Functions
+def get_fastqpatterns():
+    fastqpatterns = []
+    for sample in fastq_dict:
+        for fastqpattern in fastq_dict[sample]["fastqpair_patterns"]:
+            fastqpatterns.append(fastqpattern)
+    return fastqpatterns
 def get_samplename(wcs):
     for sample in fastq_dict:
         if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
