@@ -18,8 +18,8 @@ rule sentieon_base_calibration:
         dbsnp = config["reference"]["dbsnp"],
         bam = get_final_bam
     output:
-        recal_data_table = Path(bam_dir, "{sample_type}.merged.recal_data.table").as_posix(),
-        qual_recal = Path(bam_dir, "{sample_type}.merged.recal.csv").as_posix(),
+        recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),
+        qual_recal = Path(bam_dir, "{sample_type}.recal.csv").as_posix(),
         qual_recal_plot = Path(bam_dir, "{sample_type}.recal.pdf").as_posix(),
     benchmark:
         Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
@@ -126,7 +126,7 @@ rule sentieon_TNscope_tumor_only:
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
         bam = get_final_tumor_bam,
-        recal = expand(bam_dir + "tumor.merged.recal_data.table")
+        recal = expand(bam_dir + "tumor.recal_data.table")
     output:
         vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",

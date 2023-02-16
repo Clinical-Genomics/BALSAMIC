@@ -8,7 +8,7 @@ rule sentieon_DNAscope:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         bam = get_final_bam,
-        recal_table = bam_dir + "{sample_type}.merged.recal_data.table"
+        recal_table = bam_dir + "{sample_type}.recal_data.table"
     output:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     params:
