@@ -53,19 +53,19 @@ def get_final_bam(wcs):
     else:
         samplename = normal_sample
     if config["analysis"]["sequencing_type"] == 'wgs':
-        return "{sample}.dedup.realign.bam".format(sample=samplename)
+        return bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
     else:
-        return "{tumor}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
+        return bam_dir + "{tumor}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
 def get_final_tumor_bam(wcs):
     if config["analysis"]["sequencing_type"] == 'wgs':
-        return "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
+        return bam_dir + "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
     else:
-        return "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
+        return bam_dir + "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
 def get_final_normal_bam(wcs):
     if config["analysis"]["sequencing_type"] == 'wgs':
-        return "{normal}.dedup.realign.bam".format(normal=normal_sample)
+        return bam_dir + "{normal}.dedup.realign.bam".format(normal=normal_sample)
     else:
-        return "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
+        return bam_dir + "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
