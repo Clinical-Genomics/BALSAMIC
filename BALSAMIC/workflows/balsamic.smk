@@ -21,7 +21,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_final_bam, get_final_tumor_bam, get_final_normal_bam, get_mapping, get_sampletype, get_samplename, get_fastq_dict, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+from BALSAMIC.utils.rule import (get_fastq_dict, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
                                  get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
@@ -32,6 +32,40 @@ from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTING
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 
+# Define Snakemake Rule Functions
+def get_samplename(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
+            return sample
+
+def get_sampletype(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
+            return fastq_dict[sample]["sampletype"]
+def get_mapping(wcs):
+    fastqpatterns = []
+    for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
+        fastqpatterns.append(fastqpattern)
+    return expand(bam_dir + "{fastqpattern}_align_sort.bam", fastqpattern=fastqpatterns)
+def get_final_bam(wcs):
+    if f"{wcs.sample_type}" == "tumor":
+        samplename = tumor_sample
+    else:
+        samplename = normal_sample
+    if config["analysis"]["sequencing_type"] == 'wgs':
+        return "{sample}.dedup.realign.bam".format(sample=samplename)
+    else:
+        return "{tumor}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
+def get_final_tumor_bam(wcs):
+    if config["analysis"]["sequencing_type"] == 'wgs':
+        return "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
+    else:
+        return "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
+def get_final_normal_bam(wcs):
+    if config["analysis"]["sequencing_type"] == 'wgs':
+        return "{normal}.dedup.realign.bam".format(normal=normal_sample)
+    else:
+        return "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")

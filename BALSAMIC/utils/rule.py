@@ -185,40 +185,6 @@ def get_fastq_dict(samplename, fastq_dir):
 
     return fastq_dict
 
-def get_samplename(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return sample
-
-def get_sampletype(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["sampletype"]
-def get_mapping(wcs):
-    fastqpatterns = []
-    for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
-        fastqpatterns.append(fastqpattern)
-    return expand(bam_dir + "{fastqpattern}_align_sort.bam", fastqpattern=fastqpatterns)
-def get_final_bam(wcs):
-    if f"{wcs.sample_type}" == "tumor":
-        samplename = tumor_sample
-    else:
-        samplename = normal_sample
-    if config["analysis"]["sequencing_type"] == 'wgs':
-        return "{sample}.dedup.realign.bam".format(sample=samplename)
-    else:
-        return "{tumor}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
-def get_final_tumor_bam(wcs):
-    if config["analysis"]["sequencing_type"] == 'wgs':
-        return "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
-    else:
-        return "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
-def get_final_normal_bam(wcs):
-    if config["analysis"]["sequencing_type"] == 'wgs':
-        return "{normal}.dedup.realign.bam".format(normal=normal_sample)
-    else:
-        return "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
-
 def get_result_dir(config):
     """
     input: sample config file from BALSAMIC
