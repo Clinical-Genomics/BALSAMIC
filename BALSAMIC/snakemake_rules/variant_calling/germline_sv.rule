@@ -6,7 +6,7 @@
 rule manta_germline:
     input:
         fa = config["reference"]["reference_genome"],
-        bam = bam_dir + "{sample_type}.merged.bam",
+        bam = get_final_bam
     output:
         final = vcf_dir + "SV.germline.{sample_type}.manta_germline.vcf.gz",
     benchmark:

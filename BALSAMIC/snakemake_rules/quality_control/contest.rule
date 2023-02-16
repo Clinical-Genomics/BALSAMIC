@@ -5,8 +5,8 @@
 
 rule gatk_contest:
     input:
-        bamN = bam_dir + "normal.merged.bam",
-        bamT = bam_dir + "tumor.merged.bam",
+        bamN = get_final_normal_bam,
+        bamT = get_final_tumor_bam,
         fa = config["reference"]["reference_genome"],
         popvcf = result_dir + "popvcf.vcf",
     output:

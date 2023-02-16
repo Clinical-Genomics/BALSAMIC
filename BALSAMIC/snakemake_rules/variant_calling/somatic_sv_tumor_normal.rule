@@ -7,8 +7,8 @@ tumor_bam = "tumor.merged.bam"
 rule manta_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = bam_dir + normal_bam,
-        bamT = bam_dir + tumor_bam,
+        bamN = get_final_normal_bam,
+        bamT = get_final_tumor_bam
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
@@ -57,8 +57,8 @@ rm -rf {params.tmpdir};
 rule delly_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = bam_dir + normal_bam,
-        bamT = bam_dir + tumor_bam,
+        bamN = get_final_normal_bam,
+        bamT = get_final_tumor_bam,
         excl = config["reference"]["delly_exclusion_converted"],
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -94,8 +94,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     rule delly_cnv_tumor_normal:
         input:
             fa = config["reference"]["reference_genome"],
-            bamN = bam_dir + normal_bam,
-            bamT = bam_dir + tumor_bam,
+            bamN = get_final_normal_bam,
+            bamT = get_final_tumor_bam,
             map = config["reference"]["delly_mappability"],
         output:
             cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -142,8 +142,8 @@ else:
     rule delly_cnv_tumor_normal:
         input:
             fa = config["reference"]["reference_genome"],
-            bamN = bam_dir + normal_bam,
-            bamT = bam_dir + tumor_bam,
+            bamN = get_final_normal_bam,
+            bamT = get_final_tumor_bam,
             map = config["reference"]["delly_mappability"],
             baits_bed = config["panel"]["capture_kit"],
         output:
@@ -190,8 +190,8 @@ rm -rf {params.tmpdir};
 rule ascat_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"] ,
-        bamN = bam_dir + normal_bam,
-        bamT = bam_dir + tumor_bam,
+        bamN = get_final_normal_bam,
+        bamT = get_final_tumor_bam,
         gccorrection = config["reference"]["ascat_gccorrection"],
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
@@ -267,8 +267,8 @@ rm -rf {params.tmpdir};
 rule tiddit_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = bam_dir + normal_bam,
-        bamT = bam_dir + tumor_bam,
+        bamN = get_final_normal_bam,
+        bamT = get_final_tumor_bam,
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
         cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
