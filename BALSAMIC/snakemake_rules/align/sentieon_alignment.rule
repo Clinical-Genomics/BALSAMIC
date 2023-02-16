@@ -126,24 +126,3 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {output}; 
         """
 
-rule rename_bam_tumor:
-    input:
-        bam = Path(bam_dir, "{sample}.dedup.realign.bam".format(sample = tumor_sample)).as_posix()
-    output:
-        bam = bam_dir + "tumor.merged.bam"
-    shell:
-        """
-mv {input.bam} {output.bam}
-mv {input.bam}.bai {output.bam}.bai
-        """
-
-rule rename_bam_normal:
-    input:
-        bam = Path(bam_dir, "{sample}.dedup.realign.bam".format(sample = normal_sample)).as_posix()
-    output:
-        bam = bam_dir + "normal.merged.bam"
-    shell:
-        """
-mv {input.bam} {output.bam}
-mv {input.bam}.bai {output.bam}.bai
-        """
