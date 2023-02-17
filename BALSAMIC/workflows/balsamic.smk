@@ -61,7 +61,7 @@ def get_final_bam(wcs):
     if config["analysis"]["sequencing_type"] == 'wgs':
         return bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
     else:
-        return bam_dir + "{tumor}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
+        return bam_dir + "{sample}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
 def get_final_tumor_bam(wcs=None):
     if config["analysis"]["sequencing_type"] == 'wgs':
         return bam_dir + "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
