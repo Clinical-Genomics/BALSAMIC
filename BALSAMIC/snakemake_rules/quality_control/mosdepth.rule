@@ -5,7 +5,7 @@
 
 rule mosdepth_coverage:
     input:
-        bam = get_final_bam,
+        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
         bed = config["panel"]["capture_kit"]
     output:
         bam_dir + "{sample}.mosdepth.global.dist.txt",
