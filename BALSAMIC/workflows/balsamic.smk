@@ -87,6 +87,7 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 case_id = config["analysis"]["case_id"]
 
 # Directories
+fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
 fastqinput_dir = config["analysis"]["fastq_path"]

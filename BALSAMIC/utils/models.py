@@ -431,6 +431,7 @@ class PonBalsamicConfigModel(BaseModel):
 
     QC: QCModel
     analysis: AnalysisPonModel
+    samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: DirectoryPath
     bioinfo_tools: dict

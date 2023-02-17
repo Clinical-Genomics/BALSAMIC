@@ -14,6 +14,7 @@ from BALSAMIC.utils.cli import (
     SnakeMake,
     get_config,
     job_id_dump_to_yaml,
+    get_input_files_path,
 )
 from BALSAMIC.constants.common import BALSAMIC_SCRIPTS
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -218,7 +219,7 @@ def analysis(
 
     # Singularity bind path
     bind_path = list()
-    bind_path.append(sample_config["analysis"]["fastq_path"])
+    bind_path.append(get_input_files_path(sample_config["analysis"]["fastq_path"]))
     bind_path.append(str(Path(__file__).parents[2] / "assets"))
     bind_path.append(os.path.commonpath(sample_config["reference"].values()))
     if "panel" in sample_config:

@@ -26,15 +26,10 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     createDir,
     get_config,
-    recursive_default_dict,
-    convert_defaultdict_to_regular_dict,
     get_file_status_string,
-    get_from_two_key,
     find_file_index,
     validate_fastq_pattern,
     get_panel_chrom,
-    create_fastq_symlink,
-    get_fastq_bind_path,
     singularity,
     get_file_extension,
     get_bioinfo_tools_version,
@@ -44,8 +39,11 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_md5,
     create_md5,
+    get_sample_dict,
+    get_pon_sample_dict,
+    get_input_files_path,
 )
-from BALSAMIC.utils.io import read_json, write_json, read_yaml, remove_symlinks
+from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
 from BALSAMIC.utils.rule import (
     get_chrom,
@@ -233,31 +231,6 @@ def test_get_file_extension_known_ext():
 
     # THEN assert extension is correctly extracted
     assert file_extension == actual_extension
-
-
-def test_recursive_default_dict():
-    # GIVEN a dictionary
-    test_dict = recursive_default_dict()
-    test_dict["key_1"]["key_2"] = "value_1"
-
-    # WHEN it is recursively creates a default dictionary
-    # THEN the output should be a dicitionary
-    assert isinstance(test_dict, collections.defaultdict)
-    assert "key_2" in test_dict["key_1"]
-
-
-def test_convert_defaultdict_to_regular_dict():
-    # GIVEN a recursively created default dict
-    test_dict = recursive_default_dict()
-    test_dict["key_1"]["key_2"] = "value_1"
-
-    # WHEN converting it back to normal dict
-    test_dict = convert_defaultdict_to_regular_dict(test_dict)
-
-    # THEN the output type should be dict and not defaultdict
-    assert not isinstance(test_dict, collections.defaultdict)
-    assert isinstance(test_dict, dict)
-    assert "key_2" in test_dict["key_1"]
 
 
 def test_iterdict(reference):
@@ -677,37 +650,6 @@ def test_get_file_status_string_file_exists(tmpdir):
     assert "Found" in result[0].value_no_colors
 
 
-def test_get_file_status_string_file_not_exist():
-    # GIVEN an existing file and condition_str False
-    file_not_exist = "some_random_path/dummy_non_existing_file"
-
-    # WHEN checking for file string
-    result = get_file_status_string(str(file_not_exist))
-
-    # THEN it should not return empty str
-    assert "missing" in result[0].value_no_colors
-
-
-def test_get_from_two_key():
-    # GIVEN a dictionary with two keys that each have list of values
-    input_dict = {
-        "key_1": ["key_1_value_1", "key_1_value_2"],
-        "key_2": ["key_2_value_1", "key_2_value_2"],
-    }
-
-    # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
-    result = get_from_two_key(
-        input_dict,
-        from_key="key_1",
-        by_key="key_2",
-        by_value="key_1_value_2",
-        default=None,
-    )
-
-    # THEN retrun value should be key_2_value_2 and not None
-    assert result == "key_2_value_2"
-
-
 def test_find_file_index(tmpdir):
     # GIVEN an existing bam file and its bai index file
     bam_dir = tmpdir.mkdir("temporary_path")
@@ -841,47 +783,6 @@ def test_get_panel_chrom():
     panel_bed_file = "tests/test_data/references/panel/panel.bed"
     # THEN it should return a set containing multiple unique chromosomes
     assert len(get_panel_chrom(panel_bed_file)) > 0
-
-
-def test_create_fastq_symlink(tmpdir_factory, caplog):
-    # GIVEN a list of valid input fastq files from test directory containing 4 files
-    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
-    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-    filenames = [
-        "tumor_R_1.fastq.gz",
-        "normal_R_1.fastq.gz",
-        "tumor_R_2.fastq.gz",
-        "normal_R_2.fastq.gz",
-    ]
-    successful_log = "skipping"
-    casefiles = [Path(symlink_from_path, x) for x in filenames]
-    for casefile in casefiles:
-        casefile.touch()
-    with caplog.at_level(logging.INFO):
-        create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
-        # THEN destination should have 4 files
-        assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
-        # THEN exception triggers log message containing "skipping"
-        assert successful_log in caplog.text
-
-
-def test_get_fastq_bind_path(tmpdir_factory):
-    # GIVEN a list of valid input fastq filenames and test directories
-    filenames = [
-        "tumor_R_1.fastq.gz",
-        "normal_R_1.fastq.gz",
-        "tumor_R_2.fastq.gz",
-        "normal_R_2.fastq.gz",
-    ]
-    # WHEN files are created, and symlinks are made in symlink directory
-    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
-    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-    casefiles = [Path(symlink_from_path, x) for x in filenames]
-    for casefile in casefiles:
-        casefile.touch()
-    create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
-    # THEN function returns list containing the original parent path!
-    assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
 
 
 def test_convert_deliverables_tags():
@@ -1082,16 +983,66 @@ def test_get_sample_type_from_prefix(config_dict):
     assert sample_type == "tumor"
 
 
-def test_remove_symlinks(fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture):
+def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str):
+    """Tests sample dictionary retrieval."""
+
+    # GIVEN a tumor and a normal sample names
+
+    # GIVEN the expected dictionary output
+    samples_expected: dict = {
+        tumor_sample_name: {"type": "tumor"},
+        normal_sample_name: {"type": "normal"},
+    }
+
+    # WHEN getting the sample dictionary
+    samples: dict = get_sample_dict(
+        tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
+    )
+
+    # THEN the dictionary should be correctly formatted
+    assert samples == samples_expected
+
+
+def test_get_pon_sample_dict(
+    fastq_dir: str, tumor_sample_name: str, normal_sample_name: str
+):
+    """Tests sample PON dictionary retrieval."""
+
+    # GIVEN a FASTQ directory
+
+    # GIVEN the expected sample dictionary
+    samples_expected: dict = {"ACC1": {"type": "normal"}, "ACC2": {"type": "normal"}}
+
+    # WHEN retrieving PON samples
+    samples: dict = get_pon_sample_dict(fastq_dir)
+
+    # THEN the samples should be retrieved from the FASTQ directory
+    assert samples == samples_expected
+
+
+def test_get_input_files_path(fastq_dir: str, caplog: LogCaptureFixture):
+    """Test get unlinked input files directory."""
+
+    # GIVEN an input fast path
+
+    # WHEN  extracting the input files common path
+    input_directory: str = get_input_files_path(fastq_dir)
+
+    # THEN the fastq directory should be returned
+    assert input_directory == fastq_dir
+
+
+def test_get_input_symlinked_files_path(
+    fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture
+):
     """Test remove symlinks from a directory."""
 
-    # GIVEN a list of linked files
+    # GIVEN a temporary fast path containing symlinked files
     for file in Path(fastq_dir).iterdir():
         Path(tmp_path, file.name).symlink_to(file)
 
-    # WHEN removing the symbolic links
-    remove_symlinks(str(tmp_path), "*.fastq.gz")
+    # WHEN  extracting the input files common path
+    input_directory: str = get_input_files_path(str(tmp_path))
 
-    # THEN the temp directory should not contain any linked files
-    for file in Path(tmp_path).iterdir():
-        assert not file.is_symlink()
+    # THEN the real fastq directory should be returned
+    assert input_directory == fastq_dir

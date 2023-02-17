@@ -35,14 +35,3 @@ def read_yaml(yaml_path: str) -> dict:
             return yaml.load(fn, Loader=yaml.SafeLoader)
     else:
         raise FileNotFoundError(f"The YAML file {yaml_path} was not found")
-
-
-def remove_symlinks(directory: str, pattern: str) -> None:
-    """Remove symbolic links from an input directory by file pattern."""
-    for file in Path(directory).glob(pattern):
-        if file.is_symlink():
-            LOG.info(f"Removing symlink from {file.as_posix()}")
-            link: Path = file.resolve()
-            file.unlink()
-            shutil.copy(link.absolute().as_posix(), file.absolute().as_posix())
-    LOG.info(f"Symlinks removed from {Path(directory).as_posix()}")

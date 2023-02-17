@@ -10,7 +10,6 @@ if config['analysis']['analysis_type'] == "paired":
 #multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
 
 
-# Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 if config["analysis"]["sequencing_type"] == 'wgs':
     picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cycle_metrics",
                                "base_distribution_by_cycle.pdf", "insert_size_histogram.pdf", "insert_size_metrics",
@@ -22,6 +21,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.json", fastqpattern=get_fastqpatterns()))
     multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.html", fastqpattern=get_fastqpatterns()))
+
 
     # Picard metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_picard_wgs_metrics.txt", sample=config["samples"]))
@@ -45,6 +45,7 @@ else:
     # picard metrics
     multiqc_input.extend(expand(bam_dir + "{fastqpattern}.sorted.insertsizemetric", fastqpattern=get_fastqpatterns()))
     multiqc_input.extend(expand(bam_dir + "{fastqpattern}.sorted.alignmetric", fastqpattern=get_fastqpatterns()))
+
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]))
 
     # sambamba metrics
@@ -63,6 +64,11 @@ else:
         # UMI picard metrics
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=config["samples"]))
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=config["samples"]))
+
+if config['analysis']['analysis_type'] == "paired":
+    multiqc_input.append(bam_dir + "normal.merged.bam")
+    multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
+
 
 rule multiqc:
     input:

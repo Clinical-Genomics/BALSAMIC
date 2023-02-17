@@ -10,8 +10,10 @@ from tests.conftest import MOCKED_OS_ENVIRON
 
 
 def test_tumor_normal_config(
-    case_id_tumor_normal: str,
     invoke_cli,
+    case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     balsamic_cache: str,
@@ -48,9 +50,9 @@ def test_tumor_normal_config(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
                 "--normal-sample-name",
-                "ACC2",
+                normal_sample_name,
             ],
         )
 
@@ -64,6 +66,7 @@ def test_tumor_normal_config(
 def test_tumor_only_config(
     invoke_cli,
     case_id_tumor_only: str,
+    tumor_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     balsamic_cache: str,
@@ -98,7 +101,7 @@ def test_tumor_only_config(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
             ],
         )
 
@@ -110,6 +113,7 @@ def test_tumor_only_config(
 def test_run_without_permissions(
     invoke_cli,
     case_id_tumor_only: str,
+    tumor_sample_name: str,
     fastq_dir_tumor_only: str,
     no_write_perm_path: str,
     panel_bed_file: str,
@@ -135,7 +139,7 @@ def test_run_without_permissions(
             "--balsamic-cache",
             balsamic_cache,
             "--tumor-sample-name",
-            "ACC1",
+            tumor_sample_name,
         ],
     )
 
@@ -146,6 +150,7 @@ def test_run_without_permissions(
 def test_tumor_only_umi_config_background_file(
     invoke_cli,
     case_id_tumor_only_umi: str,
+    tumor_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_only_umi: str,
     balsamic_cache: str,
@@ -176,7 +181,7 @@ def test_tumor_only_umi_config_background_file(
             "--balsamic-cache",
             balsamic_cache,
             "--tumor-sample-name",
-            "ACC1",
+            tumor_sample_name,
         ],
     )
 
@@ -187,6 +192,7 @@ def test_tumor_only_umi_config_background_file(
 
 def test_pon_cnn_file(
     invoke_cli,
+    tumor_sample_name: str,
     analysis_dir: str,
     balsamic_cache: str,
     panel_bed_file: str,
@@ -217,7 +223,7 @@ def test_pon_cnn_file(
             "--balsamic-cache",
             balsamic_cache,
             "--tumor-sample-name",
-            "ACC1",
+            tumor_sample_name,
         ],
     )
 
@@ -246,6 +252,7 @@ def test_dag_graph_success(
 def test_config_graph_failed(
     invoke_cli,
     case_id_tumor_only: str,
+    tumor_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     balsamic_cache: str,
@@ -273,7 +280,7 @@ def test_config_graph_failed(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--tumor-sample-name",
-                "ACC1",
+                tumor_sample_name,
             ],
         )
 
