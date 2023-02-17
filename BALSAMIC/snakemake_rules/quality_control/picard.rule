@@ -53,12 +53,12 @@ METRIC_ACCUMULATION_LEVEL=ALL_READS;
 
 rule picard_CollectAlignmentSummaryMetrics:
     input:
-        bam = bam_dir + "{fastqpattern}_align_sort.bam",
+        bam = bam_dir + "{sample}_align_sort_{fastqpattern}.bam",
         fa = config["reference"]["reference_genome"]
     output:
-        bam_dir + "{fastqpattern}.sorted.alignmetric"
+        bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric"
     benchmark:
-        Path(benchmark_dir, "CollectAlignmentSummaryMetrics_" + "{fastqpattern}.tsv").as_posix()
+        Path(benchmark_dir, "CollectAlignmentSummaryMetrics_" + "{sample}.{fastqpattern}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
@@ -88,12 +88,12 @@ METRIC_ACCUMULATION_LEVEL=LIBRARY;
 
 rule picard_CollectInsertSizeMetrics:
     input:
-        bam = bam_dir + "{fastqpattern}_align_sort.bam"
+        bam = bam_dir + "{sample}_align_sort_{fastqpattern}.bam"
     output:
-        pdf = bam_dir + "{fastqpattern}.sorted.insertsizemetric.pdf",
-        txt = bam_dir + "{fastqpattern}.sorted.insertsizemetric"
+        pdf = bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric.pdf",
+        txt = bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric"
     benchmark:
-        Path(benchmark_dir, "picard_CollectInsertSizeMetrics_" + "{fastqpattern}.tsv").as_posix()
+        Path(benchmark_dir, "picard_CollectInsertSizeMetrics_" + "{sample}.{fastqpattern}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:

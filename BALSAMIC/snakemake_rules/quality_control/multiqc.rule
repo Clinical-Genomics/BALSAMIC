@@ -42,8 +42,11 @@ else:
     multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.html", fastqpattern=get_fastqpatterns()))
 
     # picard metrics
-    multiqc_input.extend(expand(bam_dir + "{fastqpattern}.sorted.insertsizemetric", fastqpattern=get_fastqpatterns()))
-    multiqc_input.extend(expand(bam_dir + "{fastqpattern}.sorted.alignmetric", fastqpattern=get_fastqpatterns()))
+    multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric", sample=tumor_sample, fastqpattern=get_fastqpatterns(tumor_sample)))
+    multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric", sample=tumor_sample, fastqpattern=get_fastqpatterns(tumor_sample)))
+    if config['analysis']['analysis_type'] == "paired":
+        multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric", sample=normal_sample, fastqpattern=get_fastqpatterns(normal_sample)))
+        multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric", sample=normal_sample, fastqpattern=get_fastqpatterns(normal_sample)))
 
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]))
 
