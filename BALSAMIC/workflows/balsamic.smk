@@ -62,12 +62,12 @@ def get_final_bam(wcs):
         return bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
     else:
         return bam_dir + "{tumor}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
-def get_final_tumor_bam(wcs):
+def get_final_tumor_bam(wcs=None):
     if config["analysis"]["sequencing_type"] == 'wgs':
         return bam_dir + "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
     else:
         return bam_dir + "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
-def get_final_normal_bam(wcs):
+def get_final_normal_bam(wcs=None):
     if config["analysis"]["sequencing_type"] == 'wgs':
         return bam_dir + "{normal}.dedup.realign.bam".format(normal=normal_sample)
     else:
