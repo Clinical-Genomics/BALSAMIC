@@ -375,9 +375,6 @@ if sequence_type == "wgs":
     if "snakemake_rules/variant_calling/mergetype_normal.rule" in rules_to_include:
         rules_to_include.remove("snakemake_rules/variant_calling/mergetype_normal.rule")
 
-# Added code for testing, removing somalier because it had errors
-if "snakemake_rules/quality_control/somalier.rule" in rules_to_include:
-    rules_to_include.remove("snakemake_rules/quality_control/somalier.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
