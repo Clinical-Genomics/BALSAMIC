@@ -6,8 +6,7 @@ multiqc_input = [get_final_tumor_bam()]
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(get_final_normal_bam())
 
-# Adding code to exclude somalier from the testing
-#multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
+multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
 
 
 if config["analysis"]["sequencing_type"] == 'wgs':
@@ -66,7 +65,6 @@ else:
         multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=config["samples"]))
 
 if config['analysis']['analysis_type'] == "paired":
-    multiqc_input.append(bam_dir + "normal.merged.bam")
     multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
 
 
