@@ -5,7 +5,7 @@
 
 rule sambamba_panel_depth:
     input:
-        bam = get_final_bam,
+        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
         bed = config["panel"]["capture_kit"]
     output:
         bam_dir + "{sample}.sorted." + picarddup + ".cov.bed"
@@ -39,7 +39,7 @@ sambamba depth region \
 
 rule sambamba_exon_depth:
     input:
-        bam = get_final_bam,
+        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
         bed = config["reference"]["exon_bed"]
     output:
         bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed"
