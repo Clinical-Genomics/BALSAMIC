@@ -1,1 +1,72 @@
-- vcf2cytosure=0.8
+name: base
+
+channels:
+  - bioconda
+  - defaults
+
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - _openmp_mutex=4.5=1_gnu
+  - brotlipy=0.7.0=py39h27cfd23_1003
+  - bzip2=1.0.8=h7b6447c_0
+  - c-ares=1.18.1=h7f8727e_0
+  - ca-certificates=2023.01.10=h06a4308_0
+  - certifi=2022.12.7=py39h06a4308_0
+  - cffi=1.14.6=py39h400218f_0
+  - chardet=4.0.0=py39h06a4308_1003
+  - conda=23.1.0=py39h06a4308_0
+  - conda-package-handling=1.7.3=py39h27cfd23_1
+  - cryptography=3.4.7=py39hd23ed53_0
+  - curl=7.87.0=h5eee18b_0
+  - htslib=1.9=h4da6232_3
+  - idna=2.10=pyhd3eb1b0_0
+  - krb5=1.19.4=h568e23c_0
+  - ld_impl_linux-64=2.35.1=h7274673_9
+  - libcurl=7.87.0=h91b91d3_0
+  - libdeflate=1.2=h516909a_1
+  - libedit=3.1.20221030=h5eee18b_0
+  - libev=4.33=h7f8727e_1
+  - libffi=3.3=he6710b0_2
+  - libgcc-ng=11.2.0=h1234567_1
+  - libgomp=11.2.0=h1234567_1
+  - libnghttp2=1.46.0=hce63b2e_0
+  - libssh2=1.10.0=h8f2d780_0
+  - libstdcxx-ng=9.3.0=hd4cf53a_17
+  - ncurses=6.4=h6a678d5_0
+  - openssl=1.1.1t=h7f8727e_0
+  - pip=21.1.3=py39h06a4308_0
+  - pluggy=1.0.0=py39h06a4308_1
+  - pycosat=0.6.3=py39h27cfd23_0
+  - pycparser=2.20=py_2
+  - pyopenssl=20.0.1=pyhd3eb1b0_1
+  - pysocks=1.7.1=py39h06a4308_0
+  - python=3.9.5=h12debd9_4
+  - readline=8.1=h27cfd23_0
+  - requests=2.25.1=pyhd3eb1b0_0
+  - ruamel.yaml=0.17.21=py39h5eee18b_0
+  - ruamel.yaml.clib=0.2.6=py39h5eee18b_1
+  - ruamel_yaml=0.15.100=py39h27cfd23_0
+  - setuptools=52.0.0=py39h06a4308_0
+  - six=1.16.0=pyhd3eb1b0_0
+  - sqlite=3.36.0=hc218d9a_0
+  - tabix=1.11=hdfd78af_0
+  - tk=8.6.10=hbc83047_0
+  - toolz=0.12.0=py39h06a4308_0
+  - tqdm=4.61.2=pyhd3eb1b0_1
+  - tzdata=2021a=h52ac0ba_0
+  - urllib3=1.26.6=pyhd3eb1b0_1
+  - wheel=0.36.2=pyhd3eb1b0_0
+  - xz=5.2.5=h7b6447c_0
+  - yaml=0.2.5=h7b6447c_0
+  - zlib=1.2.13=h5eee18b_0
+  - pip:
+      - click==8.1.3
+      - coloredlogs==15.0.1
+      - cyvcf2==0.30.18
+      - humanfriendly==10.0
+      - lxml==4.9.2
+      - numpy==1.24.2
+      - pandas==1.5.3
+      - python-dateutil==2.8.2
+      - pytz==2022.7.1
+      - vcf2cytosure==0.7.1
