@@ -1,6 +1,11 @@
 [X.X.X]
 -------
 
+
+Added:
+^^^^^^
+* PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+
 Changed:
 ^^^^^^^^
 * Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
