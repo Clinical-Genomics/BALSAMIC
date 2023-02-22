@@ -1,5 +1,9 @@
 [X.X.X]
---------
+-------
+
+Changed:
+^^^^^^^^
+* Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
 
 Fixed:
 ^^^^^^
