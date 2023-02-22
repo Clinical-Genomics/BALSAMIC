@@ -177,16 +177,28 @@ def test_get_reference_output_files():
 
 
 def test_get_bioinfo_tools_version():
-    # GIVEN a path for container path and bioinfo tool dictionary
-    # WHEN getting dictionary of bioinformatic tools and their version
-    bioinfo_tools_dict = get_bioinfo_tools_version(
+    """Test bioinformatics tools and version extraction."""
+
+    # GIVEN a tools dictionary
+    bioinfo_tools: dict = get_bioinfo_tools_version(
         BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
     )
-    observed_versions = set(bioinfo_tools_dict["samtools"])
 
-    # THEN assert it is a dictionary and versions are correct
-    assert isinstance(bioinfo_tools_dict, dict)
-    assert set(observed_versions).issubset(set(["1.15.1", "1.12", "1.15", "1.9"]))
+    # THEN assert that the versions are correctly retrieved
+    assert set(bioinfo_tools["picard"]).issubset({"2.27.1"})
+    assert set(bioinfo_tools["samtools"]).issubset({"1.15.1", "1.12", "1.15", "1.9"})
+
+
+def test_get_bioinfo_pip_tools_version():
+    """Test bioinformatics tools and version extraction for a PIP specific tool."""
+
+    # GIVEN a tools dictionary
+    bioinfo_tools: dict = get_bioinfo_tools_version(
+        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
+    )
+
+    # THEN assert that the PIP specific packages are correctly retrieved
+    assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.9"})
 
 
 def test_get_delivery_id():

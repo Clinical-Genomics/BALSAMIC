@@ -262,7 +262,8 @@ def case_config(
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
-            BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
+            bioinfo_tools=BIOINFO_TOOL_ENV,
+            container_conda_env_path=CONTAINERS_CONDA_ENV_PATH,
         ),
         panel={
             "capture_kit": panel_bed,
