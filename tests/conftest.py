@@ -73,10 +73,10 @@ def fastq_dir(case_id_tumor_only: str, analysis_dir: str):
     """Mock FastQ directory."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
-    Path(fastq_dir, f"ACC1_XXXXX_R_1.fastq.gz").touch()
-    Path(fastq_dir, f"ACC1_XXXXX_R_2.fastq.gz").touch()
-    Path(fastq_dir, f"ACC2_XXXXX_R_1.fastq.gz").touch()
-    Path(fastq_dir, f"ACC2_XXXXX_R_2.fastq.gz").touch()
+    Path(fastq_dir, "ACC1_XXXXX_R_1.fastq.gz").touch()
+    Path(fastq_dir, "ACC1_XXXXX_R_2.fastq.gz").touch()
+    Path(fastq_dir, "ACC2_XXXXX_R_1.fastq.gz").touch()
+    Path(fastq_dir, "ACC2_XXXXX_R_2.fastq.gz").touch()
     return fastq_dir.as_posix()
 
 
