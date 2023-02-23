@@ -5,7 +5,7 @@ multiqc_input = [bam_dir + "tumor.merged.bam"]
 
 # fastqc metrics
 multiqc_input.extend(
-    expand(fastqc_dir + "concatenated_{sample}_R_{read_num}_fastqc.zip",sample=config["samples"],read_num=[1, 2])
+    expand(fastqc_dir + "{sample}_R_{read_num}_fastqc.zip",sample=config["samples"],read_num=[1, 2])
 )
 # fastp metrics
 multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json",sample=config["samples"]))

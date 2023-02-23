@@ -970,8 +970,8 @@ def test_get_rule_output(snakemake_fastqc_rule):
     for file in output_files:
         # Expected file names
         assert (
-            Path(file[0]).name == "concatenated_ACC1_R_1.fastq.gz"
-            or Path(file[0]).name == "concatenated_ACC1_R_2.fastq.gz"
+            Path(file[0]).name == "ACC1_R_1.fastq.gz"
+            or Path(file[0]).name == "ACC1_R_2.fastq.gz"
         )
         # Expected tags
         assert (

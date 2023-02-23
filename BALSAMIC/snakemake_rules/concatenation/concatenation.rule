@@ -3,14 +3,14 @@
 
 rule concatenate:
     output:
-        fastq = analysis_fastq_dir + "concatenated_{sample}_R_{read}.fastq.gz"
+        fastq = concat_dir + "{sample}_R_{read}.fastq.gz"
     benchmark:
-        Path(benchmark_dir, "concatenated_{sample}_R_{read}.tsv").as_posix()
+        Path(benchmark_dir, "{sample}_R_{read}.tsv").as_posix()
     singularity:
         Path(singularity_image, "balsamic.sif").as_posix()
     params:
         fastq_dir = fastq_dir,
-        analysis_fastq_dir = analysis_fastq_dir,
+        concat_dir = concat_dir,
         sample = "{sample}",
         read = "{read}"
     threads:
@@ -19,6 +19,6 @@ rule concatenate:
         "Sample {params.sample} and read {params.read} FASTQ concatenation"
     shell:
         """
-        mkdir -p {params.analysis_fastq_dir}
+        mkdir -p {params.concat_dir}
         cat {params.fastq_dir}/*{params.sample}*_R_{params.read}.fastq.gz > {output.fastq}
         """

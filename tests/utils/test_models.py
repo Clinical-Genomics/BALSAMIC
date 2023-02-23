@@ -468,7 +468,7 @@ def test_metric_model_duplication_refactoring():
     metrics = {
         "header": None,
         "id": "ACC1",
-        "input": "concatenated_ACC1_R_1_fastqc.zip",
+        "input": "ACC1_R_1_fastqc.zip",
         "name": "FastQC_mqc-generalstats-fastqc-percent_duplicates",
         "step": "multiqc_general_stats",
         "value": 21.517800000611373,

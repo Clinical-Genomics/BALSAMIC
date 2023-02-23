@@ -50,6 +50,7 @@ fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
 analysis_fastq_dir = get_result_dir(config) + "/fastq/"
+concat_dir = get_result_dir(config) + "/concat/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"

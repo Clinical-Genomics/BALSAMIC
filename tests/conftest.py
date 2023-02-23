@@ -259,11 +259,11 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
-    # Fill the analysis fastq path folder with the concatenated fastq files
-    analysis_fastq_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "fastq")
-    analysis_fastq_dir.mkdir(parents=True, exist_ok=True)
+    # Fill the concat fastq path folder with the concatenated fastq files
+    concat_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "concat")
+    concat_dir.mkdir(parents=True, exist_ok=True)
     for read in [1, 2]:
-        Path(analysis_fastq_dir, f"concatenated_ACC1_R_{read}.fastq.gz").touch()
+        Path(concat_dir, f"ACC1_R_{read}.fastq.gz").touch()
 
     return fastq_dir.as_posix()
 
@@ -700,8 +700,8 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
         helpers.analysis_dir,
         helpers.case_id,
         "analysis",
-        "fastq",
-        "concatenated_ACC1_R_{read}.fastq.gz",
+        "concat",
+        "ACC1_R_{read}.fastq.gz",
     )
 
     return Map(
