@@ -1,10 +1,16 @@
 """This file contains constants variables used by BALSAMIC"""
 import operator
 import sys
+from enum import Enum
 from pathlib import Path
 
-# DOCKER hub path
-BALSAMIC_DOCKER_PATH = "docker://clinicalgenomics/balsamic"
+
+class StrEnum(str, Enum):
+    """StrEnum data class."""
+
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 # BALSAMIC base dir
 BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
@@ -36,22 +42,6 @@ SEQUENCING_TYPE = ["wgs", "targeted"]
 MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
-
-# list of bioinfo tools for each conda env
-VALID_CONTAINER_CONDA_NAME = {
-    "align_qc",
-    "annotate",
-    "coverage_qc",
-    "varcall_py3",
-    "varcall_py27",
-    "varcall_cnvkit",
-    "delly",
-    "ascatNgs",
-    "balsamic",
-    "vcf2cytosure",
-    "cnvpytor",
-    "somalier",
-}
 
 BIOINFO_TOOL_ENV = {
     "bedtools": "align_qc",
