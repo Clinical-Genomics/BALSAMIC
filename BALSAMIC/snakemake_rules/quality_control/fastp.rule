@@ -1,15 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-def get_fwd_read(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
-
-def get_rev_read(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
 
 if 'quality_trim' in config['QC'].keys():
     fastp_param_qc = list()
@@ -38,8 +29,8 @@ if 'quality_trim' in config['QC'].keys():
 
 rule fastp_umi:
     input:
-        fastq_r1=get_fwd_read,
-        fastq_r2=get_rev_read
+        fastq_r1=lambda wildcards: sample_dict["fastqs"][wildcards.fastqpattern]["fwd"],
+        fastq_r2=lambda wildcards: sample_dict["fastqs"][wildcards.fastqpattern]["rev"]
     output:
         fastq_r1 = temp(fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz"),
         fastq_r2 = temp(fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"),
