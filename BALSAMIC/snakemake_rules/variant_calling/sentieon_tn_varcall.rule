@@ -9,7 +9,7 @@ rule sentieon_base_calibration:
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
         dbsnp = config["reference"]["dbsnp"],
-        bam = get_final_bam
+        bam = lambda wildcards: sample_dict[wildcards.sample_type]["bam"]["final_bam"]
     output:
         recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),
         qual_recal = Path(bam_dir, "{sample_type}.recal.csv").as_posix(),
@@ -69,8 +69,8 @@ rule sentieon_TNscope:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
-        bamT = get_final_tumor_bam,
-        bamN = get_final_normal_bam,
+        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
+        bamN = sample_dict[normal_sample]["bam"]["final_bam"],
         recalT = expand(bam_dir + "tumor.recal_data.table"),
         recalN = expand(bam_dir + "normal.recal_data.table"),
     output:

@@ -3,7 +3,7 @@
 
 rule sentieon_DNAscope:
     input:
-        bam = get_final_bam,
+        bam = lambda wildcards: sample_dict[wildcards.sample_type]["bam"]["final_bam"],
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         interval = config["panel"]["capture_kit"]

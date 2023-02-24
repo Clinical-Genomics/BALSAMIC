@@ -4,7 +4,7 @@
 
 rule somalier_extract_normal:
     input:
-        bamN = get_final_normal_bam,
+        bamN = sample_dict[normal_sample]["bam"]["final_bam"],
         fa = config["reference"]["reference_genome"],
         ref_sites = config["reference"]["somalier_sites"],
     output:
@@ -28,7 +28,7 @@ rule somalier_extract_normal:
 
 rule somalier_extract_tumor:
     input:
-        bamT = get_final_tumor_bam,
+        bamT = sample_dict[tumor_name]["bam"]["final_bam"],
         fa = config["reference"]["reference_genome"],
         ref_sites = config["reference"]["somalier_sites"],
     output:
