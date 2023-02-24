@@ -135,8 +135,9 @@ picarddup = get_picard_mrkdup(config)
 
 # Get mapping info
 for sample in sample_dict:
+    sample_type = sample_dict[sample]["sample_type"].lower()
     sample_dict[sample]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
-
+    sample_dict[sample_type]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
 
 # vcfanno annotations
 research_annotations.append( {
@@ -378,11 +379,11 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
 
 # Adding code for testing, removing merge_bam from wgs analysis
-if sequence_type == "wgs":
-    if "snakemake_rules/variant_calling/mergetype_tumor.rule" in rules_to_include:
-        rules_to_include.remove("snakemake_rules/variant_calling/mergetype_tumor.rule")
-    if "snakemake_rules/variant_calling/mergetype_normal.rule" in rules_to_include:
-        rules_to_include.remove("snakemake_rules/variant_calling/mergetype_normal.rule")
+
+if "snakemake_rules/variant_calling/mergetype_tumor.rule" in rules_to_include:
+    rules_to_include.remove("snakemake_rules/variant_calling/mergetype_tumor.rule")
+if "snakemake_rules/variant_calling/mergetype_normal.rule" in rules_to_include:
+    rules_to_include.remove("snakemake_rules/variant_calling/mergetype_normal.rule")
 
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
