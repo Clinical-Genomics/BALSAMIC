@@ -145,10 +145,10 @@ for sample in config["samples"]:
         sample_dict[normal_sample]["sample_type"] = "NORMAL"
 
 # Get fastq pattern --> fastq mapping
-sample_dict["fastqs"] = {}
+fastq_dict = {}
 for sample in sample_dict:
     for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
-        sample_dict["fastqs"][fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
 
 # Get mapping
 for sample in sample_dict:
