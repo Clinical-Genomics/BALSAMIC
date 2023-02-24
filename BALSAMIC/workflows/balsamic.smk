@@ -137,7 +137,7 @@ picarddup = get_picard_mrkdup(config)
 for sample in sample_dict:
     sample_type = sample_dict[sample]["sample_type"].lower()
     sample_dict[sample]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
-    sample_dict[sample_type]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
+    sample_dict[sample_type] = sample_dict[sample]
 
 # vcfanno annotations
 research_annotations.append( {
