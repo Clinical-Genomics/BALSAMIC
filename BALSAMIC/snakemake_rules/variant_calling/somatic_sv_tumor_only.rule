@@ -5,7 +5,7 @@
 rule manta_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = sample_dict[tumor_name]["bam"]["final_bam"]
+        bamT = sample_dict[tumor_sample]["bam"]["final_bam"]
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map"
@@ -52,7 +52,7 @@ rm -rf {params.tmpdir};
 rule delly_sv_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = sample_dict[tumor_name]["bam"]["final_bam"],
+        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
         excl = config["reference"]["delly_exclusion_converted"],
     output:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -82,7 +82,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     rule delly_cnv_tumor_only:
         input:
             fa = config["reference"]["reference_genome"],
-            bamT = sample_dict[tumor_name]["bam"]["final_bam"],
+            bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
             bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
             map = config["reference"]["delly_mappability"],
         output:
@@ -115,7 +115,7 @@ else:
     rule delly_cnv_tumor_only:
         input:
             fa=config["reference"]["reference_genome"],
-            bamT=sample_dict[tumor_name]["bam"]["final_bam"],
+            bamT=sample_dict[tumor_sample]["bam"]["final_bam"],
             bcf=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
             map=config["reference"]["delly_mappability"],
             baits_bed = config["panel"]["capture_kit"],
@@ -149,7 +149,7 @@ rm -rf {params.tmpdir};
 rule tiddit_sv_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = sample_dict[tumor_name]["bam"]["final_bam"]
+        bamT = sample_dict[tumor_sample]["bam"]["final_bam"]
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
         cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
@@ -186,7 +186,7 @@ rm -rf {params.tmpdir};
 
 rule cnvpytor_tumor_only:
     input:
-        bamT = sample_dict[tumor_name]["bam"]["final_bam"],
+        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
         vcfT = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
         cnv_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.vcf.gz",

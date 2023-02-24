@@ -75,7 +75,7 @@ rm -rf {params.tmpdir};
 
 rule sentieon_TNhaplotyper_tumor_only:
     input:
-        bam = sample_dict[tumor_name]["bam"]["final_bam"],
+        bam = sample_dict[tumor_sample]["bam"]["final_bam"],
         recal_data_table = expand(bam_dir + "tumor.merged.recal_data.table"),
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
@@ -125,7 +125,7 @@ rule sentieon_TNscope_tumor_only:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
-        bam = sample_dict[tumor_name]["bam"]["final_bam"],
+        bam = sample_dict[tumor_sample]["bam"]["final_bam"],
         recal = expand(bam_dir + "tumor.recal_data.table")
     output:
         vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
