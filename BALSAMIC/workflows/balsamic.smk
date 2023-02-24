@@ -81,6 +81,7 @@ def get_final_normal_bam(wcs=None):
     else:
         return bam_dir + "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
 
+"""
 def get_fwd_read(wcs):
     for sample in fastq_dict:
         if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
@@ -90,6 +91,14 @@ def get_rev_read(wcs):
     for sample in fastq_dict:
         if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
             return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
+
+def get_samplereads(wcs):
+    fastq_list = []
+    for fastq_pattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
+        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["fwd"])
+        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["rev"])
+    return fastq_list
+"""
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")

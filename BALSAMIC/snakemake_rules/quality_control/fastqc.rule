@@ -3,16 +3,11 @@
 
 # Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
 
-def get_samplereads(wcs):
-    fastq_list = []
-    for fastq_pattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
-        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["fwd"])
-        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["rev"])
-    return fastq_list
 
 rule fastqc:
     input:
-        samplereads=get_samplereads
+        sample_fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["fwd"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]],
+        sample_rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["rev"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]]
     output:
         fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
     benchmark:
@@ -31,9 +26,9 @@ rule fastqc:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.samplereads} \
+fastqc --threads {threads} {input.sample_fwd_fastqs} {input.sample_rev_fastqs}\
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
  
-echo "Ran FastQC on {input.samplereads}" >> {output.fastqccomplete}
+echo "Ran FastQC on {input.sample_fwd_fastqs} {input.sample_rev_fastqs}" >> {output.fastqccomplete}
         """
