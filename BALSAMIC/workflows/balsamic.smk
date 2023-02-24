@@ -47,18 +47,6 @@ def get_samplename(wcs):
     for sample in sample_dict:
         if f"{wcs.fastqpattern}" in sample_dict[sample]["fastqpair_patterns"]:
             return sample
-"""
-def get_sampletype(wcs):
-    for sample in sample_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["sampletype"]
-
-def get_mapping(wcs):
-    fastqpatterns = []
-    for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
-        fastqpatterns.append(fastqpattern)
-    return expand(bam_dir + "{sample}_align_sort_{fastqpattern}.bam", sample=f"{wcs.sample}", fastqpattern=fastqpatterns)
-"""
 
 def get_final_bam(wcs):
     if f"{wcs.sample_type}" == "tumor":
@@ -81,24 +69,7 @@ def get_final_normal_bam(wcs=None):
     else:
         return bam_dir + "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
 
-"""
-def get_fwd_read(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
 
-def get_rev_read(wcs):
-    for sample in fastq_dict:
-        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
-            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
-
-def get_samplereads(wcs):
-    fastq_list = []
-    for fastq_pattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
-        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["fwd"])
-        fastq_list.append(fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"][fastq_pattern]["rev"])
-    return fastq_list
-"""
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
