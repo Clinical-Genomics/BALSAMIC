@@ -17,8 +17,8 @@ rule sentieon_align_sort:
         header = params.common.align_header,
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id = get_samplename,
-        sample_type = get_sampletype,
+        sample_id = "{sample}",
+        sample_type = lambda wildcards: sample_dict[wildcards.sample]["sample_type"],
         fastqpattern = "{fastqpattern}"
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
