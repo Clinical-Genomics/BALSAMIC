@@ -81,6 +81,16 @@ def get_final_normal_bam(wcs=None):
     else:
         return bam_dir + "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
 
+def get_fwd_read(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
+            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
+
+def get_rev_read(wcs):
+    for sample in fastq_dict:
+        if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
+            return fastq_dict[sample]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
+
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
@@ -133,6 +143,12 @@ for sample in config["samples"]:
         normal_sample = sample
         sample_dict[normal_sample] = get_fastq_info(normal_sample, fastqinput_dir)
         sample_dict[normal_sample]["sample_type"] = "NORMAL"
+
+# Get fastq pattern --> fastq mapping
+sample_dict["fastqs"] = {}
+for sample in sample_dict:
+    for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
+        sample_dict["fastqs"][fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
 
 # Get mapping
 for sample in sample_dict:
