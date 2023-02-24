@@ -189,15 +189,22 @@ def get_fastq_info(samplename, fastq_dir):
 
     return fastq_dict
 
-def get_mapping(samplename, sample_dict, bam_dir):
+def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
     """
     input:
     output:
     """
-    mappings = []
+    alignments = {}
+    alignments["align_sort_bamlist"] = []
     for fastqpattern in sample_dict[samplename]["fastqpair_patterns"]:
-        mappings.append(bam_dir + f"{samplename}_align_sort_{fastqpattern}.bam")
-    return mappings
+        alignments["align_sort_bamlist"].append(bam_dir + "{sample}_align_sort_{fastqpattern}.bam".format(sample=samplename, fastqpattern=fastqpattern))
+
+    if sequencing_type == 'wgs':
+        alignments["final_bam"] = bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
+    else:
+        alignments["final_bam"] = bam_dir + "{sample}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
+    return alignments
+
 
 def get_result_dir(config):
     """

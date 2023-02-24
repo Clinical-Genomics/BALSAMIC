@@ -21,7 +21,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_mapping, get_fastq_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+from BALSAMIC.utils.rule import (get_mapping_info, get_fastq_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
                                  get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
@@ -130,12 +130,12 @@ for sample in sample_dict:
     for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
         fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
 
-# Get mapping
+# picarddup flag
+picarddup = get_picard_mrkdup(config)
+
+# Get mapping info
 for sample in sample_dict:
-    if sample_dict[sample]["sample_type"] == "TUMOR":
-        sample_dict[sample]["align_sort"] = get_mapping(sample, sample_dict, bam_dir)
-    else:
-        sample_dict[sample]["align_sort"] = get_mapping(sample, sample_dict, bam_dir)
+    sample_dict[sample]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
 
 
 # vcfanno annotations
@@ -191,8 +191,6 @@ if "swegen_sv_frequency" in config["reference"]:
     swegen_sv = get_swegen_sv(config)
 
 
-# picarddup flag
-picarddup = get_picard_mrkdup(config)
 
 # Varcaller filter settings
 COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
