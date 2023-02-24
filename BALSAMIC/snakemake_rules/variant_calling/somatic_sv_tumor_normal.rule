@@ -6,7 +6,7 @@ rule manta_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-        bamT = sample_dict[tumor_bam]["bam"]["final_bam"]
+        bamT = sample_dict[tumor_sample]["bam"]["final_bam"]
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
@@ -56,7 +56,7 @@ rule delly_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-        bamT = sample_dict[tumor_bam]["bam"]["final_bam"],
+        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
         excl = config["reference"]["delly_exclusion_converted"],
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -93,7 +93,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
         input:
             fa = config["reference"]["reference_genome"],
             bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-            bamT = sample_dict[tumor_bam]["bam"]["final_bam"],
+            bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
             map = config["reference"]["delly_mappability"],
         output:
             cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -141,7 +141,7 @@ else:
         input:
             fa = config["reference"]["reference_genome"],
             bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-            bamT = sample_dict[tumor_bam]["bam"]["final_bam"],
+            bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
             map = config["reference"]["delly_mappability"],
             baits_bed = config["panel"]["capture_kit"],
         output:
