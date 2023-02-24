@@ -205,6 +205,20 @@ def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_typ
         alignments["final_bam"] = bam_dir + "{sample}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
     return alignments
 
+def get_fastqpatterns(sample_dict, sample=None):
+    """
+    input:
+    output:
+    """
+    fastqpatterns = []
+    if sample:
+        for fastqpattern in sample_dict[sample]["fastqpair_patterns"]:
+            fastqpatterns.append(fastqpattern)
+    else:
+        for sample in sample_dict:
+            for fastqpattern in sample_dict[sample]["fastqpair_patterns"]:
+                fastqpatterns.append(fastqpattern)
+    return fastqpatterns
 
 def get_result_dir(config):
     """

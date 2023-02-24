@@ -21,7 +21,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_mapping_info, get_fastq_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_fastq_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
                                  get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
@@ -31,43 +31,6 @@ from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTING
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
-
-# Define Snakemake Rule Functions
-def get_fastqpatterns(sample=None):
-    fastqpatterns = []
-    if sample:
-        for fastqpattern in sample_dict[sample]["fastqpair_patterns"]:
-            fastqpatterns.append(fastqpattern)
-    else:
-        for sample in sample_dict:
-            for fastqpattern in sample_dict[sample]["fastqpair_patterns"]:
-                fastqpatterns.append(fastqpattern)
-    return fastqpatterns
-def get_samplename(wcs):
-    for sample in sample_dict:
-        if f"{wcs.fastqpattern}" in sample_dict[sample]["fastqpair_patterns"]:
-            return sample
-
-def get_final_bam(wcs):
-    if f"{wcs.sample_type}" == "tumor":
-        samplename = tumor_sample
-    else:
-        samplename = normal_sample
-    if config["analysis"]["sequencing_type"] == 'wgs':
-        return bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
-    else:
-        return bam_dir + "{sample}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
-
-def get_final_tumor_bam(wcs=None):
-    if config["analysis"]["sequencing_type"] == 'wgs':
-        return bam_dir + "{tumor}.dedup.realign.bam".format(tumor=tumor_sample)
-    else:
-        return bam_dir + "{tumor}.sorted.{picardstr}.bam".format(tumor=tumor_sample, picardstr=picarddup)
-def get_final_normal_bam(wcs=None):
-    if config["analysis"]["sequencing_type"] == 'wgs':
-        return bam_dir + "{normal}.dedup.realign.bam".format(normal=normal_sample)
-    else:
-        return bam_dir + "{normal}.sorted.{picardstr}.bam".format(normal=normal_sample, picardstr=picarddup)
 
 
 
@@ -142,8 +105,6 @@ if tumor_sample:
     sample_dict["tumor"] = sample_dict[tumor_sample]
 if normal_sample:
     sample_dict["normal"] = sample_dict[tumor_sample]
-
-print(sample_dict)
 
 # vcfanno annotations
 research_annotations.append( {

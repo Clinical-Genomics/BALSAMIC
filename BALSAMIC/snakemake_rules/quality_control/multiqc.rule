@@ -17,8 +17,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     multiqc_input.extend(expand(fastqc_dir + "{sample}_fastqc.completed", sample=config["samples"]))
 
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.json", fastqpattern=get_fastqpatterns()))
-    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.html", fastqpattern=get_fastqpatterns()))
+    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.json", fastqpattern=get_fastqpatterns(sample_dict)))
+    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.html", fastqpattern=get_fastqpatterns(sample_dict)))
 
 
     # Picard metrics
@@ -37,15 +37,15 @@ else:
     multiqc_input.extend(expand(fastqc_dir + "{sample}_fastqc.completed", sample=config["samples"]))
 
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.json", fastqpattern=get_fastqpatterns()))
-    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.html", fastqpattern=get_fastqpatterns()))
+    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.json", fastqpattern=get_fastqpatterns(sample_dict)))
+    multiqc_input.extend(expand(qc_dir + "fastp/{fastqpattern}_fastp.html", fastqpattern=get_fastqpatterns(sample_dict)))
 
     # picard metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric", sample=tumor_sample, fastqpattern=get_fastqpatterns(tumor_sample)))
-    multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric", sample=tumor_sample, fastqpattern=get_fastqpatterns(tumor_sample)))
+    multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric", sample=tumor_sample, fastqpattern=get_fastqpatterns(sample_dict, tumor_sample)))
+    multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric", sample=tumor_sample, fastqpattern=get_fastqpatterns(sample_dict, tumor_sample)))
     if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric", sample=normal_sample, fastqpattern=get_fastqpatterns(normal_sample)))
-        multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric", sample=normal_sample, fastqpattern=get_fastqpatterns(normal_sample)))
+        multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric", sample=normal_sample, fastqpattern=get_fastqpatterns(sample_dict, normal_sample)))
+        multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric", sample=normal_sample, fastqpattern=get_fastqpatterns(sample_dict, normal_sample)))
 
     multiqc_input.extend(expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]))
 
