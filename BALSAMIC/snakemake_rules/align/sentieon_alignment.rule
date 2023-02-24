@@ -45,7 +45,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_dedup:
     input:
-        bamfiles = get_mapping
+        bamfiles = lambda wildcards: fastq_dict[wildcards.sample]["align_sort"]
     output:
         bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample}.dedup.score").as_posix(),

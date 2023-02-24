@@ -21,7 +21,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_fastq_dict, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+from BALSAMIC.utils.rule import (get_mapping, get_fastq_dict, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
                                  get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
@@ -52,11 +52,14 @@ def get_sampletype(wcs):
     for sample in fastq_dict:
         if f"{wcs.fastqpattern}" in fastq_dict[sample]["fastqpair_patterns"]:
             return fastq_dict[sample]["sampletype"]
+"""
 def get_mapping(wcs):
     fastqpatterns = []
     for fastqpattern in fastq_dict[f"{wcs.sample}"]["fastqpair_patterns"]:
         fastqpatterns.append(fastqpattern)
     return expand(bam_dir + "{sample}_align_sort_{fastqpattern}.bam", sample=f"{wcs.sample}", fastqpattern=fastqpatterns)
+"""
+
 def get_final_bam(wcs):
     if f"{wcs.sample_type}" == "tumor":
         samplename = tumor_sample
@@ -130,6 +133,13 @@ for sample in config["samples"]:
         normal_sample = sample
         fastq_dict[normal_sample] = get_fastq_dict(normal_sample,fastqinput_dir)
         fastq_dict[normal_sample]["sampletype"] = "NORMAL"
+
+# Get mapping
+for sample in fastq_dict:
+    if fastq_dict[sample]["sampletype"] == "TUMOR":
+        fastq_dict[sample]["align_sort"] = get_mapping(sample, fastq_dict, bam_dir)
+    else:
+        fastq_dict[sample]["align_sort"] = get_mapping(sample, fastq_dict, bam_dir)
 
 
 # vcfanno annotations
