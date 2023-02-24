@@ -188,7 +188,7 @@ def get_fastq_dict(samplename, fastq_dir):
 def get_mapping(samplename, fastq_dict, bam_dir):
     mappings = []
     for fastqpattern in fastq_dict[samplename]["fastqpair_patterns"]:
-        mappings.append(f"{bam_dir}/{samplename}_align_sort_{fastqpattern}.bam")
+        mappings.append(bam_dir + f"{samplename}_align_sort_{fastqpattern}.bam")
     return mappings
 
 def get_result_dir(config):
