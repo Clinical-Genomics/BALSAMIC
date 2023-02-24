@@ -100,11 +100,11 @@ picarddup = get_picard_mrkdup(config)
 for sample in sample_dict:
     sample_dict[sample]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
 
+
 # Adding sample type level information
-if tumor_sample:
-    sample_dict["tumor"] = sample_dict[tumor_sample]
-if normal_sample:
-    sample_dict["normal"] = sample_dict[tumor_sample]
+for sample in config["samples"]:
+    sample_type = config["samples"][sample]["type"]
+    sample_dict[sample_type] = sample_dict[sample]
 
 # vcfanno annotations
 research_annotations.append( {
