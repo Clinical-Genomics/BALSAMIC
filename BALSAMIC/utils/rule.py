@@ -160,7 +160,11 @@ def get_sample_type_from_prefix(config, sample):
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
 
-def get_fastq_dict(samplename, fastq_dir):
+def get_fastq_info(samplename, fastq_dir):
+    """
+    input:
+    output:
+    """
     # Prepare fastq_dict
     fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz"]
     revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz"]
@@ -186,6 +190,10 @@ def get_fastq_dict(samplename, fastq_dir):
     return fastq_dict
 
 def get_mapping(samplename, fastq_dict, bam_dir):
+    """
+    input:
+    output:
+    """
     mappings = []
     for fastqpattern in fastq_dict[samplename]["fastqpair_patterns"]:
         mappings.append(bam_dir + f"{samplename}_align_sort_{fastqpattern}.bam")
