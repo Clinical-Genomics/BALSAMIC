@@ -21,7 +21,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_fastq_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+from BALSAMIC.utils.rule import (validate_fastq_input, get_fastqpatterns, get_mapping_info, get_fastq_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
                                  get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
@@ -86,6 +86,9 @@ for sample in config["samples"]:
         normal_sample = sample
         sample_dict[normal_sample] = get_fastq_info(normal_sample, fastqinput_dir)
         sample_dict[normal_sample]["sample_type"] = "NORMAL"
+
+# Validate fastq-info
+validate_fastq_input(sample_dict, fastqinput_dir)
 
 # Get fastq pattern --> fastq mapping
 fastq_dict = {}
