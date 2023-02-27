@@ -8,7 +8,7 @@ from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
 import zlib
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 import yaml
 import snakemake
