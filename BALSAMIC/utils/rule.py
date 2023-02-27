@@ -187,7 +187,28 @@ def get_fastq_info(samplename, fastq_dir):
 
     return fastq_dict
 
+def validate_fastq_input(sample_dict, fastq_dir):
+    """
+    input:
+    output:
+    """
+    # are there fastqs in the directory that have not been added to any fastq_list?
+    complete_fastq_list = glob.glob(f"{fastq_dir}/*fastq.gz")
+    assigned_fastq_list = []
+    for sample in sample_dict:
+        fastq_dict = sample_dict[sample]["fastqpair_patterns"]
+        for fastq_pattern in fastq_dict:
+            assigned_fastq_list.append(fastq_dict[fastq_pattern]["fwd"])
+            assigned_fastq_list.append(fastq_dict[fastq_pattern]["rev"])
 
+    unassigned_fastqs = []
+    for fastq in complete_fastq_list:
+        if fastq not in assigned_fastq_list:
+            unassigned_fastqs.append(fastq)
+
+    if unassigned_fastqs:
+        unassigned_fastqs_str = "\n".join(unassigned_fastqs)
+        LOG.error(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
 
 def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
     """
