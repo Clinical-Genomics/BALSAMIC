@@ -165,29 +165,29 @@ def get_fastq_info(samplename, fastq_dir):
     input:
     output:
     """
-    # Prepare fastq_dict
-    fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz"]
-    revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz"]
+    # Fastq suffixes to look for
+    fastq_suffixes = {'1': {'fwd': '_1.fastq.gz', 'rev': '_2.fastq.gz'}, '2': {'fwd': '_R1_001.fastq.gz', 'rev': '_R2_001.fastq.gz'}}
 
     fastq_dict = {}
     fastq_dict["fastqpair_patterns"] = {}
 
     # Prepare Fastq Variables
-    for fwdpattern in fwdpatterns:
-        fwd_fastqs = glob.glob(f"{fastq_dir}/*{samplename}*{fwdpattern}")
+    for suffix in fastq_suffixes:
+        fwd_suffix = fastq_suffixes[suffix]["fwd"]
+        rev_suffix = fastq_suffixes[suffix]["rev"]
+        fwd_fastqs = glob.glob(f"{fastq_dir}/*{samplename}*{fwd_suffix}")
         if fwd_fastqs:
             for fwd_fastq in fwd_fastqs:
-                fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwdpattern, "")
+                fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
+                if fastqpair_pattern in fastq_dict["fastqpair_patterns"]:
+                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to dictionary for sample: {samplename}.")
                 fastq_dict["fastqpair_patterns"][fastqpair_pattern] = {}
                 fastq_dict["fastqpair_patterns"][fastqpair_pattern]["fwd"] = fwd_fastq
-    for revpattern in revpatterns:
-        rev_fastqs = glob.glob(f"{fastq_dir}/*{samplename}*{revpattern}")
-        if rev_fastqs:
-            for rev_fastq in rev_fastqs:
-                fastqpair_pattern = os.path.basename(rev_fastq).replace(revpattern, "")
-                fastq_dict["fastqpair_patterns"][fastqpair_pattern]["rev"] = rev_fastq
+                fastq_dict["fastqpair_patterns"][fastqpair_pattern]["rev"] = fwd_fastq.replace(fwd_suffix, rev_suffix)
 
     return fastq_dict
+
+
 
 def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
     """
