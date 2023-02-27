@@ -9,7 +9,7 @@ rule concatenate_umi_reads:
         fastq_fwd = fastq_dir + "concat.{sample}_1.umi_optimized.fastq.gz",
         fastq_rev = fastq_dir + "concat.{sample}_2.umi_optimized.fastq.gz"
     benchmark:
-        Path(benchmark_dir, "concatenated_{sample}_R_{read}.tsv").as_posix()
+        Path(benchmark_dir, "concatenated_{sample}_UMI.tsv").as_posix()
     singularity:
         Path(singularity_image, "balsamic.sif").as_posix()
     params:
