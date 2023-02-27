@@ -3,8 +3,8 @@
 
 rule concatenate_umi_reads:
     input:
-        fastqs_fwd = expand(fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz", fastqpattern=get_fastqpatterns()),
-        fastqs_rev = expand(fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz", fastqpattern=get_fastqpatterns())
+        fastqs_fwd = lambda wildcards: [fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz".format(fastqpattern=fastq_pattern) for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]],
+        fastqs_rev = lambda wildcards: [fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz".format(fastqpattern=fastq_pattern) for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]]
     output:
         fastq_fwd = fastq_dir + "concat.{sample}_1.umi_optimized.fastq.gz",
         fastq_rev = fastq_dor + "concat.{sample}_2.umi_optimized.fastq.gz"
@@ -21,6 +21,6 @@ rule concatenate_umi_reads:
         "Sample {params.sample} FASTQ concatenation per read-direction, before UMI extraction"
     shell:
         """
-        cat {params.fastq_dir}/*_1.umi_optimized.fastq.gz > {output.fastq_fwd}
-        cat {params.fastq_dir}/*_2.umi_optimized.fastq.gz > {output.fastq_rev}
+        cat {input.fastqs_fwd} > {output.fastq_fwd}
+        cat {input.fastqs_rev} > {output.fastq_rev}
         """
