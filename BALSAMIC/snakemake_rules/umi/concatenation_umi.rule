@@ -7,7 +7,7 @@ rule concatenate_umi_reads:
         fastqs_rev = lambda wildcards: [fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz".format(fastqpattern=fastq_pattern) for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]]
     output:
         fastq_fwd = fastq_dir + "concat.{sample}_1.umi_optimized.fastq.gz",
-        fastq_rev = fastq_dor + "concat.{sample}_2.umi_optimized.fastq.gz"
+        fastq_rev = fastq_dir + "concat.{sample}_2.umi_optimized.fastq.gz"
     benchmark:
         Path(benchmark_dir, "concatenated_{sample}_R_{read}.tsv").as_posix()
     singularity:
