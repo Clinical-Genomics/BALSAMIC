@@ -29,8 +29,8 @@ if 'quality_trim' in config['QC'].keys():
 
 rule fastp_umi:
     input:
-        fastq_r1=lambda wildcards: fastq_dict[wildcards.fastqpattern]["fwd"],
-        fastq_r2=lambda wildcards: fastq_dict[wildcards.fastqpattern]["rev"]
+        fastq_r1 = lambda wildcards: fastq_dict[wildcards.fastqpattern]["fwd"],
+        fastq_r2 = lambda wildcards: fastq_dict[wildcards.fastqpattern]["rev"]
     output:
         fastq_r1 = temp(fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz"),
         fastq_r2 = temp(fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"),
