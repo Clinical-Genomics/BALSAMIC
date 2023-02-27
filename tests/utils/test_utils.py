@@ -28,9 +28,7 @@ from BALSAMIC.utils.cli import (
     get_config,
     get_file_status_string,
     find_file_index,
-    validate_fastq_pattern,
     get_panel_chrom,
-    singularity,
     get_file_extension,
     get_bioinfo_tools_version,
     convert_deliverables_tags,
@@ -682,112 +680,6 @@ def test_find_file_index(tmpdir):
     assert isinstance(result, list)
     assert str(bai_file) in result
     assert str(bai_file_2) in result
-
-
-def test_singularity_shellcmd(balsamic_cache):
-    """test singularity shell cmd"""
-
-    # GIVEN a dummy command
-    dummy_command = "ls this_path"
-    dummy_path_1 = "this_path/path1"
-    dummy_path_2 = "this_path/path2"
-    correct_shellcmd = "exec --bind {} --bind {} ls this_path".format(
-        dummy_path_1, dummy_path_2
-    )
-    singularity_container_sif = Path(
-        balsamic_cache, balsamic_version, "containers", "align_qc", "example.sif"
-    ).as_posix()
-
-    with mock.patch.object(shutil, "which") as mocked:
-        mocked.return_value = "/my_home/binary_path/singularity"
-
-        # WHEN building singularity command
-        shellcmd = singularity(
-            sif_path=singularity_container_sif,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
-
-        # THEN successfully return a correct singularity cmd
-        assert correct_shellcmd in shellcmd
-
-
-def test_singularity_shellcmd_sif_not_exist():
-    """test singularity shell cmd with non-existing file"""
-
-    # GIVEN a dummy command
-    dummy_command = "ls this_path"
-    dummy_sif_path = "/some_path/my_sif_path_3.1415/container.sif"
-    dummy_path_1 = "this_path/path1"
-    dummy_path_2 = "this_path/path2"
-    error_msg = "container file does not exist"
-
-    # WHEN building singularity command
-    # THEN successfully get error that container doesn't exist
-    with mock.patch.object(shutil, "which") as mocked, pytest.raises(
-        BalsamicError, match=error_msg
-    ):
-        mocked.return_value = "/my_home/binary_path/singularity"
-
-        singularity(
-            sif_path=dummy_sif_path,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
-
-
-def test_singularity_shellcmd_cmd_not_exist():
-    """test singularity shell cmd with nonexisting singularity command"""
-
-    # GIVEN a dummy command
-    dummy_command = "ls this_path"
-    error_msg = "singularity command does not exist"
-    dummy_path_1 = "this_path/path1"
-    dummy_path_2 = "this_path/path2"
-    singularity_container_sif = "some_path/container.sif"
-
-    # WHEN building singularity command
-    # THEN successfully get error if singualrity command doesn't exist
-    with mock.patch.object(shutil, "which") as mocked, pytest.raises(
-        BalsamicError, match=error_msg
-    ):
-        mocked.return_value = None
-
-        singularity(
-            sif_path=singularity_container_sif,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
-
-
-def test_validate_fastq_pattern():
-    # GIVEN a path to a file with correct fastq file prefix
-    fastq_path_r1 = "/home/analysis/dummy_tumor_R_1.fastq.gz"
-    fastq_path_r2 = "/home/analysis/dummy_normal_R_2.fastq.gz"
-    # THEN it should return the correct prefix
-    assert validate_fastq_pattern(fastq_path_r1) == "dummy_tumor_R"
-    assert validate_fastq_pattern(fastq_path_r2) == "dummy_normal_R"
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_1 = "/home/analysis/dummy_tumor.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_1)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_2 = "/home/analysis/dummy_tumor_R3.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_2)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_3 = "/home/analysis/dummy_tumor_R_2.bam"
-        validate_fastq_pattern(bad_fastq_path_3)
-        # THEN AttributeError is raised
-    assert excinfo.value
 
 
 def test_get_panel_chrom():

@@ -326,50 +326,6 @@ def get_file_status_string(file_to_check):
     return return_str, file_status
 
 
-def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
-    """Run within container
-
-    Excutes input command string via Singularity container image
-
-    Args:
-        sif_path: Path to singularity image file (sif)
-        cmd: A string for series of commands to run
-        bind_path: a path to bind within container
-
-    Returns:
-        A sanitized Singularity cmd
-
-    Raises:
-        BalsamicError: An error occured while creating cmd
-    """
-
-    singularity_cmd = shutil.which("singularity")
-    if not singularity_cmd:
-        raise BalsamicError("singularity command does not exist")
-
-    if not Path(sif_path).is_file():
-        raise BalsamicError("container file does not exist")
-
-    singularity_bind_path = ""
-    for bind_path in bind_paths:
-        singularity_bind_path += "--bind {} ".format(bind_path)
-
-    shellcmd = "singularity exec {} {}".format(singularity_bind_path, cmd)
-
-    return " ".join(shellcmd.split())
-
-
-def validate_fastq_pattern(sample):
-    """Finds the correct filename prefix from file path, and returns it.
-    An error is raised if sample name has invalid pattern"""
-
-    fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
-    sample_basename = Path(sample).name
-
-    file_str = sample_basename[0 : (fq_pattern.search(sample_basename).span()[0] + 1)]
-    return file_str
-
-
 def get_panel_chrom(panel_bed) -> list:
     """Returns a set of chromosomes present in PANEL BED"""
 
