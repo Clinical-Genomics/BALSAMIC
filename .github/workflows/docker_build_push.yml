@@ -1,9 +1,6 @@
 name: Build and push master and develop container
 on:
   push:
-    branches:
-      - master
-      - develop
 jobs:
   main:
     name: Docker image build push
@@ -11,7 +8,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py3, balsamic, delly, vcf2cytosure, cnvpytor, somalier]
+        container-name: [varcall_py3]
     steps:
       - name: Git checkout
         id: git_checkout

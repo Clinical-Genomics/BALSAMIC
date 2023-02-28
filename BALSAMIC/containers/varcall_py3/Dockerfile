@@ -8,7 +8,7 @@ LABEL about.description="Bioinformatic analysis pipeline for somatic mutations i
 
 ENV PATH="/opt/conda/bin/:${PATH}"
 
-RUN apk add --no-cache bash gcc git
+RUN apk add --no-cache bash gcc git musl gsl
 
 ARG WORK_DIR=project
 ARG CONTAINER_NAME
