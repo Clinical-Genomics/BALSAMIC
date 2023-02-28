@@ -16,7 +16,7 @@ from BALSAMIC.utils.io import write_json
 
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
-from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
+from BALSAMIC.utils.rule import (validate_fastq_input, get_fastqpatterns, get_mapping_info, get_fastq_info, get_rule_output, get_result_dir,
                                  get_sample_type, get_picard_mrkdup, get_script_path,
                                  get_threads, get_sequencing_type, get_capture_kit)
 
@@ -37,7 +37,8 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 case_id = config["analysis"]["case_id"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" + case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-analysis_fastq_dir = get_result_dir(config) + "/fastq/"
+fastqinput_dir = config["analysis"]["fastq_path"]
+fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
@@ -46,8 +47,42 @@ delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image']
 
+
+# Prepare sample_dict
+sample_dict = {}
+for sample in config["samples"]:
+    sample_type = config["samples"][sample]["type"]
+    if sample_type == "tumor":
+        tumor_sample = sample
+        sample_dict[tumor_sample] = get_fastq_info(tumor_sample, fastqinput_dir)
+        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
+    else:
+        normal_sample = sample
+        sample_dict[normal_sample] = get_fastq_info(normal_sample, fastqinput_dir)
+        sample_dict[normal_sample]["sample_type"] = "NORMAL"
+
+# Validate fastq-info
+validate_fastq_input(sample_dict, fastqinput_dir)
+
+# Get fastq pattern --> fastq mapping
+fastq_dict = {}
+for sample in sample_dict:
+    for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
+
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
+
+# Get mapping info
+for sample in sample_dict:
+    sample_dict[sample]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
+
+
+# Adding sample type level information
+for sample in config["samples"]:
+    sample_type = config["samples"][sample]["type"]
+    sample_dict[sample_type] = sample_dict[sample]
+
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
@@ -84,7 +119,6 @@ os.environ['TMPDIR'] = get_result_dir(config)
 analysis_type = config['analysis']["analysis_type"]
 
 rules_to_include = [
-                "snakemake_rules/concatenation/concatenation.rule",
                 "snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/quality_control/fastqc.rule",
                 "snakemake_rules/quality_control/multiqc.rule",
