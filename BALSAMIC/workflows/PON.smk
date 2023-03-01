@@ -7,7 +7,7 @@ import tempfile
 import os
 
 
-from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
+from BALSAMIC.utils.rule import validate_fastq_input, get_fastqpatterns, get_mapping_info, get_fastq_info, get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
@@ -19,9 +19,9 @@ localrules: all
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
-fastq_dir =  config["analysis"]["fastq_path"]
+fastqinput_dir = config["analysis"]["fastq_path"]
 analysis_dir = get_result_dir(config)
-analysis_fastq_dir = analysis_dir + "/fastq/"
+fastq_dir = analysis_dir + "/fastq/"
 qc_dir = analysis_dir + "/qc/"
 bam_dir =  analysis_dir + "/bam/"
 cnv_dir =  analysis_dir + "/cnv/"
@@ -37,9 +37,41 @@ version = config["analysis"]["pon_version"]
 tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
+# Prepare sample_dict
+sample_dict = {}
+for sample in config["samples"]:
+    sample_type = config["samples"][sample]["type"]
+    if sample_type == "tumor":
+        tumor_sample = sample
+        sample_dict[tumor_sample] = get_fastq_info(tumor_sample, fastqinput_dir)
+        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
+    else:
+        normal_sample = sample
+        sample_dict[normal_sample] = get_fastq_info(normal_sample, fastqinput_dir)
+        sample_dict[normal_sample]["sample_type"] = "NORMAL"
+
+# Validate fastq-info
+validate_fastq_input(sample_dict, fastqinput_dir)
+
+# Get fastq pattern --> fastq mapping
+fastq_dict = {}
+for sample in sample_dict:
+    for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
+
+# picarddup flag
 picarddup = get_picard_mrkdup(config)
 
+# Get mapping info
+for sample in sample_dict:
+    sample_dict[sample]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
+
+# Adding sample type level information
+for sample in config["samples"]:
+    sample_type = config["samples"][sample]["type"]
+    sample_dict[sample_type] = sample_dict[sample]
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
+
 
 coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=config["samples"], cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
