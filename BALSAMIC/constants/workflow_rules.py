@@ -85,6 +85,7 @@ SNAKEMAKE_RULES = {
     },
     "single_wgs": {
         "qc": [
+            "snakemake_rules/concatenation/concatenation.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/report.rule",
