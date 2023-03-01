@@ -83,6 +83,7 @@ shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
 -i $shellbamfiles \
 --algo Dedup \
 --score_info {output.score} \
+--metrics {output.metrics} \
 --output_dup_read_name {output.dup_names};
 
 {params.sentieon_exec} driver \
@@ -91,7 +92,6 @@ shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
 --algo Dedup \
 --rmdup \
 --dup_read_name {output.dup_names} \
---metrics {output.metrics} \
 {output.bam};
         """
 
