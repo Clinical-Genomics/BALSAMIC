@@ -49,7 +49,6 @@ rule sentieon_dedup:
     output:
         bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
-        dup_names = Path(bam_dir, "{sample}.dedup.read_names").as_posix(),
         metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample}.tsv").as_posix()
@@ -82,15 +81,7 @@ shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
 -t {threads} \
 -i $shellbamfiles \
 --algo Dedup \
---score_info {output.score} \
---output_dup_read_name {output.dup_names};
-
-{params.sentieon_exec} driver \
--t {threads} \
--i $shellbamfiles \
---algo Dedup \
 --rmdup \
---dup_read_name {output.dup_names} \
 --score_info {output.score} \
 --metrics {output.metrics} \
 {output.bam};
