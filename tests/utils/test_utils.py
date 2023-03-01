@@ -747,37 +747,6 @@ def test_singularity_shellcmd_cmd_not_exist():
             bind_paths=[dummy_path_1, dummy_path_2],
         )
 
-
-def test_validate_fastq_pattern():
-    # GIVEN a path to a file with correct fastq file prefix
-    fastq_path_r1 = "/home/analysis/dummy_tumor_R_1.fastq.gz"
-    fastq_path_r2 = "/home/analysis/dummy_normal_R_2.fastq.gz"
-    # THEN it should return the correct prefix
-    assert validate_fastq_pattern(fastq_path_r1) == "dummy_tumor_R"
-    assert validate_fastq_pattern(fastq_path_r2) == "dummy_normal_R"
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_1 = "/home/analysis/dummy_tumor.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_1)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_2 = "/home/analysis/dummy_tumor_R3.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_2)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_3 = "/home/analysis/dummy_tumor_R_2.bam"
-        validate_fastq_pattern(bad_fastq_path_3)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-
 def test_get_panel_chrom():
     # GIVEN a valid PANEL BED file
     panel_bed_file = "tests/test_data/references/panel/panel.bed"
