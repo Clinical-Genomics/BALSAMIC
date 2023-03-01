@@ -52,12 +52,12 @@ def get_vcf(config, var_caller, sample):
 
 
 def get_variant_callers(
-    config,
-    mutation_type: str,
-    mutation_class: str,
-    analysis_type: str,
-    workflow_solution: str,
-    sequencing_type: str,
+        config,
+        mutation_type: str,
+        mutation_class: str,
+        analysis_type: str,
+        workflow_solution: str,
+        sequencing_type: str,
 ):
     """Get list of variant callers for a given list of input
 
@@ -94,11 +94,11 @@ def get_variant_callers(
 
     for variant_caller_name, variant_caller_params in config["vcf"].items():
         if (
-            mutation_type in variant_caller_params.get("type")
-            and mutation_class in variant_caller_params.get("mutation")
-            and analysis_type in variant_caller_params.get("analysis_type")
-            and workflow_solution in variant_caller_params.get("workflow_solution")
-            and sequencing_type in variant_caller_params.get("sequencing_type")
+                mutation_type in variant_caller_params.get("type")
+                and mutation_class in variant_caller_params.get("mutation")
+                and analysis_type in variant_caller_params.get("analysis_type")
+                and workflow_solution in variant_caller_params.get("workflow_solution")
+                and sequencing_type in variant_caller_params.get("sequencing_type")
         ):
             valid_variant_callers.append(variant_caller_name)
     return list(valid_variant_callers)
@@ -160,13 +160,15 @@ def get_sample_type_from_prefix(config, sample):
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
 
+
 def get_fastq_info(samplename, fastq_dir):
     """
     input:
     output:
     """
     # Fastq suffixes to look for
-    fastq_suffixes = {'1': {'fwd': '_1.fastq.gz', 'rev': '_2.fastq.gz'}, '2': {'fwd': '_R1_001.fastq.gz', 'rev': '_R2_001.fastq.gz'}}
+    fastq_suffixes = {'1': {'fwd': '_1.fastq.gz', 'rev': '_2.fastq.gz'},
+                      '2': {'fwd': '_R1_001.fastq.gz', 'rev': '_R2_001.fastq.gz'}}
 
     fastq_dict = {}
     fastq_dict["fastqpair_patterns"] = {}
@@ -180,12 +182,14 @@ def get_fastq_info(samplename, fastq_dir):
             for fwd_fastq in fwd_fastqs:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
                 if fastqpair_pattern in fastq_dict["fastqpair_patterns"]:
-                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to dictionary for sample: {samplename}.")
+                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
+                              f"dictionary for sample: {samplename}.")
                 fastq_dict["fastqpair_patterns"][fastqpair_pattern] = {}
                 fastq_dict["fastqpair_patterns"][fastqpair_pattern]["fwd"] = fwd_fastq
                 fastq_dict["fastqpair_patterns"][fastqpair_pattern]["rev"] = fwd_fastq.replace(fwd_suffix, rev_suffix)
 
     return fastq_dict
+
 
 def validate_fastq_input(sample_dict, fastq_dir):
     """
@@ -210,6 +214,7 @@ def validate_fastq_input(sample_dict, fastq_dir):
         unassigned_fastqs_str = "\n".join(unassigned_fastqs)
         LOG.error(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
 
+
 def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
     """
     input:
@@ -218,13 +223,16 @@ def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_typ
     alignments = {}
     alignments["align_sort_bamlist"] = []
     for fastqpattern in sample_dict[samplename]["fastqpair_patterns"]:
-        alignments["align_sort_bamlist"].append(bam_dir + "{sample}_align_sort_{fastqpattern}.bam".format(sample=samplename, fastqpattern=fastqpattern))
+        alignments["align_sort_bamlist"].append(
+            bam_dir + "{sample}_align_sort_{fastqpattern}.bam".format(sample=samplename, fastqpattern=fastqpattern))
 
     if sequencing_type == 'wgs':
         alignments["final_bam"] = bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
     else:
-        alignments["final_bam"] = bam_dir + "{sample}.sorted.{picardstr}.bam".format(sample=samplename, picardstr=picarddup)
+        alignments["final_bam"] = bam_dir + "{sample}.sorted.{picardstr}.bam".format(sample=samplename,
+                                                                                     picardstr=picarddup)
     return alignments
+
 
 def get_fastqpatterns(sample_dict, sample=None):
     """
@@ -240,6 +248,7 @@ def get_fastqpatterns(sample_dict, sample=None):
             for fastqpattern in sample_dict[sample]["fastqpair_patterns"]:
                 fastqpatterns.append(fastqpattern)
     return fastqpatterns
+
 
 def get_result_dir(config):
     """
@@ -386,7 +395,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
 
 
 def get_delivery_id(
-    id_candidate: str, file_to_store: str, tags: list, output_file_wildcards: dict
+        id_candidate: str, file_to_store: str, tags: list, output_file_wildcards: dict
 ):
     """resolve delivery id from file_to_store, tags, and output_file_wildcards
 
@@ -412,7 +421,7 @@ def get_delivery_id(
 
 
 def get_reference_output_files(
-    reference_files_dict: dict, file_type: str, gzip: bool = None
+        reference_files_dict: dict, file_type: str, gzip: bool = None
 ) -> list:
     """Returns list of files matching a file_type from reference files
 
