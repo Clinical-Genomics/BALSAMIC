@@ -59,7 +59,7 @@ else:
     multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.summary.txt", sample=config["samples"]))
 
     # samtools metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt", sample=config["samples"], stats=['flagstats', 'idxstats', 'stats']))
+    # multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt", sample=config["samples"], stats=['flagstats', 'idxstats', 'stats']))
 
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         # UMI picard metrics
