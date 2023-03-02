@@ -1,6 +1,6 @@
 channels:
-  - anaconda
   - conda-forge
+  - anaconda
   - bioconda
   - defaults
 
