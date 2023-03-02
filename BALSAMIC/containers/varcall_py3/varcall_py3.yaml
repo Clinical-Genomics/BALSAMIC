@@ -150,7 +150,7 @@ dependencies:
   - r-vctrs=0.5.2
   - r-viridislite=0.4.1
   - r-withr=2.5.0
-  - readline=8.1
+  - readline=8.1.2
   - requests=2.25.1
   - ropebwt2=r187
   - ruamel.yaml=0.17.21
