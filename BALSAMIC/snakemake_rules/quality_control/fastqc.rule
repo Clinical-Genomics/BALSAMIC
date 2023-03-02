@@ -2,6 +2,7 @@
 # coding: utf-8
 
 rule fastqc:
+    """Perform quality control checks on raw sequence data"""
     input:
         fastq = concat_dir + "{sample}_R_{read}.fastq.gz",
     output:

@@ -275,7 +275,7 @@ def case_config(
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("Config file generated successfully")
 
-    config_path = Path(analysis_dir) / case_id / (case_id + ".json")
+    config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 

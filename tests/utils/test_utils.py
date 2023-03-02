@@ -39,7 +39,7 @@ from BALSAMIC.utils.cli import (
     create_md5,
     get_sample_dict,
     get_pon_sample_dict,
-    get_input_files_path,
+    get_fastq_files_directory,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
@@ -928,13 +928,13 @@ def test_get_pon_sample_dict(
     assert samples == samples_expected
 
 
-def test_get_input_files_path(fastq_dir: str, caplog: LogCaptureFixture):
+def test_get_fastq_files_directory(fastq_dir: str, caplog: LogCaptureFixture):
     """Test get unlinked input files directory."""
 
     # GIVEN an input fast path
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_input_files_path(fastq_dir)
+    input_directory: str = get_fastq_files_directory(fastq_dir)
 
     # THEN the fastq directory should be returned
     assert input_directory == fastq_dir
@@ -950,7 +950,7 @@ def test_get_input_symlinked_files_path(
         Path(tmp_path, file.name).symlink_to(file)
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_input_files_path(str(tmp_path))
+    input_directory: str = get_fastq_files_directory(str(tmp_path))
 
     # THEN the real fastq directory should be returned
     assert input_directory == fastq_dir

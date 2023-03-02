@@ -2,6 +2,7 @@
 # coding: utf-8
 
 rule concatenate:
+    """Merge fastq files into a single one."""
     output:
         fastq = concat_dir + "{sample}_R_{read}.fastq.gz"
     benchmark:

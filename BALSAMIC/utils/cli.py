@@ -558,8 +558,8 @@ def create_md5(reference, check_md5):
                 fh.write(get_md5(value) + " " + value + "\n")
 
 
-def get_input_files_path(directory: str) -> str:
-    """Return input files path."""
+def get_fastq_files_directory(directory: str) -> str:
+    """Return the absolute path for the directory containing the input fastq files."""
     input_files: List[Path] = [
         file.absolute() for file in Path(directory).glob("*.fastq.gz")
     ]
