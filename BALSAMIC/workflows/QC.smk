@@ -89,11 +89,6 @@ params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
-# Sample names for tumor or normal
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
-if "paired" in config['analysis']['analysis_type']:
-    normal_sample = get_sample_type(config["samples"], "normal")[0]
-
 # Set case id/name
 case_id = config["analysis"]["case_id"]
 
