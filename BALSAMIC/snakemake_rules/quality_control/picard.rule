@@ -10,7 +10,7 @@ rule picard_CollectHsMetrics:
     input:
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
         bed = config["panel"]["capture_kit"],
-        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+        bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
         fa = config["reference"]["reference_genome"],
     output:
         mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
@@ -53,7 +53,7 @@ METRIC_ACCUMULATION_LEVEL=ALL_READS;
 
 rule picard_CollectAlignmentSummaryMetrics:
     input:
-        bam = bam_dir + "{sample}_align_sort_{fastqpattern}.bam",
+        bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
         fa = config["reference"]["reference_genome"]
     output:
         bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric"

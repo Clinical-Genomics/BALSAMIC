@@ -32,7 +32,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
-            "snakemake_rules/align/bwa_mem.rule",
+            "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -65,7 +65,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
-            "snakemake_rules/align/bwa_mem.rule",
+            "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],

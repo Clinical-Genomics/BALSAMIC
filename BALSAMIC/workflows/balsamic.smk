@@ -107,7 +107,6 @@ for sample in sample_dict:
                                     picarddup=picarddup,
                                     sequencing_type=config["analysis"]["sequencing_type"])
 
-
 # Adding sample type level information
 for sample in config["samples"]:
     sample_type = config["samples"][sample]["type"]

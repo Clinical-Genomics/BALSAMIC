@@ -215,7 +215,7 @@ def validate_fastq_input(sample_dict, fastq_dir):
         LOG.error(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
 
 
-def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
+def get_mapping_info_deprecated(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
     """
     input:
     output:
@@ -233,6 +233,22 @@ def get_mapping_info(samplename, sample_dict, bam_dir, picarddup, sequencing_typ
                                                                                      picardstr=picarddup)
     return alignments
 
+def get_mapping_info(samplename, sample_dict, bam_dir, sequencing_type):
+    """
+    input:
+    output:
+    """
+    alignments = {}
+    alignments["align_sort_bamlist"] = []
+    for fastqpattern in sample_dict[samplename]["fastqpair_patterns"]:
+        alignments["align_sort_bamlist"].append(
+            bam_dir + "{sample}_align_sort_{fastqpattern}.bam".format(sample=samplename, fastqpattern=fastqpattern))
+
+    if sequencing_type == 'wgs':
+        alignments["final_bam"] = bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
+    else:
+        alignments["final_bam"] = bam_dir + "{sample}.dedup.realign.bam".format(sample=samplename)
+    return alignments
 
 def get_fastqpatterns(sample_dict, sample=None):
     """
