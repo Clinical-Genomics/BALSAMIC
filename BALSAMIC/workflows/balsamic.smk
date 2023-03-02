@@ -21,7 +21,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
-                                 get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
+                                 get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
 
@@ -141,9 +141,9 @@ if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 # Sample names for tumor or normal
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+tumor_sample = get_sample_id_by_type(config["samples"], "tumor")
 if config['analysis']['analysis_type'] == "paired":
-    normal_sample = get_sample_type(config["samples"], "normal")[0]
+    normal_sample = get_sample_id_by_type(config["samples"], "normal")
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:

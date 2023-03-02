@@ -17,7 +17,7 @@ from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
 from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
-                                 get_sample_type, get_picard_mrkdup, get_script_path,
+                                 get_sample_id_by_type, get_picard_mrkdup, get_script_path,
                                  get_threads, get_sequencing_type, get_capture_kit)
 
 from BALSAMIC.constants.common import (RULE_DIRECTORY);
@@ -59,9 +59,9 @@ if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 # Sample names for tumor or normal
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+tumor_sample = get_sample_id_by_type(config["samples"], "tumor")
 if "paired" in config['analysis']['analysis_type']:
-    normal_sample = get_sample_type(config["samples"], "normal")[0]
+    normal_sample = get_sample_id_by_type(config["samples"], "normal")
 
 # Set case id/name
 case_id = config["analysis"]["case_id"]

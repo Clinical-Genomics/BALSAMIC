@@ -46,7 +46,7 @@ from BALSAMIC.utils.io import read_json, write_json, read_yaml
 from BALSAMIC.utils.rule import (
     get_chrom,
     get_vcf,
-    get_sample_type,
+    get_sample_id_by_type,
     get_picard_mrkdup,
     get_variant_callers,
     get_script_path,
@@ -423,15 +423,19 @@ def test_get_vcf_invalid_variant_caller(sample_config):
         get_vcf(sample_config, variant_callers, [sample_config["analysis"]["case_id"]])
 
 
-def test_get_sample_type(sample_config):
-    # GIVEN a sample_config dict, bio_type as tumor
-    bio_type = "tumor"
+def test_get_sample_id_by_type(sample_config: dict, tumor_sample_name: str):
+    """Test get sample ID by biological type."""
 
-    # WHEN calling get_sample_type with bio_type
-    sample_id = get_sample_type(sample_config["samples"], bio_type)
+    # GIVEN a sample configuration dictionary and a tumor sample type
+    sample_type: str = "tumor"
 
-    # THEN It should return the tumor samples id
-    assert sample_id == ["S1_R"]
+    # WHEN getting the sample ID
+    sample_id: str = get_sample_id_by_type(
+        samples=sample_config["samples"], type=sample_type
+    )
+
+    # THEN it should correspond to the tumor sample name
+    assert sample_id == tumor_sample_name
 
 
 def test_get_picard_mrkdup(sample_config):

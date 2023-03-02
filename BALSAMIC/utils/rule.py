@@ -1,5 +1,7 @@
 import os
 import re
+from typing import Optional
+
 import toml
 import logging
 from pathlib import Path
@@ -133,17 +135,12 @@ def get_capture_kit(config):
         return None
 
 
-def get_sample_type(sample, bio_type):
-    """
-    input: sample dictionary from BALSAMIC's config file
-    output: list of sample type id
-    """
-
-    type_id = []
-    for sample_id in sample:
-        if sample[sample_id]["type"] == bio_type:
-            type_id.append(sample_id)
-    return type_id
+def get_sample_id_by_type(samples: dict, type: str) -> Optional[str]:
+    """Return sample ID given a sample biological type."""
+    for sample_id in samples:
+        if samples[sample_id]["type"] == type:
+            return sample_id
+    return None
 
 
 def get_sample_type_from_prefix(config, sample):

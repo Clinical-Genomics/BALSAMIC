@@ -582,7 +582,7 @@ def tumor_only_pon_config(
 
 
 @pytest.fixture(scope="session")
-def sample_config():
+def sample_config(tumor_sample_name: str, normal_sample_name: str):
     """
     sample config dict to test workflow utils
     """
@@ -610,16 +610,8 @@ def sample_config():
         },
         "vcf": VCF_DICT,
         "samples": {
-            "S1_R": {
-                "file_prefix": "S1_R",
-                "type": "tumor",
-                "readpair_suffix": ["1", "2"],
-            },
-            "S2_R": {
-                "file_prefix": "S2_R",
-                "type": "normal",
-                "readpair_suffix": ["1", "2"],
-            },
+            tumor_sample_name: {"type": "tumor"},
+            normal_sample_name: {"type": "normal"},
         },
         "umiworkflow": "true",
     }
