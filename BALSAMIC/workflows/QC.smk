@@ -75,13 +75,11 @@ picarddup = get_picard_mrkdup(config)
 
 # Get mapping info
 for sample in sample_dict:
-    sample_dict[sample]["bam"] = get_mapping_info(sample, sample_dict, bam_dir, picarddup, config["analysis"]["sequencing_type"])
-
-
-# Adding sample type level information
-for sample in config["samples"]:
-    sample_type = config["samples"][sample]["type"]
-    sample_dict[sample_type] = sample_dict[sample]
+    sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
+                                    sample_dict=sample_dict,
+                                    bam_dir=bam_dir,
+                                    picarddup=picarddup,
+                                    sequencing_type=config["analysis"]["sequencing_type"])
 
 
 # parse parameters as constants to workflows
