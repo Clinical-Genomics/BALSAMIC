@@ -1,7 +1,6 @@
 [X.X.X]
 -------
 
-
 Added:
 ^^^^^^
 * PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
@@ -13,7 +12,8 @@ Changed:
 Fixed:
 ^^^^^^
 * Update cryptography version (39.0.1) due to security alert https://github.com/Clinical-Genomics/BALSAMIC/pull/1087
-* Pytest file saved in balsamic directory https://github.com/git statusClinical-Genomics/BALSAMIC/pull/1093
+* Pytest file saved in balsamic directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1093
+* Fix varcall_py3 container bcftools dependency error https://github.com/Clinical-Genomics/BALSAMIC/pull/1097
 
 
 [11.2.0]
