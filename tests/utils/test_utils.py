@@ -438,6 +438,23 @@ def test_get_sample_id_by_type(sample_config: dict, tumor_sample_name: str):
     assert sample_id == tumor_sample_name
 
 
+def test_get_sample_id_by_type_error(
+    sample_config: dict, tumor_sample_name: str, caplog: LogCaptureFixture
+):
+    """Test get sample ID by type when an invalid biological type is provided."""
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a sample configuration dictionary and an incorrect sample type
+    sample_type: str = "affected"
+
+    # WHEN getting the sample ID
+    with pytest.raises(BalsamicError):
+        get_sample_id_by_type(samples=sample_config["samples"], type=sample_type)
+
+        # THEN it sould raise a BalsamicError
+        assert f"There is no sample ID for the {sample_type} sample type" in caplog.text
+
+
 def test_get_picard_mrkdup(sample_config):
     # WHEN passing sample_config
     picard_str = get_picard_mrkdup(sample_config)
@@ -928,7 +945,7 @@ def test_get_pon_sample_dict(
     assert samples == samples_expected
 
 
-def test_get_fastq_files_directory(fastq_dir: str, caplog: LogCaptureFixture):
+def test_get_fastq_files_directory(fastq_dir: str):
     """Test get unlinked input files directory."""
 
     # GIVEN an input fast path
@@ -940,9 +957,7 @@ def test_get_fastq_files_directory(fastq_dir: str, caplog: LogCaptureFixture):
     assert input_directory == fastq_dir
 
 
-def test_get_input_symlinked_files_path(
-    fastq_dir: str, tmp_path: Path, caplog: LogCaptureFixture
-):
+def test_get_input_symlinked_files_path(fastq_dir: str, tmp_path: Path):
     """Test remove symlinks from a directory."""
 
     # GIVEN a temporary fast path containing symlinked files

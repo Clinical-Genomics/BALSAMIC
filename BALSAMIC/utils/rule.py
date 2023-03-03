@@ -135,12 +135,13 @@ def get_capture_kit(config):
         return None
 
 
-def get_sample_id_by_type(samples: dict, type: str) -> Optional[str]:
+def get_sample_id_by_type(samples: dict, type: str) -> str:
     """Return sample ID given a sample biological type."""
     for sample_id in samples:
         if samples[sample_id]["type"] == type:
             return sample_id
-    return None
+    LOG.error(f"There is no sample ID for the {type} sample type")
+    raise BalsamicError
 
 
 def get_sample_type_from_prefix(config, sample):
