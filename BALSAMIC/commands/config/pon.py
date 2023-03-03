@@ -146,7 +146,7 @@ def pon_config(
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("PON config file generated successfully")
 
-    config_path = Path(analysis_dir, case_id, case_id + "_PON.json")
+    config_path = Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"PON config file saved successfully - {config_path}")
 
