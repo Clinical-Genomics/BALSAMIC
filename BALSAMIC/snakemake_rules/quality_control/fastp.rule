@@ -30,11 +30,11 @@ if 'quality_trim' in config['QC'].keys():
 rule fastp_umi:
     """Fastq UMI data pre-processing."""
     input:
-        fastq_r1 = concat_dir + "{sample}_R_1.fastq.gz",
-        fastq_r2 = concat_dir + "{sample}_R_2.fastq.gz"
+        fastq_r1 = concat_dir + "{sample}" + f"_{READ_1}.fastq.gz",
+        fastq_r2 = concat_dir + "{sample}" + f"_{READ_2}.fastq.gz"
     output:
-        fastq_r1 = temp(analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz"),
-        fastq_r2 = temp(analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"),
+        fastq_r1 = temp(analysis_fastq_dir + "{sample}" + f"_{READ_1}.umi_optimized.fastq.gz"),
+        fastq_r2 = temp(analysis_fastq_dir + "{sample}" + f"_{READ_2}.umi_optimized.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp_umi.json",
         html = qc_dir + "fastp/{sample}_fastp_umi.html",
     benchmark:
@@ -72,11 +72,11 @@ fastp \
 rule fastp:
     """Fastq data pre-processing."""
     input:
-        fastq_r1 = analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz",
-        fastq_r2 = analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"
+        fastq_r1 = analysis_fastq_dir + "{sample}" + f"_{READ_1}.umi_optimized.fastq.gz",
+        fastq_r2 = analysis_fastq_dir + "{sample}" + f"_{READ_2}.umi_optimized.fastq.gz"
     output:
-        fastq_r1 = temp(analysis_fastq_dir + "{sample}_R_1.fp.fastq.gz"),
-        fastq_r2 = temp(analysis_fastq_dir + "{sample}_R_2.fp.fastq.gz"),
+        fastq_r1 = temp(analysis_fastq_dir + "{sample}" + f"_{READ_1}.fp.fastq.gz"),
+        fastq_r2 = temp(analysis_fastq_dir + "{sample}" + f"_{READ_2}.fp.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:

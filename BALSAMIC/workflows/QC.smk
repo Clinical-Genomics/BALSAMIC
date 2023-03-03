@@ -20,7 +20,7 @@ from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
                                  get_sample_id_by_type, get_picard_mrkdup, get_script_path,
                                  get_threads, get_sequencing_type, get_capture_kit)
 
-from BALSAMIC.constants.common import (RULE_DIRECTORY);
+from BALSAMIC.constants.common import RULE_DIRECTORY, READ_1, READ_2
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
 
