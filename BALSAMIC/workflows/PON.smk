@@ -8,7 +8,7 @@ import os
 
 
 from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
-from BALSAMIC.constants.common import RULE_DIRECTORY, READ_1, READ_2
+from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 

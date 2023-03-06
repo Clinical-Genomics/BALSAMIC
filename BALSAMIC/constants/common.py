@@ -92,6 +92,3 @@ VALID_OPS = {
     "ge": operator.ge,
     "gt": operator.gt,
 }
-
-READ_1: str = "R_1"
-READ_2: str = "R_2"
