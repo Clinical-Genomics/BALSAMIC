@@ -26,7 +26,7 @@ include:
 
 rule all:
   input:
-    expand(bam_dir + "{sample}.aligned.bam", sample=config["samples"]),
+    expand(bam_dir + "{sample}.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.bam", sample=config["samples"]),
     expand(bam_dir + "{sample}.dedup.realign.recal_data.table", sample=config["samples"]),

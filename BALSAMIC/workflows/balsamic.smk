@@ -63,7 +63,7 @@ umi_dir = get_result_dir(config) + "/umi/"
 umi_qc_dir = qc_dir + "umi_qc/"
 singularity_image = config['singularity']['image']
 
-
+# Annotations
 research_annotations = []
 clinical_annotations = []
 clinical_snv_obs = ""
@@ -506,6 +506,10 @@ if 'delivery' in config:
     delivery_ready = os.path.join(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk")
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
+
+
+wildcard_constraints:
+    sample = "|".join(config["samples"])
 
 rule all:
     input:
