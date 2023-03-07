@@ -509,7 +509,7 @@ if 'delivery' in config:
 
 
 wildcard_constraints:
-    sample = "|".join(config["samples"])
+    sample = "|".join(list(config["samples"]))
 
 rule all:
     input:
