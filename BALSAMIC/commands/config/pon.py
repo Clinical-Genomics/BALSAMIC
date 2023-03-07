@@ -17,6 +17,7 @@ from BALSAMIC.utils.models import PonBalsamicConfigModel
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
+    FASTQ_SUFFIXES,
 )
 
 LOG = logging.getLogger(__name__)
@@ -134,7 +135,7 @@ def pon_config(
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
-        samples=get_pon_sample_dict(fastq_path),
+        samples=get_pon_sample_dict(fastq_path, FASTQ_SUFFIXES),
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         bioinfo_tools=BIOINFO_TOOL_ENV,

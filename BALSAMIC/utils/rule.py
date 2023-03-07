@@ -161,60 +161,6 @@ def get_sample_type_from_prefix(config, sample):
         )
 
 
-def get_fastq_info(samplename, fastq_dir):
-    """
-    input:
-    output:
-    """
-    # Fastq suffixes to look for
-    fastq_suffixes = {'1': {'fwd': '_1.fastq.gz', 'rev': '_2.fastq.gz'},
-                      '2': {'fwd': '_R1_001.fastq.gz', 'rev': '_R2_001.fastq.gz'}}
-
-    fastq_dict = {}
-    fastq_dict["fastqpair_patterns"] = {}
-
-    # Prepare Fastq Variables
-    for suffix in fastq_suffixes:
-        fwd_suffix = fastq_suffixes[suffix]["fwd"]
-        rev_suffix = fastq_suffixes[suffix]["rev"]
-        fwd_fastqs = glob.glob(f"{fastq_dir}/*{samplename}*{fwd_suffix}")
-        if fwd_fastqs:
-            for fwd_fastq in fwd_fastqs:
-                fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
-                if fastqpair_pattern in fastq_dict["fastqpair_patterns"]:
-                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
-                              f"dictionary for sample: {samplename}.")
-                fastq_dict["fastqpair_patterns"][fastqpair_pattern] = {}
-                fastq_dict["fastqpair_patterns"][fastqpair_pattern]["fwd"] = fwd_fastq
-                fastq_dict["fastqpair_patterns"][fastqpair_pattern]["rev"] = fwd_fastq.replace(fwd_suffix, rev_suffix)
-
-    return fastq_dict
-
-
-def validate_fastq_input(sample_dict, fastq_dir):
-    """
-    input:
-    output:
-    """
-    # are there fastqs in the directory that have not been added to any fastq_list?
-    complete_fastq_list = glob.glob(f"{fastq_dir}/*fastq.gz")
-    assigned_fastq_list = []
-    for sample in sample_dict:
-        fastq_dict = sample_dict[sample]["fastqpair_patterns"]
-        for fastq_pattern in fastq_dict:
-            assigned_fastq_list.append(fastq_dict[fastq_pattern]["fwd"])
-            assigned_fastq_list.append(fastq_dict[fastq_pattern]["rev"])
-
-    unassigned_fastqs = []
-    for fastq in complete_fastq_list:
-        if fastq not in assigned_fastq_list:
-            unassigned_fastqs.append(fastq)
-
-    if unassigned_fastqs:
-        unassigned_fastqs_str = "\n".join(unassigned_fastqs)
-        LOG.error(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
-
-
 def get_mapping_info_deprecated(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
     """
     input:

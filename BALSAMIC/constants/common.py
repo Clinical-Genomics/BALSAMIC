@@ -38,6 +38,12 @@ MUTATION_CLASS = ["somatic", "germline"]
 MUTATION_TYPE = ["SNV", "SV", "CNV"]
 WORKFLOW_SOLUTION = ["BALSAMIC", "Sentieon", "DRAGEN", "Sentieon_umi"]
 
+# Data related constants
+FASTQ_SUFFIXES = {
+    '1': {'fwd': '_1.fastq.gz', 'rev': '_2.fastq.gz'},
+    '2': {'fwd': '_R1_001.fastq.gz', 'rev': '_R2_001.fastq.gz'}
+}
+
 # list of bioinfo tools for each conda env
 VALID_CONTAINER_CONDA_NAME = {
     "align_qc",

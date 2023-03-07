@@ -75,26 +75,22 @@ swegen_sv = ""
 
 
 # Prepare sample_dict
-sample_dict = {}
+sample_dict = config["samples"]
 for sample in config["samples"]:
     sample_type = config["samples"][sample]["type"]
     if sample_type == "tumor":
         tumor_sample = sample
-        sample_dict[tumor_sample] = get_fastq_info(tumor_sample, fastqinput_dir)
         sample_dict[tumor_sample]["sample_type"] = "TUMOR"
     else:
         normal_sample = sample
-        sample_dict[normal_sample] = get_fastq_info(normal_sample, fastqinput_dir)
         sample_dict[normal_sample]["sample_type"] = "NORMAL"
 
-# Validate fastq-info
-validate_fastq_input(sample_dict, fastqinput_dir)
 
 # Get fastq pattern --> fastq mapping
 fastq_dict = {}
 for sample in sample_dict:
-    for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
-        fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
+    for fastq_pattern in sample_dict[sample]["fastq_info"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
