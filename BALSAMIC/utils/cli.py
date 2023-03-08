@@ -478,6 +478,7 @@ def verify_fastq_pairing(fwd_fastq_path, rev_fastq_path):
 
     if len_fwd_fastq_name != len_rev_fastq_name:
         LOG.error(f"Fastq pair does not have names of equal length: {fwd_fastq_name} {rev_fastq_name}")
+        raise BalsamicError("Fastq input wrongly configured")
 
     count_str_differences = 0
     for i in range(len_fwd_fastq_name):
@@ -486,6 +487,8 @@ def verify_fastq_pairing(fwd_fastq_path, rev_fastq_path):
 
     if count_str_differences != 1:
         LOG.error(f"Fastq pair does not have exactly 1 differences ({count_str_differences}) in their forward and reverse names: {fwd_fastq_name} {rev_fastq_name}")
+        raise BalsamicError("Fastq input wrongly configured")
+
 def validate_fastq_input(sample_dict: dict, fastq_path: str):
     """Verifies that fastq files have been correctly assigned.
 
@@ -517,11 +520,13 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
     if unassigned_fastqs:
         unassigned_fastqs_str = "\n".join(unassigned_fastqs)
         LOG.error(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
+        raise BalsamicError("Fastq input wrongly configured")
 
     # Does every input fastq file exist?
     for fastq in assigned_fastq_list:
         if not Path(fastq).exists():
             LOG.error(f"Fastq file not found: {fastq}")
+            raise BalsamicError("Fastq input wrongly configured")
 
     # Does any fastq pattern appear more than once?
     fastq_patterns = {}
@@ -535,6 +540,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
         pattern_count = fastq_patterns[fastq_pattern]
         if pattern_count > 1:
             LOG.error(f"Fastq-pattern {fastq_pattern} appeared in sample_dict more than once: {pattern_count}")
+            raise BalsamicError("Fastq input wrongly configured")
 
 
 def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> Dict[str, str]:
@@ -553,7 +559,8 @@ def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> D
 
                 if fastqpair_pattern in fastq_dict:
                     LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
-                              f"dictionary for sample: {sample_name}.")
+                              f"dictionary for sample: {sample_name}")
+                    raise BalsamicError("Fastq input wrongly configured")
 
                 fastq_dict[fastqpair_pattern] = {}
                 fastq_dict[fastqpair_pattern]["fwd"] = fwd_fastq
