@@ -494,6 +494,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
     - All fastq-files must exist (mostly relevant when using "balsamic run")
     - All forward and reverse fastq pairs must be of the same length
     - All forward and reverse fastq pairs must have exactly 1 difference in their names
+    - Fastq patterns can only appear once
 
     """
     # Are there fastqs in the directory that have not been added to any fastq_list?
@@ -505,6 +506,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
             assigned_fastq_list.append(fastq_dict[fastq_pattern]["fwd"])
             assigned_fastq_list.append(fastq_dict[fastq_pattern]["rev"])
 
+            # Validate fastq pair names, req same char length and only 1 char difference
             verify_fastq_pairing(fastq_dict[fastq_pattern]["fwd"], fastq_dict[fastq_pattern]["rev"])
 
     unassigned_fastqs = []
@@ -520,6 +522,21 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
     for fastq in assigned_fastq_list:
         if not Path(fastq).exists():
             LOG.error(f"Fastq file not found: {fastq}")
+
+    # Does any fastq pattern appear more than once?
+    fastq_patterns = {}
+    for sample in sample_dict:
+        fastq_dict = sample_dict[sample]["fastq_info"]
+        for fastq_pattern in fastq_dict:
+            if fastq_pattern not in fastq_patterns:
+                fastq_patterns[fastq_pattern] = 0
+            fastq_patterns[fastq_pattern] += 1
+    for fastq_pattern in fastq_patterns:
+        pattern_count = fastq_patterns[fastq_pattern]
+        if pattern_count > 1:
+            LOG.error(f"Fastq-pattern {fastq_pattern} appeared in sample_dict more than once: {pattern_count}")
+
+
 def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> Dict[str, str]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample."""
 
@@ -529,7 +546,7 @@ def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> D
         fwd_suffix = fastq_suffixes[suffix]["fwd"]
         rev_suffix = fastq_suffixes[suffix]["rev"]
 
-        fwd_fastqs = glob.glob(f"{fastq_path}/*{sample_name}*{fwd_suffix}")
+        fwd_fastqs = glob.glob(f"{fastq_path}/*_{sample_name}_*{fwd_suffix}")
         if fwd_fastqs:
             for fwd_fastq in fwd_fastqs:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
