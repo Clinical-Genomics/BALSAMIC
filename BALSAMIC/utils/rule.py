@@ -167,7 +167,7 @@ def get_mapping_info_deprecated(samplename, sample_dict, bam_dir, picarddup, seq
     """
     alignments = {}
     alignments["align_sort_bamlist"] = []
-    for fastqpattern in sample_dict[samplename]["fastqpair_patterns"]:
+    for fastqpattern in sample_dict[samplename]["fastq_info"]:
         alignments["align_sort_bamlist"].append(
             bam_dir + "{sample}_align_sort_{fastqpattern}.bam".format(sample=samplename, fastqpattern=fastqpattern))
 
@@ -185,7 +185,7 @@ def get_mapping_info(samplename, sample_dict, bam_dir, sequencing_type):
     """
     alignments = {}
     alignments["align_sort_bamlist"] = []
-    for fastqpattern in sample_dict[samplename]["fastqpair_patterns"]:
+    for fastqpattern in sample_dict[samplename]["fastq_info"]:
         alignments["align_sort_bamlist"].append(
             bam_dir + "{sample}_align_sort_{fastqpattern}.bam".format(sample=samplename, fastqpattern=fastqpattern))
 
@@ -202,11 +202,11 @@ def get_fastqpatterns(sample_dict, sample=None):
     """
     fastqpatterns = []
     if sample:
-        for fastqpattern in sample_dict[sample]["fastqpair_patterns"]:
+        for fastqpattern in sample_dict[sample]["fastq_info"]:
             fastqpatterns.append(fastqpattern)
     else:
         for sample in sample_dict:
-            for fastqpattern in sample_dict[sample]["fastqpair_patterns"]:
+            for fastqpattern in sample_dict[sample]["fastq_info"]:
                 fastqpatterns.append(fastqpattern)
     return fastqpatterns
 
