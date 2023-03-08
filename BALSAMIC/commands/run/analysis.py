@@ -235,7 +235,7 @@ def analysis(
     bind_path.append(sample_config["analysis"]["analysis_dir"])
 
     # Validate fastq input
-    validate_fastq_input(sample_dict=sample_dict["samples"], fastq_path=sample_config["analysis"]["fastq_path"])
+    validate_fastq_input(sample_dict=sample_dict, fastq_path=sample_config["analysis"]["fastq_path"])
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()
