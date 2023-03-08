@@ -494,7 +494,7 @@ def validate_fastq_input(sample_dict, fastq_dir):
     - All fastq-files must exist (mostly relevant when using "balsamic run")
     - All forward and reverse fastq pairs must be of the same length
     - All forward and reverse fastq pairs must have exactly 1 difference in their names
-    
+
     """
     # Are there fastqs in the directory that have not been added to any fastq_list?
     complete_fastq_list = glob.glob(f"{fastq_dir}/*fastq.gz")
