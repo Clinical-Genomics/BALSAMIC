@@ -4,6 +4,7 @@ import json
 import click
 import snakemake
 
+from pathlib import Path
 from colorclass import Color
 
 from BALSAMIC.utils.cli import get_snakefile
@@ -80,7 +81,7 @@ def status(context, sample_config, show_only_missing, print_files):
             quiet=True,
         )
     summary = [i.split("\t") for i in summary]
-    summary_dict = [dict(zip(summary[1], value)) for value in summary[2:]]
+    summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
 
     existing_files = set()
     missing_files = set()

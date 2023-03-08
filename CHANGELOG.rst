@@ -9,7 +9,6 @@ Added:
 Changed:
 ^^^^^^^^
 * Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
-* Updated snakemake version to 7.24.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 
 Fixed:
 ^^^^^^
