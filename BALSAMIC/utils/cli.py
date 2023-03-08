@@ -469,7 +469,10 @@ def get_bioinfo_tools_version(
     return bioinfo_tools_version
 
 def verify_fastq_pairing(fwd_fastq_path, rev_fastq_path):
-    """    ."""
+    """Cancels analysis if any paired fastq-files have in their names:
+     - more or less than 1 character difference in their names
+     - unequal lengths of fastq-names
+    """
     fwd_fastq_name = os.path.basename(fwd_fastq_path)
     rev_fastq_name = os.path.basename(rev_fastq_path)
 
@@ -571,7 +574,19 @@ def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> D
 def get_sample_dict(
     tumor_sample_name: str, normal_sample_name: Optional[str], fastq_suffixes: dict, fastq_path: str
 ) -> Dict[str, dict]:
-    """Returns a sample dictionary given the names of the tumor and/or normal samples."""
+    """Returns a sample dictionary with fastq-information given the names of the tumor and/or normal samples:
+    "sample_name": {
+            "type": "[tumor/normal]",
+            "fastq_info": {
+                "[fastq_pair_pattern1]": {
+                    "fwd": "/path/to/fastq_dir/[forward_read_name1].fastq.gz",
+                    "rev": "/path/to/fastq_dir/[reverse_read_name1].fastq.gz"
+                },
+                "[fastq_pair_pattern2]": {
+                    "fwd": "/path/to/fastq_dir/[forward_read_name2].fastq.gz",
+                    "rev": "/path/to/fastq_dir/[reverse_read_name2].fastq.gz"
+    ...
+    """
     sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
     if normal_sample_name:
         sample_dict.update({normal_sample_name: {"type": "normal"}})
