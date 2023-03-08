@@ -484,12 +484,17 @@ def verify_fastq_pairing(fwd_fastq_path, rev_fastq_path):
         if fwd_fastq_name[i] != rev_fastq_name[i]:
             count_str_differences += 1
 
-    if count_str_differences > 1:
-        LOG.error(f"Fastq pair have more than 1 differences ({count_str_differences}) in their forward and reverse names: {fwd_fastq_name} {rev_fastq_name}")
+    if count_str_differences != 1:
+        LOG.error(f"Fastq pair does not have exactly 1 differences ({count_str_differences}) in their forward and reverse names: {fwd_fastq_name} {rev_fastq_name}")
 def validate_fastq_input(sample_dict, fastq_dir):
-    """
-    input:
-    output:
+    """Verifies that fastq files have been correctly assigned.
+
+    Requirements to pass fastq-inputs:
+    - All fastq-files in the supplied fastq_dir must be assigned to a sample
+    - All fastq-files must exist (mostly relevant when using "balsamic run")
+    - All forward and reverse fastq pairs must be of the same length
+    - All forward and reverse fastq pairs must have exactly 1 difference in their names
+    
     """
     # Are there fastqs in the directory that have not been added to any fastq_list?
     complete_fastq_list = glob.glob(f"{fastq_dir}/*fastq.gz")
@@ -510,6 +515,11 @@ def validate_fastq_input(sample_dict, fastq_dir):
     if unassigned_fastqs:
         unassigned_fastqs_str = "\n".join(unassigned_fastqs)
         LOG.error(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
+
+    # Does every input fastq file exist?
+    for fastq in assigned_fastq_list:
+        if not Path(fastq).exists():
+            LOG.error(f"Fastq file not found: {fastq}")
 def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> Dict[str, str]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample."""
 

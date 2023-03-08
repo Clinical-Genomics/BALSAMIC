@@ -11,6 +11,7 @@ from BALSAMIC.utils.cli import (
     get_panel_chrom,
     get_bioinfo_tools_version,
     generate_graph,
+    validate_fastq_input,
 )
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
@@ -275,8 +276,8 @@ def case_config(
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("Config file generated successfully")
 
-    # Validate fastq-info
-    validate_fastq_input(sample_dict, fastqinput_dir)
+    # Validate fastq input
+    validate_fastq_input(sample_dict=config_collection_dict["samples"], fastq_path=fastq_path)
 
     config_path = Path(analysis_dir) / case_id / (case_id + ".json")
     write_json(json_obj=config_collection_dict, path=config_path)
