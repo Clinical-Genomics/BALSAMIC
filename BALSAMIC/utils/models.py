@@ -387,7 +387,10 @@ class SampleInstanceModel(BaseModel):
             )
         return value
 
-
+    @validator("fastq_info")
+    def sample_fastq_dict(cls, value):
+        """Placeholder."""
+        return value
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided
     Attributes:
@@ -455,7 +458,7 @@ class BalsamicConfigModel(BaseModel):
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
         vcf : Field(VCFmodel); variables relevant for variant calling pipeline
-        samples : Field(Dict); dictionary containing samples submitted for analysis
+        samples : Field(Dict); dictionary containing samples and their respective fastq-inputs submitted for analysis
         reference : Field(Dict); dictionary containing paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
