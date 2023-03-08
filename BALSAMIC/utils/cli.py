@@ -486,7 +486,7 @@ def verify_fastq_pairing(fwd_fastq_path, rev_fastq_path):
 
     if count_str_differences != 1:
         LOG.error(f"Fastq pair does not have exactly 1 differences ({count_str_differences}) in their forward and reverse names: {fwd_fastq_name} {rev_fastq_name}")
-def validate_fastq_input(sample_dict, fastq_dir):
+def validate_fastq_input(sample_dict: dict, fastq_path: str):
     """Verifies that fastq files have been correctly assigned.
 
     Requirements to pass fastq-inputs:
@@ -497,7 +497,7 @@ def validate_fastq_input(sample_dict, fastq_dir):
 
     """
     # Are there fastqs in the directory that have not been added to any fastq_list?
-    complete_fastq_list = glob.glob(f"{fastq_dir}/*fastq.gz")
+    complete_fastq_list = glob.glob(f"{fastq_path}/*fastq.gz")
     assigned_fastq_list = []
     for sample in sample_dict:
         fastq_dict = sample_dict[sample]["fastq_info"]
