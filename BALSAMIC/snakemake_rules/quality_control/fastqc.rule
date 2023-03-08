@@ -6,8 +6,8 @@
 
 rule fastqc:
     input:
-        sample_fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["fwd"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]],
-        sample_rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["rev"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]]
+        sample_fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern]["fwd"] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]],
+        sample_rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern]["rev"] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]]
     output:
         fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
     benchmark:
