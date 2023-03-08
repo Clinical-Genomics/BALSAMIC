@@ -38,9 +38,9 @@ tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Prepare sample_dict
-sample_dict = config["samples"]
-for sample in config["samples"]:
-    sample_type = config["samples"][sample]["type"]
+sample_dict = dict(config["samples"])
+for sample in sample_dict:
+    sample_type = sample_dict[sample]["type"]
     if sample_type == "tumor":
         tumor_sample = sample
         sample_dict[tumor_sample]["sample_type"] = "TUMOR"
