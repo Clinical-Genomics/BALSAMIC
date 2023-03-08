@@ -374,9 +374,11 @@ class SampleInstanceModel(BaseModel):
 
     Attributes:
         type: Field(str): sample type [tumor, normal]
+        fastq_info: Field(dict): fastq patterns: paths to forward and reverse fastqs
     """
 
     type: str
+    fastq_info: dict
 
     @validator("type")
     def sample_type_literal(cls, value):
