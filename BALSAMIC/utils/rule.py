@@ -160,7 +160,6 @@ def get_sample_type_from_prefix(config, sample):
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
 
-
 def get_mapping_info_deprecated(samplename, sample_dict, bam_dir, picarddup, sequencing_type):
     """
     input:

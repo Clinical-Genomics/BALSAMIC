@@ -16,7 +16,7 @@ from BALSAMIC.utils.io import write_json
 
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
-from BALSAMIC.utils.rule import (validate_fastq_input, get_fastqpatterns, get_mapping_info, get_fastq_info, get_rule_output, get_result_dir,
+from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_rule_output, get_result_dir,
                                  get_sample_type, get_picard_mrkdup, get_script_path,
                                  get_threads, get_sequencing_type, get_capture_kit)
 

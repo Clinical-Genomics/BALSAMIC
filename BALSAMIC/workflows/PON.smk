@@ -7,7 +7,7 @@ import tempfile
 import os
 
 
-from BALSAMIC.utils.rule import validate_fastq_input, get_fastqpatterns, get_mapping_info, get_fastq_info, get_picard_mrkdup, get_threads, get_result_dir
+from BALSAMIC.utils.rule import get_fastqpatterns, get_mapping_info, get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
