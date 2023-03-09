@@ -47,12 +47,12 @@ rule sentieon_dedup:
     input:
         bamfiles = lambda wildcards: sample_dict[wildcards.sample]["bam"]["align_sort_bamlist"]
     output:
-        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
-        score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
-        dup_names = Path(bam_dir, "{sample}.dedup.read_names").as_posix(),
-        metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
+        dup_names = Path(bam_dir, "{sample_type}.{sample}.dedup.read_names").as_posix(),
+        metrics = Path(bam_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_dedup_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -101,11 +101,11 @@ rule sentieon_realign:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
-        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix()
     output:
-        bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.realign.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_realign_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_realign_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
