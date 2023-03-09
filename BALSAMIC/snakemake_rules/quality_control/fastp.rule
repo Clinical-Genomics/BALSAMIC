@@ -26,6 +26,10 @@ if 'quality_trim' in config['QC'].keys():
                                 "--umi_len", config['QC']['umi_trim_length'],
                                 "--umi_prefix","UMI"])
 
+    # Don't evaluate duplicates
+    fastp_param_qc.extend(["--dont_eval_duplication"])
+    fastp_param_umi.extend(["--dont_eval_duplication"])
+
 
 rule fastp_umi:
     input:
