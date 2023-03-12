@@ -47,11 +47,11 @@ else:
         multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.insertsizemetric", sample=normal_sample, fastqpattern=get_fastqpatterns(sample_dict, normal_sample)))
         multiqc_input.extend(expand(bam_dir + "{sample}.{fastqpattern}.sorted.alignmetric", sample=normal_sample, fastqpattern=get_fastqpatterns(sample_dict, normal_sample)))
 
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted."+ picarddup +".hsmetric", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.hsmetric", sample=config["samples"]))
 
     # sambamba metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".cov.bed", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.cov.bed", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.exon.cov.bed", sample=config["samples"]))
 
     # mosdepth metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.global.dist.txt", sample=config["samples"]))

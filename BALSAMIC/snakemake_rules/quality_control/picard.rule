@@ -13,7 +13,7 @@ rule picard_CollectHsMetrics:
         bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
         fa = config["reference"]["reference_genome"],
     output:
-        mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
+        mrkdup = bam_dir + "{sample}.dedup.realign.hsmetric"
     benchmark:
         Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
     singularity:
