@@ -3,8 +3,8 @@
 
 rule concatenate_umi_reads:
     input:
-        fastqs_fwd = lambda wildcards: [fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz".format(fastqpattern=fastq_pattern) for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]],
-        fastqs_rev = lambda wildcards: [fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz".format(fastqpattern=fastq_pattern) for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]]
+        fastqs_fwd = lambda wildcards: [fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz".format(fastqpattern=fastq_pattern) for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]],
+        fastqs_rev = lambda wildcards: [fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz".format(fastqpattern=fastq_pattern) for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]]
     output:
         fastq_fwd = fastq_dir + "concat.{sample}_1.umi_optimized.fastq.gz",
         fastq_rev = fastq_dir + "concat.{sample}_2.umi_optimized.fastq.gz"
