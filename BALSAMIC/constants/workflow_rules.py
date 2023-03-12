@@ -6,7 +6,6 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
-            "snakemake_rules/variant_calling/mergetype_tumor.rule",
         ],
         "align": [],
         "varcall": [
@@ -56,7 +55,6 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
             "snakemake_rules/umi/qc_umi.rule",
-            "snakemake_rules/variant_calling/mergetype_normal.rule",
             "snakemake_rules/quality_control/somalier.rule",
             "snakemake_rules/umi/concatenation_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
@@ -85,7 +83,6 @@ SNAKEMAKE_RULES = {
     },
     "single_wgs": {
         "qc": [
-            "snakemake_rules/concatenation/concatenation.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/report.rule",
