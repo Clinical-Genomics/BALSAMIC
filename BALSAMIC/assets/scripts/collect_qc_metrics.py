@@ -175,7 +175,7 @@ def get_metric_condition(
         sample_type = get_sample_type_from_prefix(config, sample)
     except KeyError:
         # Deletes pair orientation information from the sample name (insertSize metrics)
-        sample_type = get_sample_type_from_prefix(config, sample.rsplit("_", 1)[0])
+        sample_type = get_sample_type_from_prefix(config, sample.split("_")[0])
 
     req_metrics = requested_metrics[metric]["condition"]
     if sequencing_type == "wgs" and (
