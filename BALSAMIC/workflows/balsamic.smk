@@ -365,7 +365,7 @@ for r in rules_to_include:
 
 # Define common and analysis specific outputs
 quality_control_results = [
-    #os.path.join(qc_dir,case_id + "_metrics_deliverables.yaml"),
+    os.path.join(qc_dir,case_id + "_metrics_deliverables.yaml"),
     os.path.join(qc_dir, "multiqc_report.html"),
     os.path.join(qc_dir, "multiqc_data/multiqc_data.json")
 ]
@@ -563,8 +563,7 @@ rule all:
 
         # Perform validation of extracted QC metrics
         try:
-            LOG.info("commenting out deliverable qc")
-            #validate_qc_metrics(read_yaml(input[0]))
+            validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
             LOG.error(val_exc)
             raise BalsamicError
