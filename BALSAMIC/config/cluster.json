@@ -76,17 +76,9 @@
 		"time": "10:00:00",
 		"n": 12
 	},
-	"mergeBam_normal": {
-		"time": "12:00:00",
-		"n": 36
-	},
 	"mergeBam_normal_gatk": {
 		"time": "04:30:00",
 		"n": 8
-	},
-	"mergeBam_tumor": {
-		"time": "30:00:00",
-		"n": 36
 	},
 	"mergeBam_tumor_gatk": {
 		"time": "04:30:00",
@@ -335,5 +327,9 @@
 	"somalier_relate": {
 		"time": "01:00:00",
 		"n": 1
+	},
+	"bam_compress": {
+		"time": "04:00:00",
+		"n": 20
 	}
 }

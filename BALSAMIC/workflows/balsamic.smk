@@ -1,6 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 import os
+import re
 import logging
 import tempfile
 import glob
