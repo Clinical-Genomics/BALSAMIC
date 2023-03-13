@@ -1,11 +1,11 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-multiqc_input = [sample_dict[tumor_sample]["bam"]["final_bam"], re.sub('bam$', 'cram', sample_dict[tumor_sample]["bam"]["final_bam"])]
+multiqc_input = [sample_dict[tumor_sample]["bam"]["final_bam"]]
+multiqc_input.extend(expand(bam_dir + "{sample}.bam_compressed", sample=config["samples"]))
 
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(sample_dict[normal_sample]["bam"]["final_bam"])
-    multiqc_input.append(re.sub('bam$', 'cram', sample_dict[normal_sample]["bam"]["final_bam"]))
     multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
 
 

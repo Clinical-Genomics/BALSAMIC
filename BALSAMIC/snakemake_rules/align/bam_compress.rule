@@ -7,20 +7,22 @@ rule bam_compress:
         bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
         fasta = config["reference"]["reference_genome"]
     output:
-        cram = lambda wildcards: re.sub('bam$', 'cram', sample_dict[wildcards.sample]["bam"]["final_bam"])
+        cram_done = bam_dir + "{sample}.bam_compressed"
     benchmark:
         Path(benchmark_dir, "SamtoolsCompressCram_" + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        sample_type = lambda wildcards: sample_dict[wildcards.sample]["sample_type"]
+        sample_type = lambda wildcards: sample_dict[wildcards.sample]["sample_type"],
+        cram = lambda wildcards: re.sub('bam$', 'cram', sample_dict[tumor_sample]["bam"]["final_bam"])
     threads:
         get_threads(cluster_config, "bam_compress")
     message:
         ("Compressing bam to cram for {params.sample_type} : {params.sample_id}")
     shell:
         """
-samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
-samtools index {output.cram}; 
+samtools view -h -T {input.fasta} --threads {threads} -C -o {params.cram} {input.bam}; 
+samtools index {params.cram}; 
+echo "Finished compressing bamfile: {input.bam} to {params.cram}" >> {output.cram_done}
         """
