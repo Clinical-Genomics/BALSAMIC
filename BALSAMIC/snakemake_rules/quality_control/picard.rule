@@ -65,11 +65,11 @@ rule picard_CollectAlignmentSummaryMetrics:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         adapter = config["QC"]["adapter"],
-        fastqpattern = '{fastqpattern}'
+        sample = '{sample}'
     threads:
         get_threads(cluster_config,'picard_CollectAlignmentSummaryMetrics')
     message:
-        "Calculating picard alignment summary metrics for sample '{params.fastqpattern}'"
+        "Calculating picard alignment summary metrics for sample '{params.sample}'"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -99,11 +99,11 @@ rule picard_CollectInsertSizeMetrics:
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        fastqpattern = '{fastqpattern}'
+        sample = '{sample}'
     threads:
         get_threads(cluster_config,'picard_CollectInsertSizeMetrics')
     message:
-        "Calculating picard InsertSize metrics for sample '{params.fastqpattern}'"
+        "Calculating picard InsertSize metrics for sample '{params.sample}'"
     shell:
         """
 mkdir -p {params.tmpdir};
