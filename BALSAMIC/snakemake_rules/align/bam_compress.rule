@@ -7,7 +7,7 @@ rule bam_compress:
         bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
         fasta = config["reference"]["reference_genome"]
     output:
-        cram = lambda wildcards: re.sub('bam$' 'cram', sample_dict[wildcards.sample]["bam"]["final_bam"])
+        cram = lambda wildcards: re.sub('bam$', 'cram', sample_dict[wildcards.sample]["bam"]["final_bam"])
     benchmark:
         Path(benchmark_dir, "SamtoolsCompressCram_" + "{sample}.tsv").as_posix()
     singularity:
