@@ -58,7 +58,7 @@ METRICS = {
     "wgs": {
         "MEAN_INSERT_SIZE": {"condition": None},
         "MEDIAN_COVERAGE": {"condition": None},
-        "FastQC_mqc-generalstats-fastqc-percent_duplicates": {"condition": None},
+        "PERCENT_DUPLICATION": {"condition": None},
         "PCT_15X": {"condition": {"norm": "gt", "threshold": 0.95}},  # Normal sample
         "PCT_30X": {"condition": None},
         "PCT_60X": {"condition": {"norm": "gt", "threshold": 0.80}},  # Tumor sample
