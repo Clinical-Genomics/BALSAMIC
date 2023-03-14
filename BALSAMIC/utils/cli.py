@@ -555,7 +555,10 @@ def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> D
         fwd_suffix = fastq_suffixes[suffix]["fwd"]
         rev_suffix = fastq_suffixes[suffix]["rev"]
 
-        fwd_fastqs = glob.glob(f"{fastq_path}/*_{sample_name}_*{fwd_suffix}")
+        # Deprecated probably...
+        # fwd_fastqs = glob.glob(f"{fastq_path}/*_{sample_name}_*{fwd_suffix}")
+        fastq_fwd_regex = re.compile(r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$")
+        fwd_fastqs = [f"{fastq_path}/{fastq}" for fastq in os.listdir(fastq_path) if fastq_fwd_regex.match(fastq)]
         if fwd_fastqs:
             for fwd_fastq in fwd_fastqs:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
