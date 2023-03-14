@@ -212,7 +212,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                                 condition=get_metric_condition(
                                     config,
                                     requested_metrics,
-                                    sample,
+                                    sample.split(".")[1],
                                     k,
                                 ),
                             ).dict()
