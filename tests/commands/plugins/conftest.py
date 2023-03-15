@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 
@@ -7,8 +9,8 @@ def input_file():
 
 
 @pytest.fixture
-def output_file():
-    return "tests/test_data/vcf_tables/test_createVCF_output.vcf.gz"
+def output_file(tmp_path):
+    return Path(tmp_path, "test_createVCF_output.vcf.gz").as_posix()
 
 
 @pytest.fixture

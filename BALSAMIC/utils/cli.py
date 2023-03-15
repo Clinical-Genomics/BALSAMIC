@@ -9,6 +9,7 @@ from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
 import zlib
+from typing import List
 
 import yaml
 import snakemake
@@ -449,11 +450,19 @@ def bioinfo_tool_version_conda(
         conda_bioinfo_version: dict. A dictionary of tools as key and version as list in value
     """
     conda_bioinfo_version = current_bioinfo_tool_version
-    for p in packages:
-        if isinstance(p, dict):
+    for package in packages:
+        if isinstance(package, dict):
+            # Extraction of pip specific packages
+            bioinfo_tool_version_conda(
+                package[list(package.keys())[0]],
+                bioinfo_tools,
+                current_bioinfo_tool_version,
+            )
             continue
-        name = p.split("::")[1].split("=")[0]
-        version = "=".join(p.split("=")[1:])
+        name_version: List[str] = list(
+            filter(None, re.split("=|==", package))
+        )  # Supporting PIP versioning (double equal sign)
+        name, version = name_version[0], name_version[1]
         if name not in bioinfo_tools:
             continue
         if name in conda_bioinfo_version:
