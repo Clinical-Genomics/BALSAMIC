@@ -1,5 +1,4 @@
 import click
-from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.constants.cache import ContainerVersion
 
@@ -12,14 +11,12 @@ OPTION_OUT_DIR = click.option(
     help="Output directory for singularity containers and reference files",
 )
 
-OPTION_VERSION = click.option(
+OPTION_CONTAINER_VERSION = click.option(
     "-v",
     "--container-version",
     show_default=True,
     default=ContainerVersion.RELEASE,
-    type=click.Choice(
-        [ContainerVersion.DEVELOP, ContainerVersion.RELEASE, balsamic_version]
-    ),
+    type=click.Choice([ContainerVersion.DEVELOP, ContainerVersion.RELEASE]),
     help="Container version to be downloaded",
 )
 

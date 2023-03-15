@@ -1,3 +1,5 @@
+"""Balsamic analysis specific constants."""
+
 from BALSAMIC.constants.common import StrEnum
 
 

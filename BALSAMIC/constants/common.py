@@ -1,4 +1,5 @@
-"""This file contains constants variables used by BALSAMIC"""
+"""Balsamic workflow common constants."""
+
 import operator
 import sys
 from enum import Enum
