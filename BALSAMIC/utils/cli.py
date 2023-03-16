@@ -20,7 +20,7 @@ from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError
-
+from BALSAMIC.constants.common import FASTQ_SUFFIXES
 LOG = logging.getLogger(__name__)
 
 
@@ -546,11 +546,12 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
             raise BalsamicError("Fastq input wrongly configured")
 
 
-def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> Dict[str, str]:
+def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample."""
 
     fastq_dict = {}
 
+    fastq_suffixes = FASTQ_SUFFIXES
     for suffix in fastq_suffixes:
         fwd_suffix = fastq_suffixes[suffix]["fwd"]
         rev_suffix = fastq_suffixes[suffix]["rev"]
@@ -575,7 +576,7 @@ def get_fastq_info(sample_name: str, fastq_path: str, fastq_suffixes: dict) -> D
     return fastq_dict
 
 def get_sample_dict(
-    tumor_sample_name: str, normal_sample_name: Optional[str], fastq_suffixes: dict, fastq_path: str
+    tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
 ) -> Dict[str, dict]:
     """Returns a sample dictionary with fastq-information given the names of the tumor and/or normal samples:
     "sample_name": {
@@ -594,7 +595,7 @@ def get_sample_dict(
     if normal_sample_name:
         sample_dict.update({normal_sample_name: {"type": "normal"}})
     for sample_name in sample_dict:
-        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path, fastq_suffixes)
+        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path)
     return sample_dict
 
 

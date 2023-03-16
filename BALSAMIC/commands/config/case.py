@@ -16,8 +16,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
-    GENDER_OPTIONS,
-    FASTQ_SUFFIXES,
+    GENDER_OPTIONS
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.io import write_json
@@ -259,7 +258,7 @@ def case_config(
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         background_variants=background_variants,
         samples=get_sample_dict(
-            tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name, fastq_suffixes=FASTQ_SUFFIXES, fastq_path=fastq_path
+            tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name, fastq_path=fastq_path
         ),
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
