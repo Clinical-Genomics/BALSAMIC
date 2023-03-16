@@ -7,6 +7,7 @@ from pathlib import Path
 
 from copy import deepcopy
 
+from BALSAMIC.constants.analysis import GenomeVersion
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files
 from BALSAMIC.utils.models import ReferenceMeta
@@ -17,38 +18,29 @@ from BALSAMIC.utils.cli import create_md5
 
 LOG = logging.getLogger(__name__)
 
-# explictly check if cluster_config dict has zero keys.
-if len(cluster_config.keys()) == 0:
-    cluster_config = config
+# Refence CLI parsing
+reference_dir = Path(config.get("output"))
+genome_dir = Path(reference_dir, "genome")
+vcf_dir = Path(reference_dir, "variants")
+vep_dir = Path(reference_dir, "vep")
 
-
-# backward compatible genome version extraction from config
-if 'genome_version' in config:
-    genome_ver = config['genome_version']
-else:
-    genome_ver = 'hg19'
-
-# essential path reference files
-basedir = os.path.join(config['output'])
-genome_dir = os.path.join(basedir, "genome")
-vcf_dir = os.path.join(basedir, "variants")
-vep_dir = os.path.join(basedir, "vep")
-cosmicdb_key = config['cosmic_key']
+genome_version: GenomeVersion = config.get("genome_version")
+cosmic_key: str = config.get("cosmic_key")
 
 # Set temporary dir environment variable
-os.environ['TMPDIR'] = basedir
+os.environ['TMPDIR'] = reference_dir.as_posix()
 
 # indexable VCF files
 # For future reference, if you delete this line pydantic fails in tests
 # Don't know why, but don't delete it and keep deepcopy /A&H
 REFERENCE_FILES = deepcopy(REFERENCE_MODEL)
-indexable_vcf_files = get_reference_output_files(REFERENCE_FILES[genome_ver],
+indexable_vcf_files = get_reference_output_files(REFERENCE_FILES[genome_version],
                                                  file_type='vcf',
                                                  gzip = True)
 
 # intialize reference files
-REFERENCE_FILES[genome_ver]['basedir'] = basedir
-reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES[genome_ver])
+REFERENCE_FILES[genome_version]['basedir'] = reference_dir.as_posix()
+reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES[genome_version])
 
 reference_genome_url = reference_file_model.reference_genome
 dbsnp_url = reference_file_model.dbsnp
@@ -75,9 +67,9 @@ clinvar_url = reference_file_model.clinvar
 somalier_sites_url = reference_file_model.somalier_sites
 
 # add secrets from config to items that need them
-cosmicdb_url.secret=config['cosmic_key']
+cosmicdb_url.secret=cosmic_key
 
-check_md5 = os.path.join(basedir, "reference.json.md5")
+check_md5 = os.path.join(reference_dir, "reference.json.md5")
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -124,11 +116,11 @@ rule all:
         clinvar = clinvar_url.get_output_file + ".gz",
         somalier_sites = somalier_sites_url.get_output_file + ".gz",
     output:
-        finished = os.path.join(basedir,"reference.finished"),
-        reference_json = os.path.join(basedir, "reference.json"),
+        finished = os.path.join(reference_dir,"reference.finished"),
+        reference_json = os.path.join(reference_dir, "reference.json"),
         check_md5 = check_md5
     log:
-        os.path.join(basedir, "reference.json.log")
+        os.path.join(reference_dir, "reference.json.log")
     run:
         import json
         from datetime import datetime
@@ -263,8 +255,8 @@ rule prepare_refgene:
         refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
         bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
     log:
-        refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
-        refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
+        refgene_sql = os.path.join(reference_dir, "genome", "refgene_sql.log"),
+        refgene_txt = os.path.join(reference_dir, "genome", "refgene_txt.log")
     singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
     shell:
         """
@@ -369,7 +361,7 @@ rule vep_install:
         singularity_img = singularity_images
     params:
         species = "homo_sapiens_merged",
-        assembly = "GRCh37" if genome_ver == 'hg19' else "GRCh38",
+        assembly = "GRCh37" if genome_version == 'hg19' else "GRCh38",
         plugins = "all",
     output:
         directory(vep_dir)
@@ -397,7 +389,7 @@ rule prepare_delly_exclusion:
     output:
         delly_exclusion_converted = delly_exclusion_url.get_output_file.replace(".tsv", "_converted.tsv"),
     log:
-        os.path.join(basedir, "genome", "delly_exclusion.log"),
+        os.path.join(reference_dir, "genome", "delly_exclusion.log"),
     singularity: Path(singularity_image_path, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
     shell:
         """
