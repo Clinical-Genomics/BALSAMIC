@@ -6,6 +6,7 @@ from pathlib import Path
 import click
 import graphviz
 import snakemake
+from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.commands.init.options import (
     OPTION_OUT_DIR,
@@ -13,6 +14,7 @@ from BALSAMIC.commands.init.options import (
     OPTION_COSMIC_KEY,
     OPTION_SNAKEFILE,
 )
+from BALSAMIC.commands.init.utils import get_containers
 from BALSAMIC.commands.options import (
     OPTION_RUN_MODE,
     OPTION_CLUSTER_PROFILE,
@@ -28,7 +30,6 @@ from BALSAMIC.commands.options import (
     OPTION_QUIET,
 )
 from BALSAMIC.constants.analysis import RunMode, GenomeVersion
-from BALSAMIC.constants.cache import DOCKER_CONTAINERS, DOCKER_PATH
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
 from BALSAMIC.utils.io import write_json
@@ -93,8 +94,8 @@ def initialize(
         raise click.Abort()
 
     out_dir: Path = Path(out_dir).resolve()
-    containers_dir: Path = Path(out_dir, container_version, "containers")
-    reference_dir: Path = Path(out_dir, container_version, genome_version)
+    containers_dir: Path = Path(out_dir, balsamic_version, "containers")
+    reference_dir: Path = Path(out_dir, balsamic_version, genome_version)
     config_path: Path = Path(reference_dir, "config.json")
     log_dir: Path = Path(reference_dir, "logs")
     script_dir: Path = Path(reference_dir, "scripts")
@@ -108,10 +109,7 @@ def initialize(
         "rule_directory": Path(__file__).parents[2].as_posix() + "/",
         "singularity": {
             "image_path": containers_dir.as_posix(),
-            "containers": {
-                container: f"{DOCKER_PATH}:{container_version}-{container}"
-                for container in DOCKER_CONTAINERS
-            },
+            "containers": get_containers(container_version),
         },
     }
     config_dict.update({"cosmic_key": cosmic_key}) if cosmic_key else None
@@ -131,7 +129,7 @@ def initialize(
             configfiles=[config_path.as_posix()],
             printrulegraph=True,
         )
-    graph_title = "_".join(["BALSAMIC", container_version, "reference"])
+    graph_title = "_".join(["BALSAMIC", balsamic_version, "reference"])
     graph_dot = "".join(graph_dot).replace(
         "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
     )
@@ -152,7 +150,7 @@ def initialize(
     LOG.info("Starting reference generation workflow...")
     balsamic_run = SnakeMake()
     balsamic_run.configfile = config_path.as_posix()
-    balsamic_run.case_name = "reference." + genome_version + "." + container_version
+    balsamic_run.case_name = "reference." + genome_version + ".v" + balsamic_version
     balsamic_run.working_dir = config_dict["output"]
     balsamic_run.snakefile = snakefile
     balsamic_run.run_mode = run_mode

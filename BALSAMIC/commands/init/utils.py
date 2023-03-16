@@ -1,0 +1,19 @@
+"""Utility methods for balsamic init command."""
+from typing import Dict
+
+from BALSAMIC import __version__ as balsamic_version
+
+from BALSAMIC.constants.cache import ContainerVersion, DOCKER_PATH, DOCKER_CONTAINERS
+
+
+def get_containers(container_version: ContainerVersion) -> Dict[str, str]:
+    """Get dictionary of container names and their docker image paths."""
+    image_name: str = (
+        f"release_v{balsamic_version}"
+        if container_version == ContainerVersion.RELEASE
+        else container_version
+    )
+    return {
+        container: f"{DOCKER_PATH}:{image_name}-{container}"
+        for container in DOCKER_CONTAINERS
+    }
