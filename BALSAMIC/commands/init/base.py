@@ -30,8 +30,9 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
 )
-from BALSAMIC.constants.analysis import RunMode, GenomeVersion
-from BALSAMIC.constants.common import BIOINFO_TOOL_ENV, ConfigType
+from BALSAMIC.constants.analysis import RunMode, GenomeVersion, ConfigType
+from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.paths import PROJECT_DIR
 from BALSAMIC.utils.cli import (
     SnakeMake,
     get_schedulerpy,
@@ -113,7 +114,7 @@ def initialize(
         "output": reference_dir.as_posix(),
         "bioinfo_tools": BIOINFO_TOOL_ENV,
         "genome_version": genome_version,
-        "rule_directory": Path(__file__).parents[2].as_posix() + "/",
+        "rule_directory": PROJECT_DIR,
         "singularity": {
             "image_path": containers_dir.as_posix(),
             "containers": get_containers(container_version),

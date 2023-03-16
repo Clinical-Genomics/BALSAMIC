@@ -1,5 +1,13 @@
 """Balsamic analysis specific constants."""
-from BALSAMIC.constants.common import StrEnum
+from BALSAMIC.utils.enum import StrEnum
+
+
+class ConfigType(StrEnum):
+    """Analysis workflow config type."""
+
+    ANALYSIS: str = "analysis"
+    CLUSTER: str = "cluster"
+    CLUSTER_REFERENCE: str = "cluster_reference"
 
 
 class GenomeVersion(StrEnum):

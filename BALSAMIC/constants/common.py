@@ -1,46 +1,5 @@
 """Balsamic workflow common constants."""
 import operator
-import sys
-from enum import Enum
-from pathlib import Path
-
-
-class StrEnum(str, Enum):
-    """StrEnum data class."""
-
-    def __str__(self) -> str:
-        return str.__str__(self)
-
-
-class ConfigType(StrEnum):
-    """Analysis workflow config type."""
-
-    ANALYSIS: str = "analysis"
-    CLUSTER: str = "cluster"
-    CLUSTER_REFERENCE: str = "cluster_reference"
-
-
-# BALSAMIC base dir
-BALSAMIC_BASE_DIR = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
-
-# BALSAMIC scripts dir
-BALSAMIC_SCRIPTS = Path(BALSAMIC_BASE_DIR, "assets/scripts").as_posix()
-
-# Path to containers directory containing YAML files for conda installation for each one
-CONTAINERS_CONDA_ENV_PATH = Path(BALSAMIC_BASE_DIR / "containers").as_posix()
-
-# Path to rule files to be accessed by Snakemake
-RULE_DIRECTORY = BALSAMIC_BASE_DIR.as_posix()
-
-# Sentieon specific
-SENTIEON_DNASCOPE = Path(
-    BALSAMIC_BASE_DIR
-    / "assets/sentieon_models/SentieonDNAscopeModelBeta0.4a-201808.05.model"
-).as_posix()
-SENTIEON_TNSCOPE = Path(
-    BALSAMIC_BASE_DIR
-    / "assets/sentieon_models/SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model"
-)
 
 # Analysis related constants
 GENDER_OPTIONS = ["female", "male"]

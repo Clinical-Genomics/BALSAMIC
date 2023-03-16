@@ -1,5 +1,5 @@
 """Balsamic cache specific constants."""
-from BALSAMIC.constants.common import StrEnum
+from BALSAMIC.utils.enum import StrEnum
 
 
 class ContainerVersion(StrEnum):

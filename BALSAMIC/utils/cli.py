@@ -1,5 +1,4 @@
 import os
-import shutil
 import logging
 import sys
 import re
@@ -16,8 +15,8 @@ import graphviz
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.constants.common import ConfigType
-from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.constants.analysis import ConfigType
+from BALSAMIC.constants.paths import PROJECT_DIR
 
 LOG = logging.getLogger(__name__)
 
@@ -187,15 +186,6 @@ class SnakeMake:
         return sm_cmd
 
 
-def get_root_dir() -> Path:
-    """Return the absolute path to the root of the project."""
-    return Path(__file__).parents[1]
-
-
-def get_config_dir() -> Path:
-    return Path(get_root_dir(), "config")
-
-
 def add_doc(docstring):
     """
     A decorator for adding docstring. Taken shamelessly from stackexchange.
@@ -290,7 +280,7 @@ def get_config(config_name):
 
 def get_config_path(config_type: ConfigType) -> Path:
     """Return a config path given its type."""
-    return Path(get_config_dir(), config_type + ".json")
+    return Path(PROJECT_DIR, config_type + ".json")
 
 
 def find_file_index(file_path):
