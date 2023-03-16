@@ -1,8 +1,11 @@
 import subprocess
+from pathlib import Path
+
 import graphviz
 
-from pathlib import Path
 from unittest import mock
+
+from BALSAMIC import __version__ as balsamic_version
 
 
 def test_init_reference_write_json(
@@ -17,13 +20,10 @@ def test_init_reference_write_json(
 
     # WHEN creating config.json in reference dir
     test_output_reference_config = (
-        test_new_dir / test_container_version / test_genome_version / "config.json"
+        test_new_dir / balsamic_version / test_genome_version / "config.json"
     )
     test_output_reference_pdf = (
-        test_new_dir
-        / test_container_version
-        / test_genome_version
-        / "reference_graph.pdf"
+        test_new_dir / balsamic_version / test_genome_version / "reference_graph.pdf"
     )
 
     result = invoke_cli(

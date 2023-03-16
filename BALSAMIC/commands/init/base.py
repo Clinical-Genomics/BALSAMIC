@@ -104,7 +104,7 @@ def initialize(
 
     config_dict: dict = {
         "output": reference_dir.as_posix(),
-        "bioinfo_tools": dict(BIOINFO_TOOL_ENV),
+        "bioinfo_tools": BIOINFO_TOOL_ENV,
         "genome_version": genome_version,
         "rule_directory": Path(__file__).parents[2].as_posix() + "/",
         "singularity": {
