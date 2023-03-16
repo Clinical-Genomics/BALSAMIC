@@ -1,6 +1,7 @@
 # Define set of rules
 SNAKEMAKE_RULES = {
     "common": {
+        "concatenate": ["snakemake_rules/concatenation/concatenation.rule"],
         "qc": [
             "snakemake_rules/quality_control/fastp.rule",
             "snakemake_rules/quality_control/fastqc.rule",
@@ -169,4 +170,6 @@ DELIVERY_RULES = [
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
+    # TMB
+    "tmb_calculation",
 ]

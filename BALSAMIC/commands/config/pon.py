@@ -7,11 +7,11 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.cli import (
-    create_fastq_symlink,
     generate_graph,
     get_bioinfo_tools_version,
-    create_pon_fastq_symlink,
+    get_pon_sample_dict,
 )
+from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
 from BALSAMIC.constants.common import (
@@ -128,11 +128,13 @@ def pon_config(
         analysis={
             "case_id": case_id,
             "analysis_dir": analysis_dir,
+            "fastq_path": fastq_path,
             "analysis_type": "pon",
             "pon_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
+        samples=get_pon_sample_dict(fastq_path),
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         bioinfo_tools=BIOINFO_TOOL_ENV,
@@ -144,22 +146,8 @@ def pon_config(
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("PON config file generated successfully")
 
-    Path.mkdir(
-        Path(config_collection_dict["analysis"]["fastq_path"]),
-        parents=True,
-        exist_ok=True,
-    )
-    LOG.info("fastq directories created successfully")
-
-    create_pon_fastq_symlink(
-        pon_fastqs=fastq_path,
-        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
-    )
-    LOG.info(f"fastqs symlinks generated successfully")
-
-    config_path = Path(analysis_dir) / case_id / (case_id + "_PON" + ".json")
-    with open(config_path, "w+") as fh:
-        fh.write(json.dumps(config_collection_dict, indent=4))
+    config_path = Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
+    write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"PON config file saved successfully - {config_path}")
 
     try:

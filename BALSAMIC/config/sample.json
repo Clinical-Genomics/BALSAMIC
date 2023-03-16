@@ -10,14 +10,10 @@
     },
     "samples": {
         "BASE_NAME_FOR_FIRST_SAMPLE": {
-            "file_prefix": "{LANE}_{DATE}_{FLOW_CELL}_{IDN}_{BARCODE_SEQ}",
             "type": "[normal, tumor]",
-            "readpair_suffix": ["1", "2"]
         },
         "BASE_NAME_FOR_SECOND_SAMPLE": {
-            "file_prefix": "{LANE}_{DATE}_{FLOW_CELL}_{IDN}_{BARCODE SEQ}",
             "type": "[normal, tumor]",
-            "readpair_suffix": ["1", "2"]
         }
     }
 }

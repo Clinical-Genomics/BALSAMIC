@@ -4,10 +4,12 @@
 Added:
 ^^^^^^
 * PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+* Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
 
 Changed:
 ^^^^^^^^
 * Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+* Updated snakemake version to 7.24.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 
 Fixed:
 ^^^^^^

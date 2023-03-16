@@ -1,6 +1,5 @@
 import subprocess
 from pathlib import Path
-
 import graphviz
 
 from unittest import mock

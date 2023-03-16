@@ -1,14 +1,12 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-# Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
-
 
 rule bwa_mem:
     input:
         fa = config["reference"]["reference_genome"],
-        read1 = Path(fastq_dir, "{sample}_1.fp.fastq.gz").as_posix(),
-        read2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
+        fastq_r1 = Path(analysis_fastq_dir, "{sample}_R_1.fp.fastq.gz").as_posix(),
+        fastq_r2 = Path(analysis_fastq_dir, "{sample}_R_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bamout = temp(Path(bam_dir, "{sample}.sorted.bam").as_posix())
@@ -35,7 +33,7 @@ bwa mem \
 -R {params.bam_header}  \
 -M \
 -v 1 \
-{input.fa} {input.read1} {input.read2} \
+{input.fa} {input.fastq_r1} {input.fastq_r2} \
 | samtools sort -T {params.tmpdir} \
 --threads {threads} \
 --output-fmt BAM \
@@ -90,3 +88,4 @@ samtools idxstats --threads {threads} {output.mrkdup} > {output.idxstats};
 
 rm -rf {params.tmpdir};
         """
+

@@ -136,8 +136,6 @@ rule annotate_swegen_frequency_somatic_sv:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         swegen_sv_frequency = swegen_sv,
         tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
@@ -173,8 +171,6 @@ rule annotate_clinical_observation_somatic_sv:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         clinical_sv_observations = clinical_sv,
         tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
@@ -213,6 +209,7 @@ rule tmb_calculation:
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.research",
+    housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
   threads:
     get_threads(cluster_config, "vep")

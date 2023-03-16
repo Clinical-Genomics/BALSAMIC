@@ -1,5 +1,7 @@
 import os
 import re
+from typing import Optional
+
 import toml
 import logging
 from pathlib import Path
@@ -133,17 +135,13 @@ def get_capture_kit(config):
         return None
 
 
-def get_sample_type(sample, bio_type):
-    """
-    input: sample dictionary from BALSAMIC's config file
-    output: list of sample type id
-    """
-
-    type_id = []
-    for sample_id in sample:
-        if sample[sample_id]["type"] == bio_type:
-            type_id.append(sample_id)
-    return type_id
+def get_sample_id_by_type(samples: dict, type: str) -> str:
+    """Return sample ID given a sample biological type."""
+    for sample_id in samples:
+        if samples[sample_id]["type"] == type:
+            return sample_id
+    LOG.error(f"There is no sample ID for the {type} sample type")
+    raise BalsamicError
 
 
 def get_sample_type_from_prefix(config, sample):
@@ -350,16 +348,6 @@ def get_reference_output_files(
                 continue
             ref_vcf_list.append(reference_item["output_file"])
     return ref_vcf_list
-
-
-def get_pon_samples(fastq_dir):
-    """Given dirpath containing list of PON fastq files
-    Returns list of sample names
-    """
-    samples = [
-        (f.split("_1"))[0] for f in os.listdir(fastq_dir) if f.endswith("_R_1.fastq.gz")
-    ]
-    return samples
 
 
 def get_clinical_snv_observations(config: dict) -> str:
