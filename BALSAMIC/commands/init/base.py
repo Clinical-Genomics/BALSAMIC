@@ -1,3 +1,4 @@
+"""Balsamic initialize command."""
 import logging
 import subprocess
 import sys
@@ -30,8 +31,14 @@ from BALSAMIC.commands.options import (
     OPTION_QUIET,
 )
 from BALSAMIC.constants.analysis import RunMode, GenomeVersion
-from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
-from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
+from BALSAMIC.constants.common import BIOINFO_TOOL_ENV, ConfigType
+from BALSAMIC.utils.cli import (
+    SnakeMake,
+    get_schedulerpy,
+    get_snakefile,
+    CaptureStdout,
+    get_config_path,
+)
 from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
@@ -155,7 +162,11 @@ def initialize(
     balsamic_run.snakefile = snakefile
     balsamic_run.run_mode = run_mode
     balsamic_run.scheduler = get_schedulerpy()
-    balsamic_run.cluster_config = Path(cluster_config).as_posix()
+    balsamic_run.cluster_config = (
+        cluster_config
+        if cluster_config
+        else get_config_path(ConfigType.CLUSTER_REFERENCE)
+    )
     balsamic_run.profile = profile
     balsamic_run.qos = qos
     balsamic_run.account = account

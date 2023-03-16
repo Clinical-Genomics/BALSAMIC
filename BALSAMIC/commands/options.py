@@ -1,3 +1,4 @@
+"""Balsamic commands common options."""
 import click
 
 from BALSAMIC.constants.analysis import (
@@ -7,7 +8,6 @@ from BALSAMIC.constants.analysis import (
     QOS,
     ClusterMailType,
 )
-from BALSAMIC.utils.cli import get_config
 
 OPTION_GENOME_VERSION = click.option(
     "-g",
@@ -28,8 +28,6 @@ OPTION_RUN_MODE = click.option(
 
 OPTION_CLUSTER_CONFIG = click.option(
     "--cluster-config",
-    show_default=True,
-    default=get_config("reference_cluster"),
     type=click.Path(),
     help="Cluster configuration json file path",
 )

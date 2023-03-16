@@ -1,5 +1,4 @@
 """Balsamic workflow common constants."""
-
 import operator
 import sys
 from enum import Enum
@@ -11,6 +10,14 @@ class StrEnum(str, Enum):
 
     def __str__(self) -> str:
         return str.__str__(self)
+
+
+class ConfigType(StrEnum):
+    """Analysis workflow config type."""
+
+    ANALYSIS: str = "analysis"
+    CLUSTER: str = "cluster"
+    CLUSTER_REFERENCE: str = "cluster_reference"
 
 
 # BALSAMIC base dir
