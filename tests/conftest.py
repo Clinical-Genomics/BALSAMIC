@@ -252,19 +252,49 @@ def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
     return analysis_dir.as_posix()
 
+fastq_pattern_types = [
+    {
+        "tumor":
+            ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz",
+            "ACC1_S1_L002_R1_001.fastq.gz", "ACC1_S1_L002_R2_001.fastq.gz"],
+        "normal":
+            ["ACC2_S1_L001_R1_001.fastq.gz", "ACC2_S1_L001_R2_001.fastq.gz",
+            "ACC2_S1_L002_R1_001.fastq.gz", "ACC2_S1_L002_R2_001.fastq.gz"]
+    },
+    {
+        "tumor":
+            ["HXXXXXXX_123456_ACC1_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L001_R2_001.fastq.gz",
+            "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz"],
+        "normal":
+            ["HXXXXXXX_123456_ACC2_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L001_R2_001.fastq.gz",
+            "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz"],
+    },
+    {
+        "tumor":
+            ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_1.fastq.gz"],
+        "normal":
+            ["ACC2_XXXXX_R_1.fastq.gz", "ACC2_XXXXX_R_2.fastq.gz"]
+    },
+    {
+        "tumor":
+            ["HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
+            "HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"],
+        "normal":
+            ["HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
+            "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"]
+    }
+]
 
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
+@pytest.fixture(scope="session", params=fastq_pattern_types)
+def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
-    # Fill the analysis fastq path folder with the concatenated fastq files
-    analysis_fastq_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "fastq")
-    analysis_fastq_dir.mkdir(parents=True, exist_ok=True)
-    for read in [1, 2]:
-        Path(analysis_fastq_dir, f"concatenated_ACC1_R_{read}.fastq.gz").touch()
-
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
     return fastq_dir.as_posix()
 
 
