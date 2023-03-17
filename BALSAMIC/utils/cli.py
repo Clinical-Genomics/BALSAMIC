@@ -468,52 +468,22 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
-def verify_fastq_pairing(fwd_fastq_path, rev_fastq_path):
-    """Cancels analysis if any paired fastq-files have in their names:
-     - more or less than 1 character difference in their names
-     - unequal lengths of fastq-names
-    """
-    fwd_fastq_name = os.path.basename(fwd_fastq_path)
-    rev_fastq_name = os.path.basename(rev_fastq_path)
-
-    len_fwd_fastq_name = len(fwd_fastq_name)
-    len_rev_fastq_name = len(rev_fastq_name)
-
-    if len_fwd_fastq_name != len_rev_fastq_name:
-        LOG.error(f"Fastq pair does not have names of equal length: {fwd_fastq_name} {rev_fastq_name}")
-        raise BalsamicError("Fastq input wrongly configured")
-
-    count_str_differences = 0
-    for i in range(len_fwd_fastq_name):
-        if fwd_fastq_name[i] != rev_fastq_name[i]:
-            count_str_differences += 1
-
-    if count_str_differences != 1:
-        LOG.error(f"Fastq pair does not have exactly 1 differences ({count_str_differences}) in their forward and reverse names: {fwd_fastq_name} {rev_fastq_name}")
-        raise BalsamicError("Fastq input wrongly configured")
-
 def validate_fastq_input(sample_dict: dict, fastq_path: str):
-    """Verifies that fastq files have been correctly assigned.
+    """Validates fastq input in sample dict.
 
-    Requirements to pass fastq-inputs:
-    - All fastq-files in the supplied fastq_dir must be assigned to a sample
-    - All fastq-files must exist (mostly relevant when using "balsamic run")
-    - All forward and reverse fastq pairs must be of the same length
-    - All forward and reverse fastq pairs must have exactly 1 difference in their names
-    - Fastq patterns can only appear once
-
+    Criteria:
+        - All fastq-files in the supplied fastq_dir must have been assigned to a sample.
+        - All fastq-files in the sample dict must exist.
     """
-    # Are there fastqs in the directory that have not been added to any fastq_list?
     complete_fastq_list = glob.glob(f"{fastq_path}/*fastq.gz")
     assigned_fastq_list = []
     for sample in sample_dict:
         fastq_dict = sample_dict[sample]["fastq_info"]
         for fastq_pattern in fastq_dict:
-            assigned_fastq_list.append(fastq_dict[fastq_pattern]["fwd"])
-            assigned_fastq_list.append(fastq_dict[fastq_pattern]["rev"])
-
-            # Validate fastq pair names, req same char length and only 1 char difference
-            verify_fastq_pairing(fastq_dict[fastq_pattern]["fwd"], fastq_dict[fastq_pattern]["rev"])
+            for fastq_read_direction, fastq_path in fastq_dict[sample]["fastq_info"][fastq_pattern].items():
+                assigned_fastq_list.append(fastq_dict[fastq_pattern][fastq_read_direction])
+                if not Path(fastq_path).is_file():
+                    raise FileNotFoundError(f"Fastq-file: {fastq_path} does not exist")
 
     unassigned_fastqs = []
     for fastq in complete_fastq_list:
@@ -522,28 +492,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
 
     if unassigned_fastqs:
         unassigned_fastqs_str = "\n".join(unassigned_fastqs)
-        LOG.error(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
-        raise BalsamicError("Fastq input wrongly configured")
-
-    # Does every input fastq file exist?
-    for fastq in assigned_fastq_list:
-        if not Path(fastq).exists():
-            LOG.error(f"Fastq file not found: {fastq}")
-            raise BalsamicError("Fastq input wrongly configured")
-
-    # Does any fastq pattern appear more than once?
-    fastq_patterns = {}
-    for sample in sample_dict:
-        fastq_dict = sample_dict[sample]["fastq_info"]
-        for fastq_pattern in fastq_dict:
-            if fastq_pattern not in fastq_patterns:
-                fastq_patterns[fastq_pattern] = 0
-            fastq_patterns[fastq_pattern] += 1
-    for fastq_pattern in fastq_patterns:
-        pattern_count = fastq_patterns[fastq_pattern]
-        if pattern_count > 1:
-            LOG.error(f"Fastq-pattern {fastq_pattern} appeared in sample_dict more than once: {pattern_count}")
-            raise BalsamicError("Fastq input wrongly configured")
+        raise BalsamicError(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
 
 
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
