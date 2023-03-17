@@ -264,14 +264,14 @@ fastq_pattern_types = [
     {
         "tumor":
             ["HXXXXXXX_123456_ACC1_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L001_R2_001.fastq.gz",
-            "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz"],
+            "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L002_R2_001.fastq.gz"],
         "normal":
             ["HXXXXXXX_123456_ACC2_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L001_R2_001.fastq.gz",
-            "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz"],
+            "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L002_R2_001.fastq.gz"],
     },
     {
         "tumor":
-            ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_1.fastq.gz"],
+            ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_2.fastq.gz"],
         "normal":
             ["ACC2_XXXXX_R_1.fastq.gz", "ACC2_XXXXX_R_2.fastq.gz"]
     },
