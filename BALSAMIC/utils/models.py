@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseModel, validator, Field, AnyUrl
+from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
@@ -444,8 +444,9 @@ class SamplesModel(BaseModel):
     """
 
     samples: Dict[str, SampleInstanceModel]
-    @validator("samples")
+    @root_validator(pre=False)
     def verify_unique_fastq_info_across_samples(cls, value):
+        """Cool docstring."""
         fastq_patterns = {}
         fastq_filenames = {}
         for sample in value:
