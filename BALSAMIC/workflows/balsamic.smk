@@ -11,7 +11,7 @@ from snakemake.exceptions import RuleException, WorkflowError
 
 from PyPDF2 import PdfFileMerger
 
-from BALSAMIC.constants.paths import PROJECT_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
@@ -324,7 +324,7 @@ LOG.info(f"The following somatic variant callers will be included in the workflo
 
 
 for r in rules_to_include:
-    include: Path(PROJECT_DIR, r).as_posix()
+    include: Path(BALSAMIC_DIR, r).as_posix()
 
 # Define common and analysis specific outputs
 quality_control_results = [

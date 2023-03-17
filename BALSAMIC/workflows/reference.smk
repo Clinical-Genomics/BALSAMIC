@@ -19,7 +19,7 @@ from BALSAMIC.utils.cli import create_md5
 LOG = logging.getLogger(__name__)
 
 # Refence CLI parsing
-reference_dir = Path(config.get("output"))
+reference_dir = Path(config.get("output_dir"))
 genome_dir = Path(reference_dir, "genome")
 vcf_dir = Path(reference_dir, "variants")
 vep_dir = Path(reference_dir, "vep")
@@ -74,7 +74,7 @@ check_md5 = os.path.join(reference_dir, "reference.json.md5")
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
-singularity_image_path = config['singularity']['image_path']
+singularity_image_path = config['singularity']['image_dir']
 singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()]
 
 ##########################################################
@@ -172,7 +172,7 @@ wildcard_constraints:
 def download_container_file(output_file: str):
     image_name = Path(output_file).stem
     docker_path = config["singularity"]["containers"][image_name]
-    cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_path"],image_name,docker_path)
+    cmd = "singularity pull {}/{}.sif {}".format(config["singularity"]["image_dir"],image_name,docker_path)
     shell(cmd)
 
 rule download_container:

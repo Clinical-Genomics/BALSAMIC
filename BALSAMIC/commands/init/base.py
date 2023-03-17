@@ -32,7 +32,8 @@ from BALSAMIC.commands.options import (
 )
 from BALSAMIC.constants.analysis import RunMode, GenomeVersion, ConfigType
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
-from BALSAMIC.constants.paths import PROJECT_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.models.cache import CacheConfigModel
 from BALSAMIC.utils.cli import (
     SnakeMake,
     get_schedulerpy,
@@ -110,18 +111,18 @@ def initialize(
     for dir_path in [containers_dir, reference_dir, log_dir, script_dir]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
-    config_dict: dict = {
-        "output": reference_dir.as_posix(),
-        "bioinfo_tools": BIOINFO_TOOL_ENV,
-        "genome_version": genome_version,
-        "rule_directory": PROJECT_DIR,
-        "singularity": {
-            "image_path": containers_dir.as_posix(),
+    config: CacheConfigModel = CacheConfigModel(
+        output_dir=reference_dir.as_posix(),
+        balsamic_dir=BALSAMIC_DIR,
+        genome_version=genome_version,
+        cosmic_key=cosmic_key,
+        bioinfo_tools=BIOINFO_TOOL_ENV,
+        singularity={
+            "image_dir": containers_dir.as_posix(),
             "containers": get_containers(container_version),
         },
-    }
-    config_dict.update({"cosmic_key": cosmic_key}) if cosmic_key else None
-    write_json(config_dict, config_path.as_posix())
+    )
+    write_json(config.dict(exclude_none=True), config_path.as_posix())
     LOG.info(f"Reference workflow configured successfully ({config_path.as_posix()})")
 
     snakefile = (
@@ -159,7 +160,7 @@ def initialize(
     balsamic_run = SnakeMake()
     balsamic_run.configfile = config_path.as_posix()
     balsamic_run.case_name = "reference." + genome_version + ".v" + balsamic_version
-    balsamic_run.working_dir = config_dict["output"]
+    balsamic_run.working_dir = config.output_dir
     balsamic_run.snakefile = snakefile
     balsamic_run.run_mode = run_mode
     balsamic_run.scheduler = get_schedulerpy()
@@ -181,10 +182,7 @@ def initialize(
     balsamic_run.script_path = script_dir.as_posix()
     balsamic_run.result_path = reference_dir.as_posix()
     balsamic_run.use_singularity = True
-    balsamic_run.singularity_bind = [
-        config_dict["output"],
-        config_dict["rule_directory"],
-    ]
+    balsamic_run.singularity_bind = [config.output_dir, config.balsamic_dir]
 
     cmd = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)

@@ -6,7 +6,7 @@ import glob
 import tempfile
 import os
 
-from BALSAMIC.constants.paths import PROJECT_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
@@ -53,7 +53,7 @@ config["rules"] = [
 ]
 
 for r in config["rules"]:
-    include: Path(PROJECT_DIR, r).as_posix()
+    include: Path(BALSAMIC_DIR, r).as_posix()
 
 rule all:
     input:

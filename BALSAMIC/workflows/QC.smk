@@ -9,7 +9,7 @@ from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
 
-from BALSAMIC.constants.paths import PROJECT_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
@@ -106,7 +106,7 @@ if "paired" in config['analysis']['analysis_type']:
         rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
 
 for r in rules_to_include:
-    include: Path(PROJECT_DIR, r).as_posix()
+    include: Path(BALSAMIC_DIR, r).as_posix()
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
 # Define common and analysis specific outputs

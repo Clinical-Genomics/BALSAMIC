@@ -2,13 +2,13 @@
 import sys
 from pathlib import Path
 
-PROJECT_DIR: str = Path(sys.modules["BALSAMIC"].__file__).parent.resolve().as_posix()
+BALSAMIC_DIR: str = Path(sys.modules["BALSAMIC"].__file__).parent.resolve().as_posix()
 
-SCRIPT_DIR: str = Path(PROJECT_DIR, "assets", "scripts").as_posix()
+SCRIPT_DIR: str = Path(BALSAMIC_DIR, "assets", "scripts").as_posix()
 
-CONTAINERS_DIR: str = Path(PROJECT_DIR, "containers").as_posix()
+CONTAINERS_DIR: str = Path(BALSAMIC_DIR, "containers").as_posix()
 
-SENTIEON_MODELS_DIR: str = Path(PROJECT_DIR, "assets", "sentieon_models").as_posix()
+SENTIEON_MODELS_DIR: str = Path(BALSAMIC_DIR, "assets", "sentieon_models").as_posix()
 
 SENTIEON_DNASCOPE_DIR: str = Path(
     SENTIEON_MODELS_DIR, "SentieonDNAscopeModelBeta0.4a-201808.05.model"

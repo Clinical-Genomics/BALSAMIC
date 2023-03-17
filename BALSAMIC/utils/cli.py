@@ -16,7 +16,7 @@ from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import ConfigType
-from BALSAMIC.constants.paths import PROJECT_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 
 LOG = logging.getLogger(__name__)
 
@@ -280,7 +280,7 @@ def get_config(config_name):
 
 def get_config_path(config_type: ConfigType) -> Path:
     """Return a config path given its type."""
-    return Path(PROJECT_DIR, config_type + ".json")
+    return Path(BALSAMIC_DIR, config_type + ".json")
 
 
 def find_file_index(file_path):
