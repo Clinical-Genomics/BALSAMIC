@@ -548,13 +548,13 @@ def get_sample_dict(
     return sample_dict
 
 
-def get_pon_sample_dict(fastq_path: str, fastq_suffixes: dict) -> Dict[str, dict]:
+def get_pon_sample_dict(fastq_path: str) -> Dict[str, dict]:
     """Returns a PON sample dictionary."""
     sample_dict: Dict[str, dict] = {}
     for file in Path(fastq_path).glob("*.fastq.gz"):
         sample_name: str = file.name.split("_")[-4]
         sample_dict.update({sample_name: {"type": "normal"}})
-        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path, fastq_suffixes)
+        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path)
     return sample_dict
 
 
