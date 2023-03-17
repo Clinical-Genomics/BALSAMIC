@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 from pydantic import ValidationError
 
-from BALSAMIC.utils.models import (
+from BALSAMIC.models.models import (
     VCFAttributes,
     VarCallerFilter,
     QCModel,
@@ -25,7 +25,6 @@ from BALSAMIC.utils.models import (
     MetricValidationModel,
     AnalysisPonModel,
 )
-from tests.conftest import analysis_dir
 
 
 def test_referencemeta():

@@ -13,7 +13,7 @@ from BALSAMIC.utils.cli import (
     get_pon_sample_dict,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.models import PonBalsamicConfigModel
+from BALSAMIC.models.models import PonBalsamicConfigModel
 
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 

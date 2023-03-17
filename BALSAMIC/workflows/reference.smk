@@ -10,7 +10,7 @@ from copy import deepcopy
 from BALSAMIC.constants.analysis import GenomeVersion
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files
-from BALSAMIC.utils.models import ReferenceMeta
+from BALSAMIC.models.models import ReferenceMeta
 from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL
 from BALSAMIC.utils.cli import get_md5
 from BALSAMIC.utils.cli import create_md5

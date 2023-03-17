@@ -9,7 +9,7 @@ from copy import deepcopy
 
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files
-from BALSAMIC.utils.models import ReferenceMeta
+from BALSAMIC.models.models import ReferenceMeta
 from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL
 from BALSAMIC.utils.cli import get_md5
 from BALSAMIC.utils.cli import create_md5
@@ -113,7 +113,6 @@ rule download_reference:
     output:
         expand("{output}", output=[ref.get_output_file for ref in download_content])
     run:
-        import requests
 
         for ref in download_content:
             output_file = ref.get_output_file

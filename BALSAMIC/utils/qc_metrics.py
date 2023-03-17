@@ -1,4 +1,4 @@
-from BALSAMIC.utils.models import MetricValidationModel
+from BALSAMIC.models.models import MetricValidationModel
 
 
 def validate_qc_metrics(metrics: dict) -> dict:

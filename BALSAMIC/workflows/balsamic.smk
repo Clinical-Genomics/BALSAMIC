@@ -17,7 +17,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
 from BALSAMIC.utils.io import write_json, read_yaml
 
-from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
+from BALSAMIC.models.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
@@ -29,7 +29,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
 from BALSAMIC.constants.common import MUTATION_TYPE
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
-from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 
 
