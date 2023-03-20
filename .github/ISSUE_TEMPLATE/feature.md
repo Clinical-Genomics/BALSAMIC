@@ -11,7 +11,7 @@ labels: 'feature'
 *A few sentences about the intended solution* 
 
 ## Considered alternatives
-*Where there alternative approaches which has been rejected?*
+*Were there alternative approaches which have been rejected?*
 
 ## Can be closed when
 *Link the issues needed to be closed for this to be implemented*
