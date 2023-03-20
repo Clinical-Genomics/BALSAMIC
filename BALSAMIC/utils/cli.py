@@ -480,7 +480,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
     for sample in sample_dict:
         fastq_dict = sample_dict[sample]["fastq_info"]
         for fastq_pattern in fastq_dict:
-            for fastq_read_direction, fastq_path in fastq_dict[sample]["fastq_info"][fastq_pattern].items():
+            for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
                 assigned_fastq_list.append(fastq_dict[fastq_pattern][fastq_read_direction])
                 if not Path(fastq_path).is_file():
                     raise FileNotFoundError(f"Fastq-file: {fastq_path} does not exist")
@@ -499,7 +499,6 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample."""
 
     fastq_dict = {}
-
     fastq_suffixes = FASTQ_SUFFIXES
     for suffix in fastq_suffixes:
         fwd_suffix = fastq_suffixes[suffix]["fwd"]
