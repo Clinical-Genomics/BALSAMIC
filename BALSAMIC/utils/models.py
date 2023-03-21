@@ -429,6 +429,16 @@ class SampleInstanceModel(BaseModel):
             )
         return value
 
+    @validator("fastq_info", pre=True)
+    def fastq_info_exists(cls, value):
+        """Validate that fastq info exists."""
+        if value:
+            return value
+        else:
+            raise ValueError(
+                "No fastq files in fastq-dir assigned to sample."
+            )
+
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided
     Attributes:

@@ -498,14 +498,16 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample."""
 
+    fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
+    if not fastqs_in_fastq_path:
+        raise FileNotFoundError(f"No fastq files found in supplied fastq-path: {fastq_path}")
+
     fastq_dict = {}
     fastq_suffixes = FASTQ_SUFFIXES
     for suffix in fastq_suffixes:
         fwd_suffix = fastq_suffixes[suffix]["fwd"]
         rev_suffix = fastq_suffixes[suffix]["rev"]
 
-        # Deprecated probably...
-        # fwd_fastqs = glob.glob(f"{fastq_path}/*_{sample_name}_*{fwd_suffix}")
         fastq_fwd_regex = re.compile(r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$")
         fwd_fastqs = [f"{fastq_path}/{fastq}" for fastq in os.listdir(fastq_path) if fastq_fwd_regex.match(fastq)]
         if fwd_fastqs:
@@ -513,9 +515,8 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
 
                 if fastqpair_pattern in fastq_dict:
-                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
-                              f"dictionary for sample: {sample_name}")
-                    raise BalsamicError("Fastq input wrongly configured")
+                    raise BalsamicError(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
+                                        f"dictionary for sample: {sample_name}")
 
                 fastq_dict[fastqpair_pattern] = {}
                 fastq_dict[fastqpair_pattern]["fwd"] = fwd_fastq
