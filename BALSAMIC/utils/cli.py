@@ -481,7 +481,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
         fastq_dict = sample_dict[sample]["fastq_info"]
         for fastq_pattern in fastq_dict:
             for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
-                assigned_fastq_list.append(fastq_dict[fastq_pattern][fastq_read_direction])
+                assigned_fastq_list.append(fastq_path)
                 if not Path(fastq_path).is_file():
                     raise FileNotFoundError(f"Fastq-file: {fastq_path} does not exist")
 
