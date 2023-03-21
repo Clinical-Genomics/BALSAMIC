@@ -109,18 +109,28 @@ def case_id_tumor_normal_wgs() -> str:
     return "sample_tumor_normal_wgs"
 
 
-@pytest.fixture(scope="session")
-def fastq_dir(case_id_tumor_only: str, analysis_dir: str):
+@pytest.fixture(scope="session", params=fastq_pattern_types)
+def fastq_dir(case_id_tumor_normal: str, analysis_dir: str, request):
     """Mock FastQ directory."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
-    Path(fastq_dir, f"ACC1_XXXXX_R_1.fastq.gz").touch()
-    Path(fastq_dir, f"ACC1_XXXXX_R_2.fastq.gz").touch()
-    Path(fastq_dir, f"ACC2_XXXXX_R_1.fastq.gz").touch()
-    Path(fastq_dir, f"ACC2_XXXXX_R_2.fastq.gz").touch()
-    return fastq_dir.as_posix()
 
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
 
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    for fastq in fastq_test_dict["normal"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir/fastq)
+
+    for fastq in fastq_test_dict["normal"]:
+        Path.unlink(fastq_dir/fastq)
 @pytest.fixture
 def cli_runner():
     """click - cli testing"""

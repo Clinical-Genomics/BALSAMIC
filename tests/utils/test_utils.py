@@ -39,9 +39,10 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_md5,
     create_md5,
-    get_sample_dict,
     get_pon_sample_dict,
     get_input_files_path,
+    get_sample_dict,
+    get_fastq_info,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
@@ -59,6 +60,7 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_prefix,
 )
+
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -952,25 +954,21 @@ def test_get_sample_type_from_prefix(config_dict):
     assert sample_type == "tumor"
 
 
-def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str):
+def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str, fastq_dir: str):
     """Tests sample dictionary retrieval."""
 
-    # GIVEN a tumor and a normal sample names
+    try:
+        samples: dict = get_sample_dict(tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name, fastq_path=fastq_dir)
+        assert True
+    except Exception:
+        assert False
 
-    # GIVEN the expected dictionary output
-    samples_expected: dict = {
-        tumor_sample_name: {"type": "tumor"},
-        normal_sample_name: {"type": "normal"},
-    }
-
-    # WHEN getting the sample dictionary
-    samples: dict = get_sample_dict(
-        tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
-    )
-
-    # THEN the dictionary should be correctly formatted
-    assert samples == samples_expected
-
+    assert tumor_sample_name in samples
+    assert normal_sample_name in samples
+    assert samples[tumor_sample_name]["type"] == "tumor"
+    assert samples[normal_sample_name]["type"] == "normal"
+    assert samples[tumor_sample_name]["fastq_info"]
+    assert samples[normal_sample_name]["fastq_info"]
 
 def test_get_pon_sample_dict(
     fastq_dir: str, tumor_sample_name: str, normal_sample_name: str
