@@ -1,4 +1,5 @@
 import pytest
+import shutil
 import json
 import os
 
@@ -18,6 +19,46 @@ from BALSAMIC.commands.base import cli
 from BALSAMIC import __version__ as balsamic_version
 
 MOCKED_OS_ENVIRON = "os.environ"
+
+
+fastq_pattern_types = [
+    {
+        "id": "1",
+        "tumor":
+            ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz",
+            "ACC1_S1_L002_R1_001.fastq.gz", "ACC1_S1_L002_R2_001.fastq.gz"],
+        "normal":
+            ["ACC2_S1_L001_R1_001.fastq.gz", "ACC2_S1_L001_R2_001.fastq.gz",
+            "ACC2_S1_L002_R1_001.fastq.gz", "ACC2_S1_L002_R2_001.fastq.gz"]
+    },
+    {
+        "id": "2",
+        "tumor":
+            ["HXXXXXXX_123456_ACC1_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L001_R2_001.fastq.gz",
+            "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L002_R2_001.fastq.gz"],
+        "normal":
+            ["HXXXXXXX_123456_ACC2_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L001_R2_001.fastq.gz",
+            "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L002_R2_001.fastq.gz"],
+    },
+    {
+        "id": "3",
+        "tumor":
+            ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_2.fastq.gz"],
+        "normal":
+            ["ACC2_XXXXX_R_1.fastq.gz", "ACC2_XXXXX_R_2.fastq.gz"]
+    },
+    {
+        "id": "4",
+        "tumor":
+            ["HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
+            "HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"],
+        "normal":
+            ["HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
+            "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"]
+    }
+]
+
+fastq_pattern_ids = ['FastqPattern{}'.format(p["id"]) for p in fastq_pattern_types]
 
 
 @pytest.fixture(scope="session")
@@ -252,43 +293,11 @@ def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
     return analysis_dir.as_posix()
 
-fastq_pattern_types = [
-    {
-        "tumor":
-            ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz",
-            "ACC1_S1_L002_R1_001.fastq.gz", "ACC1_S1_L002_R2_001.fastq.gz"],
-        "normal":
-            ["ACC2_S1_L001_R1_001.fastq.gz", "ACC2_S1_L001_R2_001.fastq.gz",
-            "ACC2_S1_L002_R1_001.fastq.gz", "ACC2_S1_L002_R2_001.fastq.gz"]
-    },
-    {
-        "tumor":
-            ["HXXXXXXX_123456_ACC1_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L001_R2_001.fastq.gz",
-            "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L002_R2_001.fastq.gz"],
-        "normal":
-            ["HXXXXXXX_123456_ACC2_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L001_R2_001.fastq.gz",
-            "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L002_R2_001.fastq.gz"],
-    },
-    {
-        "tumor":
-            ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_2.fastq.gz"],
-        "normal":
-            ["ACC2_XXXXX_R_1.fastq.gz", "ACC2_XXXXX_R_2.fastq.gz"]
-    },
-    {
-        "tumor":
-            ["HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
-            "HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"],
-        "normal":
-            ["HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
-            "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"]
-    }
-]
 
-
-@pytest.fixture(params=fastq_pattern_types)
+@pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
+    #fastq_pattern_id = request.param["id"]
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
