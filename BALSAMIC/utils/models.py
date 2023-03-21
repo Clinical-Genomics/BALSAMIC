@@ -382,6 +382,9 @@ class FastqInfoModel(BaseModel):
     rev: FilePath
     @root_validator(pre=False)
     def validate_fastq_pairs_in_fastq_pattern(cls, values):
+        values["fwd"] = Path(values["fwd"]).resolve().as_posix()
+        values["rev"] = Path(values["rev"]).resolve().as_posix()
+
         fwd_read_path = values["fwd"]
         rev_read_path = values["rev"]
 
@@ -533,6 +536,37 @@ class BalsamicConfigModel(BaseModel):
         if value:
             return Path(value).resolve().as_posix()
         return None
+
+    @validator("samples", pre=True)
+    def verify_unique_fastq_info_across_samples(cls, value):
+        """Cool docstring."""
+        fastq_patterns = {}
+        fastq_filenames = {}
+        for sample in value:
+            for fastq_pattern in value[sample]["fastq_info"]:
+                # Count occurrences of fastq pattern
+                if fastq_pattern in fastq_patterns:
+                    fastq_patterns[fastq_pattern] += 1
+                else:
+                    fastq_patterns[fastq_pattern] = 1
+
+                # Count occurrences of fastq names
+                for fastq_read_direction, fastq_path in value[sample]["fastq_info"][fastq_pattern].items():
+                    fastq_name = os.path.basename(fastq_path)
+                    if fastq_name in fastq_filenames:
+                        fastq_filenames[fastq_name] += 1
+                    else:
+                        fastq_filenames[fastq_name] = 1
+
+        # Fastq pattern can only be assigned once per group of samples
+        for fastq_pattern in fastq_patterns:
+            assert fastq_patterns[fastq_pattern] == 1, f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
+
+        # Fastq name can only be assigned once per group of samples
+        for fastq_name in fastq_filenames:
+            assert fastq_filenames[fastq_name] == 1, f"Fastq-name: {fastq_name} has been assigned more than once."
+
+        return value
 
 
 class ReferenceUrlsModel(BaseModel):
