@@ -382,8 +382,8 @@ class FastqInfoModel(BaseModel):
     rev: FilePath
     @root_validator(pre=False)
     def validate_fastq_pairs_in_fastq_pattern(cls, values):
-        values["fwd"] = Path(values["fwd"]).resolve().as_posix()
-        values["rev"] = Path(values["rev"]).resolve().as_posix()
+        values["fwd"] = Path(values["fwd"]).as_posix()
+        values["rev"] = Path(values["rev"]).as_posix()
 
         fwd_read_path = values["fwd"]
         rev_read_path = values["rev"]
@@ -539,7 +539,10 @@ class BalsamicConfigModel(BaseModel):
 
     @validator("samples", pre=True)
     def verify_unique_fastq_info_across_samples(cls, value):
-        """Cool docstring."""
+        """
+        Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
+        Fastq patterns and Fastq names can only occur once.
+        """
         fastq_patterns = {}
         fastq_filenames = {}
         for sample in value:
