@@ -283,6 +283,7 @@ fastq_pattern_types = [
             ["HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
             "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"]
     }
+]
 
 
 @pytest.fixture(params=fastq_pattern_types)
