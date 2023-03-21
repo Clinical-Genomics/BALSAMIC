@@ -286,7 +286,7 @@ fastq_pattern_types = [
 ]
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
+def fastq_dir_tumor_onlyBLA(analysis_dir: str, case_id_tumor_only: str) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -299,7 +299,7 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
     return fastq_dir.as_posix()
 
 @pytest.fixture(params=fastq_pattern_types)
-def fastq_dir_tumor_onlyBLABLA(analysis_dir: str, case_id_tumor_only: str, request) -> str:
+def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
