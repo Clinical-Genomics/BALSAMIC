@@ -6,34 +6,40 @@ import os
 from pathlib import Path
 
 from BALSAMIC.constants.cache import FileType
-from BALSAMIC.models.cache import CacheConfigModel
+from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
+from BALSAMIC.models.cache_models import CacheConfigModel
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_threads
 
 LOG = logging.getLogger(__name__)
 
 # Balsamic cache configuration model
-config: CacheConfigModel = CacheConfigModel.parse_obj(config)
+cache_config: CacheConfigModel = CacheConfigModel.parse_obj(config)
 
 # Temporary directory environment
-os.environ["TMPDIR"] = config.references_dir
+os.environ["TMPDIR"] = cache_config.references_dir.as_posix()
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
+# Rules to include
+for rule in SNAKEMAKE_RULES["cache"]:
+    include: Path(BALSAMIC_DIR, rule).as_posix()
+LOG.info(f"The rules {SNAKEMAKE_RULES['cache']} will be included in the reference workflow")
 
 rule all:
     """Target rule for Balsamic cache generation."""
     input:
         expand(
-            Path(config.containers_dir, "{singularity_image}." + FileType.SIF).as_posix(),
-            singularity_image=config.containers.keys(),
+            Path(cache_config.containers_dir, "{singularity_image}." + FileType.SIF).as_posix(),
+            singularity_image=cache_config.containers.keys(),
         ),
-        config.get_reference_paths(),
+        #cache_config.get_reference_paths(),
     output:
-        finish_file=Path(config.references_dir, "reference.finish"),
+        finish_file=Path(cache_config.references_dir, "reference.finish"),
     threads: get_threads(cluster_config, "all")
     run:
-        write_finish_file(output.finish_file.as_posix())
+        write_finish_file(output.finish_file)
 
 
 # ##########################################################

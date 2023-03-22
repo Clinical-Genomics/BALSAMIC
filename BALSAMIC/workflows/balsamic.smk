@@ -542,4 +542,4 @@ rule all:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
         # Finish timestamp file
-        write_finish_file(output.finish_file.as_posix())
+        write_finish_file(output.finish_file)

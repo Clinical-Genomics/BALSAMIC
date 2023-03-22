@@ -32,19 +32,19 @@ class ReferenceUrlModel(BaseModel):
     gzip: bool
     file_name: str
     dir_name: str
-    file_path: Optional[FilePath]
+    file_path: Optional[str]
 
     @property
     def write_md5(self) -> None:
         """Write the md5 checksum for the first 4 kB of a file."""
-        if not file_path.is_file():
+        if not Path(file_path).is_file():
             LOG.error(f"File {self.file_path} does not exist")
             raise FileNotFoundError
-        with open(self.file_path.as_posix(), "rb") as fh:
+        with open(self.file_path, "rb") as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 hashlib.md5().update(chunk)
-        with open(file_path.as_posix() + ".md5", "w") as fh:
-            fh.write("{} {}\n".format(file_path.as_posix(), hashlib.md5().hexdigest()))
+        with open(file_path + ".md5", "w") as fh:
+            fh.write("{} {}\n".format(file_path, hashlib.md5().hexdigest()))
 
 
 class ReferencesModel(BaseModel):
@@ -105,55 +105,51 @@ class ReferencesModel(BaseModel):
         """Return output BWA genome index files."""
         bwa_index_files: List[str] = []
         for bwa_index in BwaIndexFileType:
-            bwa_index_files.append(
-                self.reference_genome.file_path.as_posix() + "." + bwa_index
-            )
+            bwa_index_files.append(self.reference_genome.file_path + "." + bwa_index)
         return bwa_index_files
 
     def get_delly_files(self) -> List[str]:
         """Return delly associated output files."""
         return [
-            self.delly_exclusion.file_path.as_posix(),
-            self.delly_exclusion.file_path.as_posix().replace(
+            self.delly_exclusion.file_path,
+            self.delly_exclusion.file_path.replace(
                 "." + FileType.TSV, "_converted." + FileType.TSV
             ),
-            self.delly_mappability.file_path.as_posix(),
-            self.delly_mappability_findex.file_path.as_posix(),
-            self.delly_mappability_gindex.file_path.as_posix(),
+            self.delly_mappability.file_path,
+            self.delly_mappability_findex.file_path,
+            self.delly_mappability_gindex.file_path,
         ]
 
     def get_gnomad_files(self) -> List[str]:
         """Return gnomad associated output files."""
         return [
-            self.gnomad_variant.file_path.as_posix(),
-            self.gnomad_variant_index.file_path.as_posix(),
+            self.gnomad_variant.file_path,
+            self.gnomad_variant_index.file_path,
         ]
 
     def get_1k_genome_files(self) -> List[str]:
         """Return 1000 Genome related files."""
         return [
-            self.known_indel_1kg.file_path.as_posix() + "." + FileType.GZ,
-            self.mills_1kg.file_path.as_posix() + "." + FileType.GZ,
-            self.hc_vcf_1kg.file_path.as_posix() + "." + FileType.GZ,
-            self.vcf_1kg.file_path.as_posix() + "." + FileType.GZ,
+            self.known_indel_1kg.file_path + "." + FileType.GZ,
+            self.mills_1kg.file_path + "." + FileType.GZ,
+            self.hc_vcf_1kg.file_path + "." + FileType.GZ,
+            self.vcf_1kg.file_path + "." + FileType.GZ,
         ]
 
     def get_reference_genome_files(self) -> List[str]:
         """Return output reference genome files."""
         return [
-            self.reference_genome.file_path.as_posix(),
-            self.reference_genome.file_path.as_posix() + "." + FileType.FAI,
-            self.reference_genome.file_path.as_posix().replace(
-                FileType.FASTA, FileType.DICT
-            ),
+            self.reference_genome.file_path,
+            self.reference_genome.file_path + "." + FileType.FAI,
+            self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
         ]
 
     def get_refgene_files(self) -> List[str]:
         """Return RefSeq's gene files from UCSC."""
         return [
-            self.refgene_txt.file_path.as_posix(),
-            self.refgene_txt.file_path.as_posix().replace(FileType.TXT, FileType.FLAT),
-            self.refgene_txt.file_path.as_posix().replace(FileType.TXT, FileType.FLAT)
+            self.refgene_txt.file_path,
+            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT),
+            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
             + "."
             + FileType.BED,
         ]
@@ -186,26 +182,30 @@ class CacheConfigModel(BaseModel):
     @validator("references")
     def validate_reference_output_path(
         cls, references: ReferencesModel, values: Dict[str, Any]
-    ):
+    ) -> ReferencesModel:
         for model in references:
             reference: ReferenceUrlModel = model[1]
-            reference.file_path = Path(
-                values.get("references_dir"), reference.dir_name, reference.file_name
-            )
+            if reference:
+                reference.file_path = Path(
+                    values.get("references_dir"),
+                    reference.dir_name,
+                    reference.file_name,
+                ).as_posix()
+        return references
 
     def get_reference_paths(self) -> List[str]:
         """Return a list of output reference paths."""
         reference_paths: List[str] = [
-            self.references.access_regions.file_path.as_posix(),
-            self.references.ascat_chryloci.file_path.as_posix(),
-            self.references.ascat_gccorrection.file_path.as_posix(),
-            self.references.clinvar.file_path.as_posix() + "." + FileType.GZ,
-            self.references.cosmicdb.file_path.as_posix() + "." + FileType.GZ,
-            self.references.dbsnp.file_path.as_posix() + "." + FileType.GZ,
-            self.references.genome_chrom_size.file_path.as_posix(),
-            self.references.rankscore.file_path.as_posix(),
-            self.references.somalier_sites.file_path.as_posix() + "." + FileType.GZ,
-            self.references.wgs_calling.file_path.as_posix(),
+            self.references.access_regions.file_path,
+            self.references.ascat_chryloci.file_path,
+            self.references.ascat_gccorrection.file_path,
+            self.references.clinvar.file_path + "." + FileType.GZ,
+            self.references.cosmicdb.file_path + "." + FileType.GZ,
+            self.references.dbsnp.file_path + "." + FileType.GZ,
+            self.references.genome_chrom_size.file_path,
+            self.references.rankscore.file_path,
+            self.references.somalier_sites.file_path + "." + FileType.GZ,
+            self.references.wgs_calling.file_path,
         ]
         reference_paths.extend(
             self.references.get_bwa_index_files()

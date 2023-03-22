@@ -120,6 +120,10 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
+    "cache": [
+        "snakemake_rules/cache/containers.rule",
+        "snakemake_rules/cache/references.rule",
+    ],
 }
 
 

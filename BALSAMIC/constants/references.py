@@ -329,7 +329,7 @@ REFERENCE_FILES = {
             "dir_name": "variants",
         },
     },
-    "canfam3": {
+    GenomeVersion.CanFam3: {
         "reference_genome": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/bigZips/canFam3.fa.gz",
             "file_type": FileType.FASTA,

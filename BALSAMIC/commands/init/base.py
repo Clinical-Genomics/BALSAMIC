@@ -1,4 +1,5 @@
 """Balsamic initialize command."""
+import json
 import logging
 import subprocess
 import sys
@@ -35,7 +36,7 @@ from BALSAMIC.constants.analysis import RunMode, GenomeVersion
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.references import REFERENCE_FILES
-from BALSAMIC.models.cache import CacheConfigModel
+from BALSAMIC.models.cache_models import CacheConfigModel
 from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
 from BALSAMIC.utils.io import write_json
 
@@ -100,7 +101,7 @@ def initialize(
 
     out_dir: Path = Path(out_dir).resolve()
     references_dir: Path = Path(out_dir, balsamic_version, genome_version)
-    containers_dir: Path = Path(out_dir, "containers")
+    containers_dir: Path = Path(out_dir, balsamic_version, "containers")
     config_path: Path = Path(references_dir, "config.json")
     log_dir: Path = Path(references_dir, "logs")
     script_dir: Path = Path(references_dir, "scripts")
@@ -117,7 +118,7 @@ def initialize(
         references=REFERENCE_FILES[genome_version],
         references_date=datetime.now().strftime("%Y-%m-%d %H:%M"),
     )
-    write_json(cache_config.dict(exclude_none=True), config_path.as_posix())
+    write_json(json.loads(cache_config.json(exclude_none=True)), config_path.as_posix())
     LOG.info(f"Reference workflow configured successfully ({config_path.as_posix()})")
 
     snakefile = (
