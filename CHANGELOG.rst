@@ -10,6 +10,8 @@ Changed:
 ^^^^^^^^
 * Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
 * Updated snakemake version to 7.24.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
+* Reference workflows (hg19, hg38, canfam3, containers download) https://github.com/Clinical-Genomics/BALSAMIC/pull/1117
+* Refactoring of constants, models, and folder structure https://github.com/Clinical-Genomics/BALSAMIC/pull/1117
 
 Fixed:
 ^^^^^^
