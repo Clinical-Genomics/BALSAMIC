@@ -14,6 +14,6 @@ SENTIEON_DNASCOPE_DIR: str = Path(
     SENTIEON_MODELS_DIR, "SentieonDNAscopeModelBeta0.4a-201808.05.model"
 ).as_posix()
 
-SENTIEON_TNSCOPE_DIR = Path(
+SENTIEON_TNSCOPE_DIR: str = Path(
     SENTIEON_MODELS_DIR, "SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model"
-)
+).as_posix()

@@ -2,6 +2,7 @@
 import logging
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import click
@@ -33,6 +34,7 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import RunMode, GenomeVersion, ConfigType
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.references import REFERENCE_FILES
 from BALSAMIC.models.cache import CacheConfigModel
 from BALSAMIC.utils.cli import (
     SnakeMake,
@@ -103,26 +105,25 @@ def initialize(
         raise click.Abort()
 
     out_dir: Path = Path(out_dir).resolve()
-    containers_dir: Path = Path(out_dir, balsamic_version, "containers")
-    reference_dir: Path = Path(out_dir, balsamic_version, genome_version)
-    config_path: Path = Path(reference_dir, "config.json")
-    log_dir: Path = Path(reference_dir, "logs")
-    script_dir: Path = Path(reference_dir, "scripts")
-    for dir_path in [containers_dir, reference_dir, log_dir, script_dir]:
+    references_dir: Path = Path(out_dir, balsamic_version, genome_version)
+    containers_dir: Path = Path(out_dir, "containers")
+    config_path: Path = Path(references_dir, "config.json")
+    log_dir: Path = Path(references_dir, "logs")
+    script_dir: Path = Path(references_dir, "scripts")
+    for dir_path in [references_dir, containers_dir, log_dir, script_dir]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
-    config: CacheConfigModel = CacheConfigModel(
-        output_dir=reference_dir.as_posix(),
-        balsamic_dir=BALSAMIC_DIR,
+    cache_config: CacheConfigModel = CacheConfigModel(
+        references_dir=references_dir.as_posix(),
+        containers_dir=containers_dir.as_posix(),
         genome_version=genome_version,
         cosmic_key=cosmic_key,
         bioinfo_tools=BIOINFO_TOOL_ENV,
-        singularity={
-            "image_dir": containers_dir.as_posix(),
-            "containers": get_containers(container_version),
-        },
+        containers=get_containers(container_version),
+        references=REFERENCE_FILES[genome_version],
+        references_date=datetime.now().strftime("%Y-%m-%d %H:%M"),
     )
-    write_json(config.dict(exclude_none=True), config_path.as_posix())
+    write_json(cache_config.dict(exclude_none=True), config_path.as_posix())
     LOG.info(f"Reference workflow configured successfully ({config_path.as_posix()})")
 
     snakefile = (
@@ -144,7 +145,7 @@ def initialize(
     )
     graph_obj = graphviz.Source(
         graph_dot,
-        directory=Path(reference_dir).as_posix(),
+        directory=Path(references_dir).as_posix(),
         filename="reference_graph",
         format="pdf",
         engine="dot",
@@ -160,7 +161,7 @@ def initialize(
     balsamic_run = SnakeMake()
     balsamic_run.configfile = config_path.as_posix()
     balsamic_run.case_name = "reference." + genome_version + ".v" + balsamic_version
-    balsamic_run.working_dir = config.output_dir
+    balsamic_run.working_dir = references_dir
     balsamic_run.snakefile = snakefile
     balsamic_run.run_mode = run_mode
     balsamic_run.scheduler = get_schedulerpy()
@@ -180,9 +181,12 @@ def initialize(
     balsamic_run.quiet = quiet
     balsamic_run.log_path = log_dir.as_posix()
     balsamic_run.script_path = script_dir.as_posix()
-    balsamic_run.result_path = reference_dir.as_posix()
+    balsamic_run.result_path = references_dir.as_posix()
     balsamic_run.use_singularity = True
-    balsamic_run.singularity_bind = [config.output_dir, config.balsamic_dir]
+    balsamic_run.singularity_bind = [
+        references_dir.as_posix(),
+        BALSAMIC_DIR,
+    ]
 
     cmd = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)

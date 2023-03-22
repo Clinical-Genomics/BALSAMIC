@@ -1,6 +1,5 @@
 import os
 import re
-from typing import Optional
 
 import toml
 import logging
@@ -18,17 +17,6 @@ from BALSAMIC.constants.common import (
 from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
 
 LOG = logging.getLogger(__name__)
-
-
-def get_chrom(panelfile):
-    """
-    input: a panel bedfile
-    output: list of chromosomes in the bedfile
-    """
-
-    lines = [line.rstrip("\n") for line in open(panelfile, "r")]
-    chrom = list(set([s.split("\t")[0] for s in lines]))
-    return chrom
 
 
 def get_vcf(config, var_caller, sample):
@@ -326,28 +314,6 @@ def get_delivery_id(
             break
 
     return delivery_id
-
-
-def get_reference_output_files(
-    reference_files_dict: dict, file_type: str, gzip: bool = None
-) -> list:
-    """Returns list of files matching a file_type from reference files
-
-    Args:
-        reference_files_dict: A validated dict model from reference
-        file_type: a file type string, e.g. vcf, fasta
-        gzip: a list of boolean
-
-    Returns:
-        ref_vcf_list: list of file_type files that are found in reference_files_dict
-    """
-    ref_vcf_list = []
-    for reference_key, reference_item in reference_files_dict.items():
-        if reference_item["file_type"] == file_type:
-            if gzip is not None and reference_item["gzip"] != gzip:
-                continue
-            ref_vcf_list.append(reference_item["output_file"])
-    return ref_vcf_list
 
 
 def get_clinical_snv_observations(config: dict) -> str:

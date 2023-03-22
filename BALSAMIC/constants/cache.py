@@ -9,6 +9,34 @@ class ContainerVersion(StrEnum):
     RELEASE: str = "release"
 
 
+class FileType(StrEnum):
+    """Balsamic reference file types."""
+
+    BED: str = "bed"
+    DICT: str = "dict"
+    FAI: str = "fai"
+    FASTA: str = "fasta"
+    FLAT: str = "flat"
+    GFF: str = "gff"
+    GTF: str = "gtf"
+    GZ: str = "gz"
+    TEXT: str = "text"
+    TSV: str = "tsv"
+    TXT: str = "txt"
+    SIF: str = "sif"
+    VCF: str = "vcf"
+
+
+class BwaIndexFileType(StrEnum):
+    """BWA genome index file suffixes."""
+
+    AMB: str = "amb"
+    ANN: str = "ann"
+    BWT: str = "bwt"
+    PAC: str = "pac"
+    SA: str = "sa"
+
+
 DOCKER_PATH: str = "docker://clinicalgenomics/balsamic"
 
 DOCKER_CONTAINERS: set = {

@@ -6,7 +6,6 @@ import subprocess
 from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
-import zlib
 from typing import Dict, Optional, List
 
 import yaml
@@ -542,25 +541,6 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
     with open(job_id_dump, "r") as jobid_in, open(job_id_yaml, "w") as jobid_out:
         jobid_list = jobid_in.read().splitlines()
         yaml.dump({case_name: jobid_list}, jobid_out)
-
-
-def get_md5(filename):
-    with open(filename, "rb") as fh:
-        hashed = 0
-        while True:
-            s = fh.read(65536)
-            if not s:
-                break
-            hashed = zlib.crc32(s, hashed)
-    return "%08X" % (hashed & 0xFFFFFFFF)
-
-
-def create_md5(reference, check_md5):
-    """create a md5 file for all reference data"""
-    with open(check_md5, "w") as fh:
-        for key, value in reference.items():
-            if os.path.isfile(value):
-                fh.write(get_md5(value) + " " + value + "\n")
 
 
 def get_fastq_files_directory(directory: str) -> str:

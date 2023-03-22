@@ -15,7 +15,7 @@ from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIE
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
-from BALSAMIC.utils.io import write_json, read_yaml
+from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
 
 from BALSAMIC.models.models import VarCallerFilter, BalsamicWorkflowConfig
 
@@ -516,7 +516,7 @@ rule all:
     input:
         quality_control_results + analysis_specific_results
     output:
-        finish_file = os.path.join(get_result_dir(config), "analysis_finish")
+        finish_file = Path(get_result_dir(config), "analysis_finish")
     params:
         tmp_dir = tmp_dir,
         case_name = config["analysis"]["case_id"],
@@ -535,12 +535,11 @@ rule all:
             LOG.error(val_exc)
             raise BalsamicError
 
-        # Delete a temporal directory tree
+        # Remove temporary directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
         # Finish timestamp file
-        with open(str(output.finish_file), mode="w") as finish_file:
-            finish_file.write("%s\n" % datetime.datetime.now())
+        write_finish_file(output.finish_file.as_posix())
