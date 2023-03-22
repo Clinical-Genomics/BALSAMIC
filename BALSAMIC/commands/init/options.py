@@ -1,6 +1,8 @@
 import click
 
+from BALSAMIC.constants.analysis import ConfigType
 from BALSAMIC.constants.cache import ContainerVersion
+from BALSAMIC.utils.cli import get_config_path
 
 OPTION_OUT_DIR = click.option(
     "-o",
@@ -35,4 +37,12 @@ OPTION_SNAKEFILE = click.option(
     type=click.Path(),
     show_default=True,
     help="Snakefile for reference generation",
+)
+
+OPTION_CLUSTER_CONFIG = click.option(
+    "--cluster-config",
+    type=click.Path(),
+    default=get_config_path(ConfigType.CLUSTER_REFERENCE),
+    show_default=True,
+    help="Cluster configuration JSON file path",
 )

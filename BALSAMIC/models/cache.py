@@ -193,13 +193,6 @@ class CacheConfigModel(BaseModel):
                 values.get("references_dir"), reference.dir_name, reference.file_name
             )
 
-    def get_container_paths(self) -> List[str]:
-        """Return a list containing the downloaded containers paths."""
-        return [
-            Path(self.containers_dir, image_name + "." + FileType.SIF).as_posix()
-            for image_name in self.containers.keys()
-        ]
-
     def get_reference_paths(self) -> List[str]:
         """Return a list of output reference paths."""
         reference_paths: List[str] = [

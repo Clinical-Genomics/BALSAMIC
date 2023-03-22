@@ -15,6 +15,7 @@ from BALSAMIC.commands.init.options import (
     OPTION_CONTAINER_VERSION,
     OPTION_COSMIC_KEY,
     OPTION_SNAKEFILE,
+    OPTION_CLUSTER_CONFIG,
 )
 from BALSAMIC.commands.init.utils import get_containers
 from BALSAMIC.commands.options import (
@@ -26,23 +27,16 @@ from BALSAMIC.commands.options import (
     OPTION_GENOME_VERSION,
     OPTION_FORCE_ALL,
     OPTION_RUN_ANALYSIS,
-    OPTION_CLUSTER_CONFIG,
     OPTION_CLUSTER_MAIL,
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
 )
-from BALSAMIC.constants.analysis import RunMode, GenomeVersion, ConfigType
+from BALSAMIC.constants.analysis import RunMode, GenomeVersion
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.references import REFERENCE_FILES
 from BALSAMIC.models.cache import CacheConfigModel
-from BALSAMIC.utils.cli import (
-    SnakeMake,
-    get_schedulerpy,
-    get_snakefile,
-    CaptureStdout,
-    get_config_path,
-)
+from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
 from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
@@ -165,11 +159,7 @@ def initialize(
     balsamic_run.snakefile = snakefile
     balsamic_run.run_mode = run_mode
     balsamic_run.scheduler = get_schedulerpy()
-    balsamic_run.cluster_config = (
-        cluster_config
-        if cluster_config
-        else get_config_path(ConfigType.CLUSTER_REFERENCE)
-    )
+    balsamic_run.cluster_config = cluster_config
     balsamic_run.profile = profile
     balsamic_run.qos = qos
     balsamic_run.account = account

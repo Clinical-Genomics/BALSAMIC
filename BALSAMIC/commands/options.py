@@ -26,11 +26,6 @@ OPTION_RUN_MODE = click.option(
     help="Run mode to download the balsamic containers and generate the reference cache",
 )
 
-OPTION_CLUSTER_CONFIG = click.option(
-    "--cluster-config",
-    type=click.Path(),
-    help="Cluster configuration json file path",
-)
 
 OPTION_CLUSTER_PROFILE = click.option(
     "-p",

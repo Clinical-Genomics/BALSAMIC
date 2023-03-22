@@ -279,7 +279,7 @@ def get_config(config_name):
 
 def get_config_path(config_type: ConfigType) -> Path:
     """Return a config path given its type."""
-    return Path(BALSAMIC_DIR, config_type + ".json")
+    return Path(BALSAMIC_DIR, "config", config_type + ".json")
 
 
 def find_file_index(file_path):

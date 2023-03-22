@@ -1,0 +1,19 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+rule download_containers:
+    """Download singularity containers from docker hub."""
+    output:
+        Path(cache_config, "{singularity_image}" + ".sif").as_posix()
+    params:
+        containers_dir=config["containers_dir"],
+        singularity_image="{singularity_image}",
+        dockerhub_image=config["containers"]["{singularity_image}"]
+    threads:
+         get_threads(cluster_config, "download_containers")
+    message:
+        "Downloading singularity image {singularity_image}"
+    shell:
+        """
+        singularity pull {params.containers_dir}/{params.singularity_image}.sif {params.dockerhub_image}
+        """
