@@ -13,7 +13,7 @@ from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import check_executable, generate_h5
-from BALSAMIC.utils.io import write_json
+from BALSAMIC.utils.io import write_json, write_finish_file
 
 from BALSAMIC.models.models import BalsamicWorkflowConfig
 
@@ -151,19 +151,17 @@ rule all:
     input:
         quality_control_results
     output:
-        finish_file = os.path.join(get_result_dir(config), "analysis_finish")
+        finish_file = Path(get_result_dir(config), "analysis_finish")
     params:
         tmp_dir = tmp_dir,
     run:
-        import datetime
         import shutil
 
-        # Delete a temporal directory tree
+        # Remove temporary directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
         # Finish timestamp file
-        with open(str(output.finish_file), mode="w") as finish_file:
-            finish_file.write("%s\n" % datetime.datetime.now())
+        write_finish_file(output.finish_file.as_posix())

@@ -7,6 +7,7 @@ import tempfile
 import os
 
 from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.models.models import BalsamicWorkflowConfig
@@ -61,11 +62,7 @@ rule all:
     output:
         pon_finish_file = pon_finish
     run:
-        import datetime
-
-        # PON finish timestamp file
-        with open(str(output.pon_finish_file), mode="w") as finish_file:
-            finish_file.write("%s\n" % datetime.datetime.now())
+        write_finish_file(output.pon_finish_file)
 
 rule create_target:
     input:
