@@ -24,7 +24,6 @@ def test_tumor_normal_config(
     """Test tumor normal balsamic config case command."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
-
     # WHEN creating a case analysis
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -232,20 +231,37 @@ def test_pon_cnn_file(
     assert Path(pon_cnn).exists()
 
 
-def test_dag_graph_success(
-    tumor_only_config: str,
-    tumor_normal_config: str,
-    tumor_only_wgs_config: str,
-    tumor_normal_wgs_config: str,
+def test_dag_graph_success_tumor_only(
+    tumor_only_config: str
 ):
     """Test DAG graph building success."""
-
     # WHEN creating config using standard CLI input and setting Sentieon env vars
 
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
+def test_dag_graph_success_tumor_normal(
+        tumor_normal_config: str
+    ):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_normal_config))["analysis"]["dag"]).exists()
+def test_dag_graph_success_tumor_only_wgs(
+        tumor_only_wgs_config: str,
+    ):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
+def test_dag_graph_success_tumor_normal_wgs(
+        tumor_normal_wgs_config: str
+    ):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
 
 

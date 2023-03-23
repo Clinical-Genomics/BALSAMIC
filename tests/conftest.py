@@ -155,6 +155,7 @@ def config_files():
     """dict: path of the config files"""
     return {
         "sample": "BALSAMIC/config/sample.json",
+        "sample_tumor_normal": "tests/test_data/config_files/sample_tumor_normal.json",
         "analysis_paired": "BALSAMIC/config/analysis_paired.json",
         "cluster_json": "BALSAMIC/config/cluster.json",
         "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
@@ -219,6 +220,9 @@ def config_path():
 def config_dict(config_path):
     return read_json(config_path)
 
+@pytest.fixture(scope="session")
+def config_sample_info_tumor_normal(config_files):
+    return read_json(config_files["sample_tumor_normal"])
 
 @pytest.fixture(scope="session")
 def pon_fastq_path():
@@ -301,6 +305,7 @@ def balsamic_cache(tmp_path_factory, reference):
 def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
     """Creates and returns the directory where the case analysis will be saved."""
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
+
     return analysis_dir.as_posix()
 
 
@@ -330,37 +335,85 @@ def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str) -> 
     return fastq_dir.as_posix()
 
 
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str) -> str:
+@pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
+def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_umi, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir/fastq)
 
 
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str) -> str:
+@pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
+def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    for fastq in fastq_test_dict["normal"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir / fastq)
+
+    for fastq in fastq_test_dict["normal"]:
+        Path.unlink(fastq_dir / fastq)
 
 
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str) -> str:
+@pytest.fixture(scope="session",  params=fastq_pattern_types, ids=fastq_pattern_ids)
+def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_wgs, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir / fastq)
 
 
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str) -> str:
+
+@pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
+def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
-
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_wgs, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    for fastq in fastq_test_dict["normal"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir / fastq)
+
+    for fastq in fastq_test_dict["normal"]:
+        Path.unlink(fastq_dir / fastq)
 
 
 @pytest.fixture(scope="session")
@@ -429,9 +482,6 @@ def tumor_normal_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id_tumor_normal, "analysis", "qc")
-    qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
@@ -533,10 +583,6 @@ def tumor_only_config(
                 tumor_sample_name,
             ],
         )
-
-    qc_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "qc")
-    qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
         analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
