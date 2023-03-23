@@ -434,9 +434,9 @@ class SampleInstanceModel(BaseModel):
         """Validate that fastq info exists."""
         if value:
             return value
-        else:
-            raise ValueError(
-                "No fastq files in fastq-dir assigned to sample."
+
+        raise ValueError(
+            "No fastq files in fastq-dir assigned to sample."
             )
 
 class PanelModel(BaseModel):
