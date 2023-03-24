@@ -30,6 +30,7 @@ _All these should be checked of when creating this issue._
 - [ ] Download containers: `balsamic init --outdir /home/proj/stage/cancer/balsamic_cache --cosmic-key ${COSMIC_KEY} --genome-version hg19 --run-mode local --snakemake-opt "--cores 1 --until download_container" -r`
 - [ ] Download reference files for hg19: `balsamic init --outdir /home/proj/stage/cancer/balsamic_cache --cosmic-key ${COSMIC_KEY} --genome-version hg19 --run-mode local --snakemake-opt "--cores 30" -r`
 - [ ] Download reference files for hg38: `balsamic init --outdir /home/proj/stage/cancer/balsamic_cache --cosmic-key ${COSMIC_KEY} --genome-version hg38 --run-mode local --snakemake-opt "--cores 30" -r`
+- [ ] Download reference files for canfam3: `balsamic init --outdir /home/proj/stage/cancer/balsamic_cache --cosmic-key ${COSMIC_KEY} --genome-version canfam3 --run-mode local --snakemake-opt "--cores 30" -r`
 
 ### Verification cases
 _Common verification cases to be used in testing. Should cover all workflows. In Bullet points_
