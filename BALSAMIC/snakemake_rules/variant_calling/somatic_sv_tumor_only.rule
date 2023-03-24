@@ -174,7 +174,7 @@ tiddit --cov -z 500 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{para
 
 tiddit --sv -p 6 -r 6 -z 1000 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor};
 
-grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf | bgzip -l 9 -c > {output.vcf};
+grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf | grep -v _2$'\t'N | bgzip -l 9 -c > {output.vcf};
 
 tabix -p vcf -f {output.vcf};
 
