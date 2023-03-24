@@ -304,7 +304,10 @@ grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.n
 
 svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
 --vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf |\
-bgzip -l 9 -c > {output.vcf};
+bgzip -l 9 -c > {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged.vcf;
+
+grep -v NORMAL_PASS_SAMPLE {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged.vcf |\
+grep -v _2$'\t'N > {output.vcf};
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
 
