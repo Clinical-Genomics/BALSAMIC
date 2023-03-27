@@ -321,10 +321,7 @@ bcftools annotate -x FILTER -e 'FILTER="tumor_contam_in_normal"'\
 > {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_rmfilters.vcf
 
 bcftools filter -s PASS \
-{params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_rmfilters.vcf \
-> {params.tmpdir}/{params.tumor}_{params.normal}_PASS.vcf
-
-grep -v _2$'\t'N {params.tmpdir}/{params.tumor}_{params.normal}_PASS.vcf > {output.vcf};
+{params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_rmfilters.vcf > {output.vcf};
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
 
