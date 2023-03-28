@@ -304,8 +304,8 @@ grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.tmpdir}/{params.tu
 grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.normal}_PASS.vcf;
 
 svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
---vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf |\
-bgzip -l 9 -c > {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged.vcf;
+--vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf \
+> {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged.vcf;
 
 bcftools filter -s in_normal -e 'INFO/NORMAL_PASS_INFO != "."' -m + \
 {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged.vcf > \
@@ -317,12 +317,13 @@ bcftools filter -s tumor_contam_in_normal \
 -m + {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter.vcf \
 > {params.vcfdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam.vcf 
 
-bcftools annotate -x FILTER -e 'FILTER="tumor_contam_in_normal"' \
-{params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam.vcf \
-> {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_rmfilters.vcf
+bcftools filter -s PASS -e 'FILTER~"tumor_contam_in_normal"' -m + \
+{params.vcfdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam.vcf \
+> {params.vcfdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_PASS.vcf
 
-bcftools filter -s PASS \
-{params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_rmfilters.vcf > {output.vcf};
+bcftools filter -i 'FILTER="PASS"' \
+{params.vcfdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_PASS.vcf \|
+bgzip -l 9 -c > {output.vcf}
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
 
