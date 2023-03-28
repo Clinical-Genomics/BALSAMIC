@@ -1,21 +1,52 @@
-rule bcftools_quality_filter_svdb:
-  input:
-    vcf_svdb = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
-  output:
-    vcf_pass_svdb_research = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
-  benchmark:
-    Path(benchmark_dir, 'bcftools_quality_filter_sv_' + config["analysis"]["case_id"] + ".tsv")
-  singularity:
-    Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-  params:
-    case_name = config["analysis"]["case_id"],
-  threads:
-    get_threads(cluster_config, "bcftools_quality_filter_svdb")
-  message:
-    "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
-  shell:
-    """
+
+if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'paired':
+  rule bcftools_quality_filter_svdb_tumor_normal_wgs:
+    input:
+      vcf_svdb = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
+    output:
+      vcf_pass_svdb_research = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+    benchmark:
+      Path(benchmark_dir, 'bcftools_quality_filter_sv_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      case_name = config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config, "bcftools_quality_filter_svdb")
+    message:
+      "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
+    shell:
+      """
+
+bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_svdb} \
+| bcftools filter -s in_normal -e 'INFO/NORMAL_PASS_INFO != "."' -m + \
+| bcftools filter -s tumor_contam_in_normal \
+-e'((FORMAT/DV[1] + FORMAT/RV[1]) / (FORMAT/COV[1:0] + FORMAT/COV[1:2])) <= 0.1 \
+&& ((FORMAT/DV[0] + FORMAT/RV[0]) / (FORMAT/COV[0:0] + FORMAT/COV[0:2])) >= 0.4' -m + \
+| bcftools filter -s PASS -e 'FILTER~"tumor_contam_in_normal"' -m + \
+| bcftools filter -i 'FILTER="PASS"' -o {output.vcf_pass_svdb_research} -O z
+
+tabix -p vcf -f {output.vcf_pass_svdb_research};
+      """
+else:
+  rule bcftools_quality_filter_svdb:
+    input:
+      vcf_svdb=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
+    output:
+      vcf_pass_svdb_research=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_sv_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      case_name=config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,"bcftools_quality_filter_svdb")
+    message:
+      "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
+    shell:
+      """
 bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb_research} -O z {input.vcf_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb_research};
-    """
+      """
