@@ -273,13 +273,14 @@ rule tiddit_sv_tumor_normal:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
         cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
         cov_normal_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".normal.tiddit_cov.bed",
-        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
     benchmark:
         benchmark_dir + 'tiddit_sv_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        vcfdir = vcf_dir,
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
         tumor = "TUMOR",
         normal = "NORMAL",
@@ -314,9 +315,9 @@ bcftools filter -s tumor_contam_in_normal \
 -e'((FORMAT/DV[1] + FORMAT/RV[1]) / (FORMAT/COV[1:0] + FORMAT/COV[1:2])) <= 0.1 \
 && ((FORMAT/DV[0] + FORMAT/RV[0]) / (FORMAT/COV[0:0] + FORMAT/COV[0:2])) >= 0.4' \
 -m + {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter.vcf \
-> {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam.vcf 
+> {params.vcfdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam.vcf 
 
-bcftools annotate -x FILTER -e 'FILTER="tumor_contam_in_normal"'\
+bcftools annotate -x FILTER -e 'FILTER="tumor_contam_in_normal"' \
 {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam.vcf \
 > {params.tmpdir}/{params.tumor}_{params.normal}_PASS_merged_normalfilter_rescuecontam_rmfilters.vcf
 
