@@ -304,8 +304,15 @@ grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.tmpdir}/{params.tu
 grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.normal}_PASS.vcf;
 
 svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
---vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf \|
-bgzip -l 9 -c > {output.vcf};
+--vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf \
+> {params.tmpdir}/{params.tumor}_{params.normal}_merged_PASS.vcf ;
+
+bcftools filter -s in_normal -e 'INFO/NORMAL_PASS_INFO != "."' -m + {params.tmpdir}/{params.tumor}_{params.normal}_merged_PASS.vcf \
+| bcftools filter -s tumor_contam_in_normal \
+-e'((FORMAT/DV[1] + FORMAT/RV[1]) / (FORMAT/COV[1:0] + FORMAT/COV[1:2])) <= 0.1 \
+&& ((FORMAT/DV[0] + FORMAT/RV[0]) / (FORMAT/COV[0:0] + FORMAT/COV[0:2])) >= 0.4' -m + \
+| bcftools filter -s PASS -e 'FILTER~"tumor_contam_in_normal"' -m + \
+| bgzip -l 9 -c > {output.vcf}
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
 
