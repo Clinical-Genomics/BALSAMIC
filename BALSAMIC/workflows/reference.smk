@@ -73,6 +73,8 @@ ascat_gccorrection_url = reference_file_model.ascat_gccorrection
 ascat_chryloci_url = reference_file_model.ascat_chryloci
 clinvar_url = reference_file_model.clinvar
 somalier_sites_url = reference_file_model.somalier_sites
+cadd_snv_url = reference_file_model.cadd_snv
+cadd_snv_index_url = reference_file_model.cadd_snv_index
 
 # add secrets from config to items that need them
 cosmicdb_url.secret=config['cosmic_key']
@@ -123,6 +125,8 @@ rule all:
         ascat_chryloci = ascat_chryloci_url.get_output_file,
         clinvar = clinvar_url.get_output_file + ".gz",
         somalier_sites = somalier_sites_url.get_output_file + ".gz",
+        cadd_snv = cadd_snv_url.get_output_file,
+        cadd_snv_index = cadd_snv_index_url.get_output_file,
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -161,6 +165,7 @@ rule all:
             "clinvar": input.clinvar,
             "somalier_sites": input.somalier_sites,
             "reference_access_date": today,
+            "cadd_snv": input.cadd_snv,
         }
 
         with open(str(output.reference_json), "w") as fh:
@@ -198,7 +203,7 @@ download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     cosmicdb_url, refgene_txt_url, refgene_sql_url, rankscore_url, access_regions_url,
                     delly_exclusion_url, delly_mappability_url, delly_mappability_gindex_url,
                     delly_mappability_findex_url, ascat_gccorrection_url, ascat_chryloci_url, clinvar_url,
-                    somalier_sites_url]
+                    somalier_sites_url, cadd_snv_url, cadd_snv_index_url]
 
 download_dict = dict([(ref.get_output_file, ref) for ref in download_content])
 
