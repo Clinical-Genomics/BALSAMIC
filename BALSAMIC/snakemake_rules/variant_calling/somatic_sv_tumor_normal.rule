@@ -303,7 +303,7 @@ grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.tmpdir}/{params.tu
 
 grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.normal}_PASS.vcf;
 
-svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
+svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.8 \
 --vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf \
 > {params.tmpdir}/{params.tumor}_{params.normal}_merged_PASS.vcf ;
 
