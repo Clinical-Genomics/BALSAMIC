@@ -196,13 +196,12 @@ def test_pon_cnn_file(
     balsamic_cache: str,
     panel_bed_file: str,
     pon_cnn: str,
+    fastq_dir_tumor_only_pon_cnn: str,
+    case_id_tumor_only_pon_cnn: str,
 ):
     """Test balsamic config case with a PON reference."""
 
     # GIVEN CLI arguments including optional pon reference ".cnn" file
-    case_id = "test_sample_cnv"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # WHEN invoking the config case command
     result = invoke_cli(
@@ -210,11 +209,11 @@ def test_pon_cnn_file(
             "config",
             "case",
             "--case-id",
-            case_id,
+            case_id_tumor_only_pon_cnn,
             "--analysis-dir",
             analysis_dir,
             "--fastq-path",
-            fastq_dir,
+            fastq_dir_tumor_only_pon_cnn,
             "-p",
             panel_bed_file,
             "--pon-cnn",

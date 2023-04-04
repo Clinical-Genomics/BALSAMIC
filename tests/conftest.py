@@ -55,11 +55,50 @@ fastq_pattern_types = [
         "normal":
             ["HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
             "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"]
+    },
+    {
+        "id": "5",
+        "tumor":
+            ["1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz", "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+             "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz", "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"],
+        "normal":
+            ["1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz", "1_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz",
+             "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz", "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz"]
     }
 ]
 
 fastq_pattern_ids = ['FastqPattern{}'.format(p["id"]) for p in fastq_pattern_types]
 
+pon_fastq_list = [
+    "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_1.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_2.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_1.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_2.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_1.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_2.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_1.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_2.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_1.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_2.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_1.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_2.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_1.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_2.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_1.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_2.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_1.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_2.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_1.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_2.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_1.fastq.gz",
+    "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_2.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_1.fastq.gz",
+    "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_2.fastq.gz",
+]
 
 @pytest.fixture(scope="session")
 def tumor_sample_name() -> str:
@@ -78,6 +117,10 @@ def case_id_tumor_only() -> str:
     """Mock TGA tumor-only case ID."""
     return "sample_tumor_only"
 
+@pytest.fixture(scope="session")
+def case_id_tumor_only_pon_cnn() -> str:
+    """Mock TGA tumor-only case ID."""
+    return "sample_tumor_only_pon_cnn"
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_pon() -> str:
@@ -312,7 +355,6 @@ def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
-    #fastq_pattern_id = request.param["id"]
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
@@ -326,12 +368,31 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) ->
     for fastq in fastq_test_dict["tumor"]:
         Path.unlink(fastq_dir/fastq)
 
+@pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
+def fastq_dir_tumor_only_pon_cnn(analysis_dir: str, case_id_tumor_only_pon_cnn: str, request) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon_cnn, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir/fastq)
 
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    for fastq in pon_fastq_list:
+        Path(fastq_dir, fastq).touch()
+
     return fastq_dir.as_posix()
 
 
