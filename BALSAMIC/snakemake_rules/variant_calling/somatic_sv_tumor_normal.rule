@@ -312,6 +312,7 @@ bcftools filter -s in_normal -e 'INFO/NORMAL_PASS_INFO != "."' -m + {params.tmpd
 -e'((FORMAT/DV[1] + FORMAT/RV[1]) / (FORMAT/COV[1:0] + FORMAT/COV[1:2])) <= 0.1 \
 && ((FORMAT/DV[0] + FORMAT/RV[0]) / (FORMAT/COV[0:0] + FORMAT/COV[0:2])) >= 0.4' -m + \
 | bcftools filter -s PASS -e 'FILTER~"tumor_contam_in_normal"' -m + \
+| bcftools filter -s PASS -e 'INFO/SVTYPE = "BND" && INFO/TUMOR_PASS_INFO != "."' -m \
 | bgzip -l 9 -c > {output.vcf}
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
