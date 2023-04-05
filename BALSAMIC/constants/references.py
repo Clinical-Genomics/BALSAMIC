@@ -82,14 +82,14 @@ REFERENCE_FILES = {
             "dir_name": "genome",
         },
         "refgene_txt": {
-            "url": "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.txt.gz",
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.txt.gz",
             "file_type": FileType.TEXT,
             "gzip": True,
             "file_name": "refGene.txt",
             "dir_name": "genome",
         },
         "refgene_sql": {
-            "url": "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.sql",
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.sql",
             "file_type": FileType.TEXT,
             "gzip": False,
             "file_name": "refGene.sql",
@@ -245,14 +245,14 @@ REFERENCE_FILES = {
             "dir_name": "genome",
         },
         "refgene_txt": {
-            "url": "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
             "file_type": FileType.TEXT,
             "gzip": True,
             "file_name": "refGene.txt",
             "dir_name": "genome",
         },
         "refgene_sql": {
-            "url": "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
+            "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
             "file_type": FileType.TEXT,
             "gzip": False,
             "file_name": "refGene.sql",

@@ -333,7 +333,7 @@ def test_metric_model_fail_validation():
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
         MetricModel(**invalid_input)
-    assert f"field required" in str(input_exc.value)
+    assert "field required" in str(input_exc.value)
 
 
 def test_metric_validation_model_pass(qc_extracted_metrics):
