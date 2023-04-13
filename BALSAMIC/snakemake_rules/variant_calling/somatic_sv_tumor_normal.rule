@@ -299,11 +299,11 @@ tiddit --sv -p 6 -r 6 -z 100 --p_ratio 0.10 --ref {input.fa} --bam {input.bamT} 
 
 tiddit --sv -p 3 -r 3 --ref {input.fa} --bam {input.bamN} -o {params.tmpdir}/{params.normal};
 
-grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.tmpdir}/{params.tumor}_PASS.vcf;
+grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.vcfdir}/{params.tumor}_tiddit_PASS.vcf;
 
-grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.normal}_PASS.vcf;
+grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.vcfdir}/{params.normal}_tiddit_PASS.vcf;
 
-svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.8 \
+svdb --merge --pass_only --notag --no_intra --bnd_distance 500 --overlap 0.8 \
 --vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf \
 > {params.tmpdir}/{params.tumor}_{params.normal}_merged_PASS.vcf ;
 
