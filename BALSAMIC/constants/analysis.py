@@ -1,5 +1,5 @@
 """Balsamic analysis specific constants."""
-from BALSAMIC.utils.enum import StrEnum
+from BALSAMIC.utils.str_enum import StrEnum
 
 
 class ConfigType(StrEnum):
