@@ -16,5 +16,6 @@ rule download_containers:
         "Downloading singularity image {params.singularity_image}"
     shell:
         """
+        export SINGULARITY_TMPDIR={params.containers_dir}
         singularity pull {params.containers_dir}/{params.singularity_image}.sif {params.dockerhub_image}
         """
