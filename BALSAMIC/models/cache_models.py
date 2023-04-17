@@ -208,7 +208,11 @@ class CacheConfigModel(BaseModel):
         return references
 
     def get_reference_paths(self) -> List[str]:
-        """Return a list of output reference paths."""
+        """Return a list of reference paths."""
+        return [reference[1].file_path for reference in self.references]
+
+    def get_reference_output_paths(self) -> List[str]:
+        """Return a complete list of output reference paths."""
         reference_paths: List[str] = [
             self.references.access_regions.file_path,
             self.references.ascat_chryloci.file_path,
