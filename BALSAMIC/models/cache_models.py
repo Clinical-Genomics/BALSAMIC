@@ -155,12 +155,24 @@ class ReferencesModel(BaseModel):
         ]
 
 
+class CacheAnalysisModel(BaseModel):
+    """
+    Reference analysis configuration model.
+
+
+    Attributes:
+        case_id : reference case identifier
+    """
+
+    case_id: str
+
+
 class CacheConfigModel(BaseModel):
     """
     Reference build configuration model.
 
     Attributes:
-        case_id         : reference case identifier
+        analysis        : reference analysis model
         references_dir  : output directory for the downloaded reference
         containers_dir  : output directory for the downloaded singularity containers
         genome_version  : genome version associated with the balsamic cache
@@ -169,9 +181,10 @@ class CacheConfigModel(BaseModel):
         containers      : dictionary linking the container names and their dockerhub image paths
         references      : reference files model
         references_date : reference access date
+
     """
 
-    case_id: str
+    analysis: CacheAnalysisModel
     references_dir: DirectoryPath
     containers_dir: DirectoryPath
     genome_version: GenomeVersion

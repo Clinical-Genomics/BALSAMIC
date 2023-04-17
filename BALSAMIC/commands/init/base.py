@@ -111,7 +111,9 @@ def initialize(
         dir_path.mkdir(parents=True, exist_ok=True)
 
     cache_config: CacheConfigModel = CacheConfigModel(
-        case_id="reference" + "." + genome_version + ".v" + balsamic_version,
+        analysis={
+            "case_id": "reference" + "." + genome_version + ".v" + balsamic_version
+        },
         references_dir=references_dir.as_posix(),
         containers_dir=containers_dir.as_posix(),
         genome_version=genome_version,
@@ -160,7 +162,7 @@ def initialize(
     LOG.info("Starting reference generation workflow...")
     balsamic_run: SnakeMake = SnakeMake()
     balsamic_run.configfile = config_path.as_posix()
-    balsamic_run.case_name = cache_config.case_id
+    balsamic_run.case_name = cache_config.analysis.case_id
     balsamic_run.working_dir = references_dir
     balsamic_run.snakefile = snakefile
     balsamic_run.run_mode = run_mode
