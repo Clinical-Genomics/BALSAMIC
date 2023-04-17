@@ -160,6 +160,7 @@ class CacheConfigModel(BaseModel):
     Reference build configuration model.
 
     Attributes:
+        case_id         : reference case identifier
         references_dir  : output directory for the downloaded reference
         containers_dir  : output directory for the downloaded singularity containers
         genome_version  : genome version associated with the balsamic cache
@@ -170,6 +171,7 @@ class CacheConfigModel(BaseModel):
         references_date : reference access date
     """
 
+    case_id: str
     references_dir: DirectoryPath
     containers_dir: DirectoryPath
     genome_version: GenomeVersion

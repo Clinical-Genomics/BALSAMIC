@@ -9,6 +9,8 @@ from pathlib import Path
 import click
 import graphviz
 import snakemake
+from graphviz import Source
+
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.commands.init.options import (
@@ -109,6 +111,7 @@ def initialize(
         dir_path.mkdir(parents=True, exist_ok=True)
 
     cache_config: CacheConfigModel = CacheConfigModel(
+        case_id="reference" + "." + genome_version + ".v" + balsamic_version,
         references_dir=references_dir.as_posix(),
         containers_dir=containers_dir.as_posix(),
         genome_version=genome_version,
@@ -121,7 +124,7 @@ def initialize(
     write_json(json.loads(cache_config.json(exclude_none=True)), config_path.as_posix())
     LOG.info(f"Reference workflow configured successfully ({config_path.as_posix()})")
 
-    snakefile = (
+    snakefile: Path = (
         snakefile
         if snakefile
         else get_snakefile("generate_ref", "balsamic", genome_version)
@@ -134,11 +137,11 @@ def initialize(
             configfiles=[config_path.as_posix()],
             printrulegraph=True,
         )
-    graph_title = "_".join(["BALSAMIC", balsamic_version, "reference"])
-    graph_dot = "".join(graph_dot).replace(
+    graph_title: str = "_".join(["BALSAMIC", balsamic_version, "reference"])
+    graph_dot: str = "".join(graph_dot).replace(
         "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
     )
-    graph_obj = graphviz.Source(
+    graph: Source = graphviz.Source(
         graph_dot,
         directory=Path(references_dir).as_posix(),
         filename="reference_graph",
@@ -146,16 +149,18 @@ def initialize(
         engine="dot",
     )
     try:
-        graph_pdf = graph_obj.render()
-        LOG.info(f"Reference workflow graph generated successfully ({graph_pdf}) ")
+        graph_pdf: Path = Path(graph.render())
+        LOG.info(
+            f"Reference workflow graph generated successfully ({graph_pdf.as_posix()}) "
+        )
     except Exception:
         LOG.error("Reference workflow graph generation failed")
         raise click.Abort()
 
     LOG.info("Starting reference generation workflow...")
-    balsamic_run = SnakeMake()
+    balsamic_run: SnakeMake = SnakeMake()
     balsamic_run.configfile = config_path.as_posix()
-    balsamic_run.case_name = "reference." + genome_version + ".v" + balsamic_version
+    balsamic_run.case_name = cache_config.case_id
     balsamic_run.working_dir = references_dir
     balsamic_run.snakefile = snakefile
     balsamic_run.run_mode = run_mode
@@ -179,5 +184,5 @@ def initialize(
         BALSAMIC_DIR,
     ]
 
-    cmd = sys.executable + " -m " + balsamic_run.build_cmd()
+    cmd: str = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)
