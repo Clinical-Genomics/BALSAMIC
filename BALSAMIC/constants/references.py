@@ -66,7 +66,7 @@ REFERENCE_FILES = {
             "file_name": "cosmic_coding_muts_v94.vcf",
             "dir_name": "variants",
         },
-        "wgs_calling": {
+        "wgs_calling_regions": {
             "url": "gs://genomics-public-data/resources/broad/hg38/v0/wgs_calling_regions.hg38.interval_list",
             "file_type": FileType.TEXT,
             "gzip": False,
@@ -229,7 +229,7 @@ REFERENCE_FILES = {
             "file_name": "cosmic_coding_muts_v94.vcf",
             "dir_name": "variants",
         },
-        "wgs_calling": {
+        "wgs_calling_regions": {
             "url": "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
             "file_type": FileType.TEXT,
             "gzip": False,

@@ -73,7 +73,7 @@ class ReferencesModel(BaseModel):
         refgene_txt              : RefSeq's gene flat format from UCSC
         somalier_sites           : somalier sites VCF
         vcf_1kg                  : 1000 Genome all SNPs
-        wgs_calling              : WGS calling intervals
+        wgs_calling_regions      : WGS calling intervals
     """
 
     access_regions: Optional[ReferenceUrlModel]
@@ -98,7 +98,7 @@ class ReferencesModel(BaseModel):
     refgene_txt: Optional[ReferenceUrlModel]
     somalier_sites: Optional[ReferenceUrlModel]
     vcf_1kg: Optional[ReferenceUrlModel]
-    wgs_calling: Optional[ReferenceUrlModel]
+    wgs_calling_regions: Optional[ReferenceUrlModel]
 
     def get_bwa_index_files(self) -> List[str]:
         """Return output BWA genome index files."""
@@ -219,7 +219,7 @@ class CacheConfigModel(BaseModel):
             self.references.genome_chrom_size.file_path,
             self.references.rankscore.file_path,
             self.references.somalier_sites.file_path + "." + FileType.GZ,
-            self.references.wgs_calling.file_path,
+            self.references.wgs_calling_regions.file_path,
         ]
         reference_paths.extend(
             self.references.get_bwa_index_files()
