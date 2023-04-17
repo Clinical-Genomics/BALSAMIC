@@ -4,10 +4,9 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, List, Any
 
-from pydantic import BaseModel, AnyUrl, DirectoryPath, validator, FilePath
+from pydantic import BaseModel, AnyUrl, DirectoryPath, validator
 
-from BALSAMIC.constants.analysis import GenomeVersion
-from BALSAMIC.constants.cache import FileType, BwaIndexFileType
+from BALSAMIC.constants.cache import FileType, BwaIndexFileType, GenomeVersion
 
 LOG = logging.getLogger(__name__)
 

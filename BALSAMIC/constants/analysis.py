@@ -10,14 +10,6 @@ class ConfigType(StrEnum):
     CLUSTER_REFERENCE: str = "cluster_reference"
 
 
-class GenomeVersion(StrEnum):
-    """Reference genome version"""
-
-    HG19: str = "hg19"
-    HG38: str = "hg38"
-    CanFam3: str = "canfam3"
-
-
 class RunMode(StrEnum):
     """Run mode to generate the balsamic cache."""
 

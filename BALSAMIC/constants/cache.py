@@ -2,6 +2,14 @@
 from BALSAMIC.utils.str_enum import StrEnum
 
 
+class GenomeVersion(StrEnum):
+    """Reference genome version"""
+
+    HG19: str = "hg19"
+    HG38: str = "hg38"
+    CanFam3: str = "canfam3"
+
+
 class ContainerVersion(StrEnum):
     """Balsamic container versions."""
 

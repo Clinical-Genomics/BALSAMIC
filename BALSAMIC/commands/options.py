@@ -1,13 +1,8 @@
 """Balsamic commands common options."""
 import click
 
-from BALSAMIC.constants.analysis import (
-    GenomeVersion,
-    RunMode,
-    ClusterProfile,
-    QOS,
-    ClusterMailType,
-)
+from BALSAMIC.constants.analysis import RunMode, ClusterProfile, QOS, ClusterMailType
+from BALSAMIC.constants.cache import GenomeVersion
 
 OPTION_GENOME_VERSION = click.option(
     "-g",

@@ -1,6 +1,5 @@
 """Reference related constants."""
-from BALSAMIC.constants.analysis import GenomeVersion
-from BALSAMIC.constants.cache import FileType
+from BALSAMIC.constants.cache import GenomeVersion, FileType
 
 REFERENCE_FILES = {
     GenomeVersion.HG38: {
