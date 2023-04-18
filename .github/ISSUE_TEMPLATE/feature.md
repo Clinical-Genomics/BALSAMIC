@@ -13,6 +13,9 @@ labels: 'feature'
 ## Considered alternatives
 *Were there alternative approaches which have been rejected?*
 
+## Requests/bugs/suggestions solved
+*Link any feature requests, bug reports or other issues solved by this feature*
+
 ## Can be closed when
 *Link the issues needed to be closed for this to be implemented*
 
