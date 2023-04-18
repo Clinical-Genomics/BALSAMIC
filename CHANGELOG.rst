@@ -8,6 +8,7 @@ Added:
 Changed:
 ^^^^^^^^
 * Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+* Increased time-limit for sambamba_exon_depth and picard_markduplicates to 6 hours
 
 Fixed:
 ^^^^^^
