@@ -23,6 +23,8 @@ def find_ctg(sample_info):
             if ctg_value != ".":
                 ctg = True
     return ctg
+
+
 def calc_af_get_ctg(pass_sample, pass_info):
     """
     Inputs fields from TIDDIT variant INFO field,
@@ -34,7 +36,7 @@ def calc_af_get_ctg(pass_sample, pass_info):
     :return: float(maximum allele frequency), and bool(if contig exists for max-AF variant or not).
     """
     max_af = 0
-    ctg = False
+    final_ctg = False
     for idx, variant in enumerate(pass_sample):
         fields = variant.split("|")
 
@@ -58,8 +60,8 @@ def calc_af_get_ctg(pass_sample, pass_info):
             af = 0
         if af > max_af:
             max_af = af
-            ctg = ctg
-    return max_af, ctg
+            final_ctg = ctg
+    return max_af, final_ctg
 
 
 def filter_vcf(vcf_path: Path):
@@ -74,31 +76,64 @@ def filter_vcf(vcf_path: Path):
     vcf = vcfpy.Reader.from_path(vcf_path)
 
     # Update VCF header
-    vcf.header.add_info_line(vcfpy.OrderedDict([
-        ('ID', 'AF_T_MAX'),
-        ('Type', 'Float'),
-        ('Description', 'Max AF in tumor, for rows with merged overlapping variants')]))
+    vcf.header.add_info_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "AF_T_MAX"),
+                ("Type", "Float"),
+                (
+                    "Description",
+                    "Max AF in tumor, for rows with merged overlapping variants",
+                ),
+            ]
+        )
+    )
 
-    vcf.header.add_info_line(vcfpy.OrderedDict([
-        ('ID', 'AF_N_MAX'),
-        ('Type', 'Float'),
-        ('Description', 'Max AF in normal, for rows with merged overlapping variants')]))
+    vcf.header.add_info_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "AF_N_MAX"),
+                ("Type", "Float"),
+                (
+                    "Description",
+                    "Max AF in normal, for rows with merged overlapping variants",
+                ),
+            ]
+        )
+    )
 
-    vcf.header.add_filter_line(vcfpy.OrderedDict([
-        ('ID', 'normal_variant'),
-        ('Description', 'AF_T_MAX == 0 and ctg_t == False')]))
+    vcf.header.add_filter_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "normal_variant"),
+                ("Description", "AF_T_MAX == 0 and ctg_t == False"),
+            ]
+        )
+    )
 
-    vcf.header.add_filter_line(vcfpy.OrderedDict([
-        ('ID', 'high_normal_af'),
-        ('Description', 'AF_N_MAX > 0.25')]))
+    vcf.header.add_filter_line(
+        vcfpy.OrderedDict(
+            [("ID", "high_normal_af"), ("Description", "AF_N_MAX > 0.25")]
+        )
+    )
 
-    vcf.header.add_filter_line(vcfpy.OrderedDict([
-        ('ID', 'high_normal_af_fraction'),
-        ('Description', '(AF_N_MAX / AF_T_MAX) > 0.25')]))
+    vcf.header.add_filter_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "high_normal_af_fraction"),
+                ("Description", "(AF_N_MAX / AF_T_MAX) > 0.25"),
+            ]
+        )
+    )
 
-    vcf.header.add_filter_line(vcfpy.OrderedDict([
-        ('ID', 'in_normal'),
-        ('Description', 'ctg_n == True and AF_N_MAX == 0 and AF_T_MAX <= 0.25')]))
+    vcf.header.add_filter_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "in_normal"),
+                ("Description", "ctg_n == True and AF_N_MAX == 0 and AF_T_MAX <= 0.25"),
+            ]
+        )
+    )
 
     writer = vcfpy.Writer.from_path("/dev/stdout", vcf.header)
 
@@ -121,28 +156,29 @@ def filter_vcf(vcf_path: Path):
 
         # Set filter statuses
         if af_t == 0 and not ctg_t:
-            sv.add_filter('normal_variant')
+            sv.add_filter("normal_variant")
         else:
             # Regardless of CTG, set filter if AF_T / AF_N > 0.25
             if af_t > 0:
                 if float(af_n / af_t) > 0.25:
                     normal_af_status = "failed"
-                    sv.add_filter('high_normal_af_fraction')
+                    sv.add_filter("high_normal_af_fraction")
                 else:
                     normal_af_status = "pass"
 
             # Set filter if AF_N > 0.25
             if af_n > 0.25:
-                sv.add_filter('high_normal_af')
+                sv.add_filter("high_normal_af")
 
             # Set filter if CTG_N = True, and AF_N is not pass
             if ctg_n and af_n == 0 and af_t <= 0.25:
-                sv.add_filter('in_normal')
+                sv.add_filter("in_normal")
 
         sv.INFO["AF_T_MAX"] = [round(af_t, 4)]
         sv.INFO["AF_N_MAX"] = [round(af_n, 4)]
 
         writer.write_record(sv)
+
 
 def get_bnd_id(info):
     """
@@ -163,6 +199,8 @@ def get_bnd_id(info):
     region_a = str(info["REGIONA"][0]) + "_" + str(info["REGIONA"][1])
     bnd_id = f"{sv_id_name}_{region_a}"
     return bnd_id, sv_id_num
+
+
 def rescue_t_n_mixed_bnds(vcf_path):
     """
     Removes soft filters and sets PASS to BND variants with mixed soft / PASS filters set.
@@ -194,7 +232,9 @@ def rescue_t_n_mixed_bnds(vcf_path):
             bnd_filter_dict[bnd_id] = {}
 
         if sv_id_num in bnd_filter_dict[bnd_id]:
-            logging.warning(f"Conflicting BND-names: {bnd_id}, will not attempt to rescue: {sv}")
+            logging.warning(
+                f"Conflicting BND-names: {bnd_id}, will not attempt to rescue: {sv}"
+            )
             continue
 
         bnd_filter_dict[bnd_id][sv_id_num] = sv.FILTER
@@ -202,13 +242,26 @@ def rescue_t_n_mixed_bnds(vcf_path):
     # Second read fo VCF-file:
     # Annotate and remove BND filters with PASS
     vcf = vcfpy.Reader.from_path(vcf_path)
-    vcf.header.add_info_line(vcfpy.OrderedDict([
-        ('ID', 'BND_ID'),
-        ('Type', 'String'),
-        ('Description', 'Unique ID for BND-variants, SVID + REGIONA')]))
-    vcf.header.add_filter_line(vcfpy.OrderedDict([
-        ('ID', 'PASS'),
-        ('Description', 'If at least 1 of the 2 BND_ID variants have PASS, set PASS')]))
+    vcf.header.add_info_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "BND_ID"),
+                ("Type", "String"),
+                ("Description", "Unique ID for BND-variants, SVID + REGIONA"),
+            ]
+        )
+    )
+    vcf.header.add_filter_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "PASS"),
+                (
+                    "Description",
+                    "If at least 1 of the 2 BND_ID variants have PASS, set PASS",
+                ),
+            ]
+        )
+    )
 
     writer = vcfpy.Writer.from_path("/dev/stdout", vcf.header)
 
@@ -236,10 +289,14 @@ def rescue_t_n_mixed_bnds(vcf_path):
                 sv.FILTER = ["PASS"]
 
         writer.write_record(sv)
+
+
 @click.group()
 def main():
     """SV filtering tool."""
     pass
+
+
 @main.command("placeholder")
 @click.option(
     "-f",
@@ -251,6 +308,8 @@ def main():
 def do_nothing(vcf_file: Path):
     """For future filtering."""
     pass
+
+
 @main.command("filter_tiddit_TN")
 @click.option(
     "-v",
@@ -259,7 +318,9 @@ def do_nothing(vcf_file: Path):
     type=click.Path(exists=True),
     help="Input Variant Calling Format(VCF) from merged TIDDIT TUMOR + NORMAL VCF.",
 )
-@click.option('--method', '-m', required=True, type=click.Choice(['filter', 'rescue_bnds']))
+@click.option(
+    "--method", "-m", required=True, type=click.Choice(["filter", "rescue_bnds"])
+)
 def filter_tiddit_TN(vcf_file: Path, method: str):
     """Filter TIDDIT variants with Tumor Normal options.
     Outputs filtered VCF in standard-out.
@@ -271,13 +332,14 @@ def filter_tiddit_TN(vcf_file: Path, method: str):
 
                 filter: Set soft-filters for presence of variants in normal.
                 rescue_bnds: Rescue BND variants with at least 1 BND with PASS.
-        """
+    """
 
     if method == "filter":
         filter_vcf(vcf_file)
 
     if method == "rescue_bnds":
         rescue_t_n_mixed_bnds(vcf_file)
+
 
 if __name__ == "__main__":
     main()
