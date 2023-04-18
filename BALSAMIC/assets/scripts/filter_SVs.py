@@ -37,6 +37,7 @@ def calc_af_get_ctg(pass_sample, pass_info):
     """
     max_af = 0
     final_ctg = False
+    any_ctg = False
     for idx, variant in enumerate(pass_sample):
         fields = variant.split("|")
 
@@ -58,9 +59,13 @@ def calc_af_get_ctg(pass_sample, pass_info):
         except Exception as e:
             logging.warning(f"Exception: {e} setting AF to 0")
             af = 0
+        if ctg:
+            any_ctg = True
         if af > max_af:
             max_af = af
             final_ctg = ctg
+    if max_af == 0:
+        final_ctg = any_ctg
     return max_af, final_ctg
 
 
