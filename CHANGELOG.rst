@@ -4,6 +4,7 @@
 Added:
 ^^^^^^
 * PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+* Store TMB files in HK https://github.com/Clinical-Genomics/BALSAMIC/pull/1143
 
 Changed:
 ^^^^^^^^
