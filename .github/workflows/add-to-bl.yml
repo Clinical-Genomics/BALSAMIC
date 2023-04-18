@@ -12,5 +12,5 @@ jobs:
     steps:
       - uses: actions/add-to-project@v0.4.0
         with:
-          project-url: https://github.com/orgs/Clinical-Genomics/projects/45
+          project-url: https://github.com/orgs/Clinical-Genomics/projects/46
           github-token: ${{ secrets.REPO_AND_PROJECT_PAT }}
