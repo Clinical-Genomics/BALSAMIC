@@ -300,18 +300,18 @@ tiddit --sv -p 6 -r 6 -z 100 --p_ratio 0.10 --ref {input.fa} --bam {input.bamT} 
 
 tiddit --sv -p 3 -r 3 --ref {input.fa} --bam {input.bamN} -o {params.tmpdir}/{params.normal};
 
-grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.vcfdir}/{params.tumor}_tiddit_PASS.vcf;
+grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.tmpdir}/{params.tumor}_PASS.vcf;
 
-grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.vcfdir}/{params.normal}_tiddit_PASS.vcf;
+grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.normal}_PASS.vcf;
 
 svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
---vcf  {params.vcfdir}/{params.tumor}_tiddit_PASS.vcf {params.vcfdir}/{params.normal}_tiddit_PASS.vcf \
+--vcf  {params.tmpdir}/{params.tumor}_tiddit_PASS.vcf {params.tmpdir}/{params.normal}_tiddit_PASS.vcf \
 > {params.vcfdir}/{params.tumor}_{params.normal}_merged_PASS.vcf ;
 
 python {params.filter_svs} filter_tiddit_TN -v {params.vcfdir}/{params.tumor}_{params.normal}_merged_PASS.vcf \
 -m filter > {params.vcfdir}/{params.tumor}_{params.normal}_merged_tn_filter.vcf ;
 
-python {params.filter_svs} filter_tiddit_TN -v {params.vcfdir}/{params.tumor}_{params.normal}_merged_tn_filter.vtercf \
+python {params.filter_svs} filter_tiddit_TN -v {params.vcfdir}/{params.tumor}_{params.normal}_merged_tn_filter.vcf \
 -m rescue_bnds | bgzip -l 9 -c > {output.vcf}
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
