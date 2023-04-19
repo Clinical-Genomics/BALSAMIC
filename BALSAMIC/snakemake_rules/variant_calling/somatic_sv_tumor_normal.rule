@@ -311,8 +311,8 @@ svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
 python {params.filter_svs} filter_tiddit_TN -v {params.vcfdir}/{params.tumor}_{params.normal}_merged_PASS.vcf \
 -m filter > {params.vcfdir}/{params.tumor}_{params.normal}_merged_tn_filter.vcf ;
 
-python {params.filter_svs} filter_tiddit_TN -v {params.vcfdir}/{params.tumor}_{params.normal}_merged_tn_filter.vcf \
--m rescue_bnds > | bgzip -l 9 -c > {output.vcf} 
+python {params.filter_svs} filter_tiddit_TN -v {params.vcfdir}/{params.tumor}_{params.normal}_merged_tn_filter.vtercf \
+-m rescue_bnds | bgzip -l 9 -c > {output.vcf}
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
 
