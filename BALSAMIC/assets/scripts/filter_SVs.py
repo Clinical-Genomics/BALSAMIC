@@ -6,79 +6,41 @@ import logging
 from pathlib import Path
 
 
-def find_ctg(sample_info):
+@click.group()
+def cli():
     """
-    Looks for contig in the variant with the highest AF.
-
-    :param sample_info: SAMPLE_PASS_INFO[variant with highest AF]
-    :return: bool(if contig exists for max-AF variant or not).
+    SV filtering tool.
     """
-    fields = sample_info.split("|")
-    ctg = False
-    for field in fields:
-        field_name_value = field.split(":")
-        field_name = field_name_value[0]
-        if field_name == "CTG":
-            ctg_value = field_name_value[1]
-            if ctg_value != ".":
-                ctg = True
-    return ctg
+    pass
 
-
-def calc_af_get_ctg(pass_sample, pass_info):
+@cli.group("tiddit_tn")
+@click.option(
+    "-v",
+    "--vcf-file",
+    required=True,
+    type=click.Path(exists=True),
+    help="Input Variant Calling Format(VCF) from merged TIDDIT TUMOR + NORMAL VCF.",
+)
+def tiddit_tn():
     """
-    Inputs fields from TIDDIT variant INFO field,
-    calculates max AF for merged variants and looks for contig in max-af variant.
+    Manage TIDDIT variants in merged tumor/normal vcf.
+    Outputs treated VCF in standard-out.
 
-    :param pass_sample: TUMOR_PASS_SAMPLE / NORMAL_PASS_SAMPLE
-    :param pass_info: TUMOR_PASS_INFO / NORMAL_PASS_INFO
-
-    :return: float(maximum allele frequency), and bool(if contig exists for max-AF variant or not).
+        Args:
+            vcf-file: Path; path to vcf-file.
     """
-    max_af = 0
-    final_ctg = False
-    any_ctg = False
-    for idx, variant in enumerate(pass_sample):
-        fields = variant.split("|")
-
-        ctg = find_ctg(pass_info[idx])
-
-        for field in fields:
-            field_name_value = field.split(":")
-            field_name = field_name_value[0]
-            if field_name == "COV":
-                B1_cov = field_name_value[1]
-                B2_cov = field_name_value[3]
-                total_cov = int(B1_cov) + int(B2_cov)
-            if field_name == "DV":
-                DV = int(field_name_value[1])
-            if field_name == "RV":
-                RV = int(field_name_value[1])
-        try:
-            af = float((DV + RV) / total_cov)
-        except Exception as e:
-            logging.warning(f"Exception: {e} setting AF to 0")
-            af = 0
-        if ctg:
-            any_ctg = True
-        if af > max_af:
-            max_af = af
-            final_ctg = ctg
-    if max_af == 0:
-        final_ctg = any_ctg
-    return max_af, final_ctg
-
-
-def filter_vcf(vcf_path: Path):
+    pass
+@tiddit_tn.command("filter")
+def filter(vcf_file: Path):
     """
-    Adds soft filters based on variant presence in normal.
+    Add soft-filters based on presence of variants in normal.
 
-    :param vcf_path: Path to VCF
+    Args:
+        vcf_path: Path to unfiltered input vcf.
 
-    Outputs to standard out.
+    Outputs filtered VCF in standard-out.
     """
-
-    vcf = vcfpy.Reader.from_path(vcf_path)
+    vcf = vcfpy.Reader.from_path(vcf_file)
 
     # Update VCF header
     vcf.header.add_info_line(
@@ -184,38 +146,79 @@ def filter_vcf(vcf_path: Path):
 
         writer.write_record(sv)
 
-
-def get_bnd_id(info):
+def find_ctg(sample_info):
     """
-    Creates and returns unique BND ID based on information in INFO field.
+    Looks for contig in the variant with the highest AF.
 
-    :param info: Variant INFO field
-    :return: unique breakend ID based on SVID and RegionA, and the BND number (1 or 2)
+    :param sample_info: SAMPLE_PASS_INFO[variant with highest AF]
+    :return: bool(if contig exists for max-AF variant or not).
     """
-    # example: SV_2414_1
-    sv_id = info["TUMOR_PASS_CHROM"][0].split("|")[0]
-
-    # extract sv_id and breakend number
-    sv_id_split = sv_id.split("_")
-    sv_id_name = "_".join(sv_id_split[0:2])
-    sv_id_num = sv_id_split[2]
-
-    # define unique breakend_name
-    region_a = str(info["REGIONA"][0]) + "_" + str(info["REGIONA"][1])
-    bnd_id = f"{sv_id_name}_{region_a}"
-    return bnd_id, sv_id_num
+    fields = sample_info.split("|")
+    ctg = False
+    for field in fields:
+        field_name_value = field.split(":")
+        field_name = field_name_value[0]
+        if field_name == "CTG":
+            ctg_value = field_name_value[1]
+            if ctg_value != ".":
+                ctg = True
+    return ctg
 
 
-def rescue_t_n_mixed_bnds(vcf_path):
+def calc_af_get_ctg(pass_sample, pass_info):
     """
-    Removes soft filters and sets PASS to BND variants with mixed soft / PASS filters set.
-    Annotates BND variants with unique ID.
+    Inputs fields from TIDDIT variant INFO field,
+    calculates max AF for merged variants and looks for contig in max-af variant.
 
-    :param vcf_path: Path to VCF
+    :param pass_sample: TUMOR_PASS_SAMPLE / NORMAL_PASS_SAMPLE
+    :param pass_info: TUMOR_PASS_INFO / NORMAL_PASS_INFO
 
-    Outputs to standard out.
+    :return: float(maximum allele frequency), and bool(if contig exists for max-AF variant or not).
     """
-    vcf_start = vcfpy.Reader.from_path(vcf_path)
+    max_allele_frequency = 0
+    final_contig = False
+    any_contig = False
+
+    for idx, variant in enumerate(pass_sample):
+        fields = variant.split("|")
+
+        is_contig = find_ctg(pass_info[idx])
+
+        for field in fields:
+            field_name_value = field.split(":")
+            field_name = field_name_value[0]
+            if field_name == "COV":
+                b1_cov = field_name_value[1]
+                b2_cov = field_name_value[3]
+                total_cov = int(b1_cov) + int(b2_cov)
+            if field_name == "DV":
+                DV = int(field_name_value[1])
+            if field_name == "RV":
+                RV = int(field_name_value[1])
+        try:
+            af = float((DV + RV) / total_cov)
+        except Exception as e:
+            logging.warning(f"Exception: {e} setting AF to 0")
+            af = 0
+        if is_contig:
+            any_ctg = True
+        if af > max_allele_frequency:
+            max_af = af
+            final_contig = is_contig
+    if max_allele_frequency == 0:
+        final_contig = any_contig
+    return max_allele_frequency, final_contig
+@tiddit_tn.command("rescue_bnds")
+def rescue_bnds(vcf_file: Path):
+    """
+    Rescue BND-variants with at least 1 of 2 BNDs set to PASS.
+
+    Args:
+        vcf_path: Path to soft-filtered input vcf.
+
+    Outputs VCF in standard-out.
+    """
+    vcf_start = vcfpy.Reader.from_path(vcf_file)
 
     # First read of VCF-file:
     # define dict with bnd_id - bnd_num - FILTER
@@ -245,8 +248,8 @@ def rescue_t_n_mixed_bnds(vcf_path):
         bnd_filter_dict[bnd_id][sv_id_num] = sv.FILTER
 
     # Second read fo VCF-file:
-    # Annotate and remove BND filters with PASS
-    vcf = vcfpy.Reader.from_path(vcf_path)
+    # Update VCF header
+    vcf = vcfpy.Reader.from_path(vcf_file)
     vcf.header.add_info_line(
         vcfpy.OrderedDict(
             [
@@ -269,7 +272,7 @@ def rescue_t_n_mixed_bnds(vcf_path):
     )
 
     writer = vcfpy.Writer.from_path("/dev/stdout", vcf.header)
-
+    # Annotate and remove BND filters with PASS
     for sv in vcf:
         info = dict([*sv.INFO.items()])
         svtype = info["SVTYPE"]
@@ -295,56 +298,26 @@ def rescue_t_n_mixed_bnds(vcf_path):
 
         writer.write_record(sv)
 
-
-@click.group()
-def main():
-    """SV filtering tool."""
-    pass
-
-
-@main.command("placeholder")
-@click.option(
-    "-f",
-    "--vcf-file",
-    required=True,
-    type=click.Path(exists=True),
-    help="",
-)
-def do_nothing(vcf_file: Path):
-    """For future filtering."""
-    pass
-
-
-@main.command("filter_tiddit_TN")
-@click.option(
-    "-v",
-    "--vcf-file",
-    required=True,
-    type=click.Path(exists=True),
-    help="Input Variant Calling Format(VCF) from merged TIDDIT TUMOR + NORMAL VCF.",
-)
-@click.option(
-    "--method", "-m", required=True, type=click.Choice(["filter", "rescue_bnds"])
-)
-def filter_tiddit_TN(vcf_file: Path, method: str):
-    """Filter TIDDIT variants with Tumor Normal options.
-    Outputs filtered VCF in standard-out.
-
-        Args:
-            vcf-file: Path; path to vcf-file.
-
-            method: Choose method:
-
-                filter: Set soft-filters for presence of variants in normal.
-                rescue_bnds: Rescue BND variants with at least 1 BND with PASS.
+def get_bnd_id(info):
     """
+    Creates and returns unique BND ID based on information in INFO field.
 
-    if method == "filter":
-        filter_vcf(vcf_file)
+    :param info: Variant INFO field
+    :return: unique breakend ID based on SVID and RegionA, and the BND number (1 or 2)
+    """
+    # example: SV_2414_1
+    sv_id = info["TUMOR_PASS_CHROM"][0].split("|")[0]
 
-    if method == "rescue_bnds":
-        rescue_t_n_mixed_bnds(vcf_file)
+    # extract sv_id and breakend number
+    sv_id_split = sv_id.split("_")
+    sv_id_name = "_".join(sv_id_split[0:2])
+    sv_id_num = sv_id_split[2]
+
+    # define unique breakend_name
+    region_a = str(info["REGIONA"][0]) + "_" + str(info["REGIONA"][1])
+    bnd_id = f"{sv_id_name}_{region_a}"
+    return bnd_id, sv_id_num
 
 
 if __name__ == "__main__":
-    main()
+    cli()
