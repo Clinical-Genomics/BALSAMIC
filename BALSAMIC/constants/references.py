@@ -60,10 +60,10 @@ REFERENCE_FILES = {
             "dir_name": "variants",
         },
         "cosmicdb": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
+            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
-            "file_name": "cosmic_coding_muts_v94.vcf",
+            "file_name": "cosmic_coding_muts_v97.vcf",
             "dir_name": "variants",
         },
         "wgs_calling_regions": {
@@ -223,10 +223,10 @@ REFERENCE_FILES = {
             "dir_name": "variants",
         },
         "cosmicdb": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
+            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
-            "file_name": "cosmic_coding_muts_v94.vcf",
+            "file_name": "cosmic_coding_muts_v97.vcf",
             "dir_name": "variants",
         },
         "wgs_calling_regions": {

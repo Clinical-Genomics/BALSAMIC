@@ -2,5 +2,242 @@
 # coding: utf-8
 
 rule download_references:
-    """Download balsamic references."""
+    """Download balsamic reference files."""
+    output:
+        Path(config["references_dir"], "{reference_file}").as_posix(),
+    params:
+        reference=lambda wildcards: cache_config.get_reference_by_path(Path(config["references_dir"],wildcards.reference_file).as_posix())
+    threads:
+        get_threads(cluster_config, "download_containers")
+    log:
+        Path(config["references_dir"], "{reference_file}.log").as_posix()
+    message:
+        "Downloading reference file {params.reference.file_path}"
+    shell:
+        """
+        export TMPDIR=$(dirname "{params.reference.file_path}")
+        if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
+            response=$(curl -s -H "Authorization: Basic {params.reference.secret}" "{params.reference.url}")
+            download_url=$(echo $response | grep -o 'https://[^"]*')
+            curl "$download_url" -o "{params.reference.file_path}"
+        elif [[ "{params.reference.url}" == gs://* ]]; then
+            gsutil cp "{params.reference.url}" "{params.reference.file_path}"
+        else
+            wget "{params.reference.url}" -O "{params.reference.file_path}"
+        fi &> "{log}"
+        """
 
+
+# rule download_reference_indexes:
+#     """Download balsamic reference index files."""
+# def download_reference_file(output_file: str):
+#     if ref.gzip:
+#         cmd += " | gunzip "
+#
+#     cmd += " > {}".format(output_file)
+#     shell(cmd)
+#     ref.write_md5
+
+# """
+#     if [ "$ref_gzip" == true ]; then
+#         cmd+=" | gunzip"
+#     fi
+#
+#     cmd+=" > $output_file"
+#     eval $cmd
+# """
+
+
+# ##########################################################
+# # Preprocess refseq file by fetching relevant columns and
+# # standardize the chr column
+# ##########################################################
+#
+#
+# rule prepare_refgene:
+#     input:
+#         cache_config.container_paths,
+#         refgene_txt=refgene_txt_url.get_output_file,
+#         refgene_sql=refgene_sql_url.get_output_file,
+#         accessible_regions=access_regions_url.get_output_file,
+#     params:
+#         refgene_sql_awk=get_script_path("refseq_sql.awk"),
+#     output:
+#         refflat=refgene_txt_url.get_output_file.replace("txt", "flat"),
+#         bed=refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
+#     log:
+#         refgene_sql=Path(reference_dir, "genome", "refgene_sql.log"),
+#         refgene_txt=Path(reference_dir, "genome", "refgene_txt.log"),
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
+# (echo \"$header\"; cat {input.refgene_txt};) \
+# | csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 \
+# | csvformat -T \
+# | bedtools expand -c 2,3 \
+# | awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed};
+#
+# awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt} \
+# | cut -f 1-11 > {output.refflat};
+# sed -i 's/chr//g' {input.refgene_txt};
+# sed -i 's/chr//g' {input.accessible_regions};
+#         """
+#
+#
+# ##########################################################
+# # bgzip and tabix the vcf files that are vcf
+# ##########################################################
+#
+#
+# rule bgzip_tabix:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         vcf=Path(vcf_dir, "{vcf}.vcf"),
+#     params:
+#         type="vcf",
+#     output:
+#         Path(vcf_dir, "{vcf}.vcf.gz"),
+#         Path(vcf_dir, "{vcf}.vcf.gz.tbi"),
+#     log:
+#         Path(vcf_dir, "{vcf}.vcf.gz_tbi.log"),
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# bgzip {input.vcf} && tabix -p {params.type} {input.vcf}.gz 2> {log};
+#         """
+#
+#
+# ##########################################################
+# # Create BWA Index for reference genome
+# ##########################################################
+#
+#
+# rule bwa_index:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         reference_genome=reference_genome_url.get_output_file,
+#     output:
+#         expand(
+#             reference_genome_url.get_output_file + "{ext}",
+#             ext=[".amb", ".ann", ".bwt", ".pac", ".sa"],
+#         ),
+#     log:
+#         reference_genome_url.get_output_file + ".bwa_index.log",
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# bwa index -a bwtsw {input.reference_genome} 2> {log};
+#         """
+#
+#
+# ##########################################################
+# # Create index for fasta file - .fai
+# ##########################################################
+#
+#
+# rule samtools_index_fasta:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         reference_genome=reference_genome_url.get_output_file,
+#     output:
+#         reference_genome_url.get_output_file + ".fai",
+#     log:
+#         reference_genome_url.get_output_file + ".faidx.log",
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# samtools faidx {input.reference_genome} 2> {log};
+#         """
+#
+#
+# ##########################################################
+# # create reference dictionary using picard
+# ##########################################################
+#
+#
+# rule picard_ref_dict:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         reference_genome=reference_genome_url.get_output_file,
+#     output:
+#         reference_genome_url.get_output_file.replace("fasta", "dict"),
+#     log:
+#         reference_genome_url.get_output_file + ".ref_dict.log",
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# picard CreateSequenceDictionary REFERENCE={input.reference_genome} OUTPUT={output} 2> {log};
+#         """
+#
+#
+# ##########################################################
+# # ENSEMBL VEP - download and install vep package,
+# #                 cache conversion
+# ##########################################################
+#
+#
+# rule vep_install:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#     params:
+#         species="homo_sapiens_merged",
+#         assembly="GRCh37" if genome_version == "hg19" else "GRCh38",
+#         plugins="all",
+#     output:
+#         directory(vep_dir),
+#     log:
+#         Path(vep_dir, "vep_install_cache.log"),
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("ensembl-vep") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# vep_install --SPECIES {params.species} \
+# --AUTO cfp \
+# --ASSEMBLY {params.assembly} \
+# --CACHEDIR {output} \
+# --PLUGINS {params.plugins} \
+# --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log};
+#         """
+#
+#
+# ##########################################################
+# # Remove chr from delly exclusion
+# ##########################################################
+#
+#
+# rule prepare_delly_exclusion:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         delly_exclusion=delly_exclusion_url.get_output_file,
+#     output:
+#         delly_exclusion_converted=delly_exclusion_url.get_output_file.replace(
+#             ".tsv", "_converted.tsv"
+#         ),
+#     log:
+#         Path(reference_dir, "genome", "delly_exclusion.log"),
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("delly") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# sed 's/chr//g' {input.delly_exclusion} > {output.delly_exclusion_converted} 2> {log}
+#         """

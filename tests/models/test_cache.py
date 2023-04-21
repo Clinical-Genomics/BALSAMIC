@@ -19,7 +19,7 @@ def test_cache_config_model(tmp_path):
         genome_version=GenomeVersion.HG19,
         bioinfo_tools=BIOINFO_TOOL_ENV,
         containers=get_containers(ContainerVersion.RELEASE),
-        references=REFERENCE_FILES[GenomeVersion.CanFam3],
+        references=REFERENCE_FILES[GenomeVersion.HG19],
         references_date=str(datetime.now),
     )
     config_path: Path = Path(config.references_dir, "config.json")

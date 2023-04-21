@@ -7,6 +7,7 @@ from typing import Dict, Optional, List, Any
 from pydantic import BaseModel, AnyUrl, DirectoryPath, validator
 
 from BALSAMIC.constants.cache import FileType, BwaIndexFileType, GenomeVersion
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
@@ -22,8 +23,7 @@ class ReferenceUrlModel(BaseModel):
         file_name : reference file name after being downloaded
         dir_name  : destination directory of the downloaded file
         file_path : full reference file path
-
-
+        secret    : database key
     """
 
     url: AnyUrl
@@ -32,6 +32,7 @@ class ReferenceUrlModel(BaseModel):
     file_name: str
     dir_name: str
     file_path: Optional[str]
+    secret: Optional[str]
 
     @property
     def write_md5(self) -> None:
@@ -194,22 +195,43 @@ class CacheConfigModel(BaseModel):
     references_date: str
 
     @validator("references")
-    def validate_reference_output_path(
+    def validate_references(
         cls, references: ReferencesModel, values: Dict[str, Any]
     ) -> ReferencesModel:
+        """Validate the reference output paths."""
         for model in references:
-            reference: ReferenceUrlModel = model[1]
-            if reference:
-                reference.file_path = Path(
+            reference_key: str
+            reference: ReferenceUrlModel
+            reference_key, reference = model[0], model[1]
+            reference.file_path = (
+                Path(
                     values.get("references_dir"),
                     reference.dir_name,
                     reference.file_name,
                 ).as_posix()
+                if reference
+                else None
+            )
+            reference.secret = (
+                values.get("cosmic_key") if "cosmic" in reference_key else None
+            )
         return references
 
     def get_reference_paths(self) -> List[str]:
-        """Return a list of reference paths."""
-        return [reference[1].file_path for reference in self.references]
+        """Return a list of reference relative paths."""
+        return [
+            Path(reference[1].dir_name, reference[1].file_name).as_posix()
+            for reference in self.references
+        ]
+
+    def get_reference_by_path(self, reference_path: str) -> ReferenceUrlModel:
+        """Return a reference given its full path."""
+        for model in self.references:
+            reference: ReferenceUrlModel = model[1]
+            if reference.file_path == reference_path:
+                return reference
+        LOG.error(f"No reference with the provided reference path {reference_path}")
+        raise BalsamicError()
 
     def get_reference_output_paths(self) -> List[str]:
         """Return a complete list of output reference paths."""
