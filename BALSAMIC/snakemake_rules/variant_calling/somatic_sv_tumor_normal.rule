@@ -305,7 +305,7 @@ grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.tmpdir}/{params.tu
 grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.normal}_PASS.vcf;
 
 svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
---vcf  {params.tmpdir}/{params.tumor}_tiddit_PASS.vcf {params.tmpdir}/{params.normal}_tiddit_PASS.vcf \
+--vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf \
 > {params.vcfdir}/{params.tumor}_{params.normal}_merged_PASS.vcf ;
 
 python {params.filter_svs} filter_tiddit_TN -v {params.vcfdir}/{params.tumor}_{params.normal}_merged_PASS.vcf \
