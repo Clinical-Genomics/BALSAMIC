@@ -22,45 +22,18 @@ rule download_references:
         if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
             response=$(curl -s -H "Authorization: Basic {params.reference.secret}" "{params.reference.url}")
             download_url=$(echo $response | grep -o 'https://[^"]*')
-            curl "$download_url" -o "{output.reference_path}"
+            cmd="curl '$download_url' -o -"
         elif [[ "{params.reference.url}" == gs://* ]]; then
-            gsutil cp "{params.reference.url}" "{output.reference_path}"
+            cmd="gsutil cp '{params.reference.url}' -"
         else
-            wget "{params.reference.url}" -O "{output.reference_path}"
-        fi &> "{log}"
+            cmd="wget '{params.reference.url}' -O -"
+        fi 
+        if [[ "{params.reference.gzip}" == "True" ]]; then
+            cmd+=" | gunzip"
+        fi
+        eval "$cmd > '{output.reference_path}'" &> "{log}"
         """
 
-
-# rule compress_references:
-#     """Compress balsamic reference files."""
-#     input:
-#         reference_path=f"{config['references_dir']}/{{reference_file}}",
-#     output:
-#         index_path=f"{config['references_dir']}/{{reference_file}}.gz",
-#     threads: get_threads(cluster_config, "download_reference_indexes")
-#     message:
-#         "Downloading reference file {output.reference_path}"
-#     log:
-#         "logs/{reference_file}.gz.log",
-#
-#
-# def download_reference_file(output_file: str):
-#     if ref.gzip:
-#         cmd += " | gunzip "
-#
-#     cmd += " > {}".format(output_file)
-#     shell(cmd)
-#     ref.write_md5
-
-
-# """
-#     if [ "$ref_gzip" == true ]; then
-#         cmd+=" | gunzip"
-#     fi
-#
-#     cmd+=" > $output_file"
-#     eval $cmd
-# """
 # ##########################################################
 # # Preprocess refseq file by fetching relevant columns and
 # # standardize the chr column

@@ -233,6 +233,34 @@ class CacheConfigModel(BaseModel):
         LOG.error(f"No reference with the provided reference path {reference_path}")
         raise BalsamicError()
 
+    def get_reference_paths_by_file_type_and_compression(
+        self, file_type: FileType, compression: bool
+    ) -> List[str]:
+        """Return a list of reference paths given a file type and a compression status."""
+        file_type_references: List[str] = self.get_reference_paths_by_file_type(
+            file_type=file_type
+        )
+        compression_references: List[str] = self.get_reference_paths_by_compression(
+            compression=compression
+        )
+        return list(set(file_type_references).intersection(compression_references))
+
+    def get_reference_paths_by_file_type(self, file_type: FileType) -> List[str]:
+        """Return a list of reference paths given a file type."""
+        return [
+            reference[1].file_path
+            for reference in self.references
+            if reference[1].file_type == file_type
+        ]
+
+    def get_reference_paths_by_compression(self, compression: bool) -> List[str]:
+        """Return a list of reference paths given a compression status."""
+        return [
+            reference[1].file_path
+            for reference in self.references
+            if reference[1].gzip == compression
+        ]
+
     def get_reference_output_paths(self) -> List[str]:
         """Return a complete list of output reference paths."""
         reference_paths: List[str] = [
@@ -256,20 +284,9 @@ class CacheConfigModel(BaseModel):
             + self.references.get_refgene_files()
             + [
                 vcf + ".gz.tbi"
-                for vcf in self.get_reference_paths_by_file_type(
+                for vcf in self.get_reference_paths_by_file_type_and_compression_status(
                     file_type=FileType.VCF, compression=True
                 )
             ]
         )
-        return reference_paths
-
-    def get_reference_paths_by_file_type(
-        self, file_type: FileType, compression: bool
-    ) -> List[str]:
-        """Return a list of reference paths given a file type and a compression status."""
-        reference_paths: List[str] = []
-        for model in self.references:
-            reference: ReferenceUrlModel = model[1]
-            if reference.file_type == file_type and reference.gzip == compression:
-                reference_paths.append(reference.file_path)
         return reference_paths
