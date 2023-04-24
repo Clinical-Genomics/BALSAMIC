@@ -4,7 +4,6 @@
 import logging
 from pathlib import Path
 
-from BALSAMIC.constants.cache import FileType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache_models import CacheConfigModel
@@ -23,18 +22,24 @@ cache_config: CacheConfigModel = CacheConfigModel.parse_obj(config)
 # Rules to include
 for rule in SNAKEMAKE_RULES["cache"]:
     include: Path(BALSAMIC_DIR, rule).as_posix()
+
 LOG.info(f"The rules {SNAKEMAKE_RULES['cache']} will be included in the reference workflow")
+
 
 rule all:
     """Target rule for Balsamic cache generation."""
     input:
         expand(
-            Path(cache_config.containers_dir, "{singularity_image}." + FileType.SIF).as_posix(),
+            f"{cache_config.containers_dir}/{{singularity_image}}.sif",
             singularity_image=cache_config.containers.keys(),
         ),
-        expand(Path(cache_config.references_dir, "{reference_file}"), reference_file=cache_config.get_reference_paths())
+        expand(
+            f"{cache_config.references_dir}/{{reference_file}}",
+            reference_file=cache_config.get_reference_paths(),
+        ),
     output:
-        finish_file=Path(cache_config.references_dir, "reference.finish"),
-    threads: get_threads(cluster_config, "all")
+        finish_file=f"{cache_config.references_dir}/reference.finish",
+    threads:
+        get_threads(cluster_config, "all")
     run:
         write_finish_file(output.finish_file)

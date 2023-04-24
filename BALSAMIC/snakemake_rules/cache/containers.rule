@@ -3,9 +3,9 @@
 
 
 rule download_containers:
-    """Download singularity containers from Docker Hub."""
+    """Download Singularity containers from Docker Hub."""
     output:
-        container_path=f"{config['containers_dir']}/{{singularity_image}}.sif"
+        container_path=f"{config['containers_dir']}/{{singularity_image}}.sif",
     params:
         containers_dir=config["containers_dir"],
         dockerhub_image=lambda wildcards: config["containers"][wildcards.singularity_image],
@@ -14,7 +14,7 @@ rule download_containers:
     message:
         "Downloading singularity image {output.container_path}"
     log:
-        "logs/containers/{singularity_image}.log"
+        "logs/containers/{singularity_image}.log",
     shell:
         """
         export SINGULARITY_TMPDIR={params.containers_dir}

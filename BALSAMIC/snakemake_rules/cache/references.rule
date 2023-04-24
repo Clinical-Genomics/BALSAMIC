@@ -1,18 +1,21 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
 rule download_references:
-    """Download balsamic reference files."""
+    """Download Balsamic reference files."""
     output:
-        reference_path=f"{config['references_dir']}/{{reference_file}}"
+        reference_path=f"{config['references_dir']}/{{reference_file}}",
     params:
-        reference=lambda wildcards: cache_config.get_reference_by_path(Path(config["references_dir"], wildcards.reference_file).as_posix())
+        reference=lambda wildcards: cache_config.get_reference_by_path(
+            Path(config["references_dir"], wildcards.reference_file).as_posix()
+        ),
     threads:
-        get_threads(cluster_config, "download_containers")
+        get_threads(cluster_config, "download_references")
     message:
         "Downloading reference file {output.reference_path}"
     log:
-        "logs/{reference_file}.log"
+        "logs/{reference_file}.log",
     shell:
         """
         export TMPDIR=$(dirname "{output.reference_path}")
@@ -28,8 +31,19 @@ rule download_references:
         """
 
 
-# rule download_reference_indexes:
-#     """Download balsamic reference index files."""
+# rule compress_references:
+#     """Compress balsamic reference files."""
+#     input:
+#         reference_path=f"{config['references_dir']}/{{reference_file}}",
+#     output:
+#         index_path=f"{config['references_dir']}/{{reference_file}}.gz",
+#     threads: get_threads(cluster_config, "download_reference_indexes")
+#     message:
+#         "Downloading reference file {output.reference_path}"
+#     log:
+#         "logs/{reference_file}.gz.log",
+#
+#
 # def download_reference_file(output_file: str):
 #     if ref.gzip:
 #         cmd += " | gunzip "
@@ -37,6 +51,7 @@ rule download_references:
 #     cmd += " > {}".format(output_file)
 #     shell(cmd)
 #     ref.write_md5
+
 
 # """
 #     if [ "$ref_gzip" == true ]; then
@@ -46,8 +61,6 @@ rule download_references:
 #     cmd+=" > $output_file"
 #     eval $cmd
 # """
-
-
 # ##########################################################
 # # Preprocess refseq file by fetching relevant columns and
 # # standardize the chr column
