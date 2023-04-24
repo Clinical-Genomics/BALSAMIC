@@ -102,9 +102,9 @@ def initialize(
         )
         raise click.Abort()
 
-    out_dir: Path = Path(out_dir).resolve()
-    references_dir: Path = Path(out_dir, balsamic_version, genome_version)
-    containers_dir: Path = Path(out_dir, balsamic_version, "containers")
+    out_dir: Path = Path(out_dir, balsamic_version)
+    references_dir: Path = Path(out_dir, genome_version)
+    containers_dir: Path = Path(out_dir, "containers")
     config_path: Path = Path(references_dir, "config.json")
     log_dir: Path = Path(references_dir, "logs")
     script_dir: Path = Path(references_dir, "scripts")
@@ -162,30 +162,30 @@ def initialize(
 
     LOG.info("Starting reference generation workflow...")
     balsamic_run: SnakeMake = SnakeMake()
-    balsamic_run.configfile = config_path.as_posix()
+    balsamic_run.account = account
     balsamic_run.case_name = cache_config.analysis.case_id
-    balsamic_run.working_dir = references_dir
-    balsamic_run.snakefile = snakefile
-    balsamic_run.run_mode = run_mode
-    balsamic_run.scheduler = get_schedulerpy()
     balsamic_run.cluster_config = cluster_config
+    balsamic_run.configfile = config_path.as_posix()
+    balsamic_run.forceall = force_all
+    balsamic_run.log_path = log_dir.as_posix()
+    balsamic_run.mail_type = mail_type
+    balsamic_run.mail_user = mail_user
     balsamic_run.profile = profile
     balsamic_run.qos = qos
-    balsamic_run.account = account
-    balsamic_run.mail_user = mail_user
-    balsamic_run.mail_type = mail_type
-    balsamic_run.sm_opt = snakemake_opt
-    balsamic_run.forceall = force_all
-    balsamic_run.run_analysis = run_analysis
     balsamic_run.quiet = quiet
-    balsamic_run.log_path = log_dir.as_posix()
-    balsamic_run.script_path = script_dir.as_posix()
     balsamic_run.result_path = references_dir.as_posix()
+    balsamic_run.run_analysis = run_analysis
+    balsamic_run.run_mode = run_mode
+    balsamic_run.scheduler = get_schedulerpy()
+    balsamic_run.script_path = script_dir.as_posix()
+    balsamic_run.sm_opt = snakemake_opt
+    balsamic_run.snakefile = snakefile
     balsamic_run.use_singularity = True
     balsamic_run.singularity_bind = [
         references_dir.as_posix(),
         BALSAMIC_DIR,
     ]
+    balsamic_run.working_dir = out_dir
 
     cmd: str = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)

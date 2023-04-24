@@ -13,13 +13,13 @@
 	},
   	"download_containers": {
         "n": 12,
-        "time": "2:00:00",
+        "time": "0:30:00",
         "mail_type": "FAIL",
         "partition": "core"
 	},
      "download_references": {
         "n": 24,
-        "time": "12:00:00",
+        "time": "3:00:00",
         "mail_type": "FAIL",
         "partition": "core"
     }
