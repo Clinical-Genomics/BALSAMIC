@@ -4,26 +4,26 @@
 rule download_references:
     """Download balsamic reference files."""
     output:
-        Path(config["references_dir"], "{reference_file}").as_posix(),
+        reference_path=f"{config['references_dir']}/{{reference_file}}"
     params:
-        reference=lambda wildcards: cache_config.get_reference_by_path(Path(config["references_dir"],wildcards.reference_file).as_posix())
+        reference=lambda wildcards: cache_config.get_reference_by_path(Path(config["references_dir"], wildcards.reference_file).as_posix())
     threads:
         get_threads(cluster_config, "download_containers")
-    log:
-        Path(config["references_dir"], "{reference_file}.log").as_posix()
     message:
-        "Downloading reference file {params.reference.file_path}"
+        "Downloading reference file {output.reference_path}"
+    log:
+        "logs/{reference_file}.log"
     shell:
         """
-        export TMPDIR=$(dirname "{params.reference.file_path}")
+        export TMPDIR=$(dirname "{output.reference_path}")
         if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
             response=$(curl -s -H "Authorization: Basic {params.reference.secret}" "{params.reference.url}")
             download_url=$(echo $response | grep -o 'https://[^"]*')
-            curl "$download_url" -o "{params.reference.file_path}"
+            curl "$download_url" -o "{output.reference_path}"
         elif [[ "{params.reference.url}" == gs://* ]]; then
-            gsutil cp "{params.reference.url}" "{params.reference.file_path}"
+            gsutil cp "{params.reference.url}" "{output.reference_path}"
         else
-            wget "{params.reference.url}" -O "{params.reference.file_path}"
+            wget "{params.reference.url}" -O "{output.reference_path}"
         fi &> "{log}"
         """
 
