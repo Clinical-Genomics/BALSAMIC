@@ -28,7 +28,7 @@
 		"n": 10
 	},
 	"picard_markduplicates": {
-		"time": "03:30:00",
+		"time": "06:00:00",
 		"n": 8
 	},
 	"bwa_mem": {
@@ -93,7 +93,7 @@
 		"n": 4
 	},
 	"sambamba_exon_depth": {
-		"time": "04:00:00",
+		"time": "06:00:00",
 		"n": 8
 	},
 	"sambamba_panel_depth": {
