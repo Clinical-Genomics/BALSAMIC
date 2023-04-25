@@ -3,6 +3,8 @@
 import vcfpy
 import click
 import logging
+from typing import List, Dict
+from BALSAMIC.constants.variant_filters import SV_FILTER_SETTINGS
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -36,6 +38,7 @@ def filter(ctx: click.Context):
     Outputs filtered VCF in standard-out.
     """
     vcf = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
+    filter_settings = SV_FILTER_SETTINGS["tiddit_tumor_normal"]
 
     # Update VCF header
     vcf.header.add_info_line(
@@ -75,7 +78,7 @@ def filter(ctx: click.Context):
 
     vcf.header.add_filter_line(
         vcfpy.OrderedDict(
-            [("ID", "high_normal_af"), ("Description", "AF_N_MAX > 0.25")]
+            [("ID", "high_normal_af"), ("Description", f"AF_N_MAX > {filter_settings['max_normal_allele_frequency']}")]
         )
     )
 
@@ -83,7 +86,7 @@ def filter(ctx: click.Context):
         vcfpy.OrderedDict(
             [
                 ("ID", "high_normal_af_fraction"),
-                ("Description", "(AF_N_MAX / AF_T_MAX) > 0.25"),
+                ("Description", f"(AF_N_MAX / AF_T_MAX) > {filter_settings['max_tin_fraction']}"),
             ]
         )
     )
@@ -101,104 +104,106 @@ def filter(ctx: click.Context):
 
     # Set soft filters for variants based on presence in the normal sample
     for sv in vcf:
-        info = dict([*sv.INFO.items()])
+        info: dict = sv.INFO
 
         # Set default values
-        ctg_t, ctg_n = False, False
-        af_t, af_n = 0, 0
+        tumor_has_contig, normal_has_contig = False, False
+        allele_frequency_tumor, allele_frequency_normal = 0, 0
 
         # Extract allele frequency and contig-status for variant in T and N
         if "TUMOR_PASS_SAMPLE" in info:
-            pass_sample = info["TUMOR_PASS_SAMPLE"]
-            pass_info = info["TUMOR_PASS_INFO"]
-            print(type(pass_sample))
-            print(type(pass_info))
-            af_t, max_af_index = calc_max_af(pass_sample)
-            if af_t == 0:
+            pass_sample: List[str] = info["TUMOR_PASS_SAMPLE"]
+            pass_info: List[str] = info["TUMOR_PASS_INFO"]
+            allele_frequency_tumor, max_af_index = calc_max_af(pass_sample)
+            if allele_frequency_tumor == 0:
                 get_any_contig = True
             else:
                 get_any_contig = False
-            ctg_t = find_ctg(pass_info, max_af_index, get_any_contig)
+            tumor_has_contig: bool = look_for_contigs(pass_info, max_af_index, get_any_contig)
 
         if "NORMAL_PASS_SAMPLE" in info:
-            pass_sample = info["NORMAL_PASS_SAMPLE"]
-            pass_info = info["NORMAL_PASS_INFO"]
-            af_n, max_af_index = calc_max_af(pass_sample)
-            if af_n == 0:
+            pass_sample: List[str] = info["NORMAL_PASS_SAMPLE"]
+            pass_info: List[str] = info["NORMAL_PASS_INFO"]
+            allele_frequency_normal, max_af_index = calc_max_af(pass_sample)
+            if allele_frequency_normal == 0:
                 get_any_contig = True
             else:
                 get_any_contig = False
-            ctg_n = find_ctg(pass_info, max_af_index, get_any_contig)
+            normal_has_contig: bool = look_for_contigs(pass_info, max_af_index, get_any_contig)
 
         # Set filter statuses
-        if af_t == 0 and not ctg_t:
+        if allele_frequency_tumor == 0 and not tumor_has_contig:
             sv.add_filter("normal_variant")
         else:
-            # Regardless of CTG, set filter if AF_T / AF_N > 0.25
-            if af_t > 0:
-                if float(af_n / af_t) > 0.25:
-                    sv.add_filter("high_normal_af_fraction")
+            # Regardless of CTG, set filter if AF_T / AF_N > max_tin_fraction
+            normal_tumor_af_ratio = float(allele_frequency_normal / allele_frequency_tumor) if allele_frequency_tumor > 0 else 0
+            if normal_tumor_af_ratio > filter_settings["max_tin_fraction"]:
+                sv.add_filter("high_normal_af_fraction")
 
             # Set filter if AF_N > 0.25
-            if af_n > 0.25:
+            if allele_frequency_normal > filter_settings["max_normal_allele_frequency"]:
                 sv.add_filter("high_normal_af")
 
             # Set filter if CTG_N = True, AF_N is 0 and AF_T is below 0.25
-            if ctg_n and af_n == 0 and af_t <= 0.25:
+            if normal_has_contig and allele_frequency_normal == 0 and allele_frequency_tumor <= 0.25:
                 sv.add_filter("in_normal")
 
-        sv.INFO["AF_T_MAX"] = [round(af_t, 4)]
-        sv.INFO["AF_N_MAX"] = [round(af_n, 4)]
+        sv.INFO["AF_T_MAX"] = [round(allele_frequency_tumor, 4)]
+        sv.INFO["AF_N_MAX"] = [round(allele_frequency_normal, 4)]
 
-        #writer.write_record(sv)
+        writer.write_record(sv)
 
-def is_ctg(variant):
+def has_contig(variant: str) -> bool:
     """
+    Parses input string into a nested [key, value] list and looks for presence of a contig.
 
-    :return:
+    Args:
+        variant: input string for a variant from the list [SAMPLE]_PASS_INFO
+
+    Returns:
+        Bool(True or False) based on if contig was found or not.
     """
-    fields = variant.split("|")
-    contig = False
+    fields: List[str] = variant.split("|")
     for field in fields:
         field_name_value = field.split(":")
         field_name = field_name_value[0]
         if field_name == "CTG":
-            contig_value = field_name_value[1]
-            if contig_value != ".":
-                contig = True
-        return contig
-def find_ctg(sample_info, max_af_index, get_any_contig):
+            field_value = field_name_value[1]
+            if field_value != ".":
+                return True
+    return False
+def look_for_contigs(sample_info: List[str], max_af_index: int, get_any_contig: bool) -> bool:
     """
-    Looks for contig in the variant with the highest AF.
+    Directs parsing of sample_info to look for contig in either variant with max_af or any variant in sample_info.
 
-    :param sample_info: SAMPLE_PASS_INFO[variant with highest AF]
-    :return: bool(if contig exists for max-AF variant or not).
+    Args:
+        sample_info: A list of variants from [SAMPLE]_PASS_INFO
+        max_af_index: Integer index for variant in sample_info list with the highest allele frequency
+        get_any_contig: Boolean if it should look for a contig in any of the variants, not only max_af_index
+
+    Returns:
+        Bool(True or False) based on if contig was found or not.
     """
-    contig = False
     if get_any_contig:
         for variant in sample_info:
-            contig = is_ctg(variant)
-            if contig:
-                return contig
+            return has_contig(variant)
     else:
         max_af_variant = sample_info[max_af_index]
-        contig = is_ctg(max_af_variant)
-    return contig
+        return has_contig(max_af_variant)
 
-def calc_max_af(pass_sample):
+def calc_max_af(pass_sample: List[str]) -> tuple[float, int]:
     """
-    Inputs fields from TIDDIT variant INFO field,
-    calculates max AF for merged variants and looks for contig in max-af variant.
+    Parses [SAMPLE]_PASS_SAMPLE field from TIDDIT info-field, returns the highest allele frequency for
+    all merged variants in the sample and the position of this variant in the list.
 
-    :param pass_sample: TUMOR_PASS_SAMPLE / NORMAL_PASS_SAMPLE
-    :param pass_info: TUMOR_PASS_INFO / NORMAL_PASS_INFO
+    Args:
+         pass_sample: list of information for variant/s within TUMOR_PASS_SAMPLE / NORMAL_PASS_SAMPLE
 
-    :return: float(maximum allele frequency), and bool(if contig exists for max-AF variant or not).
+    Returns:
+         float(maximum allele frequency), and int(position in list of max af variant)
     """
     max_allele_frequency = 0
     max_af_variant_index = 0
-    B1_cov = 0
-    B2_cov = 0
     total_cov = 0
     DV = 0
     RV = 0
@@ -209,9 +214,9 @@ def calc_max_af(pass_sample):
             field_name_value = field.split(":")
             field_name = field_name_value[0]
             if field_name == "COV":
-                B1_cov = field_name_value[1]
-                B2_cov = field_name_value[3]
-                total_cov = int(B1_cov) + int(B2_cov)
+                b1_cov = field_name_value[1]
+                b2_cov = field_name_value[3]
+                total_cov = int(b1_cov) + int(b2_cov)
 
             if field_name == "DV":
                 DV = int(field_name_value[1])
@@ -236,13 +241,13 @@ def rescue_bnds(ctx: click.Context):
     Rescue BND-variants with at least 1 of 2 BNDs set to PASS.
     Outputs VCF in standard-out.
     """
+    # First read of VCF-file:
     vcf_start = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
 
-    # First read of VCF-file:
     # define dict with bnd_id - bnd_num - FILTER
-    bnd_filter_dict = {}
+    bnd_filter_dict: dict = {}
     for sv in vcf_start:
-        info = dict([*sv.INFO.items()])
+        info: dict = sv.INFO
 
         svtype = info["SVTYPE"]
         # only relevant for bnd-variants and tumor-variants
@@ -254,16 +259,16 @@ def rescue_bnds(ctx: click.Context):
                 bnd_filter_dict[bnd_id] = {}
 
             if sv_id_num in bnd_filter_dict[bnd_id]:
-                logging.warning(
+                LOG.warning(
                     f"Conflicting BND-names: {bnd_id}, will not attempt to rescue: {sv}"
                 )
                 continue
 
-        bnd_filter_dict[bnd_id][sv_id_num] = sv.FILTER
+            bnd_filter_dict[bnd_id][sv_id_num] = sv.FILTER
 
     # Second read of VCF-file:
+    vcf = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
     # Update VCF header
-    vcf = vcfpy.Reader.from_path(vcf_file)
     vcf.header.add_info_line(
         vcfpy.OrderedDict(
             [
@@ -286,32 +291,38 @@ def rescue_bnds(ctx: click.Context):
     )
 
     writer = vcfpy.Writer.from_path("/dev/stdout", vcf.header)
+
     # Annotate and remove BND filters with PASS
     for sv in vcf:
-        info = dict([*sv.INFO.items()])
+        info: dict = sv.INFO
         svtype = info["SVTYPE"]
         # only relevant for bnd and tumor-variants
-        if svtype == "BND" and "TUMOR_PASS_CHROM":
-            print(type(info))
+        if svtype == "BND" and "TUMOR_PASS_CHROM" in info:
             bnd_id, sv_id_num = get_bnd_id(info)
             sv.INFO["BND_ID"] = [bnd_id]
 
             filter_bnds = bnd_filter_dict[bnd_id]
+            # change filter if any of the 2 BNDs are PASS
             if "1" in filter_bnds and "2" in filter_bnds and ("PASS" in filter_bnds["1"] or "PASS" in filter_bnds["2"]):
                 sv.FILTER = ["PASS"]
+            writer.write_record(sv)
         else:
             # simply output non-bnd and normal-variants
-            pass
-            #writer.write_record(sv)
+            writer.write_record(sv)
 
-def get_bnd_id(info):
+def get_bnd_id(info: dict) -> tuple[str, str]:
     """
-    Creates and returns unique BND ID based on information in INFO field.
+    Creates a unique variant ID for BND variants based on information in the info field.
+    This info field may contain multiple BND-variants merged within a sample.
+    In this case, the info for the first variant is chosen.
 
-    :param info: Variant INFO field
-    :return: unique breakend ID based on SVID and RegionA, and the BND number (1 or 2)
+    Args:
+         info: dict with information for BND variant/s in the VCF.
+
+    Returns:
+         str(unique ID for the BND variant) str(the 1st or 2nd BND)
     """
-    # example: SV_2414_1
+    # example: SV_2414_1, SV_2414 = sv_id_name, 1 = sv_id_num
     sv_id = info["TUMOR_PASS_CHROM"][0].split("|")[0]
 
     # extract sv_id and breakend number
