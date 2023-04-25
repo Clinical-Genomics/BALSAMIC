@@ -1,4 +1,6 @@
 # Define set of rules
+from BALSAMIC.constants.cache import GenomeVersion
+
 SNAKEMAKE_RULES = {
     "common": {
         "concatenate": ["snakemake_rules/concatenation/concatenation.rule"],
@@ -120,10 +122,27 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
-    "cache": [
-        "snakemake_rules/cache/containers.rule",
-        "snakemake_rules/cache/references.rule",
-    ],
+    "cache": {
+        GenomeVersion.HG19: [
+            "snakemake_rules/cache/containers.rule",
+            "snakemake_rules/cache/references/delly.rule",
+            "snakemake_rules/cache/references/reference_genome.rule",
+            "snakemake_rules/cache/references/references.rule",
+            "snakemake_rules/cache/references/refseq.rule",
+            "snakemake_rules/cache/references/vep.rule",
+        ],
+        GenomeVersion.HG38: [
+            "snakemake_rules/cache/containers.rule",
+            "snakemake_rules/cache/references/delly.rule",
+            "snakemake_rules/cache/references/reference_genome.rule",
+            "snakemake_rules/cache/references/references.rule",
+            "snakemake_rules/cache/references/refseq.rule",
+            "snakemake_rules/cache/references/vep.rule",
+        ],
+        GenomeVersion.CanFam3: [
+            # TODO
+        ],
+    },
 }
 
 

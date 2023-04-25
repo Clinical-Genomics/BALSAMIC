@@ -1,0 +1,30 @@
+# ##########################################################
+# # ENSEMBL VEP - download and install vep package,
+# #                 cache conversion
+# ##########################################################
+#
+#
+# rule vep_install:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#     params:
+#         species="homo_sapiens_merged",
+#         assembly="GRCh37" if genome_version == "hg19" else "GRCh38",
+#         plugins="all",
+#     output:
+#         directory(vep_dir),
+#     log:
+#         Path(vep_dir, "vep_install_cache.log"),
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("ensembl-vep") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# vep_install --SPECIES {params.species} \
+# --AUTO cfp \
+# --ASSEMBLY {params.assembly} \
+# --CACHEDIR {output} \
+# --PLUGINS {params.plugins} \
+# --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log};
+#         """

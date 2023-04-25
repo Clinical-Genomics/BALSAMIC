@@ -1,0 +1,63 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule download_references:
+    """Download Balsamic reference files."""
+    output:
+        reference_path=f"{config['references_dir']}/{{reference_file}}",
+    params:
+        reference=lambda wildcards: cache_config.get_reference_by_path(
+            Path(config["references_dir"], wildcards.reference_file).as_posix()
+        ),
+    threads:
+        get_threads(cluster_config, "download_references")
+    message:
+        "Downloading reference file {output.reference_path}"
+    log:
+        "logs/{reference_file}.log",
+    shell:
+        """
+        export TMPDIR=$(dirname "{output.reference_path}")
+        if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
+            response=$(curl -s -H "Authorization: Basic {params.reference.secret}" "{params.reference.url}")
+            download_url=$(echo $response | grep -o 'https://[^"]*')
+            cmd="curl '$download_url' -o -"
+        elif [[ "{params.reference.url}" == gs://* ]]; then
+            cmd="gsutil cp '{params.reference.url}' -"
+        else
+            cmd="wget '{params.reference.url}' -O -"
+        fi 
+        if [[ "{params.reference.gzip}" == "True" ]]; then
+            cmd+=" | gunzip"
+        fi
+        eval "$cmd > '{output.reference_path}'" &> "{log}"
+        """
+
+
+
+
+# ##########################################################
+# # bgzip and tabix the vcf files that are vcf
+# ##########################################################
+#
+#
+# rule bgzip_tabix:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         vcf=Path(vcf_dir, "{vcf}.vcf"),
+#     params:
+#         type="vcf",
+#     output:
+#         Path(vcf_dir, "{vcf}.vcf.gz"),
+#         Path(vcf_dir, "{vcf}.vcf.gz.tbi"),
+#     log:
+#         Path(vcf_dir, "{vcf}.vcf.gz_tbi.log"),
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# bgzip {input.vcf} && tabix -p {params.type} {input.vcf}.gz 2> {log};
+#         """

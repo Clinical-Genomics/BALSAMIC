@@ -20,10 +20,10 @@ shell.prefix("set -euo pipefail; ")
 cache_config: CacheConfigModel = CacheConfigModel.parse_obj(config)
 
 # Rules to include
-for rule in SNAKEMAKE_RULES["cache"]:
+for rule in SNAKEMAKE_RULES["cache"][cache_config.genome_version]:
     include: Path(BALSAMIC_DIR, rule).as_posix()
 
-LOG.info(f"The rules {SNAKEMAKE_RULES['cache']} will be included in the reference workflow")
+LOG.info(f"The rules {SNAKEMAKE_RULES['cache'][cache_config.genome_version]} will be included in the reference workflow")
 
 
 rule all:

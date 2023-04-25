@@ -1,0 +1,71 @@
+
+# ##########################################################
+# # Create BWA Index for reference genome
+# ##########################################################
+#
+#
+# rule bwa_index:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         reference_genome=reference_genome_url.get_output_file,
+#     output:
+#         expand(
+#             reference_genome_url.get_output_file + "{ext}",
+#             ext=[".amb", ".ann", ".bwt", ".pac", ".sa"],
+#         ),
+#     log:
+#         reference_genome_url.get_output_file + ".bwa_index.log",
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# bwa index -a bwtsw {input.reference_genome} 2> {log};
+#         """
+
+
+# ##########################################################
+# # Create index for fasta file - .fai
+# ##########################################################
+#
+#
+# rule samtools_index_fasta:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         reference_genome=reference_genome_url.get_output_file,
+#     output:
+#         reference_genome_url.get_output_file + ".fai",
+#     log:
+#         reference_genome_url.get_output_file + ".faidx.log",
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# samtools faidx {input.reference_genome} 2> {log};
+#         """
+
+
+# ##########################################################
+# # create reference dictionary using picard
+# ##########################################################
+#
+#
+# rule picard_ref_dict:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         reference_genome=reference_genome_url.get_output_file,
+#     output:
+#         reference_genome_url.get_output_file.replace("fasta", "dict"),
+#     log:
+#         reference_genome_url.get_output_file + ".ref_dict.log",
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# picard CreateSequenceDictionary REFERENCE={input.reference_genome} OUTPUT={output} 2> {log};
+#         """

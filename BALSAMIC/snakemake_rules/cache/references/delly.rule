@@ -1,0 +1,24 @@
+# ##########################################################
+# # Remove chr from delly exclusion
+# ##########################################################
+#
+#
+# rule prepare_delly_exclusion:
+#     input:
+#         singularity_img=cache_config.container_paths,
+#         delly_exclusion=delly_exclusion_url.get_output_file,
+#     output:
+#         delly_exclusion_converted=delly_exclusion_url.get_output_file.replace(
+#             ".tsv", "_converted.tsv"
+#         ),
+#     log:
+#         Path(reference_dir, "genome", "delly_exclusion.log"),
+#     singularity:
+#         Path(
+#             singularity_image_path, config["bioinfo_tools"].get("delly") + ".sif"
+#         ).as_posix()
+#     shell:
+#         """
+# sed 's/chr//g' {input.delly_exclusion} > {output.delly_exclusion_converted} 2> {log}
+#         """
+
