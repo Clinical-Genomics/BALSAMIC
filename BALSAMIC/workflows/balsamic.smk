@@ -93,7 +93,7 @@ research_annotations.append( {
 research_annotations.append( {
     'annotation': [{
     'file': Path(config["reference"]["cadd_snv"]).as_posix(),
-    'fields': ["CADD"],
+    'names': ["CADD"],
     'ops': ["mean"],
     'columns': [6]
     }]
