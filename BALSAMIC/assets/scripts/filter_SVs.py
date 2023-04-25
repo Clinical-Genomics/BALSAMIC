@@ -1,14 +1,25 @@
 #!/usr/bin/env python
 
 import vcfpy
+from vcfpy import Reader
 import click
 import logging
-from typing import List
-from BALSAMIC.constants.variant_filters import SV_FILTER_SETTINGS
+from typing import List, Dict, Tuple
 
 LOG = logging.getLogger(__name__)
 
-
+SV_FILTER_SETTINGS = {
+    "tiddit_tumor_normal": {
+        "max_tin_fraction": {
+            "filter": "high_normal_af_fraction",
+            "value": 0.25,
+        },
+        "max_normal_allele_frequency": {
+            "filter": "high_normal_af",
+            "value": 0.25,
+        }
+    }
+}
 @click.group()
 def cli():
     """
@@ -36,8 +47,6 @@ def tiddit_tn(ctx, vcf_file):
     """
     ctx.obj = {}
     ctx.obj["vcf_file"] = vcf_file
-    pass
-
 
 @tiddit_tn.command("filter")
 @click.pass_context
@@ -46,8 +55,8 @@ def filter(ctx: click.Context):
     Add soft-filters based on presence of variants in normal.
     Outputs filtered VCF in standard-out.
     """
-    vcf = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
-    filter_settings = SV_FILTER_SETTINGS["tiddit_tumor_normal"]
+    vcf: Reader = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
+    filter_settings: Dict[str, Dict] = SV_FILTER_SETTINGS["tiddit_tumor_normal"]
 
     # Update VCF header
     vcf.header.add_info_line(
@@ -88,10 +97,10 @@ def filter(ctx: click.Context):
     vcf.header.add_filter_line(
         vcfpy.OrderedDict(
             [
-                ("ID", "high_normal_af"),
+                ("ID", f"{filter_settings['max_normal_allele_frequency']['filter']}"),
                 (
                     "Description",
-                    f"AF_N_MAX > {filter_settings['max_normal_allele_frequency']}",
+                    f"AF_N_MAX > {filter_settings['max_normal_allele_frequency']['value']}",
                 ),
             ]
         )
@@ -100,10 +109,10 @@ def filter(ctx: click.Context):
     vcf.header.add_filter_line(
         vcfpy.OrderedDict(
             [
-                ("ID", "high_normal_af_fraction"),
+                ("ID", f"{filter_settings['max_tin_fraction']['filter']}"),
                 (
                     "Description",
-                    f"(AF_N_MAX / AF_T_MAX) > {filter_settings['max_tin_fraction']}",
+                    f"(AF_N_MAX / AF_T_MAX) > {filter_settings['max_tin_fraction']['value']}",
                 ),
             ]
         )
@@ -132,7 +141,7 @@ def filter(ctx: click.Context):
         if "TUMOR_PASS_SAMPLE" in info:
             pass_sample: List[str] = info["TUMOR_PASS_SAMPLE"]
             pass_info: List[str] = info["TUMOR_PASS_INFO"]
-            allele_frequency_tumor, max_af_index = calc_max_af(pass_sample)
+            allele_frequency_tumor, max_af_index = get_max_allele_frequency(pass_sample)
             if allele_frequency_tumor == 0:
                 get_any_contig = True
             else:
@@ -140,21 +149,21 @@ def filter(ctx: click.Context):
             tumor_has_contig: bool = look_for_contigs(
                 variant_info_pass_field=pass_info,
                 max_allele_frequency_variant_index=max_af_index,
-                bool_look_in_all_variants=get_any_contig,
+                look_in_all_variants=get_any_contig,
             )
 
         if "NORMAL_PASS_SAMPLE" in info:
             pass_sample: List[str] = info["NORMAL_PASS_SAMPLE"]
             pass_info: List[str] = info["NORMAL_PASS_INFO"]
-            allele_frequency_normal, max_af_index = calc_max_af(pass_sample)
+            allele_frequency_normal, max_af_index = get_max_allele_frequency(pass_sample)
             if allele_frequency_normal == 0:
-                get_any_contig = True
+                get_any_contig: bool = True
             else:
-                get_any_contig = False
+                get_any_contig: bool = False
             normal_has_contig: bool = look_for_contigs(
                 variant_info_pass_field=pass_info,
                 max_allele_frequency_variant_index=max_af_index,
-                bool_look_in_all_variants=get_any_contig,
+                look_in_all_variants=get_any_contig,
             )
 
         # Set filter statuses
@@ -167,11 +176,11 @@ def filter(ctx: click.Context):
                 if allele_frequency_tumor > 0
                 else 0
             )
-            if normal_tumor_af_ratio > filter_settings["max_tin_fraction"]:
+            if normal_tumor_af_ratio > filter_settings["max_tin_fraction"]["value"]:
                 sv.add_filter("high_normal_af_fraction")
 
             # Set filter if AF_N > 0.25
-            if allele_frequency_normal > filter_settings["max_normal_allele_frequency"]:
+            if allele_frequency_normal > filter_settings["max_normal_allele_frequency"]["value"]:
                 sv.add_filter("high_normal_af")
 
             # Set filter if CTG_N = True, AF_N is 0 and AF_T is below 0.25
@@ -200,10 +209,10 @@ def has_contig(variant: str) -> bool:
     """
     fields: List[str] = variant.split("|")
     for field in fields:
-        field_name_value = field.split(":")
-        field_name = field_name_value[0]
+        field_name_value: List[str] = field.split(":")
+        field_name: str = field_name_value[0]
         if field_name == "CTG":
-            field_value = field_name_value[1]
+            field_value: str = field_name_value[1]
             if field_value != ".":
                 return True
     return False
@@ -227,15 +236,14 @@ def look_for_contigs(
     """
     if bool_look_in_all_variants:
         for variant_info in variant_info_pass_field:
+            variant_info: List[str] = variant_info
             return has_contig(variant_info)
-    else:
-        max_af_variant_info = variant_info_pass_field[
-            max_allele_frequency_variant_index
-        ]
-        return has_contig(max_af_variant_info)
+
+    max_af_variant_info: List[str] = variant_info_pass_field[max_allele_frequency_variant_index]
+    return has_contig(max_af_variant_info)
 
 
-def calc_max_af(pass_sample: List[str]) -> tuple[float, int]:
+def get_max_allele_frequency(pass_sample: List[str]) -> Tuple[float, int]:
     """
     Parses [SAMPLE]_PASS_SAMPLE field from TIDDIT info-field, returns the highest allele frequency for
     all merged variants in the sample and the position of this variant in the list.
@@ -253,14 +261,14 @@ def calc_max_af(pass_sample: List[str]) -> tuple[float, int]:
     RV = 0
 
     for variant_idx, variant in enumerate(pass_sample):
-        fields = variant.split("|")
+        fields: List[str] = variant.split("|")
         for field in fields:
-            field_name_value = field.split(":")
-            field_name = field_name_value[0]
+            field_name_value: List[str] = field.split(":")
+            field_name: str = field_name_value[0]
             if field_name == "COV":
-                b1_cov = field_name_value[1]
-                b2_cov = field_name_value[3]
-                total_cov = int(b1_cov) + int(b2_cov)
+                b1_cov = int(field_name_value[1])
+                b2_cov = int(field_name_value[3])
+                total_cov: int = b1_cov + b2_cov
 
             if field_name == "DV":
                 DV = int(field_name_value[1])
@@ -274,8 +282,8 @@ def calc_max_af(pass_sample: List[str]) -> tuple[float, int]:
             allele_frequency = 0
 
         if allele_frequency > max_allele_frequency:
-            max_af_variant_index = variant_idx
-            max_allele_frequency = allele_frequency
+            max_af_variant_index: int = variant_idx
+            max_allele_frequency: float = allele_frequency
     return max_allele_frequency, max_af_variant_index
 
 
@@ -287,7 +295,7 @@ def rescue_bnds(ctx: click.Context):
     Outputs VCF in standard-out.
     """
     # First read of VCF-file:
-    vcf_start = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
+    vcf_start: Reader = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
 
     # define dict with bnd_id - bnd_num - FILTER
     bnd_filter_dict: dict = {}
@@ -311,7 +319,7 @@ def rescue_bnds(ctx: click.Context):
             bnd_filter_dict[bnd_id][sv_id_num] = sv.FILTER
 
     # Second read of VCF-file:
-    vcf = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
+    vcf: Reader = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
     # Update VCF header
     vcf.header.add_info_line(
         vcfpy.OrderedDict(
@@ -359,7 +367,7 @@ def rescue_bnds(ctx: click.Context):
             writer.write_record(sv)
 
 
-def get_bnd_id(variant_info_field: dict) -> tuple[str, str]:
+def get_bnd_id(variant_info_field: dict) -> Tuple[str, str]:
     """
     Creates a unique variant ID for BND variants based on information in the info field.
     This info field may contain multiple BND-variants merged within a sample.
