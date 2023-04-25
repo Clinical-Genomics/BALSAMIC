@@ -185,7 +185,7 @@ def initialize(
         references_dir.as_posix(),
         BALSAMIC_DIR,
     ]
-    balsamic_run.working_dir = out_dir
+    balsamic_run.working_dir = references_dir
 
     cmd: str = sys.executable + " -m " + balsamic_run.build_cmd()
     subprocess.run(cmd, shell=True)
