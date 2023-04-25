@@ -110,10 +110,3 @@ SVDB_FILTER_SETTINGS = {
     "analysis_type": "tumor_only,tumor_normal",
     "description": "General purpose filters used for filtering svdb merged sv",
 }
-
-SV_FILTER_SETTINGS = {
-    "tiddit_tumor_normal": {
-        "max_tin_fraction": 0.25,
-        "max_normal_allele_frequency": 0.25,
-    }
-}
