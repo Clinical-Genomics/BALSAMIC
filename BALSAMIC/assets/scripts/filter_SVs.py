@@ -17,9 +17,11 @@ SV_FILTER_SETTINGS = {
         "max_normal_allele_frequency": {
             "filter": "high_normal_af",
             "value": 0.25,
-        }
+        },
     }
 }
+
+
 @click.group()
 def cli():
     """
@@ -47,6 +49,7 @@ def tiddit_tn(ctx, vcf_file):
     """
     ctx.obj = {}
     ctx.obj["vcf_file"] = vcf_file
+
 
 @tiddit_tn.command("filter")
 @click.pass_context
@@ -154,7 +157,10 @@ def filter(ctx: click.Context):
                 sv.add_filter("high_normal_af_fraction")
 
             # Set filter if AF_N > 0.25
-            if allele_frequency_normal > filter_settings["max_normal_allele_frequency"]["value"]:
+            if (
+                allele_frequency_normal
+                > filter_settings["max_normal_allele_frequency"]["value"]
+            ):
                 sv.add_filter("high_normal_af")
 
             # Set filter if CTG_N = True, AF_N is 0 and AF_T is below 0.25
@@ -213,7 +219,9 @@ def look_for_contigs(
             variant_info: List[str] = variant_info
             return has_contig(variant_info)
 
-    max_af_variant_info: List[str] = variant_info_pass_field[max_allele_frequency_variant_index]
+    max_af_variant_info: List[str] = variant_info_pass_field[
+        max_allele_frequency_variant_index
+    ]
     return has_contig(max_af_variant_info)
 
 
@@ -260,6 +268,7 @@ def get_max_allele_frequency(pass_sample: List[str]) -> Tuple[float, int]:
             max_allele_frequency: float = allele_frequency
     return max_allele_frequency, max_af_variant_index
 
+
 def get_tumor_normal_evidence(variant_info_field: dict) -> dict:
     """
     Collects the read evidence for the variant in the tumor and normal sample.
@@ -304,11 +313,15 @@ def get_tumor_normal_evidence(variant_info_field: dict) -> dict:
             look_in_all_variants=get_any_contig,
         )
 
-    evidence_dict: dict = {"tumor_max_af": allele_frequency_tumor,
-                     "normal_max_af": allele_frequency_normal,
-                     "tumor_has_contig": tumor_has_contig,
-                     "normal_has_contig": normal_has_contig}
+    evidence_dict: dict = {
+        "tumor_max_af": allele_frequency_tumor,
+        "normal_max_af": allele_frequency_normal,
+        "tumor_has_contig": tumor_has_contig,
+        "normal_has_contig": normal_has_contig,
+    }
     return evidence_dict
+
+
 @tiddit_tn.command("rescue_bnds")
 @click.pass_context
 def rescue_bnds(ctx: click.Context):
@@ -410,7 +423,9 @@ def get_bnd_id(variant_info_field: dict) -> Tuple[str, str]:
     sv_id_num: str = sv_id_split[2]
 
     # define unique breakend_name
-    region_a: str = f"{variant_info_field['REGIONA'][0]}_{variant_info_field['REGIONA'][1]}"
+    region_a: str = (
+        f"{variant_info_field['REGIONA'][0]}_{variant_info_field['REGIONA'][1]}"
+    )
     bnd_id: str = f"{sv_id_name}_{region_a}"
     return bnd_id, sv_id_num
 
