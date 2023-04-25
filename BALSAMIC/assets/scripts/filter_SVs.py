@@ -3,9 +3,8 @@
 import vcfpy
 import click
 import logging
-from typing import List, Dict
+from typing import List
 from BALSAMIC.constants.variant_filters import SV_FILTER_SETTINGS
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -119,7 +118,9 @@ def filter(ctx: click.Context):
                 get_any_contig = True
             else:
                 get_any_contig = False
-            tumor_has_contig: bool = look_for_contigs(pass_info, max_af_index, get_any_contig)
+            tumor_has_contig: bool = look_for_contigs(variant_info_pass_field=pass_info,
+                                                      max_allele_frequency_variant_index=max_af_index,
+                                                      bool_look_in_all_variants=get_any_contig)
 
         if "NORMAL_PASS_SAMPLE" in info:
             pass_sample: List[str] = info["NORMAL_PASS_SAMPLE"]
@@ -129,7 +130,9 @@ def filter(ctx: click.Context):
                 get_any_contig = True
             else:
                 get_any_contig = False
-            normal_has_contig: bool = look_for_contigs(pass_info, max_af_index, get_any_contig)
+            normal_has_contig: bool = look_for_contigs(variant_info_pass_field=pass_info,
+                                                      max_allele_frequency_variant_index=max_af_index,
+                                                      bool_look_in_all_variants=get_any_contig)
 
         # Set filter statuses
         if allele_frequency_tumor == 0 and not tumor_has_contig:
@@ -172,24 +175,24 @@ def has_contig(variant: str) -> bool:
             if field_value != ".":
                 return True
     return False
-def look_for_contigs(sample_info: List[str], max_af_index: int, get_any_contig: bool) -> bool:
+def look_for_contigs(variant_info_pass_field: List[str], max_allele_frequency_variant_index: int, bool_look_in_all_variants: bool) -> bool:
     """
     Directs parsing of sample_info to look for contig in either variant with max_af or any variant in sample_info.
 
     Args:
-        sample_info: A list of variants from [SAMPLE]_PASS_INFO
-        max_af_index: Integer index for variant in sample_info list with the highest allele frequency
-        get_any_contig: Boolean if it should look for a contig in any of the variants, not only max_af_index
+        variant_info_pass_field: A list of variants from [SAMPLE]_PASS_INFO
+        max_allele_frequency_variant_index: Integer index for variant in sample_info list with the highest allele frequency
+        bool_look_in_all_variants: Boolean if it should look for a contig in any of the variants, not only max_af_index
 
     Returns:
         Bool(True or False) based on if contig was found or not.
     """
-    if get_any_contig:
-        for variant in sample_info:
-            return has_contig(variant)
+    if bool_look_in_all_variants:
+        for variant_info in variant_info_pass_field:
+            return has_contig(variant_info)
     else:
-        max_af_variant = sample_info[max_af_index]
-        return has_contig(max_af_variant)
+        max_af_variant_info = variant_info_pass_field[max_allele_frequency_variant_index]
+        return has_contig(max_af_variant_info)
 
 def calc_max_af(pass_sample: List[str]) -> tuple[float, int]:
     """
@@ -298,7 +301,7 @@ def rescue_bnds(ctx: click.Context):
         svtype = info["SVTYPE"]
         # only relevant for bnd and tumor-variants
         if svtype == "BND" and "TUMOR_PASS_CHROM" in info:
-            bnd_id, sv_id_num = get_bnd_id(info)
+            bnd_id, sv_id_num = get_bnd_id(variant_info_field=info)
             sv.INFO["BND_ID"] = [bnd_id]
 
             filter_bnds = bnd_filter_dict[bnd_id]
@@ -310,20 +313,20 @@ def rescue_bnds(ctx: click.Context):
             # simply output non-bnd and normal-variants
             writer.write_record(sv)
 
-def get_bnd_id(info: dict) -> tuple[str, str]:
+def get_bnd_id(variant_info_field: dict) -> tuple[str, str]:
     """
     Creates a unique variant ID for BND variants based on information in the info field.
     This info field may contain multiple BND-variants merged within a sample.
     In this case, the info for the first variant is chosen.
 
     Args:
-         info: dict with information for BND variant/s in the VCF.
+         variant_info_field: dict with information for BND variant/s in the VCF.
 
     Returns:
          str(unique ID for the BND variant) str(the 1st or 2nd BND)
     """
     # example: SV_2414_1, SV_2414 = sv_id_name, 1 = sv_id_num
-    sv_id = info["TUMOR_PASS_CHROM"][0].split("|")[0]
+    sv_id = variant_info_field["TUMOR_PASS_CHROM"][0].split("|")[0]
 
     # extract sv_id and breakend number
     sv_id_split = sv_id.split("_")
@@ -331,7 +334,7 @@ def get_bnd_id(info: dict) -> tuple[str, str]:
     sv_id_num = sv_id_split[2]
 
     # define unique breakend_name
-    region_a = f"{info['REGIONA'][0]}_{info['REGIONA'][1]}"
+    region_a = f"{variant_info_field['REGIONA'][0]}_{variant_info_field['REGIONA'][1]}"
     bnd_id = f"{sv_id_name}_{region_a}"
     return bnd_id, sv_id_num
 
