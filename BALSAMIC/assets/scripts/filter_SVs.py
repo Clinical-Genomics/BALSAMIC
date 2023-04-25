@@ -131,40 +131,14 @@ def filter(ctx: click.Context):
 
     # Set soft filters for variants based on presence in the normal sample
     for sv in vcf:
-        info: dict = sv.INFO
+        variant_info_field: dict = sv.INFO
 
-        # Set default values
-        tumor_has_contig, normal_has_contig = False, False
-        allele_frequency_tumor, allele_frequency_normal = 0, 0
-
-        # Extract allele frequency and contig-status for variant in T and N
-        if "TUMOR_PASS_SAMPLE" in info:
-            pass_sample: List[str] = info["TUMOR_PASS_SAMPLE"]
-            pass_info: List[str] = info["TUMOR_PASS_INFO"]
-            allele_frequency_tumor, max_af_index = get_max_allele_frequency(pass_sample)
-            if allele_frequency_tumor == 0:
-                get_any_contig = True
-            else:
-                get_any_contig = False
-            tumor_has_contig: bool = look_for_contigs(
-                variant_info_pass_field=pass_info,
-                max_allele_frequency_variant_index=max_af_index,
-                look_in_all_variants=get_any_contig,
-            )
-
-        if "NORMAL_PASS_SAMPLE" in info:
-            pass_sample: List[str] = info["NORMAL_PASS_SAMPLE"]
-            pass_info: List[str] = info["NORMAL_PASS_INFO"]
-            allele_frequency_normal, max_af_index = get_max_allele_frequency(pass_sample)
-            if allele_frequency_normal == 0:
-                get_any_contig: bool = True
-            else:
-                get_any_contig: bool = False
-            normal_has_contig: bool = look_for_contigs(
-                variant_info_pass_field=pass_info,
-                max_allele_frequency_variant_index=max_af_index,
-                look_in_all_variants=get_any_contig,
-            )
+        # Collect evidence of variant in tumor and normal sample
+        evidence_dict: dict = get_tumor_normal_evidence(variant_info_field)
+        allele_frequency_tumor: float = evidence_dict["tumor_max_af"]
+        allele_frequency_normal: float = evidence_dict["normal_max_af"]
+        tumor_has_contig: bool = evidence_dict["tumor_has_contig"]
+        normal_has_contig: bool = evidence_dict["normal_has_contig"]
 
         # Set filter statuses
         if allele_frequency_tumor == 0 and not tumor_has_contig:
@@ -221,7 +195,7 @@ def has_contig(variant: str) -> bool:
 def look_for_contigs(
     variant_info_pass_field: List[str],
     max_allele_frequency_variant_index: int,
-    bool_look_in_all_variants: bool,
+    look_in_all_variants: bool,
 ) -> bool:
     """
     Directs parsing of sample_info to look for contig in either variant with max_af or any variant in sample_info.
@@ -234,7 +208,7 @@ def look_for_contigs(
     Returns:
         Bool(True or False) based on if contig was found or not.
     """
-    if bool_look_in_all_variants:
+    if look_in_all_variants:
         for variant_info in variant_info_pass_field:
             variant_info: List[str] = variant_info
             return has_contig(variant_info)
@@ -286,7 +260,55 @@ def get_max_allele_frequency(pass_sample: List[str]) -> Tuple[float, int]:
             max_allele_frequency: float = allele_frequency
     return max_allele_frequency, max_af_variant_index
 
+def get_tumor_normal_evidence(variant_info_field: dict) -> dict:
+    """
+    Collects the read evidence for the variant in the tumor and normal sample.
+    Gets maximum allele frequency and checks if a contig has been assembled for the variant.
 
+    Args:
+         variant_info_field: dict with information for BND variant/s in the VCF.
+
+    Returns:
+         Dictionary containing all extracted evidences in the tumor and normal sample.
+    """
+    # Set default values
+    tumor_has_contig, normal_has_contig = False, False
+    allele_frequency_tumor, allele_frequency_normal = 0, 0
+
+    # Extract allele frequency and contig-status for variant in T and N
+    if "TUMOR_PASS_SAMPLE" in variant_info_field:
+        pass_sample: List[str] = variant_info_field["TUMOR_PASS_SAMPLE"]
+        pass_info: List[str] = variant_info_field["TUMOR_PASS_INFO"]
+        allele_frequency_tumor, max_af_index = get_max_allele_frequency(pass_sample)
+        if allele_frequency_tumor == 0:
+            get_any_contig = True
+        else:
+            get_any_contig = False
+        tumor_has_contig: bool = look_for_contigs(
+            variant_info_pass_field=pass_info,
+            max_allele_frequency_variant_index=max_af_index,
+            look_in_all_variants=get_any_contig,
+        )
+
+    if "NORMAL_PASS_SAMPLE" in variant_info_field:
+        pass_sample: List[str] = variant_info_field["NORMAL_PASS_SAMPLE"]
+        pass_info: List[str] = variant_info_field["NORMAL_PASS_INFO"]
+        allele_frequency_normal, max_af_index = get_max_allele_frequency(pass_sample)
+        if allele_frequency_normal == 0:
+            get_any_contig: bool = True
+        else:
+            get_any_contig: bool = False
+        normal_has_contig: bool = look_for_contigs(
+            variant_info_pass_field=pass_info,
+            max_allele_frequency_variant_index=max_af_index,
+            look_in_all_variants=get_any_contig,
+        )
+
+    evidence_dict: dict = {"tumor_max_af": allele_frequency_tumor,
+                     "normal_max_af": allele_frequency_normal,
+                     "tumor_has_contig": tumor_has_contig,
+                     "normal_has_contig": normal_has_contig}
+    return evidence_dict
 @tiddit_tn.command("rescue_bnds")
 @click.pass_context
 def rescue_bnds(ctx: click.Context):
@@ -353,7 +375,7 @@ def rescue_bnds(ctx: click.Context):
             bnd_id, sv_id_num = get_bnd_id(variant_info_field=info)
             sv.INFO["BND_ID"] = [bnd_id]
 
-            filter_bnds = bnd_filter_dict[bnd_id]
+            filter_bnds: Dict[str, str] = bnd_filter_dict[bnd_id]
             # change filter if any of the 2 BNDs are PASS
             if (
                 "1" in filter_bnds
@@ -380,16 +402,16 @@ def get_bnd_id(variant_info_field: dict) -> Tuple[str, str]:
          str(unique ID for the BND variant) str(the 1st or 2nd BND)
     """
     # example: SV_2414_1, SV_2414 = sv_id_name, 1 = sv_id_num
-    sv_id = variant_info_field["TUMOR_PASS_CHROM"][0].split("|")[0]
+    sv_id: str = variant_info_field["TUMOR_PASS_CHROM"][0].split("|")[0]
 
     # extract sv_id and breakend number
-    sv_id_split = sv_id.split("_")
-    sv_id_name = "_".join(sv_id_split[0:2])
-    sv_id_num = sv_id_split[2]
+    sv_id_split: List[str] = sv_id.split("_")
+    sv_id_name: str = "_".join(sv_id_split[0:2])
+    sv_id_num: str = sv_id_split[2]
 
     # define unique breakend_name
-    region_a = f"{variant_info_field['REGIONA'][0]}_{variant_info_field['REGIONA'][1]}"
-    bnd_id = f"{sv_id_name}_{region_a}"
+    region_a: str = f"{variant_info_field['REGIONA'][0]}_{variant_info_field['REGIONA'][1]}"
+    bnd_id: str = f"{sv_id_name}_{region_a}"
     return bnd_id, sv_id_num
 
 
