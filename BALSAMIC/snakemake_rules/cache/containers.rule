@@ -14,7 +14,7 @@ rule download_containers:
     message:
         "Downloading singularity image {output.container_path}"
     log:
-        "logs/containers/{singularity_image}.log",
+        f"{config['containers_dir']}/logs/{{singularity_image}}.log"
     shell:
         """
         export SINGULARITY_TMPDIR={params.containers_dir}
