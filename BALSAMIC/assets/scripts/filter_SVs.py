@@ -5,6 +5,7 @@ import click
 import logging
 from pathlib import Path
 
+LOG = logging.getLogger(__name__)
 
 @click.group()
 def cli():
@@ -14,14 +15,9 @@ def cli():
     pass
 
 @cli.group("tiddit_tn")
-@click.option(
-    "-v",
-    "--vcf-file",
-    required=True,
-    type=click.Path(exists=True),
-    help="Input Variant Calling Format(VCF) from merged TIDDIT TUMOR + NORMAL VCF.",
-)
-def tiddit_tn():
+@click.option("-v", "--vcf-file", required=True, type=click.Path(exists=True), help="Input Variant Calling Format(VCF) from merged TIDDIT TUMOR + NORMAL VCF.")
+@click.pass_context
+def tiddit_tn(ctx, vcf_file):
     """
     Manage TIDDIT variants in merged tumor/normal vcf.
     Outputs treated VCF in standard-out.
@@ -29,18 +25,17 @@ def tiddit_tn():
         Args:
             vcf-file: Path; path to vcf-file.
     """
+    ctx.obj = {}
+    ctx.obj["vcf_file"] = vcf_file
     pass
 @tiddit_tn.command("filter")
-def filter(vcf_file: Path):
+@click.pass_context
+def filter(ctx: click.Context):
     """
     Add soft-filters based on presence of variants in normal.
-
-    Args:
-        vcf_path: Path to unfiltered input vcf.
-
     Outputs filtered VCF in standard-out.
     """
-    vcf = vcfpy.Reader.from_path(vcf_file)
+    vcf = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
 
     # Update VCF header
     vcf.header.add_info_line(
@@ -112,14 +107,28 @@ def filter(vcf_file: Path):
         ctg_t, ctg_n = False, False
         af_t, af_n = 0, 0
 
+        # Extract allele frequency and contig-status for variant in T and N
         if "TUMOR_PASS_SAMPLE" in info:
             pass_sample = info["TUMOR_PASS_SAMPLE"]
             pass_info = info["TUMOR_PASS_INFO"]
-            af_t, ctg_t = calc_af_get_ctg(pass_sample, pass_info)
+            print(type(pass_sample))
+            print(type(pass_info))
+            af_t, max_af_index = calc_max_af(pass_sample)
+            if af_t == 0:
+                get_any_contig = True
+            else:
+                get_any_contig = False
+            ctg_t = find_ctg(pass_info, max_af_index, get_any_contig)
+
         if "NORMAL_PASS_SAMPLE" in info:
             pass_sample = info["NORMAL_PASS_SAMPLE"]
             pass_info = info["NORMAL_PASS_INFO"]
-            af_n, ctg_n = calc_af_get_ctg(pass_sample, pass_info)
+            af_n, max_af_index = calc_max_af(pass_sample)
+            if af_n == 0:
+                get_any_contig = True
+            else:
+                get_any_contig = False
+            ctg_n = find_ctg(pass_info, max_af_index, get_any_contig)
 
         # Set filter statuses
         if af_t == 0 and not ctg_t:
@@ -128,44 +137,55 @@ def filter(vcf_file: Path):
             # Regardless of CTG, set filter if AF_T / AF_N > 0.25
             if af_t > 0:
                 if float(af_n / af_t) > 0.25:
-                    normal_af_status = "failed"
                     sv.add_filter("high_normal_af_fraction")
-                else:
-                    normal_af_status = "pass"
 
             # Set filter if AF_N > 0.25
             if af_n > 0.25:
                 sv.add_filter("high_normal_af")
 
-            # Set filter if CTG_N = True, and AF_N is not pass
+            # Set filter if CTG_N = True, AF_N is 0 and AF_T is below 0.25
             if ctg_n and af_n == 0 and af_t <= 0.25:
                 sv.add_filter("in_normal")
 
         sv.INFO["AF_T_MAX"] = [round(af_t, 4)]
         sv.INFO["AF_N_MAX"] = [round(af_n, 4)]
 
-        writer.write_record(sv)
+        #writer.write_record(sv)
 
-def find_ctg(sample_info):
+def is_ctg(variant):
+    """
+
+    :return:
+    """
+    fields = variant.split("|")
+    contig = False
+    for field in fields:
+        field_name_value = field.split(":")
+        field_name = field_name_value[0]
+        if field_name == "CTG":
+            contig_value = field_name_value[1]
+            if contig_value != ".":
+                contig = True
+        return contig
+def find_ctg(sample_info, max_af_index, get_any_contig):
     """
     Looks for contig in the variant with the highest AF.
 
     :param sample_info: SAMPLE_PASS_INFO[variant with highest AF]
     :return: bool(if contig exists for max-AF variant or not).
     """
-    fields = sample_info.split("|")
-    ctg = False
-    for field in fields:
-        field_name_value = field.split(":")
-        field_name = field_name_value[0]
-        if field_name == "CTG":
-            ctg_value = field_name_value[1]
-            if ctg_value != ".":
-                ctg = True
-    return ctg
+    contig = False
+    if get_any_contig:
+        for variant in sample_info:
+            contig = is_ctg(variant)
+            if contig:
+                return contig
+    else:
+        max_af_variant = sample_info[max_af_index]
+        contig = is_ctg(max_af_variant)
+    return contig
 
-
-def calc_af_get_ctg(pass_sample, pass_info):
+def calc_max_af(pass_sample):
     """
     Inputs fields from TIDDIT variant INFO field,
     calculates max AF for merged variants and looks for contig in max-af variant.
@@ -176,49 +196,47 @@ def calc_af_get_ctg(pass_sample, pass_info):
     :return: float(maximum allele frequency), and bool(if contig exists for max-AF variant or not).
     """
     max_allele_frequency = 0
-    final_contig = False
-    any_contig = False
+    max_af_variant_index = 0
+    B1_cov = 0
+    B2_cov = 0
+    total_cov = 0
+    DV = 0
+    RV = 0
 
-    for idx, variant in enumerate(pass_sample):
+    for variant_idx, variant in enumerate(pass_sample):
         fields = variant.split("|")
-
-        is_contig = find_ctg(pass_info[idx])
-
         for field in fields:
             field_name_value = field.split(":")
             field_name = field_name_value[0]
             if field_name == "COV":
-                b1_cov = field_name_value[1]
-                b2_cov = field_name_value[3]
-                total_cov = int(b1_cov) + int(b2_cov)
+                B1_cov = field_name_value[1]
+                B2_cov = field_name_value[3]
+                total_cov = int(B1_cov) + int(B2_cov)
+
             if field_name == "DV":
                 DV = int(field_name_value[1])
+
             if field_name == "RV":
                 RV = int(field_name_value[1])
         try:
-            af = float((DV + RV) / total_cov)
-        except Exception as e:
-            logging.warning(f"Exception: {e} setting AF to 0")
-            af = 0
-        if is_contig:
-            any_ctg = True
-        if af > max_allele_frequency:
-            max_af = af
-            final_contig = is_contig
-    if max_allele_frequency == 0:
-        final_contig = any_contig
-    return max_allele_frequency, final_contig
+            allele_frequency = float((DV + RV) / total_cov)
+        except ZeroDivisionError as exc:
+            LOG.warning(f"Exception: {exc} setting AF to 0")
+            allele_frequency = 0
+
+        if allele_frequency > max_allele_frequency:
+            max_af_variant_index = variant_idx
+            max_allele_frequency = allele_frequency
+    return max_allele_frequency, max_af_variant_index
+
 @tiddit_tn.command("rescue_bnds")
-def rescue_bnds(vcf_file: Path):
+@click.pass_context
+def rescue_bnds(ctx: click.Context):
     """
     Rescue BND-variants with at least 1 of 2 BNDs set to PASS.
-
-    Args:
-        vcf_path: Path to soft-filtered input vcf.
-
     Outputs VCF in standard-out.
     """
-    vcf_start = vcfpy.Reader.from_path(vcf_file)
+    vcf_start = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
 
     # First read of VCF-file:
     # define dict with bnd_id - bnd_num - FILTER
@@ -227,27 +245,23 @@ def rescue_bnds(vcf_file: Path):
         info = dict([*sv.INFO.items()])
 
         svtype = info["SVTYPE"]
-        # only relevant for bnd-variants
-        if svtype != "BND":
-            continue
-        # no need to rescue normal variants
-        if "TUMOR_PASS_CHROM" not in info:
-            continue
+        # only relevant for bnd-variants and tumor-variants
+        if svtype == "BND" and "TUMOR_PASS_CHROM" in info:
 
-        bnd_id, sv_id_num = get_bnd_id(info)
+            bnd_id, sv_id_num = get_bnd_id(info)
 
-        if bnd_id not in bnd_filter_dict:
-            bnd_filter_dict[bnd_id] = {}
+            if bnd_id not in bnd_filter_dict:
+                bnd_filter_dict[bnd_id] = {}
 
-        if sv_id_num in bnd_filter_dict[bnd_id]:
-            logging.warning(
-                f"Conflicting BND-names: {bnd_id}, will not attempt to rescue: {sv}"
-            )
-            continue
+            if sv_id_num in bnd_filter_dict[bnd_id]:
+                logging.warning(
+                    f"Conflicting BND-names: {bnd_id}, will not attempt to rescue: {sv}"
+                )
+                continue
 
         bnd_filter_dict[bnd_id][sv_id_num] = sv.FILTER
 
-    # Second read fo VCF-file:
+    # Second read of VCF-file:
     # Update VCF header
     vcf = vcfpy.Reader.from_path(vcf_file)
     vcf.header.add_info_line(
@@ -276,27 +290,19 @@ def rescue_bnds(vcf_file: Path):
     for sv in vcf:
         info = dict([*sv.INFO.items()])
         svtype = info["SVTYPE"]
-        # only relevant for bnd-variants
-        if svtype != "BND":
-            writer.write_record(sv)
-            continue
+        # only relevant for bnd and tumor-variants
+        if svtype == "BND" and "TUMOR_PASS_CHROM":
+            print(type(info))
+            bnd_id, sv_id_num = get_bnd_id(info)
+            sv.INFO["BND_ID"] = [bnd_id]
 
-        # no need to rescue normal variants
-        if "TUMOR_PASS_CHROM" not in info:
-            writer.write_record(sv)
-            continue
-
-        bnd_id, sv_id_num = get_bnd_id(info)
-        sv.INFO["BND_ID"] = [bnd_id]
-
-        filter_bnds = bnd_filter_dict[bnd_id]
-        if "1" in filter_bnds and "2" in filter_bnds:
-            filter_status1 = filter_bnds["1"]
-            filter_status2 = filter_bnds["2"]
-            if "PASS" in filter_status1 or "PASS" in filter_status2:
+            filter_bnds = bnd_filter_dict[bnd_id]
+            if "1" in filter_bnds and "2" in filter_bnds and ("PASS" in filter_bnds["1"] or "PASS" in filter_bnds["2"]):
                 sv.FILTER = ["PASS"]
-
-        writer.write_record(sv)
+        else:
+            # simply output non-bnd and normal-variants
+            pass
+            #writer.write_record(sv)
 
 def get_bnd_id(info):
     """
@@ -314,7 +320,7 @@ def get_bnd_id(info):
     sv_id_num = sv_id_split[2]
 
     # define unique breakend_name
-    region_a = str(info["REGIONA"][0]) + "_" + str(info["REGIONA"][1])
+    region_a = f"{info['REGIONA'][0]}_{info['REGIONA'][1]}"
     bnd_id = f"{sv_id_name}_{region_a}"
     return bnd_id, sv_id_num
 
