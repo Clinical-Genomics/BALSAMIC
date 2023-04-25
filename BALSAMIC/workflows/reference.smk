@@ -30,15 +30,15 @@ rule all:
     """Target rule for Balsamic cache generation."""
     input:
         expand(
-            f"{cache_config.containers_dir}/{{singularity_image}}.sif",
+            f"{cache_config.containers_dir.as_posix()}/{{singularity_image}}.sif",
             singularity_image=cache_config.containers.keys(),
         ),
         expand(
-            f"{cache_config.references_dir}/{{reference_file}}",
+            f"{cache_config.references_dir.as_posix()}/{{reference_file}}",
             reference_file=cache_config.get_reference_paths(),
         ),
     output:
-        finish_file=f"{cache_config.references_dir}/reference.finish",
+        finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
     threads:
         get_threads(cluster_config, "all")
     run:
