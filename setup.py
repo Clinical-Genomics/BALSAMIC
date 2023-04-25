@@ -14,7 +14,7 @@ requirements = [
     "colorclass>=2.2.0",
     "coloredlogs>=14.0",
     "graphviz==0.16",
-    "gsutil==4.50",
+    "gsutil==5.23",
     "jinja2>=2.11.2",
     "matplotlib==3.5.2",
     "networkx>=2.6.3",
