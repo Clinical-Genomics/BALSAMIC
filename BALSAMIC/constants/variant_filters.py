@@ -114,6 +114,6 @@ SVDB_FILTER_SETTINGS = {
 SV_FILTER_SETTINGS = {
     "tiddit_tumor_normal": {
         "max_tin_fraction": 0.25,
-        "max_normal_allele_frequency": 0.25
+        "max_normal_allele_frequency": 0.25,
     }
 }
