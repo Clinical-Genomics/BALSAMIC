@@ -19,4 +19,3 @@ bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb_re
 
 tabix -p vcf -f {output.vcf_pass_svdb_research};
     """
-    
