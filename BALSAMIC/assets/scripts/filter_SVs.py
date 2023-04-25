@@ -225,43 +225,59 @@ def look_for_contigs(
     return has_contig(max_af_variant_info)
 
 
-def get_max_allele_frequency(pass_sample: List[str]) -> Tuple[float, int]:
+def calc_allele_frequency(variant_info_sample_field: List[str]) -> float:
     """
-    Parses [SAMPLE]_PASS_SAMPLE field from TIDDIT info-field, returns the highest allele frequency for
-    all merged variants in the sample and the position of this variant in the list.
+    Parses [SAMPLE]_PASS_SAMPLE field from TIDDIT info-field and calculates the allele frequency for the variant.
 
     Args:
-         pass_sample: list of information for variant/s within TUMOR_PASS_SAMPLE / NORMAL_PASS_SAMPLE
+         variant_info_sample_field: list of information for variant from tumor or normal sample
+
+    Returns:
+         float(allele frequency)
+    """
+    total_cov: int = 0
+    DV: int = 0
+    RV: int = 0
+    for field in variant_info_sample_field:
+        field_name_value: List[str] = field.split(":")
+        field_name: str = field_name_value[0]
+        if field_name == "COV":
+            b1_cov = int(field_name_value[1])
+            b2_cov = int(field_name_value[3])
+            total_cov: int = b1_cov + b2_cov
+
+        if field_name == "DV":
+            DV = int(field_name_value[1])
+
+        if field_name == "RV":
+            RV = int(field_name_value[1])
+    try:
+        allele_frequency = float((DV + RV) / total_cov)
+    except ZeroDivisionError as exc:
+        LOG.warning(f"Exception: {exc} setting AF to 0")
+        allele_frequency = 0
+    return allele_frequency
+
+
+def get_max_allele_frequency(variant_info_sample_field: List[str]) -> Tuple[float, int]:
+    """
+    Finds the highest allele frequency for all merged variants in the sample
+    and the position of this variant in the list.
+
+    Args:
+         variant_info_sample_field: list of information for variant/s from tumor or normal sample
 
     Returns:
          float(maximum allele frequency), and int(position in list of max af variant)
     """
-    max_allele_frequency = 0
-    max_af_variant_index = 0
-    total_cov = 0
-    DV = 0
-    RV = 0
+    max_allele_frequency: float = 0
+    max_af_variant_index: int = 0
 
-    for variant_idx, variant in enumerate(pass_sample):
-        fields: List[str] = variant.split("|")
-        for field in fields:
-            field_name_value: List[str] = field.split(":")
-            field_name: str = field_name_value[0]
-            if field_name == "COV":
-                b1_cov = int(field_name_value[1])
-                b2_cov = int(field_name_value[3])
-                total_cov: int = b1_cov + b2_cov
-
-            if field_name == "DV":
-                DV = int(field_name_value[1])
-
-            if field_name == "RV":
-                RV = int(field_name_value[1])
-        try:
-            allele_frequency = float((DV + RV) / total_cov)
-        except ZeroDivisionError as exc:
-            LOG.warning(f"Exception: {exc} setting AF to 0")
-            allele_frequency = 0
+    for variant_idx, variant in enumerate(variant_info_sample_field):
+        variant_info_fields: List[str] = variant.split("|")
+        allele_frequency: float = calc_allele_frequency(
+            variant_info_sample_field=variant_info_fields
+        )
 
         if allele_frequency > max_allele_frequency:
             max_af_variant_index: int = variant_idx
@@ -288,7 +304,9 @@ def get_tumor_normal_evidence(variant_info_field: dict) -> dict:
     if "TUMOR_PASS_SAMPLE" in variant_info_field:
         pass_sample: List[str] = variant_info_field["TUMOR_PASS_SAMPLE"]
         pass_info: List[str] = variant_info_field["TUMOR_PASS_INFO"]
-        allele_frequency_tumor, max_af_index = get_max_allele_frequency(pass_sample)
+        allele_frequency_tumor, max_af_index = get_max_allele_frequency(
+            variant_info_sample_field=pass_sample
+        )
         if allele_frequency_tumor == 0:
             get_any_contig = True
         else:
@@ -302,7 +320,9 @@ def get_tumor_normal_evidence(variant_info_field: dict) -> dict:
     if "NORMAL_PASS_SAMPLE" in variant_info_field:
         pass_sample: List[str] = variant_info_field["NORMAL_PASS_SAMPLE"]
         pass_info: List[str] = variant_info_field["NORMAL_PASS_INFO"]
-        allele_frequency_normal, max_af_index = get_max_allele_frequency(pass_sample)
+        allele_frequency_normal, max_af_index = get_max_allele_frequency(
+            variant_info_sample_field=pass_sample
+        )
         if allele_frequency_normal == 0:
             get_any_contig: bool = True
         else:
