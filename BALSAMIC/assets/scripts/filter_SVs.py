@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import vcfpy
-from vcfpy import Reader
 import click
+import vcfpy
 import logging
+from vcfpy import Reader
+from pathlib import Path
 from typing import List, Dict, Tuple
 
 LOG = logging.getLogger(__name__)
@@ -133,11 +134,11 @@ def filter(ctx: click.Context):
     writer = vcfpy.Writer.from_path("/dev/stdout", vcf.header)
 
     # Set soft filters for variants based on presence in the normal sample
-    for sv in vcf:
-        variant_info_field: dict = sv.INFO
+    for variant in vcf:
+        variant_info: dict = variant.INFO
 
         # Collect evidence of variant in tumor and normal sample
-        evidence_dict: dict = get_tumor_normal_evidence(variant_info_field)
+        evidence_dict: dict = get_tumor_normal_evidence(variant_info)
         allele_frequency_tumor: float = evidence_dict["tumor_max_af"]
         allele_frequency_normal: float = evidence_dict["normal_max_af"]
         tumor_has_contig: bool = evidence_dict["tumor_has_contig"]
@@ -145,7 +146,7 @@ def filter(ctx: click.Context):
 
         # Set filter statuses
         if allele_frequency_tumor == 0 and not tumor_has_contig:
-            sv.add_filter("normal_variant")
+            variant.add_filter("normal_variant")
         else:
             # Regardless of CTG, set filter if AF_T / AF_N > max_tin_fraction
             normal_tumor_af_ratio = (
@@ -154,14 +155,14 @@ def filter(ctx: click.Context):
                 else 0
             )
             if normal_tumor_af_ratio > filter_settings["max_tin_fraction"]["value"]:
-                sv.add_filter("high_normal_af_fraction")
+                variant.add_filter("high_normal_af_fraction")
 
             # Set filter if AF_N > 0.25
             if (
                 allele_frequency_normal
                 > filter_settings["max_normal_allele_frequency"]["value"]
             ):
-                sv.add_filter("high_normal_af")
+                variant.add_filter("high_normal_af")
 
             # Set filter if CTG_N = True, AF_N is 0 and AF_T is below 0.25
             if (
@@ -169,12 +170,12 @@ def filter(ctx: click.Context):
                 and allele_frequency_normal == 0
                 and allele_frequency_tumor <= 0.25
             ):
-                sv.add_filter("in_normal")
+                variant.add_filter("in_normal")
 
-        sv.INFO["AF_T_MAX"] = [round(allele_frequency_tumor, 4)]
-        sv.INFO["AF_N_MAX"] = [round(allele_frequency_normal, 4)]
+        variant.INFO["AF_T_MAX"] = [round(allele_frequency_tumor, 4)]
+        variant.INFO["AF_N_MAX"] = [round(allele_frequency_normal, 4)]
 
-        writer.write_record(sv)
+        writer.write_record(variant)
 
 
 def has_contig(variant: str) -> bool:
@@ -216,7 +217,6 @@ def look_for_contigs(
     """
     if look_in_all_variants:
         for variant_info in variant_info_pass_field:
-            variant_info: List[str] = variant_info
             return has_contig(variant_info)
 
     max_af_variant_info: List[str] = variant_info_pass_field[
@@ -349,32 +349,13 @@ def rescue_bnds(ctx: click.Context):
     Rescue BND-variants with at least 1 of 2 BNDs set to PASS.
     Outputs VCF in standard-out.
     """
-    # First read of VCF-file:
-    vcf_start: Reader = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
+    vcf_file: Path = Path(ctx.obj["vcf_file"])
 
     # define dict with bnd_id - bnd_num - FILTER
-    bnd_filter_dict: dict = {}
-    for sv in vcf_start:
-        info: dict = sv.INFO
+    bnd_filter_dict: dict = get_bnd_filter_dict(vcf_file)
 
-        svtype = info["SVTYPE"]
-        # only relevant for bnd-variants and tumor-variants
-        if svtype == "BND" and "TUMOR_PASS_CHROM" in info:
-            bnd_id, sv_id_num = get_bnd_id(info)
+    vcf: Reader = vcfpy.Reader.from_path(vcf_file)
 
-            if bnd_id not in bnd_filter_dict:
-                bnd_filter_dict[bnd_id] = {}
-
-            if sv_id_num in bnd_filter_dict[bnd_id]:
-                LOG.warning(
-                    f"Conflicting BND-names: {bnd_id}, will not attempt to rescue: {sv}"
-                )
-                continue
-
-            bnd_filter_dict[bnd_id][sv_id_num] = sv.FILTER
-
-    # Second read of VCF-file:
-    vcf: Reader = vcfpy.Reader.from_path(ctx.obj["vcf_file"])
     # Update VCF header
     vcf.header.add_info_line(
         vcfpy.OrderedDict(
@@ -400,13 +381,13 @@ def rescue_bnds(ctx: click.Context):
     writer = vcfpy.Writer.from_path("/dev/stdout", vcf.header)
 
     # Annotate and remove BND filters with PASS
-    for sv in vcf:
-        info: dict = sv.INFO
-        svtype = info["SVTYPE"]
+    for variant in vcf:
+        variant_info: dict = variant.INFO
+        svtype = variant_info["SVTYPE"]
         # only relevant for bnd and tumor-variants
-        if svtype == "BND" and "TUMOR_PASS_CHROM" in info:
-            bnd_id, sv_id_num = get_bnd_id(variant_info_field=info)
-            sv.INFO["BND_ID"] = [bnd_id]
+        if svtype == "BND" and "TUMOR_PASS_CHROM" in variant_info:
+            bnd_id, sv_id_num = get_bnd_id(variant_info_field=variant_info)
+            variant.INFO["BND_ID"] = [bnd_id]
 
             filter_bnds: Dict[str, str] = bnd_filter_dict[bnd_id]
             # change filter if any of the 2 BNDs are PASS
@@ -415,11 +396,11 @@ def rescue_bnds(ctx: click.Context):
                 and "2" in filter_bnds
                 and ("PASS" in filter_bnds["1"] or "PASS" in filter_bnds["2"])
             ):
-                sv.FILTER = ["PASS"]
-            writer.write_record(sv)
+                variant.FILTER = ["PASS"]
+            writer.write_record(variant)
         else:
             # simply output non-bnd and normal-variants
-            writer.write_record(sv)
+            writer.write_record(variant)
 
 
 def get_bnd_id(variant_info_field: dict) -> Tuple[str, str]:
@@ -448,6 +429,42 @@ def get_bnd_id(variant_info_field: dict) -> Tuple[str, str]:
     )
     bnd_id: str = f"{sv_id_name}_{region_a}"
     return bnd_id, sv_id_num
+
+
+def get_bnd_filter_dict(vcf_file: Path) -> Dict[str, Dict]:
+    """
+    Extracts a dictionary of filter statuses for BND (breakend) variants from a VCF file.
+
+    Arguments:
+        vcf_file (Path): a pathlib.Path object pointing to the input VCF file containing BND variants.
+
+    Returns:
+        bnd_filter_dict (Dict[str, Dict]): a dictionary where each key represents a unique BND variant identifier,
+      and each value is another dictionary mapping individual SV IDs to their corresponding filter statuses.
+    """
+    vcf: Reader = vcfpy.Reader.from_path(vcf_file)
+
+    # define dict with bnd_id - bnd_num - FILTER
+    bnd_filter_dict: dict = {}
+    for variant in vcf:
+        variant_info: dict = variant.INFO
+
+        svtype = variant_info["SVTYPE"]
+        # only relevant for bnd-variants and tumor-variants
+        if svtype == "BND" and "TUMOR_PASS_CHROM" in variant_info:
+            bnd_id, sv_id_num = get_bnd_id(variant_info)
+
+            if bnd_id not in bnd_filter_dict:
+                bnd_filter_dict[bnd_id] = {}
+
+            if sv_id_num in bnd_filter_dict[bnd_id]:
+                LOG.warning(
+                    f"Conflicting BND-names: {bnd_id}, will not attempt to rescue: {variant}"
+                )
+                continue
+
+            bnd_filter_dict[bnd_id][sv_id_num] = variant.FILTER
+    return bnd_filter_dict
 
 
 if __name__ == "__main__":
