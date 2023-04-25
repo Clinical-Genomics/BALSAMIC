@@ -197,15 +197,7 @@ REFERENCE_FILES = {
             "output_file": "hg38.cadd_snv.tsv.gz",
             "output_path": "variants",
         },
-        "cadd_snv_index": {
-            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh38/whole_genome_SNVs.tsv.gz.tbi",
-            "file_type": "text",
-            "gzip": False,
-            "genome_version": "hg38",
-            "output_file": "hg38.cadd_snv.tsv.gz.tbi",
-            "output_path": "variants",
-        },
-    },
+   },
     "hg19": {
         "reference_genome": {
             "url": "gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz",
@@ -399,15 +391,7 @@ REFERENCE_FILES = {
             "output_file": "hg19.cadd_snv.tsv.gz",
             "output_path": "variants",
         },
-        "cadd_snv_index": {
-            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh37/whole_genome_SNVs.tsv.gz.tbi",
-            "file_type": "text",
-            "gzip": False,
-            "genome_version": "hg19",
-            "output_file": "hg19.cadd_snv.tsv.gz.tbi",
-            "output_path": "variants",
-        },
-    },
+   },
     "canfam3": {
         "reference_genome": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/bigZips/canFam3.fa.gz",
