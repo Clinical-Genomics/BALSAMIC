@@ -4,6 +4,7 @@
 Added:
 ^^^^^^
 * PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+* Bcftools filters added to TIDDIT rule to remove normal variants https://github.com/Clinical-Genomics/BALSAMIC/pull/1120
 
 Changed:
 ^^^^^^^^
