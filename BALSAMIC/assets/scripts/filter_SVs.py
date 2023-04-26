@@ -144,36 +144,39 @@ def filter(ctx: click.Context):
         tumor_has_contig: bool = evidence_dict["tumor_has_contig"]
         normal_has_contig: bool = evidence_dict["normal_has_contig"]
 
+        # Add AF_MAX to info field
+        variant.INFO["AF_T_MAX"] = [round(allele_frequency_tumor, 4)]
+        variant.INFO["AF_N_MAX"] = [round(allele_frequency_normal, 4)]
+
         # Set filter statuses
         if allele_frequency_tumor == 0 and not tumor_has_contig:
             variant.add_filter("normal_variant")
-        else:
-            # Regardless of CTG, set filter if AF_T / AF_N > max_tin_fraction
-            normal_tumor_af_ratio = (
-                float(allele_frequency_normal / allele_frequency_tumor)
-                if allele_frequency_tumor > 0
-                else 0
-            )
-            if normal_tumor_af_ratio > filter_settings["max_tin_fraction"]["value"]:
-                variant.add_filter("high_normal_af_fraction")
+            writer.write_record(variant)
+            continue
 
-            # Set filter if AF_N > 0.25
-            if (
-                allele_frequency_normal
-                > filter_settings["max_normal_allele_frequency"]["value"]
-            ):
-                variant.add_filter("high_normal_af")
+        # Regardless of CTG, set filter if AF_T / AF_N > max_tin_fraction
+        normal_tumor_af_ratio = (
+            float(allele_frequency_normal / allele_frequency_tumor)
+            if allele_frequency_tumor > 0
+            else 0
+        )
+        if normal_tumor_af_ratio > filter_settings["max_tin_fraction"]["value"]:
+            variant.add_filter("high_normal_af_fraction")
 
-            # Set filter if CTG_N = True, AF_N is 0 and AF_T is below 0.25
-            if (
-                normal_has_contig
-                and allele_frequency_normal == 0
-                and allele_frequency_tumor <= 0.25
-            ):
-                variant.add_filter("in_normal")
+        # Set filter if AF_N > 0.25
+        if (
+            allele_frequency_normal
+            > filter_settings["max_normal_allele_frequency"]["value"]
+        ):
+            variant.add_filter("high_normal_af")
 
-        variant.INFO["AF_T_MAX"] = [round(allele_frequency_tumor, 4)]
-        variant.INFO["AF_N_MAX"] = [round(allele_frequency_normal, 4)]
+        # Set filter if CTG_N = True, AF_N is 0 and AF_T is below 0.25
+        if (
+            normal_has_contig
+            and allele_frequency_normal == 0
+            and allele_frequency_tumor <= 0.25
+        ):
+            variant.add_filter("in_normal")
 
         writer.write_record(variant)
 
