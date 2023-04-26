@@ -213,7 +213,7 @@ def look_for_contigs(
     Args:
         variant_info_pass_field: A list of variants from [SAMPLE]_PASS_INFO
         max_allele_frequency_variant_index: Int(index) for variant in sample_info list with the highest allele frequency
-        bool_look_in_all_variants: Boolean if it should look for a contig in any of the variants, not only max_af_index
+        look_in_all_variants: Boolean if it should look for a contig in any of the variants, not only max_af_index
 
     Returns:
         Bool(True or False) based on if contig was found or not.
