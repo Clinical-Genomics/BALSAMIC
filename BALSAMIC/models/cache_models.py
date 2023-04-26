@@ -175,6 +175,9 @@ class CacheConfigModel(BaseModel):
         analysis        : reference analysis model
         references_dir  : output directory for the downloaded reference
         containers_dir  : output directory for the downloaded singularity containers
+        genome_dir      : genome references output directory
+        variants_dir    : variant references output directory for the
+        vep_dir         : vep annotations output directory
         genome_version  : genome version associated with the balsamic cache
         cosmic_key      : COSMIC database key
         bioinfo_tools   : dictionary of bioinformatics software and their associated containers
@@ -186,6 +189,9 @@ class CacheConfigModel(BaseModel):
 
     analysis: CacheAnalysisModel
     references_dir: DirectoryPath
+    genome_dir: DirectoryPath
+    variants_dir: DirectoryPath
+    vep_dir: DirectoryPath
     containers_dir: DirectoryPath
     genome_version: GenomeVersion
     cosmic_key: Optional[str]
@@ -220,8 +226,7 @@ class CacheConfigModel(BaseModel):
     def get_reference_paths(self) -> List[str]:
         """Return a list of reference relative paths."""
         return [
-            Path(reference[1].dir_name, reference[1].file_name).as_posix()
-            for reference in self.references
+            Path(reference[1].file_path).as_posix() for reference in self.references
         ]
 
     def get_reference_by_path(self, reference_path: str) -> ReferenceUrlModel:
@@ -261,7 +266,7 @@ class CacheConfigModel(BaseModel):
             if reference[1].gzip == compression
         ]
 
-    def get_reference_output_paths(self) -> List[str]:
+    def get_cache_output_paths(self) -> List[str]:
         """Return a complete list of output reference paths."""
         reference_paths: List[str] = [
             self.references.access_regions.file_path,
@@ -284,7 +289,7 @@ class CacheConfigModel(BaseModel):
             + self.references.get_refgene_files()
             + [
                 vcf + ".gz.tbi"
-                for vcf in self.get_reference_paths_by_file_type_and_compression_status(
+                for vcf in self.get_reference_paths_by_file_type_and_compression(
                     file_type=FileType.VCF, compression=True
                 )
             ]

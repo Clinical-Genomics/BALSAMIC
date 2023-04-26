@@ -129,6 +129,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/cache/references/reference_genome.rule",
             "snakemake_rules/cache/references/references.rule",
             "snakemake_rules/cache/references/refseq.rule",
+            "snakemake_rules/cache/references/vcf.rule",
             "snakemake_rules/cache/references/vep.rule",
         ],
         GenomeVersion.HG38: [
@@ -137,6 +138,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/cache/references/reference_genome.rule",
             "snakemake_rules/cache/references/references.rule",
             "snakemake_rules/cache/references/refseq.rule",
+            "snakemake_rules/cache/references/vcf.rule",
             "snakemake_rules/cache/references/vep.rule",
         ],
         GenomeVersion.CanFam3: [

@@ -15,6 +15,9 @@ def test_cache_config_model(tmp_path):
     config: CacheConfigModel = CacheConfigModel(
         analysis={"case_id": "reference.v1"},
         references_dir=tmp_path,
+        variants_dir=tmp_path,
+        genome_dir=tmp_path,
+        vep_dir=tmp_path,
         containers_dir=tmp_path,
         genome_version=GenomeVersion.HG19,
         bioinfo_tools=BIOINFO_TOOL_ENV,

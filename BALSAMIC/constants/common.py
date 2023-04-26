@@ -27,6 +27,7 @@ BIOINFO_TOOL_ENV = {
     "mosdepth": "coverage_qc",
     "bcftools": "varcall_py3",
     "tabix": "varcall_py3",
+    "bgzip": "varcall_py3",
     "gatk": "varcall_py3",
     "vardict": "varcall_py3",
     "svdb": "varcall_py3",

@@ -8,13 +8,14 @@ rule download_containers:
         container_path=f"{config['containers_dir']}/{{singularity_image}}.sif",
     params:
         containers_dir=config["containers_dir"],
-        dockerhub_image=lambda wildcards: config["containers"][wildcards.singularity_image],
-    threads:
-        get_threads(cluster_config, "download_containers")
+        dockerhub_image=lambda wildcards: config["containers"][
+            wildcards.singularity_image
+        ],
+    threads: get_threads(cluster_config, "download_containers")
     message:
         "Downloading singularity image {output.container_path}"
     log:
-        f"{config['containers_dir']}/logs/{{singularity_image}}.log"
+        f"{config['containers_dir']}/logs/{{singularity_image}}.log",
     shell:
         """
         export SINGULARITY_TMPDIR={params.containers_dir}

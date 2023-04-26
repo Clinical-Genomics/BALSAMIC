@@ -1,0 +1,42 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule compress_vcfs:
+    """Compress VCF reference files."""
+    input:
+        sinfularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bgzip']}.sif",
+        vcf=f"{config['variants_dir']}/{{vcf}}.vcf",
+    output:
+        vcf_gz=f"{config['variants_dir']}/{{vcf}}.vcf.gz",
+    singularity:
+        "{input.singularity_image}"
+    threads: get_threads(cluster_config, "compress_vcfs")
+    message:
+        "Compressing VCF variant file {input.vcf}"
+    log:
+        "logs/variants/{vcf}.vcf.gz.log",
+    shell:
+        """
+        bgzip "{input.vcf}" &> "{log}"
+        """
+
+
+rule index_vcfs:
+    """Index VCF reference files."""
+    input:
+        sinfularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.sif",
+        vcf_gz=f"{config['variants_dir']}/{{vcf}}.vcf.gz",
+    output:
+        vcf_tbi=f"{config['variants_dir']}/{{vcf}}.vcf.gz.tbi",
+    singularity:
+        "{input.singularity_image}"
+    threads: get_threads(cluster_config, "index_vcfs")
+    message:
+        "Indexing VCF variant file {input.vcf_gz}"
+    log:
+        "logs/variants/{vcf}.vcf.gz.tbi.log",
+    shell:
+        """
+        tabix -p vcf "{input.vcf_gz}" &> "{log}"
+        """

@@ -104,11 +104,14 @@ def initialize(
 
     out_dir: Path = Path(out_dir, balsamic_version)
     references_dir: Path = Path(out_dir, genome_version)
+    genome_dir = Path(references_dir, "genome")
+    variants_dir = Path(references_dir, "variants")
+    vep_dir = Path(references_dir, "vep")
     containers_dir: Path = Path(out_dir, "containers")
     config_path: Path = Path(references_dir, "config.json")
     log_dir: Path = Path(references_dir, "logs")
     script_dir: Path = Path(references_dir, "scripts")
-    for dir_path in [references_dir, containers_dir, log_dir, script_dir]:
+    for dir_path in [references_dir, genome_dir, variants_dir, vep_dir, containers_dir]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
     cache_config: CacheConfigModel = CacheConfigModel(
@@ -116,6 +119,9 @@ def initialize(
             "case_id": "reference" + "." + genome_version + ".v" + balsamic_version
         },
         references_dir=references_dir.as_posix(),
+        genome_dir=genome_dir.as_posix(),
+        variants_dir=variants_dir.as_posix(),
+        vep_dir=vep_dir.as_posix(),
         containers_dir=containers_dir.as_posix(),
         genome_version=genome_version,
         cosmic_key=cosmic_key,

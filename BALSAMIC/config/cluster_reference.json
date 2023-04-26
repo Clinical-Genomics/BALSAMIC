@@ -12,14 +12,26 @@
 		"n": 1
 	},
   	"download_containers": {
-        "n": 12,
-        "time": "0:30:00",
+        "n": 4,
+        "time": "0:15:00",
         "mail_type": "FAIL",
         "partition": "core"
 	},
      "download_references": {
-        "n": 24,
-        "time": "3:00:00",
+        "n": 12,
+        "time": "1:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+     "compress_vcfs": {
+        "n": 4,
+        "time": "00:15:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+     "index_vcfs": {
+        "n": 12,
+        "time": "1:00:00",
         "mail_type": "FAIL",
         "partition": "core"
     }
