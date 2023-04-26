@@ -125,6 +125,7 @@ rule all:
         clinvar = clinvar_url.get_output_file + ".gz",
         somalier_sites = somalier_sites_url.get_output_file + ".gz",
         cadd_snv = cadd_snv_url.get_output_file,
+        cadd_snv_index = cadd_snv_url.get_output_file + ".tbi" ,
     output:
         finished = os.path.join(basedir,"reference.finished"),
         reference_json = os.path.join(basedir, "reference.json"),
@@ -407,7 +408,7 @@ rule prepare_delly_exclusion:
 sed 's/chr//g' {input.delly_exclusion} > {output.delly_exclusion_converted} 2> {log}
         """
 
-rule tabix_cadd_snv:
+rule tabix_index_cadd_snv:
     input:
         singularity_img = singularity_images,
         cadd_snv = cadd_snv_url.get_output_file,
