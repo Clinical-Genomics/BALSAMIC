@@ -90,6 +90,14 @@ The values for `ORIGIN` are described below:
    * - COSMIC_AA
      - peptide annotation
 
+.. list-table:: CADD
+   :widths: 50 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+   * - CADD
+     - Combined Annotation Dependent Depletion
 
 Where relevant, `BALSAMIC` uses `ensembl-vep` to annotate somatic and germline SNVs and somatic SVs/CNVs from `1000genomes (phase3)`, `ClinVar`, `ESP, HGMD-PUBLIC`, `dbSNP`, `gencode`, `gnomAD`, `polyphen`, `refseq`, and `sift` databases.
 The following annotations are added by `ensembl-vep`.
