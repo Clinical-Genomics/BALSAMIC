@@ -5,7 +5,7 @@ Added:
 ^^^^^^
 * PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
-* `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/11
+* `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1105
 
 Changed:
 ^^^^^^^^
