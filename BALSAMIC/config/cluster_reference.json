@@ -19,13 +19,13 @@
 	},
      "download_references": {
         "n": 12,
-        "time": "1:00:00",
+        "time": "2:00:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
      "compress_vcfs": {
         "n": 4,
-        "time": "00:15:00",
+        "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
