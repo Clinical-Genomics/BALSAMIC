@@ -125,21 +125,21 @@ SNAKEMAKE_RULES = {
     "cache": {
         GenomeVersion.HG19: [
             "snakemake_rules/cache/containers.rule",
-            "snakemake_rules/cache/references/delly.rule",
-            "snakemake_rules/cache/references/reference_genome.rule",
-            "snakemake_rules/cache/references/references.rule",
-            "snakemake_rules/cache/references/refseq.rule",
-            "snakemake_rules/cache/references/vcf_references.rule",
-            "snakemake_rules/cache/references/vep.rule",
+            "snakemake_rules/cache/delly.rule",
+            "snakemake_rules/cache/reference_genome.rule",
+            "snakemake_rules/cache/references.rule",
+            "snakemake_rules/cache/refseq.rule",
+            "snakemake_rules/cache/vcf_references.rule",
+            "snakemake_rules/cache/vep.rule",
         ],
         GenomeVersion.HG38: [
             "snakemake_rules/cache/containers.rule",
-            "snakemake_rules/cache/references/delly.rule",
-            "snakemake_rules/cache/references/reference_genome.rule",
-            "snakemake_rules/cache/references/references.rule",
-            "snakemake_rules/cache/references/refseq.rule",
-            "snakemake_rules/cache/references/vcf_references.rule",
-            "snakemake_rules/cache/references/vep.rule",
+            "snakemake_rules/cache/delly.rule",
+            "snakemake_rules/cache/reference_genome.rule",
+            "snakemake_rules/cache/references.rule",
+            "snakemake_rules/cache/refseq.rule",
+            "snakemake_rules/cache/vcf_references.rule",
+            "snakemake_rules/cache/vep.rule",
         ],
         GenomeVersion.CanFam3: [
             # TODO
