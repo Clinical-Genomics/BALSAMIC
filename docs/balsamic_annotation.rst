@@ -90,6 +90,8 @@ The values for `ORIGIN` are described below:
    * - COSMIC_AA
      - peptide annotation
 
+`BALSAMIC` adds the following annotation for SNVs from `CADD` database using ``vcfanno``.
+
 .. list-table:: CADD
    :widths: 50 50
    :header-rows: 1
