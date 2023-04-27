@@ -23,7 +23,9 @@ cache_config: CacheConfigModel = CacheConfigModel.parse_obj(config)
 for rule in SNAKEMAKE_RULES["cache"][cache_config.genome_version]:
     include: Path(BALSAMIC_DIR, rule).as_posix()
 
-LOG.info(f"The rules {SNAKEMAKE_RULES['cache'][cache_config.genome_version]} will be included in the reference workflow")
+LOG.info(
+    f"The rules {SNAKEMAKE_RULES['cache'][cache_config.genome_version]} will be included in the reference workflow"
+)
 
 
 rule all:
@@ -33,13 +35,9 @@ rule all:
             f"{cache_config.containers_dir.as_posix()}/{{singularity_image}}.sif",
             singularity_image=cache_config.containers.keys(),
         ),
-        expand(
-            f"{cache_config.references_dir.as_posix()}/{{reference_file}}",
-            reference_file=cache_config.get_reference_paths(),
-        ),
+        expand("{reference_path}", reference_path=cache_config.get_reference_paths()),
     output:
         finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
-    threads:
-        get_threads(cluster_config, "all")
+    threads: get_threads(cluster_config, "all")
     run:
         write_finish_file(output.finish_file)

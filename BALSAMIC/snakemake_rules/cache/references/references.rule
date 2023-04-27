@@ -5,17 +5,18 @@
 rule download_references:
     """Download Balsamic reference files."""
     output:
-        reference_path=f"{config['references_dir']}/{{reference_file}}",
+        reference_path="{reference_path}",
+    wildcard_constraints:
+        reference_path="|".join(cache_config.get_reference_paths()),
     params:
         reference=lambda wildcards: cache_config.get_reference_by_path(
-            Path(config["references_dir"], wildcards.reference_file).as_posix()
+            Path(config["references_dir"], wildcards.reference_path).as_posix()
         ),
-    threads:
-        get_threads(cluster_config, "download_references")
+    threads: get_threads(cluster_config, "download_references")
     message:
         "Downloading reference file {output.reference_path}"
     log:
-        "logs/{reference_file}.log",
+        "{reference_path}.log",
     shell:
         """
         export TMPDIR=$(dirname "{output.reference_path}")
@@ -33,31 +34,3 @@ rule download_references:
         fi
         eval "$cmd > '{output.reference_path}'" &> "{log}"
         """
-
-
-
-
-# ##########################################################
-# # bgzip and tabix the vcf files that are vcf
-# ##########################################################
-#
-#
-# rule bgzip_tabix:
-#     input:
-#         singularity_img=cache_config.container_paths,
-#         vcf=Path(vcf_dir, "{vcf}.vcf"),
-#     params:
-#         type="vcf",
-#     output:
-#         Path(vcf_dir, "{vcf}.vcf.gz"),
-#         Path(vcf_dir, "{vcf}.vcf.gz.tbi"),
-#     log:
-#         Path(vcf_dir, "{vcf}.vcf.gz_tbi.log"),
-#     singularity:
-#         Path(
-#             singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif"
-#         ).as_posix()
-#     shell:
-#         """
-# bgzip {input.vcf} && tabix -p {params.type} {input.vcf}.gz 2> {log};
-#         """
