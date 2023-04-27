@@ -4,6 +4,8 @@
 import logging
 from pathlib import Path
 
+from BALSAMIC.constants.cache import FileType
+
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache_models import CacheConfigModel
@@ -36,6 +38,12 @@ rule all:
             singularity_image=cache_config.containers.keys(),
         ),
         expand("{reference_path}", reference_path=cache_config.get_reference_paths()),
+        expand(
+            "{vcf}.gz.tbi",
+            vcf=cache_config.get_reference_paths_by_file_type_and_compression(
+                file_type=FileType.VCF, compression=True
+            ),
+        ),
     output:
         finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
     threads: get_threads(cluster_config, "all")

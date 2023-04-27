@@ -28,7 +28,7 @@ rule download_references:
             cmd="gsutil cp '{params.reference.url}' -"
         else
             cmd="wget '{params.reference.url}' -O -"
-        fi 
+        fi
         if [[ "{params.reference.gzip}" == "True" ]]; then
             cmd+=" | gunzip"
         fi
