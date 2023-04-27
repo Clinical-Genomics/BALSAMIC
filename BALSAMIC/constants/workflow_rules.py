@@ -169,4 +169,6 @@ DELIVERY_RULES = [
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
+    # TMB
+    "tmb_calculation",
 ]
