@@ -30,7 +30,7 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - somatic, germline
      - SNV, InDel
    * - VarDict
-     - TGA, WGS
+     - TGA
      - tumor-normal, tumor-only
      - somatic
      - SNV, InDel
