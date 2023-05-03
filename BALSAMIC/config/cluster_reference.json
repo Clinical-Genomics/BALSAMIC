@@ -1,25 +1,25 @@
 {
 	"__default__": {
-		"name": "BALSAMIC.{rule}.{wildcards}",
-		"time": "12:00:00",
 		"n": 8,
+		"time": "03:00:00",
 		"mail_type": "FAIL",
 		"partition": "core"
 	},
 	"all": {
-		"mail_type": "END",
-		"time": "00:15:00",
-		"n": 1
+        "n": 1,
+        "time": "00:15:00",
+        "mail_type": "END",
+        "partition": "core"
 	},
   	"download_containers": {
         "n": 4,
-        "time": "0:15:00",
+        "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
 	},
      "download_references": {
         "n": 12,
-        "time": "2:00:00",
+        "time": "02:00:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
@@ -31,7 +31,7 @@
     },
      "index_vcfs": {
         "n": 12,
-        "time": "1:00:00",
+        "time": "01:00:00",
         "mail_type": "FAIL",
         "partition": "core"
     }
