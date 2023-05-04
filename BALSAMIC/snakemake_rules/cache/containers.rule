@@ -21,5 +21,6 @@ rule download_containers:
     shell:
         """
         export SINGULARITY_TMPDIR={params.containers_dir}
+        export SINGULARITY_CACHEDIR={params.containers_dir}
         singularity pull {output.container_path} {params.dockerhub_image} &> "{log}"
         """
