@@ -17,6 +17,7 @@ Changed:
 Fixed:
 ^^^^^^
 * Update cryptography version (39.0.1) due to security alert https://github.com/Clinical-Genomics/BALSAMIC/pull/1087
+* Bump cryptography to v40.0.2 and gsutil to v5.23 https://github.com/Clinical-Genomics/BALSAMIC/pull/1154
 * Pytest file saved in balsamic directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1093
 * Fix varcall_py3 container bcftools dependency error https://github.com/Clinical-Genomics/BALSAMIC/pull/1097
 
