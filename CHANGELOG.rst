@@ -13,7 +13,7 @@ Changed:
 * Changed --max_sv_size in VEP params to the size of chr1 for hg19 https://github.com/Clinical-Genomics/BALSAMIC/pull/1124
 * Increased time-limit for sambamba_exon_depth and picard_markduplicates to 6 hours https://github.com/Clinical-Genomics/BALSAMIC/pull/1143
 * Update cosmicdb to v97 https://github.com/Clinical-Genomics/BALSAMIC/pull/1147
-* Updated read the docs with the changes relevant to mention
+* Updated read the docs with the changes relevant to mention https://github.com/Clinical-Genomics/BALSAMIC/pull/1153
 
 Fixed:
 ^^^^^^
