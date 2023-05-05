@@ -94,6 +94,9 @@ The values for `ORIGIN` are described below:
 Where relevant, `BALSAMIC` uses `ensembl-vep` to annotate somatic and germline SNVs and somatic SVs/CNVs from `1000genomes (phase3)`, `ClinVar`, `ESP, HGMD-PUBLIC`, `dbSNP`, `gencode`, `gnomAD`, `polyphen`, `refseq`, and `sift` databases.
 The following annotations are added by `ensembl-vep`.
 
+VEP has a setting for the maximum size of a structural variant that it will annotate, currently this is set to the size of the size of chromosome 1 (in hg19) (`--max_sv_size 249250621`).
+
+
 .. list-table:: ensembl-vep
    :widths: 10 60
    :header-rows: 1

@@ -47,9 +47,46 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
-It mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
 
-The copy number variants, identified using ascatNgs and `dellycnv`, are converted to deletion and duplications before they are merged using `SVDB` with `--bnd_distance = 5000` (distance between end points for the variants from different callers) and  `--overlap = 0.80` (percentage for overlapping bases for the variants from different callers). `SVDB` prioritizes the merging of variants from SV and CNV callers to fetch position and genotype information,  in the following order:
+**Pre-merge Filtrations**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+The copy number variants, identified using ascatNgs and `dellycnv`, are converted to deletion and duplications before they are merged using `SVDB` with `--bnd_distance = 5000` (distance between end points for the variants from different callers) and  `--overlap = 0.80` (percentage for overlapping bases for the variants from different callers).
+
+Tumor and normal calls in `TIDDIT` are merged using `SVDB` with `--bnd_distance 500` and `--overlap = 0.80`.
+Using a custom made script "filter_SVs.py", soft-filters are added to the calls based on the presence of the variant in the normal, with the goal of retaining only somatic variants as PASS.
+
+
+.. list-table:: SV filters
+   :widths: 25 25 40
+   :header-rows: 1
+
+   * - Variant caller
+     - Filter added
+     - Filter expression
+   * - TIDDIT
+     - high_normal_af_fraction
+     - (AF_N_MAX / AF_T_MAX) > 0.25
+   * - TIDDIT
+     - max_normal_allele_frequency
+     - AF_N_MAX > 0.25
+   * - TIDDIT
+     - normal_variant
+     - AF_T_MAX == 0 and ctg_t == False
+   * - TIDDIT
+     - in_normal
+     - ctg_n == True and AF_N_MAX == 0 and AF_T_MAX <= 0.25
+
+
+Further information regarding the TIDDIT tumor normal filtration: As translocation variants are represented by 2 BNDs in the VCF which allows for mixed assignment of soft-filters, a requirement for assigning soft-filters to translocations is that neither BND is PASS.
+
+
+**Post-merge Filtrations**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+`SVDB` prioritizes the merging of variants from SV and CNV callers to fetch position and genotype information,  in the following order:
 
 .. list-table:: SVDB merge caller priority order
    :widths: 25 25 25 25
