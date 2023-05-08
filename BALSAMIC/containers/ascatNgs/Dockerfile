@@ -21,7 +21,6 @@ RUN apt-get install -yq --no-install-recommends git
 ENV DEBIAN_FRONTEND "noninteractive"
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends software-properties-common
-RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -cs)-cran40/" >> /etc/apt/sources.list
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
 RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
