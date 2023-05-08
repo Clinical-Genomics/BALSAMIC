@@ -80,7 +80,7 @@ RUN cd /git && git clone --recursive https://github.com/cancerit/ascatNgs.git &&
 USER    ubuntu
 FROM ubuntu:20.04
 
-RUN apt-get -yq update && \
+RUN apt-get -yq update
 RUN apt-get install -qy --no-install-recommends \
 lsb-release \
 gnupg \
