@@ -21,7 +21,7 @@ RUN apt-get install -yq --no-install-recommends git
 ENV DEBIAN_FRONTEND "noninteractive"
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends software-properties-common
-RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`-cran40/" >> /etc/apt/sources.list
+RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -cs)-cran40/" >> /etc/apt/sources.list
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
 RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
@@ -67,8 +67,8 @@ RUN mkdir -p $OPT
 RUN mkdir $OPT/config/
 RUN mkdir -p $R_LIBS_USER
 WORKDIR /R
-RUN cd /R && wget https://cdn.rstudio.com/r/ubuntu-2004/pkgs/r-4.2.1_1_amd64.deb &&\
-	apt install -f -y ./r-4.2.1_1_amd64.deb &&\
+RUN cd /R && wget --progress=dot:giga -q -nv https://cdn.rstudio.com/r/ubuntu-2004/pkgs/r-4.2.1_1_amd64.deb &&\
+	apt-get install -f -y ./r-4.2.1_1_amd64.deb &&\
 	ln -s /opt/R/4.2.1/bin/R /usr/bin/R &&\
     ln -s /opt/R/4.2.1/bin/Rscript /usr/bin/Rscript &&\
     ln -s /opt/R/4.2.1/lib/R /usr/lib/R
@@ -77,20 +77,27 @@ RUN cd /git && git clone --recursive https://github.com/cancerit/ascatNgs.git &&
    cd ascatNgs &&\
    ./setup.sh $OPT
 
+USER    ubuntu
 FROM ubuntu:20.04
 
-RUN apt-get -yq update
-RUN apt-get install -qy --no-install-recommends lsb-release
-RUN apt-get install -qy --no-install-recommends gnupg
-RUN apt-get install -yq --no-install-recommends dirmngr
-RUN apt-get install -yq --no-install-recommends wget
-RUN apt-get install -yq --no-install-recommends build-essential
-RUN apt-get install -yq --no-install-recommends locales
-RUN apt-get install -yq --no-install-recommends gcc
-RUN apt-get install -yq --no-install-recommends wget
-RUN apt-get install -yq --no-install-recommends pkg-config
-RUN apt-get install -yq --no-install-recommends cpanminus
-RUN apt-get install -yq --no-install-recommends git
+RUN apt-get -yq update && \
+RUN apt-get install -qy --no-install-recommends \
+lsb-release \
+gnupg \
+dirmngr \
+wget \
+build-essential \
+locales \
+gcc \
+wget \
+pkg-config \
+cpanminus \
+git \
+unattended-upgrade -d -v && \
+apt-get remove -yq unattended-upgrades && \
+apt-get autoremove -yq && \
+&& apt-get clean && \
+rm -rf /var/lib/apt/lists/*
 ENV DEBIAN_FRONTEND "noninteractive"
 RUN locale-gen en_US.UTF-8
 RUN update-locale LANG=en_US.UTF-8
@@ -135,7 +142,9 @@ gfortran \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \
-apt-get autoremove -yq
+apt-get autoremove -yq && \
+&& apt-get clean && \
+rm -rf /var/lib/apt/lists/*
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
@@ -158,8 +167,8 @@ RUN mkdir -p $OPT
 COPY --from=builder $OPT $OPT
 COPY --from=builder /opt/R /opt/R
 WORKDIR /R
-RUN cd /R && wget https://cdn.rstudio.com/r/ubuntu-2004/pkgs/r-4.2.1_1_amd64.deb &&\
-	apt install -f -y ./r-4.2.1_1_amd64.deb
+RUN cd /R && wget --progress=dot:giga -q -nv https://cdn.rstudio.com/r/ubuntu-2004/pkgs/r-4.2.1_1_amd64.deb &&\
+	apt-get install -f -y ./r-4.2.1_1_amd64.deb
 RUN	ln -s /opt/R/4.2.1/bin/R /usr/bin/R
 RUN ln -s /opt/R/4.2.1/bin/Rscript /usr/bin/Rscript
 RUN ln -s /opt/R/4.2.1/lib/R /usr/lib/R
