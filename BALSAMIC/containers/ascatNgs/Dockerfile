@@ -93,10 +93,11 @@ wget \
 pkg-config \
 cpanminus \
 git \
+unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \
-apt-get autoremove -yq && \
-&& apt-get clean && \
+apt-get autoremove -yq &&\
+apt-get clean && \
 rm -rf /var/lib/apt/lists/*
 ENV DEBIAN_FRONTEND "noninteractive"
 RUN locale-gen en_US.UTF-8
@@ -143,7 +144,7 @@ unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \
 apt-get autoremove -yq && \
-&& apt-get clean && \
+apt-get clean && \
 rm -rf /var/lib/apt/lists/*
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
