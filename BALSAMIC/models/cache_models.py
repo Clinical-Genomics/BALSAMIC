@@ -140,18 +140,18 @@ class ReferencesModel(BaseModel):
         """Return output reference genome files."""
         return [
             self.reference_genome.file_path,
-            self.reference_genome.file_path + "." + FileType.FAI,
-            self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
+            # self.reference_genome.file_path + "." + FileType.FAI,
+            # self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
         ]
 
     def get_refgene_files(self) -> List[str]:
         """Return RefSeq's gene files from UCSC."""
         return [
             self.refgene_txt.file_path,
-            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT),
-            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
-            + "."
-            + FileType.BED,
+            # self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT),
+            # self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
+            # + "."
+            # + FileType.BED,
         ]
 
 
@@ -266,7 +266,14 @@ class CacheConfigModel(BaseModel):
             if reference[1].gzip == compression
         ]
 
-    def get_cache_output_paths(self) -> List[str]:
+    def get_container_output_paths(self) -> List[str]:
+        """Return a complete list of output singularity images."""
+        return [
+            Path(self.containers_dir, image + "." + FileType.SIF).as_posix()
+            for image in self.containers.keys()
+        ]
+
+    def get_reference_output_paths(self) -> List[str]:
         """Return a complete list of output reference paths."""
         reference_paths: List[str] = [
             self.references.access_regions.file_path,
@@ -281,9 +288,9 @@ class CacheConfigModel(BaseModel):
             self.references.wgs_calling_regions.file_path,
         ]
         reference_paths.extend(
-            self.references.get_bwa_index_files()
-            + self.references.get_delly_files()
-            + self.references.get_gnomad_files()
+            # self.references.get_bwa_index_files()
+            # + self.references.get_delly_files()
+            self.references.get_gnomad_files()
             + self.references.get_1k_genome_files()
             + self.references.get_reference_genome_files()
             + self.references.get_refgene_files()

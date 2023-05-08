@@ -35,17 +35,8 @@ LOG.info(
 rule all:
     """Target rule for Balsamic cache generation."""
     input:
-        expand(
-            f"{cache_config.containers_dir.as_posix()}/{{singularity_image}}.sif",
-            singularity_image=cache_config.containers.keys(),
-        ),
-        expand("{reference_path}", reference_path=cache_config.get_reference_paths()),
-        expand(
-            "{vcf}.gz.tbi",
-            vcf=cache_config.get_reference_paths_by_file_type_and_compression(
-                file_type=FileType.VCF, compression=True
-            ),
-        ),
+        cache_config.get_container_output_paths(),
+        cache_config.get_reference_output_paths(),
     output:
         finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
     threads: get_threads(cluster_config, "all")
