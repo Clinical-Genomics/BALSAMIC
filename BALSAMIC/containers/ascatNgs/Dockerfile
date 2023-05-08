@@ -68,7 +68,7 @@ RUN mkdir $OPT/config/
 RUN mkdir -p $R_LIBS_USER
 WORKDIR /R
 RUN cd /R && wget --progress=dot:giga -q -nv https://cdn.rstudio.com/r/ubuntu-2004/pkgs/r-4.2.1_1_amd64.deb &&\
-	apt-get install -f -y ./r-4.2.1_1_amd64.deb &&\
+	apt-get install --no-install-recommends -f -y ./r-4.2.1_1_amd64.deb &&\
 	ln -s /opt/R/4.2.1/bin/R /usr/bin/R &&\
     ln -s /opt/R/4.2.1/bin/Rscript /usr/bin/Rscript &&\
     ln -s /opt/R/4.2.1/lib/R /usr/lib/R
@@ -80,8 +80,8 @@ RUN cd /git && git clone --recursive https://github.com/cancerit/ascatNgs.git &&
 USER    ubuntu
 FROM ubuntu:20.04
 
-RUN apt-get -yq update
-RUN apt-get install -qy --no-install-recommends \
+RUN apt-get -yq update && \
+apt-get install -qy --no-install-recommends \
 lsb-release \
 gnupg \
 dirmngr \
@@ -169,7 +169,7 @@ COPY --from=builder $OPT $OPT
 COPY --from=builder /opt/R /opt/R
 WORKDIR /R
 RUN cd /R && wget --progress=dot:giga -q -nv https://cdn.rstudio.com/r/ubuntu-2004/pkgs/r-4.2.1_1_amd64.deb &&\
-	apt-get install -f -y ./r-4.2.1_1_amd64.deb
+	apt-get install --no-install-recommends -f -y ./r-4.2.1_1_amd64.deb
 RUN	ln -s /opt/R/4.2.1/bin/R /usr/bin/R
 RUN ln -s /opt/R/4.2.1/bin/Rscript /usr/bin/Rscript
 RUN ln -s /opt/R/4.2.1/lib/R /usr/lib/R
