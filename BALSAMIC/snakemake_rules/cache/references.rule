@@ -19,7 +19,6 @@ rule download_references:
         "{reference_path}.log",
     shell:
         """
-        export TMPDIR=$(dirname "{output.reference_path}")
         if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
             response=$(curl -s -H "Authorization: Basic {params.reference.secret}" "{params.reference.url}")
             download_url=$(echo $response | grep -o 'https://[^"]*')

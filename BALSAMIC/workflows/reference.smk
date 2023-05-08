@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import logging
+import os
 from pathlib import Path
 
 from BALSAMIC.constants.cache import FileType
@@ -14,12 +15,13 @@ from BALSAMIC.utils.rule import get_threads
 
 LOG = logging.getLogger(__name__)
 
-# Shell options
-shell.executable("/bin/bash")
-shell.prefix("set -euo pipefail; ")
-
 # Balsamic cache configuration model
 cache_config: CacheConfigModel = CacheConfigModel.parse_obj(config)
+
+# Temporary directory and shell options
+os.environ["TMPDIR"] = cache_config.references_dir.as_posix()
+shell.executable("/bin/bash")
+shell.prefix("set -euo pipefail; ")
 
 # Rules to include
 for rule in SNAKEMAKE_RULES["cache"][cache_config.genome_version]:
