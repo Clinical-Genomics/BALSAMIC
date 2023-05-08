@@ -18,6 +18,7 @@ RUN apt-get install -yq --no-install-recommends g++
 RUN apt-get install -yq --no-install-recommends make
 RUN apt-get install -yq --no-install-recommends gcc
 RUN apt-get install -yq --no-install-recommends git
+
 ENV DEBIAN_FRONTEND "noninteractive"
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends software-properties-common
@@ -25,7 +26,6 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD5
 RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
 RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
 RUN apt-get -yq update
-ENV DEBIAN_FRONTEND "noninteractive"
 RUN apt-get install -yq --no-install-recommends locales
 RUN apt-get install -yq --no-install-recommends g++
 RUN apt-get install -yq --no-install-recommends make
@@ -98,6 +98,7 @@ apt-get remove -yq unattended-upgrades && \
 apt-get autoremove -yq &&\
 apt-get clean && \
 rm -rf /var/lib/apt/lists/*
+
 ENV DEBIAN_FRONTEND "noninteractive"
 RUN locale-gen en_US.UTF-8
 RUN update-locale LANG=en_US.UTF-8
@@ -176,7 +177,7 @@ RUN rm -rf /R
 RUN rm -rf /var/lib/apt/lists/*
 RUN adduser --disabled-password --gecos '' ubuntu && chsh -s /bin/bash && mkdir -p /home/ubuntu
 
-USER    ubuntu
+USER ubuntu
 WORKDIR /home/ubuntu
 
 CMD ["/bin/bash"]
