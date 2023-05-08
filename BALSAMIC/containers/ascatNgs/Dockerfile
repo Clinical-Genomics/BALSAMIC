@@ -1,4 +1,4 @@
-FROM quay.io/wtsicgp/pcap-core:5.4.2 as builder
+FROM quay.io/wtsicgp/pcap-core:5.4.2 AS builder
 
 USER root
 
