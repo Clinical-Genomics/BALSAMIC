@@ -2,8 +2,30 @@
 # coding: utf-8
 
 
-rule index_reference_genome:
-    """Create BWA indexes for the reference genome file."""
+rule fasta_index_reference_genome:
+    """Create FASTA index for the reference genome."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.sif",
+        reference_genome=cache_config.references.reference_genome.file_path,
+    output:
+        indexed_reference_genome=cache_config.references.reference_genome.file_path
+        + "."
+        + FileType.FAI,
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.sif"
+    threads: get_threads(cluster_config, "fasta_index_reference_genome")
+    message:
+        "FASTA format indexing of the reference genome file {input.reference_genome}"
+    log:
+        f"{cache_config.references.reference_genome.file_path}.fasta_index.log",
+    shell:
+        """
+        samtools faidx "{input.reference_genome}" &> "{log}"
+        """
+
+
+rule bwa_index_reference_genome:
+    """Create BWA indexes for the reference genome."""
     input:
         singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bwa']}.sif",
         reference_genome=cache_config.references.reference_genome.file_path,
@@ -11,9 +33,9 @@ rule index_reference_genome:
         indexed_reference_genome=cache_config.references.get_reference_genome_bwa_index_files(),
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['bwa']}.sif"
-    threads: get_threads(cluster_config, "index_reference_genome")
+    threads: get_threads(cluster_config, "bwa_index_reference_genome")
     message:
-        "Indexing reference genome file {input.reference_genome}"
+        "BWA indexing of the reference genome file {input.reference_genome}"
     log:
         f"{cache_config.references.reference_genome.file_path}.bwa_index.log",
     shell:
@@ -21,27 +43,7 @@ rule index_reference_genome:
         bwa index -a bwtsw "{input.reference_genome}" &> "{log}"
         """
 
-# ##########################################################
-# # Create index for fasta file - .fai
-# ##########################################################
-#
-#
-# rule samtools_index_fasta:
-#     input:
-#         singularity_img=cache_config.container_paths,
-#         reference_genome=reference_genome_url.get_output_file,
-#     output:
-#         reference_genome_url.get_output_file + ".fai",
-#     log:
-#         reference_genome_url.get_output_file + ".faidx.log",
-#     singularity:
-#         Path(
-#             singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif"
-#         ).as_posix()
-#     shell:
-#         """
-# samtools faidx {input.reference_genome} 2> {log};
-#         """
+
 # ##########################################################
 # # create reference dictionary using picard
 # ##########################################################

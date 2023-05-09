@@ -137,7 +137,7 @@ class ReferencesModel(BaseModel):
         """Return output reference genome files."""
         return [
             self.reference_genome.file_path,
-            # self.reference_genome.file_path + "." + FileType.FAI,
+            self.reference_genome.file_path + "." + FileType.FAI,
             # self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
         ] + self.get_reference_genome_bwa_index_files()
 
