@@ -1,7 +1,7 @@
 {
 	"__default__": {
 		"n": 8,
-		"time": "03:00:00",
+		"time": "02:00:00",
 		"mail_type": "FAIL",
 		"partition": "core"
 	},
@@ -30,6 +30,12 @@
         "partition": "core"
     },
      "index_vcfs": {
+        "n": 12,
+        "time": "01:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "index_reference_genome": {
         "n": 12,
         "time": "01:00:00",
         "mail_type": "FAIL",

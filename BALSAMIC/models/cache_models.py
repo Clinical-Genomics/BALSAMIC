@@ -101,13 +101,6 @@ class ReferencesModel(BaseModel):
     vcf_1kg: Optional[ReferenceUrlModel]
     wgs_calling_regions: Optional[ReferenceUrlModel]
 
-    def get_bwa_index_files(self) -> List[str]:
-        """Return output BWA genome index files."""
-        bwa_index_files: List[str] = []
-        for bwa_index in BwaIndexFileType:
-            bwa_index_files.append(self.reference_genome.file_path + "." + bwa_index)
-        return bwa_index_files
-
     def get_delly_files(self) -> List[str]:
         """Return delly associated output files."""
         return [
@@ -146,7 +139,14 @@ class ReferencesModel(BaseModel):
             self.reference_genome.file_path,
             # self.reference_genome.file_path + "." + FileType.FAI,
             # self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
-        ]
+        ] + self.get_reference_genome_bwa_index_files()
+
+    def get_reference_genome_bwa_index_files(self) -> List[str]:
+        """Return output BWA reference genome index files."""
+        bwa_index_files: List[str] = []
+        for bwa_index in BwaIndexFileType:
+            bwa_index_files.append(self.reference_genome.file_path + "." + bwa_index)
+        return bwa_index_files
 
     def get_refgene_files(self) -> List[str]:
         """Return RefSeq's gene files from UCSC."""
@@ -292,7 +292,6 @@ class CacheConfigModel(BaseModel):
             self.references.wgs_calling_regions.file_path,
         ]
         reference_paths.extend(
-            # self.references.get_bwa_index_files()
             self.references.get_delly_files()
             + self.references.get_gnomad_files()
             + self.references.get_1k_genome_files()
