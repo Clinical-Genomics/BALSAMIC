@@ -112,13 +112,17 @@ class ReferencesModel(BaseModel):
         """Return delly associated output files."""
         return [
             self.delly_exclusion.file_path,
-            self.delly_exclusion.file_path.replace(
-                "." + FileType.TSV, "_converted." + FileType.TSV
-            ),
+            self.get_delly_exclusion_converted_file(),
             self.delly_mappability.file_path,
             self.delly_mappability_findex.file_path,
             self.delly_mappability_gindex.file_path,
         ]
+
+    def get_delly_exclusion_converted_file(self) -> str:
+        """Return delly exclusion converted file."""
+        return self.delly_exclusion.file_path.replace(
+            "." + FileType.TSV, "_converted." + FileType.TSV
+        )
 
     def get_gnomad_files(self) -> List[str]:
         """Return gnomad associated output files."""
@@ -289,8 +293,8 @@ class CacheConfigModel(BaseModel):
         ]
         reference_paths.extend(
             # self.references.get_bwa_index_files()
-            # + self.references.get_delly_files()
-            self.references.get_gnomad_files()
+            self.references.get_delly_files()
+            + self.references.get_gnomad_files()
             + self.references.get_1k_genome_files()
             + self.references.get_reference_genome_files()
             + self.references.get_refgene_files()
