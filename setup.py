@@ -14,7 +14,7 @@ requirements = [
     "colorclass>=2.2.0",
     "coloredlogs>=14.0",
     "graphviz==0.16",
-    "gsutil==4.50",
+    "gsutil==5.23",
     "jinja2>=2.11.2",
     "matplotlib==3.5.2",
     "networkx>=2.6.3",
@@ -30,7 +30,7 @@ requirements = [
     "h5py>=3.6.0",
     "PyPDF2>=1.26.0",
     "markdown==3.3.3",
-    "cryptography==3.2.1",
+    "cryptography==40.0.2",
     "tabulate==0.8.10",
     "toml==0.10.2",
 ]

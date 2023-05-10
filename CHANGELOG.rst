@@ -1,3 +1,28 @@
+[12.0.0]
+-------
+
+Added:
+^^^^^^
+* PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+* Filtering script to remove normal variants from TIDDIT https://github.com/Clinical-Genomics/BALSAMIC/pull/1120
+* Store TMB files in HK https://github.com/Clinical-Genomics/BALSAMIC/pull/1144
+
+Changed:
+^^^^^^^^
+* Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
+* Changed --max_sv_size in VEP params to the size of chr1 for hg19 https://github.com/Clinical-Genomics/BALSAMIC/pull/1124
+* Increased time-limit for sambamba_exon_depth and picard_markduplicates to 6 hours https://github.com/Clinical-Genomics/BALSAMIC/pull/1143
+* Update cosmicdb to v97 https://github.com/Clinical-Genomics/BALSAMIC/pull/1147
+* Updated read the docs with the changes relevant to mention https://github.com/Clinical-Genomics/BALSAMIC/pull/1153
+
+Fixed:
+^^^^^^
+* Update cryptography version (39.0.1) due to security alert https://github.com/Clinical-Genomics/BALSAMIC/pull/1087
+* Bump cryptography to v40.0.2 and gsutil to v5.23 https://github.com/Clinical-Genomics/BALSAMIC/pull/1154
+* Pytest file saved in balsamic directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1093
+* Fix varcall_py3 container bcftools dependency error https://github.com/Clinical-Genomics/BALSAMIC/pull/1097
+* AscatNgs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1155
+
 [11.2.0]
 --------
 
@@ -11,7 +36,7 @@ Fixed:
 Added:
 ^^^^^^
 * Added somalier integration and relatedness check: https://github.com/Clinical-Genomics/BALSAMIC/pull/1017
-* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083 
+* Cluster resources for CNVPytor tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1083
 
 Changed:
 ^^^^^^^^
@@ -21,7 +46,7 @@ Changed:
 Fixed:
 ^^^^^^
 * triallelic_site in quality filter for SNV https://github.com/Clinical-Genomics/BALSAMIC/pull/1052
-* Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/1060 
+* Compression of SNV, research and clinical, VCF files https://github.com/Clinical-Genomics/BALSAMIC/pull/1060
 * `test_write_json` failing locally https://github.com/Clinical-Genomics/BALSAMIC/pull/1063
 * Container build and push via github actions by setting buildx `provenance` flag to false https://github.com/Clinical-Genomics/BALSAMIC/pull/1071
 * Added buildx to the submodule workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1072
