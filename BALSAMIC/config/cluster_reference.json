@@ -1,6 +1,6 @@
 {
     "__default__": {
-        "n": 8,
+        "n": 12,
         "time": "02:00:00",
         "mail_type": "FAIL",
         "partition": "core"
@@ -12,7 +12,7 @@
         "partition": "core"
     },
     "download_containers": {
-        "n": 8,
+        "n": 12,
         "time": "00:15:00",
         "mail_type": "FAIL",
         "partition": "core"
@@ -24,43 +24,43 @@
         "partition": "core"
     },
     "compress_vcfs": {
-        "n": 8,
+        "n": 12,
         "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
     "index_vcfs": {
         "n": 12,
-        "time": "01:00:00",
+        "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
     "picard_dict_reference_genome": {
         "n": 12,
-        "time": "01:00:00",
+        "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
     "fasta_index_reference_genome": {
         "n": 12,
-        "time": "01:00:00",
+        "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
     "bwa_index_reference_genome": {
         "n": 12,
-        "time": "01:00:00",
+        "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
     "preprocess_refseq": {
         "n": 12,
-        "time": "01:00:00",
+        "time": "00:30:00",
         "mail_type": "FAIL",
         "partition": "core"
     },
     "download_vep": {
-        "n": 12,
+        "n": 24,
         "time": "01:00:00",
         "mail_type": "FAIL",
         "partition": "core"
