@@ -30,7 +30,7 @@ rule preprocess_refseq:
         refgene_flat=f"{cache_config.references.refgene_txt.file_path.replace(FileType.TXT,FileType.FLAT)}.log",
     shell:
         """
-        # Generate BED file
+        # Generate RefSeq's BED file
         (
             header=$(awk -f "{params.refseq_script_path}" "{input.refgene_sql}")
             (echo \"$header\"; cat "{input.refgene_txt}") |\
@@ -43,7 +43,7 @@ rule preprocess_refseq:
                 
         ) &> "{log.refgene_bed}"
         
-        # Generate refflat file and remove "chr" prefix from refgene_txt and access_regions files
+        # Generate RefSeq's flat file and remove "chr" prefix from refgene_txt and access_regions files
         (
             awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' "{input.refgene_txt}" |\
                 cut -f 1-11 > "{output.refgene_flat}"
