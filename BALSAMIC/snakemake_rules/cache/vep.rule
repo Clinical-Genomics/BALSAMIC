@@ -1,30 +1,31 @@
-# ##########################################################
-# # ENSEMBL VEP - download and install vep package,
-# #                 cache conversion
-# ##########################################################
-#
-#
-# rule vep_install:
-#     input:
-#         singularity_img=cache_config.container_paths,
-#     params:
-#         species="homo_sapiens_merged",
-#         assembly="GRCh37" if genome_version == "hg19" else "GRCh38",
-#         plugins="all",
-#     output:
-#         directory(vep_dir),
-#     log:
-#         Path(vep_dir, "vep_install_cache.log"),
-#     singularity:
-#         Path(
-#             singularity_image_path, config["bioinfo_tools"].get("ensembl-vep") + ".sif"
-#         ).as_posix()
-#     shell:
-#         """
-# vep_install --SPECIES {params.species} \
-# --AUTO cfp \
-# --ASSEMBLY {params.assembly} \
-# --CACHEDIR {output} \
-# --PLUGINS {params.plugins} \
-# --NO_HTSLIB --CONVERT --NO_UPDATE 2> {log};
-#         """
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule download_vep:
+    """Download and install VEP package."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.sif",
+    output:
+        vep_dir=directory(cache_config.vep_dir),
+    params:
+        species=Species.HOMO_SAPIENS,
+        assembly=cache_config.get_grch_version(),
+        plugins=VEP_PLUGINS,
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.sif"
+    threads: get_threads(cluster_config, "download_vep")
+    message:
+        "Downloading and installing VEP package in {output.vep_dir}"
+    log:
+        f"{cache_config.vep_dir}/download_vep.log",
+    shell:
+        """
+        vep_install --SPECIES {params.species} \
+            --AUTO cfp \
+            --ASSEMBLY {params.assembly} \
+            --CACHEDIR {output.vep_dir} \
+            --PLUGINS {params.plugins} \
+            --NO_HTSLIB --CONVERT --NO_UPDATE \
+            &> {log}
+        """

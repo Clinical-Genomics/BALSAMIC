@@ -6,7 +6,12 @@ from typing import Dict, Optional, List, Any
 
 from pydantic import BaseModel, AnyUrl, DirectoryPath, validator
 
-from BALSAMIC.constants.cache import FileType, BwaIndexFileType, GenomeVersion
+from BALSAMIC.constants.cache import (
+    FileType,
+    BwaIndexFileType,
+    GenomeVersion,
+    GRCHVersion,
+)
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -227,6 +232,14 @@ class CacheConfigModel(BaseModel):
             )
         return references
 
+    def get_grch_version(self) -> Optional[GRCHVersion]:
+        """Return GRCH format version of the genome version."""
+        version: Dict[GenomeVersion, GRCHVersion] = {
+            GenomeVersion.HG19: GRCHVersion.GRCH37,
+            GenomeVersion.HG38: GRCHVersion.GRCH38,
+        }
+        return version.get(self.genome_version)
+
     def get_reference_paths(self) -> List[str]:
         """Return a list of reference relative paths."""
         return [
@@ -290,6 +303,7 @@ class CacheConfigModel(BaseModel):
             self.references.rankscore.file_path,
             self.references.somalier_sites.file_path + "." + FileType.GZ,
             self.references.wgs_calling_regions.file_path,
+            self.vep_dir.as_posix(),
         ]
         reference_paths.extend(
             self.references.get_delly_files()

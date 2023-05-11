@@ -58,5 +58,11 @@
         "time": "01:00:00",
         "mail_type": "FAIL",
         "partition": "core"
+    },
+    "download_vep": {
+        "n": 12,
+        "time": "01:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
     }
 }

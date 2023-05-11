@@ -3,11 +3,24 @@ from BALSAMIC.utils.str_enum import StrEnum
 
 
 class GenomeVersion(StrEnum):
-    """Reference genome version"""
+    """Reference genome versions."""
 
     HG19: str = "hg19"
     HG38: str = "hg38"
     CanFam3: str = "canfam3"
+
+
+class GRCHVersion(StrEnum):
+    """Genome Reference Consortium Human Reference versions."""
+
+    GRCH37: str = "GRCh37"
+    GRCH38: str = "GRCh38"
+
+
+class Species(StrEnum):
+    """A class representing different species."""
+
+    HOMO_SAPIENS: str = "homo_sapiens_merged"
 
 
 class ContainerVersion(StrEnum):
@@ -61,3 +74,5 @@ DOCKER_CONTAINERS: set = {
     "varcall_py27",
     "vcf2cytosure",
 }
+
+VEP_PLUGINS: str = "all"
