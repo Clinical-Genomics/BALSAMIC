@@ -17,7 +17,7 @@ rule fasta_index_reference_genome:
     message:
         "FASTA format indexing of the reference genome file {input.reference_genome}"
     log:
-        f"{cache_config.references.reference_genome.file_path}.fasta_index.log",
+        f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}.log",
     shell:
         """
         samtools faidx "{input.reference_genome}" &> "{log}"
@@ -37,7 +37,7 @@ rule bwa_index_reference_genome:
     message:
         "BWA indexing of the reference genome file {input.reference_genome}"
     log:
-        f"{cache_config.references.reference_genome.file_path}.bwa_index.log",
+        f"{cache_config.references.reference_genome.file_path}.bwa_indexes.log",
     shell:
         """
         bwa index -a bwtsw "{input.reference_genome}" &> "{log}"
