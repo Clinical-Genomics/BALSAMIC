@@ -21,7 +21,7 @@ rule picard_dict_reference_genome:
     shell:
         """
         picard CreateSequenceDictionary REFERENCE="{input.reference_genome}" OUTPUT="{output.dict_reference_genome}" \
-        &> "{log}"
+            &> "{log}"
         """
 
 

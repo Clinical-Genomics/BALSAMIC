@@ -7,7 +7,7 @@ from pathlib import Path
 
 from BALSAMIC.constants.cache import FileType
 
-from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR, REFSEQ_SCRIPT_PATH
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache_models import CacheConfigModel
 from BALSAMIC.utils.io import write_finish_file

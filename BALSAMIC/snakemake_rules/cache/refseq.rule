@@ -1,38 +1,53 @@
-# ##########################################################
-# # Preprocess refseq file by fetching relevant columns and
-# # standardize the chr column
-# ##########################################################
-#
-#
-# rule prepare_refgene:
-#     input:
-#         cache_config.container_paths,
-#         refgene_txt=refgene_txt_url.get_output_file,
-#         refgene_sql=refgene_sql_url.get_output_file,
-#         accessible_regions=access_regions_url.get_output_file,
-#     params:
-#         refgene_sql_awk=get_script_path("refseq_sql.awk"),
-#     output:
-#         refflat=refgene_txt_url.get_output_file.replace("txt", "flat"),
-#         bed=refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
-#     log:
-#         refgene_sql=Path(reference_dir, "genome", "refgene_sql.log"),
-#         refgene_txt=Path(reference_dir, "genome", "refgene_txt.log"),
-#     singularity:
-#         Path(
-#             singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif"
-#         ).as_posix()
-#     shell:
-#         """
-# header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
-# (echo \"$header\"; cat {input.refgene_txt};) \
-# | csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 \
-# | csvformat -T \
-# | bedtools expand -c 2,3 \
-# | awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed};
-#
-# awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt} \
-# | cut -f 1-11 > {output.refflat};
-# sed -i 's/chr//g' {input.refgene_txt};
-# sed -i 's/chr//g' {input.accessible_regions};
-#         """
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule preprocess_refseq:
+    """Preprocess RefSeq's gene files."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bedtools']}.sif",
+        access_regions=cache_config.references.access_regions.file_path,
+        refgene_sql=cache_config.references.refgene_sql.file_path,
+        refgene_txt=cache_config.references.refgene_txt.file_path,
+    output:
+        refgene_bed=cache_config.references.refgene_txt.file_path.replace(
+            FileType.TXT, FileType.FLAT
+        )
+        + "."
+        + FileType.BED,
+        refgene_flat=cache_config.references.refgene_txt.file_path.replace(
+            FileType.TXT, FileType.FLAT
+        ),
+    params:
+        refseq_script_path=REFSEQ_SCRIPT_PATH,
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['bedtools']}.sif"
+    threads: get_threads(cluster_config, "preprocess_refseq")
+    message:
+        "Preprocessing RefSeq's gene files {input.refgene_sql} and {input.refgene_txt}"
+    log:
+        refgene_bed=f"{cache_config.references.refgene_sql.file_path.replace(FileType.TXT, FileType.FLAT)}.{FileType.BED}.log",
+        refgene_flat=f"{cache_config.references.refgene_txt.file_path.replace(FileType.TXT,FileType.FLAT)}.log",
+    shell:
+        """
+        # Generate BED file
+        (
+            header=$(awk -f "{params.refseq_script_path}" "{input.refgene_sql}")
+            (echo \"$header\"; cat "{input.refgene_txt}") |\
+                csvcut -t -c chrom,exonStarts,exonEnds,name,score,strand,exonCount,txStart,txEnd,name2 |\
+                csvformat -T |\
+                bedtools expand -c 2,3 |\
+                awk '$1~/chr[1-9]/ && $1!~/[_]/' |\
+                cut -c 4- |\
+                sort -k1,1 -k2,2n > "{output.refgene_bed}"
+                
+        ) &> "{log.refgene_bed}"
+        
+        # Generate refflat file and remove "chr" prefix from refgene_txt and access_regions files
+        (
+            awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' "{input.refgene_txt}" |\
+                cut -f 1-11 > "{output.refgene_flat}"
+            sed -i 's/chr//g' "{input.refgene_txt}"
+            sed -i 's/chr//g' "{input.access_regions}"
+        ) &> "{log.refgene_flat}"
+        """

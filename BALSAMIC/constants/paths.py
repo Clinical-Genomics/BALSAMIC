@@ -17,3 +17,5 @@ SENTIEON_DNASCOPE_DIR: str = Path(
 SENTIEON_TNSCOPE_DIR: str = Path(
     SENTIEON_MODELS_DIR, "SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model"
 ).as_posix()
+
+REFSEQ_SCRIPT_PATH: str = Path(SCRIPT_DIR, "refseq_sql.awk").as_posix()

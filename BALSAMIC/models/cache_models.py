@@ -152,10 +152,10 @@ class ReferencesModel(BaseModel):
         """Return RefSeq's gene files from UCSC."""
         return [
             self.refgene_txt.file_path,
-            # self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT),
-            # self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
-            # + "."
-            # + FileType.BED,
+            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT),
+            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
+            + "."
+            + FileType.BED,
         ]
 
 
