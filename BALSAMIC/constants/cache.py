@@ -43,6 +43,7 @@ class FileType(StrEnum):
     GZ: str = "gz"
     LOG: str = "log"
     SIF: str = "sif"
+    TBI: str = "tbi"
     TEXT: str = "text"
     TSV: str = "tsv"
     TXT: str = "txt"

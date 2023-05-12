@@ -13,17 +13,19 @@ wildcard_constraints:
 rule compress_vcfs:
     """Compress VCF reference files."""
     input:
-        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bgzip']}.sif",
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bgzip']}.{FileType.SIF}",
         vcf="{vcf}",
     output:
-        vcf_gz="{vcf}.gz",
+        vcf_gz=f"{{vcf}}.{FileType.GZ}",
     singularity:
-        f"{config['containers_dir']}/{config['bioinfo_tools']['bgzip']}.sif"
+        f"{config['containers_dir']}/{config['bioinfo_tools']['bgzip']}.{FileType.SIF}"
     threads: get_threads(cluster_config, "compress_vcfs")
     message:
         "Compressing VCF variant file {input.vcf}"
+    benchmark:
+        f"{{vcf}}.{FileType.GZ}.{FileType.TSV}"
     log:
-        "{vcf}.gz.log",
+        f"{{vcf}}.{FileType.GZ}.{FileType.LOG}",
     shell:
         """
         bgzip "{input.vcf}" &> "{log}"
@@ -33,17 +35,19 @@ rule compress_vcfs:
 rule index_vcfs:
     """Index VCF reference files."""
     input:
-        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.sif",
-        vcf_gz="{vcf}.gz",
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}",
+        vcf_gz=f"{{vcf}}.{FileType.GZ}",
     output:
-        vcf_gz_tbi="{vcf}.gz.tbi",
+        vcf_gz_tbi=f"{{vcf}}.{FileType.GZ}.{FileType.TBI}",
     singularity:
-        f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.sif"
+        f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}"
     threads: get_threads(cluster_config, "index_vcfs")
     message:
         "Indexing VCF variant file {input.vcf_gz}"
+    benchmark:
+        f"{{vcf}}.{FileType.GZ}.{FileType.TBI}.{FileType.TSV}"
     log:
-        "{vcf}.gz.tbi.log",
+        f"{{vcf}}.{FileType.GZ}.{FileType.TBI}.{FileType.LOG}",
     shell:
         """
         tabix -p vcf "{input.vcf_gz}" &> "{log}"
