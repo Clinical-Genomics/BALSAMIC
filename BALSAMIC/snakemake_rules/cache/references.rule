@@ -15,8 +15,10 @@ rule download_references:
     threads: get_threads(cluster_config, "download_references")
     message:
         "Downloading reference file {output.reference_path}"
+    benchmark:
+        f"{{reference_path}}.{FileType.TSV}"
     log:
-        "{reference_path}.log",
+        f"{{reference_path}}.{FileType.TSV}",
     shell:
         """
         if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
