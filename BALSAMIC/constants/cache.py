@@ -41,10 +41,11 @@ class FileType(StrEnum):
     GFF: str = "gff"
     GTF: str = "gtf"
     GZ: str = "gz"
+    LOG: str = "log"
+    SIF: str = "sif"
     TEXT: str = "text"
     TSV: str = "tsv"
     TXT: str = "txt"
-    SIF: str = "sif"
     VCF: str = "vcf"
 
 

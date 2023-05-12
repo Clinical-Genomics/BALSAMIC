@@ -17,8 +17,10 @@ rule download_containers:
     threads: get_threads(cluster_config, "download_containers")
     message:
         "Downloading singularity image {output.container_path}"
+    benchmark:
+        f"{config['containers_dir']}/benchmarks/{{singularity_image}}.{FileType.SIF}.{FileType.TSV}"
     log:
-        f"{config['containers_dir']}/logs/{{singularity_image}}.sif.log",
+        f"{config['containers_dir']}/logs/{{singularity_image}}.{FileType.SIF}.{FileType.LOG}",
     shell:
         """
         export SINGULARITY_CACHEDIR={params.tmp_dir}/{params.singularity_image}
