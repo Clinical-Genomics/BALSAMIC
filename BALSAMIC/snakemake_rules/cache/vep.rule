@@ -5,7 +5,7 @@
 rule download_vep:
     """Download and install VEP package."""
     input:
-        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.sif",
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.{FileType.SIF}",
     output:
         vep_dir=directory(cache_config.vep_dir),
     params:
@@ -13,12 +13,14 @@ rule download_vep:
         assembly=cache_config.get_grch_version(),
         plugins=VEP_PLUGINS,
     singularity:
-        f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.sif"
+        f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.{FileType.SIF}"
     threads: get_threads(cluster_config, "download_vep")
     message:
         "Downloading and installing VEP package in {output.vep_dir}"
+    benchmark:
+        f"{cache_config.vep_dir}/download_vep.{FileType.TSV}"
     log:
-        f"{cache_config.vep_dir}/download_vep.log",
+        f"{cache_config.vep_dir}/download_vep.{FileType.LOG}",
     shell:
         """
         vep_install --SPECIES {params.species} \
