@@ -35,10 +35,10 @@ from BALSAMIC.commands.options import (
     OPTION_QUIET,
 )
 from BALSAMIC.constants.analysis import RunMode, ClusterMailType, QOS, ClusterProfile
-from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion
+from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.references import REFERENCE_FILES
+
 from BALSAMIC.models.cache_models import CacheConfigModel
 from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
 from BALSAMIC.utils.io import write_json
