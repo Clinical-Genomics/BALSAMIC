@@ -1,3 +1,4 @@
+"""Balsamic commands init options."""
 import click
 
 from BALSAMIC.constants.analysis import ConfigType
@@ -7,7 +8,6 @@ from BALSAMIC.utils.cli import get_config_path
 OPTION_OUT_DIR = click.option(
     "-o",
     "--out-dir",
-    "--outdir",
     required=True,
     type=click.Path(exists=True),
     help="Output directory for singularity containers and reference files",

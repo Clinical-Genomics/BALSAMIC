@@ -203,7 +203,7 @@ def test_init_container_force_dry(invoke_cli, tmp_path):
     result = invoke_cli(
         [
             "init",
-            "--outdir",
+            "--out-dir",
             str(test_new_dir),
             "--cosmic-key",
             "secret_key",
@@ -226,7 +226,7 @@ def test_init_container_specific_tag(invoke_cli, tmp_path):
     result = invoke_cli(
         [
             "init",
-            "--outdir",
+            "--out-dir",
             str(test_new_dir),
             "--cosmic-key",
             "secret_key",
@@ -251,7 +251,7 @@ def test_init_container_without_dry_run(invoke_cli, tmp_path):
         result = invoke_cli(
             [
                 "init",
-                "--outdir",
+                "--out-dir",
                 str(test_new_dir),
                 "--cosmic-key",
                 "secret_key",
@@ -275,7 +275,7 @@ def test_init_container_wrong_tag(invoke_cli, tmp_path):
     result = invoke_cli(
         [
             "init",
-            "--outdir",
+            "--out-dir",
             str(test_new_dir),
             "--cosmic-key",
             "secret_key",

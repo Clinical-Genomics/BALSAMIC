@@ -34,8 +34,8 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
 )
-from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.analysis import RunMode, ClusterMailType, QOS, ClusterProfile
+from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.references import REFERENCE_FILES
@@ -67,23 +67,23 @@ LOG = logging.getLogger(__name__)
 @OPTION_QUIET
 @click.pass_context
 def initialize(
-    context,
-    out_dir,
-    container_version,
-    cosmic_key,
-    genome_version,
-    snakefile,
-    run_mode,
-    cluster_config,
-    profile,
-    qos,
-    account,
-    mail_user,
-    mail_type,
-    snakemake_opt,
-    force_all,
-    run_analysis,
-    quiet,
+    context: click.Context,
+    out_dir: str,
+    container_version: ContainerVersion,
+    cosmic_key: str,
+    genome_version: GenomeVersion,
+    snakefile: Path,
+    run_mode: RunMode,
+    cluster_config: Path,
+    profile: ClusterProfile,
+    qos: QOS,
+    account: str,
+    mail_user: str,
+    mail_type: ClusterMailType,
+    snakemake_opt: str,
+    force_all: bool,
+    run_analysis: bool,
+    quiet: bool,
 ):
     """Reference cache and containers download."""
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}")
