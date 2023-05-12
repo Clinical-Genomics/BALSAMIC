@@ -2,7 +2,7 @@
 import hashlib
 import logging
 from pathlib import Path
-from typing import Dict, Optional, List, Any
+from typing import Dict, Optional, List, Any, Union
 
 from pydantic import BaseModel, AnyUrl, DirectoryPath, validator
 
@@ -200,7 +200,7 @@ class CacheConfigModel(BaseModel):
     references_dir: DirectoryPath
     genome_dir: DirectoryPath
     variants_dir: DirectoryPath
-    vep_dir: DirectoryPath
+    vep_dir: Path
     containers_dir: DirectoryPath
     genome_version: GenomeVersion
     cosmic_key: Optional[str]
