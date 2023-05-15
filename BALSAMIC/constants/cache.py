@@ -1,5 +1,5 @@
 """Balsamic cache specific constants."""
-from BALSAMIC.utils.str_enum import StrEnum
+from BALSAMIC.utils.class_types import StrEnum
 
 
 class GenomeVersion(StrEnum):
