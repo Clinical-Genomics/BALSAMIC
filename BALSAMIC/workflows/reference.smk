@@ -10,13 +10,14 @@ from BALSAMIC.constants.cache import FileType, Species, VEP_PLUGINS
 from BALSAMIC.constants.paths import BALSAMIC_DIR, REFSEQ_SCRIPT_PATH
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache_models import CacheConfigModel
-from BALSAMIC.utils.io import write_finish_file
+from BALSAMIC.utils.io import write_finish_file, write_json
 from BALSAMIC.utils.rule import get_threads
 
 LOG = logging.getLogger(__name__)
 
 # Balsamic cache configuration model
 cache_config: CacheConfigModel = CacheConfigModel.parse_obj(config)
+reference_json: str = Path(cache_config.references_dir, "reference.json").as_posix()
 
 # Temporary directory and shell options
 os.environ["TMPDIR"] = cache_config.references_dir.as_posix()
@@ -25,7 +26,9 @@ shell.prefix("set -euo pipefail; ")
 
 # Rules to include
 for rule in SNAKEMAKE_RULES["cache"][cache_config.genome_version]:
+
     include: Path(BALSAMIC_DIR, rule).as_posix()
+
 
 LOG.info(
     f"The rules {SNAKEMAKE_RULES['cache'][cache_config.genome_version]} will be included in the reference workflow"
@@ -41,4 +44,5 @@ rule all:
         finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
     threads: get_threads(cluster_config, "all")
     run:
+        write_json(cache_config.get_analysis_references().dict(), reference_json)
         write_finish_file(output.finish_file)
