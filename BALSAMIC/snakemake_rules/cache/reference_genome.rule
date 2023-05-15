@@ -17,7 +17,7 @@ rule picard_dict_reference_genome:
     message:
         "Creating a sequence dictionary for a reference file {input.reference_genome}"
     benchmark:
-        f"{cache_config.references.reference_genome.file_path.replace(FileType.FASTA,FileType.DICT)}.{FileType.TSV}"
+        f"{cache_config.references.reference_genome.file_path.replace(FileType.FASTA,FileType.DICT)}.benchmark.{FileType.TSV}"
     log:
         f"{cache_config.references.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT)}.{FileType.LOG}",
     shell:
@@ -42,7 +42,7 @@ rule fasta_index_reference_genome:
     message:
         "FASTA format indexing of the reference genome file {input.reference_genome}"
     benchmark:
-        f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}.{FileType.TSV}"
+        f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}.benchmark.{FileType.TSV}"
     log:
         f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}.{FileType.LOG}",
     shell:
@@ -64,7 +64,7 @@ rule bwa_index_reference_genome:
     message:
         "BWA indexing of the reference genome file {input.reference_genome}"
     benchmark:
-        f"{cache_config.references.reference_genome.file_path}.bwa_indexes.{FileType.TSV}"
+        f"{cache_config.references.reference_genome.file_path}.bwa_indexes.benchmark.{FileType.TSV}"
     log:
         f"{cache_config.references.reference_genome.file_path}.bwa_indexes.{FileType.LOG}",
     shell:

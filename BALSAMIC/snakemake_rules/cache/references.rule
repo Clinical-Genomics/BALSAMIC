@@ -16,7 +16,7 @@ rule download_references:
     message:
         "Downloading reference file {output.reference_path}"
     benchmark:
-        f"{{reference_path}}.{FileType.TSV}"
+        f"{{reference_path}}.benchmark.{FileType.TSV}"
     log:
         f"{{reference_path}}.{FileType.TSV}",
     shell:

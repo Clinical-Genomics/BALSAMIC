@@ -18,7 +18,7 @@ rule download_containers:
     message:
         "Downloading singularity image {output.container_path}"
     benchmark:
-        f"{config['containers_dir']}/benchmarks/{{singularity_image}}.{FileType.SIF}.{FileType.TSV}"
+        f"{config['containers_dir']}/benchmarks/{{singularity_image}}.{FileType.SIF}.benchmark.{FileType.TSV}"
     log:
         f"{config['containers_dir']}/logs/{{singularity_image}}.{FileType.SIF}.{FileType.LOG}",
     shell:

@@ -18,7 +18,7 @@ rule download_vep:
     message:
         "Downloading and installing VEP package in {output.vep_dir}"
     benchmark:
-        f"{cache_config.vep_dir}/download_vep.{FileType.TSV}"
+        f"{cache_config.vep_dir}/download_vep.benchmark.{FileType.TSV}"
     log:
         f"{cache_config.vep_dir}/download_vep.{FileType.LOG}",
     shell:

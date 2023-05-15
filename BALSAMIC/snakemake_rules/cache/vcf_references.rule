@@ -23,7 +23,7 @@ rule compress_vcfs:
     message:
         "Compressing VCF variant file {input.vcf}"
     benchmark:
-        f"{{vcf}}.{FileType.GZ}.{FileType.TSV}"
+        f"{{vcf}}.{FileType.GZ}.benchmark.{FileType.TSV}"
     log:
         f"{{vcf}}.{FileType.GZ}.{FileType.LOG}",
     shell:
