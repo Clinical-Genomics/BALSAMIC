@@ -2,9 +2,9 @@
 import hashlib
 import logging
 from pathlib import Path
-from typing import Dict, Optional, List, Any, Union
+from typing import Dict, Optional, List, Any
 
-from pydantic import BaseModel, AnyUrl, DirectoryPath, validator
+from pydantic import BaseModel, AnyUrl, DirectoryPath, validator, FilePath
 
 from BALSAMIC.constants.cache import (
     FileType,
@@ -15,6 +15,62 @@ from BALSAMIC.constants.cache import (
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
+
+
+class AnalysisReferencesModel(BaseModel):
+    """
+    Reference files model to be used during analysis.
+
+    Attributes:
+        access_regions            : accessible genome regions
+        ascat_chr_y_loci          : chromosome Y loci
+        ascat_gc_correction       : genome GC correction bins
+        clinvar                   : ClinVar reference
+        cosmic                    : COSMIC database's variants as VCF
+        dbsnp                     : dbSNP VCF file
+        delly_exclusion           : genome exclusion regions
+        delly_exclusion_converted : genome exclusion regions without "chr" field
+        delly_mappability         : genome mappability
+        genome_chrom_size         : genome chromosome sizes
+        gnomad_variant            : gnomAD variants (non SV) as VCF
+        hc_vcf_1kg                : high confidence 1000 Genome VCF
+        known_indel_1kg           : 1000 Genome known InDels VCF
+        mills_1kg                 : Mills' high confidence InDels VCF
+        rank_score                : rank score model
+        reference_genome          : required field for reference genome FASTA file
+        refgene_bed               : RefSeq's gene BED format from UCSC
+        refgene_flat              : RefSeq's gene flat format from UCSC
+        refgene_txt               : RefSeq's gene txt format from UCSC
+        somalier_sites            : somalier sites VCF
+        vcf_1kg                   : 1000 Genome all SNPs
+        vep_dir                   : vep annotations output directory
+        wgs_calling_regions       : WGS calling intervals
+
+    """
+
+    access_regions: FilePath
+    ascat_chr_y_loci: FilePath
+    ascat_gc_correction: FilePath
+    clinvar: FilePath
+    cosmic: FilePath
+    dbsnp: FilePath
+    delly_exclusion: FilePath
+    delly_exclusion_converted: FilePath
+    delly_mappability: FilePath
+    genome_chrom_size: FilePath
+    gnomad_variant: FilePath
+    hc_vcf_1kg: FilePath
+    known_indel_1kg: FilePath
+    mills_1kg: FilePath
+    rank_score: FilePath
+    reference_genome: FilePath
+    refgene_bed: FilePath
+    refgene_flat: FilePath
+    refgene_txt: FilePath
+    somalier_sites: FilePath
+    vcf_1kg: FilePath
+    vep_dir: DirectoryPath
+    wgs_calling_regions: FilePath
 
 
 class ReferenceUrlModel(BaseModel):
@@ -58,10 +114,10 @@ class ReferencesModel(BaseModel):
 
     Attributes:
         access_regions           : accessible genome regions
-        ascat_chryloci           : chromosome Y loci
-        ascat_gccorrection       : genome GC correction bins
+        ascat_chr_y_loci         : chromosome Y loci
+        ascat_gc_correction      : genome GC correction bins
         clinvar                  : ClinVar reference
-        cosmicdb                 : COSMIC database's variants as VCF
+        cosmic                   : COSMIC database's variants as VCF
         dbsnp                    : dbSNP VCF file
         delly_exclusion          : genome exclusion regions
         delly_mappability        : genome mappability
@@ -73,7 +129,7 @@ class ReferencesModel(BaseModel):
         hc_vcf_1kg               : high confidence 1000 Genome VCF
         known_indel_1kg          : 1000 Genome known InDels VCF
         mills_1kg                : Mills' high confidence InDels VCF
-        rankscore                : rank score model
+        rank_score               : rank score model
         reference_genome         : required field for reference genome FASTA file
         refgene_sql              : RefSeq's gene SQL format from UCSC
         refgene_txt              : RefSeq's gene flat format from UCSC
@@ -82,29 +138,29 @@ class ReferencesModel(BaseModel):
         wgs_calling_regions      : WGS calling intervals
     """
 
-    access_regions: Optional[ReferenceUrlModel]
-    ascat_chryloci: Optional[ReferenceUrlModel]
-    ascat_gccorrection: Optional[ReferenceUrlModel]
-    clinvar: Optional[ReferenceUrlModel]
-    cosmicdb: Optional[ReferenceUrlModel]
-    dbsnp: Optional[ReferenceUrlModel]
-    delly_exclusion: Optional[ReferenceUrlModel]
-    delly_mappability: Optional[ReferenceUrlModel]
-    delly_mappability_findex: Optional[ReferenceUrlModel]
-    delly_mappability_gindex: Optional[ReferenceUrlModel]
-    genome_chrom_size: Optional[ReferenceUrlModel]
-    gnomad_variant: Optional[ReferenceUrlModel]
-    gnomad_variant_index: Optional[ReferenceUrlModel]
-    hc_vcf_1kg: Optional[ReferenceUrlModel]
-    known_indel_1kg: Optional[ReferenceUrlModel]
-    mills_1kg: Optional[ReferenceUrlModel]
-    rankscore: Optional[ReferenceUrlModel]
+    access_regions: ReferenceUrlModel
+    ascat_chr_y_loci: ReferenceUrlModel
+    ascat_gc_correction: ReferenceUrlModel
+    clinvar: ReferenceUrlModel
+    cosmic: ReferenceUrlModel
+    dbsnp: ReferenceUrlModel
+    delly_exclusion: ReferenceUrlModel
+    delly_mappability: ReferenceUrlModel
+    delly_mappability_findex: ReferenceUrlModel
+    delly_mappability_gindex: ReferenceUrlModel
+    genome_chrom_size: ReferenceUrlModel
+    gnomad_variant: ReferenceUrlModel
+    gnomad_variant_index: ReferenceUrlModel
+    hc_vcf_1kg: ReferenceUrlModel
+    known_indel_1kg: ReferenceUrlModel
+    mills_1kg: ReferenceUrlModel
+    rank_score: ReferenceUrlModel
     reference_genome: ReferenceUrlModel
-    refgene_sql: Optional[ReferenceUrlModel]
-    refgene_txt: Optional[ReferenceUrlModel]
-    somalier_sites: Optional[ReferenceUrlModel]
-    vcf_1kg: Optional[ReferenceUrlModel]
-    wgs_calling_regions: Optional[ReferenceUrlModel]
+    refgene_sql: ReferenceUrlModel
+    refgene_txt: ReferenceUrlModel
+    somalier_sites: ReferenceUrlModel
+    vcf_1kg: ReferenceUrlModel
+    wgs_calling_regions: ReferenceUrlModel
 
     def get_delly_files(self) -> List[str]:
         """Return delly associated output files."""
@@ -294,13 +350,13 @@ class CacheConfigModel(BaseModel):
         """Return a complete list of output reference paths."""
         reference_paths: List[str] = [
             self.references.access_regions.file_path,
-            self.references.ascat_chryloci.file_path,
-            self.references.ascat_gccorrection.file_path,
+            self.references.ascat_chr_y_loci.file_path,
+            self.references.ascat_gc_correction.file_path,
             self.references.clinvar.file_path + "." + FileType.GZ,
-            self.references.cosmicdb.file_path + "." + FileType.GZ,
+            self.references.cosmic.file_path + "." + FileType.GZ,
             self.references.dbsnp.file_path + "." + FileType.GZ,
             self.references.genome_chrom_size.file_path,
-            self.references.rankscore.file_path,
+            self.references.rank_score.file_path,
             self.references.somalier_sites.file_path + "." + FileType.GZ,
             self.references.wgs_calling_regions.file_path,
             self.vep_dir.as_posix(),
@@ -319,3 +375,39 @@ class CacheConfigModel(BaseModel):
             ]
         )
         return reference_paths
+
+    def get_analysis_references(self) -> AnalysisReferencesModel:
+        """Return reference output model to be used during analysis."""
+        return AnalysisReferencesModel(
+            access_regions=self.references.access_regions.file_path,
+            ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
+            ascat_gc_correction=self.references.ascat_gc_correction.file_path,
+            clinvar=self.references.clinvar.file_path + "." + FileType.GZ,
+            cosmic=self.references.cosmic.file_path + "." + FileType.GZ,
+            dbsnp=self.references.dbsnp.file_path + "." + FileType.GZ,
+            delly_exclusion=self.references.delly_exclusion.file_path,
+            delly_exclusion_converted=self.references.get_delly_exclusion_converted_file(),
+            delly_mappability=self.references.delly_mappability.file_path,
+            genome_chrom_size=self.references.genome_chrom_size.file_path,
+            gnomad_variant=self.references.gnomad_variant.file_path,
+            hc_vcf_1kg=self.references.hc_vcf_1kg.file_path + "." + FileType.GZ,
+            known_indel_1kg=self.references.known_indel_1kg.file_path
+            + "."
+            + FileType.GZ,
+            mills_1kg=self.references.mills_1kg.file_path + "." + FileType.GZ,
+            rank_score=self.references.rank_score.file_path,
+            reference_genome=self.references.reference_genome.file_path,
+            refgene_bed=self.references.refgene_txt.file_path.replace(
+                FileType.TXT, FileType.FLAT
+            )
+            + "."
+            + FileType.BED,
+            refgene_flat=self.references.refgene_txt.file_path.replace(
+                FileType.TXT, FileType.FLAT
+            ),
+            refgene_txt=self.references.refgene_txt.file_path,
+            somalier_sites=self.references.somalier_sites.file_path + "." + FileType.GZ,
+            vcf_1kg=self.references.vcf_1kg.file_path + "." + FileType.GZ,
+            vep_dir=self.vep_dir.as_posix(),
+            wgs_calling_regions=self.references.wgs_calling_regions.file_path,
+        )

@@ -28,7 +28,7 @@ bam_dir =  analysis_dir + "/bam/"
 cnv_dir =  analysis_dir + "/cnv/"
 
 reffasta = config["reference"]["reference_genome"]
-refflat = config["reference"]["refflat"]
+refflat = config["reference"]["refgene_flat"]
 access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]

@@ -40,7 +40,7 @@ sambamba depth region \
 rule sambamba_exon_depth:
     input:
         bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
-        bed = config["reference"]["exon_bed"]
+        bed = config["reference"]["refgene_bed"]
     output:
         bam_dir + "{sample}.sorted." + picarddup + ".exon.cov.bed"
     benchmark:

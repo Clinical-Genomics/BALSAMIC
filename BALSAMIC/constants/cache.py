@@ -137,7 +137,7 @@ REFERENCE_FILES = {
             "file_name": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
             "dir_name": "variants",
         },
-        "cosmicdb": {
+        "cosmic": {
             "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
@@ -172,7 +172,7 @@ REFERENCE_FILES = {
             "file_name": "refGene.sql",
             "dir_name": "genome",
         },
-        "rankscore": {
+        "rank_score": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
             "file_type": FileType.TEXT,
             "gzip": False,
@@ -214,14 +214,14 @@ REFERENCE_FILES = {
             "file_name": "delly_mappability.gz.fai",
             "dir_name": "genome",
         },
-        "ascat_gccorrection": {
+        "ascat_gc_correction": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_SnpGcCorrections.tsv.gz",
             "file_type": FileType.TEXT,
             "gzip": True,
             "file_name": "GRCh37_SnpGcCorrections.tsv",
             "dir_name": "genome",
         },
-        "ascat_chryloci": {
+        "ascat_chr_y_loci": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_d5_Y.loci",
             "file_type": FileType.TEXT,
             "gzip": False,
@@ -300,7 +300,7 @@ REFERENCE_FILES = {
             "file_name": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
             "dir_name": "variants",
         },
-        "cosmicdb": {
+        "cosmic": {
             "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
@@ -335,7 +335,7 @@ REFERENCE_FILES = {
             "file_name": "refGene.sql",
             "dir_name": "genome",
         },
-        "rankscore": {
+        "rank_score": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
             "file_type": FileType.TEXT,
             "gzip": False,
@@ -377,14 +377,14 @@ REFERENCE_FILES = {
             "file_name": "delly_mappability.gz.fai",
             "dir_name": "genome",
         },
-        "ascat_gccorrection": {
+        "ascat_gc_correction": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/35465e2644f76f2d59427a9b379d34ecea71f259/cancer/references/hg38_SnpGcCorrections.tsv.gz",
             "file_type": FileType.TEXT,
             "gzip": True,
             "file_name": "hg38_SnpGcCorrections.tsv",
             "dir_name": "genome",
         },
-        "ascat_chryloci": {
+        "ascat_chr_y_loci": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/hg38_Y.loci",
             "file_type": FileType.TEXT,
             "gzip": False,

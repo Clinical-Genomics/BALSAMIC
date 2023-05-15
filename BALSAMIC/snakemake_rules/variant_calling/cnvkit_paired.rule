@@ -15,7 +15,7 @@ rule cnvkit_paired:
         bamN = bam_dir + "normal.merged" + ".bam",
         bamT = bam_dir + "tumor.merged" + ".bam",
         baits_bed = config["panel"]["capture_kit"],
-        refflat = config["reference"]["refflat"],
+        refflat = config["reference"]["refgene_flat"],
         snv_vcf_tumor = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         snv_vcf_normal = vcf_dir + "SNV.germline.normal.dnascope.vcf.gz",
     output:
