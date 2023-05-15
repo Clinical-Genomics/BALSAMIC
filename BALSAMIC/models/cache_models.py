@@ -213,11 +213,17 @@ class ReferencesModel(BaseModel):
         """Return RefSeq's gene files from UCSC."""
         return [
             self.refgene_txt.file_path,
-            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT),
-            self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
-            + "."
-            + FileType.BED,
+            self.get_refgene_flat_file(),
+            self.get_refgene_bed_file(),
         ]
+
+    def get_refgene_flat_file(self) -> str:
+        """Return RefSeq's gene flat file from UCSC."""
+        return self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
+
+    def get_refgene_bed_file(self) -> str:
+        """Return RefSeq's gene BED file from UCSC."""
+        return self.get_refgene_flat_file() + "." + FileType.BED
 
 
 class CacheAnalysisModel(BaseModel):
@@ -397,14 +403,8 @@ class CacheConfigModel(BaseModel):
             mills_1kg=self.references.mills_1kg.file_path + "." + FileType.GZ,
             rank_score=self.references.rank_score.file_path,
             reference_genome=self.references.reference_genome.file_path,
-            refgene_bed=self.references.refgene_txt.file_path.replace(
-                FileType.TXT, FileType.FLAT
-            )
-            + "."
-            + FileType.BED,
-            refgene_flat=self.references.refgene_txt.file_path.replace(
-                FileType.TXT, FileType.FLAT
-            ),
+            refgene_bed=self.references.get_refgene_bed_file(),
+            refgene_flat=self.references.get_refgene_flat_file(),
             refgene_txt=self.references.refgene_txt.file_path,
             somalier_sites=self.references.somalier_sites.file_path + "." + FileType.GZ,
             vcf_1kg=self.references.vcf_1kg.file_path + "." + FileType.GZ,
