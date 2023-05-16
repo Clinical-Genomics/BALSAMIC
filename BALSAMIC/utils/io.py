@@ -38,7 +38,7 @@ def read_yaml(yaml_path: str) -> dict:
         raise FileNotFoundError(f"The YAML file {yaml_path} was not found")
 
 
-def write_finish_file(finish_path: str) -> None:
+def write_finish_file(file_path: str) -> None:
     """Write finish file indicating the analysis completion."""
-    with open(finish_path, mode="w") as finish_file:
+    with open(file_path, mode="w") as finish_file:
         finish_file.write("%s\n" % datetime.now().strftime("%Y-%m-%d %H:%M"))
