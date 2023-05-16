@@ -3,11 +3,7 @@
 
 
 wildcard_constraints:
-    vcf="|".join(
-        cache_config.get_reference_paths_by_file_type_and_compression(
-            file_type=FileType.VCF, compression=True
-        )
-    ),
+    vcf="|".join(cache_config.get_reference_paths_by_file_type(file_type=FileType.VCF)),
 
 
 rule compress_vcfs:
