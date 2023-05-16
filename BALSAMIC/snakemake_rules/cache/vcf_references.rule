@@ -19,7 +19,7 @@ rule compress_vcfs:
         vcf_gz=f"{{vcf}}.{FileType.GZ}",
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['bgzip']}.{FileType.SIF}"
-    threads: get_threads(cluster_config, "compress_vcfs")
+    threads: get_threads(cluster_config=cluster_config, rule_name="compress_vcfs")
     message:
         "Compressing VCF variant file {input.vcf}"
     benchmark:
@@ -41,7 +41,7 @@ rule index_vcfs:
         vcf_gz_tbi=f"{{vcf}}.{FileType.GZ}.{FileType.TBI}",
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}"
-    threads: get_threads(cluster_config, "index_vcfs")
+    threads: get_threads(cluster_config=cluster_config, rule_name="index_vcfs")
     message:
         "Indexing VCF variant file {input.vcf_gz}"
     benchmark:

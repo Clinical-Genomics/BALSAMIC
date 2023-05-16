@@ -14,7 +14,7 @@ rule download_containers:
         dockerhub_image=lambda wildcards: config["containers"][
             wildcards.singularity_image
         ],
-    threads: get_threads(cluster_config, "download_containers")
+    threads: get_threads(cluster_config=cluster_config, rule_name="download_containers")
     message:
         "Downloading singularity image {output.container_path}"
     benchmark:

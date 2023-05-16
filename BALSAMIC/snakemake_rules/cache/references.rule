@@ -12,7 +12,7 @@ rule download_references:
         reference=lambda wildcards: cache_config.get_reference_by_path(
             Path(config["references_dir"], wildcards.reference_path).as_posix()
         ),
-    threads: get_threads(cluster_config, "download_references")
+    threads: get_threads(cluster_config=cluster_config, rule_name="download_references")
     message:
         "Downloading reference file {output.reference_path}"
     benchmark:
