@@ -1,7 +1,7 @@
 """Balsamic commands init options."""
 import click
 
-from BALSAMIC.constants.analysis import ConfigType
+from BALSAMIC.constants.cluster import ConfigType
 from BALSAMIC.constants.cache import ContainerVersion
 from BALSAMIC.utils.cli import get_config_path
 

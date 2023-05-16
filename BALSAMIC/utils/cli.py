@@ -14,7 +14,7 @@ import graphviz
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.constants.analysis import ConfigType
+from BALSAMIC.constants.cluster import ConfigType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 
 LOG = logging.getLogger(__name__)

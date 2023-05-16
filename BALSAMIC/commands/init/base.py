@@ -34,7 +34,7 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
 )
-from BALSAMIC.constants.analysis import RunMode, ClusterMailType, QOS, ClusterProfile
+from BALSAMIC.constants.cluster import RunMode, ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
 from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.paths import BALSAMIC_DIR
