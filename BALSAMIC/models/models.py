@@ -10,7 +10,7 @@ from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
-from BALSAMIC.constants.common import (
+from BALSAMIC.constants.analysis import (
     SEQUENCING_TYPE,
     ANALYSIS_TYPES,
     ANALYSIS_WORKFLOW,

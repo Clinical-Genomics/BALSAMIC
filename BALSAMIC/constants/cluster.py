@@ -1,4 +1,4 @@
-"""Balsamic analysis specific constants."""
+"""Balsamic cluster and submission specific constants."""
 from BALSAMIC.utils.class_types import StrEnum
 
 

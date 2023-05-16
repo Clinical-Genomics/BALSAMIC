@@ -26,7 +26,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
 
-from BALSAMIC.constants.common import MUTATION_TYPE
+from BALSAMIC.constants.analysis import MUTATION_TYPE
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, VARCALL_PARAMS

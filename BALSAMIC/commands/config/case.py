@@ -13,7 +13,7 @@ from BALSAMIC.utils.cli import (
     get_bioinfo_tools_version,
     generate_graph,
 )
-from BALSAMIC.constants.common import (
+from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
     GENDER_OPTIONS,
 )

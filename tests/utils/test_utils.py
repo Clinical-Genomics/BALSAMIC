@@ -14,7 +14,7 @@ from _pytest.logging import LogCaptureFixture
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
-from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
 from BALSAMIC.utils.cli import (
     SnakeMake,

@@ -7,7 +7,7 @@ from pathlib import Path
 import snakemake
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import find_file_index
-from BALSAMIC.constants.common import (
+from BALSAMIC.constants.analysis import (
     MUTATION_TYPE,
     MUTATION_CLASS,
     SEQUENCING_TYPE,

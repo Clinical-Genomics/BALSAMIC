@@ -1,4 +1,4 @@
-"""Balsamic workflow common constants."""
+"""Balsamic analysis workflow constants."""
 import operator
 
 # Analysis related constants

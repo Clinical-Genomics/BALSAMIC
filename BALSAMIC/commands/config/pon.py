@@ -15,7 +15,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.models.models import PonBalsamicConfigModel
 
-from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
 LOG = logging.getLogger(__name__)
 

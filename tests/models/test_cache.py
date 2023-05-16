@@ -4,7 +4,7 @@ from pathlib import Path
 
 from BALSAMIC.commands.init.utils import get_containers
 from BALSAMIC.constants.cache import ContainerVersion, GenomeVersion, REFERENCE_FILES
-from BALSAMIC.constants.common import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.models.cache_models import CacheConfigModel
 
 
