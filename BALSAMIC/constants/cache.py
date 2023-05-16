@@ -253,8 +253,8 @@ REFERENCE_FILES = {
         },
         "dbsnp": {
             "url": "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf",
-            "file_type": FileType.FASTA,
-            "gzip": False,
+            "file_type": FileType.VCF,
+            "gzip": True,
             "file_name": "Homo_sapiens_assembly38.dbsnp138.vcf",
             "dir_name": "variants",
         },
@@ -282,7 +282,7 @@ REFERENCE_FILES = {
         "vcf_1kg": {
             "url": "gs://genomics-public-data/resources/broad/hg38/v0/1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
             "file_type": FileType.VCF,
-            "gzip": False,
+            "gzip": True,
             "file_name": "1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf",
             "dir_name": "variants",
         },
