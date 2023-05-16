@@ -17,12 +17,6 @@ LOG = logging.getLogger(__name__)
 
 # Balsamic cache configuration model
 cache_config: CacheConfigModel = CacheConfigModel.parse_obj(config)
-analysis_references_json: dict = json.loads(
-    cache_config.get_analysis_references().json()
-)
-reference_finish_path: str = Path(
-    cache_config.references_dir, "reference.json"
-).as_posix()
 
 # Temporary directory and shell options
 os.environ["TMPDIR"] = cache_config.references_dir.as_posix()
@@ -47,7 +41,10 @@ rule all:
         cache_config.get_reference_output_paths(),
     output:
         finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
-    threads: get_threads(cluster_config, "all")
+    threads: get_threads(cluster_config=cluster_config, rule_name="all")
     run:
-        write_json(json_obj=analysis_references_json, path=reference_finish_path)
+        write_json(
+            json_obj=json.loads(cache_config.get_analysis_references().json()),
+            path=Path(cache_config.references_dir, "reference.json").as_posix(),
+        )
         write_finish_file(file_path=output.finish_file)
