@@ -18,7 +18,7 @@ rule download_references:
     benchmark:
         f"{{reference_path}}.benchmark.{FileType.TSV}"
     log:
-        f"{{reference_path}}.{FileType.TSV}",
+        f"{{reference_path}}.{FileType.LOG}",
     shell:
         """
         if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
