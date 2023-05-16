@@ -142,6 +142,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/cache/vep.rule",
         ],
         GenomeVersion.CanFam3: [
+            "snakemake_rules/cache/containers.rule",
             # TODO
         ],
     },

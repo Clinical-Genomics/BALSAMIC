@@ -5,6 +5,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Union
 
 import click
 import graphviz
@@ -39,7 +40,11 @@ from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 
-from BALSAMIC.models.cache_models import CacheConfigModel
+from BALSAMIC.models.cache_models import (
+    CacheConfigModel,
+    HgReferencesModel,
+    CanFamReferencesModel,
+)
 from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
 from BALSAMIC.utils.io import write_json
 
@@ -122,6 +127,9 @@ def initialize(
     ]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
+    references: Union[HgReferencesModel, CanFamReferencesModel] = REFERENCE_FILES[
+        genome_version
+    ]
     cache_config: CacheConfigModel = CacheConfigModel(
         analysis={
             "case_id": "reference" + "." + genome_version + ".v" + balsamic_version
@@ -135,7 +143,7 @@ def initialize(
         cosmic_key=cosmic_key,
         bioinfo_tools=BIOINFO_TOOL_ENV,
         containers=get_containers(container_version),
-        references=REFERENCE_FILES[genome_version],
+        references=references,
         references_date=datetime.now().strftime("%Y-%m-%d %H:%M"),
     )
     write_json(json.loads(cache_config.json(exclude_none=True)), config_path.as_posix())
