@@ -128,11 +128,13 @@ class ReferencesModel(BaseModel):
     Attributes:
         genome_chrom_size : genome chromosome sizes
         reference_genome  : required field for reference genome FASTA file
+        refgene_sql       : RefSeq's gene SQL format from UCSC
         refgene_txt       : RefSeq's gene flat format from UCSC
     """
 
     genome_chrom_size: ReferenceUrlModel
     reference_genome: ReferenceUrlModel
+    refgene_sql: ReferenceUrlModel
     refgene_txt: ReferenceUrlModel
 
     def get_reference_genome_files(self) -> List[str]:
@@ -192,7 +194,6 @@ class HgReferencesModel(ReferencesModel):
         known_indel_1kg          : 1000 Genome known InDels VCF
         mills_1kg                : Mills' high confidence InDels VCF
         rank_score               : rank score model
-        refgene_sql              : RefSeq's gene SQL format from UCSC
         somalier_sites           : somalier sites VCF
         vcf_1kg                  : 1000 Genome all SNPs
         wgs_calling_regions      : WGS calling intervals
@@ -214,7 +215,6 @@ class HgReferencesModel(ReferencesModel):
     known_indel_1kg: ReferenceUrlModel
     mills_1kg: ReferenceUrlModel
     rank_score: ReferenceUrlModel
-    refgene_sql: ReferenceUrlModel
     somalier_sites: ReferenceUrlModel
     vcf_1kg: ReferenceUrlModel
     wgs_calling_regions: ReferenceUrlModel
