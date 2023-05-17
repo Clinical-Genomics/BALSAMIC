@@ -1,23 +1,35 @@
 [X.X.X]
--------
+--------
+
+Added:
+^^^^^^
+* `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
+
+
+[12.0.0]
+--------
 
 Added:
 ^^^^^^
 * PIP specific missing tools to config https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
-* `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/
+* Filtering script to remove normal variants from TIDDIT https://github.com/Clinical-Genomics/BALSAMIC/pull/1120
+* Store TMB files in HK https://github.com/Clinical-Genomics/BALSAMIC/pull/1144
 
 Changed:
 ^^^^^^^^
 * Fixed all conda container dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1096
 * Changed --max_sv_size in VEP params to the size of chr1 for hg19 https://github.com/Clinical-Genomics/BALSAMIC/pull/1124
 * Increased time-limit for sambamba_exon_depth and picard_markduplicates to 6 hours https://github.com/Clinical-Genomics/BALSAMIC/pull/1143
+* Update cosmicdb to v97 https://github.com/Clinical-Genomics/BALSAMIC/pull/1147
+* Updated read the docs with the changes relevant to mention https://github.com/Clinical-Genomics/BALSAMIC/pull/1153
 
 Fixed:
 ^^^^^^
 * Update cryptography version (39.0.1) due to security alert https://github.com/Clinical-Genomics/BALSAMIC/pull/1087
+* Bump cryptography to v40.0.2 and gsutil to v5.23 https://github.com/Clinical-Genomics/BALSAMIC/pull/1154
 * Pytest file saved in balsamic directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1093
 * Fix varcall_py3 container bcftools dependency error https://github.com/Clinical-Genomics/BALSAMIC/pull/1097
-
+* AscatNgs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1155
 
 [11.2.0]
 --------
