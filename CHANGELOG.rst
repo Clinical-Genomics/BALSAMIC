@@ -1,3 +1,10 @@
+[X.X.X]
+
+Fixed:
+^^^^^^
+* vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/11
+
+
 [12.0.0]
 --------
 
