@@ -2,7 +2,7 @@
 
 Fixed:
 ^^^^^^
-* vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/11
+* vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
 
 
 [12.0.0]
