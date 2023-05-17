@@ -252,7 +252,7 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome=
     if analysis_type == "generate_ref":
         snakefile = Path(p, "workflows", "reference.smk")
         if "canfam3" in reference_genome:
-            snakefile = Path(p, "workflows", "reference-canfam3.smk")
+            snakefile = Path(p, "workflows", "reference_canfam3.smk")
             return str(snakefile)
 
     if analysis_type == "pon":
