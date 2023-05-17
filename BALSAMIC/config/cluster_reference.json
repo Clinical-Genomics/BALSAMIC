@@ -59,6 +59,12 @@
         "mail_type": "FAIL",
         "partition": "core"
     },
+    "preprocess_refseq_canfam": {
+        "n": 12,
+        "time": "00:30:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
     "download_vep": {
         "n": 24,
         "time": "01:00:00",
