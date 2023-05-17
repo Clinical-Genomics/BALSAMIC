@@ -143,6 +143,8 @@ SNAKEMAKE_RULES = {
         ],
         GenomeVersion.CanFam3: [
             "snakemake_rules/cache/containers.rule",
+            "snakemake_rules/cache/references.rule",
+            "snakemake_rules/cache/refseq_canfam.rule",
             # TODO
         ],
     },
