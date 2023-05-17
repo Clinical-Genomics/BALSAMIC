@@ -22,6 +22,29 @@ class AnalysisReferencesModel(BaseModel):
     Reference files model to be used during analysis.
 
     Attributes:
+        genome_chrom_size         : genome chromosome sizes
+        reference_genome          : required field for reference genome FASTA file
+        refgene_bed               : RefSeq's gene BED format from UCSC
+        refgene_flat              : RefSeq's gene flat format from UCSC
+        refgene_txt               : RefSeq's gene txt format from UCSC
+    """
+
+    genome_chrom_size: FilePath
+    reference_genome: FilePath
+    refgene_bed: FilePath
+    refgene_flat: FilePath
+    refgene_txt: FilePath
+
+
+class CanFamAnalysisReferencesModel(AnalysisReferencesModel):
+    """Human reference genome files model to be used during analysis."""
+
+
+class HgAnalysisReferencesModel(AnalysisReferencesModel):
+    """
+    Human reference genome files model to be used during analysis.
+
+    Attributes:
         access_regions            : accessible genome regions
         ascat_chr_y_loci          : chromosome Y loci
         ascat_gc_correction       : genome GC correction bins
@@ -31,16 +54,11 @@ class AnalysisReferencesModel(BaseModel):
         delly_exclusion           : genome exclusion regions
         delly_exclusion_converted : genome exclusion regions without "chr" field
         delly_mappability         : genome mappability
-        genome_chrom_size         : genome chromosome sizes
         gnomad_variant            : gnomAD variants (non SV) as VCF
         hc_vcf_1kg                : high confidence 1000 Genome VCF
         known_indel_1kg           : 1000 Genome known InDels VCF
         mills_1kg                 : Mills' high confidence InDels VCF
         rank_score                : rank score model
-        reference_genome          : required field for reference genome FASTA file
-        refgene_bed               : RefSeq's gene BED format from UCSC
-        refgene_flat              : RefSeq's gene flat format from UCSC
-        refgene_txt               : RefSeq's gene txt format from UCSC
         somalier_sites            : somalier sites VCF
         vcf_1kg                   : 1000 Genome all SNPs
         vep_dir                   : vep annotations output directory
@@ -57,16 +75,11 @@ class AnalysisReferencesModel(BaseModel):
     delly_exclusion: FilePath
     delly_exclusion_converted: FilePath
     delly_mappability: FilePath
-    genome_chrom_size: FilePath
     gnomad_variant: FilePath
     hc_vcf_1kg: FilePath
     known_indel_1kg: FilePath
     mills_1kg: FilePath
     rank_score: FilePath
-    reference_genome: FilePath
-    refgene_bed: FilePath
-    refgene_flat: FilePath
-    refgene_txt: FilePath
     somalier_sites: FilePath
     vcf_1kg: FilePath
     vep_dir: DirectoryPath
@@ -402,9 +415,20 @@ class CacheConfigModel(BaseModel):
         ]
         return reference_paths
 
-    def get_analysis_references(self) -> AnalysisReferencesModel:
+    def get_analysis_references(
+        self,
+    ) -> Union[HgAnalysisReferencesModel, CanFamAnalysisReferencesModel]:
         """Return reference output model to be used during analysis."""
-        return AnalysisReferencesModel(
+        if self.genome_version == GenomeVersion.CanFam3:
+            return CanFamAnalysisReferencesModel(
+                genome_chrom_size=self.references.genome_chrom_size.file_path,
+                reference_genome=self.references.reference_genome.file_path,
+                refgene_bed=self.references.get_refgene_bed_file(),
+                refgene_flat=self.references.get_refgene_flat_file(),
+                refgene_txt=self.references.refgene_txt.file_path,
+            )
+
+        return HgAnalysisReferencesModel(
             access_regions=self.references.access_regions.file_path,
             ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,
