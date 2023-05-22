@@ -600,6 +600,7 @@ class ReferenceMeta(BaseModel):
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
         somalier_sites: ReferenceUrlsModel. Optional field for somalier sites vcf
+        cadd_snv: ReferenceUrlsModel. Optional field for CADD SNV reference
     """
 
     basedir: str = ""
@@ -626,6 +627,8 @@ class ReferenceMeta(BaseModel):
     ascat_chryloci: Optional[ReferenceUrlsModel]
     clinvar: Optional[ReferenceUrlsModel]
     somalier_sites: Optional[ReferenceUrlsModel]
+    cadd_snv: Optional[ReferenceUrlsModel]
+    cadd_snv_index: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):

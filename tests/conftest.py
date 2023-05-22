@@ -88,6 +88,7 @@ def reference():
             "swegen_snv_frequency": "tests/test_data/references/variants/swegen_snv.vcf.gz",
             "swegen_sv_frequency": "tests/test_data/references/variants/swegen_sv.vcf.gz",
             "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
+            "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
         }
     }
 
