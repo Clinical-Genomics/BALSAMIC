@@ -1,3 +1,11 @@
+[X.X.X]
+--------
+
+Added:
+^^^^^^
+* `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
+
+
 [12.0.0]
 --------
 
