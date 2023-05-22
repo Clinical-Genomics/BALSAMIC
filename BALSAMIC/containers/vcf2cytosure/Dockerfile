@@ -25,7 +25,7 @@ RUN cd /opt &&\
     git checkout v0.8 && \
 	pip install --no-cache-dir -e .
 
-from python:3.11-slim
+FROM python:3.11-slim
 
 LABEL base.image="python:3.11-slim"
 LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
