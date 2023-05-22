@@ -28,7 +28,7 @@ References and other resources
 #. **Drug sensitivity in cancer**\ : Identifying molecular features of cancers that predict response to anti-cancer drugs. http://www.cancerrxgene.org/ Download link: ftp://ftp.sanger.ac.uk/pub4/cancerrxgene/releases
 #. **VarSome**\ : VarSome is a knowledge base and aggregator for human genomic variants. https://varsome.com/about/
 #. **Google Genomics Public Data**\ : Google Genomics helps the life science community organize the world’s genomic information and make it accessible and useful. and http://googlegenomics.readthedocs.io
-
+#. **CADD**\ : CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome. CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings.
 Sample datasets
 ---------------
 
