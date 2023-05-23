@@ -66,6 +66,7 @@ BIOINFO_TOOL_ENV = {
     "fastqc": "align_qc",
     "samtools": "align_qc",
     "picard": "align_qc",
+    "compress": "align_qc",
     "multiqc": "align_qc",
     "fastp": "align_qc",
     "csvkit": "align_qc",
