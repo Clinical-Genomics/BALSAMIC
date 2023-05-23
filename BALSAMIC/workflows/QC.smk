@@ -59,9 +59,6 @@ for sample in sample_dict:
         normal_sample = sample
         sample_dict[normal_sample]["sample_type"] = "NORMAL"
 
-# Validate fastq-info
-validate_fastq_input(sample_dict, fastqinput_dir)
-
 # Get fastq pattern --> fastq mapping
 fastq_dict = {}
 for sample in sample_dict:
