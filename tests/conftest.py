@@ -276,7 +276,9 @@ def pon_fastq_path():
 def panel_bed_file():
     return "tests/test_data/references/panel/panel.bed"
 
-
+@pytest.fixture(scope="session")
+def analysis_workflow_qc():
+    return "balsamic-qc"
 @pytest.fixture(scope="session")
 def background_variant_file():
     return "tests/test_data/references/panel/background_variants.txt"
@@ -495,7 +497,6 @@ ls -l # dummy command
 
     return {"snakescript": str(snakemake_script_file)}
 
-
 @pytest.fixture(scope="session")
 def tumor_normal_config(
     case_id_tumor_normal: str,
@@ -540,6 +541,60 @@ def tumor_normal_config(
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
+            ],
+        )
+
+
+    return Path(
+        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
+    ).as_posix()
+@pytest.fixture(scope="session")
+def tumor_normal_config_qc(
+    case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal: str,
+    balsamic_cache: str,
+    background_variant_file: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    analysis_workflow_qc: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "--case-id",
+                case_id_tumor_normal,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal,
+                "--background-variants",
+                background_variant_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+                "--analysis-workflow",
+                analysis_workflow_qc,
             ],
         )
 
@@ -649,6 +704,56 @@ def tumor_only_config(
         analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
     ).as_posix()
 
+@pytest.fixture(scope="session")
+def tumor_only_config_qc(
+    case_id_tumor_only: str,
+    tumor_sample_name: str,
+    balsamic_cache: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only: str,
+    panel_bed_file: str,
+    background_variant_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    analysis_workflow_qc: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_only,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_only,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--background-variants",
+                background_variant_file,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--analysis-workflow",
+                analysis_workflow_qc,
+            ],
+        )
+
+    return Path(
+        analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
+    ).as_posix()
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(

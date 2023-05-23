@@ -90,6 +90,20 @@ case_id = config["analysis"]["case_id"]
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
+# Find and set Sentieon binary and license server from env variables
+try:
+    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
+    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+
+    if os.getenv("SENTIEON_EXEC") is not None:
+        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
+    else:
+        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+except KeyError as error:
+    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+              "to run SENTIEON variant callers")
+    raise BalsamicError
+
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
 elif "canfam3" in config["reference"]["reference_genome"]:
@@ -108,12 +122,13 @@ analysis_type = config['analysis']["analysis_type"]
 rules_to_include = [
                 "snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/quality_control/fastqc.rule",
+                "snakemake_rules/align/bam_compress.rule",
                 "snakemake_rules/quality_control/multiqc.rule",
                 "snakemake_rules/variant_calling/mergetype_tumor.rule",
                 "snakemake_rules/quality_control/picard.rule",
                 "snakemake_rules/quality_control/sambamba_depth.rule",
                 "snakemake_rules/quality_control/mosdepth.rule",
-                "snakemake_rules/align/bwa_mem.rule",
+                "snakemake_rules/align/sentieon_alignment.rule",
                 "snakemake_rules/quality_control/qc_metrics.rule"
 ]
 
