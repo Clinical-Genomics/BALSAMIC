@@ -69,36 +69,39 @@ fastq_pattern_types = [
 
 fastq_pattern_ids = ['FastqPattern{}'.format(p["id"]) for p in fastq_pattern_types]
 
-pon_fastq_list = [
-    "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_1.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_2.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_1.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_2.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_1.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_2.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_1.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_2.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_1.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_2.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_1.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_2.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_1.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_2.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_1.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_2.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_1.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_2.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_1.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_2.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_1.fastq.gz",
-    "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_2.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_1.fastq.gz",
-    "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_2.fastq.gz",
-]
+@pytest.fixture(scope="session")
+def pon_fastq_list() -> list:
+    pon_fastq_list = [
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz",
+    ]
+    return pon_fastq_list
 
 @pytest.fixture(scope="session")
 def tumor_sample_name() -> str:
@@ -387,7 +390,7 @@ def fastq_dir_tumor_only_pon_cnn(analysis_dir: str, case_id_tumor_only_pon_cnn: 
         Path.unlink(fastq_dir/fastq)
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str) -> str:
+def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str, pon_fastq_list: list) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)

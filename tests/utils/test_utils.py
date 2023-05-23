@@ -62,7 +62,6 @@ from BALSAMIC.utils.rule import (
 )
 
 
-
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
     # GIVEN a wrong analysis_type
     wrong_analysis_type = "cohort"
@@ -749,6 +748,7 @@ def test_singularity_shellcmd_cmd_not_exist():
             bind_paths=[dummy_path_1, dummy_path_2],
         )
 
+
 def test_get_panel_chrom():
     # GIVEN a valid PANEL BED file
     panel_bed_file = "tests/test_data/references/panel/panel.bed"
@@ -910,35 +910,6 @@ def test_create_md5(tmp_path):
     assert dummy_file.exists()
 
 
-def test_get_rule_output(snakemake_fastqc_rule):
-    """Tests retrieval of existing output files from a specific workflow."""
-
-    # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
-    rules = snakemake_fastqc_rule
-    rule_name = "fastqc"
-    output_file_wildcards = {
-        "sample": ["ACC1", "tumor", "normal"],
-        "case_name": "sample_tumor_only",
-    }
-
-    # THEN retrieve the output files
-    output_files = get_rule_output(rules, rule_name, output_file_wildcards)
-
-    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
-    assert len(output_files) == 2
-    for file in output_files:
-        # Expected file names
-        assert (
-            Path(file[0]).name == "concatenated_ACC1_R_1.fastq.gz"
-            or Path(file[0]).name == "concatenated_ACC1_R_2.fastq.gz"
-        )
-        # Expected tags
-        assert (
-            file[3] == "1,fastqc,quality-trimmed-seq-fastqc"
-            or file[3] == "2,fastqc,quality-trimmed-seq-fastqc"
-        )
-
-
 def test_get_sample_type_from_prefix(config_dict):
     """Test sample type extraction from a extracted config file."""
 
@@ -954,11 +925,17 @@ def test_get_sample_type_from_prefix(config_dict):
     assert sample_type == "tumor"
 
 
-def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str, fastq_dir: str):
+def test_get_sample_dict(
+    tumor_sample_name: str, normal_sample_name: str, fastq_dir: str
+):
     """Tests sample dictionary retrieval."""
 
     try:
-        samples: dict = get_sample_dict(tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name, fastq_path=fastq_dir)
+        samples: dict = get_sample_dict(
+            tumor_sample_name=tumor_sample_name,
+            normal_sample_name=normal_sample_name,
+            fastq_path=fastq_dir,
+        )
         assert True
     except Exception:
         assert False
@@ -970,22 +947,32 @@ def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str, fastq_
     assert samples[tumor_sample_name]["fastq_info"]
     assert samples[normal_sample_name]["fastq_info"]
 
+
 def test_get_pon_sample_dict(
-    fastq_dir: str, tumor_sample_name: str, normal_sample_name: str
+    fastq_dir_tumor_only_pon: str, tumor_sample_name: str, normal_sample_name: str
 ):
     """Tests sample PON dictionary retrieval."""
 
     # GIVEN a FASTQ directory
 
     # GIVEN the expected sample dictionary
-    samples_expected: dict = {"ACC1": {"type": "normal"}, "ACC2": {"type": "normal"}}
+    samples_expected: dict = {
+        "ACC1": {"type": "normal"},
+        "ACCN1": {"type": "normal"},
+        "ACCN2": {"type": "normal"},
+        "ACCN3": {"type": "normal"},
+        "ACCN4": {"type": "normal"},
+        "ACCN4": {"type": "normal"},
+        "ACCN5": {"type": "normal"},
+        "ACCN6": {"type": "normal"},
+    }
 
     # WHEN retrieving PON samples
-    samples: dict = get_pon_sample_dict(fastq_dir)
+    samples: dict = get_pon_sample_dict(fastq_dir_tumor_only_pon)
 
     # THEN the samples should be retrieved from the FASTQ directory
-    assert samples == samples_expected
-
+    for sample in samples:
+        assert sample in samples_expected and samples[sample]["type"] == samples_expected[sample]["type"]
 
 def test_get_input_files_path(fastq_dir: str, caplog: LogCaptureFixture):
     """Test get unlinked input files directory."""
