@@ -62,8 +62,8 @@ for sample in sample_dict:
 # Get fastq pattern --> fastq mapping
 fastq_dict = {}
 for sample in sample_dict:
-    for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
-        fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
+    for fastq_pattern in sample_dict[sample]["fastq_info"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
 
 # picarddup flag
 picarddup = get_picard_mrkdup(config)
