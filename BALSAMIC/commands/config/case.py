@@ -273,14 +273,13 @@ def case_config(
         if panel_bed
         else None,
     ).dict(by_alias=True, exclude_none=True)
-    LOG.info("Config file generated successfully")
 
     # Validate fastq input
     validate_fastq_input(sample_dict=config_collection_dict["samples"], fastq_path=fastq_path)
 
     config_path = Path(analysis_dir) / case_id / (case_id + ".json")
     write_json(json_obj=config_collection_dict, path=config_path)
-    LOG.info(f"Config file saved successfully - {config_path}")
+    LOG.info("Config file generated successfully")
 
     try:
         generate_graph(config_collection_dict, config_path)

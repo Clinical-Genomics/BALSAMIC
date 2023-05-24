@@ -807,10 +807,10 @@ def tumor_only_wgs_config(
 
 @pytest.fixture(scope="session")
 def tumor_only_pon_config(
-    case_id_tumor_only_pon: str,
+    case_id_tumor_only_pon_cnn: str,
     tumor_sample_name: str,
     analysis_dir: str,
-    fastq_dir_tumor_only_pon: str,
+    fastq_dir_tumor_only_pon_cnn: str,
     panel_bed_file: str,
     pon_cnn: str,
     balsamic_cache: str,
@@ -833,11 +833,11 @@ def tumor_only_pon_config(
                 "config",
                 "case",
                 "--case-id",
-                case_id_tumor_only_pon,
+                case_id_tumor_only_pon_cnn,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir_tumor_only_pon,
+                fastq_dir_tumor_only_pon_cnn,
                 "-p",
                 panel_bed_file,
                 "--pon-cnn",
@@ -850,7 +850,7 @@ def tumor_only_pon_config(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_only_pon, case_id_tumor_only_pon + ".json"
+        analysis_dir, case_id_tumor_only_pon_cnn, case_id_tumor_only_pon_cnn + ".json"
     ).as_posix()
 
 
