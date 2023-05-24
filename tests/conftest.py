@@ -138,10 +138,14 @@ def case_id_tumor_only_umi() -> str:
 
 
 @pytest.fixture(scope="session")
+def case_id_tumor_normal_fastqdir() -> str:
+    """Mock case ID for dummy fastqdir."""
+    return "sample_tumor_normal_fastqdir"
+
+@pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
     """Mock TGA tumor-normal case ID."""
     return "sample_tumor_normal"
-
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_wgs() -> str:
@@ -156,9 +160,9 @@ def case_id_tumor_normal_wgs() -> str:
 
 
 @pytest.fixture(scope="session", params=fastq_pattern_types)
-def fastq_dir(case_id_tumor_normal: str, analysis_dir: str, request):
+def fastq_dir(case_id_tumor_normal_fastqdir: str, analysis_dir: str, request):
     """Mock FastQ directory."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_fastqdir, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
@@ -398,7 +402,7 @@ def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str, pon
     for fastq in pon_fastq_list:
         Path(fastq_dir, fastq).touch()
 
-    return fastq_dir.as_posix()
+    yield fastq_dir.as_posix()
 
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)

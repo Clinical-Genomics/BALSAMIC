@@ -61,6 +61,32 @@ from BALSAMIC.utils.rule import (
     get_sample_type_from_prefix,
 )
 
+def test_get_pon_sample_dict(
+    fastq_dir_tumor_only_pon: str, tumor_sample_name: str, normal_sample_name: str
+):
+    """Tests sample PON dictionary retrieval."""
+
+    # GIVEN a FASTQ directory
+
+    # GIVEN the expected sample dictionary
+    samples_expected: dict = {
+        "ACC1": {"type": "normal"},
+        "ACCN1": {"type": "normal"},
+        "ACCN2": {"type": "normal"},
+        "ACCN3": {"type": "normal"},
+        "ACCN4": {"type": "normal"},
+        "ACCN4": {"type": "normal"},
+        "ACCN5": {"type": "normal"},
+        "ACCN6": {"type": "normal"},
+    }
+
+    # WHEN retrieving PON samples
+    samples: dict = get_pon_sample_dict(fastq_dir_tumor_only_pon)
+
+    # THEN the samples should be retrieved from the FASTQ directory
+    for sample in samples:
+        assert sample in samples_expected and samples[sample]["type"] == samples_expected[sample]["type"]
+
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
     # GIVEN a wrong analysis_type
@@ -81,8 +107,6 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
             mutation_class=mutation_class,
             sequencing_type=sequencing_type,
         )
-
-
 def test_get_variant_callers_wrong_workflow(tumor_normal_config):
     # GIVEN a wrong workflow name
     wrong_workflow = "MIP"
@@ -875,41 +899,6 @@ def test_generate_h5_capture_no_output(tmp_path):
     assert actual_output == None
 
 
-def test_get_md5(tmp_path):
-
-    # GIVEN a dummy file
-    dummy_dir = tmp_path / "md5"
-    dummy_dir.mkdir()
-    dummy_file = dummy_dir / "dummy_file.dump"
-    dummy_file.write_text("Awesome Text")
-
-    # THEN md5 returned should be
-    assert get_md5(dummy_file) == "3945B39E"
-
-
-def test_create_md5(tmp_path):
-
-    # GIVEN a path to a md5 file and reference dummy files
-    ref_dir = tmp_path / "references"
-    ref_dir.mkdir()
-    dummy_ref_file1 = ref_dir / "reference_file1.dump"
-    dummy_ref_file1.write_text("Test reference1")
-    dummy_ref_file2 = ref_dir / "reference_file2.dump"
-    dummy_ref_file2.write_text("Test reference2")
-    dummy_reference_dict = {
-        "reference_dummy1": str(dummy_ref_file1),
-        "reference_dummy2": str(dummy_ref_file2),
-    }
-    dummy_dir = tmp_path / "md5"
-    dummy_dir.mkdir()
-    dummy_file = dummy_dir / "dummy_file.dump"
-
-    create_md5(dummy_reference_dict, dummy_file)
-
-    # THEN md5 file exists
-    assert dummy_file.exists()
-
-
 def test_get_sample_type_from_prefix(config_dict):
     """Test sample type extraction from a extracted config file."""
 
@@ -948,32 +937,6 @@ def test_get_sample_dict(
     assert samples[normal_sample_name]["fastq_info"]
 
 
-def test_get_pon_sample_dict(
-    fastq_dir_tumor_only_pon: str, tumor_sample_name: str, normal_sample_name: str
-):
-    """Tests sample PON dictionary retrieval."""
-
-    # GIVEN a FASTQ directory
-
-    # GIVEN the expected sample dictionary
-    samples_expected: dict = {
-        "ACC1": {"type": "normal"},
-        "ACCN1": {"type": "normal"},
-        "ACCN2": {"type": "normal"},
-        "ACCN3": {"type": "normal"},
-        "ACCN4": {"type": "normal"},
-        "ACCN4": {"type": "normal"},
-        "ACCN5": {"type": "normal"},
-        "ACCN6": {"type": "normal"},
-    }
-
-    # WHEN retrieving PON samples
-    samples: dict = get_pon_sample_dict(fastq_dir_tumor_only_pon)
-
-    # THEN the samples should be retrieved from the FASTQ directory
-    for sample in samples:
-        assert sample in samples_expected and samples[sample]["type"] == samples_expected[sample]["type"]
-
 def test_get_input_files_path(fastq_dir: str, caplog: LogCaptureFixture):
     """Test get unlinked input files directory."""
 
@@ -1000,3 +963,39 @@ def test_get_input_symlinked_files_path(
 
     # THEN the real fastq directory should be returned
     assert input_directory == fastq_dir
+
+def test_get_md5(tmp_path):
+
+    # GIVEN a dummy file
+    dummy_dir = tmp_path / "md5"
+    dummy_dir.mkdir()
+    dummy_file = dummy_dir / "dummy_file.dump"
+    dummy_file.write_text("Awesome Text")
+
+    # THEN md5 returned should be
+    assert get_md5(dummy_file) == "3945B39E"
+
+
+def test_create_md5(tmp_path):
+
+    # GIVEN a path to a md5 file and reference dummy files
+    ref_dir = tmp_path / "references"
+    ref_dir.mkdir()
+    dummy_ref_file1 = ref_dir / "reference_file1.dump"
+    dummy_ref_file1.write_text("Test reference1")
+    dummy_ref_file2 = ref_dir / "reference_file2.dump"
+    dummy_ref_file2.write_text("Test reference2")
+    dummy_reference_dict = {
+        "reference_dummy1": str(dummy_ref_file1),
+        "reference_dummy2": str(dummy_ref_file2),
+    }
+    dummy_dir = tmp_path / "md5"
+    dummy_dir.mkdir()
+    dummy_file = dummy_dir / "dummy_file.dump"
+
+    create_md5(dummy_reference_dict, dummy_file)
+
+    # THEN md5 file exists
+    assert dummy_file.exists()
+
+
