@@ -50,7 +50,7 @@ rule sentieon_dedup:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
         dup_names = Path(bam_dir, "{sample_type}.{sample}.dedup.read_names").as_posix(),
-        metrics = Path(qc_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
+        metrics = Path(bam_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     params:
