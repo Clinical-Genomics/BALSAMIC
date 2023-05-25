@@ -6,6 +6,7 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
+            "snakemake_rules/quality_control/samtools_qc.rule"
         ],
         "align": [
             "snakemake_rules/align/bam_compress.rule"
