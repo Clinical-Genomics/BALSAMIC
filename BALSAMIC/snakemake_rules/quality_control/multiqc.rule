@@ -4,6 +4,9 @@
 multiqc_input = [sample_dict[tumor_sample]["bam"]["final_bam"]]
 multiqc_input.extend(expand(bam_dir + "{sample}.bam_compressed", sample=config["samples"]))
 multiqc_input.append(qc_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
+multiqc_input.extend(expand(bam_dir + "{sample}.samtools.flagstats.txt", sample=config["samples"]))
+multiqc_input.extend(expand(bam_dir + "{sample}.samtools.idxstats.txt", sample=config["samples"]))
+multiqc_input.extend(expand(bam_dir + "{sample}.samtools.stats.txt", sample=config["samples"]))
 
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(sample_dict[normal_sample]["bam"]["final_bam"])
