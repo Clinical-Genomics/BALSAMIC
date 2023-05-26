@@ -94,7 +94,7 @@ shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
 --dup_read_name {output.dup_names} \
 {output.bam};
 
-sed "s/^LIBRARY/\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\nLIBRARY/" -i {output.metrics}
+sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
         """
 
 
