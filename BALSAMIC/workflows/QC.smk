@@ -129,7 +129,8 @@ rules_to_include = [
                 "snakemake_rules/quality_control/sambamba_depth.rule",
                 "snakemake_rules/quality_control/mosdepth.rule",
                 "snakemake_rules/align/sentieon_alignment.rule",
-                "snakemake_rules/quality_control/qc_metrics.rule"
+                "snakemake_rules/quality_control/qc_metrics.rule",
+                "snakemake_rules/quality_control/samtools_qc.rule"
 ]
 
 if "paired" in config['analysis']['analysis_type']:
