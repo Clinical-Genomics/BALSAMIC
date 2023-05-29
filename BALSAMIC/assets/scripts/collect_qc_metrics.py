@@ -92,29 +92,20 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                 subtool_name[1].lower() in source_tool.lower()
                 and subtool_name[2].lower() in source_subtool.lower()
             ):
-
-
-                tumor_sample = f"tumor.{sample}"
-                normal_sample = f"normal.{sample}"
-                if tumor_sample in multiqc_data["report_data_sources"][source_tool][source_subtool]:
-                    return os.path.basename(multiqc_data["report_data_sources"][source_tool][source_subtool][tumor_sample])
-                elif normal_sample in multiqc_data["report_data_sources"][source_tool][source_subtool]:
-                    return os.path.basename(multiqc_data["report_data_sources"][source_tool][source_subtool][normal_sample])
-                else:
-                    try:
-                        return os.path.basename(
-                            multiqc_data["report_data_sources"][source_tool][
-                                source_subtool
-                            ][sample]
-                        )
-                    except KeyError:
-                        # Deletes pair orientation information from the sample name (insertSize metrics)
-                        sample = sample.rsplit("_", 1)[0]
-                        return os.path.basename(
-                            multiqc_data["report_data_sources"][source_tool][
-                                source_subtool
-                            ][sample]
-                        )
+                try:
+                    return os.path.basename(
+                        multiqc_data["report_data_sources"][source_tool][
+                            source_subtool
+                        ][sample]
+                    )
+                except KeyError:
+                    # Deletes pair orientation information from the sample name (insertSize metrics)
+                    sample = sample.rsplit("_", 1)[0]
+                    return os.path.basename(
+                        multiqc_data["report_data_sources"][source_tool][
+                            source_subtool
+                        ][sample]
+                    )
 
 
 def get_relatedness_metrics(multiqc_data: dict) -> list:
@@ -211,7 +202,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                     if k in requested_metrics:
                         output_metrics.append(
                             MetricModel(
-                                id=sample.split(".")[1],
+                                id=sample.split(".")[1].split("_")[0],
                                 input=get_multiqc_data_source(
                                     multiqc_data, sample, source
                                 ),
@@ -221,7 +212,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                                 condition=get_metric_condition(
                                     config,
                                     requested_metrics,
-                                    sample.split(".")[1],
+                                    sample.split(".")[1].split("_")[0],
                                     k,
                                 ),
                             ).dict()

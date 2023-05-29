@@ -603,7 +603,7 @@ def test_read_yaml(metrics_yaml_path):
     dropout_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.mrkdup.hsmetric",
+        "input": "ACC1.dedup.realign.hsmetric",
         "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
         "value": 0.027402,
@@ -613,7 +613,7 @@ def test_read_yaml(metrics_yaml_path):
     ins_size_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.insertsizemetric",
+        "input": "ACC1.dedup.realign.insertsizemetric",
         "name": "MEAN_INSERT_SIZE",
         "step": "multiqc_picard_insertSize",
         "value": 201.813054,
@@ -623,7 +623,7 @@ def test_read_yaml(metrics_yaml_path):
     dups_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.mrkdup.txt",
+        "input": "tumor.ACC1.dedup.metrics",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
         "value": 0.391429,
