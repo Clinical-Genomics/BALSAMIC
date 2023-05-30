@@ -64,6 +64,7 @@ METRICS = {
         "PCT_60X": {"condition": {"norm": "gt", "threshold": 0.80}},  # Tumor sample
         "PCT_100X": {"condition": None},
         "FOLD_80_BASE_PENALTY": {"condition": None},
+        "PCT_PF_READS_IMPROPER_PAIRS": {"condition": {"norm": "le", "threshold": 1.00}},
     },
     "variants": {
         "NUMBER_OF_SITES": {"condition": {"norm": "lt", "threshold": 50000}},
