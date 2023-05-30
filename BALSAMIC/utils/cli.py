@@ -361,18 +361,6 @@ def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
 
     return " ".join(shellcmd.split())
 
-
-def validate_fastq_pattern(sample):
-    """Finds the correct filename prefix from file path, and returns it.
-    An error is raised if sample name has invalid pattern"""
-
-    fq_pattern = re.compile(r".fastq.gz$")
-    sample_basename = Path(sample).name
-
-    file_str = sample_basename[0 : (fq_pattern.search(sample_basename).span()[0] + 1)]
-    return file_str
-
-
 def get_panel_chrom(panel_bed) -> list:
     """Returns a set of chromosomes present in PANEL BED"""
 
