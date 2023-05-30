@@ -468,12 +468,19 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
-def validate_fastq_input(sample_dict: dict, fastq_path: str):
-    """Validates fastq input in sample dict.
+def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
+    """Validates fastq input in sample dict and fastq_path.
 
     Criteria:
         - All fastq-files in the supplied fastq_dir must have been assigned to a sample.
         - All fastq-files in the sample dict must exist.
+
+    Args:
+        sample_dict: dict. Dictionary of sample-names and their associated sample-type and fastq-information.
+        fastq_path: str. Path to the directory containing the fastq-files.
+
+    Returns:
+        Nothing
     """
     complete_fastq_list = glob.glob(f"{fastq_path}/*fastq.gz")
     assigned_fastq_list = []
@@ -496,7 +503,16 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str):
 
 
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
-    """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample."""
+    """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample.
+
+    Args:
+        sample_name: str. The name of the sample for which fastq-files will be searched for in the fastq_path.
+        fastq_path: str. Path to where the fastq-files should be found for the supplied sample_name.
+
+    Returns:
+        fastq_dict: dict. Nested dictionary containing the unique file-name pattern for each fastq-pair,
+        and the paths to the fastq-files.
+    """
 
     fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
     if not fastqs_in_fastq_path:
@@ -527,8 +543,16 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
 def get_sample_dict(
     tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
 ) -> Dict[str, dict]:
-    """Returns a sample dictionary with fastq-information given the names of the tumor and/or normal samples:
-    "sample_name": {
+    """Returns a sample dictionary with fastq-information given the names of the tumor and/or normal samples.
+    Args:
+        tumor_sample_name: str. The sample_name of the tumor.
+        normal_sample_name: str. The sample_ename of the normal, if it exists.
+        fastq_path: str. The path to the fastq-files for the supplied samples.
+
+    Returns:
+        sample_dict: dict with this format:
+
+            "sample_name": {
             "type": "[tumor/normal]",
             "fastq_info": {
                 "[fastq_pair_pattern1]": {
@@ -538,7 +562,7 @@ def get_sample_dict(
                 "[fastq_pair_pattern2]": {
                     "fwd": "/path/to/fastq_dir/[forward_read_name2].fastq.gz",
                     "rev": "/path/to/fastq_dir/[reverse_read_name2].fastq.gz"
-    ...
+            ...
     """
     sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
     if normal_sample_name:
