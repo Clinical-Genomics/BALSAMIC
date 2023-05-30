@@ -4,10 +4,19 @@
 Added:
 ^^^^^^
 * Concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
+* Samtools stats, flagstat, idxstat to WGS workflow
+* Functionality for dynamically assigning fastq-info to sample-dictionary from input fastq-dir
+
 
 Fixed:
 ^^^^^^
 * Update cryptography version (39.0.1) due to security alert https://github.com/Clinical-Genomics/BALSAMIC/pull/1087
+
+Changed:
+^^^^^^
+* Standardised alignment workflows to WGS-workflow
+* Implemented parallel trimming and alignment in all workflows per lane
+* All bam-QC tools take the final dedup.realign bamfile as input
 
 
 [11.2.0]
