@@ -278,6 +278,7 @@ def get_config(config_name):
     if Path(config_file).exists():
         return config_file
     else:
+        LOG.error(f"Config for {config_name} was not found.")
         raise FileNotFoundError(f"Config for {config_name} was not found.")
 
 
@@ -348,9 +349,11 @@ def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
 
     singularity_cmd = shutil.which("singularity")
     if not singularity_cmd:
+        LOG.error("singularity command does not exist")
         raise BalsamicError("singularity command does not exist")
 
     if not Path(sif_path).is_file():
+        LOG.error("container file does not exist")
         raise BalsamicError("container file does not exist")
 
     singularity_bind_path = ""
@@ -478,6 +481,9 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
             for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
                 assigned_fastq_list.append(fastq_path)
                 if not Path(fastq_path).is_file():
+                    LOG.error(
+                        f"Fastq-file: {fastq_path} does not exist"
+                    )
                     raise FileNotFoundError(f"Fastq-file: {fastq_path} does not exist")
 
     unassigned_fastqs = []
@@ -487,6 +493,9 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
 
     if unassigned_fastqs:
         unassigned_fastqs_str = "\n".join(unassigned_fastqs)
+        LOG.error(
+            f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
+        )
         raise BalsamicError(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
 
 
@@ -504,6 +513,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
 
     fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
     if not fastqs_in_fastq_path:
+        LOG.error(f"No fastq files found in supplied fastq-path: {fastq_path}")
         raise FileNotFoundError(f"No fastq files found in supplied fastq-path: {fastq_path}")
 
     fastq_dict = {}
@@ -519,6 +529,8 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
 
                 if fastqpair_pattern in fastq_dict:
+                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
+                              f"dictionary for sample: {sample_name}")
                     raise BalsamicError(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
                                         f"dictionary for sample: {sample_name}")
 
