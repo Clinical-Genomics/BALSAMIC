@@ -15,7 +15,7 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - Somatic/Germline
      - Variant type
    * - DNAscope
-     - WGS
+     - TGA, WGS
      - tumor-normal, tumor-only
      - germline
      - SNV, InDel
@@ -25,12 +25,12 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - somatic
      - SNV, InDel
    * - TNScope_umi
-     - TGA, WGS
+     - TGA
      - tumor-normal, tumor-only
-     - somatic, germline
+     - somatic
      - SNV, InDel
    * - VarDict
-     - TGA, WGS
+     - TGA
      - tumor-normal, tumor-only
      - somatic
      - SNV, InDel

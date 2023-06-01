@@ -206,6 +206,7 @@ rule tmb_calculation:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
+    housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.research",

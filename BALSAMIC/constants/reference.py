@@ -70,11 +70,11 @@ REFERENCE_FILES = {
             "output_path": "variants",
         },
         "cosmicdb": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
+            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg38",
-            "output_file": "cosmic_coding_muts_v94.vcf",
+            "output_file": "cosmic_coding_muts_v97.vcf",
             "output_path": "variants",
         },
         "wgs_calling": {
@@ -189,6 +189,14 @@ REFERENCE_FILES = {
             "output_file": "hg38.somalier.sites.vcf",
             "output_path": "variants",
         },
+        "cadd_snv": {
+            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh38/whole_genome_SNVs.tsv.gz",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg38",
+            "output_file": "hg38.cadd_snv.tsv.gz",
+            "output_path": "variants",
+        },
     },
     "hg19": {
         "reference_genome": {
@@ -256,11 +264,11 @@ REFERENCE_FILES = {
             "output_path": "variants",
         },
         "cosmicdb": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v94/VCF/CosmicCodingMuts.vcf.gz",
+            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
             "file_type": "vcf",
             "gzip": True,
             "genome_version": "hg19",
-            "output_file": "cosmic_coding_muts_v94.vcf",
+            "output_file": "cosmic_coding_muts_v97.vcf",
             "output_path": "variants",
         },
         "wgs_calling": {
@@ -373,6 +381,14 @@ REFERENCE_FILES = {
             "gzip": True,
             "genome_version": "hg19",
             "output_file": "GRCh37.somalier.sites.vcf",
+            "output_path": "variants",
+        },
+        "cadd_snv": {
+            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh37/whole_genome_SNVs.tsv.gz",
+            "file_type": "text",
+            "gzip": False,
+            "genome_version": "hg19",
+            "output_file": "hg19.cadd_snv.tsv.gz",
             "output_path": "variants",
         },
     },

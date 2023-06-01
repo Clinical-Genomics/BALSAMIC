@@ -19,6 +19,7 @@
         "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
         "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
         "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
-        "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz"
+        "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
+        "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
     }
 }
