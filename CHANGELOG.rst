@@ -5,6 +5,10 @@ Added:
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
 
+Changed:
+^^^^^^^^
+* Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
+
 Fixed:
 ^^^^^^
 * vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
