@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest a functionality you would like to see in BALSAMIC
-labels: 'request'
+labels: "Request"
 ---
 
 **Is your feature request related to a problem? Please describe.**
