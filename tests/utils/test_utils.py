@@ -28,7 +28,6 @@ from BALSAMIC.utils.cli import (
     get_config,
     get_file_status_string,
     find_file_index,
-    validate_fastq_pattern,
     get_panel_chrom,
     singularity,
     get_file_extension,
@@ -999,3 +998,5 @@ def test_create_md5(tmp_path):
     assert dummy_file.exists()
 
 
+def test_validate_fastq_input():
+    pass

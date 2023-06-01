@@ -34,7 +34,6 @@ def test_run_analysis_disable_variant_caller(invoke_cli, tumor_only_config):
     assert result.exit_code == 0
     assert disabled_varcaller not in result.output
 
-
 def test_run_analysis_tumor_normal_dry_run(invoke_cli, tumor_normal_config):
     # GIVEN a tumor-normal config file
     # WHEN running analysis
@@ -42,7 +41,6 @@ def test_run_analysis_tumor_normal_dry_run(invoke_cli, tumor_normal_config):
 
     # THEN it should run without any error
     assert result.exit_code == 0
-
 
 def test_run_analysis_tumor_only_dry_run(
     invoke_cli, tumor_only_config, tumor_normal_config
