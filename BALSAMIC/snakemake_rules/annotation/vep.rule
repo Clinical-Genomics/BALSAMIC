@@ -210,7 +210,6 @@ rule tmb_calculation:
     af_cutoff = "0.05",
     bed = config["panel"]["capture_kit"] if "panel" in config else "",
     message_text = "{var_type}.somatic.{case_name}.{var_caller}.research",
-    housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
   threads:
     get_threads(cluster_config, "vep")
