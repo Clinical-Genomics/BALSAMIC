@@ -13,7 +13,7 @@ Changed:
 Fixed:
 ^^^^^^
 * vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
-* Fix logged delly version https://github.com/Clinical-Genomics/BALSAMIC/pull/1167
+* Fix delly version (properly update to v1.1.3) https://github.com/Clinical-Genomics/BALSAMIC/pull/1167
 
 [12.0.0]
 --------
