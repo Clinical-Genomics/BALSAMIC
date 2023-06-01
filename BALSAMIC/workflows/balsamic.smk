@@ -21,11 +21,11 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
-                                 get_sample_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
+                                 get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
 
-from BALSAMIC.constants.common import (SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE)
+from BALSAMIC.constants.common import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
@@ -40,15 +40,17 @@ logging.getLogger("filelock").setLevel("WARN")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Set case id/name
 case_id = config["analysis"]["case_id"]
 
 # Directories
+fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
+analysis_fastq_dir = get_result_dir(config) + "/fastq/"
+concat_dir = get_result_dir(config) + "/concat/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
@@ -61,7 +63,7 @@ umi_dir = get_result_dir(config) + "/umi/"
 umi_qc_dir = qc_dir + "umi_qc/"
 singularity_image = config['singularity']['image']
 
-
+# Annotations
 research_annotations = []
 clinical_annotations = []
 clinical_snv_obs = ""
@@ -149,14 +151,9 @@ if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 # Sample names for tumor or normal
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+tumor_sample = get_sample_id_by_type(config["samples"], "tumor")
 if config['analysis']['analysis_type'] == "paired":
-    normal_sample = get_sample_type(config["samples"], "normal")[0]
-
-# Get sample unique names for tumor or normal
-lims_id = {'normal': [], 'tumor': []}
-for sample, sample_info in config["samples"].items():
-    lims_id[sample_info["type"]].append(sample_info["sample_name"])
+    normal_sample = get_sample_id_by_type(config["samples"], "normal")
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -519,6 +516,10 @@ if 'delivery' in config:
     delivery_ready = os.path.join(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk")
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
+
+
+wildcard_constraints:
+    sample = "|".join(list(config["samples"]))
 
 rule all:
     input:

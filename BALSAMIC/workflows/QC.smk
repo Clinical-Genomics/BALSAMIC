@@ -17,10 +17,10 @@ from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
 from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
-                                 get_sample_type, get_picard_mrkdup, get_script_path,
+                                 get_sample_id_by_type, get_picard_mrkdup, get_script_path,
                                  get_threads, get_sequencing_type, get_capture_kit)
 
-from BALSAMIC.constants.common import (RULE_DIRECTORY);
+from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
 
@@ -32,12 +32,14 @@ logging.getLogger("filelock").setLevel("WARN")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 case_id = config["analysis"]["case_id"]
+fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" + case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
+analysis_fastq_dir = get_result_dir(config) + "/fastq/"
+concat_dir = get_result_dir(config) + "/concat/"
 bam_dir = get_result_dir(config) + "/bam/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
@@ -57,9 +59,9 @@ if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 # Sample names for tumor or normal
-tumor_sample = get_sample_type(config["samples"], "tumor")[0]
+tumor_sample = get_sample_id_by_type(config["samples"], "tumor")
 if "paired" in config['analysis']['analysis_type']:
-    normal_sample = get_sample_type(config["samples"], "normal")[0]
+    normal_sample = get_sample_id_by_type(config["samples"], "normal")
 
 # Set case id/name
 case_id = config["analysis"]["case_id"]
@@ -84,6 +86,7 @@ os.environ['TMPDIR'] = get_result_dir(config)
 analysis_type = config['analysis']["analysis_type"]
 
 rules_to_include = [
+                "snakemake_rules/concatenation/concatenation.rule",
                 "snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/quality_control/fastqc.rule",
                 "snakemake_rules/quality_control/multiqc.rule",
@@ -97,12 +100,11 @@ rules_to_include = [
 
 if "paired" in config['analysis']['analysis_type']:
     rules_to_include.append("snakemake_rules/variant_calling/mergetype_normal.rule")
+
     # Somalier only implemented for hg38 and hg19
     if "canfam3" not in config["reference"]["reference_genome"]:
         rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
 
-
-# for r in rules_to_include:
 for r in rules_to_include:
     include: Path(RULE_DIRECTORY, r).as_posix()
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")

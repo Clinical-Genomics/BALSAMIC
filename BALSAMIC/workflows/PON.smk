@@ -7,8 +7,7 @@ import tempfile
 import os
 
 
-from BALSAMIC.utils.rule import (get_picard_mrkdup, get_threads,
-                                 get_result_dir, get_pon_samples)
+from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
@@ -20,8 +19,10 @@ localrules: all
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
+fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = get_result_dir(config)
-fastq_dir = analysis_dir + "/fastq/"
+analysis_fastq_dir = analysis_dir + "/fastq/"
+concat_dir = get_result_dir(config) + "/concat/"
 qc_dir = analysis_dir + "/qc/"
 bam_dir =  analysis_dir + "/bam/"
 cnv_dir =  analysis_dir + "/cnv/"
@@ -35,20 +36,22 @@ benchmark_dir = config["analysis"]["benchmark"]
 version = config["analysis"]["pon_version"]
 
 tmp_dir = os.path.join(analysis_dir, "tmp", "" )
-Path.mkdir(Path(tmp_dir), exist_ok=True)
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 picarddup = get_picard_mrkdup(config)
-samples = get_pon_samples(fastq_dir)
 
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
-coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=samples, cov=['target','antitarget'])
+coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=config["samples"], cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
 pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
 
-config["rules"] = ["snakemake_rules/quality_control/fastp.rule",
-                   "snakemake_rules/align/bwa_mem.rule"]
+config["rules"] = [
+    "snakemake_rules/concatenation/concatenation.rule",
+    "snakemake_rules/quality_control/fastp.rule",
+    "snakemake_rules/align/bwa_mem.rule",
+]
 
 for r in config["rules"]:
     include: Path(RULE_DIRECTORY, r).as_posix()
@@ -103,7 +106,7 @@ cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn}
 
 rule create_reference:
     input:
-        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=samples, prefix=["target","antitarget"]),
+        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config["samples"], prefix=["target", "antitarget"]),
         ref = reffasta
     output:
         ref_cnn = pon_reference

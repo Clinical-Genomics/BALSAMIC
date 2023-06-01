@@ -28,17 +28,18 @@ if 'quality_trim' in config['QC'].keys():
 
 
 rule fastp_umi:
+    """Fastq UMI data pre-processing."""
     input:
-        read1=config["analysis"]["fastq_path"] + "{sample}" + "_1.fastq.gz",
-        read2=config["analysis"]["fastq_path"] + "{sample}" + "_2.fastq.gz",
+        fastq_r1 = concat_dir + "{sample}_R_1.fastq.gz",
+        fastq_r2 = concat_dir + "{sample}_R_2.fastq.gz"
     output:
-        read1 = temp(fastq_dir + "{sample}_1.umi_optimized.fastq.gz"),
-        read2 = temp(fastq_dir + "{sample}_2.umi_optimized.fastq.gz"),
+        fastq_r1 = temp(analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz"),
+        fastq_r2 = temp(analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp_umi.json",
         html = qc_dir + "fastp/{sample}_fastp_umi.html",
     benchmark:
         Path(benchmark_dir, "fastp_umi" + "{sample}.tsv").as_posix()
-    singularity: 
+    singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
@@ -55,10 +56,10 @@ export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {input.read1} \
---in2 {input.read2} \
---out1 {output.read1} \
---out2 {output.read2} \
+--in1 {input.fastq_r1} \
+--in2 {input.fastq_r2} \
+--out1 {output.fastq_r1} \
+--out2 {output.fastq_r2} \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
@@ -69,18 +70,19 @@ fastp \
 
 
 rule fastp:
+    """Fastq data pre-processing."""
     input:
-        read1 = fastq_dir + "{sample}_1.umi_optimized.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.umi_optimized.fastq.gz"
+        fastq_r1 = analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz",
+        fastq_r2 = analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"
     output:
-        read1 = temp(fastq_dir + "{sample}_1.fp.fastq.gz"),
-        read2 = temp(fastq_dir + "{sample}_2.fp.fastq.gz"),
+        fastq_r1 = temp(analysis_fastq_dir + "{sample}_R_1.fp.fastq.gz"),
+        fastq_r2 = temp(analysis_fastq_dir + "{sample}_R_2.fp.fastq.gz"),
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:
         Path(benchmark_dir, "fastp_" + "{sample}.tsv").as_posix()
-    singularity: 
-        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix() 
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
         umi = " ".join(fastp_param_umi),
@@ -96,10 +98,10 @@ export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {input.read1} \
---in2 {input.read2} \
---out1 {output.read1} \
---out2 {output.read2} \
+--in1 {input.fastq_r1} \
+--in2 {input.fastq_r2} \
+--out1 {output.fastq_r1} \
+--out2 {output.fastq_r2} \
 --json {output.json} \
 --html {output.html} \
 --disable_adapter_trimming \

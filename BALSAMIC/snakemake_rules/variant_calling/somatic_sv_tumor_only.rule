@@ -17,7 +17,7 @@ rule manta_tumor_only:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        tumor = get_sample_type(config["samples"], "tumor"),
+        tumor = get_sample_id_by_type(config["samples"], "tumor"),
         case_name = config["analysis"]["case_id"],
         manta_install_path= "/opt/conda/share/manta-1.6.0-2"
     threads:
@@ -301,7 +301,7 @@ rule svdb_merge_tumor_only:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-        tumor = get_sample_type(config["samples"], "tumor"),
+        tumor = get_sample_id_by_type(config["samples"], "tumor"),
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_callers_prio)

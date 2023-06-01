@@ -2,6 +2,7 @@
 
 Added:
 ^^^^^^
+* Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
 

@@ -136,8 +136,6 @@ rule annotate_swegen_frequency_somatic_sv:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         swegen_sv_frequency = swegen_sv,
         tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
@@ -173,8 +171,6 @@ rule annotate_clinical_observation_somatic_sv:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         clinical_sv_observations = clinical_sv,
         tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
