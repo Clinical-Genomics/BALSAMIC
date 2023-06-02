@@ -7,7 +7,7 @@ Added:
 
 Fixed:
 ^^^^^^
-* Logged version of Delly (changing it back to v1.0.3)  https://github.com/Clinical-Genomics/BALSAMIC/pull/1170
+* Logged version of Delly (changing it to v1.0.3)  https://github.com/Clinical-Genomics/BALSAMIC/pull/1170
 
 [12.0.0]
 --------
