@@ -1,12 +1,12 @@
 ---
-name: Validation Report - Minor and Patch Releases
+name: Verification Report - Minor and Patch Releases
 about: Report for validating minor and patch releases in Balsamic
-title: "Validation Report [vX.X.X]"
-labels: ["Validation Report"]
+title: "Verification Report [vX.X.X]"
+labels: ["Verification Report"]
 assignees: "@Clinical-Genomics/cancer-bioinfo"
 ---
 
-# Balsamic validation report
+# Balsamic Verification Report
 
 ## Release Information
 
@@ -17,18 +17,18 @@ assignees: "@Clinical-Genomics/cancer-bioinfo"
 
 ## Person(s) involved in the development of new release
 - Developer/s: [Name]
-- Validation operator/s: [Name]
-- Validation reviewer/s: [Name]
+- Verification operator/s: [Name]
+- Verification reviewer/s: [Name]
 
 ## Summary
 
 <!--
-Provide a brief summary of the validation performed for the release, including the objectives and scope.
+Provide a brief summary of the verification performed for the release, including the objectives and scope.
 -->
 
 [Summary]
 
-These are the goals of this validation:
+These are the goals of this verification:
 1. [Goal 1]
 2. [Goal 2]
 3. [Goal 3]
@@ -45,9 +45,9 @@ Provide a summary of the changes and updates included in this minor/patch releas
 | Changed | #PR002       | Test [Test 3]                |
 | Fixed   | #PR003       | Test [Test 2], Test [Test 4] |
 
-## Pre-Validation Checklist
+## Pre-Verification Checklist
 
-Before proceeding with the validation process, ensure that the following tasks have been completed:
+Before proceeding with the verification process, ensure that the following tasks have been completed:
 
 - [ ] [Install Balsamic in stage and production environments in hasta and build its cache](https://atlas.scilifelab.se/infrastructure/BALSAMIC/balsamic/#instructions-for-installation).
 - [ ] Confirm the availability of necessary resources, such as test cases.
@@ -67,16 +67,16 @@ Before proceeding with the validation process, ensure that the following tasks h
     | Hermes   | Version Z.Z.Z   | #PR002                                 |
 
 
-## Validation Results
+## Verification Results
 
 <!--
-List the specific test cases that were executed during the validation process. Include the test case ID,
+List the specific test cases that were executed during the verification process. Include the test case ID,
 description, and status (Pass/Fail).
 -->
 
-### Workflow Integrity Validation Cases
+### Workflow Integrity Verification Cases
 
-| Case ID        | Analysis type      | Expected QC validation                                | Status    |
+| Case ID        | Analysis type      | Expected QC                                           | Status    |
 |----------------|--------------------|-------------------------------------------------------|-----------|
 | `acetuna`      | QC, tumor-only     | Pass                                                  | Pass/Fail |
 | `civilsole`    | WGS, tumor-only    | Fail (`PCT_60X=0.004532`)                             | Pass/Fail |
@@ -86,12 +86,12 @@ description, and status (Pass/Fail).
 | `uphippo`      | UMI, tumor-only    | Fail (`GC dropout=1.650392`)                          | Pass/Fail |
 | `equalbug`     | UMI, tumor-normal  | Fail (`GC_DROPOUT=1.087173` and `RELATEDNESS=-0.524`) | Pass/Fail |
 
-### Version Specific Validation Cases
+### Version Specific Verification Cases
 
-| Case ID  | Analysis type     | Expected QC validation | Status    |
-|----------|-------------------|------------------------|-----------|
-| `TC001`  | [Analysis type]   | Pass/Fail              | Pass/Fail |
-| `TC002`  | [Analysis type]   | Pass/Fail              | Pass/Fail |
+| Case ID  | Analysis type     | Expected QC | Status    |
+|----------|-------------------|-------------|-----------|
+| `TC001`  | [Analysis type]   | Pass/Fail   | Pass/Fail |
+| `TC002`  | [Analysis type]   | Pass/Fail   | Pass/Fail |
 
 
 ### Test [Test 1]
@@ -109,7 +109,7 @@ Provide detailed results for the specific test, including observations, passing 
 ### Issues Identified
 
 <!--
-Document any issues or defects identified during the validation process. Include the issue ID, description, severity, 
+Document any issues or defects identified during the verification process. Include the issue ID, description, severity, 
 and status (Open/Closed).
 -->
 
@@ -121,20 +121,20 @@ and status (Open/Closed).
 ### Recommendations
 
 <!--
-Provide any recommendations or suggestions for improvement based on the validation results and observations.
+Provide any recommendations or suggestions for improvement based on the verification results and observations.
 -->
 
 ### Conclusion
 
 <!--
-Summarize the overall outcome of the validation for the minor or patch release. Include any significant findings, 
+Summarize the overall outcome of the verification for the minor or patch release. Include any significant findings, 
 achievements, or areas requiring further attention.
 -->
 
 ---
 
 ## Approval
-- Validation review: [Name]
+- Verification review: [Name]
 - Date: [Date]
 
 ## Deployment
