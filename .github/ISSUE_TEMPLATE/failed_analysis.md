@@ -1,10 +1,8 @@
 ---
 name: Report failed analysis
 about: Troubleshooting errors in Balsamic
-title: "[ Failed Analysis ]"
-labels: Bug, Failed Analysis
-assignees: ''
-
+title: "Failed Analysis: "
+labels: ["Bug"]
 ---
 
 **Case or sample information**
