@@ -1,7 +1,7 @@
 ---
 name: Feature
 about: A new feature for BALSAMIC
-labels: "Feature"
+labels: ["Feature"]
 ---
 
 ## Need
