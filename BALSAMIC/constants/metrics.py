@@ -1,8 +1,9 @@
 """QC metrics constants."""
 import operator
-from typing import Dict
+from typing import Dict, Callable
 
-VALID_OPS: Dict[str, operator] = {
+
+VALID_OPS: Dict[str, Callable] = {
     "lt": operator.lt,
     "le": operator.le,
     "eq": operator.eq,

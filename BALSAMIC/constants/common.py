@@ -1,5 +1,4 @@
 """This file contains constants variables used by BALSAMIC"""
-import operator
 import sys
 from pathlib import Path
 
