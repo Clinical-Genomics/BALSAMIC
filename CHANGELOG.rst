@@ -1,5 +1,5 @@
 [X.X.X]
-
+-------
 Added:
 ^^^^^^
 * Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
@@ -14,6 +14,17 @@ Fixed:
 ^^^^^^
 * vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
 * Fix delly version (properly update to v1.1.3) https://github.com/Clinical-Genomics/BALSAMIC/pull/1167
+
+[12.0.1]
+--------
+
+Added:
+^^^^^^
+* WGS QC criteria for `PCT_PF_READS_IMPROPER_PAIRS` (condition: <= 0.1) https://github.com/Clinical-Genomics/BALSAMIC/pull/1164
+
+Fixed:
+^^^^^^
+* Logged version of Delly (changing it to v1.0.3)  https://github.com/Clinical-Genomics/BALSAMIC/pull/1170
 
 [12.0.0]
 --------
