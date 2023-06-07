@@ -108,18 +108,6 @@ class ReferenceUrlModel(BaseModel):
     file_path: Optional[str]
     secret: Optional[str]
 
-    @property
-    def write_md5(self) -> None:
-        """Write the md5 checksum for the first 4 kB of a file."""
-        if not Path(file_path).is_file():
-            LOG.error(f"File {self.file_path} does not exist")
-            raise FileNotFoundError
-        with open(self.file_path, "rb") as fh:
-            for chunk in iter(lambda: fh.read(4096), b""):
-                hashlib.md5().update(chunk)
-        with open(file_path + ".md5", "w") as fh:
-            fh.write("{} {}\n".format(file_path, hashlib.md5().hexdigest()))
-
 
 class ReferencesModel(BaseModel):
     """
