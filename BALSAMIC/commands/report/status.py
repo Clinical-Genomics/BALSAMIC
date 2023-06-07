@@ -4,7 +4,6 @@ import json
 import click
 import snakemake
 
-from pathlib import Path
 from colorclass import Color
 
 from BALSAMIC.utils.cli import get_snakefile

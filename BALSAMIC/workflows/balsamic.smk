@@ -93,6 +93,16 @@ research_annotations.append( {
 }
 )
 
+research_annotations.append( {
+    'annotation': [{
+    'file': Path(config["reference"]["cadd_snv"]).as_posix(),
+    'names': ["CADD"],
+    'ops': ["mean"],
+    'columns': [6]
+    }]
+}
+)
+
 if "swegen_snv_frequency" in config["reference"]:
     research_annotations.append( {
         'annotation': [{

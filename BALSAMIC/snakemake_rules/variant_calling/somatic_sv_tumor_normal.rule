@@ -273,17 +273,19 @@ rule tiddit_sv_tumor_normal:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
         cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
         cov_normal_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".normal.tiddit_cov.bed",
-        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
     benchmark:
         benchmark_dir + 'tiddit_sv_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        vcf_dir = vcf_dir,
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
         tumor = "TUMOR",
         normal = "NORMAL",
-        case_name = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"],
+        filter_svs = get_script_path("filter_SVs.py")
     threads:
         get_threads(cluster_config, "tiddit_sv_tumor_normal")
     message:
@@ -303,8 +305,14 @@ grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf > {params.tmpdir}/{params.tu
 grep -E "#|PASS" {params.tmpdir}/{params.normal}.vcf > {params.tmpdir}/{params.normal}_PASS.vcf;
 
 svdb --merge --pass_only --notag --bnd_distance 500 --overlap 0.6 \
---vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf |\
-bgzip -l 9 -c > {output.vcf};
+--vcf {params.tmpdir}/{params.tumor}_PASS.vcf {params.tmpdir}/{params.normal}_PASS.vcf \
+> {params.vcf_dir}{params.tumor}_{params.normal}_merged_PASS.vcf ;
+
+python {params.filter_svs} tiddit_tn -v {params.vcf_dir}{params.tumor}_{params.normal}_merged_PASS.vcf filter \
+> {params.vcf_dir}{params.tumor}_{params.normal}_merged_tn_filter.vcf ;
+
+python {params.filter_svs} tiddit_tn -v {params.vcf_dir}{params.tumor}_{params.normal}_merged_tn_filter.vcf rescue_bnds \
+| bgzip -l 9 -c > {output.vcf}
 
 cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
 

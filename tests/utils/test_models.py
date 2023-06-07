@@ -23,6 +23,7 @@ from BALSAMIC.models.models import (
     MetricValidationModel,
     AnalysisPonModel,
 )
+from tests.conftest import analysis_dir
 
 
 def test_vcfattributes():

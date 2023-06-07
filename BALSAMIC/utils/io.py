@@ -2,7 +2,6 @@
 
 import json
 import logging
-import shutil
 from datetime import datetime
 from pathlib import Path
 
