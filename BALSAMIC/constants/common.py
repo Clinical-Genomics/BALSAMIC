@@ -83,12 +83,3 @@ BIOINFO_TOOL_ENV = {
     "vcf2cytosure": "vcf2cytosure",
     "somalier": "somalier",
 }
-
-VALID_OPS = {
-    "lt": operator.lt,
-    "le": operator.le,
-    "eq": operator.eq,
-    "ne": operator.ne,
-    "ge": operator.ge,
-    "gt": operator.gt,
-}

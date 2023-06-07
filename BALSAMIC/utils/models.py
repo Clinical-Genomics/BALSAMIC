@@ -17,10 +17,10 @@ from BALSAMIC.constants.common import (
     WORKFLOW_SOLUTION,
     MUTATION_CLASS,
     MUTATION_TYPE,
-    VALID_OPS,
     GENDER_OPTIONS,
     SAMPLE_TYPE,
 )
+from BALSAMIC.constants.metrics import VALID_OPS
 from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
 LOG = logging.getLogger(__name__)
