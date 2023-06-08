@@ -10,15 +10,15 @@ from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
-from BALSAMIC.constants.common import (
-    SEQUENCING_TYPE,
-    ANALYSIS_TYPES,
-    ANALYSIS_WORKFLOW,
-    WORKFLOW_SOLUTION,
-    MUTATION_CLASS,
-    MUTATION_TYPE,
-    GENDER_OPTIONS,
-    SAMPLE_TYPE,
+from BALSAMIC.constants.analysis import (
+    Gender,
+    AnalysisType,
+    AnalysisWorkflow,
+    SequencingType,
+    SampleType,
+    MutationOrigin,
+    MutationType,
+    WorkflowSolution,
 )
 from BALSAMIC.constants.metrics import VALID_OPS
 from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
@@ -154,7 +154,7 @@ class VarcallerAttribute(BaseModel):
     def workflow_solution_literal(cls, value) -> str:
         """Validate workflow solution"""
         assert set(value).issubset(
-            set(WORKFLOW_SOLUTION)
+            set(WorkflowSolution)
         ), f"{value} is not valid workflow solution."
         return value
 
@@ -162,27 +162,27 @@ class VarcallerAttribute(BaseModel):
     def annotation_type_literal(cls, value) -> str:
         """Validate analysis types"""
         assert set(value).issubset(
-            set(ANALYSIS_TYPES)
+            set(AnalysisType)
         ), f"{value} is not a valid analysis type."
         return value
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
         """Validate mutation class"""
-        assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
+        assert value in set(MutationOrigin), f"{value} is not a valid mutation type."
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
         """Validate mutation type"""
-        assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
+        assert value in set(MutationType), f"{value} is not not a valid mutation class"
         return value
 
     @validator("sequencing_type", check_fields=False)
     def sequencing_type_literal(cls, value) -> str:
         """Validate sequencing type"""
         assert set(value).issubset(
-            set(SEQUENCING_TYPE)
+            set(SequencingType)
         ), f"{value} is not not a valid sequencing type."
         return value
 
@@ -261,8 +261,7 @@ class AnalysisModel(BaseModel):
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
-        balsamic_analysis_types = ANALYSIS_TYPES
-        if value not in balsamic_analysis_types:
+        if value not in set(AnalysisType):
             raise ValueError(
                 f"Provided analysis type ({value}) not supported in BALSAMIC!"
             )
@@ -270,7 +269,7 @@ class AnalysisModel(BaseModel):
 
     @validator("gender")
     def gender_literal(cls, value, values) -> Optional[str]:
-        if value not in GENDER_OPTIONS and values.get("analysis_type") != "pon":
+        if value not in set(Gender) and values.get("analysis_type") != "pon":
             raise ValueError(
                 f"Provided gender type ({value}) is not supported in BALSAMIC!"
             )
@@ -278,8 +277,7 @@ class AnalysisModel(BaseModel):
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
-        balsamic_sequencing_types = SEQUENCING_TYPE
-        if value not in balsamic_sequencing_types:
+        if value not in set(SequencingType):
             raise ValueError(
                 f"Provided sequencing type ({value}) not supported in BALSAMIC!"
             )
@@ -287,8 +285,7 @@ class AnalysisModel(BaseModel):
 
     @validator("analysis_workflow", check_fields=True)
     def analysis_workflow_literal(cls, value) -> str:
-        balsamic_analysis_workflow = ANALYSIS_WORKFLOW
-        if value not in balsamic_analysis_workflow:
+        if value not in set(AnalysisWorkflow):
             raise ValueError(
                 f"Provided analysis workflow ({value} not supported in BALSAMIC"
             )
@@ -381,7 +378,7 @@ class SampleInstanceModel(BaseModel):
     @validator("type")
     def sample_type_literal(cls, value):
         """Validate balsamic supported sample type."""
-        if value not in SAMPLE_TYPE:
+        if value not in set(SampleType):
             raise ValueError(
                 f"The provided sample type ({value}) is not supported in BALSAMIC"
             )

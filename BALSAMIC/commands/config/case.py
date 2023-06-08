@@ -6,17 +6,14 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
     get_sample_dict,
     get_panel_chrom,
     get_bioinfo_tools_version,
     generate_graph,
 )
-from BALSAMIC.constants.common import (
-    CONTAINERS_CONDA_ENV_PATH,
-    BIOINFO_TOOL_ENV,
-    GENDER_OPTIONS,
-)
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.models import BalsamicConfigModel
@@ -36,7 +33,7 @@ LOG = logging.getLogger(__name__)
     required=False,
     default="female",
     show_default=True,
-    type=click.Choice(GENDER_OPTIONS),
+    type=click.Choice([Gender.FEMALE, Gender.MALE]),
     help="Case associated gender",
 )
 @click.option(
@@ -263,7 +260,7 @@ def case_config(
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,
-            container_conda_env_path=CONTAINERS_CONDA_ENV_PATH,
+            container_conda_env_path=CONTAINERS_DIR,
         ),
         panel={
             "capture_kit": panel_bed,
