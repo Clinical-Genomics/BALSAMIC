@@ -6,6 +6,7 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
     generate_graph,
     get_bioinfo_tools_version,
@@ -14,10 +15,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.models import PonBalsamicConfigModel
 
-from BALSAMIC.constants.common import (
-    CONTAINERS_CONDA_ENV_PATH,
-    BIOINFO_TOOL_ENV,
-)
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
 LOG = logging.getLogger(__name__)
 
@@ -140,7 +138,7 @@ def pon_config(
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,
-            container_conda_env_path=CONTAINERS_CONDA_ENV_PATH,
+            container_conda_env_path=CONTAINERS_DIR,
         ),
         panel={"capture_kit": panel_bed} if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)

@@ -14,9 +14,10 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
-from BALSAMIC.constants.common import CONTAINERS_CONDA_ENV_PATH, BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.reference import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
@@ -178,9 +179,7 @@ def test_get_bioinfo_tools_version():
     """Test bioinformatics tools and version extraction."""
 
     # GIVEN a tools dictionary
-    bioinfo_tools: dict = get_bioinfo_tools_version(
-        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
-    )
+    bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the versions are correctly retrieved
     assert set(bioinfo_tools["picard"]).issubset({"2.27.1"})
@@ -191,9 +190,7 @@ def test_get_bioinfo_pip_tools_version():
     """Test bioinformatics tools and version extraction for a PIP specific tool."""
 
     # GIVEN a tools dictionary
-    bioinfo_tools: dict = get_bioinfo_tools_version(
-        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
-    )
+    bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the PIP specific packages are correctly retrieved
     assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.9"})
