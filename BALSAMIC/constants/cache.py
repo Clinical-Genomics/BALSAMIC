@@ -69,7 +69,7 @@ class DockerContainers(StrEnum):
 
     ALIGN_QC: str = "align_qc"
     ANNOTATE: str = "annotate"
-    ASCAT_NGS: str = "ascatNgs"
+    ASCAT: str = "ascatNgs"
     BALSAMIC: str = "balsamic"
     CNVKIT: str = "varcall_cnvkit"
     CNVPYTOR: str = "cnvpytor"
