@@ -11,6 +11,7 @@ from snakemake.exceptions import RuleException, WorkflowError
 
 from PyPDF2 import PdfFileMerger
 
+from BALSAMIC.constants.paths import SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR, BALSAMIC_DIR
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
@@ -25,7 +26,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
 
-from BALSAMIC.constants.common import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE
+from BALSAMIC.constants.analysis import MutationType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
@@ -169,8 +170,8 @@ try:
     else:
         config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
+    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR
+    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR
 
 except KeyError as error:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
@@ -231,7 +232,7 @@ germline_caller = []
 somatic_caller = []
 somatic_caller_cnv = []
 somatic_caller_sv = []
-for m in MUTATION_TYPE:
+for m in set(MutationType):
     germline_caller_balsamic = get_variant_callers(config=config,
                                             analysis_type=config['analysis']['analysis_type'],
                                             workflow_solution="BALSAMIC",
@@ -333,7 +334,7 @@ LOG.info(f"The following somatic variant callers will be included in the workflo
 
 
 for r in rules_to_include:
-    include: Path(RULE_DIRECTORY, r).as_posix()
+    include: Path(BALSAMIC_DIR, r).as_posix()
 
 # Define common and analysis specific outputs
 quality_control_results = [
