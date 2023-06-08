@@ -9,18 +9,16 @@ import click
 import graphviz
 import snakemake
 
-from BALSAMIC.constants.common import (
+from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
-    BALSAMIC_DOCKER_PATH,
-    VALID_CONTAINER_CONDA_NAME,
 )
+from BALSAMIC.constants.cache import DOCKER_URL, DockerContainers
 from BALSAMIC.utils.cli import (
     CaptureStdout,
     get_snakefile,
     SnakeMake,
     get_config,
     get_schedulerpy,
-    # job_id_dump_to_yaml,
 )
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.io import write_json
@@ -229,9 +227,9 @@ def initialize(
     else:
         docker_image_base_name = container_version
 
-    for image_suffix in VALID_CONTAINER_CONDA_NAME:
+    for image_suffix in set(DockerContainers):
         container_stub_url = "{}:{}-{}".format(
-            BALSAMIC_DOCKER_PATH, docker_image_base_name, image_suffix
+            DOCKER_URL, docker_image_base_name, image_suffix
         )
         config_dict["singularity"]["containers"][image_suffix] = container_stub_url
 
