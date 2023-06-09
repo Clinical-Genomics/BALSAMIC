@@ -572,7 +572,7 @@ class ReferenceMeta(BaseModel):
         delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
         delly_mappability: ReferenceUrlsModel. Optional field for genome mappability
         ascat_gc_correction: ReferenceUrlsModel. Optional field for genome gc correction bins
-        ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
+        ascat_chr_y_loci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
         somalier_sites: ReferenceUrlsModel. Optional field for somalier sites vcf
         cadd_snv: ReferenceUrlsModel. Optional field for CADD SNV reference

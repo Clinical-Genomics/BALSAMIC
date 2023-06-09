@@ -159,7 +159,7 @@ rule all:
             "delly_exclusion_converted" : input.delly_exclusion_converted,
             "delly_mappability": input.delly_mappability,
             "ascat_gc_correction" : input.ascat_gccorrection,
-            "ascat_chryloci" : input.ascat_chryloci,
+            "ascat_chr_y_loci" : input.ascat_chryloci,
             "clinvar": input.clinvar,
             "somalier_sites": input.somalier_sites,
             "reference_access_date": today,
