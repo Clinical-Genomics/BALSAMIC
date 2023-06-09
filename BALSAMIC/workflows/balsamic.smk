@@ -536,7 +536,7 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
+        from BALSAMIC.utils.metrics import validate_qc_metrics
 
         # Perform validation of extracted QC metrics
         try:
