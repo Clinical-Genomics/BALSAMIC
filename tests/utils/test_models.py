@@ -5,6 +5,7 @@ import pytest
 from pathlib import Path
 from pydantic import ValidationError
 
+from BALSAMIC.models.cache_models import ReferenceMeta, ReferenceUrlsModel
 from BALSAMIC.models.models import (
     VCFAttributes,
     VarCallerFilter,
@@ -12,8 +13,6 @@ from BALSAMIC.models.models import (
     VarcallerAttribute,
     AnalysisModel,
     SampleInstanceModel,
-    ReferenceUrlsModel,
-    ReferenceMeta,
     UMIParamsCommon,
     UMIParamsUMIextract,
     UMIParamsConsensuscall,
