@@ -16,7 +16,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.models import BalsamicConfigModel
+from BALSAMIC.models.models import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
 

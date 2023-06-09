@@ -9,7 +9,7 @@ import re
 
 from BALSAMIC.constants.metrics import METRICS
 from BALSAMIC.utils.io import read_json
-from BALSAMIC.utils.models import MetricModel
+from BALSAMIC.models.models import MetricModel
 from BALSAMIC.utils.rule import (
     get_capture_kit,
     get_sequencing_type,
