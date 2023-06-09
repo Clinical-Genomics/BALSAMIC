@@ -3,9 +3,7 @@ import subprocess
 import pytest
 import sys
 import copy
-import collections
 
-import shutil
 from unittest import mock
 import logging
 
@@ -13,10 +11,9 @@ from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 
-from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cache import REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterConfigType
-from BALSAMIC.constants.paths import CONTAINERS_DIR, CONSTANTS_DIR
+from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
