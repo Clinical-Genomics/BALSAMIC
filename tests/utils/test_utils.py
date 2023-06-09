@@ -15,7 +15,8 @@ from _pytest.logging import LogCaptureFixture
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cache import REFERENCE_FILES
-from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.paths import CONTAINERS_DIR, CONSTANTS_DIR
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
@@ -26,7 +27,6 @@ from BALSAMIC.utils.cli import (
     iterdict,
     get_snakefile,
     createDir,
-    get_config,
     get_file_status_string,
     find_file_index,
     get_panel_chrom,
@@ -41,6 +41,7 @@ from BALSAMIC.utils.cli import (
     get_sample_dict,
     get_pon_sample_dict,
     get_fastq_files_directory,
+    get_config_path,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
@@ -369,9 +370,8 @@ def test_get_snakefile():
             assert Path(snakefile).is_file()
 
 
-def test_get_chrom(config_files):
+def test_get_chrom(panel_bed_file: str):
     # Given a panel bed file
-    bed_file = config_files["panel_bed_file"]
     actual_chrom = [
         "10",
         "11",
@@ -389,7 +389,7 @@ def test_get_chrom(config_files):
     ]
 
     # WHEN passing this bed file
-    test_chrom = get_chrom(bed_file)
+    test_chrom = get_chrom(panel_bed_file)
 
     # THEN It should return list of chrom presents in that bed file
     assert set(actual_chrom) == set(test_chrom)
@@ -520,23 +520,17 @@ def test_capturestdout():
     assert "".join(captured_stdout_message) == test_stdout_message
 
 
-def test_get_config():
-    # GIVEN the config files name
-    config_files = ["sample", "analysis"]
-    # WHEN passing file names
-    for config_file in config_files:
-        # THEN return the config files path
-        assert get_config(config_file)
+def test_get_config_path(cluster_analysis_config_path: str):
+    """Test return of a config path given its type."""
 
+    # GIVEN an analysis config path
 
-def test_get_config_wrong_config():
-    # GIVEN the config files name
-    config_file = "non_existing_config"
+    # WHEN retrieving the cluster analysis configuration
+    cluster_analysis: Path = get_config_path(ClusterConfigType.ANALYSIS)
 
-    # WHEN passing file names
-    # THEN return the config files path
-    with pytest.raises(FileNotFoundError):
-        assert get_config(config_file)
+    # THEN an analysis cluster json should be returned
+    assert cluster_analysis.exists()
+    assert cluster_analysis.as_posix() == cluster_analysis_config_path
 
 
 def test_write_json(tmp_path, reference):
@@ -656,9 +650,9 @@ def test_read_yaml_error():
         assert f"The YAML file {yaml_path} was not found" in str(file_exc)
 
 
-def test_get_threads(config_files):
+def test_get_threads(cluster_analysis_config_path: str):
     # GIVEN cluster config file and rule name
-    cluster_config = json.load(open(config_files["cluster_json"], "r"))
+    cluster_config = json.load(open(cluster_analysis_config_path, "r"))
     rule_name = "sentieon_align_sort"
 
     # WHEN passing cluster_config and rule_name

@@ -1,5 +1,4 @@
 import os
-import shutil
 import logging
 import sys
 import re
@@ -16,7 +15,8 @@ import graphviz
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.paths import CONSTANTS_DIR
 
 LOG = logging.getLogger(__name__)
 
@@ -265,17 +265,9 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome=
     return str(snakefile)
 
 
-def get_config(config_name):
-    """
-    Return a string path for config file.
-    """
-
-    p = Path(__file__).parents[1]
-    config_file = str(Path(p, "config", config_name + ".json"))
-    if Path(config_file).exists():
-        return config_file
-    else:
-        raise FileNotFoundError(f"Config for {config_name} was not found.")
+def get_config_path(config_type: ClusterConfigType) -> Path:
+    """Return a config path given its type."""
+    return Path(CONSTANTS_DIR, config_type + ".json")
 
 
 def find_file_index(file_path):

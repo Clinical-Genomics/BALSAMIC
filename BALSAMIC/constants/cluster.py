@@ -2,12 +2,11 @@
 from BALSAMIC.utils.class_types import StrEnum
 
 
-class ConfigType(StrEnum):
+class ClusterConfigType(StrEnum):
     """Analysis workflow config type."""
 
-    ANALYSIS: str = "analysis"
-    CLUSTER: str = "cluster"
-    CLUSTER_REFERENCE: str = "cluster_reference"
+    ANALYSIS: str = "cluster_analysis"
+    CACHE: str = "cluster_cache"
 
 
 class RunMode(StrEnum):

@@ -13,12 +13,13 @@ from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
 )
 from BALSAMIC.constants.cache import DOCKER_URL, DockerContainers
+from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.utils.cli import (
     CaptureStdout,
     get_snakefile,
     SnakeMake,
-    get_config,
     get_schedulerpy,
+    get_config_path,
 )
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.io import write_json
@@ -105,7 +106,7 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "--cluster-config",
     show_default=True,
-    default=get_config("reference_cluster"),
+    default=get_config_path(ClusterConfigType.CACHE),
     type=click.Path(),
     help="cluster config json file. (eg- SLURM, QSUB)",
 )
