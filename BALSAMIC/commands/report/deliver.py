@@ -15,7 +15,7 @@ from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
+from BALSAMIC.constants.rules import DELIVERY_RULES
 
 LOG = logging.getLogger(__name__)
 

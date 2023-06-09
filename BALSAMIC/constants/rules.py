@@ -1,5 +1,7 @@
-# Define set of rules
-SNAKEMAKE_RULES = {
+"""Snakemake rules constants."""
+from typing import Dict, List
+
+SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
         "concatenate": ["snakemake_rules/concatenation/concatenation.rule"],
         "qc": [
@@ -123,7 +125,7 @@ SNAKEMAKE_RULES = {
 }
 
 
-DELIVERY_RULES = [
+DELIVERY_RULES: List[str] = [
     # QC
     "multiqc",
     "collect_custom_qc_metrics",

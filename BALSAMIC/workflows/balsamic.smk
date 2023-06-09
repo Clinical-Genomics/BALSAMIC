@@ -30,7 +30,7 @@ from BALSAMIC.constants.analysis import MutationType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
-from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 
 
 shell.executable("/bin/bash")
