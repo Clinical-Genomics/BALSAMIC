@@ -2,16 +2,19 @@
 # coding: utf-8
 
 rule concatenate:
-    """Merge fastq files into a single one."""
+    input:
+        fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["fwd"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]],
+        rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["rev"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]]
     output:
-        fastq = concat_dir + "{sample}_R_{read}.fastq.gz"
+        concat_fwd = fastq_dir + "{sample}_concat_R_1.fp.fastq.gz",
+        concat_rev = fastq_dir + "{sample}_concat_R_2.fp.fastq.gz"
     benchmark:
-        Path(benchmark_dir, "{sample}_R_{read}.tsv").as_posix()
+        Path(benchmark_dir, "concatenated_{sample}.tsv").as_posix()
+
     singularity:
         Path(singularity_image, "balsamic.sif").as_posix()
     params:
         fastq_dir = fastq_dir,
-        concat_dir = concat_dir,
         sample = "{sample}",
         read = "{read}"
     threads:
@@ -20,6 +23,6 @@ rule concatenate:
         "Sample {params.sample} and read {params.read} FASTQ concatenation"
     shell:
         """
-        mkdir -p {params.concat_dir}
-        cat {params.fastq_dir}/*{params.sample}*_R_{params.read}.fastq.gz > {output.fastq}
+        cat {input.fwd_fastqs} > {output.concat_fwd}
+        cat {input.rev_fastqs} > {output.concat_rev}
         """

@@ -7,7 +7,7 @@ import tempfile
 import os
 
 
-from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
+from BALSAMIC.utils.rule import get_fastqpatterns, get_mapping_info, get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
@@ -38,7 +38,34 @@ version = config["analysis"]["pon_version"]
 tmp_dir = os.path.join(analysis_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
+# Prepare sample_dict
+sample_dict = dict(config["samples"])
+for sample in sample_dict:
+    sample_type = sample_dict[sample]["type"]
+    if sample_type == "tumor":
+        tumor_sample = sample
+        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
+    else:
+        normal_sample = sample
+        sample_dict[normal_sample]["sample_type"] = "NORMAL"
+
+# Get fastq pattern --> fastq mapping
+fastq_dict = {}
+for sample in sample_dict:
+    for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
+
+# picarddup flag
 picarddup = get_picard_mrkdup(config)
+
+
+# Get mapping info
+for sample in sample_dict:
+    sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
+                                    sample_dict=sample_dict,
+                                    bam_dir=bam_dir,
+                                    sequencing_type=config["analysis"]["sequencing_type"])
+
 
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
 

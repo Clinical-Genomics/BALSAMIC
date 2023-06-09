@@ -5,7 +5,7 @@
 
 rule PreparePopVCF:
     input:
-        bam = bam_dir + "tumor.merged.bam",
+        bam = sample_dict[tumor_sample]["bam"]["final_bam"],
         ref1kg = config["reference"]["1kg_snps_all"],
     output:
         popvcf = result_dir + "popvcf.vcf"

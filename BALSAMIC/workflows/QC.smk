@@ -16,9 +16,10 @@ from BALSAMIC.utils.io import write_json
 
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
-from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
-                                 get_sample_id_by_type, get_picard_mrkdup, get_script_path,
-                                 get_threads, get_sequencing_type, get_capture_kit)
+from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_rule_output, get_result_dir,
+                                 get_picard_mrkdup, get_script_path, get_threads,
+                                 get_sequencing_type, get_capture_kit)
+
 
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
@@ -38,8 +39,8 @@ case_id = config["analysis"]["case_id"]
 fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" + case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-analysis_fastq_dir = get_result_dir(config) + "/fastq/"
-concat_dir = get_result_dir(config) + "/concat/"
+fastq_dir = get_result_dir(config) + "/fastq/"
+
 bam_dir = get_result_dir(config) + "/bam/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
@@ -48,8 +49,31 @@ delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image']
 
-# picarddup flag
-picarddup = get_picard_mrkdup(config)
+
+# Prepare sample_dict
+sample_dict = dict(config["samples"])
+for sample in sample_dict:
+    sample_type = sample_dict[sample]["type"]
+    if sample_type == "tumor":
+        tumor_sample = sample
+        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
+    else:
+        normal_sample = sample
+        sample_dict[normal_sample]["sample_type"] = "NORMAL"
+
+# Get fastq pattern --> fastq mapping
+fastq_dict = {}
+for sample in sample_dict:
+    for fastq_pattern in sample_dict[sample]["fastq_info"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
+
+# Get mapping info
+for sample in sample_dict:
+    sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
+                                    sample_dict=sample_dict,
+                                    bam_dir=bam_dir,
+                                    sequencing_type=config["analysis"]["sequencing_type"])
+
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
@@ -58,17 +82,26 @@ params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
-# Sample names for tumor or normal
-tumor_sample = get_sample_id_by_type(config["samples"], "tumor")
-if "paired" in config['analysis']['analysis_type']:
-    normal_sample = get_sample_id_by_type(config["samples"], "normal")
-
 # Set case id/name
 case_id = config["analysis"]["case_id"]
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config
+
+# Find and set Sentieon binary and license server from env variables
+try:
+    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
+    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+
+    if os.getenv("SENTIEON_EXEC") is not None:
+        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
+    else:
+        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+except KeyError as error:
+    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+              "to run SENTIEON variant callers")
+    raise BalsamicError
 
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
@@ -89,13 +122,15 @@ rules_to_include = [
                 "snakemake_rules/concatenation/concatenation.rule",
                 "snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/quality_control/fastqc.rule",
+                "snakemake_rules/align/bam_compress.rule",
                 "snakemake_rules/quality_control/multiqc.rule",
                 "snakemake_rules/variant_calling/mergetype_tumor.rule",
                 "snakemake_rules/quality_control/picard.rule",
                 "snakemake_rules/quality_control/sambamba_depth.rule",
                 "snakemake_rules/quality_control/mosdepth.rule",
-                "snakemake_rules/align/bwa_mem.rule",
-                "snakemake_rules/quality_control/qc_metrics.rule"
+                "snakemake_rules/align/sentieon_alignment.rule",
+                "snakemake_rules/quality_control/qc_metrics.rule",
+                "snakemake_rules/quality_control/samtools_qc.rule"
 ]
 
 if "paired" in config['analysis']['analysis_type']:

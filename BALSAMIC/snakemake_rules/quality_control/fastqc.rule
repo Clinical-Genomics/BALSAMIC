@@ -4,27 +4,29 @@
 rule fastqc:
     """Perform quality control checks on raw sequence data"""
     input:
-        fastq = concat_dir + "{sample}_R_{read}.fastq.gz",
+        sample_fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern]["fwd"] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]],
+        sample_rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern]["rev"] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]]
     output:
-        fastqc = fastqc_dir + "{sample}_R_{read}_fastqc.zip",
+        fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
     benchmark:
         Path(benchmark_dir, "fastqc_{sample}_R_{read}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
         fastqc_dir = fastqc_dir,
-        sample = "{sample}",
-        read = "{read}",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sample_id = "{sample}",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
     threads: get_threads(cluster_config, "fastqc")
     message:
-        "Running FastQC on {params.sample} and read {params.read}"
+        "Running FastQC on {params.sample_id}"
     shell:
         """
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.fastq} \
+fastqc --threads {threads} {input.sample_fwd_fastqs} {input.sample_rev_fastqs} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
+ 
+echo "Ran FastQC on {input.sample_fwd_fastqs} {input.sample_rev_fastqs}" >> {output.fastqccomplete}
         """

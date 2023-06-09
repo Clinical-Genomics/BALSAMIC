@@ -7,9 +7,11 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
-            "snakemake_rules/variant_calling/mergetype_tumor.rule",
+            "snakemake_rules/quality_control/samtools_qc.rule"
         ],
-        "align": [],
+        "align": [
+            "snakemake_rules/align/bam_compress.rule"
+        ],
         "varcall": [
             "snakemake_rules/variant_calling/germline_sv.rule",
             "snakemake_rules/variant_calling/sentieon_quality_filter.rule",
@@ -27,12 +29,13 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/picard.rule",
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
+            "snakemake_rules/umi/concatenation_umi.rule",
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
-            "snakemake_rules/align/bwa_mem.rule",
+            "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -56,15 +59,15 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
             "snakemake_rules/umi/qc_umi.rule",
-            "snakemake_rules/variant_calling/mergetype_normal.rule",
             "snakemake_rules/quality_control/somalier.rule",
+            "snakemake_rules/umi/concatenation_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/mergetype_normal_umi.rule",
             "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
-            "snakemake_rules/align/bwa_mem.rule",
+            "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],

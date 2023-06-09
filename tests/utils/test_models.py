@@ -286,19 +286,17 @@ def test_analysis_model(test_data_dir: str):
         AnalysisModel.parse_obj(invalid_args)
         assert "not supported" in excinfo.value
 
-
-def test_sample_instance_model():
+def test_sample_instance_model(config_sample_info_tumor_normal):
     """Test sample instance model initialisation."""
 
     # GIVEN a sample dictionary
-    tumor_sample: dict = {"ACC1": {"type": "tumor"}}
-
+    sample_dict = config_sample_info_tumor_normal["samples"]
     # WHEN parsing the sample dictionary
-    sample: SampleInstanceModel = SampleInstanceModel.parse_obj(tumor_sample["ACC1"])
+    for sample_name in sample_dict:
+        sample: SampleInstanceModel = SampleInstanceModel.parse_obj(sample_dict[sample_name])
 
-    # THEN the sample model should be correctly initialised
-    assert sample.dict() == tumor_sample["ACC1"]
-
+        # THEN the sample model should be correctly initialised
+        assert sample.dict() == sample_dict[sample_name]
 
 def test_sample_instance_model_error():
     """Test sample instance model error raise."""

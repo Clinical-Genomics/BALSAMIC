@@ -7,7 +7,7 @@ rule bedtools_splitbed_by_chrom:
     input:
         bed = config["panel"]["capture_kit"],
         chrom = config["reference"]["genome_chrom_size"],
-        bam = bam_dir + "tumor.merged.bam"
+        bam = sample_dict[tumor_sample]["bam"]["final_bam"]
     output:
         bed = expand(vcf_dir + "split_bed/" + "{chrom}." + capture_kit, chrom=chromlist)
     benchmark:

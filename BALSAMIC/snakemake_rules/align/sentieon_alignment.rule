@@ -4,23 +4,25 @@
 rule sentieon_align_sort:
     input:
         ref = config["reference"]["reference_genome"],
-        fastq_r1 = Path(analysis_fastq_dir, "{sample}_R_1.fp.fastq.gz").as_posix(),
-        fastq_r2 = Path(analysis_fastq_dir, "{sample}_R_2.fp.fastq.gz").as_posix(),
+        fastq_r1 = Path(fastq_dir, "{fastqpattern}_1.fp.fastq.gz").as_posix(),
+        fastq_r2 = Path(fastq_dir, "{fastqpattern}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = Path(bam_dir, "{sample}.bam").as_posix()
+        bamout = Path(bam_dir, "{sample}_align_sort_{fastqpattern}.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_align_sort_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_align_sort_{sample}_{fastqpattern}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         header = params.common.align_header,
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sample_id = "{sample}"
+        sample_id = "{sample}",
+        sample_type = lambda wildcards: sample_dict[wildcards.sample]["sample_type"],
+        fastqpattern = "{fastqpattern}"
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
     message:
-        "Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample: {params.sample_id}"
+        "Align fastq reads using sentieon bwa-mem and sort reads using samtools for sampletype: {params.sample_type} : {params.sample_id}, {params.fastqpattern}"
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -29,7 +31,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem -M \
--R {params.header} \
+-R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
 -t {threads} \
 -K 50000000 \
 {input.ref} {input.fastq_r1} {input.fastq_r2} \
@@ -40,16 +42,16 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --sam2bam -i -;
         """
 
-
 rule sentieon_dedup:
     input:
-        bam = Path(bam_dir, "{sample}.bam").as_posix(),
+        bamfiles = lambda wildcards: sample_dict[wildcards.sample]["bam"]["align_sort_bamlist"]
     output:
-        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix(),
-        score = Path(bam_dir, "{sample}.dedup.score").as_posix(),
-        metrics = Path(bam_dir, "{sample}.dedup.metrics").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
+        dup_names = Path(bam_dir, "{sample_type}.{sample}.dedup.read_names").as_posix(),
+        metrics = Path(bam_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_dedup_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -66,21 +68,32 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
+shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
+
 {params.sentieon_exec} driver \
 -t {threads} \
--i {input.bam} \
+-i $shellbamfiles \
 --algo LocusCollector \
 --fun score_info \
 {output.score};
 
 {params.sentieon_exec} driver \
 -t {threads} \
--i {input.bam} \
+-i $shellbamfiles \
 --algo Dedup \
---rmdup \
 --score_info {output.score} \
 --metrics {output.metrics} \
+--output_dup_read_name {output.dup_names};
+
+{params.sentieon_exec} driver \
+-t {threads} \
+-i $shellbamfiles \
+--algo Dedup \
+--rmdup \
+--dup_read_name {output.dup_names} \
 {output.bam};
+
+sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
         """
 
 
@@ -89,11 +102,11 @@ rule sentieon_realign:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["1kg_known_indel"],
-        bam = Path(bam_dir, "{sample}.dedup.bam").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix()
     output:
-        bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.realign.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_realign_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_realign_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
@@ -119,3 +132,4 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -k {input.indel_1kg} \
 {output}; 
         """
+

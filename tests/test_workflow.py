@@ -48,68 +48,84 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_l
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_tumor_only(tumor_only_config):
+def test_workflow_qc_tumor_only(tumor_only_config_qc, sentieon_install_dir, sentieon_license):
 
     # GIVEN a sample config dict and snakefile
     workflow = "single"
     reference_genome = "hg19"
     analysis_workflow = "balsamic-qc"
     snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
-    config_json = tumor_only_config
+    config_json = tumor_only_config_qc
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_tumor_only_canfam(tumor_only_config):
+def test_workflow_qc_tumor_only_canfam(tumor_only_config_qc, sentieon_install_dir, sentieon_license):
 
     # GIVEN a sample config dict and snakefile
     workflow = "single"
     reference_genome = "canfam3"
     analysis_workflow = "balsamic-qc"
     snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
-    config_json = tumor_only_config
+    config_json = tumor_only_config_qc
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_normal(tumor_normal_config):
+def test_workflow_qc_normal(tumor_normal_config_qc, sentieon_install_dir, sentieon_license):
     # GIVEN a sample config dict and snakefile
     workflow = "paired"
     reference_genome = "hg19"
     analysis_workflow = "balsamic-qc"
     snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
-    config_json = tumor_normal_config
+    config_json = tumor_normal_config_qc
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_normal_canfam3(tumor_normal_config):
+def test_workflow_qc_normal_canfam3(tumor_normal_config_qc, sentieon_install_dir, sentieon_license):
     # GIVEN a sample config dict and snakefile
     workflow = "paired"
     reference_genome = "canfam3"
     analysis_workflow = "balsamic-qc"
     snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
-    config_json = tumor_normal_config
+    config_json = tumor_normal_config_qc
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 

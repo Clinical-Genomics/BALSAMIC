@@ -37,8 +37,8 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_md5,
     create_md5,
-    get_sample_dict,
     get_pon_sample_dict,
+    get_sample_dict,
     get_fastq_files_directory,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml
@@ -57,7 +57,31 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_prefix,
 )
+def test_get_pon_sample_dict(
+    fastq_dir_tumor_only_pon: str, tumor_sample_name: str, normal_sample_name: str
+):
+    """Tests sample PON dictionary retrieval."""
 
+    # GIVEN a FASTQ directory
+
+    # GIVEN the expected sample dictionary
+    samples_expected: dict = {
+        "ACC1": {"type": "normal"},
+        "ACCN1": {"type": "normal"},
+        "ACCN2": {"type": "normal"},
+        "ACCN3": {"type": "normal"},
+        "ACCN4": {"type": "normal"},
+        "ACCN4": {"type": "normal"},
+        "ACCN5": {"type": "normal"},
+        "ACCN6": {"type": "normal"},
+    }
+
+    # WHEN retrieving PON samples
+    samples: dict = get_pon_sample_dict(fastq_dir_tumor_only_pon)
+
+    # THEN the samples should be retrieved from the FASTQ directory
+    for sample in samples:
+        assert sample in samples_expected and samples[sample]["type"] == samples_expected[sample]["type"]
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
     # GIVEN a wrong analysis_type
@@ -78,8 +102,6 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
             mutation_class=mutation_class,
             sequencing_type=sequencing_type,
         )
-
-
 def test_get_variant_callers_wrong_workflow(tumor_normal_config):
     # GIVEN a wrong workflow name
     wrong_workflow = "MIP"
@@ -609,7 +631,7 @@ def test_read_yaml(metrics_yaml_path):
     dropout_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.mrkdup.hsmetric",
+        "input": "ACC1.dedup.realign.hsmetric",
         "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
         "value": 0.027402,
@@ -619,7 +641,7 @@ def test_read_yaml(metrics_yaml_path):
     ins_size_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.insertsizemetric",
+        "input": "ACC1.dedup.realign.insertsizemetric",
         "name": "MEAN_INSERT_SIZE",
         "step": "multiqc_picard_insertSize",
         "value": 201.813054,
@@ -629,7 +651,7 @@ def test_read_yaml(metrics_yaml_path):
     dups_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.mrkdup.txt",
+        "input": "tumor.ACC1.dedup.metrics",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
         "value": 0.391429,
@@ -701,7 +723,6 @@ def test_find_file_index(tmpdir):
     assert isinstance(result, list)
     assert str(bai_file) in result
     assert str(bai_file_2) in result
-
 
 def test_get_panel_chrom():
     # GIVEN a valid PANEL BED file
@@ -829,6 +850,43 @@ def test_generate_h5_capture_no_output(tmp_path):
     assert actual_output == None
 
 
+def test_get_sample_type_from_prefix(config_dict):
+    """Test sample type extraction from a extracted config file."""
+
+    # GIVEN a config dictionary
+
+    # GIVEN a sample name
+    sample = "ACC1"
+
+    # WHEN calling the function
+    sample_type = get_sample_type_from_prefix(config_dict, sample)
+
+    # THEN the retrieved sample type should match the expected one
+    assert sample_type == "tumor"
+
+
+def test_get_sample_dict(
+    tumor_sample_name: str, normal_sample_name: str, fastq_dir: str
+):
+    """Tests sample dictionary retrieval."""
+
+    try:
+        samples: dict = get_sample_dict(
+            tumor_sample_name=tumor_sample_name,
+            normal_sample_name=normal_sample_name,
+            fastq_path=fastq_dir,
+        )
+        assert True
+    except Exception:
+        assert False
+
+    assert tumor_sample_name in samples
+    assert normal_sample_name in samples
+    assert samples[tumor_sample_name]["type"] == "tumor"
+    assert samples[normal_sample_name]["type"] == "normal"
+    assert samples[tumor_sample_name]["fastq_info"]
+    assert samples[normal_sample_name]["fastq_info"]
+
 def test_get_md5(tmp_path):
 
     # GIVEN a dummy file
@@ -863,6 +921,8 @@ def test_create_md5(tmp_path):
     # THEN md5 file exists
     assert dummy_file.exists()
 
+def test_validate_fastq_input():
+    pass
 
 def test_get_rule_output(snakemake_fastqc_rule):
     """Tests retrieval of existing output files from a specific workflow."""

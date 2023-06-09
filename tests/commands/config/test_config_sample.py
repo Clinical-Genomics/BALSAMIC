@@ -8,7 +8,6 @@ from pathlib import Path
 
 from tests.conftest import MOCKED_OS_ENVIRON
 
-
 def test_tumor_normal_config(
     invoke_cli,
     case_id_tumor_normal: str,
@@ -24,7 +23,6 @@ def test_tumor_normal_config(
     """Test tumor normal balsamic config case command."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
-
     # WHEN creating a case analysis
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -61,6 +59,56 @@ def test_tumor_normal_config(
     assert Path(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).exists()
+
+def test_tumor_normal_extrafastq_config(
+    invoke_cli,
+    case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal_extrafile: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    caplog,
+):
+    """Test tumor normal balsamic config case command."""
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+    # WHEN creating a case analysis
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        result = invoke_cli(
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal,
+                "--gender",
+                "male",
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal_extrafile,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+            ],
+        )
+    # THEN a config should be created and exist
+    assert "Fastq files found in fastq directory not assigned to any sample" in caplog.text
+    assert result.exit_code == 1
 
 
 def test_tumor_only_config(
@@ -197,13 +245,13 @@ def test_pon_cnn_file(
     balsamic_cache: str,
     panel_bed_file: str,
     pon_cnn: str,
+    fastq_dir_tumor_only_pon_cnn: str,
+    case_id_tumor_only_pon_cnn: str,
+
 ):
     """Test balsamic config case with a PON reference."""
 
     # GIVEN CLI arguments including optional pon reference ".cnn" file
-    case_id = "test_sample_cnv"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # WHEN invoking the config case command
     result = invoke_cli(
@@ -211,11 +259,11 @@ def test_pon_cnn_file(
             "config",
             "case",
             "--case-id",
-            case_id,
+            case_id_tumor_only_pon_cnn,
             "--analysis-dir",
             analysis_dir,
             "--fastq-path",
-            fastq_dir,
+            fastq_dir_tumor_only_pon_cnn,
             "-p",
             panel_bed_file,
             "--pon-cnn",
@@ -231,21 +279,38 @@ def test_pon_cnn_file(
     assert result.exit_code == 0
     assert Path(pon_cnn).exists()
 
-
-def test_dag_graph_success(
-    tumor_only_config: str,
-    tumor_normal_config: str,
-    tumor_only_wgs_config: str,
-    tumor_normal_wgs_config: str,
+def test_dag_graph_success_tumor_only(
+    tumor_only_config: str
 ):
     """Test DAG graph building success."""
-
     # WHEN creating config using standard CLI input and setting Sentieon env vars
 
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
+
+def test_dag_graph_success_tumor_normal(
+        tumor_normal_config: str
+    ):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_normal_config))["analysis"]["dag"]).exists()
+def test_dag_graph_success_tumor_only_wgs(
+        tumor_only_wgs_config: str,
+    ):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_only_wgs_config))["analysis"]["dag"]).exists()
+def test_dag_graph_success_tumor_normal_wgs(
+        tumor_normal_wgs_config: str
+    ):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
 
 

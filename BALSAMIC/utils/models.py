@@ -1,11 +1,12 @@
 import hashlib
 import logging
 import re
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseModel, validator, Field, AnyUrl
+from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
@@ -20,6 +21,7 @@ from BALSAMIC.constants.common import (
     VALID_OPS,
     GENDER_OPTIONS,
     SAMPLE_TYPE,
+    FASTQ_SUFFIXES,
 )
 from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
@@ -367,16 +369,56 @@ class AnalysisPonModel(AnalysisModel):
             )
 
         return value
+class FastqInfoModel(BaseModel):
+    """Verifies that fastq files have been correctly assigned in fastq-pattern of sample.
 
+    Requirements to pass fastq-inputs for a sample:
+    - All fastq-files must exist
+    - All forward and reverse fastq pairs must be of the same length
+    - All forward and reverse fastq pairs must have exactly 1 difference in their names
+
+    """
+    fwd: FilePath
+    rev: FilePath
+    @root_validator(pre=False)
+    def validate_fastq_pairs_in_fastq_pattern(cls, values):
+        values["fwd"] = Path(values["fwd"]).as_posix()
+        values["rev"] = Path(values["rev"]).as_posix()
+
+        fwd_read_path = values["fwd"]
+        rev_read_path = values["rev"]
+
+        # Fastq files in a pair must have file-names of same length
+        fwd_fastq_name = os.path.basename(fwd_read_path)
+        rev_fastq_name = os.path.basename(rev_read_path)
+
+        len_fwd_fastq_name = len(fwd_fastq_name)
+        len_rev_fastq_name = len(rev_fastq_name)
+
+        assert len_fwd_fastq_name == len_rev_fastq_name, f"Fastq pair does not have names of equal length: " \
+                                                         f"{fwd_fastq_name} {rev_fastq_name}"
+
+        # Fastq files in a pair must have file-names with maximum 1 character difference
+        count_str_diff = 0
+        for i in range(len_fwd_fastq_name):
+            if fwd_fastq_name[i] != rev_fastq_name[i]:
+                count_str_diff += 1
+
+        assert count_str_diff == 1, f"Fastq pair does not have exactly 1 differences ({count_str_diff})," \
+                                    f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
+
+        return values
 
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis.
 
     Attributes:
         type: Field(str): sample type [tumor, normal]
+        fastq_info: Field(dict): fastq patterns: paths to forward and reverse fastqs
     """
 
     type: str
+    fastq_info: Dict[str, FastqInfoModel]
 
     @validator("type")
     def sample_type_literal(cls, value):
@@ -386,6 +428,16 @@ class SampleInstanceModel(BaseModel):
                 f"The provided sample type ({value}) is not supported in BALSAMIC"
             )
         return value
+
+    @validator("fastq_info", pre=True)
+    def fastq_info_exists(cls, value):
+        """Validate that fastq info exists."""
+        if value:
+            return value
+
+        raise ValueError(
+            "No fastq files in fastq-dir assigned to sample."
+            )
 
 
 class PanelModel(BaseModel):
@@ -455,7 +507,7 @@ class BalsamicConfigModel(BaseModel):
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
         vcf : Field(VCFmodel); variables relevant for variant calling pipeline
-        samples : Field(Dict); dictionary containing samples submitted for analysis
+        samples : Field(Dict); dictionary containing samples and their respective fastq-inputs submitted for analysis
         reference : Field(Dict); dictionary containing paths to reference genome files
         panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
         bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
@@ -463,6 +515,10 @@ class BalsamicConfigModel(BaseModel):
         singularity : Field(Path); path to singularity container of BALSAMIC
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
+
+    Requirements to pass fastq-inputs for a group of samples:
+        - Fastq pattern can only be assigned once per group of samples
+        - Fastq name can only be assigned once per group of samples
     """
 
     QC: QCModel
@@ -491,6 +547,40 @@ class BalsamicConfigModel(BaseModel):
         if value:
             return Path(value).resolve().as_posix()
         return None
+
+    @validator("samples", pre=True)
+    def verify_unique_fastq_info_across_samples(cls, value):
+        """
+        Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
+        Fastq patterns and Fastq names can only occur once.
+        """
+        fastq_patterns = {}
+        fastq_filenames = {}
+        for sample in value:
+            for fastq_pattern in value[sample]["fastq_info"]:
+                # Count occurrences of fastq pattern
+                if fastq_pattern in fastq_patterns:
+                    fastq_patterns[fastq_pattern] += 1
+                else:
+                    fastq_patterns[fastq_pattern] = 1
+
+                # Count occurrences of fastq names
+                for fastq_read_direction, fastq_path in value[sample]["fastq_info"][fastq_pattern].items():
+                    fastq_name = os.path.basename(fastq_path)
+                    if fastq_name in fastq_filenames:
+                        fastq_filenames[fastq_name] += 1
+                    else:
+                        fastq_filenames[fastq_name] = 1
+
+        # Fastq pattern can only be assigned once per group of samples
+        for fastq_pattern in fastq_patterns:
+            assert fastq_patterns[fastq_pattern] == 1, f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
+
+        # Fastq name can only be assigned once per group of samples
+        for fastq_name in fastq_filenames:
+            assert fastq_filenames[fastq_name] == 1, f"Fastq-name: {fastq_name} has been assigned more than once."
+
+        return value
 
 
 class ReferenceUrlsModel(BaseModel):

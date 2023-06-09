@@ -6,8 +6,8 @@
 
 rule sentieon_umiextract:
     input:
-        fastq_r1 = analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz",
-        fastq_r2 = analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"
+        fastq_r1 = temp(fastq_dir + "concat.{sample}_1.umi_optimized.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "concat.{sample}_2.umi_optimized.fastq.gz")
     output:
         ds_umi = temp(umi_dir + "{sample}_umiextract.fastq.gz")
     benchmark:

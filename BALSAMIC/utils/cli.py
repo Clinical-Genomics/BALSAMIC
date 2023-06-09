@@ -1,7 +1,7 @@
 import os
-import shutil
 import logging
 import sys
+import glob
 import re
 import subprocess
 from pathlib import Path
@@ -17,7 +17,7 @@ from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError
-
+from BALSAMIC.constants.common import FASTQ_SUFFIXES
 LOG = logging.getLogger(__name__)
 
 
@@ -275,6 +275,7 @@ def get_config(config_name):
     if Path(config_file).exists():
         return config_file
     else:
+        LOG.error(f"Config for {config_name} was not found.")
         raise FileNotFoundError(f"Config for {config_name} was not found.")
 
 
@@ -429,23 +430,126 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
+def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
+    """Validates fastq input in sample dict and fastq_path.
+
+    Criteria:
+        - All fastq-files in the supplied fastq_dir must have been assigned to a sample.
+        - All fastq-files in the sample dict must exist.
+
+    Args:
+        sample_dict: dict. Dictionary of sample-names and their associated sample-type and fastq-information.
+        fastq_path: str. Path to the directory containing the fastq-files.
+
+    Returns:
+        Nothing
+    """
+    complete_fastq_list = glob.glob(f"{fastq_path}/*fastq.gz")
+    assigned_fastq_list = []
+    for sample in sample_dict:
+        fastq_dict = sample_dict[sample]["fastq_info"]
+        for fastq_pattern in fastq_dict:
+            for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
+                assigned_fastq_list.append(fastq_path)
+                if not Path(fastq_path).is_file():
+                    LOG.error(
+                        f"Fastq-file: {fastq_path} does not exist"
+                    )
+                    raise FileNotFoundError(f"Fastq-file: {fastq_path} does not exist")
+
+    unassigned_fastqs = []
+    for fastq in complete_fastq_list:
+        if fastq not in assigned_fastq_list:
+            unassigned_fastqs.append(fastq)
+
+    if unassigned_fastqs:
+        unassigned_fastqs_str = "\n".join(unassigned_fastqs)
+        LOG.error(
+            f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
+        )
+        raise BalsamicError(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
+
+
+def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
+    """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample.
+
+    Args:
+        sample_name: str. The name of the sample for which fastq-files will be searched for in the fastq_path.
+        fastq_path: str. Path to where the fastq-files should be found for the supplied sample_name.
+
+    Returns:
+        fastq_dict: dict. Nested dictionary containing the unique file-name pattern for each fastq-pair,
+        and the paths to the fastq-files.
+    """
+
+    fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
+    if not fastqs_in_fastq_path:
+        LOG.error(f"No fastq files found in supplied fastq-path: {fastq_path}")
+        raise FileNotFoundError(f"No fastq files found in supplied fastq-path: {fastq_path}")
+
+    fastq_dict = {}
+    fastq_suffixes = FASTQ_SUFFIXES
+    for suffix in fastq_suffixes:
+        fwd_suffix = fastq_suffixes[suffix]["fwd"]
+        rev_suffix = fastq_suffixes[suffix]["rev"]
+
+        fastq_fwd_regex = re.compile(r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$")
+        fwd_fastqs = [f"{fastq_path}/{fastq}" for fastq in os.listdir(fastq_path) if fastq_fwd_regex.match(fastq)]
+        if fwd_fastqs:
+            for fwd_fastq in fwd_fastqs:
+                fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
+
+                if fastqpair_pattern in fastq_dict:
+                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
+                              f"dictionary for sample: {sample_name}")
+                    raise BalsamicError(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
+                                        f"dictionary for sample: {sample_name}")
+
+                fastq_dict[fastqpair_pattern] = {}
+                fastq_dict[fastqpair_pattern]["fwd"] = fwd_fastq
+                fastq_dict[fastqpair_pattern]["rev"] = fwd_fastq.replace(fwd_suffix, rev_suffix)
+
+    return fastq_dict
 
 def get_sample_dict(
-    tumor_sample_name: str, normal_sample_name: Optional[str]
+    tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
 ) -> Dict[str, dict]:
-    """Returns a sample dictionary given the names of the tumor and/or normal samples."""
+    """Returns a sample dictionary with fastq-information given the names of the tumor and/or normal samples.
+    Args:
+        tumor_sample_name: str. The sample_name of the tumor.
+        normal_sample_name: str. The sample_ename of the normal, if it exists.
+        fastq_path: str. The path to the fastq-files for the supplied samples.
+
+    Returns:
+        sample_dict: dict with this format:
+
+            "sample_name": {
+            "type": "[tumor/normal]",
+            "fastq_info": {
+                "[fastq_pair_pattern1]": {
+                    "fwd": "/path/to/fastq_dir/[forward_read_name1].fastq.gz",
+                    "rev": "/path/to/fastq_dir/[reverse_read_name1].fastq.gz"
+                },
+                "[fastq_pair_pattern2]": {
+                    "fwd": "/path/to/fastq_dir/[forward_read_name2].fastq.gz",
+                    "rev": "/path/to/fastq_dir/[reverse_read_name2].fastq.gz"
+            ...
+    """
     sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
     if normal_sample_name:
         sample_dict.update({normal_sample_name: {"type": "normal"}})
+    for sample_name in sample_dict:
+        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path)
     return sample_dict
 
 
-def get_pon_sample_dict(directory: str) -> Dict[str, dict]:
+def get_pon_sample_dict(fastq_path: str) -> Dict[str, dict]:
     """Returns a PON sample dictionary."""
     sample_dict: Dict[str, dict] = {}
-    for file in Path(directory).glob("*.fastq.gz"):
+    for file in Path(fastq_path).glob("*.fastq.gz"):
         sample_name: str = file.name.split("_")[-4]
         sample_dict.update({sample_name: {"type": "normal"}})
+        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path)
     return sample_dict
 
 

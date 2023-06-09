@@ -5,11 +5,16 @@ Added:
 * Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
+* Samtools stats, flagstat, idxstat to WGS workflow
+* Functionality for dynamically assigning fastq-info to sample-dictionary from input fastq-dir
 
 Changed:
 ^^^^^^^^
 * Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
+* Standardised alignment workflows to WGS-workflow
+* Implemented parallel trimming and alignment in all workflows per lane
+* All bam-QC tools take the final dedup.realign bamfile as input
 
 Fixed:
 ^^^^^^

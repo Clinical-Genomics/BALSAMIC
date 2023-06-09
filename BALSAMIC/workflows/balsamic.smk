@@ -1,8 +1,10 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 import os
+import re
 import logging
 import tempfile
+import glob
 
 from pathlib import Path
 from yapf.yapflib.yapf_api import FormatFile
@@ -20,9 +22,8 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
-                                 get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
-                                 get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
+from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+                                 get_threads, get_script_path, get_sequencing_type, get_capture_kit, get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml)
 
 from BALSAMIC.constants.common import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE
@@ -30,6 +31,7 @@ from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTING
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
+
 
 
 shell.executable("/bin/bash")
@@ -49,8 +51,7 @@ case_id = config["analysis"]["case_id"]
 fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-analysis_fastq_dir = get_result_dir(config) + "/fastq/"
-concat_dir = get_result_dir(config) + "/concat/"
+fastq_dir = get_result_dir(config) + "/fastq/"
 bam_dir = get_result_dir(config) + "/bam/"
 cnv_dir = get_result_dir(config) + "/cnv/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
@@ -70,6 +71,37 @@ clinical_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
 swegen_sv = ""
+
+
+# Prepare sample_dict
+sample_dict = dict(config["samples"])
+for sample in sample_dict:
+    sample_type = sample_dict[sample]["type"]
+    if sample_type == "tumor":
+        tumor_sample = sample
+        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
+    else:
+        normal_sample = sample
+        sample_dict[normal_sample]["sample_type"] = "NORMAL"
+
+
+# Get fastq pattern --> fastq mapping
+fastq_dict = {}
+for sample in sample_dict:
+    for fastq_pattern in sample_dict[sample]["fastq_info"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
+
+# Get mapping info
+for sample in sample_dict:
+    sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
+                                    sample_dict=sample_dict,
+                                    bam_dir=bam_dir,
+                                    sequencing_type=config["analysis"]["sequencing_type"])
+
+# Adding sample type level information
+for sample in config["samples"]:
+    sample_type = config["samples"][sample]["type"]
+    sample_dict[sample_type] = sample_dict[sample]
 
 # vcfanno annotations
 research_annotations.append( {
@@ -134,8 +166,6 @@ if "swegen_sv_frequency" in config["reference"]:
     swegen_sv = get_swegen_sv(config)
 
 
-# picarddup flag
-picarddup = get_picard_mrkdup(config)
 
 # Varcaller filter settings
 COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
@@ -149,11 +179,6 @@ params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
-
-# Sample names for tumor or normal
-tumor_sample = get_sample_id_by_type(config["samples"], "tumor")
-if config['analysis']['analysis_type'] == "paired":
-    normal_sample = get_sample_id_by_type(config["samples"], "normal")
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -326,6 +351,16 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller = [var_caller for var_caller in somatic_caller if "umi" not in var_caller]
     somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
 
+# Adding code for testing, removing merge_bam from wgs analysis
+
+if "snakemake_rules/variant_calling/mergetype_tumor.rule" in rules_to_include:
+    rules_to_include.remove("snakemake_rules/variant_calling/mergetype_tumor.rule")
+if "snakemake_rules/variant_calling/mergetype_normal.rule" in rules_to_include:
+    rules_to_include.remove("snakemake_rules/variant_calling/mergetype_normal.rule")
+
+# Add rule for DRAGEN
+if "dragen" in config:
+    rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
