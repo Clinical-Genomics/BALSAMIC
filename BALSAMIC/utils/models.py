@@ -567,11 +567,11 @@ class ReferenceMeta(BaseModel):
         cosmic: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
         refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
         refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
-        rankscore: ReferenceUrlsModel. Optional rankscore model
+        rank_score: ReferenceUrlsModel. Optional rankscore model
         access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
         delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
         delly_mappability: ReferenceUrlsModel. Optional field for genome mappability
-        ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
+        ascat_gc_correction: ReferenceUrlsModel. Optional field for genome gc correction bins
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
         somalier_sites: ReferenceUrlsModel. Optional field for somalier sites vcf
