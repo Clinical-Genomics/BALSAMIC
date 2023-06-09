@@ -124,6 +124,8 @@ research_annotations.append( {
 }
 )
 
+# Comment out CADD 
+"""
 research_annotations.append( {
     'annotation': [{
     'file': Path(config["reference"]["cadd_snv"]).as_posix(),
@@ -133,6 +135,7 @@ research_annotations.append( {
     }]
 }
 )
+"""
 
 if "swegen_snv_frequency" in config["reference"]:
     research_annotations.append( {
