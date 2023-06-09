@@ -16,6 +16,10 @@ Fixed:
 ^^^^^^
 * vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
 
+Removed:
+^^^^^^^
+* Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
+
 [12.0.1]
 --------
 
