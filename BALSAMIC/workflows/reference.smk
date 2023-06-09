@@ -141,7 +141,7 @@ rule all:
         ref_json['reference'] = {
             "reference_genome": input.reference_genome,
             "dbsnp": input.dbsnp_vcf,
-            "1kg_snps_all": input.th_genome_vcf,
+            "vcf_1kg": input.th_genome_vcf,
             "1kg_snps_high": input.tg_high_vcf,
             "1kg_known_indel": input.known_indel_1kg,
             "mills_1kg": input.mills_1kg,
