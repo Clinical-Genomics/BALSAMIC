@@ -14,11 +14,11 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.cache import REFERENCE_FILES
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
-from BALSAMIC.constants.reference import REFERENCE_FILES
 
 from BALSAMIC.utils.cli import (
     SnakeMake,

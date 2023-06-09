@@ -20,8 +20,8 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     WorkflowSolution,
 )
+from BALSAMIC.constants.cache import GenomeVersion, FileType
 from BALSAMIC.constants.metrics import VALID_OPS
-from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
 LOG = logging.getLogger(__name__)
 
@@ -509,34 +509,34 @@ class ReferenceUrlsModel(BaseModel):
     url: AnyUrl
     file_type: str
     gzip: bool = True
-    genome_version: str
-    output_file: Optional[str]
-    output_path: Optional[str]
+    genome_version: Optional[str]
+    file_name: Optional[str]
+    dir_name: Optional[str]
     secret: Optional[str]
 
     @validator("file_type")
     def check_file_type(cls, value) -> str:
         """Validate file format according to constants"""
-        assert value in VALID_REF_FORMAT, f"{value} not a valid reference file format."
+        assert value in set(FileType), f"{value} not a valid reference file format."
         return value
 
     @validator("genome_version")
     def check_genome_ver(cls, value) -> str:
         """Validate genome version according constants"""
-        assert value in VALID_GENOME_VER, f"{value} not a valid genome version."
+        assert value in set(GenomeVersion), f"{value} not a valid genome version."
         return value
 
     @property
     def get_output_file(self):
         """return output file full path"""
-        output_file_path = Path(self.output_path, self.output_file).as_posix()
+        output_file_path = Path(self.dir_name, self.file_name).as_posix()
         return output_file_path
 
     @property
     def write_md5(self):
         """calculate md5 for first 4kb of file and write to file_name.md5"""
         hash_md5 = hashlib.md5()
-        output_file = Path(self.output_path, self.output_file)
+        output_file = Path(self.dir_name, self.file_name)
         if not output_file.is_file():
             raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
 
@@ -564,7 +564,7 @@ class ReferenceMeta(BaseModel):
         wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
         genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
         gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
-        cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
+        cosmic: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
         refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
         refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
         rankscore: ReferenceUrlsModel. Optional rankscore model
@@ -585,21 +585,21 @@ class ReferenceMeta(BaseModel):
     mills_1kg: Optional[ReferenceUrlsModel]
     known_indel_1kg: Optional[ReferenceUrlsModel]
     vcf_1kg: Optional[ReferenceUrlsModel]
-    wgs_calling: Optional[ReferenceUrlsModel]
+    wgs_calling_regions: Optional[ReferenceUrlsModel]
     genome_chrom_size: Optional[ReferenceUrlsModel]
     gnomad_variant: Optional[ReferenceUrlsModel]
     gnomad_variant_index: Optional[ReferenceUrlsModel]
-    cosmicdb: Optional[ReferenceUrlsModel]
+    cosmic: Optional[ReferenceUrlsModel]
     refgene_txt: Optional[ReferenceUrlsModel]
     refgene_sql: Optional[ReferenceUrlsModel]
-    rankscore: Optional[ReferenceUrlsModel]
+    rank_score: Optional[ReferenceUrlsModel]
     access_regions: Optional[ReferenceUrlsModel]
     delly_exclusion: Optional[ReferenceUrlsModel]
     delly_mappability: Optional[ReferenceUrlsModel]
     delly_mappability_gindex: Optional[ReferenceUrlsModel]
     delly_mappability_findex: Optional[ReferenceUrlsModel]
-    ascat_gccorrection: Optional[ReferenceUrlsModel]
-    ascat_chryloci: Optional[ReferenceUrlsModel]
+    ascat_gc_correction: Optional[ReferenceUrlsModel]
+    ascat_chr_y_loci: Optional[ReferenceUrlsModel]
     clinvar: Optional[ReferenceUrlsModel]
     somalier_sites: Optional[ReferenceUrlsModel]
     cadd_snv: Optional[ReferenceUrlsModel]
@@ -611,9 +611,9 @@ class ReferenceMeta(BaseModel):
         if isinstance(value, str):
             output_value = value
         else:
-            if "output_path" in value:
-                value["output_path"] = Path(
-                    values["basedir"], value["output_path"]
+            if "dir_name" in value:
+                value["dir_name"] = Path(
+                    values["basedir"], value["dir_name"]
                 ).as_posix()
                 output_value = ReferenceUrlsModel.parse_obj(value)
             else:

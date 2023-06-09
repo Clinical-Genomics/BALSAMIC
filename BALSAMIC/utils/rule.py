@@ -345,7 +345,7 @@ def get_reference_output_files(
         if reference_item["file_type"] == file_type:
             if gzip is not None and reference_item["gzip"] != gzip:
                 continue
-            ref_vcf_list.append(reference_item["output_file"])
+            ref_vcf_list.append(reference_item["file_name"])
     return ref_vcf_list
 
 

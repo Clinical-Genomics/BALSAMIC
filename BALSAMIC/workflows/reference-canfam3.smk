@@ -7,10 +7,10 @@ from pathlib import Path
 
 from copy import deepcopy
 
+from BALSAMIC.constants.cache import REFERENCE_FILES
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files
 from BALSAMIC.utils.models import ReferenceMeta
-from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL
 from BALSAMIC.utils.cli import get_md5
 from BALSAMIC.utils.cli import create_md5
 
@@ -29,7 +29,6 @@ genome_dir = os.path.join(basedir, "genome")
 # Set temporary dir environment variable
 os.environ['TMPDIR'] = basedir
 
-REFERENCE_FILES = deepcopy(REFERENCE_MODEL)
 
 # intialize reference files
 REFERENCE_FILES[genome_ver]['basedir'] = basedir

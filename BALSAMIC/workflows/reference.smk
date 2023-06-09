@@ -7,10 +7,10 @@ from pathlib import Path
 
 from copy import deepcopy
 
+from BALSAMIC.constants.cache import REFERENCE_FILES
 from BALSAMIC.utils.rule import get_script_path
-from BALSAMIC.utils.rule import get_reference_output_files 
+from BALSAMIC.utils.rule import get_reference_output_files
 from BALSAMIC.utils.models import ReferenceMeta
-from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL 
 from BALSAMIC.utils.cli import get_md5
 from BALSAMIC.utils.cli import create_md5
 
@@ -33,15 +33,14 @@ basedir = os.path.join(config['output'])
 genome_dir = os.path.join(basedir, "genome")
 vcf_dir = os.path.join(basedir, "variants")
 vep_dir = os.path.join(basedir, "vep")
-cosmicdb_key = config['cosmic_key'] 
+cosmicdb_key = config['cosmic_key']
 
 # Set temporary dir environment variable
-os.environ['TMPDIR'] = basedir 
+os.environ['TMPDIR'] = basedir
 
 # indexable VCF files
 # For future reference, if you delete this line pydantic fails in tests
 # Don't know why, but don't delete it and keep deepcopy /A&H
-REFERENCE_FILES = deepcopy(REFERENCE_MODEL)
 indexable_vcf_files = get_reference_output_files(REFERENCE_FILES[genome_ver],
                                                  file_type='vcf',
                                                  gzip = True)
@@ -51,26 +50,26 @@ REFERENCE_FILES[genome_ver]['basedir'] = basedir
 reference_file_model = ReferenceMeta.parse_obj(REFERENCE_FILES[genome_ver])
 
 reference_genome_url = reference_file_model.reference_genome
-dbsnp_url = reference_file_model.dbsnp 
+dbsnp_url = reference_file_model.dbsnp
 hc_vcf_1kg_url = reference_file_model.hc_vcf_1kg
 mills_1kg_url = reference_file_model.mills_1kg
 known_indel_1kg_url = reference_file_model.known_indel_1kg
 vcf_1kg_url = reference_file_model.vcf_1kg
 gnomad_url = reference_file_model.gnomad_variant
 gnomad_tbi_url = reference_file_model.gnomad_variant_index
-cosmicdb_url = reference_file_model.cosmicdb
-wgs_calling_url = reference_file_model.wgs_calling
+cosmicdb_url = reference_file_model.cosmic
+wgs_calling_url = reference_file_model.wgs_calling_regions
 genome_chrom_size_url = reference_file_model.genome_chrom_size
-refgene_txt_url = reference_file_model.refgene_txt 
+refgene_txt_url = reference_file_model.refgene_txt
 refgene_sql_url = reference_file_model.refgene_sql
-rankscore_url = reference_file_model.rankscore
+rankscore_url = reference_file_model.rank_score
 access_regions_url = reference_file_model.access_regions
 delly_exclusion_url = reference_file_model.delly_exclusion
 delly_mappability_url = reference_file_model.delly_mappability
 delly_mappability_gindex_url = reference_file_model.delly_mappability_gindex
 delly_mappability_findex_url = reference_file_model.delly_mappability_findex
-ascat_gccorrection_url = reference_file_model.ascat_gccorrection
-ascat_chryloci_url = reference_file_model.ascat_chryloci
+ascat_gccorrection_url = reference_file_model.ascat_gc_correction
+ascat_chryloci_url = reference_file_model.ascat_chr_y_loci
 clinvar_url = reference_file_model.clinvar
 somalier_sites_url = reference_file_model.somalier_sites
 cadd_snv_url = reference_file_model.cadd_snv
@@ -84,11 +83,11 @@ shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 singularity_image_path = config['singularity']['image_path']
-singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()] 
+singularity_images = [Path(singularity_image_path, image_name + ".sif").as_posix() for image_name in config["singularity"]["containers"].keys()]
 
 ##########################################################
 # Generating Reference files for BALSAMIC pipeline
-# Writing reference json file 
+# Writing reference json file
 ##########################################################
 
 rule all:
@@ -134,7 +133,7 @@ rule all:
         os.path.join(basedir, "reference.json.log")
     run:
         import json
-        from datetime import datetime 
+        from datetime import datetime
 
         today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -169,7 +168,7 @@ rule all:
 
         with open(str(output.reference_json), "w") as fh:
             json.dump(ref_json, fh, indent=4)
-        
+
         create_md5(ref_json['reference'], output.check_md5)
 
         with open(str(output.finished), mode='w') as finish_file:
@@ -193,7 +192,7 @@ rule download_container:
       download_container_file(output_file=output[0])
 
 ##########################################################
-# Download the reference genome, variant db 
+# Download the reference genome, variant db
 ##########################################################
 download_content = [reference_genome_url, dbsnp_url, hc_vcf_1kg_url,
                     mills_1kg_url, known_indel_1kg_url, vcf_1kg_url,
@@ -233,8 +232,8 @@ def download_reference_file(output_file: str):
     shell(cmd)
     ref.write_md5
 
-ref_subdirs = set([ref.output_path for ref in download_content])
-ref_files = set([ref.output_file for ref in download_content])
+ref_subdirs = set([ref.dir_name for ref in download_content])
+ref_files = set([ref.file_name for ref in download_content])
 
 wildcard_constraints:
     ref_subdir="|".join(ref_subdirs),
@@ -251,7 +250,7 @@ rule download_reference:
 
 
 ##########################################################
-# Preprocess refseq file by fetching relevant columns and 
+# Preprocess refseq file by fetching relevant columns and
 # standardize the chr column
 ##########################################################
 
@@ -269,7 +268,7 @@ rule prepare_refgene:
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
         refgene_txt = os.path.join(basedir, "genome", "refgene_txt.log")
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
     shell:
         """
 header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
@@ -290,7 +289,7 @@ sed -i 's/chr//g' {input.accessible_regions};
 ##########################################################
 
 rule bgzip_tabix:
-    input: 
+    input:
         singularity_img = singularity_images,
         vcf = os.path.join(vcf_dir, "{vcf}.vcf")
     params:
@@ -300,7 +299,7 @@ rule bgzip_tabix:
         os.path.join(vcf_dir, "{vcf}.vcf.gz.tbi")
     log:
         os.path.join(vcf_dir, "{vcf}.vcf.gz_tbi.log")
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("tabix") + ".sif").as_posix()
     shell:
         """
 bgzip {input.vcf} && tabix -p {params.type} {input.vcf}.gz 2> {log};
@@ -319,7 +318,7 @@ rule bwa_index:
         expand(reference_genome_url.get_output_file + "{ext}", ext=['.amb','.ann','.bwt','.pac','.sa'])
     log:
         reference_genome_url.get_output_file + ".bwa_index.log"
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("bwa") + ".sif").as_posix()
     shell:
         """
 bwa index -a bwtsw {input.reference_genome} 2> {log};
@@ -337,7 +336,7 @@ rule samtools_index_fasta:
         reference_genome_url.get_output_file + ".fai"
     log:
         reference_genome_url.get_output_file + ".faidx.log"
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     shell:
         """
 samtools faidx {input.reference_genome} 2> {log};
@@ -356,7 +355,7 @@ rule picard_ref_dict:
         reference_genome_url.get_output_file.replace("fasta","dict")
     log:
         reference_genome_url.get_output_file + ".ref_dict.log"
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     shell:
         """
 picard CreateSequenceDictionary REFERENCE={input.reference_genome} OUTPUT={output} 2> {log};
@@ -364,12 +363,12 @@ picard CreateSequenceDictionary REFERENCE={input.reference_genome} OUTPUT={outpu
 
 
 ##########################################################
-# ENSEMBL VEP - download and install vep package, 
+# ENSEMBL VEP - download and install vep package,
 #                 cache conversion
 ##########################################################
 
 rule vep_install:
-    input: 
+    input:
         singularity_img = singularity_images
     params:
         species = "homo_sapiens_merged",
@@ -379,7 +378,7 @@ rule vep_install:
         directory(vep_dir)
     log:
         os.path.join(vep_dir, "vep_install_cache.log")
-    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix() 
+    singularity: Path(singularity_image_path, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
     shell:
         """
 vep_install --SPECIES {params.species} \

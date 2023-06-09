@@ -50,7 +50,6 @@ class FileType(StrEnum):
     TBI: str = "tbi"
     TEXT: str = "text"
     TSV: str = "tsv"
-    TXT: str = "txt"
     VCF: str = "vcf"
 
 
@@ -190,7 +189,7 @@ REFERENCE_FILES = {
         },
         "delly_exclusion": {
             "url": "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg19.excl.tsv",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TSV,
             "gzip": False,
             "file_name": "delly_exclusion.tsv",
             "dir_name": "genome",
@@ -218,7 +217,7 @@ REFERENCE_FILES = {
         },
         "ascat_gc_correction": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_SnpGcCorrections.tsv.gz",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TSV,
             "gzip": True,
             "file_name": "GRCh37_SnpGcCorrections.tsv",
             "dir_name": "genome",
@@ -242,6 +241,13 @@ REFERENCE_FILES = {
             "file_type": FileType.VCF,
             "gzip": True,
             "file_name": "GRCh37.somalier.sites.vcf",
+            "dir_name": "variants",
+        },
+        "cadd_snv": {
+            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh37/whole_genome_SNVs.tsv.gz",
+            "file_type": FileType.TSV,
+            "gzip": False,
+            "file_name": "hg19.cadd_snv.tsv.gz",
             "dir_name": "variants",
         },
     },
@@ -353,7 +359,7 @@ REFERENCE_FILES = {
         },
         "delly_exclusion": {
             "url": "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg38.excl.tsv",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TSV,
             "gzip": False,
             "file_name": "delly_exclusion.tsv",
             "dir_name": "genome",
@@ -381,7 +387,7 @@ REFERENCE_FILES = {
         },
         "ascat_gc_correction": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/35465e2644f76f2d59427a9b379d34ecea71f259/cancer/references/hg38_SnpGcCorrections.tsv.gz",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TSV,
             "gzip": True,
             "file_name": "hg38_SnpGcCorrections.tsv",
             "dir_name": "genome",
@@ -407,13 +413,19 @@ REFERENCE_FILES = {
             "file_name": "hg38.somalier.sites.vcf",
             "dir_name": "variants",
         },
+        "cadd_snv": {
+            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh38/whole_genome_SNVs.tsv.gz",
+            "file_type": FileType.TSV,
+            "gzip": False,
+            "file_name": "hg38.cadd_snv.tsv.gz",
+            "dir_name": "variants",
+        },
     },
     GenomeVersion.CanFam3: {
         "reference_genome": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/bigZips/canFam3.fa.gz",
             "file_type": FileType.FASTA,
             "gzip": True,
-            "genome_version": "canfam3",
             "file_name": "canFam3.fasta",
             "dir_name": "genome",
         },
@@ -421,7 +433,6 @@ REFERENCE_FILES = {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/database/refGene.txt.gz",
             "file_type": FileType.TEXT,
             "gzip": True,
-            "genome_version": "canfam3",
             "file_name": "canfam3_refGene.txt",
             "dir_name": "genome",
         },
@@ -429,7 +440,6 @@ REFERENCE_FILES = {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/database/refGene.sql",
             "file_type": FileType.TEXT,
             "gzip": False,
-            "genome_version": "canfam3",
             "file_name": "canfam3_refGene.sql",
             "dir_name": "genome",
         },
@@ -437,7 +447,6 @@ REFERENCE_FILES = {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/bigZips/canFam3.chrom.sizes",
             "file_type": FileType.TEXT,
             "gzip": False,
-            "genome_version": "canfam3",
             "file_name": "canfam3.chrom.sizes",
             "dir_name": "genome",
         },
