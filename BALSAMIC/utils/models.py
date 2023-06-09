@@ -561,7 +561,7 @@ class ReferenceMeta(BaseModel):
         mills_1kg: ReferenceUrlsModel. Optional field for Mills' high confidence indels vcf
         known_indel_1kg: ReferenceUrlsModel. Optional field for 1000Genome known indel vcf
         vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
-        wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
+        wgs_calling_regions: ReferenceUrlsModel. Optional field for wgs calling intervals
         genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
         gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
         cosmic: ReferenceUrlsModel. Optional COSMIC database's variants as vcf

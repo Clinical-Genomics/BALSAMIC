@@ -150,7 +150,7 @@ rule all:
             "exon_bed": input.refseq_bed,
             "refflat": input.refseq_flat,
             "refGene": input.refgene,
-            "wgs_calling_interval": input.wgs_calling,
+            "wgs_calling_regions": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
             "vep": input.vep,
             "rankscore": input.rankscore,
