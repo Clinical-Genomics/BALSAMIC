@@ -79,7 +79,7 @@ rule all:
             "reference_genome": input.reference_genome,
             "refgene_bed": input.refseq_bed,
             "refgene_flat": input.refseq_flat,
-            "refGene": input.refgene,
+            "refgene_txt": input.refgene,
             "genome_chrom_size": input.genome_chrom_size,
             "reference_access_date": today,
         }
