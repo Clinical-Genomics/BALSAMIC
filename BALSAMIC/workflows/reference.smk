@@ -147,7 +147,7 @@ rule all:
             "mills_1kg": input.mills_1kg,
             "gnomad_variant": input.gnomad_variant_vcf,
             "cosmic": input.cosmic_vcf,
-            "exon_bed": input.refseq_bed,
+            "refgene_bed": input.refseq_bed,
             "refflat": input.refseq_flat,
             "refGene": input.refgene,
             "wgs_calling_regions": input.wgs_calling,

@@ -77,7 +77,7 @@ rule all:
         ref_json = dict()
         ref_json['reference'] = {
             "reference_genome": input.reference_genome,
-            "exon_bed": input.refseq_bed,
+            "refgene_bed": input.refseq_bed,
             "refflat": input.refseq_flat,
             "refGene": input.refgene,
             "genome_chrom_size": input.genome_chrom_size,
