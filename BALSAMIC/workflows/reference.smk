@@ -148,7 +148,7 @@ rule all:
             "gnomad_variant": input.gnomad_variant_vcf,
             "cosmic": input.cosmic_vcf,
             "refgene_bed": input.refseq_bed,
-            "refflat": input.refseq_flat,
+            "refgene_flat": input.refseq_flat,
             "refGene": input.refgene,
             "wgs_calling_regions": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
@@ -263,7 +263,7 @@ rule prepare_refgene:
     params:
         refgene_sql_awk = get_script_path('refseq_sql.awk'),
     output:
-        refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
+        refgene_flat = refgene_txt_url.get_output_file.replace("txt", "flat"),
         bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
@@ -279,7 +279,7 @@ header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
 | awk '$1~/chr[1-9]/ && $1!~/[_]/' | cut -c 4- | sort -k1,1 -k2,2n > {output.bed};
 
 awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"\",$3); $1=$13; print }}' {input.refgene_txt} \
-| cut -f 1-11 > {output.refflat};
+| cut -f 1-11 > {output.refgene_flat};
 sed -i 's/chr//g' {input.refgene_txt};
 sed -i 's/chr//g' {input.accessible_regions};
         """
