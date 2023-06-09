@@ -152,7 +152,7 @@ rule all:
             "refGene": input.refgene,
             "wgs_calling_regions": input.wgs_calling,
             "genome_chrom_size": input.genome_chrom_size,
-            "vep": input.vep,
+            "vep_dir": input.vep,
             "rank_score": input.rankscore,
             "access_regions": input.access_regions,
             "delly_exclusion" : input.delly_exclusion,
