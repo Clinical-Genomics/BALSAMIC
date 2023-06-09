@@ -9,7 +9,7 @@ rule fastqc:
     output:
         fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
     benchmark:
-        Path(benchmark_dir, "fastqc_{sample}_R_{read}.tsv").as_posix()
+        Path(benchmark_dir, "fastqc_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:

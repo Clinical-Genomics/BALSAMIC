@@ -124,7 +124,7 @@ research_annotations.append( {
 }
 )
 
-# Comment out CADD 
+# Comment out CADD
 """
 research_annotations.append( {
     'annotation': [{
