@@ -10,6 +10,7 @@ Changed:
 ^^^^^^^^
 * Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
+* Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
 
 Fixed:
 ^^^^^^
