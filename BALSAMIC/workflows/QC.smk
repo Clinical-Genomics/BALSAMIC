@@ -124,18 +124,19 @@ rules_to_include = [
                 "snakemake_rules/quality_control/fastqc.rule",
                 "snakemake_rules/align/bam_compress.rule",
                 "snakemake_rules/quality_control/multiqc.rule",
-                "snakemake_rules/variant_calling/mergetype_tumor.rule",
-                "snakemake_rules/quality_control/picard.rule",
-                "snakemake_rules/quality_control/sambamba_depth.rule",
-                "snakemake_rules/quality_control/mosdepth.rule",
                 "snakemake_rules/align/sentieon_alignment.rule",
                 "snakemake_rules/quality_control/qc_metrics.rule",
                 "snakemake_rules/quality_control/samtools_qc.rule"
 ]
+if config["analysis"]["sequencing_type"] == 'wgs':
+    rules_to_include.append("snakemake_rules/quality_control/picard_wgs.rule")
+else:
+    rules_to_include.append("snakemake_rules/quality_control/picard.rule")
+    rules_to_include.append("snakemake_rules/quality_control/sambamba_depth.rule")
+    rules_to_include.append("snakemake_rules/quality_control/mosdepth.rule")
+
 
 if "paired" in config['analysis']['analysis_type']:
-    rules_to_include.append("snakemake_rules/variant_calling/mergetype_normal.rule")
-
     # Somalier only implemented for hg38 and hg19
     if "canfam3" not in config["reference"]["reference_genome"]:
         rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
