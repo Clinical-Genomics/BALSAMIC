@@ -377,6 +377,29 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) ->
     for fastq in fastq_test_dict["tumor"]:
         Path.unlink(fastq_dir/fastq)
 
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_only_single_w_dummy_vep(analysis_dir: str, case_id_tumor_only: str) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = fastq_pattern_types[0]
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    vep_dir: Path = Path(analysis_dir, case_id_tumor_only, "analysis", "vep")
+    vep_dir.mkdir(parents=True, exist_ok=True)
+    vep_test_file = "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+    Path(vep_dir, vep_test_file).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir/fastq)
+
+    Path.unlink(vep_dir/vep_test_file)
+
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_only_pon_cnn(analysis_dir: str, case_id_tumor_only_pon_cnn: str, request) -> str:
     """Creates and returns the directory containing the FASTQs."""
@@ -789,6 +812,53 @@ def tumor_only_config(
     ).as_posix()
 
 @pytest.fixture(scope="session")
+def tumor_only_config_single(
+    case_id_tumor_only: str,
+    tumor_sample_name: str,
+    balsamic_cache: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only_single_w_dummy_vep: str,
+    panel_bed_file: str,
+    background_variant_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_only,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_only_single_w_dummy_vep,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--background-variants",
+                background_variant_file,
+                "--tumor-sample-name",
+                tumor_sample_name,
+            ],
+        )
+    return Path(
+        analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
+    ).as_posix()
+
+@pytest.fixture(scope="session")
 def tumor_only_config_qc(
     case_id_tumor_only: str,
     tumor_sample_name: str,
@@ -1034,41 +1104,41 @@ def qc_extracted_metrics(metrics_yaml_path):
 
 
 @pytest.fixture(scope="function")
-def snakemake_fastqc_rule(tumor_only_config, helpers):
-    """FastQC snakemake mock rule"""
+def snakemake_bcftools_filter_vardict_research_tumor_only(tumor_only_config_single, helpers):
+    """bcftools_filter_vardict_research_tumor_only snakemake mock rule"""
 
-    helpers.read_config(tumor_only_config)
-    fastq_path = os.path.join(
+    helpers.read_config(tumor_only_config_single)
+    vep_path = os.path.join(
         helpers.analysis_dir,
         helpers.case_id,
         "analysis",
-        "concat",
-        "ACC1_R_{read}.fastq.gz",
+        "vep",
+        "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
     )
 
     return Map(
         {
-            "fastqc": Map(
+            "bcftools_filter_vardict_research_tumor_only": Map(
                 {
                     "params": Map(
                         {
                             "housekeeper_id": {
                                 "id": "sample_tumor_only",
-                                "tags": "quality-trimmed-seq",
+                                "tags": "research",
                             }
                         }
                     ),
                     "output": Map(
                         {
-                            "_names": Map({"fastqc": fastq_path}),
-                            "fastqc": fastq_path,
+                            "_names": Map({"vcf_pass_vardict": vep_path}),
+                            "vcf_pass_vardict": vep_path,
                         }
                     ),
                     "rule": Map(
                         {
-                            "name": "fastq",
+                            "name": "bcftools_filter_vardict_research_tumor_only",
                             "output": [
-                                fastq_path,
+                                vep_path,
                             ],
                             "temp_output": set(),
                         }

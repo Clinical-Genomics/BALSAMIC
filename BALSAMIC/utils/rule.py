@@ -262,17 +262,16 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
     output_files = list()
     # Extract housekeeper tags from rule's params value
     housekeeper = getattr(rules, rule_name).params.housekeeper_id
-
     # Get temp_output files
     temp_files = getattr(rules, rule_name).rule.temp_output
 
     # Get list of named output from rule. e.g. output.vcf
     output_file_names = list(getattr(rules, rule_name).output._names.keys())
 
+
     for output_name in output_file_names:
         output_file = getattr(rules, rule_name).output[output_name]
 
-        LOG.debug("Found following potential output files: {}".format(output_file))
         for file_wildcard_list in snakemake.utils.listfiles(output_file):
             file_to_store = file_wildcard_list[0]
             # Do not store file if it is a temp() output
@@ -286,7 +285,6 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
 
             file_extension = get_file_extension(file_to_store)
             file_to_store_index = find_file_index(file_to_store)
-
             base_tags = list(file_wildcard_list[1])
             base_tags.append(output_name)
 
@@ -311,7 +309,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             composit_tag = "-".join([housekeeper["tags"], output_name])
             file_tags = base_tags + [composit_tag]
 
-            # replace all instsances of "_" with "-", since housekeeper doesn't like _
+            # replace all instances of "_" with "-", since housekeeper doesn't like _
             file_tags = [t.replace("_", "-") for t in file_tags]
 
             LOG.debug("Found the following delivery id: {}".format(delivery_id))

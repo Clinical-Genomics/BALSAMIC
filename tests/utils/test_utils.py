@@ -924,32 +924,30 @@ def test_create_md5(tmp_path):
 def test_validate_fastq_input():
     pass
 
-def test_get_rule_output(snakemake_fastqc_rule):
+def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
 
     # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
-    rules = snakemake_fastqc_rule
-    rule_name = "fastqc"
+    rules = snakemake_bcftools_filter_vardict_research_tumor_only
+    rule_name = "bcftools_filter_vardict_research_tumor_only"
     output_file_wildcards = {
         "sample": ["ACC1", "tumor", "normal"],
         "case_name": "sample_tumor_only",
+        "var_type": ["CNV", "SNV", "SV"],
     }
-
     # THEN retrieve the output files
     output_files = get_rule_output(rules, rule_name, output_file_wildcards)
 
     # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
-    assert len(output_files) == 2
+    assert len(output_files) == 1
     for file in output_files:
         # Expected file names
         assert (
-            Path(file[0]).name == "ACC1_R_1.fastq.gz"
-            or Path(file[0]).name == "ACC1_R_2.fastq.gz"
+            Path(file[0]).name == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
         )
         # Expected tags
         assert (
-            file[3] == "1,fastqc,quality-trimmed-seq-fastqc"
-            or file[3] == "2,fastqc,quality-trimmed-seq-fastqc"
+            file[3] == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
         )
 
 
