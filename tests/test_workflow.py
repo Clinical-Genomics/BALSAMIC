@@ -115,7 +115,7 @@ def test_workflow_qc_normal_wgs(tumor_normal_config_qc_wgs, sentieon_install_dir
     reference_genome = "hg19"
     analysis_workflow = "balsamic-qc"
     snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
-    config_json = tumor_normal_config_qc
+    config_json = tumor_normal_config_qc_wgs
 
     # WHEN invoking snakemake module with dryrun option
     # THEN it should return true

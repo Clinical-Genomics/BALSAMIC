@@ -20,7 +20,6 @@ from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_rule_o
                                  get_picard_mrkdup, get_script_path, get_threads,
                                  get_sequencing_type, get_capture_kit)
 
-
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
@@ -132,7 +131,6 @@ rules_to_include = [
 if config["analysis"]["sequencing_type"] == 'wgs':
     rules_to_include.append("snakemake_rules/quality_control/picard_wgs.rule")
     rules_to_include.append("snakemake_rules/quality_control/sentieon_qc_metrics.rule")
-    rules_to_include.append("snakemake_rules/variant_calling/sentieon_tn_varcall.rule")
 else:
     rules_to_include.append("snakemake_rules/quality_control/picard.rule")
     rules_to_include.append("snakemake_rules/quality_control/sambamba_depth.rule")
