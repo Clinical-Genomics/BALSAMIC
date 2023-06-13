@@ -119,7 +119,6 @@ os.environ['TMPDIR'] = get_result_dir(config)
 analysis_type = config['analysis']["analysis_type"]
 
 rules_to_include = [
-                "snakemake_rules/concatenation/concatenation.rule",
                 "snakemake_rules/quality_control/fastp.rule",
                 "snakemake_rules/quality_control/fastqc.rule",
                 "snakemake_rules/align/bam_compress.rule",
