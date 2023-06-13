@@ -45,6 +45,7 @@ bam_dir = get_result_dir(config) + "/bam/"
 fastqc_dir = get_result_dir(config) + "/fastqc/"
 result_dir = get_result_dir(config) + "/"
 qc_dir = get_result_dir(config) + "/qc/"
+vcf_dir = get_result_dir(config) + "/vcf/"
 delivery_dir = get_result_dir(config) + "/delivery/"
 
 singularity_image = config['singularity']['image']
