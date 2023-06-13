@@ -514,63 +514,6 @@ def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str,
     for fastq in fastq_test_dict["normal"]:
         Path.unlink(fastq_dir / fastq)
 
-
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
-    """Creates and returns the directory containing the FASTQs."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-
-    # Fill the concat fastq path folder with the concatenated fastq files
-    concat_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "concat")
-    concat_dir.mkdir(parents=True, exist_ok=True)
-    for read in [1, 2]:
-        Path(concat_dir, f"ACC1_R_{read}.fastq.gz").touch()
-
-    return fastq_dir.as_posix()
-
-
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str) -> str:
-    """Creates and returns the directory containing the FASTQs."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
-
-
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str) -> str:
-    """Creates and returns the directory containing the FASTQs."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_umi, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
-
-
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str) -> str:
-    """Creates and returns the directory containing the FASTQs."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
-
-
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str) -> str:
-    """Creates and returns the directory containing the FASTQs."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_wgs, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
-
-
-@pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str) -> str:
-    """Creates and returns the directory containing the FASTQs."""
-
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_wgs, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-    return fastq_dir.as_posix()
-
-
 @pytest.fixture(scope="session")
 def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """
