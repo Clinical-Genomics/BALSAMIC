@@ -638,6 +638,57 @@ def tumor_normal_config_qc(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).as_posix()
 
+@pytest.fixture(scope="session")
+def tumor_normal_config_qc_wgs(
+    case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal: str,
+    balsamic_cache: str,
+    background_variant_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    analysis_workflow_qc: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal,
+                "--background-variants",
+                background_variant_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+                "--analysis-workflow",
+                analysis_workflow_qc,
+            ],
+        )
+
+    return Path(
+        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
+    ).as_posix()
+
 @pytest.fixture(name="helpers")
 def fixture_config_helpers():
     """Helper fixture for case config files"""
