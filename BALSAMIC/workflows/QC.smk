@@ -130,6 +130,8 @@ rules_to_include = [
 ]
 if config["analysis"]["sequencing_type"] == 'wgs':
     rules_to_include.append("snakemake_rules/quality_control/picard_wgs.rule")
+    rules_to_include.append("snakemake_rules/quality_control/sentieon_qc_metrics.rule")
+    rules_to_include.append("snakemake_rules/variant_calling/sentieon_tn_varcall.rule")
 else:
     rules_to_include.append("snakemake_rules/quality_control/picard.rule")
     rules_to_include.append("snakemake_rules/quality_control/sambamba_depth.rule")
