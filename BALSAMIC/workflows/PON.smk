@@ -27,8 +27,6 @@ params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 fastq_dir =  config["analysis"]["fastq_path"]
 analysis_dir = get_result_dir(config)
-analysis_fastq_dir = analysis_dir + "/fastq/"
-concat_dir = get_result_dir(config) + "/concat/"
 qc_dir = analysis_dir + "/qc/"
 bam_dir =  analysis_dir + "/bam/"
 cnv_dir =  analysis_dir + "/cnv/"
