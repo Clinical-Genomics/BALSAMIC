@@ -61,7 +61,8 @@ for sample in sample_dict:
     sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
                                     sample_dict=sample_dict,
                                     bam_dir=bam_dir,
-                                    sequencing_type=config["analysis"]["sequencing_type"])
+                                    sequencing_type=config["analysis"]["sequencing_type"],
+                                    analysis_type=config["analysis"]["analysis_type"])
 
 
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
@@ -72,9 +73,8 @@ pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version
 pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
 
 config["rules"] = [
-    "snakemake_rules/concatenation/concatenation.rule",
     "snakemake_rules/quality_control/fastp.rule",
-    "snakemake_rules/align/bwa_mem.rule",
+    "snakemake_rules/align/sentieon_alignment.rule",
 ]
 
 for r in config["rules"]:
@@ -112,7 +112,7 @@ cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtar
 
 rule create_coverage:
     input:
-        bam = bam_dir + "{sample}.sorted." + picarddup  + ".bam",
+        bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
         target_bed = cnv_dir + "target.bed",
         antitarget_bed = cnv_dir + "antitarget.bed"
     output:

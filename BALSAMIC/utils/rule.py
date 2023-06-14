@@ -186,7 +186,7 @@ def get_mapping_info_deprecated(
     return alignments
 
 
-def get_mapping_info(samplename, sample_dict, bam_dir, sequencing_type):
+def get_mapping_info(samplename, sample_dict, bam_dir, sequencing_type, analysis_type):
     """
     input:
     output:
@@ -202,7 +202,14 @@ def get_mapping_info(samplename, sample_dict, bam_dir, sequencing_type):
         )
 
     sample_type = sample_dict[samplename]["type"]
-    alignments[
+    if analysis_type == "pon":
+        alignments[
+            "final_bam"
+        ] = bam_dir + "{sample_type}.{sample}.dedup.bam".format(
+            sample_type=sample_type, sample=samplename
+        )
+    else:
+        alignments[
         "final_bam"
     ] = bam_dir + "{sample_type}.{sample}.dedup.realign.bam".format(
         sample_type=sample_type, sample=samplename
