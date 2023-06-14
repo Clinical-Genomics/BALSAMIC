@@ -5,7 +5,10 @@ from pathlib import Path
 import glob
 import tempfile
 import os
+import logging
 
+
+from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.rule import get_fastqpatterns, get_mapping_info, get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.common import RULE_DIRECTORY
@@ -15,6 +18,9 @@ from BALSAMIC.utils.models import BalsamicWorkflowConfig
 shell.prefix("set -eo pipefail; ")
 
 localrules: all
+
+LOG = logging.getLogger(__name__)
+logging.getLogger("filelock").setLevel("WARN")
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
@@ -64,6 +70,24 @@ for sample in sample_dict:
                                     sequencing_type=config["analysis"]["sequencing_type"],
                                     analysis_type=config["analysis"]["analysis_type"])
 
+# Find and set Sentieon binary and license server from env variables
+try:
+    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
+    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+
+    if os.getenv("SENTIEON_EXEC") is not None:
+        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
+    else:
+        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+
+except KeyError as error:
+    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
+              "to run SENTIEON variant callers")
+    raise BalsamicError
+
+if not Path(config["SENTIEON_EXEC"]).exists():
+    LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
+    raise BalsamicError
 
 panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
