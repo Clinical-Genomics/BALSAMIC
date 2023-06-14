@@ -369,6 +369,8 @@ class AnalysisPonModel(AnalysisModel):
             )
 
         return value
+
+
 class FastqInfoModel(BaseModel):
     """Verifies that fastq files have been correctly assigned in fastq-pattern of sample.
 
@@ -378,8 +380,10 @@ class FastqInfoModel(BaseModel):
     - All forward and reverse fastq pairs must have exactly 1 difference in their names
 
     """
+
     fwd: FilePath
     rev: FilePath
+
     @root_validator(pre=False)
     def validate_fastq_pairs_in_fastq_pattern(cls, values):
         values["fwd"] = Path(values["fwd"]).as_posix()
@@ -395,8 +399,10 @@ class FastqInfoModel(BaseModel):
         len_fwd_fastq_name = len(fwd_fastq_name)
         len_rev_fastq_name = len(rev_fastq_name)
 
-        assert len_fwd_fastq_name == len_rev_fastq_name, f"Fastq pair does not have names of equal length: " \
-                                                         f"{fwd_fastq_name} {rev_fastq_name}"
+        assert len_fwd_fastq_name == len_rev_fastq_name, (
+            f"Fastq pair does not have names of equal length: "
+            f"{fwd_fastq_name} {rev_fastq_name}"
+        )
 
         # Fastq files in a pair must have file-names with maximum 1 character difference
         count_str_diff = 0
@@ -404,10 +410,13 @@ class FastqInfoModel(BaseModel):
             if fwd_fastq_name[i] != rev_fastq_name[i]:
                 count_str_diff += 1
 
-        assert count_str_diff == 1, f"Fastq pair does not have exactly 1 differences ({count_str_diff})," \
-                                    f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
+        assert count_str_diff == 1, (
+            f"Fastq pair does not have exactly 1 differences ({count_str_diff}),"
+            f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
+        )
 
         return values
+
 
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis.
@@ -435,9 +444,7 @@ class SampleInstanceModel(BaseModel):
         if value:
             return value
 
-        raise ValueError(
-            "No fastq files in fastq-dir assigned to sample."
-            )
+        raise ValueError("No fastq files in fastq-dir assigned to sample.")
 
 
 class PanelModel(BaseModel):
@@ -565,7 +572,9 @@ class BalsamicConfigModel(BaseModel):
                     fastq_patterns[fastq_pattern] = 1
 
                 # Count occurrences of fastq names
-                for fastq_read_direction, fastq_path in value[sample]["fastq_info"][fastq_pattern].items():
+                for fastq_read_direction, fastq_path in value[sample]["fastq_info"][
+                    fastq_pattern
+                ].items():
                     fastq_name = os.path.basename(fastq_path)
                     if fastq_name in fastq_filenames:
                         fastq_filenames[fastq_name] += 1
@@ -574,11 +583,15 @@ class BalsamicConfigModel(BaseModel):
 
         # Fastq pattern can only be assigned once per group of samples
         for fastq_pattern in fastq_patterns:
-            assert fastq_patterns[fastq_pattern] == 1, f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
+            assert (
+                fastq_patterns[fastq_pattern] == 1
+            ), f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
 
         # Fastq name can only be assigned once per group of samples
         for fastq_name in fastq_filenames:
-            assert fastq_filenames[fastq_name] == 1, f"Fastq-name: {fastq_name} has been assigned more than once."
+            assert (
+                fastq_filenames[fastq_name] == 1
+            ), f"Fastq-name: {fastq_name} has been assigned more than once."
 
         return value
 

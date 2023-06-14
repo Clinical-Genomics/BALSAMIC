@@ -155,6 +155,7 @@ def test_get_multiqc_data_source(multiqc_data_path):
     assert source_hs_metrics == out_source_hs_metrics
     assert source_dup == out_source_dup
 
+
 def test_get_multiqc_metrics(config_dict, multiqc_data_dict, qc_extracted_metrics):
     """test metrics retrieval from the multiqc_data.json file"""
 

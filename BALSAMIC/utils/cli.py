@@ -18,6 +18,7 @@ from colorclass import Color
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.constants.common import FASTQ_SUFFIXES
+
 LOG = logging.getLogger(__name__)
 
 
@@ -430,6 +431,7 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
+
 def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
     """Validates fastq input in sample dict and fastq_path.
 
@@ -452,9 +454,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
             for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
                 assigned_fastq_list.append(fastq_path)
                 if not Path(fastq_path).is_file():
-                    LOG.error(
-                        f"Fastq-file: {fastq_path} does not exist"
-                    )
+                    LOG.error(f"Fastq-file: {fastq_path} does not exist")
                     raise FileNotFoundError(f"Fastq-file: {fastq_path} does not exist")
 
     unassigned_fastqs = []
@@ -467,7 +467,9 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
         LOG.error(
             f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
         )
-        raise BalsamicError(f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}")
+        raise BalsamicError(
+            f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
+        )
 
 
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
@@ -485,7 +487,9 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
     fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
     if not fastqs_in_fastq_path:
         LOG.error(f"No fastq files found in supplied fastq-path: {fastq_path}")
-        raise FileNotFoundError(f"No fastq files found in supplied fastq-path: {fastq_path}")
+        raise FileNotFoundError(
+            f"No fastq files found in supplied fastq-path: {fastq_path}"
+        )
 
     fastq_dict = {}
     fastq_suffixes = FASTQ_SUFFIXES
@@ -493,23 +497,36 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
         fwd_suffix = fastq_suffixes[suffix]["fwd"]
         rev_suffix = fastq_suffixes[suffix]["rev"]
 
-        fastq_fwd_regex = re.compile(r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$")
-        fwd_fastqs = [f"{fastq_path}/{fastq}" for fastq in os.listdir(fastq_path) if fastq_fwd_regex.match(fastq)]
+        fastq_fwd_regex = re.compile(
+            r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$"
+        )
+        fwd_fastqs = [
+            f"{fastq_path}/{fastq}"
+            for fastq in os.listdir(fastq_path)
+            if fastq_fwd_regex.match(fastq)
+        ]
         if fwd_fastqs:
             for fwd_fastq in fwd_fastqs:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
 
                 if fastqpair_pattern in fastq_dict:
-                    LOG.error(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
-                              f"dictionary for sample: {sample_name}")
-                    raise BalsamicError(f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
-                                        f"dictionary for sample: {sample_name}")
+                    LOG.error(
+                        f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
+                        f"dictionary for sample: {sample_name}"
+                    )
+                    raise BalsamicError(
+                        f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
+                        f"dictionary for sample: {sample_name}"
+                    )
 
                 fastq_dict[fastqpair_pattern] = {}
                 fastq_dict[fastqpair_pattern]["fwd"] = fwd_fastq
-                fastq_dict[fastqpair_pattern]["rev"] = fwd_fastq.replace(fwd_suffix, rev_suffix)
+                fastq_dict[fastqpair_pattern]["rev"] = fwd_fastq.replace(
+                    fwd_suffix, rev_suffix
+                )
 
     return fastq_dict
+
 
 def get_sample_dict(
     tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str

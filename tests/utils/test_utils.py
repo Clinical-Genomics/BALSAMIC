@@ -57,6 +57,8 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_prefix,
 )
+
+
 def test_get_pon_sample_dict(
     fastq_dir_tumor_only_pon: str, tumor_sample_name: str, normal_sample_name: str
 ):
@@ -81,7 +83,11 @@ def test_get_pon_sample_dict(
 
     # THEN the samples should be retrieved from the FASTQ directory
     for sample in samples:
-        assert sample in samples_expected and samples[sample]["type"] == samples_expected[sample]["type"]
+        assert (
+            sample in samples_expected
+            and samples[sample]["type"] == samples_expected[sample]["type"]
+        )
+
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
     # GIVEN a wrong analysis_type
@@ -102,6 +108,8 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
             mutation_class=mutation_class,
             sequencing_type=sequencing_type,
         )
+
+
 def test_get_variant_callers_wrong_workflow(tumor_normal_config):
     # GIVEN a wrong workflow name
     wrong_workflow = "MIP"
@@ -724,6 +732,7 @@ def test_find_file_index(tmpdir):
     assert str(bai_file) in result
     assert str(bai_file_2) in result
 
+
 def test_get_panel_chrom():
     # GIVEN a valid PANEL BED file
     panel_bed_file = "tests/test_data/references/panel/panel.bed"
@@ -778,7 +787,6 @@ def test_convert_deliverables_tags():
 
 
 def test_check_executable_exists():
-
     # GIVEN an existing executable command
     test_command = "ls"
 
@@ -788,7 +796,6 @@ def test_check_executable_exists():
 
 
 def test_check_executable_not_existing():
-
     # GIVEN an existing executable command
     test_command = "twenty_twenty_was_bad"
 
@@ -798,7 +805,6 @@ def test_check_executable_not_existing():
 
 
 def test_job_id_dump_to_yaml(tmp_path):
-
     # GIVEN a file with one job id per line, a key (case name), and an output file name
     dummy_dir = tmp_path / "job_id_dump_dir"
     dummy_dir.mkdir()
@@ -817,7 +823,6 @@ def test_job_id_dump_to_yaml(tmp_path):
 
 
 def test_generate_h5(tmp_path):
-
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
@@ -833,7 +838,6 @@ def test_generate_h5(tmp_path):
 
 
 def test_generate_h5_capture_no_output(tmp_path):
-
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
@@ -887,8 +891,8 @@ def test_get_sample_dict(
     assert samples[tumor_sample_name]["fastq_info"]
     assert samples[normal_sample_name]["fastq_info"]
 
-def test_get_md5(tmp_path):
 
+def test_get_md5(tmp_path):
     # GIVEN a dummy file
     dummy_dir = tmp_path / "md5"
     dummy_dir.mkdir()
@@ -900,7 +904,6 @@ def test_get_md5(tmp_path):
 
 
 def test_create_md5(tmp_path):
-
     # GIVEN a path to a md5 file and reference dummy files
     ref_dir = tmp_path / "references"
     ref_dir.mkdir()
@@ -921,8 +924,10 @@ def test_create_md5(tmp_path):
     # THEN md5 file exists
     assert dummy_file.exists()
 
+
 def test_validate_fastq_input():
     pass
+
 
 def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
@@ -943,11 +948,13 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     for file in output_files:
         # Expected file names
         assert (
-            Path(file[0]).name == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+            Path(file[0]).name
+            == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
         )
         # Expected tags
         assert (
-            file[3] == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+            file[3]
+            == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
         )
 
 
@@ -964,6 +971,7 @@ def test_get_sample_type_from_prefix(config_dict):
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == "tumor"
+
 
 def test_get_fastq_files_directory(fastq_dir: str):
     """Test get unlinked input files directory."""

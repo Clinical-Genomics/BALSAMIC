@@ -15,7 +15,8 @@ from BALSAMIC.utils.cli import (
     get_config,
     job_id_dump_to_yaml,
     validate_fastq_input,
-    get_fastq_files_directory,)
+    get_fastq_files_directory,
+)
 
 from BALSAMIC.constants.common import BALSAMIC_SCRIPTS
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -199,7 +200,6 @@ def analysis(
     case_name = sample_config["analysis"]["case_id"]
     sample_dict = sample_config["samples"]
 
-
     if run_analysis:
         # if not dry run, then create (new) log/script directory
         for dirpath, dirnames, files in os.walk(logpath):
@@ -235,8 +235,9 @@ def analysis(
     bind_path.append(sample_config["analysis"]["analysis_dir"])
 
     # Validate fastq input
-    validate_fastq_input(sample_dict=sample_dict, fastq_path=sample_config["analysis"]["fastq_path"])
-
+    validate_fastq_input(
+        sample_dict=sample_dict, fastq_path=sample_config["analysis"]["fastq_path"]
+    )
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()

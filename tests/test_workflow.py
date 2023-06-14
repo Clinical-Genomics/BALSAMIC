@@ -48,8 +48,9 @@ def test_workflow_tumor_only(tumor_only_config, sentieon_install_dir, sentieon_l
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_tumor_only(tumor_only_config_qc, sentieon_install_dir, sentieon_license):
-
+def test_workflow_qc_tumor_only(
+    tumor_only_config_qc, sentieon_install_dir, sentieon_license
+):
     # GIVEN a sample config dict and snakefile
     workflow = "single"
     reference_genome = "hg19"
@@ -69,8 +70,9 @@ def test_workflow_qc_tumor_only(tumor_only_config_qc, sentieon_install_dir, sent
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_tumor_only_canfam(tumor_only_config_qc, sentieon_install_dir, sentieon_license):
-
+def test_workflow_qc_tumor_only_canfam(
+    tumor_only_config_qc, sentieon_install_dir, sentieon_license
+):
     # GIVEN a sample config dict and snakefile
     workflow = "single"
     reference_genome = "canfam3"
@@ -90,7 +92,9 @@ def test_workflow_qc_tumor_only_canfam(tumor_only_config_qc, sentieon_install_di
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
 
-def test_workflow_qc_normal(tumor_normal_config_qc, sentieon_install_dir, sentieon_license):
+def test_workflow_qc_normal(
+    tumor_normal_config_qc, sentieon_install_dir, sentieon_license
+):
     # GIVEN a sample config dict and snakefile
     workflow = "paired"
     reference_genome = "hg19"
@@ -109,7 +113,10 @@ def test_workflow_qc_normal(tumor_normal_config_qc, sentieon_install_dir, sentie
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
-def test_workflow_qc_normal_wgs(tumor_normal_config_qc_wgs, sentieon_install_dir, sentieon_license):
+
+def test_workflow_qc_normal_wgs(
+    tumor_normal_config_qc_wgs, sentieon_install_dir, sentieon_license
+):
     # GIVEN a sample config dict and snakefile
     workflow = "paired"
     reference_genome = "hg19"
@@ -127,7 +134,11 @@ def test_workflow_qc_normal_wgs(tumor_normal_config_qc_wgs, sentieon_install_dir
         },
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
-def test_workflow_qc_normal_canfam3(tumor_normal_config_qc, sentieon_install_dir, sentieon_license):
+
+
+def test_workflow_qc_normal_canfam3(
+    tumor_normal_config_qc, sentieon_install_dir, sentieon_license
+):
     # GIVEN a sample config dict and snakefile
     workflow = "paired"
     reference_genome = "canfam3"

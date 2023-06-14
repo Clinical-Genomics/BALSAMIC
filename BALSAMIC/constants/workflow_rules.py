@@ -7,11 +7,9 @@ SNAKEMAKE_RULES = {
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
-            "snakemake_rules/quality_control/samtools_qc.rule"
+            "snakemake_rules/quality_control/samtools_qc.rule",
         ],
-        "align": [
-            "snakemake_rules/align/bam_compress.rule"
-        ],
+        "align": ["snakemake_rules/align/bam_compress.rule"],
         "varcall": [
             "snakemake_rules/variant_calling/germline_sv.rule",
             "snakemake_rules/variant_calling/sentieon_quality_filter.rule",

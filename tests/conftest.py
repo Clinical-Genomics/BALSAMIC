@@ -23,50 +23,73 @@ MOCKED_OS_ENVIRON = "os.environ"
 fastq_pattern_types = [
     {
         "id": "1",
-        "tumor":
-            ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz",
-            "ACC1_S1_L002_R1_001.fastq.gz", "ACC1_S1_L002_R2_001.fastq.gz"],
-        "normal":
-            ["ACC2_S1_L001_R1_001.fastq.gz", "ACC2_S1_L001_R2_001.fastq.gz",
-            "ACC2_S1_L002_R1_001.fastq.gz", "ACC2_S1_L002_R2_001.fastq.gz"]
+        "tumor": [
+            "ACC1_S1_L001_R1_001.fastq.gz",
+            "ACC1_S1_L001_R2_001.fastq.gz",
+            "ACC1_S1_L002_R1_001.fastq.gz",
+            "ACC1_S1_L002_R2_001.fastq.gz",
+        ],
+        "normal": [
+            "ACC2_S1_L001_R1_001.fastq.gz",
+            "ACC2_S1_L001_R2_001.fastq.gz",
+            "ACC2_S1_L002_R1_001.fastq.gz",
+            "ACC2_S1_L002_R2_001.fastq.gz",
+        ],
     },
     {
         "id": "2",
-        "tumor":
-            ["HXXXXXXX_123456_ACC1_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L001_R2_001.fastq.gz",
-            "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC1_L002_R2_001.fastq.gz"],
-        "normal":
-            ["HXXXXXXX_123456_ACC2_L001_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L001_R2_001.fastq.gz",
-            "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz", "HXXXXXXX_123456_ACC2_L002_R2_001.fastq.gz"],
+        "tumor": [
+            "HXXXXXXX_123456_ACC1_L001_R1_001.fastq.gz",
+            "HXXXXXXX_123456_ACC1_L001_R2_001.fastq.gz",
+            "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz",
+            "HXXXXXXX_123456_ACC1_L002_R2_001.fastq.gz",
+        ],
+        "normal": [
+            "HXXXXXXX_123456_ACC2_L001_R1_001.fastq.gz",
+            "HXXXXXXX_123456_ACC2_L001_R2_001.fastq.gz",
+            "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz",
+            "HXXXXXXX_123456_ACC2_L002_R2_001.fastq.gz",
+        ],
     },
     {
         "id": "3",
-        "tumor":
-            ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_2.fastq.gz"],
-        "normal":
-            ["ACC2_XXXXX_R_1.fastq.gz", "ACC2_XXXXX_R_2.fastq.gz"]
+        "tumor": ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_2.fastq.gz"],
+        "normal": ["ACC2_XXXXX_R_1.fastq.gz", "ACC2_XXXXX_R_2.fastq.gz"],
     },
     {
         "id": "4",
-        "tumor":
-            ["HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
-            "HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"],
-        "normal":
-            ["HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
-            "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz", "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"]
+        "tumor": [
+            "HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
+            "HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
+            "HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
+            "HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz",
+        ],
+        "normal": [
+            "HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
+            "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
+            "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz",
+            "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz",
+        ],
     },
     {
         "id": "5",
-        "tumor":
-            ["1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz", "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
-             "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz", "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"],
-        "normal":
-            ["1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz", "1_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz",
-             "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz", "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz"]
-    }
+        "tumor": [
+            "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+            "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+            "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+            "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+        ],
+        "normal": [
+            "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+            "1_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz",
+            "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+            "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz",
+        ],
+    },
 ]
 
-fastq_pattern_ids = ['FastqPattern{}'.format(p["id"]) for p in fastq_pattern_types]
+fastq_pattern_ids = ["FastqPattern{}".format(p["id"]) for p in fastq_pattern_types]
+
 
 @pytest.fixture(scope="session")
 def pon_fastq_list() -> list:
@@ -120,6 +143,7 @@ def case_id_tumor_only() -> str:
     """Mock TGA tumor-only case ID."""
     return "sample_tumor_only"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_only_pon_cnn() -> str:
     """Mock TGA tumor-only case ID."""
@@ -143,10 +167,12 @@ def case_id_tumor_normal_fastqdir() -> str:
     """Mock case ID for dummy fastqdir."""
     return "sample_tumor_normal_fastqdir"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
     """Mock TGA tumor-normal case ID."""
     return "sample_tumor_normal"
+
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_wgs() -> str:
@@ -158,6 +184,8 @@ def case_id_tumor_only_wgs() -> str:
 def case_id_tumor_normal_wgs() -> str:
     """Mock WGS tumor-normal case ID."""
     return "sample_tumor_normal_wgs"
+
+
 @pytest.fixture(scope="session", params=fastq_pattern_types)
 def fastq_dir(case_id_tumor_normal_fastqdir: str, analysis_dir: str, request):
     """Mock FastQ directory."""
@@ -176,10 +204,11 @@ def fastq_dir(case_id_tumor_normal_fastqdir: str, analysis_dir: str, request):
     yield fastq_dir.as_posix()
 
     for fastq in fastq_test_dict["tumor"]:
-        Path.unlink(fastq_dir/fastq)
+        Path.unlink(fastq_dir / fastq)
 
     for fastq in fastq_test_dict["normal"]:
-        Path.unlink(fastq_dir/fastq)
+        Path.unlink(fastq_dir / fastq)
+
 
 @pytest.fixture
 def cli_runner():
@@ -271,9 +300,11 @@ def config_path():
 def config_dict(config_path):
     return read_json(config_path)
 
+
 @pytest.fixture(scope="session")
 def config_sample_info_tumor_normal(config_files):
     return read_json(config_files["sample_tumor_normal"])
+
 
 @pytest.fixture(scope="session")
 def pon_fastq_path():
@@ -284,9 +315,12 @@ def pon_fastq_path():
 def panel_bed_file():
     return "tests/test_data/references/panel/panel.bed"
 
+
 @pytest.fixture(scope="session")
 def analysis_workflow_qc():
     return "balsamic-qc"
+
+
 @pytest.fixture(scope="session")
 def background_variant_file():
     return "tests/test_data/references/panel/background_variants.txt"
@@ -375,10 +409,13 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) ->
     yield fastq_dir.as_posix()
 
     for fastq in fastq_test_dict["tumor"]:
-        Path.unlink(fastq_dir/fastq)
+        Path.unlink(fastq_dir / fastq)
+
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_single_w_dummy_vep(analysis_dir: str, case_id_tumor_only: str) -> str:
+def fastq_dir_tumor_only_single_w_dummy_vep(
+    analysis_dir: str, case_id_tumor_only: str
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -390,18 +427,23 @@ def fastq_dir_tumor_only_single_w_dummy_vep(analysis_dir: str, case_id_tumor_onl
 
     vep_dir: Path = Path(analysis_dir, case_id_tumor_only, "analysis", "vep")
     vep_dir.mkdir(parents=True, exist_ok=True)
-    vep_test_file = "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+    vep_test_file = (
+        "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+    )
     Path(vep_dir, vep_test_file).touch()
 
     yield fastq_dir.as_posix()
 
     for fastq in fastq_test_dict["tumor"]:
-        Path.unlink(fastq_dir/fastq)
+        Path.unlink(fastq_dir / fastq)
 
-    Path.unlink(vep_dir/vep_test_file)
+    Path.unlink(vep_dir / vep_test_file)
+
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
-def fastq_dir_tumor_only_pon_cnn(analysis_dir: str, case_id_tumor_only_pon_cnn: str, request) -> str:
+def fastq_dir_tumor_only_pon_cnn(
+    analysis_dir: str, case_id_tumor_only_pon_cnn: str, request
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon_cnn, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -414,10 +456,13 @@ def fastq_dir_tumor_only_pon_cnn(analysis_dir: str, case_id_tumor_only_pon_cnn: 
     yield fastq_dir.as_posix()
 
     for fastq in fastq_test_dict["tumor"]:
-        Path.unlink(fastq_dir/fastq)
+        Path.unlink(fastq_dir / fastq)
+
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str, pon_fastq_list: list) -> str:
+def fastq_dir_tumor_only_pon(
+    analysis_dir: str, case_id_tumor_only_pon: str, pon_fastq_list: list
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -429,7 +474,9 @@ def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str, pon
 
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
-def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str, request) -> str:
+def fastq_dir_tumor_only_umi(
+    analysis_dir: str, case_id_tumor_only_umi: str, request
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_umi, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -442,11 +489,13 @@ def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str, req
     yield fastq_dir.as_posix()
 
     for fastq in fastq_test_dict["tumor"]:
-        Path.unlink(fastq_dir/fastq)
+        Path.unlink(fastq_dir / fastq)
 
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
-def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str, request) -> str:
+def fastq_dir_tumor_normal(
+    analysis_dir: str, case_id_tumor_normal: str, request
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -467,8 +516,12 @@ def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str, request
     for fastq in fastq_test_dict["normal"]:
         Path.unlink(fastq_dir / fastq)
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_extrafile(analysis_dir: str, case_id_tumor_normal: str, ) -> str:
+def fastq_dir_tumor_normal_extrafile(
+    analysis_dir: str,
+    case_id_tumor_normal: str,
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -497,8 +550,11 @@ def fastq_dir_tumor_normal_extrafile(analysis_dir: str, case_id_tumor_normal: st
     Path.unlink(fastq_dir / extra_file1)
     Path.unlink(fastq_dir / extra_file2)
 
-@pytest.fixture(scope="session",  params=fastq_pattern_types, ids=fastq_pattern_ids)
-def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str, request) -> str:
+
+@pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
+def fastq_dir_tumor_only_wgs(
+    analysis_dir: str, case_id_tumor_only_wgs: str, request
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_wgs, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -514,9 +570,10 @@ def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str, req
         Path.unlink(fastq_dir / fastq)
 
 
-
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
-def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str, request) -> str:
+def fastq_dir_tumor_normal_wgs(
+    analysis_dir: str, case_id_tumor_normal_wgs: str, request
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_wgs, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -537,6 +594,7 @@ def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str,
     for fastq in fastq_test_dict["normal"]:
         Path.unlink(fastq_dir / fastq)
 
+
 @pytest.fixture(scope="session")
 def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """
@@ -554,6 +612,7 @@ ls -l # dummy command
         fn.write(snakemake_script)
 
     return {"snakescript": str(snakemake_script_file)}
+
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(
@@ -606,6 +665,7 @@ def tumor_normal_config(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc(
     case_id_tumor_normal: str,
@@ -656,10 +716,10 @@ def tumor_normal_config_qc(
             ],
         )
 
-
     return Path(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc_wgs(
@@ -711,6 +771,7 @@ def tumor_normal_config_qc_wgs(
     return Path(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).as_posix()
+
 
 @pytest.fixture(name="helpers")
 def fixture_config_helpers():
@@ -811,6 +872,7 @@ def tumor_only_config(
         analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def tumor_only_config_single(
     case_id_tumor_only: str,
@@ -857,6 +919,7 @@ def tumor_only_config_single(
     return Path(
         analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_only_config_qc(
@@ -908,6 +971,7 @@ def tumor_only_config_qc(
     return Path(
         analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(
@@ -1104,7 +1168,9 @@ def qc_extracted_metrics(metrics_yaml_path):
 
 
 @pytest.fixture(scope="function")
-def snakemake_bcftools_filter_vardict_research_tumor_only(tumor_only_config_single, helpers):
+def snakemake_bcftools_filter_vardict_research_tumor_only(
+    tumor_only_config_single, helpers
+):
     """bcftools_filter_vardict_research_tumor_only snakemake mock rule"""
 
     helpers.read_config(tumor_only_config_single)
