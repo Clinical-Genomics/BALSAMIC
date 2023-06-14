@@ -25,7 +25,7 @@ logging.getLogger("filelock").setLevel("WARN")
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
-fastq_dir =  config["analysis"]["fastq_path"]
+fastq_dir = get_result_dir(config) + "/fastq/"
 analysis_dir = get_result_dir(config)
 qc_dir = analysis_dir + "/qc/"
 bam_dir =  analysis_dir + "/bam/"
