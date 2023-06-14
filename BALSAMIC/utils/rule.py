@@ -156,36 +156,6 @@ def get_sample_type_from_prefix(config, sample):
         raise KeyError(
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
-
-
-def get_mapping_info_deprecated(
-    samplename, sample_dict, bam_dir, picarddup, sequencing_type
-):
-    """
-    input:
-    output:
-    """
-    alignments = {}
-    alignments["align_sort_bamlist"] = []
-    for fastqpattern in sample_dict[samplename]["fastq_info"]:
-        alignments["align_sort_bamlist"].append(
-            bam_dir
-            + "{sample}_align_sort_{fastqpattern}.bam".format(
-                sample=samplename, fastqpattern=fastqpattern
-            )
-        )
-
-    if sequencing_type == "wgs":
-        alignments["final_bam"] = bam_dir + "{sample}.dedup.realign.bam".format(
-            sample=samplename
-        )
-    else:
-        alignments["final_bam"] = bam_dir + "{sample}.sorted.{picardstr}.bam".format(
-            sample=samplename, picardstr=picarddup
-        )
-    return alignments
-
-
 def get_mapping_info(samplename, sample_dict, bam_dir, sequencing_type, analysis_type):
     """
     input:
