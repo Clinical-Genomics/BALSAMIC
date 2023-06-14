@@ -49,15 +49,12 @@ for sample in sample_dict:
         normal_sample = sample
         sample_dict[normal_sample]["sample_type"] = "NORMAL"
 
+
 # Get fastq pattern --> fastq mapping
 fastq_dict = {}
 for sample in sample_dict:
-    for fastq_pattern in sample_dict[sample]["fastqpair_patterns"]:
-        fastq_dict[fastq_pattern] = sample_dict[sample]["fastqpair_patterns"][fastq_pattern]
-
-# picarddup flag
-picarddup = get_picard_mrkdup(config)
-
+    for fastq_pattern in sample_dict[sample]["fastq_info"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
 
 # Get mapping info
 for sample in sample_dict:
