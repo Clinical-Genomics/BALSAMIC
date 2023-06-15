@@ -66,7 +66,7 @@ rule vep_somatic_clinical_snv:
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
     clinical_snv = clinical_snv_obs,
-    calncer_germline_snv = cancer_germline_snv_obs,
+    cancer_germline_snv = cancer_germline_snv_obs,
     vcfanno_clinical_annotations = dump_toml(clinical_annotations),
   threads:
     get_threads(cluster_config, "vep_somatic_snv")
@@ -74,7 +74,7 @@ rule vep_somatic_clinical_snv:
     "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:
     """
-if [[ -f "{params.clinical_snv}" ] || [ -f "{params.calncer_germline_snv}" ]]; then
+if [[ -f "{params.clinical_snv}" ] || [ -f "{params.cancer_germline_snv}" ]]; then
 
 echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
 
