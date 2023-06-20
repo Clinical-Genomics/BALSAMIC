@@ -363,6 +363,19 @@ def get_clinical_snv_observations(config: dict) -> str:
     return Path(config["reference"]["clinical_snv_observations"]).as_posix()
 
 
+def get_cancer_germline_snv_observations(config: dict) -> str:
+    """Returns path for cancer germline snv observations
+
+    Args:
+        config: a config dictionary
+
+    Returns:
+        Path for cancer-germline-snv-observations vcf file
+
+    """
+    return Path(config["reference"]["cancer_germline_snv_observations"]).as_posix()
+
+
 def get_swegen_snv(config: dict) -> str:
     """Returns path for swegen snv frequencies
 
