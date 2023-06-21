@@ -244,6 +244,8 @@ cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scatter_cnvpytor};
 
 cp {params.tmpdir}/{params.tumor}.circular.0001.png {output.circular_cnvpytor};
 
+sed 's/FORMAT=<ID=CN,Number=1,Type=Integer/FORMAT=<ID=CN,Number=1,Type=Float/g' -i {params.tmpdir}/{params.tumor}.vcf
+
 bgzip -c -l 9 {params.tmpdir}/{params.tumor}.vcf > {output.cnv_cnvpytor};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
