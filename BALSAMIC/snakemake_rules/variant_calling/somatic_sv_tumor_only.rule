@@ -192,7 +192,7 @@ rule cnvpytor_tumor_only:
     output:
         cnv_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.vcf.gz",
         circular_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.circular.png",
-        scattter_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.scatter.png",
+        scatter_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.scatter.png",
         namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.sample_name_map",
     benchmark:
         benchmark_dir + 'cnvpytor_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
@@ -240,7 +240,7 @@ cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
 for binsize in 1000 10000 100000; do cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
 -view $binsize < {params.tmpdir}/{params.tumor}.out.sh;done;
 
-cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scattter_cnvpytor};
+cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scatter_cnvpytor};
 
 cp {params.tmpdir}/{params.tumor}.circular.0001.png {output.circular_cnvpytor};
 
