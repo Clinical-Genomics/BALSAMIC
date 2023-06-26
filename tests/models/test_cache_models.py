@@ -68,7 +68,6 @@ def test_referenceurlsmodel_validate_file_type():
     # GIVEN a reference model
     dummy_output_file = "some_random_file"
     dummy_output_path = "some_path"
-    actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
 
     dummy_reference = {
         "url": "gs://domain/file_name",
