@@ -6,7 +6,7 @@ Added:
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
 * Annotate SNVs with cancer germline SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
-* Annotate SNVs with somatic SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/11
+* Annotate SNVs with somatic SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
 
 Changed:
 ^^^^^^^^
