@@ -68,13 +68,13 @@ def test_metric_model_duplication_refactoring():
 def test_metric_model_fail_validation():
     """test MetricModel behaviour for an incorrect input"""
 
-    # GIVEN a non accepted input
+    # GIVEN an invalid input
     invalid_input = {"header": None, "id": "ACC1"}
 
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
         MetricModel(**invalid_input)
-    assert f"field required" in str(input_exc.value)
+    assert "field required" in str(input_exc.value)
 
 
 def test_metric_validation_model_pass(qc_extracted_metrics):

@@ -1,10 +1,6 @@
-import os
+"""Test module for Balsamic common models."""
 import pytest
 
-from pathlib import Path
-from pydantic import ValidationError
-
-from BALSAMIC.models.cache_models import ReferenceMeta, ReferenceUrlsModel
 from BALSAMIC.models.models import (
     VCFAttributes,
     VarCallerFilter,

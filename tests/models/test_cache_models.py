@@ -83,7 +83,7 @@ def test_referenceurlsmodel_validate_file_type():
 
     # THEN model raise error on validation
     with pytest.raises(ValidationError) as excinfo:
-        built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+        ReferenceUrlsModel.parse_obj(dummy_reference)
         assert "not a valid reference file format" in excinfo.value
 
 
@@ -119,8 +119,6 @@ def test_referenceurlsmodel_write_md5_no_output_file(tmp_path_factory):
     dummy_output_file = "some_random_file"
     dummy_output_path = tmp_path_factory.mktemp("some_path")
 
-    actual_md5_file = Path(dummy_output_path, dummy_output_file + ".md5")
-
     dummy_reference = {
         "url": "gs://domain/file_name",
         "file_type": "fasta",
@@ -144,7 +142,6 @@ def test_referenceurlsmodel_validate_genome_version():
     # GIVEN a reference model
     dummy_output_file = "some_random_file"
     dummy_output_path = "some_path"
-    actual_path = Path(dummy_output_path, dummy_output_file).as_posix()
 
     dummy_reference = {
         "url": "gs://domain/file_name",
@@ -157,7 +154,7 @@ def test_referenceurlsmodel_validate_genome_version():
 
     with pytest.raises(ValidationError) as excinfo:
         # WHEN building the model
-        built_model = ReferenceUrlsModel.parse_obj(dummy_reference)
+        ReferenceUrlsModel.parse_obj(dummy_reference)
 
         # THEN model raise error on validation
         assert "not a valid genome version" in excinfo.value
