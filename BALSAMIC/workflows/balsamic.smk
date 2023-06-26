@@ -22,9 +22,10 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
-                                 get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type, get_capture_kit,
-                                 get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
-                                 get_swegen_sv, dump_toml)
+                                 get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type,
+                                 get_capture_kit,
+                                 get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
+                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations)
 
 from BALSAMIC.constants.analysis import MutationType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
@@ -68,6 +69,7 @@ singularity_image = config['singularity']['image']
 research_annotations = []
 clinical_annotations = []
 clinical_snv_obs = ""
+cancer_germline_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
 swegen_sv = ""
@@ -126,6 +128,17 @@ if "clinical_snv_observations" in config["reference"]:
     )
     clinical_snv_obs = get_clinical_snv_observations(config)
 
+if "cancer_germline_snv_observations" in config["reference"]:
+    clinical_annotations.append( {
+        'annotation': [{
+            'file': get_cancer_germline_snv_observations(config),
+            'fields': ["Frq", "Obs", "Hom"],
+            'ops': ["self", "self", "self"],
+            'names': ["Cancer_Germline_Frq", "Cancer_Germline_Obs", "Cancer_Germline_Hom"]
+        }]
+    }
+    )
+    cancer_germline_snv_obs = get_cancer_germline_snv_observations(config)
 
 if "clinical_sv_observations" in config["reference"]:
     clinical_sv = get_clinical_sv_observations(config)
