@@ -66,6 +66,7 @@ rule vep_somatic_clinical_snv:
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
     clinical_snv = clinical_snv_obs,
+    cancer_germline_snv = cancer_germline_snv_obs,
     vcfanno_clinical_annotations = dump_toml(clinical_annotations),
   threads:
     get_threads(cluster_config, "vep_somatic_snv")
@@ -73,7 +74,7 @@ rule vep_somatic_clinical_snv:
     "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:
     """
-if [[ -f "{params.clinical_snv}" ]]; then
+if [[ -f "{params.clinical_snv}" ]] || [[ -f "{params.cancer_germline_snv}" ]]; then
 
 echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
 
@@ -136,8 +137,6 @@ rule annotate_swegen_frequency_somatic_sv:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         swegen_sv_frequency = swegen_sv,
         tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
@@ -173,8 +172,6 @@ rule annotate_clinical_observation_somatic_sv:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         clinical_sv_observations = clinical_sv,
         tmp_vcf_clinical = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),

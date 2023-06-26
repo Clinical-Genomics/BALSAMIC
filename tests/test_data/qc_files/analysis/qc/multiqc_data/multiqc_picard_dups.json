@@ -1,5 +1,5 @@
 {
-    "concatenated_tumor_XXXXXX_R": {
+    "ACC1": {
         "LIBRARY": "Unknown Library",
         "UNPAIRED_READS_EXAMINED": 11860.0,
         "READ_PAIRS_EXAMINED": 20440841.0,

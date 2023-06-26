@@ -2,14 +2,13 @@ import os
 import shutil
 import logging
 import sys
-import collections
 import re
 import subprocess
 from pathlib import Path
 from io import StringIO
 from distutils.spawn import find_executable
 import zlib
-from typing import List
+from typing import Dict, Optional, List
 
 import yaml
 import snakemake
@@ -279,25 +278,6 @@ def get_config(config_name):
         raise FileNotFoundError(f"Config for {config_name} was not found.")
 
 
-def recursive_default_dict():
-    """
-    Recursivly create defaultdict.
-    """
-    return collections.defaultdict(recursive_default_dict)
-
-
-def convert_defaultdict_to_regular_dict(inputdict: dict):
-    """
-    Recursively convert defaultdict to dict.
-    """
-    if isinstance(inputdict, collections.defaultdict):
-        inputdict = {
-            key: convert_defaultdict_to_regular_dict(value)
-            for key, value in inputdict.items()
-        }
-    return inputdict
-
-
 def find_file_index(file_path):
     indexible_files = {
         ".bam": [".bam.bai", ".bai"],
@@ -331,25 +311,6 @@ def get_file_extension(file_path):
     return file_extension[1:]
 
 
-def get_from_two_key(input_dict, from_key, by_key, by_value, default=None):
-    """
-    Given two keys with list of values of same length, find matching index of by_value in from_key from by_key.
-
-    from_key and by_key should both exist
-    """
-
-    matching_value = default
-    if (
-        from_key in input_dict
-        and by_key in input_dict
-        and by_value in input_dict[from_key]
-    ):
-        idx = input_dict[from_key].index(by_value)
-        matching_value = input_dict[by_key][idx]
-
-    return matching_value
-
-
 def get_file_status_string(file_to_check):
     """
     Checks if file exsits. and returns a string with checkmark or redcorss mark
@@ -363,50 +324,6 @@ def get_file_status_string(file_to_check):
         return_str = Color("[{green}\u2713{/green}] Found: ") + file_to_check
 
     return return_str, file_status
-
-
-def singularity(sif_path: str, cmd: str, bind_paths: list) -> str:
-    """Run within container
-
-    Excutes input command string via Singularity container image
-
-    Args:
-        sif_path: Path to singularity image file (sif)
-        cmd: A string for series of commands to run
-        bind_path: a path to bind within container
-
-    Returns:
-        A sanitized Singularity cmd
-
-    Raises:
-        BalsamicError: An error occured while creating cmd
-    """
-
-    singularity_cmd = shutil.which("singularity")
-    if not singularity_cmd:
-        raise BalsamicError("singularity command does not exist")
-
-    if not Path(sif_path).is_file():
-        raise BalsamicError("container file does not exist")
-
-    singularity_bind_path = ""
-    for bind_path in bind_paths:
-        singularity_bind_path += "--bind {} ".format(bind_path)
-
-    shellcmd = "singularity exec {} {}".format(singularity_bind_path, cmd)
-
-    return " ".join(shellcmd.split())
-
-
-def validate_fastq_pattern(sample):
-    """Finds the correct filename prefix from file path, and returns it.
-    An error is raised if sample name has invalid pattern"""
-
-    fq_pattern = re.compile(r"R_[12]" + ".fastq.gz$")
-    sample_basename = Path(sample).name
-
-    file_str = sample_basename[0 : (fq_pattern.search(sample_basename).span()[0] + 1)]
-    return file_str
 
 
 def get_panel_chrom(panel_bed) -> list:
@@ -514,58 +431,26 @@ def get_bioinfo_tools_version(
 
 
 def get_sample_dict(
-    tumor: str,
-    normal: str,
-    tumor_sample_name: str = None,
-    normal_sample_name: str = None,
-) -> dict:
-    """Concatenates sample dicts for all provided files"""
-    samples = {}
-    if normal:
-        for sample in normal:
-            key, val = get_sample_names(sample, "normal")
-            samples[key] = val
-            samples[key]["sample_name"] = normal_sample_name
-
-    for sample in tumor:
-        key, val = get_sample_names(sample, "tumor")
-        samples[key] = val
-        samples[key]["sample_name"] = tumor_sample_name
-    return samples
+    tumor_sample_name: str, normal_sample_name: Optional[str]
+) -> Dict[str, dict]:
+    """Returns a sample dictionary given the names of the tumor and/or normal samples."""
+    sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
+    if normal_sample_name:
+        sample_dict.update({normal_sample_name: {"type": "normal"}})
+    return sample_dict
 
 
-def get_sample_names(filename, sample_type):
-    """Creates a dict with sample prefix, sample type, and readpair suffix"""
-    file_str = validate_fastq_pattern(filename)
-    if file_str:
-        return (
-            file_str,
-            {
-                "file_prefix": file_str,
-                "type": sample_type,
-                "readpair_suffix": ["1", "2"],
-            },
-        )
-
-
-def create_fastq_symlink(casefiles, symlink_dir: Path):
-    """Creates symlinks for provided files in analysis/fastq directory.
-    Identifies file prefix pattern, and also creates symlinks for the
-    second read file, if needed"""
-
-    for filename in casefiles:
-        parent_dir = Path(filename).parents[0]
-        file_str = validate_fastq_pattern(filename)
-        for f in parent_dir.rglob(f"*{file_str}*.fastq.gz"):
-            try:
-                LOG.info(f"Creating symlink {f} -> {Path(symlink_dir, f.name)}")
-                Path(symlink_dir, f.name).symlink_to(f)
-            except FileExistsError:
-                LOG.info(f"File {symlink_dir / f.name} exists, skipping")
+def get_pon_sample_dict(directory: str) -> Dict[str, dict]:
+    """Returns a PON sample dictionary."""
+    sample_dict: Dict[str, dict] = {}
+    for file in Path(directory).glob("*.fastq.gz"):
+        sample_name: str = file.name.split("_")[-4]
+        sample_dict.update({sample_name: {"type": "normal"}})
+    return sample_dict
 
 
 def generate_graph(config_collection_dict, config_path):
-    """Generate DAG graph using snakemake stdout output"""
+    """Generate DAG graph using snakemake stdout output."""
 
     with CaptureStdout() as graph_dot:
         snakemake.snakemake(
@@ -602,34 +487,21 @@ def generate_graph(config_collection_dict, config_path):
     graph_obj.render(cleanup=True)
 
 
-def get_fastq_bind_path(fastq_path: Path) -> list():
-    """Takes a path with symlinked fastq files.
-    Returns unique paths to parent directories for singulatiry bind
-    """
-    parents = set()
-    for fastq_file_path in Path(fastq_path).iterdir():
-        parents.add(Path(fastq_file_path).resolve().parent.as_posix())
-    return list(parents)
-
-
 def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> dict:
-    """Replaces values of file_prefix with sample_name in deliverables dict"""
+    """Replaces values of sample_type with sample_name in deliverables dict."""
 
     for delivery_file in delivery_json["files"]:
         file_tags = delivery_file["tag"].split(",")
         for sample in sample_config_dict["samples"]:
-            file_prefix = sample_config_dict["samples"][sample]["file_prefix"]
-            sample_name = sample_config_dict["samples"][sample]["sample_name"]
             sample_type = sample_config_dict["samples"][sample]["type"]
-            if file_prefix == delivery_file["id"]:
-                delivery_file["id"] = sample_name
+            if sample == delivery_file["id"]:
                 for tag_index, tag in enumerate(file_tags):
-                    if tag == file_prefix or tag == file_prefix.replace("_", "-"):
-                        file_tags[tag_index] = sample_name
-                if sample_name not in file_tags:
-                    file_tags.append(sample_name)
+                    if tag == sample or tag == sample.replace("_", "-"):
+                        file_tags[tag_index] = sample
+                if sample not in file_tags:
+                    file_tags.append(sample)
             if sample_type == delivery_file["id"]:
-                delivery_file["id"] = sample_name
+                delivery_file["id"] = sample
             if sample_type in file_tags:
                 file_tags.remove(sample_type)
         delivery_file["tag"] = list(set(file_tags))
@@ -667,17 +539,6 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
         yaml.dump({case_name: jobid_list}, jobid_out)
 
 
-def create_pon_fastq_symlink(pon_fastqs, symlink_dir):
-    for fastq_name in os.listdir(pon_fastqs):
-        pon_fastq = Path(pon_fastqs, fastq_name).as_posix()
-        pon_sym_file = Path(symlink_dir, fastq_name).as_posix()
-        try:
-            LOG.info(f"Creating symlink {fastq_name} -> {pon_sym_file}")
-            os.symlink(pon_fastq, pon_sym_file)
-        except FileExistsError:
-            LOG.info(f"File {pon_sym_file} exists, skipping")
-
-
 def get_md5(filename):
     with open(filename, "rb") as fh:
         hashed = 0
@@ -695,3 +556,13 @@ def create_md5(reference, check_md5):
         for key, value in reference.items():
             if os.path.isfile(value):
                 fh.write(get_md5(value) + " " + value + "\n")
+
+
+def get_fastq_files_directory(directory: str) -> str:
+    """Return the absolute path for the directory containing the input fastq files."""
+    input_files: List[Path] = [
+        file.absolute() for file in Path(directory).glob("*.fastq.gz")
+    ]
+    if not input_files or not input_files[0].is_symlink():
+        return directory
+    return os.path.commonpath([file.resolve().as_posix() for file in input_files])

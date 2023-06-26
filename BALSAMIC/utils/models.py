@@ -1,18 +1,16 @@
 import hashlib
 import logging
-import os
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
+from pydantic import BaseModel, validator, Field, AnyUrl
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.constants.common import (
-    BIOINFO_TOOL_ENV,
     SEQUENCING_TYPE,
     ANALYSIS_TYPES,
     ANALYSIS_WORKFLOW,
@@ -21,6 +19,7 @@ from BALSAMIC.constants.common import (
     MUTATION_TYPE,
     VALID_OPS,
     GENDER_OPTIONS,
+    SAMPLE_TYPE,
 )
 from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
 
@@ -220,11 +219,11 @@ class AnalysisModel(BaseModel):
         sequencing_type : Field(required); string literal [targeted, wgs]
             targeted : if capture kit was used to enrich specific genomic regions
             wgs : if whole genome sequencing was performed
-         analysis_workflow: Field(required); string literal [balsamic, balsamic-qc, balsamic-umi]
-             balsamic: execute balsamic workflow
-             balsamic-qc: execute balsamic qc-only workflow
-             balsamic-umi: execute balsamic along with UMIworkflow for panels
-         analysis_dir : Field(required); existing path where to save files
+        analysis_workflow: Field(required); string literal [balsamic, balsamic-qc, balsamic-umi]
+            balsamic: execute balsamic workflow
+            balsamic-qc: execute balsamic qc-only workflow
+            balsamic-umi: execute balsamic along with UMIworkflow for panels
+        analysis_dir : Field(required); existing path where to save files
         fastq_path : Field(optional); Path where fastq files will be stored
         script : Field(optional); Path where snakemake scripts will be stored
         log : Field(optional); Path where logs will be saved
@@ -299,19 +298,14 @@ class AnalysisModel(BaseModel):
     def dirpath_always_abspath(cls, value) -> str:
         return Path(value).resolve().as_posix()
 
+    @validator("fastq_path")
+    def fastq_path_as_abspath(cls, value, values, **kwargs) -> str:
+        return Path(value).resolve().as_posix()
+
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
         return (
             Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
-            + "/"
-        )
-
-    @validator("fastq_path")
-    def parse_analysis_to_fastq_path(cls, value, values, **kwargs) -> str:
-        return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "analysis", "fastq"
-            ).as_posix()
             + "/"
         )
 
@@ -376,39 +370,22 @@ class AnalysisPonModel(AnalysisModel):
 
 
 class SampleInstanceModel(BaseModel):
-    """Holds attributes for samples used in analysis
+    """Holds attributes for samples used in analysis.
 
     Attributes:
-        file_prefix : Field(str); basename of sample pair
-        sample_type : Field(str; alias=type); type of sample [tumor, normal]
-        sample_name : Field(str); Internal ID of sample to use in deliverables
-        readpair_suffix : Field(List); currently always set to [1, 2]
-
-    Raises:
-        ValueError:
-            When sample_type is set ot any value other than [tumor, normal]
-
+        type: Field(str): sample type [tumor, normal]
     """
 
-    file_prefix: str
-    sample_name: Optional[str]
-    sample_type: str = Field(alias="type")
-    readpair_suffix: List[str] = ["1", "2"]
+    type: str
 
-    @validator("sample_type")
+    @validator("type")
     def sample_type_literal(cls, value):
-        balsamic_sample_types = ["tumor", "normal"]
-        if value not in balsamic_sample_types:
+        """Validate balsamic supported sample type."""
+        if value not in SAMPLE_TYPE:
             raise ValueError(
-                f"Provided sample type ({value}) not supported in BALSAMIC!"
+                f"The provided sample type ({value}) is not supported in BALSAMIC"
             )
         return value
-
-    @validator("sample_name")
-    def set_sample_id_if_missing_value(cls, value, values, **kwargs):
-        if value:
-            return value
-        return values.get("file_prefix")
 
 
 class PanelModel(BaseModel):
@@ -454,6 +431,7 @@ class PonBalsamicConfigModel(BaseModel):
 
     QC: QCModel
     analysis: AnalysisPonModel
+    samples: Dict[str, SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: DirectoryPath
     bioinfo_tools: dict
@@ -600,6 +578,7 @@ class ReferenceMeta(BaseModel):
         ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
         clinvar: ReferenceUrlsModel. Optional field for clinvar reference
         somalier_sites: ReferenceUrlsModel. Optional field for somalier sites vcf
+        cadd_snv: ReferenceUrlsModel. Optional field for CADD SNV reference
     """
 
     basedir: str = ""
@@ -626,6 +605,8 @@ class ReferenceMeta(BaseModel):
     ascat_chryloci: Optional[ReferenceUrlsModel]
     clinvar: Optional[ReferenceUrlsModel]
     somalier_sites: Optional[ReferenceUrlsModel]
+    cadd_snv: Optional[ReferenceUrlsModel]
+    cadd_snv_index: Optional[ReferenceUrlsModel]
 
     @validator("*", pre=True)
     def validate_path(cls, value, values, **kwargs):

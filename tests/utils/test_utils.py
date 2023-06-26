@@ -1,5 +1,4 @@
 import json
-import os
 import subprocess
 import pytest
 import sys
@@ -11,6 +10,8 @@ from unittest import mock
 import logging
 
 from pathlib import Path
+
+from _pytest.logging import LogCaptureFixture
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
@@ -25,17 +26,9 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     createDir,
     get_config,
-    recursive_default_dict,
-    create_pon_fastq_symlink,
-    convert_defaultdict_to_regular_dict,
     get_file_status_string,
-    get_from_two_key,
     find_file_index,
-    validate_fastq_pattern,
     get_panel_chrom,
-    create_fastq_symlink,
-    get_fastq_bind_path,
-    singularity,
     get_file_extension,
     get_bioinfo_tools_version,
     convert_deliverables_tags,
@@ -44,13 +37,16 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_md5,
     create_md5,
+    get_sample_dict,
+    get_pon_sample_dict,
+    get_fastq_files_directory,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
 from BALSAMIC.utils.rule import (
     get_chrom,
     get_vcf,
-    get_sample_type,
+    get_sample_id_by_type,
     get_picard_mrkdup,
     get_variant_callers,
     get_script_path,
@@ -61,7 +57,6 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_prefix,
 )
-from tests.helpers import Map
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -248,31 +243,6 @@ def test_get_file_extension_known_ext():
     assert file_extension == actual_extension
 
 
-def test_recursive_default_dict():
-    # GIVEN a dictionary
-    test_dict = recursive_default_dict()
-    test_dict["key_1"]["key_2"] = "value_1"
-
-    # WHEN it is recursively creates a default dictionary
-    # THEN the output should be a dicitionary
-    assert isinstance(test_dict, collections.defaultdict)
-    assert "key_2" in test_dict["key_1"]
-
-
-def test_convert_defaultdict_to_regular_dict():
-    # GIVEN a recursively created default dict
-    test_dict = recursive_default_dict()
-    test_dict["key_1"]["key_2"] = "value_1"
-
-    # WHEN converting it back to normal dict
-    test_dict = convert_defaultdict_to_regular_dict(test_dict)
-
-    # THEN the output type should be dict and not defaultdict
-    assert not isinstance(test_dict, collections.defaultdict)
-    assert isinstance(test_dict, dict)
-    assert "key_2" in test_dict["key_1"]
-
-
 def test_iterdict(reference):
     """GIVEN a dict for iteration"""
     # WHEN passing dict to this function
@@ -453,15 +423,36 @@ def test_get_vcf_invalid_variant_caller(sample_config):
         get_vcf(sample_config, variant_callers, [sample_config["analysis"]["case_id"]])
 
 
-def test_get_sample_type(sample_config):
-    # GIVEN a sample_config dict, bio_type as tumor
-    bio_type = "tumor"
+def test_get_sample_id_by_type(sample_config: dict, tumor_sample_name: str):
+    """Test get sample ID by biological type."""
 
-    # WHEN calling get_sample_type with bio_type
-    sample_id = get_sample_type(sample_config["samples"], bio_type)
+    # GIVEN a sample configuration dictionary and a tumor sample type
+    sample_type: str = "tumor"
 
-    # THEN It should return the tumor samples id
-    assert sample_id == ["S1_R"]
+    # WHEN getting the sample ID
+    sample_id: str = get_sample_id_by_type(
+        samples=sample_config["samples"], type=sample_type
+    )
+
+    # THEN it should correspond to the tumor sample name
+    assert sample_id == tumor_sample_name
+
+
+def test_get_sample_id_by_type_error(
+    sample_config: dict, tumor_sample_name: str, caplog: LogCaptureFixture
+):
+    """Test get sample ID by type when an invalid biological type is provided."""
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a sample configuration dictionary and an incorrect sample type
+    sample_type: str = "affected"
+
+    # WHEN getting the sample ID
+    with pytest.raises(BalsamicError):
+        get_sample_id_by_type(samples=sample_config["samples"], type=sample_type)
+
+        # THEN it sould raise a BalsamicError
+        assert f"There is no sample ID for the {sample_type} sample type" in caplog.text
 
 
 def test_get_picard_mrkdup(sample_config):
@@ -569,20 +560,20 @@ def test_write_json(tmp_path, reference):
     assert len(list(tmp.iterdir())) == 1
 
 
-def test_write_json_error(tmp_path):
-    with pytest.raises(Exception, match=r"Is a directory"):
-        # GIVEN a invalid dict
-        ref_json = {"path": "this_path", "reference": ""}
-        tmp = tmp_path / "tmp"
-        tmp.mkdir()
+def test_write_json_error(tmp_path: Path):
+    """Test JSON write error."""
 
-        # WHEN passing a invalid dict
-        # THEN It will raise the error
-        assert write_json(ref_json, tmp)
+    # GIVEN a dictionary to be saved in a JSON file
+    ref_json = {"case": "/path/to/case", "reference": "/path/to/reference"}
+
+    # GIVEN a directory as the output file
+    with pytest.raises(Exception, match=r"Is a directory"):
+        # THEN an exception should be raised
+        assert write_json(ref_json, tmp_path)
 
 
 def test_read_json(config_path):
-    """test data extraction from a BALSAMIC config JSON file"""
+    """Test data extraction from a BALSAMIC config JSON file."""
 
     # GIVEN a config path
 
@@ -594,7 +585,7 @@ def test_read_json(config_path):
 
 
 def test_read_json_error():
-    """test data extraction from a BALSAMIC config JSON file for an ivalid path"""
+    """Test data extraction from a BALSAMIC config JSON file for an invalid path."""
 
     # GIVEN an incorrect config path
     config_path = "/not/a/path"
@@ -610,15 +601,15 @@ def test_read_json_error():
 
 
 def test_read_yaml(metrics_yaml_path):
-    """test data extraction from a saved YAML file"""
+    """Test data extraction from a saved YAML file."""
 
     # GIVEN an expected output
     n_metrics = 12  # Number of expected metric
 
     dropout_metric = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric",
+        "id": "ACC1",
+        "input": "ACC1.sorted.mrkdup.hsmetric",
         "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
         "value": 0.027402,
@@ -627,8 +618,8 @@ def test_read_yaml(metrics_yaml_path):
 
     ins_size_metric = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.insertsizemetric",
+        "id": "ACC1",
+        "input": "ACC1.sorted.insertsizemetric",
         "name": "MEAN_INSERT_SIZE",
         "step": "multiqc_picard_insertSize",
         "value": 201.813054,
@@ -637,8 +628,8 @@ def test_read_yaml(metrics_yaml_path):
 
     dups_metric = {
         "header": None,
-        "id": "tumor",
-        "input": "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt",
+        "id": "ACC1",
+        "input": "ACC1.sorted.mrkdup.txt",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
         "value": 0.391429,
@@ -656,7 +647,7 @@ def test_read_yaml(metrics_yaml_path):
 
 
 def test_read_yaml_error():
-    """test data extraction from an incorrect YAML path"""
+    """Test data extraction from an incorrect YAML path."""
 
     # GIVEN an invalid path
     yaml_path = "NOT_A_PATH"
@@ -665,7 +656,7 @@ def test_read_yaml_error():
     try:
         read_yaml(yaml_path)
     except FileNotFoundError as file_exc:
-        assert f"The YAML file {yaml_path} was not found." in str(file_exc)
+        assert f"The YAML file {yaml_path} was not found" in str(file_exc)
 
 
 def test_get_threads(config_files):
@@ -690,37 +681,6 @@ def test_get_file_status_string_file_exists(tmpdir):
     assert "Found" in result[0].value_no_colors
 
 
-def test_get_file_status_string_file_not_exist():
-    # GIVEN an existing file and condition_str False
-    file_not_exist = "some_random_path/dummy_non_existing_file"
-
-    # WHEN checking for file string
-    result = get_file_status_string(str(file_not_exist))
-
-    # THEN it should not return empty str
-    assert "missing" in result[0].value_no_colors
-
-
-def test_get_from_two_key():
-    # GIVEN a dictionary with two keys that each have list of values
-    input_dict = {
-        "key_1": ["key_1_value_1", "key_1_value_2"],
-        "key_2": ["key_2_value_1", "key_2_value_2"],
-    }
-
-    # WHEN knowing the key_1_value_2 from key_1, return key_2_value_2 from key_2
-    result = get_from_two_key(
-        input_dict,
-        from_key="key_1",
-        by_key="key_2",
-        by_value="key_1_value_2",
-        default=None,
-    )
-
-    # THEN retrun value should be key_2_value_2 and not None
-    assert result == "key_2_value_2"
-
-
 def test_find_file_index(tmpdir):
     # GIVEN an existing bam file and its bai index file
     bam_dir = tmpdir.mkdir("temporary_path")
@@ -743,112 +703,6 @@ def test_find_file_index(tmpdir):
     assert str(bai_file_2) in result
 
 
-def test_singularity_shellcmd(balsamic_cache):
-    """test singularity shell cmd"""
-
-    # GIVEN a dummy command
-    dummy_command = "ls this_path"
-    dummy_path_1 = "this_path/path1"
-    dummy_path_2 = "this_path/path2"
-    correct_shellcmd = "exec --bind {} --bind {} ls this_path".format(
-        dummy_path_1, dummy_path_2
-    )
-    singularity_container_sif = Path(
-        balsamic_cache, balsamic_version, "containers", "align_qc", "example.sif"
-    ).as_posix()
-
-    with mock.patch.object(shutil, "which") as mocked:
-        mocked.return_value = "/my_home/binary_path/singularity"
-
-        # WHEN building singularity command
-        shellcmd = singularity(
-            sif_path=singularity_container_sif,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
-
-        # THEN successfully return a correct singularity cmd
-        assert correct_shellcmd in shellcmd
-
-
-def test_singularity_shellcmd_sif_not_exist():
-    """test singularity shell cmd with non-existing file"""
-
-    # GIVEN a dummy command
-    dummy_command = "ls this_path"
-    dummy_sif_path = "/some_path/my_sif_path_3.1415/container.sif"
-    dummy_path_1 = "this_path/path1"
-    dummy_path_2 = "this_path/path2"
-    error_msg = "container file does not exist"
-
-    # WHEN building singularity command
-    # THEN successfully get error that container doesn't exist
-    with mock.patch.object(shutil, "which") as mocked, pytest.raises(
-        BalsamicError, match=error_msg
-    ):
-        mocked.return_value = "/my_home/binary_path/singularity"
-
-        singularity(
-            sif_path=dummy_sif_path,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
-
-
-def test_singularity_shellcmd_cmd_not_exist():
-    """test singularity shell cmd with nonexisting singularity command"""
-
-    # GIVEN a dummy command
-    dummy_command = "ls this_path"
-    error_msg = "singularity command does not exist"
-    dummy_path_1 = "this_path/path1"
-    dummy_path_2 = "this_path/path2"
-    singularity_container_sif = "some_path/container.sif"
-
-    # WHEN building singularity command
-    # THEN successfully get error if singualrity command doesn't exist
-    with mock.patch.object(shutil, "which") as mocked, pytest.raises(
-        BalsamicError, match=error_msg
-    ):
-        mocked.return_value = None
-
-        singularity(
-            sif_path=singularity_container_sif,
-            cmd=dummy_command,
-            bind_paths=[dummy_path_1, dummy_path_2],
-        )
-
-
-def test_validate_fastq_pattern():
-    # GIVEN a path to a file with correct fastq file prefix
-    fastq_path_r1 = "/home/analysis/dummy_tumor_R_1.fastq.gz"
-    fastq_path_r2 = "/home/analysis/dummy_normal_R_2.fastq.gz"
-    # THEN it should return the correct prefix
-    assert validate_fastq_pattern(fastq_path_r1) == "dummy_tumor_R"
-    assert validate_fastq_pattern(fastq_path_r2) == "dummy_normal_R"
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_1 = "/home/analysis/dummy_tumor.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_1)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_2 = "/home/analysis/dummy_tumor_R3.fastq.gz"
-        validate_fastq_pattern(bad_fastq_path_2)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-    with pytest.raises(AttributeError) as excinfo:
-        # GIVEN a path to a file with incorrect fastq file prefix
-        bad_fastq_path_3 = "/home/analysis/dummy_tumor_R_2.bam"
-        validate_fastq_pattern(bad_fastq_path_3)
-        # THEN AttributeError is raised
-    assert excinfo.value
-
-
 def test_get_panel_chrom():
     # GIVEN a valid PANEL BED file
     panel_bed_file = "tests/test_data/references/panel/panel.bed"
@@ -856,115 +710,46 @@ def test_get_panel_chrom():
     assert len(get_panel_chrom(panel_bed_file)) > 0
 
 
-def test_create_fastq_symlink(tmpdir_factory, caplog):
-    # GIVEN a list of valid input fastq files from test directory containing 4 files
-    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
-    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-    filenames = [
-        "tumor_R_1.fastq.gz",
-        "normal_R_1.fastq.gz",
-        "tumor_R_2.fastq.gz",
-        "normal_R_2.fastq.gz",
-    ]
-    successful_log = "skipping"
-    casefiles = [Path(symlink_from_path, x) for x in filenames]
-    for casefile in casefiles:
-        casefile.touch()
-    with caplog.at_level(logging.INFO):
-        create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
-        # THEN destination should have 4 files
-        assert len(list(Path(symlink_to_path).rglob("*.fastq.gz"))) == 4
-        # THEN exception triggers log message containing "skipping"
-        assert successful_log in caplog.text
-
-
-def test_get_fastq_bind_path(tmpdir_factory):
-    # GIVEN a list of valid input fastq filenames and test directories
-    filenames = [
-        "tumor_R_1.fastq.gz",
-        "normal_R_1.fastq.gz",
-        "tumor_R_2.fastq.gz",
-        "normal_R_2.fastq.gz",
-    ]
-    # WHEN files are created, and symlinks are made in symlink directory
-    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
-    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-    casefiles = [Path(symlink_from_path, x) for x in filenames]
-    for casefile in casefiles:
-        casefile.touch()
-    create_fastq_symlink(casefiles=casefiles, symlink_dir=symlink_to_path)
-    # THEN function returns list containing the original parent path!
-    assert get_fastq_bind_path(symlink_to_path) == [symlink_from_path]
-
-
-def test_create_pon_fastq_symlink_file_exist_error(tmpdir_factory, caplog):
-    # GIVEN a list of valid fastq file names for cnv pon
-    fastq_files = [
-        "case1_R_1.fastq.gz",
-    ]
-
-    # WHEN files are created, and symlinks are made in symlink directory
-    symlink_from_path = tmpdir_factory.mktemp("symlink_from")
-    symlink_to_path = tmpdir_factory.mktemp("symlink_to")
-
-    for fastq_file in fastq_files:
-        Path(symlink_from_path, fastq_file).touch()
-        Path(symlink_to_path, fastq_file).touch()
-
-    with caplog.at_level(logging.INFO):
-        create_pon_fastq_symlink(symlink_from_path, symlink_to_path)
-        assert "exists, skipping" in caplog.text
-
-
 def test_convert_deliverables_tags():
+    """Test generation of delivery tags."""
 
     # GIVEN a deliverables dict and a sample config dict
     delivery_json = {
         "files": [
             {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/S1_R_2.fp.fastq.gz",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_1.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "read2,quality-trimmed-fastq-read2,tumor",
-                "id": "S1_R",
+                "tag": "ACC1,read1,quality-trimmed-fastq-read1",
+                "id": "ACC1",
                 "format": "fastq.gz",
             },
             {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S1_R_fastp.json",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_2.fp.fastq.gz",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "S1_R,json,quality-trimmed-fastq-json",
-                "id": "S1_R",
-                "format": "json",
+                "tag": "read2,quality-trimmed-fastq-read1",
+                "id": "ACC1",
+                "format": "fastq.gz",
             },
             {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/S2_R_fastp.json",
+                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/ACC1.fastp.json",
                 "path_index": [],
                 "step": "fastp",
-                "tag": "ACC1,json,quality-trimmed-fastq-json",
+                "tag": "ACC1,json,quality-trimmed-fastq-json,tumor",
                 "id": "tumor",
                 "format": "json",
             },
         ]
     }
+    sample_config_dict = {"samples": {"ACC1": {"type": "tumor"}}}
 
-    sample_config_dict = {
-        "samples": {
-            "S1_R": {
-                "file_prefix": "S1_R",
-                "sample_name": "ACC1",
-                "type": "tumor",
-                "readpair_suffix": ["1", "2"],
-            },
-        },
-    }
-
-    # WHEN running convert function
-    delivery_json = convert_deliverables_tags(
+    # WHEN running the convert function
+    delivery_json: dict = convert_deliverables_tags(
         delivery_json=delivery_json, sample_config_dict=sample_config_dict
     )
 
-    # Prefix strings should be replaced with sample name
+    # THEN prefix strings should be replaced with sample name
     for delivery_file in delivery_json["files"]:
         assert delivery_file["id"] == "ACC1"
         assert "ACC1" in delivery_file["tag"]
@@ -1080,13 +865,13 @@ def test_create_md5(tmp_path):
 
 
 def test_get_rule_output(snakemake_fastqc_rule):
-    """Tests retrieval of existing output files from a specific workflow"""
+    """Tests retrieval of existing output files from a specific workflow."""
 
     # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
     rules = snakemake_fastqc_rule
     rule_name = "fastqc"
     output_file_wildcards = {
-        "sample": ["concatenated_tumor_XXXXXX_R", "tumor", "normal"],
+        "sample": ["ACC1", "tumor", "normal"],
         "case_name": "sample_tumor_only",
     }
 
@@ -1098,8 +883,8 @@ def test_get_rule_output(snakemake_fastqc_rule):
     for file in output_files:
         # Expected file names
         assert (
-            os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_1.fastq.gz"
-            or os.path.basename(file[0]) == "concatenated_tumor_XXXXXX_R_2.fastq.gz"
+            Path(file[0]).name == "ACC1_R_1.fastq.gz"
+            or Path(file[0]).name == "ACC1_R_2.fastq.gz"
         )
         # Expected tags
         assert (
@@ -1109,15 +894,78 @@ def test_get_rule_output(snakemake_fastqc_rule):
 
 
 def test_get_sample_type_from_prefix(config_dict):
-    """Test sample type extraction from a extracted config file"""
+    """Test sample type extraction from a extracted config file."""
 
     # GIVEN a config dictionary
 
     # GIVEN a sample name
-    sample = "concatenated_tumor_XXXXXX_R"
+    sample = "ACC1"
 
     # WHEN calling the function
     sample_type = get_sample_type_from_prefix(config_dict, sample)
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == "tumor"
+
+
+def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str):
+    """Tests sample dictionary retrieval."""
+
+    # GIVEN a tumor and a normal sample names
+
+    # GIVEN the expected dictionary output
+    samples_expected: dict = {
+        tumor_sample_name: {"type": "tumor"},
+        normal_sample_name: {"type": "normal"},
+    }
+
+    # WHEN getting the sample dictionary
+    samples: dict = get_sample_dict(
+        tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
+    )
+
+    # THEN the dictionary should be correctly formatted
+    assert samples == samples_expected
+
+
+def test_get_pon_sample_dict(
+    fastq_dir: str, tumor_sample_name: str, normal_sample_name: str
+):
+    """Tests sample PON dictionary retrieval."""
+
+    # GIVEN a FASTQ directory
+
+    # GIVEN the expected sample dictionary
+    samples_expected: dict = {"ACC1": {"type": "normal"}, "ACC2": {"type": "normal"}}
+
+    # WHEN retrieving PON samples
+    samples: dict = get_pon_sample_dict(fastq_dir)
+
+    # THEN the samples should be retrieved from the FASTQ directory
+    assert samples == samples_expected
+
+
+def test_get_fastq_files_directory(fastq_dir: str):
+    """Test get unlinked input files directory."""
+
+    # GIVEN an input fast path
+
+    # WHEN  extracting the input files common path
+    input_directory: str = get_fastq_files_directory(fastq_dir)
+
+    # THEN the fastq directory should be returned
+    assert input_directory == fastq_dir
+
+
+def test_get_input_symlinked_files_path(fastq_dir: str, tmp_path: Path):
+    """Test remove symlinks from a directory."""
+
+    # GIVEN a temporary fast path containing symlinked files
+    for file in Path(fastq_dir).iterdir():
+        Path(tmp_path, file.name).symlink_to(file)
+
+    # WHEN  extracting the input files common path
+    input_directory: str = get_fastq_files_directory(str(tmp_path))
+
+    # THEN the real fastq directory should be returned
+    assert input_directory == fastq_dir

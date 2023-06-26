@@ -1,3 +1,21 @@
+[X.X.X]
+-------
+Added:
+^^^^^^
+* Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
+* `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
+* `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
+* Annotate SNVs with cancer germline observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
+
+Changed:
+^^^^^^^^
+* Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
+* Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
+
+Fixed:
+^^^^^^
+* vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
+
 [12.0.1]
 --------
 

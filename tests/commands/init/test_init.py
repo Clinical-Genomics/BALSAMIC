@@ -1,5 +1,4 @@
 import subprocess
-import logging
 import graphviz
 
 from pathlib import Path
