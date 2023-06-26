@@ -129,10 +129,10 @@ LOG = logging.getLogger(__name__)
     help="VCF path of clinical SV observations (WGS analysis workflow)",
 )
 @click.option(
-    "--cancer-all-snv-observations",
+    "--cancer-germline-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF path of cancer SNV normal observations (WGS analysis workflow)",
+    help="VCF path of cancer germline SNV normal observations (WGS analysis workflow)",
 )
 @click.option(
     "--cancer-somatic-snv-observations",
@@ -198,7 +198,7 @@ def case_config(
     normal_sample_name,
     clinical_snv_observations,
     clinical_sv_observations,
-    cancer_all_snv_observations,
+    cancer_germline_snv_observations,
     cancer_somatic_snv_observations,
     cancer_somatic_sv_observations,
     swegen_snv,
@@ -220,7 +220,7 @@ def case_config(
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
-        "cancer_all_snv_observations": cancer_all_snv_observations,
+        "cancer_germline_snv_observations": cancer_germline_snv_observations,
         "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
