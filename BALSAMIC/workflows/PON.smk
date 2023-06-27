@@ -65,7 +65,6 @@ for sample in sample_dict:
     sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
                                     sample_dict=sample_dict,
                                     bam_dir=bam_dir,
-                                    sequencing_type=config["analysis"]["sequencing_type"],
                                     analysis_type=config["analysis"]["analysis_type"])
 
 # Find and set Sentieon binary and license server from env variables

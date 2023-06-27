@@ -17,7 +17,7 @@ rule sentieon_umiextract:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        ds_params= params.umiextract.read_structure,
+        ds_params = params.umiextract.read_structure,
         sample = "{sample}"
     threads:
         get_threads(cluster_config, "sentieon_umiextract")

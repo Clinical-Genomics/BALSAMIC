@@ -156,7 +156,7 @@ def get_sample_type_from_prefix(config, sample):
         raise KeyError(
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
-def get_mapping_info(samplename, sample_dict, bam_dir, sequencing_type, analysis_type):
+def get_mapping_info(samplename, sample_dict, bam_dir, analysis_type):
     """
     input:
     output:
