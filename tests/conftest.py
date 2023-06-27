@@ -138,6 +138,7 @@ def reference():
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
             "clinical_snv_observations": "tests/test_data/references/variants/clinical_snv_variants.vcf.gz",
             "cancer_germline_snv_observations": "tests/test_data/references/variants/cancer_germline_snv_variants.vcf.gz",
+            "cancer_somatic_snv_observations": "tests/test_data/references/variants/cancer_somatic_snv_variants.vcf.gz",
             "clinical_sv_observations": "tests/test_data/references/variants/clinical_sv_variants.vcf.gz",
             "swegen_snv_frequency": "tests/test_data/references/variants/swegen_snv.vcf.gz",
             "swegen_sv_frequency": "tests/test_data/references/variants/swegen_sv.vcf.gz",
@@ -221,7 +222,7 @@ def balsamic_cache(tmp_path_factory, reference):
     Create singularity container
     """
 
-    cache_dir = tmp_path_factory.mktemp("balsmic_coche")
+    cache_dir = tmp_path_factory.mktemp("balsmic_cache")
 
     cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
     cache_container.mkdir(parents=True, exist_ok=True)
