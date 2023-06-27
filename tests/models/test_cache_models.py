@@ -5,7 +5,7 @@ from pathlib import Path
 from BALSAMIC.commands.init.utils import get_containers
 from BALSAMIC.constants.cache import ContainerVersion, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
-from BALSAMIC.models.cache_models import CacheConfigModel
+from BALSAMIC.models.cache import CacheConfigModel
 
 
 def test_cache_config_model(tmp_path):

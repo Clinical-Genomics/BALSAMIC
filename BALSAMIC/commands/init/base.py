@@ -39,7 +39,7 @@ from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 
-from BALSAMIC.models.cache_models import (
+from BALSAMIC.models.cache import (
     CacheConfigModel,
     HgReferencesModel,
     CanFamReferencesModel,

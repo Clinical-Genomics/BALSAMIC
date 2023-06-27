@@ -15,7 +15,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.io import write_json, write_finish_file
 
-from BALSAMIC.models.models import BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig
 
 from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
                                  get_sample_id_by_type, get_picard_mrkdup, get_script_path,

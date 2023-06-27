@@ -1,5 +1,5 @@
 """QC metrics utility methods."""
-from BALSAMIC.models.metrics_model import MetricValidationModel
+from BALSAMIC.models.metrics import MetricValidationModel
 
 
 def validate_qc_metrics(metrics: dict) -> dict:

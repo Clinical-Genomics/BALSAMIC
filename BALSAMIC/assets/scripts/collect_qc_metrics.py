@@ -8,7 +8,7 @@ import yaml
 import re
 
 from BALSAMIC.constants.metrics import METRICS
-from BALSAMIC.models.metrics_model import MetricModel
+from BALSAMIC.models.metrics import MetricModel
 from BALSAMIC.utils.io import read_json
 from BALSAMIC.utils.rule import (
     get_capture_kit,
