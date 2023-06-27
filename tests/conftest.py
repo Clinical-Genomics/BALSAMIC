@@ -104,7 +104,7 @@ def environ():
 @pytest.fixture(scope="session")
 def cluster_analysis_config_path() -> str:
     """Return cluster analysis configuration file."""
-    return Path(CONSTANTS_DIR, ClusterConfigType.ANALYSIS.value + ".json").as_posix()
+    return Path(CONSTANTS_DIR, ClusterConfigType.ANALYSIS + ".json").as_posix()
 
 
 @pytest.fixture(scope="session")

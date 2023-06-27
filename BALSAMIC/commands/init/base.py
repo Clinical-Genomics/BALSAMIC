@@ -94,7 +94,7 @@ def initialize(
 
     if run_mode == RunMode.CLUSTER and not run_analysis:
         LOG.info("Changing run-mode to local on dry-run")
-        run_mode = RunMode.LOCAL
+        run_mode: RunMode = RunMode.LOCAL
 
     if run_mode == RunMode.CLUSTER and not account:
         LOG.error("A cluster account is required for cluster run mode")

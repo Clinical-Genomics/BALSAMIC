@@ -1,288 +1,182 @@
-import subprocess
+"""Test Balsamic init command."""
+from functools import partial
 from pathlib import Path
-import graphviz
 
-from unittest import mock
+from graphviz import Source
+from mock import mock
+
+from BALSAMIC.constants.analysis import RunMode
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.cache import GenomeVersion
+from click.testing import Result
+
+from BALSAMIC.constants.process import EXIT_SUCCESS, EXIT_FAIL
 
 
-def test_init_reference_write_json(
-    invoke_cli,
-    tmp_path,
+def test_init_hg(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
+    """Test Balsamic init command."""
+
+    # GIVEN a temporary output directory and a COSMIC key
+
+    # WHEN invoking the init command
+    result: Result = invoke_cli(
+        [
+            "init",
+            "--out-dir",
+            tmp_path.as_posix(),
+            "--genome-version",
+            GenomeVersion.HG19,
+            "--cosmic-key",
+            cosmic_key,
+        ]
+    )
+
+    # THEN the human reference generation workflow should have successfully started
+    assert "Starting reference generation workflow" in result.output
+    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, "config.json").exists()
+    assert Path(
+        tmp_path, balsamic_version, GenomeVersion.HG19, "reference_graph.pdf"
+    ).exists()
+    assert result.exit_code == EXIT_SUCCESS
+
+
+def test_init_canfam(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
+    """Test Balsamic canine workflow init command."""
+
+    # GIVEN a temporary output directory and a COSMIC key
+
+    # WHEN invoking the init command
+    result: Result = invoke_cli(
+        [
+            "init",
+            "--out-dir",
+            tmp_path.as_posix(),
+            "--genome-version",
+            GenomeVersion.CanFam3,
+        ]
+    )
+
+    # THEN the canine reference generation workflow should have successfully started
+    assert "Starting reference generation workflow" in result.output
+    assert Path(
+        tmp_path, balsamic_version, GenomeVersion.CanFam3, "config.json"
+    ).exists()
+    assert Path(
+        tmp_path, balsamic_version, GenomeVersion.CanFam3, "reference_graph.pdf"
+    ).exists()
+    assert result.exit_code == EXIT_SUCCESS
+
+
+def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
+    """Test Balsamic init command when a COSMIC key is not provided."""
+
+    # GIVEN a temporary output directory and a COSMIC key
+
+    # WHEN invoking the init command
+    result: Result = invoke_cli(
+        [
+            "init",
+            "--out-dir",
+            tmp_path.as_posix(),
+            "--genome-version",
+            GenomeVersion.HG19,
+        ]
+    )
+
+    # THEN an exception should have been raised
+    assert (
+        "A COSMIC authentication key is required for hg19/hg38 references"
+        in result.output
+    )
+    assert result.exit_code == EXIT_FAIL
+
+
+def test_init_hg_run_analysis(
+    invoke_cli: partial, tmp_path: Path, cluster_account: str, cosmic_key: str
 ):
-    # Given test_reference.json
-    test_genome_version = "hg19"
-    test_container_version = "develop"
-    test_new_dir = tmp_path / "test_reference_dir"
-    test_new_dir.mkdir()
+    """Test Balsamic init command when actually running the analysis."""
 
-    # WHEN creating config.json in reference dir
-    test_output_reference_config = (
-        test_new_dir / balsamic_version / test_genome_version / "config.json"
-    )
-    test_output_reference_pdf = (
-        test_new_dir / balsamic_version / test_genome_version / "reference_graph.pdf"
-    )
+    # GIVEN a temporary output directory, a cluster account, and a COSMIC key
 
-    result = invoke_cli(
+    # WHEN invoking the init command
+    result: Result = invoke_cli(
         [
             "init",
-            "-o",
-            str(test_new_dir),
+            "--out-dir",
+            tmp_path.as_posix(),
+            "--genome-version",
+            GenomeVersion.HG19,
             "--cosmic-key",
-            "secret_key",
-            "-v",
-            test_container_version,
-        ]
-    )
-
-    # THEN output config and pdf file generate and command exit code 0
-    assert result.exit_code == 0
-    assert Path(test_output_reference_pdf).exists()
-    assert Path(test_output_reference_config).exists()
-
-
-def test_init_reference_no_write_perm(tmp_path, invoke_cli, no_write_perm_path):
-    # Given a path with no write permission
-    test_genome_version = "hg19"
-    test_container_version = "develop"
-    test_new_dir = str(no_write_perm_path)
-
-    # WHEN invoking config sample
-    result = invoke_cli(
-        [
-            "init",
-            "-o",
-            str(test_new_dir),
-            "--cosmic-key",
-            "secret_key",
-            "-v",
-            test_container_version,
-            "-g",
-            test_genome_version,
-        ]
-    )
-
-    # THEN it should create test_reference.json and exist with no error
-    assert result.exit_code == 1
-
-
-def test_init_reference_no_cosmic_abort(tmp_path, invoke_cli):
-    # Given a path with no write permission
-    test_genome_version = "hg19"
-    test_container_version = "develop"
-    test_new_dir = tmp_path / "test_reference_dir"
-    test_new_dir.mkdir()
-
-    # WHEN invoking config sample
-    result = invoke_cli(
-        [
-            "init",
-            "-o",
-            str(test_new_dir),
-            "-v",
-            test_container_version,
-            "-g",
-            test_genome_version,
-        ]
-    )
-
-    # THEN it should create test_reference.json and exist with no error
-    assert result.exit_code == 1
-
-
-def test_init_reference_no_cosmic_run(tmp_path, invoke_cli):
-    # Given a path with no write permission
-    test_genome_version = "canfam3"
-    test_container_version = "develop"
-    test_new_dir = tmp_path / "test_reference_dir"
-    test_new_dir.mkdir()
-
-    # WHEN invoking config sample
-    result = invoke_cli(
-        [
-            "init",
-            "-o",
-            str(test_new_dir),
-            "-v",
-            test_container_version,
-            "-g",
-            test_genome_version,
-        ]
-    )
-
-    # THEN it should create test_reference.json and exist with no error
-    assert result.exit_code == 0
-
-
-def test_init_reference_click_abort(invoke_cli, tmp_path):
-    # Given test_reference output directory
-    test_container_version = "develop"
-    test_new_dir = tmp_path / "test_reference_dir"
-    test_new_dir.mkdir()
-
-    # WHEN running the command
-    result = invoke_cli(
-        [
-            "init",
-            "-o",
-            str(test_new_dir),
-            "--cosmic-key",
-            "secret_key",
-            "-v",
-            test_container_version,
-            "--run-analysis",
-        ]
-    )
-
-    # THEN it should exit code for not providing the run-mode
-    assert result.exit_code == 1
-
-
-def test_init_reference_mail_type(invoke_cli, tmp_path):
-    # Given test_reference output directory
-    test_container_version = "develop"
-    test_new_dir = tmp_path / "test_reference_dir"
-    test_new_dir.mkdir()
-
-    dummy_mail_type = "END"
-    dummy_mail_user = "dummy@gmail.com"
-
-    # WHEN running the command
-    result = invoke_cli(
-        [
-            "init",
-            "-o",
-            str(test_new_dir),
-            "--cosmic-key",
-            "secret_key",
-            "-v",
-            test_container_version,
-            "--run-analysis",
+            cosmic_key,
             "--run-mode",
-            "local",
-            "--mail-type",
-            dummy_mail_type,
-            "--mail-user",
-            dummy_mail_user,
+            RunMode.CLUSTER,
+            "--account",
+            cluster_account,
+            "--run-analysis",
         ]
     )
 
-    # THEN it should exit code for not providing the run-mode
-    assert result.exit_code == 0
+    # THEN the human reference generation workflow should have successfully started
+    assert "Starting reference generation workflow" in result.output
+    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, "config.json").exists()
+    assert Path(
+        tmp_path, balsamic_version, GenomeVersion.HG19, "reference_graph.pdf"
+    ).exists()
+    assert result.exit_code == EXIT_SUCCESS
 
 
-def test_init_reference_graph_exception(invoke_cli, tmp_path):
-    # Given test_reference.json
-    test_new_dir = tmp_path / "test_reference_nonfunctional_graph"
-    test_new_dir.mkdir()
+def test_init_hg_run_analysis_no_account(
+    invoke_cli: partial, tmp_path: Path, cosmic_key: str
+):
+    """Test Balsamic init command when actually running the analysis without specifying a cluster account."""
 
-    with mock.patch.object(graphviz, "Source") as mocked:
-        mocked.return_value = None
-        result = invoke_cli(
-            [
-                "init",
-                "-o",
-                str(test_new_dir),
-                "--cosmic-key",
-                "secret_key",
-            ]
-        )
+    # GIVEN a temporary output directory and a COSMIC key
 
-    # assert result.exit_code == 1
-
-
-def test_init_container_force_dry(invoke_cli, tmp_path):
-    # Given a dummy path
-    test_new_dir = tmp_path / "test_container_dry_force"
-    test_new_dir.mkdir()
-    test_container_version = "develop"
-
-    # WHEN force pull dry-run container
-    result = invoke_cli(
+    # WHEN invoking the init command
+    result: Result = invoke_cli(
         [
             "init",
             "--out-dir",
-            str(test_new_dir),
+            tmp_path.as_posix(),
+            "--genome-version",
+            GenomeVersion.HG19,
             "--cosmic-key",
-            "secret_key",
-            "-v",
-            test_container_version,
+            cosmic_key,
+            "--run-mode",
+            RunMode.CLUSTER,
+            "--run-analysis",
         ]
     )
 
-    # THEN command exit code 0
-    assert result.exit_code == 0
+    # THEN an exception should have been raised
+    assert "A cluster account is required for cluster run mode" in result.output
+    assert result.exit_code == EXIT_FAIL
 
 
-def test_init_container_specific_tag(invoke_cli, tmp_path):
-    # Given a dummy path
-    test_new_dir = tmp_path / "test_container_dir"
-    test_new_dir.mkdir()
-    dummy_tag = "develop"
+def test_init_hg_graph_exception(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
+    """Test Balsamic init command with a graphviz exception."""
 
-    # WHEN pulling a specific tag other than standard version
-    result = invoke_cli(
-        [
-            "init",
-            "--out-dir",
-            str(test_new_dir),
-            "--cosmic-key",
-            "secret_key",
-            "--container-version",
-            dummy_tag,
-        ]
-    )
+    # GIVEN a temporary output directory and a COSMIC key
 
-    # THEN command exit code 0
-    assert result.exit_code == 0
-
-
-def test_init_container_without_dry_run(invoke_cli, tmp_path):
-    # Given a dummy path
-    test_new_dir = tmp_path / "test_container_dir"
-    test_new_dir.mkdir()
-
-    with mock.patch.object(subprocess, "run") as mocked:
-        mocked.return_value = 0
-
-        # WHEN pulling a container in a non dry-run mode
-        result = invoke_cli(
+    # WHEN invoking the init command
+    with mock.patch.object(Source, "render"):
+        result: Result = invoke_cli(
             [
                 "init",
                 "--out-dir",
-                str(test_new_dir),
+                tmp_path.as_posix(),
+                "--genome-version",
+                GenomeVersion.HG19,
                 "--cosmic-key",
-                "secret_key",
-                "--run-analysis",
-                "--account",
-                "development",
+                cosmic_key,
             ]
         )
 
-        # THEN output config and pdf file generate and command exit code 0
-        assert result.exit_code == 0
-
-
-def test_init_container_wrong_tag(invoke_cli, tmp_path):
-    # Given a dummy path
-    test_new_dir = tmp_path / "test_container_dir"
-    test_new_dir.mkdir()
-    dummy_tag = "some_tag_that_does_not_exist_ngrtf123jsds3wqe2"
-
-    # WHEN pulling a wrong container tag
-    result = invoke_cli(
-        [
-            "init",
-            "--out-dir",
-            str(test_new_dir),
-            "--cosmic-key",
-            "secret_key",
-            "--container-version",
-            dummy_tag,
-        ]
-    )
-
-    # THEN capture error log and error code
-    assert result.exit_code > 0
+    # THEN the human reference generation workflow should have successfully started
+    assert "Reference workflow graph generation failed" in result.output
+    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, "config.json").exists()
+    assert not Path(
+        tmp_path, balsamic_version, GenomeVersion.HG19, "reference_graph.pdf"
+    ).exists()
+    assert result.exit_code == EXIT_FAIL

@@ -11,7 +11,6 @@ from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 
-from BALSAMIC.constants.cache import REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError

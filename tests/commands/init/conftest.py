@@ -23,3 +23,15 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.COVERAGE_QC.value: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
         DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
     }
+
+
+@pytest.fixture(scope="session", name="cosmic_key")
+def fixture_cosmic_key() -> str:
+    """Mocked COSMIC key."""
+    return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
+
+
+@pytest.fixture(scope="session", name="cluster_account")
+def fixture_cluster_account() -> str:
+    """Mocked cluster account for job submission."""
+    return "development"
