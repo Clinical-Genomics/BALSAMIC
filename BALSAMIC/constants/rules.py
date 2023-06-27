@@ -3,6 +3,16 @@ from typing import Dict, List
 
 from BALSAMIC.constants.cache import GenomeVersion
 
+common_cache_rules: List[str] = [
+    "snakemake_rules/cache/containers.rule",
+    "snakemake_rules/cache/delly.rule",
+    "snakemake_rules/cache/reference_genome.rule",
+    "snakemake_rules/cache/references.rule",
+    "snakemake_rules/cache/refseq.rule",
+    "snakemake_rules/cache/vcf_references.rule",
+    "snakemake_rules/cache/vep.rule",
+]
+
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
         "concatenate": ["snakemake_rules/concatenation/concatenation.rule"],
@@ -125,24 +135,8 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
     },
     "cache": {
-        GenomeVersion.HG19: [
-            "snakemake_rules/cache/containers.rule",
-            "snakemake_rules/cache/delly.rule",
-            "snakemake_rules/cache/reference_genome.rule",
-            "snakemake_rules/cache/references.rule",
-            "snakemake_rules/cache/refseq.rule",
-            "snakemake_rules/cache/vcf_references.rule",
-            "snakemake_rules/cache/vep.rule",
-        ],
-        GenomeVersion.HG38: [
-            "snakemake_rules/cache/containers.rule",
-            "snakemake_rules/cache/delly.rule",
-            "snakemake_rules/cache/reference_genome.rule",
-            "snakemake_rules/cache/references.rule",
-            "snakemake_rules/cache/refseq.rule",
-            "snakemake_rules/cache/vcf_references.rule",
-            "snakemake_rules/cache/vep.rule",
-        ],
+        GenomeVersion.HG19: common_cache_rules,
+        GenomeVersion.HG38: common_cache_rules,
         GenomeVersion.CanFam3: [
             "snakemake_rules/cache/containers.rule",
             "snakemake_rules/cache/reference_genome.rule",
