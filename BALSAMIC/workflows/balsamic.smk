@@ -25,7 +25,8 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type,
                                  get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
-                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations)
+                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
+                                 get_cancer_somatic_snv_observations)
 
 from BALSAMIC.constants.analysis import MutationType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
@@ -70,6 +71,7 @@ research_annotations = []
 clinical_annotations = []
 clinical_snv_obs = ""
 cancer_germline_snv_obs = ""
+cancer_somatic_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
 swegen_sv = ""
@@ -126,7 +128,7 @@ if "clinical_snv_observations" in config["reference"]:
         }]
     }
     )
-    clinical_snv_obs = get_clinical_snv_observations(config)
+    clinical_snv_obs: str = get_clinical_snv_observations(config)
 
 if "cancer_germline_snv_observations" in config["reference"]:
     clinical_annotations.append( {
@@ -138,14 +140,26 @@ if "cancer_germline_snv_observations" in config["reference"]:
         }]
     }
     )
-    cancer_germline_snv_obs = get_cancer_germline_snv_observations(config)
+    cancer_germline_snv_obs: str = get_cancer_germline_snv_observations(config)
+
+if "cancer_somatic_snv_observations" in config["reference"]:
+    clinical_annotations.append( {
+        'annotation': [{
+            'file': get_cancer_somatic_snv_observations(config),
+            'fields': ["Frq", "Obs", "Hom"],
+            'ops': ["self", "self", "self"],
+            'names': ["Cancer_Somatic_Frq", "Cancer_Somatic_Obs", "Cancer_Somatic_Hom"]
+        }]
+    }
+    )
+    cancer_somatic_snv_obs: str = get_cancer_somatic_snv_observations(config)
 
 if "clinical_sv_observations" in config["reference"]:
-    clinical_sv = get_clinical_sv_observations(config)
+    clinical_sv: str = get_clinical_sv_observations(config)
 
 
 if "swegen_sv_frequency" in config["reference"]:
-    swegen_sv = get_swegen_sv(config)
+    swegen_sv: str = get_swegen_sv(config)
 
 
 # picarddup flag
