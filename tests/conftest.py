@@ -231,7 +231,7 @@ def balsamic_cache(tmp_path_factory, reference):
     Create singularity container
     """
 
-    cache_dir = tmp_path_factory.mktemp("balsmic_coche")
+    cache_dir = tmp_path_factory.mktemp("balsmic_cache")
 
     cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
     cache_container.mkdir(parents=True, exist_ok=True)

@@ -127,7 +127,7 @@ if "clinical_snv_observations" in config["reference"]:
         }]
     }
     )
-    clinical_snv_obs = get_clinical_snv_observations(config)
+    clinical_snv_obs: str = get_clinical_snv_observations(config)
 
 if "cancer_germline_snv_observations" in config["reference"]:
     clinical_annotations.append( {
@@ -139,7 +139,7 @@ if "cancer_germline_snv_observations" in config["reference"]:
         }]
     }
     )
-    cancer_germline_snv_obs = get_cancer_germline_snv_observations(config)
+    cancer_germline_snv_obs: str = get_cancer_germline_snv_observations(config)
 
 if "cancer_somatic_snv_observations" in config["reference"]:
     clinical_annotations.append( {
@@ -151,14 +151,14 @@ if "cancer_somatic_snv_observations" in config["reference"]:
         }]
     }
     )
-    cancer_somatic_snv_obs = get_cancer_somatic_snv_observations(config)
+    cancer_somatic_snv_obs: str = get_cancer_somatic_snv_observations(config)
 
 if "clinical_sv_observations" in config["reference"]:
-    clinical_sv = get_clinical_sv_observations(config)
+    clinical_sv: str = get_clinical_sv_observations(config)
 
 
 if "swegen_sv_frequency" in config["reference"]:
-    swegen_sv = get_swegen_sv(config)
+    swegen_sv: str = get_swegen_sv(config)
 
 
 # picarddup flag
