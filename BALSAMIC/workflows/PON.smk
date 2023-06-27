@@ -62,7 +62,7 @@ rule all:
     output:
         pon_finish_file = pon_finish
     run:
-        write_finish_file(file_path=output.pon_finish_file)
+        write_finish_file(output.pon_finish_file)
 
 rule create_target:
     input:
