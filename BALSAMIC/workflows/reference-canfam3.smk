@@ -10,7 +10,7 @@ from copy import deepcopy
 from BALSAMIC.constants.cache import REFERENCE_FILES
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files
-from BALSAMIC.models.cache_models import ReferenceMeta
+from BALSAMIC.models.cache import ReferenceMeta
 from BALSAMIC.utils.cli import get_md5
 from BALSAMIC.utils.cli import create_md5
 

@@ -9,7 +9,7 @@ import os
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
-from BALSAMIC.models.models import BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig
 
 shell.prefix("set -eo pipefail; ")
 

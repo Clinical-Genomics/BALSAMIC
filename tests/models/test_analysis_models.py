@@ -1,7 +1,7 @@
 """Test module for Balsamic common models."""
 import pytest
 
-from BALSAMIC.models.models import (
+from BALSAMIC.models.analysis import (
     VCFAttributes,
     VarCallerFilter,
     QCModel,

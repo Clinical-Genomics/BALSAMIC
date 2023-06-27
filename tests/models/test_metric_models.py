@@ -3,7 +3,7 @@ import copy
 
 import pytest
 
-from BALSAMIC.models.metrics_model import (
+from BALSAMIC.models.metrics import (
     MetricValidationModel,
     MetricModel,
     MetricConditionModel,

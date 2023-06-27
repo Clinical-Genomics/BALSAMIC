@@ -17,7 +17,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
 from BALSAMIC.utils.io import write_json, read_yaml
 
-from BALSAMIC.models.models import VarCallerFilter, BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 

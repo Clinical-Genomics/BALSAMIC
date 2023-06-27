@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from BALSAMIC.models.cache_models import ReferenceMeta, ReferenceUrlsModel
+from BALSAMIC.models.cache import ReferenceMeta, ReferenceUrlsModel
 
 
 def test_referencemeta():
