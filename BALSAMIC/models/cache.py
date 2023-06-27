@@ -1,4 +1,4 @@
-"""Balsamic cache models."""
+"""Balsamic reference cache models."""
 import logging
 from pathlib import Path
 from typing import Dict, Optional, List, Any, Union
