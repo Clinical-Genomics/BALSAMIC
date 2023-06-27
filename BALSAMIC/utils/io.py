@@ -1,8 +1,7 @@
-"""Input/Output utils file."""
-
+"""Input/Output utility methods."""
 import json
 import logging
-import shutil
+from datetime import datetime
 from pathlib import Path
 
 import yaml
@@ -35,3 +34,9 @@ def read_yaml(yaml_path: str) -> dict:
             return yaml.load(fn, Loader=yaml.SafeLoader)
     else:
         raise FileNotFoundError(f"The YAML file {yaml_path} was not found")
+
+
+def write_finish_file(file_path: str) -> None:
+    """Write finish file indicating the analysis completion."""
+    with open(file_path, mode="w") as finish_file:
+        finish_file.write("%s\n" % datetime.now().strftime("%Y-%m-%d %H:%M"))

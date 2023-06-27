@@ -7,11 +7,11 @@ import logging
 import os
 from pathlib import Path
 
-from BALSAMIC.constants.cache import FileType, Species, VEP_PLUGINS
+from BALSAMIC.constants.cache import FileType
 from BALSAMIC.constants.paths import BALSAMIC_DIR, REFSEQ_SCRIPT_PATH
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache_models import CacheConfigModel
-from BALSAMIC.utils.io import write_finish_file, write_json
+from BALSAMIC.utils.io import write_json, write_finish_file
 from BALSAMIC.utils.rule import get_threads
 
 LOG = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ LOG.info(
 
 
 rule all:
-    """Target rule for Balsamic cache generation."""
+    """Target rule for Balsamic CanFam cache generation."""
     input:
         cache_config.get_container_output_paths(),
         cache_config.get_reference_output_paths(),

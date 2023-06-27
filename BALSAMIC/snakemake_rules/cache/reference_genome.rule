@@ -1,0 +1,73 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule picard_dict_reference_genome:
+    """Create a sequence dictionary for a reference using Picard."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['picard']}.{FileType.SIF}",
+        reference_genome=cache_config.references.reference_genome.file_path,
+    output:
+        dict_reference_genome=cache_config.references.reference_genome.file_path.replace(
+            FileType.FASTA, FileType.DICT
+        ),
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['picard']}.{FileType.SIF}"
+    threads: get_threads(cluster_config=cluster_config, rule_name="picard_dict_reference_genome")
+    message:
+        "Creating a sequence dictionary for a reference file {input.reference_genome}"
+    benchmark:
+        f"{cache_config.references.reference_genome.file_path.replace(FileType.FASTA,FileType.DICT)}.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT)}.{FileType.LOG}",
+    shell:
+        """
+        picard CreateSequenceDictionary REFERENCE="{input.reference_genome}" OUTPUT="{output.dict_reference_genome}" \
+            &> "{log}"
+        """
+
+
+rule fasta_index_reference_genome:
+    """Create a FASTA index for the reference genome."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.{FileType.SIF}",
+        reference_genome=cache_config.references.reference_genome.file_path,
+    output:
+        indexed_reference_genome=cache_config.references.reference_genome.file_path
+        + "."
+        + FileType.FAI,
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.{FileType.SIF}"
+    threads: get_threads(cluster_config=cluster_config, rule_name="fasta_index_reference_genome")
+    message:
+        "FASTA format indexing of the reference genome file {input.reference_genome}"
+    benchmark:
+        f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}.{FileType.LOG}",
+    shell:
+        """
+        samtools faidx "{input.reference_genome}" &> "{log}"
+        """
+
+
+rule bwa_index_reference_genome:
+    """Create BWA indexes for the reference genome."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bwa']}.{FileType.SIF}",
+        reference_genome=cache_config.references.reference_genome.file_path,
+    output:
+        indexed_reference_genome=cache_config.references.get_reference_genome_bwa_index_files(),
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['bwa']}.{FileType.SIF}"
+    threads: get_threads(cluster_config=cluster_config, rule_name="bwa_index_reference_genome")
+    message:
+        "BWA indexing of the reference genome file {input.reference_genome}"
+    benchmark:
+        f"{cache_config.references.reference_genome.file_path}.bwa_indexes.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.reference_genome.file_path}.bwa_indexes.{FileType.LOG}",
+    shell:
+        """
+        bwa index -a bwtsw "{input.reference_genome}" &> "{log}"
+        """

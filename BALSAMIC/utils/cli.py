@@ -253,7 +253,7 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome=
     if analysis_type == "generate_ref":
         snakefile = Path(p, "workflows", "reference.smk")
         if "canfam3" in reference_genome:
-            snakefile = Path(p, "workflows", "reference-canfam3.smk")
+            snakefile = Path(p, "workflows", "reference_canfam3.smk")
             return str(snakefile)
 
     if analysis_type == "pon":
@@ -529,25 +529,6 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
     with open(job_id_dump, "r") as jobid_in, open(job_id_yaml, "w") as jobid_out:
         jobid_list = jobid_in.read().splitlines()
         yaml.dump({case_name: jobid_list}, jobid_out)
-
-
-def get_md5(filename):
-    with open(filename, "rb") as fh:
-        hashed = 0
-        while True:
-            s = fh.read(65536)
-            if not s:
-                break
-            hashed = zlib.crc32(s, hashed)
-    return "%08X" % (hashed & 0xFFFFFFFF)
-
-
-def create_md5(reference, check_md5):
-    """create a md5 file for all reference data"""
-    with open(check_md5, "w") as fh:
-        for key, value in reference.items():
-            if os.path.isfile(value):
-                fh.write(get_md5(value) + " " + value + "\n")
 
 
 def get_fastq_files_directory(directory: str) -> str:

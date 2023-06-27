@@ -5,6 +5,13 @@ from BALSAMIC.constants.cache import DockerContainers
 from BALSAMIC.utils.class_types import StrEnum
 
 
+class RunMode(StrEnum):
+    """Balsamic workflow run mode."""
+
+    CLUSTER: str = "cluster"
+    LOCAL: str = "local"
+
+
 class Gender(StrEnum):
     """Sex options."""
 

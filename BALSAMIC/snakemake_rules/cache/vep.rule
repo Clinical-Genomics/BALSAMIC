@@ -1,0 +1,33 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule download_vep:
+    """Download and install VEP package."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.{FileType.SIF}",
+    output:
+        vep_dir=directory(cache_config.vep_dir),
+    params:
+        species=Species.HOMO_SAPIENS,
+        assembly=cache_config.get_grch_version(),
+        plugins=VEP_PLUGINS,
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.{FileType.SIF}"
+    threads: get_threads(cluster_config=cluster_config, rule_name="download_vep")
+    message:
+        "Downloading and installing VEP package in {output.vep_dir}"
+    benchmark:
+        f"{cache_config.vep_dir}/download_vep.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.vep_dir}/download_vep.{FileType.LOG}",
+    shell:
+        """
+        vep_install --SPECIES {params.species} \
+            --AUTO cfp \
+            --ASSEMBLY {params.assembly} \
+            --CACHEDIR {output.vep_dir} \
+            --PLUGINS {params.plugins} \
+            --NO_HTSLIB --CONVERT --NO_UPDATE \
+            &> {log}
+        """
