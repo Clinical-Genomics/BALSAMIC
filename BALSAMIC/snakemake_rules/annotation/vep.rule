@@ -75,14 +75,15 @@ rule vep_somatic_clinical_snv:
     "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:
     """
-if [[ -f "{params.clinical_snv}" ]] || [[ -f "{params.cancer_germline_snv}" ]] || \
-   [[ -f "{params.cancer_somatic_snv}" ]] ; then
+if [[ -f "{params.clinical_snv}" || \ 
+      -f "{params.cancer_germline_snv}" || \
+      -f "{params.cancer_somatic_snv}" ]] ; then
 
 echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
 
-vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} \
-| bcftools reheader --threads {threads} -s {input.header} \
-| bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical} ;
+vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} | \
+bcftools reheader --threads {threads} -s {input.header} | \
+bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical} ;
 
 else
 
