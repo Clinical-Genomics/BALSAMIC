@@ -191,29 +191,36 @@ def background_variant_file():
 def pon_cnn():
     return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
+
 @pytest.fixture(scope="session")
 def clinical_snv_observations():
     return "tests/test_data/references/variants/clinical_snv_variants.vcf.gz"
+
 
 @pytest.fixture(scope="session")
 def cancer_germline_snv_observations():
     return "tests/test_data/references/variants/cancer_germline_snv_variants.vcf.gz"
 
+
 @pytest.fixture(scope="session")
 def cancer_somatic_snv_observations():
     return "tests/test_data/references/variants/cancer_somatic_snv_variants.vcf.gz"
+
 
 @pytest.fixture(scope="session")
 def clinical_sv_observations():
     return "tests/test_data/references/variants/clinical_sv_variants.vcf.gz"
 
+
 @pytest.fixture(scope="session")
 def swegen_snv_frequency():
     return "tests/test_data/references/variants/swegen_snv.vcf.gz"
 
+
 @pytest.fixture(scope="session")
 def swegen_sv_frequency():
     return "tests/test_data/references/variants/swegen_sv.vcf.gz"
+
 
 @pytest.fixture(scope="session")
 def sentieon_license(tmp_path_factory):
@@ -490,7 +497,7 @@ def tumor_normal_wgs_config(
                 cancer_germline_snv_observations,
                 "--cancer-somatic-snv-observations",
                 cancer_somatic_snv_observations,
-           ],
+            ],
         )
 
     return Path(
