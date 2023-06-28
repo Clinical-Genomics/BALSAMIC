@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 import pytest
 import json
@@ -17,6 +17,7 @@ from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
+from BALSAMIC.models.cache import ReferencesModel
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
@@ -746,6 +747,22 @@ def fixture_reference_file(tmp_path: Path) -> Path:
     return reference_file
 
 
+@pytest.fixture(scope="function", name="reference_genome_file")
+def fixture_reference_genome_file(tmp_path: Path) -> Path:
+    """Dummy reference file."""
+    reference_file: Path = Path(tmp_path, "reference.fasta")
+    reference_file.touch()
+    return reference_file
+
+
+@pytest.fixture(scope="function", name="refgene_txt_file")
+def fixture_refgene_txt_file(tmp_path: Path) -> Path:
+    """Dummy RefSeq's gene file."""
+    reference_file: Path = Path(tmp_path, "refGene.txt")
+    reference_file.touch()
+    return reference_file
+
+
 @pytest.fixture(scope="function", name="reference_url")
 def fixture_reference_url() -> str:
     """Dummy reference URL."""
@@ -816,7 +833,7 @@ def fixture_hg_analysis_references_model_data(
 def fixture_reference_url_model_data(
     reference_url: str, reference_file: Path, cosmic_key: str
 ) -> Dict[str, Any]:
-    """Reference URL model model data."""
+    """Reference URL model data."""
     return {
         "url": reference_url,
         "file_type": FileType.VCF,
@@ -826,3 +843,22 @@ def fixture_reference_url_model_data(
         "file_path": reference_file.as_posix(),
         "secret": cosmic_key,
     }
+
+
+@pytest.fixture(scope="function", name="references_model_data")
+def fixture_references_model_data(
+    reference_url_model_data: Dict[str, Any]
+) -> Dict[str, dict]:
+    """References model data."""
+    return {
+        "genome_chrom_size": reference_url_model_data,
+        "reference_genome": reference_url_model_data,
+        "refgene_sql": reference_url_model_data,
+        "refgene_txt": reference_url_model_data,
+    }
+
+
+@pytest.fixture(scope="function", name="references_model")
+def fixture_references_model(references_model_data: Dict[str, dict]) -> ReferencesModel:
+    """Mocked references model."""
+    return ReferencesModel(**references_model_data)
