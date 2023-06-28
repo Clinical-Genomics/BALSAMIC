@@ -2,7 +2,6 @@ from unittest import mock
 from pathlib import Path
 import pytest
 
-from BALSAMIC.utils.cli import generate_h5
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
 

@@ -988,7 +988,7 @@ def test_get_fastq_files_directory(fastq_dir: str):
 def test_get_input_symlinked_files_path(fastq_dir: str, tmp_path: Path):
     """Test remove symlinks from a directory."""
 
-    # GIVEN a temporary fast path containing symlinked files
+    # GIVEN a temporary fastq path containing symlinked files
     for file in Path(fastq_dir).iterdir():
         Path(tmp_path, file.name).symlink_to(file)
 
