@@ -920,7 +920,7 @@ def test_get_fastqpatterns(sample_config, tumor_sample_name, normal_sample_name)
     fastq_patterns_normal = get_fastqpatterns(sample_dict, normal_sample_name)
     fastq_patterns_normal_expected = ["ACC2_S1_L001_R"]
     assert fastq_patterns_normal == fastq_patterns_normal_expected
-    
+
 
 def test_get_sample_dict(
     tumor_sample_name: str, normal_sample_name: str, fastq_dir: str

@@ -8,6 +8,7 @@ from typing import Optional, List, Dict, Any
 
 from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
 from pydantic.types import DirectoryPath, FilePath
+from collections import defaultdict
 
 from BALSAMIC import __version__ as balsamic_version
 
@@ -561,39 +562,35 @@ class BalsamicConfigModel(BaseModel):
         Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
         Fastq patterns and Fastq names can only occur once.
         """
-        fastq_patterns = {}
-        fastq_filenames = {}
-        for sample in value:
-            for fastq_pattern in value[sample]["fastq_info"]:
-                # Count occurrences of fastq pattern
-                if fastq_pattern in fastq_patterns:
-                    fastq_patterns[fastq_pattern] += 1
-                else:
-                    fastq_patterns[fastq_pattern] = 1
+        def count_occurrences(items):
+            counter = defaultdict(int)
+            for item in items:
+                counter[item] += 1
+            return counter
 
-                # Count occurrences of fastq names
-                for fastq_read_direction, fastq_path in value[sample]["fastq_info"][
-                    fastq_pattern
-                ].items():
-                    fastq_name = os.path.basename(fastq_path)
-                    if fastq_name in fastq_filenames:
-                        fastq_filenames[fastq_name] += 1
-                    else:
-                        fastq_filenames[fastq_name] = 1
+        fastq_patterns = count_occurrences(
+            fastq_pattern
+            for sample in value
+            for fastq_pattern in value[sample]["fastq_info"]
+        )
+
+        fastq_filenames = count_occurrences(
+            os.path.basename(fastq_path)
+            for sample in value
+            for fastq_pattern_info in value[sample]["fastq_info"].values()
+            for fastq_path in fastq_pattern_info.values()
+        )
 
         # Fastq pattern can only be assigned once per group of samples
-        for fastq_pattern in fastq_patterns:
-            assert (
-                fastq_patterns[fastq_pattern] == 1
-            ), f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
+        for fastq_pattern, count in fastq_patterns.items():
+            assert count == 1, f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
 
         # Fastq name can only be assigned once per group of samples
-        for fastq_name in fastq_filenames:
-            assert (
-                fastq_filenames[fastq_name] == 1
-            ), f"Fastq-name: {fastq_name} has been assigned more than once."
+        for fastq_name, count in fastq_filenames.items():
+            assert count == 1, f"Fastq-name: {fastq_name} has been assigned more than once."
 
         return value
+
 
 
 class ReferenceUrlsModel(BaseModel):
