@@ -67,7 +67,7 @@ for sample in sample_dict:
     for fastq_pattern in sample_dict[sample]["fastq_info"]:
         fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
 
-# Get mapping info
+# Get names of bamfiles to be created
 for sample in sample_dict:
     sample_dict[sample]["bam"] = get_bam_names(samplename=sample,
                                     sample_dict=sample_dict,

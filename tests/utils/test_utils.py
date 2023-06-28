@@ -47,7 +47,6 @@ from BALSAMIC.utils.rule import (
     get_chrom,
     get_vcf,
     get_sample_id_by_type,
-    get_picard_mrkdup,
     get_variant_callers,
     get_script_path,
     get_result_dir,
@@ -483,25 +482,6 @@ def test_get_sample_id_by_type_error(
 
         # THEN it sould raise a BalsamicError
         assert f"There is no sample ID for the {sample_type} sample type" in caplog.text
-
-
-def test_get_picard_mrkdup(sample_config):
-    # WHEN passing sample_config
-    picard_str = get_picard_mrkdup(sample_config)
-
-    # THEN It will return the picard str as rmdup
-    assert "mrkdup" == picard_str
-
-
-def test_get_picard_mrkdup_rmdup(sample_config):
-    # WHEN passing sample_config
-    sample_config_rmdup = copy.deepcopy(sample_config)
-    sample_config_rmdup["QC"]["picard_rmdup"] = True
-
-    picard_str = get_picard_mrkdup(sample_config_rmdup)
-
-    # THEN It will return the picard str as rmdup
-    assert "rmdup" == picard_str
 
 
 def test_createDir(tmp_path):
