@@ -1,38 +1,123 @@
 """Test reference cache models."""
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Any
+
+import pytest
+from pydantic import ValidationError
 
 from BALSAMIC.commands.init.utils import get_containers
 from BALSAMIC.constants.cache import ContainerVersion, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
-from BALSAMIC.models.cache import CacheConfigModel
+from BALSAMIC.models.cache import (
+    CacheConfigModel,
+    AnalysisReferencesModel,
+    CanFamAnalysisReferencesModel,
+    HgAnalysisReferencesModel,
+    ReferenceUrlModel,
+)
 
 
-def test_cache_config_model(tmp_path):
-    """"""
+def test_analysis_references_model(analysis_references_model_data: Dict[str, Path]):
+    """Test common analysis references model."""
 
-    config: CacheConfigModel = CacheConfigModel(
-        analysis={"case_id": "reference.v1"},
-        references_dir=tmp_path,
-        variants_dir=tmp_path,
-        genome_dir=tmp_path,
-        vep_dir=tmp_path,
-        containers_dir=tmp_path,
-        genome_version=GenomeVersion.HG19,
-        bioinfo_tools=BIOINFO_TOOL_ENV,
-        containers=get_containers(ContainerVersion.RELEASE),
-        references=REFERENCE_FILES[GenomeVersion.HG19],
-        references_date=str(datetime.now),
+    # GIVEN an input for the analysis reference model
+
+    # WHEN initialising the model
+    model: AnalysisReferencesModel = AnalysisReferencesModel(
+        **analysis_references_model_data
     )
-    config_path: Path = Path(config.references_dir, "config.json")
-    json_obj = config.json(exclude_none=True)
 
-    # with open(config_path, "w") as fn:
-    #     json.dump(json.loads(json_obj), fn, indent=4)
-    #
-    # import os
-    #
-    # os.system(f"open {config.references_dir}")
+    # THEN the model should have been correctly constructed
+    assert model.dict() == analysis_references_model_data
+
+
+def test_analysis_references_model_empty():
+    """Test common analysis references model for an empty input."""
+
+    # GIVEN no input for the analysis reference model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        AnalysisReferencesModel()
+
+
+def test_canfam_analysis_references_model(
+    analysis_references_model_data: Dict[str, Path]
+):
+    """Test canine analysis references model."""
+
+    # GIVEN an input for the canine analysis reference model
+
+    # WHEN initialising the model
+    model: CanFamAnalysisReferencesModel = CanFamAnalysisReferencesModel(
+        **analysis_references_model_data
+    )
+
+    # THEN the model should have been correctly constructed
+    assert model.dict() == analysis_references_model_data
+
+
+def test_canfam_analysis_references_model_empty():
+    """Test canine analysis references model for an empty input."""
+
+    # GIVEN no input for the canine analysis reference model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        CanFamAnalysisReferencesModel()
+
+
+def test_hg_analysis_references_model(
+    hg_analysis_references_model_data: Dict[str, Path]
+):
+    """Test human genome analysis references model."""
+
+    # GIVEN an input for the human genome analysis reference model
+
+    # WHEN initialising the model
+    model: HgAnalysisReferencesModel = HgAnalysisReferencesModel(
+        **hg_analysis_references_model_data
+    )
+
+    # THEN the model should have been correctly constructed
+    assert model.dict() == hg_analysis_references_model_data
+
+
+def test_hg_analysis_references_model_empty():
+    """Test human genome analysis references model for an empty input."""
+
+    # GIVEN no input for the human genome analysis reference model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        HgAnalysisReferencesModel()
+
+
+def test_reference_url_model(reference_url_model_data: Dict[str, Any]):
+    """Test references URL model."""
+
+    # GIVEN an input for the reference URL model
+
+    # WHEN initialising the model
+    model: ReferenceUrlModel = ReferenceUrlModel(**reference_url_model_data)
+
+    # THEN the model should have been correctly constructed
+    assert model.dict() == reference_url_model_data
+
+
+def test_reference_url_model_empty():
+    """Test references URL model for an empty input."""
+
+    # GIVEN no input for the references URL model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        ReferenceUrlModel()
 
 
 # def test_get_reference_output_files():

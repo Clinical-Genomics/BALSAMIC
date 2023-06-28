@@ -1,3 +1,5 @@
+from typing import Dict, Any
+
 import pytest
 import json
 import os
@@ -7,6 +9,7 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 
+from BALSAMIC.constants.cache import DockerContainers, FileType
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.constants.cluster import ClusterConfigType
@@ -721,3 +724,105 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
             )
         }
     )
+
+
+@pytest.fixture(scope="session", name="cosmic_key")
+def fixture_cosmic_key() -> str:
+    """Mocked COSMIC key."""
+    return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
+
+
+@pytest.fixture(scope="session", name="cluster_account")
+def fixture_cluster_account() -> str:
+    """Mocked cluster account for job submission."""
+    return "development"
+
+
+@pytest.fixture(scope="function", name="reference_file")
+def fixture_reference_file(tmp_path: Path) -> Path:
+    """Dummy reference file."""
+    reference_file: Path = Path(tmp_path, "reference.vcf")
+    reference_file.touch()
+    return reference_file
+
+
+@pytest.fixture(scope="function", name="reference_url")
+def fixture_reference_url() -> str:
+    """Dummy reference URL."""
+    return "gs://gatk-legacy-bundles/b37/reference.vcf.gz"
+
+
+@pytest.fixture(scope="session", name="develop_containers")
+def fixture_develop_containers() -> Dict[str, str]:
+    """Develop containers fixture."""
+    return {
+        DockerContainers.ASCAT.value: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
+        DockerContainers.VCF2CYTOSURE.value: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
+        DockerContainers.PYTHON_3.value: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
+        DockerContainers.BALSAMIC.value: "docker://clinicalgenomics/balsamic:develop-balsamic",
+        DockerContainers.SOMALIER.value: "docker://clinicalgenomics/balsamic:develop-somalier",
+        DockerContainers.CNVPYTOR.value: "docker://clinicalgenomics/balsamic:develop-cnvpytor",
+        DockerContainers.ALIGN_QC.value: "docker://clinicalgenomics/balsamic:develop-align_qc",
+        DockerContainers.ANNOTATE.value: "docker://clinicalgenomics/balsamic:develop-annotate",
+        DockerContainers.PYTHON_27.value: "docker://clinicalgenomics/balsamic:develop-varcall_py27",
+        DockerContainers.CNVKIT.value: "docker://clinicalgenomics/balsamic:develop-varcall_cnvkit",
+        DockerContainers.COVERAGE_QC.value: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
+        DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
+    }
+
+
+@pytest.fixture(scope="function", name="analysis_references_model_data")
+def fixture_analysis_references_model_data(reference_file: Path) -> Dict[str, Path]:
+    """Analysis references model data."""
+    return {
+        "genome_chrom_size": reference_file,
+        "reference_genome": reference_file,
+        "refgene_bed": reference_file,
+        "refgene_flat": reference_file,
+        "refgene_txt": reference_file,
+    }
+
+
+@pytest.fixture(scope="function", name="hg_analysis_references_model_data")
+def fixture_hg_analysis_references_model_data(
+    analysis_references_model_data: Dict[str, Path], reference_file: Path
+) -> Dict[str, Path]:
+    """Human genome analysis references model data."""
+    hg_analysis_references_model_data: Dict[str, Path] = {
+        "access_regions": reference_file,
+        "ascat_chr_y_loci": reference_file,
+        "ascat_gc_correction": reference_file,
+        "clinvar": reference_file,
+        "cosmic": reference_file,
+        "dbsnp": reference_file,
+        "delly_exclusion": reference_file,
+        "delly_exclusion_converted": reference_file,
+        "delly_mappability": reference_file,
+        "gnomad_variant": reference_file,
+        "hc_vcf_1kg": reference_file,
+        "known_indel_1kg": reference_file,
+        "mills_1kg": reference_file,
+        "rank_score": reference_file,
+        "somalier_sites": reference_file,
+        "vcf_1kg": reference_file,
+        "vep_dir": reference_file.parent,
+        "wgs_calling_regions": reference_file,
+    }
+    hg_analysis_references_model_data.update(analysis_references_model_data)
+    return hg_analysis_references_model_data
+
+
+@pytest.fixture(scope="function", name="reference_url_model_data")
+def fixture_reference_url_model_data(
+    reference_url: str, reference_file: Path, cosmic_key: str
+) -> Dict[str, Any]:
+    """Reference URL model model data."""
+    return {
+        "url": reference_url,
+        "file_type": FileType.VCF,
+        "gzip": True,
+        "file_name": "reference",
+        "dir_name": "variants",
+        "file_path": reference_file.as_posix(),
+        "secret": cosmic_key,
+    }
