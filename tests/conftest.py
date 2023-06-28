@@ -113,6 +113,12 @@ def config_files():
         "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
         "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
         "pon_fastq_path": "tests/test_data/fastq/",
+        "clinical_snv_observations": "tests/test_data/references/variants/clinical_snv_variants.vcf.gz",
+        "cancer_germline_snv_observations": "tests/test_data/references/variants/cancer_germline_snv_variants.vcf.gz",
+        "cancer_somatic_snv_observations": "tests/test_data/references/variants/cancer_somatic_snv_variants.vcf.gz",
+        "clinical_sv_observations": "tests/test_data/references/variants/clinical_sv_variants.vcf.gz",
+        "swegen_snv_frequency": "tests/test_data/references/variants/swegen_snv.vcf.gz",
+        "swegen_sv_frequency": "tests/test_data/references/variants/swegen_sv.vcf.gz",
     }
 
 
@@ -145,12 +151,6 @@ def reference():
             "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
             "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
             "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
-            "clinical_snv_observations": "tests/test_data/references/variants/clinical_snv_variants.vcf.gz",
-            "cancer_germline_snv_observations": "tests/test_data/references/variants/cancer_germline_snv_variants.vcf.gz",
-            "cancer_somatic_snv_observations": "tests/test_data/references/variants/cancer_somatic_snv_variants.vcf.gz",
-            "clinical_sv_observations": "tests/test_data/references/variants/clinical_sv_variants.vcf.gz",
-            "swegen_snv_frequency": "tests/test_data/references/variants/swegen_snv.vcf.gz",
-            "swegen_sv_frequency": "tests/test_data/references/variants/swegen_sv.vcf.gz",
             "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
             "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
         }
@@ -191,6 +191,29 @@ def background_variant_file():
 def pon_cnn():
     return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
+@pytest.fixture(scope="session")
+def clinical_snv_observations():
+    return "tests/test_data/references/variants/clinical_snv_variants.vcf.gz"
+
+@pytest.fixture(scope="session")
+def cancer_germline_snv_observations():
+    return "tests/test_data/references/variants/cancer_germline_snv_variants.vcf.gz"
+
+@pytest.fixture(scope="session")
+def cancer_somatic_snv_observations():
+    return "tests/test_data/references/variants/cancer_somatic_snv_variants.vcf.gz"
+
+@pytest.fixture(scope="session")
+def clinical_sv_observations():
+    return "tests/test_data/references/variants/clinical_sv_variants.vcf.gz"
+
+@pytest.fixture(scope="session")
+def swegen_snv_frequency():
+    return "tests/test_data/references/variants/swegen_snv.vcf.gz"
+
+@pytest.fixture(scope="session")
+def swegen_sv_frequency():
+    return "tests/test_data/references/variants/swegen_sv.vcf.gz"
 
 @pytest.fixture(scope="session")
 def sentieon_license(tmp_path_factory):
@@ -343,6 +366,12 @@ def tumor_normal_config(
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    swegen_snv_frequency: str,
+    swegen_sv_frequency: str,
+    clinical_snv_observations: str,
+    clinical_sv_observations: str,
+    cancer_germline_snv_observations: str,
+    cancer_somatic_snv_observations: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
@@ -375,6 +404,18 @@ def tumor_normal_config(
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
+                "--swegen-snv",
+                swegen_snv_frequency,
+                "--swegen-sv",
+                swegen_sv_frequency,
+                "--clinical-snv-observations",
+                clinical_snv_observations,
+                "--clinical-sv-observations",
+                clinical_sv_observations,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations,
             ],
         )
 
@@ -403,6 +444,12 @@ def tumor_normal_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    swegen_snv_frequency: str,
+    swegen_sv_frequency: str,
+    clinical_snv_observations: str,
+    clinical_sv_observations: str,
+    cancer_germline_snv_observations: str,
+    cancer_somatic_snv_observations: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
 
@@ -431,7 +478,19 @@ def tumor_normal_wgs_config(
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
-            ],
+                "--swegen-snv",
+                swegen_snv_frequency,
+                "--swegen-sv",
+                swegen_sv_frequency,
+                "--clinical-snv-observations",
+                clinical_snv_observations,
+                "--clinical-sv-observations",
+                clinical_sv_observations,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations,
+           ],
         )
 
     return Path(
@@ -450,6 +509,12 @@ def tumor_only_config(
     background_variant_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    swegen_snv_frequency: str,
+    swegen_sv_frequency: str,
+    clinical_snv_observations: str,
+    clinical_sv_observations: str,
+    cancer_germline_snv_observations: str,
+    cancer_somatic_snv_observations: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
@@ -480,6 +545,18 @@ def tumor_only_config(
                 background_variant_file,
                 "--tumor-sample-name",
                 tumor_sample_name,
+                "--swegen-snv",
+                swegen_snv_frequency,
+                "--swegen-sv",
+                swegen_sv_frequency,
+                "--clinical-snv-observations",
+                clinical_snv_observations,
+                "--clinical-sv-observations",
+                clinical_sv_observations,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations,
             ],
         )
 
@@ -501,6 +578,12 @@ def tumor_only_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    swegen_snv_frequency: str,
+    swegen_sv_frequency: str,
+    clinical_snv_observations: str,
+    clinical_sv_observations: str,
+    cancer_germline_snv_observations: str,
+    cancer_somatic_snv_observations: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
 
@@ -527,6 +610,18 @@ def tumor_only_wgs_config(
                 balsamic_cache,
                 "--tumor-sample-name",
                 tumor_sample_name,
+                "--swegen-snv",
+                swegen_snv_frequency,
+                "--swegen-sv",
+                swegen_sv_frequency,
+                "--clinical-snv-observations",
+                clinical_snv_observations,
+                "--clinical-sv-observations",
+                clinical_sv_observations,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations,
             ],
         )
 
