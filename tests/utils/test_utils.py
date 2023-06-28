@@ -74,7 +74,6 @@ def test_get_pon_sample_dict(
         "ACCN2": {"type": "normal"},
         "ACCN3": {"type": "normal"},
         "ACCN4": {"type": "normal"},
-        "ACCN4": {"type": "normal"},
         "ACCN5": {"type": "normal"},
         "ACCN6": {"type": "normal"},
     }
@@ -905,35 +904,34 @@ def test_get_pon_bam_name(sample_config, tumor_sample_name, normal_sample_name):
 
 def test_get_fastqpatterns(sample_config, tumor_sample_name, normal_sample_name):
     """Tests proper extraction of fastq patterns from sample_dict"""
+
+    # Verify the extraction of fastq patterns for all samples
     sample_dict = dict(sample_config["samples"])
-
     fastq_patterns_all = get_fastqpatterns(sample_dict)
-    fastq_patterns_tumor = get_fastqpatterns(sample_dict, tumor_sample_name)
-    fastq_patterns_normal = get_fastqpatterns(sample_dict, normal_sample_name)
-
     fastq_patterns_all_expected = ["ACC1_S1_L001_R", "ACC2_S1_L001_R"]
-    fastq_patterns_tumor_expected = ["ACC1_S1_L001_R"]
-    fastq_patterns_normal_expected = ["ACC2_S1_L001_R"]
-
     assert fastq_patterns_all == fastq_patterns_all_expected
-    assert fastq_patterns_tumor == fastq_patterns_tumor_expected
-    assert fastq_patterns_normal == fastq_patterns_normal_expected
 
+    # Verify the extraction of fastq patterns for the tumor sample
+    fastq_patterns_tumor = get_fastqpatterns(sample_dict, tumor_sample_name)
+    fastq_patterns_tumor_expected = ["ACC1_S1_L001_R"]
+    assert fastq_patterns_tumor == fastq_patterns_tumor_expected
+
+    # Verify the extraction of fastq patterns for the normal sample
+    fastq_patterns_normal = get_fastqpatterns(sample_dict, normal_sample_name)
+    fastq_patterns_normal_expected = ["ACC2_S1_L001_R"]
+    assert fastq_patterns_normal == fastq_patterns_normal_expected
+    
 
 def test_get_sample_dict(
     tumor_sample_name: str, normal_sample_name: str, fastq_dir: str
 ):
     """Tests sample dictionary retrieval."""
 
-    try:
-        samples: dict = get_sample_dict(
-            tumor_sample_name=tumor_sample_name,
-            normal_sample_name=normal_sample_name,
-            fastq_path=fastq_dir,
-        )
-        assert True
-    except Exception:
-        assert False
+    samples: dict = get_sample_dict(
+        tumor_sample_name=tumor_sample_name,
+        normal_sample_name=normal_sample_name,
+        fastq_path=fastq_dir,
+    )
 
     assert tumor_sample_name in samples
     assert normal_sample_name in samples
