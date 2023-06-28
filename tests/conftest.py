@@ -750,17 +750,79 @@ def fixture_reference_file(tmp_path: Path) -> Path:
 @pytest.fixture(scope="function", name="reference_genome_file")
 def fixture_reference_genome_file(tmp_path: Path) -> Path:
     """Dummy reference file."""
-    reference_file: Path = Path(tmp_path, "reference.fasta")
-    reference_file.touch()
-    return reference_file
+    reference_genome_file: Path = Path(tmp_path, "reference.fasta")
+    reference_genome_file.touch()
+    return reference_genome_file
 
 
 @pytest.fixture(scope="function", name="refgene_txt_file")
 def fixture_refgene_txt_file(tmp_path: Path) -> Path:
     """Dummy RefSeq's gene file."""
-    reference_file: Path = Path(tmp_path, "refGene.txt")
-    reference_file.touch()
-    return reference_file
+    refgene_txt_file: Path = Path(tmp_path, "refGene.txt")
+    refgene_txt_file.touch()
+    return refgene_txt_file
+
+
+@pytest.fixture(scope="function", name="delly_exclusion_file")
+def fixture_delly_exclusion_file(tmp_path: Path) -> Path:
+    """Dummy Delly exclusion file."""
+    delly_exclusion_file: Path = Path(tmp_path, "human.hg19.excl.tsv")
+    delly_exclusion_file.touch()
+    return delly_exclusion_file
+
+
+@pytest.fixture(scope="function", name="delly_exclusion_converted_file")
+def fixture_delly_exclusion_converted_file(tmp_path: Path) -> Path:
+    """Dummy Delly exclusion converted file."""
+    delly_exclusion_converted: Path = Path(tmp_path, "human.hg19.excl_converted.tsv")
+    delly_exclusion_converted.touch()
+    return delly_exclusion_converted
+
+
+@pytest.fixture(scope="function", name="delly_mappability_file")
+def fixture_delly_mappability_file(tmp_path: Path) -> Path:
+    """Dummy Delly mappability file."""
+    delly_mappability_file: Path = Path(tmp_path, "GRCh37.delly.blacklist.gz")
+    delly_mappability_file.touch()
+    return delly_mappability_file
+
+
+@pytest.fixture(scope="function", name="delly_mappability_findex_file")
+def fixture_delly_mappability_findex_file(tmp_path: Path) -> Path:
+    """Dummy Delly mappability findex file."""
+    delly_mappability_findex_file: Path = Path(
+        tmp_path, "GRCh37.delly.blacklist.gz.fai"
+    )
+    delly_mappability_findex_file.touch()
+    return delly_mappability_findex_file
+
+
+@pytest.fixture(scope="function", name="delly_mappability_gindex_file")
+def fixture_delly_mappability_gindex_file(tmp_path: Path) -> Path:
+    """Dummy Delly exclusion file."""
+    delly_mappability_gindex_file: Path = Path(
+        tmp_path, "GRCh37.delly.blacklist.gz.gzi"
+    )
+    delly_mappability_gindex_file.touch()
+    return delly_mappability_gindex_file
+
+
+@pytest.fixture(scope="function", name="gnomad_variant_file")
+def fixture_gnomad_variant_file(tmp_path: Path) -> Path:
+    """Dummy gnomad_variant file."""
+    gnomad_variant_file: Path = Path(tmp_path, "gnomad.genomes.r2.1.1.sites.vcf.bgz")
+    gnomad_variant_file.touch()
+    return gnomad_variant_file
+
+
+@pytest.fixture(scope="function", name="gnomad_variant_index_file")
+def fixture_gnomad_variant_index_file(tmp_path: Path) -> Path:
+    """Dummy gnomad_variant index file."""
+    gnomad_variant_index_file: Path = Path(
+        tmp_path, "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi"
+    )
+    gnomad_variant_index_file.touch()
+    return gnomad_variant_index_file
 
 
 @pytest.fixture(scope="function", name="reference_url")

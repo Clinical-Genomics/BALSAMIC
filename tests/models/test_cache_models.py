@@ -284,6 +284,88 @@ def test_hg_references_model_empty():
         HgReferencesModel()
 
 
+def test_get_delly_files(
+    hg_references_model: HgReferencesModel,
+    delly_exclusion_file: Path,
+    delly_exclusion_converted_file: Path,
+    delly_mappability_file: Path,
+    delly_mappability_findex_file: Path,
+    delly_mappability_gindex_file: Path,
+):
+    """Test Delly specific files retrieval."""
+
+    # GIVEN a human genome references model with delly specific files
+    hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
+    hg_references_model.delly_mappability.file_path = delly_mappability_file.as_posix()
+    hg_references_model.delly_mappability_findex.file_path = (
+        delly_mappability_findex_file.as_posix()
+    )
+    hg_references_model.delly_mappability_gindex.file_path = (
+        delly_mappability_gindex_file.as_posix()
+    )
+
+    # WHEN getting the Delly specific reference files
+    delly_files: List[str] = hg_references_model.get_delly_files()
+
+    # THEN all the delly reference files should be returned
+    assert len(delly_files) == 5
+    assert delly_exclusion_file.as_posix() in delly_files
+    assert delly_exclusion_converted_file.as_posix() in delly_files
+    assert delly_mappability_file.as_posix() in delly_files
+    assert delly_mappability_findex_file.as_posix() in delly_files
+    assert delly_mappability_gindex_file.as_posix() in delly_files
+
+
+def test_get_delly_exclusion_converted_file(
+    hg_references_model: HgReferencesModel,
+    delly_exclusion_file: Path,
+    delly_exclusion_converted_file: Path,
+):
+    """Test get Delly exclusion converted file."""
+
+    # GIVEN a human genome references model with a specific delly exclusion file
+    hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
+
+    # WHEN getting the Delly exclusion converted file
+    converted_file: str = hg_references_model.get_delly_exclusion_converted_file()
+
+    # THEN the returned file should match the expected one
+    assert converted_file == delly_exclusion_converted_file.as_posix()
+
+
+def test_get_gnomad_files(
+    hg_references_model: HgReferencesModel,
+    gnomad_variant_file: Path,
+    gnomad_variant_index_file: Path,
+):
+    """Test get gnomad reference files."""
+
+    # GIVEN a human genome references model and specific gnomad files
+    hg_references_model.gnomad_variant.file_path = gnomad_variant_file.as_posix()
+    hg_references_model.gnomad_variant_index.file_path = (
+        gnomad_variant_index_file.as_posix()
+    )
+
+    # WHEN getting the genomad reference files
+    gnomad_files: List[str] = hg_references_model.get_gnomad_files()
+
+    # THEN the genomad files should be returned
+    assert len(gnomad_files) == 2
+    assert gnomad_variant_file.as_posix() in gnomad_files
+    assert gnomad_variant_index_file.as_posix() in gnomad_files
+
+
+def test_get_1k_genome_files(hg_references_model: HgReferencesModel):
+    """Test get 1000 Genome related files."""
+
+    # GIVEN a human genome references model
+
+    # WHEN getting the 1000 Genome files
+    genome_files: List[str] = hg_references_model.get_1k_genome_files()
+
+    # THEN
+
+
 # def test_get_reference_output_files():
 #     # GIVEN a reference genome version
 #     genome_ver = "hg38"
