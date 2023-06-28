@@ -55,6 +55,8 @@ from BALSAMIC.utils.rule import (
     get_reference_output_files,
     get_rule_output,
     get_sample_type_from_prefix,
+    get_fastqpatterns,
+    get_bam_names,
 )
 
 
@@ -847,6 +849,75 @@ def test_get_sample_type_from_prefix(config_dict):
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == "tumor"
+
+
+def test_get_bam_names(sample_config, tumor_sample_name, normal_sample_name):
+    """Tests assignment of bamfile names to sample_dict"""
+    bam_dir = "tests/test_data/id1/analysis/" + "/bam/"
+    sample_dict = dict(sample_config["samples"])
+    analysis_type = sample_config["analysis"]["analysis_type"]
+
+    assert analysis_type == "paired"
+
+    bam_dict_tumor = get_bam_names(
+        tumor_sample_name, sample_dict, bam_dir, analysis_type
+    )
+    bam_dict_normal = get_bam_names(
+        normal_sample_name, sample_dict, bam_dir, analysis_type
+    )
+    bam_dict_tumor_expected = {
+        "align_sort_bamlist": [f"{bam_dir}ACC1_align_sort_ACC1_S1_L001_R.bam"],
+        "final_bam": f"{bam_dir}tumor.ACC1.dedup.realign.bam",
+    }
+    bam_dict_normal_expected = {
+        "align_sort_bamlist": [f"{bam_dir}ACC2_align_sort_ACC2_S1_L001_R.bam"],
+        "final_bam": f"{bam_dir}normal.ACC2.dedup.realign.bam",
+    }
+
+    assert bam_dict_tumor == bam_dict_tumor_expected
+    assert bam_dict_normal == bam_dict_normal_expected
+
+
+def test_get_pon_bam_name(sample_config, tumor_sample_name, normal_sample_name):
+    """Tests assignment of bamfile names to sample_dict with pon as analysis_type"""
+    bam_dir = "tests/test_data/id1/analysis/" + "/bam/"
+    sample_dict = dict(sample_config["samples"])
+    analysis_type = "pon"
+
+    bam_dict_tumor_pon = get_bam_names(
+        tumor_sample_name, sample_dict, bam_dir, analysis_type
+    )
+    bam_dict_normal_pon = get_bam_names(
+        normal_sample_name, sample_dict, bam_dir, analysis_type
+    )
+    bam_dict_tumor_pon_expected = {
+        "align_sort_bamlist": [f"{bam_dir}ACC1_align_sort_ACC1_S1_L001_R.bam"],
+        "final_bam": f"{bam_dir}tumor.ACC1.dedup.bam",
+    }
+    bam_dict_normal_pon_expected = {
+        "align_sort_bamlist": [f"{bam_dir}ACC2_align_sort_ACC2_S1_L001_R.bam"],
+        "final_bam": f"{bam_dir}normal.ACC2.dedup.bam",
+    }
+
+    assert bam_dict_tumor_pon == bam_dict_tumor_pon_expected
+    assert bam_dict_normal_pon == bam_dict_normal_pon_expected
+
+
+def test_get_fastqpatterns(sample_config, tumor_sample_name, normal_sample_name):
+    """Tests proper extraction of fastq patterns from sample_dict"""
+    sample_dict = dict(sample_config["samples"])
+
+    fastq_patterns_all = get_fastqpatterns(sample_dict)
+    fastq_patterns_tumor = get_fastqpatterns(sample_dict, tumor_sample_name)
+    fastq_patterns_normal = get_fastqpatterns(sample_dict, normal_sample_name)
+
+    fastq_patterns_all_expected = ["ACC1_S1_L001_R", "ACC2_S1_L001_R"]
+    fastq_patterns_tumor_expected = ["ACC1_S1_L001_R"]
+    fastq_patterns_normal_expected = ["ACC2_S1_L001_R"]
+
+    assert fastq_patterns_all == fastq_patterns_all_expected
+    assert fastq_patterns_tumor == fastq_patterns_tumor_expected
+    assert fastq_patterns_normal == fastq_patterns_normal_expected
 
 
 def test_get_sample_dict(

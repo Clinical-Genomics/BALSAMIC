@@ -143,14 +143,18 @@ def case_id_tumor_only() -> str:
     """Mock TGA tumor-only case ID."""
     return "sample_tumor_only"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_only_single() -> str:
     """Mock TGA tumor-only case ID."""
     return "sample_tumor_only_single"
+
+
 @pytest.fixture(scope="session")
 def case_id_tumor_only_qc() -> str:
     """Mock TGA tumor-only case ID."""
     return "sample_tumor_only_qc"
+
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_pon_cnn() -> str:
@@ -175,24 +179,31 @@ def case_id_tumor_normal_fastqdir() -> str:
     """Mock case ID for dummy fastqdir."""
     return "sample_tumor_normal_fastqdir"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
     """Mock TGA tumor-normal case ID."""
     return "sample_tumor_normal"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_extrafile() -> str:
     """Mock TGA tumor-normal case ID."""
     return "sample_tumor_normal_extrafile"
+
+
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_qc() -> str:
     """Mock TGA tumor-normal case ID for QC TGA test."""
     return "sample_tumor_normal_qc"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_qc_wgs() -> str:
     """Mock TGA tumor-normal case ID for QC WGS test."""
     return "sample_tumor_normal_qc_wgs"
+
+
 @pytest.fixture(scope="session")
 def case_id_tumor_only_wgs() -> str:
     """Mock WGS tumor-only case ID."""
@@ -430,8 +441,11 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) ->
     for fastq in fastq_test_dict["tumor"]:
         Path.unlink(fastq_dir / fastq)
 
+
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
-def fastq_dir_tumor_only_qc(analysis_dir: str, case_id_tumor_only_qc: str, request) -> str:
+def fastq_dir_tumor_only_qc(
+    analysis_dir: str, case_id_tumor_only_qc: str, request
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_qc, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -445,6 +459,8 @@ def fastq_dir_tumor_only_qc(analysis_dir: str, case_id_tumor_only_qc: str, reque
 
     for fastq in fastq_test_dict["tumor"]:
         Path.unlink(fastq_dir / fastq)
+
+
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_single_w_dummy_vep(
     analysis_dir: str, case_id_tumor_only_single: str
@@ -549,6 +565,7 @@ def fastq_dir_tumor_normal(
     for fastq in fastq_test_dict["normal"]:
         Path.unlink(fastq_dir / fastq)
 
+
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_normal_qc(
     analysis_dir: str, case_id_tumor_normal_qc: str, request
@@ -572,6 +589,7 @@ def fastq_dir_tumor_normal_qc(
 
     for fastq in fastq_test_dict["normal"]:
         Path.unlink(fastq_dir / fastq)
+
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_normal_qc_wgs(
@@ -745,6 +763,7 @@ def tumor_normal_config(
     return Path(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc(
@@ -1174,8 +1193,24 @@ def sample_config(tumor_sample_name: str, normal_sample_name: str):
         },
         "vcf": VCF_DICT,
         "samples": {
-            tumor_sample_name: {"type": "tumor"},
-            normal_sample_name: {"type": "normal"},
+            tumor_sample_name: {
+                "type": "tumor",
+                "fastq_info": {
+                    "ACC1_S1_L001_R": {
+                        "fwd": "ACC1_S1_L001_R1_001.fastq.gz",
+                        "rev": "ACC1_S1_L001_R2_001.fastq.gz",
+                    }
+                },
+            },
+            normal_sample_name: {
+                "type": "normal",
+                "fastq_info": {
+                    "ACC2_S1_L001_R": {
+                        "fwd": "ACC2_S1_L001_R1_001.fastq.gz",
+                        "rev": "ACC2_S1_L001_R2_001.fastq.gz",
+                    }
+                },
+            },
         },
         "umiworkflow": "true",
     }
