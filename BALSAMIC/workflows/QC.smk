@@ -16,8 +16,8 @@ from BALSAMIC.utils.io import write_json
 
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
-from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_rule_output, get_result_dir,
-                                 get_picard_mrkdup, get_script_path, get_threads,
+from BALSAMIC.utils.rule import (get_fastqpatterns, get_bam_names, get_rule_output, get_result_dir,
+                                 get_script_path, get_threads,
                                  get_sequencing_type, get_capture_kit)
 
 from BALSAMIC.constants.common import RULE_DIRECTORY
@@ -69,7 +69,7 @@ for sample in sample_dict:
 
 # Get mapping info
 for sample in sample_dict:
-    sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
+    sample_dict[sample]["bam"] = get_bam_names(samplename=sample,
                                     sample_dict=sample_dict,
                                     bam_dir=bam_dir,
                                     analysis_type=config["analysis"]["analysis_type"])

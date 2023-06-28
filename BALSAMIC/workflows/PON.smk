@@ -10,7 +10,7 @@ import logging
 
 from BALSAMIC.utils.exc import BalsamicError
 
-from BALSAMIC.utils.rule import get_fastqpatterns, get_mapping_info, get_picard_mrkdup, get_threads, get_result_dir
+from BALSAMIC.utils.rule import get_fastqpatterns, get_bam_names, get_threads, get_result_dir
 from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
@@ -62,7 +62,7 @@ for sample in sample_dict:
 
 # Get mapping info
 for sample in sample_dict:
-    sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
+    sample_dict[sample]["bam"] = get_bam_names(samplename=sample,
                                     sample_dict=sample_dict,
                                     bam_dir=bam_dir,
                                     analysis_type=config["analysis"]["analysis_type"])

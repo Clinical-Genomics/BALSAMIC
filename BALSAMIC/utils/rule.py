@@ -156,45 +156,62 @@ def get_sample_type_from_prefix(config, sample):
         raise KeyError(
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
-def get_mapping_info(samplename, sample_dict, bam_dir, analysis_type):
+def get_bam_names(samplename, sample_dict, bam_dir, analysis_type):
+    """Returns a dict containing names of bamfiles accessed with wildcards as inputs to rules.
+
+    Args:
+        samplename: str. Samplename (i.e: ACCXXXXXX)
+        sample_dict: dict. Dictionary containing information about samples and fastq-files.
+        bam_dir: str. Path to where bamfiles are stored.
+        analysis_type: str. Analysis_type specified in case config file. (i.e: paired / pon)
+
+    Returns:
+        bam_names: dict. Dictionary containing names of bamfiles.
     """
-    input:
-    output:
-    """
-    alignments = {}
-    alignments["align_sort_bamlist"] = []
+    bam_names = {}
+    sample_type = sample_dict[samplename]["type"]
+
+    # Add bamfilenames from parallel alignment per lane for sample
+    bam_names["align_sort_bamlist"] = []
     for fastqpattern in sample_dict[samplename]["fastq_info"]:
-        alignments["align_sort_bamlist"].append(
+        bam_names["align_sort_bamlist"].append(
             bam_dir
             + "{sample}_align_sort_{fastqpattern}.bam".format(
                 sample=samplename, fastqpattern=fastqpattern
             )
         )
 
-    sample_type = sample_dict[samplename]["type"]
+    # Add bamfilename as final version, to be used as inputs in downstream tools
     if analysis_type == "pon":
-        alignments[
+        # Only dedup is necessary for panel of normals
+        bam_names[
             "final_bam"
         ] = bam_dir + "{sample_type}.{sample}.dedup.bam".format(
             sample_type=sample_type, sample=samplename
         )
     else:
-        alignments[
+        # For every analysis except PON, the name of the final processed bamfile is defined here
+        bam_names[
         "final_bam"
     ] = bam_dir + "{sample_type}.{sample}.dedup.realign.bam".format(
         sample_type=sample_type, sample=samplename
     )
-    return alignments
+    return bam_names
 
 
-def get_fastqpatterns(sample_dict, sample=None):
-    """
-    input:
-    output:
+def get_fastqpatterns(sample_dict, samplename=None):
+    """Returns a list of fastq-patterns to be used as wildcards, optionally return only fastq-patterns for a given sample.
+
+    Args:
+        sample_dict: dict. Dictionary containing information about samples and fastq-files.
+        samplename: str. Optional argument, for selecting only fastq-patterns associated to the supplied samplename.
+
+    Returns:
+        fastqpatterns: list. List of fastq-pattern strings.
     """
     fastqpatterns = []
-    if sample:
-        for fastqpattern in sample_dict[sample]["fastq_info"]:
+    if samplename:
+        for fastqpattern in sample_dict[samplename]["fastq_info"]:
             fastqpatterns.append(fastqpattern)
     else:
         for sample in sample_dict:
@@ -210,21 +227,6 @@ def get_result_dir(config):
     """
 
     return config["analysis"]["result"]
-
-
-def get_picard_mrkdup(config):
-    """
-    input: sample config file output from BALSAMIC
-    output: mrkdup or rmdup strings
-    """
-
-    picard_str = "mrkdup"
-
-    if "picard_rmdup" in config["QC"]:
-        if config["QC"]["picard_rmdup"] == True:
-            picard_str = "rmdup"
-
-    return picard_str
 
 
 def get_script_path(script_name: str):

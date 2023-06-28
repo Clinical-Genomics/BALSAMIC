@@ -22,7 +22,7 @@ from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_fastqpatterns, get_mapping_info, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
+from BALSAMIC.utils.rule import (get_fastqpatterns, get_bam_names, get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
                                  get_threads, get_script_path, get_sequencing_type, get_capture_kit, get_clinical_snv_observations, get_clinical_sv_observations,get_swegen_snv,
                                  get_swegen_sv, dump_toml, get_sample_id_by_type)
 
@@ -92,7 +92,7 @@ for sample in sample_dict:
 
 # Get mapping info
 for sample in sample_dict:
-    sample_dict[sample]["bam"] = get_mapping_info(samplename=sample,
+    sample_dict[sample]["bam"] = get_bam_names(samplename=sample,
                                     sample_dict=sample_dict,
                                     bam_dir=bam_dir,
                                     analysis_type=config["analysis"]["analysis_type"])
