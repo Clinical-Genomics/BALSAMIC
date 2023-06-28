@@ -17,7 +17,7 @@ from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
-from BALSAMIC.models.cache import ReferencesModel
+from BALSAMIC.models.cache import ReferencesModel, HgReferencesModel
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
@@ -862,3 +862,41 @@ def fixture_references_model_data(
 def fixture_references_model(references_model_data: Dict[str, dict]) -> ReferencesModel:
     """Mocked references model."""
     return ReferencesModel(**references_model_data)
+
+
+@pytest.fixture(scope="function", name="hg_references_model_data")
+def fixture_hg_references_model_data(
+    reference_url_model_data: Dict[str, Any], references_model_data: Dict[str, dict]
+) -> Dict[str, dict]:
+    """Human genome references model data."""
+    hg_references_model_data: Dict[str, dict] = {
+        "access_regions": reference_url_model_data,
+        "ascat_chr_y_loci": reference_url_model_data,
+        "ascat_gc_correction": reference_url_model_data,
+        "clinvar": reference_url_model_data,
+        "cosmic": reference_url_model_data,
+        "dbsnp": reference_url_model_data,
+        "delly_exclusion": reference_url_model_data,
+        "delly_mappability": reference_url_model_data,
+        "delly_mappability_findex": reference_url_model_data,
+        "delly_mappability_gindex": reference_url_model_data,
+        "gnomad_variant": reference_url_model_data,
+        "gnomad_variant_index": reference_url_model_data,
+        "hc_vcf_1kg": reference_url_model_data,
+        "known_indel_1kg": reference_url_model_data,
+        "mills_1kg": reference_url_model_data,
+        "rank_score": reference_url_model_data,
+        "somalier_sites": reference_url_model_data,
+        "vcf_1kg": reference_url_model_data,
+        "wgs_calling_regions": reference_url_model_data,
+    }
+    hg_references_model_data.update(references_model_data)
+    return hg_references_model_data
+
+
+@pytest.fixture(scope="function", name="hg_references_model")
+def fixture_hg_references_model(
+    hg_references_model_data: Dict[str, dict]
+) -> HgReferencesModel:
+    """Mocked human genome references model."""
+    return HgReferencesModel(**hg_references_model_data)

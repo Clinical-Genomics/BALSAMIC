@@ -23,6 +23,7 @@ from BALSAMIC.models.cache import (
     ReferenceUrlModel,
     ReferencesModel,
     CanFamReferencesModel,
+    HgReferencesModel,
 )
 
 
@@ -258,6 +259,29 @@ def test_canfam_references_model_empty():
     with pytest.raises(ValidationError):
         # THEN an empty model should raise a ValidationError
         CanFamReferencesModel()
+
+
+def test_hg_references_model(hg_references_model_data: Dict[str, dict]):
+    """Test human genome references model."""
+
+    # GIVEN an input for the human genome reference model
+
+    # WHEN initialising the model
+    model: HgReferencesModel = HgReferencesModel(**hg_references_model_data)
+
+    # THEN the model should have been correctly constructed
+    assert model.dict() == hg_references_model_data
+
+
+def test_hg_references_model_empty():
+    """Test human genome references model for an empty input."""
+
+    # GIVEN no input for the human genome references model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        HgReferencesModel()
 
 
 # def test_get_reference_output_files():
