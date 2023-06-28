@@ -13,7 +13,6 @@ from BALSAMIC.utils.scheduler import main as scheduler_main
 from BALSAMIC.utils.cli import createDir
 
 
-
 def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, capsys):
     # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd
     test_jobid = "999999999999"
@@ -62,6 +61,7 @@ def test_scheduler_slurm_py(snakemake_job_script, tumor_normal_config, capsys):
     # THEN captured output is job id
     captured = capsys.readouterr()
     assert captured.out == test_jobid + "\n"
+
 
 def test_scheduler_qsub_py(snakemake_job_script, tumor_normal_config, capsys):
     # GIVEN a jobscript, dependencies, joutput job id, and sample comamnd

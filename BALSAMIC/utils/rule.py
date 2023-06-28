@@ -156,6 +156,8 @@ def get_sample_type_from_prefix(config, sample):
         raise KeyError(
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
+
+
 def get_bam_names(samplename, sample_dict, bam_dir, analysis_type):
     """Returns a dict containing names of bamfiles accessed with wildcards as inputs to rules.
 
@@ -184,18 +186,16 @@ def get_bam_names(samplename, sample_dict, bam_dir, analysis_type):
     # Add bamfilename as final version, to be used as inputs in downstream tools
     if analysis_type == "pon":
         # Only dedup is necessary for panel of normals
-        bam_names[
-            "final_bam"
-        ] = bam_dir + "{sample_type}.{sample}.dedup.bam".format(
+        bam_names["final_bam"] = bam_dir + "{sample_type}.{sample}.dedup.bam".format(
             sample_type=sample_type, sample=samplename
         )
     else:
         # For every analysis except PON, the name of the final processed bamfile is defined here
         bam_names[
-        "final_bam"
-    ] = bam_dir + "{sample_type}.{sample}.dedup.realign.bam".format(
-        sample_type=sample_type, sample=samplename
-    )
+            "final_bam"
+        ] = bam_dir + "{sample_type}.{sample}.dedup.realign.bam".format(
+            sample_type=sample_type, sample=samplename
+        )
     return bam_names
 
 
