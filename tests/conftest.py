@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict, Any, List
 
 import pytest
@@ -9,7 +10,16 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 
-from BALSAMIC.constants.cache import DockerContainers, FileType
+from BALSAMIC.commands.init.utils import get_containers
+
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+
+from BALSAMIC.constants.cache import (
+    DockerContainers,
+    FileType,
+    GenomeVersion,
+    ContainerVersion,
+)
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.constants.cluster import ClusterConfigType
@@ -17,7 +27,12 @@ from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
-from BALSAMIC.models.cache import ReferencesModel, HgReferencesModel
+from BALSAMIC.models.cache import (
+    ReferencesModel,
+    HgReferencesModel,
+    CacheAnalysisModel,
+    CacheConfigModel,
+)
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
@@ -727,6 +742,12 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
     )
 
 
+@pytest.fixture(name="timestamp_now", scope="session")
+def fixture_timestamp_now() -> datetime:
+    """Return a time stamp of today's date in date time format."""
+    return datetime.now()
+
+
 @pytest.fixture(scope="session", name="cosmic_key")
 def fixture_cosmic_key() -> str:
     """Mocked COSMIC key."""
@@ -931,8 +952,8 @@ def fixture_reference_url_model_data(
     return {
         "url": reference_url,
         "file_type": FileType.VCF,
-        "gzip": True,
-        "file_name": "reference",
+        "gzip": False,
+        "file_name": "reference.vcf",
         "dir_name": "variants",
         "file_path": reference_file.as_posix(),
         "secret": cosmic_key,
@@ -994,3 +1015,52 @@ def fixture_hg_references_model(
 ) -> HgReferencesModel:
     """Mocked human genome references model."""
     return HgReferencesModel(**hg_references_model_data)
+
+
+@pytest.fixture(scope="function", name="cache_analysis_model_data")
+def fixture_cache_analysis_model_data(case_id_tumor_only: str) -> Dict[str, str]:
+    """Mocked cache analysis data."""
+    return {"case_id": case_id_tumor_only}
+
+
+@pytest.fixture(scope="function", name="cache_analysis_model")
+def fixture_cache_analysis_model(
+    cache_analysis_model_data: Dict[str, str]
+) -> CacheAnalysisModel:
+    """Mocked cache analysis model."""
+    return CacheAnalysisModel(**cache_analysis_model_data)
+
+
+@pytest.fixture(scope="function", name="cache_config_model_data")
+def fixture_cache_config_model_data(
+    cache_analysis_model: CacheAnalysisModel,
+    hg_references_model: HgReferencesModel,
+    develop_containers: Dict[str, str],
+    cosmic_key: str,
+    timestamp_now: datetime,
+    tmp_path: Path,
+) -> Dict[str, str]:
+    """Mocked cache config data."""
+
+    return {
+        "analysis": cache_analysis_model,
+        "references_dir": tmp_path,
+        "genome_dir": tmp_path,
+        "variants_dir": tmp_path,
+        "vep_dir": tmp_path,
+        "containers_dir": tmp_path,
+        "genome_version": GenomeVersion.HG19,
+        "cosmic_key": cosmic_key,
+        "bioinfo_tools": BIOINFO_TOOL_ENV,
+        "containers": develop_containers,
+        "references": hg_references_model,
+        "references_date": timestamp_now.strftime("%Y-%m-%d %H:%M"),
+    }
+
+
+@pytest.fixture(scope="function", name="cache_config_model")
+def fixture_cache_config_model(
+    cache_config_model_data: Dict[str, dict]
+) -> CacheConfigModel:
+    """Mocked cache config model."""
+    return CacheConfigModel(**cache_config_model_data)

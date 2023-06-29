@@ -1,22 +1,12 @@
 """Test reference cache models."""
-from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, List, Any
 
 import pytest
+from BALSAMIC.constants.cache import FileType, BwaIndexFileType, GRCHVersion
 from pydantic import ValidationError
 
-from BALSAMIC.commands.init.utils import get_containers
-from BALSAMIC.constants.cache import (
-    ContainerVersion,
-    GenomeVersion,
-    REFERENCE_FILES,
-    FileType,
-    BwaIndexFileType,
-)
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.models.cache import (
-    CacheConfigModel,
     AnalysisReferencesModel,
     CanFamAnalysisReferencesModel,
     HgAnalysisReferencesModel,
@@ -24,6 +14,8 @@ from BALSAMIC.models.cache import (
     ReferencesModel,
     CanFamReferencesModel,
     HgReferencesModel,
+    CacheAnalysisModel,
+    CacheConfigModel,
 )
 
 
@@ -37,7 +29,7 @@ def test_analysis_references_model(analysis_references_model_data: Dict[str, Pat
         **analysis_references_model_data
     )
 
-    # THEN the model should have been correctly constructed
+    # THEN the model should have been correctly built
     assert model.dict() == analysis_references_model_data
 
 
@@ -64,7 +56,7 @@ def test_canfam_analysis_references_model(
         **analysis_references_model_data
     )
 
-    # THEN the model should have been correctly constructed
+    # THEN the model should have been correctly built
     assert model.dict() == analysis_references_model_data
 
 
@@ -91,7 +83,7 @@ def test_hg_analysis_references_model(
         **hg_analysis_references_model_data
     )
 
-    # THEN the model should have been correctly constructed
+    # THEN the model should have been correctly built
     assert model.dict() == hg_analysis_references_model_data
 
 
@@ -114,7 +106,7 @@ def test_reference_url_model(reference_url_model_data: Dict[str, Any]):
     # WHEN initialising the model
     model: ReferenceUrlModel = ReferenceUrlModel(**reference_url_model_data)
 
-    # THEN the model should have been correctly constructed
+    # THEN the model should have been correctly built
     assert model.dict() == reference_url_model_data
 
 
@@ -137,7 +129,7 @@ def test_references_model(references_model_data: Dict[str, dict]):
     # WHEN initialising the model
     model: ReferencesModel = ReferencesModel(**references_model_data)
 
-    # THEN the model should have been correctly constructed
+    # THEN the model should have been correctly built
     assert model.dict() == references_model_data
 
 
@@ -246,7 +238,7 @@ def test_canfam_references_model(references_model_data: Dict[str, dict]):
     # WHEN initialising the model
     model: CanFamReferencesModel = CanFamReferencesModel(**references_model_data)
 
-    # THEN the model should have been correctly constructed
+    # THEN the model should have been correctly built
     assert model.dict() == references_model_data
 
 
@@ -269,7 +261,7 @@ def test_hg_references_model(hg_references_model_data: Dict[str, dict]):
     # WHEN initialising the model
     model: HgReferencesModel = HgReferencesModel(**hg_references_model_data)
 
-    # THEN the model should have been correctly constructed
+    # THEN the model should have been correctly built
     assert model.dict() == hg_references_model_data
 
 
@@ -379,6 +371,217 @@ def test_get_1k_genome_files(
     assert mills_1kg_file.as_posix() + "." + FileType.GZ in genome_files
     assert hc_vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
     assert vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
+
+
+def test_cache_analysis_model(cache_analysis_model_data: Dict[str, str]):
+    """Test cache analysis model initialisation."""
+
+    # GIVEN an input for the cache analysis model
+
+    # WHEN initialising the model
+    model: CacheAnalysisModel = CacheAnalysisModel(**cache_analysis_model_data)
+
+    # THEN the model should have been correctly built
+    assert model.dict() == cache_analysis_model_data
+
+
+def test_hg_references_model_empty():
+    """Test ache analysis model for an empty input."""
+
+    # GIVEN no input for the cache analysis model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        CacheAnalysisModel()
+
+
+def test_cache_config_model(cache_config_model_data: Dict[str, dict]):
+    """Test cache config model initialisation."""
+
+    # GIVEN an input for the cache config model
+
+    # WHEN initialising the model
+    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+
+    # THEN the model should have been correctly built
+    assert model.dict() == cache_config_model_data
+
+
+def test_cache_config_model_empty():
+    """Test cache config model for an empty input."""
+
+    # GIVEN no input for the cache config model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        CacheConfigModel()
+
+
+def test_cache_config_model_empty_file_path(cache_config_model_data: Dict[str, dict]):
+    """Test cache config model reference validation method and file path assignment."""
+
+    # GIVEN a cache config model data with empty file paths
+    for reference in cache_config_model_data["references"]:
+        reference[1].file_path = None
+
+    # WHEN initialising the model
+    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+
+    # THEN the file paths should have been assigned
+    for reference in model.references:
+        assert reference[1].file_path
+
+
+def test_cache_config_model_empty_cosmic_key(
+    cache_config_model_data: Dict[str, dict], cosmic_key: str
+):
+    """Test cache config model reference validation method and cosmic key assignment."""
+
+    # GIVEN a cache config model data with empty cosmic keys
+    for reference in cache_config_model_data["references"]:
+        reference[1].secret = None
+
+    # WHEN initialising the model
+    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+
+    # THEN a cosmic key should only have been assigned to a cosmic reference file
+    for reference in model.references:
+        if reference[0] == "cosmic":
+            assert reference[1].secret == cosmic_key
+            continue
+        assert reference[1].secret is None
+
+
+def test_get_grch_version(cache_config_model: CacheConfigModel):
+    """Test extraction of the GRCH format version having a specific genome version."""
+
+    # GIVEN a cache config model
+
+    # WHEN getting the GRCH version
+    grch_version: GRCHVersion = cache_config_model.get_grch_version()
+
+    # THEN a correct GRCH format version should be returned
+    assert grch_version == GRCHVersion.GRCH37
+
+
+def test_get_reference_paths(cache_config_model: CacheConfigModel):
+    """Test reference path extraction."""
+
+    # GIVEN a cache config model
+
+    # WHEN extracting the list of reference paths
+    reference_paths: List[str] = cache_config_model.get_reference_paths()
+
+    # THEN a complete list of reference path should be returned
+    assert reference_paths == [
+        reference[1].file_path for reference in cache_config_model.references
+    ]
+
+
+def test_get_reference_by_path(
+    cache_config_model: CacheConfigModel, reference_genome_file: Path
+):
+    """Test reference extraction given its path."""
+
+    # GIVEN a cache config model with a reference genome to be extracted
+    cache_config_model.references.reference_genome.file_path = (
+        reference_genome_file.as_posix()
+    )
+
+    # WHEN getting the reference genome by path
+    reference_genome: ReferenceUrlModel = cache_config_model.get_reference_by_path(
+        reference_path=reference_genome_file.as_posix()
+    )
+
+    # THEN the correct reference should be returned
+    assert reference_genome == cache_config_model.references.reference_genome
+
+
+def test_get_reference_paths_by_file_type_and_compression(
+    cache_config_model: CacheConfigModel, reference_genome_file: Path
+):
+    """Test reference path by file type and compression."""
+
+    # GIVEN a cache config model with multiple fasta files
+    cache_config_model.references.reference_genome.file_path = (
+        reference_genome_file.as_posix()
+    )
+    cache_config_model.references.reference_genome.file_type = FileType.FASTA
+    cache_config_model.references.reference_genome.gzip = True
+
+    # WHEN extracting the reference paths by file type and compression status
+    reference_paths: List[
+        str
+    ] = cache_config_model.get_reference_paths_by_file_type_and_compression(
+        file_type=FileType.FASTA, compression=True
+    )
+
+    # THEN the expected reference path should be returned
+    assert reference_paths == [reference_genome_file.as_posix()]
+
+
+def test_get_reference_paths_by_file_type(
+    cache_config_model: CacheConfigModel, refgene_txt_file: Path
+):
+    """Test reference path by file type."""
+
+    # GIVEN a cache config model with a RefSeq's gene file
+    cache_config_model.references.refgene_txt.file_path = refgene_txt_file.as_posix()
+    cache_config_model.references.refgene_txt.file_type = FileType.TXT
+
+    # WHEN extracting the reference paths by file type
+    reference_paths: List[str] = cache_config_model.get_reference_paths_by_file_type(
+        file_type=FileType.TXT
+    )
+
+    # THEN the TXT file should be returned
+    assert reference_paths == [refgene_txt_file.as_posix()]
+
+
+def test_get_reference_paths_by_compression(
+    cache_config_model: CacheConfigModel, reference_genome_file: Path
+):
+    """Test reference path by compression."""
+
+    # GIVEN a cache config model with a compressed reference genome file
+    cache_config_model.references.reference_genome.file_path = (
+        reference_genome_file.as_posix()
+    )
+    cache_config_model.references.reference_genome.gzip = True
+
+    # WHEN extracting the reference paths by compression status
+    reference_paths: List[str] = cache_config_model.get_reference_paths_by_compression(
+        compression=True
+    )
+
+    # THEN the expected reference path should be returned
+    assert reference_paths == [reference_genome_file.as_posix()]
+
+
+def test_get_compressed_indexed_vcfs(cache_config_model: CacheConfigModel):
+    """"""
+
+    # GIVEN a cache config model
+
+
+def test_get_container_output_paths(cache_config_model: CacheConfigModel):
+    """"""
+
+    # GIVEN a cache config model
+
+
+def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
+    """"""
+
+    # GIVEN a cache config model
+
+
+def test_get_analysis_references(cache_config_model: CacheConfigModel):
+    """"""
+
+    # GIVEN a cache config model
 
 
 # def test_get_reference_output_files():
