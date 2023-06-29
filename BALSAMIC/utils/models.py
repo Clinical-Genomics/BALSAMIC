@@ -562,9 +562,9 @@ class BalsamicConfigModel(BaseModel):
         Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
         Fastq patterns and Fastq names can only occur once.
         """
-        def count_occurrences(items):
+        def count_occurrences(fastq_pattern_or_file):
             counter = defaultdict(int)
-            for item in items:
+            for item in fastq_pattern_or_file:
                 counter[item] += 1
             return counter
 
