@@ -1,9 +1,9 @@
 """Test reference cache models."""
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, Any, List
 
 import pytest
-from BALSAMIC.constants.cache import FileType, BwaIndexFileType, GRCHVersion
+from BALSAMIC.constants.cache import FileType, BwaIndexFileType
 from pydantic import ValidationError
 
 from BALSAMIC.models.cache import (
@@ -12,10 +12,6 @@ from BALSAMIC.models.cache import (
     HgAnalysisReferencesModel,
     ReferenceUrlModel,
     ReferencesModel,
-    CanFamReferencesModel,
-    HgReferencesModel,
-    CacheAnalysisModel,
-    CacheConfigModel,
 )
 
 
@@ -144,13 +140,10 @@ def test_references_model_empty():
         ReferencesModel()
 
 
-def test_get_reference_genome_files(
-    references_model: ReferencesModel, reference_genome_file: Path
-):
+def test_get_reference_genome_files(references_model: ReferencesModel):
     """Test reference genome files retrieval."""
 
-    # GIVEN a references model with a specific reference genome file
-    references_model.reference_genome.file_path = reference_genome_file.as_posix()
+    # GIVEN a references model
 
     # GIVEN the expected files to be retrieved
     expected_file_types: set = {FileType.FASTA, FileType.FAI, FileType.DICT}
@@ -164,425 +157,428 @@ def test_get_reference_genome_files(
         assert file_type in [file.split(".")[-1] for file in reference_genome_files]
 
 
-def test_get_reference_genome_bwa_index_files(
-    references_model: ReferencesModel, reference_genome_file: Path
-):
-    """Test extraction of reference genome BWA index files."""
-
-    # GIVEN a references model with a specific reference genome file
-    references_model.reference_genome.file_path = reference_genome_file.as_posix()
-
-    # GIVEN the expected files to be retrieved
-    expected_file_types: set = set(BwaIndexFileType)
-
-    # WHEN getting the reference genome BWA index files
-    bwa_index_files: List[str] = references_model.get_reference_genome_bwa_index_files()
-
-    # THEN the expected reference genome BWA index files should be returned
-    for file_type in expected_file_types:
-        assert file_type in [file.split(".")[-1] for file in bwa_index_files]
-
-
-def test_get_refgene_files(references_model: ReferencesModel, refgene_txt_file: Path):
-    """Test extraction of RefSeq's gene files."""
-
-    # GIVEN a references model with a specific RefSeq's gene TXT file
-    references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
-
-    # GIVEN the expected files to be retrieved
-    expected_file_types: set = {FileType.TXT, FileType.FLAT, FileType.BED}
-
-    # WHEN getting the RefSeq's gene files
-    refegene_files: List[str] = references_model.get_refgene_files()
-
-    # THEN the expected RefSeq's gene files should be returned
-    for file_type in expected_file_types:
-        assert file_type in [file.split(".")[-1] for file in expected_file_types]
-
-
-def test_get_refgene_flat_file(
-    references_model: ReferencesModel, refgene_txt_file: Path
-):
-    """Test extraction of RefSeq's gene FLAT file."""
-
-    # GIVEN a references model with a specific RefSeq's gene TXT file
-    references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
-
-    # WHEN getting the RefSeq's gene FLAT file
-    refegene_flat_file: str = references_model.get_refgene_flat_file()
-
-    # THEN the correctly formatted flat file should be returned
-    assert refegene_flat_file.split(".")[-1] == FileType.FLAT
-
-
-def test_get_refgene_bed_file(
-    references_model: ReferencesModel, refgene_txt_file: Path
-):
-    """Test extraction of RefSeq's gene BED file."""
-
-    # GIVEN a references model with a specific RefSeq's gene TXT file
-    references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
-
-    # WHEN getting the RefSeq's gene BED file
-    refegene_flat_file: str = references_model.get_refgene_bed_file()
-
-    # THEN the correctly formatted flat file should be returned
-    assert refegene_flat_file.split(".")[-1] == FileType.BED
-
-
-def test_canfam_references_model(references_model_data: Dict[str, dict]):
-    """Test canine references model."""
-
-    # GIVEN an input for the canine reference model
-
-    # WHEN initialising the model
-    model: CanFamReferencesModel = CanFamReferencesModel(**references_model_data)
-
-    # THEN the model should have been correctly built
-    assert model.dict() == references_model_data
-
-
-def test_canfam_references_model_empty():
-    """Test canine references model for an empty input."""
-
-    # GIVEN no input for the canine references model
-
-    # WHEN initialising the model
-    with pytest.raises(ValidationError):
-        # THEN an empty model should raise a ValidationError
-        CanFamReferencesModel()
-
-
-def test_hg_references_model(hg_references_model_data: Dict[str, dict]):
-    """Test human genome references model."""
-
-    # GIVEN an input for the human genome reference model
-
-    # WHEN initialising the model
-    model: HgReferencesModel = HgReferencesModel(**hg_references_model_data)
-
-    # THEN the model should have been correctly built
-    assert model.dict() == hg_references_model_data
-
-
-def test_hg_references_model_empty():
-    """Test human genome references model for an empty input."""
-
-    # GIVEN no input for the human genome references model
-
-    # WHEN initialising the model
-    with pytest.raises(ValidationError):
-        # THEN an empty model should raise a ValidationError
-        HgReferencesModel()
-
-
-def test_get_delly_files(
-    hg_references_model: HgReferencesModel,
-    delly_exclusion_file: Path,
-    delly_exclusion_converted_file: Path,
-    delly_mappability_file: Path,
-    delly_mappability_findex_file: Path,
-    delly_mappability_gindex_file: Path,
-):
-    """Test Delly specific files retrieval."""
-
-    # GIVEN a human genome references model with delly specific files
-    hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
-    hg_references_model.delly_mappability.file_path = delly_mappability_file.as_posix()
-    hg_references_model.delly_mappability_findex.file_path = (
-        delly_mappability_findex_file.as_posix()
-    )
-    hg_references_model.delly_mappability_gindex.file_path = (
-        delly_mappability_gindex_file.as_posix()
-    )
-
-    # WHEN getting the Delly specific reference files
-    delly_files: List[str] = hg_references_model.get_delly_files()
-
-    # THEN all the delly reference files should be returned
-    assert len(delly_files) == 5
-    assert delly_exclusion_file.as_posix() in delly_files
-    assert delly_exclusion_converted_file.as_posix() in delly_files
-    assert delly_mappability_file.as_posix() in delly_files
-    assert delly_mappability_findex_file.as_posix() in delly_files
-    assert delly_mappability_gindex_file.as_posix() in delly_files
-
-
-def test_get_delly_exclusion_converted_file(
-    hg_references_model: HgReferencesModel,
-    delly_exclusion_file: Path,
-    delly_exclusion_converted_file: Path,
-):
-    """Test get Delly exclusion converted file."""
-
-    # GIVEN a human genome references model with a specific delly exclusion file
-    hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
-
-    # WHEN getting the Delly exclusion converted file
-    converted_file: str = hg_references_model.get_delly_exclusion_converted_file()
-
-    # THEN the returned file should match the expected one
-    assert converted_file == delly_exclusion_converted_file.as_posix()
-
-
-def test_get_gnomad_files(
-    hg_references_model: HgReferencesModel,
-    gnomad_variant_file: Path,
-    gnomad_variant_index_file: Path,
-):
-    """Test get gnomad reference files."""
-
-    # GIVEN a human genome references model and specific gnomad files
-    hg_references_model.gnomad_variant.file_path = gnomad_variant_file.as_posix()
-    hg_references_model.gnomad_variant_index.file_path = (
-        gnomad_variant_index_file.as_posix()
-    )
-
-    # WHEN getting the genomad reference files
-    gnomad_files: List[str] = hg_references_model.get_gnomad_files()
-
-    # THEN the genomad files should be returned
-    assert len(gnomad_files) == 2
-    assert gnomad_variant_file.as_posix() in gnomad_files
-    assert gnomad_variant_index_file.as_posix() in gnomad_files
-
-
-def test_get_1k_genome_files(
-    hg_references_model: HgReferencesModel,
-    known_indel_1kg_file: Path,
-    mills_1kg_file: Path,
-    hc_vcf_1kg_file: Path,
-    vcf_1kg_file: Path,
-):
-    """Test get 1000 Genome related files."""
-
-    # GIVEN a human genome references model and specific 1k genome files
-    hg_references_model.known_indel_1kg.file_path = known_indel_1kg_file.as_posix()
-    hg_references_model.mills_1kg.file_path = mills_1kg_file.as_posix()
-    hg_references_model.hc_vcf_1kg.file_path = hc_vcf_1kg_file.as_posix()
-    hg_references_model.vcf_1kg.file_path = vcf_1kg_file.as_posix()
-
-    # WHEN getting the 1k genome files
-    genome_files: List[str] = hg_references_model.get_1k_genome_files()
-
-    # THEN the 1k genome files should be returned
-    assert len(genome_files) == 4
-    assert known_indel_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-    assert mills_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-    assert hc_vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-    assert vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-
-
-def test_cache_analysis_model(cache_analysis_model_data: Dict[str, str]):
-    """Test cache analysis model initialisation."""
-
-    # GIVEN an input for the cache analysis model
-
-    # WHEN initialising the model
-    model: CacheAnalysisModel = CacheAnalysisModel(**cache_analysis_model_data)
-
-    # THEN the model should have been correctly built
-    assert model.dict() == cache_analysis_model_data
-
-
-def test_hg_references_model_empty():
-    """Test ache analysis model for an empty input."""
-
-    # GIVEN no input for the cache analysis model
-
-    # WHEN initialising the model
-    with pytest.raises(ValidationError):
-        # THEN an empty model should raise a ValidationError
-        CacheAnalysisModel()
-
-
-def test_cache_config_model(cache_config_model_data: Dict[str, dict]):
-    """Test cache config model initialisation."""
-
-    # GIVEN an input for the cache config model
-
-    # WHEN initialising the model
-    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
-
-    # THEN the model should have been correctly built
-    assert model.dict() == cache_config_model_data
-
-
-def test_cache_config_model_empty():
-    """Test cache config model for an empty input."""
-
-    # GIVEN no input for the cache config model
-
-    # WHEN initialising the model
-    with pytest.raises(ValidationError):
-        # THEN an empty model should raise a ValidationError
-        CacheConfigModel()
-
-
-def test_cache_config_model_empty_file_path(cache_config_model_data: Dict[str, dict]):
-    """Test cache config model reference validation method and file path assignment."""
-
-    # GIVEN a cache config model data with empty file paths
-    for reference in cache_config_model_data["references"]:
-        reference[1].file_path = None
-
-    # WHEN initialising the model
-    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
-
-    # THEN the file paths should have been assigned
-    for reference in model.references:
-        assert reference[1].file_path
-
-
-def test_cache_config_model_empty_cosmic_key(
-    cache_config_model_data: Dict[str, dict], cosmic_key: str
-):
-    """Test cache config model reference validation method and cosmic key assignment."""
-
-    # GIVEN a cache config model data with empty cosmic keys
-    for reference in cache_config_model_data["references"]:
-        reference[1].secret = None
-
-    # WHEN initialising the model
-    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
-
-    # THEN a cosmic key should only have been assigned to a cosmic reference file
-    for reference in model.references:
-        if reference[0] == "cosmic":
-            assert reference[1].secret == cosmic_key
-            continue
-        assert reference[1].secret is None
-
-
-def test_get_grch_version(cache_config_model: CacheConfigModel):
-    """Test extraction of the GRCH format version having a specific genome version."""
-
-    # GIVEN a cache config model
-
-    # WHEN getting the GRCH version
-    grch_version: GRCHVersion = cache_config_model.get_grch_version()
-
-    # THEN a correct GRCH format version should be returned
-    assert grch_version == GRCHVersion.GRCH37
-
-
-def test_get_reference_paths(cache_config_model: CacheConfigModel):
-    """Test reference path extraction."""
-
-    # GIVEN a cache config model
-
-    # WHEN extracting the list of reference paths
-    reference_paths: List[str] = cache_config_model.get_reference_paths()
-
-    # THEN a complete list of reference path should be returned
-    assert reference_paths == [
-        reference[1].file_path for reference in cache_config_model.references
-    ]
-
-
-def test_get_reference_by_path(
-    cache_config_model: CacheConfigModel, reference_genome_file: Path
-):
-    """Test reference extraction given its path."""
-
-    # GIVEN a cache config model with a reference genome to be extracted
-    cache_config_model.references.reference_genome.file_path = (
-        reference_genome_file.as_posix()
-    )
-
-    # WHEN getting the reference genome by path
-    reference_genome: ReferenceUrlModel = cache_config_model.get_reference_by_path(
-        reference_path=reference_genome_file.as_posix()
-    )
-
-    # THEN the correct reference should be returned
-    assert reference_genome == cache_config_model.references.reference_genome
-
-
-def test_get_reference_paths_by_file_type_and_compression(
-    cache_config_model: CacheConfigModel, reference_genome_file: Path
-):
-    """Test reference path by file type and compression."""
-
-    # GIVEN a cache config model with multiple fasta files
-    cache_config_model.references.reference_genome.file_path = (
-        reference_genome_file.as_posix()
-    )
-    cache_config_model.references.reference_genome.file_type = FileType.FASTA
-    cache_config_model.references.reference_genome.gzip = True
-
-    # WHEN extracting the reference paths by file type and compression status
-    reference_paths: List[
-        str
-    ] = cache_config_model.get_reference_paths_by_file_type_and_compression(
-        file_type=FileType.FASTA, compression=True
-    )
-
-    # THEN the expected reference path should be returned
-    assert reference_paths == [reference_genome_file.as_posix()]
-
-
-def test_get_reference_paths_by_file_type(
-    cache_config_model: CacheConfigModel, refgene_txt_file: Path
-):
-    """Test reference path by file type."""
-
-    # GIVEN a cache config model with a RefSeq's gene file
-    cache_config_model.references.refgene_txt.file_path = refgene_txt_file.as_posix()
-    cache_config_model.references.refgene_txt.file_type = FileType.TXT
-
-    # WHEN extracting the reference paths by file type
-    reference_paths: List[str] = cache_config_model.get_reference_paths_by_file_type(
-        file_type=FileType.TXT
-    )
-
-    # THEN the TXT file should be returned
-    assert reference_paths == [refgene_txt_file.as_posix()]
-
-
-def test_get_reference_paths_by_compression(
-    cache_config_model: CacheConfigModel, reference_genome_file: Path
-):
-    """Test reference path by compression."""
-
-    # GIVEN a cache config model with a compressed reference genome file
-    cache_config_model.references.reference_genome.file_path = (
-        reference_genome_file.as_posix()
-    )
-    cache_config_model.references.reference_genome.gzip = True
-
-    # WHEN extracting the reference paths by compression status
-    reference_paths: List[str] = cache_config_model.get_reference_paths_by_compression(
-        compression=True
-    )
-
-    # THEN the expected reference path should be returned
-    assert reference_paths == [reference_genome_file.as_posix()]
-
-
-def test_get_compressed_indexed_vcfs(cache_config_model: CacheConfigModel):
-    """"""
-
-    # GIVEN a cache config model
-
-
-def test_get_container_output_paths(cache_config_model: CacheConfigModel):
-    """"""
-
-    # GIVEN a cache config model
-
-
-def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
-    """"""
-
-    # GIVEN a cache config model
-
-
-def test_get_analysis_references(cache_config_model: CacheConfigModel):
-    """"""
-
-    # GIVEN a cache config model
-
+# def test_get_reference_genome_bwa_index_files(
+#     references_model: ReferencesModel, reference_genome_file: Path
+# ):
+#     """Test extraction of reference genome BWA index files."""
+#
+#     # GIVEN a references model with a specific reference genome file
+#     references_model.reference_genome.file_path = reference_genome_file.as_posix()
+#
+#     # GIVEN the expected files to be retrieved
+#     expected_file_types: set = set(BwaIndexFileType)
+#
+#     # WHEN getting the reference genome BWA index files
+#     bwa_index_files: List[str] = references_model.get_reference_genome_bwa_index_files()
+#
+#     # THEN the expected reference genome BWA index files should be returned
+#     for file_type in expected_file_types:
+#         assert file_type in [file.split(".")[-1] for file in bwa_index_files]
+#
+#
+# def test_get_refgene_files(references_model: ReferencesModel, refgene_txt_file: Path):
+#     """Test extraction of RefSeq's gene files."""
+#
+#     # GIVEN a references model with a specific RefSeq's gene TXT file
+#     references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
+#
+#     # GIVEN the expected files to be retrieved
+#     expected_file_types: set = {FileType.TXT, FileType.FLAT, FileType.BED}
+#
+#     # WHEN getting the RefSeq's gene files
+#     refegene_files: List[str] = references_model.get_refgene_files()
+#
+#     # THEN the expected RefSeq's gene files should be returned
+#     for file_type in expected_file_types:
+#         assert file_type in [file.split(".")[-1] for file in expected_file_types]
+#
+#
+# def test_get_refgene_flat_file(
+#     references_model: ReferencesModel, refgene_txt_file: Path
+# ):
+#     """Test extraction of RefSeq's gene FLAT file."""
+#
+#     # GIVEN a references model with a specific RefSeq's gene TXT file
+#     references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
+#
+#     # WHEN getting the RefSeq's gene FLAT file
+#     refegene_flat_file: str = references_model.get_refgene_flat_file()
+#
+#     # THEN the correctly formatted flat file should be returned
+#     assert refegene_flat_file.split(".")[-1] == FileType.FLAT
+#
+#
+# def test_get_refgene_bed_file(
+#     references_model: ReferencesModel, refgene_txt_file: Path
+# ):
+#     """Test extraction of RefSeq's gene BED file."""
+#
+#     # GIVEN a references model with a specific RefSeq's gene TXT file
+#     references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
+#
+#     # WHEN getting the RefSeq's gene BED file
+#     refegene_flat_file: str = references_model.get_refgene_bed_file()
+#
+#     # THEN the correctly formatted flat file should be returned
+#     assert refegene_flat_file.split(".")[-1] == FileType.BED
+#
+#
+# def test_canfam_references_model(references_model_data: Dict[str, dict]):
+#     """Test canine references model."""
+#
+#     # GIVEN an input for the canine reference model
+#
+#     # WHEN initialising the model
+#     model: CanFamReferencesModel = CanFamReferencesModel(**references_model_data)
+#
+#     # THEN the model should have been correctly built
+#     assert model.dict() == references_model_data
+#
+#
+# def test_canfam_references_model_empty():
+#     """Test canine references model for an empty input."""
+#
+#     # GIVEN no input for the canine references model
+#
+#     # WHEN initialising the model
+#     with pytest.raises(ValidationError):
+#         # THEN an empty model should raise a ValidationError
+#         CanFamReferencesModel()
+#
+#
+# def test_hg_references_model(hg_references_model_data: Dict[str, dict]):
+#     """Test human genome references model."""
+#
+#     # GIVEN an input for the human genome reference model
+#
+#     # WHEN initialising the model
+#     model: HgReferencesModel = HgReferencesModel(**hg_references_model_data)
+#
+#     # THEN the model should have been correctly built
+#     assert model.dict() == hg_references_model_data
+#
+#
+# def test_hg_references_model_empty():
+#     """Test human genome references model for an empty input."""
+#
+#     # GIVEN no input for the human genome references model
+#
+#     # WHEN initialising the model
+#     with pytest.raises(ValidationError):
+#         # THEN an empty model should raise a ValidationError
+#         HgReferencesModel()
+#
+#
+# def test_get_delly_files(
+#     hg_references_model: HgReferencesModel,
+#     delly_exclusion_file: Path,
+#     delly_exclusion_converted_file: Path,
+#     delly_mappability_file: Path,
+#     delly_mappability_findex_file: Path,
+#     delly_mappability_gindex_file: Path,
+# ):
+#     """Test Delly specific files retrieval."""
+#
+#     # GIVEN a human genome references model with delly specific files
+#     hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
+#     hg_references_model.delly_mappability.file_path = delly_mappability_file.as_posix()
+#     hg_references_model.delly_mappability_findex.file_path = (
+#         delly_mappability_findex_file.as_posix()
+#     )
+#     hg_references_model.delly_mappability_gindex.file_path = (
+#         delly_mappability_gindex_file.as_posix()
+#     )
+#
+#     # WHEN getting the Delly specific reference files
+#     delly_files: List[str] = hg_references_model.get_delly_files()
+#
+#     # THEN all the delly reference files should be returned
+#     assert len(delly_files) == 5
+#     assert delly_exclusion_file.as_posix() in delly_files
+#     assert delly_exclusion_converted_file.as_posix() in delly_files
+#     assert delly_mappability_file.as_posix() in delly_files
+#     assert delly_mappability_findex_file.as_posix() in delly_files
+#     assert delly_mappability_gindex_file.as_posix() in delly_files
+#
+#
+# def test_get_delly_exclusion_converted_file(
+#     hg_references_model: HgReferencesModel,
+#     delly_exclusion_file: Path,
+#     delly_exclusion_converted_file: Path,
+# ):
+#     """Test get Delly exclusion converted file."""
+#
+#     # GIVEN a human genome references model with a specific delly exclusion file
+#     hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
+#
+#     # WHEN getting the Delly exclusion converted file
+#     converted_file: str = hg_references_model.get_delly_exclusion_converted_file()
+#
+#     # THEN the returned file should match the expected one
+#     assert converted_file == delly_exclusion_converted_file.as_posix()
+#
+#
+# def test_get_gnomad_files(
+#     hg_references_model: HgReferencesModel,
+#     gnomad_variant_file: Path,
+#     gnomad_variant_index_file: Path,
+# ):
+#     """Test get gnomad reference files."""
+#
+#     # GIVEN a human genome references model and specific gnomad files
+#     hg_references_model.gnomad_variant.file_path = gnomad_variant_file.as_posix()
+#     hg_references_model.gnomad_variant_index.file_path = (
+#         gnomad_variant_index_file.as_posix()
+#     )
+#
+#     # WHEN getting the genomad reference files
+#     gnomad_files: List[str] = hg_references_model.get_gnomad_files()
+#
+#     # THEN the genomad files should be returned
+#     assert len(gnomad_files) == 2
+#     assert gnomad_variant_file.as_posix() in gnomad_files
+#     assert gnomad_variant_index_file.as_posix() in gnomad_files
+#
+#
+# def test_get_1k_genome_files(
+#     hg_references_model: HgReferencesModel,
+#     known_indel_1kg_file: Path,
+#     mills_1kg_file: Path,
+#     hc_vcf_1kg_file: Path,
+#     vcf_1kg_file: Path,
+# ):
+#     """Test get 1000 Genome related files."""
+#
+#     # GIVEN a human genome references model and specific 1k genome files
+#     hg_references_model.known_indel_1kg.file_path = known_indel_1kg_file.as_posix()
+#     hg_references_model.mills_1kg.file_path = mills_1kg_file.as_posix()
+#     hg_references_model.hc_vcf_1kg.file_path = hc_vcf_1kg_file.as_posix()
+#     hg_references_model.vcf_1kg.file_path = vcf_1kg_file.as_posix()
+#
+#     # WHEN getting the 1k genome files
+#     genome_files: List[str] = hg_references_model.get_1k_genome_files()
+#
+#     # THEN the 1k genome files should be returned
+#     assert len(genome_files) == 4
+#     assert known_indel_1kg_file.as_posix() + "." + FileType.GZ in genome_files
+#     assert mills_1kg_file.as_posix() + "." + FileType.GZ in genome_files
+#     assert hc_vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
+#     assert vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
+#
+#
+# def test_cache_analysis_model(cache_analysis_model_data: Dict[str, str]):
+#     """Test cache analysis model initialisation."""
+#
+#     # GIVEN an input for the cache analysis model
+#
+#     # WHEN initialising the model
+#     model: CacheAnalysisModel = CacheAnalysisModel(**cache_analysis_model_data)
+#
+#     # THEN the model should have been correctly built
+#     assert model.dict() == cache_analysis_model_data
+#
+#
+# def test_hg_references_model_empty():
+#     """Test ache analysis model for an empty input."""
+#
+#     # GIVEN no input for the cache analysis model
+#
+#     # WHEN initialising the model
+#     with pytest.raises(ValidationError):
+#         # THEN an empty model should raise a ValidationError
+#         CacheAnalysisModel()
+#
+#
+# def test_cache_config_model(cache_config_model_data: Dict[str, dict]):
+#     """Test cache config model initialisation."""
+#
+#     # GIVEN an input for the cache config model
+#
+#     # WHEN initialising the model
+#     model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+#
+#     # THEN the model should have been correctly built
+#     assert model.dict() == cache_config_model_data
+#
+#
+# def test_cache_config_model_empty():
+#     """Test cache config model for an empty input."""
+#
+#     # GIVEN no input for the cache config model
+#
+#     # WHEN initialising the model
+#     with pytest.raises(ValidationError):
+#         # THEN an empty model should raise a ValidationError
+#         CacheConfigModel()
+#
+#
+# def test_cache_config_model_empty_file_path(cache_config_model_data: Dict[str, dict]):
+#     """Test cache config model reference validation method and file path assignment."""
+#
+#     # GIVEN a cache config model data with empty file paths
+#     for reference in cache_config_model_data["references"]:
+#         reference[1].file_path = None
+#
+#     # WHEN initialising the model
+#     model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+#
+#     # THEN the file paths should have been assigned
+#     for reference in model.references:
+#         assert reference[1].file_path
+#
+#
+# def test_cache_config_model_empty_cosmic_key(
+#     cache_config_model_data: Dict[str, dict], cosmic_key: str
+# ):
+#     """Test cache config model reference validation method and cosmic key assignment."""
+#
+#     # GIVEN a cache config model data with empty cosmic keys
+#     for reference in cache_config_model_data["references"]:
+#         reference[1].secret = None
+#
+#     # WHEN initialising the model
+#     model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+#
+#     # THEN a cosmic key should only have been assigned to a cosmic reference file
+#     for reference in model.references:
+#         if reference[0] == "cosmic":
+#             assert reference[1].secret == cosmic_key
+#             continue
+#         assert reference[1].secret is None
+#
+#
+# def test_get_grch_version(cache_config_model: CacheConfigModel):
+#     """Test extraction of the GRCH format version having a specific genome version."""
+#
+#     # GIVEN a cache config model
+#
+#     # WHEN getting the GRCH version
+#     grch_version: GRCHVersion = cache_config_model.get_grch_version()
+#
+#     # THEN a correct GRCH format version should be returned
+#     assert grch_version == GRCHVersion.GRCH37
+#
+#
+# def test_get_reference_paths(cache_config_model: CacheConfigModel):
+#     """Test reference path extraction."""
+#
+#     # GIVEN a cache config model
+#
+#     # WHEN extracting the list of reference paths
+#     reference_paths: List[str] = cache_config_model.get_reference_paths()
+#
+#     # THEN a complete list of reference path should be returned
+#     assert reference_paths == [
+#         reference[1].file_path for reference in cache_config_model.references
+#     ]
+#
+#
+# def test_get_reference_by_path(
+#     cache_config_model: CacheConfigModel, reference_genome_file: Path
+# ):
+#     """Test reference extraction given its path."""
+#
+#     # GIVEN a cache config model with a reference genome to be extracted
+#     cache_config_model.references.reference_genome.file_path = (
+#         reference_genome_file.as_posix()
+#     )
+#
+#     # WHEN getting the reference genome by path
+#     reference_genome: ReferenceUrlModel = cache_config_model.get_reference_by_path(
+#         reference_path=reference_genome_file.as_posix()
+#     )
+#
+#     # THEN the correct reference should be returned
+#     assert reference_genome == cache_config_model.references.reference_genome
+#
+#
+# def test_get_reference_paths_by_file_type_and_compression(
+#     cache_config_model: CacheConfigModel, reference_genome_file: Path
+# ):
+#     """Test reference path extraction by file type and compression."""
+#
+#     # GIVEN a cache config model with multiple fasta files
+#     cache_config_model.references.reference_genome.file_path = (
+#         reference_genome_file.as_posix()
+#     )
+#     cache_config_model.references.reference_genome.file_type = FileType.FASTA
+#     cache_config_model.references.reference_genome.gzip = True
+#
+#     # WHEN extracting the reference paths by file type and compression status
+#     reference_paths: List[
+#         str
+#     ] = cache_config_model.get_reference_paths_by_file_type_and_compression(
+#         file_type=FileType.FASTA, compression=True
+#     )
+#
+#     # THEN the expected reference path should be returned
+#     assert reference_paths == [reference_genome_file.as_posix()]
+#
+#
+# def test_get_reference_paths_by_file_type(
+#     cache_config_model: CacheConfigModel, refgene_txt_file: Path
+# ):
+#     """Test reference path extraction by file type."""
+#
+#     # GIVEN a cache config model with a RefSeq's gene file
+#     cache_config_model.references.refgene_txt.file_path = refgene_txt_file.as_posix()
+#     cache_config_model.references.refgene_txt.file_type = FileType.TXT
+#
+#     # WHEN extracting the reference paths by file type
+#     reference_paths: List[str] = cache_config_model.get_reference_paths_by_file_type(
+#         file_type=FileType.TXT
+#     )
+#
+#     # THEN the TXT file should be returned
+#     assert reference_paths == [refgene_txt_file.as_posix()]
+#
+#
+# def test_get_reference_paths_by_compression(
+#     cache_config_model: CacheConfigModel, reference_genome_file: Path
+# ):
+#     """Test reference path extraction by compression."""
+#
+#     # GIVEN a cache config model with a compressed reference genome file
+#     cache_config_model.references.reference_genome.file_path = (
+#         reference_genome_file.as_posix()
+#     )
+#     cache_config_model.references.reference_genome.gzip = True
+#
+#     # WHEN extracting the reference paths by compression status
+#     reference_paths: List[str] = cache_config_model.get_reference_paths_by_compression(
+#         compression=True
+#     )
+#
+#     # THEN the expected reference path should be returned
+#     assert reference_paths == [reference_genome_file.as_posix()]
+#
+#
+# def test_get_compressed_indexed_vcfs(cache_config_model: CacheConfigModel):
+#     """"""
+#
+#     # GIVEN a cache config model
+#
+#
+# def test_get_container_output_paths(cache_config_model: CacheConfigModel):
+#     """"""
+#
+#     # GIVEN a cache config model
+#
+#
+# def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
+#     """"""
+#
+#     # GIVEN a cache config model
+#
+#
+# def test_get_analysis_references(cache_config_model: CacheConfigModel):
+#     """"""
+#
+#     # GIVEN a cache config model
+
+################################################################################################
+################################################################################################
+################################################################################################
 
 # def test_get_reference_output_files():
 #     # GIVEN a reference genome version

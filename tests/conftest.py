@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 import pytest
 import json
@@ -10,15 +10,14 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from functools import partial
 
-from BALSAMIC.commands.init.utils import get_containers
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
 from BALSAMIC.constants.cache import (
     DockerContainers,
-    FileType,
     GenomeVersion,
-    ContainerVersion,
+    REFERENCE_FILES,
+    FileType,
 )
 from _pytest.tmpdir import TempPathFactory
 
@@ -27,12 +26,7 @@ from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
-from BALSAMIC.models.cache import (
-    ReferencesModel,
-    HgReferencesModel,
-    CacheAnalysisModel,
-    CacheConfigModel,
-)
+from BALSAMIC.models.cache import CacheAnalysisModel, CacheConfigModel, ReferencesModel
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
@@ -760,130 +754,6 @@ def fixture_cluster_account() -> str:
     return "development"
 
 
-@pytest.fixture(scope="function", name="reference_file")
-def fixture_reference_file(tmp_path: Path) -> Path:
-    """Dummy reference file."""
-    reference_file: Path = Path(tmp_path, "reference.vcf")
-    reference_file.touch()
-    return reference_file
-
-
-@pytest.fixture(scope="function", name="reference_genome_file")
-def fixture_reference_genome_file(tmp_path: Path) -> Path:
-    """Dummy reference file."""
-    reference_genome_file: Path = Path(tmp_path, "reference.fasta")
-    reference_genome_file.touch()
-    return reference_genome_file
-
-
-@pytest.fixture(scope="function", name="refgene_txt_file")
-def fixture_refgene_txt_file(tmp_path: Path) -> Path:
-    """Dummy RefSeq's gene file."""
-    refgene_txt_file: Path = Path(tmp_path, "refGene.txt")
-    refgene_txt_file.touch()
-    return refgene_txt_file
-
-
-@pytest.fixture(scope="function", name="delly_exclusion_file")
-def fixture_delly_exclusion_file(tmp_path: Path) -> Path:
-    """Dummy Delly exclusion file."""
-    delly_exclusion_file: Path = Path(tmp_path, "human.hg19.excl.tsv")
-    delly_exclusion_file.touch()
-    return delly_exclusion_file
-
-
-@pytest.fixture(scope="function", name="delly_exclusion_converted_file")
-def fixture_delly_exclusion_converted_file(tmp_path: Path) -> Path:
-    """Dummy Delly exclusion converted file."""
-    delly_exclusion_converted: Path = Path(tmp_path, "human.hg19.excl_converted.tsv")
-    delly_exclusion_converted.touch()
-    return delly_exclusion_converted
-
-
-@pytest.fixture(scope="function", name="delly_mappability_file")
-def fixture_delly_mappability_file(tmp_path: Path) -> Path:
-    """Dummy Delly mappability file."""
-    delly_mappability_file: Path = Path(tmp_path, "GRCh37.delly.blacklist.gz")
-    delly_mappability_file.touch()
-    return delly_mappability_file
-
-
-@pytest.fixture(scope="function", name="delly_mappability_findex_file")
-def fixture_delly_mappability_findex_file(tmp_path: Path) -> Path:
-    """Dummy Delly mappability findex file."""
-    delly_mappability_findex_file: Path = Path(
-        tmp_path, "GRCh37.delly.blacklist.gz.fai"
-    )
-    delly_mappability_findex_file.touch()
-    return delly_mappability_findex_file
-
-
-@pytest.fixture(scope="function", name="delly_mappability_gindex_file")
-def fixture_delly_mappability_gindex_file(tmp_path: Path) -> Path:
-    """Dummy Delly exclusion file."""
-    delly_mappability_gindex_file: Path = Path(
-        tmp_path, "GRCh37.delly.blacklist.gz.gzi"
-    )
-    delly_mappability_gindex_file.touch()
-    return delly_mappability_gindex_file
-
-
-@pytest.fixture(scope="function", name="gnomad_variant_file")
-def fixture_gnomad_variant_file(tmp_path: Path) -> Path:
-    """Dummy gnomad_variant file."""
-    gnomad_variant_file: Path = Path(tmp_path, "gnomad.genomes.r2.1.1.sites.vcf.bgz")
-    gnomad_variant_file.touch()
-    return gnomad_variant_file
-
-
-@pytest.fixture(scope="function", name="gnomad_variant_index_file")
-def fixture_gnomad_variant_index_file(tmp_path: Path) -> Path:
-    """Dummy gnomad_variant index file."""
-    gnomad_variant_index_file: Path = Path(
-        tmp_path, "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi"
-    )
-    gnomad_variant_index_file.touch()
-    return gnomad_variant_index_file
-
-
-@pytest.fixture(scope="function", name="known_indel_1kg_file")
-def fixture_known_indel_1kg_file(tmp_path: Path) -> Path:
-    """Dummy 1000 Genome known InDels VCF file."""
-    known_indel_1kg_file: Path = Path(tmp_path, "1kg_known_indels_b37.vcf")
-    known_indel_1kg_file.touch()
-    return known_indel_1kg_file
-
-
-@pytest.fixture(scope="function", name="mills_1kg_file")
-def fixture_mills_1kg_file(tmp_path: Path) -> Path:
-    """Dummy Mills' high confidence InDels VCF file."""
-    mills_1kg_file: Path = Path(tmp_path, "mills_1kg_index.vcf")
-    mills_1kg_file.touch()
-    return mills_1kg_file
-
-
-@pytest.fixture(scope="function", name="hc_vcf_1kg_file")
-def fixture_hc_vcf_1kg_file(tmp_path: Path) -> Path:
-    """Dummy high confidence 1000 Genome VCF file."""
-    hc_vcf_1kg_file: Path = Path(tmp_path, "1kg_phase1_snps_high_confidence_b37.vcf")
-    hc_vcf_1kg_file.touch()
-    return hc_vcf_1kg_file
-
-
-@pytest.fixture(scope="function", name="vcf_1kg_file")
-def fixture_vcf_1kg_file(tmp_path: Path) -> Path:
-    """Dummy 1000 Genome all SNPs file."""
-    vcf_1kg_file: Path = Path(tmp_path, "1k_genome_wgs_p1_v3_all_sites.vcf")
-    vcf_1kg_file.touch()
-    return vcf_1kg_file
-
-
-@pytest.fixture(scope="function", name="reference_url")
-def fixture_reference_url() -> str:
-    """Dummy reference URL."""
-    return "gs://gatk-legacy-bundles/b37/reference.vcf.gz"
-
-
 @pytest.fixture(scope="session", name="develop_containers")
 def fixture_develop_containers() -> Dict[str, str]:
     """Develop containers fixture."""
@@ -903,45 +773,139 @@ def fixture_develop_containers() -> Dict[str, str]:
     }
 
 
-@pytest.fixture(scope="function", name="analysis_references_model_data")
-def fixture_analysis_references_model_data(reference_file: Path) -> Dict[str, Path]:
-    """Analysis references model data."""
+@pytest.fixture(scope="function", name="cache_config_model_data")
+def fixture_cache_config_model_data(
+    cache_analysis_model: CacheAnalysisModel,
+    develop_containers: Dict[str, str],
+    cosmic_key: str,
+    timestamp_now: datetime,
+    tmp_path: Path,
+) -> Dict[str, str]:
+    """Mocked cache config data."""
+
     return {
-        "genome_chrom_size": reference_file,
-        "reference_genome": reference_file,
-        "refgene_bed": reference_file,
-        "refgene_flat": reference_file,
-        "refgene_txt": reference_file,
+        "analysis": cache_analysis_model,
+        "references_dir": tmp_path,
+        "genome_dir": tmp_path,
+        "variants_dir": tmp_path,
+        "vep_dir": tmp_path,
+        "containers_dir": tmp_path,
+        "genome_version": GenomeVersion.HG19,
+        "cosmic_key": cosmic_key,
+        "bioinfo_tools": BIOINFO_TOOL_ENV,
+        "containers": develop_containers,
+        "references": REFERENCE_FILES[GenomeVersion.HG19],
+        "references_date": timestamp_now.strftime("%Y-%m-%d %H:%M"),
+    }
+
+
+@pytest.fixture(scope="function", name="cache_config_model")
+def fixture_cache_config_model(
+    cache_config_model_data: Dict[str, dict]
+) -> CacheConfigModel:
+    """Mocked cache config model."""
+    cache_config_model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+    for reference in cache_config_model.references:
+        reference_file: Path = Path(reference[1].file_path)
+        reference_file.parent.mkdir(parents=True, exist_ok=True)
+        reference_file.touch()
+    return cache_config_model
+
+
+@pytest.fixture(scope="function", name="cache_analysis_model_data")
+def fixture_cache_analysis_model_data(case_id_tumor_only: str) -> Dict[str, str]:
+    """Mocked cache analysis data."""
+    return {"case_id": case_id_tumor_only}
+
+
+@pytest.fixture(scope="function", name="cache_analysis_model")
+def fixture_cache_analysis_model(
+    cache_analysis_model_data: Dict[str, str]
+) -> CacheAnalysisModel:
+    """Mocked cache analysis model."""
+    return CacheAnalysisModel(**cache_analysis_model_data)
+
+
+@pytest.fixture(scope="function", name="analysis_references_model_data")
+def fixture_analysis_references_model_data(
+    cache_config_model: CacheConfigModel,
+) -> Dict[str, Path]:
+    """Analysis references model data."""
+    refgene_bed_file: Path = Path(cache_config_model.references.get_refgene_bed_file())
+    refgene_bed_file.touch()
+    refgene_flat_file: Path = Path(cache_config_model.references.get_refgene_bed_file())
+    refgene_flat_file.touch()
+    return {
+        "genome_chrom_size": Path(
+            cache_config_model.references.genome_chrom_size.file_path
+        ),
+        "reference_genome": Path(
+            cache_config_model.references.reference_genome.file_path
+        ),
+        "refgene_bed": refgene_bed_file,
+        "refgene_flat": refgene_flat_file,
+        "refgene_txt": Path(cache_config_model.references.refgene_txt.file_path),
     }
 
 
 @pytest.fixture(scope="function", name="hg_analysis_references_model_data")
 def fixture_hg_analysis_references_model_data(
-    analysis_references_model_data: Dict[str, Path], reference_file: Path
+    cache_config_model: CacheConfigModel,
+    analysis_references_model_data: Dict[str, Path],
 ) -> Dict[str, Path]:
     """Human genome analysis references model data."""
+    delly_exclusion_converted_file: Path = Path(
+        cache_config_model.references.get_delly_exclusion_converted_file()
+    )
+    delly_exclusion_converted_file.touch()
     hg_analysis_references_model_data: Dict[str, Path] = {
-        "access_regions": reference_file,
-        "ascat_chr_y_loci": reference_file,
-        "ascat_gc_correction": reference_file,
-        "clinvar": reference_file,
-        "cosmic": reference_file,
-        "dbsnp": reference_file,
-        "delly_exclusion": reference_file,
-        "delly_exclusion_converted": reference_file,
-        "delly_mappability": reference_file,
-        "gnomad_variant": reference_file,
-        "hc_vcf_1kg": reference_file,
-        "known_indel_1kg": reference_file,
-        "mills_1kg": reference_file,
-        "rank_score": reference_file,
-        "somalier_sites": reference_file,
-        "vcf_1kg": reference_file,
-        "vep_dir": reference_file.parent,
-        "wgs_calling_regions": reference_file,
+        "access_regions": Path(cache_config_model.references.access_regions.file_path),
+        "ascat_chr_y_loci": Path(
+            cache_config_model.references.ascat_chr_y_loci.file_path
+        ),
+        "ascat_gc_correction": Path(
+            cache_config_model.references.ascat_gc_correction.file_path
+        ),
+        "clinvar": Path(cache_config_model.references.clinvar.file_path),
+        "cosmic": Path(cache_config_model.references.cosmic.file_path),
+        "dbsnp": Path(cache_config_model.references.dbsnp.file_path),
+        "delly_exclusion": Path(
+            cache_config_model.references.delly_exclusion.file_path
+        ),
+        "delly_exclusion_converted": delly_exclusion_converted_file,
+        "delly_mappability": Path(
+            cache_config_model.references.delly_mappability.file_path
+        ),
+        "gnomad_variant": Path(cache_config_model.references.gnomad_variant.file_path),
+        "hc_vcf_1kg": Path(cache_config_model.references.hc_vcf_1kg.file_path),
+        "known_indel_1kg": Path(
+            cache_config_model.references.known_indel_1kg.file_path
+        ),
+        "mills_1kg": Path(cache_config_model.references.mills_1kg.file_path),
+        "rank_score": Path(cache_config_model.references.rank_score.file_path),
+        "somalier_sites": Path(cache_config_model.references.somalier_sites.file_path),
+        "vcf_1kg": Path(cache_config_model.references.vcf_1kg.file_path),
+        "vep_dir": cache_config_model.references_dir,
+        "wgs_calling_regions": Path(
+            cache_config_model.references.wgs_calling_regions.file_path
+        ),
     }
     hg_analysis_references_model_data.update(analysis_references_model_data)
     return hg_analysis_references_model_data
+
+
+@pytest.fixture(scope="function", name="reference_url")
+def fixture_reference_url() -> str:
+    """Dummy reference URL."""
+    return "gs://gatk-legacy-bundles/b37/reference.vcf.gz"
+
+
+@pytest.fixture(scope="function", name="reference_file")
+def fixture_reference_file(tmp_path: Path) -> Path:
+    """Dummy reference file."""
+    reference_file: Path = Path(tmp_path, "reference.vcf")
+    reference_file.touch()
+    return reference_file
 
 
 @pytest.fixture(scope="function", name="reference_url_model_data")
@@ -962,14 +926,14 @@ def fixture_reference_url_model_data(
 
 @pytest.fixture(scope="function", name="references_model_data")
 def fixture_references_model_data(
-    reference_url_model_data: Dict[str, Any]
+    cache_config_model: CacheConfigModel,
 ) -> Dict[str, dict]:
     """References model data."""
     return {
-        "genome_chrom_size": reference_url_model_data,
-        "reference_genome": reference_url_model_data,
-        "refgene_sql": reference_url_model_data,
-        "refgene_txt": reference_url_model_data,
+        "genome_chrom_size": cache_config_model.references.genome_chrom_size,
+        "reference_genome": cache_config_model.references.reference_genome,
+        "refgene_sql": cache_config_model.references.refgene_sql,
+        "refgene_txt": cache_config_model.references.refgene_txt,
     }
 
 
@@ -979,88 +943,151 @@ def fixture_references_model(references_model_data: Dict[str, dict]) -> Referenc
     return ReferencesModel(**references_model_data)
 
 
-@pytest.fixture(scope="function", name="hg_references_model_data")
-def fixture_hg_references_model_data(
-    reference_url_model_data: Dict[str, Any], references_model_data: Dict[str, dict]
-) -> Dict[str, dict]:
-    """Human genome references model data."""
-    hg_references_model_data: Dict[str, dict] = {
-        "access_regions": reference_url_model_data,
-        "ascat_chr_y_loci": reference_url_model_data,
-        "ascat_gc_correction": reference_url_model_data,
-        "clinvar": reference_url_model_data,
-        "cosmic": reference_url_model_data,
-        "dbsnp": reference_url_model_data,
-        "delly_exclusion": reference_url_model_data,
-        "delly_mappability": reference_url_model_data,
-        "delly_mappability_findex": reference_url_model_data,
-        "delly_mappability_gindex": reference_url_model_data,
-        "gnomad_variant": reference_url_model_data,
-        "gnomad_variant_index": reference_url_model_data,
-        "hc_vcf_1kg": reference_url_model_data,
-        "known_indel_1kg": reference_url_model_data,
-        "mills_1kg": reference_url_model_data,
-        "rank_score": reference_url_model_data,
-        "somalier_sites": reference_url_model_data,
-        "vcf_1kg": reference_url_model_data,
-        "wgs_calling_regions": reference_url_model_data,
-    }
-    hg_references_model_data.update(references_model_data)
-    return hg_references_model_data
+# @pytest.fixture(scope="function", name="reference_genome_file")
+# def fixture_reference_genome_file(tmp_path: Path) -> Path:
+#     """Dummy reference file."""
+#     reference_genome_file: Path = Path(tmp_path, "reference.fasta")
+#     reference_genome_file.touch()
+#     return reference_genome_file
+#
+#
+# @pytest.fixture(scope="function", name="refgene_txt_file")
+# def fixture_refgene_txt_file(tmp_path: Path) -> Path:
+#     """Dummy RefSeq's gene file."""
+#     refgene_txt_file: Path = Path(tmp_path, "refGene.txt")
+#     refgene_txt_file.touch()
+#     return refgene_txt_file
+#
+#
+# @pytest.fixture(scope="function", name="delly_exclusion_file")
+# def fixture_delly_exclusion_file(tmp_path: Path) -> Path:
+#     """Dummy Delly exclusion file."""
+#     delly_exclusion_file: Path = Path(tmp_path, "human.hg19.excl.tsv")
+#     delly_exclusion_file.touch()
+#     return delly_exclusion_file
+#
+#
+# @pytest.fixture(scope="function", name="delly_exclusion_converted_file")
+# def fixture_delly_exclusion_converted_file(tmp_path: Path) -> Path:
+#     """Dummy Delly exclusion converted file."""
+#     delly_exclusion_converted: Path = Path(tmp_path, "human.hg19.excl_converted.tsv")
+#     delly_exclusion_converted.touch()
+#     return delly_exclusion_converted
+#
+#
+# @pytest.fixture(scope="function", name="delly_mappability_file")
+# def fixture_delly_mappability_file(tmp_path: Path) -> Path:
+#     """Dummy Delly mappability file."""
+#     delly_mappability_file: Path = Path(tmp_path, "GRCh37.delly.blacklist.gz")
+#     delly_mappability_file.touch()
+#     return delly_mappability_file
+#
+#
+# @pytest.fixture(scope="function", name="delly_mappability_findex_file")
+# def fixture_delly_mappability_findex_file(tmp_path: Path) -> Path:
+#     """Dummy Delly mappability findex file."""
+#     delly_mappability_findex_file: Path = Path(
+#         tmp_path, "GRCh37.delly.blacklist.gz.fai"
+#     )
+#     delly_mappability_findex_file.touch()
+#     return delly_mappability_findex_file
+#
+#
+# @pytest.fixture(scope="function", name="delly_mappability_gindex_file")
+# def fixture_delly_mappability_gindex_file(tmp_path: Path) -> Path:
+#     """Dummy Delly exclusion file."""
+#     delly_mappability_gindex_file: Path = Path(
+#         tmp_path, "GRCh37.delly.blacklist.gz.gzi"
+#     )
+#     delly_mappability_gindex_file.touch()
+#     return delly_mappability_gindex_file
+#
+#
+# @pytest.fixture(scope="function", name="gnomad_variant_file")
+# def fixture_gnomad_variant_file(tmp_path: Path) -> Path:
+#     """Dummy gnomad_variant file."""
+#     gnomad_variant_file: Path = Path(tmp_path, "gnomad.genomes.r2.1.1.sites.vcf.bgz")
+#     gnomad_variant_file.touch()
+#     return gnomad_variant_file
+#
+#
+# @pytest.fixture(scope="function", name="gnomad_variant_index_file")
+# def fixture_gnomad_variant_index_file(tmp_path: Path) -> Path:
+#     """Dummy gnomad_variant index file."""
+#     gnomad_variant_index_file: Path = Path(
+#         tmp_path, "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi"
+#     )
+#     gnomad_variant_index_file.touch()
+#     return gnomad_variant_index_file
+#
+#
+# @pytest.fixture(scope="function", name="known_indel_1kg_file")
+# def fixture_known_indel_1kg_file(tmp_path: Path) -> Path:
+#     """Dummy 1000 Genome known InDels VCF file."""
+#     known_indel_1kg_file: Path = Path(tmp_path, "1kg_known_indels_b37.vcf")
+#     known_indel_1kg_file.touch()
+#     return known_indel_1kg_file
+#
+#
+# @pytest.fixture(scope="function", name="mills_1kg_file")
+# def fixture_mills_1kg_file(tmp_path: Path) -> Path:
+#     """Dummy Mills' high confidence InDels VCF file."""
+#     mills_1kg_file: Path = Path(tmp_path, "mills_1kg_index.vcf")
+#     mills_1kg_file.touch()
+#     return mills_1kg_file
+#
+#
+# @pytest.fixture(scope="function", name="hc_vcf_1kg_file")
+# def fixture_hc_vcf_1kg_file(tmp_path: Path) -> Path:
+#     """Dummy high confidence 1000 Genome VCF file."""
+#     hc_vcf_1kg_file: Path = Path(tmp_path, "1kg_phase1_snps_high_confidence_b37.vcf")
+#     hc_vcf_1kg_file.touch()
+#     return hc_vcf_1kg_file
+#
+#
+# @pytest.fixture(scope="function", name="vcf_1kg_file")
+# def fixture_vcf_1kg_file(tmp_path: Path) -> Path:
+#     """Dummy 1000 Genome all SNPs file."""
+#     vcf_1kg_file: Path = Path(tmp_path, "1k_genome_wgs_p1_v3_all_sites.vcf")
+#     vcf_1kg_file.touch()
+#     return vcf_1kg_file
 
 
-@pytest.fixture(scope="function", name="hg_references_model")
-def fixture_hg_references_model(
-    hg_references_model_data: Dict[str, dict]
-) -> HgReferencesModel:
-    """Mocked human genome references model."""
-    return HgReferencesModel(**hg_references_model_data)
-
-
-@pytest.fixture(scope="function", name="cache_analysis_model_data")
-def fixture_cache_analysis_model_data(case_id_tumor_only: str) -> Dict[str, str]:
-    """Mocked cache analysis data."""
-    return {"case_id": case_id_tumor_only}
-
-
-@pytest.fixture(scope="function", name="cache_analysis_model")
-def fixture_cache_analysis_model(
-    cache_analysis_model_data: Dict[str, str]
-) -> CacheAnalysisModel:
-    """Mocked cache analysis model."""
-    return CacheAnalysisModel(**cache_analysis_model_data)
-
-
-@pytest.fixture(scope="function", name="cache_config_model_data")
-def fixture_cache_config_model_data(
-    cache_analysis_model: CacheAnalysisModel,
-    hg_references_model: HgReferencesModel,
-    develop_containers: Dict[str, str],
-    cosmic_key: str,
-    timestamp_now: datetime,
-    tmp_path: Path,
-) -> Dict[str, str]:
-    """Mocked cache config data."""
-
-    return {
-        "analysis": cache_analysis_model,
-        "references_dir": tmp_path,
-        "genome_dir": tmp_path,
-        "variants_dir": tmp_path,
-        "vep_dir": tmp_path,
-        "containers_dir": tmp_path,
-        "genome_version": GenomeVersion.HG19,
-        "cosmic_key": cosmic_key,
-        "bioinfo_tools": BIOINFO_TOOL_ENV,
-        "containers": develop_containers,
-        "references": hg_references_model,
-        "references_date": timestamp_now.strftime("%Y-%m-%d %H:%M"),
-    }
-
-
-@pytest.fixture(scope="function", name="cache_config_model")
-def fixture_cache_config_model(
-    cache_config_model_data: Dict[str, dict]
-) -> CacheConfigModel:
-    """Mocked cache config model."""
-    return CacheConfigModel(**cache_config_model_data)
+#
+#
+# @pytest.fixture(scope="function", name="hg_references_model_data")
+# def fixture_hg_references_model_data(
+#     reference_url_model_data: Dict[str, Any], references_model_data: Dict[str, dict]
+# ) -> Dict[str, dict]:
+#     """Human genome references model data."""
+#     hg_references_model_data: Dict[str, dict] = {
+#         "access_regions": reference_url_model_data,
+#         "ascat_chr_y_loci": reference_url_model_data,
+#         "ascat_gc_correction": reference_url_model_data,
+#         "clinvar": reference_url_model_data,
+#         "cosmic": reference_url_model_data,
+#         "dbsnp": reference_url_model_data,
+#         "delly_exclusion": reference_url_model_data,
+#         "delly_mappability": reference_url_model_data,
+#         "delly_mappability_findex": reference_url_model_data,
+#         "delly_mappability_gindex": reference_url_model_data,
+#         "gnomad_variant": reference_url_model_data,
+#         "gnomad_variant_index": reference_url_model_data,
+#         "hc_vcf_1kg": reference_url_model_data,
+#         "known_indel_1kg": reference_url_model_data,
+#         "mills_1kg": reference_url_model_data,
+#         "rank_score": reference_url_model_data,
+#         "somalier_sites": reference_url_model_data,
+#         "vcf_1kg": reference_url_model_data,
+#         "wgs_calling_regions": reference_url_model_data,
+#     }
+#     hg_references_model_data.update(references_model_data)
+#     return hg_references_model_data
+#
+#
+# @pytest.fixture(scope="function", name="hg_references_model")
+# def fixture_hg_references_model(
+#     hg_references_model_data: Dict[str, dict]
+# ) -> HgReferencesModel:
+#     """Mocked human genome references model."""
+#     return HgReferencesModel(**hg_references_model_data)

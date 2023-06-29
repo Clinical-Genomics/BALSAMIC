@@ -1,9 +1,9 @@
 """Test Balsamic init command."""
 from functools import partial
 from pathlib import Path
+from unittest import mock
 
 from graphviz import Source
-from mock import mock
 
 from BALSAMIC.constants.analysis import RunMode
 
