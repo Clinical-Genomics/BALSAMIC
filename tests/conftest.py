@@ -825,6 +825,38 @@ def fixture_gnomad_variant_index_file(tmp_path: Path) -> Path:
     return gnomad_variant_index_file
 
 
+@pytest.fixture(scope="function", name="known_indel_1kg_file")
+def fixture_known_indel_1kg_file(tmp_path: Path) -> Path:
+    """Dummy 1000 Genome known InDels VCF file."""
+    known_indel_1kg_file: Path = Path(tmp_path, "1kg_known_indels_b37.vcf")
+    known_indel_1kg_file.touch()
+    return known_indel_1kg_file
+
+
+@pytest.fixture(scope="function", name="mills_1kg_file")
+def fixture_mills_1kg_file(tmp_path: Path) -> Path:
+    """Dummy Mills' high confidence InDels VCF file."""
+    mills_1kg_file: Path = Path(tmp_path, "mills_1kg_index.vcf")
+    mills_1kg_file.touch()
+    return mills_1kg_file
+
+
+@pytest.fixture(scope="function", name="hc_vcf_1kg_file")
+def fixture_hc_vcf_1kg_file(tmp_path: Path) -> Path:
+    """Dummy high confidence 1000 Genome VCF file."""
+    hc_vcf_1kg_file: Path = Path(tmp_path, "1kg_phase1_snps_high_confidence_b37.vcf")
+    hc_vcf_1kg_file.touch()
+    return hc_vcf_1kg_file
+
+
+@pytest.fixture(scope="function", name="vcf_1kg_file")
+def fixture_vcf_1kg_file(tmp_path: Path) -> Path:
+    """Dummy 1000 Genome all SNPs file."""
+    vcf_1kg_file: Path = Path(tmp_path, "1k_genome_wgs_p1_v3_all_sites.vcf")
+    vcf_1kg_file.touch()
+    return vcf_1kg_file
+
+
 @pytest.fixture(scope="function", name="reference_url")
 def fixture_reference_url() -> str:
     """Dummy reference URL."""
