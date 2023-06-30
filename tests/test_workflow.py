@@ -5,10 +5,9 @@ from BALSAMIC.utils.cli import get_snakefile
 
 MOCKED_OS_ENVIRON = "os.environ"
 
+
 def test_workflow_tumor_only_tga(
-    tumor_only_config,
-    sentieon_install_dir,
-    sentieon_license
+    tumor_only_config, sentieon_install_dir, sentieon_license
 ):
     # GIVEN a sample config dict and snakefile
     analysis_type = "single"
@@ -28,10 +27,9 @@ def test_workflow_tumor_only_tga(
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
+
 def test_workflow_tumor_normal_tga(
-    tumor_normal_config,
-    sentieon_install_dir,
-    sentieon_license
+    tumor_normal_config, sentieon_install_dir, sentieon_license
 ):
     # GIVEN a sample config dict and snakefile
     analysis_type = "paired"
@@ -51,10 +49,9 @@ def test_workflow_tumor_normal_tga(
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
+
 def test_workflow_tumor_only_wgs(
-    tumor_only_wgs_config,
-    sentieon_install_dir,
-    sentieon_license
+    tumor_only_wgs_config, sentieon_install_dir, sentieon_license
 ):
     # GIVEN a sample config dict and snakefile
     analysis_type = "single"
@@ -74,10 +71,9 @@ def test_workflow_tumor_only_wgs(
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
+
 def test_workflow_tumor_normal_wgs(
-    tumor_normal_wgs_config,
-    sentieon_install_dir,
-    sentieon_license
+    tumor_normal_wgs_config, sentieon_install_dir, sentieon_license
 ):
     # GIVEN a sample config dict and snakefile
     analysis_type = "paired"
