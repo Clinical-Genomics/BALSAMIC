@@ -943,6 +943,14 @@ def fixture_references_model(references_model_data: Dict[str, dict]) -> Referenc
     return ReferencesModel(**references_model_data)
 
 
+@pytest.fixture(scope="function", name="hg_references_model_data")
+def fixture_hg_references_model_data(
+    cache_config_model: CacheConfigModel,
+) -> Dict[str, dict]:
+    """Human genome references model data."""
+    return dict(cache_config_model.references)
+
+
 # @pytest.fixture(scope="function", name="reference_genome_file")
 # def fixture_reference_genome_file(tmp_path: Path) -> Path:
 #     """Dummy reference file."""
@@ -1053,38 +1061,6 @@ def fixture_references_model(references_model_data: Dict[str, dict]) -> Referenc
 #     return vcf_1kg_file
 
 
-#
-#
-# @pytest.fixture(scope="function", name="hg_references_model_data")
-# def fixture_hg_references_model_data(
-#     reference_url_model_data: Dict[str, Any], references_model_data: Dict[str, dict]
-# ) -> Dict[str, dict]:
-#     """Human genome references model data."""
-#     hg_references_model_data: Dict[str, dict] = {
-#         "access_regions": reference_url_model_data,
-#         "ascat_chr_y_loci": reference_url_model_data,
-#         "ascat_gc_correction": reference_url_model_data,
-#         "clinvar": reference_url_model_data,
-#         "cosmic": reference_url_model_data,
-#         "dbsnp": reference_url_model_data,
-#         "delly_exclusion": reference_url_model_data,
-#         "delly_mappability": reference_url_model_data,
-#         "delly_mappability_findex": reference_url_model_data,
-#         "delly_mappability_gindex": reference_url_model_data,
-#         "gnomad_variant": reference_url_model_data,
-#         "gnomad_variant_index": reference_url_model_data,
-#         "hc_vcf_1kg": reference_url_model_data,
-#         "known_indel_1kg": reference_url_model_data,
-#         "mills_1kg": reference_url_model_data,
-#         "rank_score": reference_url_model_data,
-#         "somalier_sites": reference_url_model_data,
-#         "vcf_1kg": reference_url_model_data,
-#         "wgs_calling_regions": reference_url_model_data,
-#     }
-#     hg_references_model_data.update(references_model_data)
-#     return hg_references_model_data
-#
-#
 # @pytest.fixture(scope="function", name="hg_references_model")
 # def fixture_hg_references_model(
 #     hg_references_model_data: Dict[str, dict]

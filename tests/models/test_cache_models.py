@@ -12,6 +12,8 @@ from BALSAMIC.models.cache import (
     HgAnalysisReferencesModel,
     ReferenceUrlModel,
     ReferencesModel,
+    CanFamReferencesModel,
+    HgReferencesModel,
 )
 
 
@@ -153,122 +155,115 @@ def test_get_reference_genome_files(references_model: ReferencesModel):
     reference_genome_files: List[str] = references_model.get_reference_genome_files()
 
     # THEN the expected reference genome files should be returned
+    assert len(reference_genome_files) == len(expected_file_types)
     for file_type in expected_file_types:
         assert file_type in [file.split(".")[-1] for file in reference_genome_files]
 
 
-# def test_get_reference_genome_bwa_index_files(
-#     references_model: ReferencesModel, reference_genome_file: Path
-# ):
-#     """Test extraction of reference genome BWA index files."""
-#
-#     # GIVEN a references model with a specific reference genome file
-#     references_model.reference_genome.file_path = reference_genome_file.as_posix()
-#
-#     # GIVEN the expected files to be retrieved
-#     expected_file_types: set = set(BwaIndexFileType)
-#
-#     # WHEN getting the reference genome BWA index files
-#     bwa_index_files: List[str] = references_model.get_reference_genome_bwa_index_files()
-#
-#     # THEN the expected reference genome BWA index files should be returned
-#     for file_type in expected_file_types:
-#         assert file_type in [file.split(".")[-1] for file in bwa_index_files]
-#
-#
-# def test_get_refgene_files(references_model: ReferencesModel, refgene_txt_file: Path):
-#     """Test extraction of RefSeq's gene files."""
-#
-#     # GIVEN a references model with a specific RefSeq's gene TXT file
-#     references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
-#
-#     # GIVEN the expected files to be retrieved
-#     expected_file_types: set = {FileType.TXT, FileType.FLAT, FileType.BED}
-#
-#     # WHEN getting the RefSeq's gene files
-#     refegene_files: List[str] = references_model.get_refgene_files()
-#
-#     # THEN the expected RefSeq's gene files should be returned
-#     for file_type in expected_file_types:
-#         assert file_type in [file.split(".")[-1] for file in expected_file_types]
-#
-#
-# def test_get_refgene_flat_file(
-#     references_model: ReferencesModel, refgene_txt_file: Path
-# ):
-#     """Test extraction of RefSeq's gene FLAT file."""
-#
-#     # GIVEN a references model with a specific RefSeq's gene TXT file
-#     references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
-#
-#     # WHEN getting the RefSeq's gene FLAT file
-#     refegene_flat_file: str = references_model.get_refgene_flat_file()
-#
-#     # THEN the correctly formatted flat file should be returned
-#     assert refegene_flat_file.split(".")[-1] == FileType.FLAT
-#
-#
-# def test_get_refgene_bed_file(
-#     references_model: ReferencesModel, refgene_txt_file: Path
-# ):
-#     """Test extraction of RefSeq's gene BED file."""
-#
-#     # GIVEN a references model with a specific RefSeq's gene TXT file
-#     references_model.refgene_txt.file_path = refgene_txt_file.as_posix()
-#
-#     # WHEN getting the RefSeq's gene BED file
-#     refegene_flat_file: str = references_model.get_refgene_bed_file()
-#
-#     # THEN the correctly formatted flat file should be returned
-#     assert refegene_flat_file.split(".")[-1] == FileType.BED
-#
-#
-# def test_canfam_references_model(references_model_data: Dict[str, dict]):
-#     """Test canine references model."""
-#
-#     # GIVEN an input for the canine reference model
-#
-#     # WHEN initialising the model
-#     model: CanFamReferencesModel = CanFamReferencesModel(**references_model_data)
-#
-#     # THEN the model should have been correctly built
-#     assert model.dict() == references_model_data
-#
-#
-# def test_canfam_references_model_empty():
-#     """Test canine references model for an empty input."""
-#
-#     # GIVEN no input for the canine references model
-#
-#     # WHEN initialising the model
-#     with pytest.raises(ValidationError):
-#         # THEN an empty model should raise a ValidationError
-#         CanFamReferencesModel()
-#
-#
-# def test_hg_references_model(hg_references_model_data: Dict[str, dict]):
-#     """Test human genome references model."""
-#
-#     # GIVEN an input for the human genome reference model
-#
-#     # WHEN initialising the model
-#     model: HgReferencesModel = HgReferencesModel(**hg_references_model_data)
-#
-#     # THEN the model should have been correctly built
-#     assert model.dict() == hg_references_model_data
-#
-#
-# def test_hg_references_model_empty():
-#     """Test human genome references model for an empty input."""
-#
-#     # GIVEN no input for the human genome references model
-#
-#     # WHEN initialising the model
-#     with pytest.raises(ValidationError):
-#         # THEN an empty model should raise a ValidationError
-#         HgReferencesModel()
-#
-#
+def test_get_reference_genome_bwa_index_files(references_model: ReferencesModel):
+    """Test extraction of reference genome BWA index files."""
+
+    # GIVEN a references model
+
+    # GIVEN the expected files to be retrieved
+    expected_file_types: set = set(BwaIndexFileType)
+
+    # WHEN getting the reference genome BWA index files
+    bwa_index_files: List[str] = references_model.get_reference_genome_bwa_index_files()
+
+    # THEN the expected reference genome BWA index files should be returned
+    assert len(bwa_index_files) == len(expected_file_types)
+    for file_type in expected_file_types:
+        assert file_type in [file.split(".")[-1] for file in bwa_index_files]
+
+
+def test_get_refgene_files(references_model: ReferencesModel):
+    """Test extraction of RefSeq's gene files."""
+
+    # GIVEN a references model
+
+    # GIVEN the expected files to be retrieved
+    expected_file_types: set = {FileType.TXT, FileType.FLAT, FileType.BED}
+
+    # WHEN getting the RefSeq's gene files
+    refgene_files: List[str] = references_model.get_refgene_files()
+
+    # THEN the expected RefSeq's gene files should be returned
+    assert len(refgene_files) == len(expected_file_types)
+    for file_type in expected_file_types:
+        assert file_type in [file.split(".")[-1] for file in refgene_files]
+
+
+def test_get_refgene_flat_file(references_model: ReferencesModel):
+    """Test extraction of RefSeq's gene FLAT file."""
+
+    # GIVEN a references model
+
+    # WHEN getting the RefSeq's gene FLAT file
+    refgene_flat_file: str = references_model.get_refgene_flat_file()
+
+    # THEN the correctly formatted flat file should be returned
+    assert refgene_flat_file.split(".")[-1] == FileType.FLAT
+
+
+def test_get_refgene_bed_file(references_model: ReferencesModel):
+    """Test extraction of RefSeq's gene BED file."""
+
+    # GIVEN a references model
+
+    # WHEN getting the RefSeq's gene BED file
+    refgene_bed_file: str = references_model.get_refgene_bed_file()
+
+    # THEN the correctly formatted flat file should be returned
+    assert refgene_bed_file.split(".")[-1] == FileType.BED
+
+
+def test_canfam_references_model(references_model_data: Dict[str, dict]):
+    """Test canine references model."""
+
+    # GIVEN an input for the canine reference model
+
+    # WHEN initialising the model
+    model: CanFamReferencesModel = CanFamReferencesModel(**references_model_data)
+
+    # THEN the model should have been correctly built
+    assert model.dict() == references_model_data
+
+
+def test_canfam_references_model_empty():
+    """Test canine references model for an empty input."""
+
+    # GIVEN no input for the canine references model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        CanFamReferencesModel()
+
+
+def test_hg_references_model(hg_references_model_data: Dict[str, dict]):
+    """Test human genome references model."""
+
+    # GIVEN an input for the human genome reference model
+
+    # WHEN initialising the model
+    model: HgReferencesModel = HgReferencesModel(**hg_references_model_data)
+
+    # THEN the model should have been correctly built
+    assert model.dict() == hg_references_model_data
+
+
+def test_hg_references_model_empty():
+    """Test human genome references model for an empty input."""
+
+    # GIVEN no input for the human genome references model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        HgReferencesModel()
+
+
 # def test_get_delly_files(
 #     hg_references_model: HgReferencesModel,
 #     delly_exclusion_file: Path,
