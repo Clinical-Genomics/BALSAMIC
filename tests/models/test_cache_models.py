@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Any, List
 
 import pytest
-from BALSAMIC.constants.cache import FileType, BwaIndexFileType
+from BALSAMIC.constants.cache import FileType, BwaIndexFileType, GRCHVersion
 from pydantic import ValidationError
 
 from BALSAMIC.models.cache import (
@@ -384,147 +384,136 @@ def test_cache_config_model_empty():
         CacheConfigModel()
 
 
-# def test_cache_config_model_empty_file_path(cache_config_model_data: Dict[str, dict]):
-#     """Test cache config model reference validation method and file path assignment."""
-#
-#     # GIVEN a cache config model data with empty file paths
-#     for reference in cache_config_model_data["references"]:
-#         reference[1].file_path = None
-#
-#     # WHEN initialising the model
-#     model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
-#
-#     # THEN the file paths should have been assigned
-#     for reference in model.references:
-#         assert reference[1].file_path
-#
-#
-# def test_cache_config_model_empty_cosmic_key(
-#     cache_config_model_data: Dict[str, dict], cosmic_key: str
-# ):
-#     """Test cache config model reference validation method and cosmic key assignment."""
-#
-#     # GIVEN a cache config model data with empty cosmic keys
-#     for reference in cache_config_model_data["references"]:
-#         reference[1].secret = None
-#
-#     # WHEN initialising the model
-#     model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
-#
-#     # THEN a cosmic key should only have been assigned to a cosmic reference file
-#     for reference in model.references:
-#         if reference[0] == "cosmic":
-#             assert reference[1].secret == cosmic_key
-#             continue
-#         assert reference[1].secret is None
-#
-#
-# def test_get_grch_version(cache_config_model: CacheConfigModel):
-#     """Test extraction of the GRCH format version having a specific genome version."""
-#
-#     # GIVEN a cache config model
-#
-#     # WHEN getting the GRCH version
-#     grch_version: GRCHVersion = cache_config_model.get_grch_version()
-#
-#     # THEN a correct GRCH format version should be returned
-#     assert grch_version == GRCHVersion.GRCH37
-#
-#
-# def test_get_reference_paths(cache_config_model: CacheConfigModel):
-#     """Test reference path extraction."""
-#
-#     # GIVEN a cache config model
-#
-#     # WHEN extracting the list of reference paths
-#     reference_paths: List[str] = cache_config_model.get_reference_paths()
-#
-#     # THEN a complete list of reference path should be returned
-#     assert reference_paths == [
-#         reference[1].file_path for reference in cache_config_model.references
-#     ]
-#
-#
-# def test_get_reference_by_path(
-#     cache_config_model: CacheConfigModel, reference_genome_file: Path
-# ):
-#     """Test reference extraction given its path."""
-#
-#     # GIVEN a cache config model with a reference genome to be extracted
-#     cache_config_model.references.reference_genome.file_path = (
-#         reference_genome_file.as_posix()
-#     )
-#
-#     # WHEN getting the reference genome by path
-#     reference_genome: ReferenceUrlModel = cache_config_model.get_reference_by_path(
-#         reference_path=reference_genome_file.as_posix()
-#     )
-#
-#     # THEN the correct reference should be returned
-#     assert reference_genome == cache_config_model.references.reference_genome
-#
-#
-# def test_get_reference_paths_by_file_type_and_compression(
-#     cache_config_model: CacheConfigModel, reference_genome_file: Path
-# ):
-#     """Test reference path extraction by file type and compression."""
-#
-#     # GIVEN a cache config model with multiple fasta files
-#     cache_config_model.references.reference_genome.file_path = (
-#         reference_genome_file.as_posix()
-#     )
-#     cache_config_model.references.reference_genome.file_type = FileType.FASTA
-#     cache_config_model.references.reference_genome.gzip = True
-#
-#     # WHEN extracting the reference paths by file type and compression status
-#     reference_paths: List[
-#         str
-#     ] = cache_config_model.get_reference_paths_by_file_type_and_compression(
-#         file_type=FileType.FASTA, compression=True
-#     )
-#
-#     # THEN the expected reference path should be returned
-#     assert reference_paths == [reference_genome_file.as_posix()]
-#
-#
-# def test_get_reference_paths_by_file_type(
-#     cache_config_model: CacheConfigModel, refgene_txt_file: Path
-# ):
-#     """Test reference path extraction by file type."""
-#
-#     # GIVEN a cache config model with a RefSeq's gene file
-#     cache_config_model.references.refgene_txt.file_path = refgene_txt_file.as_posix()
-#     cache_config_model.references.refgene_txt.file_type = FileType.TXT
-#
-#     # WHEN extracting the reference paths by file type
-#     reference_paths: List[str] = cache_config_model.get_reference_paths_by_file_type(
-#         file_type=FileType.TXT
-#     )
-#
-#     # THEN the TXT file should be returned
-#     assert reference_paths == [refgene_txt_file.as_posix()]
-#
-#
-# def test_get_reference_paths_by_compression(
-#     cache_config_model: CacheConfigModel, reference_genome_file: Path
-# ):
-#     """Test reference path extraction by compression."""
-#
-#     # GIVEN a cache config model with a compressed reference genome file
-#     cache_config_model.references.reference_genome.file_path = (
-#         reference_genome_file.as_posix()
-#     )
-#     cache_config_model.references.reference_genome.gzip = True
-#
-#     # WHEN extracting the reference paths by compression status
-#     reference_paths: List[str] = cache_config_model.get_reference_paths_by_compression(
-#         compression=True
-#     )
-#
-#     # THEN the expected reference path should be returned
-#     assert reference_paths == [reference_genome_file.as_posix()]
-#
-#
+def test_cache_config_model_empty_file_path(cache_config_model_data: Dict[str, dict]):
+    """Test cache config model reference validation method and file path assignment."""
+
+    # GIVEN a cache config model data with empty file paths
+
+    # WHEN initialising the model
+    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+
+    # THEN the file paths should have been assigned
+    for reference in model.references:
+        assert reference[1].file_path
+
+
+def test_cache_config_model_empty_cosmic_key(
+    cache_config_model_data: Dict[str, dict], cosmic_key: str
+):
+    """Test cache config model reference validation method and cosmic key assignment."""
+
+    # GIVEN a cache config model data with empty cosmic keys
+
+    # WHEN initialising the model
+    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+
+    # THEN a cosmic key should only have been assigned to a cosmic reference file
+    for reference in model.references:
+        if reference[0] == "cosmic":
+            assert reference[1].secret == cosmic_key
+            continue
+        assert reference[1].secret is None
+
+
+def test_get_grch_version(cache_config_model: CacheConfigModel):
+    """Test extraction of the GRCH format version having a specific genome version."""
+
+    # GIVEN a cache config model
+
+    # WHEN getting the GRCH version
+    grch_version: GRCHVersion = cache_config_model.get_grch_version()
+
+    # THEN a correct GRCH format version should be returned
+    assert grch_version == GRCHVersion.GRCH37
+
+
+def test_get_reference_paths(cache_config_model: CacheConfigModel):
+    """Test reference path extraction."""
+
+    # GIVEN a cache config model
+
+    # WHEN extracting the list of reference paths
+    reference_paths: List[str] = cache_config_model.get_reference_paths()
+
+    # THEN a complete list of reference path should be returned
+    assert reference_paths == [
+        reference[1].file_path for reference in cache_config_model.references
+    ]
+
+
+def test_get_reference_by_path(cache_config_model: CacheConfigModel):
+    """Test reference extraction given its path."""
+
+    # GIVEN a cache config model
+
+    # WHEN getting the reference genome by path
+    reference_genome: ReferenceUrlModel = cache_config_model.get_reference_by_path(
+        reference_path=cache_config_model.references.reference_genome.file_path
+    )
+
+    # THEN the correct reference should be returned
+    assert reference_genome == cache_config_model.references.reference_genome
+
+
+def test_get_reference_paths_by_file_type_and_compression(
+    cache_config_model: CacheConfigModel,
+):
+    """Test reference path extraction by file type and compression."""
+
+    # GIVEN a cache config model
+
+    # WHEN extracting the reference paths by file type and compression status
+    reference_paths: List[
+        str
+    ] = cache_config_model.get_reference_paths_by_file_type_and_compression(
+        file_type=FileType.FASTA, compression=True
+    )
+
+    # THEN the expected reference path should be returned
+    assert reference_paths == [cache_config_model.references.reference_genome.file_path]
+
+
+def test_get_reference_paths_by_file_type(cache_config_model: CacheConfigModel):
+    """Test reference path extraction by file type."""
+
+    # GIVEN a cache config model
+
+    # WHEN extracting the reference paths by file type
+    reference_paths: List[str] = cache_config_model.get_reference_paths_by_file_type(
+        file_type=FileType.FASTA
+    )
+
+    # THEN the TXT file should be returned
+    assert reference_paths == [cache_config_model.references.reference_genome.file_path]
+
+
+def test_get_reference_paths_by_compression(cache_config_model: CacheConfigModel):
+    """Test reference path extraction by compression."""
+
+    # GIVEN a cache config model
+
+    # WHEN extracting the reference paths by compression status
+    reference_paths: List[str] = cache_config_model.get_reference_paths_by_compression(
+        compression=True
+    )
+
+    # THEN the expected reference path should be returned
+    assert len(reference_paths) == 11
+    assert cache_config_model.references.reference_genome.file_path in reference_paths
+    assert cache_config_model.references.refgene_txt.file_path in reference_paths
+    assert (
+        cache_config_model.references.ascat_gc_correction.file_path in reference_paths
+    )
+    assert cache_config_model.references.clinvar.file_path in reference_paths
+    assert cache_config_model.references.cosmic.file_path in reference_paths
+    assert cache_config_model.references.dbsnp.file_path in reference_paths
+    assert cache_config_model.references.known_indel_1kg.file_path in reference_paths
+    assert cache_config_model.references.hc_vcf_1kg.file_path in reference_paths
+    assert cache_config_model.references.vcf_1kg.file_path in reference_paths
+    assert cache_config_model.references.mills_1kg.file_path in reference_paths
+    assert cache_config_model.references.somalier_sites.file_path in reference_paths
+
+
 # def test_get_compressed_indexed_vcfs(cache_config_model: CacheConfigModel):
 #     """"""
 #
