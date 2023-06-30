@@ -123,7 +123,9 @@ def environ():
 @pytest.fixture(scope="session")
 def cluster_analysis_config_path() -> str:
     """Return cluster analysis configuration file."""
-    return Path(CONSTANTS_DIR, ClusterConfigType.ANALYSIS + ".json").as_posix()
+    return Path(
+        CONSTANTS_DIR, ClusterConfigType.ANALYSIS + "." + FileType.JSON
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -202,10 +204,22 @@ def pon_cnn():
     return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
 
-@pytest.fixture(scope="function", name="")
-def json_file(tmp_path: Path):
+@pytest.fixture(scope="function", name="json_file")
+def fixture_json_file(tmp_path: Path) -> Path:
     """Mocked file path to use when writing JSON."""
     return Path(tmp_path, "write_json.json")
+
+
+@pytest.fixture(scope="session", name="config_json")
+def fixture_config_json() -> str:
+    """Balsamic analysis config JSON file name."""
+    return "config.json"
+
+
+@pytest.fixture(scope="session", name="reference_graph")
+def fixture_reference_graph() -> str:
+    """Balsamic refrence graph PDF file name."""
+    return "reference_graph.pdf"
 
 
 @pytest.fixture(scope="session")
@@ -399,7 +413,7 @@ def tumor_normal_config(
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
-        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
+        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + "." + FileType.JSON
     ).as_posix()
 
 
@@ -451,7 +465,9 @@ def tumor_normal_wgs_config(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_normal_wgs, case_id_tumor_normal_wgs + ".json"
+        analysis_dir,
+        case_id_tumor_normal_wgs,
+        case_id_tumor_normal_wgs + "." + FileType.JSON,
     ).as_posix()
 
 
@@ -504,7 +520,7 @@ def tumor_only_config(
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
-        analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
+        analysis_dir, case_id_tumor_only, case_id_tumor_only + "." + FileType.JSON
     ).as_posix()
 
 
@@ -547,7 +563,9 @@ def tumor_only_wgs_config(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_only_wgs, case_id_tumor_only_wgs + ".json"
+        analysis_dir,
+        case_id_tumor_only_wgs,
+        case_id_tumor_only_wgs + "." + FileType.JSON,
     ).as_posix()
 
 
@@ -596,7 +614,9 @@ def tumor_only_pon_config(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_only_pon, case_id_tumor_only_pon + ".json"
+        analysis_dir,
+        case_id_tumor_only_pon,
+        case_id_tumor_only_pon + "." + FileType.JSON,
     ).as_posix()
 
 

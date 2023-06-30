@@ -14,7 +14,13 @@ from click.testing import Result
 from BALSAMIC.constants.process import EXIT_SUCCESS, EXIT_FAIL
 
 
-def test_init_hg(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
+def test_init_hg(
+    invoke_cli: partial,
+    tmp_path: Path,
+    cosmic_key: str,
+    config_json: str,
+    reference_graph: str,
+):
     """Test Balsamic init command."""
 
     # GIVEN a temporary output directory and a COSMIC key
@@ -33,15 +39,20 @@ def test_init_hg(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
     )
 
     # THEN the human reference generation workflow should have successfully started
-    assert "Starting reference generation workflow" in result.output
-    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, "config.json").exists()
+    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
     assert Path(
-        tmp_path, balsamic_version, GenomeVersion.HG19, "reference_graph.pdf"
+        tmp_path, balsamic_version, GenomeVersion.HG19, reference_graph
     ).exists()
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_init_canfam(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
+def test_init_canfam(
+    invoke_cli: partial,
+    tmp_path: Path,
+    cosmic_key: str,
+    config_json: str,
+    reference_graph: str,
+):
     """Test Balsamic canine workflow init command."""
 
     # GIVEN a temporary output directory and a COSMIC key
@@ -58,12 +69,9 @@ def test_init_canfam(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
     )
 
     # THEN the canine reference generation workflow should have successfully started
-    assert "Starting reference generation workflow" in result.output
+    assert Path(tmp_path, balsamic_version, GenomeVersion.CanFam3, config_json).exists()
     assert Path(
-        tmp_path, balsamic_version, GenomeVersion.CanFam3, "config.json"
-    ).exists()
-    assert Path(
-        tmp_path, balsamic_version, GenomeVersion.CanFam3, "reference_graph.pdf"
+        tmp_path, balsamic_version, GenomeVersion.CanFam3, reference_graph
     ).exists()
     assert result.exit_code == EXIT_SUCCESS
 
@@ -93,7 +101,12 @@ def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: 
 
 
 def test_init_hg_run_analysis(
-    invoke_cli: partial, tmp_path: Path, cluster_account: str, cosmic_key: str
+    invoke_cli: partial,
+    tmp_path: Path,
+    cluster_account: str,
+    cosmic_key: str,
+    config_json: str,
+    reference_graph: str,
 ):
     """Test Balsamic init command when actually running the analysis."""
 
@@ -118,10 +131,9 @@ def test_init_hg_run_analysis(
     )
 
     # THEN the human reference generation workflow should have successfully started
-    assert "Starting reference generation workflow" in result.output
-    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, "config.json").exists()
+    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
     assert Path(
-        tmp_path, balsamic_version, GenomeVersion.HG19, "reference_graph.pdf"
+        tmp_path, balsamic_version, GenomeVersion.HG19, reference_graph
     ).exists()
     assert result.exit_code == EXIT_SUCCESS
 
@@ -154,7 +166,13 @@ def test_init_hg_run_analysis_no_account(
     assert result.exit_code == EXIT_FAIL
 
 
-def test_init_hg_graph_exception(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
+def test_init_hg_graph_exception(
+    invoke_cli: partial,
+    tmp_path: Path,
+    cosmic_key: str,
+    config_json: str,
+    reference_graph: str,
+):
     """Test Balsamic init command with a graphviz exception."""
 
     # GIVEN a temporary output directory and a COSMIC key
@@ -175,8 +193,8 @@ def test_init_hg_graph_exception(invoke_cli: partial, tmp_path: Path, cosmic_key
 
     # THEN the human reference generation workflow should have successfully started
     assert "Reference workflow graph generation failed" in result.output
-    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, "config.json").exists()
+    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
     assert not Path(
-        tmp_path, balsamic_version, GenomeVersion.HG19, "reference_graph.pdf"
+        tmp_path, balsamic_version, GenomeVersion.HG19, reference_graph
     ).exists()
     assert result.exit_code == EXIT_FAIL

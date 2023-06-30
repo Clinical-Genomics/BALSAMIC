@@ -45,11 +45,12 @@ class FileType(StrEnum):
     GFF: str = "gff"
     GTF: str = "gtf"
     GZ: str = "gz"
+    JSON: str = "json"
     LOG: str = "log"
     SIF: str = "sif"
     TBI: str = "tbi"
-    TXT: str = "txt"
     TSV: str = "tsv"
+    TXT: str = "txt"
     VCF: str = "vcf"
 
 
