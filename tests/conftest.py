@@ -785,7 +785,7 @@ def fixture_cache_config_model_data(
     cosmic_key: str,
     timestamp_now: datetime,
     tmp_path: Path,
-) -> Dict[str, str]:
+) -> Dict[str, Any]:
     """Mocked cache config data."""
 
     return {

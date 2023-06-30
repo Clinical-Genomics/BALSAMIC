@@ -14,6 +14,8 @@ from BALSAMIC.models.cache import (
     ReferencesModel,
     CanFamReferencesModel,
     HgReferencesModel,
+    CacheAnalysisModel,
+    CacheConfigModel,
 )
 
 
@@ -315,78 +317,73 @@ def test_get_gnomad_files(hg_references_model: HgReferencesModel):
     assert hg_references_model.gnomad_variant_index.file_path in gnomad_files
 
 
-# def test_get_1k_genome_files(
-#     hg_references_model: HgReferencesModel,
-#     known_indel_1kg_file: Path,
-#     mills_1kg_file: Path,
-#     hc_vcf_1kg_file: Path,
-#     vcf_1kg_file: Path,
-# ):
-#     """Test get 1000 Genome related files."""
-#
-#     # GIVEN a human genome references model and specific 1k genome files
-#     hg_references_model.known_indel_1kg.file_path = known_indel_1kg_file.as_posix()
-#     hg_references_model.mills_1kg.file_path = mills_1kg_file.as_posix()
-#     hg_references_model.hc_vcf_1kg.file_path = hc_vcf_1kg_file.as_posix()
-#     hg_references_model.vcf_1kg.file_path = vcf_1kg_file.as_posix()
-#
-#     # WHEN getting the 1k genome files
-#     genome_files: List[str] = hg_references_model.get_1k_genome_files()
-#
-#     # THEN the 1k genome files should be returned
-#     assert len(genome_files) == 4
-#     assert known_indel_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-#     assert mills_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-#     assert hc_vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-#     assert vcf_1kg_file.as_posix() + "." + FileType.GZ in genome_files
-#
-#
-# def test_cache_analysis_model(cache_analysis_model_data: Dict[str, str]):
-#     """Test cache analysis model initialisation."""
-#
-#     # GIVEN an input for the cache analysis model
-#
-#     # WHEN initialising the model
-#     model: CacheAnalysisModel = CacheAnalysisModel(**cache_analysis_model_data)
-#
-#     # THEN the model should have been correctly built
-#     assert model.dict() == cache_analysis_model_data
-#
-#
-# def test_hg_references_model_empty():
-#     """Test ache analysis model for an empty input."""
-#
-#     # GIVEN no input for the cache analysis model
-#
-#     # WHEN initialising the model
-#     with pytest.raises(ValidationError):
-#         # THEN an empty model should raise a ValidationError
-#         CacheAnalysisModel()
-#
-#
-# def test_cache_config_model(cache_config_model_data: Dict[str, dict]):
-#     """Test cache config model initialisation."""
-#
-#     # GIVEN an input for the cache config model
-#
-#     # WHEN initialising the model
-#     model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
-#
-#     # THEN the model should have been correctly built
-#     assert model.dict() == cache_config_model_data
-#
-#
-# def test_cache_config_model_empty():
-#     """Test cache config model for an empty input."""
-#
-#     # GIVEN no input for the cache config model
-#
-#     # WHEN initialising the model
-#     with pytest.raises(ValidationError):
-#         # THEN an empty model should raise a ValidationError
-#         CacheConfigModel()
-#
-#
+def test_get_1k_genome_files(hg_references_model: HgReferencesModel):
+    """Test get 1000 Genome related files."""
+
+    # GIVEN a human genome references model
+
+    # WHEN getting the 1k genome files
+    genome_files: List[str] = hg_references_model.get_1k_genome_files()
+
+    # THEN the 1k genome files should be returned
+    assert len(genome_files) == 4
+    assert (
+        hg_references_model.known_indel_1kg.file_path + "." + FileType.GZ
+        in genome_files
+    )
+    assert hg_references_model.mills_1kg.file_path + "." + FileType.GZ in genome_files
+    assert hg_references_model.hc_vcf_1kg.file_path + "." + FileType.GZ in genome_files
+    assert hg_references_model.vcf_1kg.file_path + "." + FileType.GZ in genome_files
+
+
+def test_cache_analysis_model(cache_analysis_model_data: Dict[str, str]):
+    """Test cache analysis model initialisation."""
+
+    # GIVEN an input for the cache analysis model
+
+    # WHEN initialising the model
+    model: CacheAnalysisModel = CacheAnalysisModel(**cache_analysis_model_data)
+
+    # THEN the model should have been correctly built
+    assert model.dict() == cache_analysis_model_data
+
+
+def test_cache_analysis_model_empty():
+    """Test ache analysis model for an empty input."""
+
+    # GIVEN no input for the cache analysis model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        CacheAnalysisModel()
+
+
+def test_cache_config_model(
+    cache_config_model_data: Dict[str, Any], cache_config_model: CacheConfigModel
+):
+    """Test cache config model initialisation."""
+
+    # GIVEN an input for the cache config model and a mocked reference model
+
+    # WHEN initialising the model
+    model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
+
+    # THEN the model should have been correctly built
+    assert model == cache_config_model
+
+
+def test_cache_config_model_empty():
+    """Test cache config model for an empty input."""
+
+    # GIVEN no input for the cache config model
+
+    # WHEN initialising the model
+    with pytest.raises(ValidationError):
+        # THEN an empty model should raise a ValidationError
+        CacheConfigModel()
+
+
 # def test_cache_config_model_empty_file_path(cache_config_model_data: Dict[str, dict]):
 #     """Test cache config model reference validation method and file path assignment."""
 #
