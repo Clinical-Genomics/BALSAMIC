@@ -31,6 +31,7 @@ from BALSAMIC.models.cache import (
     CacheConfigModel,
     ReferencesModel,
     HgReferencesModel,
+    HgAnalysisReferencesModel,
 )
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
@@ -831,13 +832,6 @@ def fixture_cache_analysis_model(
     return CacheAnalysisModel(**cache_analysis_model_data)
 
 
-[
-    "/private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-320/test_get_refgene_files0/genome/refGene.txt",
-    "/private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-320/test_get_refgene_files0/genome/refGene.flat",
-    "/private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-320/test_get_refgene_files0/genome/refGene.flat.bed",
-]
-
-
 @pytest.fixture(scope="function", name="refgene_bed_file")
 def fixture_refgene_bed_file(tmp_path: Path) -> Path:
     """Dummy RefSeq's gene BED file."""
@@ -882,11 +876,91 @@ def fixture_delly_exclusion_converted_file(tmp_path: Path) -> Path:
     return reference_file
 
 
+@pytest.fixture(scope="function", name="clinvar_file")
+def fixture_clinvar_file(tmp_path: Path) -> Path:
+    """Dummy ClinVar file."""
+    clinvar_file: Path = Path(tmp_path, "variants", "clinvar.vcf.gz")
+    clinvar_file.touch()
+    return clinvar_file
+
+
+@pytest.fixture(scope="function", name="cosmic_file")
+def fixture_cosmic_file(tmp_path: Path) -> Path:
+    """Dummy COSMIC file."""
+    cosmic_file: Path = Path(tmp_path, "variants", "cosmic_coding_muts_v97.vcf.gz")
+    cosmic_file.touch()
+    return cosmic_file
+
+
+@pytest.fixture(scope="function", name="dbsnp_file")
+def fixture_dbsnp_file(tmp_path: Path) -> Path:
+    """Dummy dbSNP file."""
+    dbsnp_file: Path = Path(tmp_path, "variants", "dbsnp_grch37_b138.vcf.gz")
+    dbsnp_file.touch()
+    return dbsnp_file
+
+
+@pytest.fixture(scope="function", name="hc_vcf_1kg_file")
+def fixture_hc_vcf_1kg(tmp_path: Path) -> Path:
+    """Dummy high confidence 1000 Genome VCF file."""
+    hc_vcf_1kg_file: Path = Path(
+        tmp_path, "variants", "1kg_phase1_snps_high_confidence_b37.vcf.gz"
+    )
+    hc_vcf_1kg_file.touch()
+    return hc_vcf_1kg_file
+
+
+@pytest.fixture(scope="function", name="known_indel_1kg_file")
+def fixture_known_indel_1kg_file(tmp_path: Path) -> Path:
+    """Dummy 1000 Genome known InDels VCF file."""
+    known_indel_1kg_file: Path = Path(
+        tmp_path, "variants", "1kg_known_indels_b37.vcf.gz"
+    )
+    known_indel_1kg_file.touch()
+    return known_indel_1kg_file
+
+
+@pytest.fixture(scope="function", name="mills_1kg_file")
+def fixture_mills_1kg_file(tmp_path: Path) -> Path:
+    """Dummy Mills' high confidence InDels VCF file."""
+    mills_1kg_file: Path = Path(tmp_path, "variants", "mills_1kg_index.vcf.gz")
+    mills_1kg_file.touch()
+    return mills_1kg_file
+
+
+@pytest.fixture(scope="function", name="somalier_sites_file")
+def fixture_somalier_sites_file(tmp_path: Path) -> Path:
+    """Dummy somalier sites VCF file."""
+    somalier_sites_file: Path = Path(
+        tmp_path, "variants", "GRCh37.somalier.sites.vcf.gz"
+    )
+    somalier_sites_file.touch()
+    return somalier_sites_file
+
+
+@pytest.fixture(scope="function", name="vcf_1kg_file")
+def fixture_vcf_1kg_file(tmp_path: Path) -> Path:
+    """Dummy 1000 Genome all SNPs file."""
+    vcf_1kg_file: Path = Path(
+        tmp_path, "variants", "1k_genome_wgs_p1_v3_all_sites.vcf.gz"
+    )
+    vcf_1kg_file.touch()
+    return vcf_1kg_file
+
+
 @pytest.fixture(scope="function", name="hg_analysis_references_model_data")
 def fixture_hg_analysis_references_model_data(
     cache_config_model: CacheConfigModel,
     analysis_references_model_data: Dict[str, Path],
     delly_exclusion_converted_file: Path,
+    clinvar_file: Path,
+    cosmic_file: Path,
+    dbsnp_file: Path,
+    hc_vcf_1kg_file: Path,
+    known_indel_1kg_file: Path,
+    mills_1kg_file: Path,
+    somalier_sites_file: Path,
+    vcf_1kg_file: Path,
 ) -> Dict[str, Path]:
     """Human genome analysis references model data."""
     hg_analysis_references_model_data: Dict[str, Path] = {
@@ -897,9 +971,9 @@ def fixture_hg_analysis_references_model_data(
         "ascat_gc_correction": Path(
             cache_config_model.references.ascat_gc_correction.file_path
         ),
-        "clinvar": Path(cache_config_model.references.clinvar.file_path),
-        "cosmic": Path(cache_config_model.references.cosmic.file_path),
-        "dbsnp": Path(cache_config_model.references.dbsnp.file_path),
+        "clinvar": clinvar_file,
+        "cosmic": cosmic_file,
+        "dbsnp": dbsnp_file,
         "delly_exclusion": Path(
             cache_config_model.references.delly_exclusion.file_path
         ),
@@ -908,14 +982,12 @@ def fixture_hg_analysis_references_model_data(
             cache_config_model.references.delly_mappability.file_path
         ),
         "gnomad_variant": Path(cache_config_model.references.gnomad_variant.file_path),
-        "hc_vcf_1kg": Path(cache_config_model.references.hc_vcf_1kg.file_path),
-        "known_indel_1kg": Path(
-            cache_config_model.references.known_indel_1kg.file_path
-        ),
-        "mills_1kg": Path(cache_config_model.references.mills_1kg.file_path),
+        "hc_vcf_1kg": hc_vcf_1kg_file,
+        "known_indel_1kg": known_indel_1kg_file,
+        "mills_1kg": mills_1kg_file,
         "rank_score": Path(cache_config_model.references.rank_score.file_path),
-        "somalier_sites": Path(cache_config_model.references.somalier_sites.file_path),
-        "vcf_1kg": Path(cache_config_model.references.vcf_1kg.file_path),
+        "somalier_sites": somalier_sites_file,
+        "vcf_1kg": vcf_1kg_file,
         "vep_dir": cache_config_model.references_dir,
         "wgs_calling_regions": Path(
             cache_config_model.references.wgs_calling_regions.file_path
@@ -923,6 +995,14 @@ def fixture_hg_analysis_references_model_data(
     }
     hg_analysis_references_model_data.update(analysis_references_model_data)
     return hg_analysis_references_model_data
+
+
+@pytest.fixture(scope="function", name="hg_analysis_references_model")
+def fixture_hg_analysis_references_model(
+    hg_analysis_references_model_data: Dict[str, Path]
+) -> CacheAnalysisModel:
+    """Mocked human genome analysis references model."""
+    return HgAnalysisReferencesModel(**hg_analysis_references_model_data)
 
 
 @pytest.fixture(scope="function", name="reference_url")

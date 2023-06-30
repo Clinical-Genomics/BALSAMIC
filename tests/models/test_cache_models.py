@@ -3,7 +3,12 @@ from pathlib import Path
 from typing import Dict, Any, List
 
 import pytest
-from BALSAMIC.constants.cache import FileType, BwaIndexFileType, GRCHVersion
+from BALSAMIC.constants.cache import (
+    FileType,
+    BwaIndexFileType,
+    GRCHVersion,
+    DockerContainers,
+)
 from pydantic import ValidationError
 
 from BALSAMIC.models.cache import (
@@ -499,43 +504,94 @@ def test_get_reference_paths_by_compression(cache_config_model: CacheConfigModel
 
     # THEN the expected reference path should be returned
     assert len(reference_paths) == 11
-    assert cache_config_model.references.reference_genome.file_path in reference_paths
-    assert cache_config_model.references.refgene_txt.file_path in reference_paths
-    assert (
-        cache_config_model.references.ascat_gc_correction.file_path in reference_paths
+    for reference in [
+        cache_config_model.references.ascat_gc_correction.file_path,
+        cache_config_model.references.clinvar.file_path,
+        cache_config_model.references.cosmic.file_path,
+        cache_config_model.references.dbsnp.file_path,
+        cache_config_model.references.hc_vcf_1kg.file_path,
+        cache_config_model.references.known_indel_1kg.file_path,
+        cache_config_model.references.mills_1kg.file_path,
+        cache_config_model.references.reference_genome.file_path,
+        cache_config_model.references.refgene_txt.file_path,
+        cache_config_model.references.somalier_sites.file_path,
+        cache_config_model.references.vcf_1kg.file_path,
+    ]:
+        assert reference in reference_paths
+
+
+def test_get_compressed_indexed_vcfs(cache_config_model: CacheConfigModel):
+    """Test get compressed indexed VCFs."""
+
+    # GIVEN a cache config model
+
+    # WHEN retrieving the compressed and indexed VCFs
+    compressed_indexed_vcfs: List[
+        str
+    ] = cache_config_model.get_compressed_indexed_vcfs()
+
+    # THEN the indexed VCFs should be returned
+    assert len(compressed_indexed_vcfs) == 8
+    for reference in [
+        cache_config_model.references.dbsnp.file_path,
+        cache_config_model.references.vcf_1kg.file_path,
+        cache_config_model.references.known_indel_1kg.file_path,
+        cache_config_model.references.mills_1kg.file_path,
+        cache_config_model.references.clinvar.file_path,
+        cache_config_model.references.somalier_sites.file_path,
+        cache_config_model.references.hc_vcf_1kg.file_path,
+        cache_config_model.references.cosmic.file_path,
+    ]:
+        assert (
+            reference + "." + FileType.GZ + "." + FileType.TBI
+            in compressed_indexed_vcfs
+        )
+
+
+def test_get_container_output_paths(
+    cache_config_model: CacheConfigModel, tmp_path: Path
+):
+    """Test retrieval of the containers output paths."""
+
+    # GIVEN a cache config model
+
+    # WHEN getting the list of container paths
+    container_paths: List[str] = cache_config_model.get_container_output_paths()
+
+    # THEN all the container paths should be returned
+    assert len(container_paths) == len(set(DockerContainers))
+    for container in set(DockerContainers):
+        assert Path(tmp_path, container + "." + FileType.SIF)
+
+
+def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
+    """Test get reference list to be downloaded."""
+
+    # GIVEN a cache config model
+
+    # WHEN retrieving the reference output paths
+    reference_output_paths: List[str] = cache_config_model.get_reference_output_paths()
+
+    # THEN all the reference paths should be returned
+    assert len(reference_output_paths) == 41
+
+
+def test_get_analysis_references(
+    cache_config_model: CacheConfigModel,
+    hg_analysis_references_model: HgAnalysisReferencesModel,
+):
+    """Test analysis references retrieval to be used for Balsamic analyses."""
+
+    # GIVEN a cache config model
+
+    # WHEN getting the analysis references
+    analysis_references: HgAnalysisReferencesModel = (
+        cache_config_model.get_analysis_references()
     )
-    assert cache_config_model.references.clinvar.file_path in reference_paths
-    assert cache_config_model.references.cosmic.file_path in reference_paths
-    assert cache_config_model.references.dbsnp.file_path in reference_paths
-    assert cache_config_model.references.known_indel_1kg.file_path in reference_paths
-    assert cache_config_model.references.hc_vcf_1kg.file_path in reference_paths
-    assert cache_config_model.references.vcf_1kg.file_path in reference_paths
-    assert cache_config_model.references.mills_1kg.file_path in reference_paths
-    assert cache_config_model.references.somalier_sites.file_path in reference_paths
 
+    # THEN the retrieved analysis references should match the mocked one
+    assert analysis_references == hg_analysis_references_model
 
-# def test_get_compressed_indexed_vcfs(cache_config_model: CacheConfigModel):
-#     """"""
-#
-#     # GIVEN a cache config model
-#
-#
-# def test_get_container_output_paths(cache_config_model: CacheConfigModel):
-#     """"""
-#
-#     # GIVEN a cache config model
-#
-#
-# def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
-#     """"""
-#
-#     # GIVEN a cache config model
-#
-#
-# def test_get_analysis_references(cache_config_model: CacheConfigModel):
-#     """"""
-#
-#     # GIVEN a cache config model
 
 ################################################################################################
 ################################################################################################
