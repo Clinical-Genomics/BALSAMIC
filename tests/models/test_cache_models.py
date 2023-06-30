@@ -301,28 +301,20 @@ def test_get_delly_exclusion_converted_file(
     assert converted_file == delly_exclusion_converted_file.as_posix()
 
 
-# def test_get_gnomad_files(
-#     hg_references_model: HgReferencesModel,
-#     gnomad_variant_file: Path,
-#     gnomad_variant_index_file: Path,
-# ):
-#     """Test get gnomad reference files."""
-#
-#     # GIVEN a human genome references model and specific gnomad files
-#     hg_references_model.gnomad_variant.file_path = gnomad_variant_file.as_posix()
-#     hg_references_model.gnomad_variant_index.file_path = (
-#         gnomad_variant_index_file.as_posix()
-#     )
-#
-#     # WHEN getting the genomad reference files
-#     gnomad_files: List[str] = hg_references_model.get_gnomad_files()
-#
-#     # THEN the genomad files should be returned
-#     assert len(gnomad_files) == 2
-#     assert gnomad_variant_file.as_posix() in gnomad_files
-#     assert gnomad_variant_index_file.as_posix() in gnomad_files
-#
-#
+def test_get_gnomad_files(hg_references_model: HgReferencesModel):
+    """Test get gnomad reference files."""
+
+    # GIVEN a human genome references model
+
+    # WHEN getting the gnomad reference files
+    gnomad_files: List[str] = hg_references_model.get_gnomad_files()
+
+    # THEN the gnomad files should be returned
+    assert len(gnomad_files) == 2
+    assert hg_references_model.gnomad_variant.file_path in gnomad_files
+    assert hg_references_model.gnomad_variant_index.file_path in gnomad_files
+
+
 # def test_get_1k_genome_files(
 #     hg_references_model: HgReferencesModel,
 #     known_indel_1kg_file: Path,
