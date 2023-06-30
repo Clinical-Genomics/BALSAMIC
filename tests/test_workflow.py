@@ -93,6 +93,7 @@ def test_workflow_tumor_normal_wgs(
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
+
 def test_workflow_qc_tumor_only_canfam(tumor_only_config):
 
     # GIVEN a sample config dict and snakefile
