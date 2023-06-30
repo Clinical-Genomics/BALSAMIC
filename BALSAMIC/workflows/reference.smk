@@ -48,4 +48,4 @@ rule all:
             json_obj=json.loads(cache_config.get_analysis_references().json()),
             path=Path(cache_config.references_dir, "reference.json").as_posix(),
         )
-        write_finish_file(output.finish_file)
+        write_finish_file(file_path=output.finish_file)
