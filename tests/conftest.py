@@ -202,6 +202,12 @@ def pon_cnn():
     return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
 
+@pytest.fixture(scope="function", name="")
+def json_file(tmp_path: Path):
+    """Mocked file path to use when writing JSON."""
+    return Path(tmp_path, "write_json.json")
+
+
 @pytest.fixture(scope="session")
 def sentieon_license(tmp_path_factory):
     """

@@ -37,7 +37,7 @@ from BALSAMIC.utils.cli import (
     get_fastq_files_directory,
     get_config_path,
 )
-from BALSAMIC.utils.io import read_json, write_json, read_yaml
+from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
 
 from BALSAMIC.utils.rule import (
     get_vcf,
@@ -880,3 +880,15 @@ def test_get_input_symlinked_files_path(fastq_dir: str, tmp_path: Path):
 
     # THEN the real fastq directory should be returned
     assert input_directory == fastq_dir
+
+
+def test_write_finish_file(json_file: Path):
+    """Test finish analysis completion file generation."""
+
+    # GIVEN a file path to write to
+
+    # WHEN writing a json file after an analysis has been completed
+    write_finish_file(file_path=json_file.as_posix())
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(json_file)
