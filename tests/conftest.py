@@ -88,8 +88,29 @@ fastq_pattern_types = [
     },
 ]
 
-fastq_pattern_ids = ["FastqPattern{}".format(p["id"]) for p in fastq_pattern_types]
+fastq_pattern_fails = {
+    "duplicate_fastq_patterns": {
+        "tumor": [
+            "ACC1_S1_L001_R_R1_001.fastq.gz",
+            "ACC1_S1_L001_R_R2_001.fastq.gz",
+            "ACC1_S1_L001_R_1.fastq.gz",
+            "ACC1_S1_L001_R_2.fastq.gz",
+        ]
+    },
+    "duplicate_fastq_files_tumor_normal": {
+        "tumor": [
+            "ACC1_S1_L001_R1_001.fastq.gz",
+            "ACC1_S1_L001_R2_001.fastq.gz"
+        ],
+        "normal": [
+            "ACC1_NORMAL_S1_L001_R1_001.fastq.gz",
+            "ACC1_NORMAL_S1_L001_R1_001.fastq.gz",
 
+        ]
+    }
+}
+
+fastq_pattern_ids = ["FastqPattern{}".format(p["id"]) for p in fastq_pattern_types]
 
 @pytest.fixture(scope="session")
 def pon_fastq_list() -> list:
@@ -127,16 +148,44 @@ def pon_fastq_list() -> list:
 
 
 @pytest.fixture(scope="session")
+def tumor_normal_fastq_info_correct() -> str:
+    """Mock tumor normal fastq info in sample_dict"""
+    sample_dict = {
+        "ACC1": {
+            "type": "tumor",
+            "fastq_info": {
+                "ACC1_S1_L001_R": {
+                    "fwd": "ACC1_S1_L001_R1_001.fastq.gz",
+                    "rev": "ACC1_S1_L001_R2_001.fastq.gz",
+                }
+            },
+        },
+        "ACC2": {
+            "type": "normal",
+            "fastq_info": {
+                "ACC2_S1_L001_R": {
+                    "fwd": "ACC2_S1_L001_R1_001.fastq.gz",
+                    "rev": "ACC2_S1_L001_R2_001.fastq.gz",
+                }
+            },
+        },
+    }
+    return sample_dict
+
+@pytest.fixture(scope="session")
 def tumor_sample_name() -> str:
     """Mock tumor sample name."""
     return "ACC1"
-
 
 @pytest.fixture(scope="session")
 def normal_sample_name() -> str:
     """Mock normal sample name."""
     return "ACC2"
 
+@pytest.fixture(scope="session")
+def illegal_normal_sample_name() -> str:
+    """Mock illegal normal sample name."""
+    return "ACC1_NORMAL"
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only() -> str:
@@ -179,6 +228,15 @@ def case_id_tumor_normal_fastqdir() -> str:
     """Mock case ID for dummy fastqdir."""
     return "sample_tumor_normal_fastqdir"
 
+@pytest.fixture(scope="session")
+def case_id_tumor_duplicate_fastqpatterns() -> str:
+    """Mock case ID for single fastq-dir"""
+    return "sample_tumor_duplicate_fastqpatterns"
+
+@pytest.fixture(scope="session")
+def case_id_tumor_normal_duplicate_assigned_fastqfiles() -> str:
+    """Mock case ID for single fastq-dir"""
+    return "sample_tumor_normal_duplicate_assigned_fastqfiles"
 
 @pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
@@ -190,7 +248,6 @@ def case_id_tumor_normal() -> str:
 def case_id_tumor_normal_extrafile() -> str:
     """Mock TGA tumor-normal case ID."""
     return "sample_tumor_normal_extrafile"
-
 
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_qc() -> str:
@@ -214,30 +271,6 @@ def case_id_tumor_only_wgs() -> str:
 def case_id_tumor_normal_wgs() -> str:
     """Mock WGS tumor-normal case ID."""
     return "sample_tumor_normal_wgs"
-
-
-@pytest.fixture(scope="session", params=fastq_pattern_types)
-def fastq_dir(case_id_tumor_normal_fastqdir: str, analysis_dir: str, request):
-    """Mock FastQ directory."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_fastqdir, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-
-    # Fill the fastq path folder with the test fastq-files
-    fastq_test_dict = request.param
-
-    for fastq in fastq_test_dict["tumor"]:
-        Path(fastq_dir, fastq).touch()
-
-    for fastq in fastq_test_dict["normal"]:
-        Path(fastq_dir, fastq).touch()
-
-    yield fastq_dir.as_posix()
-
-    for fastq in fastq_test_dict["tumor"]:
-        Path.unlink(fastq_dir / fastq)
-
-    for fastq in fastq_test_dict["normal"]:
-        Path.unlink(fastq_dir / fastq)
 
 
 @pytest.fixture
@@ -424,6 +457,28 @@ def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
     return analysis_dir.as_posix()
 
+@pytest.fixture(scope="session", params=fastq_pattern_types)
+def fastq_dir(case_id_tumor_normal_fastqdir: str, analysis_dir: str, request):
+    """Mock FastQ directory."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_fastqdir, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = request.param
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    for fastq in fastq_test_dict["normal"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+    for fastq in fastq_test_dict["tumor"]:
+        Path.unlink(fastq_dir / fastq)
+
+    for fastq in fastq_test_dict["normal"]:
+        Path.unlink(fastq_dir / fastq)
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) -> str:
@@ -440,7 +495,6 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) ->
 
     for fastq in fastq_test_dict["tumor"]:
         Path.unlink(fastq_dir / fastq)
-
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_only_qc(
@@ -459,7 +513,6 @@ def fastq_dir_tumor_only_qc(
 
     for fastq in fastq_test_dict["tumor"]:
         Path.unlink(fastq_dir / fastq)
-
 
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_single_w_dummy_vep(
@@ -487,6 +540,20 @@ def fastq_dir_tumor_only_single_w_dummy_vep(
         Path.unlink(fastq_dir / fastq)
 
     Path.unlink(vep_dir / vep_test_file)
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_only_single_id3(
+    analysis_dir: str, case_id_tumor_only_single: str
+) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_single, "fastq_id3")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = fastq_pattern_types[2]
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
 
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
@@ -521,6 +588,15 @@ def fastq_dir_tumor_only_pon(
 
     yield fastq_dir.as_posix()
 
+@pytest.fixture(scope="session")
+def empty_fastq_dir(
+    analysis_dir: str, case_id_tumor_normal: str
+) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq_empty")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    yield fastq_dir.as_posix()
 
 @pytest.fixture(scope="session", params=fastq_pattern_types, ids=fastq_pattern_ids)
 def fastq_dir_tumor_only_umi(
@@ -615,6 +691,40 @@ def fastq_dir_tumor_normal_qc_wgs(
     for fastq in fastq_test_dict["normal"]:
         Path.unlink(fastq_dir / fastq)
 
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_duplicate_fastqpatterns(
+    analysis_dir: str,
+    case_id_tumor_duplicate_fastqpatterns: str,
+) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_duplicate_fastqpatterns, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = fastq_pattern_fails["duplicate_fastq_patterns"]
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_normal_duplicate_assigned_fastqfiles(
+    analysis_dir: str,
+    case_id_tumor_normal_duplicate_assigned_fastqfiles: str,
+) -> str:
+    """Creates and returns the directory containing the FASTQs."""
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_duplicate_assigned_fastqfiles, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the fastq path folder with the test fastq-files
+    fastq_test_dict = fastq_pattern_fails["duplicate_fastq_files_tumor_normal"]
+    for fastq in fastq_test_dict["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    for fastq in fastq_test_dict["normal"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
 
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_normal_extrafile(
@@ -1165,7 +1275,11 @@ def tumor_only_pon_config(
 
 
 @pytest.fixture(scope="session")
-def sample_config(tumor_sample_name: str, normal_sample_name: str):
+def sample_config(
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    tumor_normal_fastq_info_correct: dict,
+):
     """
     sample config dict to test workflow utils
     """
@@ -1192,32 +1306,125 @@ def sample_config(tumor_sample_name: str, normal_sample_name: str):
             "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
         },
         "vcf": VCF_DICT,
-        "samples": {
-            tumor_sample_name: {
-                "type": "tumor",
-                "fastq_info": {
-                    "ACC1_S1_L001_R": {
-                        "fwd": "ACC1_S1_L001_R1_001.fastq.gz",
-                        "rev": "ACC1_S1_L001_R2_001.fastq.gz",
-                    }
-                },
-            },
-            normal_sample_name: {
-                "type": "normal",
-                "fastq_info": {
-                    "ACC2_S1_L001_R": {
-                        "fwd": "ACC2_S1_L001_R1_001.fastq.gz",
-                        "rev": "ACC2_S1_L001_R2_001.fastq.gz",
-                    }
-                },
-            },
-        },
+        "samples": tumor_normal_fastq_info_correct,
         "umiworkflow": "true",
     }
 
     return sample_config
 
+@pytest.fixture(scope="session")
+def sample_config(
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    tumor_normal_fastq_info_correct: dict,
+    empty_fastq_dir: str,
+):
+    """
+    sample config dict to test workflow utils
+    """
+    sample_config = {
+        "QC": {
+            "picard_rmdup": "False",
+            "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+            "min_seq_length": "25",
+            "quality_trim": "True",
+            "adapter_trim": "False",
+            "umi_trim": "True",
+            "umi_trim_length": "5",
+        },
+        "analysis": {
+            "case_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "tests/test_data/",
+            "fastq_path": empty_fastq_dir,
+            "script": "tests/test_data/id1/scripts/",
+            "log": "tests/test_data/id1/logs/",
+            "result": "tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
+            "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
+        },
+        "vcf": VCF_DICT,
+        "samples": tumor_normal_fastq_info_correct,
+        "umiworkflow": "true",
+    }
 
+    return sample_config
+@pytest.fixture(scope="session")
+def sample_config_duplicate_fastqpatterns(
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    tumor_normal_fastq_info_duplicate_fastq_patterns: dict,
+):
+    """
+    sample config dict to test workflow utils
+    """
+    sample_config = {
+        "QC": {
+            "picard_rmdup": "False",
+            "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+            "min_seq_length": "25",
+            "quality_trim": "True",
+            "adapter_trim": "False",
+            "umi_trim": "True",
+            "umi_trim_length": "5",
+        },
+        "analysis": {
+            "case_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "tests/test_data/",
+            "fastq_path": "tests/test_data/id1/fastq/",
+            "script": "tests/test_data/id1/scripts/",
+            "log": "tests/test_data/id1/logs/",
+            "result": "tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
+            "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
+        },
+        "vcf": VCF_DICT,
+        "samples": tumor_normal_fastq_info_duplicate_fastq_patterns,
+        "umiworkflow": "true",
+    }
+
+    return sample_config
+
+@pytest.fixture(scope="session")
+def sample_config_duplicate_fastqfiles(
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    tumor_normal_fastq_info_double_assigned_fastqfiles: dict,
+):
+    """
+    sample config dict to test workflow utils
+    """
+    sample_config = {
+        "QC": {
+            "picard_rmdup": "False",
+            "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+            "min_seq_length": "25",
+            "quality_trim": "True",
+            "adapter_trim": "False",
+            "umi_trim": "True",
+            "umi_trim_length": "5",
+        },
+        "analysis": {
+            "case_id": "id1",
+            "analysis_type": "paired",
+            "analysis_dir": "tests/test_data/",
+            "fastq_path": "tests/test_data/id1/fastq/",
+            "script": "tests/test_data/id1/scripts/",
+            "log": "tests/test_data/id1/logs/",
+            "result": "tests/test_data/id1/analysis/",
+            "config_creation_date": "yyyy-mm-dd xx",
+            "BALSAMIC_version": "2.9.8",
+            "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
+        },
+        "vcf": VCF_DICT,
+        "samples": tumor_normal_fastq_info_double_assigned_fastqfiles,
+        "umiworkflow": "true",
+    }
+
+    return sample_config
 @pytest.fixture(scope="session")
 def analysis_path():
     """Analysis test path"""

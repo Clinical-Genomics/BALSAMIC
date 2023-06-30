@@ -40,8 +40,11 @@ from BALSAMIC.utils.cli import (
     get_pon_sample_dict,
     get_sample_dict,
     get_fastq_files_directory,
+    validate_fastq_input,
+    get_fastq_info,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml
+from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.rule import (
     get_chrom,
@@ -974,8 +977,78 @@ def test_create_md5(tmp_path):
     assert dummy_file.exists()
 
 
-def test_validate_fastq_input():
-    pass
+def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3):
+    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
+    # GIVEN a fastq_dir with these files: ACC1_XXXXX_R_1.fastq.gz and ACC1_XXXXX_R_2.fastq.gz and sample name ACC1
+
+    # WHEN calling the get_fastq_info function
+    fastq_dict = get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3)
+
+    # THEN check that the fastq_dict matches the expected fastq_dict
+    expected_fastq_dict = {
+        "ACC1_XXXXX_R": {
+            "fwd": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_1.fastq.gz",
+            "rev": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_2.fastq.gz"
+        }
+    }
+    assert fastq_dict == expected_fastq_dict
+
+
+def test_get_fastq_info_empty_fastq_dir(tumor_sample_name, empty_fastq_dir):
+    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
+    # GIVEN an empty fastq_dir and a sample name
+
+    # WHEN calling get_fastq_info
+    # THEN the following error should be found
+    with pytest.raises(
+        FileNotFoundError, match="No fastq files found in supplied fastq-path"
+    ):
+        get_fastq_info(tumor_sample_name, empty_fastq_dir)
+
+
+def test_get_fastq_info_double_assigned_fastq_pattern(
+    tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns
+):
+    """Tests if get_fastq_info correctly reports error of finding double-assigned fastq-patterns"""
+    # GIVEN an empty fastq_dir and a sample name
+
+    # WHEN calling get_fastq_info
+    # THEN the following error should be found
+    with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
+        get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns)
+
+
+def test_validate_fastq_input_extrafile(
+    fastq_dir_tumor_normal_extrafile, tumor_sample_name, normal_sample_name
+):
+    """Tests test_validate_fastq_input ability to detect un-assigned fastq-files in fastq dir"""
+
+    # GIVEN a fastq-dir with fastq-files matching tumor and normal, with extra fastq-files matching neither
+
+    # GIVEN the creation of a sample_dict
+    sample_dict = get_sample_dict(
+        tumor_sample_name, normal_sample_name, fastq_dir_tumor_normal_extrafile
+    )
+
+    # WHEN calling validate_fastq_input
+    # THEN the following error should be found
+    with pytest.raises(
+        BalsamicError,
+        match="Fastq files found in fastq directory not assigned to any sample",
+    ):
+        validate_fastq_input(sample_dict, fastq_dir_tumor_normal_extrafile)
+
+
+def test_validate_fastq_input_missingfiles(sample_config, empty_fastq_dir):
+    """Tests test_validate_fastq_input ability to detect missing fastq-files in fastq dir"""
+
+    # GIVEN a tumor normal sample_dict where fastq_dir is empty
+    sample_dict = sample_config["samples"]
+
+    # WHEN calling validate_fastq_input
+    # THEN the following error should be found
+    with pytest.raises(FileNotFoundError, match="Fastq-file does not exist:"):
+        validate_fastq_input(sample_dict, empty_fastq_dir)
 
 
 def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):

@@ -6,6 +6,7 @@ import graphviz
 
 from pathlib import Path
 
+
 from tests.conftest import MOCKED_OS_ENVIRON
 
 
@@ -61,60 +62,6 @@ def test_tumor_normal_config(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).exists()
 
-
-def test_tumor_normal_extrafastq_config(
-    invoke_cli,
-    case_id_tumor_normal: str,
-    tumor_sample_name: str,
-    normal_sample_name: str,
-    analysis_dir: str,
-    fastq_dir_tumor_normal_extrafile: str,
-    balsamic_cache: str,
-    panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-    caplog,
-):
-    """Test tumor normal balsamic config case command."""
-
-    # GIVEN a case ID, fastq files, and an analysis dir
-    # WHEN creating a case analysis
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        result = invoke_cli(
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal,
-                "--gender",
-                "male",
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_extrafile,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-            ],
-        )
-    # THEN a config should be created and exist
-    assert (
-        "Fastq files found in fastq directory not assigned to any sample" in caplog.text
-    )
-    assert result.exit_code == 1
-
-
 def test_tumor_only_config(
     invoke_cli,
     case_id_tumor_only: str,
@@ -160,6 +107,58 @@ def test_tumor_only_config(
     # THEN a config should be created and exist
     assert result.exit_code == 0
     assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
+
+
+def test_tumor_normal_config_duplicate_assigned_fastqfiles(
+    invoke_cli,
+    case_id_tumor_normal_duplicate_assigned_fastqfiles: str,
+    tumor_sample_name: str,
+    illegal_normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal_duplicate_assigned_fastqfiles: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+):
+    """Test tumor normal balsamic config case command with sample-names that include each other."""
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+    # WHEN creating a case analysis
+    # THEN creation of config-file should fail with ValidationError from pydantic
+    with mock.patch.dict(
+            MOCKED_OS_ENVIRON,
+            {
+                "SENTIEON_LICENSE": sentieon_license,
+                "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+            },
+    ):
+        try:
+            invoke_cli(
+                [
+                    "config",
+                    "case",
+                    "--case-id",
+                    case_id_tumor_normal_duplicate_assigned_fastqfiles,
+                    "--gender",
+                    "male",
+                    "--analysis-dir",
+                    analysis_dir,
+                    "--fastq-path",
+                    fastq_dir_tumor_normal_duplicate_assigned_fastqfiles,
+                    "-p",
+                    panel_bed_file,
+                    "--balsamic-cache",
+                    balsamic_cache,
+                    "--tumor-sample-name",
+                    tumor_sample_name,
+                    "--normal-sample-name",
+                    illegal_normal_sample_name,
+                ],
+            )
+        except Exception as exc:
+            # Perform the assertion on the error message
+            assert "Fastq-pattern: ACC1_NORMAL_S1_L001 has been assigned more than once" in str(exc)
 
 
 def test_run_without_permissions(

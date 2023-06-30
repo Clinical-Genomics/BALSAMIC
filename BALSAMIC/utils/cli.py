@@ -454,8 +454,8 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
             for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
                 assigned_fastq_list.append(fastq_path)
                 if not Path(fastq_path).is_file():
-                    LOG.error(f"Fastq-file: {fastq_path} does not exist")
-                    raise FileNotFoundError(f"Fastq-file: {fastq_path} does not exist")
+                    LOG.error(f"Fastq-file does not exist: {fastq_path}")
+                    raise FileNotFoundError(f"Fastq-file does not exist: {fastq_path}")
 
     unassigned_fastqs = []
     for fastq in complete_fastq_list:
