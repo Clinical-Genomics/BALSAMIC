@@ -204,6 +204,12 @@ def pon_cnn():
     return "tests/test_data/references/panel/test_panel_ponn.cnn"
 
 
+@pytest.fixture(scope="function", name="invalid_file")
+def fixture_invalid_file(tmp_path: Path) -> Path:
+    """Non existent file path."""
+    return Path(tmp_path, "invalid_file.json")
+
+
 @pytest.fixture(scope="function", name="json_file")
 def fixture_json_file(tmp_path: Path) -> Path:
     """Mocked file path to use when writing JSON."""

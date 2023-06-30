@@ -3,9 +3,12 @@ from pathlib import Path
 from typing import Dict, Any, List
 
 import pytest
+from _pytest.logging import LogCaptureFixture
+
 from BALSAMIC.constants.cache import (
     GRCHVersion,
     DockerContainers,
+    GenomeVersion,
 )
 from BALSAMIC.constants.constants import FileType, BwaIndexFileType
 from pydantic import ValidationError
@@ -21,6 +24,7 @@ from BALSAMIC.models.cache import (
     CacheAnalysisModel,
     CacheConfigModel,
 )
+from BALSAMIC.utils.exc import BalsamicError
 
 
 def test_analysis_references_model(analysis_references_model_data: Dict[str, Path]):
@@ -459,6 +463,24 @@ def test_get_reference_by_path(cache_config_model: CacheConfigModel):
     assert reference_genome == cache_config_model.references.reference_genome
 
 
+def test_get_reference_by_path_error(
+    cache_config_model: CacheConfigModel, invalid_file: Path, caplog: LogCaptureFixture
+):
+    """Test reference extraction given an invalid path."""
+
+    # GIVEN a cache config model
+
+    # WHEN getting the reference genome by path
+    with pytest.raises(BalsamicError):
+        cache_config_model.get_reference_by_path(reference_path=invalid_file.as_posix())
+
+    # THEN a Balsamic error should be returned
+    assert (
+        f"No reference with the provided reference path {invalid_file.as_posix()}"
+        in caplog.text
+    )
+
+
 def test_get_reference_paths_by_file_type_and_compression(
     cache_config_model: CacheConfigModel,
 ):
@@ -575,18 +597,20 @@ def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
     assert len(reference_output_paths) == 41
 
 
-def test_get_analysis_references(
+def test_get_canfam_analysis_references(
     cache_config_model: CacheConfigModel,
-    hg_analysis_references_model: HgAnalysisReferencesModel,
+    analysis_references_model_data: Dict[str, Path],
 ):
-    """Test analysis references retrieval to be used for Balsamic analyses."""
+    """Test analysis references retrieval to be used for Balsamic canine analyses."""
 
-    # GIVEN a cache config model
+    # GIVEN a canine cache config model
+    cache_config_model.genome_version = GenomeVersion.CanFam3
 
     # WHEN getting the analysis references
-    analysis_references: HgAnalysisReferencesModel = (
+    analysis_references: CanFamAnalysisReferencesModel = (
         cache_config_model.get_analysis_references()
     )
 
     # THEN the retrieved analysis references should match the mocked one
-    assert analysis_references == hg_analysis_references_model
+    assert type(analysis_references) is CanFamAnalysisReferencesModel
+    assert analysis_references.dict() == analysis_references_model_data
