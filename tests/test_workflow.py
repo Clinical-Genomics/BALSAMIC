@@ -93,36 +93,6 @@ def test_workflow_tumor_normal_wgs(
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
-
-def test_workflow_wgs(
-    tumor_normal_wgs_config,
-    tumor_only_wgs_config,
-    sentieon_install_dir,
-    sentieon_license,
-):
-    # GIVEN a sample config dict and snakefile
-    workflows = [("single", tumor_only_wgs_config), ("paired", tumor_normal_wgs_config)]
-
-    # WHEN invoking snakemake module with dryrun option
-    # THEN it should return true
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        for workflow in workflows:
-            analysis_type = workflow[0]
-            config = workflow[1]
-            reference_genome = "hg19"
-            analysis_workflow = "balsamic"
-            snakefile = get_snakefile(
-                analysis_type, analysis_workflow, reference_genome
-            )
-            assert snakemake.snakemake(snakefile, configfiles=[config], dryrun=True)
-
-
 def test_workflow_qc_tumor_only_canfam(tumor_only_config):
 
     # GIVEN a sample config dict and snakefile
