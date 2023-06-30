@@ -11,7 +11,7 @@ from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cache import GenomeVersion
 from click.testing import Result
 
-from BALSAMIC.constants.process import EXIT_SUCCESS, EXIT_FAIL
+from BALSAMIC.constants.constants import EXIT_SUCCESS, EXIT_FAIL
 
 
 def test_init_hg(

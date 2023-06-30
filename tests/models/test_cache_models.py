@@ -4,11 +4,10 @@ from typing import Dict, Any, List
 
 import pytest
 from BALSAMIC.constants.cache import (
-    FileType,
-    BwaIndexFileType,
     GRCHVersion,
     DockerContainers,
 )
+from BALSAMIC.constants.constants import FileType, BwaIndexFileType
 from pydantic import ValidationError
 
 from BALSAMIC.models.cache import (

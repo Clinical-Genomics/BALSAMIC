@@ -1,4 +1,5 @@
 """Balsamic cache specific constants."""
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.class_types import StrEnum
 
 
@@ -32,36 +33,6 @@ class ContainerVersion(StrEnum):
 
     DEVELOP: str = "develop"
     RELEASE: str = "release"
-
-
-class FileType(StrEnum):
-    """Balsamic reference file types."""
-
-    BED: str = "bed"
-    DICT: str = "dict"
-    FAI: str = "fai"
-    FASTA: str = "fasta"
-    FLAT: str = "flat"
-    GFF: str = "gff"
-    GTF: str = "gtf"
-    GZ: str = "gz"
-    JSON: str = "json"
-    LOG: str = "log"
-    SIF: str = "sif"
-    TBI: str = "tbi"
-    TSV: str = "tsv"
-    TXT: str = "txt"
-    VCF: str = "vcf"
-
-
-class BwaIndexFileType(StrEnum):
-    """BWA genome index file suffixes."""
-
-    AMB: str = "amb"
-    ANN: str = "ann"
-    BWT: str = "bwt"
-    PAC: str = "pac"
-    SA: str = "sa"
 
 
 class DockerContainers(StrEnum):

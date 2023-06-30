@@ -20,7 +20,8 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     WorkflowSolution,
 )
-from BALSAMIC.constants.cache import GenomeVersion, FileType
+from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.metrics import VALID_OPS
 
 LOG = logging.getLogger(__name__)

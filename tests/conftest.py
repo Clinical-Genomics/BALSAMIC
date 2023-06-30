@@ -17,8 +17,8 @@ from BALSAMIC.constants.cache import (
     DockerContainers,
     GenomeVersion,
     REFERENCE_FILES,
-    FileType,
 )
+from BALSAMIC.constants.constants import FileType
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.constants.cluster import ClusterConfigType

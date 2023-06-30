@@ -7,7 +7,8 @@ import logging
 import os
 from pathlib import Path
 
-from BALSAMIC.constants.cache import FileType, Species, VEP_PLUGINS
+from BALSAMIC.constants.cache import Species, VEP_PLUGINS
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import BALSAMIC_DIR, REFSEQ_SCRIPT_PATH
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache import CacheConfigModel
