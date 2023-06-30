@@ -26,7 +26,12 @@ from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
-from BALSAMIC.models.cache import CacheAnalysisModel, CacheConfigModel, ReferencesModel
+from BALSAMIC.models.cache import (
+    CacheAnalysisModel,
+    CacheConfigModel,
+    ReferencesModel,
+    HgReferencesModel,
+)
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 from BALSAMIC.commands.base import cli
@@ -736,7 +741,7 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
     )
 
 
-@pytest.fixture(name="timestamp_now", scope="session")
+@pytest.fixture(scope="session", name="timestamp_now")
 def fixture_timestamp_now() -> datetime:
     """Return a time stamp of today's date in date time format."""
     return datetime.now()
@@ -826,15 +831,36 @@ def fixture_cache_analysis_model(
     return CacheAnalysisModel(**cache_analysis_model_data)
 
 
+[
+    "/private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-320/test_get_refgene_files0/genome/refGene.txt",
+    "/private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-320/test_get_refgene_files0/genome/refGene.flat",
+    "/private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-320/test_get_refgene_files0/genome/refGene.flat.bed",
+]
+
+
+@pytest.fixture(scope="function", name="refgene_bed_file")
+def fixture_refgene_bed_file(tmp_path: Path) -> Path:
+    """Dummy RefSeq's gene BED file."""
+    refgene_bed_file: Path = Path(tmp_path, "genome", "refGene.flat.bed")
+    refgene_bed_file.touch()
+    return refgene_bed_file
+
+
+@pytest.fixture(scope="function", name="refgene_flat_file")
+def fixture_refgene_flat_file(tmp_path: Path) -> Path:
+    """Dummy RefSeq's gene flat file."""
+    refgene_flat_file: Path = Path(tmp_path, "genome", "refGene.flat")
+    refgene_flat_file.touch()
+    return refgene_flat_file
+
+
 @pytest.fixture(scope="function", name="analysis_references_model_data")
 def fixture_analysis_references_model_data(
     cache_config_model: CacheConfigModel,
+    refgene_bed_file: Path,
+    refgene_flat_file: Path,
 ) -> Dict[str, Path]:
     """Analysis references model data."""
-    refgene_bed_file: Path = Path(cache_config_model.references.get_refgene_bed_file())
-    refgene_bed_file.touch()
-    refgene_flat_file: Path = Path(cache_config_model.references.get_refgene_bed_file())
-    refgene_flat_file.touch()
     return {
         "genome_chrom_size": Path(
             cache_config_model.references.genome_chrom_size.file_path
@@ -848,16 +874,21 @@ def fixture_analysis_references_model_data(
     }
 
 
+@pytest.fixture(scope="function", name="delly_exclusion_converted_file")
+def fixture_delly_exclusion_converted_file(tmp_path: Path) -> Path:
+    """Dummy Delly exclusion converted file."""
+    reference_file: Path = Path(tmp_path, "genome", "delly_exclusion_converted.tsv")
+    reference_file.touch()
+    return reference_file
+
+
 @pytest.fixture(scope="function", name="hg_analysis_references_model_data")
 def fixture_hg_analysis_references_model_data(
     cache_config_model: CacheConfigModel,
     analysis_references_model_data: Dict[str, Path],
+    delly_exclusion_converted_file: Path,
 ) -> Dict[str, Path]:
     """Human genome analysis references model data."""
-    delly_exclusion_converted_file: Path = Path(
-        cache_config_model.references.get_delly_exclusion_converted_file()
-    )
-    delly_exclusion_converted_file.touch()
     hg_analysis_references_model_data: Dict[str, Path] = {
         "access_regions": Path(cache_config_model.references.access_regions.file_path),
         "ascat_chr_y_loci": Path(
@@ -949,6 +980,14 @@ def fixture_hg_references_model_data(
 ) -> Dict[str, dict]:
     """Human genome references model data."""
     return dict(cache_config_model.references)
+
+
+@pytest.fixture(scope="function", name="hg_references_model")
+def fixture_hg_references_model(
+    hg_references_model_data: Dict[str, dict]
+) -> HgReferencesModel:
+    """Mocked human genome references model."""
+    return HgReferencesModel(**hg_references_model_data)
 
 
 # @pytest.fixture(scope="function", name="reference_genome_file")
@@ -1059,11 +1098,3 @@ def fixture_hg_references_model_data(
 #     vcf_1kg_file: Path = Path(tmp_path, "1k_genome_wgs_p1_v3_all_sites.vcf")
 #     vcf_1kg_file.touch()
 #     return vcf_1kg_file
-
-
-# @pytest.fixture(scope="function", name="hg_references_model")
-# def fixture_hg_references_model(
-#     hg_references_model_data: Dict[str, dict]
-# ) -> HgReferencesModel:
-#     """Mocked human genome references model."""
-#     return HgReferencesModel(**hg_references_model_data)

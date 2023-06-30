@@ -177,45 +177,49 @@ def test_get_reference_genome_bwa_index_files(references_model: ReferencesModel)
         assert file_type in [file.split(".")[-1] for file in bwa_index_files]
 
 
-def test_get_refgene_files(references_model: ReferencesModel):
+def test_get_refgene_files(
+    references_model: ReferencesModel, refgene_bed_file: Path, refgene_flat_file: Path
+):
     """Test extraction of RefSeq's gene files."""
 
-    # GIVEN a references model
-
-    # GIVEN the expected files to be retrieved
-    expected_file_types: set = {FileType.TXT, FileType.FLAT, FileType.BED}
+    # GIVEN a references model and some  mocked RefSeq's gene file
 
     # WHEN getting the RefSeq's gene files
     refgene_files: List[str] = references_model.get_refgene_files()
 
     # THEN the expected RefSeq's gene files should be returned
-    assert len(refgene_files) == len(expected_file_types)
-    for file_type in expected_file_types:
-        assert file_type in [file.split(".")[-1] for file in refgene_files]
+    assert len(refgene_files) == 3
+    assert references_model.refgene_txt.file_path in refgene_files
+    assert refgene_bed_file.as_posix() in refgene_files
+    assert refgene_flat_file.as_posix() in refgene_files
 
 
-def test_get_refgene_flat_file(references_model: ReferencesModel):
+def test_get_refgene_flat_file(
+    references_model: ReferencesModel, refgene_flat_file: Path
+):
     """Test extraction of RefSeq's gene FLAT file."""
 
-    # GIVEN a references model
+    # GIVEN a references model and a mocked RefSeq's gene FLAT file
 
     # WHEN getting the RefSeq's gene FLAT file
-    refgene_flat_file: str = references_model.get_refgene_flat_file()
+    refgene_output_file: str = references_model.get_refgene_flat_file()
 
     # THEN the correctly formatted flat file should be returned
-    assert refgene_flat_file.split(".")[-1] == FileType.FLAT
+    assert refgene_output_file == refgene_flat_file.as_posix()
 
 
-def test_get_refgene_bed_file(references_model: ReferencesModel):
+def test_get_refgene_bed_file(
+    references_model: ReferencesModel, refgene_bed_file: Path
+):
     """Test extraction of RefSeq's gene BED file."""
 
-    # GIVEN a references model
+    # GIVEN a references model and a mocked RefSeq's gene BED file
 
     # WHEN getting the RefSeq's gene BED file
-    refgene_bed_file: str = references_model.get_refgene_bed_file()
+    refgene_output_file: str = references_model.get_refgene_bed_file()
 
     # THEN the correctly formatted flat file should be returned
-    assert refgene_bed_file.split(".")[-1] == FileType.BED
+    assert refgene_output_file == refgene_bed_file.as_posix()
 
 
 def test_canfam_references_model(references_model_data: Dict[str, dict]):
@@ -264,55 +268,39 @@ def test_hg_references_model_empty():
         HgReferencesModel()
 
 
-# def test_get_delly_files(
-#     hg_references_model: HgReferencesModel,
-#     delly_exclusion_file: Path,
-#     delly_exclusion_converted_file: Path,
-#     delly_mappability_file: Path,
-#     delly_mappability_findex_file: Path,
-#     delly_mappability_gindex_file: Path,
-# ):
-#     """Test Delly specific files retrieval."""
-#
-#     # GIVEN a human genome references model with delly specific files
-#     hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
-#     hg_references_model.delly_mappability.file_path = delly_mappability_file.as_posix()
-#     hg_references_model.delly_mappability_findex.file_path = (
-#         delly_mappability_findex_file.as_posix()
-#     )
-#     hg_references_model.delly_mappability_gindex.file_path = (
-#         delly_mappability_gindex_file.as_posix()
-#     )
-#
-#     # WHEN getting the Delly specific reference files
-#     delly_files: List[str] = hg_references_model.get_delly_files()
-#
-#     # THEN all the delly reference files should be returned
-#     assert len(delly_files) == 5
-#     assert delly_exclusion_file.as_posix() in delly_files
-#     assert delly_exclusion_converted_file.as_posix() in delly_files
-#     assert delly_mappability_file.as_posix() in delly_files
-#     assert delly_mappability_findex_file.as_posix() in delly_files
-#     assert delly_mappability_gindex_file.as_posix() in delly_files
-#
-#
-# def test_get_delly_exclusion_converted_file(
-#     hg_references_model: HgReferencesModel,
-#     delly_exclusion_file: Path,
-#     delly_exclusion_converted_file: Path,
-# ):
-#     """Test get Delly exclusion converted file."""
-#
-#     # GIVEN a human genome references model with a specific delly exclusion file
-#     hg_references_model.delly_exclusion.file_path = delly_exclusion_file.as_posix()
-#
-#     # WHEN getting the Delly exclusion converted file
-#     converted_file: str = hg_references_model.get_delly_exclusion_converted_file()
-#
-#     # THEN the returned file should match the expected one
-#     assert converted_file == delly_exclusion_converted_file.as_posix()
-#
-#
+def test_get_delly_files(
+    hg_references_model: HgReferencesModel, delly_exclusion_converted_file: Path
+):
+    """Test Delly specific files retrieval."""
+
+    # GIVEN a human genome references model and a mocked Delly exclusion converted file
+
+    # WHEN getting the Delly specific reference files
+    delly_files: List[str] = hg_references_model.get_delly_files()
+
+    # THEN all the delly reference files should be returned
+    assert len(delly_files) == 5
+    assert hg_references_model.delly_exclusion.file_path in delly_files
+    assert delly_exclusion_converted_file.as_posix() in delly_files
+    assert hg_references_model.delly_mappability.file_path in delly_files
+    assert hg_references_model.delly_mappability_findex.file_path in delly_files
+    assert hg_references_model.delly_mappability_gindex.file_path in delly_files
+
+
+def test_get_delly_exclusion_converted_file(
+    hg_references_model: HgReferencesModel, delly_exclusion_converted_file: Path
+):
+    """Test get Delly exclusion converted file."""
+
+    # GIVEN a human genome references model and a delly exclusion converted file
+
+    # WHEN getting the Delly exclusion converted file
+    converted_file: str = hg_references_model.get_delly_exclusion_converted_file()
+
+    # THEN the returned file should match the expected one
+    assert converted_file == delly_exclusion_converted_file.as_posix()
+
+
 # def test_get_gnomad_files(
 #     hg_references_model: HgReferencesModel,
 #     gnomad_variant_file: Path,
