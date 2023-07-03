@@ -14,7 +14,7 @@ rule index_cadd:
     message:
         "Indexing CADD file {input.cadd_snv}"
     benchmark:
-        f"{cache_config.references.cadd_snv.file_path}.{FileType.TBI}.{FileType.TSV}"
+        f"{cache_config.references.cadd_snv.file_path}.{FileType.TBI}.benchmark.{FileType.TSV}"
     log:
         f"{cache_config.references.cadd_snv.file_path}.{FileType.TBI}.{FileType.LOG}",
     shell:

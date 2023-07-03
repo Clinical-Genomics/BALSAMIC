@@ -40,7 +40,7 @@ rule index_vcfs:
     message:
         "Indexing VCF variant file {input.vcf_gz}"
     benchmark:
-        f"{{vcf}}.{FileType.GZ}.{FileType.TBI}.{FileType.TSV}"
+        f"{{vcf}}.{FileType.GZ}.{FileType.TBI}.benchmark.{FileType.TSV}"
     log:
         f"{{vcf}}.{FileType.GZ}.{FileType.TBI}.{FileType.LOG}",
     shell:
