@@ -21,7 +21,7 @@ requirements = [
     "numpy>=1.21.6",
     "pandas>=1.1.5",
     "psutil>=5.7.0",
-    "pydantic>=1.9.0",
+    "pydantic==1.10.10",
     "pygments>=2.6.1",
     "pyyaml>=5.3.1",
     "six>=1.12.0",
