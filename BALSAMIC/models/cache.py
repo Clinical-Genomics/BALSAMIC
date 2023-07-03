@@ -208,8 +208,12 @@ class HgReferencesModel(ReferencesModel):
     vcf_1kg: ReferenceUrlModel
     wgs_calling_regions: ReferenceUrlModel
 
+    def get_cadd_snv_files(self) -> List[str]:
+        """Return CADD SNV reference output files."""
+        return [self.cadd_snv.file_path, self.cadd_snv.file_path + "." + FileType.TBI]
+
     def get_delly_files(self) -> List[str]:
-        """Return delly associated output files."""
+        """Return Delly associated output files."""
         return [
             self.delly_exclusion.file_path,
             self.get_delly_exclusion_converted_file(),
@@ -219,13 +223,13 @@ class HgReferencesModel(ReferencesModel):
         ]
 
     def get_delly_exclusion_converted_file(self) -> str:
-        """Return delly exclusion converted file."""
+        """Return Delly exclusion converted file."""
         return self.delly_exclusion.file_path.replace(
             "." + FileType.TSV, "_converted." + FileType.TSV
         )
 
     def get_gnomad_files(self) -> List[str]:
-        """Return gnomad associated output files."""
+        """Return gnomAD associated output files."""
         return [
             self.gnomad_variant.file_path,
             self.gnomad_variant_index.file_path,
@@ -397,11 +401,12 @@ class CacheConfigModel(BaseModel):
             self.references.rank_score.file_path,
             self.references.somalier_sites.file_path + "." + FileType.GZ,
             self.references.wgs_calling_regions.file_path,
-            self.vep_dir.as_posix(),
+            *self.get_compressed_indexed_vcfs(),
+            *self.references.get_1k_genome_files(),
+            *self.references.get_cadd_snv_files(),
             *self.references.get_delly_files(),
             *self.references.get_gnomad_files(),
-            *self.references.get_1k_genome_files(),
-            *self.get_compressed_indexed_vcfs(),
+            self.vep_dir.as_posix(),
         ]
         return reference_paths
 

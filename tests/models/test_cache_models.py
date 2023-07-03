@@ -278,6 +278,22 @@ def test_hg_references_model_empty():
         HgReferencesModel()
 
 
+def test_get_cadd_snv_files(
+    hg_references_model: HgReferencesModel, cadd_snv_indexed_file: Path
+):
+    """Test get CADD SNV reference output files."""
+
+    # GIVEN a human genome references model and a mocked CADD SNV indexed file
+
+    # WHEN getting the CADD specific reference files
+    cadd_snv_files: List[str] = hg_references_model.get_cadd_snv_files()
+
+    # THEN all the CADD SNV reference files should be returned
+    assert len(cadd_snv_files) == 2
+    assert hg_references_model.cadd_snv.file_path in cadd_snv_files
+    assert cadd_snv_indexed_file.as_posix() in cadd_snv_files
+
+
 def test_get_delly_files(
     hg_references_model: HgReferencesModel, delly_exclusion_converted_file: Path
 ):
@@ -594,7 +610,7 @@ def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
     reference_output_paths: List[str] = cache_config_model.get_reference_output_paths()
 
     # THEN all the reference paths should be returned
-    assert len(reference_output_paths) == 42
+    assert len(reference_output_paths) == 44
 
 
 def test_get_canfam_analysis_references(

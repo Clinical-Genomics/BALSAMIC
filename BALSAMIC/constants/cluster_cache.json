@@ -35,6 +35,12 @@
         "mail_type": "FAIL",
         "partition": "core"
     },
+    "index_cadd": {
+        "n": 12,
+        "time": "00:30:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
     "picard_dict_reference_genome": {
         "n": 12,
         "time": "00:30:00",

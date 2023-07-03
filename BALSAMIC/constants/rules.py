@@ -4,6 +4,7 @@ from typing import Dict, List
 from BALSAMIC.constants.cache import GenomeVersion
 
 common_cache_rules: List[str] = [
+    "snakemake_rules/cache/cadd.rule",
     "snakemake_rules/cache/containers.rule",
     "snakemake_rules/cache/delly.rule",
     "snakemake_rules/cache/reference_genome.rule",

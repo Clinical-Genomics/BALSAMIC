@@ -900,6 +900,14 @@ def fixture_analysis_references_model_data(
     }
 
 
+@pytest.fixture(scope="function", name="cadd_snv_indexed_file")
+def fixture_cadd_snv_indexed_file(tmp_path: Path) -> Path:
+    """Dummy CADD SNV indexed file."""
+    reference_file: Path = Path(tmp_path, "variants", "hg19.cadd_snv.tsv.gz.tbi")
+    reference_file.touch()
+    return reference_file
+
+
 @pytest.fixture(scope="function", name="delly_exclusion_converted_file")
 def fixture_delly_exclusion_converted_file(tmp_path: Path) -> Path:
     """Dummy Delly exclusion converted file."""
