@@ -1,9 +1,8 @@
-# vim: syntax=python tabstop=4 expandtab
-# coding: utf-8
+"""Delly reference specific rules."""
 
 
 rule convert_delly_exclusion_file:
-    """Remove all occurrences of "chr" from the delly telomeres and centromeres exclusion file."""
+    """Remove all occurrences of "chr" from the Delly telomeres and centromeres exclusion file."""
     input:
         exclusion_file=cache_config.references.delly_exclusion.file_path,
     output:

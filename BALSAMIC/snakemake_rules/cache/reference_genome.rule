@@ -1,5 +1,4 @@
-# vim: syntax=python tabstop=4 expandtab
-# coding: utf-8
+"""Reference genome files processing rules."""
 
 
 rule picard_dict_reference_genome:

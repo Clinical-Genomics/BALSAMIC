@@ -46,6 +46,7 @@ class HgAnalysisReferencesModel(AnalysisReferencesModel):
         access_regions            : accessible genome regions
         ascat_chr_y_loci          : chromosome Y loci
         ascat_gc_correction       : genome GC correction bins
+        cadd_snv                  : CADD SNV annotation file
         clinvar                   : ClinVar reference
         cosmic                    : COSMIC database's variants as VCF
         dbsnp                     : dbSNP VCF file
@@ -66,6 +67,7 @@ class HgAnalysisReferencesModel(AnalysisReferencesModel):
     access_regions: FilePath
     ascat_chr_y_loci: FilePath
     ascat_gc_correction: FilePath
+    cadd_snv: FilePath
     clinvar: FilePath
     cosmic: FilePath
     dbsnp: FilePath
@@ -166,6 +168,7 @@ class HgReferencesModel(ReferencesModel):
         access_regions           : accessible genome regions
         ascat_chr_y_loci         : chromosome Y loci
         ascat_gc_correction      : genome GC correction bins
+        cadd_snv                 : CADD SNV annotation file
         clinvar                  : ClinVar reference
         cosmic                   : COSMIC database's variants as VCF
         dbsnp                    : dbSNP VCF file
@@ -187,6 +190,7 @@ class HgReferencesModel(ReferencesModel):
     access_regions: ReferenceUrlModel
     ascat_chr_y_loci: ReferenceUrlModel
     ascat_gc_correction: ReferenceUrlModel
+    cadd_snv: ReferenceUrlModel
     clinvar: ReferenceUrlModel
     cosmic: ReferenceUrlModel
     dbsnp: ReferenceUrlModel
@@ -386,6 +390,7 @@ class CacheConfigModel(BaseModel):
             self.references.access_regions.file_path,
             self.references.ascat_chr_y_loci.file_path,
             self.references.ascat_gc_correction.file_path,
+            self.references.cadd_snv.file_path,
             self.references.clinvar.file_path + "." + FileType.GZ,
             self.references.cosmic.file_path + "." + FileType.GZ,
             self.references.dbsnp.file_path + "." + FileType.GZ,
@@ -417,6 +422,7 @@ class CacheConfigModel(BaseModel):
             access_regions=self.references.access_regions.file_path,
             ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,
+            cadd_snv=self.references.cadd_snv.file_path,
             clinvar=self.references.clinvar.file_path + "." + FileType.GZ,
             cosmic=self.references.cosmic.file_path + "." + FileType.GZ,
             dbsnp=self.references.dbsnp.file_path + "." + FileType.GZ,

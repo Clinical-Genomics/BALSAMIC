@@ -594,7 +594,7 @@ def test_get_reference_output_paths(cache_config_model: CacheConfigModel):
     reference_output_paths: List[str] = cache_config_model.get_reference_output_paths()
 
     # THEN all the reference paths should be returned
-    assert len(reference_output_paths) == 41
+    assert len(reference_output_paths) == 42
 
 
 def test_get_canfam_analysis_references(

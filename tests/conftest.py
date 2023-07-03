@@ -1003,6 +1003,7 @@ def fixture_hg_analysis_references_model_data(
         "ascat_gc_correction": Path(
             cache_config_model.references.ascat_gc_correction.file_path
         ),
+        "cadd_snv": Path(cache_config_model.references.cadd_snv.file_path),
         "clinvar": clinvar_file,
         "cosmic": cosmic_file,
         "dbsnp": dbsnp_file,
