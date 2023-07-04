@@ -5,11 +5,15 @@ Added:
 * Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
+* Annotate SNVs with cancer germline SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
+* Annotate SNVs with somatic SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
+* Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
 
 Changed:
 ^^^^^^^^
 * Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
+* Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
 
 Fixed:
 ^^^^^^
