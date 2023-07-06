@@ -4,27 +4,27 @@ import copy
 import pytest
 
 from BALSAMIC.models.metrics import (
-    MetricValidationModel,
-    MetricModel,
-    MetricConditionModel,
+    MetricValidation,
+    Metric,
+    MetricCondition,
 )
 
 
 def test_metric_condition_model():
-    """test MetricConditionModel attributes parsing"""
+    """test MetricCondition attributes parsing"""
 
     # GIVEN input attributes
     metric_condition = {"norm": "gt", "threshold": 1}
 
     # WHEN building the metric condition model
-    metrics_model = MetricConditionModel(**metric_condition)
+    metrics_model = MetricCondition(**metric_condition)
 
     # THEN assert retrieved values from the created model
     assert metrics_model.dict().items() == metric_condition.items()
 
 
 def test_metric_model_pass_validation():
-    """test MetricModel attributes parsing"""
+    """test Metric attributes parsing"""
 
     # GIVEN input attributes
     metrics = {
@@ -38,14 +38,14 @@ def test_metric_model_pass_validation():
     }
 
     # WHEN building the metric model
-    metric_model = MetricModel(**metrics)
+    metric_model = Metric(**metrics)
 
     # THEN assert retrieved values from the created model
     assert metric_model.dict().items() == metrics.items()
 
 
 def test_metric_model_duplication_refactoring():
-    """test MetricModel duplications param refactoring"""
+    """test Metric duplications param refactoring"""
 
     # GIVEN input attributes
     metrics = {
@@ -59,36 +59,36 @@ def test_metric_model_duplication_refactoring():
     }
 
     # WHEN building the metric model
-    metric_model = MetricModel(**metrics)
+    metric_model = Metric(**metrics)
 
     # THEN assert retrieved values from the created model
     assert metric_model.name == "PERCENT_DUPLICATION_R1"
 
 
 def test_metric_model_fail_validation():
-    """test MetricModel behaviour for an incorrect input"""
+    """test Metric behaviour for an incorrect input"""
 
     # GIVEN an invalid input
     invalid_input = {"header": None, "id": "ACC1"}
 
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
-        MetricModel(**invalid_input)
+        Metric(**invalid_input)
     assert "field required" in str(input_exc.value)
 
 
 def test_metric_validation_model_pass(qc_extracted_metrics):
-    """test MetricValidationModel attribute parsing and positive validation"""
+    """test MetricValidation attribute parsing and positive validation"""
 
-    # WHEN building the MetricValidationModel model
-    model = MetricValidationModel(metrics=qc_extracted_metrics)
+    # WHEN building the MetricValidation model
+    model = MetricValidation(metrics=qc_extracted_metrics)
 
     # THEN assert retrieved values from the created model
     assert model.dict()["metrics"] == qc_extracted_metrics
 
 
 def test_metric_validation_model_fail(qc_extracted_metrics):
-    """test MetricValidationModel for an overly restrictive metric condition"""
+    """test MetricValidation for an overly restrictive metric condition"""
 
     # GIVEN input attributes with a value that does not meet the filtering condition
     metrics = copy.deepcopy(qc_extracted_metrics)
@@ -96,7 +96,7 @@ def test_metric_validation_model_fail(qc_extracted_metrics):
 
     # THEN check that the model filters the metric according to its norm
     with pytest.raises(ValueError) as val_exc:
-        MetricValidationModel(metrics=metrics)
+        MetricValidation(metrics=metrics)
     assert (
         f"QC metric {metrics[4]['name']}: {metrics[4]['value']} validation has failed. "
         f"(Condition: {metrics[4]['condition']['norm']} {metrics[4]['condition']['threshold']}, ID: {metrics[4]['id']})"
@@ -105,7 +105,7 @@ def test_metric_validation_model_fail(qc_extracted_metrics):
 
 
 def test_multiple_metric_validation_model_fail(qc_extracted_metrics):
-    """test MetricValidationModel for multiple metrics with failing conditions"""
+    """test MetricValidation for multiple metrics with failing conditions"""
 
     # GIVEN input attributes that does not meet the specified conditions
     metrics = copy.deepcopy(qc_extracted_metrics)
@@ -114,14 +114,14 @@ def test_multiple_metric_validation_model_fail(qc_extracted_metrics):
 
     # THEN check that the model filters the metrics according to its norm
     with pytest.raises(ValueError) as val_exc:
-        MetricValidationModel(metrics=metrics)
-    assert "2 validation errors for MetricValidationModel" in str(val_exc.value)
+        MetricValidation(metrics=metrics)
+    assert "2 validation errors for MetricValidation" in str(val_exc.value)
     assert metrics[4]["name"] in str(val_exc.value)
     assert metrics[8]["name"] in str(val_exc.value)
 
 
 def test_metric_validation_model_norm_fail(qc_extracted_metrics):
-    """test MetricValidationModel ValueError raising for an operator that it is not accepted"""
+    """test MetricValidation ValueError raising for an operator that it is not accepted"""
 
     # GIVEN a metric with an incorrect norm attribute
     metrics = copy.deepcopy(qc_extracted_metrics)
@@ -129,6 +129,6 @@ def test_metric_validation_model_norm_fail(qc_extracted_metrics):
 
     # THEN model raises an error due to a non accepted norm
     try:
-        MetricValidationModel(metrics=metrics)
+        MetricValidation(metrics=metrics)
     except KeyError as key_exc:
         assert metrics[4]["condition"]["norm"] in str(key_exc)

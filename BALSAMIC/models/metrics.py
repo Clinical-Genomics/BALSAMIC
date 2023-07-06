@@ -9,7 +9,7 @@ from BALSAMIC.constants.metrics import VALID_OPS
 LOG = logging.getLogger(__name__)
 
 
-class MetricConditionModel(BaseModel):
+class MetricCondition(BaseModel):
     """Defines the metric condition model
 
     Attributes:
@@ -21,7 +21,7 @@ class MetricConditionModel(BaseModel):
     threshold: Optional[float] = None
 
 
-class MetricModel(BaseModel):
+class Metric(BaseModel):
     """Defines the metric attributes model
 
     Attributes:
@@ -31,7 +31,7 @@ class MetricModel(BaseModel):
         name: str (required); metric name
         step: str (required); step that generated the metric
         value: Any (required and can take None as a value); metric value
-        condition: MetricConditionModel (required and can take None as a value); metric validation condition
+        condition: MetricCondition (required and can take None as a value); metric validation condition
     """
 
     header: Optional[str]
@@ -40,7 +40,7 @@ class MetricModel(BaseModel):
     name: str
     step: str
     value: Any = ...
-    condition: Optional[MetricConditionModel] = ...
+    condition: Optional[MetricCondition] = ...
 
     @validator("name")
     def validate_name(cls, name, values):
@@ -52,17 +52,17 @@ class MetricModel(BaseModel):
         return name
 
 
-class MetricValidationModel(BaseModel):
+class MetricValidation(BaseModel):
     """Defines the metric validation model
 
     Attributes:
-        metrics: List[MetricModel] (required); metric model to validate
+        metrics: List[Metric] (required); metric model to validate
 
     Raises:
         ValueError: when a metric does not meet its validation requirements
     """
 
-    metrics: List[MetricModel]
+    metrics: List[Metric]
 
     @validator("metrics", each_item=True)
     def validate_metrics(cls, metric):
