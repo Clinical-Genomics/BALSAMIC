@@ -7,7 +7,7 @@ from BALSAMIC.constants.cache import ContainerVersion, DOCKER_URL, DockerContain
 
 
 def get_containers(container_version: ContainerVersion) -> Dict[str, str]:
-    """Get a dictionary of container names and their docker image paths."""
+    """Return a dictionary mapping container names to their docker image paths."""
     image_name: str = (
         f"release_v{balsamic_version}"
         if container_version == ContainerVersion.RELEASE
