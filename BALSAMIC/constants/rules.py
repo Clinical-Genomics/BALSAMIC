@@ -5,7 +5,7 @@ from BALSAMIC.constants.cache import GenomeVersion
 
 common_cache_rules: List[str] = [
     "snakemake_rules/cache/cadd.rule",
-    "snakemake_rules/cache/containers.rule",
+    "snakemake_rules/cache/singularity_containers.rule",
     "snakemake_rules/cache/delly.rule",
     "snakemake_rules/cache/reference_genome_index.rule",
     "snakemake_rules/cache/references.rule",
@@ -139,7 +139,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         GenomeVersion.HG19: common_cache_rules,
         GenomeVersion.HG38: common_cache_rules,
         GenomeVersion.CanFam3: [
-            "snakemake_rules/cache/containers.rule",
+            "snakemake_rules/cache/singularity_containers.rule",
             "snakemake_rules/cache/reference_genome_index.rule",
             "snakemake_rules/cache/references.rule",
             "snakemake_rules/cache/refseq_canfam.rule",

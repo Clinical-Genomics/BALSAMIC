@@ -1,4 +1,4 @@
-"""Rules to download Docker containers."""
+"""Rules to download Singularity containers."""
 
 
 rule download_containers:
