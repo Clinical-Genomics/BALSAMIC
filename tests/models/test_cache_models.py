@@ -15,8 +15,8 @@ from pydantic import ValidationError
 
 from BALSAMIC.models.cache import (
     AnalysisReferences,
-    CanFamAnalysisReferences,
-    HgAnalysisReferences,
+    AnalysisReferencesCanFam,
+    AnalysisReferencesHg,
     ReferenceUrl,
     References,
     CanFamReferences,
@@ -50,13 +50,13 @@ def test_analysis_references_empty():
         AnalysisReferences()
 
 
-def test_canfam_analysis_references(analysis_references_data: Dict[str, Path]):
+def test_analysis_references_canfam(analysis_references_data: Dict[str, Path]):
     """Test canine analysis references model."""
 
     # GIVEN an input for the canine analysis reference model
 
     # WHEN initialising the model
-    model: CanFamAnalysisReferences = CanFamAnalysisReferences(
+    model: AnalysisReferencesCanFam = AnalysisReferencesCanFam(
         **analysis_references_data
     )
 
@@ -64,7 +64,7 @@ def test_canfam_analysis_references(analysis_references_data: Dict[str, Path]):
     assert model.dict() == analysis_references_data
 
 
-def test_canfam_analysis_references_empty():
+def test_analysis_references_canfam_empty():
     """Test canine analysis references model for an empty input."""
 
     # GIVEN no input for the canine analysis reference model
@@ -72,22 +72,22 @@ def test_canfam_analysis_references_empty():
     # WHEN initialising the model
     with pytest.raises(ValidationError):
         # THEN an empty model should raise a ValidationError
-        CanFamAnalysisReferences()
+        AnalysisReferencesCanFam()
 
 
-def test_hg_analysis_references(hg_analysis_references_data: Dict[str, Path]):
+def test_analysis_references_hg(hg_analysis_references_data: Dict[str, Path]):
     """Test human genome analysis references model."""
 
     # GIVEN an input for the human genome analysis reference model
 
     # WHEN initialising the model
-    model: HgAnalysisReferences = HgAnalysisReferences(**hg_analysis_references_data)
+    model: AnalysisReferencesHg = AnalysisReferencesHg(**hg_analysis_references_data)
 
     # THEN the model should have been correctly built
     assert model.dict() == hg_analysis_references_data
 
 
-def test_hg_analysis_references_empty():
+def test_analysis_references_hg_empty():
     """Test human genome analysis references model for an empty input."""
 
     # GIVEN no input for the human genome analysis reference model
@@ -95,7 +95,7 @@ def test_hg_analysis_references_empty():
     # WHEN initialising the model
     with pytest.raises(ValidationError):
         # THEN an empty model should raise a ValidationError
-        HgAnalysisReferences()
+        AnalysisReferencesHg()
 
 
 def test_reference_url(reference_url_data: Dict[str, Any]):
@@ -590,7 +590,7 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     assert len(reference_output_paths) == 44
 
 
-def test_get_canfam_analysis_references(
+def test_get_analysis_references_canfam(
     cache_config: CacheConfig,
     analysis_references_data: Dict[str, Path],
 ):
@@ -600,10 +600,10 @@ def test_get_canfam_analysis_references(
     cache_config.genome_version = GenomeVersion.CanFam3
 
     # WHEN getting the analysis references
-    analysis_references: CanFamAnalysisReferences = (
+    analysis_references: AnalysisReferencesCanFam = (
         cache_config.get_analysis_references()
     )
 
     # THEN the retrieved analysis references should match the mocked one
-    assert type(analysis_references) is CanFamAnalysisReferences
+    assert type(analysis_references) is AnalysisReferencesCanFam
     assert analysis_references.dict() == analysis_references_data

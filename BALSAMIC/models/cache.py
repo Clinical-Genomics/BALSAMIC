@@ -34,11 +34,11 @@ class AnalysisReferences(BaseModel):
     refgene_txt: FilePath
 
 
-class CanFamAnalysisReferences(AnalysisReferences):
+class AnalysisReferencesCanFam(AnalysisReferences):
     """Canine reference genome files model."""
 
 
-class HgAnalysisReferences(AnalysisReferences):
+class AnalysisReferencesHg(AnalysisReferences):
     """
     Human reference genome files model.
 
@@ -412,10 +412,10 @@ class CacheConfig(BaseModel):
 
     def get_analysis_references(
         self,
-    ) -> Union[HgAnalysisReferences, CanFamAnalysisReferences]:
+    ) -> Union[AnalysisReferencesHg, AnalysisReferencesCanFam]:
         """Return reference output model for Balsamic analyses."""
         if self.genome_version == GenomeVersion.CanFam3:
-            return CanFamAnalysisReferences(
+            return AnalysisReferencesCanFam(
                 genome_chrom_size=self.references.genome_chrom_size.file_path,
                 reference_genome=self.references.reference_genome.file_path,
                 refgene_bed=self.references.get_refgene_bed_file(),
@@ -423,7 +423,7 @@ class CacheConfig(BaseModel):
                 refgene_txt=self.references.refgene_txt.file_path,
             )
 
-        return HgAnalysisReferences(
+        return AnalysisReferencesHg(
             access_regions=self.references.access_regions.file_path,
             ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,

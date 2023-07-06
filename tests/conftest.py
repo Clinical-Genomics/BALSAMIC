@@ -31,7 +31,7 @@ from BALSAMIC.models.cache import (
     CacheConfig,
     References,
     HgReferences,
-    HgAnalysisReferences,
+    AnalysisReferencesHg,
 )
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
@@ -1238,7 +1238,7 @@ def fixture_hg_analysis_references(
     hg_analysis_references_data: Dict[str, Path]
 ) -> CacheAnalysis:
     """Mocked human genome analysis references model."""
-    return HgAnalysisReferences(**hg_analysis_references_data)
+    return AnalysisReferencesHg(**hg_analysis_references_data)
 
 
 @pytest.fixture(scope="session", name="reference_url")
