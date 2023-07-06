@@ -8,7 +8,7 @@ common_cache_rules: List[str] = [
     "snakemake_rules/cache/singularity_containers.rule",
     "snakemake_rules/cache/delly.rule",
     "snakemake_rules/cache/reference_genome_index.rule",
-    "snakemake_rules/cache/references.rule",
+    "snakemake_rules/cache/reference_download.rule",
     "snakemake_rules/cache/refseq.rule",
     "snakemake_rules/cache/vcf_references.rule",
     "snakemake_rules/cache/vep.rule",
@@ -141,7 +141,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         GenomeVersion.CanFam3: [
             "snakemake_rules/cache/singularity_containers.rule",
             "snakemake_rules/cache/reference_genome_index.rule",
-            "snakemake_rules/cache/references.rule",
+            "snakemake_rules/cache/reference_download.rule",
             "snakemake_rules/cache/refseq_canfam.rule",
         ],
     },
