@@ -10,21 +10,21 @@ from BALSAMIC.models.metrics import (
 )
 
 
-def test_metric_condition_model():
-    """test MetricCondition attributes parsing"""
+def test_metric_condition():
+    """Test MetricCondition attributes parsing."""
 
     # GIVEN input attributes
     metric_condition = {"norm": "gt", "threshold": 1}
 
     # WHEN building the metric condition model
-    metrics_model = MetricCondition(**metric_condition)
+    metric_model = MetricCondition(**metric_condition)
 
     # THEN assert retrieved values from the created model
-    assert metrics_model.dict().items() == metric_condition.items()
+    assert metric_model.dict().items() == metric_condition.items()
 
 
-def test_metric_model_pass_validation():
-    """test Metric attributes parsing"""
+def test_metric_pass_validation():
+    """Test Metric attributes parsing."""
 
     # GIVEN input attributes
     metrics = {
@@ -44,8 +44,8 @@ def test_metric_model_pass_validation():
     assert metric_model.dict().items() == metrics.items()
 
 
-def test_metric_model_duplication_refactoring():
-    """test Metric duplications param refactoring"""
+def test_metric_duplication_refactoring():
+    """Test Metric duplications param refactoring."""
 
     # GIVEN input attributes
     metrics = {
@@ -59,14 +59,14 @@ def test_metric_model_duplication_refactoring():
     }
 
     # WHEN building the metric model
-    metric_model = Metric(**metrics)
+    metric = Metric(**metrics)
 
     # THEN assert retrieved values from the created model
-    assert metric_model.name == "PERCENT_DUPLICATION_R1"
+    assert metric.name == "PERCENT_DUPLICATION_R1"
 
 
-def test_metric_model_fail_validation():
-    """test Metric behaviour for an incorrect input"""
+def test_metric_fail_validation():
+    """Test Metric behaviour for an incorrect input."""
 
     # GIVEN an invalid input
     invalid_input = {"header": None, "id": "ACC1"}
@@ -77,8 +77,8 @@ def test_metric_model_fail_validation():
     assert "field required" in str(input_exc.value)
 
 
-def test_metric_validation_model_pass(qc_extracted_metrics):
-    """test MetricValidation attribute parsing and positive validation"""
+def test_metric_validation_pass(qc_extracted_metrics):
+    """Test MetricValidation attribute parsing and positive validation."""
 
     # WHEN building the MetricValidation model
     model = MetricValidation(metrics=qc_extracted_metrics)
@@ -87,8 +87,8 @@ def test_metric_validation_model_pass(qc_extracted_metrics):
     assert model.dict()["metrics"] == qc_extracted_metrics
 
 
-def test_metric_validation_model_fail(qc_extracted_metrics):
-    """test MetricValidation for an overly restrictive metric condition"""
+def test_metric_validation_fail(qc_extracted_metrics):
+    """Test MetricValidation for an overly restrictive metric condition."""
 
     # GIVEN input attributes with a value that does not meet the filtering condition
     metrics = copy.deepcopy(qc_extracted_metrics)
@@ -104,8 +104,8 @@ def test_metric_validation_model_fail(qc_extracted_metrics):
     )
 
 
-def test_multiple_metric_validation_model_fail(qc_extracted_metrics):
-    """test MetricValidation for multiple metrics with failing conditions"""
+def test_multiple_metric_validation_fail(qc_extracted_metrics):
+    """Test MetricValidation for multiple metrics with failing conditions."""
 
     # GIVEN input attributes that does not meet the specified conditions
     metrics = copy.deepcopy(qc_extracted_metrics)
@@ -120,8 +120,8 @@ def test_multiple_metric_validation_model_fail(qc_extracted_metrics):
     assert metrics[8]["name"] in str(val_exc.value)
 
 
-def test_metric_validation_model_norm_fail(qc_extracted_metrics):
-    """test MetricValidation ValueError raising for an operator that it is not accepted"""
+def test_metric_validation_norm_fail(qc_extracted_metrics):
+    """Test MetricValidation ValueError raising for an operator that it is not accepted."""
 
     # GIVEN a metric with an incorrect norm attribute
     metrics = copy.deepcopy(qc_extracted_metrics)

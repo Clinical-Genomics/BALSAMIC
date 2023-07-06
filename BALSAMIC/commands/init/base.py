@@ -40,9 +40,9 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 
 from BALSAMIC.models.cache import (
-    CacheConfigModel,
-    HgReferencesModel,
-    CanFamReferencesModel,
+    CacheConfig,
+    HgReferences,
+    CanFamReferences,
 )
 from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
 from BALSAMIC.utils.io import write_json
@@ -126,10 +126,8 @@ def initialize(
     ]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
-    references: Union[HgReferencesModel, CanFamReferencesModel] = REFERENCE_FILES[
-        genome_version
-    ]
-    cache_config: CacheConfigModel = CacheConfigModel(
+    references: Union[HgReferences, CanFamReferences] = REFERENCE_FILES[genome_version]
+    cache_config: CacheConfig = CacheConfig(
         analysis={
             "case_id": "reference" + "." + genome_version + ".v" + balsamic_version
         },

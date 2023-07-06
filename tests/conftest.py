@@ -27,11 +27,11 @@ from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
 from BALSAMIC.models.cache import (
-    CacheAnalysisModel,
-    CacheConfigModel,
-    ReferencesModel,
-    HgReferencesModel,
-    HgAnalysisReferencesModel,
+    CacheAnalysis,
+    CacheConfig,
+    References,
+    HgReferences,
+    HgAnalysisReferences,
 )
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
@@ -1014,9 +1014,9 @@ def fixture_develop_containers() -> Dict[str, str]:
     }
 
 
-@pytest.fixture(scope="session", name="cache_config_model_data")
-def fixture_cache_config_model_data(
-    cache_analysis_model: CacheAnalysisModel,
+@pytest.fixture(scope="session", name="cache_config_data")
+def fixture_cache_config_data(
+    cache_analysis: CacheAnalysis,
     develop_containers: Dict[str, str],
     cosmic_key: str,
     timestamp_now: datetime,
@@ -1025,7 +1025,7 @@ def fixture_cache_config_model_data(
     """Mocked cache config data."""
 
     return {
-        "analysis": cache_analysis_model,
+        "analysis": cache_analysis,
         "references_dir": session_tmp_path,
         "genome_dir": session_tmp_path,
         "variants_dir": session_tmp_path,
@@ -1040,31 +1040,27 @@ def fixture_cache_config_model_data(
     }
 
 
-@pytest.fixture(scope="session", name="cache_config_model")
-def fixture_cache_config_model(
-    cache_config_model_data: Dict[str, dict]
-) -> CacheConfigModel:
+@pytest.fixture(scope="session", name="cache_config")
+def fixture_cache_config_(cache_config_data: Dict[str, dict]) -> CacheConfig:
     """Mocked cache config model."""
-    cache_config_model: CacheConfigModel = CacheConfigModel(**cache_config_model_data)
-    for reference in cache_config_model.references:
+    cache_config: CacheConfig = CacheConfig(**cache_config_data)
+    for reference in cache_config.references:
         reference_file: Path = Path(reference[1].file_path)
         reference_file.parent.mkdir(parents=True, exist_ok=True)
         reference_file.touch()
-    return cache_config_model
+    return cache_config
 
 
-@pytest.fixture(scope="session", name="cache_analysis_model_data")
-def fixture_cache_analysis_model_data(case_id_tumor_only: str) -> Dict[str, str]:
+@pytest.fixture(scope="session", name="cache_analysis_data")
+def fixture_cache_analysis_data(case_id_tumor_only: str) -> Dict[str, str]:
     """Mocked cache analysis data."""
     return {"case_id": case_id_tumor_only}
 
 
-@pytest.fixture(scope="session", name="cache_analysis_model")
-def fixture_cache_analysis_model(
-    cache_analysis_model_data: Dict[str, str]
-) -> CacheAnalysisModel:
+@pytest.fixture(scope="session", name="cache_analysis")
+def fixture_cache_analysis(cache_analysis_data: Dict[str, str]) -> CacheAnalysis:
     """Mocked cache analysis model."""
-    return CacheAnalysisModel(**cache_analysis_model_data)
+    return CacheAnalysis(**cache_analysis_data)
 
 
 @pytest.fixture(scope="session", name="refgene_bed_file")
@@ -1083,23 +1079,19 @@ def fixture_refgene_flat_file(session_tmp_path: Path) -> Path:
     return refgene_flat_file
 
 
-@pytest.fixture(scope="session", name="analysis_references_model_data")
-def fixture_analysis_references_model_data(
-    cache_config_model: CacheConfigModel,
+@pytest.fixture(scope="session", name="analysis_references_data")
+def fixture_analysis_references_data(
+    cache_config: CacheConfig,
     refgene_bed_file: Path,
     refgene_flat_file: Path,
 ) -> Dict[str, Path]:
     """Analysis references model data."""
     return {
-        "genome_chrom_size": Path(
-            cache_config_model.references.genome_chrom_size.file_path
-        ),
-        "reference_genome": Path(
-            cache_config_model.references.reference_genome.file_path
-        ),
+        "genome_chrom_size": Path(cache_config.references.genome_chrom_size.file_path),
+        "reference_genome": Path(cache_config.references.reference_genome.file_path),
         "refgene_bed": refgene_bed_file,
         "refgene_flat": refgene_flat_file,
-        "refgene_txt": Path(cache_config_model.references.refgene_txt.file_path),
+        "refgene_txt": Path(cache_config.references.refgene_txt.file_path),
     }
 
 
@@ -1197,10 +1189,10 @@ def fixture_vcf_1kg_file(session_tmp_path: Path) -> Path:
     return vcf_1kg_file
 
 
-@pytest.fixture(scope="session", name="hg_analysis_references_model_data")
-def fixture_hg_analysis_references_model_data(
-    cache_config_model: CacheConfigModel,
-    analysis_references_model_data: Dict[str, Path],
+@pytest.fixture(scope="session", name="hg_analysis_references_data")
+def fixture_hg_analysis_references_data(
+    cache_config: CacheConfig,
+    analysis_references_data: Dict[str, Path],
     delly_exclusion_converted_file: Path,
     clinvar_file: Path,
     cosmic_file: Path,
@@ -1212,47 +1204,41 @@ def fixture_hg_analysis_references_model_data(
     vcf_1kg_file: Path,
 ) -> Dict[str, Path]:
     """Human genome analysis references model data."""
-    hg_analysis_references_model_data: Dict[str, Path] = {
-        "access_regions": Path(cache_config_model.references.access_regions.file_path),
-        "ascat_chr_y_loci": Path(
-            cache_config_model.references.ascat_chr_y_loci.file_path
-        ),
+    hg_analysis_references_data: Dict[str, Path] = {
+        "access_regions": Path(cache_config.references.access_regions.file_path),
+        "ascat_chr_y_loci": Path(cache_config.references.ascat_chr_y_loci.file_path),
         "ascat_gc_correction": Path(
-            cache_config_model.references.ascat_gc_correction.file_path
+            cache_config.references.ascat_gc_correction.file_path
         ),
-        "cadd_snv": Path(cache_config_model.references.cadd_snv.file_path),
+        "cadd_snv": Path(cache_config.references.cadd_snv.file_path),
         "clinvar": clinvar_file,
         "cosmic": cosmic_file,
         "dbsnp": dbsnp_file,
-        "delly_exclusion": Path(
-            cache_config_model.references.delly_exclusion.file_path
-        ),
+        "delly_exclusion": Path(cache_config.references.delly_exclusion.file_path),
         "delly_exclusion_converted": delly_exclusion_converted_file,
-        "delly_mappability": Path(
-            cache_config_model.references.delly_mappability.file_path
-        ),
-        "gnomad_variant": Path(cache_config_model.references.gnomad_variant.file_path),
+        "delly_mappability": Path(cache_config.references.delly_mappability.file_path),
+        "gnomad_variant": Path(cache_config.references.gnomad_variant.file_path),
         "hc_vcf_1kg": hc_vcf_1kg_file,
         "known_indel_1kg": known_indel_1kg_file,
         "mills_1kg": mills_1kg_file,
-        "rank_score": Path(cache_config_model.references.rank_score.file_path),
+        "rank_score": Path(cache_config.references.rank_score.file_path),
         "somalier_sites": somalier_sites_file,
         "vcf_1kg": vcf_1kg_file,
-        "vep_dir": cache_config_model.references_dir,
+        "vep_dir": cache_config.references_dir,
         "wgs_calling_regions": Path(
-            cache_config_model.references.wgs_calling_regions.file_path
+            cache_config.references.wgs_calling_regions.file_path
         ),
     }
-    hg_analysis_references_model_data.update(analysis_references_model_data)
-    return hg_analysis_references_model_data
+    hg_analysis_references_data.update(analysis_references_data)
+    return hg_analysis_references_data
 
 
-@pytest.fixture(scope="session", name="hg_analysis_references_model")
-def fixture_hg_analysis_references_model(
-    hg_analysis_references_model_data: Dict[str, Path]
-) -> CacheAnalysisModel:
+@pytest.fixture(scope="session", name="hg_analysis_references")
+def fixture_hg_analysis_references(
+    hg_analysis_references_data: Dict[str, Path]
+) -> CacheAnalysis:
     """Mocked human genome analysis references model."""
-    return HgAnalysisReferencesModel(**hg_analysis_references_model_data)
+    return HgAnalysisReferences(**hg_analysis_references_data)
 
 
 @pytest.fixture(scope="session", name="reference_url")
@@ -1269,8 +1255,8 @@ def fixture_reference_file(session_tmp_path: Path) -> Path:
     return reference_file
 
 
-@pytest.fixture(scope="session", name="reference_url_model_data")
-def fixture_reference_url_model_data(
+@pytest.fixture(scope="session", name="reference_url_data")
+def fixture_reference_url_data(
     reference_url: str, reference_file: Path, cosmic_key: str
 ) -> Dict[str, Any]:
     """Reference URL model data."""
@@ -1285,36 +1271,34 @@ def fixture_reference_url_model_data(
     }
 
 
-@pytest.fixture(scope="session", name="references_model_data")
-def fixture_references_model_data(
-    cache_config_model: CacheConfigModel,
+@pytest.fixture(scope="session", name="references_data")
+def fixture_references_data(
+    cache_config: CacheConfig,
 ) -> Dict[str, dict]:
     """References model data."""
     return {
-        "genome_chrom_size": cache_config_model.references.genome_chrom_size,
-        "reference_genome": cache_config_model.references.reference_genome,
-        "refgene_sql": cache_config_model.references.refgene_sql,
-        "refgene_txt": cache_config_model.references.refgene_txt,
+        "genome_chrom_size": cache_config.references.genome_chrom_size,
+        "reference_genome": cache_config.references.reference_genome,
+        "refgene_sql": cache_config.references.refgene_sql,
+        "refgene_txt": cache_config.references.refgene_txt,
     }
 
 
-@pytest.fixture(scope="session", name="references_model")
-def fixture_references_model(references_model_data: Dict[str, dict]) -> ReferencesModel:
+@pytest.fixture(scope="session", name="references")
+def fixture_references(references_data: Dict[str, dict]) -> References:
     """Mocked references model."""
-    return ReferencesModel(**references_model_data)
+    return References(**references_data)
 
 
-@pytest.fixture(scope="session", name="hg_references_model_data")
-def fixture_hg_references_model_data(
-    cache_config_model: CacheConfigModel,
+@pytest.fixture(scope="session", name="hg_references_data")
+def fixture_hg_references_data(
+    cache_config: CacheConfig,
 ) -> Dict[str, dict]:
     """Human genome references model data."""
-    return dict(cache_config_model.references)
+    return dict(cache_config.references)
 
 
-@pytest.fixture(scope="session", name="hg_references_model")
-def fixture_hg_references_model(
-    hg_references_model_data: Dict[str, dict]
-) -> HgReferencesModel:
+@pytest.fixture(scope="session", name="hg_references")
+def fixture_hg_references(hg_references_data: Dict[str, dict]) -> HgReferences:
     """Mocked human genome references model."""
-    return HgReferencesModel(**hg_references_model_data)
+    return HgReferences(**hg_references_data)

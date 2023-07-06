@@ -15,9 +15,9 @@ from BALSAMIC.utils.exc import BalsamicError
 LOG = logging.getLogger(__name__)
 
 
-class AnalysisReferencesModel(BaseModel):
+class AnalysisReferences(BaseModel):
     """
-    Reference files model for a general Balsamic analysis.
+    Reference files pytest t for a general Balsamic analysis.
 
     Attributes:
         genome_chrom_size : genome chromosome sizes
@@ -34,11 +34,11 @@ class AnalysisReferencesModel(BaseModel):
     refgene_txt: FilePath
 
 
-class CanFamAnalysisReferencesModel(AnalysisReferencesModel):
+class CanFamAnalysisReferences(AnalysisReferences):
     """Canine reference genome files model."""
 
 
-class HgAnalysisReferencesModel(AnalysisReferencesModel):
+class HgAnalysisReferences(AnalysisReferences):
     """
     Human reference genome files model.
 
@@ -85,7 +85,7 @@ class HgAnalysisReferencesModel(AnalysisReferencesModel):
     wgs_calling_regions: FilePath
 
 
-class ReferenceUrlModel(BaseModel):
+class ReferenceUrl(BaseModel):
     """
     Reference model handling URLs and destination paths.
 
@@ -108,7 +108,7 @@ class ReferenceUrlModel(BaseModel):
     secret: Optional[str]
 
 
-class ReferencesModel(BaseModel):
+class References(BaseModel):
     """
     Reference files model.
 
@@ -119,10 +119,10 @@ class ReferencesModel(BaseModel):
         refgene_txt       : RefSeq's gene flat format from UCSC
     """
 
-    genome_chrom_size: ReferenceUrlModel
-    reference_genome: ReferenceUrlModel
-    refgene_sql: ReferenceUrlModel
-    refgene_txt: ReferenceUrlModel
+    genome_chrom_size: ReferenceUrl
+    reference_genome: ReferenceUrl
+    refgene_sql: ReferenceUrl
+    refgene_txt: ReferenceUrl
 
     def get_reference_genome_files(self) -> List[str]:
         """Return output reference genome files."""
@@ -156,11 +156,11 @@ class ReferencesModel(BaseModel):
         return self.get_refgene_flat_file() + "." + FileType.BED
 
 
-class CanFamReferencesModel(ReferencesModel):
+class CanFamReferences(References):
     """Canine reference genome files model."""
 
 
-class HgReferencesModel(ReferencesModel):
+class HgReferences(References):
     """
     Human reference genome files model.
 
@@ -187,26 +187,26 @@ class HgReferencesModel(ReferencesModel):
         wgs_calling_regions      : WGS calling intervals
     """
 
-    access_regions: ReferenceUrlModel
-    ascat_chr_y_loci: ReferenceUrlModel
-    ascat_gc_correction: ReferenceUrlModel
-    cadd_snv: ReferenceUrlModel
-    clinvar: ReferenceUrlModel
-    cosmic: ReferenceUrlModel
-    dbsnp: ReferenceUrlModel
-    delly_exclusion: ReferenceUrlModel
-    delly_mappability: ReferenceUrlModel
-    delly_mappability_findex: ReferenceUrlModel
-    delly_mappability_gindex: ReferenceUrlModel
-    gnomad_variant: ReferenceUrlModel
-    gnomad_variant_index: ReferenceUrlModel
-    hc_vcf_1kg: ReferenceUrlModel
-    known_indel_1kg: ReferenceUrlModel
-    mills_1kg: ReferenceUrlModel
-    rank_score: ReferenceUrlModel
-    somalier_sites: ReferenceUrlModel
-    vcf_1kg: ReferenceUrlModel
-    wgs_calling_regions: ReferenceUrlModel
+    access_regions: ReferenceUrl
+    ascat_chr_y_loci: ReferenceUrl
+    ascat_gc_correction: ReferenceUrl
+    cadd_snv: ReferenceUrl
+    clinvar: ReferenceUrl
+    cosmic: ReferenceUrl
+    dbsnp: ReferenceUrl
+    delly_exclusion: ReferenceUrl
+    delly_mappability: ReferenceUrl
+    delly_mappability_findex: ReferenceUrl
+    delly_mappability_gindex: ReferenceUrl
+    gnomad_variant: ReferenceUrl
+    gnomad_variant_index: ReferenceUrl
+    hc_vcf_1kg: ReferenceUrl
+    known_indel_1kg: ReferenceUrl
+    mills_1kg: ReferenceUrl
+    rank_score: ReferenceUrl
+    somalier_sites: ReferenceUrl
+    vcf_1kg: ReferenceUrl
+    wgs_calling_regions: ReferenceUrl
 
     def get_cadd_snv_files(self) -> List[str]:
         """Return CADD SNV reference output files."""
@@ -245,7 +245,7 @@ class HgReferencesModel(ReferencesModel):
         ]
 
 
-class CacheAnalysisModel(BaseModel):
+class CacheAnalysis(BaseModel):
     """
     Reference analysis configuration model.
 
@@ -257,7 +257,7 @@ class CacheAnalysisModel(BaseModel):
     case_id: str
 
 
-class CacheConfigModel(BaseModel):
+class CacheConfig(BaseModel):
     """
     Reference build configuration model.
 
@@ -277,7 +277,7 @@ class CacheConfigModel(BaseModel):
 
     """
 
-    analysis: CacheAnalysisModel
+    analysis: CacheAnalysis
     references_dir: DirectoryPath
     genome_dir: DirectoryPath
     variants_dir: DirectoryPath
@@ -287,17 +287,17 @@ class CacheConfigModel(BaseModel):
     cosmic_key: Optional[str]
     bioinfo_tools: dict
     containers: Dict[str, str]
-    references: Union[HgReferencesModel, CanFamReferencesModel]
+    references: Union[HgReferences, CanFamReferences]
     references_date: str
 
     @validator("references")
     def validate_references(
-        cls, references: ReferencesModel, values: Dict[str, Any]
-    ) -> ReferencesModel:
+        cls, references: References, values: Dict[str, Any]
+    ) -> References:
         """Validate the reference output paths."""
         for model in references:
             reference_key: str
-            reference: ReferenceUrlModel
+            reference: ReferenceUrl
             reference_key, reference = model[0], model[1]
             reference.file_path = (
                 Path(
@@ -327,10 +327,10 @@ class CacheConfigModel(BaseModel):
             Path(reference[1].file_path).as_posix() for reference in self.references
         ]
 
-    def get_reference_by_path(self, reference_path: str) -> ReferenceUrlModel:
+    def get_reference_by_path(self, reference_path: str) -> ReferenceUrl:
         """Return a reference given its full path."""
         for model in self.references:
-            reference: ReferenceUrlModel = model[1]
+            reference: ReferenceUrl = model[1]
             if reference.file_path == reference_path:
                 return reference
         LOG.error(f"No reference with the provided reference path {reference_path}")
@@ -412,10 +412,10 @@ class CacheConfigModel(BaseModel):
 
     def get_analysis_references(
         self,
-    ) -> Union[HgAnalysisReferencesModel, CanFamAnalysisReferencesModel]:
+    ) -> Union[HgAnalysisReferences, CanFamAnalysisReferences]:
         """Return reference output model for Balsamic analyses."""
         if self.genome_version == GenomeVersion.CanFam3:
-            return CanFamAnalysisReferencesModel(
+            return CanFamAnalysisReferences(
                 genome_chrom_size=self.references.genome_chrom_size.file_path,
                 reference_genome=self.references.reference_genome.file_path,
                 refgene_bed=self.references.get_refgene_bed_file(),
@@ -423,7 +423,7 @@ class CacheConfigModel(BaseModel):
                 refgene_txt=self.references.refgene_txt.file_path,
             )
 
-        return HgAnalysisReferencesModel(
+        return HgAnalysisReferences(
             access_regions=self.references.access_regions.file_path,
             ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,
