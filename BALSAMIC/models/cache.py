@@ -15,76 +15,6 @@ from BALSAMIC.utils.exc import BalsamicError
 LOG = logging.getLogger(__name__)
 
 
-class AnalysisReferences(BaseModel):
-    """
-    Reference files pytest t for a general Balsamic analysis.
-
-    Attributes:
-        genome_chrom_size : genome chromosome sizes
-        reference_genome  : required field for reference genome FASTA file
-        refgene_bed       : RefSeq's gene BED format from UCSC
-        refgene_flat      : RefSeq's gene flat format from UCSC
-        refgene_txt       : RefSeq's gene txt format from UCSC
-    """
-
-    genome_chrom_size: FilePath
-    reference_genome: FilePath
-    refgene_bed: FilePath
-    refgene_flat: FilePath
-    refgene_txt: FilePath
-
-
-class AnalysisReferencesCanFam(AnalysisReferences):
-    """Canine reference genome files model."""
-
-
-class AnalysisReferencesHg(AnalysisReferences):
-    """
-    Human reference genome files model.
-
-    Attributes:
-        access_regions            : accessible genome regions
-        ascat_chr_y_loci          : chromosome Y loci
-        ascat_gc_correction       : genome GC correction bins
-        cadd_snv                  : CADD SNV annotation file
-        clinvar                   : ClinVar reference
-        cosmic                    : COSMIC database's variants as VCF
-        dbsnp                     : dbSNP VCF file
-        delly_exclusion           : genome exclusion regions
-        delly_exclusion_converted : genome exclusion regions without "chr" field
-        delly_mappability         : genome mappability
-        gnomad_variant            : gnomAD variants (non SV) as VCF
-        hc_vcf_1kg                : high confidence 1000 Genome VCF
-        known_indel_1kg           : 1000 Genome known InDels VCF
-        mills_1kg                 : Mills' high confidence InDels VCF
-        rank_score                : rank score model
-        somalier_sites            : somalier sites VCF
-        vcf_1kg                   : 1000 Genome all SNPs
-        vep_dir                   : vep annotations output directory
-        wgs_calling_regions       : WGS calling intervals
-    """
-
-    access_regions: FilePath
-    ascat_chr_y_loci: FilePath
-    ascat_gc_correction: FilePath
-    cadd_snv: FilePath
-    clinvar: FilePath
-    cosmic: FilePath
-    dbsnp: FilePath
-    delly_exclusion: FilePath
-    delly_exclusion_converted: FilePath
-    delly_mappability: FilePath
-    gnomad_variant: FilePath
-    hc_vcf_1kg: FilePath
-    known_indel_1kg: FilePath
-    mills_1kg: FilePath
-    rank_score: FilePath
-    somalier_sites: FilePath
-    vcf_1kg: FilePath
-    vep_dir: DirectoryPath
-    wgs_calling_regions: FilePath
-
-
 class ReferenceUrl(BaseModel):
     """
     Reference model handling URLs and destination paths.
@@ -156,11 +86,11 @@ class References(BaseModel):
         return self.get_refgene_flat_file() + "." + FileType.BED
 
 
-class CanFamReferences(References):
+class ReferencesCanFam(References):
     """Canine reference genome files model."""
 
 
-class HgReferences(References):
+class ReferencesHg(References):
     """
     Human reference genome files model.
 
@@ -245,6 +175,76 @@ class HgReferences(References):
         ]
 
 
+class AnalysisReferences(BaseModel):
+    """
+    Reference files pytest t for a general Balsamic analysis.
+
+    Attributes:
+        genome_chrom_size : genome chromosome sizes
+        reference_genome  : required field for reference genome FASTA file
+        refgene_bed       : RefSeq's gene BED format from UCSC
+        refgene_flat      : RefSeq's gene flat format from UCSC
+        refgene_txt       : RefSeq's gene txt format from UCSC
+    """
+
+    genome_chrom_size: FilePath
+    reference_genome: FilePath
+    refgene_bed: FilePath
+    refgene_flat: FilePath
+    refgene_txt: FilePath
+
+
+class AnalysisReferencesCanFam(AnalysisReferences):
+    """Canine reference genome files model."""
+
+
+class AnalysisReferencesHg(AnalysisReferences):
+    """
+    Human reference genome files model.
+
+    Attributes:
+        access_regions            : accessible genome regions
+        ascat_chr_y_loci          : chromosome Y loci
+        ascat_gc_correction       : genome GC correction bins
+        cadd_snv                  : CADD SNV annotation file
+        clinvar                   : ClinVar reference
+        cosmic                    : COSMIC database's variants as VCF
+        dbsnp                     : dbSNP VCF file
+        delly_exclusion           : genome exclusion regions
+        delly_exclusion_converted : genome exclusion regions without "chr" field
+        delly_mappability         : genome mappability
+        gnomad_variant            : gnomAD variants (non SV) as VCF
+        hc_vcf_1kg                : high confidence 1000 Genome VCF
+        known_indel_1kg           : 1000 Genome known InDels VCF
+        mills_1kg                 : Mills' high confidence InDels VCF
+        rank_score                : rank score model
+        somalier_sites            : somalier sites VCF
+        vcf_1kg                   : 1000 Genome all SNPs
+        vep_dir                   : vep annotations output directory
+        wgs_calling_regions       : WGS calling intervals
+    """
+
+    access_regions: FilePath
+    ascat_chr_y_loci: FilePath
+    ascat_gc_correction: FilePath
+    cadd_snv: FilePath
+    clinvar: FilePath
+    cosmic: FilePath
+    dbsnp: FilePath
+    delly_exclusion: FilePath
+    delly_exclusion_converted: FilePath
+    delly_mappability: FilePath
+    gnomad_variant: FilePath
+    hc_vcf_1kg: FilePath
+    known_indel_1kg: FilePath
+    mills_1kg: FilePath
+    rank_score: FilePath
+    somalier_sites: FilePath
+    vcf_1kg: FilePath
+    vep_dir: DirectoryPath
+    wgs_calling_regions: FilePath
+
+
 class CacheAnalysis(BaseModel):
     """
     Reference analysis configuration model.
@@ -287,7 +287,7 @@ class CacheConfig(BaseModel):
     cosmic_key: Optional[str]
     bioinfo_tools: dict
     containers: Dict[str, str]
-    references: Union[HgReferences, CanFamReferences]
+    references: Union[ReferencesHg, ReferencesCanFam]
     references_date: str
 
     @validator("references")

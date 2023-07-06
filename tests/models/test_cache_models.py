@@ -19,8 +19,8 @@ from BALSAMIC.models.cache import (
     AnalysisReferencesHg,
     ReferenceUrl,
     References,
-    CanFamReferences,
-    HgReferences,
+    ReferencesCanFam,
+    ReferencesHg,
     CacheAnalysis,
     CacheConfig,
 )
@@ -220,19 +220,19 @@ def test_get_refgene_bed_file(references: References, refgene_bed_file: Path):
     assert refgene_output_file == refgene_bed_file.as_posix()
 
 
-def test_canfam_references(references_data: Dict[str, dict]):
+def test_references_canfam(references_data: Dict[str, dict]):
     """Test canine references model."""
 
     # GIVEN an input for the canine reference model
 
     # WHEN initialising the model
-    model: CanFamReferences = CanFamReferences(**references_data)
+    model: ReferencesCanFam = ReferencesCanFam(**references_data)
 
     # THEN the model should have been correctly built
     assert model.dict() == references_data
 
 
-def test_canfam_references_empty():
+def test_references_canfam_empty():
     """Test canine references model for an empty input."""
 
     # GIVEN no input for the canine references model
@@ -240,22 +240,22 @@ def test_canfam_references_empty():
     # WHEN initialising the model
     with pytest.raises(ValidationError):
         # THEN an empty model should raise a ValidationError
-        CanFamReferences()
+        ReferencesCanFam()
 
 
-def test_hg_references(hg_references_data: Dict[str, dict]):
+def test_references_hg(hg_references_data: Dict[str, dict]):
     """Test human genome references model."""
 
     # GIVEN an input for the human genome reference model
 
     # WHEN initialising the model
-    model: HgReferences = HgReferences(**hg_references_data)
+    model: ReferencesHg = ReferencesHg(**hg_references_data)
 
     # THEN the model should have been correctly built
     assert model.dict() == hg_references_data
 
 
-def test_hg_references_empty():
+def test_references_hg_empty():
     """Test human genome references model for an empty input."""
 
     # GIVEN no input for the human genome references model
@@ -263,10 +263,10 @@ def test_hg_references_empty():
     # WHEN initialising the model
     with pytest.raises(ValidationError):
         # THEN an empty model should raise a ValidationError
-        HgReferences()
+        ReferencesHg()
 
 
-def test_get_cadd_snv_files(hg_references: HgReferences, cadd_snv_indexed_file: Path):
+def test_get_cadd_snv_files(hg_references: ReferencesHg, cadd_snv_indexed_file: Path):
     """Test get CADD SNV reference output files."""
 
     # GIVEN a human genome references model and a mocked CADD SNV indexed file
@@ -281,7 +281,7 @@ def test_get_cadd_snv_files(hg_references: HgReferences, cadd_snv_indexed_file: 
 
 
 def test_get_delly_files(
-    hg_references: HgReferences, delly_exclusion_converted_file: Path
+    hg_references: ReferencesHg, delly_exclusion_converted_file: Path
 ):
     """Test Delly specific files retrieval."""
 
@@ -300,7 +300,7 @@ def test_get_delly_files(
 
 
 def test_get_delly_exclusion_converted_file(
-    hg_references: HgReferences, delly_exclusion_converted_file: Path
+    hg_references: ReferencesHg, delly_exclusion_converted_file: Path
 ):
     """Test get Delly exclusion converted file."""
 
@@ -313,7 +313,7 @@ def test_get_delly_exclusion_converted_file(
     assert converted_file == delly_exclusion_converted_file.as_posix()
 
 
-def test_get_gnomad_files(hg_references: HgReferences):
+def test_get_gnomad_files(hg_references: ReferencesHg):
     """Test get gnomad reference files."""
 
     # GIVEN a human genome references model
@@ -327,7 +327,7 @@ def test_get_gnomad_files(hg_references: HgReferences):
     assert hg_references.gnomad_variant_index.file_path in gnomad_files
 
 
-def test_get_1k_genome_files(hg_references: HgReferences):
+def test_get_1k_genome_files(hg_references: ReferencesHg):
     """Test get 1000 Genome related files."""
 
     # GIVEN a human genome references model
