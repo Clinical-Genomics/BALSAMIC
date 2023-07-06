@@ -88,8 +88,8 @@ def initialize(
     force_all: bool,
     run_analysis: bool,
     quiet: bool,
-):
-    """Reference cache and containers download."""
+) -> None:
+    """Validate inputs and download reference caches and containers."""
     LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}")
 
     if run_mode == RunMode.CLUSTER and not run_analysis:
@@ -102,7 +102,7 @@ def initialize(
 
     if genome_version in [GenomeVersion.HG19, GenomeVersion.HG38] and not cosmic_key:
         LOG.error(
-            f"A COSMIC authentication key is required for {GenomeVersion.HG19}/{GenomeVersion.HG38} references"
+            f"No COSMIC authentication key specified. It is required when using {genome_version} reference."
         )
         raise click.Abort()
 
