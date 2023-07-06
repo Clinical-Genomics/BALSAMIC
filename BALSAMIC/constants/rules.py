@@ -10,7 +10,7 @@ common_cache_rules: List[str] = [
     "snakemake_rules/cache/reference_genome_index.rule",
     "snakemake_rules/cache/reference_download.rule",
     "snakemake_rules/cache/refseq.rule",
-    "snakemake_rules/cache/vcf_references.rule",
+    "snakemake_rules/cache/reference_vcf.rule",
     "snakemake_rules/cache/vep.rule",
 ]
 
