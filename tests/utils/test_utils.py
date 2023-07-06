@@ -335,7 +335,7 @@ def test_get_snakefile():
             ):
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
             elif analysis_type == "generate_ref" and reference_genome != "canfam3":
-                pipeline = "BALSAMIC/workflows/reference.smk"
+                pipeline = "BALSAMIC/workflows/reference_hg.smk"
             elif analysis_type == "generate_ref" and reference_genome == "canfam3":
                 pipeline = "BALSAMIC/workflows/reference_canfam3.smk"
             elif analysis_type == "pon":
