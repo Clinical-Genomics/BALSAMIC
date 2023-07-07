@@ -1041,7 +1041,7 @@ def fixture_cache_config_data(
 
 
 @pytest.fixture(scope="session", name="cache_config")
-def fixture_cache_config_(cache_config_data: Dict[str, dict]) -> CacheConfig:
+def fixture_cache_config(cache_config_data: Dict[str, dict]) -> CacheConfig:
     """Return mocked cache config model."""
     cache_config: CacheConfig = CacheConfig(**cache_config_data)
     for reference in cache_config.references:

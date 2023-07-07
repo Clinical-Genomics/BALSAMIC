@@ -55,36 +55,36 @@ class References(BaseModel):
     refgene_sql: ReferenceUrl
     refgene_txt: ReferenceUrl
 
-    def get_reference_genome_files(self) -> List[str]:
+    def get_reference_genome_file_paths(self) -> List[str]:
         """Return output reference genome files."""
         return [
             self.reference_genome.file_path,
             self.reference_genome.file_path + "." + FileType.FAI,
             self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
-        ] + self.get_reference_genome_bwa_index_files()
+        ] + self.get_reference_genome_bwa_index_file_paths()
 
-    def get_reference_genome_bwa_index_files(self) -> List[str]:
+    def get_reference_genome_bwa_index_file_paths(self) -> List[str]:
         """Return output BWA reference genome index files."""
         bwa_index_files: List[str] = []
         for bwa_index in BwaIndexFileType:
             bwa_index_files.append(self.reference_genome.file_path + "." + bwa_index)
         return bwa_index_files
 
-    def get_refgene_files(self) -> List[str]:
+    def get_refgene_file_paths(self) -> List[str]:
         """Return RefSeq's gene files from UCSC."""
         return [
             self.refgene_txt.file_path,
-            self.get_refgene_flat_file(),
-            self.get_refgene_bed_file(),
+            self.get_refgene_flat_file_path(),
+            self.get_refgene_bed_file_path(),
         ]
 
-    def get_refgene_flat_file(self) -> str:
+    def get_refgene_flat_file_path(self) -> str:
         """Return RefSeq's gene flat file from UCSC."""
         return self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
 
-    def get_refgene_bed_file(self) -> str:
+    def get_refgene_bed_file_path(self) -> str:
         """Return RefSeq's gene BED file from UCSC."""
-        return self.get_refgene_flat_file() + "." + FileType.BED
+        return self.get_refgene_flat_file_path() + "." + FileType.BED
 
 
 class ReferencesCanFam(References):
@@ -139,34 +139,31 @@ class ReferencesHg(References):
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
 
-    def get_cadd_snv_files(self) -> List[str]:
+    def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
         return [self.cadd_snv.file_path, self.cadd_snv.file_path + "." + FileType.TBI]
 
-    def get_delly_files(self) -> List[str]:
+    def get_delly_file_paths(self) -> List[str]:
         """Return Delly associated output files."""
         return [
             self.delly_exclusion.file_path,
-            self.get_delly_exclusion_converted_file(),
+            self.get_delly_exclusion_converted_file_path(),
             self.delly_mappability.file_path,
             self.delly_mappability_findex.file_path,
             self.delly_mappability_gindex.file_path,
         ]
 
-    def get_delly_exclusion_converted_file(self) -> str:
+    def get_delly_exclusion_converted_file_path(self) -> str:
         """Return path to Delly exclusion converted file."""
         return self.delly_exclusion.file_path.replace(
             "." + FileType.TSV, "_converted." + FileType.TSV
         )
 
-    def get_gnomad_files(self) -> List[str]:
+    def get_gnomad_file_paths(self) -> List[str]:
         """Return gnomAD associated output files."""
-        return [
-            self.gnomad_variant.file_path,
-            self.gnomad_variant_index.file_path,
-        ]
+        return [self.gnomad_variant.file_path, self.gnomad_variant_index.file_path]
 
-    def get_1k_genome_files(self) -> List[str]:
+    def get_1k_genome_file_paths(self) -> List[str]:
         """Return 1000 Genome related files."""
         return [
             self.known_indel_1kg.file_path + "." + FileType.GZ,
@@ -321,7 +318,7 @@ class CacheConfig(BaseModel):
         }
         return version.get(self.genome_version)
 
-    def get_reference_paths(self) -> List[str]:
+    def get_reference_file_paths(self) -> List[str]:
         """Return a list of reference paths."""
         return [
             Path(reference[1].file_path).as_posix() for reference in self.references
@@ -336,19 +333,19 @@ class CacheConfig(BaseModel):
         LOG.error(f"No reference with the provided reference path {reference_path}")
         raise BalsamicError()
 
-    def get_reference_paths_by_file_type_and_compression(
+    def get_reference_file_paths_by_file_type_and_compression(
         self, file_type: FileType, compression: bool
     ) -> List[str]:
         """Return a list of reference paths given a file type and a compression status."""
-        file_type_references: List[str] = self.get_reference_paths_by_file_type(
+        file_type_references: List[str] = self.get_reference_file_paths_by_file_type(
             file_type=file_type
         )
-        compression_references: List[str] = self.get_reference_paths_by_compression(
-            compression=compression
-        )
+        compression_references: List[
+            str
+        ] = self.get_reference_file_paths_by_compression(compression=compression)
         return list(set(file_type_references).intersection(compression_references))
 
-    def get_reference_paths_by_file_type(self, file_type: FileType) -> List[str]:
+    def get_reference_file_paths_by_file_type(self, file_type: FileType) -> List[str]:
         """Return a list of reference paths given a file type."""
         return [
             reference[1].file_path
@@ -356,7 +353,7 @@ class CacheConfig(BaseModel):
             if reference[1].file_type == file_type
         ]
 
-    def get_reference_paths_by_compression(self, compression: bool) -> List[str]:
+    def get_reference_file_paths_by_compression(self, compression: bool) -> List[str]:
         """Return a list of reference paths given a compression status."""
         return [
             reference[1].file_path
@@ -364,11 +361,11 @@ class CacheConfig(BaseModel):
             if reference[1].gzip == compression
         ]
 
-    def get_compressed_indexed_vcfs(self) -> List[str]:
+    def get_compressed_indexed_vcf_paths(self) -> List[str]:
         """Return an output list of compressed and indexed VCFs."""
         return [
             vcf + ".gz.tbi"
-            for vcf in self.get_reference_paths_by_file_type_and_compression(
+            for vcf in self.get_reference_file_paths_by_file_type_and_compression(
                 file_type=FileType.VCF, compression=True
             )
         ]
@@ -384,8 +381,8 @@ class CacheConfig(BaseModel):
         """Return a complete list of output reference paths."""
         reference_paths: List[str] = [
             self.references.genome_chrom_size.file_path,
-            *self.references.get_reference_genome_files(),
-            *self.references.get_refgene_files(),
+            *self.references.get_reference_genome_file_paths(),
+            *self.references.get_refgene_file_paths(),
         ]
         if self.genome_version == GenomeVersion.CanFam3:
             return reference_paths
@@ -401,11 +398,11 @@ class CacheConfig(BaseModel):
             self.references.rank_score.file_path,
             self.references.somalier_sites.file_path + "." + FileType.GZ,
             self.references.wgs_calling_regions.file_path,
-            *self.get_compressed_indexed_vcfs(),
-            *self.references.get_1k_genome_files(),
-            *self.references.get_cadd_snv_files(),
-            *self.references.get_delly_files(),
-            *self.references.get_gnomad_files(),
+            *self.get_compressed_indexed_vcf_paths(),
+            *self.references.get_1k_genome_file_paths(),
+            *self.references.get_cadd_snv_file_paths(),
+            *self.references.get_delly_file_paths(),
+            *self.references.get_gnomad_file_paths(),
             self.vep_dir.as_posix(),
         ]
         return reference_paths
@@ -418,8 +415,8 @@ class CacheConfig(BaseModel):
             return AnalysisReferencesCanFam(
                 genome_chrom_size=self.references.genome_chrom_size.file_path,
                 reference_genome=self.references.reference_genome.file_path,
-                refgene_bed=self.references.get_refgene_bed_file(),
-                refgene_flat=self.references.get_refgene_flat_file(),
+                refgene_bed=self.references.get_refgene_bed_file_path(),
+                refgene_flat=self.references.get_refgene_flat_file_path(),
                 refgene_txt=self.references.refgene_txt.file_path,
             )
 
@@ -432,7 +429,7 @@ class CacheConfig(BaseModel):
             cosmic=self.references.cosmic.file_path + "." + FileType.GZ,
             dbsnp=self.references.dbsnp.file_path + "." + FileType.GZ,
             delly_exclusion=self.references.delly_exclusion.file_path,
-            delly_exclusion_converted=self.references.get_delly_exclusion_converted_file(),
+            delly_exclusion_converted=self.references.get_delly_exclusion_converted_file_path(),
             delly_mappability=self.references.delly_mappability.file_path,
             genome_chrom_size=self.references.genome_chrom_size.file_path,
             gnomad_variant=self.references.gnomad_variant.file_path,
@@ -443,8 +440,8 @@ class CacheConfig(BaseModel):
             mills_1kg=self.references.mills_1kg.file_path + "." + FileType.GZ,
             rank_score=self.references.rank_score.file_path,
             reference_genome=self.references.reference_genome.file_path,
-            refgene_bed=self.references.get_refgene_bed_file(),
-            refgene_flat=self.references.get_refgene_flat_file(),
+            refgene_bed=self.references.get_refgene_bed_file_path(),
+            refgene_flat=self.references.get_refgene_flat_file_path(),
             refgene_txt=self.references.refgene_txt.file_path,
             somalier_sites=self.references.somalier_sites.file_path + "." + FileType.GZ,
             vcf_1kg=self.references.vcf_1kg.file_path + "." + FileType.GZ,

@@ -6,7 +6,7 @@ rule download_references:
     output:
         reference_path="{reference_path}",
     wildcard_constraints:
-        reference_path="|".join(cache_config.get_reference_paths()),
+        reference_path="|".join(cache_config.get_reference_file_paths()),
     params:
         reference=lambda wildcards: cache_config.get_reference_by_path(
             Path(config["references_dir"], wildcards.reference_path).as_posix()

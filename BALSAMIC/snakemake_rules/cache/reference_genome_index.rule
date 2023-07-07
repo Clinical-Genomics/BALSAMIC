@@ -56,7 +56,7 @@ rule bwa_index_reference_genome:
         singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bwa']}.{FileType.SIF}",
         reference_genome=cache_config.references.reference_genome.file_path,
     output:
-        indexed_reference_genome=cache_config.references.get_reference_genome_bwa_index_files(),
+        indexed_reference_genome=cache_config.references.get_reference_genome_bwa_index_file_paths(),
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['bwa']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="bwa_index_reference_genome")

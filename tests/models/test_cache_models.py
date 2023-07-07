@@ -144,7 +144,7 @@ def test_references_empty():
         References()
 
 
-def test_get_reference_genome_files(references: References):
+def test_get_reference_genome_file_paths(references: References):
     """Test reference genome files retrieval."""
 
     # GIVEN a references model
@@ -154,7 +154,7 @@ def test_get_reference_genome_files(references: References):
     expected_file_types.update(BwaIndexFileType)
 
     # WHEN getting the reference genome files
-    reference_genome_files: List[str] = references.get_reference_genome_files()
+    reference_genome_files: List[str] = references.get_reference_genome_file_paths()
 
     # THEN the expected reference genome files should be returned
     assert len(reference_genome_files) == len(expected_file_types)
@@ -162,7 +162,7 @@ def test_get_reference_genome_files(references: References):
         assert file_type in [file.split(".")[-1] for file in reference_genome_files]
 
 
-def test_get_reference_genome_bwa_index_files(references: References):
+def test_get_reference_genome_bwa_index_file_paths(references: References):
     """Test extraction of reference genome BWA index files."""
 
     # GIVEN a references model
@@ -171,7 +171,7 @@ def test_get_reference_genome_bwa_index_files(references: References):
     expected_file_types: set = set(BwaIndexFileType)
 
     # WHEN getting the reference genome BWA index files
-    bwa_index_files: List[str] = references.get_reference_genome_bwa_index_files()
+    bwa_index_files: List[str] = references.get_reference_genome_bwa_index_file_paths()
 
     # THEN the expected reference genome BWA index files should be returned
     assert len(bwa_index_files) == len(expected_file_types)
@@ -179,7 +179,7 @@ def test_get_reference_genome_bwa_index_files(references: References):
         assert file_type in [file.split(".")[-1] for file in bwa_index_files]
 
 
-def test_get_refgene_files(
+def test_get_refgene_file_paths(
     references: References, refgene_bed_file: Path, refgene_flat_file: Path
 ):
     """Test extraction of RefSeq's gene files."""
@@ -187,7 +187,7 @@ def test_get_refgene_files(
     # GIVEN a references model and some  mocked RefSeq's gene file
 
     # WHEN getting the RefSeq's gene files
-    refgene_files: List[str] = references.get_refgene_files()
+    refgene_files: List[str] = references.get_refgene_file_paths()
 
     # THEN the expected RefSeq's gene files should be returned
     assert len(refgene_files) == 3
@@ -196,25 +196,25 @@ def test_get_refgene_files(
     assert refgene_flat_file.as_posix() in refgene_files
 
 
-def test_get_refgene_flat_file(references: References, refgene_flat_file: Path):
+def test_get_refgene_flat_file_path(references: References, refgene_flat_file: Path):
     """Test extraction of RefSeq's gene FLAT file."""
 
     # GIVEN a references model and a mocked RefSeq's gene FLAT file
 
     # WHEN getting the RefSeq's gene FLAT file
-    refgene_output_file: str = references.get_refgene_flat_file()
+    refgene_output_file: str = references.get_refgene_flat_file_path()
 
     # THEN the correctly formatted flat file should be returned
     assert refgene_output_file == refgene_flat_file.as_posix()
 
 
-def test_get_refgene_bed_file(references: References, refgene_bed_file: Path):
+def test_get_refgene_bed_file_path(references: References, refgene_bed_file: Path):
     """Test extraction of RefSeq's gene BED file."""
 
     # GIVEN a references model and a mocked RefSeq's gene BED file
 
     # WHEN getting the RefSeq's gene BED file
-    refgene_output_file: str = references.get_refgene_bed_file()
+    refgene_output_file: str = references.get_refgene_bed_file_path()
 
     # THEN the correctly formatted flat file should be returned
     assert refgene_output_file == refgene_bed_file.as_posix()
@@ -266,13 +266,15 @@ def test_references_hg_empty():
         ReferencesHg()
 
 
-def test_get_cadd_snv_files(references_hg: ReferencesHg, cadd_snv_indexed_file: Path):
+def test_get_cadd_snv_file_paths(
+    references_hg: ReferencesHg, cadd_snv_indexed_file: Path
+):
     """Test get CADD SNV reference output files."""
 
     # GIVEN a human genome references model and a mocked CADD SNV indexed file
 
     # WHEN getting the CADD specific reference files
-    cadd_snv_files: List[str] = references_hg.get_cadd_snv_files()
+    cadd_snv_files: List[str] = references_hg.get_cadd_snv_file_paths()
 
     # THEN all the CADD SNV reference files should be returned
     assert len(cadd_snv_files) == 2
@@ -280,7 +282,7 @@ def test_get_cadd_snv_files(references_hg: ReferencesHg, cadd_snv_indexed_file: 
     assert cadd_snv_indexed_file.as_posix() in cadd_snv_files
 
 
-def test_get_delly_files(
+def test_get_delly_file_paths(
     references_hg: ReferencesHg, delly_exclusion_converted_file: Path
 ):
     """Test Delly specific files retrieval."""
@@ -288,7 +290,7 @@ def test_get_delly_files(
     # GIVEN a human genome references model and a mocked Delly exclusion converted file
 
     # WHEN getting the Delly specific reference files
-    delly_files: List[str] = references_hg.get_delly_files()
+    delly_files: List[str] = references_hg.get_delly_file_paths()
 
     # THEN all the delly reference files should be returned
     assert len(delly_files) == 5
@@ -299,7 +301,7 @@ def test_get_delly_files(
     assert references_hg.delly_mappability_gindex.file_path in delly_files
 
 
-def test_get_delly_exclusion_converted_file(
+def test_get_delly_exclusion_converted_file_path(
     references_hg: ReferencesHg, delly_exclusion_converted_file: Path
 ):
     """Test get Delly exclusion converted file."""
@@ -307,19 +309,19 @@ def test_get_delly_exclusion_converted_file(
     # GIVEN a human genome references model and a delly exclusion converted file
 
     # WHEN getting the Delly exclusion converted file
-    converted_file: str = references_hg.get_delly_exclusion_converted_file()
+    converted_file: str = references_hg.get_delly_exclusion_converted_file_path()
 
     # THEN the returned file should match the expected one
     assert converted_file == delly_exclusion_converted_file.as_posix()
 
 
-def test_get_gnomad_files(references_hg: ReferencesHg):
+def test_get_gnomad_file_paths(references_hg: ReferencesHg):
     """Test get gnomad reference files."""
 
     # GIVEN a human genome references model
 
     # WHEN getting the gnomad reference files
-    gnomad_files: List[str] = references_hg.get_gnomad_files()
+    gnomad_files: List[str] = references_hg.get_gnomad_file_paths()
 
     # THEN the gnomad files should be returned
     assert len(gnomad_files) == 2
@@ -327,13 +329,13 @@ def test_get_gnomad_files(references_hg: ReferencesHg):
     assert references_hg.gnomad_variant_index.file_path in gnomad_files
 
 
-def test_get_1k_genome_files(references_hg: ReferencesHg):
+def test_get_1k_genome_file_paths(references_hg: ReferencesHg):
     """Test get 1000 Genome related files."""
 
     # GIVEN a human genome references model
 
     # WHEN getting the 1k genome files
-    genome_files: List[str] = references_hg.get_1k_genome_files()
+    genome_files: List[str] = references_hg.get_1k_genome_file_paths()
 
     # THEN the 1k genome files should be returned
     assert len(genome_files) == 4
@@ -432,13 +434,13 @@ def test_get_grch_version(cache_config: CacheConfig):
     assert grch_version == GRCHVersion.GRCH37
 
 
-def test_get_reference_paths(cache_config: CacheConfig):
+def test_get_reference_file_paths(cache_config: CacheConfig):
     """Test reference path extraction."""
 
     # GIVEN a cache config model
 
     # WHEN extracting the list of reference paths
-    reference_paths: List[str] = cache_config.get_reference_paths()
+    reference_paths: List[str] = cache_config.get_reference_file_paths()
 
     # THEN a complete list of reference path should be returned
     assert reference_paths == [
@@ -478,7 +480,7 @@ def test_get_reference_by_path_error(
     )
 
 
-def test_get_reference_paths_by_file_type_and_compression(
+def test_get_reference_file_paths_by_file_type_and_compression(
     cache_config: CacheConfig,
 ):
     """Test reference path extraction by file type and compression."""
@@ -488,7 +490,7 @@ def test_get_reference_paths_by_file_type_and_compression(
     # WHEN extracting the reference paths by file type and compression status
     reference_paths: List[
         str
-    ] = cache_config.get_reference_paths_by_file_type_and_compression(
+    ] = cache_config.get_reference_file_paths_by_file_type_and_compression(
         file_type=FileType.FASTA, compression=True
     )
 
@@ -496,13 +498,13 @@ def test_get_reference_paths_by_file_type_and_compression(
     assert reference_paths == [cache_config.references.reference_genome.file_path]
 
 
-def test_get_reference_paths_by_file_type(cache_config: CacheConfig):
+def test_get_reference_file_paths_by_file_type(cache_config: CacheConfig):
     """Test reference path extraction by file type."""
 
     # GIVEN a cache config model
 
     # WHEN extracting the reference paths by file type
-    reference_paths: List[str] = cache_config.get_reference_paths_by_file_type(
+    reference_paths: List[str] = cache_config.get_reference_file_paths_by_file_type(
         file_type=FileType.FASTA
     )
 
@@ -510,13 +512,13 @@ def test_get_reference_paths_by_file_type(cache_config: CacheConfig):
     assert reference_paths == [cache_config.references.reference_genome.file_path]
 
 
-def test_get_reference_paths_by_compression(cache_config: CacheConfig):
+def test_get_reference_file_paths_by_compression(cache_config: CacheConfig):
     """Test reference path extraction by compression."""
 
     # GIVEN a cache config model
 
     # WHEN extracting the reference paths by compression status
-    reference_paths: List[str] = cache_config.get_reference_paths_by_compression(
+    reference_paths: List[str] = cache_config.get_reference_file_paths_by_compression(
         compression=True
     )
 
@@ -538,13 +540,13 @@ def test_get_reference_paths_by_compression(cache_config: CacheConfig):
         assert reference in reference_paths
 
 
-def test_get_compressed_indexed_vcfs(cache_config: CacheConfig):
+def test_get_compressed_indexed_vcf_paths(cache_config: CacheConfig):
     """Test get compressed indexed VCFs."""
 
     # GIVEN a cache config model
 
     # WHEN retrieving the compressed and indexed VCFs
-    compressed_indexed_vcfs: List[str] = cache_config.get_compressed_indexed_vcfs()
+    compressed_indexed_vcfs: List[str] = cache_config.get_compressed_indexed_vcf_paths()
 
     # THEN the indexed VCFs should be returned
     assert len(compressed_indexed_vcfs) == 8
