@@ -926,7 +926,7 @@ def qc_requested_metrics():
 
 
 @pytest.fixture(scope="session")
-def qc_extracted_metrics(metrics_yaml_path):
+def qc_extracted_metrics(metrics_yaml_path: str) -> dict:
     """Return extracted and formatted QC metrics."""
     return read_yaml(metrics_yaml_path)
 
