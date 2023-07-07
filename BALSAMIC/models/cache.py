@@ -20,13 +20,14 @@ class ReferenceUrl(BaseModel):
     Reference model handling URLs and destination paths.
 
     Attributes:
-        url       : address of the reference to download
-        file_type : reference file type
-        gzip      : compression status
-        file_name : reference file name after being downloaded
-        dir_name  : destination directory of the downloaded file
-        file_path : full reference file path
-        secret    : database key
+        url (AnyUrl)              : Address of the reference to download.
+        file_type (FileType)      : Reference file type.
+        gzip (bool)               : Compression status.
+        file_name (str)           : Reference file name after being downloaded.
+        dir_name (str)            : Destination directory of the downloaded file.
+        file_path (str, optional) : Full reference file path.
+        secret (str)              : Database key.
+
     """
 
     url: AnyUrl
@@ -43,10 +44,10 @@ class References(BaseModel):
     Reference files model.
 
     Attributes:
-        genome_chrom_size : genome chromosome sizes
-        reference_genome  : required field for reference genome FASTA file
-        refgene_sql       : RefSeq's gene SQL format from UCSC
-        refgene_txt       : RefSeq's gene flat format from UCSC
+        genome_chrom_size (ReferenceUrl) : Genome chromosome sizes.
+        reference_genome (ReferenceUrl)  : Required field for reference genome FASTA file.
+        refgene_sql (ReferenceUrl)       : RefSeq's gene SQL format from UCSC.
+        refgene_txt (ReferenceUrl)       : RefSeq's gene flat format from UCSC.
     """
 
     genome_chrom_size: ReferenceUrl
@@ -95,26 +96,26 @@ class ReferencesHg(References):
     Human reference genome files model.
 
     Attributes:
-        access_regions           : accessible genome regions
-        ascat_chr_y_loci         : chromosome Y loci
-        ascat_gc_correction      : genome GC correction bins
-        cadd_snv                 : CADD SNV annotation file
-        clinvar                  : ClinVar reference
-        cosmic                   : COSMIC database's variants as VCF
-        dbsnp                    : dbSNP VCF file
-        delly_exclusion          : genome exclusion regions
-        delly_mappability        : genome mappability
-        delly_mappability_findex : genome mappability fasta index
-        delly_mappability_gindex : genome mappability index
-        gnomad_variant           : gnomAD variants (non SV) as VCF
-        gnomad_variant_index     : gnomAD variants VCF index
-        hc_vcf_1kg               : high confidence 1000 Genome VCF
-        known_indel_1kg          : 1000 Genome known InDels VCF
-        mills_1kg                : Mills' high confidence InDels VCF
-        rank_score               : rank score model
-        somalier_sites           : somalier sites VCF
-        vcf_1kg                  : 1000 Genome all SNPs
-        wgs_calling_regions      : WGS calling intervals
+        access_regions (ReferenceUrl)           : Accessible genome regions.
+        ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
+        ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
+        cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
+        clinvar (ReferenceUrl)                  : ClinVar reference.
+        cosmic (ReferenceUrl)                   : COSMIC database's variants as VCF.
+        dbsnp (ReferenceUrl)                    : dbSNP VCF file.
+        delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
+        delly_mappability (ReferenceUrl)        : Genome mappability.
+        delly_mappability_findex (ReferenceUrl) : Genome mappability fasta index.
+        delly_mappability_gindex (ReferenceUrl) : Genome mappability index.
+        gnomad_variant (ReferenceUrl)           : gnomAD variants (non SV) as VCF.
+        gnomad_variant_index (ReferenceUrl)     : gnomAD variants VCF index.
+        hc_vcf_1kg (ReferenceUrl)               : High confidence 1000 Genome VCF.
+        known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
+        mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
+        rank_score (ReferenceUrl)               : Rank score model.
+        somalier_sites (ReferenceUrl)           : Somalier sites VCF.
+        vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
+        wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
     """
 
     access_regions: ReferenceUrl
@@ -180,11 +181,11 @@ class AnalysisReferences(BaseModel):
     Reference files pytest t for a general Balsamic analysis.
 
     Attributes:
-        genome_chrom_size : genome chromosome sizes
-        reference_genome  : required field for reference genome FASTA file
-        refgene_bed       : RefSeq's gene BED format from UCSC
-        refgene_flat      : RefSeq's gene flat format from UCSC
-        refgene_txt       : RefSeq's gene txt format from UCSC
+        genome_chrom_size (FilePath) : Genome chromosome sizes.
+        reference_genome (FilePath)  : Required field for reference genome FASTA file.
+        refgene_bed (FilePath)       : RefSeq's gene BED format from UCSC.
+        refgene_flat (FilePath)      : RefSeq's gene flat format from UCSC.
+        refgene_txt (FilePath)       : RefSeq's gene txt format from UCSC.
     """
 
     genome_chrom_size: FilePath
@@ -203,25 +204,25 @@ class AnalysisReferencesHg(AnalysisReferences):
     Human reference genome files model.
 
     Attributes:
-        access_regions            : accessible genome regions
-        ascat_chr_y_loci          : chromosome Y loci
-        ascat_gc_correction       : genome GC correction bins
-        cadd_snv                  : CADD SNV annotation file
-        clinvar                   : ClinVar reference
-        cosmic                    : COSMIC database's variants as VCF
-        dbsnp                     : dbSNP VCF file
-        delly_exclusion           : genome exclusion regions
-        delly_exclusion_converted : genome exclusion regions without "chr" field
-        delly_mappability         : genome mappability
-        gnomad_variant            : gnomAD variants (non SV) as VCF
-        hc_vcf_1kg                : high confidence 1000 Genome VCF
-        known_indel_1kg           : 1000 Genome known InDels VCF
-        mills_1kg                 : Mills' high confidence InDels VCF
-        rank_score                : rank score model
-        somalier_sites            : somalier sites VCF
-        vcf_1kg                   : 1000 Genome all SNPs
-        vep_dir                   : vep annotations output directory
-        wgs_calling_regions       : WGS calling intervals
+        access_regions (FilePath)            : Accessible genome regions.
+        ascat_chr_y_loci (FilePath)          : Chromosome Y loci.
+        ascat_gc_correction (FilePath)       : Genome GC correction bins.
+        cadd_snv (FilePath)                  : CADD SNV annotation file.
+        clinvar (FilePath)                   : ClinVar reference.
+        cosmic (FilePath)                    : COSMIC database's variants as VCF.
+        dbsnp (FilePath)                     : dbSNP VCF file.
+        delly_exclusion (FilePath)           : Genome exclusion regions.
+        delly_exclusion_converted (FilePath) : Genome exclusion regions without "chr" field.
+        delly_mappability (FilePath)         : Genome mappability.
+        gnomad_variant (FilePath)            : gnomAD variants (non SV) as VCF.
+        hc_vcf_1kg (FilePath)                : High confidence 1000 Genome VCF.
+        known_indel_1kg (FilePath)           : 1000 Genome known InDels VCF.
+        mills_1kg (FilePath)                 : Mills' high confidence InDels VCF.
+        rank_score (FilePath)                : Rank score model.
+        somalier_sites (FilePath)            : Somalier sites VCF.
+        vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
+        vep_dir (DirectoryPath)              : VEP annotations output directory.
+        wgs_calling_regions (FilePath)       : WGS calling intervals.
     """
 
     access_regions: FilePath
@@ -251,7 +252,7 @@ class CacheAnalysis(BaseModel):
 
 
     Attributes:
-        case_id : reference case identifier
+        case_id (str) : Reference case identifier.
     """
 
     case_id: str
@@ -262,27 +263,26 @@ class CacheConfig(BaseModel):
     Reference build configuration model.
 
     Attributes:
-        analysis        : reference analysis model
-        references_dir  : output directory for the downloaded reference
-        containers_dir  : output directory for the downloaded singularity containers
-        genome_dir      : genome references output directory
-        variants_dir    : variant references output directory for the
-        vep_dir         : vep annotations output directory
-        genome_version  : genome version associated with the balsamic cache
-        cosmic_key      : COSMIC database key
-        bioinfo_tools   : dictionary of bioinformatics software and their associated containers
-        containers      : dictionary linking the container names and their dockerhub image paths
-        references      : reference files model
-        references_date : reference access date
-
+        analysis (CacheAnalysis)                           : Reference analysis model.
+        references_dir (DirectoryPath)                     : Output directory for the downloaded reference.
+        containers_dir (DirectoryPath)                     : Output directory for the downloaded singularity containers.
+        genome_dir (DirectoryPath)                         : Genome references output directory.
+        variants_dir (DirectoryPath)                       : Variant references output directory for the.
+        vep_dir (Path)                                     : VEP annotations output directory.
+        genome_version (GenomeVersion)                     : Genome version associated with the balsamic cache.
+        cosmic_key (str, optional)                         : COSMIC database key.
+        bioinfo_tools (dict)                               : Dictionary of bioinformatics software and containers.
+        containers (Dict[str, str])                        : Dictionary linking container names and dockerhub images.
+        references (Union[ReferencesHg, ReferencesCanFam]) : Reference files model.
+        references_date (str)                              : Reference access date.
     """
 
     analysis: CacheAnalysis
     references_dir: DirectoryPath
+    containers_dir: DirectoryPath
     genome_dir: DirectoryPath
     variants_dir: DirectoryPath
     vep_dir: Path
-    containers_dir: DirectoryPath
     genome_version: GenomeVersion
     cosmic_key: Optional[str]
     bioinfo_tools: dict
