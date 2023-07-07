@@ -59,7 +59,7 @@ class References(BaseModel):
         """Return output reference genome files."""
         return [
             self.reference_genome.file_path,
-            self.reference_genome.file_path + "." + FileType.FAI,
+            f"{self.reference_genome.file_path}.{FileType.FAI}",
             self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
         ] + self.get_reference_genome_bwa_index_file_paths()
 
@@ -67,7 +67,7 @@ class References(BaseModel):
         """Return output BWA reference genome index files."""
         bwa_index_files: List[str] = []
         for bwa_index in BwaIndexFileType:
-            bwa_index_files.append(self.reference_genome.file_path + "." + bwa_index)
+            bwa_index_files.append(f"{self.reference_genome.file_path}.{bwa_index}")
         return bwa_index_files
 
     def get_refgene_file_paths(self) -> List[str]:
@@ -84,7 +84,7 @@ class References(BaseModel):
 
     def get_refgene_bed_file_path(self) -> str:
         """Return RefSeq's gene BED file from UCSC."""
-        return self.get_refgene_flat_file_path() + "." + FileType.BED
+        return f"{self.get_refgene_flat_file_path()}.{FileType.BED}"
 
 
 class ReferencesCanFam(References):
@@ -141,7 +141,7 @@ class ReferencesHg(References):
 
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
-        return [self.cadd_snv.file_path, self.cadd_snv.file_path + "." + FileType.TBI]
+        return [self.cadd_snv.file_path, f"{self.cadd_snv.file_path}.{FileType.TBI}"]
 
     def get_delly_file_paths(self) -> List[str]:
         """Return Delly associated output files."""
@@ -156,7 +156,7 @@ class ReferencesHg(References):
     def get_delly_exclusion_converted_file_path(self) -> str:
         """Return path to Delly exclusion converted file."""
         return self.delly_exclusion.file_path.replace(
-            "." + FileType.TSV, "_converted." + FileType.TSV
+            f".{FileType.TSV}", f"_converted.{FileType.TSV}"
         )
 
     def get_gnomad_file_paths(self) -> List[str]:
@@ -166,10 +166,10 @@ class ReferencesHg(References):
     def get_1k_genome_file_paths(self) -> List[str]:
         """Return 1000 Genome related files."""
         return [
-            self.known_indel_1kg.file_path + "." + FileType.GZ,
-            self.mills_1kg.file_path + "." + FileType.GZ,
-            self.hc_vcf_1kg.file_path + "." + FileType.GZ,
-            self.vcf_1kg.file_path + "." + FileType.GZ,
+            f"{self.known_indel_1kg.file_path}.{FileType.GZ}",
+            f"{self.mills_1kg.file_path}.{FileType.GZ}",
+            f"{self.hc_vcf_1kg.file_path}.{FileType.GZ}",
+            f"{self.vcf_1kg.file_path}.{FileType.GZ}",
         ]
 
 
@@ -364,7 +364,7 @@ class CacheConfig(BaseModel):
     def get_compressed_indexed_vcf_paths(self) -> List[str]:
         """Return an output list of compressed and indexed VCFs."""
         return [
-            vcf + ".gz.tbi"
+            f"{vcf}.{FileType.GZ}.{FileType.TBI}"
             for vcf in self.get_reference_file_paths_by_file_type_and_compression(
                 file_type=FileType.VCF, compression=True
             )
@@ -373,7 +373,7 @@ class CacheConfig(BaseModel):
     def get_container_output_paths(self) -> List[str]:
         """Return a complete list of output singularity images."""
         return [
-            Path(self.containers_dir, image + "." + FileType.SIF).as_posix()
+            Path(self.containers_dir, f"{image}.{FileType.SIF}").as_posix()
             for image in self.containers.keys()
         ]
 
@@ -392,11 +392,11 @@ class CacheConfig(BaseModel):
             self.references.ascat_chr_y_loci.file_path,
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
-            self.references.clinvar.file_path + "." + FileType.GZ,
-            self.references.cosmic.file_path + "." + FileType.GZ,
-            self.references.dbsnp.file_path + "." + FileType.GZ,
+            f"{self.references.clinvar.file_path}.{FileType.GZ}",
+            f"{self.references.cosmic.file_path}.{FileType.GZ}",
+            f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,
-            self.references.somalier_sites.file_path + "." + FileType.GZ,
+            f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
             self.references.wgs_calling_regions.file_path,
             *self.get_compressed_indexed_vcf_paths(),
             *self.references.get_1k_genome_file_paths(),
@@ -425,26 +425,24 @@ class CacheConfig(BaseModel):
             ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,
             cadd_snv=self.references.cadd_snv.file_path,
-            clinvar=self.references.clinvar.file_path + "." + FileType.GZ,
-            cosmic=self.references.cosmic.file_path + "." + FileType.GZ,
-            dbsnp=self.references.dbsnp.file_path + "." + FileType.GZ,
+            clinvar=f"{self.references.clinvar.file_path}.{FileType.GZ}",
+            cosmic=f"{self.references.cosmic.file_path}.{FileType.GZ}",
+            dbsnp=f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             delly_exclusion=self.references.delly_exclusion.file_path,
             delly_exclusion_converted=self.references.get_delly_exclusion_converted_file_path(),
             delly_mappability=self.references.delly_mappability.file_path,
             genome_chrom_size=self.references.genome_chrom_size.file_path,
             gnomad_variant=self.references.gnomad_variant.file_path,
-            hc_vcf_1kg=self.references.hc_vcf_1kg.file_path + "." + FileType.GZ,
-            known_indel_1kg=self.references.known_indel_1kg.file_path
-            + "."
-            + FileType.GZ,
-            mills_1kg=self.references.mills_1kg.file_path + "." + FileType.GZ,
+            hc_vcf_1kg=f"{self.references.hc_vcf_1kg.file_path}.{FileType.GZ}",
+            known_indel_1kg=f"{self.references.known_indel_1kg.file_path}.{FileType.GZ}",
+            mills_1kg=f"{self.references.mills_1kg.file_path}.{FileType.GZ}",
             rank_score=self.references.rank_score.file_path,
             reference_genome=self.references.reference_genome.file_path,
             refgene_bed=self.references.get_refgene_bed_file_path(),
             refgene_flat=self.references.get_refgene_flat_file_path(),
             refgene_txt=self.references.refgene_txt.file_path,
-            somalier_sites=self.references.somalier_sites.file_path + "." + FileType.GZ,
-            vcf_1kg=self.references.vcf_1kg.file_path + "." + FileType.GZ,
+            somalier_sites=f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
+            vcf_1kg=f"{self.references.vcf_1kg.file_path}.{FileType.GZ}",
             vep_dir=self.vep_dir.as_posix(),
             wgs_calling_regions=self.references.wgs_calling_regions.file_path,
         )

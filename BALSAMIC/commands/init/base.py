@@ -128,9 +128,7 @@ def initialize(
 
     references: Union[ReferencesHg, ReferencesCanFam] = REFERENCE_FILES[genome_version]
     cache_config: CacheConfig = CacheConfig(
-        analysis={
-            "case_id": "reference" + "." + genome_version + ".v" + balsamic_version
-        },
+        analysis={"case_id": f"reference.{genome_version}.v{balsamic_version}"},
         references_dir=references_dir.as_posix(),
         genome_dir=genome_dir.as_posix(),
         variants_dir=variants_dir.as_posix(),

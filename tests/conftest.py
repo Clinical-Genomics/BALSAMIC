@@ -154,7 +154,7 @@ def environ():
 def cluster_analysis_config_path() -> str:
     """Return cluster analysis configuration file."""
     return Path(
-        CONSTANTS_DIR, ClusterConfigType.ANALYSIS + "." + FileType.JSON
+        CONSTANTS_DIR, f"{ClusterConfigType.ANALYSIS}.{FileType.JSON}"
     ).as_posix()
 
 
@@ -568,7 +568,7 @@ def tumor_normal_config(
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
-        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + "." + FileType.JSON
+        analysis_dir, case_id_tumor_normal, f"{case_id_tumor_normal}.{FileType.JSON}"
     ).as_posix()
 
 
@@ -640,7 +640,7 @@ def tumor_normal_wgs_config(
     return Path(
         analysis_dir,
         case_id_tumor_normal_wgs,
-        case_id_tumor_normal_wgs + "." + FileType.JSON,
+        f"{case_id_tumor_normal_wgs}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -711,7 +711,7 @@ def tumor_only_config(
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
-        analysis_dir, case_id_tumor_only, case_id_tumor_only + "." + FileType.JSON
+        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
     ).as_posix()
 
 
@@ -774,7 +774,7 @@ def tumor_only_wgs_config(
     return Path(
         analysis_dir,
         case_id_tumor_only_wgs,
-        case_id_tumor_only_wgs + "." + FileType.JSON,
+        f"{case_id_tumor_only_wgs}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -825,7 +825,7 @@ def tumor_only_pon_config(
     return Path(
         analysis_dir,
         case_id_tumor_only_pon,
-        case_id_tumor_only_pon + "." + FileType.JSON,
+        f"{case_id_tumor_only_pon}.{FileType.JSON}",
     ).as_posix()
 
 

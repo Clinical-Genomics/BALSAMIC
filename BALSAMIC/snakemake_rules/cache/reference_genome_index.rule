@@ -32,9 +32,7 @@ rule fasta_index_reference_genome:
         singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.{FileType.SIF}",
         reference_genome=cache_config.references.reference_genome.file_path,
     output:
-        indexed_reference_genome=cache_config.references.reference_genome.file_path
-        + "."
-        + FileType.FAI,
+        indexed_reference_genome=f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}",
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="fasta_index_reference_genome")

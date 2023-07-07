@@ -339,10 +339,10 @@ def test_get_1k_genome_file_paths(references_hg: ReferencesHg):
 
     # THEN the 1k genome files should be returned
     assert len(genome_files) == 4
-    assert references_hg.known_indel_1kg.file_path + "." + FileType.GZ in genome_files
-    assert references_hg.mills_1kg.file_path + "." + FileType.GZ in genome_files
-    assert references_hg.hc_vcf_1kg.file_path + "." + FileType.GZ in genome_files
-    assert references_hg.vcf_1kg.file_path + "." + FileType.GZ in genome_files
+    assert f"{references_hg.known_indel_1kg.file_path}.{FileType.GZ}" in genome_files
+    assert f"{references_hg.mills_1kg.file_path}.{FileType.GZ}" in genome_files
+    assert f"{references_hg.hc_vcf_1kg.file_path}.{FileType.GZ}" in genome_files
+    assert f"{references_hg.vcf_1kg.file_path}.{FileType.GZ}" in genome_files
 
 
 def test_cache_analysis(cache_analysis_data: Dict[str, str]):
@@ -560,10 +560,7 @@ def test_get_compressed_indexed_vcf_paths(cache_config: CacheConfig):
         cache_config.references.hc_vcf_1kg.file_path,
         cache_config.references.cosmic.file_path,
     ]:
-        assert (
-            reference + "." + FileType.GZ + "." + FileType.TBI
-            in compressed_indexed_vcfs
-        )
+        assert f"{reference}.{FileType.GZ}.{FileType.TBI}" in compressed_indexed_vcfs
 
 
 def test_get_container_output_paths(cache_config: CacheConfig, tmp_path: Path):
@@ -577,7 +574,7 @@ def test_get_container_output_paths(cache_config: CacheConfig, tmp_path: Path):
     # THEN all the container paths should be returned
     assert len(container_paths) == len(set(DockerContainers))
     for container in set(DockerContainers):
-        assert Path(tmp_path, container + "." + FileType.SIF)
+        assert Path(tmp_path, f"{container}.{FileType.SIF}")
 
 
 def test_get_reference_output_paths(cache_config: CacheConfig):
