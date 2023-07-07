@@ -11,6 +11,7 @@ from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cache import GenomeVersion
 from click.testing import Result
 
+from BALSAMIC.constants.cluster import ClusterAccount
 from BALSAMIC.constants.constants import EXIT_SUCCESS, EXIT_FAIL
 
 
@@ -103,7 +104,6 @@ def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: 
 def test_init_hg_run_analysis(
     invoke_cli: partial,
     tmp_path: Path,
-    cluster_account: str,
     cosmic_key: str,
     config_json: str,
     reference_graph: str,
@@ -125,7 +125,7 @@ def test_init_hg_run_analysis(
             "--run-mode",
             RunMode.CLUSTER,
             "--account",
-            cluster_account,
+            ClusterAccount.DEVELOPMENT,
             "--run-analysis",
         ]
     )

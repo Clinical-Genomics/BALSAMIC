@@ -43,7 +43,7 @@ MOCKED_OS_ENVIRON = "os.environ"
 
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
-    """Return a non-existent file path."""
+    """Return a non-existent files directory path."""
     return tmp_path_factory.mktemp("session_tests")
 
 
@@ -987,12 +987,6 @@ def fixture_timestamp_now() -> datetime:
 def fixture_cosmic_key() -> str:
     """Return mocked COSMIC key."""
     return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
-
-
-@pytest.fixture(scope="session", name="cluster_account")
-def fixture_cluster_account() -> str:
-    """Mocked cluster account for job submission."""
-    return "development"
 
 
 @pytest.fixture(scope="session", name="develop_containers")

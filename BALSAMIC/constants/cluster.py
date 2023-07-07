@@ -16,6 +16,12 @@ class ClusterProfile(StrEnum):
     QSUB: str = "qsub"
 
 
+class ClusterAccount(StrEnum):
+    """Cluster job submission account."""
+
+    DEVELOPMENT: str = "development"
+
+
 class QOS(StrEnum):
     """Cluster quality of service."""
 
