@@ -12,7 +12,6 @@ import snakemake
 from graphviz import Source
 
 from BALSAMIC import __version__ as balsamic_version
-
 from BALSAMIC.commands.init.options import (
     OPTION_OUT_DIR,
     OPTION_CONTAINER_VERSION,
@@ -34,11 +33,10 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
 )
-from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
-from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
+from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
+from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-
 from BALSAMIC.models.cache import (
     CacheConfig,
     ReferencesHg,

@@ -1,8 +1,8 @@
 """Balsamic commands init options."""
 import click
 
-from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.cache import ContainerVersion
+from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.utils.cli import get_config_path
 
 OPTION_OUT_DIR = click.option(

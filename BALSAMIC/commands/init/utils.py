@@ -2,7 +2,6 @@
 from typing import Dict
 
 from BALSAMIC import __version__ as balsamic_version
-
 from BALSAMIC.constants.cache import ContainerVersion, DOCKER_URL, DockerContainers
 
 

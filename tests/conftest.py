@@ -1,31 +1,28 @@
-from datetime import datetime
-from typing import Dict, Any
-
-import pytest
 import json
 import os
-
-from unittest import mock
+from datetime import datetime
 from distutils.dir_util import copy_tree
-from pathlib import Path
 from functools import partial
+from pathlib import Path
+from typing import Dict, Any
+from unittest import mock
 
+import pytest
+from _pytest.tmpdir import TempPathFactory
+from click.testing import CliRunner
 
+from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
-
 from BALSAMIC.constants.cache import (
     DockerContainers,
     GenomeVersion,
     REFERENCE_FILES,
 )
-from BALSAMIC.constants.constants import FileType
-from _pytest.tmpdir import TempPathFactory
-
 from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from click.testing import CliRunner
-
 from BALSAMIC.models.cache import (
     CacheAnalysis,
     CacheConfig,
@@ -35,8 +32,6 @@ from BALSAMIC.models.cache import (
 )
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
-from BALSAMIC.commands.base import cli
-from BALSAMIC import __version__ as balsamic_version
 
 MOCKED_OS_ENVIRON = "os.environ"
 

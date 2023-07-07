@@ -5,10 +5,7 @@ from typing import Dict, Optional, List, Any, Union
 
 from pydantic import BaseModel, AnyUrl, DirectoryPath, validator, FilePath
 
-from BALSAMIC.constants.cache import (
-    GenomeVersion,
-    GRCHVersion,
-)
+from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
 from BALSAMIC.constants.constants import FileType, BwaIndexFileType
 from BALSAMIC.utils.exc import BalsamicError
 

@@ -2,8 +2,8 @@
 import click
 
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
 from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
 
 OPTION_GENOME_VERSION = click.option(
     "-g",
@@ -21,7 +21,6 @@ OPTION_RUN_MODE = click.option(
     type=click.Choice([RunMode.CLUSTER, RunMode.LOCAL]),
     help="Run mode to execute Balsamic workflows",
 )
-
 
 OPTION_CLUSTER_PROFILE = click.option(
     "-p",

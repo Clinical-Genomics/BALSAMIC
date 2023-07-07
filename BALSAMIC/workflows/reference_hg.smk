@@ -1,7 +1,4 @@
-# syntax=python tabstop=4 expandtab
-# coding: utf-8
-
-
+"""Snakemake human reference genome file."""
 import json
 import logging
 import os

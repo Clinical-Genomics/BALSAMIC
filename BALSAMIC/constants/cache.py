@@ -2,7 +2,6 @@
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.class_types import StrEnum
 
-
 DOCKER_URL: str = "docker://clinicalgenomics/balsamic"
 VEP_PLUGINS: str = "all"
 

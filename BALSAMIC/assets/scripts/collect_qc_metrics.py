@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import os
+import re
 from pathlib import Path
 from typing import List, Optional
 
 import click
 import yaml
-import re
 
 from BALSAMIC.constants.metrics import METRICS
 from BALSAMIC.models.metrics import Metric
