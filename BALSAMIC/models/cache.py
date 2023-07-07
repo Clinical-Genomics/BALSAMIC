@@ -314,7 +314,7 @@ class CacheConfig(BaseModel):
         return references
 
     def get_grch_version(self) -> Optional[GRCHVersion]:
-        """Return GRCH format version of the genome version."""
+        """Return GRCH format version of the genome version if exists."""
         version: Dict[GenomeVersion, GRCHVersion] = {
             GenomeVersion.HG19: GRCHVersion.GRCH37,
             GenomeVersion.HG38: GRCHVersion.GRCH38,
