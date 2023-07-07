@@ -461,7 +461,7 @@ def test_get_reference_by_path(cache_config: CacheConfig):
 
 
 def test_get_reference_by_path_error(
-    cache_config: CacheConfig, invalid_file: Path, caplog: LogCaptureFixture
+    cache_config: CacheConfig, invalid_json_file: Path, caplog: LogCaptureFixture
 ):
     """Test reference extraction given an invalid path."""
 
@@ -469,11 +469,11 @@ def test_get_reference_by_path_error(
 
     # WHEN getting the reference genome by path
     with pytest.raises(BalsamicError):
-        cache_config.get_reference_by_path(reference_path=invalid_file.as_posix())
+        cache_config.get_reference_by_path(reference_path=invalid_json_file.as_posix())
 
     # THEN a Balsamic error should be returned
     assert (
-        f"No reference with the provided reference path {invalid_file.as_posix()}"
+        f"No reference with the provided reference path {invalid_json_file.as_posix()}"
         in caplog.text
     )
 

@@ -153,7 +153,7 @@ class ReferencesHg(References):
             self.delly_mappability_gindex.file_path,
         ]
 
-    def get_delly_exclusion_converted_file_path(self) -> str:
+    def get_delly_exclusion_converted_file(self) -> str:
         """Return path to Delly exclusion converted file."""
         return self.delly_exclusion.file_path.replace(
             "." + FileType.TSV, "_converted." + FileType.TSV
