@@ -43,7 +43,7 @@ MOCKED_OS_ENVIRON = "os.environ"
 
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
-    """Non existent file path."""
+    """Return a non-existent file path."""
     return tmp_path_factory.mktemp("session_tests")
 
 
