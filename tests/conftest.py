@@ -155,38 +155,34 @@ def cluster_analysis_config_path() -> str:
 
 @pytest.fixture(scope="session")
 def reference():
-    """
-    Creates a dictionary for reference json model.
-    """
+    """Return a dictionary for reference json model."""
     return {
-        "reference": {
-            "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
-            "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-            "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-            "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
-            "known_indel_1kg": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
-            "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
-            "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-            "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-            "vep_dir": "tests/test_data/references/vep/",
-            "refgene_flat": "tests/test_data/references/genome/refseq.flat",
-            "refgene_txt": "tests/test_data/references/genome/refGene.txt",
-            "wgs_calling_regions": "tests/test_data/references/genome/wgs_calling_regions.v1",
-            "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
-            "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
-            "rank_score": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
-            "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
-            "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
-            "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
-            "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
-            "delly_mappability_gindex": "tests/test_data/references/genome/delly_mappability.gz.gzi",
-            "delly_mappability_findex": "tests/test_data/references/genome/delly_mappability.fai",
-            "ascat_gc_correction": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
-            "ascat_chr_y_loci": "tests/test_data/references/genome/GRCh37_Y.loci",
-            "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
-            "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
-            "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
-        }
+        "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+        "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+        "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "known_indel_1kg": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
+        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+        "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+        "vep_dir": "tests/test_data/references/vep/",
+        "refgene_flat": "tests/test_data/references/genome/refseq.flat",
+        "refgene_txt": "tests/test_data/references/genome/refGene.txt",
+        "wgs_calling_regions": "tests/test_data/references/genome/wgs_calling_regions.v1",
+        "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
+        "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
+        "rank_score": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
+        "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
+        "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
+        "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
+        "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
+        "delly_mappability_gindex": "tests/test_data/references/genome/delly_mappability.gz.gzi",
+        "delly_mappability_findex": "tests/test_data/references/genome/delly_mappability.fai",
+        "ascat_gc_correction": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
+        "ascat_chr_y_loci": "tests/test_data/references/genome/GRCh37_Y.loci",
+        "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
+        "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
+        "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
     }
 
 

@@ -114,7 +114,7 @@ def pon_config(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
     with open(reference_config, "r") as f:
-        reference_dict = json.load(f)["reference"]
+        reference_dict = json.load(f)
 
     config_collection_dict = PonBalsamicConfigModel(
         QC={
