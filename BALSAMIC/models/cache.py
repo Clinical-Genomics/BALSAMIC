@@ -62,10 +62,10 @@ class References(BaseModel):
 
     def get_reference_genome_bwa_index_file_paths(self) -> List[str]:
         """Return output BWA reference genome index files."""
-        bwa_index_files: List[str] = []
-        for bwa_index in BwaIndexFileType:
-            bwa_index_files.append(f"{self.reference_genome.file_path}.{bwa_index}")
-        return bwa_index_files
+        return [
+            f"{self.reference_genome.file_path}.{bwa_index}"
+            for bwa_index in BwaIndexFileType
+        ]
 
     def get_refgene_file_paths(self) -> List[str]:
         """Return RefSeq's gene files from UCSC."""
