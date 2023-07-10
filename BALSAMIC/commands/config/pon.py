@@ -113,8 +113,8 @@ def pon_config(
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as f:
-        reference_dict = json.load(f)
+    with open(reference_config, "r") as config_file:
+        reference_dict = json.load(config_file)
 
     config_collection_dict = PonBalsamicConfigModel(
         QC={

@@ -100,7 +100,7 @@ def initialize(
 
     if genome_version in [GenomeVersion.HG19, GenomeVersion.HG38] and not cosmic_key:
         LOG.error(
-            f"No COSMIC authentication key specified. It is required when using {genome_version} reference."
+            f"No COSMIC authentication key specified. It is required when using {genome_version} reference"
         )
         raise click.Abort()
 

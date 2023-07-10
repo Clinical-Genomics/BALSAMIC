@@ -95,7 +95,7 @@ def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: 
 
     # THEN an exception should have been raised
     assert (
-        f"No COSMIC authentication key specified. It is required when using {GenomeVersion.HG19} reference."
+        f"No COSMIC authentication key specified. It is required when using {GenomeVersion.HG19} reference"
         in result.output
     )
     assert result.exit_code == EXIT_FAIL

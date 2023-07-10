@@ -214,8 +214,8 @@ def case_config(
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as f:
-        reference_dict = json.load(f)
+    with open(reference_config, "r") as config_file:
+        reference_dict = json.load(config_file)
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
