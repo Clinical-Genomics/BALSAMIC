@@ -104,7 +104,7 @@ def initialize(
         )
         raise click.Abort()
 
-    out_dir: Path = Path(out_dir, balsamic_version)
+    out_dir: Path = Path(out_dir, balsamic_version).absolute()
     references_dir: Path = Path(out_dir, genome_version)
     genome_dir = Path(references_dir, "genome")
     variants_dir = Path(references_dir, "variants")
@@ -117,7 +117,6 @@ def initialize(
         references_dir,
         genome_dir,
         variants_dir,
-        vep_dir,
         containers_dir,
         log_dir,
         script_dir,
