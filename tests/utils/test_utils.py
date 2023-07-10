@@ -20,7 +20,6 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.utils.cli import (
     SnakeMake,
     CaptureStdout,
-    iterdict,
     get_snakefile,
     createDir,
     get_file_status_string,
@@ -219,17 +218,6 @@ def test_get_file_extension_known_ext():
 
     # THEN assert extension is correctly extracted
     assert file_extension == actual_extension
-
-
-def test_iterdict(reference):
-    """GIVEN a dict for iteration"""
-    # WHEN passing dict to this function
-    dict_gen = iterdict(reference)
-
-    # THEN it will create dict generator, we can iterate it, get the key, values as string
-    for key, value in dict_gen:
-        assert isinstance(key, str)
-        assert isinstance(value, str)
 
 
 def test_snakemake_local():
@@ -499,7 +487,7 @@ def test_write_json(tmp_path, reference):
     output = output_json.read_text()
 
     # THEN It will create a json file with given dict
-    for key, value in iterdict(reference):
+    for key, value in reference.items():
         assert key in output
         assert value in output
 

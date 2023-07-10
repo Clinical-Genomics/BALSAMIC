@@ -222,15 +222,6 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def iterdict(dic):
-    """dictionary iteration - returns generator"""
-    for key, value in dic.items():
-        if isinstance(value, dict):
-            yield from iterdict(value)
-        else:
-            yield key, value
-
-
 def get_schedulerpy():
     """
     Returns a string path for scheduler.py

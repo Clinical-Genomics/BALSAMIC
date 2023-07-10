@@ -589,9 +589,25 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     assert len(reference_output_paths) == 44
 
 
-def test_get_analysis_references_canfam(
+def test_get_analysis_references_hg(
     cache_config: CacheConfig,
-    analysis_references_data: Dict[str, Path],
+    analysis_references_hg_data: Dict[str, Path],
+):
+    """Test analysis references retrieval to be used for Balsamic human genome analyses."""
+
+    # GIVEN a canine cache config model
+    cache_config.genome_version = GenomeVersion.HG19
+
+    # WHEN getting the analysis references
+    analysis_references: AnalysisReferencesHg = cache_config.get_analysis_references()
+
+    # THEN the retrieved analysis references should match the mocked one
+    assert type(analysis_references) is AnalysisReferencesHg
+    assert analysis_references.dict() == analysis_references_hg_data
+
+
+def test_get_analysis_references_canfam(
+    cache_config: CacheConfig, analysis_references_data: Dict[str, Path]
 ):
     """Test analysis references retrieval to be used for Balsamic canine analyses."""
 
