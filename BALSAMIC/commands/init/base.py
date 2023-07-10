@@ -8,8 +8,6 @@ from pathlib import Path
 from typing import Union
 
 import click
-import snakemake
-from graphviz import Source
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.init.options import (
@@ -42,8 +40,8 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     ReferencesCanFam,
 )
-from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile, CaptureStdout
-from BALSAMIC.utils.io import write_json
+from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile
+from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
 LOG = logging.getLogger(__name__)
 
@@ -140,32 +138,12 @@ def initialize(
         else get_snakefile("generate_ref", "balsamic", genome_version)
     )
 
-    with CaptureStdout() as graph_dot:
-        snakemake.snakemake(
-            snakefile=snakefile,
-            dryrun=True,
-            configfiles=[config_path.as_posix()],
-            printrulegraph=True,
-        )
-    graph_title: str = "_".join(["BALSAMIC", balsamic_version, "reference"])
-    graph_dot: str = "".join(graph_dot).replace(
-        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
+    generate_workflow_graph(
+        config_path=config_path,
+        directory_path=references_dir,
+        snakefile=snakefile,
+        title="reference",
     )
-    graph: Source = Source(
-        graph_dot,
-        directory=Path(references_dir).as_posix(),
-        filename="reference_graph",
-        format="pdf",
-        engine="dot",
-    )
-    try:
-        graph_pdf: Path = Path(graph.render())
-        LOG.info(
-            f"Reference workflow graph generated successfully ({graph_pdf.as_posix()}) "
-        )
-    except Exception:
-        LOG.error("Reference workflow graph generation failed")
-        raise click.Abort()
 
     LOG.info("Starting reference generation workflow...")
     balsamic_run: SnakeMake = SnakeMake()

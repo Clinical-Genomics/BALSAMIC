@@ -3,14 +3,12 @@ from functools import partial
 from pathlib import Path
 from unittest import mock
 
+from click.testing import Result
 from graphviz import Source
 
-from BALSAMIC.constants.analysis import RunMode
-
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cache import GenomeVersion
-from click.testing import Result
-
 from BALSAMIC.constants.cluster import ClusterAccount
 from BALSAMIC.constants.constants import EXIT_SUCCESS, EXIT_FAIL
 
@@ -192,7 +190,7 @@ def test_init_hg_graph_exception(
         )
 
     # THEN the human reference generation workflow should have successfully started
-    assert "Reference workflow graph generation failed" in result.output
+    assert "Workflow graph generation failed" in result.output
     assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
     assert not Path(
         tmp_path, balsamic_version, GenomeVersion.HG19, reference_graph

@@ -4,9 +4,45 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+import snakemake
 import yaml
+from graphviz import Source
+
+from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.cli import CaptureStdout
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
+
+
+def generate_workflow_graph(
+    config_path: Path, directory_path: Path, snakefile: Path, title: str
+) -> None:
+    """Generate snakemake workflow graph and save it in a PDF file."""
+    with CaptureStdout() as graph_dot:
+        snakemake.snakemake(
+            snakefile=snakefile,
+            dryrun=True,
+            configfiles=[config_path.as_posix()],
+            printrulegraph=True,
+        )
+    graph_title: str = "_".join(["BALSAMIC", balsamic_version, title])
+    graph_dot: str = "".join(graph_dot).replace(
+        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
+    )
+    graph: Source = Source(
+        graph_dot,
+        directory=directory_path.as_posix(),
+        filename=f"{title}_graph",
+        format="pdf",
+        engine="dot",
+    )
+    try:
+        graph_pdf: Path = Path(graph.render())
+        LOG.info(f"Workflow graph generated successfully ({graph_pdf.as_posix()}) ")
+    except Exception:
+        LOG.error("Workflow graph generation failed")
+        raise BalsamicError()
 
 
 def read_json(json_path: str) -> dict:
