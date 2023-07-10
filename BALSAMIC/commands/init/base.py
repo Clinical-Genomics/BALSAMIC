@@ -113,14 +113,7 @@ def initialize(
     config_path: Path = Path(references_dir, "config.json")
     log_dir: Path = Path(references_dir, "logs")
     script_dir: Path = Path(references_dir, "scripts")
-    for dir_path in [
-        references_dir,
-        genome_dir,
-        variants_dir,
-        containers_dir,
-        log_dir,
-        script_dir,
-    ]:
+    for dir_path in [references_dir, log_dir, script_dir]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
     references: Union[ReferencesHg, ReferencesCanFam] = REFERENCE_FILES[genome_version]

@@ -259,9 +259,9 @@ class CacheConfig(BaseModel):
     Attributes:
         analysis (CacheAnalysis)                           : Reference analysis model.
         references_dir (DirectoryPath)                     : Output directory for the downloaded reference.
-        containers_dir (DirectoryPath)                     : Output directory for the downloaded singularity containers.
-        genome_dir (DirectoryPath)                         : Genome references output directory.
-        variants_dir (DirectoryPath)                       : Variant references output directory.
+        containers_dir (Path)                              : Output directory for the downloaded singularity containers.
+        genome_dir (Path)                                  : Genome references output directory.
+        variants_dir (Path)                                : Variant references output directory.
         vep_dir (Path)                                     : VEP annotations output directory.
         genome_version (GenomeVersion)                     : Genome version associated with the balsamic cache.
         cosmic_key (str, optional)                         : COSMIC database key.
@@ -273,9 +273,9 @@ class CacheConfig(BaseModel):
 
     analysis: CacheAnalysis
     references_dir: DirectoryPath
-    containers_dir: DirectoryPath
-    genome_dir: DirectoryPath
-    variants_dir: DirectoryPath
+    containers_dir: Path
+    genome_dir: Path
+    variants_dir: Path
     vep_dir: Path
     genome_version: GenomeVersion
     cosmic_key: Optional[str]
