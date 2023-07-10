@@ -4,14 +4,21 @@ from typing import Dict, List
 from BALSAMIC.constants.cache import GenomeVersion
 
 common_cache_rules: List[str] = [
-    "snakemake_rules/cache/cadd.rule",
     "snakemake_rules/cache/singularity_containers.rule",
-    "snakemake_rules/cache/delly.rule",
     "snakemake_rules/cache/reference_genome_index.rule",
     "snakemake_rules/cache/reference_download.rule",
+]
+
+hg_cache_rules: List[str] = common_cache_rules + [
+    "snakemake_rules/cache/cadd.rule",
+    "snakemake_rules/cache/delly.rule",
     "snakemake_rules/cache/refseq.rule",
     "snakemake_rules/cache/reference_vcf.rule",
     "snakemake_rules/cache/vep.rule",
+]
+
+canfam_cache_rules: List[str] = common_cache_rules + [
+    "snakemake_rules/cache/refseq_canfam.rule"
 ]
 
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
@@ -136,14 +143,9 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
     },
     "cache": {
-        GenomeVersion.HG19: common_cache_rules,
-        GenomeVersion.HG38: common_cache_rules,
-        GenomeVersion.CanFam3: [
-            "snakemake_rules/cache/singularity_containers.rule",
-            "snakemake_rules/cache/reference_genome_index.rule",
-            "snakemake_rules/cache/reference_download.rule",
-            "snakemake_rules/cache/refseq_canfam.rule",
-        ],
+        GenomeVersion.HG19: hg_cache_rules,
+        GenomeVersion.HG38: hg_cache_rules,
+        GenomeVersion.CanFam3: canfam_cache_rules,
     },
 }
 
