@@ -114,7 +114,7 @@ rule vep_somatic_research_sv:
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
   threads:
-    get_threads(cluster_config, "vep_somatic_sv")
+    get_threads(cluster_config, "vep_somatic_research_sv")
   message:
     "Running vep annotation for structural and copy number variants on {params.message_text}"
   shell:
@@ -162,7 +162,7 @@ tabix -p vcf -f {output.vcf_research};
           """
 
 
-rule annotate_clinical_sv:
+rule svdb_annotate_somatic_clinical_sv:
     input:
         vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
     output:
@@ -178,9 +178,8 @@ rule annotate_clinical_sv:
         vcf_clinical_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinicalobs.vcf"),
         vcf_somatic_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.somaticobs.vcf"),
         tmp_vcf_clinical= temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.tmp.clinical.vcf"),
-
     threads:
-        get_threads(cluster_config, "svdb_query_somatic_sv")
+        get_threads(cluster_config, "svdb_annotate_somatic_clinical_sv")
     message:
         "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
     shell:
@@ -193,7 +192,7 @@ svdb --query --bnd_distance 10000 --overlap 0.80 \
 --db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
 
 svdb --query --bnd_distance 10000 --overlap 0.80 \
---in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
+--in_occ Obs --out_occ somatic_obs --in_frq Frq --out_frq somatic_frq \
 --db {params.somatic_sv_observations} --query_vcf {params.vcf_clinical_obs} > {params.vcf_somatic_obs}
 
 bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
@@ -209,7 +208,7 @@ bgzip -l 9 -c {params.vcf_clinical_obs} > {output.vcf_sv_clinical};
 
 elif [[ -f "{params.somatic_sv_observations}" ]]; then
 svdb --query --bnd_distance 10000 --overlap 0.80 \
---in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
+--in_occ Obs --out_occ somatic_obs --in_frq Frq --out_frq somatic_frq \
 --db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_somatic_obs}
 
 bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
