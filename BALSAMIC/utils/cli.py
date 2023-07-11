@@ -570,7 +570,7 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
     """Return analysis fastq directory, linking the fastq files if necessary."""
     analysis_fastq_path: Path = Path(case_dir, "fastq")
     analysis_fastq_path.mkdir(parents=True, exist_ok=True)
-    if case_dir not in fastq_path:
+    if Path(case_dir) not in Path(fastq_path).parents:
         for fastq in Path(fastq_path).glob("*.fastq.gz"):
             Path(analysis_fastq_path, fastq.name).symlink_to(fastq)
         return analysis_fastq_path.as_posix()
