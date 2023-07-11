@@ -989,6 +989,31 @@ def test_get_analysis_fastq_files_directory(fastq_dir: str):
     assert input_dir == fastq_dir
 
 
+def test_get_analysis_fastq_files_directory_exception(
+    fastq_dir: str,
+    case_id_tumor_only,
+    tmp_path_factory: TempPathFactory,
+    caplog: LogCaptureFixture,
+):
+    """Test get analysis fastq directory when it already exists in case folder but another path is provided."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an input fastq path and an external case directory
+    case_dir: str = tmp_path_factory.mktemp(case_id_tumor_only).as_posix()
+
+    # WHEN getting the analysis fastq directory twice
+    _input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+
+    # THEN the fastq directory should be located inside the case directory and the linking should have been skipped
+    assert input_dir == Path(case_dir, "fastq").as_posix()
+    assert "Skipping linking" in caplog.text
+
+
 def test_get_analysis_fastq_files_directory_no_fastqs(
     fastq_dir: str, tmp_path_factory: TempPathFactory, case_id_tumor_only: str
 ):
