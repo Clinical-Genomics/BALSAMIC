@@ -25,7 +25,7 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
                                  get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
-                                 get_cancer_somatic_snv_observations)
+                                 get_cancer_somatic_snv_observations, get_somatic_sv_observations)
 
 from BALSAMIC.constants.common import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
@@ -73,6 +73,7 @@ cancer_germline_snv_obs = ""
 cancer_somatic_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
+somatic_sv = ""
 swegen_sv = ""
 
 # vcfanno annotations
@@ -156,6 +157,8 @@ if "cancer_somatic_snv_observations" in config["reference"]:
 if "clinical_sv_observations" in config["reference"]:
     clinical_sv: str = get_clinical_sv_observations(config)
 
+if "cancer_somatic_sv_observations" in config["reference"]:
+    somatic_sv: str = get_somatic_sv_observations(config)
 
 if "swegen_sv_frequency" in config["reference"]:
     swegen_sv: str = get_swegen_sv(config)
