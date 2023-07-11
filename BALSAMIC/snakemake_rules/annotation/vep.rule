@@ -95,42 +95,6 @@ fi
 tabix -p vcf -f {output.vcf_snv_clinical};
     """
 
-# rule vep_somatic_sv:
-#   input:
-#     vcf_research = vcf_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz",
-#     header = vcf_dir + "SV.somatic.{case_name}.svdb.sample_name_map",
-#   output:
-#     vcf_research = temp(vep_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz"),
-#   benchmark:
-#     Path(benchmark_dir, "vep_somatic_SV.somatic.{case_name}.svdb.tsv").as_posix()
-#   singularity:
-#     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
-#   params:
-#     message_text = "SV.somatic.{case_name}.svdb.research.vcf.gz",
-#     vep_cache = config["reference"]["vep"],
-#     vep_defaults = params.vep.vep_filters
-#   threads:
-#     get_threads(cluster_config, "vep_somatic_sv")
-#   message:
-#     "Running vep annotation for structural and copy number variants on {params.message_text}"
-#   shell:
-#     """
-# vep_path=$(dirname $(readlink -f $(which vep)));
-# export PERL5LIB=;
-#
-# bcftools reheader --threads {threads} -s {input.header} {input.vcf_research} | \
-# bcftools view --threads {threads} -O v | \
-# vep \
-# --dir $vep_path \
-# --dir_cache {params.vep_cache} \
-# --dir_plugins $vep_path \
-# --output_file {output.vcf_research} \
-# --fork {threads} \
-# {params.vep_defaults} \
-#
-# tabix -p vcf -f {output.vcf_research};
-#     """
-
 
 rule vep_somatic_research_sv:
   input:
