@@ -35,11 +35,7 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.models.cache import (
-    CacheConfig,
-    ReferencesHg,
-    ReferencesCanFam,
-)
+from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
 from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
