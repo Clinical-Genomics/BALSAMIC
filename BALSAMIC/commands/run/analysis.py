@@ -15,8 +15,8 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     SnakeMake,
     job_id_dump_to_yaml,
-    get_fastq_files_directory,
     get_config_path,
+    get_resolved_fastq_files_directory,
 )
 
 LOG = logging.getLogger(__name__)
@@ -219,7 +219,9 @@ def analysis(
 
     # Singularity bind path
     bind_path = list()
-    bind_path.append(get_fastq_files_directory(sample_config["analysis"]["fastq_path"]))
+    bind_path.append(
+        get_resolved_fastq_files_directory(sample_config["analysis"]["fastq_path"])
+    )
     bind_path.append(str(Path(__file__).parents[2] / "assets"))
     bind_path.append(os.path.commonpath(sample_config["reference"].values()))
     if "panel" in sample_config:
