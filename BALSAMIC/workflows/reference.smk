@@ -1,4 +1,4 @@
-"""Snakemake human reference genome file."""
+"""Snakemake reference cache file."""
 import json
 import logging
 import os
