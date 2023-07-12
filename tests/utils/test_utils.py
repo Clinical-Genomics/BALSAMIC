@@ -12,6 +12,7 @@ import logging
 from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
+from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cache import REFERENCE_FILES
@@ -40,7 +41,8 @@ from BALSAMIC.utils.cli import (
     create_md5,
     get_sample_dict,
     get_pon_sample_dict,
-    get_fastq_files_directory,
+    get_resolved_fastq_files_directory,
+    get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import read_json, write_json, read_yaml
 
@@ -942,27 +944,91 @@ def test_get_pon_sample_dict(
     assert samples == samples_expected
 
 
-def test_get_fastq_files_directory(fastq_dir: str):
-    """Test get unlinked input files directory."""
+def test_get_resolved_fastq_files_directory(fastq_dir: str):
+    """Test get fastq directory for unlinked fastqs."""
 
-    # GIVEN an input fast path
+    # GIVEN an input fastq path
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_fastq_files_directory(fastq_dir)
+    input_dir: str = get_resolved_fastq_files_directory(fastq_dir)
 
     # THEN the fastq directory should be returned
-    assert input_directory == fastq_dir
+    assert input_dir == fastq_dir
 
 
-def test_get_input_symlinked_files_path(fastq_dir: str, tmp_path: Path):
-    """Test remove symlinks from a directory."""
+def test_get_resolved_fastq_files_directory_symlinked_files(
+    fastq_dir: str, tmp_path: Path
+):
+    """Test get fastq directory for symlinked files."""
 
     # GIVEN a temporary fast path containing symlinked files
     for file in Path(fastq_dir).iterdir():
         Path(tmp_path, file.name).symlink_to(file)
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_fastq_files_directory(str(tmp_path))
+    input_dir: str = get_resolved_fastq_files_directory(str(tmp_path))
 
     # THEN the real fastq directory should be returned
-    assert input_directory == fastq_dir
+    assert input_dir == fastq_dir
+
+
+def test_get_analysis_fastq_files_directory(fastq_dir: str):
+    """Test get analysis fastq directory when it already exists in case folder."""
+
+    # GIVEN an input fastq path
+
+    # WHEN getting the analysis fastq directory
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=Path(fastq_dir).parents[1].as_posix(), fastq_path=fastq_dir
+    )
+
+    # THEN the original fastq directory should be returned
+    assert input_dir == fastq_dir
+
+
+def test_get_analysis_fastq_files_directory_exception(
+    fastq_dir: str,
+    case_id_tumor_only,
+    tmp_path_factory: TempPathFactory,
+    caplog: LogCaptureFixture,
+):
+    """Test get analysis fastq directory when it already exists in case folder but another path is provided."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an input fastq path and an external case directory
+    case_dir: str = tmp_path_factory.mktemp(case_id_tumor_only).as_posix()
+
+    # WHEN getting the analysis fastq directory twice
+    _input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+
+    # THEN the fastq directory should be located inside the case directory and the linking should have been skipped
+    assert input_dir == Path(case_dir, "fastq").as_posix()
+    assert "Skipping linking" in caplog.text
+
+
+def test_get_analysis_fastq_files_directory_no_fastqs(
+    fastq_dir: str, tmp_path_factory: TempPathFactory, case_id_tumor_only: str
+):
+    """Test get analysis fastq directory when the provided fastq directory is outside the case folder."""
+
+    # GIVEN an external input fastq path and a case directory
+    case_dir: str = tmp_path_factory.mktemp(case_id_tumor_only).as_posix()
+
+    # WHEN getting the analysis fastq directory
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+
+    # THEN the fastq directory should be located inside the case directory
+    assert input_dir == Path(case_dir, "fastq").as_posix()
+
+    # THEN the case fast files should have been linked to the provided fastq directory
+    for fastq in Path(input_dir).iterdir():
+        assert fastq.is_symlink()
+        assert fastq.resolve().is_file()
+        assert fastq_dir == fastq.resolve().parent.as_posix()
