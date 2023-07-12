@@ -1,23 +1,24 @@
-import os
 import json
 import logging
+import os
 from pathlib import Path
 
 import click
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.cli import (
-    get_sample_dict,
-    get_panel_chrom,
-    get_bioinfo_tools_version,
-    generate_graph,
-)
 from BALSAMIC.constants.common import (
     CONTAINERS_CONDA_ENV_PATH,
     BIOINFO_TOOL_ENV,
     GENDER_OPTIONS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.utils.cli import (
+    get_sample_dict,
+    get_panel_chrom,
+    get_bioinfo_tools_version,
+    generate_graph,
+    get_analysis_fastq_files_directory,
+)
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.models import BalsamicConfigModel
 
@@ -248,7 +249,9 @@ def case_config(
             "case_id": case_id,
             "gender": gender,
             "analysis_dir": analysis_dir,
-            "fastq_path": fastq_path,
+            "fastq_path": get_analysis_fastq_files_directory(
+                case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
+            ),
             "analysis_type": "paired" if normal_sample_name else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
