@@ -222,21 +222,10 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def get_schedulerpy():
-    """
-    Returns a string path for scheduler.py
-    """
-
-    p = Path(__file__).parents[1]
-    scheduler = str(Path(p, "utils", "scheduler.py"))
-
-    return scheduler
-
-
-def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome="hg19"):
-    """
-    Return a string path for variant calling snakefile.
-    """
+def get_snakefile(
+    analysis_type, analysis_workflow="balsamic", reference_genome="hg19"
+) -> str:
+    """Return a string path for the specific snakemake file."""
 
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")

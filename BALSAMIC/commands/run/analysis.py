@@ -1,24 +1,23 @@
-import sys
-import os
-import logging
-import subprocess
 import json
-import click
-
+import logging
+import os
+import subprocess
+import sys
 from pathlib import Path
 
+import click
+
 from BALSAMIC.constants.cluster import ClusterConfigType
-from BALSAMIC.constants.paths import SCRIPT_DIR
+from BALSAMIC.constants.paths import SCRIPT_DIR, SCHEDULER_PATH
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import (
     createDir,
-    get_schedulerpy,
     get_snakefile,
     SnakeMake,
     job_id_dump_to_yaml,
     get_fastq_files_directory,
     get_config_path,
 )
-from BALSAMIC.constants.workflow_params import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 
@@ -97,7 +96,7 @@ LOG = logging.getLogger(__name__)
     type=click.Choice(["low", "normal", "high", "express"]),
     show_default=True,
     default="low",
-    help="QOS for sbatch jobs. Passed to " + get_schedulerpy(),
+    help=f"QOS for sbatch jobs. Passed to {SCHEDULER_PATH}",
 )
 @click.option(
     "-f",
@@ -249,7 +248,7 @@ def analysis(
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
-    balsamic_run.scheduler = get_schedulerpy()
+    balsamic_run.scheduler = SCHEDULER_PATH
     balsamic_run.profile = profile
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath

@@ -34,9 +34,9 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
-from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR, SCHEDULER_PATH
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
-from BALSAMIC.utils.cli import SnakeMake, get_schedulerpy, get_snakefile
+from BALSAMIC.utils.cli import SnakeMake, get_snakefile
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
 LOG = logging.getLogger(__name__)
@@ -157,7 +157,7 @@ def initialize(
     balsamic_run.result_path = references_dir.as_posix()
     balsamic_run.run_analysis = run_analysis
     balsamic_run.run_mode = run_mode
-    balsamic_run.scheduler = get_schedulerpy()
+    balsamic_run.scheduler = SCHEDULER_PATH
     balsamic_run.script_path = script_dir.as_posix()
     balsamic_run.sm_opt = snakemake_opt
     balsamic_run.snakefile = snakefile
