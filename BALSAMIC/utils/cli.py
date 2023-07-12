@@ -1,17 +1,17 @@
-import os
 import logging
-import sys
+import os
 import re
 import subprocess
-from pathlib import Path
-from io import StringIO
-from distutils.spawn import find_executable
+import sys
 import zlib
+from distutils.spawn import find_executable
+from io import StringIO
+from pathlib import Path
 from typing import Dict, Optional, List
 
-import yaml
-import snakemake
 import graphviz
+import snakemake
+import yaml
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
@@ -550,7 +550,7 @@ def create_md5(reference, check_md5):
                 fh.write(get_md5(value) + " " + value + "\n")
 
 
-def get_fastq_files_directory(directory: str) -> str:
+def get_resolved_fastq_files_directory(directory: str) -> str:
     """Return the absolute path for the directory containing the input fastq files."""
     input_files: List[Path] = [
         file.absolute() for file in Path(directory).glob("*.fastq.gz")
@@ -558,3 +558,21 @@ def get_fastq_files_directory(directory: str) -> str:
     if not input_files or not input_files[0].is_symlink():
         return directory
     return os.path.commonpath([file.resolve().as_posix() for file in input_files])
+
+
+def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
+    """Return analysis fastq directory, linking the fastq files if necessary."""
+    analysis_fastq_path: Path = Path(case_dir, "fastq")
+    analysis_fastq_path.mkdir(parents=True, exist_ok=True)
+    if Path(case_dir) not in Path(fastq_path).parents:
+        for fastq in Path(fastq_path).glob("*.fastq.gz"):
+            try:
+                Path(analysis_fastq_path, fastq.name).symlink_to(fastq)
+                LOG.info(f"Created link for {fastq} in {analysis_fastq_path}")
+            except FileExistsError:
+                LOG.warning(
+                    f"File {Path(analysis_fastq_path, fastq.name)} exists. Skipping linking."
+                )
+
+        return analysis_fastq_path.as_posix()
+    return fastq_path
