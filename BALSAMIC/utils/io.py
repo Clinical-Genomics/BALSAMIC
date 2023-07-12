@@ -75,4 +75,4 @@ def read_yaml(yaml_path: str) -> dict:
 def write_finish_file(file_path: str) -> None:
     """Write finish file indicating the analysis completion."""
     with open(file_path, mode="w") as finish_file:
-        finish_file.write("%s\n" % datetime.now().strftime("%Y-%m-%d %H:%M"))
+        finish_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
