@@ -35,7 +35,6 @@ rule preprocess_refseq:
                 awk '$1~/chr[1-9]/ && $1!~/[_]/' |\
                 cut -c 4- |\
                 sort -k1,1 -k2,2n > "{output.refgene_bed}"
-                
         ) &> "{log.refgene_bed}"
         
         # Generate RefSeq's flat file and remove "chr" prefix from refgene_txt and access_regions files
