@@ -1,4 +1,6 @@
 """Balsamic cache specific constants."""
+from typing import Dict
+
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.class_types import StrEnum
 
@@ -51,7 +53,7 @@ class DockerContainers(StrEnum):
     VCF2CYTOSURE: str = "vcf2cytosure"
 
 
-REFERENCE_FILES = {
+REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
     GenomeVersion.HG19: {
         "reference_genome": {
             "url": "gs://gatk-legacy-bundles/b37/human_g1k_v37.fasta.gz",
