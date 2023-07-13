@@ -243,9 +243,7 @@ def analysis(
         + "/"
     )
     balsamic_run.snakefile = (
-        snake_file
-        if snake_file
-        else get_snakefile(analysis_type, analysis_workflow, reference_genome)
+        snake_file if snake_file else get_snakefile(analysis_type, analysis_workflow)
     )
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode

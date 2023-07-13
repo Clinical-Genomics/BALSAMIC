@@ -129,9 +129,7 @@ def initialize(
     LOG.info(f"Reference workflow configured successfully ({config_path.as_posix()})")
 
     snakefile: Path = (
-        snakefile
-        if snakefile
-        else get_snakefile("generate_ref", "balsamic", genome_version)
+        snakefile if snakefile else get_snakefile("generate_ref", "balsamic")
     )
 
     generate_workflow_graph(

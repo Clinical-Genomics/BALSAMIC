@@ -222,9 +222,7 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def get_snakefile(
-    analysis_type, analysis_workflow="balsamic", reference_genome="hg19"
-) -> str:
+def get_snakefile(analysis_type, analysis_workflow="balsamic") -> str:
     """Return a string path for the specific snakemake file."""
 
     p = Path(__file__).parents[1]
@@ -427,9 +425,6 @@ def generate_graph(config_collection_dict, config_path):
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
                 analysis_workflow=config_collection_dict["analysis"][
                     "analysis_workflow"
-                ],
-                reference_genome=config_collection_dict["reference"][
-                    "reference_genome"
                 ],
             ),
             dryrun=True,
