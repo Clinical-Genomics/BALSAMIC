@@ -359,7 +359,7 @@ def bioinfo_tool_version_conda(
 
 
 def get_bioinfo_tools_version(
-    bioinfo_tools: dict, container_conda_env_path: os.PathLike
+    bioinfo_tools: dict, container_conda_env_path: Path
 ) -> dict:
     """Parses the names and versions of bioinfo tools
     used by BALSAMIC from config YAML into a dict.

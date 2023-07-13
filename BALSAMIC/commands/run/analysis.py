@@ -96,7 +96,7 @@ LOG = logging.getLogger(__name__)
     type=click.Choice(["low", "normal", "high", "express"]),
     show_default=True,
     default="low",
-    help=f"QOS for sbatch jobs. Passed to {SCHEDULER_PATH}",
+    help=f"QOS for sbatch jobs. Passed to {SCHEDULER_PATH.as_posix()}",
 )
 @click.option(
     "-f",
@@ -230,7 +230,7 @@ def analysis(
         bind_path.append(sample_config.get("background_variants"))
     if "pon_cnn" in sample_config:
         bind_path.append(sample_config.get("panel").get("pon_cnn"))
-    bind_path.append(SCRIPT_DIR)
+    bind_path.append(SCRIPT_DIR.as_posix())
     bind_path.append(sample_config["analysis"]["analysis_dir"])
 
     # Construct snakemake command to run workflow
@@ -248,7 +248,7 @@ def analysis(
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
-    balsamic_run.scheduler = SCHEDULER_PATH
+    balsamic_run.scheduler = SCHEDULER_PATH.as_posix()
     balsamic_run.profile = profile
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath

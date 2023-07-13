@@ -197,8 +197,8 @@ try:
     else:
         config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR
+    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
+    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
 
 except KeyError as error:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "

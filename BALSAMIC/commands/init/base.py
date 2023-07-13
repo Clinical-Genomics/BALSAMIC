@@ -155,7 +155,7 @@ def initialize(
     balsamic_run.result_path = references_dir.as_posix()
     balsamic_run.run_analysis = run_analysis
     balsamic_run.run_mode = run_mode
-    balsamic_run.scheduler = SCHEDULER_PATH
+    balsamic_run.scheduler = SCHEDULER_PATH.as_posix()
     balsamic_run.script_path = script_dir.as_posix()
     balsamic_run.sm_opt = snakemake_opt
     balsamic_run.snakefile = snakefile

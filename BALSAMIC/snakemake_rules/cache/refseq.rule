@@ -12,7 +12,7 @@ rule preprocess_refseq:
         refgene_bed=cache_config.references.get_refgene_bed_file_path(),
         refgene_flat=cache_config.references.get_refgene_flat_file_path(),
     params:
-        refseq_script_path=REFSEQ_SCRIPT_PATH,
+        refseq_script_path=REFSEQ_SCRIPT_PATH.as_posix(),
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['bedtools']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="preprocess_refseq")
