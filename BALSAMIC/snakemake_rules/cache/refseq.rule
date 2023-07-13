@@ -19,7 +19,7 @@ rule preprocess_refseq:
     message:
         "Preprocessing RefSeq's gene files {input.refgene_sql} and {input.refgene_txt}"
     benchmark:
-        f"{cache_config.references.get_refgene_flat_file_path()}.benchmark.{FileType.TSV}"
+        f"{cache_config.references.get_refgene_bed_file_path()}.benchmark.{FileType.TSV}"
     log:
         refgene_bed=f"{cache_config.references.get_refgene_bed_file_path()}.{FileType.LOG}",
         refgene_flat=f"{cache_config.references.get_refgene_flat_file_path()}.{FileType.LOG}",
