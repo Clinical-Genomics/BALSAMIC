@@ -19,7 +19,7 @@ Fixed:
 ^^^^^^
 * vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
 * Link external fastqs to case folder & create case directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1195
-
+* vcf2cytosure container missing constants https://github.com/Clinical-Genomics/BALSAMIC/pull/11
 [12.0.1]
 --------
 
