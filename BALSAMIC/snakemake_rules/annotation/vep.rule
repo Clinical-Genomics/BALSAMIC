@@ -101,15 +101,12 @@ rule vep_somatic_research_sv:
     vcf_research = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
     header = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
   output:
-    vcf_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+    vcf_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
   benchmark:
     Path(benchmark_dir, "vep_somatic_SV.somatic." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
-    swegen_sv_frequency = swegen_sv,
-    vcf_research_vep = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz"),
-    vcf_research_swegen = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.swegen.vcf.gz"),
     message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
     vep_cache = config["reference"]["vep"],
     vep_defaults = params.vep.vep_filters
@@ -119,8 +116,6 @@ rule vep_somatic_research_sv:
     "Running vep annotation for structural and copy number variants on {params.message_text}"
   shell:
       """
-if [[ -f "{params.swegen_sv_frequency}" ]]; then
-
 vep_path=$(dirname $(readlink -f $(which vep)));
 export PERL5LIB=;
 bcftools reheader --threads {threads} -s {input.header} {input.vcf_research} | \
@@ -129,31 +124,46 @@ vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
---output_file {params.vcf_research_vep} \
+--output_file {output.vcf_research_vep} \
 --fork {threads} \
 {params.vep_defaults} \
 
-tabix -p vcf -f {params.vcf_research_vep};
+tabix -p vcf -f {output.vcf_research_vep};
+          """
+
+
+
+rule svdb_annotate_somatic_research_sv:
+  input:
+    vcf_sv_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
+    header = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
+  output:
+    vcf_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, "vep_somatic_SV.somatic." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+  params:
+    swegen_sv_frequency = swegen_sv,
+    tmp_vcf = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.tmp.swegen.vcf"),
+    message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
+  threads:
+    get_threads(cluster_config, "vep_somatic_research_sv")
+  message:
+    "Running vep annotation for structural and copy number variants on {params.message_text}"
+  shell:
+      """
+if [[ -f "{params.swegen_sv_frequency}" ]]; then
 
 svdb --query --bnd_distance 5000 --overlap 0.80 \
 --in_occ OCC --out_occ swegen_obs --in_frq FRQ --out_frq SWEGENAF \
---db {params.swegen_sv_frequency} --query_vcf {params.vcf_research_vep} > {params.vcf_research_swegen};
+--db {params.swegen_sv_frequency} --query_vcf {input.vcf_sv_research_vep} > {params.tmp_vcf};
 
-bgzip -l 9 -c {params.vcf_research_swegen} > {output.vcf_research};
+bgzip -l 9 -c {params.tmp_vcf} > {output.vcf_research};
 
 else
 
-vep_path=$(dirname $(readlink -f $(which vep)));
-export PERL5LIB=;
-bcftools reheader --threads {threads} -s {input.header} {input.vcf_research} | \
-bcftools view --threads {threads} -O v | \
-vep \
---dir $vep_path \
---dir_cache {params.vep_cache} \
---dir_plugins $vep_path \
---output_file {output.vcf_research} \
---fork {threads} \
-{params.vep_defaults} \
+cp {input.vcf_sv_research_vep} {output.vcf_research};
 
 fi
 
