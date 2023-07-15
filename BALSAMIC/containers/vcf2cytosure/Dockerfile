@@ -1,4 +1,4 @@
-FROM python:3.11-slim AS builder
+FROM python:3.11.3-slim AS builder
 
 ARG CONTAINER_NAME
 ENV WORK_DIR /opt/
