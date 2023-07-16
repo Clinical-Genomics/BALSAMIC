@@ -16,5 +16,5 @@ rule convert_delly_exclusion_file:
         f"{cache_config.references.get_delly_exclusion_converted_file_path()}.{FileType.LOG}",
     shell:
         """
-        sed 's/chr//g' "{input.exclusion_file}" > "{output.exclusion_converted_file}" &> "{log}"
+        sed 's/chr//g' "{input.exclusion_file}" > "{output.exclusion_converted_file}" 2> "{log}"
         """
