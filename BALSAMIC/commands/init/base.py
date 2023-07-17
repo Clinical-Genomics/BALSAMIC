@@ -1,14 +1,14 @@
-import os
-import sys
-import re
 import logging
+import re
 import subprocess
+import sys
 from pathlib import Path
 
 import click
 import graphviz
 import snakemake
 
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
 )
@@ -21,7 +21,6 @@ from BALSAMIC.utils.cli import (
     get_schedulerpy,
     get_config_path,
 )
-from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
