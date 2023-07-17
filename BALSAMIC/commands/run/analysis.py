@@ -7,6 +7,7 @@ import click
 
 from pathlib import Path
 
+from BALSAMIC.constants.paths import SCRIPT_DIR
 from BALSAMIC.utils.cli import (
     createDir,
     get_schedulerpy,
@@ -16,7 +17,6 @@ from BALSAMIC.utils.cli import (
     job_id_dump_to_yaml,
     get_resolved_fastq_files_directory,
 )
-from BALSAMIC.constants.common import BALSAMIC_SCRIPTS
 from BALSAMIC.constants.workflow_params import VCF_DICT
 
 LOG = logging.getLogger(__name__)
@@ -230,7 +230,7 @@ def analysis(
         bind_path.append(sample_config.get("background_variants"))
     if "pon_cnn" in sample_config:
         bind_path.append(sample_config.get("panel").get("pon_cnn"))
-    bind_path.append(BALSAMIC_SCRIPTS)
+    bind_path.append(SCRIPT_DIR)
     bind_path.append(sample_config["analysis"]["analysis_dir"])
 
     # Construct snakemake command to run workflow

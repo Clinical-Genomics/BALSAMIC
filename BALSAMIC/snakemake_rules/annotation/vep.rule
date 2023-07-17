@@ -19,7 +19,7 @@ rule vep_somatic_research_snv:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmpvcf_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz",
     vcfanno_research_annotations = dump_toml(research_annotations),
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_somatic_research_snv")
@@ -98,7 +98,7 @@ rule vep_somatic_sv:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     message_text = "SV.somatic.{case_name}.svdb.research.vcf.gz",
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_somatic_sv")
@@ -262,7 +262,7 @@ rule vep_germline_tumor:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
     sample = 'tumor',
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')
@@ -301,7 +301,7 @@ rule vep_germline_normal:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
     sample = 'normal',
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')

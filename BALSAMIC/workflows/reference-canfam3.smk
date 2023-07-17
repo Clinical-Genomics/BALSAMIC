@@ -7,10 +7,10 @@ from pathlib import Path
 
 from copy import deepcopy
 
+from BALSAMIC.constants.cache import REFERENCE_FILES
 from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.rule import get_reference_output_files
 from BALSAMIC.utils.models import ReferenceMeta
-from BALSAMIC.constants.reference import REFERENCE_FILES as REFERENCE_MODEL
 from BALSAMIC.utils.cli import get_md5
 from BALSAMIC.utils.cli import create_md5
 
@@ -29,7 +29,6 @@ genome_dir = os.path.join(basedir, "genome")
 # Set temporary dir environment variable
 os.environ['TMPDIR'] = basedir
 
-REFERENCE_FILES = deepcopy(REFERENCE_MODEL)
 
 # intialize reference files
 REFERENCE_FILES[genome_ver]['basedir'] = basedir
@@ -78,9 +77,9 @@ rule all:
         ref_json = dict()
         ref_json['reference'] = {
             "reference_genome": input.reference_genome,
-            "exon_bed": input.refseq_bed,
-            "refflat": input.refseq_flat,
-            "refGene": input.refgene,
+            "refgene_bed": input.refseq_bed,
+            "refgene_flat": input.refseq_flat,
+            "refgene_txt": input.refgene,
             "genome_chrom_size": input.genome_chrom_size,
             "reference_access_date": today,
         }
@@ -141,7 +140,7 @@ rule prepare_refgene:
     params:
         refgene_sql_awk = get_script_path('refseq_sql.awk'),
     output:
-        refflat = refgene_txt_url.get_output_file.replace("txt", "flat"),
+        refgene_flat = refgene_txt_url.get_output_file.replace("txt", "flat"),
         bed = refgene_txt_url.get_output_file.replace("txt", "flat") + ".bed",
     log:
         refgene_sql = os.path.join(basedir, "genome", "refgene_sql.log"),
@@ -157,7 +156,7 @@ header=$(awk -f {params.refgene_sql_awk} {input.refgene_sql});
 | awk '$1~/chr[1-9]/ && $1!~/[_]/' | sort -k1,1 -k2,2n > {output.bed};
 
 awk -v OFS=\"\\t\" '$3!~/_/ {{ gsub(\"chr\",\"chr\",$3); $1=$13; print }}' {input.refgene_txt} \
-| cut -f 1-11 > {output.refflat};
+| cut -f 1-11 > {output.refgene_flat};
         """
 
 ##########################################################

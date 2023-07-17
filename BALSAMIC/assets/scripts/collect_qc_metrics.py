@@ -7,7 +7,7 @@ import click
 import yaml
 import re
 
-from BALSAMIC.constants.qc_metrics import METRICS
+from BALSAMIC.constants.metrics import METRICS
 from BALSAMIC.utils.io import read_json
 from BALSAMIC.utils.models import MetricModel
 from BALSAMIC.utils.rule import (

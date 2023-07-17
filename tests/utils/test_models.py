@@ -38,15 +38,15 @@ def test_referencemeta():
             "file_type": "fasta",
             "gzip": True,
             "genome_version": "hg19",
-            "output_file": "genome.fa",
-            "output_path": "genome",
+            "file_name": "genome.fa",
+            "dir_name": "genome",
         },
         "dbsnp": {
             "url": "gs://some_path/b37/dbsnp_138.b37.vcf.gz",
             "file_type": "fasta",
             "gzip": True,
             "genome_version": "hg19",
-            "output_file": "dbsnp.vcf",
+            "file_name": "dbsnp.vcf",
         },
     }
 
@@ -71,8 +71,8 @@ def test_referenceurlsmodel_build_model():
         "file_type": "fasta",
         "gzip": True,
         "genome_version": "hg19",
-        "output_file": dummy_output_file,
-        "output_path": dummy_output_path,
+        "file_name": dummy_output_file,
+        "dir_name": dummy_output_path,
     }
 
     # WHEN building the model
@@ -95,8 +95,8 @@ def test_referenceurlsmodel_validate_file_type():
         "file_type": "wrong_type",
         "gzip": True,
         "genome_version": "hg19",
-        "output_file": dummy_output_file,
-        "output_path": dummy_output_path,
+        "file_name": dummy_output_file,
+        "dir_name": dummy_output_path,
     }
 
     # WHEN building the model
@@ -121,8 +121,8 @@ def test_referenceurlsmodel_write_md5(tmp_path_factory):
         "file_type": "fasta",
         "gzip": True,
         "genome_version": "hg19",
-        "output_file": dummy_output_file,
-        "output_path": dummy_output_path.as_posix(),
+        "file_name": dummy_output_file,
+        "dir_name": dummy_output_path.as_posix(),
     }
 
     # WHEN building the model
@@ -146,8 +146,8 @@ def test_referenceurlsmodel_write_md5_no_output_file(tmp_path_factory):
         "file_type": "fasta",
         "gzip": True,
         "genome_version": "hg19",
-        "output_file": dummy_output_file,
-        "output_path": dummy_output_path.as_posix(),
+        "file_name": dummy_output_file,
+        "dir_name": dummy_output_path.as_posix(),
     }
 
     # WHEN building the model
@@ -171,8 +171,8 @@ def test_referenceurlsmodel_validate_genome_version():
         "file_type": "fasta",
         "gzip": True,
         "genome_version": "wrong_genome",
-        "output_file": dummy_output_file,
-        "output_path": dummy_output_path,
+        "file_name": dummy_output_file,
+        "dir_name": dummy_output_path,
     }
 
     with pytest.raises(ValidationError) as excinfo:

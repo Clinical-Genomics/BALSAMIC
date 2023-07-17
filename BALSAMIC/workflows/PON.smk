@@ -6,9 +6,8 @@ import glob
 import tempfile
 import os
 
-
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.utils.rule import get_picard_mrkdup, get_threads, get_result_dir
-from BALSAMIC.constants.common import RULE_DIRECTORY
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.utils.models import BalsamicWorkflowConfig
 
@@ -28,7 +27,7 @@ bam_dir =  analysis_dir + "/bam/"
 cnv_dir =  analysis_dir + "/cnv/"
 
 reffasta = config["reference"]["reference_genome"]
-refflat = config["reference"]["refflat"]
+refgene_flat = config["reference"]["refgene_flat"]
 access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
 singularity_image = config["singularity"]["image"]
@@ -54,7 +53,7 @@ config["rules"] = [
 ]
 
 for r in config["rules"]:
-    include: Path(RULE_DIRECTORY, r).as_posix()
+    include: Path(BALSAMIC_DIR, r).as_posix()
 
 rule all:
     input:
@@ -71,7 +70,7 @@ rule all:
 rule create_target:
     input:
         target_bait = target_bed,
-        refFlat = refflat,
+        refgene_flat = refgene_flat,
         access_bed = access_5kb_hg19
     output:
         target_bed = cnv_dir + "target.bed",
@@ -82,7 +81,7 @@ rule create_target:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
     shell:
         """
-cnvkit.py target {input.target_bait} --annotate {input.refFlat} --split -o {output.target_bed};
+cnvkit.py target {input.target_bait} --annotate {input.refgene_flat} --split -o {output.target_bed};
 cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtarget_bed};
         """
 

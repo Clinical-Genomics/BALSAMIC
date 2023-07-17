@@ -1,6 +1,5 @@
 import os
 import re
-from typing import Optional
 
 import toml
 import logging
@@ -8,12 +7,12 @@ from pathlib import Path
 import snakemake
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import find_file_index
-from BALSAMIC.constants.common import (
-    MUTATION_TYPE,
-    MUTATION_CLASS,
-    SEQUENCING_TYPE,
-    WORKFLOW_SOLUTION,
-    ANALYSIS_TYPES,
+from BALSAMIC.constants.analysis import (
+    AnalysisType,
+    SequencingType,
+    MutationOrigin,
+    MutationType,
+    WorkflowSolution,
 )
 from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
 
@@ -78,19 +77,19 @@ def get_variant_callers(
     """
 
     valid_variant_callers = list()
-    if mutation_type not in MUTATION_TYPE:
+    if mutation_type not in set(MutationType):
         raise WorkflowRunError(f"{mutation_type} is not a valid mutation type.")
 
-    if workflow_solution not in WORKFLOW_SOLUTION:
+    if workflow_solution not in set(WorkflowSolution):
         raise WorkflowRunError(f"{workflow_solution} is not a valid workflow solution.")
 
-    if analysis_type not in ANALYSIS_TYPES:
+    if analysis_type not in set(AnalysisType):
         raise WorkflowRunError(f"{analysis_type} is not a valid analysis type.")
 
-    if mutation_class not in MUTATION_CLASS:
+    if mutation_class not in set(MutationOrigin):
         raise WorkflowRunError(f"{mutation_class} is not a valid mutation class.")
 
-    if sequencing_type not in SEQUENCING_TYPE:
+    if sequencing_type not in set(SequencingType):
         raise WorkflowRunError(f"{sequencing_type} is not a valid sequencing type.")
 
     for variant_caller_name, variant_caller_params in config["vcf"].items():
@@ -346,7 +345,7 @@ def get_reference_output_files(
         if reference_item["file_type"] == file_type:
             if gzip is not None and reference_item["gzip"] != gzip:
                 continue
-            ref_vcf_list.append(reference_item["output_file"])
+            ref_vcf_list.append(reference_item["file_name"])
     return ref_vcf_list
 
 

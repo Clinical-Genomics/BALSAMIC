@@ -14,7 +14,7 @@ rule sentieon_base_calibration:
     input:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
-        indel_1kg = config["reference"]["1kg_known_indel"],
+        indel_1kg = config["reference"]["known_indel_1kg"],
         dbsnp = config["reference"]["dbsnp"],
         bam = Path(bam_dir, "{sample_type}.merged.bam").as_posix()
     output:
