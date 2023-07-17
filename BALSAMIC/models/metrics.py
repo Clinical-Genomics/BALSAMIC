@@ -32,7 +32,6 @@ class Metric(BaseModel):
         step (str, required)                  : Step that generated the metric.
         value (Any, required)                 : Metric value.
         condition (MetricCondition, required) : Metric validation condition.
-
     """
 
     header: Optional[str]
@@ -46,10 +45,8 @@ class Metric(BaseModel):
     @validator("name")
     def validate_name(cls, name, values):
         """Updates the name if the source is FastQC."""
-
         if "fastqc-percent_duplicates" in name:
             return "PERCENT_DUPLICATION_R" + values["input"].split("_")[-2]
-
         return name
 
 
@@ -65,7 +62,6 @@ class MetricValidation(BaseModel):
     @validator("metrics", each_item=True)
     def validate_metrics(cls, metric):
         """Checks if a metric meets its filtering condition."""
-
         if metric.condition and not VALID_OPS[metric.condition.norm](
             metric.value, metric.condition.threshold
         ):
@@ -73,7 +69,5 @@ class MetricValidation(BaseModel):
                 f"QC metric {metric.name}: {metric.value} validation has failed. "
                 f"(Condition: {metric.condition.norm} {metric.condition.threshold}, ID: {metric.id})."
             )
-
         LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
-
         return metric

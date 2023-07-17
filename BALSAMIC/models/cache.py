@@ -24,7 +24,6 @@ class ReferenceUrl(BaseModel):
         dir_name (str)            : Destination directory of the downloaded file.
         file_path (str, optional) : Full reference file path.
         secret (str)              : Database key.
-
     """
 
     url: AnyUrl

@@ -4,6 +4,7 @@ from typing import Dict, Any, List
 
 import pytest
 from _pytest.logging import LogCaptureFixture
+from pydantic import ValidationError
 
 from BALSAMIC.constants.cache import (
     GRCHVersion,
@@ -11,8 +12,6 @@ from BALSAMIC.constants.cache import (
     GenomeVersion,
 )
 from BALSAMIC.constants.constants import FileType, BwaIndexFileType
-from pydantic import ValidationError
-
 from BALSAMIC.models.cache import (
     AnalysisReferences,
     AnalysisReferencesCanFam,
