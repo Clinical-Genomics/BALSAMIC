@@ -17,7 +17,7 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.models import BalsamicConfigModel
+from BALSAMIC.models.analysis import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
 

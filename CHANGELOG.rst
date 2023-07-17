@@ -15,6 +15,7 @@ Changed:
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
 * Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
 * Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
+* Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 
 Fixed:
 ^^^^^^

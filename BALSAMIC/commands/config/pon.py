@@ -14,7 +14,7 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.models import PonBalsamicConfigModel
+from BALSAMIC.models.analysis import PonBalsamicConfigModel
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 

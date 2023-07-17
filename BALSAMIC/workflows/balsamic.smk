@@ -17,7 +17,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
 from BALSAMIC.utils.io import write_json, read_yaml
 
-from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
@@ -563,7 +563,7 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
+        from BALSAMIC.utils.metrics import validate_qc_metrics
 
         # Perform validation of extracted QC metrics
         try:

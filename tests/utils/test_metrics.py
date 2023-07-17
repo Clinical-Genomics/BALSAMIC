@@ -1,4 +1,4 @@
-from BALSAMIC.utils.qc_metrics import validate_qc_metrics
+from BALSAMIC.utils.metrics import validate_qc_metrics
 
 
 def test_validate_qc_metrics(qc_extracted_metrics):
