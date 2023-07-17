@@ -13,7 +13,7 @@ rule vep_somatic_research_snv:
     vcf_snv_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz"),
     vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -61,7 +61,7 @@ rule vep_somatic_clinical_snv:
     vcf_snv_clinical = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz"),
     vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
   benchmark:
-    Path(benchmark_dir, "vep_somatic_clinical_SNV.somatic.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_clinical_snv.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -80,15 +80,15 @@ if [[ -f "{params.clinical_snv}" || \
       -f "{params.cancer_germline_snv}" || \
       -f "{params.cancer_somatic_snv}" ]] ; then
 
-echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
+  echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
 
-vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} | \
-bcftools reheader --threads {threads} -s {input.header} | \
-bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical} ;
+  vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} | \
+  bcftools reheader --threads {threads} -s {input.header} | \
+  bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical} ;
 
 else
 
-cp {input.vcf_snv_research} {output.vcf_snv_clinical};
+  cp {input.vcf_snv_research} {output.vcf_snv_clinical};
 
 fi
 
@@ -103,7 +103,7 @@ rule vep_somatic_research_sv:
   output:
     vcf_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_SV.somatic." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -140,7 +140,7 @@ rule svdb_annotate_somatic_research_sv:
   output:
     vcf_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_SV.somatic." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
+    Path(benchmark_dir, "svdb_annotate_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
   params:
@@ -155,15 +155,15 @@ rule svdb_annotate_somatic_research_sv:
       """
 if [[ -f "{params.swegen_sv_frequency}" ]]; then
 
-svdb --query --bnd_distance 5000 --overlap 0.80 \
---in_occ OCC --out_occ swegen_obs --in_frq FRQ --out_frq SWEGENAF \
---db {params.swegen_sv_frequency} --query_vcf {input.vcf_sv_research_vep} > {params.tmp_vcf};
+  svdb --query --bnd_distance 5000 --overlap 0.80 \
+  --in_occ OCC --out_occ swegen_obs --in_frq FRQ --out_frq SWEGENAF \
+  --db {params.swegen_sv_frequency} --query_vcf {input.vcf_sv_research_vep} > {params.tmp_vcf};
 
-bgzip -l 9 -c {params.tmp_vcf} > {output.vcf_research};
+  bgzip -l 9 -c {params.tmp_vcf} > {output.vcf_research};
 
 else
 
-cp {input.vcf_sv_research_vep} {output.vcf_research};
+  cp {input.vcf_sv_research_vep} {output.vcf_research};
 
 fi
 
@@ -178,7 +178,7 @@ rule svdb_annotate_somatic_clinical_sv:
     output:
         vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
     benchmark:
-        Path(benchmark_dir, 'annotate_clinical_observation_somatic_sv_' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir, 'svdb_annotate_somatic_clinical_sv.' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
@@ -197,36 +197,38 @@ rule svdb_annotate_somatic_clinical_sv:
 if [[ -f "{params.clinical_sv_observations}" && \ 
       -f "{params.somatic_sv_observations}" ]] ; then
 
-svdb --query --bnd_distance 10000 --overlap 0.80 \
---in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
---db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
+  svdb --query --bnd_distance 10000 --overlap 0.80 \
+  --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
+  --db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
 
-svdb --query --bnd_distance 10000 --overlap 0.80 \
---in_occ Obs --out_occ somatic_obs --in_frq Frq --out_frq somatic_frq \
---db {params.somatic_sv_observations} --query_vcf {params.vcf_clinical_obs} > {params.vcf_somatic_obs}
+  svdb --query --bnd_distance 10000 --overlap 0.80 \
+  --in_occ Obs --out_occ somatic_obs --in_frq Frq --out_frq somatic_frq \
+  --db {params.somatic_sv_observations} --query_vcf {params.vcf_clinical_obs} > {params.vcf_somatic_obs}
 
-bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
+  bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
 
 
 elif [[ -f "{params.clinical_sv_observations}" ]]; then
-svdb --query --bnd_distance 10000 --overlap 0.80 \
---in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
---db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
 
-bgzip -l 9 -c {params.vcf_clinical_obs} > {output.vcf_sv_clinical};
+  svdb --query --bnd_distance 10000 --overlap 0.80 \
+  --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
+  --db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
+
+  bgzip -l 9 -c {params.vcf_clinical_obs} > {output.vcf_sv_clinical};
 
 
 elif [[ -f "{params.somatic_sv_observations}" ]]; then
-svdb --query --bnd_distance 10000 --overlap 0.80 \
---in_occ Obs --out_occ somatic_obs --in_frq Frq --out_frq somatic_frq \
---db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_somatic_obs}
 
-bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
+  svdb --query --bnd_distance 10000 --overlap 0.80 \
+  --in_occ Obs --out_occ somatic_obs --in_frq Frq --out_frq somatic_frq \
+  --db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_somatic_obs}
+
+  bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
 
 
 else
 
-cp {input.vcf_sv_research} {output.vcf_sv_clinical};
+  cp {input.vcf_sv_research} {output.vcf_sv_clinical};
 
 fi
 
@@ -240,7 +242,7 @@ rule tmb_calculation:
   output:
     tmb = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.balsamic_stat"
   benchmark:
-    Path(benchmark_dir, "vep_stat_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "tmb_calculation_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -298,7 +300,7 @@ rule vep_germline_tumor:
   output:
     vcf_tumor = vep_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_germline_{var_type}.germline.tumor.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_germline_{var_type}.tumor.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -337,7 +339,7 @@ rule vep_germline_normal:
   output:
     vcf_normal = vep_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_germline_{var_type}.germline.normal.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_germline_{var_type}.normal.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
