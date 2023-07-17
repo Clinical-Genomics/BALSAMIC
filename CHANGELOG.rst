@@ -23,6 +23,10 @@ Fixed:
 * vcf2cytosure container missing constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1198
 * Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
 
+Removed:
+^^^^^^^
+* Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
+
 [12.0.1]
 --------
 

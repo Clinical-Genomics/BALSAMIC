@@ -9,6 +9,8 @@ from functools import partial
 
 from _pytest.tmpdir import TempPathFactory
 
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
@@ -124,28 +126,9 @@ def environ():
 
 
 @pytest.fixture(scope="session")
-def config_files():
-    """
-    Creates a dictionary containing paths of the config files.
-    """
-    return {
-        "sample": "BALSAMIC/config/sample.json",
-        "analysis_paired": "BALSAMIC/config/analysis_paired.json",
-        "cluster_json": "BALSAMIC/config/cluster.json",
-        "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
-        "analysis_single": "BALSAMIC/config/analysis_single.json",
-        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
-        "panel_bed_file": "tests/test_data/references/panel/panel.bed",
-        "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
-        "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
-        "pon_fastq_path": "tests/test_data/fastq/",
-        "clinical_snv_observations": "tests/test_data/references/variants/clinical_snv_variants.vcf.gz",
-        "cancer_germline_snv_observations": "tests/test_data/references/variants/cancer_germline_snv_variants.vcf.gz",
-        "cancer_somatic_snv_observations": "tests/test_data/references/variants/cancer_somatic_snv_variants.vcf.gz",
-        "clinical_sv_observations": "tests/test_data/references/variants/clinical_sv_variants.vcf.gz",
-        "swegen_snv_frequency": "tests/test_data/references/variants/swegen_snv.vcf.gz",
-        "swegen_sv_frequency": "tests/test_data/references/variants/swegen_sv.vcf.gz",
-    }
+def cluster_analysis_config_path() -> str:
+    """Return cluster analysis configuration file."""
+    return Path(CONSTANTS_DIR, ClusterConfigType.ANALYSIS.value + ".json").as_posix()
 
 
 @pytest.fixture(scope="session")

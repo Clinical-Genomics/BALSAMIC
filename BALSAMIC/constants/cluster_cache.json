@@ -1,0 +1,14 @@
+{
+    "__default__": {
+        "n": 12,
+        "time": "02:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "all": {
+        "n": 1,
+        "time": "00:15:00",
+        "mail_type": "END",
+        "partition": "core"
+    }
+}

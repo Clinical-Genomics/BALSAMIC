@@ -1,23 +1,24 @@
-import sys
-import os
-import logging
-import subprocess
 import json
-import click
-
+import logging
+import os
+import subprocess
+import sys
 from pathlib import Path
 
+import click
+
+from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import SCRIPT_DIR
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import (
     createDir,
     get_schedulerpy,
     get_snakefile,
     SnakeMake,
-    get_config,
     job_id_dump_to_yaml,
+    get_config_path,
     get_resolved_fastq_files_directory,
 )
-from BALSAMIC.constants.workflow_params import VCF_DICT
 
 LOG = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ LOG = logging.getLogger(__name__)
     "-c",
     "--cluster-config",
     show_default=True,
-    default=get_config("cluster"),
+    default=get_config_path(ClusterConfigType.ANALYSIS),
     type=click.Path(),
     help="cluster config json file. (eg- SLURM, QSUB)",
 )

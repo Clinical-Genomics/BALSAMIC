@@ -189,14 +189,15 @@ def test_qsub_scheduler():
     )
 
 
-def test_read_sample_config_err(config_files):
+def test_read_sample_config_err(panel_bed_file: str):
     with pytest.raises(Exception):
+
         # GIVEN a bed file instead of json file
-        bed_file = config_files["panel_bed_file"]
 
         # WHEN calling read_sample_config
+
         # THEN It should raise the exception error
-        assert read_sample_config(bed_file)
+        assert read_sample_config(panel_bed_file)
 
 
 def test_write_sacct_file_err():

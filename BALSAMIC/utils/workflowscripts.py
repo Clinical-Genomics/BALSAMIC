@@ -1,5 +1,3 @@
-import os
-import subprocess
 import json
 from pathlib import Path
 import pandas as pd
@@ -8,9 +6,9 @@ import numpy as np
 import h5py
 import typing
 
+from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.utils.rule import get_threads
-from BALSAMIC.utils.cli import get_config
-from BALSAMIC.utils.cli import generate_h5
+from BALSAMIC.utils.cli import get_config_path
 
 
 def plot_analysis(
@@ -20,7 +18,7 @@ def plot_analysis(
     plots analysis job.
     """
 
-    cluster_config = get_config("cluster")
+    cluster_config = get_config_path(ClusterConfigType.ANALYSIS)
     with open(cluster_config, "r") as f:
         cluster_config = json.load(f)
 
