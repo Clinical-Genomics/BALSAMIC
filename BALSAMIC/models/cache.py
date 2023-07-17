@@ -1,143 +1,444 @@
 """Balsamic reference cache models."""
-import hashlib
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional, List, Any, Union
 
-from pydantic import BaseModel, validator, AnyUrl
+from pydantic import BaseModel, AnyUrl, DirectoryPath, validator, FilePath
 
-from BALSAMIC.constants.cache import GenomeVersion, FileType
+from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
+from BALSAMIC.constants.constants import FileType, BwaIndexFileType
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
 
-class ReferenceUrlsModel(BaseModel):
-    """Defines a basemodel for reference urls
-
-    This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
+class ReferenceUrl(BaseModel):
+    """
+    Reference model handling URLs and destination paths.
 
     Attributes:
-        url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
-        file_type: describes file type. Accepted values are VALID_REF_FORMAT constant
-        gzip: gzip status. Binary: True or False
-        genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant
-
-    Raises:
-        ValidationError: When it can't validate values matching above attributes
-
+        url (AnyUrl)              : Address of the reference to download.
+        file_type (FileType)      : Reference file type.
+        gzip (bool)               : Compression status.
+        file_name (str)           : Reference file name after being downloaded.
+        dir_name (str)            : Destination directory of the downloaded file.
+        file_path (str, optional) : Full reference file path.
+        secret (str)              : Database key.
     """
 
     url: AnyUrl
-    file_type: str
-    gzip: bool = True
-    genome_version: Optional[str]
-    file_name: Optional[str]
-    dir_name: Optional[str]
+    file_type: FileType
+    gzip: bool
+    file_name: str
+    dir_name: str
+    file_path: Optional[str]
     secret: Optional[str]
 
-    @validator("file_type")
-    def check_file_type(cls, value) -> str:
-        """Validate file format according to constants"""
-        assert value in set(FileType), f"{value} not a valid reference file format."
-        return value
 
-    @validator("genome_version")
-    def check_genome_ver(cls, value) -> str:
-        """Validate genome version according constants"""
-        assert value in set(GenomeVersion), f"{value} not a valid genome version."
-        return value
-
-    @property
-    def get_output_file(self):
-        """return output file full path"""
-        output_file_path = Path(self.dir_name, self.file_name).as_posix()
-        return output_file_path
-
-    @property
-    def write_md5(self):
-        """calculate md5 for first 4kb of file and write to file_name.md5"""
-        hash_md5 = hashlib.md5()
-        output_file = Path(self.dir_name, self.file_name)
-        if not output_file.is_file():
-            raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
-
-        with open(output_file.as_posix(), "rb") as fh:
-            for chunk in iter(lambda: fh.read(4096), b""):
-                hash_md5.update(chunk)
-
-        with open(output_file.as_posix() + ".md5", "w") as fh:
-            fh.write("{} {}\n".format(output_file.as_posix(), hash_md5.hexdigest()))
-
-
-class ReferenceMeta(BaseModel):
-    """Defines a basemodel for all reference file
-
-    This class defines a meta for various reference files. Only reference_genome is mandatory.
+class References(BaseModel):
+    """
+    Reference files model.
 
     Attributes:
-        basedir: str for base directory which will be appended to all ReferenceUrlsModel fields
-        reference_genome: ReferenceUrlsModel. Required field for reference genome fasta file
-        dbsnp: ReferenceUrlsModel. Optional field for dbSNP vcf file
-        hc_vcf_1kg: ReferenceUrlsModel. Optional field for high confidence 1000Genome vcf
-        mills_1kg: ReferenceUrlsModel. Optional field for Mills' high confidence indels vcf
-        known_indel_1kg: ReferenceUrlsModel. Optional field for 1000Genome known indel vcf
-        vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
-        wgs_calling_regions: ReferenceUrlsModel. Optional field for wgs calling intervals
-        genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
-        gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
-        cosmic: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
-        refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
-        refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
-        rank_score: ReferenceUrlsModel. Optional rankscore model
-        access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
-        delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
-        delly_mappability: ReferenceUrlsModel. Optional field for genome mappability
-        ascat_gc_correction: ReferenceUrlsModel. Optional field for genome gc correction bins
-        ascat_chr_y_loci: ReferenceUrlsModel. Optional field for chromosome Y loci
-        clinvar: ReferenceUrlsModel. Optional field for clinvar reference
-        somalier_sites: ReferenceUrlsModel. Optional field for somalier sites vcf
-        cadd_snv: ReferenceUrlsModel. Optional field for CADD SNV reference
+        genome_chrom_size (ReferenceUrl) : Genome chromosome sizes.
+        reference_genome (ReferenceUrl)  : Required field for reference genome FASTA file.
+        refgene_sql (ReferenceUrl)       : RefSeq's gene SQL format from UCSC.
+        refgene_txt (ReferenceUrl)       : RefSeq's gene flat format from UCSC.
     """
 
-    basedir: str = ""
-    reference_genome: ReferenceUrlsModel
-    dbsnp: Optional[ReferenceUrlsModel]
-    hc_vcf_1kg: Optional[ReferenceUrlsModel]
-    mills_1kg: Optional[ReferenceUrlsModel]
-    known_indel_1kg: Optional[ReferenceUrlsModel]
-    vcf_1kg: Optional[ReferenceUrlsModel]
-    wgs_calling_regions: Optional[ReferenceUrlsModel]
-    genome_chrom_size: Optional[ReferenceUrlsModel]
-    gnomad_variant: Optional[ReferenceUrlsModel]
-    gnomad_variant_index: Optional[ReferenceUrlsModel]
-    cosmic: Optional[ReferenceUrlsModel]
-    refgene_txt: Optional[ReferenceUrlsModel]
-    refgene_sql: Optional[ReferenceUrlsModel]
-    rank_score: Optional[ReferenceUrlsModel]
-    access_regions: Optional[ReferenceUrlsModel]
-    delly_exclusion: Optional[ReferenceUrlsModel]
-    delly_mappability: Optional[ReferenceUrlsModel]
-    delly_mappability_gindex: Optional[ReferenceUrlsModel]
-    delly_mappability_findex: Optional[ReferenceUrlsModel]
-    ascat_gc_correction: Optional[ReferenceUrlsModel]
-    ascat_chr_y_loci: Optional[ReferenceUrlsModel]
-    clinvar: Optional[ReferenceUrlsModel]
-    somalier_sites: Optional[ReferenceUrlsModel]
-    cadd_snv: Optional[ReferenceUrlsModel]
-    cadd_snv_index: Optional[ReferenceUrlsModel]
+    genome_chrom_size: ReferenceUrl
+    reference_genome: ReferenceUrl
+    refgene_sql: ReferenceUrl
+    refgene_txt: ReferenceUrl
 
-    @validator("*", pre=True)
-    def validate_path(cls, value, values, **kwargs):
-        """validate and append path in ReferenceUrlsModel fields with basedir"""
-        if isinstance(value, str):
-            output_value = value
-        else:
-            if "dir_name" in value:
-                value["dir_name"] = Path(
-                    values["basedir"], value["dir_name"]
+    def get_reference_genome_file_paths(self) -> List[str]:
+        """Return output reference genome files."""
+        return [
+            self.reference_genome.file_path,
+            f"{self.reference_genome.file_path}.{FileType.FAI}",
+            self.reference_genome.file_path.replace(FileType.FASTA, FileType.DICT),
+        ] + self.get_reference_genome_bwa_index_file_paths()
+
+    def get_reference_genome_bwa_index_file_paths(self) -> List[str]:
+        """Return output BWA reference genome index files."""
+        return [
+            f"{self.reference_genome.file_path}.{bwa_index}"
+            for bwa_index in BwaIndexFileType
+        ]
+
+    def get_refgene_file_paths(self) -> List[str]:
+        """Return RefSeq's gene files from UCSC."""
+        return [
+            self.refgene_txt.file_path,
+            self.get_refgene_flat_file_path(),
+            self.get_refgene_bed_file_path(),
+        ]
+
+    def get_refgene_flat_file_path(self) -> str:
+        """Return RefSeq's gene flat file from UCSC."""
+        return self.refgene_txt.file_path.replace(FileType.TXT, FileType.FLAT)
+
+    def get_refgene_bed_file_path(self) -> str:
+        """Return RefSeq's gene BED file from UCSC."""
+        return f"{self.get_refgene_flat_file_path()}.{FileType.BED}"
+
+
+class ReferencesCanFam(References):
+    """Canine reference genome files model."""
+
+
+class ReferencesHg(References):
+    """
+    Human reference genome files model.
+
+    Attributes:
+        access_regions (ReferenceUrl)           : Accessible genome regions.
+        ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
+        ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
+        cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
+        clinvar (ReferenceUrl)                  : ClinVar reference.
+        cosmic (ReferenceUrl)                   : COSMIC database's variants as VCF.
+        dbsnp (ReferenceUrl)                    : dbSNP VCF file.
+        delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
+        delly_mappability (ReferenceUrl)        : Genome mappability.
+        delly_mappability_findex (ReferenceUrl) : Genome mappability fasta index.
+        delly_mappability_gindex (ReferenceUrl) : Genome mappability index.
+        gnomad_variant (ReferenceUrl)           : gnomAD variants (non SV) as VCF.
+        gnomad_variant_index (ReferenceUrl)     : gnomAD variants VCF index.
+        hc_vcf_1kg (ReferenceUrl)               : High confidence 1000 Genome VCF.
+        known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
+        mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
+        rank_score (ReferenceUrl)               : Rank score model.
+        somalier_sites (ReferenceUrl)           : Somalier sites VCF.
+        vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
+        wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
+    """
+
+    access_regions: ReferenceUrl
+    ascat_chr_y_loci: ReferenceUrl
+    ascat_gc_correction: ReferenceUrl
+    cadd_snv: ReferenceUrl
+    clinvar: ReferenceUrl
+    cosmic: ReferenceUrl
+    dbsnp: ReferenceUrl
+    delly_exclusion: ReferenceUrl
+    delly_mappability: ReferenceUrl
+    delly_mappability_findex: ReferenceUrl
+    delly_mappability_gindex: ReferenceUrl
+    gnomad_variant: ReferenceUrl
+    gnomad_variant_index: ReferenceUrl
+    hc_vcf_1kg: ReferenceUrl
+    known_indel_1kg: ReferenceUrl
+    mills_1kg: ReferenceUrl
+    rank_score: ReferenceUrl
+    somalier_sites: ReferenceUrl
+    vcf_1kg: ReferenceUrl
+    wgs_calling_regions: ReferenceUrl
+
+    def get_cadd_snv_file_paths(self) -> List[str]:
+        """Return CADD SNV reference output files."""
+        return [self.cadd_snv.file_path, f"{self.cadd_snv.file_path}.{FileType.TBI}"]
+
+    def get_delly_file_paths(self) -> List[str]:
+        """Return Delly associated output files."""
+        return [
+            self.delly_exclusion.file_path,
+            self.get_delly_exclusion_converted_file_path(),
+            self.delly_mappability.file_path,
+            self.delly_mappability_findex.file_path,
+            self.delly_mappability_gindex.file_path,
+        ]
+
+    def get_delly_exclusion_converted_file_path(self) -> str:
+        """Return path to Delly exclusion converted file."""
+        return self.delly_exclusion.file_path.replace(
+            f".{FileType.TSV}", f"_converted.{FileType.TSV}"
+        )
+
+    def get_gnomad_file_paths(self) -> List[str]:
+        """Return gnomAD associated output files."""
+        return [self.gnomad_variant.file_path, self.gnomad_variant_index.file_path]
+
+    def get_1k_genome_file_paths(self) -> List[str]:
+        """Return 1000 Genome related files."""
+        return [
+            f"{self.known_indel_1kg.file_path}.{FileType.GZ}",
+            f"{self.mills_1kg.file_path}.{FileType.GZ}",
+            f"{self.hc_vcf_1kg.file_path}.{FileType.GZ}",
+            f"{self.vcf_1kg.file_path}.{FileType.GZ}",
+        ]
+
+
+class AnalysisReferences(BaseModel):
+    """
+    Reference files pytest t for a general Balsamic analysis.
+
+    Attributes:
+        genome_chrom_size (FilePath) : Genome chromosome sizes.
+        reference_genome (FilePath)  : Required field for reference genome FASTA file.
+        refgene_bed (FilePath)       : RefSeq's gene BED format from UCSC.
+        refgene_flat (FilePath)      : RefSeq's gene flat format from UCSC.
+        refgene_txt (FilePath)       : RefSeq's gene txt format from UCSC.
+    """
+
+    genome_chrom_size: FilePath
+    reference_genome: FilePath
+    refgene_bed: FilePath
+    refgene_flat: FilePath
+    refgene_txt: FilePath
+
+
+class AnalysisReferencesCanFam(AnalysisReferences):
+    """Canine reference genome files model."""
+
+
+class AnalysisReferencesHg(AnalysisReferences):
+    """
+    Human reference genome files model.
+
+    Attributes:
+        access_regions (FilePath)            : Accessible genome regions.
+        ascat_chr_y_loci (FilePath)          : Chromosome Y loci.
+        ascat_gc_correction (FilePath)       : Genome GC correction bins.
+        cadd_snv (FilePath)                  : CADD SNV annotation file.
+        clinvar (FilePath)                   : ClinVar reference.
+        cosmic (FilePath)                    : COSMIC database's variants as VCF.
+        dbsnp (FilePath)                     : dbSNP VCF file.
+        delly_exclusion (FilePath)           : Genome exclusion regions.
+        delly_exclusion_converted (FilePath) : Genome exclusion regions without "chr" field.
+        delly_mappability (FilePath)         : Genome mappability.
+        gnomad_variant (FilePath)            : gnomAD variants (non SV) as VCF.
+        hc_vcf_1kg (FilePath)                : High confidence 1000 Genome VCF.
+        known_indel_1kg (FilePath)           : 1000 Genome known InDels VCF.
+        mills_1kg (FilePath)                 : Mills' high confidence InDels VCF.
+        rank_score (FilePath)                : Rank score model.
+        somalier_sites (FilePath)            : Somalier sites VCF.
+        vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
+        vep_dir (DirectoryPath)              : VEP annotations output directory.
+        wgs_calling_regions (FilePath)       : WGS calling intervals.
+    """
+
+    access_regions: FilePath
+    ascat_chr_y_loci: FilePath
+    ascat_gc_correction: FilePath
+    cadd_snv: FilePath
+    clinvar: FilePath
+    cosmic: FilePath
+    dbsnp: FilePath
+    delly_exclusion: FilePath
+    delly_exclusion_converted: FilePath
+    delly_mappability: FilePath
+    gnomad_variant: FilePath
+    hc_vcf_1kg: FilePath
+    known_indel_1kg: FilePath
+    mills_1kg: FilePath
+    rank_score: FilePath
+    somalier_sites: FilePath
+    vcf_1kg: FilePath
+    vep_dir: DirectoryPath
+    wgs_calling_regions: FilePath
+
+
+class CacheAnalysis(BaseModel):
+    """
+    Reference analysis configuration model.
+
+
+    Attributes:
+        case_id (str) : Reference case identifier.
+    """
+
+    case_id: str
+
+
+class CacheConfig(BaseModel):
+    """
+    Reference build configuration model.
+
+    Attributes:
+        analysis (CacheAnalysis)                           : Reference analysis model.
+        references_dir (DirectoryPath)                     : Output directory for the downloaded reference.
+        containers_dir (Path)                              : Output directory for the downloaded singularity containers.
+        genome_dir (Path)                                  : Genome references output directory.
+        variants_dir (Path)                                : Variant references output directory.
+        vep_dir (Path)                                     : VEP annotations output directory.
+        genome_version (GenomeVersion)                     : Genome version associated with the balsamic cache.
+        cosmic_key (str, optional)                         : COSMIC database key.
+        bioinfo_tools (dict)                               : Dictionary of bioinformatics software and containers.
+        containers (Dict[str, str])                        : Dictionary linking container names and dockerhub images.
+        references (Union[ReferencesHg, ReferencesCanFam]) : Reference files model.
+        references_date (str)                              : Reference access date.
+    """
+
+    analysis: CacheAnalysis
+    references_dir: DirectoryPath
+    containers_dir: Path
+    genome_dir: Path
+    variants_dir: Path
+    vep_dir: Path
+    genome_version: GenomeVersion
+    cosmic_key: Optional[str]
+    bioinfo_tools: dict
+    containers: Dict[str, str]
+    references: Union[ReferencesHg, ReferencesCanFam]
+    references_date: str
+
+    @validator("references")
+    def validate_references(
+        cls, references: References, values: Dict[str, Any]
+    ) -> References:
+        """Validate the reference output paths."""
+        for model in references:
+            reference_key: str
+            reference: ReferenceUrl
+            reference_key, reference = model[0], model[1]
+            reference.file_path = (
+                Path(
+                    values.get("references_dir"),
+                    reference.dir_name,
+                    reference.file_name,
                 ).as_posix()
-                output_value = ReferenceUrlsModel.parse_obj(value)
-            else:
-                output_value = value
+                if reference
+                else None
+            )
+            reference.secret = (
+                values.get("cosmic_key") if "cosmic" in reference_key else None
+            )
+        return references
 
-        return output_value
+    def get_grch_version(self) -> Optional[GRCHVersion]:
+        """Return GRCH format version of the genome version if exists."""
+        version: Dict[GenomeVersion, GRCHVersion] = {
+            GenomeVersion.HG19: GRCHVersion.GRCH37,
+            GenomeVersion.HG38: GRCHVersion.GRCH38,
+        }
+        return version.get(self.genome_version)
+
+    def get_reference_file_paths(self) -> List[str]:
+        """Return a list of reference paths."""
+        return [
+            Path(reference[1].file_path).as_posix() for reference in self.references
+        ]
+
+    def get_reference_by_path(self, reference_path: str) -> ReferenceUrl:
+        """Return a reference given its full path."""
+        for model in self.references:
+            reference: ReferenceUrl = model[1]
+            if reference.file_path == reference_path:
+                return reference
+        LOG.error(f"No reference with the provided reference path {reference_path}")
+        raise BalsamicError()
+
+    def get_reference_file_paths_by_file_type_and_compression(
+        self, file_type: FileType, compression: bool
+    ) -> List[str]:
+        """Return a list of reference paths given a file type and a compression status."""
+        file_type_references: List[str] = self.get_reference_file_paths_by_file_type(
+            file_type=file_type
+        )
+        compression_references: List[
+            str
+        ] = self.get_reference_file_paths_by_compression(compression=compression)
+        return list(set(file_type_references).intersection(compression_references))
+
+    def get_reference_file_paths_by_file_type(self, file_type: FileType) -> List[str]:
+        """Return a list of reference paths given a file type."""
+        return [
+            reference[1].file_path
+            for reference in self.references
+            if reference[1].file_type == file_type
+        ]
+
+    def get_reference_file_paths_by_compression(self, compression: bool) -> List[str]:
+        """Return a list of reference paths given a compression status."""
+        return [
+            reference[1].file_path
+            for reference in self.references
+            if reference[1].gzip == compression
+        ]
+
+    def get_compressed_indexed_vcf_paths(self) -> List[str]:
+        """Return an output list of compressed and indexed VCFs."""
+        return [
+            f"{vcf}.{FileType.GZ}.{FileType.TBI}"
+            for vcf in self.get_reference_file_paths_by_file_type_and_compression(
+                file_type=FileType.VCF, compression=True
+            )
+        ]
+
+    def get_container_output_paths(self) -> List[str]:
+        """Return a complete list of output singularity images."""
+        return [
+            Path(self.containers_dir, f"{image}.{FileType.SIF}").as_posix()
+            for image in self.containers.keys()
+        ]
+
+    def get_reference_output_paths(self) -> List[str]:
+        """Return a complete list of output reference paths."""
+        reference_paths: List[str] = [
+            self.references.genome_chrom_size.file_path,
+            *self.references.get_reference_genome_file_paths(),
+            *self.references.get_refgene_file_paths(),
+        ]
+        if self.genome_version == GenomeVersion.CanFam3:
+            return reference_paths
+
+        reference_paths += [
+            self.references.access_regions.file_path,
+            self.references.ascat_chr_y_loci.file_path,
+            self.references.ascat_gc_correction.file_path,
+            self.references.cadd_snv.file_path,
+            f"{self.references.clinvar.file_path}.{FileType.GZ}",
+            f"{self.references.cosmic.file_path}.{FileType.GZ}",
+            f"{self.references.dbsnp.file_path}.{FileType.GZ}",
+            self.references.rank_score.file_path,
+            f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
+            self.references.wgs_calling_regions.file_path,
+            *self.get_compressed_indexed_vcf_paths(),
+            *self.references.get_1k_genome_file_paths(),
+            *self.references.get_cadd_snv_file_paths(),
+            *self.references.get_delly_file_paths(),
+            *self.references.get_gnomad_file_paths(),
+            self.vep_dir.as_posix(),
+        ]
+        return reference_paths
+
+    def get_analysis_references(
+        self,
+    ) -> Union[AnalysisReferencesHg, AnalysisReferencesCanFam]:
+        """Return reference output model for Balsamic analyses."""
+        if self.genome_version == GenomeVersion.CanFam3:
+            return AnalysisReferencesCanFam(
+                genome_chrom_size=self.references.genome_chrom_size.file_path,
+                reference_genome=self.references.reference_genome.file_path,
+                refgene_bed=self.references.get_refgene_bed_file_path(),
+                refgene_flat=self.references.get_refgene_flat_file_path(),
+                refgene_txt=self.references.refgene_txt.file_path,
+            )
+
+        return AnalysisReferencesHg(
+            access_regions=self.references.access_regions.file_path,
+            ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
+            ascat_gc_correction=self.references.ascat_gc_correction.file_path,
+            cadd_snv=self.references.cadd_snv.file_path,
+            clinvar=f"{self.references.clinvar.file_path}.{FileType.GZ}",
+            cosmic=f"{self.references.cosmic.file_path}.{FileType.GZ}",
+            dbsnp=f"{self.references.dbsnp.file_path}.{FileType.GZ}",
+            delly_exclusion=self.references.delly_exclusion.file_path,
+            delly_exclusion_converted=self.references.get_delly_exclusion_converted_file_path(),
+            delly_mappability=self.references.delly_mappability.file_path,
+            genome_chrom_size=self.references.genome_chrom_size.file_path,
+            gnomad_variant=self.references.gnomad_variant.file_path,
+            hc_vcf_1kg=f"{self.references.hc_vcf_1kg.file_path}.{FileType.GZ}",
+            known_indel_1kg=f"{self.references.known_indel_1kg.file_path}.{FileType.GZ}",
+            mills_1kg=f"{self.references.mills_1kg.file_path}.{FileType.GZ}",
+            rank_score=self.references.rank_score.file_path,
+            reference_genome=self.references.reference_genome.file_path,
+            refgene_bed=self.references.get_refgene_bed_file_path(),
+            refgene_flat=self.references.get_refgene_flat_file_path(),
+            refgene_txt=self.references.refgene_txt.file_path,
+            somalier_sites=f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
+            vcf_1kg=f"{self.references.vcf_1kg.file_path}.{FileType.GZ}",
+            vep_dir=self.vep_dir.as_posix(),
+            wgs_calling_regions=self.references.wgs_calling_regions.file_path,
+        )

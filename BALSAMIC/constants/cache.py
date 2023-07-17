@@ -1,8 +1,8 @@
 """Balsamic cache specific constants."""
 from typing import Dict
 
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.class_types import StrEnum
-
 
 DOCKER_URL: str = "docker://clinicalgenomics/balsamic"
 VEP_PLUGINS: str = "all"
@@ -34,35 +34,6 @@ class ContainerVersion(StrEnum):
 
     DEVELOP: str = "develop"
     RELEASE: str = "release"
-
-
-class FileType(StrEnum):
-    """Balsamic reference file types."""
-
-    BED: str = "bed"
-    DICT: str = "dict"
-    FAI: str = "fai"
-    FASTA: str = "fasta"
-    FLAT: str = "flat"
-    GFF: str = "gff"
-    GTF: str = "gtf"
-    GZ: str = "gz"
-    LOG: str = "log"
-    SIF: str = "sif"
-    TBI: str = "tbi"
-    TEXT: str = "text"
-    TSV: str = "tsv"
-    VCF: str = "vcf"
-
-
-class BwaIndexFileType(StrEnum):
-    """BWA genome index file suffixes."""
-
-    AMB: str = "amb"
-    ANN: str = "ann"
-    BWT: str = "bwt"
-    PAC: str = "pac"
-    SA: str = "sa"
 
 
 class DockerContainers(StrEnum):
@@ -149,42 +120,42 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         },
         "wgs_calling_regions": {
             "url": "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "wgs_calling_regions.v1",
             "dir_name": "genome",
         },
         "genome_chrom_size": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "hg19.chrom.sizes",
             "dir_name": "genome",
         },
         "refgene_txt": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": True,
             "file_name": "refGene.txt",
             "dir_name": "genome",
         },
         "refgene_sql": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "refGene.sql",
             "dir_name": "genome",
         },
         "rank_score": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "cancer_rank_model_-v0.1-.ini",
             "dir_name": "genome",
         },
         "access_regions": {
             "url": "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "access_5kb_hg19.txt",
             "dir_name": "genome",
@@ -198,21 +169,21 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         },
         "delly_mappability": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/86aab2d10c5ffc009bc8c68ad077ab7283d8fe06/cancer/references/GRCh37.delly.blacklist.gz",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "delly_mappability.gz",
             "dir_name": "genome",
         },
         "delly_mappability_gindex": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/86aab2d10c5ffc009bc8c68ad077ab7283d8fe06/cancer/references/GRCh37.delly.blacklist.gz.gzi",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "delly_mappability.gz.gzi",
             "dir_name": "genome",
         },
         "delly_mappability_findex": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/86aab2d10c5ffc009bc8c68ad077ab7283d8fe06/cancer/references/GRCh37.delly.blacklist.gz.fai",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "delly_mappability.gz.fai",
             "dir_name": "genome",
@@ -226,7 +197,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         },
         "ascat_chr_y_loci": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/12a6c760fd542c02de2cda286b6245e46f4b6a97/cancer/references/GRCh37_d5_Y.loci",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "GRCh37_Y.loci",
             "dir_name": "genome",
@@ -319,42 +290,42 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         },
         "wgs_calling_regions": {
             "url": "gs://genomics-public-data/resources/broad/hg38/v0/wgs_calling_regions.hg38.interval_list",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "wgs_calling_regions.v1",
             "dir_name": "genome",
         },
         "genome_chrom_size": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "hg38.chrom.sizes",
             "dir_name": "genome",
         },
         "refgene_txt": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.txt.gz",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": True,
             "file_name": "refGene.txt",
             "dir_name": "genome",
         },
         "refgene_sql": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/refGene.sql",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "refGene.sql",
             "dir_name": "genome",
         },
         "rank_score": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "cancer_rank_model_-v0.1-.ini",
             "dir_name": "genome",
         },
         "access_regions": {
             "url": "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "access_5kb_hg38.txt",
             "dir_name": "genome",
@@ -368,21 +339,21 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         },
         "delly_mappability": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/GRCh38.delly.blacklist.gz",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "delly_mappability.gz",
             "dir_name": "genome",
         },
         "delly_mappability_gindex": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/GRCh38.delly.blacklist.gz.gzi",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "delly_mappability.gz.gzi",
             "dir_name": "genome",
         },
         "delly_mappability_findex": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/GRCh38.delly.blacklist.gz.fai",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "delly_mappability.gz.fai",
             "dir_name": "genome",
@@ -396,7 +367,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         },
         "ascat_chr_y_loci": {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/ea051b864d18945980f0ded6b16a5d192bd736a5/cancer/references/hg38_Y.loci",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "hg38_Y.loci",
             "dir_name": "genome",
@@ -433,21 +404,21 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         },
         "refgene_txt": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/database/refGene.txt.gz",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": True,
             "file_name": "canfam3_refGene.txt",
             "dir_name": "genome",
         },
         "refgene_sql": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/database/refGene.sql",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "canfam3_refGene.sql",
             "dir_name": "genome",
         },
         "genome_chrom_size": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/canFam3/bigZips/canFam3.chrom.sizes",
-            "file_type": FileType.TEXT,
+            "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "canfam3.chrom.sizes",
             "dir_name": "genome",

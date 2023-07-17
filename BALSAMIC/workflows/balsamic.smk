@@ -15,7 +15,7 @@ from BALSAMIC.constants.paths import SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
-from BALSAMIC.utils.io import write_json, read_yaml
+from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
 
 from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig
 
@@ -197,8 +197,8 @@ try:
     else:
         config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR
+    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
+    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
 
 except KeyError as error:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
@@ -572,12 +572,11 @@ rule all:
             LOG.error(val_exc)
             raise BalsamicError
 
-        # Delete a temporal directory tree
+        # Remove temporary directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
         # Finish timestamp file
-        with open(str(output.finish_file), mode="w") as finish_file:
-            finish_file.write("%s\n" % datetime.datetime.now())
+        write_finish_file(file_path=output.finish_file)

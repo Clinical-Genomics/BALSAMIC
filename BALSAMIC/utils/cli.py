@@ -222,39 +222,14 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def iterdict(dic):
-    """dictionary iteration - returns generator"""
-    for key, value in dic.items():
-        if isinstance(value, dict):
-            yield from iterdict(value)
-        else:
-            yield key, value
-
-
-def get_schedulerpy():
-    """
-    Returns a string path for scheduler.py
-    """
-
-    p = Path(__file__).parents[1]
-    scheduler = str(Path(p, "utils", "scheduler.py"))
-
-    return scheduler
-
-
-def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome="hg19"):
-    """
-    Return a string path for variant calling snakefile.
-    """
+def get_snakefile(analysis_type, analysis_workflow="balsamic") -> str:
+    """Return a string path for the specific snakemake file."""
 
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
 
     if analysis_type == "generate_ref":
         snakefile = Path(p, "workflows", "reference.smk")
-        if "canfam3" in reference_genome:
-            snakefile = Path(p, "workflows", "reference-canfam3.smk")
-            return str(snakefile)
 
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
@@ -384,7 +359,7 @@ def bioinfo_tool_version_conda(
 
 
 def get_bioinfo_tools_version(
-    bioinfo_tools: dict, container_conda_env_path: os.PathLike
+    bioinfo_tools: dict, container_conda_env_path: Path
 ) -> dict:
     """Parses the names and versions of bioinfo tools
     used by BALSAMIC from config YAML into a dict.
@@ -450,9 +425,6 @@ def generate_graph(config_collection_dict, config_path):
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
                 analysis_workflow=config_collection_dict["analysis"][
                     "analysis_workflow"
-                ],
-                reference_genome=config_collection_dict["reference"][
-                    "reference_genome"
                 ],
             ),
             dryrun=True,
@@ -529,25 +501,6 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
     with open(job_id_dump, "r") as jobid_in, open(job_id_yaml, "w") as jobid_out:
         jobid_list = jobid_in.read().splitlines()
         yaml.dump({case_name: jobid_list}, jobid_out)
-
-
-def get_md5(filename):
-    with open(filename, "rb") as fh:
-        hashed = 0
-        while True:
-            s = fh.read(65536)
-            if not s:
-                break
-            hashed = zlib.crc32(s, hashed)
-    return "%08X" % (hashed & 0xFFFFFFFF)
-
-
-def create_md5(reference, check_md5):
-    """create a md5 file for all reference data"""
-    with open(check_md5, "w") as fh:
-        for key, value in reference.items():
-            if os.path.isfile(value):
-                fh.write(get_md5(value) + " " + value + "\n")
 
 
 def get_resolved_fastq_files_directory(directory: str) -> str:

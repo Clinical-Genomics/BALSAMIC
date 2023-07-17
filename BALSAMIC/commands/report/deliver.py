@@ -89,7 +89,7 @@ def deliver(
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
     reference_genome = sample_config_dict["reference"]["reference_genome"]
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
 
     report_file_name = os.path.join(
         yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"

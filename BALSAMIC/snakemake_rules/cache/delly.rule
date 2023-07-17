@@ -1,0 +1,20 @@
+"""Delly reference specific rules."""
+
+
+rule convert_delly_exclusion_file:
+    """Remove all occurrences of "chr" from the Delly telomeres and centromeres exclusion file."""
+    input:
+        exclusion_file=cache_config.references.delly_exclusion.file_path,
+    output:
+        exclusion_converted_file=cache_config.references.get_delly_exclusion_converted_file_path(),
+    threads: get_threads(cluster_config=cluster_config, rule_name="convert_delly_exclusion_file")
+    message:
+        "Converting delly exclusion file {input.exclusion_file}"
+    benchmark:
+        f"{cache_config.references.get_delly_exclusion_converted_file_path()}.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.get_delly_exclusion_converted_file_path()}.{FileType.LOG}",
+    shell:
+        """
+        sed 's/chr//g' "{input.exclusion_file}" > "{output.exclusion_converted_file}" 2> "{log}"
+        """

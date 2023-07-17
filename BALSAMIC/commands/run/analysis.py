@@ -8,11 +8,10 @@ from pathlib import Path
 import click
 
 from BALSAMIC.constants.cluster import ClusterConfigType
-from BALSAMIC.constants.paths import SCRIPT_DIR
+from BALSAMIC.constants.paths import SCRIPT_DIR, SCHEDULER_PATH
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import (
     createDir,
-    get_schedulerpy,
     get_snakefile,
     SnakeMake,
     job_id_dump_to_yaml,
@@ -97,7 +96,7 @@ LOG = logging.getLogger(__name__)
     type=click.Choice(["low", "normal", "high", "express"]),
     show_default=True,
     default="low",
-    help="QOS for sbatch jobs. Passed to " + get_schedulerpy(),
+    help=f"QOS for sbatch jobs. Passed to {SCHEDULER_PATH.as_posix()}",
 )
 @click.option(
     "-f",
@@ -231,7 +230,7 @@ def analysis(
         bind_path.append(sample_config.get("background_variants"))
     if "pon_cnn" in sample_config:
         bind_path.append(sample_config.get("panel").get("pon_cnn"))
-    bind_path.append(SCRIPT_DIR)
+    bind_path.append(SCRIPT_DIR.as_posix())
     bind_path.append(sample_config["analysis"]["analysis_dir"])
 
     # Construct snakemake command to run workflow
@@ -244,14 +243,12 @@ def analysis(
         + "/"
     )
     balsamic_run.snakefile = (
-        snake_file
-        if snake_file
-        else get_snakefile(analysis_type, analysis_workflow, reference_genome)
+        snake_file if snake_file else get_snakefile(analysis_type, analysis_workflow)
     )
     balsamic_run.configfile = sample_config_path
     balsamic_run.run_mode = run_mode
     balsamic_run.cluster_config = cluster_config
-    balsamic_run.scheduler = get_schedulerpy()
+    balsamic_run.scheduler = SCHEDULER_PATH.as_posix()
     balsamic_run.profile = profile
     balsamic_run.log_path = logpath
     balsamic_run.script_path = scriptpath

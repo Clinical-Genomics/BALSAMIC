@@ -10,5 +10,77 @@
         "time": "00:15:00",
         "mail_type": "END",
         "partition": "core"
+    },
+    "download_containers": {
+        "n": 12,
+        "time": "00:15:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "download_references": {
+        "n": 24,
+        "time": "10:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "compress_vcfs": {
+        "n": 12,
+        "time": "00:30:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "index_vcfs": {
+        "n": 12,
+        "time": "00:30:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "index_cadd": {
+        "n": 12,
+        "time": "01:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "picard_dict_reference_genome": {
+        "n": 12,
+        "time": "00:30:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "convert_delly_exclusion_file": {
+        "n": 2,
+        "time": "00:15:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "fasta_index_reference_genome": {
+        "n": 24,
+        "time": "01:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "bwa_index_reference_genome": {
+        "n": 24,
+        "time": "01:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "preprocess_refseq": {
+        "n": 12,
+        "time": "00:30:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "preprocess_refseq_canfam": {
+        "n": 12,
+        "time": "00:30:00",
+        "mail_type": "FAIL",
+        "partition": "core"
+    },
+    "download_vep": {
+        "n": 24,
+        "time": "01:00:00",
+        "mail_type": "FAIL",
+        "partition": "core"
     }
 }

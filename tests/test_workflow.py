@@ -13,7 +13,7 @@ def test_workflow_tumor_only_tga_hg19(
     analysis_type = "single"
     reference_genome = "hg19"
     analysis_workflow = "balsamic"
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
     config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dry run option
@@ -35,7 +35,7 @@ def test_workflow_tumor_normal_tga_hg19(
     analysis_type = "paired"
     reference_genome = "hg19"
     analysis_workflow = "balsamic"
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
     config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dry run option
@@ -57,7 +57,7 @@ def test_workflow_tumor_only_wgs_hg19(
     analysis_type = "single"
     reference_genome = "hg19"
     analysis_workflow = "balsamic"
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
     config_json = tumor_only_wgs_config
 
     # WHEN invoking snakemake module with dry run option
@@ -79,7 +79,7 @@ def test_workflow_tumor_normal_wgs_hg19(
     analysis_type = "paired"
     reference_genome = "hg19"
     analysis_workflow = "balsamic"
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
     config_json = tumor_normal_wgs_config
 
     # WHEN invoking snakemake module with dry run option
@@ -99,7 +99,7 @@ def test_workflow_qc_tumor_only_hg19(tumor_only_config):
     workflow = "paired"
     reference_genome = "hg19"
     analysis_workflow = "balsamic-qc"
-    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(workflow, analysis_workflow)
     config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dry run option
@@ -115,7 +115,7 @@ def test_workflow_qc_tumor_normal_hg19(tumor_normal_config):
     workflow = "paired"
     reference_genome = "hg19"
     analysis_workflow = "balsamic-qc"
-    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(workflow, analysis_workflow)
     config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dry run option
@@ -132,7 +132,7 @@ def test_workflow_qc_tumor_only_canfam3(tumor_only_config):
     workflow = "single"
     reference_genome = "canfam3"
     analysis_workflow = "balsamic-qc"
-    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(workflow, analysis_workflow)
     config_json = tumor_only_config
 
     # WHEN invoking snakemake module with dry run option
@@ -148,7 +148,7 @@ def test_workflow_qc_tumor_normal_canfam3(tumor_normal_config):
     workflow = "paired"
     reference_genome = "canfam3"
     analysis_workflow = "balsamic-qc"
-    snakefile = get_snakefile(workflow, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(workflow, analysis_workflow)
     config_json = tumor_normal_config
 
     # WHEN invoking snakemake module with dry run option

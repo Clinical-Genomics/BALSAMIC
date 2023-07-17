@@ -114,8 +114,8 @@ def pon_config(
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as f:
-        reference_dict = json.load(f)["reference"]
+    with open(reference_config, "r") as config_file:
+        reference_dict = json.load(config_file)
 
     fastq_path: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
