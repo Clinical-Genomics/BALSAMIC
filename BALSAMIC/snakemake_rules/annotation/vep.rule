@@ -76,11 +76,11 @@ rule vep_somatic_clinical_snv:
     "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:
     """
-if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" ]] ; then
+if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" ]]; then
   echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
   vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} | \
   bcftools reheader --threads {threads} -s {input.header} | \
-  bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical} ;
+  bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};
 else
   cp {input.vcf_snv_research} {output.vcf_snv_clinical};
 fi
@@ -182,7 +182,7 @@ rule svdb_annotate_somatic_clinical_sv:
         "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
     shell:
         """
-if [[ -f "{params.clinical_sv_observations}" && -f "{params.somatic_sv_observations}" ]] ; then
+if [[ -f "{params.clinical_sv_observations}" && -f "{params.somatic_sv_observations}" ]]; then
   svdb --query --bnd_distance 10000 --overlap 0.80 \
   --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
   --db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
