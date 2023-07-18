@@ -5,7 +5,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 import click
 
@@ -76,7 +76,7 @@ def initialize(
     account: str,
     mail_user: str,
     mail_type: ClusterMailType,
-    snakemake_opt: str,
+    snakemake_opt: List[str],
     force_all: bool,
     run_analysis: bool,
     quiet: bool,
