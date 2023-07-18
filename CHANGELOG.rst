@@ -8,7 +8,7 @@ Added:
 * Annotate SNVs with cancer germline SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
 * Annotate SNVs with somatic SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
-* Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/11
+* Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
 
 Changed:
 ^^^^^^^^
