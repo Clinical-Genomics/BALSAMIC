@@ -146,7 +146,6 @@ def environ():
 
 
 @pytest.fixture(scope="session")
-
 def cluster_analysis_config_path() -> str:
     """Return cluster analysis configuration file."""
     return Path(
@@ -721,7 +720,7 @@ def tumor_only_wgs_config(
     return Path(
         analysis_dir,
         case_id_tumor_only_wgs,
-        f"{case_id_tumor_only_wgs}.{FileType.JSON}"
+        f"{case_id_tumor_only_wgs}.{FileType.JSON}",
     ).as_posix()
 
 
