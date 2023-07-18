@@ -15,6 +15,9 @@ Changed:
 * Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
 * Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
+* Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
+* Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 
 Fixed:
 ^^^^^^
@@ -22,6 +25,10 @@ Fixed:
 * Link external fastqs to case folder & create case directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1195
 * vcf2cytosure container missing constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1198
 * Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
+
+Removed:
+^^^^^^^
+* Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
 
 [12.0.1]
 --------

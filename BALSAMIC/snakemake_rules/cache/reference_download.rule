@@ -1,0 +1,36 @@
+"""Common reference download rules."""
+
+
+rule download_references:
+    """Download Balsamic reference files."""
+    output:
+        reference_path="{reference_path}",
+    wildcard_constraints:
+        reference_path="|".join(cache_config.get_reference_file_paths()),
+    params:
+        reference=lambda wildcards: cache_config.get_reference_by_path(
+            Path(config["references_dir"], wildcards.reference_path).as_posix()
+        ),
+    threads: get_threads(cluster_config=cluster_config, rule_name="download_references")
+    message:
+        "Downloading reference file {output.reference_path}"
+    benchmark:
+        f"{{reference_path}}.benchmark.{FileType.TSV}"
+    log:
+        f"{{reference_path}}.{FileType.LOG}",
+    shell:
+        """
+        if [[ -n "{params.reference.secret}" ]] && [[ "{params.reference.secret}" != "None" ]]; then
+            response=$(curl -s -H "Authorization: Basic {params.reference.secret}" "{params.reference.url}")
+            download_url=$(echo $response | grep -o 'https://[^"]*')
+            cmd="curl '$download_url' -o -"
+        elif [[ "{params.reference.url}" == gs://* ]]; then
+            cmd="gsutil cp '{params.reference.url}' -"
+        else
+            cmd="wget '{params.reference.url}' -O -"
+        fi
+        if [[ "{params.reference.gzip}" == "True" ]]; then
+            cmd+=" | gunzip"
+        fi
+        eval "$cmd > '{output.reference_path}'" &> "{log}"
+        """

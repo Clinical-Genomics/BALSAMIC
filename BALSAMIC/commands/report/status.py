@@ -54,7 +54,7 @@ def status(context, sample_config, show_only_missing, print_files):
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
     reference_genome = sample_config_dict["reference"]["reference_genome"]
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
 
     if os.path.isfile(os.path.join(result_dir, "analysis_finish")):
         snakemake.snakemake(

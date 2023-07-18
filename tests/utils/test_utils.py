@@ -1,32 +1,23 @@
-import json
-import subprocess
-import pytest
-import sys
 import copy
-import collections
-
-import shutil
-from unittest import mock
+import json
 import logging
-
+import subprocess
+import sys
 from pathlib import Path
+from unittest import mock
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
-from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
-
-from BALSAMIC.constants.common import CONTAINERS_CONDA_ENV_PATH, BIOINFO_TOOL_ENV
-from BALSAMIC.constants.reference import REFERENCE_FILES
-
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
     SnakeMake,
     CaptureStdout,
-    iterdict,
     get_snakefile,
     createDir,
-    get_config,
     get_file_status_string,
     find_file_index,
     get_panel_chrom,
@@ -36,17 +27,15 @@ from BALSAMIC.utils.cli import (
     check_executable,
     job_id_dump_to_yaml,
     generate_h5,
-    get_md5,
-    create_md5,
     get_sample_dict,
     get_pon_sample_dict,
+    get_config_path,
     get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
 )
-from BALSAMIC.utils.io import read_json, write_json, read_yaml
-
+from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
+from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
 from BALSAMIC.utils.rule import (
-    get_chrom,
     get_vcf,
     get_sample_id_by_type,
     get_picard_mrkdup,
@@ -55,7 +44,6 @@ from BALSAMIC.utils.rule import (
     get_result_dir,
     get_threads,
     get_delivery_id,
-    get_reference_output_files,
     get_rule_output,
     get_sample_type_from_prefix,
 )
@@ -164,25 +152,11 @@ def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config):
         )
 
 
-def test_get_reference_output_files():
-    # GIVEN a reference genome version
-    genome_ver = "hg38"
-    file_type = "fasta"
-
-    # WHEN getting list of valid types
-    fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver], file_type)
-
-    # THEN it should return list of file
-    assert "Homo_sapiens_assembly38.fasta" in fasta_files
-
-
 def test_get_bioinfo_tools_version():
     """Test bioinformatics tools and version extraction."""
 
     # GIVEN a tools dictionary
-    bioinfo_tools: dict = get_bioinfo_tools_version(
-        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
-    )
+    bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the versions are correctly retrieved
     assert set(bioinfo_tools["picard"]).issubset({"2.27.1"})
@@ -193,9 +167,7 @@ def test_get_bioinfo_pip_tools_version():
     """Test bioinformatics tools and version extraction for a PIP specific tool."""
 
     # GIVEN a tools dictionary
-    bioinfo_tools: dict = get_bioinfo_tools_version(
-        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
-    )
+    bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the PIP specific packages are correctly retrieved
     assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.9"})
@@ -243,17 +215,6 @@ def test_get_file_extension_known_ext():
 
     # THEN assert extension is correctly extracted
     assert file_extension == actual_extension
-
-
-def test_iterdict(reference):
-    """GIVEN a dict for iteration"""
-    # WHEN passing dict to this function
-    dict_gen = iterdict(reference)
-
-    # THEN it will create dict generator, we can iterate it, get the key, values as string
-    for key, value in dict_gen:
-        assert isinstance(key, str)
-        assert isinstance(value, str)
 
 
 def test_snakemake_local():
@@ -347,9 +308,7 @@ def test_get_snakefile():
     # WHEN asking to see snakefile for paired
     for reference_genome in ["hg19", "hg38", "canfam3"]:
         for analysis_type, analysis_workflow in workflow:
-            snakefile = get_snakefile(
-                analysis_type, analysis_workflow, reference_genome
-            )
+            snakefile = get_snakefile(analysis_type, analysis_workflow)
 
             pipeline = ""
             if (
@@ -358,10 +317,8 @@ def test_get_snakefile():
                 and analysis_workflow != "balsamic-umi"
             ):
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
-            elif analysis_type == "generate_ref" and reference_genome != "canfam3":
+            elif analysis_type == "generate_ref":
                 pipeline = "BALSAMIC/workflows/reference.smk"
-            elif analysis_type == "generate_ref" and reference_genome == "canfam3":
-                pipeline = "BALSAMIC/workflows/reference-canfam3.smk"
             elif analysis_type == "pon":
                 pipeline = "BALSAMIC/workflows/PON.smk"
             elif analysis_workflow == "balsamic-qc":
@@ -372,32 +329,6 @@ def test_get_snakefile():
             assert snakefile.startswith("/")
             assert pipeline in snakefile
             assert Path(snakefile).is_file()
-
-
-def test_get_chrom(config_files):
-    # Given a panel bed file
-    bed_file = config_files["panel_bed_file"]
-    actual_chrom = [
-        "10",
-        "11",
-        "16",
-        "17",
-        "18",
-        "19",
-        "2",
-        "3",
-        "4",
-        "6",
-        "7",
-        "9",
-        "X",
-    ]
-
-    # WHEN passing this bed file
-    test_chrom = get_chrom(bed_file)
-
-    # THEN It should return list of chrom presents in that bed file
-    assert set(actual_chrom) == set(test_chrom)
 
 
 def test_get_vcf(sample_config):
@@ -525,23 +456,17 @@ def test_capturestdout():
     assert "".join(captured_stdout_message) == test_stdout_message
 
 
-def test_get_config():
-    # GIVEN the config files name
-    config_files = ["sample", "analysis"]
-    # WHEN passing file names
-    for config_file in config_files:
-        # THEN return the config files path
-        assert get_config(config_file)
+def test_get_config_path(cluster_analysis_config_path: str):
+    """Test return of a config path given its type."""
 
+    # GIVEN an analysis config path
 
-def test_get_config_wrong_config():
-    # GIVEN the config files name
-    config_file = "non_existing_config"
+    # WHEN retrieving the cluster analysis configuration
+    cluster_analysis: Path = get_config_path(ClusterConfigType.ANALYSIS)
 
-    # WHEN passing file names
-    # THEN return the config files path
-    with pytest.raises(FileNotFoundError):
-        assert get_config(config_file)
+    # THEN an analysis cluster json should be returned
+    assert cluster_analysis.exists()
+    assert cluster_analysis.as_posix() == cluster_analysis_config_path
 
 
 def test_write_json(tmp_path, reference):
@@ -555,7 +480,7 @@ def test_write_json(tmp_path, reference):
     output = output_json.read_text()
 
     # THEN It will create a json file with given dict
-    for key, value in iterdict(reference):
+    for key, value in reference.items():
         assert key in output
         assert value in output
 
@@ -661,9 +586,9 @@ def test_read_yaml_error():
         assert f"The YAML file {yaml_path} was not found" in str(file_exc)
 
 
-def test_get_threads(config_files):
+def test_get_threads(cluster_analysis_config_path: str):
     # GIVEN cluster config file and rule name
-    cluster_config = json.load(open(config_files["cluster_json"], "r"))
+    cluster_config = json.load(open(cluster_analysis_config_path, "r"))
     rule_name = "sentieon_align_sort"
 
     # WHEN passing cluster_config and rule_name
@@ -831,41 +756,6 @@ def test_generate_h5_capture_no_output(tmp_path):
     assert actual_output == None
 
 
-def test_get_md5(tmp_path):
-
-    # GIVEN a dummy file
-    dummy_dir = tmp_path / "md5"
-    dummy_dir.mkdir()
-    dummy_file = dummy_dir / "dummy_file.dump"
-    dummy_file.write_text("Awesome Text")
-
-    # THEN md5 returned should be
-    assert get_md5(dummy_file) == "3945B39E"
-
-
-def test_create_md5(tmp_path):
-
-    # GIVEN a path to a md5 file and reference dummy files
-    ref_dir = tmp_path / "references"
-    ref_dir.mkdir()
-    dummy_ref_file1 = ref_dir / "reference_file1.dump"
-    dummy_ref_file1.write_text("Test reference1")
-    dummy_ref_file2 = ref_dir / "reference_file2.dump"
-    dummy_ref_file2.write_text("Test reference2")
-    dummy_reference_dict = {
-        "reference_dummy1": str(dummy_ref_file1),
-        "reference_dummy2": str(dummy_ref_file2),
-    }
-    dummy_dir = tmp_path / "md5"
-    dummy_dir.mkdir()
-    dummy_file = dummy_dir / "dummy_file.dump"
-
-    create_md5(dummy_reference_dict, dummy_file)
-
-    # THEN md5 file exists
-    assert dummy_file.exists()
-
-
 def test_get_rule_output(snakemake_fastqc_rule):
     """Tests retrieval of existing output files from a specific workflow."""
 
@@ -973,6 +863,18 @@ def test_get_resolved_fastq_files_directory_symlinked_files(
 
     # THEN the real fastq directory should be returned
     assert input_dir == fastq_dir
+
+
+def test_write_finish_file(json_file: Path):
+    """Test finish analysis completion file generation."""
+
+    # GIVEN a file path to write to
+
+    # WHEN writing a json file after an analysis has been completed
+    write_finish_file(file_path=json_file.as_posix())
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(json_file)
 
 
 def test_get_analysis_fastq_files_directory(fastq_dir: str):

@@ -10,18 +10,19 @@ from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
 
-from BALSAMIC.constants.common import (
-    SEQUENCING_TYPE,
-    ANALYSIS_TYPES,
-    ANALYSIS_WORKFLOW,
-    WORKFLOW_SOLUTION,
-    MUTATION_CLASS,
-    MUTATION_TYPE,
-    VALID_OPS,
-    GENDER_OPTIONS,
-    SAMPLE_TYPE,
+from BALSAMIC.constants.analysis import (
+    Gender,
+    AnalysisType,
+    AnalysisWorkflow,
+    SequencingType,
+    SampleType,
+    MutationOrigin,
+    MutationType,
+    WorkflowSolution,
 )
-from BALSAMIC.constants.reference import VALID_GENOME_VER, VALID_REF_FORMAT
+from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.constants import FileType
+from BALSAMIC.constants.metrics import VALID_OPS
 
 LOG = logging.getLogger(__name__)
 
@@ -154,7 +155,7 @@ class VarcallerAttribute(BaseModel):
     def workflow_solution_literal(cls, value) -> str:
         """Validate workflow solution"""
         assert set(value).issubset(
-            set(WORKFLOW_SOLUTION)
+            set(WorkflowSolution)
         ), f"{value} is not valid workflow solution."
         return value
 
@@ -162,27 +163,27 @@ class VarcallerAttribute(BaseModel):
     def annotation_type_literal(cls, value) -> str:
         """Validate analysis types"""
         assert set(value).issubset(
-            set(ANALYSIS_TYPES)
+            set(AnalysisType)
         ), f"{value} is not a valid analysis type."
         return value
 
     @validator("mutation", check_fields=False)
     def mutation_literal(cls, value) -> str:
         """Validate mutation class"""
-        assert value in MUTATION_CLASS, f"{value} is not a valid mutation type."
+        assert value in set(MutationOrigin), f"{value} is not a valid mutation type."
         return value
 
     @validator("mutation_type", check_fields=False)
     def mutation_type_literal(cls, value) -> str:
         """Validate mutation type"""
-        assert value in MUTATION_TYPE, f"{value} is not not a valid mutation class"
+        assert value in set(MutationType), f"{value} is not not a valid mutation class"
         return value
 
     @validator("sequencing_type", check_fields=False)
     def sequencing_type_literal(cls, value) -> str:
         """Validate sequencing type"""
         assert set(value).issubset(
-            set(SEQUENCING_TYPE)
+            set(SequencingType)
         ), f"{value} is not not a valid sequencing type."
         return value
 
@@ -261,8 +262,7 @@ class AnalysisModel(BaseModel):
 
     @validator("analysis_type")
     def analysis_type_literal(cls, value) -> str:
-        balsamic_analysis_types = ANALYSIS_TYPES
-        if value not in balsamic_analysis_types:
+        if value not in set(AnalysisType):
             raise ValueError(
                 f"Provided analysis type ({value}) not supported in BALSAMIC!"
             )
@@ -270,7 +270,7 @@ class AnalysisModel(BaseModel):
 
     @validator("gender")
     def gender_literal(cls, value, values) -> Optional[str]:
-        if value not in GENDER_OPTIONS and values.get("analysis_type") != "pon":
+        if value not in set(Gender) and values.get("analysis_type") != "pon":
             raise ValueError(
                 f"Provided gender type ({value}) is not supported in BALSAMIC!"
             )
@@ -278,8 +278,7 @@ class AnalysisModel(BaseModel):
 
     @validator("sequencing_type")
     def sequencing_type_literal(cls, value) -> str:
-        balsamic_sequencing_types = SEQUENCING_TYPE
-        if value not in balsamic_sequencing_types:
+        if value not in set(SequencingType):
             raise ValueError(
                 f"Provided sequencing type ({value}) not supported in BALSAMIC!"
             )
@@ -287,8 +286,7 @@ class AnalysisModel(BaseModel):
 
     @validator("analysis_workflow", check_fields=True)
     def analysis_workflow_literal(cls, value) -> str:
-        balsamic_analysis_workflow = ANALYSIS_WORKFLOW
-        if value not in balsamic_analysis_workflow:
+        if value not in set(AnalysisWorkflow):
             raise ValueError(
                 f"Provided analysis workflow ({value} not supported in BALSAMIC"
             )
@@ -381,7 +379,7 @@ class SampleInstanceModel(BaseModel):
     @validator("type")
     def sample_type_literal(cls, value):
         """Validate balsamic supported sample type."""
-        if value not in SAMPLE_TYPE:
+        if value not in set(SampleType):
             raise ValueError(
                 f"The provided sample type ({value}) is not supported in BALSAMIC"
             )
@@ -491,138 +489,6 @@ class BalsamicConfigModel(BaseModel):
         if value:
             return Path(value).resolve().as_posix()
         return None
-
-
-class ReferenceUrlsModel(BaseModel):
-    """Defines a basemodel for reference urls
-
-    This class handles four attributes for each reference url. Each attribute defines url, type of file, and gzip status.
-
-    Attributes:
-        url: defines the url to access file. Essentially it will be used to download file locally. It should match url_type://...
-        file_type: describes file type. Accepted values are VALID_REF_FORMAT constant
-        gzip: gzip status. Binary: True or False
-        genome_version: genome version matching the content of the file. Accepted values are VALID_GENOME_VER constant
-
-    Raises:
-        ValidationError: When it can't validate values matching above attributes
-
-    """
-
-    url: AnyUrl
-    file_type: str
-    gzip: bool = True
-    genome_version: str
-    output_file: Optional[str]
-    output_path: Optional[str]
-    secret: Optional[str]
-
-    @validator("file_type")
-    def check_file_type(cls, value) -> str:
-        """Validate file format according to constants"""
-        assert value in VALID_REF_FORMAT, f"{value} not a valid reference file format."
-        return value
-
-    @validator("genome_version")
-    def check_genome_ver(cls, value) -> str:
-        """Validate genome version according constants"""
-        assert value in VALID_GENOME_VER, f"{value} not a valid genome version."
-        return value
-
-    @property
-    def get_output_file(self):
-        """return output file full path"""
-        output_file_path = Path(self.output_path, self.output_file).as_posix()
-        return output_file_path
-
-    @property
-    def write_md5(self):
-        """calculate md5 for first 4kb of file and write to file_name.md5"""
-        hash_md5 = hashlib.md5()
-        output_file = Path(self.output_path, self.output_file)
-        if not output_file.is_file():
-            raise FileNotFoundError(f"{output_file.as_posix()} file does not exist")
-
-        with open(output_file.as_posix(), "rb") as fh:
-            for chunk in iter(lambda: fh.read(4096), b""):
-                hash_md5.update(chunk)
-
-        with open(output_file.as_posix() + ".md5", "w") as fh:
-            fh.write("{} {}\n".format(output_file.as_posix(), hash_md5.hexdigest()))
-
-
-class ReferenceMeta(BaseModel):
-    """Defines a basemodel for all reference file
-
-    This class defines a meta for various reference files. Only reference_genome is mandatory.
-
-    Attributes:
-        basedir: str for base directory which will be appended to all ReferenceUrlsModel fields
-        reference_genome: ReferenceUrlsModel. Required field for reference genome fasta file
-        dbsnp: ReferenceUrlsModel. Optional field for dbSNP vcf file
-        hc_vcf_1kg: ReferenceUrlsModel. Optional field for high confidence 1000Genome vcf
-        mills_1kg: ReferenceUrlsModel. Optional field for Mills' high confidence indels vcf
-        known_indel_1kg: ReferenceUrlsModel. Optional field for 1000Genome known indel vcf
-        vcf_1kg: ReferenceUrlsModel. Optional field for 1000Genome all SNPs
-        wgs_calling: ReferenceUrlsModel. Optional field for wgs calling intervals
-        genome_chrom_size: ReferenceUrlsModel. Optional field for geneome's chromosome sizes
-        gnomad_variant: ReferenceUrlsModel. Optional gnomad variants (non SV) as vcf
-        cosmicdb: ReferenceUrlsModel. Optional COSMIC database's variants as vcf
-        refgene_txt: ReferenceUrlsModel. Optional refseq's gene flat format from UCSC
-        refgene_sql: ReferenceUrlsModel. Optional refseq's gene sql format from UCSC
-        rankscore: ReferenceUrlsModel. Optional rankscore model
-        access_regions: ReferenceUrlsModel. Optional field for accessible genome regions
-        delly_exclusion: ReferenceUrlsModel. Optional field for genome exclusion regions
-        delly_mappability: ReferenceUrlsModel. Optional field for genome mappability
-        ascat_gccorrection: ReferenceUrlsModel. Optional field for genome gc correction bins
-        ascat_chryloci: ReferenceUrlsModel. Optional field for chromosome Y loci
-        clinvar: ReferenceUrlsModel. Optional field for clinvar reference
-        somalier_sites: ReferenceUrlsModel. Optional field for somalier sites vcf
-        cadd_snv: ReferenceUrlsModel. Optional field for CADD SNV reference
-    """
-
-    basedir: str = ""
-    reference_genome: ReferenceUrlsModel
-    dbsnp: Optional[ReferenceUrlsModel]
-    hc_vcf_1kg: Optional[ReferenceUrlsModel]
-    mills_1kg: Optional[ReferenceUrlsModel]
-    known_indel_1kg: Optional[ReferenceUrlsModel]
-    vcf_1kg: Optional[ReferenceUrlsModel]
-    wgs_calling: Optional[ReferenceUrlsModel]
-    genome_chrom_size: Optional[ReferenceUrlsModel]
-    gnomad_variant: Optional[ReferenceUrlsModel]
-    gnomad_variant_index: Optional[ReferenceUrlsModel]
-    cosmicdb: Optional[ReferenceUrlsModel]
-    refgene_txt: Optional[ReferenceUrlsModel]
-    refgene_sql: Optional[ReferenceUrlsModel]
-    rankscore: Optional[ReferenceUrlsModel]
-    access_regions: Optional[ReferenceUrlsModel]
-    delly_exclusion: Optional[ReferenceUrlsModel]
-    delly_mappability: Optional[ReferenceUrlsModel]
-    delly_mappability_gindex: Optional[ReferenceUrlsModel]
-    delly_mappability_findex: Optional[ReferenceUrlsModel]
-    ascat_gccorrection: Optional[ReferenceUrlsModel]
-    ascat_chryloci: Optional[ReferenceUrlsModel]
-    clinvar: Optional[ReferenceUrlsModel]
-    somalier_sites: Optional[ReferenceUrlsModel]
-    cadd_snv: Optional[ReferenceUrlsModel]
-    cadd_snv_index: Optional[ReferenceUrlsModel]
-
-    @validator("*", pre=True)
-    def validate_path(cls, value, values, **kwargs):
-        """validate and append path in ReferenceUrlsModel fields with basedir"""
-        if isinstance(value, str):
-            output_value = value
-        else:
-            if "output_path" in value:
-                value["output_path"] = Path(
-                    values["basedir"], value["output_path"]
-                ).as_posix()
-                output_value = ReferenceUrlsModel.parse_obj(value)
-            else:
-                output_value = value
-
-        return output_value
 
 
 class UMIParamsCommon(BaseModel):
@@ -755,75 +621,3 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
-
-
-class MetricConditionModel(BaseModel):
-    """Defines the metric condition model
-
-    Attributes:
-        norm: string (optional); validation condition
-        threshold: float (optional); validation cut off
-    """
-
-    norm: Optional[str] = None
-    threshold: Optional[float] = None
-
-
-class MetricModel(BaseModel):
-    """Defines the metric attributes model
-
-    Attributes:
-        header: str (optional); data
-        id: str (required); unique sample identifier (sample_id, case_id or project_id)
-        input: str (required); input file
-        name: str (required); metric name
-        step: str (required); step that generated the metric
-        value: Any (required and can take None as a value); metric value
-        condition: MetricConditionModel (required and can take None as a value); metric validation condition
-    """
-
-    header: Optional[str]
-    id: str
-    input: str
-    name: str
-    step: str
-    value: Any = ...
-    condition: Optional[MetricConditionModel] = ...
-
-    @validator("name")
-    def validate_name(cls, name, values):
-        """Updates the name if the source is FastQC"""
-
-        if "fastqc-percent_duplicates" in name:
-            return "PERCENT_DUPLICATION_R" + values["input"].split("_")[-2]
-
-        return name
-
-
-class MetricValidationModel(BaseModel):
-    """Defines the metric validation model
-
-    Attributes:
-        metrics: List[MetricModel] (required); metric model to validate
-
-    Raises:
-        ValueError: when a metric does not meet its validation requirements
-    """
-
-    metrics: List[MetricModel]
-
-    @validator("metrics", each_item=True)
-    def validate_metrics(cls, metric):
-        """Checks if a metric meets its filtering condition"""
-
-        if metric.condition and not VALID_OPS[metric.condition.norm](
-            metric.value, metric.condition.threshold
-        ):
-            raise ValueError(
-                f"QC metric {metric.name}: {metric.value} validation has failed. "
-                f"(Condition: {metric.condition.norm} {metric.condition.threshold}, ID: {metric.id})."
-            )
-
-        LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
-
-        return metric

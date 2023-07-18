@@ -196,6 +196,14 @@
 		"time": "12:00:00",
 		"n": 36
 	},
+	"svdb_annotate_somatic_research_sv": {
+		"time": "12:00:00",
+		"n": 8
+	},
+	"svdb_annotate_somatic_clinical_sv": {
+		"time": "12:00:00",
+		"n": 8
+	},
 	"vep_germline": {
 		"time": "06:00:00",
 		"n": 10

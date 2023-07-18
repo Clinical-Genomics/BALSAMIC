@@ -1,23 +1,45 @@
-import pytest
 import json
 import os
-
-from unittest import mock
+from datetime import datetime
 from distutils.dir_util import copy_tree
-from pathlib import Path
 from functools import partial
+from pathlib import Path
+from typing import Dict, Any
+from unittest import mock
 
+import pytest
 from _pytest.tmpdir import TempPathFactory
-
-from BALSAMIC.constants.workflow_params import VCF_DICT
 from click.testing import CliRunner
 
+from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.commands.base import cli
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.cache import (
+    DockerContainers,
+    GenomeVersion,
+    REFERENCE_FILES,
+)
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.constants import FileType
+from BALSAMIC.constants.paths import CONSTANTS_DIR
+from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.models.cache import (
+    CacheAnalysis,
+    CacheConfig,
+    References,
+    ReferencesHg,
+    AnalysisReferencesHg,
+)
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
-from BALSAMIC.commands.base import cli
-from BALSAMIC import __version__ as balsamic_version
 
 MOCKED_OS_ENVIRON = "os.environ"
+
+
+@pytest.fixture(scope="session", name="session_tmp_path")
+def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
+    """Return a non-existent files directory path."""
+    return tmp_path_factory.mktemp("session_tests")
 
 
 @pytest.fixture(scope="session")
@@ -124,65 +146,44 @@ def environ():
 
 
 @pytest.fixture(scope="session")
-def config_files():
-    """
-    Creates a dictionary containing paths of the config files.
-    """
-    return {
-        "sample": "BALSAMIC/config/sample.json",
-        "analysis_paired": "BALSAMIC/config/analysis_paired.json",
-        "cluster_json": "BALSAMIC/config/cluster.json",
-        "analysis_paired_umi": "BALSAMIC/config/analysis_paired_umi.json",
-        "analysis_single": "BALSAMIC/config/analysis_single.json",
-        "analysis_single_umi": "BALSAMIC/config/analysis_single_umi.json",
-        "panel_bed_file": "tests/test_data/references/panel/panel.bed",
-        "background_variant_file": "tests/test_data/references/panel/background_variants.txt",
-        "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
-        "pon_fastq_path": "tests/test_data/fastq/",
-        "clinical_snv_observations": "tests/test_data/references/variants/clinical_snv_variants.vcf.gz",
-        "cancer_germline_snv_observations": "tests/test_data/references/variants/cancer_germline_snv_variants.vcf.gz",
-        "cancer_somatic_snv_observations": "tests/test_data/references/variants/cancer_somatic_snv_variants.vcf.gz",
-        "clinical_sv_observations": "tests/test_data/references/variants/clinical_sv_variants.vcf.gz",
-        "somatic_sv_observations": "tests/test_data/references/variants/somatic_sv_variants.vcf.gz",
-        "swegen_snv_frequency": "tests/test_data/references/variants/swegen_snv.vcf.gz",
-        "swegen_sv_frequency": "tests/test_data/references/variants/swegen_sv.vcf.gz",
-    }
+
+def cluster_analysis_config_path() -> str:
+    """Return cluster analysis configuration file."""
+    return Path(
+        CONSTANTS_DIR, f"{ClusterConfigType.ANALYSIS}.{FileType.JSON}"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
 def reference():
-    """
-    Creates a dictionary for reference json model.
-    """
+    """Return a dictionary for reference json model."""
     return {
-        "reference": {
-            "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
-            "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-            "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-            "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
-            "1kg_known_indel": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
-            "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
-            "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-            "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-            "vep": "tests/test_data/references/vep/",
-            "refflat": "tests/test_data/references/genome/refseq.flat",
-            "refGene": "tests/test_data/references/genome/refGene.txt",
-            "wgs_calling_interval": "tests/test_data/references/genome/wgs_calling_regions.v1",
-            "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
-            "exon_bed": "tests/test_data/references/genome/refseq.flat.bed",
-            "rankscore": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
-            "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
-            "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
-            "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
-            "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
-            "delly_mappability_gindex": "tests/test_data/references/genome/delly_mappability.gz.gzi",
-            "delly_mappability_findex": "tests/test_data/references/genome/delly_mappability.fai",
-            "ascat_gccorrection": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
-            "ascat_chryloci": "tests/test_data/references/genome/GRCh37_Y.loci",
-            "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
-            "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
-            "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
-        }
+        "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+        "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+        "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "known_indel_1kg": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
+        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+        "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+        "vep_dir": "tests/test_data/references/vep/",
+        "refgene_flat": "tests/test_data/references/genome/refseq.flat",
+        "refgene_txt": "tests/test_data/references/genome/refGene.txt",
+        "wgs_calling_regions": "tests/test_data/references/genome/wgs_calling_regions.v1",
+        "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
+        "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
+        "rank_score": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
+        "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
+        "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
+        "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
+        "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
+        "delly_mappability_gindex": "tests/test_data/references/genome/delly_mappability.gz.gzi",
+        "delly_mappability_findex": "tests/test_data/references/genome/delly_mappability.fai",
+        "ascat_gc_correction": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
+        "ascat_chr_y_loci": "tests/test_data/references/genome/GRCh37_Y.loci",
+        "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
+        "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
+        "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
     }
 
 
@@ -316,6 +317,30 @@ def swegen_sv_frequency(reference_variants_dir_path: str) -> str:
     Creates path for Swegen SVs.
     """
     return Path(reference_variants_dir_path, "swegen_sv.vcf.gz").as_posix()
+
+
+@pytest.fixture(scope="session", name="invalid_json_file")
+def fixture_invalid_json_file(session_tmp_path: Path) -> Path:
+    """Return a non-existent json file path."""
+    return Path(session_tmp_path, "invalid_file.json")
+
+
+@pytest.fixture(scope="session", name="json_file")
+def fixture_json_file(session_tmp_path: Path) -> Path:
+    """Return a mocked json file path."""
+    return Path(session_tmp_path, "write_json.json")
+
+
+@pytest.fixture(scope="session", name="config_json")
+def fixture_config_json() -> str:
+    """Return Balsamic analysis config json file name."""
+    return "config.json"
+
+
+@pytest.fixture(scope="session", name="reference_graph")
+def fixture_reference_graph() -> str:
+    """Return Balsamic reference graph pdf file name."""
+    return "reference_graph.pdf"
 
 
 @pytest.fixture(scope="session")
@@ -549,7 +574,9 @@ def tumor_only_config(
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
-        analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json"
+        analysis_dir,
+        case_id_tumor_only,
+        f"{case_id_tumor_only}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -626,7 +653,9 @@ def tumor_normal_config(
     copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
 
     return Path(
-        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
+        analysis_dir,
+        case_id_tumor_normal,
+        f"{case_id_tumor_normal}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -690,7 +719,9 @@ def tumor_only_wgs_config(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_only_wgs, case_id_tumor_only_wgs + ".json"
+        analysis_dir,
+        case_id_tumor_only_wgs,
+        f"{case_id_tumor_only_wgs}.{FileType.JSON}"
     ).as_posix()
 
 
@@ -757,7 +788,9 @@ def tumor_normal_wgs_config(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_normal_wgs, case_id_tumor_normal_wgs + ".json"
+        analysis_dir,
+        case_id_tumor_normal_wgs,
+        f"{case_id_tumor_normal_wgs}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -806,7 +839,9 @@ def tumor_only_pon_config(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_only_pon, case_id_tumor_only_pon + ".json"
+        analysis_dir,
+        case_id_tumor_only_pon,
+        f"{case_id_tumor_only_pon}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -884,7 +919,7 @@ def bcftools_counts_path(analysis_path):
 
 @pytest.fixture(scope="session")
 def qc_requested_metrics():
-    """Raw requested metrics"""
+    """Return raw requested metrics."""
     return {
         "targeted": {
             "default": {
@@ -907,8 +942,8 @@ def qc_requested_metrics():
 
 
 @pytest.fixture(scope="session")
-def qc_extracted_metrics(metrics_yaml_path):
-    """Extracted and formatted QC metrics"""
+def qc_extracted_metrics(metrics_yaml_path: str) -> dict:
+    """Return extracted and formatted QC metrics."""
     return read_yaml(metrics_yaml_path)
 
 
@@ -956,3 +991,324 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
             )
         }
     )
+
+
+@pytest.fixture(scope="session", name="timestamp_now")
+def fixture_timestamp_now() -> datetime:
+    """Return a time stamp of today's date in date time format."""
+    return datetime.now()
+
+
+@pytest.fixture(scope="session", name="cosmic_key")
+def fixture_cosmic_key() -> str:
+    """Return mocked COSMIC key."""
+    return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
+
+
+@pytest.fixture(scope="session", name="develop_containers")
+def fixture_develop_containers() -> Dict[str, str]:
+    """Return develop docker hub containers dictionary."""
+    return {
+        DockerContainers.ASCAT.value: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
+        DockerContainers.VCF2CYTOSURE.value: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
+        DockerContainers.PYTHON_3.value: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
+        DockerContainers.BALSAMIC.value: "docker://clinicalgenomics/balsamic:develop-balsamic",
+        DockerContainers.SOMALIER.value: "docker://clinicalgenomics/balsamic:develop-somalier",
+        DockerContainers.CNVPYTOR.value: "docker://clinicalgenomics/balsamic:develop-cnvpytor",
+        DockerContainers.ALIGN_QC.value: "docker://clinicalgenomics/balsamic:develop-align_qc",
+        DockerContainers.ANNOTATE.value: "docker://clinicalgenomics/balsamic:develop-annotate",
+        DockerContainers.PYTHON_27.value: "docker://clinicalgenomics/balsamic:develop-varcall_py27",
+        DockerContainers.CNVKIT.value: "docker://clinicalgenomics/balsamic:develop-varcall_cnvkit",
+        DockerContainers.COVERAGE_QC.value: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
+        DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
+    }
+
+
+@pytest.fixture(scope="session", name="cache_config_data")
+def fixture_cache_config_data(
+    cache_analysis: CacheAnalysis,
+    develop_containers: Dict[str, str],
+    cosmic_key: str,
+    timestamp_now: datetime,
+    session_tmp_path: Path,
+) -> Dict[str, Any]:
+    """Return mocked cache config data."""
+
+    return {
+        "analysis": cache_analysis,
+        "references_dir": session_tmp_path,
+        "genome_dir": session_tmp_path,
+        "variants_dir": session_tmp_path,
+        "vep_dir": session_tmp_path,
+        "containers_dir": session_tmp_path,
+        "genome_version": GenomeVersion.HG19,
+        "cosmic_key": cosmic_key,
+        "bioinfo_tools": BIOINFO_TOOL_ENV,
+        "containers": develop_containers,
+        "references": REFERENCE_FILES[GenomeVersion.HG19],
+        "references_date": timestamp_now.strftime("%Y-%m-%d %H:%M"),
+    }
+
+
+@pytest.fixture(scope="session", name="cache_config")
+def fixture_cache_config(cache_config_data: Dict[str, dict]) -> CacheConfig:
+    """Return mocked cache config model."""
+    cache_config: CacheConfig = CacheConfig(**cache_config_data)
+    for reference in cache_config.references:
+        reference_file: Path = Path(reference[1].file_path)
+        reference_file.parent.mkdir(parents=True, exist_ok=True)
+        reference_file.touch()
+    return cache_config
+
+
+@pytest.fixture(scope="session", name="cache_analysis_data")
+def fixture_cache_analysis_data(case_id_tumor_only: str) -> Dict[str, str]:
+    """Return mocked cache analysis data."""
+    return {"case_id": case_id_tumor_only}
+
+
+@pytest.fixture(scope="session", name="cache_analysis")
+def fixture_cache_analysis(cache_analysis_data: Dict[str, str]) -> CacheAnalysis:
+    """Return mocked cache analysis model."""
+    return CacheAnalysis(**cache_analysis_data)
+
+
+@pytest.fixture(scope="session", name="refgene_bed_file")
+def fixture_refgene_bed_file(session_tmp_path: Path) -> Path:
+    """Return dummy refseq's gene bed file."""
+    refgene_bed_file: Path = Path(session_tmp_path, "genome", "refGene.flat.bed")
+    refgene_bed_file.touch()
+    return refgene_bed_file
+
+
+@pytest.fixture(scope="session", name="refgene_flat_file")
+def fixture_refgene_flat_file(session_tmp_path: Path) -> Path:
+    """Return dummy refseq's gene flat file."""
+    refgene_flat_file: Path = Path(session_tmp_path, "genome", "refGene.flat")
+    refgene_flat_file.touch()
+    return refgene_flat_file
+
+
+@pytest.fixture(scope="session", name="analysis_references_data")
+def fixture_analysis_references_data(
+    cache_config: CacheConfig,
+    refgene_bed_file: Path,
+    refgene_flat_file: Path,
+) -> Dict[str, Path]:
+    """Return analysis references model data."""
+    return {
+        "genome_chrom_size": Path(cache_config.references.genome_chrom_size.file_path),
+        "reference_genome": Path(cache_config.references.reference_genome.file_path),
+        "refgene_bed": refgene_bed_file,
+        "refgene_flat": refgene_flat_file,
+        "refgene_txt": Path(cache_config.references.refgene_txt.file_path),
+    }
+
+
+@pytest.fixture(scope="session", name="cadd_snv_indexed_file")
+def fixture_cadd_snv_indexed_file(session_tmp_path: Path) -> Path:
+    """Return dummy cadd snv indexed file."""
+    reference_file: Path = Path(
+        session_tmp_path, "variants", "hg19.cadd_snv.tsv.gz.tbi"
+    )
+    reference_file.touch()
+    return reference_file
+
+
+@pytest.fixture(scope="session", name="delly_exclusion_converted_file")
+def fixture_delly_exclusion_converted_file(session_tmp_path: Path) -> Path:
+    """Return dummy delly exclusion converted file."""
+    reference_file: Path = Path(
+        session_tmp_path, "genome", "delly_exclusion_converted.tsv"
+    )
+    reference_file.touch()
+    return reference_file
+
+
+@pytest.fixture(scope="session", name="clinvar_file")
+def fixture_clinvar_file(session_tmp_path: Path) -> Path:
+    """Return dummy clinvar file."""
+    clinvar_file: Path = Path(session_tmp_path, "variants", "clinvar.vcf.gz")
+    clinvar_file.touch()
+    return clinvar_file
+
+
+@pytest.fixture(scope="session", name="cosmic_file")
+def fixture_cosmic_file(session_tmp_path: Path) -> Path:
+    """Return dummy cosmic file."""
+    cosmic_file: Path = Path(
+        session_tmp_path, "variants", "cosmic_coding_muts_v97.vcf.gz"
+    )
+    cosmic_file.touch()
+    return cosmic_file
+
+
+@pytest.fixture(scope="session", name="dbsnp_file")
+def fixture_dbsnp_file(session_tmp_path: Path) -> Path:
+    """Return dummy dbsnp file."""
+    dbsnp_file: Path = Path(session_tmp_path, "variants", "dbsnp_grch37_b138.vcf.gz")
+    dbsnp_file.touch()
+    return dbsnp_file
+
+
+@pytest.fixture(scope="session", name="hc_vcf_1kg_file")
+def fixture_hc_vcf_1kg(session_tmp_path: Path) -> Path:
+    """Return dummy high confidence 1000 genome vcf file."""
+    hc_vcf_1kg_file: Path = Path(
+        session_tmp_path, "variants", "1kg_phase1_snps_high_confidence_b37.vcf.gz"
+    )
+    hc_vcf_1kg_file.touch()
+    return hc_vcf_1kg_file
+
+
+@pytest.fixture(scope="session", name="known_indel_1kg_file")
+def fixture_known_indel_1kg_file(session_tmp_path: Path) -> Path:
+    """Return dummy 1000 genome known indels vcf file."""
+    known_indel_1kg_file: Path = Path(
+        session_tmp_path, "variants", "1kg_known_indels_b37.vcf.gz"
+    )
+    known_indel_1kg_file.touch()
+    return known_indel_1kg_file
+
+
+@pytest.fixture(scope="session", name="mills_1kg_file")
+def fixture_mills_1kg_file(session_tmp_path: Path) -> Path:
+    """Return dummy Mills' high confidence indels vcf file."""
+    mills_1kg_file: Path = Path(session_tmp_path, "variants", "mills_1kg_index.vcf.gz")
+    mills_1kg_file.touch()
+    return mills_1kg_file
+
+
+@pytest.fixture(scope="session", name="somalier_sites_file")
+def fixture_somalier_sites_file(session_tmp_path: Path) -> Path:
+    """Return dummy somalier sites vcf file."""
+    somalier_sites_file: Path = Path(
+        session_tmp_path, "variants", "GRCh37.somalier.sites.vcf.gz"
+    )
+    somalier_sites_file.touch()
+    return somalier_sites_file
+
+
+@pytest.fixture(scope="session", name="vcf_1kg_file")
+def fixture_vcf_1kg_file(session_tmp_path: Path) -> Path:
+    """Return dummy 1000 genome all snps file."""
+    vcf_1kg_file: Path = Path(
+        session_tmp_path, "variants", "1k_genome_wgs_p1_v3_all_sites.vcf.gz"
+    )
+    vcf_1kg_file.touch()
+    return vcf_1kg_file
+
+
+@pytest.fixture(scope="session", name="analysis_references_hg_data")
+def fixture_analysis_references_hg_data(
+    cache_config: CacheConfig,
+    analysis_references_data: Dict[str, Path],
+    delly_exclusion_converted_file: Path,
+    clinvar_file: Path,
+    cosmic_file: Path,
+    dbsnp_file: Path,
+    hc_vcf_1kg_file: Path,
+    known_indel_1kg_file: Path,
+    mills_1kg_file: Path,
+    somalier_sites_file: Path,
+    vcf_1kg_file: Path,
+) -> Dict[str, Path]:
+    """Return human genome analysis references model data."""
+    analysis_references_hg_data: Dict[str, Path] = {
+        "access_regions": Path(cache_config.references.access_regions.file_path),
+        "ascat_chr_y_loci": Path(cache_config.references.ascat_chr_y_loci.file_path),
+        "ascat_gc_correction": Path(
+            cache_config.references.ascat_gc_correction.file_path
+        ),
+        "cadd_snv": Path(cache_config.references.cadd_snv.file_path),
+        "clinvar": clinvar_file,
+        "cosmic": cosmic_file,
+        "dbsnp": dbsnp_file,
+        "delly_exclusion": Path(cache_config.references.delly_exclusion.file_path),
+        "delly_exclusion_converted": delly_exclusion_converted_file,
+        "delly_mappability": Path(cache_config.references.delly_mappability.file_path),
+        "gnomad_variant": Path(cache_config.references.gnomad_variant.file_path),
+        "hc_vcf_1kg": hc_vcf_1kg_file,
+        "known_indel_1kg": known_indel_1kg_file,
+        "mills_1kg": mills_1kg_file,
+        "rank_score": Path(cache_config.references.rank_score.file_path),
+        "somalier_sites": somalier_sites_file,
+        "vcf_1kg": vcf_1kg_file,
+        "vep_dir": cache_config.references_dir,
+        "wgs_calling_regions": Path(
+            cache_config.references.wgs_calling_regions.file_path
+        ),
+    }
+    analysis_references_hg_data.update(analysis_references_data)
+    return analysis_references_hg_data
+
+
+@pytest.fixture(scope="session", name="analysis_references_hg")
+def fixture_analysis_references_hg(
+    analysis_references_hg_data: Dict[str, Path]
+) -> CacheAnalysis:
+    """Return mocked human genome analysis references model."""
+    return AnalysisReferencesHg(**analysis_references_hg_data)
+
+
+@pytest.fixture(scope="session", name="reference_url")
+def fixture_reference_url() -> str:
+    """Return dummy reference url."""
+    return "gs://gatk-legacy-bundles/b37/reference.vcf.gz"
+
+
+@pytest.fixture(scope="session", name="reference_file")
+def fixture_reference_file(session_tmp_path: Path) -> Path:
+    """Return dummy reference file."""
+    reference_file: Path = Path(session_tmp_path, "reference.vcf")
+    reference_file.touch()
+    return reference_file
+
+
+@pytest.fixture(scope="session", name="reference_url_data")
+def fixture_reference_url_data(
+    reference_url: str, reference_file: Path, cosmic_key: str
+) -> Dict[str, Any]:
+    """return reference url model data."""
+    return {
+        "url": reference_url,
+        "file_type": FileType.VCF,
+        "gzip": False,
+        "file_name": "reference.vcf",
+        "dir_name": "variants",
+        "file_path": reference_file.as_posix(),
+        "secret": cosmic_key,
+    }
+
+
+@pytest.fixture(scope="session", name="references_data")
+def fixture_references_data(
+    cache_config: CacheConfig,
+) -> Dict[str, dict]:
+    """Return references model data."""
+    return {
+        "genome_chrom_size": cache_config.references.genome_chrom_size,
+        "reference_genome": cache_config.references.reference_genome,
+        "refgene_sql": cache_config.references.refgene_sql,
+        "refgene_txt": cache_config.references.refgene_txt,
+    }
+
+
+@pytest.fixture(scope="session", name="references")
+def fixture_references(references_data: Dict[str, dict]) -> References:
+    """Return mocked references model."""
+    return References(**references_data)
+
+
+@pytest.fixture(scope="session", name="references_hg_data")
+def fixture_references_hg_data(
+    cache_config: CacheConfig,
+) -> Dict[str, dict]:
+    """Return human genome references model data."""
+    return dict(cache_config.references)
+
+
+@pytest.fixture(scope="session", name="references_hg")
+def fixture_references_hg(references_hg_data: Dict[str, dict]) -> ReferencesHg:
+    """Return mocked human genome references model."""
+    return ReferencesHg(**references_hg_data)

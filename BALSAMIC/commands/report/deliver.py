@@ -15,7 +15,7 @@ from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.rule import get_result_dir
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
+from BALSAMIC.constants.rules import DELIVERY_RULES
 
 LOG = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ def deliver(
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
     reference_genome = sample_config_dict["reference"]["reference_genome"]
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
 
     report_file_name = os.path.join(
         yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"

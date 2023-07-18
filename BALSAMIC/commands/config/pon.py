@@ -6,6 +6,7 @@ from pathlib import Path
 import click
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
     generate_graph,
     get_bioinfo_tools_version,
@@ -13,12 +14,9 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.models import PonBalsamicConfigModel
+from BALSAMIC.models.analysis import PonBalsamicConfigModel
 
-from BALSAMIC.constants.common import (
-    CONTAINERS_CONDA_ENV_PATH,
-    BIOINFO_TOOL_ENV,
-)
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
 LOG = logging.getLogger(__name__)
 
@@ -116,8 +114,8 @@ def pon_config(
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as f:
-        reference_dict = json.load(f)["reference"]
+    with open(reference_config, "r") as config_file:
+        reference_dict = json.load(config_file)
 
     fastq_path: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
@@ -145,7 +143,7 @@ def pon_config(
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,
-            container_conda_env_path=CONTAINERS_CONDA_ENV_PATH,
+            container_conda_env_path=CONTAINERS_DIR,
         ),
         panel={"capture_kit": panel_bed} if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)
