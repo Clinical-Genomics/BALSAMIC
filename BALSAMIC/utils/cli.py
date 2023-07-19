@@ -454,8 +454,9 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
             for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
                 assigned_fastq_list.append(fastq_path)
                 if not Path(fastq_path).is_file():
-                    LOG.error(f"Fastq-file does not exist: {fastq_path}")
-                    raise FileNotFoundError(f"Fastq-file does not exist: {fastq_path}")
+                    error_message = f"Fastq-file does not exist: {fastq_path}"
+                    LOG.error(error_message)
+                    raise FileNotFoundError(error_message)
 
     unassigned_fastqs = []
     for fastq in complete_fastq_list:
@@ -464,12 +465,9 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
 
     if unassigned_fastqs:
         unassigned_fastqs_str = "\n".join(unassigned_fastqs)
-        LOG.error(
-            f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
-        )
-        raise BalsamicError(
-            f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
-        )
+        error_message = f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
+        LOG.error(error_message)
+        raise BalsamicError(error_message)
 
 
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
@@ -486,10 +484,9 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
 
     fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
     if not fastqs_in_fastq_path:
-        LOG.error(f"No fastq files found in supplied fastq-path: {fastq_path}")
-        raise FileNotFoundError(
-            f"No fastq files found in supplied fastq-path: {fastq_path}"
-        )
+        error_message = f"No fastq files found in supplied fastq-path: {fastq_path}"
+        LOG.error(error_message)
+        raise FileNotFoundError(error_message)
 
     fastq_dict = {}
     fastq_suffixes = FASTQ_SUFFIXES
@@ -510,14 +507,9 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
 
                 if fastqpair_pattern in fastq_dict:
-                    LOG.error(
-                        f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
-                        f"dictionary for sample: {sample_name}"
-                    )
-                    raise BalsamicError(
-                        f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to "
-                        f"dictionary for sample: {sample_name}"
-                    )
+                    error_message = f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to dictionary for sample: {sample_name}"
+                    LOG.error(error_message)
+                    raise BalsamicError(error_message)
 
                 fastq_dict[fastqpair_pattern] = {}
                 fastq_dict[fastqpair_pattern]["fwd"] = fwd_fastq
