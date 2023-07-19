@@ -33,7 +33,6 @@ requirements = [
     "cryptography==41.0.2",
     "tabulate==0.8.10",
     "toml==0.10.2",
-    "Cython==0.29.35",
 ]
 
 # The C libraries required to build numpy are not available on RTD
