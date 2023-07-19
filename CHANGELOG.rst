@@ -1,3 +1,11 @@
+[X.X.X]
+--------
+
+Fixed:
+^^^^^^
+* Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/12
+
+
 [12.0.1]
 --------
 
