@@ -15,7 +15,7 @@ rule cnvkit_paired:
         bamN = sample_dict[normal_sample]["bam"]["final_bam"],
         bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
         baits_bed = config["panel"]["capture_kit"],
-        refflat = config["reference"]["refflat"],
+        refgene_flat = config["reference"]["refgene_flat"],
         snv_vcf_tumor = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         snv_vcf_normal = vcf_dir + "SNV.germline.normal.dnascope.vcf.gz",
     output:
@@ -62,7 +62,7 @@ tabix -p vcf -f {params.tmpdir}/SNV.merged.vcf.gz;
 
 # create target and anti-target bed files
 cnvkit.py target {input.baits_bed} \
---annotate {input.refflat} \
+--annotate {input.refgene_flat} \
 --split \
 --output {params.cnv_dir}/targets.bed;
 

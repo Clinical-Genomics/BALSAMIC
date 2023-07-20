@@ -19,7 +19,7 @@ rule vep_somatic_research_snv:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmpvcf_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz",
     vcfanno_research_annotations = dump_toml(research_annotations),
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_somatic_research_snv")
@@ -66,6 +66,8 @@ rule vep_somatic_clinical_snv:
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
     clinical_snv = clinical_snv_obs,
+    cancer_germline_snv = cancer_germline_snv_obs,
+    cancer_somatic_snv = cancer_somatic_snv_obs,
     vcfanno_clinical_annotations = dump_toml(clinical_annotations),
   threads:
     get_threads(cluster_config, "vep_somatic_snv")
@@ -73,20 +75,14 @@ rule vep_somatic_clinical_snv:
     "Running vep annotation for single nuceotide variants on {params.message_text}"
   shell:
     """
-if [[ -f "{params.clinical_snv}" ]]; then
-
-echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
-
-vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} \
-| bcftools reheader --threads {threads} -s {input.header} \
-| bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical} ;
-
+if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" ]]; then
+    echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
+    vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} | \
+    bcftools reheader --threads {threads} -s {input.header} | \
+    bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};
 else
-
-cp {input.vcf_snv_research} {output.vcf_snv_clinical};
-
+    cp {input.vcf_snv_research} {output.vcf_snv_clinical};
 fi
-
 tabix -p vcf -f {output.vcf_snv_clinical};
     """
 
@@ -102,7 +98,7 @@ rule vep_somatic_sv:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     message_text = "SV.somatic.{case_name}.svdb.research.vcf.gz",
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_somatic_sv")
@@ -266,7 +262,7 @@ rule vep_germline_tumor:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
     sample = 'tumor',
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')
@@ -305,7 +301,7 @@ rule vep_germline_normal:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
     sample = 'normal',
-    vep_cache = config["reference"]["vep"],
+    vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')

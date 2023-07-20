@@ -10,14 +10,12 @@ def test_pon_config(
     analysis_dir: str,
     balsamic_cache: str,
     panel_bed_file: str,
-    pon_fastq_path: str,
+    fastq_dir_pon: str,
+    case_id_pon: str,
 ):
     """Test balsamic PON config case command."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
-    case_id = "sample_pon"
-    fastq_dir: Path = Path(analysis_dir, case_id, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # WHEN creating a case config
     result = invoke_cli(
@@ -25,11 +23,11 @@ def test_pon_config(
             "config",
             "pon",
             "--case-id",
-            case_id,
+            case_id_pon,
             "--analysis-dir",
             analysis_dir,
             "--fastq-path",
-            fastq_dir,
+            fastq_dir_pon,
             "-p",
             panel_bed_file,
             "--version",
@@ -41,7 +39,7 @@ def test_pon_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(analysis_dir, case_id, case_id + "_PON.json").exists()
+    assert Path(analysis_dir, case_id_pon, case_id_pon + "_PON.json").exists()
 
 
 def test_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file):
@@ -70,18 +68,12 @@ def test_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file)
     assert "Error: Missing option" in result.output
     assert result.exit_code == 2
 
-
-def test_pon_config_graph(
-    invoke_cli,
-    tumor_only_pon_config: str,
-):
+def test_dag_graph_success_pon(pon_creation_config: str):
     """Test DAG graph building success."""
-
     # WHEN creating config using standard CLI input and setting Sentieon env vars
 
     # THEN DAG graph should be created successfully
-    assert Path(json.load(open(tumor_only_pon_config))["analysis"]["dag"]).exists()
-
+    assert Path(json.load(open(pon_creation_config))["analysis"]["dag"]).exists()
 
 def test_pon_config_graph_failed(
     invoke_cli,

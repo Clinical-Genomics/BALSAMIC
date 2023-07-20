@@ -40,7 +40,7 @@ sambamba depth region \
 rule sambamba_exon_depth:
     input:
         bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
-        bed = config["reference"]["exon_bed"]
+        bed = config["reference"]["refgene_bed"]
     output:
         bam_dir + "{sample}.dedup.realign.exon.cov.bed"
     benchmark:

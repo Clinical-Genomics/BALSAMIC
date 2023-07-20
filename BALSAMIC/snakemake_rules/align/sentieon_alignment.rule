@@ -101,8 +101,8 @@ rule sentieon_realign:
     input:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
-        indel_1kg = config["reference"]["1kg_known_indel"],
-        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        indel_1kg = config["reference"]["known_indel_1kg"]
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.realign.bam").as_posix()
     benchmark:

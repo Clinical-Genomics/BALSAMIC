@@ -1,4 +1,19 @@
-METRICS = {
+"""QC metrics constants."""
+import operator
+from typing import Dict, Callable
+
+
+VALID_OPS: Dict[str, Callable] = {
+    "lt": operator.lt,
+    "le": operator.le,
+    "eq": operator.eq,
+    "ne": operator.ne,
+    "ge": operator.ge,
+    "gt": operator.gt,
+}
+
+
+METRICS: Dict[str, dict] = {
     "targeted": {
         "default": {
             "MEAN_INSERT_SIZE": {"condition": None},

@@ -7,6 +7,9 @@ Added:
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
 * Samtools stats, flagstat, idxstat to WGS workflow
 * Functionality for dynamically assigning fastq-info to sample-dictionary from input fastq-dir
+* Annotate SNVs with cancer germline SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
+* Annotate SNVs with somatic SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
+* Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
 
 Changed:
 ^^^^^^^^
@@ -15,10 +18,21 @@ Changed:
 * Standardised alignment workflows to WGS-workflow
 * Implemented parallel trimming and alignment in all workflows per lane
 * All bam-QC tools take the final dedup.realign bamfile as input
+* Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
+* Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
+* Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 
 Fixed:
 ^^^^^^
 * vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
+* Link external fastqs to case folder & create case directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1195
+* vcf2cytosure container missing constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1198
+* Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
+
+Removed:
+^^^^^^^
+* Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
 
 [12.0.1]
 --------

@@ -7,7 +7,7 @@
 rule bcftools_filter_tnscope_research_tumor_only:
   input:
     vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
-    wgs_calling_file = config["reference"]["wgs_calling_interval"]
+    wgs_calling_file = config["reference"]["wgs_calling_regions"]
   output:
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
     bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
@@ -41,7 +41,7 @@ bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_research};
 rule bcftools_filter_tnscope_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
-    wgs_calling_file = config["reference"]["wgs_calling_interval"]
+    wgs_calling_file = config["reference"]["wgs_calling_regions"]
   output:
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
