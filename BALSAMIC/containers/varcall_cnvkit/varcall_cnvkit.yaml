@@ -286,7 +286,7 @@ dependencies:
       - nvidia-cusparse-cu11==11.7.4.91
       - nvidia-nccl-cu11==2.14.3
       - nvidia-nvtx-cu11==11.7.91
-      - pandas==2.0.3
+      - pandas==1.5.3
       - pillow==10.0.0
       - pomegranate==1.0.0
       - pyfaidx==0.7.2.1
