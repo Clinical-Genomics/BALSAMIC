@@ -62,6 +62,7 @@ def test_tumor_normal_config(
         analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
     ).exists()
 
+
 def test_tumor_only_config(
     invoke_cli,
     case_id_tumor_only: str,
@@ -127,11 +128,11 @@ def test_tumor_normal_config_duplicate_assigned_fastqfiles(
     # WHEN creating a case analysis
     # THEN creation of config-file should fail with ValidationError from pydantic
     with mock.patch.dict(
-            MOCKED_OS_ENVIRON,
-            {
-                "SENTIEON_LICENSE": sentieon_license,
-                "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-            },
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
     ):
         try:
             invoke_cli(
@@ -158,7 +159,10 @@ def test_tumor_normal_config_duplicate_assigned_fastqfiles(
             )
         except Exception as exc:
             # Perform the assertion on the error message
-            assert "Fastq-pattern: ACC1_NORMAL_S1_L001 has been assigned more than once" in str(exc)
+            assert (
+                "Fastq-pattern: ACC1_NORMAL_S1_L001 has been assigned more than once"
+                in str(exc)
+            )
 
 
 def test_run_without_permissions(
@@ -289,6 +293,7 @@ def test_dag_graph_success_tumor_only(tumor_only_config: str):
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
 
+
 def test_dag_graph_success_tumor_only_w_pon(tumor_only_pon_config: str):
     """Test DAG graph building success."""
 
@@ -296,6 +301,7 @@ def test_dag_graph_success_tumor_only_w_pon(tumor_only_pon_config: str):
 
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_only_pon_config))["analysis"]["dag"]).exists()
+
 
 def test_dag_graph_success_tumor_normal(tumor_normal_config: str):
     """Test DAG graph building success."""
@@ -321,6 +327,7 @@ def test_dag_graph_success_tumor_normal_wgs(tumor_normal_wgs_config: str):
 
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(tumor_normal_wgs_config))["analysis"]["dag"]).exists()
+
 
 def test_config_graph_failed(
     invoke_cli,

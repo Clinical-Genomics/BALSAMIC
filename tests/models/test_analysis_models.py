@@ -137,7 +137,6 @@ def test_sample_instance_model(config_dict):
         assert sample.dict() == sample_dict[sample_name]
 
 
-
 def test_sample_instance_model_error():
     """Test sample instance model error raise."""
 

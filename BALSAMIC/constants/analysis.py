@@ -48,6 +48,7 @@ class SampleType(StrEnum):
     NORMAL: str = "normal"
     TUMOR: str = "tumor"
 
+
 class MutationOrigin(StrEnum):
     """Variations present in a sample."""
 
@@ -105,8 +106,10 @@ class BioinfoTools(StrEnum):
     VCFANNO: str = "vcfanno"
 
 
-FASTQ_SUFFIXES: Dict[str, Dict] = {"1": {"fwd": "_1.fastq.gz", "rev": "_2.fastq.gz"},
-                                   "2": {"fwd": "_R1_001.fastq.gz", "rev": "_R2_001.fastq.gz"}}
+FASTQ_SUFFIXES: Dict[str, Dict] = {
+    "1": {"fwd": "_1.fastq.gz", "rev": "_2.fastq.gz"},
+    "2": {"fwd": "_R1_001.fastq.gz", "rev": "_R2_001.fastq.gz"},
+}
 
 BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BEDTOOLS.value: DockerContainers.ALIGN_QC.value,

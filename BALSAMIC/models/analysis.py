@@ -558,6 +558,7 @@ class BalsamicConfigModel(BaseModel):
         Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
         Fastq patterns and Fastq names can only occur once.
         """
+
         def count_occurrences(fastq_pattern_or_file):
             counter = defaultdict(int)
             for item in fastq_pattern_or_file:
@@ -579,14 +580,17 @@ class BalsamicConfigModel(BaseModel):
 
         # Fastq pattern can only be assigned once per group of samples
         for fastq_pattern, count in fastq_patterns.items():
-            assert count == 1, f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
+            assert (
+                count == 1
+            ), f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
 
         # Fastq name can only be assigned once per group of samples
         for fastq_name, count in fastq_filenames.items():
-            assert count == 1, f"Fastq-name: {fastq_name} has been assigned more than once."
+            assert (
+                count == 1
+            ), f"Fastq-name: {fastq_name} has been assigned more than once."
 
         return value
-
 
 
 class UMIParamsCommon(BaseModel):

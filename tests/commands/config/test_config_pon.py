@@ -68,12 +68,14 @@ def test_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file)
     assert "Error: Missing option" in result.output
     assert result.exit_code == 2
 
+
 def test_dag_graph_success_pon(pon_creation_config: str):
     """Test DAG graph building success."""
     # WHEN creating config using standard CLI input and setting Sentieon env vars
 
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(pon_creation_config))["analysis"]["dag"]).exists()
+
 
 def test_pon_config_graph_failed(
     invoke_cli,

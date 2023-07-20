@@ -765,6 +765,7 @@ def test_generate_h5_capture_no_output(tmp_path):
 
     assert actual_output == None
 
+
 def test_get_sample_type_from_prefix(config_dict):
     """Test sample type extraction from a extracted config file."""
 
@@ -823,12 +824,15 @@ def test_get_pon_bam_name(pon_creation_config):
     )
 
     bam_dict_pon_expected = {
-        "align_sort_bamlist": [f"{bam_dir}{test_sample}_align_sort_1_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
-                               f"{bam_dir}{test_sample}_align_sort_2_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam"],
+        "align_sort_bamlist": [
+            f"{bam_dir}{test_sample}_align_sort_1_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
+            f"{bam_dir}{test_sample}_align_sort_2_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
+        ],
         "final_bam": f"{bam_dir}normal.{test_sample}.dedup.bam",
     }
 
     assert sample_dict[test_sample]["bam"] == bam_dict_pon_expected
+
 
 def test_get_fastqpatterns(sample_config, tumor_sample_name, normal_sample_name):
     """Tests proper extraction of fastq patterns from sample_dict"""
@@ -868,6 +872,7 @@ def test_get_sample_dict(
     assert samples[tumor_sample_name]["fastq_info"]
     assert samples[normal_sample_name]["fastq_info"]
 
+
 def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3):
     """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
     # GIVEN a fastq_dir with these files: ACC1_XXXXX_R_1.fastq.gz and ACC1_XXXXX_R_2.fastq.gz and sample name ACC1
@@ -879,7 +884,7 @@ def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3):
     expected_fastq_dict = {
         "ACC1_XXXXX_R": {
             "fwd": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_1.fastq.gz",
-            "rev": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_2.fastq.gz"
+            "rev": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_2.fastq.gz",
         }
     }
     assert fastq_dict == expected_fastq_dict
@@ -969,6 +974,7 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
             file[3]
             == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
         )
+
 
 def test_get_resolved_fastq_files_directory(fastq_dir: str):
     """Test get fastq directory for unlinked fastqs."""

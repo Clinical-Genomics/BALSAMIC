@@ -242,9 +242,11 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic") -> str:
 
     return str(snakefile)
 
+
 def get_config_path(config_type: ClusterConfigType) -> Path:
     """Return a config path given its type."""
     return Path(CONSTANTS_DIR, config_type + ".json")
+
 
 def find_file_index(file_path):
     indexible_files = {
