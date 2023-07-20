@@ -252,10 +252,6 @@
 		"time": "02:00:00",
 		"n": 8
 	},
-	"svdb_annotate_somatic_clinical_sv": {
-		"time": "12:00:00",
-		"n": 8
-	},
 	"tiddit_sv_tumor_only": {
 		"time": "10:00:00",
 		"n": 24

@@ -38,14 +38,16 @@ MOCKED_OS_ENVIRON = "os.environ"
 
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
-    """Return a non-existent files directory path."""
+    """
+    Return a non-existent files directory path.
+    """
     return tmp_path_factory.mktemp("session_tests")
 
 
 @pytest.fixture(scope="session")
 def tumor_sample_name() -> str:
     """
-    Creates mock name for tumor sample.
+    Create mock name for tumor sample.
     """
     return "ACC1"
 
@@ -53,7 +55,7 @@ def tumor_sample_name() -> str:
 @pytest.fixture(scope="session")
 def normal_sample_name() -> str:
     """
-    Creates mock name for normal sample.
+    Create mock name for normal sample.
     """
     return "ACC2"
 
@@ -61,7 +63,7 @@ def normal_sample_name() -> str:
 @pytest.fixture(scope="session")
 def case_id_tumor_only() -> str:
     """
-    creates mock case-id for TGA tumor-only.
+    Create mock case-id for TGA tumor-only.
     """
     return "sample_tumor_only"
 
@@ -69,7 +71,7 @@ def case_id_tumor_only() -> str:
 @pytest.fixture(scope="session")
 def case_id_tumor_only_pon() -> str:
     """
-    Creates mock case-id for TGA PON tumor-only.
+    Create mock case-id for TGA PON tumor-only.
     """
     return "sample_tumor_only_pon"
 
@@ -77,7 +79,7 @@ def case_id_tumor_only_pon() -> str:
 @pytest.fixture(scope="session")
 def case_id_tumor_only_umi() -> str:
     """
-    Creates mock case-id for TGA PON tumor-only.
+    Create mock case-id for TGA PON tumor-only.
     """
     return "sample_tumor_only_umi"
 
@@ -85,7 +87,7 @@ def case_id_tumor_only_umi() -> str:
 @pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
     """
-    Creates mock case-id for TGA tumor-normal.
+    Create mock case-id for TGA tumor-normal.
     """
     return "sample_tumor_normal"
 
@@ -93,7 +95,7 @@ def case_id_tumor_normal() -> str:
 @pytest.fixture(scope="session")
 def case_id_tumor_only_wgs() -> str:
     """
-    Creates mock case-id for WGS tumor-only.
+    Create mock case-id for WGS tumor-only.
     """
     return "sample_tumor_only_wgs"
 
@@ -101,7 +103,7 @@ def case_id_tumor_only_wgs() -> str:
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_wgs() -> str:
     """
-    Creates mock case-id for WGS tumor-normal.
+    Create mock case-id for WGS tumor-normal.
     """
     return "sample_tumor_normal_wgs"
 
@@ -109,7 +111,7 @@ def case_id_tumor_normal_wgs() -> str:
 @pytest.fixture(scope="session")
 def fastq_dir(case_id_tumor_only: str, analysis_dir: str):
     """
-    Returns path for mock FastQ directory.
+    Return path for mock FastQ directory.
     """
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -123,7 +125,7 @@ def fastq_dir(case_id_tumor_only: str, analysis_dir: str):
 @pytest.fixture
 def cli_runner():
     """
-    Runs click for command line interface testing.
+    Run click for command line interface testing.
     """
     runner = CliRunner()
     return runner
@@ -132,7 +134,7 @@ def cli_runner():
 @pytest.fixture
 def invoke_cli(cli_runner):
     """
-    Invokes cli commands with options.
+    Invoke cli commands with options.
     """
     return partial(cli_runner.invoke, cli)
 
@@ -140,14 +142,16 @@ def invoke_cli(cli_runner):
 @pytest.fixture(scope="session")
 def environ():
     """
-    Creates operating system's environment object.
+    Create operating system's environment object.
     """
     return "os.environ"
 
 
 @pytest.fixture(scope="session")
 def cluster_analysis_config_path() -> str:
-    """Return cluster analysis configuration file."""
+    """
+    Return cluster analysis configuration file.
+    """
     return Path(
         CONSTANTS_DIR, f"{ClusterConfigType.ANALYSIS}.{FileType.JSON}"
     ).as_posix()
@@ -155,7 +159,9 @@ def cluster_analysis_config_path() -> str:
 
 @pytest.fixture(scope="session")
 def reference():
-    """Return a dictionary for reference json model."""
+    """
+    Return a dictionary for reference json model.
+    """
     return {
         "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
         "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
@@ -189,7 +195,7 @@ def reference():
 @pytest.fixture(scope="session")
 def test_data_dir() -> str:
     """
-    Returns path for test data directory.
+    Return path for test data directory.
     """
     return "tests/test_data"
 
@@ -197,7 +203,7 @@ def test_data_dir() -> str:
 @pytest.fixture(scope="session")
 def pon_fastq_path(test_data_dir: str) -> str:
     """
-    Returns path for FASTQ directory for Panel Of Normal (PON).
+    Return path for FASTQ directory for Panel Of Normal (PON).
     """
     return Path(test_data_dir, "fastq").as_posix()
 
@@ -205,7 +211,7 @@ def pon_fastq_path(test_data_dir: str) -> str:
 @pytest.fixture(scope="session")
 def reference_panel_dir_path(test_data_dir: str) -> str:
     """
-    Returns path for reference panel directory.
+    Return path for reference panel directory.
     """
     return Path(test_data_dir, "references", "panel").as_posix()
 
@@ -213,7 +219,7 @@ def reference_panel_dir_path(test_data_dir: str) -> str:
 @pytest.fixture(scope="session")
 def reference_variants_dir_path(test_data_dir: str) -> str:
     """
-    Returns path for reference variants directory.
+    Return path for reference variants directory.
     """
     return Path(test_data_dir, "references", "variants").as_posix()
 
@@ -221,7 +227,7 @@ def reference_variants_dir_path(test_data_dir: str) -> str:
 @pytest.fixture(scope="session")
 def config_path(test_data_dir: str) -> str:
     """
-    Returns path for config json file.
+    Return path for config json file.
     """
     return Path(test_data_dir, "config.json").as_posix()
 
@@ -229,7 +235,7 @@ def config_path(test_data_dir: str) -> str:
 @pytest.fixture(scope="session")
 def config_dict(config_path: str) -> str:
     """
-    Reads and returns config from json.
+    Read and return config from json.
     """
     return read_json(config_path)
 
@@ -237,7 +243,7 @@ def config_dict(config_path: str) -> str:
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
     """
-    Returns path for panel bed file.
+    Return path for panel bed file.
     """
     return Path(reference_panel_dir_path, "panel.bed").as_posix()
 
@@ -245,7 +251,7 @@ def panel_bed_file(reference_panel_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def background_variant_file(reference_panel_dir_path: str) -> str:
     """
-    Returns path for background variants for TGA.
+    Return path for background variants for TGA.
     """
     return Path(reference_panel_dir_path, "background_variants.txt").as_posix()
 
@@ -253,7 +259,7 @@ def background_variant_file(reference_panel_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def pon_cnn(reference_panel_dir_path: str) -> str:
     """
-    Returns path for Panel Of Normal (PON), cnn file for cnvkit.
+    Return path for Panel Of Normal (PON), cnn file for cnvkit.
     """
     return Path(reference_panel_dir_path, "test_panel_ponn.cnn").as_posix()
 
@@ -261,7 +267,7 @@ def pon_cnn(reference_panel_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def clinical_snv_observations(reference_variants_dir_path: str) -> str:
     """
-    Returns path for clinical SNVs from loqusDB.
+    Return path for clinical SNVs from loqusDB.
     """
     return Path(reference_variants_dir_path, "clinical_snv_variants.vcf.gz").as_posix()
 
@@ -269,7 +275,7 @@ def clinical_snv_observations(reference_variants_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def cancer_germline_snv_observations(reference_variants_dir_path: str) -> str:
     """
-    Returns path of cancer germline SNVs from loqusDB.
+    Return path of cancer germline SNVs from loqusDB.
     """
     return Path(
         reference_variants_dir_path, "cancer_germline_snv_variants.vcf.gz"
@@ -279,7 +285,7 @@ def cancer_germline_snv_observations(reference_variants_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def cancer_somatic_snv_observations(reference_variants_dir_path: str) -> str:
     """
-    Returns path for somatic SNVs from loqusDB.
+    Return path for somatic SNVs from loqusDB.
     """
     return Path(
         reference_variants_dir_path, "cancer_somatic_snv_variants.vcf.gz"
@@ -289,7 +295,7 @@ def cancer_somatic_snv_observations(reference_variants_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def clinical_sv_observations(reference_variants_dir_path: str) -> str:
     """
-    Returns path for clinical SV observations from loqusDB.
+    Return path for clinical SV observations from loqusDB.
     """
     return Path(reference_variants_dir_path, "clinical_sv_variants.vcf.gz").as_posix()
 
@@ -297,7 +303,7 @@ def clinical_sv_observations(reference_variants_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def somatic_sv_observations(reference_variants_dir_path: str) -> str:
     """
-    Returns path for somatic SV observations from loqusDB.
+    Return path for somatic SV observations from loqusDB.
     """
     return Path(reference_variants_dir_path, "somatic_sv_variants.vcf.gz").as_posix()
 
@@ -305,7 +311,7 @@ def somatic_sv_observations(reference_variants_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def swegen_snv_frequency(reference_variants_dir_path: str) -> str:
     """
-    Returns path for Swegen SNVs.
+    Return path for Swegen SNVs.
     """
     return Path(reference_variants_dir_path, "swegen_snv.vcf.gz").as_posix()
 
@@ -313,39 +319,47 @@ def swegen_snv_frequency(reference_variants_dir_path: str) -> str:
 @pytest.fixture(scope="session")
 def swegen_sv_frequency(reference_variants_dir_path: str) -> str:
     """
-    Creates path for Swegen SVs.
+    Create path for Swegen SVs.
     """
     return Path(reference_variants_dir_path, "swegen_sv.vcf.gz").as_posix()
 
 
 @pytest.fixture(scope="session", name="invalid_json_file")
 def fixture_invalid_json_file(session_tmp_path: Path) -> Path:
-    """Return a non-existent json file path."""
+    """
+    Return a non-existent json file path.
+    """
     return Path(session_tmp_path, "invalid_file.json")
 
 
 @pytest.fixture(scope="session", name="json_file")
 def fixture_json_file(session_tmp_path: Path) -> Path:
-    """Return a mocked json file path."""
+    """
+    Return a mocked json file path.
+    """
     return Path(session_tmp_path, "write_json.json")
 
 
 @pytest.fixture(scope="session", name="config_json")
 def fixture_config_json() -> str:
-    """Return Balsamic analysis config json file name."""
+    """
+    Return Balsamic analysis config json file name.
+    """
     return "config.json"
 
 
 @pytest.fixture(scope="session", name="reference_graph")
 def fixture_reference_graph() -> str:
-    """Return Balsamic reference graph pdf file name."""
+    """
+    Return Balsamic reference graph pdf file name.
+    """
     return "reference_graph.pdf"
 
 
 @pytest.fixture(scope="session")
 def sentieon_license(tmp_path_factory):
     """
-    Creates Sentieon's license path
+    Create Sentieon's license path
     """
     sentieon_license_dir = tmp_path_factory.mktemp("sentieon_licence")
     sentieon_license_path = sentieon_license_dir / "license_file.lic"
@@ -357,7 +371,7 @@ def sentieon_license(tmp_path_factory):
 @pytest.fixture(scope="session")
 def sentieon_install_dir(tmp_path_factory):
     """
-    Creates install directory for Sentieon tools
+    Create install directory for Sentieon tools
     """
     sentieon_install_dir = tmp_path_factory.mktemp("sentieon_install_dir")
     Path(sentieon_install_dir / "bin").mkdir(exist_ok=True)
@@ -370,7 +384,7 @@ def sentieon_install_dir(tmp_path_factory):
 @pytest.fixture()
 def no_write_perm_path(tmp_path_factory) -> str:
     """
-    A path with no write permissions.
+    Return path with no write permissions.
     """
     bad_perm_path: Path = tmp_path_factory.mktemp("bad_perm_path")
     bad_perm_path.chmod(0o444)
@@ -380,7 +394,7 @@ def no_write_perm_path(tmp_path_factory) -> str:
 @pytest.fixture(scope="session")
 def balsamic_cache(tmp_path_factory, reference):
     """
-    Creates balsamic-cache and returns the path for balsamic-cache
+    Create and return the path for balsamic-cache
     """
 
     cache_dir = tmp_path_factory.mktemp("balsmic_cache")
@@ -404,7 +418,7 @@ def balsamic_cache(tmp_path_factory, reference):
 @pytest.fixture(scope="session")
 def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
     """
-    Creates and returns the directory where the case analysis will be saved.
+    Create and return the directory where the case analysis will be saved.
     """
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
     return analysis_dir.as_posix()
@@ -413,7 +427,7 @@ def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
     """
-    Creates and returns the directory containing the FASTQs for tumor-only.
+    Create and return the directory containing the FASTQs for tumor-only.
     """
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -430,7 +444,7 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str) -> str:
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str) -> str:
     """
-    Creates and returns the directory containing the FASTQs for PON, tumor-only.
+    Create and return the directory containing the FASTQs for PON, tumor-only.
     """
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_pon, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -440,7 +454,7 @@ def fastq_dir_tumor_only_pon(analysis_dir: str, case_id_tumor_only_pon: str) -> 
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str) -> str:
     """
-    Creates and returns the directory containing the FASTQs for UMI, tumor only.
+    Create and return the directory containing the FASTQs for UMI, tumor only.
     """
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_umi, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -450,7 +464,7 @@ def fastq_dir_tumor_only_umi(analysis_dir: str, case_id_tumor_only_umi: str) -> 
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str) -> str:
     """
-    Creates and returns the directory containing the FASTQs for tumor-normal.
+    Create and return the directory containing the FASTQs for tumor-normal.
     """
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -460,7 +474,7 @@ def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str) -> str:
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str) -> str:
     """
-    Creates and returns the directory containing the FASTQs for WGS tumor-only.
+    Create and return the directory containing the FASTQs for WGS tumor-only.
     """
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_wgs, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -470,7 +484,7 @@ def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str) -> 
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str) -> str:
     """
-    Creates and returns the directory containing the FASTQs for WGS tumor-normal.
+    Create and return the directory containing the FASTQs for WGS tumor-normal.
     """
 
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_wgs, "fastq")
@@ -481,7 +495,7 @@ def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str)
 @pytest.fixture(scope="session")
 def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """
-    Creates a dummy snakemake jobscript
+    Create a dummy snakemake jobscript
     """
 
     script_dir = tmp_path_factory.mktemp("snakemake_script")
@@ -499,7 +513,9 @@ ls -l # dummy command
 
 @pytest.fixture(name="helpers")
 def fixture_config_helpers():
-    """Helper fixture for case config files"""
+    """
+    Return helper for case config files
+    """
     return ConfigHelper()
 
 
@@ -522,7 +538,9 @@ def tumor_only_config(
     cancer_germline_snv_observations: str,
     cancer_somatic_snv_observations: str,
 ) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
+    """
+    Invoke balsamic config sample to create sample configuration file for tumor-only TGA.
+    """
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -599,7 +617,9 @@ def tumor_normal_config(
     cancer_germline_snv_observations: str,
     cancer_somatic_snv_observations: str,
 ) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
+    """
+    Invoke balsamic config sample to create sample configuration file for tumor-normal TGA.
+    """
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -675,7 +695,9 @@ def tumor_only_wgs_config(
     cancer_germline_snv_observations: str,
     cancer_somatic_snv_observations: str,
 ) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
+    """
+    Invoke balsamic config sample to create sample configuration file for tumor-only WGS.
+    """
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -742,7 +764,9 @@ def tumor_normal_wgs_config(
     cancer_germline_snv_observations: str,
     cancer_somatic_snv_observations: str,
 ) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
+    """
+    Invoke balsamic config sample to create sample configuration file for tumor-normal WGS.
+    """
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -805,7 +829,9 @@ def tumor_only_pon_config(
     sentieon_license: str,
     sentieon_install_dir: str,
 ) -> str:
-    """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
+    """
+    Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA.
+    """
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -847,7 +873,7 @@ def tumor_only_pon_config(
 @pytest.fixture(scope="session")
 def sample_config(tumor_sample_name: str, normal_sample_name: str):
     """
-    sample config dict to test workflow utils
+    Create and return sample config dict to test workflow utils
     """
     sample_config = {
         "QC": {
@@ -884,25 +910,33 @@ def sample_config(tumor_sample_name: str, normal_sample_name: str):
 
 @pytest.fixture(scope="session")
 def analysis_path():
-    """Analysis test path"""
+    """
+    Return path for test analysis
+    """
     return "tests/test_data/qc_files/analysis"
 
 
 @pytest.fixture(scope="session")
 def multiqc_data_path(analysis_path):
-    """multiqc_data.json test path"""
+    """
+    Return path of JSON for MultiQC test data
+    """
     return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
 
 
 @pytest.fixture(scope="session")
 def multiqc_data_dict(multiqc_data_path):
-    """multiqc_data.json test path"""
+    """
+    Read and Return test data from JASON of MultiQC test data
+    """
     return read_json(multiqc_data_path)
 
 
 @pytest.fixture(scope="session")
 def metrics_yaml_path(analysis_path):
-    """sample_tumor_only_metrics_deliverables.yaml test path"""
+    """
+    Return path for Tumor-Only deliverable metrics from YAML
+    """
     return os.path.join(
         analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml"
     )
@@ -910,15 +944,19 @@ def metrics_yaml_path(analysis_path):
 
 @pytest.fixture(scope="session")
 def bcftools_counts_path(analysis_path):
-    """svdb.all.filtered.pass.stats test path"""
+    """
+    Return path for svdb.clinical.filtered.pass.stats
+    """
     return os.path.join(
-        analysis_path, "vep", "SNV.somatic.case.svdb.all.filtered.pass.stats"
+        analysis_path, "vep", "SNV.somatic.case.svdb.clinical.filtered.pass.stats"
     )
 
 
 @pytest.fixture(scope="session")
 def qc_requested_metrics():
-    """Return raw requested metrics."""
+    """
+    Return raw requested metrics.
+    """
     return {
         "targeted": {
             "default": {
@@ -942,13 +980,17 @@ def qc_requested_metrics():
 
 @pytest.fixture(scope="session")
 def qc_extracted_metrics(metrics_yaml_path: str) -> dict:
-    """Return extracted and formatted QC metrics."""
+    """
+    Return extracted and formatted QC metrics.
+    """
     return read_yaml(metrics_yaml_path)
 
 
 @pytest.fixture(scope="function")
 def snakemake_fastqc_rule(tumor_only_config, helpers):
-    """FastQC snakemake mock rule"""
+    """
+    Return FastQC snakemake mock rule
+    """
 
     helpers.read_config(tumor_only_config)
     fastq_path = os.path.join(
@@ -994,19 +1036,25 @@ def snakemake_fastqc_rule(tumor_only_config, helpers):
 
 @pytest.fixture(scope="session", name="timestamp_now")
 def fixture_timestamp_now() -> datetime:
-    """Return a time stamp of today's date in date time format."""
+    """
+    Return a time stamp of current date in date time format.
+    """
     return datetime.now()
 
 
 @pytest.fixture(scope="session", name="cosmic_key")
 def fixture_cosmic_key() -> str:
-    """Return mocked COSMIC key."""
+    """
+    Return a mocked COSMIC key.
+    """
     return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
 
 
 @pytest.fixture(scope="session", name="develop_containers")
 def fixture_develop_containers() -> Dict[str, str]:
-    """Return develop docker hub containers dictionary."""
+    """
+    Return a dictionary of docker hub containers for develop branch.
+    """
     return {
         DockerContainers.ASCAT.value: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
         DockerContainers.VCF2CYTOSURE.value: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
@@ -1031,7 +1079,9 @@ def fixture_cache_config_data(
     timestamp_now: datetime,
     session_tmp_path: Path,
 ) -> Dict[str, Any]:
-    """Return mocked cache config data."""
+    """
+    Return mocked cache config data.
+    """
 
     return {
         "analysis": cache_analysis,
@@ -1051,7 +1101,9 @@ def fixture_cache_config_data(
 
 @pytest.fixture(scope="session", name="cache_config")
 def fixture_cache_config(cache_config_data: Dict[str, dict]) -> CacheConfig:
-    """Return mocked cache config model."""
+    """
+    Return mocked cache config model.
+    """
     cache_config: CacheConfig = CacheConfig(**cache_config_data)
     for reference in cache_config.references:
         reference_file: Path = Path(reference[1].file_path)
@@ -1062,19 +1114,25 @@ def fixture_cache_config(cache_config_data: Dict[str, dict]) -> CacheConfig:
 
 @pytest.fixture(scope="session", name="cache_analysis_data")
 def fixture_cache_analysis_data(case_id_tumor_only: str) -> Dict[str, str]:
-    """Return mocked cache analysis data."""
+    """
+    Return mocked cache analysis data.
+    """
     return {"case_id": case_id_tumor_only}
 
 
 @pytest.fixture(scope="session", name="cache_analysis")
 def fixture_cache_analysis(cache_analysis_data: Dict[str, str]) -> CacheAnalysis:
-    """Return mocked cache analysis model."""
+    """
+    Return mocked cache analysis model.
+    """
     return CacheAnalysis(**cache_analysis_data)
 
 
 @pytest.fixture(scope="session", name="refgene_bed_file")
 def fixture_refgene_bed_file(session_tmp_path: Path) -> Path:
-    """Return dummy refseq's gene bed file."""
+    """
+    Return dummy refseq's gene bed file.
+    """
     refgene_bed_file: Path = Path(session_tmp_path, "genome", "refGene.flat.bed")
     refgene_bed_file.touch()
     return refgene_bed_file
@@ -1082,7 +1140,9 @@ def fixture_refgene_bed_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="refgene_flat_file")
 def fixture_refgene_flat_file(session_tmp_path: Path) -> Path:
-    """Return dummy refseq's gene flat file."""
+    """
+    Return dummy refseq's gene flat file.
+    """
     refgene_flat_file: Path = Path(session_tmp_path, "genome", "refGene.flat")
     refgene_flat_file.touch()
     return refgene_flat_file
@@ -1094,7 +1154,9 @@ def fixture_analysis_references_data(
     refgene_bed_file: Path,
     refgene_flat_file: Path,
 ) -> Dict[str, Path]:
-    """Return analysis references model data."""
+    """
+    Return analysis references model data.
+    """
     return {
         "genome_chrom_size": Path(cache_config.references.genome_chrom_size.file_path),
         "reference_genome": Path(cache_config.references.reference_genome.file_path),
@@ -1106,7 +1168,9 @@ def fixture_analysis_references_data(
 
 @pytest.fixture(scope="session", name="cadd_snv_indexed_file")
 def fixture_cadd_snv_indexed_file(session_tmp_path: Path) -> Path:
-    """Return dummy cadd snv indexed file."""
+    """
+    Return dummy cadd snv indexed file.
+    """
     reference_file: Path = Path(
         session_tmp_path, "variants", "hg19.cadd_snv.tsv.gz.tbi"
     )
@@ -1116,7 +1180,9 @@ def fixture_cadd_snv_indexed_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="delly_exclusion_converted_file")
 def fixture_delly_exclusion_converted_file(session_tmp_path: Path) -> Path:
-    """Return dummy delly exclusion converted file."""
+    """
+    Return dummy delly exclusion converted file.
+    """
     reference_file: Path = Path(
         session_tmp_path, "genome", "delly_exclusion_converted.tsv"
     )
@@ -1126,7 +1192,9 @@ def fixture_delly_exclusion_converted_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="clinvar_file")
 def fixture_clinvar_file(session_tmp_path: Path) -> Path:
-    """Return dummy clinvar file."""
+    """
+    Return dummy clinvar file.
+    """
     clinvar_file: Path = Path(session_tmp_path, "variants", "clinvar.vcf.gz")
     clinvar_file.touch()
     return clinvar_file
@@ -1134,7 +1202,9 @@ def fixture_clinvar_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="cosmic_file")
 def fixture_cosmic_file(session_tmp_path: Path) -> Path:
-    """Return dummy cosmic file."""
+    """
+    Return dummy cosmic file.
+    """
     cosmic_file: Path = Path(
         session_tmp_path, "variants", "cosmic_coding_muts_v97.vcf.gz"
     )
@@ -1144,7 +1214,9 @@ def fixture_cosmic_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="dbsnp_file")
 def fixture_dbsnp_file(session_tmp_path: Path) -> Path:
-    """Return dummy dbsnp file."""
+    """
+    Return dummy dbsnp file.
+    """
     dbsnp_file: Path = Path(session_tmp_path, "variants", "dbsnp_grch37_b138.vcf.gz")
     dbsnp_file.touch()
     return dbsnp_file
@@ -1152,7 +1224,9 @@ def fixture_dbsnp_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="hc_vcf_1kg_file")
 def fixture_hc_vcf_1kg(session_tmp_path: Path) -> Path:
-    """Return dummy high confidence 1000 genome vcf file."""
+    """
+    Return dummy high confidence 1000 genome vcf file.
+    """
     hc_vcf_1kg_file: Path = Path(
         session_tmp_path, "variants", "1kg_phase1_snps_high_confidence_b37.vcf.gz"
     )
@@ -1162,7 +1236,9 @@ def fixture_hc_vcf_1kg(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="known_indel_1kg_file")
 def fixture_known_indel_1kg_file(session_tmp_path: Path) -> Path:
-    """Return dummy 1000 genome known indels vcf file."""
+    """
+    Return dummy 1000 genome known indels vcf file.
+    """
     known_indel_1kg_file: Path = Path(
         session_tmp_path, "variants", "1kg_known_indels_b37.vcf.gz"
     )
@@ -1172,7 +1248,9 @@ def fixture_known_indel_1kg_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="mills_1kg_file")
 def fixture_mills_1kg_file(session_tmp_path: Path) -> Path:
-    """Return dummy Mills' high confidence indels vcf file."""
+    """
+    Return dummy Mills' high confidence indels vcf file.
+    """
     mills_1kg_file: Path = Path(session_tmp_path, "variants", "mills_1kg_index.vcf.gz")
     mills_1kg_file.touch()
     return mills_1kg_file
@@ -1180,7 +1258,9 @@ def fixture_mills_1kg_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="somalier_sites_file")
 def fixture_somalier_sites_file(session_tmp_path: Path) -> Path:
-    """Return dummy somalier sites vcf file."""
+    """
+    Return dummy somalier sites vcf file.
+    """
     somalier_sites_file: Path = Path(
         session_tmp_path, "variants", "GRCh37.somalier.sites.vcf.gz"
     )
@@ -1190,7 +1270,9 @@ def fixture_somalier_sites_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="vcf_1kg_file")
 def fixture_vcf_1kg_file(session_tmp_path: Path) -> Path:
-    """Return dummy 1000 genome all snps file."""
+    """
+    Return dummy 1000 genome all snps file.
+    """
     vcf_1kg_file: Path = Path(
         session_tmp_path, "variants", "1k_genome_wgs_p1_v3_all_sites.vcf.gz"
     )
@@ -1212,7 +1294,9 @@ def fixture_analysis_references_hg_data(
     somalier_sites_file: Path,
     vcf_1kg_file: Path,
 ) -> Dict[str, Path]:
-    """Return human genome analysis references model data."""
+    """
+    Return human genome analysis references model data.
+    """
     analysis_references_hg_data: Dict[str, Path] = {
         "access_regions": Path(cache_config.references.access_regions.file_path),
         "ascat_chr_y_loci": Path(cache_config.references.ascat_chr_y_loci.file_path),
@@ -1246,7 +1330,9 @@ def fixture_analysis_references_hg_data(
 def fixture_analysis_references_hg(
     analysis_references_hg_data: Dict[str, Path]
 ) -> CacheAnalysis:
-    """Return mocked human genome analysis references model."""
+    """
+    Return mocked human genome analysis references model.
+    """
     return AnalysisReferencesHg(**analysis_references_hg_data)
 
 
@@ -1258,7 +1344,9 @@ def fixture_reference_url() -> str:
 
 @pytest.fixture(scope="session", name="reference_file")
 def fixture_reference_file(session_tmp_path: Path) -> Path:
-    """Return dummy reference file."""
+    """
+    Return dummy reference file.
+    """
     reference_file: Path = Path(session_tmp_path, "reference.vcf")
     reference_file.touch()
     return reference_file
@@ -1268,7 +1356,9 @@ def fixture_reference_file(session_tmp_path: Path) -> Path:
 def fixture_reference_url_data(
     reference_url: str, reference_file: Path, cosmic_key: str
 ) -> Dict[str, Any]:
-    """return reference url model data."""
+    """
+    return reference url model data.
+    """
     return {
         "url": reference_url,
         "file_type": FileType.VCF,
@@ -1284,7 +1374,9 @@ def fixture_reference_url_data(
 def fixture_references_data(
     cache_config: CacheConfig,
 ) -> Dict[str, dict]:
-    """Return references model data."""
+    """
+    Return references model data.
+    """
     return {
         "genome_chrom_size": cache_config.references.genome_chrom_size,
         "reference_genome": cache_config.references.reference_genome,
@@ -1295,7 +1387,9 @@ def fixture_references_data(
 
 @pytest.fixture(scope="session", name="references")
 def fixture_references(references_data: Dict[str, dict]) -> References:
-    """Return mocked references model."""
+    """
+    Return mocked references model.
+    """
     return References(**references_data)
 
 
@@ -1303,11 +1397,15 @@ def fixture_references(references_data: Dict[str, dict]) -> References:
 def fixture_references_hg_data(
     cache_config: CacheConfig,
 ) -> Dict[str, dict]:
-    """Return human genome references model data."""
+    """
+    Return human genome references model data.
+    """
     return dict(cache_config.references)
 
 
 @pytest.fixture(scope="session", name="references_hg")
 def fixture_references_hg(references_hg_data: Dict[str, dict]) -> ReferencesHg:
-    """Return mocked human genome references model."""
+    """
+    Return mocked human genome references model.
+    """
     return ReferencesHg(**references_hg_data)
