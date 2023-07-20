@@ -236,6 +236,8 @@ def case_config(
         }
     )
 
+    analysis_fastq_dir = get_analysis_fastq_files_directory(case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path)
+
     config_collection_dict = BalsamicConfigModel(
         QC={
             "quality_trim": quality_trim,
@@ -247,9 +249,7 @@ def case_config(
             "case_id": case_id,
             "gender": gender,
             "analysis_dir": analysis_dir,
-            "fastq_path": get_analysis_fastq_files_directory(
-                case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
-            ),
+            "fastq_path": analysis_fastq_dir,
             "analysis_type": "paired" if normal_sample_name else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
@@ -260,7 +260,7 @@ def case_config(
         samples=get_sample_dict(
             tumor_sample_name=tumor_sample_name,
             normal_sample_name=normal_sample_name,
-            fastq_path=fastq_path,
+            fastq_path=analysis_fastq_dir,
         ),
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
@@ -279,7 +279,7 @@ def case_config(
 
     # Validate fastq input
     validate_fastq_input(
-        sample_dict=config_collection_dict["samples"], fastq_path=fastq_path
+        sample_dict=config_collection_dict["samples"], fastq_path=analysis_fastq_dir
     )
 
     config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
