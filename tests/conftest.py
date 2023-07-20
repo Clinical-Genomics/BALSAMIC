@@ -187,6 +187,16 @@ def tumor_normal_fastq_info_correct() -> str:
     }
     return sample_dict
 
+@pytest.fixture(scope="session")
+def analysis_workflow_qc():
+    """Return string for balsamic QC workflow."""
+    return "balsamic-qc"
+
+@pytest.fixture(scope="session")
+def genome_version_canfam():
+    """Return string to specify Canfam reference for QC workflow."""
+    return "canfam3"
+
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
     """Return a non-existent files directory path."""
@@ -229,11 +239,6 @@ def case_id_tumor_only_w_dummy_vep() -> str:
 def case_id_tumor_only_qc() -> str:
     """Mock TGA tumor-only case ID for QC workflow."""
     return "sample_tumor_only_qc"
-
-@pytest.fixture(scope="session")
-def case_id_tumor_only_qc_canfam() -> str:
-    """Mock TGA tumor-only case ID for QC canfam workflow."""
-    return "sample_tumor_only_qc_canfam"
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_pon_cnn() -> str:
@@ -290,10 +295,6 @@ def case_id_tumor_normal_qc() -> str:
     """Mock TGA tumor-normal case ID for QC TGA test."""
     return "sample_tumor_normal_qc"
 
-@pytest.fixture(scope="session")
-def case_id_tumor_normal_qc_canfam() -> str:
-    """Mock TGA tumor-normal case ID for QC TGA test."""
-    return "sample_tumor_normal_qc_canfam"
 
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_qc_wgs() -> str:
@@ -417,12 +418,6 @@ def config_dict(config_path: str) -> str:
     Reads and returns config from json.
     """
     return read_json(config_path)
-
-
-@pytest.fixture(scope="session")
-def config_sample_info_tumor_normal(config_files):
-    return read_json(config_files["sample_tumor_normal"])
-
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
@@ -674,12 +669,12 @@ def fastq_dir_tumor_only_w_dummy_vep(
     Path.unlink(vep_dir / vep_test_file)
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_single_id3(
-    analysis_dir: str, case_id_tumor_only_single: str
+    analysis_dir: str, case_id_tumor_only: str
 ) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-only analysis for a specific fastq-pattern.
     """
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_single, "fastq_id3")
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq_id3")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
@@ -1102,7 +1097,7 @@ def tumor_normal_config_qc(
 
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc_canfam(
-    case_id_tumor_normal_qc_canfam: str,
+    case_id_tumor_normal_qc: str,
     tumor_sample_name: str,
     normal_sample_name: str,
     analysis_dir: str,
@@ -1135,7 +1130,7 @@ def tumor_normal_config_qc_canfam(
                 "-p",
                 panel_bed_file,
                 "--case-id",
-                case_id_tumor_normal_qc_canfam,
+                case_id_tumor_normal_qc,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
@@ -1156,7 +1151,7 @@ def tumor_normal_config_qc_canfam(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_normal_qc_canfam, f"{case_id_tumor_normal_qc_canfam}.{FileType.JSON}"
+        analysis_dir, case_id_tumor_normal_qc, f"{case_id_tumor_normal_qc}.{FileType.JSON}"
     ).as_posix()
 
 @pytest.fixture(scope="session")
@@ -1444,7 +1439,7 @@ def tumor_only_config_qc(
 
 @pytest.fixture(scope="session")
 def tumor_only_config_qc_canfam(
-    case_id_tumor_only_qc_canfam: str,
+    case_id_tumor_only_qc: str,
     tumor_sample_name: str,
     balsamic_cache: str,
     analysis_dir: str,
@@ -1472,7 +1467,7 @@ def tumor_only_config_qc_canfam(
                 "config",
                 "case",
                 "--case-id",
-                case_id_tumor_only_qc_canfam,
+                case_id_tumor_only_qc,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
@@ -1493,7 +1488,7 @@ def tumor_only_config_qc_canfam(
         )
 
     return Path(
-        analysis_dir, case_id_tumor_only_qc_canfam, f"{case_id_tumor_only_qc_canfam}.{FileType.JSON}"
+        analysis_dir, case_id_tumor_only_qc, f"{case_id_tumor_only_qc}.{FileType.JSON}"
     ).as_posix()
 
 @pytest.fixture(scope="session")
@@ -1650,8 +1645,7 @@ def pon_creation_config(
             ]
         )
 
-    return Path(analysis_dir, case_id_pon, f"{case_id_pon}.{FileType.JSON}",
-                ).as_posix()
+    return Path(analysis_dir, case_id_pon, f"{case_id_pon}_PON.{FileType.JSON}").as_posix()
 
 @pytest.fixture(scope="session")
 def sample_config(

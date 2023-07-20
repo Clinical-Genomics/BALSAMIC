@@ -51,9 +51,33 @@
         "dag": "tests/test_data/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
     },
     "samples": {
-        "ACC1": {"type": "tumor"},
-        "ACC2": {"type": "normal"}
-    },
+        "ACC1": {
+            "type": "tumor",
+            "fastq_info": {
+                "HXXXXXXX_ACC1_S01_L001": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz"
+                },
+                "HXXXXXXX_ACC1_S01_L002": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
+                }
+            }
+        },
+        "ACC2": {
+            "type": "normal",
+            "fastq_info": {
+                "HXXXXXXX_ACC2_S01_L002": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
+                },
+                "HXXXXXXX_ACC2_S01_L001": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz"
+                }
+            }
+        }
+   },
     "reference": {
         "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
         "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",

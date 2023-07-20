@@ -122,11 +122,11 @@ def test_analysis_model(test_data_dir: str):
         assert "not supported" in excinfo.value
 
 
-def test_sample_instance_model(config_sample_info_tumor_normal):
+def test_sample_instance_model(config_dict):
     """Test sample instance model initialisation."""
 
     # GIVEN a sample dictionary
-    sample_dict = config_sample_info_tumor_normal["samples"]
+    sample_dict = config_dict["samples"]
     # WHEN parsing the sample dictionary
     for sample_name in sample_dict:
         sample: SampleInstanceModel = SampleInstanceModel.parse_obj(

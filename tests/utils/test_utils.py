@@ -55,7 +55,7 @@ from BALSAMIC.utils.rule import (
 
 
 def test_get_pon_sample_dict(
-    fastq_dir_tumor_only_pon: str, tumor_sample_name: str, normal_sample_name: str
+    fastq_dir_pon: str, tumor_sample_name: str, normal_sample_name: str
 ):
     """Tests sample PON dictionary retrieval."""
 
@@ -73,7 +73,7 @@ def test_get_pon_sample_dict(
     }
 
     # WHEN retrieving PON samples
-    samples: dict = get_pon_sample_dict(fastq_dir_tumor_only_pon)
+    samples: dict = get_pon_sample_dict(fastq_dir_pon)
 
     # THEN the samples should be retrieved from the FASTQ directory
     for sample in samples:
@@ -809,9 +809,10 @@ def test_get_bam_names(sample_config, tumor_sample_name, normal_sample_name):
 
 def test_get_pon_bam_name(pon_creation_config):
     """Tests assignment of bamfile names to sample_dict with pon as analysis_type"""
-    bam_dir = "tests/test_data/id1/analysis/" + "/bam/"
-    sample_dict = dict(pon_creation_config["samples"])
-    analysis_type = pon_creation_config["analysis"]["analysis_type"]
+    bam_dir = "tests/test_data/id1/analysis/" + "bam/"
+    config_dict = json.load(open(pon_creation_config, "r"))
+    sample_dict = config_dict["samples"]
+    analysis_type = config_dict["analysis"]["analysis_type"]
     test_sample = "ACCN1"
 
     assert analysis_type == "pon"
@@ -822,8 +823,9 @@ def test_get_pon_bam_name(pon_creation_config):
     )
 
     bam_dict_pon_expected = {
-        "align_sort_bamlist": [f"{bam_dir}{test_sample}_align_sort_{test_sample}_S1_L001_R.bam"],
-        "final_bam": f"{bam_dir}tumor.{test_sample}.dedup.bam",
+        "align_sort_bamlist": [f"{bam_dir}{test_sample}_align_sort_1_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
+                               f"{bam_dir}{test_sample}_align_sort_2_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam"],
+        "final_bam": f"{bam_dir}normal.{test_sample}.dedup.bam",
     }
 
     assert sample_dict[test_sample]["bam"] == bam_dict_pon_expected
@@ -967,43 +969,6 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
             file[3]
             == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
         )
-
-def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str):
-    """Tests sample dictionary retrieval."""
-
-    # GIVEN a tumor and a normal sample names
-
-    # GIVEN the expected dictionary output
-    samples_expected: dict = {
-        tumor_sample_name: {"type": "tumor"},
-        normal_sample_name: {"type": "normal"},
-    }
-
-    # WHEN getting the sample dictionary
-    samples: dict = get_sample_dict(
-        tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
-    )
-
-    # THEN the dictionary should be correctly formatted
-    assert samples == samples_expected
-
-
-def test_get_pon_sample_dict(
-    fastq_dir: str, tumor_sample_name: str, normal_sample_name: str
-):
-    """Tests sample PON dictionary retrieval."""
-
-    # GIVEN a FASTQ directory
-
-    # GIVEN the expected sample dictionary
-    samples_expected: dict = {"ACC1": {"type": "normal"}, "ACC2": {"type": "normal"}}
-
-    # WHEN retrieving PON samples
-    samples: dict = get_pon_sample_dict(fastq_dir)
-
-    # THEN the samples should be retrieved from the FASTQ directory
-    assert samples == samples_expected
-
 
 def test_get_resolved_fastq_files_directory(fastq_dir: str):
     """Test get fastq directory for unlinked fastqs."""

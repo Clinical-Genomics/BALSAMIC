@@ -82,6 +82,7 @@ class BioinfoTools(StrEnum):
     BWA: str = "bwa"
     CNVKIT: str = "cnvkit"
     CNVPYTOR: str = "cnvpytor"
+    COMPRESS: str = "compress"
     CSVKIT: str = "csvkit"
     DELLY: str = "delly"
     VEP: str = "ensembl-vep"
@@ -110,6 +111,7 @@ FASTQ_SUFFIXES: Dict[str, Dict] = {"1": {"fwd": "_1.fastq.gz", "rev": "_2.fastq.
 BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BEDTOOLS.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.BWA.value: DockerContainers.ALIGN_QC.value,
+    BioinfoTools.COMPRESS.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.FASTQC.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.SAMTOOLS.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.PICARD.value: DockerContainers.ALIGN_QC.value,
