@@ -10,38 +10,50 @@ from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.constants.paths import SCHEDULER_PATH
 
 
+class SingularityBindPath(BaseModel):
+    """Singularity binding path model.
+
+    Attributes:
+        source (Path)      : Path to the file or directory on the host system.
+        destination (Path) : Path inside the container where the source will be mounted.
+
+    """
+
+    source: Path
+    destination: Path
+
+
 class Snakemake(BaseModel):
     """Snakemake command building model.
 
     Attributes:
-        account (str)                                     : Scheduler account
-        case_id (str)                                     : Analysis case name
-        cluster_config_path (FilePath)                    : Cluster configuration file path
-        config_path (FilePath)                            : Sample configuration file
-        disable_variant_caller (Optional[str])            : Disable variant caller
-        dragen (Optional[bool])                           : FLag for enabling or disabling Dragen suite
-        force (bool)                                      : Force snakemake execution
-        log_dir (DirectoryPath)                           : Logging directory
-        mail_type (Optional[ClusterMailType])             : Email type triggering job status notifications
-        mail_user (Optional[str])                         : User email to receive job status notifications
-        profile (ClusterProfile)                          : Cluster profile to submit jobs
-        qos (QOS)                                         : QOS for sbatch jobs
-        quiet (bool)                                      : Quiet mode for snakemake
-        report_path (Optional[Path])                      : Snakemake generated report path
-        result_dir (DirectoryPath)                        : Analysis output directory
-        run_analysis (bool)                               : Flag to run the actual analysis
-        run_mode (RunMode)                                : Cluster run mode to execute analysis
-        script_dir (DirectoryPath)                        : Cluster profile scripts directory
-        singularity (bool)                                : Flag to enable singularity
-        singularity_bind_paths (Optional[Dict[str, str]]) : Singularity source and destination bind paths
-        slurm_profiler (Optional[str])                    : Slurm profiling option to be used for benchmarking
-        snakefile (FilePath)                              : Snakemake rule configuration file
-        snakemake_options (Optional[List[str]])           : Snakemake command additional options
-        working_dir (DirectoryPath)                       : Snakemake working directory
-
+        account (Optional[str])                           : Scheduler account.
+        case_id (str)                                     : Analysis case name.
+        cluster_config_path (FilePath)                    : Cluster configuration file path.
+        config_path (FilePath)                            : Sample configuration file.
+        disable_variant_caller (Optional[str])            : Disable variant caller.
+        dragen (Optional[bool])                           : FLag for enabling or disabling Dragen suite.
+        force (bool)                                      : Force snakemake execution.
+        log_dir (DirectoryPath)                           : Logging directory.
+        mail_type (Optional[ClusterMailType])             : Email type triggering job status notifications.
+        mail_user (Optional[str])                         : User email to receive job status notifications.
+        profile (ClusterProfile)                          : Cluster profile to submit jobs.
+        qos (QOS)                                         : QOS for sbatch jobs.
+        quiet (bool)                                      : Quiet mode for snakemake.
+        report_path (Optional[Path])                      : Snakemake generated report path.
+        result_dir (DirectoryPath)                        : Analysis output directory.
+        run_analysis (bool)                               : Flag to run the actual analysis.
+        run_mode (RunMode)                                : Cluster run mode to execute analysis.
+        script_dir (DirectoryPath)                        : Cluster profile scripts directory.
+        singularity (bool)                                : Flag to enable singularity.
+        singularity_bind_paths (Optional[Dict[str, str]]) : Singularity source and destination bind paths.
+        slurm_profiler (Optional[str])                    : Slurm profiling option to be used for benchmarking.
+        snakefile (FilePath)                              : Snakemake rule configuration file.
+        snakemake_options (Optional[List[str]])           : Snakemake command additional options.
+        working_dir (DirectoryPath)                       : Snakemake working directory.
     """
 
-    account: str
+    account: Optional[str]
     case_id: str
     cluster_config_path: FilePath
     config_path: FilePath
@@ -60,7 +72,7 @@ class Snakemake(BaseModel):
     run_mode: RunMode
     script_dir: DirectoryPath
     singularity: bool
-    singularity_bind_paths: Optional[Dict[str, str]]
+    singularity_bind_paths: Optional[List[SingularityBindPath]]
     slurm_profiler: Optional[str]
     snakefile: FilePath
     snakemake_options: Optional[List[str]]
@@ -127,8 +139,10 @@ class Snakemake(BaseModel):
         """Return string representation of the singularity_bind_paths option."""
         if self.singularity:
             bind_options: List[str] = []
-            for source_path, destination_path in self.singularity_bind_paths:
-                bind_options.append(f"--bind {source_path}:{destination_path}")
+            for singularity_bind_path in self.singularity_bind_paths:
+                bind_options.append(
+                    f"--bind {singularity_bind_path.source.as_posix()}:{singularity_bind_path.destination.as_posix()}"
+                )
             return f"--use-singularity --singularity-args ' --cleanenv {' '.join(bind_options)}'"
         return ""
 
