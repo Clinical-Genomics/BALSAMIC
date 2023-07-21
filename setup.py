@@ -21,7 +21,7 @@ requirements = [
     "numpy>=1.21.6",
     "pandas>=1.1.5",
     "psutil>=5.7.0",
-    "pydantic>=1.9.0",
+    "pydantic>=1.9.0,<2.0",
     "pygments>=2.6.1",
     "pyyaml>=5.3.1",
     "six>=1.12.0",
@@ -37,7 +37,7 @@ requirements = [
 
 # The C libraries required to build numpy are not available on RTD
 if not os.getenv("READTHEDOCS"):
-    requirements.extend(["cyvcf2<0.10.0"])
+    requirements.extend(["cyvcf2==0.30.22"])
 
 setup(
     name="BALSAMIC",
