@@ -16,7 +16,6 @@ class SingularityBindPath(BaseModel):
     Attributes:
         source (Path)      : Path to the file or directory on the host system.
         destination (Path) : Path inside the container where the source will be mounted.
-
     """
 
     source: Path
