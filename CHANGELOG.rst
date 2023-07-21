@@ -5,7 +5,7 @@ Changed:
 ^^^^^^^^
 * Fix cyvcf2 to version 0.30.22 https://github.com/Clinical-Genomics/BALSAMIC/pull/1206
 * Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1206
-* Bump varcall-cnvkit container versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1207
+* Update varcall-cnvkit container versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1207
 
 [12.0.1]
 --------
