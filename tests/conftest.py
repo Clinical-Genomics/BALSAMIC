@@ -79,19 +79,21 @@ def pon_fastq_list(load_test_fastq_data) -> list:
 
 
 @pytest.fixture(scope="session")
-def fastq_names_duplicate_assigned_fastq_patterns(load_test_fastq_data) -> Dict[str: list]:
+def fastq_names_duplicate_assigned_fastq_patterns(
+    load_test_fastq_data,
+) -> Dict[str:list]:
     """Returns dict with list of fastq file names for testing of duplicate assigned fastq patterns."""
     return load_test_fastq_data["fastq_fails"]["duplicate_fastq_patterns"]
 
 
 @pytest.fixture(scope="session")
-def fastq_names_duplicate_assigned_fastq_files(load_test_fastq_data) -> Dict[str: list]:
+def fastq_names_duplicate_assigned_fastq_files(load_test_fastq_data) -> Dict[str:list]:
     """Returns dict with list of fastq file names for testing of duplicate assigned fastq files."""
     return load_test_fastq_data["fastq_fails"]["duplicate_fastq_files_tumor_normal"]
 
 
 @pytest.fixture(scope="session")
-def fastq_names_illegal_normal_sample_name(load_test_fastq_data) -> Dict[str: list]:
+def fastq_names_illegal_normal_sample_name(load_test_fastq_data) -> Dict[str:list]:
     """Returns dict with list of fastq file names for testing of detection of sample name containing underscore."""
     return load_test_fastq_data["fastq_fails"]["illegal_normal_sample_name"]
 
