@@ -557,7 +557,8 @@ class BalsamicConfigModel(BaseModel):
         for sample_name in value:
             if "_" in sample_name:
                 raise ValueError(
-                    f"Sample name '{sample_name}' contains an underscore (_). Underscores are not allowed.")
+                    f"Sample name '{sample_name}' contains an underscore (_). Underscores are not allowed."
+                )
         return value
 
     @validator("samples", pre=True)

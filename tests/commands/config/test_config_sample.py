@@ -135,33 +135,37 @@ def test_tumor_normal_config_duplicate_assigned_fastqfiles(
         },
     ):
         result = invoke_cli(
-                [
-                    "config",
-                    "case",
-                    "--case-id",
-                    case_id_tumor_normal,
-                    "--gender",
-                    "male",
-                    "--analysis-dir",
-                    analysis_dir,
-                    "--fastq-path",
-                    fastq_dir_tumor_normal_duplicate_assigned_fastqfiles,
-                    "-p",
-                    panel_bed_file,
-                    "--balsamic-cache",
-                    balsamic_cache,
-                    "--tumor-sample-name",
-                    tumor_sample_name,
-                    "--normal-sample-name",
-                    illegal_normal_sample_name_v1,
-                ],
-            )
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal,
+                "--gender",
+                "male",
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal_duplicate_assigned_fastqfiles,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                illegal_normal_sample_name_v1,
+            ],
+        )
 
     exception = result.exception
     assert isinstance(exception, ValidationError)
     error_message = str(exception)
-    assert "Fastq-pattern: ACC1_NORMAL_S1_L001 has been assigned more than once" in error_message
+    assert (
+        "Fastq-pattern: ACC1_NORMAL_S1_L001 has been assigned more than once"
+        in error_message
+    )
     assert result.exit_code == 1
+
 
 def test_tumor_normal_config_illegal_sample_name(
     invoke_cli,
@@ -188,32 +192,36 @@ def test_tumor_normal_config_illegal_sample_name(
         },
     ):
         result = invoke_cli(
-                [
-                    "config",
-                    "case",
-                    "--case-id",
-                    case_id_tumor_normal,
-                    "--gender",
-                    "male",
-                    "--analysis-dir",
-                    analysis_dir,
-                    "--fastq-path",
-                    fastq_dir_tumor_normal_illegal_normal_name,
-                    "-p",
-                    panel_bed_file,
-                    "--balsamic-cache",
-                    balsamic_cache,
-                    "--tumor-sample-name",
-                    tumor_sample_name,
-                    "--normal-sample-name",
-                    illegal_normal_sample_name_v2,
-                ],
-            )
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal,
+                "--gender",
+                "male",
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal_illegal_normal_name,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                illegal_normal_sample_name_v2,
+            ],
+        )
     exception = result.exception
     assert isinstance(exception, ValidationError)
     error_message = str(exception)
-    assert "Sample name 'ACC2_NORMAL' contains an underscore (_). Underscores are not allowed." in error_message
+    assert (
+        "Sample name 'ACC2_NORMAL' contains an underscore (_). Underscores are not allowed."
+        in error_message
+    )
     assert result.exit_code == 1
+
 
 def test_run_without_permissions(
     invoke_cli,
