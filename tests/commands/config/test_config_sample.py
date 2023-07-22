@@ -6,7 +6,7 @@ import graphviz
 
 from pathlib import Path
 
-
+from pydantic import ValidationError
 from tests.conftest import MOCKED_OS_ENVIRON
 
 
@@ -112,9 +112,9 @@ def test_tumor_only_config(
 
 def test_tumor_normal_config_duplicate_assigned_fastqfiles(
     invoke_cli,
-    case_id_tumor_normal_duplicate_assigned_fastqfiles: str,
+    case_id_tumor_normal: str,
     tumor_sample_name: str,
-    illegal_normal_sample_name: str,
+    illegal_normal_sample_name_v1: str,
     analysis_dir: str,
     fastq_dir_tumor_normal_duplicate_assigned_fastqfiles: str,
     balsamic_cache: str,
@@ -134,13 +134,12 @@ def test_tumor_normal_config_duplicate_assigned_fastqfiles(
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
     ):
-        try:
-            invoke_cli(
+        result = invoke_cli(
                 [
                     "config",
                     "case",
                     "--case-id",
-                    case_id_tumor_normal_duplicate_assigned_fastqfiles,
+                    case_id_tumor_normal,
                     "--gender",
                     "male",
                     "--analysis-dir",
@@ -154,16 +153,67 @@ def test_tumor_normal_config_duplicate_assigned_fastqfiles(
                     "--tumor-sample-name",
                     tumor_sample_name,
                     "--normal-sample-name",
-                    illegal_normal_sample_name,
+                    illegal_normal_sample_name_v1,
                 ],
             )
-        except Exception as exc:
-            # Perform the assertion on the error message
-            assert (
-                "Fastq-pattern: ACC1_NORMAL_S1_L001 has been assigned more than once"
-                in str(exc)
-            )
 
+    exception = result.exception
+    assert isinstance(exception, ValidationError)
+    error_message = str(exception)
+    assert "Fastq-pattern: ACC1_NORMAL_S1_L001 has been assigned more than once" in error_message
+    assert result.exit_code == 1
+
+def test_tumor_normal_config_illegal_sample_name(
+    invoke_cli,
+    case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    illegal_normal_sample_name_v2: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal_illegal_normal_name: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+):
+    """Test tumor normal balsamic config case command with sample-names that include each other."""
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+    # WHEN creating a case analysis
+    # THEN creation of config-file should fail with ValidationError from pydantic
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        result = invoke_cli(
+                [
+                    "config",
+                    "case",
+                    "--case-id",
+                    case_id_tumor_normal,
+                    "--gender",
+                    "male",
+                    "--analysis-dir",
+                    analysis_dir,
+                    "--fastq-path",
+                    fastq_dir_tumor_normal_illegal_normal_name,
+                    "-p",
+                    panel_bed_file,
+                    "--balsamic-cache",
+                    balsamic_cache,
+                    "--tumor-sample-name",
+                    tumor_sample_name,
+                    "--normal-sample-name",
+                    illegal_normal_sample_name_v2,
+                ],
+            )
+    exception = result.exception
+    assert isinstance(exception, ValidationError)
+    error_message = str(exception)
+    assert "Sample name 'ACC2_NORMAL' contains an underscore (_). Underscores are not allowed." in error_message
+    assert result.exit_code == 1
 
 def test_run_without_permissions(
     invoke_cli,

@@ -552,6 +552,14 @@ class BalsamicConfigModel(BaseModel):
             return Path(value).resolve().as_posix()
         return None
 
+    @validator("samples")
+    def validate_sample_names(cls, value):
+        for sample_name in value:
+            if "_" in sample_name:
+                raise ValueError(
+                    f"Sample name '{sample_name}' contains an underscore (_). Underscores are not allowed.")
+        return value
+
     @validator("samples", pre=True)
     def verify_unique_fastq_info_across_samples(cls, value):
         """
