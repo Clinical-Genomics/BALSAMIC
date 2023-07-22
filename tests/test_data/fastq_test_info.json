@@ -1,0 +1,123 @@
+{
+    "fastq_pattern_types": [
+        {
+            "id": "1",
+            "tumor": [
+                "ACC1_S1_L001_R1_001.fastq.gz",
+                "ACC1_S1_L001_R2_001.fastq.gz",
+                "ACC1_S1_L002_R1_001.fastq.gz",
+                "ACC1_S1_L002_R2_001.fastq.gz"
+            ],
+            "normal": [
+                "ACC2_S1_L001_R1_001.fastq.gz",
+                "ACC2_S1_L001_R2_001.fastq.gz",
+                "ACC2_S1_L002_R1_001.fastq.gz",
+                "ACC2_S1_L002_R2_001.fastq.gz"
+            ]
+        },
+        {
+            "id": "2",
+            "tumor": [
+                "HXXXXXXX_123456_ACC1_L001_R1_001.fastq.gz",
+                "HXXXXXXX_123456_ACC1_L001_R2_001.fastq.gz",
+                "HXXXXXXX_123456_ACC1_L002_R1_001.fastq.gz",
+                "HXXXXXXX_123456_ACC1_L002_R2_001.fastq.gz"
+            ],
+            "normal": [
+                "HXXXXXXX_123456_ACC2_L001_R1_001.fastq.gz",
+                "HXXXXXXX_123456_ACC2_L001_R2_001.fastq.gz",
+                "HXXXXXXX_123456_ACC2_L002_R1_001.fastq.gz",
+                "HXXXXXXX_123456_ACC2_L002_R2_001.fastq.gz"
+            ]
+        },
+        {
+            "id": "3",
+            "tumor": ["ACC1_XXXXX_R_1.fastq.gz", "ACC1_XXXXX_R_2.fastq.gz"],
+            "normal": ["ACC2_XXXXX_R_1.fastq.gz", "ACC2_XXXXX_R_2.fastq.gz"]
+        },
+        {
+            "id": "4",
+            "tumor": [
+                "HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
+                "HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
+                "HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
+                "HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
+            ],
+            "normal": [
+                "HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
+                "HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz",
+                "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz",
+                "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
+            ]
+        },
+        {
+            "id": "5",
+            "tumor": [
+                "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+                "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+                "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+                "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"
+            ],
+            "normal": [
+                "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+                "1_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz",
+                "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+                "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz"
+            ]
+        }
+    ],
+    "pon_fastq_list": [
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz"
+    ],
+    "fastq_fails": {
+        "duplicate_fastq_patterns": {
+            "tumor": [
+                "ACC1_S1_L001_R_R1_001.fastq.gz",
+                "ACC1_S1_L001_R_R2_001.fastq.gz",
+                "ACC1_S1_L001_R_1.fastq.gz",
+                "ACC1_S1_L001_R_2.fastq.gz"
+            ]
+        },
+        "duplicate_fastq_files_tumor_normal": {
+            "tumor": ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz"],
+            "normal": [
+                "ACC1_NORMAL_S1_L001_R1_001.fastq.gz",
+                "ACC1_NORMAL_S1_L001_R1_001.fastq.gz"
+            ]
+        },
+        "illegal_normal_sample_name": {
+            "tumor": ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz"],
+            "normal": [
+                "ACC2_NORMAL_S1_L001_R1_001.fastq.gz",
+                "ACC2_NORMAL_S1_L001_R2_001.fastq.gz"
+            ]
+        }
+    }
+}
