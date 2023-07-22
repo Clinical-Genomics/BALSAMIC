@@ -57,9 +57,13 @@ else:
     multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.exon.cov.bed", sample=config["samples"]))
 
     # mosdepth metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.global.dist.txt", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.region.dist.txt", sample=config["samples"]))
-    multiqc_input.extend(expand(bam_dir + "{sample}.mosdepth.summary.txt", sample=config["samples"]))
+    multiqc_input.extend(expand(bam_dir + "{sample}_tumor.mosdepth.global.dist.txt", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}_tumor.mosdepth.region.dist.txt", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}_tumor.mosdepth.summary.txt", sample=tumor_sample))
+    if config['analysis']['analysis_type'] == "paired":
+        multiqc_input.extend(expand(bam_dir + "{sample}_normal.mosdepth.global.dist.txt", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}_normal.mosdepth.region.dist.txt", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}_normal.mosdepth.summary.txt", sample=normal_sample))
 
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         # UMI picard metrics
