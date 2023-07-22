@@ -36,7 +36,9 @@ MOCKED_OS_ENVIRON = "os.environ"
 
 
 def fastq_patterns() -> list:
-    """placeholder"""
+    """
+    Returns a list of dicts containing different formatted fastq-file names to be used in parameterized tests.
+    """
     test_data_dir = "tests/test_data"
     fastq_test_info_path = Path(test_data_dir, "fastq_test_info.json").as_posix()
     fastq_test_info_dict = read_json(fastq_test_info_path)
@@ -44,7 +46,9 @@ def fastq_patterns() -> list:
 
 
 def fastq_pattern_ids() -> list:
-    """placeholder"""
+    """
+    Returns a list of IDs for the parameterized testing of different fastq file name formats.
+    """
     test_data_dir = "tests/test_data"
     fastq_test_info_path = Path(test_data_dir, "fastq_test_info.json").as_posix()
     fastq_test_info_dict = read_json(fastq_test_info_path)
@@ -70,25 +74,25 @@ def load_test_fastq_data(test_data_dir):
 
 @pytest.fixture(scope="session")
 def pon_fastq_list(load_test_fastq_data) -> list:
-    """placeholder"""
+    """Returns list of fastq names to be used in PON creation testing."""
     return load_test_fastq_data["pon_fastq_list"]
 
 
 @pytest.fixture(scope="session")
-def fastq_names_duplicate_assigned_fastq_patterns(load_test_fastq_data) -> list:
-    """placeholder"""
+def fastq_names_duplicate_assigned_fastq_patterns(load_test_fastq_data) -> Dict[str: list]:
+    """Returns dict with list of fastq file names for testing of duplicate assigned fastq patterns."""
     return load_test_fastq_data["fastq_fails"]["duplicate_fastq_patterns"]
 
 
 @pytest.fixture(scope="session")
-def fastq_names_duplicate_assigned_fastq_files(load_test_fastq_data) -> list:
-    """placeholder"""
+def fastq_names_duplicate_assigned_fastq_files(load_test_fastq_data) -> Dict[str: list]:
+    """Returns dict with list of fastq file names for testing of duplicate assigned fastq files."""
     return load_test_fastq_data["fastq_fails"]["duplicate_fastq_files_tumor_normal"]
 
 
 @pytest.fixture(scope="session")
-def fastq_names_illegal_normal_sample_name(load_test_fastq_data) -> list:
-    """placeholder"""
+def fastq_names_illegal_normal_sample_name(load_test_fastq_data) -> Dict[str: list]:
+    """Returns dict with list of fastq file names for testing of detection of sample name containing underscore."""
     return load_test_fastq_data["fastq_fails"]["illegal_normal_sample_name"]
 
 
