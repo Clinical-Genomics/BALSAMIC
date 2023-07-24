@@ -158,7 +158,6 @@ def initialize(
         run_mode=run_mode,
         script_dir=script_dir,
         snakemake_options=snakemake_opt,
-        singularity=True,
         singularity_bind_paths=[
             SingularityBindPath(source=BALSAMIC_DIR, destination=BALSAMIC_DIR),
             SingularityBindPath(source=references_dir, destination=references_dir),

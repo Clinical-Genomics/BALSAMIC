@@ -13,13 +13,19 @@ from click.testing import CliRunner
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import (
     DockerContainers,
     GenomeVersion,
     REFERENCE_FILES,
 )
-from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.cluster import (
+    ClusterConfigType,
+    ClusterAccount,
+    QOS,
+    ClusterMailType,
+    ClusterProfile,
+)
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -30,6 +36,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
+from BALSAMIC.models.snakemake import SingularityBindPath, Snakemake
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 
@@ -1287,3 +1294,86 @@ def fixture_references_hg_data(
 def fixture_references_hg(references_hg_data: Dict[str, dict]) -> ReferencesHg:
     """Return mocked human genome references model."""
     return ReferencesHg(**references_hg_data)
+
+
+@pytest.fixture(scope="session", name="singularity_bind_path_data")
+def fixture_singularity_bind_path_data(reference_file: Path) -> Dict[str, Path]:
+    """Return singularity bind path data."""
+    return {"source": reference_file, "destination": Path("/")}
+
+
+@pytest.fixture(scope="session", name="singularity_bind_path")
+def fixture_singularity_bind_path(
+    singularity_bind_path_data: Dict[str, Path]
+) -> SingularityBindPath:
+    """Return mocked singularity bind path model."""
+    return SingularityBindPath(**singularity_bind_path_data)
+
+
+@pytest.fixture(scope="session", name="snakemake_data")
+def fixture_snakemake_data(
+    case_id_tumor_only: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+    singularity_bind_path: SingularityBindPath,
+) -> Dict[str, Any]:
+    """Return snakemake model data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "case_id": case_id_tumor_only,
+        "cluster_config_path": reference_file,
+        "config_path": reference_file,
+        "disable_variant_caller": "tnscope,vardict",
+        "log_dir": session_tmp_path,
+        "profile": ClusterProfile.SLURM,
+        "qos": QOS.HIGH,
+        "quiet": True,
+        "result_dir": session_tmp_path,
+        "run_analysis": True,
+        "run_mode": RunMode.CLUSTER,
+        "script_dir": session_tmp_path,
+        "singularity_bind_paths": [singularity_bind_path],
+        "snakefile": reference_file,
+        "working_dir": session_tmp_path,
+    }
+
+
+@pytest.fixture(scope="session", name="snakemake")
+def fixture_snakemake(snakemake_data: Dict[str, Any]) -> SingularityBindPath:
+    """Return mocked singularity model."""
+    return Snakemake(**snakemake_data)
+
+
+@pytest.fixture(scope="session", name="snakemake_validated_data")
+def fixture_snakemake_validated_data(
+    case_id_tumor_only: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+    singularity_bind_path: SingularityBindPath,
+) -> Dict[str, Any]:
+    """Return snakemake model expected data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "case_id": case_id_tumor_only,
+        "cluster_config_path": reference_file,
+        "config_path": reference_file,
+        "disable_variant_caller": "disable_variant_caller=tnscope,vardict",
+        "dragen": False,
+        "force": False,
+        "log_dir": session_tmp_path,
+        "mail_type": None,
+        "mail_user": "",
+        "profile": ClusterProfile.SLURM,
+        "qos": QOS.HIGH,
+        "quiet": True,
+        "report_path": None,
+        "result_dir": session_tmp_path,
+        "run_analysis": True,
+        "run_mode": RunMode.CLUSTER,
+        "script_dir": session_tmp_path,
+        "singularity_bind_paths": [singularity_bind_path],
+        "slurm_profiler": "",
+        "snakefile": reference_file,
+        "snakemake_options": None,
+        "working_dir": session_tmp_path,
+    }

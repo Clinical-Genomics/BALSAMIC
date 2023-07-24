@@ -36,8 +36,8 @@ class Snakemake(BaseModel):
         log_dir (DirectoryPath)                           : Logging directory.
         mail_type (Optional[ClusterMailType])             : Email type triggering job status notifications.
         mail_user (Optional[str])                         : User email to receive job status notifications.
-        profile (ClusterProfile)                          : Cluster profile to submit jobs.
-        qos (QOS)                                         : QOS for sbatch jobs.
+        profile (Optional[ClusterProfile])                : Cluster profile to submit jobs.
+        qos (Optional[QOS])                               : QOS for sbatch jobs.
         quiet (bool)                                      : Quiet mode for snakemake.
         report_path (Optional[Path])                      : Snakemake generated report path.
         result_dir (DirectoryPath)                        : Analysis output directory.
@@ -58,19 +58,18 @@ class Snakemake(BaseModel):
     config_path: FilePath
     disable_variant_caller: Optional[str]
     dragen: bool = False
-    force: bool
+    force: bool = False
     log_dir: DirectoryPath
     mail_type: Optional[ClusterMailType]
     mail_user: Optional[str]
-    profile: ClusterProfile
-    qos: QOS
-    quiet: bool
+    profile: Optional[ClusterProfile]
+    qos: Optional[QOS]
+    quiet: bool = False
     report_path: Optional[Path]
     result_dir: DirectoryPath
-    run_analysis: bool
+    run_analysis: bool = False
     run_mode: RunMode
     script_dir: DirectoryPath
-    singularity: bool
     singularity_bind_paths: Optional[List[SingularityBindPath]]
     slurm_profiler: Optional[str]
     snakefile: FilePath
@@ -136,7 +135,7 @@ class Snakemake(BaseModel):
 
     def get_singularity_bind_paths_option(self) -> str:
         """Return string representation of the singularity_bind_paths option."""
-        if self.singularity:
+        if self.singularity_bind_paths:
             bind_options: List[str] = []
             for singularity_bind_path in self.singularity_bind_paths:
                 bind_options.append(
