@@ -39,10 +39,6 @@
 		"time": "00:30:00",
 		"n": 1
 	},
-	"concatenate": {
-		"time": "00:30:00",
-		"n": 1
-	},
 	"cnvkit_paired": {
 		"time": "12:00:00",
 		"n": 10
