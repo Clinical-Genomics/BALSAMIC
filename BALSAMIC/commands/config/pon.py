@@ -77,7 +77,8 @@ LOG = logging.getLogger(__name__)
     "--fastq-path",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
-    help="Path directing to list of PON fastq samples.",
+    help="Path directing to list of PON fastq samples. NOTE: Fastq-files in directory requires this structure:"
+    " X_X_X_[sampleID]_XXXXXX_R_2.fastq.gz",
 )
 @click.option(
     "-g",
