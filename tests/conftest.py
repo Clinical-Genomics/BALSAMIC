@@ -99,7 +99,7 @@ def fastq_names_illegal_normal_sample_name(load_test_fastq_data) -> Dict[str, Li
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_fastq_info_correct() -> str:
+def tumor_normal_fastq_info_correct() -> Dict[str, Dict]:
     """Mock tumor normal fastq info in sample_dict"""
     sample_dict = {
         "ACC1": {
