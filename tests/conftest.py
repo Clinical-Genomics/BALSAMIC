@@ -4,7 +4,7 @@ from datetime import datetime
 from distutils.dir_util import copy_tree
 from functools import partial
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
 from unittest import mock
 
 import pytest
@@ -14,16 +14,11 @@ from click.testing import CliRunner
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
-from BALSAMIC.constants.cache import (
-    DockerContainers,
-    GenomeVersion,
-    REFERENCE_FILES,
-)
+from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import (
     ClusterConfigType,
     ClusterAccount,
     QOS,
-    ClusterMailType,
     ClusterProfile,
 )
 from BALSAMIC.constants.constants import FileType
@@ -1297,9 +1292,9 @@ def fixture_references_hg(references_hg_data: Dict[str, dict]) -> ReferencesHg:
 
 
 @pytest.fixture(scope="session", name="singularity_bind_path_data")
-def fixture_singularity_bind_path_data(reference_file: Path) -> Dict[str, Path]:
+def fixture_singularity_bind_path_data(session_tmp_path: Path) -> Dict[str, Path]:
     """Return singularity bind path data."""
-    return {"source": reference_file, "destination": Path("/")}
+    return {"source": session_tmp_path, "destination": Path("/")}
 
 
 @pytest.fixture(scope="session", name="singularity_bind_path")
@@ -1310,12 +1305,19 @@ def fixture_singularity_bind_path(
     return SingularityBindPath(**singularity_bind_path_data)
 
 
+@pytest.fixture(scope="session", name="snakemake_options_command")
+def fixture_snakemake_options_command() -> List[str]:
+    """Return mocked singularity bind path model."""
+    return ["--cores", "36"]
+
+
 @pytest.fixture(scope="session", name="snakemake_data")
 def fixture_snakemake_data(
     case_id_tumor_only: str,
     reference_file: Path,
     session_tmp_path: Path,
     singularity_bind_path: SingularityBindPath,
+    snakemake_options_command: List[str],
 ) -> Dict[str, Any]:
     """Return snakemake model data."""
     return {
@@ -1334,12 +1336,13 @@ def fixture_snakemake_data(
         "script_dir": session_tmp_path,
         "singularity_bind_paths": [singularity_bind_path],
         "snakefile": reference_file,
+        "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
     }
 
 
 @pytest.fixture(scope="session", name="snakemake")
-def fixture_snakemake(snakemake_data: Dict[str, Any]) -> SingularityBindPath:
+def fixture_snakemake(snakemake_data: Dict[str, Any]) -> Snakemake:
     """Return mocked singularity model."""
     return Snakemake(**snakemake_data)
 
@@ -1350,6 +1353,7 @@ def fixture_snakemake_validated_data(
     reference_file: Path,
     session_tmp_path: Path,
     singularity_bind_path: SingularityBindPath,
+    snakemake_options_command: List[str],
 ) -> Dict[str, Any]:
     """Return snakemake model expected data."""
     return {
@@ -1374,6 +1378,6 @@ def fixture_snakemake_validated_data(
         "singularity_bind_paths": [singularity_bind_path],
         "slurm_profiler": "",
         "snakefile": reference_file,
-        "snakemake_options": None,
+        "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
     }

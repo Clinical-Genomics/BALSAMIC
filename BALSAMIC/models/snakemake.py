@@ -6,8 +6,9 @@ from typing import Dict, Optional, List
 from pydantic import BaseModel, FilePath, DirectoryPath, validator
 
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
+from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile, MAX_JOBS
 from BALSAMIC.constants.paths import SCHEDULER_PATH
+from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
 
 class SingularityBindPath(BaseModel):
@@ -152,7 +153,7 @@ class Snakemake(BaseModel):
 
     def get_snakemake_command(self) -> str:
         """Return Snakemake command to be submitted."""
-        return (
+        snakemake_command: str = (
             f"snakemake --notemp -p "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
@@ -167,25 +168,29 @@ class Snakemake(BaseModel):
             f"{self.get_snakemake_config_options()} "
             f"{self.get_snakemake_options_command()}"
         )
+        return remove_unnecessary_spaces(snakemake_command)
 
     def get_snakemake_config_options(self) -> str:
         """Return Snakemake config options to be submitted."""
-        return f"--config {self.disable_variant_caller} {self.get_dragen_flag()}"
+        return remove_unnecessary_spaces(
+            f"--config {self.disable_variant_caller} {self.get_dragen_flag()}"
+        )
 
     def get_snakemake_cluster_options(self) -> str:
         """Return Snakemake cluster options to be submitted."""
         if self.run_mode == RunMode.CLUSTER:
-            return (
-                f"--immediate-submit -j 999 "
+            snakemake_cluster_options: str = (
+                f"--immediate-submit -j {MAX_JOBS} "
                 f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
                 f"--cluster-config {self.cluster_config_path.as_posix()} "
                 f"--cluster {self.get_cluster_submit_command()}"
             )
+            return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""
 
     def get_cluster_submit_command(self) -> str:
         """Get cluster command to be submitted by Snakemake."""
-        return (
+        cluster_submit_command: str = (
             f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
             f"--sample-config {self.config_path.as_posix()} "
             f"--profile {self.profile.value} "
@@ -199,3 +204,4 @@ class Snakemake(BaseModel):
             f"{self.get_mail_type_option()} "
             "{dependencies} '"
         )
+        return remove_unnecessary_spaces(cluster_submit_command)

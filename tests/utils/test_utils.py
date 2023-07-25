@@ -1,3 +1,4 @@
+"""Test helper functions."""
 import copy
 import json
 import logging
@@ -47,6 +48,20 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_prefix,
 )
+from BALSAMIC.utils.utils import remove_unnecessary_spaces
+
+
+def test_remove_unnecessary_spaces():
+    """Tests removal of unnecessary spaces from a string."""
+
+    # GIVEN a string with unnecessary spaces
+    string: str = "  Developing Balsamic   brings  me    joy "
+
+    # WHEN calling the function
+    formatted_string: str = remove_unnecessary_spaces(string)
+
+    # THEN the extra spaces are removed
+    assert formatted_string == "Developing Balsamic brings me joy"
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -684,7 +699,6 @@ def test_convert_deliverables_tags():
 
 
 def test_check_executable_exists():
-
     # GIVEN an existing executable command
     test_command = "ls"
 
@@ -694,7 +708,6 @@ def test_check_executable_exists():
 
 
 def test_check_executable_not_existing():
-
     # GIVEN an existing executable command
     test_command = "twenty_twenty_was_bad"
 
@@ -704,7 +717,6 @@ def test_check_executable_not_existing():
 
 
 def test_job_id_dump_to_yaml(tmp_path):
-
     # GIVEN a file with one job id per line, a key (case name), and an output file name
     dummy_dir = tmp_path / "job_id_dump_dir"
     dummy_dir.mkdir()
@@ -723,7 +735,6 @@ def test_job_id_dump_to_yaml(tmp_path):
 
 
 def test_generate_h5(tmp_path):
-
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
@@ -739,7 +750,6 @@ def test_generate_h5(tmp_path):
 
 
 def test_generate_h5_capture_no_output(tmp_path):
-
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
