@@ -3,7 +3,6 @@ import os
 import re
 import subprocess
 import sys
-import zlib
 from distutils.spawn import find_executable
 from io import StringIO
 from pathlib import Path

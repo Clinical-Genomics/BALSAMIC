@@ -176,7 +176,10 @@ def test_get_snakemake_options_command(snakemake: Snakemake):
 
 
 def test_get_snakemake_command(
-    snakemake: Snakemake, session_tmp_path: Path, reference_file: Path
+    snakemake: Snakemake,
+    case_id_tumor_only: str,
+    session_tmp_path: Path,
+    reference_file: Path,
 ):
     """Test retrieval of the snakemake command to be submitted to Slurm."""
 
@@ -192,7 +195,7 @@ def test_get_snakemake_command(
         f"--snakefile {reference_file.as_posix()} "
         f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()} "
         f"--use-singularity --singularity-args ' --cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
-        f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.sample_tumor_only.{{rulename}}.{{jobid}}.sh "
+        f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
         f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "
@@ -214,7 +217,10 @@ def test_get_snakemake_config_options(snakemake: Snakemake):
 
 
 def test_get_snakemake_cluster_options(
-    snakemake: Snakemake, session_tmp_path: Path, reference_file: Path
+    snakemake: Snakemake,
+    case_id_tumor_only: str,
+    session_tmp_path: Path,
+    reference_file: Path,
 ):
     """Test formatting of the snakemake cluster options."""
 
@@ -226,7 +232,7 @@ def test_get_snakemake_cluster_options(
     # THEN the expected format should be returned
     assert (
         snakemake_cluster_options
-        == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.sample_tumor_only.{{rulename}}.{{jobid}}.sh "
+        == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH.as_posix()} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
         f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "

@@ -15,7 +15,6 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
-    SnakeMake,
     CaptureStdout,
     get_snakefile,
     createDir,
@@ -230,68 +229,6 @@ def test_get_file_extension_known_ext():
 
     # THEN assert extension is correctly extracted
     assert file_extension == actual_extension
-
-
-def test_snakemake_local():
-    # GIVEN required params
-    snakemake_local = SnakeMake()
-    snakemake_local.working_dir = "this_path/snakemake"
-    snakemake_local.snakefile = "workflow/variantCalling_paired"
-    snakemake_local.configfile = "sample_config.json"
-    snakemake_local.run_mode = "local"
-    snakemake_local.use_singularity = True
-    snakemake_local.singularity_bind = ["path_1", "path_2"]
-    snakemake_local.forceall = True
-
-    # WHEN calling the build command
-    shell_command = snakemake_local.build_cmd()
-
-    # THEN it will contruct the snakemake command to run
-    assert isinstance(shell_command, str)
-    assert "workflow/variantCalling_paired" in shell_command
-    assert "sample_config.json" in shell_command
-    assert "this_path/snakemake" in shell_command
-    assert "--dryrun" in shell_command
-    assert "--forceall" in shell_command
-
-
-def test_snakemake_slurm():
-    # GIVEN required params
-    snakemake_slurm = SnakeMake()
-    snakemake_slurm.case_name = "test_case"
-    snakemake_slurm.working_dir = "this_path/snakemake"
-    snakemake_slurm.snakefile = "worflow/variantCalling_paired"
-    snakemake_slurm.configfile = "sample_config.json"
-    snakemake_slurm.run_mode = "cluster"
-    snakemake_slurm.cluster_config = "cluster_config.json"
-    snakemake_slurm.scheduler = "sbatch.py"
-    snakemake_slurm.log_path = "logs/"
-    snakemake_slurm.script_path = "scripts/"
-    snakemake_slurm.result_path = "results/"
-    snakemake_slurm.qos = "normal"
-    snakemake_slurm.account = "development"
-    snakemake_slurm.profile = "slurm"
-    snakemake_slurm.mail_type = "FAIL"
-    snakemake_slurm.mail_user = "john.doe@example.com"
-    snakemake_slurm.sm_opt = ("containers",)
-    snakemake_slurm.quiet = True
-    snakemake_slurm.use_singularity = True
-    snakemake_slurm.singularity_bind = ["path_1", "path_2"]
-    snakemake_slurm.run_analysis = True
-
-    # WHEN calling the build command
-    shell_command = snakemake_slurm.build_cmd()
-
-    # THEN constructing snakecommand for slurm runner
-    assert isinstance(shell_command, str)
-    assert "worflow/variantCalling_paired" in shell_command
-    assert "sample_config.json" in shell_command
-    assert "this_path/snakemake" in shell_command
-    assert "--dryrun" not in shell_command
-    assert "sbatch.py" in shell_command
-    assert "test_case" in shell_command
-    assert "containers" in shell_command
-    assert "--quiet" in shell_command
 
 
 def test_get_script_path():
