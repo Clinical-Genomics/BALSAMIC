@@ -209,7 +209,7 @@ def test_get_snakemake_command(
     # GIVEN a snakemake_executable model with working environment paths
 
     # WHEN calling the method
-    snakemake_command: str = snakemake_executable.get_snakemake_command()
+    snakemake_command: str = snakemake_executable.get_command()
 
     # THEN the expected format should be returned
     assert (

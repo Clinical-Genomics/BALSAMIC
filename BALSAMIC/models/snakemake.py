@@ -149,7 +149,7 @@ class SnakemakeExecutable(BaseModel):
             return " ".join(self.snakemake_options)
         return ""
 
-    def get_snakemake_command(self) -> str:
+    def get_command(self) -> str:
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
             f"snakemake --notemp -p "

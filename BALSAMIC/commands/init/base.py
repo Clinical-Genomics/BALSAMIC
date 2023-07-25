@@ -166,6 +166,6 @@ def initialize(
         working_dir=references_dir,
     )
     subprocess.run(
-        f"{sys.executable} -m {snakemake_executable.get_snakemake_command()}",
+        f"{sys.executable} -m {snakemake_executable.get_command()}",
         shell=True,
     )

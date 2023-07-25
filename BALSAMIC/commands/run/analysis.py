@@ -273,7 +273,7 @@ def analysis(
         working_dir=Path(analysis_dir, case_name, "BALSAMIC_run"),
     )
     subprocess.run(
-        f"{sys.executable} -m {snakemake_executable.get_snakemake_command()}",
+        f"{sys.executable} -m {snakemake_executable.get_command()}",
         shell=True,
     )
 

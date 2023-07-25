@@ -92,10 +92,8 @@ def deliver(
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
     snakefile = get_snakefile(analysis_type, analysis_workflow)
 
-    report_file_name = os.path.join(
-        yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"
-    )
-    LOG.info("Creating report file {}".format(report_file_name))
+    report_path = Path(yaml_write_directory, f"{case_name}_report.html")
+    LOG.info(f"Creating report file {report_path.as_posix()}")
 
     LOG.info(f"Delivering {analysis_workflow} workflow...")
     working_dir = Path(
@@ -105,7 +103,7 @@ def deliver(
         case_id=case_name,
         config_path=sample_config,
         disable_variant_caller=disable_variant_caller,
-        report_path=report_file_name,
+        report_path=report_path,
         run_analysis=True,
         run_mode=RunMode.LOCAL,
         snakefile=snakefile,
@@ -114,10 +112,10 @@ def deliver(
     )
 
     subprocess.check_output(
-        f"{sys.executable} -m {snakemake_executable.get_snakemake_command().split()}",
+        f"{sys.executable} -m {snakemake_executable.get_command().split()}",
         shell=False,
     )
-    LOG.info(f"Workflow report file {report_file_name}")
+    LOG.info(f"Workflow report file {report_path.as_posix()}")
 
     snakemake.snakemake(
         snakefile=snakefile,
@@ -146,9 +144,9 @@ def deliver(
     # Add Housekeeper file to report
     delivery_json["files"].append(
         {
-            "path": report_file_name,
+            "path": report_path.as_posix(),
             "step": "balsamic_delivery",
-            "format": get_file_extension(report_file_name),
+            "format": get_file_extension(report_path.as_posix()),
             "tag": ["balsamic-report"],
             "id": case_name,
         }
