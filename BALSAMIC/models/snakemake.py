@@ -90,6 +90,19 @@ class SnakemakeExecutable(BaseModel):
             return f"--mail-user {mail_user}"
         return ""
 
+    def get_config_files_option(self) -> str:
+        """Return string representation of the config files."""
+        config_files_option: str = f"--configfiles {self.config_path.as_posix()}"
+        if self.cluster_config_path:
+            config_files_option += f" {self.cluster_config_path.as_posix()}"
+        return config_files_option
+
+    def get_config_options(self) -> str:
+        """Return Snakemake config options to be submitted."""
+        return remove_unnecessary_spaces(
+            f"--config {self.disable_variant_caller} {self.get_dragen_flag()}"
+        )
+
     def get_dragen_flag(self) -> str:
         """Return string representation of the dragen flag."""
         if self.dragen:
@@ -155,24 +168,17 @@ class SnakemakeExecutable(BaseModel):
             f"snakemake --notemp -p "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
-            f"--configfiles {self.config_path.as_posix()} "
-            f"{self.cluster_config_path.as_posix()} "
+            f"{self.get_config_files_option()} "
             f"{self.get_singularity_bind_paths_option()} "
             f"{self.get_quiet_flag()} "
             f"{self.get_force_flag()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
             f"{self.get_report_path_option()} "
-            f"{self.get_snakemake_config_options()} "
+            f"{self.get_config_options()} "
             f"{self.get_snakemake_options_command()}"
         )
         return remove_unnecessary_spaces(snakemake_command)
-
-    def get_snakemake_config_options(self) -> str:
-        """Return Snakemake config options to be submitted."""
-        return remove_unnecessary_spaces(
-            f"--config {self.disable_variant_caller} {self.get_dragen_flag()}"
-        )
 
     def get_snakemake_cluster_options(self) -> str:
         """Return Snakemake cluster options to be submitted."""

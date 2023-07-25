@@ -60,6 +60,35 @@ def test_snakemake_model_empty():
         SnakemakeExecutable()
 
 
+def test_get_config_files_option(
+    snakemake_executable: SnakemakeExecutable, reference_file: Path
+):
+    """Test formatting of the configuration files."""
+
+    # GIVEN a snakemake executable model with a mocked config file
+
+    # WHEN calling the method
+    config_files_option: str = snakemake_executable.get_config_files_option()
+
+    # THEN the expected format should be returned
+    assert (
+        config_files_option
+        == f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()}"
+    )
+
+
+def test_get_config_options(snakemake_executable: SnakemakeExecutable):
+    """Test formatting of the snakemake config options."""
+
+    # GIVEN a snakemake executable model disabling some variant callers
+
+    # WHEN calling the method
+    snakemake_config_options: str = snakemake_executable.get_config_options()
+
+    # THEN the expected format should be returned
+    assert snakemake_config_options == "--config disable_variant_caller=tnscope,vardict"
+
+
 def test_get_dragen_flag(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the dragen flag."""
 
@@ -173,7 +202,7 @@ def test_get_singularity_bind_paths_option(
 def test_get_slurm_profiler_option(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake slurm profiler option."""
 
-    # GIVEN a snakemake_executable model
+    # GIVEN a snakemake executable model
     snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.benchmark = True
 
@@ -187,7 +216,7 @@ def test_get_slurm_profiler_option(snakemake_executable: SnakemakeExecutable):
 def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake options command."""
 
-    # GIVEN a snakemake_executable model with additional snakemake options command
+    # GIVEN a snakemake executable model with additional snakemake options command
 
     # WHEN calling the method
     snakemake_options_command: str = (
@@ -206,7 +235,7 @@ def test_get_snakemake_command(
 ):
     """Test retrieval of the snakemake command to be submitted to Slurm."""
 
-    # GIVEN a snakemake_executable model with working environment paths
+    # GIVEN a snakemake executable model with working environment paths
 
     # WHEN calling the method
     snakemake_command: str = snakemake_executable.get_command()
@@ -227,18 +256,6 @@ def test_get_snakemake_command(
     )
 
 
-def test_get_snakemake_config_options(snakemake_executable: SnakemakeExecutable):
-    """Test formatting of the snakemake config options."""
-
-    # GIVEN a snakemake_executable model disabling some variant callers
-
-    # WHEN calling the method
-    snakemake_config_options: str = snakemake_executable.get_snakemake_config_options()
-
-    # THEN the expected format should be returned
-    assert snakemake_config_options == "--config disable_variant_caller=tnscope,vardict"
-
-
 def test_get_snakemake_cluster_options(
     snakemake_executable: SnakemakeExecutable,
     case_id_tumor_only: str,
@@ -247,7 +264,7 @@ def test_get_snakemake_cluster_options(
 ):
     """Test formatting of the snakemake cluster options."""
 
-    # GIVEN a snakemake_executable model with working environment paths
+    # GIVEN a snakemake executable model with working environment paths
 
     # WHEN calling the method
     snakemake_cluster_options: str = (
@@ -272,7 +289,7 @@ def test_get_cluster_submit_command(
 ):
     """Test formatting of the cluster submit command."""
 
-    # GIVEN a snakemake_executable model with working environment paths
+    # GIVEN a snakemake executable model with working environment paths
 
     # WHEN calling the method
     snakemake_cluster_submit_command: str = (
