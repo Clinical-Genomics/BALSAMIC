@@ -110,9 +110,8 @@ def deliver(
         snakemake_options=["--quiet"],
         working_dir=working_dir,
     )
-
     subprocess.check_output(
-        f"{sys.executable} -m {snakemake_executable.get_command().split()}",
+        f"{sys.executable} -m {snakemake_executable.get_command()}".split(),
         shell=False,
     )
     LOG.info(f"Workflow report file {report_path.as_posix()}")
