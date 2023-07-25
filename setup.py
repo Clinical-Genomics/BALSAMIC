@@ -37,7 +37,7 @@ requirements = [
 
 # The C libraries required to build numpy are not available on RTD
 if not os.getenv("READTHEDOCS"):
-    requirements.extend(["cyvcf2<0.10.0"])
+    requirements.extend(["cyvcf2==0.30.22"])
 
 setup(
     name="BALSAMIC",
