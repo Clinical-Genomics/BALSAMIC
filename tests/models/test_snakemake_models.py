@@ -15,7 +15,7 @@ from BALSAMIC.constants.cluster import (
     QOS,
 )
 from BALSAMIC.constants.paths import SCHEDULER_PATH
-from BALSAMIC.models.snakemake import SingularityBindPath, Snakemake
+from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 
 
 def test_singularity_bind_path_model(singularity_bind_path_data: Dict[str, Path]):
@@ -33,17 +33,20 @@ def test_singularity_bind_path_model(singularity_bind_path_data: Dict[str, Path]
 
 
 def test_snakemake_model(
-    snakemake_data: Dict[str, Any], snakemake_validated_data: Dict[str, Any]
+    snakemake_executable_data: Dict[str, Any],
+    snakemake_executable_validated_data: Dict[str, Any],
 ):
     """Test snakemake model initialisation."""
 
     # GIVEN a cluster ready snakemake data
 
     # WHEN initialising the model
-    snakemake_model: Snakemake = Snakemake(**snakemake_data)
+    snakemake_model: SnakemakeExecutable = SnakemakeExecutable(
+        **snakemake_executable_data
+    )
 
     # THEN the model should have been correctly built
-    assert snakemake_model.dict() == snakemake_validated_data
+    assert snakemake_model.dict() == snakemake_executable_validated_data
 
 
 def test_snakemake_model_empty():
@@ -54,14 +57,14 @@ def test_snakemake_model_empty():
     # WHEN initialising the model
     with pytest.raises(ValidationError):
         # THEN an empty model should raise a ValidationError
-        Snakemake()
+        SnakemakeExecutable()
 
 
-def test_get_dragen_flag(snakemake: Snakemake):
+def test_get_dragen_flag(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the dragen flag."""
 
-    # GIVEN a snakemake model with a dragen flag
-    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    # GIVEN a snakemake executable model with a dragen flag
+    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.dragen = True
 
     # WHEN calling the method
@@ -71,11 +74,11 @@ def test_get_dragen_flag(snakemake: Snakemake):
     assert dragen_flag == "dragen=True"
 
 
-def test_get_force_flag(snakemake: Snakemake):
+def test_get_force_flag(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the force flag."""
 
-    # GIVEN a snakemake model with a force flag
-    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    # GIVEN a snakemake executable model with a force flag
+    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.force = True
 
     # WHEN calling the method
@@ -85,11 +88,11 @@ def test_get_force_flag(snakemake: Snakemake):
     assert force_flag == "--forceall"
 
 
-def test_get_mail_type_option(snakemake: Snakemake):
+def test_get_mail_type_option(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the mail type option."""
 
     # GIVEN a snakemake model with a mail type option
-    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.mail_type = ClusterMailType.FAIL
 
     # WHEN calling the method
@@ -99,23 +102,25 @@ def test_get_mail_type_option(snakemake: Snakemake):
     assert mail_type_option == "--mail-type FAIL"
 
 
-def test_quiet_flag(snakemake: Snakemake):
+def test_quiet_flag(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the quiet flag."""
 
-    # GIVEN a snakemake model with a quiet option
+    # GIVEN a snakemake executable model with a quiet option
 
     # WHEN calling the method
-    quiet_flag: str = snakemake.get_quiet_flag()
+    quiet_flag: str = snakemake_executable.get_quiet_flag()
 
     # THEN the expected format should be returned
     assert quiet_flag == "--quiet"
 
 
-def test_get_report_path_option(snakemake: Snakemake, session_tmp_path: Path):
+def test_get_report_path_option(
+    snakemake_executable: SnakemakeExecutable, session_tmp_path: Path
+):
     """Test formatting of the report path option."""
 
-    # GIVEN a snakemake model with a report path option
-    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    # GIVEN a snakemake executable model with a report path option
+    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.report_path = session_tmp_path
 
     # WHEN calling the method
@@ -125,11 +130,11 @@ def test_get_report_path_option(snakemake: Snakemake, session_tmp_path: Path):
     assert report_path_option == f"--report {session_tmp_path.as_posix()}"
 
 
-def test_get_run_analysis_flag(snakemake: Snakemake):
+def test_get_run_analysis_flag(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the run analysis flag."""
 
-    # GIVEN a snakemake model with a dry run option
-    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    # GIVEN a snakemake executable model with a dry run option
+    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.run_analysis = False
 
     # WHEN calling the method
@@ -140,12 +145,14 @@ def test_get_run_analysis_flag(snakemake: Snakemake):
 
 
 def test_get_singularity_bind_paths_option(
-    snakemake: Snakemake, session_tmp_path: Path, reference_file: Path
+    snakemake_executable: SnakemakeExecutable,
+    session_tmp_path: Path,
+    reference_file: Path,
 ):
     """Test formatting of the singularity bind paths."""
 
-    # GIVEN a snakemake model with multiple binding paths
-    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    # GIVEN a snakemake executable model with multiple binding paths
+    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.singularity_bind_paths.append(
         SingularityBindPath(source=reference_file, destination=reference_file)
     )
@@ -163,11 +170,11 @@ def test_get_singularity_bind_paths_option(
     )
 
 
-def test_get_slurm_profiler_option(snakemake: Snakemake):
+def test_get_slurm_profiler_option(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake slurm profiler option."""
 
-    # GIVEN a snakemake model
-    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    # GIVEN a snakemake_executable model
+    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
     snakemake_model.benchmark = True
 
     # WHEN calling the method
@@ -177,30 +184,32 @@ def test_get_slurm_profiler_option(snakemake: Snakemake):
     assert slurm_profiler == "--slurm-profiler task"
 
 
-def test_get_snakemake_options_command(snakemake: Snakemake):
+def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake options command."""
 
-    # GIVEN a snakemake model with additional snakemake options command
+    # GIVEN a snakemake_executable model with additional snakemake options command
 
     # WHEN calling the method
-    snakemake_options_command: str = snakemake.get_snakemake_options_command()
+    snakemake_options_command: str = (
+        snakemake_executable.get_snakemake_options_command()
+    )
 
     # THEN the expected format should be returned
     assert snakemake_options_command == "--cores 36"
 
 
 def test_get_snakemake_command(
-    snakemake: Snakemake,
+    snakemake_executable: SnakemakeExecutable,
     case_id_tumor_only: str,
     session_tmp_path: Path,
     reference_file: Path,
 ):
     """Test retrieval of the snakemake command to be submitted to Slurm."""
 
-    # GIVEN a snakemake model with working environment paths
+    # GIVEN a snakemake_executable model with working environment paths
 
     # WHEN calling the method
-    snakemake_command: str = snakemake.get_snakemake_command()
+    snakemake_command: str = snakemake_executable.get_snakemake_command()
 
     # THEN the expected format should be returned
     assert (
@@ -218,30 +227,32 @@ def test_get_snakemake_command(
     )
 
 
-def test_get_snakemake_config_options(snakemake: Snakemake):
+def test_get_snakemake_config_options(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake config options."""
 
-    # GIVEN a snakemake model disabling some variant callers
+    # GIVEN a snakemake_executable model disabling some variant callers
 
     # WHEN calling the method
-    snakemake_config_options: str = snakemake.get_snakemake_config_options()
+    snakemake_config_options: str = snakemake_executable.get_snakemake_config_options()
 
     # THEN the expected format should be returned
     assert snakemake_config_options == "--config disable_variant_caller=tnscope,vardict"
 
 
 def test_get_snakemake_cluster_options(
-    snakemake: Snakemake,
+    snakemake_executable: SnakemakeExecutable,
     case_id_tumor_only: str,
     session_tmp_path: Path,
     reference_file: Path,
 ):
     """Test formatting of the snakemake cluster options."""
 
-    # GIVEN a snakemake model with working environment paths
+    # GIVEN a snakemake_executable model with working environment paths
 
     # WHEN calling the method
-    snakemake_cluster_options: str = snakemake.get_snakemake_cluster_options()
+    snakemake_cluster_options: str = (
+        snakemake_executable.get_snakemake_cluster_options()
+    )
 
     # THEN the expected format should be returned
     assert (
@@ -255,14 +266,18 @@ def test_get_snakemake_cluster_options(
 
 
 def test_get_cluster_submit_command(
-    snakemake: Snakemake, session_tmp_path: Path, reference_file: Path
+    snakemake_executable: SnakemakeExecutable,
+    session_tmp_path: Path,
+    reference_file: Path,
 ):
     """Test formatting of the cluster submit command."""
 
-    # GIVEN a snakemake model with working environment paths
+    # GIVEN a snakemake_executable model with working environment paths
 
     # WHEN calling the method
-    snakemake_cluster_submit_command: str = snakemake.get_cluster_submit_command()
+    snakemake_cluster_submit_command: str = (
+        snakemake_executable.get_cluster_submit_command()
+    )
 
     # THEN the expected format should be returned
     assert snakemake_cluster_submit_command == (

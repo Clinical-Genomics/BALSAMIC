@@ -36,7 +36,7 @@ from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
-from BALSAMIC.models.snakemake import Snakemake, SingularityBindPath
+from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
@@ -141,7 +141,7 @@ def initialize(
     )
 
     LOG.info("Starting reference generation workflow...")
-    snakemake: Snakemake = Snakemake(
+    snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         case_id=cache_config.analysis.case_id,
         cluster_config_path=cluster_config,
@@ -166,5 +166,6 @@ def initialize(
         working_dir=references_dir,
     )
     subprocess.run(
-        f"{sys.executable} -m {snakemake.get_snakemake_command()}", shell=True
+        f"{sys.executable} -m {snakemake_executable.get_snakemake_command()}",
+        shell=True,
     )

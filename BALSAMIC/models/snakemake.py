@@ -23,7 +23,7 @@ class SingularityBindPath(BaseModel):
     destination: Path
 
 
-class Snakemake(BaseModel):
+class SnakemakeExecutable(BaseModel):
     """Snakemake command building model.
 
     Attributes:

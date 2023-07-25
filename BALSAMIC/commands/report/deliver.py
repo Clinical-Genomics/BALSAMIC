@@ -12,7 +12,7 @@ import yaml
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.snakemake import Snakemake
+from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import get_snakefile
@@ -101,7 +101,7 @@ def deliver(
     working_dir = Path(
         sample_config_dict["analysis"]["analysis_dir"], case_name, "BALSAMIC_run"
     )
-    snakemake_model: Snakemake = Snakemake(
+    snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         case_id=case_name,
         config_path=sample_config,
         disable_variant_caller=disable_variant_caller,
@@ -114,7 +114,7 @@ def deliver(
     )
 
     subprocess.check_output(
-        f"{sys.executable} -m {snakemake_model.get_snakemake_command().split()}",
+        f"{sys.executable} -m {snakemake_executable.get_snakemake_command().split()}",
         shell=False,
     )
     LOG.info(f"Workflow report file {report_file_name}")

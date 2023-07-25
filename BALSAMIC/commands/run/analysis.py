@@ -11,7 +11,7 @@ import click
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import SCHEDULER_PATH, ASSETS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.snakemake import Snakemake, SingularityBindPath
+from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.cli import (
     createDir,
     get_snakefile,
@@ -248,7 +248,7 @@ def analysis(
         )
 
     LOG.info(f"Starting {analysis_workflow} workflow...")
-    snakemake: Snakemake = Snakemake(
+    snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         benchmark=benchmark,
         case_id=case_name,
@@ -273,7 +273,8 @@ def analysis(
         working_dir=Path(analysis_dir, case_name, "BALSAMIC_run"),
     )
     subprocess.run(
-        f"{sys.executable} -m {snakemake.get_snakemake_command()}", shell=True
+        f"{sys.executable} -m {snakemake_executable.get_snakemake_command()}",
+        shell=True,
     )
 
     if run_analysis and run_mode == "cluster":

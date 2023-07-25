@@ -31,7 +31,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
-from BALSAMIC.models.snakemake import SingularityBindPath, Snakemake
+from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 
@@ -1311,15 +1311,15 @@ def fixture_snakemake_options_command() -> List[str]:
     return ["--cores", "36"]
 
 
-@pytest.fixture(scope="session", name="snakemake_data")
-def fixture_snakemake_data(
+@pytest.fixture(scope="session", name="snakemake_executable_data")
+def fixture_snakemake_executable_data(
     case_id_tumor_only: str,
     reference_file: Path,
     session_tmp_path: Path,
     singularity_bind_path: SingularityBindPath,
     snakemake_options_command: List[str],
 ) -> Dict[str, Any]:
-    """Return snakemake model data."""
+    """Return snakemake executable model data."""
     return {
         "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
@@ -1341,14 +1341,16 @@ def fixture_snakemake_data(
     }
 
 
-@pytest.fixture(scope="session", name="snakemake")
-def fixture_snakemake(snakemake_data: Dict[str, Any]) -> Snakemake:
-    """Return mocked singularity model."""
-    return Snakemake(**snakemake_data)
+@pytest.fixture(scope="session", name="snakemake_executable")
+def fixture_snakemake_executable(
+    snakemake_executable_data: Dict[str, Any]
+) -> SnakemakeExecutable:
+    """Return mocked snakemake executable model."""
+    return SnakemakeExecutable(**snakemake_executable_data)
 
 
-@pytest.fixture(scope="session", name="snakemake_validated_data")
-def fixture_snakemake_validated_data(
+@pytest.fixture(scope="session", name="snakemake_executable_validated_data")
+def fixture_snakemake_executable_validated_data(
     case_id_tumor_only: str,
     reference_file: Path,
     session_tmp_path: Path,
