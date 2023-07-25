@@ -80,7 +80,6 @@ shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
 -t {threads} \
 -i $shellbamfiles \
 --algo Dedup \
---rmdup \
 --score_info {output.score} \
 --metrics {output.metrics} \
 {output.bam};
