@@ -8,7 +8,7 @@ Added:
 * Annotate SNVs with cancer germline SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
 * Annotate SNVs with somatic SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
-* Support external singularity bind paths https://github/Clinical-Genomics/BALSAMIC/pull/1210
+* Support external singularity bind paths https://github/Clinical-Genomics/BALSAMIC/pull/1211
 
 Changed:
 ^^^^^^^^
@@ -18,7 +18,7 @@ Changed:
 * Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
 * Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
-* Snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1210
+* Snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
 
 Fixed:
 ^^^^^^
