@@ -1,21 +1,23 @@
-import os
-import sys
-import logging
 import json
-import yaml
-import click
-import snakemake
+import logging
+import os
 import subprocess
+import sys
 from pathlib import Path
 
+import click
+import snakemake
+import yaml
+
+from BALSAMIC.constants.analysis import RunMode
+from BALSAMIC.constants.rules import DELIVERY_RULES
+from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.models.snakemake import Snakemake
+from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.cli import SnakeMake
-from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.constants.rules import DELIVERY_RULES
 
 LOG = logging.getLogger(__name__)
 
@@ -88,7 +90,6 @@ def deliver(
 
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
-    reference_genome = sample_config_dict["reference"]["reference_genome"]
     snakefile = get_snakefile(analysis_type, analysis_workflow)
 
     report_file_name = os.path.join(
@@ -96,25 +97,26 @@ def deliver(
     )
     LOG.info("Creating report file {}".format(report_file_name))
 
-    # write report.html file
-    report = SnakeMake()
-    report.case_name = case_name
-    report.working_dir = os.path.join(
-        sample_config_dict["analysis"]["analysis_dir"],
-        sample_config_dict["analysis"]["case_id"],
-        "BALSAMIC_run",
+    LOG.info(f"Delivering {analysis_workflow} workflow...")
+    working_dir = Path(
+        sample_config_dict["analysis"]["analysis_dir"], case_name, "BALSAMIC_run"
     )
-    report.report = report_file_name
-    report.configfile = sample_config
-    report.snakefile = snakefile
-    report.run_mode = "local"
-    report.use_singularity = False
-    report.run_analysis = True
-    report.sm_opt = ["--quiet"]
-    if disable_variant_caller:
-        report.disable_variant_caller = disable_variant_caller
-    cmd = sys.executable + " -m  " + report.build_cmd()
-    subprocess.check_output(cmd.split(), shell=False)
+    snakemake_model: Snakemake = Snakemake(
+        case_id=case_name,
+        config_path=sample_config,
+        disable_variant_caller=disable_variant_caller,
+        report_path=report_file_name,
+        run_analysis=True,
+        run_mode=RunMode.LOCAL,
+        snakefile=snakefile,
+        snakemake_options=["--quiet"],
+        working_dir=working_dir,
+    )
+
+    subprocess.check_output(
+        f"{sys.executable} -m {snakemake_model.get_snakemake_command().split()}",
+        shell=False,
+    )
     LOG.info(f"Workflow report file {report_file_name}")
 
     snakemake.snakemake(
