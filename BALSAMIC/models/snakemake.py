@@ -49,7 +49,7 @@ class Snakemake(BaseModel):
         singularity_bind_paths (Optional[Dict[str, str]]) : Singularity source and destination bind paths.
         snakefile (FilePath)                              : Snakemake rule configuration file.
         snakemake_options (Optional[List[str]])           : Snakemake command additional options.
-        working_dir (DirectoryPath)                       : Snakemake working directory.
+        working_dir (Path)                                : Snakemake working directory.
     """
 
     account: Optional[str]
@@ -74,7 +74,7 @@ class Snakemake(BaseModel):
     singularity_bind_paths: Optional[List[SingularityBindPath]]
     snakefile: FilePath
     snakemake_options: Optional[List[str]]
-    working_dir: DirectoryPath
+    working_dir: Path
 
     @validator("disable_variant_caller", always=True)
     def get_disable_variant_caller_option(cls, disable_variant_caller: str) -> str:

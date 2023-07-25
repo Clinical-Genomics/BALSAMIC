@@ -4,16 +4,17 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 import click
 
 from BALSAMIC.constants.cluster import ClusterConfigType
-from BALSAMIC.constants.paths import SCRIPT_DIR, SCHEDULER_PATH
+from BALSAMIC.constants.paths import SCHEDULER_PATH, ASSETS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.models.snakemake import Snakemake, SingularityBindPath
 from BALSAMIC.utils.cli import (
     createDir,
     get_snakefile,
-    SnakeMake,
     job_id_dump_to_yaml,
     get_config_path,
     get_resolved_fastq_files_directory,
@@ -186,9 +187,8 @@ def analysis(
         )
         raise click.Abort()
 
-    sample_config_path = os.path.abspath(sample_config)
-
-    with open(sample_config, "r") as sample_fh:
+    sample_config_path: Path = Path(sample_config).absolute()
+    with open(sample_config_path, "r") as sample_fh:
         sample_config = json.load(sample_fh)
 
     logpath = sample_config["analysis"]["log"]
@@ -215,71 +215,70 @@ def analysis(
 
     analysis_type = sample_config["analysis"]["analysis_type"]
     analysis_workflow = sample_config["analysis"]["analysis_workflow"]
-    reference_genome = sample_config["reference"]["reference_genome"]
-
-    # Singularity bind path
-    bind_path = list()
-    bind_path.append(
-        get_resolved_fastq_files_directory(sample_config["analysis"]["fastq_path"])
-    )
-    bind_path.append(str(Path(__file__).parents[2] / "assets"))
-    bind_path.append(os.path.commonpath(sample_config["reference"].values()))
-    if "panel" in sample_config:
-        bind_path.append(sample_config.get("panel").get("capture_kit"))
-    if "background_variants" in sample_config:
-        bind_path.append(sample_config.get("background_variants"))
-    if "pon_cnn" in sample_config:
-        bind_path.append(sample_config.get("panel").get("pon_cnn"))
-    bind_path.append(SCRIPT_DIR.as_posix())
-    bind_path.append(sample_config["analysis"]["analysis_dir"])
-
-    # Construct snakemake command to run workflow
-    balsamic_run = SnakeMake()
-    balsamic_run.case_name = case_name
-    balsamic_run.working_dir = (
-        Path(
-            sample_config["analysis"]["analysis_dir"], case_name, "BALSAMIC_run"
-        ).as_posix()
-        + "/"
-    )
-    balsamic_run.snakefile = (
+    analysis_dir: Path = Path(sample_config["analysis"]["analysis_dir"])
+    snakefile: Path = (
         snake_file if snake_file else get_snakefile(analysis_type, analysis_workflow)
     )
-    balsamic_run.configfile = sample_config_path
-    balsamic_run.run_mode = run_mode
-    balsamic_run.cluster_config = cluster_config
-    balsamic_run.scheduler = SCHEDULER_PATH.as_posix()
-    balsamic_run.profile = profile
-    balsamic_run.log_path = logpath
-    balsamic_run.script_path = scriptpath
-    balsamic_run.result_path = resultpath
-    balsamic_run.qos = qos
-    balsamic_run.account = account
-    if mail_type:
-        balsamic_run.mail_type = mail_type
-    balsamic_run.mail_user = mail_user
-    balsamic_run.forceall = force_all
-    balsamic_run.run_analysis = run_analysis
-    balsamic_run.quiet = quiet
-    # Always use singularity
-    balsamic_run.use_singularity = True
-    balsamic_run.singularity_bind = bind_path
-    balsamic_run.sm_opt = snakemake_opt
-    if benchmark and profile == "slurm":
-        balsamic_run.slurm_profiler = "task"
+    fastq_dir: Path = Path(
+        get_resolved_fastq_files_directory(sample_config["analysis"]["fastq_path"])
+    )
+    cache_dir: Path = Path(os.path.commonpath(sample_config["reference"].values()))
+    singularity_bind_paths: List[SingularityBindPath] = [
+        SingularityBindPath(source=fastq_dir, destination=fastq_dir),
+        SingularityBindPath(source=ASSETS_DIR, destination=ASSETS_DIR),
+        SingularityBindPath(source=analysis_dir, destination=analysis_dir),
+        SingularityBindPath(source=cache_dir, destination=cache_dir),
+    ]
+    if sample_config.get("panel"):
+        capture_kit_path: Path = Path(sample_config.get("panel").get("capture_kit"))
+        singularity_bind_paths.append(
+            SingularityBindPath(source=capture_kit_path, destination=capture_kit_path)
+        )
+        if sample_config.get("panel").get("pon_cnn"):
+            pon_cnn_path: Path = Path(sample_config.get("panel").get("pon_cnn"))
+            singularity_bind_paths.append(
+                SingularityBindPath(source=pon_cnn_path, destination=pon_cnn_path)
+            )
+    if sample_config.get("background_variants"):
+        background_variants_path: Path = Path(sample_config.get("background_variants"))
+        singularity_bind_paths.append(
+            SingularityBindPath(
+                source=background_variants_path, destination=background_variants_path
+            )
+        )
 
-    if disable_variant_caller:
-        balsamic_run.disable_variant_caller = disable_variant_caller
-
-    if dragen:
-        balsamic_run.dragen = dragen
-
-    cmd = sys.executable + " -m  " + balsamic_run.build_cmd()
-    subprocess.run(cmd, shell=True)
+    LOG.info(f"Starting {analysis_workflow} workflow...")
+    snakemake: Snakemake = Snakemake(
+        account=account,
+        benchmark=benchmark,
+        case_id=case_name,
+        cluster_config_path=cluster_config,
+        config_path=sample_config_path,
+        disable_variant_caller=disable_variant_caller,
+        dragen=dragen,
+        force=force_all,
+        log_dir=logpath,
+        mail_type=mail_type,
+        mail_user=mail_user,
+        profile=profile,
+        qos=qos,
+        quiet=quiet,
+        result_dir=resultpath,
+        run_analysis=run_analysis,
+        run_mode=run_mode,
+        script_dir=scriptpath,
+        singularity_bind_paths=singularity_bind_paths,
+        snakefile=snakefile,
+        snakemake_options=snakemake_opt,
+        working_dir=Path(analysis_dir, case_name, "BALSAMIC_run"),
+    )
+    subprocess.run(
+        f"{sys.executable} -m {snakemake.get_snakemake_command()}", shell=True
+    )
 
     if run_analysis and run_mode == "cluster":
-        jobid_dump = os.path.join(
-            logpath, sample_config["analysis"]["case_id"] + ".sacct"
+        jobid_dump = Path(logpath, f"{case_name}.sacct")
+        jobid_yaml = Path(resultpath, f"{profile}_jobids.yaml")
+        job_id_dump_to_yaml(
+            job_id_dump=jobid_dump, job_id_yaml=jobid_yaml, case_name=case_name
         )
-        jobid_yaml = os.path.join(resultpath, profile + "_jobids.yaml")
-        job_id_dump_to_yaml(jobid_dump, jobid_yaml, case_name)

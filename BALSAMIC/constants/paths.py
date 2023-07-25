@@ -6,7 +6,8 @@ from pathlib import Path
 BALSAMIC_DIR: Path = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 CONSTANTS_DIR: Path = Path(BALSAMIC_DIR, "constants")
 CONTAINERS_DIR: Path = Path(BALSAMIC_DIR, "containers")
-SCRIPT_DIR: Path = Path(BALSAMIC_DIR, "assets", "scripts")
+ASSETS_DIR: Path = Path(BALSAMIC_DIR, "assets")
+SCRIPT_DIR: Path = Path(ASSETS_DIR, "scripts")
 REFSEQ_SCRIPT_PATH: Path = Path(SCRIPT_DIR, "refseq_sql.awk")
 SCHEDULER_PATH: Path = Path(BALSAMIC_DIR, "utils", "scheduler.py")
 
