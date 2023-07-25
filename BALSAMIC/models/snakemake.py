@@ -28,6 +28,7 @@ class Snakemake(BaseModel):
 
     Attributes:
         account (Optional[str])                           : Scheduler account.
+        benchmark (Optional[bool])                        : Slurm jobs profiling option.
         case_id (str)                                     : Analysis case name.
         cluster_config_path (FilePath)                    : Cluster configuration file path.
         config_path (FilePath)                            : Sample configuration file.
@@ -45,15 +46,14 @@ class Snakemake(BaseModel):
         run_analysis (bool)                               : Flag to run the actual analysis.
         run_mode (RunMode)                                : Cluster run mode to execute analysis.
         script_dir (DirectoryPath)                        : Cluster profile scripts directory.
-        singularity (bool)                                : Flag to enable singularity.
         singularity_bind_paths (Optional[Dict[str, str]]) : Singularity source and destination bind paths.
-        slurm_profiler (Optional[str])                    : Slurm profiling option to be used for benchmarking.
         snakefile (FilePath)                              : Snakemake rule configuration file.
         snakemake_options (Optional[List[str]])           : Snakemake command additional options.
         working_dir (DirectoryPath)                       : Snakemake working directory.
     """
 
     account: Optional[str]
+    benchmark: bool = False
     case_id: str
     cluster_config_path: FilePath
     config_path: FilePath
@@ -72,7 +72,6 @@ class Snakemake(BaseModel):
     run_mode: RunMode
     script_dir: DirectoryPath
     singularity_bind_paths: Optional[List[SingularityBindPath]]
-    slurm_profiler: Optional[str]
     snakefile: FilePath
     snakemake_options: Optional[List[str]]
     working_dir: DirectoryPath
@@ -89,13 +88,6 @@ class Snakemake(BaseModel):
         """Return string representation of the mail_user option."""
         if mail_user:
             return f"--mail-user {mail_user}"
-        return ""
-
-    @validator("slurm_profiler", always=True)
-    def get_slurm_profiler_option(cls, slurm_profiler: Optional[str]) -> str:
-        """Return string representation of the slurm_profiler option."""
-        if slurm_profiler:
-            return f"--slurm-profiler {slurm_profiler}"
         return ""
 
     def get_dragen_flag(self) -> str:
@@ -143,6 +135,12 @@ class Snakemake(BaseModel):
                     f"--bind {singularity_bind_path.source.as_posix()}:{singularity_bind_path.destination.as_posix()}"
                 )
             return f"--use-singularity --singularity-args ' --cleanenv {' '.join(bind_options)}'"
+        return ""
+
+    def get_slurm_profiler_option(self) -> str:
+        """Return string representation of the slurm profiler option."""
+        if self.benchmark and self.profile == ClusterProfile.SLURM:
+            return "--slurm-profiler task"
         return ""
 
     def get_snakemake_options_command(self) -> str:
@@ -199,7 +197,7 @@ class Snakemake(BaseModel):
             f"--log-dir {self.log_dir.as_posix()} "
             f"--script-dir {self.script_dir.as_posix()} "
             f"--result-dir {self.result_dir.as_posix()} "
-            f"{self.slurm_profiler} "
+            f"{self.get_slurm_profiler_option()} "
             f"{self.mail_user} "
             f"{self.get_mail_type_option()} "
             "{dependencies} '"

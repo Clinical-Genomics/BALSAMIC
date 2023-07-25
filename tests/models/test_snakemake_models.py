@@ -163,6 +163,20 @@ def test_get_singularity_bind_paths_option(
     )
 
 
+def test_get_slurm_profiler_option(snakemake: Snakemake):
+    """Test formatting of the snakemake slurm profiler option."""
+
+    # GIVEN a snakemake model
+    snakemake_model: Snakemake = copy.deepcopy(snakemake)
+    snakemake_model.benchmark = True
+
+    # WHEN calling the method
+    slurm_profiler: str = snakemake_model.get_slurm_profiler_option()
+
+    # THEN the expected format should be returned
+    assert slurm_profiler == "--slurm-profiler task"
+
+
 def test_get_snakemake_options_command(snakemake: Snakemake):
     """Test formatting of the snakemake options command."""
 

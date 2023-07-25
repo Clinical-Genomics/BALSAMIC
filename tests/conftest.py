@@ -1358,6 +1358,7 @@ def fixture_snakemake_validated_data(
     """Return snakemake model expected data."""
     return {
         "account": ClusterAccount.DEVELOPMENT.value,
+        "benchmark": False,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
@@ -1376,7 +1377,6 @@ def fixture_snakemake_validated_data(
         "run_mode": RunMode.CLUSTER,
         "script_dir": session_tmp_path,
         "singularity_bind_paths": [singularity_bind_path],
-        "slurm_profiler": "",
         "snakefile": reference_file,
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
