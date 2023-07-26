@@ -144,7 +144,7 @@ def test_quiet_flag(snakemake_executable: SnakemakeExecutable):
 
 
 def test_get_report_path_option(
-    snakemake_executable: SnakemakeExecutable, session_tmp_path: Path
+    session_tmp_path: Path, snakemake_executable: SnakemakeExecutable
 ):
     """Test formatting of the report path option."""
 
@@ -174,9 +174,9 @@ def test_get_run_analysis_flag(snakemake_executable: SnakemakeExecutable):
 
 
 def test_get_singularity_bind_paths_option(
-    snakemake_executable: SnakemakeExecutable,
-    session_tmp_path: Path,
     reference_file: Path,
+    session_tmp_path: Path,
+    snakemake_executable: SnakemakeExecutable,
 ):
     """Test formatting of the singularity bind paths."""
 
@@ -228,10 +228,11 @@ def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable
 
 
 def test_get_snakemake_command(
-    snakemake_executable: SnakemakeExecutable,
     case_id_tumor_only: str,
-    session_tmp_path: Path,
+    mail_user_option: str,
     reference_file: Path,
+    session_tmp_path: Path,
+    snakemake_executable: SnakemakeExecutable,
 ):
     """Test retrieval of the snakemake command to be submitted to Slurm."""
 
@@ -251,16 +252,17 @@ def test_get_snakemake_command(
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
         f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} {{dependencies}} ' "
-        f"--config disable_variant_caller=tnscope,vardict --cores 36"
+        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
+        f"{{dependencies}} ' --config disable_variant_caller=tnscope,vardict --cores 36"
     )
 
 
 def test_get_snakemake_cluster_options(
-    snakemake_executable: SnakemakeExecutable,
     case_id_tumor_only: str,
-    session_tmp_path: Path,
+    mail_user_option: str,
     reference_file: Path,
+    session_tmp_path: Path,
+    snakemake_executable: SnakemakeExecutable,
 ):
     """Test formatting of the snakemake cluster options."""
 
@@ -278,14 +280,16 @@ def test_get_snakemake_cluster_options(
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH.as_posix()} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
         f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} {{dependencies}} '"
+        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
+        "{dependencies} '"
     )
 
 
 def test_get_cluster_submit_command(
-    snakemake_executable: SnakemakeExecutable,
-    session_tmp_path: Path,
+    mail_user_option: str,
     reference_file: Path,
+    session_tmp_path: Path,
+    snakemake_executable: SnakemakeExecutable,
 ):
     """Test formatting of the cluster submit command."""
 
@@ -301,5 +305,6 @@ def test_get_cluster_submit_command(
         f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
         f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} {{dependencies}} '"
+        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
+        "{dependencies} '"
     )

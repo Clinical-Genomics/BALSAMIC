@@ -1311,11 +1311,18 @@ def fixture_snakemake_options_command() -> List[str]:
     return ["--cores", "36"]
 
 
+@pytest.fixture(scope="session", name="mail_user_option")
+def fixture_mail_user_option() -> str:
+    """Return mail user option."""
+    return "balsamic@scilifelab.se"
+
+
 @pytest.fixture(scope="session", name="snakemake_executable_data")
 def fixture_snakemake_executable_data(
     case_id_tumor_only: str,
     reference_file: Path,
     session_tmp_path: Path,
+    mail_user_option: str,
     singularity_bind_path: SingularityBindPath,
     snakemake_options_command: List[str],
 ) -> Dict[str, Any]:
@@ -1327,6 +1334,7 @@ def fixture_snakemake_executable_data(
         "config_path": reference_file,
         "disable_variant_caller": "tnscope,vardict",
         "log_dir": session_tmp_path,
+        "mail_user": mail_user_option,
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
@@ -1354,6 +1362,7 @@ def fixture_snakemake_executable_validated_data(
     case_id_tumor_only: str,
     reference_file: Path,
     session_tmp_path: Path,
+    mail_user_option: str,
     singularity_bind_path: SingularityBindPath,
     snakemake_options_command: List[str],
 ) -> Dict[str, Any]:
@@ -1369,7 +1378,7 @@ def fixture_snakemake_executable_validated_data(
         "force": False,
         "log_dir": session_tmp_path,
         "mail_type": None,
-        "mail_user": "",
+        "mail_user": f"--mail-user {mail_user_option}",
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
