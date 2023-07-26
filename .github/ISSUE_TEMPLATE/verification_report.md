@@ -86,6 +86,33 @@ description, and status (Pass/Fail).
 | `uphippo`      | UMI, tumor-only    | Fail (`GC dropout=1.650392`)                          | Pass/Fail |
 | `equalbug`     | UMI, tumor-normal  | Fail (`GC_DROPOUT=1.087173` and `RELATEDNESS=-0.524`) | Pass/Fail |
 
+### Storage and Upload Integrity Verifications
+
+Table of potentially affected steps in Storage and Upload of files:
+
+| Processes                                | Affected in current version | Affected workflows     | 
+|------------------------------------------|-----------------------------|------------------------|
+| New files to be delivered                | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| Changes of file-names of delivered files | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| New files to be stored                   | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| Changes of file-names of stored files    | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| Changes to Housekeeper IDs               | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| Changes to Scout yaml creation           | Yes/No                      | ALL / TGA / WGS / UMI  | 
+
+For each affected workflow above, verify that all required files are stored, delivered and uploaded.
+
+If none are affected, this step can be ignored. 
+
+| Case ID        | Analysis type      | File  status | 
+|----------------|--------------------|--------------|
+| `acetuna`      | QC, tumor-only     | Pass/Fail/NA |
+| `civilsole`    | WGS, tumor-only    | Pass/Fail/NA |
+| `fleetjay`     | WGS, tumor-normal  | Pass/Fail/NA |
+| `setamoeba`    | TGA, tumor-only    | Pass/Fail/NA |
+| `unitedbeagle` | TGA, tumor-normal  | Pass/Fail/NA |
+| `uphippo`      | UMI, tumor-only    | Pass/Fail/NA |
+| `equalbug`     | UMI, tumor-normal  | Pass/Fail/NA |
+
 ### Version Specific Verification Cases
 
 | Case ID  | Analysis type     | Expected QC | Status    |
