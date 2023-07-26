@@ -111,19 +111,3 @@ def test_run_analysis_ponpath(invoke_cli, tumor_only_pon_config):
     # THEN it checks for existence of paths
     assert pon_path.exists()
     assert str(pon_path) in bind_path
-
-
-def test_bind_path_with_pon_cnn():
-    # Define a sample config dictionary with "pon_cnn" key
-    sample_config = {
-        "panel": {"pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn"}
-    }
-
-    # Call the code snippet
-    bind_path = list()
-    if "pon_cnn" in sample_config.get("panel"):
-        bind_path.append(sample_config.get("panel").get("pon_cnn"))
-
-    # Assert that the bind_path contains the correct value
-    expected_value = "tests/test_data/references/panel/test_panel_ponn.cnn"
-    assert bind_path == [expected_value]
