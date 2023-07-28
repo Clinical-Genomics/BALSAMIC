@@ -194,7 +194,7 @@ def test_get_singularity_bind_paths_option(
     # THEN the expected format should be returned
     assert (
         singularity_bind_paths_option
-        == f"--use-singularity --singularity-args ' --cleanenv --bind {session_tmp_path.as_posix()}:/ "
+        == f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/ "
         f"--bind {reference_file.as_posix()}:{reference_file.as_posix()}'"
     )
 
@@ -247,7 +247,7 @@ def test_get_snakemake_command(
         == f"snakemake --notemp -p --directory {session_tmp_path.as_posix()} "
         f"--snakefile {reference_file.as_posix()} "
         f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()} "
-        f"--use-singularity --singularity-args ' --cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
+        f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "

@@ -148,7 +148,7 @@ class SnakemakeExecutable(BaseModel):
                 bind_options.append(
                     f"--bind {singularity_bind_path.source.as_posix()}:{singularity_bind_path.destination.as_posix()}"
                 )
-            return f"--use-singularity --singularity-args ' --cleanenv {' '.join(bind_options)}'"
+            return f"--use-singularity --singularity-args '--cleanenv {' '.join(bind_options)}'"
         return ""
 
     def get_slurm_profiler_option(self) -> str:
