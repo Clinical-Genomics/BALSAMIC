@@ -200,6 +200,10 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                 # Ignore UMI and reverse reads metrics
                 if "umi" not in k:
                     if k in requested_metrics:
+                        # example of possible sample-formats below from "report_saved_raw_data":
+                        # tumor.ACCXXXXXX
+                        # tumor.ACCXXXXXX_FR
+                        # extracted below for id to: ACCXXXXXX
                         output_metrics.append(
                             Metric(
                                 id=sample.split(".")[1].split("_")[0],
