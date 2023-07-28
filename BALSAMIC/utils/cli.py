@@ -405,7 +405,7 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
 
     Criteria:
         - All fastq-files in the supplied fastq_dir must have been assigned to a sample.
-        - All fastq-files in the sample dict must exist.
+        - All fastq-files in the sample dict must exist in the fastq_dir.
 
     Args:
         sample_dict: dict. Dictionary of sample-names and their associated sample-type and fastq-information.
@@ -414,28 +414,32 @@ def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
     Returns:
         Nothing
     """
-    complete_fastq_list = glob.glob(f"{fastq_path}/*fastq.gz")
-    assigned_fastq_list = []
+    # Extract fastq files assigned to sample_dict to a list
+    def extract_assigned_fastqs(fastq_info):
+        return [fastq_path for val in fastq_info.values() for fastq_path in val.values()]
+
+    assigned_fastq_files = []
     for sample in sample_dict:
-        fastq_dict = sample_dict[sample]["fastq_info"]
-        for fastq_pattern in fastq_dict:
-            for fastq_read_direction, fastq_path in fastq_dict[fastq_pattern].items():
-                assigned_fastq_list.append(fastq_path)
-                if not Path(fastq_path).is_file():
-                    error_message = f"Fastq-file does not exist: {fastq_path}"
-                    LOG.error(error_message)
-                    raise FileNotFoundError(error_message)
+        fastq_info = sample_dict[sample]["fastq_info"]
+        assigned_fastq_files.extend(extract_assigned_fastqs(fastq_info))
+    # Convert list to set
+    assigned_fastq_files = set(assigned_fastq_files)
 
-    unassigned_fastqs = []
-    for fastq in complete_fastq_list:
-        if fastq not in assigned_fastq_list:
-            unassigned_fastqs.append(fastq)
+    # Get a set of all fastq files in fastq-directory
+    fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
 
-    if unassigned_fastqs:
-        unassigned_fastqs_str = "\n".join(unassigned_fastqs)
-        error_message = f"Fastq files found in fastq directory not assigned to any sample: {unassigned_fastqs_str}"
+    # Unique elements in sets
+    unique_assigned = assigned_fastq_files - fastqs_in_fastq_path
+    unique_fastqdir = fastqs_in_fastq_path - assigned_fastq_files
+
+    # Assigned and currently existing fastq-files in fastq-dir should be the same
+    if not assigned_fastq_files == fastqs_in_fastq_path:
+        error_message = f"List of assigned fastq files differs from those present in the provided fastq-directory"
+        f"Assigned not in fastq-dir: {unique_assigned}"
+        f"In fastq-dir not assigned: {unique_fastqdir}"
         LOG.error(error_message)
         raise BalsamicError(error_message)
+
 
 
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:

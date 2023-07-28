@@ -236,7 +236,7 @@ def case_config(
         }
     )
 
-    analysis_fastq_dir = get_analysis_fastq_files_directory(
+    analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
 
@@ -278,11 +278,6 @@ def case_config(
         if panel_bed
         else None,
     ).dict(by_alias=True, exclude_none=True)
-
-    # Validate fastq input
-    validate_fastq_input(
-        sample_dict=config_collection_dict["samples"], fastq_path=analysis_fastq_dir
-    )
 
     config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)

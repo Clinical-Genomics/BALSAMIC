@@ -1,12 +1,13 @@
 import hashlib
 import logging
 import re
+import glob
 import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseModel, validator, Field, AnyUrl, root_validator
+from pydantic import BaseModel, validator, Field, AnyUrl, root_validator, ValidationError
 from pydantic.types import DirectoryPath, FilePath
 from collections import defaultdict
 
@@ -381,7 +382,7 @@ class FastqInfoModel(BaseModel):
     fwd: FilePath
     rev: FilePath
 
-    @root_validator(pre=False)
+    @root_validator
     def validate_fastq_pairs_in_fastq_pattern(cls, values):
         values["fwd"] = Path(values["fwd"]).as_posix()
         values["rev"] = Path(values["rev"]).as_posix()
@@ -434,14 +435,6 @@ class SampleInstanceModel(BaseModel):
                 f"The provided sample type ({value}) is not supported in BALSAMIC"
             )
         return value
-
-    @validator("fastq_info", pre=True)
-    def fastq_info_exists(cls, value):
-        """Validate that fastq info exists."""
-        if value:
-            return value
-
-        raise ValueError("No fastq files in fastq-dir assigned to sample.")
 
 
 class PanelModel(BaseModel):
@@ -560,6 +553,34 @@ class BalsamicConfigModel(BaseModel):
                     f"Sample name '{sample_name}' contains an underscore (_). Underscores are not allowed."
                 )
         return value
+
+    @validator("samples")
+    def validate_fastq_input(cls, samples, values):
+        """
+        All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
+        """
+        # Access fastq_path from analysis
+        fastq_path = values.get("analysis").fastq_path
+
+        # Get a set of all fastq files in fastq-directory
+        fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
+
+        # Extract fastq files assigned to sample_dict to a list
+        def extract_assigned_fastqs(fastq_info):
+            return [fastq_path for val in fastq_info.values() for fastq_path in val.values()]
+
+        assigned_fastq_files = []
+        for sample in samples:
+            fastq_info = samples[sample]["fastq_info"]
+            assigned_fastq_files.extend(extract_assigned_fastqs(fastq_info))
+
+        # Check if all fastq files in fastqs_in_fastq_path exist in assigned_fastq_files
+        if not set(fastqs_in_fastq_path).issubset(assigned_fastq_files):
+            unique_fastqs = set(fastqs_in_fastq_path) - set(assigned_fastq_files)
+            error_message = f"The following fastq files in {fastq_path} are not assigned to any sample: {', '.join(unique_fastqs)}"
+            raise ValidationError(error_message)
+
+        return samples
 
     @validator("samples", pre=True)
     def verify_unique_fastq_info_across_samples(cls, value):
