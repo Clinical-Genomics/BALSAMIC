@@ -930,7 +930,7 @@ def test_validate_fastq_input_extrafile(
     # THEN the following error should be found
     with pytest.raises(
         BalsamicError,
-        match="Fastq files found in fastq directory not assigned to any sample",
+        match="List of assigned fastq files differs from those present in the provided fastq-directory",
     ):
         validate_fastq_input(sample_dict, fastq_dir_tumor_normal_extrafile)
 
@@ -943,7 +943,7 @@ def test_validate_fastq_input_missingfiles(sample_config, empty_fastq_dir):
 
     # WHEN calling validate_fastq_input
     # THEN the following error should be found
-    with pytest.raises(FileNotFoundError, match="Fastq-file does not exist:"):
+    with pytest.raises(BalsamicError, match="List of assigned fastq files differs from those present in the provided fastq-directory"):
         validate_fastq_input(sample_dict, empty_fastq_dir)
 
 

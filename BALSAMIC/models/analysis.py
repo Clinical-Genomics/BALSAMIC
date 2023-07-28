@@ -554,24 +554,26 @@ class BalsamicConfigModel(BaseModel):
                 )
         return value
 
-    @validator("samples")
-    def validate_fastq_input(cls, samples, values):
+    @validator("samples", pre=True)
+    def validate_fastq_input(cls, value, values):
         """
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
         """
         # Access fastq_path from analysis
-        fastq_path = values.get("analysis").fastq_path
+        fastq_path = values["analysis"].fastq_path
+        #samples = values["samples"]
 
         # Get a set of all fastq files in fastq-directory
         fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
 
-        # Extract fastq files assigned to sample_dict to a list
+
+        # Extract assigned fastq files from sample_dict
         def extract_assigned_fastqs(fastq_info):
             return [fastq_path for val in fastq_info.values() for fastq_path in val.values()]
 
         assigned_fastq_files = []
-        for sample in samples:
-            fastq_info = samples[sample]["fastq_info"]
+        for sample in value:
+            fastq_info = value[sample]["fastq_info"]
             assigned_fastq_files.extend(extract_assigned_fastqs(fastq_info))
 
         # Check if all fastq files in fastqs_in_fastq_path exist in assigned_fastq_files
@@ -580,7 +582,7 @@ class BalsamicConfigModel(BaseModel):
             error_message = f"The following fastq files in {fastq_path} are not assigned to any sample: {', '.join(unique_fastqs)}"
             raise ValidationError(error_message)
 
-        return samples
+        return value
 
     @validator("samples", pre=True)
     def verify_unique_fastq_info_across_samples(cls, value):
