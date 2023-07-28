@@ -23,6 +23,10 @@ def get_singularity_bind_paths(
         SingularityBindPath(source=ASSETS_DIR, destination=ASSETS_DIR),
         SingularityBindPath(source=analysis_dir, destination=analysis_dir),
         SingularityBindPath(source=cache_dir, destination=cache_dir),
+        # TODO: remove (only test purposes)
+        SingularityBindPath(
+            source="/home/proj/development/cancer/vadym", destination="/opt/"
+        ),
     ]
     if sample_config.get("panel"):
         capture_kit_path: Path = Path(sample_config.get("panel").get("capture_kit"))
