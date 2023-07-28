@@ -8,7 +8,7 @@ Added:
 * Annotate SNVs with cancer germline SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
 * Annotate SNVs with somatic SNV observations https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
-* Support external singularity bind paths https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
 
 Changed:
 ^^^^^^^^
