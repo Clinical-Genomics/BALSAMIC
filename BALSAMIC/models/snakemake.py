@@ -27,29 +27,30 @@ class SnakemakeExecutable(BaseModel):
     """Snakemake command building model.
 
     Attributes:
-        account (Optional[str])                           : Scheduler account.
-        benchmark (Optional[bool])                        : Slurm jobs profiling option.
-        case_id (str)                                     : Analysis case name.
-        cluster_config_path (Optional[FilePath])          : Cluster configuration file path.
-        config_path (FilePath)                            : Sample configuration file.
-        disable_variant_caller (Optional[str])            : Disable variant caller.
-        dragen (Optional[bool])                           : FLag for enabling or disabling Dragen suite.
-        force (bool)                                      : Force snakemake execution.
-        log_dir (Optional[DirectoryPath])                 : Logging directory.
-        mail_type (Optional[ClusterMailType])             : Email type triggering job status notifications.
-        mail_user (Optional[str])                         : User email to receive job status notifications.
-        profile (Optional[ClusterProfile])                : Cluster profile to submit jobs.
-        qos (Optional[QOS])                               : QOS for sbatch jobs.
-        quiet (Optional[bool])                            : Quiet mode for snakemake.
-        report_path (Optional[Path])                      : Snakemake generated report path.
-        result_dir (Optional[DirectoryPath])              : Analysis output directory.
-        run_analysis (bool)                               : Flag to run the actual analysis.
-        run_mode (RunMode)                                : Cluster run mode to execute analysis.
-        script_dir (Optional[DirectoryPath])              : Cluster profile scripts directory.
-        singularity_bind_paths (Optional[Dict[str, str]]) : Singularity source and destination bind paths.
-        snakefile (FilePath)                              : Snakemake rule configuration file.
-        snakemake_options (Optional[List[str]])           : Snakemake command additional options.
-        working_dir (Path)                                : Snakemake working directory.
+        account (Optional[str])                                      : Scheduler account.
+        benchmark (Optional[bool])                                   : Slurm jobs profiling option.
+        case_id (str)                                                : Analysis case name.
+        cluster_config_path (Optional[FilePath])                     : Cluster configuration file path.
+        config_path (FilePath)                                       : Sample configuration file.
+        disable_variant_caller (Optional[str])                       : Disable variant caller.
+        dragen (Optional[bool])                                      : FLag for enabling or disabling Dragen suite.
+        force (bool)                                                 : Force snakemake execution.
+        log_dir (Optional[DirectoryPath])                            : Logging directory.
+        mail_type (Optional[ClusterMailType])                        : Email type triggering job status notifications.
+        mail_user (Optional[str])                                    : User email to receive job status notifications.
+        profile (Optional[ClusterProfile])                           : Cluster profile to submit jobs.
+        qos (Optional[QOS])                                          : QOS for sbatch jobs.
+        quiet (Optional[bool])                                       : Quiet mode for snakemake.
+        report_path (Optional[Path])                                 : Snakemake generated report path.
+        result_dir (Optional[DirectoryPath])                         : Analysis output directory.
+        run_analysis (bool)                                          : Flag to run the actual analysis.
+        run_mode (RunMode)                                           : Cluster run mode to execute analysis.
+        script_dir (Optional[DirectoryPath])                         : Cluster profile scripts directory.
+        singularity_bind_paths (Optional[List[SingularityBindPath]]) : Singularity source and destination bind paths.
+        snakefile (FilePath)                                         : Snakemake rule configuration file.
+        snakemake_options (Optional[List[str]])                      : Snakemake command additional options.
+        working_dir (Path)                                           : Snakemake working directory.
+
     """
 
     account: Optional[str]
