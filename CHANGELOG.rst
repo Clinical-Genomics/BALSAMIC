@@ -19,7 +19,7 @@ Changed:
 * Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
-* Snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
 
 Fixed:
 ^^^^^^
