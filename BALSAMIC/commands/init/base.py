@@ -17,7 +17,7 @@ from BALSAMIC.commands.init.options import (
     OPTION_SNAKEFILE,
     OPTION_CLUSTER_CONFIG,
 )
-from BALSAMIC.commands.init.utils import get_containers
+from BALSAMIC.utils.cache import get_containers
 from BALSAMIC.commands.options import (
     OPTION_RUN_MODE,
     OPTION_CLUSTER_PROFILE,
