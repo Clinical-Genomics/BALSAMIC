@@ -849,6 +849,10 @@ def sample_config(tumor_sample_name: str, normal_sample_name: str):
             "BALSAMIC_version": "2.9.8",
             "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
         },
+        "reference": {
+            "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+            "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
+        },
         "vcf": VCF_DICT,
         "samples": {
             tumor_sample_name: {"type": "tumor"},

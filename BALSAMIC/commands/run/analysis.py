@@ -4,20 +4,19 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 import click
 
 from BALSAMIC.constants.cluster import ClusterConfigType
-from BALSAMIC.constants.paths import SCHEDULER_PATH, ASSETS_DIR
+from BALSAMIC.constants.paths import SCHEDULER_PATH
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
+from BALSAMIC.models.snakemake import SnakemakeExecutable
+from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import (
     createDir,
     get_snakefile,
     job_id_dump_to_yaml,
     get_config_path,
-    get_resolved_fastq_files_directory,
 )
 
 LOG = logging.getLogger(__name__)
@@ -219,33 +218,6 @@ def analysis(
     snakefile: Path = (
         snake_file if snake_file else get_snakefile(analysis_type, analysis_workflow)
     )
-    fastq_dir: Path = Path(
-        get_resolved_fastq_files_directory(sample_config["analysis"]["fastq_path"])
-    )
-    cache_dir: Path = Path(os.path.commonpath(sample_config["reference"].values()))
-    singularity_bind_paths: List[SingularityBindPath] = [
-        SingularityBindPath(source=fastq_dir, destination=fastq_dir),
-        SingularityBindPath(source=ASSETS_DIR, destination=ASSETS_DIR),
-        SingularityBindPath(source=analysis_dir, destination=analysis_dir),
-        SingularityBindPath(source=cache_dir, destination=cache_dir),
-    ]
-    if sample_config.get("panel"):
-        capture_kit_path: Path = Path(sample_config.get("panel").get("capture_kit"))
-        singularity_bind_paths.append(
-            SingularityBindPath(source=capture_kit_path, destination=capture_kit_path)
-        )
-        if sample_config.get("panel").get("pon_cnn"):
-            pon_cnn_path: Path = Path(sample_config.get("panel").get("pon_cnn"))
-            singularity_bind_paths.append(
-                SingularityBindPath(source=pon_cnn_path, destination=pon_cnn_path)
-            )
-    if sample_config.get("background_variants"):
-        background_variants_path: Path = Path(sample_config.get("background_variants"))
-        singularity_bind_paths.append(
-            SingularityBindPath(
-                source=background_variants_path, destination=background_variants_path
-            )
-        )
 
     LOG.info(f"Starting {analysis_workflow} workflow...")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
@@ -267,7 +239,7 @@ def analysis(
         run_analysis=run_analysis,
         run_mode=run_mode,
         script_dir=scriptpath,
-        singularity_bind_paths=singularity_bind_paths,
+        singularity_bind_paths=get_singularity_bind_paths(sample_config),
         snakefile=snakefile,
         snakemake_options=snakemake_opt,
         working_dir=Path(analysis_dir, case_name, "BALSAMIC_run"),

@@ -17,7 +17,6 @@ from BALSAMIC.commands.init.options import (
     OPTION_SNAKEFILE,
     OPTION_CLUSTER_CONFIG,
 )
-from BALSAMIC.utils.cache import get_containers
 from BALSAMIC.commands.options import (
     OPTION_RUN_MODE,
     OPTION_CLUSTER_PROFILE,
@@ -34,9 +33,10 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
-from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
-from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
+from BALSAMIC.models.snakemake import SnakemakeExecutable
+from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
+from BALSAMIC.utils.cache import get_containers
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
@@ -158,10 +158,7 @@ def initialize(
         run_mode=run_mode,
         script_dir=script_dir,
         snakemake_options=snakemake_opt,
-        singularity_bind_paths=[
-            SingularityBindPath(source=BALSAMIC_DIR, destination=BALSAMIC_DIR),
-            SingularityBindPath(source=references_dir, destination=references_dir),
-        ],
+        singularity_bind_paths=get_cache_singularity_bind_paths(cache_config),
         snakefile=snakefile,
         working_dir=references_dir,
     )
