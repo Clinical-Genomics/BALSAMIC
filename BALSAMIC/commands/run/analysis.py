@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from BALSAMIC.models.analysis import BalsamicConfigModel
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import SCRIPT_DIR, SCHEDULER_PATH
 from BALSAMIC.utils.cli import (
@@ -194,6 +195,9 @@ def analysis(
     with open(sample_config, "r") as sample_fh:
         sample_config = json.load(sample_fh)
 
+    # Initialize balsamic model
+    config_collection_dict = BalsamicConfigModel(sample_config).dict(by_alias=True, exclude_none=True)
+
     logpath = sample_config["analysis"]["log"]
     scriptpath = sample_config["analysis"]["script"]
     resultpath = sample_config["analysis"]["result"]
@@ -236,11 +240,6 @@ def analysis(
         bind_path.append(sample_config.get("panel").get("pon_cnn"))
     bind_path.append(SCRIPT_DIR.as_posix())
     bind_path.append(sample_config["analysis"]["analysis_dir"])
-
-    # Validate fastq input
-    validate_fastq_input(
-        sample_dict=sample_dict, fastq_path=sample_config["analysis"]["fastq_path"]
-    )
 
     # Construct snakemake command to run workflow
     balsamic_run = SnakeMake()

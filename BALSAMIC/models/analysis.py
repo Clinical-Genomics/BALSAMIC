@@ -370,41 +370,31 @@ class AnalysisPonModel(AnalysisModel):
 
 
 class FastqInfoModel(BaseModel):
-    """Verifies that fastq files have been correctly assigned in fastq-pattern of sample.
-
-    Requirements to pass fastq-inputs for a sample:
-    - All fastq-files must exist
-    - All forward and reverse fastq pairs must be of the same length
-    - All forward and reverse fastq pairs must have exactly 1 difference in their names
-
+    """
+    Holds filepaths for forward and reverse reads for a fastq_pattern.
     """
 
     fwd: FilePath
     rev: FilePath
 
     @root_validator
-    def validate_fastq_pairs_in_fastq_pattern(cls, values):
-        values["fwd"] = Path(values["fwd"]).as_posix()
-        values["rev"] = Path(values["rev"]).as_posix()
+    def validate_fastq_pairs_in_fastq_pattern(cls, values: Dict[str, Path]):
+        """
+        Requirements to pass fastq-inputs for a sample:
+        - All forward and reverse fastq pairs must be of the same length
+        - All forward and reverse fastq pairs must have exactly 1 difference in their names
+        """
+        fwd_fastq_name = values["fwd"].name
+        rev_fastq_name = values["rev"].name
 
-        fwd_read_path = values["fwd"]
-        rev_read_path = values["rev"]
-
-        # Fastq files in a pair must have file-names of same length
-        fwd_fastq_name = os.path.basename(fwd_read_path)
-        rev_fastq_name = os.path.basename(rev_read_path)
-
-        len_fwd_fastq_name = len(fwd_fastq_name)
-        len_rev_fastq_name = len(rev_fastq_name)
-
-        assert len_fwd_fastq_name == len_rev_fastq_name, (
+        assert len(fwd_fastq_name) == len(rev_fastq_name), (
             f"Fastq pair does not have names of equal length: "
             f"{fwd_fastq_name} {rev_fastq_name}"
         )
 
         # Fastq files in a pair must have file-names with maximum 1 character difference
         count_str_diff = 0
-        for i in range(len_fwd_fastq_name):
+        for i in range(len(fwd_fastq_name)):
             if fwd_fastq_name[i] != rev_fastq_name[i]:
                 count_str_diff += 1
 
@@ -412,6 +402,8 @@ class FastqInfoModel(BaseModel):
             f"Fastq pair does not have exactly 1 differences ({count_str_diff}),"
             f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
         )
+        values["fwd"] = str(values["fwd"])
+        values["rev"] = str(values["rev"])
 
         return values
 
@@ -513,9 +505,6 @@ class BalsamicConfigModel(BaseModel):
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
 
-    Requirements to pass fastq-inputs for a group of samples:
-        - Fastq pattern can only be assigned once per group of samples
-        - Fastq name can only be assigned once per group of samples
     """
 
     QC: QCModel
@@ -547,6 +536,9 @@ class BalsamicConfigModel(BaseModel):
 
     @validator("samples")
     def validate_sample_names(cls, value):
+        """
+        Sample names are not allowed to contain underscores, to avoid risk of wrongly assigned fastq-files.
+        """
         for sample_name in value:
             if "_" in sample_name:
                 raise ValueError(
@@ -558,14 +550,13 @@ class BalsamicConfigModel(BaseModel):
     def validate_fastq_input(cls, value, values):
         """
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
+        All fastq files assigned in the sample-dict must exist in the fastq-dir.
         """
         # Access fastq_path from analysis
         fastq_path = values["analysis"].fastq_path
-        #samples = values["samples"]
 
         # Get a set of all fastq files in fastq-directory
         fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
-
 
         # Extract assigned fastq files from sample_dict
         def extract_assigned_fastqs(fastq_info):
@@ -575,11 +566,18 @@ class BalsamicConfigModel(BaseModel):
         for sample in value:
             fastq_info = value[sample]["fastq_info"]
             assigned_fastq_files.extend(extract_assigned_fastqs(fastq_info))
+        assigned_fastq_files = set(assigned_fastq_files)
 
-        # Check if all fastq files in fastqs_in_fastq_path exist in assigned_fastq_files
-        if not set(fastqs_in_fastq_path).issubset(assigned_fastq_files):
-            unique_fastqs = set(fastqs_in_fastq_path) - set(assigned_fastq_files)
-            error_message = f"The following fastq files in {fastq_path} are not assigned to any sample: {', '.join(unique_fastqs)}"
+        # Assigned and currently existing fastq-files in fastq-dir should be the same
+        if not assigned_fastq_files == fastqs_in_fastq_path:
+            # Unique elements in sets
+            unique_assigned = assigned_fastq_files - fastqs_in_fastq_path
+            unique_fastqdir = fastqs_in_fastq_path - assigned_fastq_files
+
+            error_message = f"List of assigned fastq files differs from those present in the provided fastq-directory"
+            f"Assigned not in fastq-dir: {unique_assigned}"
+            f"In fastq-dir not assigned: {unique_fastqdir}"
+            LOG.error(error_message)
             raise ValidationError(error_message)
 
         return value
