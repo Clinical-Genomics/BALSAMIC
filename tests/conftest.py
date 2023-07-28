@@ -858,7 +858,10 @@ def sample_config(tumor_sample_name: str, normal_sample_name: str):
             tumor_sample_name: {"type": "tumor"},
             normal_sample_name: {"type": "normal"},
         },
-        "panel": {"pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn"},
+        "panel": {
+            "capture_kit": "tests/test_data/references/panel/panel.bed",
+            "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
+        },
         "umiworkflow": "true",
     }
 
