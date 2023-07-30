@@ -196,7 +196,7 @@ def analysis(
         sample_config = json.load(sample_fh)
 
     # Initialize balsamic model
-    config_collection_dict = BalsamicConfigModel(sample_config).dict(by_alias=True, exclude_none=True)
+    balsamic_config: BalsamicConfigModel(**sample_config)
 
     logpath = sample_config["analysis"]["log"]
     scriptpath = sample_config["analysis"]["script"]

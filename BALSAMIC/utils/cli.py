@@ -399,49 +399,6 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
-
-def validate_fastq_input(sample_dict: dict, fastq_path: str) -> None:
-    """Validates fastq input in sample dict and fastq_path.
-
-    Criteria:
-        - All fastq-files in the supplied fastq_dir must have been assigned to a sample.
-        - All fastq-files in the sample dict must exist in the fastq_dir.
-
-    Args:
-        sample_dict: dict. Dictionary of sample-names and their associated sample-type and fastq-information.
-        fastq_path: str. Path to the directory containing the fastq-files.
-
-    Returns:
-        Nothing
-    """
-    # Extract fastq files assigned to sample_dict to a list
-    def extract_assigned_fastqs(fastq_info):
-        return [fastq_path for val in fastq_info.values() for fastq_path in val.values()]
-
-    assigned_fastq_files = []
-    for sample in sample_dict:
-        fastq_info = sample_dict[sample]["fastq_info"]
-        assigned_fastq_files.extend(extract_assigned_fastqs(fastq_info))
-    # Convert list to set
-    assigned_fastq_files = set(assigned_fastq_files)
-
-    # Get a set of all fastq files in fastq-directory
-    fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
-
-    # Unique elements in sets
-    unique_assigned = assigned_fastq_files - fastqs_in_fastq_path
-    unique_fastqdir = fastqs_in_fastq_path - assigned_fastq_files
-
-    # Assigned and currently existing fastq-files in fastq-dir should be the same
-    if not assigned_fastq_files == fastqs_in_fastq_path:
-        error_message = f"List of assigned fastq files differs from those present in the provided fastq-directory"
-        f"Assigned not in fastq-dir: {unique_assigned}"
-        f"In fastq-dir not assigned: {unique_fastqdir}"
-        LOG.error(error_message)
-        raise BalsamicError(error_message)
-
-
-
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample.
 

@@ -387,26 +387,23 @@ class FastqInfoModel(BaseModel):
         fwd_fastq_name = values["fwd"].name
         rev_fastq_name = values["rev"].name
 
-        assert len(fwd_fastq_name) == len(rev_fastq_name), (
-            f"Fastq pair does not have names of equal length: "
-            f"{fwd_fastq_name} {rev_fastq_name}"
-        )
+        if len(fwd_fastq_name) != len(rev_fastq_name):
+            error_message = f"Fastq pair does not have names of equal length:" \
+                            f"fwd: {fwd_fastq_name} rev: {rev_fastq_name}"
+            raise ValidationError(error_message)
 
         # Fastq files in a pair must have file-names with maximum 1 character difference
-        count_str_diff = 0
-        for i in range(len(fwd_fastq_name)):
-            if fwd_fastq_name[i] != rev_fastq_name[i]:
-                count_str_diff += 1
+        count_str_diff: int = sum(fwd_char != rev_char for fwd_char, rev_char in zip(fwd_fastq_name, rev_fastq_name))
 
-        assert count_str_diff == 1, (
-            f"Fastq pair does not have exactly 1 differences ({count_str_diff}),"
-            f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
-        )
+        if count_str_diff != 1:
+            error_message = f"Fastq pair does not have exactly 1 differences ({count_str_diff}),"\
+                            f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
+            raise ValidationError(error_message)
+
         values["fwd"] = str(values["fwd"])
         values["rev"] = str(values["rev"])
 
         return values
-
 
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis.
@@ -519,35 +516,35 @@ class BalsamicConfigModel(BaseModel):
     panel: Optional[PanelModel]
 
     @validator("reference")
-    def abspath_as_str(cls, value):
-        for k, v in value.items():
-            value[k] = Path(v).resolve().as_posix()
-        return value
+    def abspath_as_str(cls, reference: Path):
+        for k, v in reference.items():
+            reference[k] = Path(v).resolve().as_posix()
+        return reference
 
     @validator("singularity")
-    def transform_path_to_dict(cls, value):
-        return {"image": Path(value).resolve().as_posix()}
+    def transform_path_to_dict(cls, singularity: DirectoryPath):
+        return {"image": Path(singularity).resolve().as_posix()}
 
     @validator("background_variants")
-    def fl_abspath_as_str(cls, value):
-        if value:
-            return Path(value).resolve().as_posix()
+    def fl_abspath_as_str(cls, background_variants: FilePath):
+        if background_variants:
+            return Path(background_variants).resolve().as_posix()
         return None
 
     @validator("samples")
-    def validate_sample_names(cls, value):
+    def validate_sample_names(cls, samples: Dict[str, SampleInstanceModel]):
         """
         Sample names are not allowed to contain underscores, to avoid risk of wrongly assigned fastq-files.
         """
-        for sample_name in value:
+        for sample_name in samples:
             if "_" in sample_name:
                 raise ValueError(
                     f"Sample name '{sample_name}' contains an underscore (_). Underscores are not allowed."
                 )
-        return value
+        return samples
 
     @validator("samples", pre=True)
-    def validate_fastq_input(cls, value, values):
+    def validate_fastq_input(cls, samples: Dict[str, Dict], values):
         """
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
         All fastq files assigned in the sample-dict must exist in the fastq-dir.
@@ -563,8 +560,8 @@ class BalsamicConfigModel(BaseModel):
             return [fastq_path for val in fastq_info.values() for fastq_path in val.values()]
 
         assigned_fastq_files = []
-        for sample in value:
-            fastq_info = value[sample]["fastq_info"]
+        for sample in samples:
+            fastq_info = samples[sample]["fastq_info"]
             assigned_fastq_files.extend(extract_assigned_fastqs(fastq_info))
         assigned_fastq_files = set(assigned_fastq_files)
 
@@ -580,10 +577,10 @@ class BalsamicConfigModel(BaseModel):
             LOG.error(error_message)
             raise ValidationError(error_message)
 
-        return value
+        return samples
 
     @validator("samples", pre=True)
-    def verify_unique_fastq_info_across_samples(cls, value):
+    def verify_unique_fastq_info_across_samples(cls, samples: Dict[str, Dict]):
         """
         Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
         Fastq patterns and Fastq names can only occur once.
@@ -597,14 +594,14 @@ class BalsamicConfigModel(BaseModel):
 
         fastq_patterns = count_occurrences(
             fastq_pattern
-            for sample in value
-            for fastq_pattern in value[sample]["fastq_info"]
+            for sample in samples
+            for fastq_pattern in samples[sample]["fastq_info"]
         )
 
         fastq_filenames = count_occurrences(
             os.path.basename(fastq_path)
-            for sample in value
-            for fastq_pattern_info in value[sample]["fastq_info"].values()
+            for sample in samples
+            for fastq_pattern_info in samples[sample]["fastq_info"].values()
             for fastq_path in fastq_pattern_info.values()
         )
 
@@ -620,7 +617,7 @@ class BalsamicConfigModel(BaseModel):
                 count == 1
             ), f"Fastq-name: {fastq_name} has been assigned more than once."
 
-        return value
+        return samples
 
 
 class UMIParamsCommon(BaseModel):
