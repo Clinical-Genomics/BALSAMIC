@@ -200,8 +200,12 @@
 		"time": "12:00:00",
 		"n": 8
 	},
-	"svdb_annotate_somatic_clinical_sv": {
-		"time": "12:00:00",
+	"svdb_annotate_clinical_obs_somatic_clinical_sv": {
+		"time": "10:00:00",
+		"n": 8
+	},
+	"svdb_annotate_somatic_obs_somatic_clinical_sv": {
+		"time": "10:00:00",
 		"n": 8
 	},
 	"vep_germline": {
