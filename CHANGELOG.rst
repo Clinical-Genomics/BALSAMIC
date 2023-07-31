@@ -18,6 +18,7 @@ Changed:
 * Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
 * Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
+* Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
 
 Fixed:
 ^^^^^^
@@ -29,6 +30,20 @@ Fixed:
 Removed:
 ^^^^^^^
 * Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
+
+[12.0.2]
+--------
+
+Fixed:
+^^^^^^
+* Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
+
+=======
+Changed:
+^^^^^^^^
+* Fix cyvcf2 to version 0.30.22 https://github.com/Clinical-Genomics/BALSAMIC/pull/1206
+* Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1206
+* Update varcall-cnvkit container versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1207
 
 [12.0.1]
 --------
