@@ -42,7 +42,7 @@
         "analysis_type": "paired",
         "sequencing_type": "targeted",
         "analysis_dir": "tests/test_data/",
-        "fastq_path": "tests/test_data/fastq/",
+        "fastq_path": "tests/test_data/fastq_lanes/",
         "script": "tests/test_data/id1/scripts/",
         "log": "tests/test_data/id1/logs/",
         "result": "tests/test_data/id1/analysis/",

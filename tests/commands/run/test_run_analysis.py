@@ -3,6 +3,8 @@ import subprocess
 import json
 from unittest import mock
 from pathlib import Path
+from pydantic import ValidationError
+
 
 
 def test_run_analysis_dragen(invoke_cli, tumor_only_wgs_config):
@@ -55,6 +57,27 @@ def test_run_analysis_tumor_only_dry_run(
 
     # THEN it should run without any error
     assert result.exit_code == 0
+
+
+def test_validate_fastq_input_missingfiles(invoke_cli, config_path):
+    """Tests test_validate_fastq_input ability to detect missing fastq-files in fastq dir"""
+
+    # GIVEN a tumor normal config where fastq_dir is empty
+
+    # WHEN instantiating the balsamic model
+    # THEN the following error should be found
+
+    result = invoke_cli(
+        ["run", "analysis", "-s", config_path]
+    )
+    assert result.exit_code == 1
+    exception = result.exception
+    assert isinstance(exception, ValidationError)
+    error_message = str(exception)
+    assert (
+            "List of assigned fastq files differs from those present in the provided fastq-directory"
+            in error_message
+    )
 
 
 def test_run_analysis_click_abort(invoke_cli, tumor_only_config, tumor_normal_config):

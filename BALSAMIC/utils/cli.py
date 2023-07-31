@@ -399,7 +399,7 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
-def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
+def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, Dict]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample.
 
     Args:
@@ -449,9 +449,9 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, str]:
     return fastq_dict
 
 
-def get_sample_dict(
+def get_sample_list(
     tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
-) -> Dict[str, dict]:
+) -> List[Dict]:
     """Returns a sample dictionary with fastq-information given the names of the tumor and/or normal samples.
     Args:
         tumor_sample_name: str. The sample_name of the tumor.
@@ -459,26 +459,36 @@ def get_sample_dict(
         fastq_path: str. The path to the fastq-files for the supplied samples.
 
     Returns:
-        sample_dict: dict with this format:
-
-            "sample_name": {
+        sample_list: List containing dicts with this format:
+            {
+            "name": "[sample_name]",
             "type": "[tumor/normal]",
-            "fastq_info": {
-                "[fastq_pair_pattern1]": {
+            "fastq_info": [
+                {
+                    "fastqpair_pattern": "[fastqpair_pattern1]",
                     "fwd": "/path/to/fastq_dir/[forward_read_name1].fastq.gz",
                     "rev": "/path/to/fastq_dir/[reverse_read_name1].fastq.gz"
                 },
-                "[fastq_pair_pattern2]": {
+                {
+                    "fastqpair_pattern": "[fastqpair_pattern2]",
                     "fwd": "/path/to/fastq_dir/[forward_read_name2].fastq.gz",
                     "rev": "/path/to/fastq_dir/[reverse_read_name2].fastq.gz"
+                },
+            ]
+            ...
+            },
             ...
     """
-    sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
+    sample_list: List[Dict] = [{"name": tumor_sample_name, "type": "tumor"}]
+
     if normal_sample_name:
-        sample_dict.update({normal_sample_name: {"type": "normal"}})
-    for sample_name in sample_dict:
-        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path)
-    return sample_dict
+        sample_list.append({"name": normal_sample_name, "type": "normal"})
+
+    for sample_dict in sample_list:
+        sample_name = sample_dict["name"]
+        sample_dict["fastq_info"] = get_fastq_info(sample_name, fastq_path)
+
+    return sample_list
 
 
 def get_pon_sample_dict(fastq_path: str) -> Dict[str, dict]:

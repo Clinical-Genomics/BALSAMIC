@@ -15,7 +15,6 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     SnakeMake,
     job_id_dump_to_yaml,
-    validate_fastq_input,
     get_config_path,
     get_resolved_fastq_files_directory,
 )
@@ -196,7 +195,7 @@ def analysis(
         sample_config = json.load(sample_fh)
 
     # Initialize balsamic model
-    balsamic_config: BalsamicConfigModel(**sample_config)
+    balsamic_config: BalsamicConfigModel.parse_obj(sample_config)
 
     logpath = sample_config["analysis"]["log"]
     scriptpath = sample_config["analysis"]["script"]

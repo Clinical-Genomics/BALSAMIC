@@ -10,11 +10,10 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import (
-    get_sample_dict,
+    get_sample_list,
     get_panel_chrom,
     get_bioinfo_tools_version,
     generate_graph,
-    validate_fastq_input,
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
@@ -259,7 +258,7 @@ def case_config(
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         background_variants=background_variants,
-        samples=get_sample_dict(
+        samples=get_sample_list(
             tumor_sample_name=tumor_sample_name,
             normal_sample_name=normal_sample_name,
             fastq_path=analysis_fastq_dir,

@@ -414,6 +414,7 @@ class SampleInstanceModel(BaseModel):
     """
 
     type: str
+    name: str
     fastq_info: Dict[str, FastqInfoModel]
 
     @validator("type")
@@ -424,6 +425,17 @@ class SampleInstanceModel(BaseModel):
                 f"The provided sample type ({value}) is not supported in BALSAMIC"
             )
         return value
+
+    @validator("name")
+    def no_underscore_in_sample_name(cls, name: str):
+        """
+        Sample names are not allowed to contain underscores, to avoid risk of wrongly assigned fastq-files.
+        """
+        if "_" in name:
+            raise ValueError(
+                f"Sample name '{name}' contains an underscore (_). Underscores are not allowed."
+            )
+        return name
 
 
 class PanelModel(BaseModel):
@@ -507,7 +519,7 @@ class BalsamicConfigModel(BaseModel):
     QC: QCModel
     vcf: Optional[VCFModel]
     analysis: AnalysisModel
-    samples: Dict[str, SampleInstanceModel]
+    samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: DirectoryPath
     background_variants: Optional[FilePath]
@@ -532,59 +544,62 @@ class BalsamicConfigModel(BaseModel):
         return None
 
     @validator("samples")
-    def validate_sample_names(cls, samples: Dict[str, SampleInstanceModel]):
-        """
-        Sample names are not allowed to contain underscores, to avoid risk of wrongly assigned fastq-files.
-        """
-        for sample_name in samples:
-            if "_" in sample_name:
-                raise ValueError(
-                    f"Sample name '{sample_name}' contains an underscore (_). Underscores are not allowed."
-                )
+    def no_duplicate_fastq_patterns(cls, samples):
+        fastq_info_values = set()
+        for sample in samples:
+            for fastq_pattern in sample.fastq_info:
+                if fastq_pattern in fastq_info_values:
+                    raise ValidationError(f"Duplicate FastqPattern found: {fastq_pattern}")
+                fastq_info_values.add(fastq_pattern)
         return samples
 
-    @validator("samples", pre=True)
-    def validate_fastq_input(cls, samples: Dict[str, Dict], values):
-        """
+"""
+    @validator("samples")
+    def validate_fastq_input(cls, samples: List[SampleInstanceModel], values):
+
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
-        All fastq files assigned in the sample-dict must exist in the fastq-dir.
-        """
+
         # Access fastq_path from analysis
         fastq_path = values["analysis"].fastq_path
 
         # Get a set of all fastq files in fastq-directory
         fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
 
-        # Extract assigned fastq files from sample_dict
-        def extract_assigned_fastqs(fastq_info):
-            return [fastq_path for val in fastq_info.values() for fastq_path in val.values()]
+        # Look for fastqs in sample dict
+        sample_dicts = {}
+        for idx, sample_instance_model in enumerate(samples):
+            sample_dicts[idx] = dict(sample_instance_model)
 
-        assigned_fastq_files = []
-        for sample in samples:
-            fastq_info = samples[sample]["fastq_info"]
-            assigned_fastq_files.extend(extract_assigned_fastqs(fastq_info))
-        assigned_fastq_files = set(assigned_fastq_files)
+        unassigned_fastqs = []
+        for fastq in fastqs_in_fastq_path:
+            if fastq not in sample_dicts:
+                unassigned_fastqs.append(fastq)
 
-        # Assigned and currently existing fastq-files in fastq-dir should be the same
-        if not assigned_fastq_files == fastqs_in_fastq_path:
-            # Unique elements in sets
-            unique_assigned = assigned_fastq_files - fastqs_in_fastq_path
-            unique_fastqdir = fastqs_in_fastq_path - assigned_fastq_files
-
-            error_message = f"List of assigned fastq files differs from those present in the provided fastq-directory"
-            f"Assigned not in fastq-dir: {unique_assigned}"
-            f"In fastq-dir not assigned: {unique_fastqdir}"
-            LOG.error(error_message)
+        if unassigned_fastqs:
+            error_message = f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
             raise ValidationError(error_message)
 
-        return samples
 
-    @validator("samples", pre=True)
-    def verify_unique_fastq_info_across_samples(cls, samples: Dict[str, Dict]):
-        """
+    @validator("samples")
+    def verify_unique_fastq_info_across_samples(cls, samples: List[SampleInstanceModel]):
+
         Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
         Fastq patterns and Fastq names can only occur once.
-        """
+
+        def get_fastq_patterns(samples):
+            fastq_patterns = []
+            for sample in samples:
+                for fastq_pattern in sample.fastq_info:
+                    fastq_patterns.append(fastq_pattern)
+            return fastq_patterns
+
+        def get_fastq_filenames(samples):
+
+        fastq_patterns = get_fastq_patterns(samples)
+
+        fastq_files = get_fastq_filenames(samples)
+
+
 
         def count_occurrences(fastq_pattern_or_file):
             counter = defaultdict(int)
@@ -595,7 +610,7 @@ class BalsamicConfigModel(BaseModel):
         fastq_patterns = count_occurrences(
             fastq_pattern
             for sample in samples
-            for fastq_pattern in samples[sample]["fastq_info"]
+            for fastq_pattern in sample["fastq_info"]["fastqpair_pattern"]
         )
 
         fastq_filenames = count_occurrences(
@@ -618,6 +633,16 @@ class BalsamicConfigModel(BaseModel):
             ), f"Fastq-name: {fastq_name} has been assigned more than once."
 
         return samples
+
+    def get_fastq_names(self):
+        fastq_list = [
+            os.path.basename(fastq_info[field])
+            for sample in self.samples
+            for fastq_info in sample["fastq_info"]
+            for field in ["fwd", "rev"]
+        ]
+        return fastq_list
+"""
 
 
 class UMIParamsCommon(BaseModel):
