@@ -79,34 +79,39 @@ swegen_sv = ""
 
 
 # Prepare sample_dict
-sample_dict = dict(config["samples"])
-for sample in sample_dict:
-    sample_type = sample_dict[sample]["type"]
+sample_dict = {}
+for sample_dict in config["samples"]:
+    sample_name = sample_dict["name"]
+    sample_dict[sample_name] = sample_dict
+
+for sample_name in sample_dict:
+    sample_type = sample_dict[sample_name]["type"]
     if sample_type == "tumor":
-        tumor_sample = sample
+        tumor_sample = sample_name
         sample_dict[tumor_sample]["sample_type"] = "TUMOR"
     else:
-        normal_sample = sample
+        normal_sample = sample_name
         sample_dict[normal_sample]["sample_type"] = "NORMAL"
 
 
 # Get fastq pattern --> fastq mapping
 fastq_dict = {}
-for sample in sample_dict:
-    for fastq_pattern in sample_dict[sample]["fastq_info"]:
-        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
+for sample_name in sample_dict:
+    for fastq_pattern in sample_dict[sample_name]["fastq_info"]:
+        fastq_dict[fastq_pattern] = sample_dict[sample_name]["fastq_info"][fastq_pattern]
 
 # Get names of bamfiles to be created
-for sample in sample_dict:
-    sample_dict[sample]["bam"] = get_bam_names(samplename=sample,
+for sample_name in sample_dict:
+    sample_dict[sample_name]["bam"] = get_bam_names(samplename=sample_name,
                                     sample_dict=sample_dict,
                                     bam_dir=bam_dir,
                                     analysis_type=config["analysis"]["analysis_type"])
 
 # Adding sample type level information
-for sample in config["samples"]:
-    sample_type = config["samples"][sample]["type"]
-    sample_dict[sample_type] = sample_dict[sample]
+for sample_dict in config["samples"]:
+    sample_type = sample_dict["type"]
+    sample_name = sample_dict["name"]
+    sample_dict[sample_type] = sample_dict[sample_name]
 
 # vcfanno annotations
 research_annotations.append( {

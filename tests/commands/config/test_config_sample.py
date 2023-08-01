@@ -110,7 +110,7 @@ def test_tumor_only_config(
     assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
 
 
-def test_validate_fastq_input_extrafile(
+def test_detection_unassigned_fastq_file(
     invoke_cli,
     case_id_tumor_normal: str,
     tumor_sample_name: str,
@@ -161,10 +161,68 @@ def test_validate_fastq_input_extrafile(
     assert isinstance(exception, ValidationError)
     error_message = str(exception)
     assert (
-        "List of assigned fastq files differs from those present in the provided fastq-directory"
+        "Fastqs in fastq-dir not assigned to sample config"
         in error_message
     )
     assert result.exit_code == 1
+
+def test_detect_duplicate_fastq_pattern(
+    invoke_cli,
+    case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    normal_sample_name_problematic: str,
+    analysis_dir: str,
+    fastq_dir_tumor_duplicate_fastqpatterns_model: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+):
+    """
+    Test tumor normal balsamic config case command with sample name and fastq names causing duplicate assigned fastq files and patterns.
+    """
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+    # WHEN creating a case analysis
+    # THEN creation of config-file should fail with ValidationError from pydantic
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        result = invoke_cli(
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal,
+                "--gender",
+                "male",
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_duplicate_fastqpatterns_model,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name_problematic,
+            ],
+        )
+    assert result.exit_code == 1
+    exception = result.exception
+    assert isinstance(exception, ValidationError)
+    error_message = str(exception)
+    assert (
+        "Duplicate FastqPattern found"
+        in error_message
+    )
+
 
 def test_tumor_normal_config_illegal_sample_name(
     invoke_cli,

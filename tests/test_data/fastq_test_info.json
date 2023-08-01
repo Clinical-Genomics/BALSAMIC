@@ -96,34 +96,36 @@
         "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
         "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz"
     ],
-    "existing_test_fastq_info": {
-        "ACC1": {
+    "test_fastq_info": [
+        {
+            "name": "ACC1",
             "type": "tumor",
             "fastq_info": {
                 "HXXXXXXX_ACC1_S01_L001_R": {
-                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
-                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz"
+                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz"
                 },
                 "HXXXXXXX_ACC1_S01_L002_R": {
-                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
-                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
+                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
                 }
             }
         },
-        "ACC2": {
+        {
+            "name": "ACC2",
             "type": "normal",
             "fastq_info": {
                 "HXXXXXXX_ACC2_S01_L001_R": {
-                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
-                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz"
+                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz"
                 },
                 "HXXXXXXX_ACC1_S01_L002_R": {
-                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz",
-                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
+                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
                 }
             }
         }
-    },
+    ],
     "fastq_fails": {
         "duplicate_fastq_patterns": {
             "tumor": [
@@ -131,6 +133,16 @@
                 "ACC1_S1_L001_R_R2_001.fastq.gz",
                 "ACC1_S1_L001_R_1.fastq.gz",
                 "ACC1_S1_L001_R_2.fastq.gz"
+            ]
+        },
+        "duplicate_fastq_patterns_model": {
+            "tumor": [
+                "ACC1_S1_L001_R1_001.fastq.gz",
+                "ACC1_S1_L001_R2_001.fastq.gz"
+            ],
+            "normal": [
+                "TEST_S1_L001_R1_001.fastq.gz",
+                "TEST_S1_L001_R2_001.fastq.gz"
             ]
         },
         "illegal_normal_sample_name": {

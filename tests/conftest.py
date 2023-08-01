@@ -83,6 +83,13 @@ def fastq_names_duplicate_assigned_fastq_patterns(
     return load_test_fastq_data["fastq_fails"]["duplicate_fastq_patterns"]
 
 @pytest.fixture(scope="session")
+def fastq_names_duplicate_assigned_fastq_patterns_model(
+    load_test_fastq_data,
+) -> Dict[str, List]:
+    """Returns dict with list of fastq file names for testing of duplicate assigned fastq patterns."""
+    return load_test_fastq_data["fastq_fails"]["duplicate_fastq_patterns_model"]
+
+@pytest.fixture(scope="session")
 def fastq_names_illegal_normal_sample_name(load_test_fastq_data) -> Dict[str, List]:
     """Returns dict with list of fastq file names for testing of detection of sample name containing underscore."""
     return load_test_fastq_data["fastq_fails"]["illegal_normal_sample_name"]
@@ -90,7 +97,7 @@ def fastq_names_illegal_normal_sample_name(load_test_fastq_data) -> Dict[str, Li
 @pytest.fixture(scope="session")
 def tumor_normal_fastq_info_correct(load_test_fastq_data) -> Dict[str, Dict]:
     """Mock tumor normal fastq info in sample_dict"""
-    return load_test_fastq_data["existing_test_fastq_info"]
+    return load_test_fastq_data["test_fastq_info"]
 
 @pytest.fixture(scope="session")
 def analysis_workflow_qc():
@@ -125,6 +132,12 @@ def normal_sample_name() -> str:
     """
     return "ACC2"
 
+@pytest.fixture(scope="session")
+def normal_sample_name_problematic() -> str:
+    """
+    Creates problematic normal sample name.
+    """
+    return "S1"
 
 @pytest.fixture(scope="session")
 def illegal_normal_sample_name_v1() -> str:
@@ -308,7 +321,7 @@ def config_path(test_data_dir: str) -> str:
     """
     Created path for config json file.
     """
-    return Path(test_data_dir, "config.json").as_posix()
+    return Path(test_data_dir, f"config.{FileType.JSON}").as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -398,19 +411,19 @@ def swegen_sv_frequency(reference_variants_dir_path: str) -> str:
 @pytest.fixture(scope="session", name="invalid_json_file")
 def fixture_invalid_json_file(session_tmp_path: Path) -> Path:
     """Return a non-existent json file path."""
-    return Path(session_tmp_path, "invalid_file.json")
+    return Path(session_tmp_path, f"invalid_file.{FileType.JSON}")
 
 
 @pytest.fixture(scope="session", name="json_file")
 def fixture_json_file(session_tmp_path: Path) -> Path:
     """Return a mocked json file path."""
-    return Path(session_tmp_path, "write_json.json")
+    return Path(session_tmp_path, f"write_json.{FileType.JSON}")
 
 
 @pytest.fixture(scope="session", name="config_json")
 def fixture_config_json() -> str:
     """Return Balsamic analysis config json file name."""
-    return "config.json"
+    return f"config.{FileType.JSON}"
 
 
 @pytest.fixture(scope="session", name="reference_graph")
@@ -470,7 +483,7 @@ def balsamic_cache(tmp_path_factory, reference):
     cache_reference = cache_dir / balsamic_version / "hg19"
     cache_reference.mkdir(parents=True, exist_ok=True)
 
-    cache_reference_json = cache_reference / "reference.json"
+    cache_reference_json = cache_reference / f"reference.{FileType.JSON}"
     cache_reference_json.touch()
     with open(cache_reference_json, "w") as fp:
         json.dump(reference, fp)
@@ -791,6 +804,29 @@ def fastq_dir_tumor_duplicate_fastqpatterns(
 
     # Fill the fastq path folder with the test fastq-files
     for fastq in fastq_names_duplicate_assigned_fastq_patterns["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_duplicate_fastqpatterns_model(
+    analysis_dir: str,
+    case_id_tumor_normal: str,
+    fastq_names_duplicate_assigned_fastq_patterns_model: Dict,
+) -> str:
+    """
+    Creates and returns the directory containing the FASTQs to test duplicate fastq-patterns.
+    """
+    fastq_dir: Path = Path(
+        analysis_dir, case_id_tumor_normal, "fastq_duplicate_assigned_fastq_patterns_model"
+    )
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fill the fastq path folder with the test fastq-files
+    for fastq in fastq_names_duplicate_assigned_fastq_patterns_model["tumor"]:
+        Path(fastq_dir, fastq).touch()
+
+    for fastq in fastq_names_duplicate_assigned_fastq_patterns_model["normal"]:
         Path(fastq_dir, fastq).touch()
 
     yield fastq_dir.as_posix()
@@ -1599,6 +1635,26 @@ def sample_config(
     }
 
     return sample_config
+
+@pytest.fixture(scope="session")
+def sample_config_new_data(
+    config_dict: dict,
+    tumor_normal_fastq_info_correct: dict,
+    analysis_dir,
+    case_id_tumor_normal,
+):
+    """
+    sample config dict to test workflow utils
+    """
+    case_dir: Path = Path(analysis_dir, case_id_tumor_normal)
+    case_dir.mkdir(parents=True, exist_ok=True)
+    config_json_path = f"{case_dir}/sample_tumor_normal_non_existing_fastqs.{FileType.JSON}"
+    config_dict["samples"] = tumor_normal_fastq_info_correct
+
+    with open(config_json_path, "w") as config_json:
+        json.dump(config_dict, config_json)
+
+    return config_json_path
 
 @pytest.fixture(scope="session")
 def analysis_path():

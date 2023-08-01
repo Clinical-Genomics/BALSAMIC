@@ -400,20 +400,18 @@ class FastqInfoModel(BaseModel):
                             f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
             raise ValidationError(error_message)
 
-        values["fwd"] = str(values["fwd"])
-        values["rev"] = str(values["rev"])
-
-        return values
+        return {"fwd": values["fwd"].as_posix(), "rev": values["rev"].as_posix()}
 
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis.
 
     Attributes:
         type: Field(str): sample type [tumor, normal]
+        name: Field(str): sample name
         fastq_info: Field(dict): fastq patterns: paths to forward and reverse fastqs
     """
 
-    type: str
+    type: SampleType
     name: str
     fastq_info: Dict[str, FastqInfoModel]
 
@@ -481,7 +479,7 @@ class PonBalsamicConfigModel(BaseModel):
 
     QC: QCModel
     analysis: AnalysisPonModel
-    samples: Dict[str, SampleInstanceModel]
+    samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: DirectoryPath
     bioinfo_tools: dict
@@ -545,19 +543,30 @@ class BalsamicConfigModel(BaseModel):
 
     @validator("samples")
     def no_duplicate_fastq_patterns(cls, samples):
+        """
+        Validate that no duplicate fastq patterns have been assigned in dict
+        """
         fastq_info_values = set()
         for sample in samples:
-            for fastq_pattern in sample.fastq_info:
+            for fastq_pattern in sample.fastq_info.keys():
                 if fastq_pattern in fastq_info_values:
-                    raise ValidationError(f"Duplicate FastqPattern found: {fastq_pattern}")
+                    raise ValueError(f"Duplicate FastqPattern found: {fastq_pattern} across multiple samples")
                 fastq_info_values.add(fastq_pattern)
         return samples
 
-"""
-    @validator("samples")
-    def validate_fastq_input(cls, samples: List[SampleInstanceModel], values):
 
+    @validator("samples")
+    def no_unassigned_fastqs_in_fastq_dir(cls, samples, values):
+        """
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
+        """
+        def get_all_fwd_rev_values(samples):
+            fwd_rev_values = []
+            for sample in samples:
+                for fastq_pattern in sample.fastq_info.values():
+                    fwd_rev_values.append(fastq_pattern.fwd)
+                    fwd_rev_values.append(fastq_pattern.rev)
+            return fwd_rev_values
 
         # Access fastq_path from analysis
         fastq_path = values["analysis"].fastq_path
@@ -566,83 +575,15 @@ class BalsamicConfigModel(BaseModel):
         fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
 
         # Look for fastqs in sample dict
-        sample_dicts = {}
-        for idx, sample_instance_model in enumerate(samples):
-            sample_dicts[idx] = dict(sample_instance_model)
+        fastqs_assigned = set(get_all_fwd_rev_values(samples))
 
-        unassigned_fastqs = []
-        for fastq in fastqs_in_fastq_path:
-            if fastq not in sample_dicts:
-                unassigned_fastqs.append(fastq)
+        unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
 
         if unassigned_fastqs:
             error_message = f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
             raise ValidationError(error_message)
 
-
-    @validator("samples")
-    def verify_unique_fastq_info_across_samples(cls, samples: List[SampleInstanceModel]):
-
-        Counts occurrences of fastq-patterns and fastq-names for all samples in dict.
-        Fastq patterns and Fastq names can only occur once.
-
-        def get_fastq_patterns(samples):
-            fastq_patterns = []
-            for sample in samples:
-                for fastq_pattern in sample.fastq_info:
-                    fastq_patterns.append(fastq_pattern)
-            return fastq_patterns
-
-        def get_fastq_filenames(samples):
-
-        fastq_patterns = get_fastq_patterns(samples)
-
-        fastq_files = get_fastq_filenames(samples)
-
-
-
-        def count_occurrences(fastq_pattern_or_file):
-            counter = defaultdict(int)
-            for item in fastq_pattern_or_file:
-                counter[item] += 1
-            return counter
-
-        fastq_patterns = count_occurrences(
-            fastq_pattern
-            for sample in samples
-            for fastq_pattern in sample["fastq_info"]["fastqpair_pattern"]
-        )
-
-        fastq_filenames = count_occurrences(
-            os.path.basename(fastq_path)
-            for sample in samples
-            for fastq_pattern_info in samples[sample]["fastq_info"].values()
-            for fastq_path in fastq_pattern_info.values()
-        )
-
-        # Fastq pattern can only be assigned once per group of samples
-        for fastq_pattern, count in fastq_patterns.items():
-            assert (
-                count == 1
-            ), f"Fastq-pattern: {fastq_pattern} has been assigned more than once."
-
-        # Fastq name can only be assigned once per group of samples
-        for fastq_name, count in fastq_filenames.items():
-            assert (
-                count == 1
-            ), f"Fastq-name: {fastq_name} has been assigned more than once."
-
         return samples
-
-    def get_fastq_names(self):
-        fastq_list = [
-            os.path.basename(fastq_info[field])
-            for sample in self.samples
-            for fastq_info in sample["fastq_info"]
-            for field in ["fwd", "rev"]
-        ]
-        return fastq_list
-"""
 
 
 class UMIParamsCommon(BaseModel):

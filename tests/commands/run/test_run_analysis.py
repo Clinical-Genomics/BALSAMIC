@@ -59,8 +59,8 @@ def test_run_analysis_tumor_only_dry_run(
     assert result.exit_code == 0
 
 
-def test_validate_fastq_input_missingfiles(invoke_cli, config_path):
-    """Tests test_validate_fastq_input ability to detect missing fastq-files in fastq dir"""
+def test_validate_fastq_input_missingfiles(invoke_cli, sample_config_new_data):
+    """Tests ability of balsamic model to detect non-existent fastq files assigned to sample config."""
 
     # GIVEN a tumor normal config where fastq_dir is empty
 
@@ -68,14 +68,14 @@ def test_validate_fastq_input_missingfiles(invoke_cli, config_path):
     # THEN the following error should be found
 
     result = invoke_cli(
-        ["run", "analysis", "-s", config_path]
+        ["run", "analysis", "-s", sample_config_new_data]
     )
     assert result.exit_code == 1
     exception = result.exception
     assert isinstance(exception, ValidationError)
     error_message = str(exception)
     assert (
-            "List of assigned fastq files differs from those present in the provided fastq-directory"
+            "Fastqs in fastq-dir not assigned to sample config"
             in error_message
     )
 
