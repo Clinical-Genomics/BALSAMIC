@@ -162,7 +162,7 @@ rule svdb_annotate_clinical_obs_somatic_clinical_sv:
     input:
         vcf_sv_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.filtered.pass.vcf.gz",
     output:
-        vcf_sv_clinical_obs = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf.gz",
+        vcf_sv_clinical_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf.gz"),
     benchmark:
         Path(benchmark_dir, 'svdb_annotate_clinical_obs_somatic_clinical_sv.' + config["analysis"]["case_id"] + ".tsv")
     singularity:
