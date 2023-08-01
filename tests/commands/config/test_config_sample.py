@@ -196,7 +196,7 @@ def test_pon_cnn_file(
     analysis_dir: str,
     balsamic_cache: str,
     panel_bed_file: str,
-    pon_cnn: str,
+    pon_cnn_path: str,
 ):
     """Test balsamic config case with a PON reference."""
 
@@ -219,7 +219,7 @@ def test_pon_cnn_file(
             "-p",
             panel_bed_file,
             "--pon-cnn",
-            pon_cnn,
+            pon_cnn_path,
             "--balsamic-cache",
             balsamic_cache,
             "--tumor-sample-name",
@@ -229,7 +229,7 @@ def test_pon_cnn_file(
 
     # THEN program exits and checks for filepath
     assert result.exit_code == 0
-    assert Path(pon_cnn).exists()
+    assert Path(pon_cnn_path).exists()
 
 
 def test_dag_graph_success(

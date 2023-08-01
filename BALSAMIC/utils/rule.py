@@ -381,6 +381,19 @@ def get_clinical_sv_observations(config: dict) -> str:
     return Path(config["reference"]["clinical_sv_observations"]).as_posix()
 
 
+def get_somatic_sv_observations(config: dict) -> str:
+    """Returns path for somatic sv observations
+
+    Args:
+        config: a config dictionary
+
+    Returns:
+        Path for cancer_somatic_sv_observations vcf file
+
+    """
+    return Path(config["reference"]["cancer_somatic_sv_observations"]).as_posix()
+
+
 def get_swegen_sv(config: dict) -> str:
     """Returns path for swegen sv frequencies
 
