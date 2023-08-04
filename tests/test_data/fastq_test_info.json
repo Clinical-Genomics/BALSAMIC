@@ -126,6 +126,28 @@
             }
         }
     ],
+    "test_fastq_info_illegal_fastq_pairs": [
+        {
+            "name": "ACC1",
+            "type": "tumor",
+            "fastq_info": {
+                "HXXXXXXX_ACC1_S01_L001_FWD_001": {
+                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L001_FWD_001_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L001_REV_001_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "name": "ACC2",
+            "type": "normal",
+            "fastq_info": {
+                "HXXXXXXX_ACC2_S01_L001_R": {
+                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz"
+                }
+            }
+        }
+    ],
     "fastq_fails": {
         "duplicate_fastq_patterns": {
             "tumor": [

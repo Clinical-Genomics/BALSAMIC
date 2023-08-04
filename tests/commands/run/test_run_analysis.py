@@ -58,6 +58,25 @@ def test_run_analysis_tumor_only_dry_run(
     # THEN it should run without any error
     assert result.exit_code == 0
 
+def test_validate_fastq_input_illegal_pairnames(invoke_cli, sample_config_illegal_fastq_pairnames):
+    """Tests ability of balsamic model to detect non-existent fastq files assigned to sample config."""
+
+    # GIVEN a tumor normal config where fastq_dir is empty
+
+    # WHEN instantiating the balsamic model
+    # THEN the following error should be found
+
+    result = invoke_cli(
+        ["run", "analysis", "-s", sample_config_illegal_fastq_pairnames]
+    )
+    assert result.exit_code == 1
+    exception = result.exception
+    assert isinstance(exception, ValidationError)
+    error_message = str(exception)
+    assert (
+            "Fastq pair does not have names of equal length"
+            in error_message
+    )
 
 def test_validate_fastq_input_missingfiles(invoke_cli, sample_config_new_data):
     """Tests ability of balsamic model to detect non-existent fastq files assigned to sample config."""

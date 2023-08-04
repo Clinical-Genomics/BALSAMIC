@@ -864,12 +864,12 @@ def test_get_sample_list(
         normal_sample_name=normal_sample_name,
         fastq_path=fastq_dir,
     )
-    assert samples[0]["name"] == tumor_sample_name
-    assert samples[1]["name"] == normal_sample_name
-    assert samples[0]["type"] == "tumor"
-    assert samples[1]["type"] == "normal"
-    assert samples[0]["fastq_info"]
-    assert samples[1]["fastq_info"]
+    assert samples[0].name == tumor_sample_name
+    assert samples[1].name == normal_sample_name
+    assert samples[0].type == "tumor"
+    assert samples[1].type == "normal"
+    assert samples[0].fastq_info
+    assert samples[1].fastq_info
 
 
 def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3):

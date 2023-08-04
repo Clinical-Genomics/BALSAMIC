@@ -16,7 +16,7 @@ import graphviz
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.models.analysis import SampleInstanceModel
+from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType
 from BALSAMIC.constants.cluster import ClusterConfigType
@@ -400,6 +400,7 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
+
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, Dict]:
     """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample.
 
@@ -441,11 +442,10 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, Dict]:
                     LOG.error(error_message)
                     raise BalsamicError(error_message)
 
-                fastq_dict[fastqpair_pattern] = {}
-                fastq_dict[fastqpair_pattern]["fwd"] = fwd_fastq
-                fastq_dict[fastqpair_pattern]["rev"] = fwd_fastq.replace(
-                    fwd_suffix, rev_suffix
+                fastq_dict[fastqpair_pattern] = FastqInfoModel(
+                    fwd=fwd_fastq, rev=fwd_fastq.replace(fwd_suffix, rev_suffix)
                 )
+
     if not fastq_dict:
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
         LOG.error(error_message)
@@ -480,11 +480,22 @@ def get_sample_list(
                 },
             }
     """
-    sample_list: List[SampleInstanceModel] = [SampleInstanceModel(name=tumor_sample_name, type=SampleType.TUMOR, fastq_info=get_fastq_info(tumor_sample_name, fastq_path))]
+    sample_list: List[SampleInstanceModel] = [
+        SampleInstanceModel(
+            name=tumor_sample_name,
+            type=SampleType.TUMOR,
+            fastq_info=get_fastq_info(tumor_sample_name, fastq_path),
+        )
+    ]
 
     if normal_sample_name:
-        sample_list.append(SampleInstanceModel(name=normal_sample_name, type=SampleType.NORMAL, fastq_info=get_fastq_info(normal_sample_name, fastq_path)))
-
+        sample_list.append(
+            SampleInstanceModel(
+                name=normal_sample_name,
+                type=SampleType.NORMAL,
+                fastq_info=get_fastq_info(normal_sample_name, fastq_path),
+            )
+        )
 
     return sample_list
 
@@ -594,6 +605,7 @@ def get_resolved_fastq_files_directory(directory: str) -> str:
     if not input_files or not input_files[0].is_symlink():
         return directory
     return os.path.commonpath([file.resolve().as_posix() for file in input_files])
+
 
 def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
     """Return analysis fastq directory, linking the fastq files if necessary."""

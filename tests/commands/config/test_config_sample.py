@@ -157,6 +157,7 @@ def test_detection_unassigned_fastq_file(
             ],
         )
 
+    assert result.exit_code == 1
     exception = result.exception
     assert isinstance(exception, ValidationError)
     error_message = str(exception)
@@ -164,7 +165,6 @@ def test_detection_unassigned_fastq_file(
         "Fastqs in fastq-dir not assigned to sample config"
         in error_message
     )
-    assert result.exit_code == 1
 
 def test_detect_duplicate_fastq_pattern(
     invoke_cli,

@@ -100,6 +100,11 @@ def tumor_normal_fastq_info_correct(load_test_fastq_data) -> Dict[str, Dict]:
     return load_test_fastq_data["test_fastq_info"]
 
 @pytest.fixture(scope="session")
+def tumor_normal_fastq_info_illegal_fastq_pairnames(load_test_fastq_data) -> Dict[str, Dict]:
+    """Mock tumor normal fastq info in sample_dict"""
+    return load_test_fastq_data["test_fastq_info_illegal_fastq_pairs"]
+
+@pytest.fixture(scope="session")
 def analysis_workflow_qc():
     """Return string for balsamic QC workflow."""
     return "balsamic-qc"
@@ -1650,6 +1655,26 @@ def sample_config_new_data(
     case_dir.mkdir(parents=True, exist_ok=True)
     config_json_path = f"{case_dir}/sample_tumor_normal_non_existing_fastqs.{FileType.JSON}"
     config_dict["samples"] = tumor_normal_fastq_info_correct
+
+    with open(config_json_path, "w") as config_json:
+        json.dump(config_dict, config_json)
+
+    return config_json_path
+
+@pytest.fixture(scope="session")
+def sample_config_illegal_fastq_pairnames(
+    config_dict: dict,
+    tumor_normal_fastq_info_illegal_fastq_pairnames: dict,
+    analysis_dir,
+    case_id_tumor_normal,
+):
+    """
+    sample config dict to test workflow utils
+    """
+    case_dir: Path = Path(analysis_dir, case_id_tumor_normal)
+    case_dir.mkdir(parents=True, exist_ok=True)
+    config_json_path = f"{case_dir}/sample_tumor_normal_illegal_fastqnames.{FileType.JSON}"
+    config_dict["samples"] = tumor_normal_fastq_info_illegal_fastq_pairnames
 
     with open(config_json_path, "w") as config_json:
         json.dump(config_dict, config_json)

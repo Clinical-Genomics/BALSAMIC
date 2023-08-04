@@ -7,7 +7,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseModel, validator, Field, AnyUrl, root_validator, ValidationError
+from pydantic import (
+    BaseModel,
+    validator,
+    Field,
+    AnyUrl,
+    root_validator,
+    ValidationError,
+)
 from pydantic.types import DirectoryPath, FilePath
 from collections import defaultdict
 
@@ -388,19 +395,27 @@ class FastqInfoModel(BaseModel):
         rev_fastq_name = values["rev"].name
 
         if len(fwd_fastq_name) != len(rev_fastq_name):
-            error_message = f"Fastq pair does not have names of equal length:" \
-                            f"fwd: {fwd_fastq_name} rev: {rev_fastq_name}"
+            error_message = (
+                f"Fastq pair does not have names of equal length:"
+                f"fwd: {fwd_fastq_name} rev: {rev_fastq_name}"
+            )
             raise ValidationError(error_message)
 
         # Fastq files in a pair must have file-names with maximum 1 character difference
-        count_str_diff: int = sum(fwd_char != rev_char for fwd_char, rev_char in zip(fwd_fastq_name, rev_fastq_name))
+        count_str_diff: int = sum(
+            fwd_char != rev_char
+            for fwd_char, rev_char in zip(fwd_fastq_name, rev_fastq_name)
+        )
 
         if count_str_diff != 1:
-            error_message = f"Fastq pair does not have exactly 1 differences ({count_str_diff}),"\
-                            f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
+            error_message = (
+                f"Fastq pair does not have exactly 1 differences ({count_str_diff}),"
+                f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
+            )
             raise ValidationError(error_message)
 
         return {"fwd": values["fwd"].as_posix(), "rev": values["rev"].as_posix()}
+
 
 class SampleInstanceModel(BaseModel):
     """Holds attributes for samples used in analysis.
@@ -550,16 +565,18 @@ class BalsamicConfigModel(BaseModel):
         for sample in samples:
             for fastq_pattern in sample.fastq_info.keys():
                 if fastq_pattern in fastq_info_values:
-                    raise ValueError(f"Duplicate FastqPattern found: {fastq_pattern} across multiple samples")
+                    raise ValueError(
+                        f"Duplicate FastqPattern found: {fastq_pattern} across multiple samples"
+                    )
                 fastq_info_values.add(fastq_pattern)
         return samples
-
 
     @validator("samples")
     def no_unassigned_fastqs_in_fastq_dir(cls, samples, values):
         """
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
         """
+
         def get_all_fwd_rev_values(samples):
             fwd_rev_values = []
             for sample in samples:
@@ -578,7 +595,7 @@ class BalsamicConfigModel(BaseModel):
         fastqs_assigned = set(get_all_fwd_rev_values(samples))
 
         unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
-
+        unassigned_fastqs = []
         if unassigned_fastqs:
             error_message = f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
             raise ValidationError(error_message)
