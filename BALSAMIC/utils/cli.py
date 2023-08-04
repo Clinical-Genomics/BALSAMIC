@@ -18,7 +18,7 @@ from colorclass import Color
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
 from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType
+from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 
@@ -422,8 +422,8 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str: FastqInfoMode
     fastq_dict = {}
     fastq_suffixes = FASTQ_SUFFIXES
     for suffix in fastq_suffixes:
-        fwd_suffix = fastq_suffixes[suffix]["fwd"]
-        rev_suffix = fastq_suffixes[suffix]["rev"]
+        fwd_suffix = fastq_suffixes[suffix][FastqName.FWD]
+        rev_suffix = fastq_suffixes[suffix][FastqName.REV]
 
         fastq_fwd_regex = re.compile(
             r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$"

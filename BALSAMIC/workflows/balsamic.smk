@@ -30,7 +30,7 @@ from BALSAMIC.utils.rule import (get_fastqpatterns, get_bam_names, get_variant_c
                                  get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
                                  get_cancer_somatic_snv_observations)
 
-from BALSAMIC.constants.analysis import MutationType
+from BALSAMIC.constants.analysis import MutationType, FastqName
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)

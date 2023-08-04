@@ -30,6 +30,7 @@ from BALSAMIC.constants.analysis import (
     MutationOrigin,
     MutationType,
     WorkflowSolution,
+    FastqName,
 )
 
 
@@ -391,8 +392,8 @@ class FastqInfoModel(BaseModel):
         - All forward and reverse fastq pairs must be of the same length
         - All forward and reverse fastq pairs must have exactly 1 difference in their names
         """
-        fwd_fastq_name = values["fwd"].name
-        rev_fastq_name = values["rev"].name
+        fwd_fastq_name = values[FastqName.FWD].name
+        rev_fastq_name = values[FastqName.REV].name
 
         if len(fwd_fastq_name) != len(rev_fastq_name):
             error_message = (
@@ -414,7 +415,7 @@ class FastqInfoModel(BaseModel):
             )
             raise ValidationError(error_message)
 
-        return {"fwd": values["fwd"].as_posix(), "rev": values["rev"].as_posix()}
+        return {FastqName.FWD: values[FastqName.FWD].as_posix(), FastqName.REV: values[FastqName.REV].as_posix()}
 
 
 class SampleInstanceModel(BaseModel):

@@ -6,8 +6,8 @@
 rule dragen_align_call_tumor_only:
     input:
         reference = config["reference"]["reference_genome"],
-        fastq_r1 = Path(fastq_dir, "{sample}_concat_R_1.fp.fastq.gz".format(sample = tumor_sample)).as_posix(),
-        fastq_r2 = Path(fastq_dir, "{sample}_concat_R_2.fp.fastq.gz".format(sample = tumor_sample)).as_posix()
+        fastq_r1 = Path(fastq_dir, "{sample}_concat_R_1.fp.fastq.gz".format(sample=tumor_sample)).as_posix(),
+        fastq_r2 = Path(fastq_dir, "{sample}_concat_R_2.fp.fastq.gz".format(sample=tumor_sample)).as_posix()
     output:
         bam = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
         vcf = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()

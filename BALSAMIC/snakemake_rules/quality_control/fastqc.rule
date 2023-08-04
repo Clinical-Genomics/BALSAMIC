@@ -4,8 +4,8 @@
 rule fastqc:
     """Perform quality control checks on raw sequence data"""
     input:
-        sample_fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern]["fwd"] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]],
-        sample_rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern]["rev"] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]]
+        sample_fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern][FastqName.FWD] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]],
+        sample_rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern][FastqName.REV] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]]
     output:
         fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
     benchmark:
