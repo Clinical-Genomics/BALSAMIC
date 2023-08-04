@@ -8,7 +8,7 @@ NAME: str = "BALSAMIC"
 AUTHOR: str = "Clinical Genomics"
 URL: str = "https://github.com/Clinical-Genomics/BALSAMIC"
 EMAIL: str = "support@clinicalgenomics.se"
-REQUIRES_PYTHON: str = "==3.11.0"
+REQUIRES_PYTHON: str = ">=3.11.0"
 
 # Requirements
 requirements: List[str] = [
