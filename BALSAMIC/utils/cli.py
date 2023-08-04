@@ -413,17 +413,10 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str: FastqInfoMode
             "[fastq_patternX]" (str): FastqInfoModel.
     """
 
-    fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
-    if not fastqs_in_fastq_path:
-        error_message = f"No fastq files found in supplied fastq-path: {fastq_path}"
-        LOG.error(error_message)
-        raise FileNotFoundError(error_message)
-
-    fastq_dict = {}
-    fastq_suffixes = FASTQ_SUFFIXES
-    for suffix in fastq_suffixes:
-        fwd_suffix = fastq_suffixes[suffix][FastqName.FWD]
-        rev_suffix = fastq_suffixes[suffix][FastqName.REV]
+    fastq_dict: Dict[str: FastqInfoModel] = {}
+    for suffix in FASTQ_SUFFIXES:
+        fwd_suffix = FASTQ_SUFFIXES[suffix][FastqName.FWD]
+        rev_suffix = FASTQ_SUFFIXES[suffix][FastqName.REV]
 
         fastq_fwd_regex = re.compile(
             r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$"
@@ -438,7 +431,8 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str: FastqInfoMode
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
 
                 if fastqpair_pattern in fastq_dict:
-                    error_message = f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern} already assigned to dictionary for sample: {sample_name}"
+                    error_message = f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern}" \
+                                    f" already assigned to dictionary for sample: {sample_name}"
                     LOG.error(error_message)
                     raise BalsamicError(error_message)
 
@@ -450,6 +444,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str: FastqInfoMode
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
         LOG.error(error_message)
         raise BalsamicError(error_message)
+
     return fastq_dict
 
 
