@@ -11,6 +11,7 @@ from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.cluster import ClusterAccount
 from BALSAMIC.constants.constants import EXIT_SUCCESS, EXIT_FAIL
+from BALSAMIC.utils.exc import BalsamicError
 
 
 def test_init_hg(
@@ -176,7 +177,7 @@ def test_init_hg_graph_exception(
     # GIVEN a temporary output directory and a COSMIC key
 
     # WHEN invoking the init command
-    with mock.patch.object(Source, "render"):
+    with mock.patch.object(Source, "render", side_effect=BalsamicError("Test error")):
         result: Result = invoke_cli(
             [
                 "init",
@@ -189,7 +190,7 @@ def test_init_hg_graph_exception(
             ]
         )
 
-    # THEN the human reference generation workflow should have successfully started
+    # THEN the human reference generation workflow should have been canceled
     assert "Workflow graph generation failed" in result.output
     assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
     assert not Path(
