@@ -21,6 +21,7 @@ Changed:
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
 * Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Add `--rerun-trigger mtime` option to snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 
 Fixed:
 ^^^^^^
@@ -40,7 +41,6 @@ Fixed:
 ^^^^^^
 * Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
 
-=======
 Changed:
 ^^^^^^^^
 * Fix cyvcf2 to version 0.30.22 https://github.com/Clinical-Genomics/BALSAMIC/pull/1206
