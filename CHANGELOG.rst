@@ -19,6 +19,7 @@ Changed:
 * Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
+* Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 
 Fixed:
 ^^^^^^
