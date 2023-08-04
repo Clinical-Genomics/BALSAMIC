@@ -138,7 +138,7 @@ def pon_config(
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
-        samples=get_pon_sample_dict(fastq_path),
+        samples=get_pon_sample_list(fastq_path),
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         bioinfo_tools=BIOINFO_TOOL_ENV,

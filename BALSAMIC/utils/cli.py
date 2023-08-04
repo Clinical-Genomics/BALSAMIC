@@ -401,16 +401,16 @@ def get_bioinfo_tools_version(
     return bioinfo_tools_version
 
 
-def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, Dict]:
-    """Returns a dictionary of fastq-patterns and fastq-paths existing in fastq_dir for a given sample.
+def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str: FastqInfoModel]:
+    """Returns a dictionary of fastq-pattern/s and FastqInfoModel instance/s for a sample.
 
     Args:
-        sample_name: str. The name of the sample for which fastq-files will be searched for in the fastq_path.
-        fastq_path: str. Path to where the fastq-files should be found for the supplied sample_name.
+        sample_name: (str). The name of the sample for which fastq-files will be searched for in the fastq_path.
+        fastq_path: (str). Path to where the fastq-files should be found for the supplied sample_name.
 
     Returns:
-        fastq_dict: dict. Nested dictionary containing the unique file-name pattern for each fastq-pair,
-        and the paths to the fastq-files.
+        fastq_dict: (Dict) with format:
+            "[fastq_patternX]" (str): FastqInfoModel.
     """
 
     fastqs_in_fastq_path = glob.glob(f"{fastq_path}/*fastq.gz")
@@ -456,29 +456,14 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, Dict]:
 def get_sample_list(
     tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
 ) -> List[Dict]:
-    """Returns a sample dictionary with fastq-information given the names of the tumor and/or normal samples.
+    """Returns a list of SampleInstanceModel/s given the names of the tumor and/or normal samples.
     Args:
-        tumor_sample_name: str. The sample_name of the tumor.
-        normal_sample_name: str. The sample_ename of the normal, if it exists.
-        fastq_path: str. The path to the fastq-files for the supplied samples.
+        tumor_sample_name (str). The sample_name of the tumor.
+        normal_sample_name (str). The sample_name of the normal, if it exists.
+        fastq_path: (str). The path to the fastq-files for the supplied samples.
 
     Returns:
-        sample_list: List containing dicts with this format:
-            {
-            "name": "[sample_name]",
-            "type": "[tumor/normal]",
-            "fastq_info": {
-                "[fastqpair_pattern1]":
-                {
-                    "fwd": "/path/to/fastq_dir/[forward_read_name1].fastq.gz",
-                    "rev": "/path/to/fastq_dir/[reverse_read_name1].fastq.gz"
-                },
-                "[fastqpair_pattern2]":
-                {
-                    "fwd": "/path/to/fastq_dir/[forward_read_name2].fastq.gz",
-                    "rev": "/path/to/fastq_dir/[reverse_read_name2].fastq.gz"
-                },
-            }
+        sample_list: List containing SampleInstanceModel/s.
     """
     sample_list: List[SampleInstanceModel] = [
         SampleInstanceModel(
@@ -500,14 +485,32 @@ def get_sample_list(
     return sample_list
 
 
-def get_pon_sample_dict(fastq_path: str) -> Dict[str, dict]:
-    """Returns a PON sample dictionary."""
-    sample_dict: Dict[str, dict] = {}
-    for file in Path(fastq_path).glob("*.fastq.gz"):
-        sample_name: str = file.name.split("_")[-4]
-        sample_dict.update({sample_name: {"type": "normal"}})
-        sample_dict[sample_name]["fastq_info"] = get_fastq_info(sample_name, fastq_path)
-    return sample_dict
+def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
+    """Returns a list of SampleInstanceModels to be used in PON generation."""
+    sample_list: List[SampleInstanceModel] = []
+
+    sample_names = set()
+
+    for fastq in Path(fastq_path).glob("*.fastq.gz"):
+        sample_name: str = fastq.name.split("_")[-4]
+        sample_names.add(sample_name)
+
+    num_samples = len(sample_names)
+    if len(num_samples) < 6:
+        error_message = f"Number of samples detected in supplied fastq path ({num_samples})," \
+                        f"not sufficient for PON generation. Sample names detected: {sample_names}"
+        LOG.error(error_message)
+        raise BalsamicError(error_message)
+
+    for sample_name in sample_names:
+        sample_list.append(
+            SampleInstanceModel(
+                name=sample_name,
+                type=SampleType.NORMAL,
+                fastq_info=get_fastq_info(sample_name, fastq_path),
+            )
+        )
+    return sample_list
 
 
 def generate_graph(config_collection_dict, config_path):
