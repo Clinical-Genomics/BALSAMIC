@@ -21,7 +21,7 @@ Changed:
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
 * Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
-* Add `--rerun-trigger mtime` option to snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
+* Add `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 
 Fixed:
 ^^^^^^
