@@ -9,6 +9,7 @@ Added:
 * Annotate SNVs with somatic SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
 * Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
+* Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
 
 Changed:
 ^^^^^^^^
@@ -19,6 +20,8 @@ Changed:
 * Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
+* Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Add `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 
 Fixed:
@@ -40,7 +43,6 @@ Fixed:
 ^^^^^^
 * Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
 
-=======
 Changed:
 ^^^^^^^^
 * Fix cyvcf2 to version 0.30.22 https://github.com/Clinical-Genomics/BALSAMIC/pull/1206

@@ -4,7 +4,7 @@ from datetime import datetime
 from distutils.dir_util import copy_tree
 from functools import partial
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
 from unittest import mock
 
 import pytest
@@ -13,13 +13,14 @@ from click.testing import CliRunner
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
-from BALSAMIC.constants.cache import (
-    DockerContainers,
-    GenomeVersion,
-    REFERENCE_FILES,
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
+from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
+from BALSAMIC.constants.cluster import (
+    ClusterConfigType,
+    ClusterAccount,
+    QOS,
+    ClusterProfile,
 )
-from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -30,6 +31,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
+from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 
@@ -786,10 +788,18 @@ def sample_config(tumor_sample_name: str, normal_sample_name: str):
             "BALSAMIC_version": "2.9.8",
             "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
         },
+        "reference": {
+            "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+            "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
+        },
         "vcf": VCF_DICT,
         "samples": {
             tumor_sample_name: {"type": "tumor"},
             normal_sample_name: {"type": "normal"},
+        },
+        "panel": {
+            "capture_kit": "tests/test_data/references/panel/panel.bed",
+            "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
         },
         "umiworkflow": "true",
     }
@@ -1226,3 +1236,106 @@ def fixture_references_hg_data(
 def fixture_references_hg(references_hg_data: Dict[str, dict]) -> ReferencesHg:
     """Return mocked human genome references model."""
     return ReferencesHg(**references_hg_data)
+
+
+@pytest.fixture(scope="session", name="singularity_bind_path_data")
+def fixture_singularity_bind_path_data(session_tmp_path: Path) -> Dict[str, Path]:
+    """Return singularity bind path data."""
+    return {"source": session_tmp_path, "destination": Path("/")}
+
+
+@pytest.fixture(scope="session", name="singularity_bind_path")
+def fixture_singularity_bind_path(
+    singularity_bind_path_data: Dict[str, Path]
+) -> SingularityBindPath:
+    """Return mocked singularity bind path model."""
+    return SingularityBindPath(**singularity_bind_path_data)
+
+
+@pytest.fixture(scope="session", name="snakemake_options_command")
+def fixture_snakemake_options_command() -> List[str]:
+    """Return mocked singularity bind path model."""
+    return ["--cores", "36"]
+
+
+@pytest.fixture(scope="session", name="mail_user_option")
+def fixture_mail_user_option() -> str:
+    """Return mail user option."""
+    return "balsamic@scilifelab.se"
+
+
+@pytest.fixture(scope="session", name="snakemake_executable_data")
+def fixture_snakemake_executable_data(
+    case_id_tumor_only: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+    mail_user_option: str,
+    singularity_bind_path: SingularityBindPath,
+    snakemake_options_command: List[str],
+) -> Dict[str, Any]:
+    """Return snakemake executable model data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "case_id": case_id_tumor_only,
+        "cluster_config_path": reference_file,
+        "config_path": reference_file,
+        "disable_variant_caller": "tnscope,vardict",
+        "log_dir": session_tmp_path,
+        "mail_user": mail_user_option,
+        "profile": ClusterProfile.SLURM,
+        "qos": QOS.HIGH,
+        "quiet": True,
+        "result_dir": session_tmp_path,
+        "run_analysis": True,
+        "run_mode": RunMode.CLUSTER,
+        "script_dir": session_tmp_path,
+        "singularity_bind_paths": [singularity_bind_path],
+        "snakefile": reference_file,
+        "snakemake_options": snakemake_options_command,
+        "working_dir": session_tmp_path,
+    }
+
+
+@pytest.fixture(scope="session", name="snakemake_executable")
+def fixture_snakemake_executable(
+    snakemake_executable_data: Dict[str, Any]
+) -> SnakemakeExecutable:
+    """Return mocked snakemake executable model."""
+    return SnakemakeExecutable(**snakemake_executable_data)
+
+
+@pytest.fixture(scope="session", name="snakemake_executable_validated_data")
+def fixture_snakemake_executable_validated_data(
+    case_id_tumor_only: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+    mail_user_option: str,
+    singularity_bind_path: SingularityBindPath,
+    snakemake_options_command: List[str],
+) -> Dict[str, Any]:
+    """Return snakemake model expected data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "benchmark": False,
+        "case_id": case_id_tumor_only,
+        "cluster_config_path": reference_file,
+        "config_path": reference_file,
+        "disable_variant_caller": "disable_variant_caller=tnscope,vardict",
+        "dragen": False,
+        "force": False,
+        "log_dir": session_tmp_path,
+        "mail_type": None,
+        "mail_user": f"--mail-user {mail_user_option}",
+        "profile": ClusterProfile.SLURM,
+        "qos": QOS.HIGH,
+        "quiet": True,
+        "report_path": None,
+        "result_dir": session_tmp_path,
+        "run_analysis": True,
+        "run_mode": RunMode.CLUSTER,
+        "script_dir": session_tmp_path,
+        "singularity_bind_paths": [singularity_bind_path],
+        "snakefile": reference_file,
+        "snakemake_options": snakemake_options_command,
+        "working_dir": session_tmp_path,
+    }

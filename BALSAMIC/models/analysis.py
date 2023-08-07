@@ -1,15 +1,13 @@
-import hashlib
 import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 
-from pydantic import BaseModel, validator, Field, AnyUrl
+from pydantic import BaseModel, validator, Field
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
-
 from BALSAMIC.constants.analysis import (
     Gender,
     AnalysisType,
@@ -20,9 +18,6 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     WorkflowSolution,
 )
-from BALSAMIC.constants.cache import GenomeVersion
-from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.metrics import VALID_OPS
 
 LOG = logging.getLogger(__name__)
 

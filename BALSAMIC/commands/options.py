@@ -68,7 +68,7 @@ OPTION_CLUSTER_MAIL_TYPE = click.option(
 OPTION_SNAKEMAKE_OPT = click.option(
     "--snakemake-opt",
     multiple=True,
-    help="Options to be passed to snakemake",
+    help="Options to be passed to Snakemake",
 )
 
 OPTION_FORCE_ALL = click.option(
@@ -93,5 +93,5 @@ OPTION_QUIET = click.option(
     "--quiet",
     default=False,
     is_flag=True,
-    help="Instruct snakemake to not output any progress or rule information",
+    help="Instruct Snakemake to not output any progress or rule information",
 )
