@@ -10,6 +10,7 @@ Added:
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
 * Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
 * Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 
 Changed:
 ^^^^^^^^
@@ -41,7 +42,6 @@ Fixed:
 ^^^^^^
 * Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
 
-=======
 Changed:
 ^^^^^^^^
 * Fix cyvcf2 to version 0.30.22 https://github.com/Clinical-Genomics/BALSAMIC/pull/1206
