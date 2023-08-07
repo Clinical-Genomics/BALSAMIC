@@ -5,7 +5,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Union
+from typing import Union, List, Optional
 
 import click
 
@@ -17,7 +17,6 @@ from BALSAMIC.commands.init.options import (
     OPTION_SNAKEFILE,
     OPTION_CLUSTER_CONFIG,
 )
-from BALSAMIC.commands.init.utils import get_containers
 from BALSAMIC.commands.options import (
     OPTION_RUN_MODE,
     OPTION_CLUSTER_PROFILE,
@@ -34,9 +33,11 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
-from BALSAMIC.constants.paths import BALSAMIC_DIR, SCHEDULER_PATH
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
-from BALSAMIC.utils.cli import SnakeMake, get_snakefile
+from BALSAMIC.models.snakemake import SnakemakeExecutable
+from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
+from BALSAMIC.utils.cache import get_containers
+from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
 LOG = logging.getLogger(__name__)
@@ -73,10 +74,10 @@ def initialize(
     cluster_config: Path,
     profile: ClusterProfile,
     qos: QOS,
-    account: str,
-    mail_user: str,
-    mail_type: ClusterMailType,
-    snakemake_opt: str,
+    account: Optional[str],
+    mail_user: Optional[str],
+    mail_type: Optional[ClusterMailType],
+    snakemake_opt: List[str],
     force_all: bool,
     run_analysis: bool,
     quiet: bool,
@@ -140,28 +141,28 @@ def initialize(
     )
 
     LOG.info("Starting reference generation workflow...")
-    balsamic_run: SnakeMake = SnakeMake()
-    balsamic_run.account = account
-    balsamic_run.case_name = cache_config.analysis.case_id
-    balsamic_run.cluster_config = cluster_config
-    balsamic_run.configfile = config_path.as_posix()
-    balsamic_run.forceall = force_all
-    balsamic_run.log_path = log_dir.as_posix()
-    balsamic_run.mail_type = mail_type
-    balsamic_run.mail_user = mail_user
-    balsamic_run.profile = profile
-    balsamic_run.qos = qos
-    balsamic_run.quiet = quiet
-    balsamic_run.result_path = references_dir.as_posix()
-    balsamic_run.run_analysis = run_analysis
-    balsamic_run.run_mode = run_mode
-    balsamic_run.scheduler = SCHEDULER_PATH.as_posix()
-    balsamic_run.script_path = script_dir.as_posix()
-    balsamic_run.sm_opt = snakemake_opt
-    balsamic_run.snakefile = snakefile
-    balsamic_run.use_singularity = True
-    balsamic_run.singularity_bind = [BALSAMIC_DIR, references_dir.as_posix()]
-    balsamic_run.working_dir = references_dir
-
-    cmd: str = sys.executable + " -m " + balsamic_run.build_cmd()
-    subprocess.run(cmd, shell=True)
+    snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
+        account=account,
+        case_id=cache_config.analysis.case_id,
+        cluster_config_path=cluster_config,
+        config_path=config_path,
+        force=force_all,
+        log_dir=log_dir,
+        mail_type=mail_type,
+        mail_user=mail_user,
+        profile=profile,
+        qos=qos,
+        quiet=quiet,
+        result_dir=references_dir,
+        run_analysis=run_analysis,
+        run_mode=run_mode,
+        script_dir=script_dir,
+        snakemake_options=snakemake_opt,
+        singularity_bind_paths=get_cache_singularity_bind_paths(cache_config),
+        snakefile=snakefile,
+        working_dir=references_dir,
+    )
+    subprocess.run(
+        f"{sys.executable} -m {snakemake_executable.get_command()}",
+        shell=True,
+    )
