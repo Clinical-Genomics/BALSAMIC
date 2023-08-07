@@ -355,6 +355,7 @@ class AnalysisModel(BaseModel):
         return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
+
 class AnalysisPonModel(AnalysisModel):
     """Pydantic model containing PON workflow variables
 
@@ -541,6 +542,79 @@ class BalsamicConfigModel(BaseModel):
     bioinfo_tools_version: dict
     panel: Optional[PanelModel]
 
+    def get_all_sample_names(self) -> List[str]:
+        """Return all sample names in the analysis."""
+        sample_list = [sample.name for sample in self.samples]
+        return sample_list
+
+    def get_fastq_patterns_by_sample(self, sample_names: List[str]) -> List[str]:
+        """Return all fastq_patterns for a given sample."""
+        fastq_pattern_list = []
+        for sample in self.samples:
+            if sample.name in sample_names:
+                fastq_pattern_list.extend(sample.fastq_info.values())
+        return fastq_pattern_list
+
+    def get_all_fastqs_for_sample(self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]) -> List[str]:
+        """Return all fastqs (optionally only [fastq/rev]) involved in analysis of sample."""
+        fastq_list = []
+        for sample in self.samples:
+            if sample.name == sample_name:
+                for fastq_pattern in sample.fastq_info.values():
+                    if FastqName.FWD in fastq_types:
+                        fastq_list.append(fastq_pattern.fwd)
+                    if FastqName.REV in fastq_types:
+                        fastq_list.append(fastq_pattern.rev)
+        return fastq_list
+
+    def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
+        """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
+        for sample in self.samples:
+            if fastq_pattern in sample.fastq_info.values():
+                if fastq_type == FastqName.FWD:
+                    return sample.fastq_info[fastq_pattern].fwd
+                elif fastq_type == FastqName.REV:
+                    return sample.fastq_info[fastq_pattern].rev
+                else:
+                    raise ValueError(f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: {fastq_type}")
+    def get_sample_name_by_type(self, sample_type: str) -> str:
+        """Return sample name for requested sample type."""
+        for sample in self.samples:
+            if sample.type == sample_type:
+                return sample.name
+
+    def get_sample_type_by_name(self, sample_name: str) -> str:
+        """Return sample type for requested sample name."""
+        for sample in self.samples:
+            if sample.name == sample_name:
+                return sample.type
+    def get_bam_name_per_lane(self, bam_dir: str, sample_name: str) -> List[str]:
+        """Return list of bam-file names for all fastq_patterns of a sample."""
+        bam_names = []
+        for sample in self.samples:
+            if sample.name == sample_name:
+                for fastq_pattern in sample.fastq_info.values():
+                    bam_names.append(f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam")
+        return bam_names
+    def get_final_bam_name(self, bam_dir: str, sample_name: str = None, sample_type: str = None) -> str:
+        """Return final bam name to be used in downstream analysis."""
+
+        if sample_name is None and sample_type is None:
+            raise ValueError("Either sample_name or sample_type must be provided to get the final bam name.")
+
+        if sample_name is None:
+            sample_name = self.get_sample_name_by_type(sample_type)
+
+        if sample_type is None:
+            sample_type = self.get_sample_type_by_name(sample_name)
+
+        if self.analysis.analysis_type == "pon":
+            # Only dedup is necessary for panel of normals
+            return f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+        else:
+            # For every analysis except PON, the name of the final processed bamfile is defined here
+            return f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
+
     @validator("reference")
     def abspath_as_str(cls, reference: Path):
         for k, v in reference.items():
@@ -602,7 +676,6 @@ class BalsamicConfigModel(BaseModel):
             raise ValidationError(error_message)
 
         return samples
-
 
 class UMIParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.

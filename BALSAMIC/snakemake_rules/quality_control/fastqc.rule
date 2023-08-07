@@ -4,8 +4,7 @@
 rule fastqc:
     """Perform quality control checks on raw sequence data"""
     input:
-        sample_fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern][FastqName.FWD] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]],
-        sample_rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastq_info"][fastq_pattern][FastqName.REV] for fastq_pattern in sample_dict[wildcards.sample]["fastq_info"]]
+        fastqs = lambda wildcards: balsamic.get_all_fastqs_for_sample(sample_name = wildcards.sample)
     output:
         fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
     benchmark:
@@ -24,7 +23,7 @@ rule fastqc:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.sample_fwd_fastqs} {input.sample_rev_fastqs} \
+fastqc --threads {threads} {input.fastqs} {input.sample_rev_fastqs} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
  

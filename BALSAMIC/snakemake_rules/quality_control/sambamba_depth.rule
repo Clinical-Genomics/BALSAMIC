@@ -5,7 +5,7 @@
 
 rule sambamba_panel_depth:
     input:
-        bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
         bed = config["panel"]["capture_kit"]
     output:
         bam_dir + "{sample}.dedup.realign.cov.bed"
@@ -39,7 +39,7 @@ sambamba depth region \
 
 rule sambamba_exon_depth:
     input:
-        bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
         bed = config["reference"]["refgene_bed"]
     output:
         bam_dir + "{sample}.dedup.realign.exon.cov.bed"

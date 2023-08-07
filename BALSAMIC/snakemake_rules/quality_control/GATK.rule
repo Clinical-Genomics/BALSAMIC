@@ -5,7 +5,7 @@
 
 rule PreparePopVCF:
     input:
-        bam = sample_dict[tumor_sample]["bam"]["final_bam"],
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
         ref1kg = config["reference"]["vcf_1kg"],
     output:
         popvcf = result_dir + "popvcf.vcf"

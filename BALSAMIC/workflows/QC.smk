@@ -10,19 +10,22 @@ from yapf.yapflib.yapf_api import FormatFile
 from snakemake.exceptions import RuleException, WorkflowError
 
 from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.analysis import FastqName, SampleType
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.io import write_json, write_finish_file
 
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig, BalsamicConfigModel
 
-from BALSAMIC.utils.rule import (get_fastqpatterns, get_bam_names, get_rule_output, get_result_dir,
+from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
                                  get_script_path, get_threads,
                                  get_sequencing_type, get_capture_kit)
 
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
+# Initialize BalsamicConfigModel
+balsamic = BalsamicConfigModel.parse_obj(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -30,50 +33,34 @@ shell.prefix("set -eo pipefail; ")
 LOG = logging.getLogger(__name__)
 logging.getLogger("filelock").setLevel("WARN")
 
+# Get analysis dir
+analysis_dir_home = balsamic.analysis.analysis_dir
+# Get case id/name
+case_id = balsamic.analysis.case_id
+# Get result dir
+result_dir = balsamic.analysis.result
+
 # Create a temporary directory with trailing /
-tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
+tmp_dir = os.path.join(result_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
-case_id = config["analysis"]["case_id"]
-fastq_dir =  config["analysis"]["fastq_path"]
-analysis_dir = config["analysis"]["analysis_dir"] + "/" + case_id + "/"
+fastq_dir = str(result_dir.joinpath("fastq")) + "/"
+analysis_dir = str(analysis_dir_home.joinpath(case_id)) + "/"
 benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
+fastq_dir = str(result_dir.joinpath("fastq")) + "/"
 
-bam_dir = get_result_dir(config) + "/bam/"
-fastqc_dir = get_result_dir(config) + "/fastqc/"
-result_dir = get_result_dir(config) + "/"
-qc_dir = get_result_dir(config) + "/qc/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-delivery_dir = get_result_dir(config) + "/delivery/"
+bam_dir = str(result_dir.joinpath("bam")) + "/"
+fastqc_dir = str(result_dir.joinpath("fastqc")) + "/"
+qc_dir = str(result_dir.joinpath("qc")) + "/"
+vcf_dir = str(result_dir.joinpath("vcf")) + "/"
+delivery_dir = str(result_dir.joinpath("delivery")) + "/"
 
-singularity_image = config['singularity']['image']
+singularity_image = balsamic.singularity['image']
 
-
-# Prepare sample_dict
-sample_dict = dict(config["samples"])
-for sample in sample_dict:
-    sample_type = sample_dict[sample]["type"]
-    if sample_type == "tumor":
-        tumor_sample = sample
-        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
-    else:
-        normal_sample = sample
-        sample_dict[normal_sample]["sample_type"] = "NORMAL"
-
-# Get fastq pattern --> fastq mapping
-fastq_dict = {}
-for sample in sample_dict:
-    for fastq_pattern in sample_dict[sample]["fastq_info"]:
-        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
-
-# Get names of bamfiles to be created
-for sample in sample_dict:
-    sample_dict[sample]["bam"] = get_bam_names(samplename=sample,
-                                    sample_dict=sample_dict,
-                                    bam_dir=bam_dir,
-                                    analysis_type=config["analysis"]["analysis_type"])
-
+sample_names = balsamic.get_all_sample_names()
+tumor_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
+if balsamic.analysis.analysis_type == "paired":
+    normal_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)

@@ -401,7 +401,7 @@ def get_bioinfo_tools_version(
     return bioinfo_tools_version
 
 
-def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str: FastqInfoModel]:
+def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoModel]:
     """Returns a dictionary of fastq-pattern/s and FastqInfoModel instance/s for a sample.
 
     Args:

@@ -6,7 +6,7 @@
 rule manta_germline:
     input:
         fa = config["reference"]["reference_genome"],
-        bam = lambda wildcards: sample_dict[wildcards.sample_type]["bam"]["final_bam"]
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
     output:
         final = vcf_dir + "SV.germline.{sample_type}.manta_germline.vcf.gz",
     benchmark:

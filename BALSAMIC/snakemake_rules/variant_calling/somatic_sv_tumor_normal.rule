@@ -5,8 +5,8 @@
 rule manta_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-        bamT = sample_dict[tumor_sample]["bam"]["final_bam"]
+        bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",
@@ -17,9 +17,9 @@ rule manta_tumor_normal:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        tumor = get_sample_id_by_type(config["samples"], "tumor"),
-        normal = get_sample_id_by_type(config["samples"], "normal"),
-        case_name = config["analysis"]["case_id"],
+        tumor = balsamic.get_sample_name_by_type(SampleType.TUMOR),
+        normal = balsamic.get_sample_name_by_type(SampleType.NORMAL),
+        case_name = case_id,
         manta_install_path = "/opt/conda/share/manta-1.6.0-2"
     threads:
         get_threads(cluster_config, "manta_tumor_normal")
@@ -55,8 +55,8 @@ rm -rf {params.tmpdir};
 rule delly_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
+        bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         excl = config["reference"]["delly_exclusion_converted"],
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -92,8 +92,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     rule delly_cnv_tumor_normal:
         input:
             fa = config["reference"]["reference_genome"],
-            bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-            bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
+            bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+            bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
             map = config["reference"]["delly_mappability"],
         output:
             cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -140,8 +140,8 @@ else:
     rule delly_cnv_tumor_normal:
         input:
             fa = config["reference"]["reference_genome"],
-            bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-            bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
+            bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+            bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
             map = config["reference"]["delly_mappability"],
             baits_bed = config["panel"]["capture_kit"],
         output:
@@ -188,8 +188,8 @@ rm -rf {params.tmpdir};
 rule ascat_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"] ,
-        bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
+        bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         gccorrection = config["reference"]["ascat_gc_correction"]
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
@@ -265,8 +265,8 @@ rm -rf {params.tmpdir};
 rule tiddit_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = sample_dict[normal_sample]["bam"]["final_bam"],
-        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
+        bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
         cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
@@ -413,8 +413,8 @@ rule svdb_merge_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-        tumor = get_sample_id_by_type(config["samples"], "tumor"),
-        normal = get_sample_id_by_type(config["samples"], "normal"),
+        tumor = balsamic.get_sample_name_by_type(SampleType.TUMOR),
+        normal = balsamic.get_sample_name_by_type(SampleType.NORMAL),
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_callers_prio)

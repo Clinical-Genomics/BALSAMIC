@@ -10,7 +10,7 @@ from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
     generate_graph,
     get_bioinfo_tools_version,
-    get_pon_sample_dict,
+    get_pon_sample_list,
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json

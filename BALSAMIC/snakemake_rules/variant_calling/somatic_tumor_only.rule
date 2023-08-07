@@ -4,7 +4,7 @@
 rule vardict_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = sample_dict[tumor_sample]["bam"]["final_bam"],
+        bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
@@ -84,7 +84,7 @@ echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf_vardict} }} }} }}
 
 rule sentieon_TNhaplotyper_tumor_only:
     input:
-        bam = sample_dict[tumor_sample]["bam"]["final_bam"],
+        bam = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],

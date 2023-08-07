@@ -12,10 +12,15 @@ from BALSAMIC.utils.exc import BalsamicError
 
 
 from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.analysis import FastqName, SampleType
 from BALSAMIC.utils.io import write_finish_file
-from BALSAMIC.utils.rule import get_fastqpatterns, get_bam_names, get_threads, get_result_dir
+from BALSAMIC.utils.rule import get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig, BalsamicConfigModel
+
+
+# Initialize BalsamicConfigModel
+balsamic = BalsamicConfigModel.parse_obj(config)
 
 shell.prefix("set -eo pipefail; ")
 
@@ -27,47 +32,33 @@ logging.getLogger("filelock").setLevel("WARN")
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
-fastq_dir = get_result_dir(config) + "/fastq/"
-analysis_dir = get_result_dir(config)
-qc_dir = analysis_dir + "/qc/"
-bam_dir =  analysis_dir + "/bam/"
-cnv_dir =  analysis_dir + "/cnv/"
+# Get analysis dir
+analysis_dir_home = balsamic.analysis.analysis_dir
+# Get case id/name
+case_id = balsamic.analysis.case_id
+# Get result dir
+result_dir = balsamic.analysis.result
+
+analysis_dir = str(analysis_dir_home.joinpath(case_id)) + "/"
+fastq_dir = str(result_dir.joinpath("fastq")) + "/"
+qc_dir = str(result_dir.joinpath("qc")) + "/"
+bam_dir = str(result_dir.joinpath("bam")) + "/"
+cnv_dir = str(result_dir.joinpath("cnv")) + "/"
 
 reffasta = config["reference"]["reference_genome"]
 refgene_flat = config["reference"]["refgene_flat"]
 access_5kb_hg19 = config["reference"]["access_regions"]
 target_bed = config["panel"]["capture_kit"]
-singularity_image = config["singularity"]["image"]
 benchmark_dir = config["analysis"]["benchmark"]
 version = config["analysis"]["pon_version"]
 
-tmp_dir = os.path.join(analysis_dir, "tmp", "" )
+singularity_image = balsamic.singularity['image']
+
+sample_names = balsamic.get_all_sample_names()
+
+tmp_dir = os.path.join(result_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
-# Prepare sample_dict
-sample_dict = dict(config["samples"])
-for sample in sample_dict:
-    sample_type = sample_dict[sample]["type"]
-    if sample_type == "tumor":
-        tumor_sample = sample
-        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
-    else:
-        normal_sample = sample
-        sample_dict[normal_sample]["sample_type"] = "NORMAL"
-
-
-# Get fastq pattern --> fastq mapping
-fastq_dict = {}
-for sample in sample_dict:
-    for fastq_pattern in sample_dict[sample]["fastq_info"]:
-        fastq_dict[fastq_pattern] = sample_dict[sample]["fastq_info"][fastq_pattern]
-
-# Get names of bamfiles to be created
-for sample in sample_dict:
-    sample_dict[sample]["bam"] = get_bam_names(samplename=sample,
-                                    sample_dict=sample_dict,
-                                    bam_dir=bam_dir,
-                                    analysis_type=config["analysis"]["analysis_type"])
 
 # Find and set Sentieon binary and license server from env variables
 try:
@@ -131,7 +122,7 @@ cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtar
 
 rule create_coverage:
     input:
-        bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
         target_bed = cnv_dir + "target.bed",
         antitarget_bed = cnv_dir + "antitarget.bed"
     output:

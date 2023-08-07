@@ -5,7 +5,7 @@
 
 rule mosdepth_coverage:
     input:
-        bam = lambda wildcards: sample_dict[wildcards.sample]["bam"]["final_bam"],
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
         bed = config["panel"]["capture_kit"]
     output:
         bam_dir + "{sample}_{sample_type}.mosdepth.global.dist.txt",

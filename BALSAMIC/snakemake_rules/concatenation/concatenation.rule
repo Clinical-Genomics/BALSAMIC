@@ -3,8 +3,8 @@
 
 rule concatenate:
     input:
-        fwd_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["fwd"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]],
-        rev_fastqs = lambda wildcards: [sample_dict[wildcards.sample]["fastqpair_patterns"][fastq_pattern]["rev"] for fastq_pattern in sample_dict[wildcards.sample]["fastqpair_patterns"]]
+        fwd_fastqs = lambda wildcards: balsamic.get_all_fastqs_for_sample(sample_name = wildcards.sample, fastq_types = [FastqName.FWD]),
+        rev_fastqs = lambda wildcards: balsamic.get_all_fastqs_for_sample(sample_name = wildcards.sample, fastq_types = [FastqName.REV])
     output:
         concat_fwd = fastq_dir + "{sample}_concat_R_1.fp.fastq.gz",
         concat_rev = fastq_dir + "{sample}_concat_R_2.fp.fastq.gz"

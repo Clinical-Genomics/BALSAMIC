@@ -145,69 +145,6 @@ def get_sample_type_from_prefix(config, sample):
             f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
         )
 
-
-def get_bam_names(samplename, sample_dict, bam_dir, analysis_type):
-    """Returns a dict containing names of bamfiles accessed with wildcards as inputs to rules.
-
-    Args:
-        samplename: str. Samplename (i.e: ACCXXXXXX)
-        sample_dict: dict. Dictionary containing information about samples and fastq-files.
-        bam_dir: str. Path to where bamfiles are stored.
-        analysis_type: str. Analysis_type specified in case config file. (i.e: paired / pon)
-
-    Returns:
-        bam_names: dict. Dictionary containing names of bamfiles.
-    """
-    bam_names = {}
-    sample_type = sample_dict[samplename]["type"]
-
-    # Add bamfilenames from parallel alignment per lane for sample
-    bam_names["align_sort_bamlist"] = []
-    for fastqpattern in sample_dict[samplename]["fastq_info"]:
-        bam_names["align_sort_bamlist"].append(
-            bam_dir
-            + "{sample}_align_sort_{fastqpattern}.bam".format(
-                sample=samplename, fastqpattern=fastqpattern
-            )
-        )
-
-    # Add bamfilename as final version, to be used as inputs in downstream tools
-    if analysis_type == "pon":
-        # Only dedup is necessary for panel of normals
-        bam_names["final_bam"] = bam_dir + "{sample_type}.{sample}.dedup.bam".format(
-            sample_type=sample_type, sample=samplename
-        )
-    else:
-        # For every analysis except PON, the name of the final processed bamfile is defined here
-        bam_names[
-            "final_bam"
-        ] = bam_dir + "{sample_type}.{sample}.dedup.realign.bam".format(
-            sample_type=sample_type, sample=samplename
-        )
-    return bam_names
-
-
-def get_fastqpatterns(sample_dict, samplename=None):
-    """Returns a list of fastq-patterns to be used as wildcards, optionally return only fastq-patterns for a given sample.
-
-    Args:
-        sample_dict: dict. Dictionary containing information about samples and fastq-files.
-        samplename: str. Optional argument, for selecting only fastq-patterns associated to the supplied samplename.
-
-    Returns:
-        fastqpatterns: list. List of fastq-pattern strings.
-    """
-    fastqpatterns = []
-    if samplename:
-        for fastqpattern in sample_dict[samplename]["fastq_info"]:
-            fastqpatterns.append(fastqpattern)
-    else:
-        for sample in sample_dict:
-            for fastqpattern in sample_dict[sample]["fastq_info"]:
-                fastqpatterns.append(fastqpattern)
-    return fastqpatterns
-
-
 def get_result_dir(config):
     """
     input: sample config file from BALSAMIC

@@ -195,7 +195,7 @@ def analysis(
         sample_config = json.load(sample_fh)
 
     # Initialize balsamic model
-    balsamic_config: BalsamicConfigModel.parse_obj(sample_config)
+    balsamic_config = BalsamicConfigModel.parse_obj(sample_config)
 
     logpath = sample_config["analysis"]["log"]
     scriptpath = sample_config["analysis"]["script"]

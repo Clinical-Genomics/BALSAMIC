@@ -19,24 +19,25 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
 from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
 
-from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, BalsamicConfigModel
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_fastqpatterns, get_bam_names, get_variant_callers, get_rule_output, get_result_dir, get_vcf,
+from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf,
                                  get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type,
                                  get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
                                  get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
                                  get_cancer_somatic_snv_observations)
 
-from BALSAMIC.constants.analysis import MutationType, FastqName
+from BALSAMIC.constants.analysis import MutationType, FastqName, SampleType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 
-
+# Initialize BalsamicConfigModel
+balsamic = BalsamicConfigModel.parse_obj(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -44,28 +45,33 @@ shell.prefix("set -eo pipefail; ")
 LOG = logging.getLogger(__name__)
 logging.getLogger("filelock").setLevel("WARN")
 
+# Get analysis dir
+analysis_dir_home = balsamic.analysis.analysis_dir
+# Get case id/name
+case_id = balsamic.analysis.case_id
+# Get result dir
+result_dir = balsamic.analysis.result
+
 # Create a temporary directory with trailing /
-tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
+tmp_dir = os.path.join(result_dir, "tmp", "")
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
-# Set case id/name
-case_id = config["analysis"]["case_id"]
-
 # Directories
-analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
-benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = get_result_dir(config) + "/fastq/"
-bam_dir = get_result_dir(config) + "/bam/"
-cnv_dir = get_result_dir(config) + "/cnv/"
-fastqc_dir = get_result_dir(config) + "/fastqc/"
-result_dir = get_result_dir(config) + "/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
-qc_dir = get_result_dir(config) + "/qc/"
-delivery_dir = get_result_dir(config) + "/delivery/"
-umi_dir = get_result_dir(config) + "/umi/"
+analysis_dir = str(analysis_dir_home.joinpath(case_id)) + "/"
+benchmark_dir = balsamic.analysis.benchmark.as_posix()
+fastq_dir = str(result_dir.joinpath("fastq")) + "/"
+bam_dir = str(result_dir.joinpath("bam")) + "/"
+cnv_dir = str(result_dir.joinpath("cnv")) + "/"
+fastqc_dir = str(result_dir.joinpath("fastqc")) + "/"
+vcf_dir = str(result_dir.joinpath("vcf")) + "/"
+vep_dir = str(result_dir.joinpath("vep")) + "/"
+qc_dir = str(result_dir.joinpath("qc")) + "/"
+delivery_dir = str(result_dir.joinpath("delivery")) + "/"
+umi_dir = str(result_dir.joinpath("umi")) + "/"
+result_dir = str(result_dir) + "/"
+
 umi_qc_dir = qc_dir + "umi_qc/"
-singularity_image = config['singularity']['image']
+singularity_image = balsamic.singularity['image']
 
 # Annotations
 research_annotations = []
@@ -77,41 +83,11 @@ swegen_snv = ""
 clinical_sv = ""
 swegen_sv = ""
 
+sample_names = balsamic.get_all_sample_names()
+tumor_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
+if balsamic.analysis.analysis_type == "paired":
+    normal_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
 
-# Prepare sample_dict
-sample_dict = {}
-for sample_dict in config["samples"]:
-    sample_name = sample_dict["name"]
-    sample_dict[sample_name] = sample_dict
-
-for sample_name in sample_dict:
-    sample_type = sample_dict[sample_name]["type"]
-    if sample_type == "tumor":
-        tumor_sample = sample_name
-        sample_dict[tumor_sample]["sample_type"] = "TUMOR"
-    else:
-        normal_sample = sample_name
-        sample_dict[normal_sample]["sample_type"] = "NORMAL"
-
-
-# Get fastq pattern --> fastq mapping
-fastq_dict = {}
-for sample_name in sample_dict:
-    for fastq_pattern in sample_dict[sample_name]["fastq_info"]:
-        fastq_dict[fastq_pattern] = sample_dict[sample_name]["fastq_info"][fastq_pattern]
-
-# Get names of bamfiles to be created
-for sample_name in sample_dict:
-    sample_dict[sample_name]["bam"] = get_bam_names(samplename=sample_name,
-                                    sample_dict=sample_dict,
-                                    bam_dir=bam_dir,
-                                    analysis_type=config["analysis"]["analysis_type"])
-
-# Adding sample type level information
-for sample_dict in config["samples"]:
-    sample_type = sample_dict["type"]
-    sample_name = sample_dict["name"]
-    sample_dict[sample_type] = sample_dict[sample_name]
 
 # vcfanno annotations
 research_annotations.append( {
@@ -134,8 +110,6 @@ research_annotations.append( {
 }
 )
 
-# Comment out CADD
-"""
 research_annotations.append( {
     'annotation': [{
     'file': Path(config["reference"]["cadd_snv"]).as_posix(),
@@ -145,7 +119,7 @@ research_annotations.append( {
     }]
 }
 )
-"""
+
 
 if "swegen_snv_frequency" in config["reference"]:
     research_annotations.append( {
@@ -469,7 +443,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     )
     # UMI
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
-        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
+        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=balsamic.get_all_sample_names()))
         if background_variant_file:
             analysis_specific_results.extend(
                 expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])
@@ -551,7 +525,7 @@ if 'benchmark_plots' in config:
 
 if 'delivery' in config:
     wildcard_dict = {
-        "sample": list(config["samples"].keys())+["tumor", "normal"],
+        "sample": sample_names,
         "case_name": case_id,
         "allow_missing": True
     }
@@ -590,7 +564,7 @@ if 'delivery' in config:
 
 
 wildcard_constraints:
-    sample = "|".join(list(config["samples"]))
+    sample = "|".join(sample_names)
 
 rule all:
     input:

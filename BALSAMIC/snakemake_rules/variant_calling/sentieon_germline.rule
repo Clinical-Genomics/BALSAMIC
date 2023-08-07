@@ -7,7 +7,7 @@ rule sentieon_DNAscope:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
-        bam = lambda wildcards: sample_dict[wildcards.sample_type]["bam"]["final_bam"],
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         recal_table = bam_dir + "{sample_type}.recal_data.table"
     output:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
