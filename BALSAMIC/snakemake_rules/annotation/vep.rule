@@ -223,7 +223,6 @@ fi
 tabix -p vcf -f {output.vcf_sv_clinical};
 
 rm {input.vcf_sv_clinical_obs};
-rm {params.vcf_somatic_obs};
         """
 
 
