@@ -10,6 +10,7 @@ Added:
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
 * Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
 * Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 
 Changed:
 ^^^^^^^^
@@ -21,7 +22,6 @@ Changed:
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
 * Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
-* Add `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 
 Fixed:

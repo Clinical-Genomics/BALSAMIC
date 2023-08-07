@@ -216,6 +216,7 @@ if [[ -f "{params.somatic_sv_observations}" ]]; then
     --in_occ Obs --out_occ somatic_obs --in_frq Frq --out_frq somatic_frq \
     --db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_clinical_obs} > {params.vcf_somatic_obs}
     bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
+    rm {params.vcf_somatic_obs};
 else
     cp {input.vcf_sv_clinical_obs} {output.vcf_sv_clinical};
 fi
