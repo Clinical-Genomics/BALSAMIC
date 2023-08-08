@@ -263,7 +263,7 @@ class AnalysisModel(BaseModel):
     log: Optional[DirectoryPath]
     result: Optional[DirectoryPath]
     benchmark: Optional[DirectoryPath]
-    dag: Optional[FilePath]
+    dag: Optional[str]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
 
@@ -344,10 +344,10 @@ class AnalysisModel(BaseModel):
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
-            ).as_posix()
-            + f"_BALSAMIC_{balsamic_version}_graph.pdf"
+                Path(
+                    values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
+                ).as_posix()
+                + f"_BALSAMIC_{balsamic_version}_graph.pdf"
         )
 
     @validator("config_creation_date")
@@ -481,7 +481,97 @@ class PanelModel(BaseModel):
         return None
 
 
-class PonBalsamicConfigModel(BaseModel):
+class BalsamicRunFunctions:
+    """
+        Mixin class providing common functions for handling BALSAMIC run operations.
+
+        This class contains functions that help retrieve sample and file information,
+        facilitating BALSAMIC run operations in Snakemake.
+
+        Functions:
+            - get_all_sample_names: Return all sample names in the analysis.
+            - get_fastq_patterns_by_sample: Return all fastq patterns for given samples.
+            - get_all_fastqs_for_sample: Return all fastqs for a sample.
+            - get_fastq_by_fastq_pattern: Return fastq file path for requested fastq pattern and type.
+            - get_sample_name_by_type: Return sample name for requested sample type.
+            - get_sample_type_by_name: Return sample type for requested sample name.
+            - get_bam_name_per_lane: Return list of bam file names for all fastq patterns of a sample.
+            - get_final_bam_name: Return final bam name for downstream analysis.
+    """
+    def get_all_sample_names(self) -> List[str]:
+        """Return all sample names in the analysis."""
+        sample_list = [sample.name for sample in self.samples]
+        return sample_list
+
+    def get_fastq_patterns_by_sample(self, sample_names: List[str]) -> List[str]:
+        """Return all fastq_patterns for a given sample."""
+        fastq_pattern_list = []
+        for sample in self.samples:
+            if sample.name in sample_names:
+                fastq_pattern_list.extend(sample.fastq_info.keys())
+        return fastq_pattern_list
+
+    def get_all_fastqs_for_sample(self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]) -> List[str]:
+        """Return all fastqs (optionally only [fastq/rev]) involved in analysis of sample."""
+        fastq_list = []
+        for sample in self.samples:
+            if sample.name == sample_name:
+                for fastq_info in sample.fastq_info.values():
+                    if FastqName.FWD in fastq_types:
+                        fastq_list.append(fastq_info.fwd)
+                    if FastqName.REV in fastq_types:
+                        fastq_list.append(fastq_info.rev)
+        return fastq_list
+
+    def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
+        """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
+        for sample in self.samples:
+            if fastq_pattern in sample.fastq_info:
+                if fastq_type == FastqName.FWD:
+                    return sample.fastq_info[fastq_pattern].fwd
+                elif fastq_type == FastqName.REV:
+                    return sample.fastq_info[fastq_pattern].rev
+                else:
+                    raise ValueError(f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: {fastq_type}")
+    def get_sample_name_by_type(self, sample_type: str) -> str:
+        """Return sample name for requested sample type."""
+        for sample in self.samples:
+            if sample.type == sample_type:
+                return sample.name
+
+    def get_sample_type_by_name(self, sample_name: str) -> str:
+        """Return sample type for requested sample name."""
+        for sample in self.samples:
+            if sample.name == sample_name:
+                return sample.type
+    def get_bam_name_per_lane(self, bam_dir: str, sample_name: str) -> List[str]:
+        """Return list of bam-file names for all fastq_patterns of a sample."""
+        bam_names = []
+        for sample in self.samples:
+            if sample.name == sample_name:
+                for fastq_pattern in sample.fastq_info:
+                    bam_names.append(f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam")
+        return bam_names
+    def get_final_bam_name(self, bam_dir: str, sample_name: str = None, sample_type: str = None) -> str:
+        """Return final bam name to be used in downstream analysis."""
+
+        if sample_name is None and sample_type is None:
+            raise ValueError("Either sample_name or sample_type must be provided to get the final bam name.")
+
+        if sample_name is None:
+            sample_name = self.get_sample_name_by_type(sample_type)
+
+        if sample_type is None:
+            sample_type = self.get_sample_type_by_name(sample_name)
+
+        if self.analysis.analysis_type == "pon":
+            # Only dedup is necessary for panel of normals
+            return f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+        else:
+            # For every analysis except PON, the name of the final processed bamfile is defined here
+            return f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
+
+class PonBalsamicConfigModel(BaseModel, BalsamicRunFunctions):
     """Summarizes config models in preparation for export
 
     Attributes:
@@ -513,8 +603,7 @@ class PonBalsamicConfigModel(BaseModel):
     def transform_path_to_dict(cls, value):
         return {"image": Path(value).resolve().as_posix()}
 
-
-class BalsamicConfigModel(BaseModel):
+class BalsamicConfigModel(BaseModel, BalsamicRunFunctions):
     """Summarizes config models in preparation for export
 
     Attributes:
@@ -536,94 +625,24 @@ class BalsamicConfigModel(BaseModel):
     analysis: AnalysisModel
     samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
-    singularity: DirectoryPath
+    singularity: Dict[str, DirectoryPath]
     background_variants: Optional[FilePath]
     bioinfo_tools: dict
     bioinfo_tools_version: dict
     panel: Optional[PanelModel]
 
-    def get_all_sample_names(self) -> List[str]:
-        """Return all sample names in the analysis."""
-        sample_list = [sample.name for sample in self.samples]
-        return sample_list
-
-    def get_fastq_patterns_by_sample(self, sample_names: List[str]) -> List[str]:
-        """Return all fastq_patterns for a given sample."""
-        fastq_pattern_list = []
-        for sample in self.samples:
-            if sample.name in sample_names:
-                fastq_pattern_list.extend(sample.fastq_info.values())
-        return fastq_pattern_list
-
-    def get_all_fastqs_for_sample(self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]) -> List[str]:
-        """Return all fastqs (optionally only [fastq/rev]) involved in analysis of sample."""
-        fastq_list = []
-        for sample in self.samples:
-            if sample.name == sample_name:
-                for fastq_pattern in sample.fastq_info.values():
-                    if FastqName.FWD in fastq_types:
-                        fastq_list.append(fastq_pattern.fwd)
-                    if FastqName.REV in fastq_types:
-                        fastq_list.append(fastq_pattern.rev)
-        return fastq_list
-
-    def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
-        """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
-        for sample in self.samples:
-            if fastq_pattern in sample.fastq_info.values():
-                if fastq_type == FastqName.FWD:
-                    return sample.fastq_info[fastq_pattern].fwd
-                elif fastq_type == FastqName.REV:
-                    return sample.fastq_info[fastq_pattern].rev
-                else:
-                    raise ValueError(f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: {fastq_type}")
-    def get_sample_name_by_type(self, sample_type: str) -> str:
-        """Return sample name for requested sample type."""
-        for sample in self.samples:
-            if sample.type == sample_type:
-                return sample.name
-
-    def get_sample_type_by_name(self, sample_name: str) -> str:
-        """Return sample type for requested sample name."""
-        for sample in self.samples:
-            if sample.name == sample_name:
-                return sample.type
-    def get_bam_name_per_lane(self, bam_dir: str, sample_name: str) -> List[str]:
-        """Return list of bam-file names for all fastq_patterns of a sample."""
-        bam_names = []
-        for sample in self.samples:
-            if sample.name == sample_name:
-                for fastq_pattern in sample.fastq_info.values():
-                    bam_names.append(f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam")
-        return bam_names
-    def get_final_bam_name(self, bam_dir: str, sample_name: str = None, sample_type: str = None) -> str:
-        """Return final bam name to be used in downstream analysis."""
-
-        if sample_name is None and sample_type is None:
-            raise ValueError("Either sample_name or sample_type must be provided to get the final bam name.")
-
-        if sample_name is None:
-            sample_name = self.get_sample_name_by_type(sample_type)
-
-        if sample_type is None:
-            sample_type = self.get_sample_type_by_name(sample_name)
-
-        if self.analysis.analysis_type == "pon":
-            # Only dedup is necessary for panel of normals
-            return f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
-        else:
-            # For every analysis except PON, the name of the final processed bamfile is defined here
-            return f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
 
     @validator("reference")
-    def abspath_as_str(cls, reference: Path):
+    def abspath_as_str(cls, reference: Dict[str, Path]):
         for k, v in reference.items():
             reference[k] = Path(v).resolve().as_posix()
         return reference
 
     @validator("singularity")
-    def transform_path_to_dict(cls, singularity: DirectoryPath):
-        return {"image": Path(singularity).resolve().as_posix()}
+    def transform_path_to_dict(cls, singularity: Dict[str, DirectoryPath]):
+        for k, v in singularity.items():
+            singularity[k] = Path(v).resolve().as_posix()
+        return singularity
 
     @validator("background_variants")
     def fl_abspath_as_str(cls, background_variants: FilePath):
@@ -646,11 +665,12 @@ class BalsamicConfigModel(BaseModel):
                 fastq_info_values.add(fastq_pattern)
         return samples
 
+"""
     @validator("samples")
     def no_unassigned_fastqs_in_fastq_dir(cls, samples, values):
-        """
+
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
-        """
+
 
         def get_all_fwd_rev_values(samples):
             fwd_rev_values = []
@@ -676,6 +696,7 @@ class BalsamicConfigModel(BaseModel):
             raise ValidationError(error_message)
 
         return samples
+"""
 
 class UMIParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.

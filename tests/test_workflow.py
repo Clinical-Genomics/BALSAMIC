@@ -78,6 +78,8 @@ def test_workflow_tumor_normal_wgs_hg19(
     snakefile = get_snakefile(analysis_type, analysis_workflow)
     config_json = tumor_normal_wgs_config
 
+
+
     # WHEN invoking snakemake module with dry run option
     # THEN the snakemake workflow for WGS, hg19-tumor-normal should run successfully.
     with mock.patch.dict(

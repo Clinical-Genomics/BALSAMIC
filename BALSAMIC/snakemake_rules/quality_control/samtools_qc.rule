@@ -3,7 +3,7 @@
 
 rule samtools_qc:
     input:
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name)
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample)
     output:
         flagstats = Path(bam_dir, "{sample}.samtools.flagstats.txt").as_posix(),
         idxstats = Path(bam_dir, "{sample}.samtools.idxstats.txt").as_posix(),

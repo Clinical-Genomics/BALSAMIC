@@ -16,11 +16,11 @@ from BALSAMIC.constants.analysis import FastqName, SampleType
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, BalsamicConfigModel
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig, PonBalsamicConfigModel
 
 
 # Initialize BalsamicConfigModel
-balsamic = BalsamicConfigModel.parse_obj(config)
+balsamic = PonBalsamicConfigModel.parse_obj(config)
 
 shell.prefix("set -eo pipefail; ")
 
@@ -32,32 +32,39 @@ logging.getLogger("filelock").setLevel("WARN")
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
-# Get analysis dir
-analysis_dir_home = balsamic.analysis.analysis_dir
 # Get case id/name
 case_id = balsamic.analysis.case_id
+# Get analysis dir
+analysis_dir_home = balsamic.analysis.analysis_dir
+analysis_dir = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir = balsamic.analysis.result
+result_dir = os.path.join(balsamic.analysis.result, "")
 
-analysis_dir = str(analysis_dir_home.joinpath(case_id)) + "/"
-fastq_dir = str(result_dir.joinpath("fastq")) + "/"
-qc_dir = str(result_dir.joinpath("qc")) + "/"
-bam_dir = str(result_dir.joinpath("bam")) + "/"
-cnv_dir = str(result_dir.joinpath("cnv")) + "/"
+# Create a temporary directory with trailing /
+tmp_dir = os.path.join(result_dir, "tmp", "" )
+Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
+
+# Directories
+benchmark_dir = balsamic.analysis.benchmark
+
+result_dir_subdirs = ["fastq", "bam", "cnv", "qc"]
+
+for directory_name in result_dir_subdirs:
+    globals()[f"{directory_name}_dir"] = os.path.join(result_dir, directory_name, "")
+
 
 reffasta = config["reference"]["reference_genome"]
 refgene_flat = config["reference"]["refgene_flat"]
 access_5kb_hg19 = config["reference"]["access_regions"]
+
 target_bed = config["panel"]["capture_kit"]
-benchmark_dir = config["analysis"]["benchmark"]
 version = config["analysis"]["pon_version"]
 
 singularity_image = balsamic.singularity['image']
 
 sample_names = balsamic.get_all_sample_names()
 
-tmp_dir = os.path.join(result_dir, "tmp", "" )
-Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
+
 
 
 # Find and set Sentieon binary and license server from env variables
@@ -122,7 +129,7 @@ cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtar
 
 rule create_coverage:
     input:
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         target_bed = cnv_dir + "target.bed",
         antitarget_bed = cnv_dir + "antitarget.bed"
     output:

@@ -194,9 +194,6 @@ def analysis(
     with open(sample_config, "r") as sample_fh:
         sample_config = json.load(sample_fh)
 
-    # Initialize balsamic model
-    balsamic_config = BalsamicConfigModel.parse_obj(sample_config)
-
     logpath = sample_config["analysis"]["log"]
     scriptpath = sample_config["analysis"]["script"]
     resultpath = sample_config["analysis"]["result"]
@@ -219,6 +216,9 @@ def analysis(
         os.makedirs(logpath, exist_ok=True)
         os.makedirs(scriptpath, exist_ok=True)
         os.makedirs(benchmarkpath, exist_ok=True)
+
+    # Initialize balsamic model
+    balsamic_config = BalsamicConfigModel.parse_obj(sample_config)
 
     analysis_type = sample_config["analysis"]["analysis_type"]
     analysis_workflow = sample_config["analysis"]["analysis_workflow"]

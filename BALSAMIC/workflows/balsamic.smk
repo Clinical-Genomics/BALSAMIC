@@ -45,32 +45,28 @@ shell.prefix("set -eo pipefail; ")
 LOG = logging.getLogger(__name__)
 logging.getLogger("filelock").setLevel("WARN")
 
-# Get analysis dir
-analysis_dir_home = balsamic.analysis.analysis_dir
 # Get case id/name
 case_id = balsamic.analysis.case_id
+# Get analysis dir
+analysis_dir_home = balsamic.analysis.analysis_dir
+analysis_dir = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir = balsamic.analysis.result
+result_dir = os.path.join(balsamic.analysis.result, "")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(result_dir, "tmp", "")
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-analysis_dir = str(analysis_dir_home.joinpath(case_id)) + "/"
-benchmark_dir = balsamic.analysis.benchmark.as_posix()
-fastq_dir = str(result_dir.joinpath("fastq")) + "/"
-bam_dir = str(result_dir.joinpath("bam")) + "/"
-cnv_dir = str(result_dir.joinpath("cnv")) + "/"
-fastqc_dir = str(result_dir.joinpath("fastqc")) + "/"
-vcf_dir = str(result_dir.joinpath("vcf")) + "/"
-vep_dir = str(result_dir.joinpath("vep")) + "/"
-qc_dir = str(result_dir.joinpath("qc")) + "/"
-delivery_dir = str(result_dir.joinpath("delivery")) + "/"
-umi_dir = str(result_dir.joinpath("umi")) + "/"
-result_dir = str(result_dir) + "/"
+benchmark_dir = balsamic.analysis.benchmark
+
+result_dir_subdirs = ["fastq", "bam", "cnv", "fastqc", "vcf", "vep", "qc", "delivery", "umi"]
+
+for directory_name in result_dir_subdirs:
+    globals()[f"{directory_name}_dir"] = os.path.join(result_dir, directory_name, "")
 
 umi_qc_dir = qc_dir + "umi_qc/"
+
 singularity_image = balsamic.singularity['image']
 
 # Annotations

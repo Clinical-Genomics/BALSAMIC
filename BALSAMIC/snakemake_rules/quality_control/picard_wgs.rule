@@ -10,7 +10,7 @@ picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cy
 
 rule picard_CollectMultipleMetrics:
     input:
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         reference = config["reference"]["reference_genome"]
     output:
         expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample = config["samples"], metrics_wc = picard_metrics_wildcard)
@@ -42,7 +42,7 @@ R={input.reference};
 
 rule picard_CollectWgsMetrics:
     input:
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample_name),
+        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         reference = config["reference"]["reference_genome"]
     output:
         qc_dir + "{sample}_picard_wgs_metrics.txt"

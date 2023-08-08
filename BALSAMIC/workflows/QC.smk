@@ -33,27 +33,25 @@ shell.prefix("set -eo pipefail; ")
 LOG = logging.getLogger(__name__)
 logging.getLogger("filelock").setLevel("WARN")
 
-# Get analysis dir
-analysis_dir_home = balsamic.analysis.analysis_dir
 # Get case id/name
 case_id = balsamic.analysis.case_id
+# Get analysis dir
+analysis_dir_home = balsamic.analysis.analysis_dir
+analysis_dir = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir = balsamic.analysis.result
+result_dir = os.path.join(balsamic.analysis.result, "")
 
 # Create a temporary directory with trailing /
 tmp_dir = os.path.join(result_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
-fastq_dir = str(result_dir.joinpath("fastq")) + "/"
-analysis_dir = str(analysis_dir_home.joinpath(case_id)) + "/"
-benchmark_dir = config["analysis"]["benchmark"]
-fastq_dir = str(result_dir.joinpath("fastq")) + "/"
+result_dir_subdirs = ["fastq", "bam", "fastqc", "vcf", "qc", "delivery"]
 
-bam_dir = str(result_dir.joinpath("bam")) + "/"
-fastqc_dir = str(result_dir.joinpath("fastqc")) + "/"
-qc_dir = str(result_dir.joinpath("qc")) + "/"
-vcf_dir = str(result_dir.joinpath("vcf")) + "/"
-delivery_dir = str(result_dir.joinpath("delivery")) + "/"
+for directory_name in result_dir_subdirs:
+    globals()[f"{directory_name}_dir"] = os.path.join(result_dir, directory_name, "")
+
+benchmark_dir = balsamic.analysis.benchmark
+
 
 singularity_image = balsamic.singularity['image']
 
@@ -130,6 +128,7 @@ if "paired" in config['analysis']['analysis_type']:
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()
+
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
 # Define common and analysis specific outputs

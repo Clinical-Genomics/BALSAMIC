@@ -7,7 +7,7 @@ multiqc_input.append(bam_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
 multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt", sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
 # fastqc metrics
-multiqc_input.extend(expand(fastqc_dir + "{sample}_fastqc.completed", sample=sample_names)
+multiqc_input.extend(expand(fastqc_dir + "{sample}_fastqc.completed", sample=sample_names))
 
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample))
