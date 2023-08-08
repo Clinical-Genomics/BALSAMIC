@@ -2,6 +2,9 @@
 from BALSAMIC.utils.class_types import StrEnum
 
 
+MAX_JOBS: int = 999
+
+
 class ClusterConfigType(StrEnum):
     """Analysis workflow config type."""
 

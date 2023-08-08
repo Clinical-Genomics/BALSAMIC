@@ -12,13 +12,14 @@ from click.testing import CliRunner
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
-from BALSAMIC.constants.cache import (
-    DockerContainers,
-    GenomeVersion,
-    REFERENCE_FILES,
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
+from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
+from BALSAMIC.constants.cluster import (
+    ClusterConfigType,
+    ClusterAccount,
+    QOS,
+    ClusterProfile,
 )
-from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -29,6 +30,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
+from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 
@@ -124,17 +126,13 @@ def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
 
 @pytest.fixture(scope="session")
 def tumor_sample_name() -> str:
-    """
-    Creates mock name for tumor sample.
-    """
+    """Create mock name for tumor sample."""
     return "ACC1"
 
 
 @pytest.fixture(scope="session")
 def normal_sample_name() -> str:
-    """
-    Creates mock name for normal sample.
-    """
+    """Create mock name for normal sample."""
     return "ACC2"
 
 @pytest.fixture(scope="session")
@@ -158,9 +156,7 @@ def illegal_normal_sample_name_v2() -> str:
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only() -> str:
-    """
-    creates mock case-id for TGA tumor-only.
-    """
+    """Create mock case-id for TGA tumor-only."""
     return "sample_tumor_only"
 
 
@@ -189,12 +185,15 @@ def case_id_pon() -> str:
     """
     return "sample_pon_creation"
 
+def case_id_tumor_only_pon() -> str:
+    """Create mock case-id for TGA PON tumor-only."""
+    return "sample_tumor_only_pon"
+
+
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_umi() -> str:
-    """
-    Creates mock case-id for TGA tumor-only UMI workflow.
-    """
+    """Creates mock case-id for TGA tumor-only UMI workflow."""
     return "sample_tumor_only_umi"
 
 
@@ -206,9 +205,7 @@ def case_id_tumor_normal_fastqdir() -> str:
 
 @pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
-    """
-    Creates mock case-id for TGA tumor-normal.
-    """
+    """Create mock case-id for TGA tumor-normal."""
     return "sample_tumor_normal"
 
 @pytest.fixture(scope="session")
@@ -225,42 +222,31 @@ def case_id_tumor_normal_qc_wgs() -> str:
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_wgs() -> str:
-    """
-    Creates mock case-id for WGS tumor-only.
-    """
+    """Create mock case-id for WGS tumor-only."""
     return "sample_tumor_only_wgs"
 
 
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_wgs() -> str:
-    """
-    Creates mock case-id for WGS tumor-normal.
-    """
+    """Create mock case-id for WGS tumor-normal."""
     return "sample_tumor_normal_wgs"
-
 
 @pytest.fixture
 def cli_runner():
-    """
-    Runs click for command line interface testing.
-    """
+    """Run click for command line interface testing."""
     runner = CliRunner()
     return runner
 
 
 @pytest.fixture
 def invoke_cli(cli_runner):
-    """
-    Invokes cli commands with options.
-    """
+    """Invoke cli commands with options."""
     return partial(cli_runner.invoke, cli)
 
 
 @pytest.fixture(scope="session")
 def environ():
-    """
-    Creates operating system's environment object.
-    """
+    """Create operating system's environment object."""
     return "os.environ"
 
 
@@ -307,17 +293,13 @@ def reference():
 
 @pytest.fixture(scope="session")
 def reference_panel_dir_path(test_data_dir: str) -> str:
-    """
-    Creates path for reference panel directory.
-    """
+    """Return path for reference panel directory."""
     return Path(test_data_dir, "references", "panel").as_posix()
 
 
 @pytest.fixture(scope="session")
 def reference_variants_dir_path(test_data_dir: str) -> str:
-    """
-    Created path for reference variants directory.
-    """
+    """Return path for reference variants directory."""
     return Path(test_data_dir, "references", "variants").as_posix()
 
 
@@ -329,87 +311,74 @@ def config_path(test_data_dir: str) -> str:
     return Path(test_data_dir, f"config.{FileType.JSON}").as_posix()
 
 
+
 @pytest.fixture(scope="session")
 def config_dict(config_path: str) -> str:
-    """
-    Reads and returns config from json.
-    """
+    """Read and return config from json."""
     return read_json(config_path)
 
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
-    """
-    Created path for panel bed file.
-    """
+    """Return path for panel bed file."""
     return Path(reference_panel_dir_path, "panel.bed").as_posix()
 
 
 @pytest.fixture(scope="session")
 def background_variant_file(reference_panel_dir_path: str) -> str:
-    """
-    Created path for background variants for TGA.
-    """
+    """Return path for background variants for TGA."""
     return Path(reference_panel_dir_path, "background_variants.txt").as_posix()
 
 
 @pytest.fixture(scope="session")
 def pon_cnn_path(reference_panel_dir_path: str) -> str:
-    """
-    Creates path for Panel Of Normal (PON), cnn file for cnvkit.
-    """
+    """Creates path for Panel Of Normal (PON), cnn file for cnvkit."""
     return Path(reference_panel_dir_path, "test_panel_ponn.cnn").as_posix()
 
 
 @pytest.fixture(scope="session")
-def clinical_snv_observations(reference_variants_dir_path: str) -> str:
-    """
-    Creates path for clinical SNVs from loqusDB.
-    """
+def clinical_snv_observations_path(reference_variants_dir_path: str) -> str:
+    """Return path for clinical SNVs from loqusDB."""
     return Path(reference_variants_dir_path, "clinical_snv_variants.vcf.gz").as_posix()
 
 
 @pytest.fixture(scope="session")
-def cancer_germline_snv_observations(reference_variants_dir_path: str) -> str:
-    """
-    Creates path of cancer germline SNVs from loqusDB.
-    """
+def cancer_germline_snv_observations_path(reference_variants_dir_path: str) -> str:
+    """Return path of cancer germline SNVs from loqusDB."""
     return Path(
         reference_variants_dir_path, "cancer_germline_snv_variants.vcf.gz"
     ).as_posix()
 
 
 @pytest.fixture(scope="session")
-def cancer_somatic_snv_observations(reference_variants_dir_path: str) -> str:
-    """
-    Creates path for somatic SNVs from loqusDB.
-    """
+def cancer_somatic_snv_observations_path(reference_variants_dir_path: str) -> str:
+    """Return path for somatic SNVs from loqusDB."""
     return Path(
         reference_variants_dir_path, "cancer_somatic_snv_variants.vcf.gz"
     ).as_posix()
 
 
 @pytest.fixture(scope="session")
-def clinical_sv_observations(reference_variants_dir_path: str) -> str:
-    """
-    Creates path for clinical SVs from loqusDB.
-    """
+def clinical_sv_observations_path(reference_variants_dir_path: str) -> str:
+    """Return path for clinical SV observations from loqusDB."""
     return Path(reference_variants_dir_path, "clinical_sv_variants.vcf.gz").as_posix()
 
 
 @pytest.fixture(scope="session")
-def swegen_snv_frequency(reference_variants_dir_path: str) -> str:
-    """
-    Creates path for Swegen SNVs.
-    """
+def somatic_sv_observations_path(reference_variants_dir_path: str) -> str:
+    """Return path for somatic SV observations from loqusDB."""
+    return Path(reference_variants_dir_path, "somatic_sv_variants.vcf.gz").as_posix()
+
+
+@pytest.fixture(scope="session")
+def swegen_snv_frequency_path(reference_variants_dir_path: str) -> str:
+    """Return path for Swegen SNVs."""
     return Path(reference_variants_dir_path, "swegen_snv.vcf.gz").as_posix()
 
 
 @pytest.fixture(scope="session")
-def swegen_sv_frequency(reference_variants_dir_path: str) -> str:
-    """
-    Creates path for Swegen SVs.
-    """
+def swegen_sv_frequency_path(reference_variants_dir_path: str) -> str:
+    """Create path for Swegen SVs."""
     return Path(reference_variants_dir_path, "swegen_sv.vcf.gz").as_posix()
 
 
@@ -439,9 +408,7 @@ def fixture_reference_graph() -> str:
 
 @pytest.fixture(scope="session")
 def sentieon_license(tmp_path_factory):
-    """
-    Creates Sentieon's license path
-    """
+    """Create Sentieon's license path"""
     sentieon_license_dir = tmp_path_factory.mktemp("sentieon_licence")
     sentieon_license_path = sentieon_license_dir / "license_file.lic"
     sentieon_license_path.touch()
@@ -451,9 +418,7 @@ def sentieon_license(tmp_path_factory):
 
 @pytest.fixture(scope="session")
 def sentieon_install_dir(tmp_path_factory):
-    """
-    Creates install directory for Sentieon tools
-    """
+    """Create install directory for Sentieon tools"""
     sentieon_install_dir = tmp_path_factory.mktemp("sentieon_install_dir")
     Path(sentieon_install_dir / "bin").mkdir(exist_ok=True)
     sentieon_executable = sentieon_install_dir / "bin" / "sentieon"
@@ -464,9 +429,7 @@ def sentieon_install_dir(tmp_path_factory):
 
 @pytest.fixture()
 def no_write_perm_path(tmp_path_factory) -> str:
-    """
-    A path with no write permissions.
-    """
+    """Return path with no write permissions."""
     bad_perm_path: Path = tmp_path_factory.mktemp("bad_perm_path")
     bad_perm_path.chmod(0o444)
     return bad_perm_path.as_posix()
@@ -474,10 +437,7 @@ def no_write_perm_path(tmp_path_factory) -> str:
 
 @pytest.fixture(scope="session")
 def balsamic_cache(tmp_path_factory, reference):
-    """
-    Creates balsamic-cache and returns the path for balsamic-cache
-    """
-
+    """Create and return the path for balsamic-cache"""
     cache_dir = tmp_path_factory.mktemp("balsmic_cache")
 
     cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
@@ -498,9 +458,7 @@ def balsamic_cache(tmp_path_factory, reference):
 
 @pytest.fixture(scope="session")
 def analysis_dir(tmp_path_factory: TempPathFactory) -> str:
-    """
-    Creates and returns the directory where the case analysis will be saved.
-    """
+    """Create and return the directory where the case analysis will be saved."""
     analysis_dir = tmp_path_factory.mktemp("analysis", numbered=False)
     return analysis_dir.as_posix()
 
@@ -724,7 +682,6 @@ def fastq_dir_tumor_only_wgs(
     for fastq in fastq_test_dict["tumor"]:
         Path.unlink(fastq_dir / fastq)
 
-
 @pytest.fixture(scope="session", params=fastq_patterns(), ids=fastq_pattern_ids())
 def fastq_dir_tumor_normal_wgs(
     analysis_dir: str, case_id_tumor_normal_wgs: str, request
@@ -888,11 +845,9 @@ def fastq_dir_tumor_normal_extrafile(
 
 
 @pytest.fixture(scope="session")
-def snakemake_job_script(tmp_path_factory):
-    """
-    Creates a dummy snakemake jobscript
-    """
 
+def snakemake_job_script(tmp_path_factory, tumor_normal_config):
+    """Create a dummy snakemake jobscript"""
     script_dir = tmp_path_factory.mktemp("snakemake_script")
     snakemake_script_file = script_dir / "example_script.sh"
     snakemake_script = """#!/bin/sh
@@ -908,9 +863,83 @@ ls -l # dummy command
 
 @pytest.fixture(name="helpers")
 def fixture_config_helpers():
-    """Helper fixture for case config files"""
+    """Return helper for case config files"""
     return ConfigHelper()
 
+@pytest.fixture(scope="session")
+def tumor_only_config(
+    case_id_tumor_only: str,
+    tumor_sample_name: str,
+    balsamic_cache: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only: str,
+    panel_bed_file: str,
+    background_variant_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_only,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_only,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--background-variants",
+                background_variant_file,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--swegen-snv",
+                swegen_snv_frequency_path,
+                "--swegen-sv",
+                swegen_sv_frequency_path,
+                "--clinical-snv-observations",
+                clinical_snv_observations_path,
+                "--clinical-sv-observations",
+                clinical_sv_observations_path,
+                "--cancer-somatic-sv-observations",
+                somatic_sv_observations_path,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations_path,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations_path,
+            ],
+        )
+
+    qc_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "qc")
+    qc_dir.mkdir(parents=True, exist_ok=False)
+    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_only,
+        f"{case_id_tumor_only}.{FileType.JSON}",
+    ).as_posix()
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(
@@ -924,12 +953,13 @@ def tumor_normal_config(
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    swegen_snv_frequency: str,
-    swegen_sv_frequency: str,
-    clinical_snv_observations: str,
-    clinical_sv_observations: str,
-    cancer_germline_snv_observations: str,
-    cancer_somatic_snv_observations: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
@@ -963,22 +993,26 @@ def tumor_normal_config(
                 "--normal-sample-name",
                 normal_sample_name,
                 "--swegen-snv",
-                swegen_snv_frequency,
+                swegen_snv_frequency_path,
                 "--swegen-sv",
-                swegen_sv_frequency,
+                swegen_sv_frequency_path,
                 "--clinical-snv-observations",
-                clinical_snv_observations,
+                clinical_snv_observations_path,
                 "--clinical-sv-observations",
-                clinical_sv_observations,
+                clinical_sv_observations_path,
+                "--cancer-somatic-sv-observations",
+                somatic_sv_observations_path,
                 "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations,
+                cancer_germline_snv_observations_path,
                 "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations,
+                cancer_somatic_snv_observations_path,
             ],
         )
 
     return Path(
-        analysis_dir, case_id_tumor_normal, f"{case_id_tumor_normal}.{FileType.JSON}"
+        analysis_dir,
+        case_id_tumor_normal,
+        f"{case_id_tumor_normal}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -1144,7 +1178,7 @@ def tumor_normal_config_qc_wgs(
                 "--normal-sample-name",
                 normal_sample_name,
                 "--analysis-workflow",
-                analysis_workflow_qc,
+                analysis_workflow_qc
             ],
         )
 
@@ -1153,7 +1187,6 @@ def tumor_normal_config_qc_wgs(
         case_id_tumor_normal_qc_wgs,
         f"{case_id_tumor_normal_qc_wgs}.{FileType.JSON}",
     ).as_posix()
-
 
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(
@@ -1165,12 +1198,13 @@ def tumor_normal_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    swegen_snv_frequency: str,
-    swegen_sv_frequency: str,
-    clinical_snv_observations: str,
-    clinical_sv_observations: str,
-    cancer_germline_snv_observations: str,
-    cancer_somatic_snv_observations: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
 
@@ -1200,17 +1234,19 @@ def tumor_normal_wgs_config(
                 "--normal-sample-name",
                 normal_sample_name,
                 "--swegen-snv",
-                swegen_snv_frequency,
+                swegen_snv_frequency_path,
                 "--swegen-sv",
-                swegen_sv_frequency,
+                swegen_sv_frequency_path,
                 "--clinical-snv-observations",
-                clinical_snv_observations,
+                clinical_snv_observations_path,
                 "--clinical-sv-observations",
-                clinical_sv_observations,
+                clinical_sv_observations_path,
+                "--cancer-somatic-sv-observations",
+                somatic_sv_observations_path,
                 "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations,
+                cancer_germline_snv_observations_path,
                 "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations,
+                cancer_somatic_snv_observations_path,
             ],
         )
 
@@ -1219,73 +1255,6 @@ def tumor_normal_wgs_config(
         case_id_tumor_normal_wgs,
         f"{case_id_tumor_normal_wgs}.{FileType.JSON}",
     ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_only_config(
-    case_id_tumor_only: str,
-    tumor_sample_name: str,
-    balsamic_cache: str,
-    analysis_dir: str,
-    fastq_dir_tumor_only: str,
-    panel_bed_file: str,
-    background_variant_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-    swegen_snv_frequency: str,
-    swegen_sv_frequency: str,
-    clinical_snv_observations: str,
-    clinical_sv_observations: str,
-    cancer_germline_snv_observations: str,
-    cancer_somatic_snv_observations: str,
-) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--background-variants",
-                background_variant_file,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--swegen-snv",
-                swegen_snv_frequency,
-                "--swegen-sv",
-                swegen_sv_frequency,
-                "--clinical-snv-observations",
-                clinical_snv_observations,
-                "--clinical-sv-observations",
-                clinical_sv_observations,
-                "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations,
-                "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations,
-            ],
-        )
-    return Path(
-        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
-    ).as_posix()
-
 
 @pytest.fixture(scope="session")
 def tumor_only_config_w_dummy_vep(
@@ -1609,9 +1578,7 @@ def sample_config(
     normal_sample_name: str,
     tumor_normal_fastq_info_correct: dict,
 ):
-    """
-    sample config dict to test workflow utils
-    """
+    """Create and return sample config dict to test workflow utils"""
     sample_config = {
         "QC": {
             "picard_rmdup": "False",
@@ -1634,8 +1601,16 @@ def sample_config(
             "BALSAMIC_version": "2.9.8",
             "dag": "tests/test_data/id1/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf",
         },
+        "reference": {
+            "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+            "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
+        },
         "vcf": VCF_DICT,
         "samples": tumor_normal_fastq_info_correct,
+        "panel": {
+            "capture_kit": "tests/test_data/references/panel/panel.bed",
+            "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
+        },
         "umiworkflow": "true",
     }
 
@@ -1683,25 +1658,25 @@ def sample_config_illegal_fastq_pairnames(
 
 @pytest.fixture(scope="session")
 def analysis_path():
-    """Analysis test path"""
+    """Return path for test analysis"""
     return "tests/test_data/qc_files/analysis"
 
 
 @pytest.fixture(scope="session")
 def multiqc_data_path(analysis_path):
-    """multiqc_data.json test path"""
+    """Return path of JSON for MultiQC test data"""
     return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
 
 
 @pytest.fixture(scope="session")
 def multiqc_data_dict(multiqc_data_path):
-    """multiqc_data.json test path"""
+    """Read and Return test data from JASON of MultiQC test data"""
     return read_json(multiqc_data_path)
 
 
 @pytest.fixture(scope="session")
 def metrics_yaml_path(analysis_path):
-    """sample_tumor_only_metrics_deliverables.yaml test path"""
+    """Return path for Tumor-Only deliverable metrics from YAML"""
     return os.path.join(
         analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml"
     )
@@ -1709,9 +1684,9 @@ def metrics_yaml_path(analysis_path):
 
 @pytest.fixture(scope="session")
 def bcftools_counts_path(analysis_path):
-    """svdb.all.filtered.pass.stats test path"""
+    """Return path for svdb.clinical.filtered.pass.stats"""
     return os.path.join(
-        analysis_path, "vep", "SNV.somatic.case.svdb.all.filtered.pass.stats"
+        analysis_path, "vep", "SNV.somatic.case.svdb.clinical.filtered.pass.stats"
     )
 
 
@@ -1759,7 +1734,6 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
         "vep",
         "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
     )
-
     return Map(
         {
             "bcftools_filter_vardict_research_tumor_only": Map(
@@ -1795,19 +1769,19 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
 
 @pytest.fixture(scope="session", name="timestamp_now")
 def fixture_timestamp_now() -> datetime:
-    """Return a time stamp of today's date in date time format."""
+    """Return a time stamp of current date in date time format."""
     return datetime.now()
 
 
 @pytest.fixture(scope="session", name="cosmic_key")
 def fixture_cosmic_key() -> str:
-    """Return mocked COSMIC key."""
+    """Return a mocked COSMIC key."""
     return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
 
 
 @pytest.fixture(scope="session", name="develop_containers")
 def fixture_develop_containers() -> Dict[str, str]:
-    """Return develop docker hub containers dictionary."""
+    """Return a dictionary of docker hub containers for develop branch."""
     return {
         DockerContainers.ASCAT.value: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
         DockerContainers.VCF2CYTOSURE.value: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
@@ -2112,3 +2086,106 @@ def fixture_references_hg_data(
 def fixture_references_hg(references_hg_data: Dict[str, dict]) -> ReferencesHg:
     """Return mocked human genome references model."""
     return ReferencesHg(**references_hg_data)
+
+
+@pytest.fixture(scope="session", name="singularity_bind_path_data")
+def fixture_singularity_bind_path_data(session_tmp_path: Path) -> Dict[str, Path]:
+    """Return singularity bind path data."""
+    return {"source": session_tmp_path, "destination": Path("/")}
+
+
+@pytest.fixture(scope="session", name="singularity_bind_path")
+def fixture_singularity_bind_path(
+    singularity_bind_path_data: Dict[str, Path]
+) -> SingularityBindPath:
+    """Return mocked singularity bind path model."""
+    return SingularityBindPath(**singularity_bind_path_data)
+
+
+@pytest.fixture(scope="session", name="snakemake_options_command")
+def fixture_snakemake_options_command() -> List[str]:
+    """Return mocked singularity bind path model."""
+    return ["--cores", "36"]
+
+
+@pytest.fixture(scope="session", name="mail_user_option")
+def fixture_mail_user_option() -> str:
+    """Return mail user option."""
+    return "balsamic@scilifelab.se"
+
+
+@pytest.fixture(scope="session", name="snakemake_executable_data")
+def fixture_snakemake_executable_data(
+    case_id_tumor_only: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+    mail_user_option: str,
+    singularity_bind_path: SingularityBindPath,
+    snakemake_options_command: List[str],
+) -> Dict[str, Any]:
+    """Return snakemake executable model data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "case_id": case_id_tumor_only,
+        "cluster_config_path": reference_file,
+        "config_path": reference_file,
+        "disable_variant_caller": "tnscope,vardict",
+        "log_dir": session_tmp_path,
+        "mail_user": mail_user_option,
+        "profile": ClusterProfile.SLURM,
+        "qos": QOS.HIGH,
+        "quiet": True,
+        "result_dir": session_tmp_path,
+        "run_analysis": True,
+        "run_mode": RunMode.CLUSTER,
+        "script_dir": session_tmp_path,
+        "singularity_bind_paths": [singularity_bind_path],
+        "snakefile": reference_file,
+        "snakemake_options": snakemake_options_command,
+        "working_dir": session_tmp_path,
+    }
+
+
+@pytest.fixture(scope="session", name="snakemake_executable")
+def fixture_snakemake_executable(
+    snakemake_executable_data: Dict[str, Any]
+) -> SnakemakeExecutable:
+    """Return mocked snakemake executable model."""
+    return SnakemakeExecutable(**snakemake_executable_data)
+
+
+@pytest.fixture(scope="session", name="snakemake_executable_validated_data")
+def fixture_snakemake_executable_validated_data(
+    case_id_tumor_only: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+    mail_user_option: str,
+    singularity_bind_path: SingularityBindPath,
+    snakemake_options_command: List[str],
+) -> Dict[str, Any]:
+    """Return snakemake model expected data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "benchmark": False,
+        "case_id": case_id_tumor_only,
+        "cluster_config_path": reference_file,
+        "config_path": reference_file,
+        "disable_variant_caller": "disable_variant_caller=tnscope,vardict",
+        "dragen": False,
+        "force": False,
+        "log_dir": session_tmp_path,
+        "mail_type": None,
+        "mail_user": f"--mail-user {mail_user_option}",
+        "profile": ClusterProfile.SLURM,
+        "qos": QOS.HIGH,
+        "quiet": True,
+        "report_path": None,
+        "result_dir": session_tmp_path,
+        "run_analysis": True,
+        "run_mode": RunMode.CLUSTER,
+        "script_dir": session_tmp_path,
+        "singularity_bind_paths": [singularity_bind_path],
+        "snakefile": reference_file,
+        "snakemake_options": snakemake_options_command,
+        "working_dir": session_tmp_path,
+    }

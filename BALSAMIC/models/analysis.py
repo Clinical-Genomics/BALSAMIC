@@ -1,25 +1,17 @@
-import hashlib
 import logging
 import re
 import glob
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 
-from pydantic import (
-    BaseModel,
-    validator,
-    Field,
-    AnyUrl,
-    root_validator,
-    ValidationError,
-)
+
+from pydantic import BaseModel, validator, Field, root_validator, ValidationError
 from pydantic.types import DirectoryPath, FilePath
 from collections import defaultdict
 
 from BALSAMIC import __version__ as balsamic_version
-
 
 from BALSAMIC.constants.analysis import (
     Gender,
