@@ -1,9 +1,0 @@
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-
-dependencies:
-  - conda-forge::python=3.11
-  - conda-forge::pip==23.2.1
-  - conda-forge::pygraphviz==1.11
