@@ -140,7 +140,7 @@ def pon_config(
         },
         samples=get_pon_sample_list(fastq_path),
         reference=reference_dict,
-        singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
+        singularity={"image": os.path.join(balsamic_cache, balsamic_version, "containers")},
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,
@@ -148,7 +148,20 @@ def pon_config(
         ),
         panel={"capture_kit": panel_bed} if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)
-    LOG.info("PON config file generated successfully")
+    LOG.info("PON config model instantiated successfully")
+
+    logpath = config_collection_dict["analysis"]["log"]
+    scriptpath = config_collection_dict["analysis"]["script"]
+    resultpath = config_collection_dict["analysis"]["result"]
+    benchmarkpath = config_collection_dict["analysis"]["benchmark"]
+
+    # Create result directory
+    os.makedirs(resultpath, exist_ok=True)
+
+    if not os.path.exists(logpath):
+        os.makedirs(logpath, exist_ok=True)
+        os.makedirs(scriptpath, exist_ok=True)
+        os.makedirs(benchmarkpath, exist_ok=True)
 
     config_path = Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)

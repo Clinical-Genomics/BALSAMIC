@@ -277,6 +277,7 @@ def case_config(
         if panel_bed
         else None,
     ).dict(by_alias=True, exclude_none=True)
+    LOG.info("Balsamic config model instantiated successfully")
 
     logpath = config_collection_dict["analysis"]["log"]
     scriptpath = config_collection_dict["analysis"]["script"]

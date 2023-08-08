@@ -588,7 +588,7 @@ class PonBalsamicConfigModel(BaseModel, BalsamicRunFunctions):
     analysis: AnalysisPonModel
     samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
-    singularity: DirectoryPath
+    singularity: Dict[str, DirectoryPath]
     bioinfo_tools: dict
     bioinfo_tools_version: dict
     panel: Optional[PanelModel]
@@ -600,8 +600,10 @@ class PonBalsamicConfigModel(BaseModel, BalsamicRunFunctions):
         return value
 
     @validator("singularity")
-    def transform_path_to_dict(cls, value):
-        return {"image": Path(value).resolve().as_posix()}
+    def transform_path_to_dict(cls, singularity: Dict[str, DirectoryPath]):
+        for k, v in singularity.items():
+            singularity[k] = Path(v).resolve().as_posix()
+        return singularity
 
 class BalsamicConfigModel(BaseModel, BalsamicRunFunctions):
     """Summarizes config models in preparation for export

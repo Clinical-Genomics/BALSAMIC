@@ -491,7 +491,7 @@ def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
         sample_names.add(sample_name)
 
     num_samples = len(sample_names)
-    if len(num_samples) < 6:
+    if num_samples < 6:
         error_message = f"Number of samples detected in supplied fastq path ({num_samples})," \
                         f"not sufficient for PON generation. Sample names detected: {sample_names}"
         LOG.error(error_message)
