@@ -936,7 +936,6 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.ASCAT.value: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
         DockerContainers.VCF2CYTOSURE.value: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
         DockerContainers.PYTHON_3.value: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
-        DockerContainers.BALSAMIC.value: "docker://clinicalgenomics/balsamic:develop-balsamic",
         DockerContainers.SOMALIER.value: "docker://clinicalgenomics/balsamic:develop-somalier",
         DockerContainers.CNVPYTOR.value: "docker://clinicalgenomics/balsamic:develop-cnvpytor",
         DockerContainers.ALIGN_QC.value: "docker://clinicalgenomics/balsamic:develop-align_qc",
