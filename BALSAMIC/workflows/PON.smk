@@ -66,7 +66,6 @@ sample_names = balsamic.get_all_sample_names()
 
 
 
-
 # Find and set Sentieon binary and license server from env variables
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]

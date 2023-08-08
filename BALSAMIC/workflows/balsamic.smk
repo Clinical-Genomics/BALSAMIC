@@ -83,7 +83,7 @@ swegen_sv = ""
 sample_names = balsamic.get_all_sample_names()
 tumor_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
 if balsamic.analysis.analysis_type == "paired":
-    normal_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
+    normal_sample = balsamic.get_sample_name_by_type(SampleType.NORMAL)
 
 
 # vcfanno annotations
