@@ -20,5 +20,3 @@ RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINE
 
 # Clean work environment
 RUN rm -rf /${WORK_DIR:?} && conda clean --all --yes
-
-# Commenting here to see if the github action will be triggered

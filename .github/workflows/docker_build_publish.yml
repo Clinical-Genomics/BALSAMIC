@@ -1,4 +1,4 @@
-name: Build, push, and test develop containers
+name: Build and publish develop containers
 on:
   push:
     branches:
