@@ -190,7 +190,7 @@ def test_init_hg_graph_exception(
             ]
         )
 
-    # THEN the human reference generation workflow should have been canceled
+    # THEN the human reference generation workflow should fail
     assert "Workflow graph generation failed" in result.output
     assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
     assert not Path(
