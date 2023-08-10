@@ -30,7 +30,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
-from BALSAMIC.models.analysis import BalsamicConfigModel
+from BALSAMIC.models.analysis import BalsamicConfigModel, PonBalsamicConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
@@ -317,18 +317,35 @@ def reference_variants_dir_path(test_data_dir: str) -> str:
 
 @pytest.fixture(scope="session")
 def config_path(test_data_dir: str) -> str:
-    """
-    Created path for config json file.
-    """
+    """Created path for config json file."""
     return Path(test_data_dir, f"config.{FileType.JSON}").as_posix()
-
-
 
 @pytest.fixture(scope="session")
 def config_dict(config_path: str) -> str:
     """Read and return config from json."""
     return read_json(config_path)
 
+@pytest.fixture(scope="session")
+def config_dict_w_singularity(config_dict: str, balsamic_cache: str) -> str:
+    """Read and return config from json with singularity image path."""
+    config_dict["singularity"] = {"image": f"{balsamic_cache}/{balsamic_version}/containers"}
+    return config_dict
+
+@pytest.fixture(scope="session")
+def pon_config_path(test_data_dir: str) -> str:
+    """Created path for PON config json file."""
+    return Path(test_data_dir, f"config_pon.{FileType.JSON}").as_posix()
+
+@pytest.fixture(scope="session")
+def pon_config_dict(pon_config_path: str) -> str:
+    """Read and return PON config from json."""
+    return read_json(pon_config_path)
+
+@pytest.fixture(scope="session")
+def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> str:
+    """Read and return PON config from json with singularity image path."""
+    pon_config_dict["singularity"] = {"image": f"{balsamic_cache}/{balsamic_version}/containers"}
+    return pon_config_dict
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
@@ -1109,12 +1126,22 @@ def tumor_normal_config(
 
 @pytest.fixture(scope="session")
 def balsamic_model(
-    config_dict: Dict,
+    config_dict_w_singularity: Dict,
 ) -> BalsamicConfigModel:
     """Return BalsamicConfigModel parsed from static tumor normal config dict."""
     # Initialize balsamic model
-    balsamic_config = BalsamicConfigModel.parse_obj(config_dict)
+    balsamic_config = BalsamicConfigModel.parse_obj(config_dict_w_singularity)
     return balsamic_config
+
+@pytest.fixture(scope="session")
+def balsamic_pon_model(
+    pon_config_dict_w_singularity: Dict,
+) -> PonBalsamicConfigModel:
+    """Return PonBalsamicConfigModel parsed from static PON config dict."""
+    # Initialize balsamic PON model
+    balsamic_pon_config = PonBalsamicConfigModel.parse_obj(pon_config_dict_w_singularity)
+    return balsamic_pon_config
+
 
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc(

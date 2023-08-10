@@ -590,6 +590,7 @@ class ConfigModel(BaseModel):
                 for fastq_pattern in sample.fastq_info:
                     bam_names.append(f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam")
         return bam_names
+
     def get_final_bam_name(self, bam_dir: str, sample_name: str = None, sample_type: str = None) -> str:
         """Return final bam name to be used in downstream analysis."""
 

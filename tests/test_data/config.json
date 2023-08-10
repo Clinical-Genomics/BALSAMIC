@@ -254,9 +254,6 @@
         "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
         "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz"
     },
-    "singularity": {
-        "image": "/private/var/folders/yv/h5b9mhs10x19d5rq8bv8b0wr0000gn/T/pytest-of-mathiasjohansson/pytest-83/balsmic_cache0/12.0.2/containers"
-    },
     "bioinfo_tools": {
         "bedtools": "align_qc",
         "bwa": "align_qc",
