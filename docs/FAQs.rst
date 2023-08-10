@@ -71,9 +71,11 @@ branch.
 
 Release from `develop`:
 
+#. Switch to the master branch `git checkout master`.
+#. Pull the latest changes `git pull`.
 #. Switch to the `develop` branch: `git checkout develop`.
-#. Fetch the latest changes from `master` into `develop`: `git pull origin master`.
-#. Resolve any conflicts, commit changes, and push back to `develop`.
+#. Merge the latest changes from master into develop: `git merge master`.
+#. Resolve any conflicts, commit the changes, and push them to the develop branch.
 #. Create a new release branch: `git checkout -B release_vX.X.X` (adhere strictly to the naming convention for compatibility with container publishing GitHub Actions).
 #. Update the version number `X.X.X` in the `CHANGELOG.rst`.
 #. Open a pull request for the `release` branch, and after obtaining approval, merge it into `master`.
