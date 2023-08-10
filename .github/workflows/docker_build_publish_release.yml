@@ -5,7 +5,7 @@ on:
       - "release_*"
 jobs:
   main:
-    name: Docker image build push
+    name: Docker release image build and publish
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
