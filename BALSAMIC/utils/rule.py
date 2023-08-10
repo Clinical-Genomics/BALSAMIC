@@ -407,18 +407,6 @@ def get_swegen_sv(config: dict) -> str:
     return Path(config["reference"]["swegen_sv_frequency"]).as_posix()
 
 
-def get_toml(annotation: dict) -> str:
-    """Returns annotation in toml format
-
-    Args:
-        annotation: a dict containing annotation resource
-
-    Returns:
-        toml_annotation: a string in toml format
-    """
-    return toml.dumps(annotation)
-
-
 def dump_toml(annotations: list) -> str:
     """Returns list of converted annotation in toml format
 
@@ -430,5 +418,5 @@ def dump_toml(annotations: list) -> str:
     """
     toml_annotations = ""
     for annotation in annotations:
-        toml_annotations += get_toml(annotation)
+        toml_annotations += toml.dumps(annotation)
     return toml_annotations
