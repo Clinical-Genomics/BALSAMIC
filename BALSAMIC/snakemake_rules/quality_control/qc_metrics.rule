@@ -24,8 +24,6 @@ rule collect_custom_qc_metrics:
         config_path = analysis_dir + config["analysis"]["case_id"] + ".json",
         collect_qc_metrics_script = get_script_path("collect_qc_metrics.py"),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "qc-metrics"}
-    singularity:
-        Path(singularity_image, "balsamic.sif").as_posix()
     threads:
         get_threads(cluster_config, "collect_custom_qc_metrics")
     message:
