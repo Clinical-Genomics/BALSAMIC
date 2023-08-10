@@ -123,27 +123,14 @@ def get_capture_kit(config):
     else:
         return None
 
-
-def get_sample_id_by_type(samples: dict, type: str) -> str:
-    """Return sample ID given a sample biological type."""
-    for sample_id in samples:
-        if samples[sample_id]["type"] == type:
-            return sample_id
-    LOG.error(f"There is no sample ID for the {type} sample type")
-    raise BalsamicError
-
-
-def get_sample_type_from_prefix(config, sample):
+def get_sample_type_from_sample_name(config, sample_name):
     """
-    input: case config file from BALSAMIC
+    input: case config file from BALSAMIC, and sample_name
     output: sample type
     """
-    try:
-        return config["samples"][sample]["type"]
-    except KeyError:
-        raise KeyError(
-            f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
-        )
+    for sample in config["samples"]:
+        if sample_name == sample["name"]:
+            return sample["type"]
 
 def get_result_dir(config):
     """

@@ -13,7 +13,7 @@ from BALSAMIC.utils.io import read_json
 from BALSAMIC.utils.rule import (
     get_capture_kit,
     get_sequencing_type,
-    get_sample_type_from_prefix,
+    get_sample_type_from_sample_name,
     get_analysis_type,
 )
 
@@ -171,11 +171,10 @@ def get_metric_condition(
     """Returns a condition associated to a sample and sequencing type"""
 
     sequencing_type = get_sequencing_type(config)
-    try:
-        sample_type = get_sample_type_from_prefix(config, sample)
-    except KeyError:
+    sample_type = get_sample_type_from_sample_name(config, sample)
+    if not sample_type:
         # Deletes pair orientation information from the sample name (insertSize metrics)
-        sample_type = get_sample_type_from_prefix(config, sample.split("_")[0])
+        sample_type = get_sample_type_from_sample_name(config, sample.split("_")[0])
 
     req_metrics = requested_metrics[metric]["condition"]
     if sequencing_type == "wgs" and (

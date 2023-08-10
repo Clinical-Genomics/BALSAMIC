@@ -24,7 +24,7 @@ from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, Ba
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
 from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf,
-                                 get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type,
+                                 get_threads, get_script_path, get_sequencing_type,
                                  get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
                                  get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,

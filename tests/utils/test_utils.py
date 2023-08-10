@@ -13,6 +13,8 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
+
+from BALSAMIC.models.analysis import FastqInfoModel
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, FastqName, SampleType
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
@@ -42,14 +44,13 @@ from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_fil
 
 from BALSAMIC.utils.rule import (
     get_vcf,
-    get_sample_id_by_type,
     get_variant_callers,
     get_script_path,
     get_result_dir,
     get_threads,
     get_delivery_id,
     get_rule_output,
-    get_sample_type_from_prefix
+    get_sample_type_from_sample_name
 )
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
@@ -339,39 +340,6 @@ def test_get_vcf_invalid_variant_caller(sample_config):
     with pytest.raises(KeyError):
         # THEN a key error should be raised for a not supported caller
         get_vcf(sample_config, variant_callers, [sample_config["analysis"]["case_id"]])
-
-
-def test_get_sample_id_by_type(sample_config: dict, tumor_sample_name: str):
-    """Test get sample ID by biological type."""
-
-    # GIVEN a sample configuration dictionary and a tumor sample type
-    sample_type: str = "tumor"
-
-    # WHEN getting the sample ID
-    sample_id: str = get_sample_id_by_type(
-        samples=sample_config["samples"], type=sample_type
-    )
-
-    # THEN it should correspond to the tumor sample name
-    assert sample_id == tumor_sample_name
-
-
-def test_get_sample_id_by_type_error(
-    sample_config: dict, tumor_sample_name: str, caplog: LogCaptureFixture
-):
-    """Test get sample ID by type when an invalid biological type is provided."""
-    caplog.set_level(logging.ERROR)
-
-    # GIVEN a sample configuration dictionary and an incorrect sample type
-    sample_type: str = "affected"
-
-    # WHEN getting the sample ID
-    with pytest.raises(BalsamicError):
-        get_sample_id_by_type(samples=sample_config["samples"], type=sample_type)
-
-        # THEN it sould raise a BalsamicError
-        assert f"There is no sample ID for the {sample_type} sample type" in caplog.text
-
 
 def test_createDir(tmp_path):
     # GIVEN a directory path
@@ -717,19 +685,19 @@ def test_generate_h5_capture_no_output(tmp_path):
     assert actual_output == None
 
 
-def test_get_sample_type_from_prefix(config_dict):
+def test_get_sample_type_from_sample_name(config_dict):
     """Test sample type extraction from a extracted config file."""
 
     # GIVEN a config dictionary
 
     # GIVEN a sample name
-    sample = "ACC1"
+    sample_name = "ACC1"
 
     # WHEN calling the function
-    sample_type = get_sample_type_from_prefix(config_dict, sample)
+    sample_type = get_sample_type_from_sample_name(config_dict, sample_name)
 
     # THEN the retrieved sample type should match the expected one
-    assert sample_type == "tumor"
+    assert sample_type == SampleType.TUMOR
 
 def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
@@ -906,7 +874,7 @@ def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
     rev_fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.REV])
     fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.FWD, FastqName.REV])
 
-    compare_fastq_file_lists(fastq_files_expected, fwd_fastq_files)
+    compare_fastq_file_lists(fwd_fastq_files_expected, fwd_fastq_files)
     compare_fastq_file_lists(rev_fastq_files_expected, rev_fastq_files)
     compare_fastq_file_lists(fastq_files_expected, fastq_files)
     assert normal_fastq not in fastq_files
@@ -942,16 +910,16 @@ def test_sample_name_by_type(balsamic_model):
 def test_sample_type_by_name(balsamic_model):
     """Validate retrieval of sample type by sample name from BalsamicConfigModel."""
 
-    tumor_name_expected = "ACC1"
-    normal_name_expected = "ACC2"
+    tumor_name = "ACC1"
+    normal_name = "ACC2"
 
-    # Given sample type
-    tumor_name_retrieved = balsamic_model.get_sample_type_by_name(SampleType.TUMOR)
-    normal_name_retrieved = balsamic_model.get_sample_type_by_name(SampleType.NORMAL)
+    # Given sample name
+    tumor_type_retrieved = balsamic_model.get_sample_type_by_name(tumor_name)
+    normal_type_retrieved = balsamic_model.get_sample_type_by_name(normal_name)
 
-    # Then the retrieved sample name should match the expected
-    assert tumor_name_retrieved == tumor_name_expected
-    assert normal_name_retrieved == normal_name_expected
+    # Then the retrieved sample type should match the expected
+    assert tumor_type_retrieved == SampleType.TUMOR
+    assert normal_type_retrieved == SampleType.NORMAL
 
 def test_get_bam_name_per_lane(balsamic_model):
     """Validate retrieval of per lane bam names by sample name."""
@@ -1012,14 +980,14 @@ def test_get_final_bam_name_pon(balsamic_pon_model):
     assert expected_final_bam_name == bam_name_sample_name
 
 def test_get_sample_list(
-    tumor_sample_name: str, normal_sample_name: str, fastq_dir: str
+    tumor_sample_name: str, normal_sample_name: str, fastq_dir_tumor_normal: str
 ):
     """Tests sample dictionary retrieval."""
 
     samples: List = get_sample_list(
         tumor_sample_name=tumor_sample_name,
         normal_sample_name=normal_sample_name,
-        fastq_path=fastq_dir,
+        fastq_path=fastq_dir_tumor_normal,
     )
     assert samples[0].name == tumor_sample_name
     assert samples[1].name == normal_sample_name
@@ -1029,20 +997,23 @@ def test_get_sample_list(
     assert samples[1].fastq_info
 
 
-def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3):
-    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
-    # GIVEN a fastq_dir with these files: ACC1_XXXXX_R_1.fastq.gz and ACC1_XXXXX_R_2.fastq.gz and sample name ACC1
+def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only):
+    """Validates that get_fastq_info assigns fastq info as expected."""
+    # GIVEN a fastq_dir and sample name ACC1
 
     # WHEN calling the get_fastq_info function
-    fastq_dict = get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3)
+    fastq_dict = get_fastq_info(tumor_sample_name, fastq_dir_tumor_only)
+
+    fwd1_expected = f"{fastq_dir_tumor_only}/1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz"
+    rev1_expected = f"{fastq_dir_tumor_only}/1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"
+    fwd2_expected = f"{fastq_dir_tumor_only}/2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz"
+    rev2_expected = f"{fastq_dir_tumor_only}/2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"
+    fastq_info1_expected = FastqInfoModel(fwd=fwd1_expected, rev=rev1_expected)
+    fastq_info2_expected = FastqInfoModel(fwd=fwd2_expected, rev=rev2_expected)
 
     # THEN check that the fastq_dict matches the expected fastq_dict
-    expected_fastq_dict = {
-        "ACC1_XXXXX_R": {
-            "fwd": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_1.fastq.gz",
-            "rev": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_2.fastq.gz",
-        }
-    }
+    expected_fastq_dict = {"1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected,
+                           "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected}
     assert fastq_dict == expected_fastq_dict
 
 
@@ -1053,7 +1024,7 @@ def test_get_fastq_info_empty_fastq_dir(tumor_sample_name, empty_fastq_dir):
     # WHEN calling get_fastq_info
     # THEN the following error should be found
     with pytest.raises(
-        FileNotFoundError, match="No fastq files found in supplied fastq-path"
+        BalsamicError, match=f"No fastqs found for: {tumor_sample_name}"
     ):
         get_fastq_info(tumor_sample_name, empty_fastq_dir)
 

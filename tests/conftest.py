@@ -535,7 +535,7 @@ def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str, tumor_f
     """
     Creates and returns the directory containing the FASTQs for tumor-normal.
     """
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
