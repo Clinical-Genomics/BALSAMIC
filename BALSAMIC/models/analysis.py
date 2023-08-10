@@ -473,11 +473,20 @@ class PanelModel(BaseModel):
         return None
 
 
-class BalsamicRunFunctions:
+class ConfigModel(BaseModel):
     """
-        Mixin class providing common functions for handling BALSAMIC run operations.
+        Parent class providing common functions and variables for different balsamic workflows.
 
-        This class contains functions that help retrieve sample and file information,
+        Attributes:
+            QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
+            samples : Field(List[SampleInstanceModel]); List containing samples submitted for analysis
+            reference : Field(Dict); dictionary containing paths to reference genome files
+            panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
+            bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
+            bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
+            singularity : Field(Dict); path to singularity container of BALSAMIC
+
+        This class also contains functions that help retrieve sample and file information,
         facilitating BALSAMIC run operations in Snakemake.
 
         Functions:
@@ -490,6 +499,42 @@ class BalsamicRunFunctions:
             - get_bam_name_per_lane: Return list of bam file names for all fastq patterns of a sample.
             - get_final_bam_name: Return final bam name for downstream analysis.
     """
+
+    QC: QCModel
+    samples: List[SampleInstanceModel]
+    reference: Dict[str, Path]
+    singularity: Dict[str, DirectoryPath]
+    bioinfo_tools: Dict
+    bioinfo_tools_version: Dict
+    panel: Optional[PanelModel]
+
+    @validator("reference")
+    def abspath_as_str(cls, reference: Dict[str, Path]):
+        for k, v in reference.items():
+            reference[k] = Path(v).resolve().as_posix()
+        return reference
+
+    @validator("singularity")
+    def transform_path_to_dict(cls, singularity: Dict[str, DirectoryPath]):
+        for k, v in singularity.items():
+            singularity[k] = Path(v).resolve().as_posix()
+        return singularity
+
+    @validator("samples")
+    def no_duplicate_fastq_patterns(cls, samples):
+        """
+        Validate that no duplicate fastq patterns have been assigned in dict
+        """
+        fastq_info_values = set()
+        for sample in samples:
+            for fastq_pattern in sample.fastq_info.keys():
+                if fastq_pattern in fastq_info_values:
+                    raise ValueError(
+                        f"Duplicate FastqPattern found: {fastq_pattern} across multiple samples"
+                    )
+                fastq_info_values.add(fastq_pattern)
+        return samples
+
     def get_all_sample_names(self) -> List[str]:
         """Return all sample names in the analysis."""
         sample_list = [sample.name for sample in self.samples]
@@ -536,6 +581,7 @@ class BalsamicRunFunctions:
         for sample in self.samples:
             if sample.name == sample_name:
                 return sample.type
+
     def get_bam_name_per_lane(self, bam_dir: str, sample_name: str) -> List[str]:
         """Return list of bam-file names for all fastq_patterns of a sample."""
         bam_names = []
@@ -562,102 +608,6 @@ class BalsamicRunFunctions:
         else:
             # For every analysis except PON, the name of the final processed bamfile is defined here
             return f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
-
-class PonBalsamicConfigModel(BaseModel, BalsamicRunFunctions):
-    """Summarizes config models in preparation for export
-
-    Attributes:
-        QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
-        reference : Field(Dict); dictionary containing paths to reference genome files
-        panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
-        singularity : Field(Path); path to singularity container of BALSAMIC
-        rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-        bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
-        bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
-    """
-
-    QC: QCModel
-    analysis: AnalysisPonModel
-    samples: List[SampleInstanceModel]
-    reference: Dict[str, Path]
-    singularity: Dict[str, DirectoryPath]
-    bioinfo_tools: dict
-    bioinfo_tools_version: dict
-    panel: Optional[PanelModel]
-
-    @validator("reference")
-    def abspath_as_str(cls, value):
-        for k, v in value.items():
-            value[k] = Path(v).resolve().as_posix()
-        return value
-
-    @validator("singularity")
-    def transform_path_to_dict(cls, singularity: Dict[str, DirectoryPath]):
-        for k, v in singularity.items():
-            singularity[k] = Path(v).resolve().as_posix()
-        return singularity
-
-class BalsamicConfigModel(BaseModel, BalsamicRunFunctions):
-    """Summarizes config models in preparation for export
-
-    Attributes:
-        QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
-        vcf : Field(VCFmodel); variables relevant for variant calling pipeline
-        samples : Field(Dict); dictionary containing samples and their respective fastq-inputs submitted for analysis
-        reference : Field(Dict); dictionary containing paths to reference genome files
-        panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
-        bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
-        bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
-        singularity : Field(Path); path to singularity container of BALSAMIC
-        background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
-        rule_directory : Field(Path(RULE_DIRECTORY)); path where snakemake rules can be found
-
-    """
-
-    QC: QCModel
-    vcf: Optional[VCFModel]
-    analysis: AnalysisModel
-    samples: List[SampleInstanceModel]
-    reference: Dict[str, Path]
-    singularity: Dict[str, DirectoryPath]
-    background_variants: Optional[FilePath]
-    bioinfo_tools: dict
-    bioinfo_tools_version: dict
-    panel: Optional[PanelModel]
-
-
-    @validator("reference")
-    def abspath_as_str(cls, reference: Dict[str, Path]):
-        for k, v in reference.items():
-            reference[k] = Path(v).resolve().as_posix()
-        return reference
-
-    @validator("singularity")
-    def transform_path_to_dict(cls, singularity: Dict[str, DirectoryPath]):
-        for k, v in singularity.items():
-            singularity[k] = Path(v).resolve().as_posix()
-        return singularity
-
-    @validator("background_variants")
-    def fl_abspath_as_str(cls, background_variants: FilePath):
-        if background_variants:
-            return Path(background_variants).resolve().as_posix()
-        return None
-
-    @validator("samples")
-    def no_duplicate_fastq_patterns(cls, samples):
-        """
-        Validate that no duplicate fastq patterns have been assigned in dict
-        """
-        fastq_info_values = set()
-        for sample in samples:
-            for fastq_pattern in sample.fastq_info.keys():
-                if fastq_pattern in fastq_info_values:
-                    raise ValueError(
-                        f"Duplicate FastqPattern found: {fastq_pattern} across multiple samples"
-                    )
-                fastq_info_values.add(fastq_pattern)
-        return samples
 
 """
     @validator("samples")
@@ -691,6 +641,36 @@ class BalsamicConfigModel(BaseModel, BalsamicRunFunctions):
 
         return samples
 """
+
+
+class PonBalsamicConfigModel(ConfigModel):
+    """Summarizes config models in preparation for export
+
+    Attributes:
+        analysis : Field(AnalysisPonModel); Pydantic model containing PON workflow variables
+    """
+
+    analysis: AnalysisPonModel
+
+class BalsamicConfigModel(ConfigModel):
+    """Summarizes config models in preparation for export
+
+    Attributes:
+        vcf : Field(VCFmodel); variables relevant for variant calling pipeline
+        analysis: Field(AnalysisModel); Pydantic model containing workflow variables
+        background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
+    """
+
+    vcf: Optional[VCFModel]
+    analysis: AnalysisModel
+    background_variants: Optional[FilePath]
+
+    @validator("background_variants")
+    def fl_abspath_as_str(cls, background_variants: FilePath):
+        if background_variants:
+            return Path(background_variants).resolve().as_posix()
+        return None
+
 
 class UMIParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.
