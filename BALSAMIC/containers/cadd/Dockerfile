@@ -9,6 +9,7 @@ LABEL about.description="CADD for BALSAMIC"
 RUN apt-get update && \
      apt-get -y upgrade && \
      apt-get -y install -y --no-install-recommends \
+     tabix \
      unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -32,12 +33,6 @@ RUN cd /opt/conda/share/CADD-scripts && \
     --conda-prefix /opt/conda/share/CADD-scripts/envs \
     --cores 1 --configfile config/config_GRCh38_v1.6.yml --snakefile Snakefile
 RUN  ln -s /opt/conda/share/CADD-scripts/CADD.sh /opt/conda/bin/CADD.sh
-
-RUN apt-get update && \
-     apt-get -y upgrade && \
-     apt-get -y install -y --no-install-recommends tabix && \
-     apt-get clean && \
-     rm -rf /var/lib/apt/lists/*
 
 ## Clean-up Conda
 RUN /opt/conda/bin/conda clean -ya
