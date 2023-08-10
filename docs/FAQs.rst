@@ -70,21 +70,21 @@ If changes are hotfixes/patches, make a release from the `master` branch. Otherw
 branch.
 
 Release from `develop`:
-1. Switch to the `develop` branch: `git checkout develop`.
-2. Fetch the latest changes from `master` into `develop`: `git pull origin master`.
-3. Resolve any conflicts, commit changes, and push back to `develop`.
-4. Create a new release branch: `git checkout -B release_vX.X.X` (adhere strictly to the naming convention for
-compatibility with container publishing GitHub Actions).
-5. Update the version number `X.X.X` in the `CHANGELOG.rst`.
-6. Open a pull request for the `release` branch, and after obtaining approval, merge it into `master`.
-7. Move back to `master` branch: `git checkout master`.
-8. Fetch the latest changes: `git pull`.
-9. Use `bumpversion` to increment the version (choose `major`, `minor`, or `patch`):
-`bumpversion --verbose [major/minor/patch]`.
-10. Push the version increment changes: `git push`.
-11. Push the tags for the new version: `git push --tags`.
+
+#. Switch to the `develop` branch: `git checkout develop`.
+#. Fetch the latest changes from `master` into `develop`: `git pull origin master`.
+#. Resolve any conflicts, commit changes, and push back to `develop`.
+#. Create a new release branch: `git checkout -B release_vX.X.X` (adhere strictly to the naming convention for compatibility with container publishing GitHub Actions).
+#. Update the version number `X.X.X` in the `CHANGELOG.rst`.
+#. Open a pull request for the `release` branch, and after obtaining approval, merge it into `master`.
+#. Move back to `master` branch: `git checkout master`.
+#. Fetch the latest changes: `git pull`.
+#. Use `bumpversion` to increment the version (choose `major`, `minor`, or `patch`): `bumpversion --verbose [major/minor/patch]`.
+#. Push the version increment changes: `git push`.
+#. Push the tags for the new version: `git push --tags`.
 
 **Note**
-- Never force rebase commits into `master` or `develop`.
-- For pull requests to `master`, opt for `Create a merge commit` to capture full commit history.
-- For pull requests to `develop`, use `Squash and merge` to combine commit messages.
+
+* Never force rebase commits into `master` or `develop`.
+* For pull requests to `master`, opt for `Create a merge commit` to capture full commit history.
+* For pull requests to `develop`, use `Squash and merge` to combine commit messages.
