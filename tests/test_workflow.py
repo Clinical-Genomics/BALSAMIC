@@ -127,7 +127,6 @@ def test_workflow_qc_tumor_normal_hg19(tumor_normal_config):
 
 
 def test_workflow_qc_tumor_only_canfam3(tumor_only_config):
-
     # GIVEN a sample config dict and a snakefile
     workflow = "single"
     reference_genome = "canfam3"
