@@ -17,6 +17,7 @@ from BALSAMIC.models.analysis import (
     AnalysisPonModel,
 )
 
+from typing import List, Dict
 
 def test_vcfattributes():
     """test VCFAttributes model for correct validation"""
@@ -125,32 +126,31 @@ def test_analysis_model(test_data_dir: str):
 def test_sample_instance_model(config_dict):
     """Test sample instance model initialisation."""
 
-    # GIVEN a sample dictionary
-    sample_dict = config_dict["samples"]
+    # GIVEN a sample list
+    sample_list = config_dict["samples"]
     # WHEN parsing the sample dictionary
-    for sample_name in sample_dict:
-        sample: SampleInstanceModel = SampleInstanceModel.parse_obj(
-            sample_dict[sample_name]
-        )
+    for idx, sample in enumerate(sample_list):
+        sample: SampleInstanceModel = SampleInstanceModel.parse_obj(sample)
 
         # THEN the sample model should be correctly initialised
-        assert sample.dict() == sample_dict[sample_name]
+        assert sample.dict() == sample_list[idx]
 
 
-def test_sample_instance_model_error():
+def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct):
     """Test sample instance model error raise."""
 
     # GIVEN a sample dictionary with an invalid sample type
-    sample_type: str = "affected"
-    samples: dict = {"ACC1": {"type": sample_type}}
+    samples: List[Dict] = tumor_normal_fastq_info_correct
+    illegal_sample_type: str = "affected"
+    tumor_dict = samples[0]
+    tumor_dict["type"] = illegal_sample_type
 
     # WHEN parsing the sample dictionary
-
     # THEN a ValueError should be triggered
     with pytest.raises(ValueError) as exc:
-        SampleInstanceModel.parse_obj(samples["ACC1"])
+        SampleInstanceModel.parse_obj(tumor_dict)
         assert (
-            f"The provided sample type ({sample_type}) is not supported in BALSAMIC"
+            f"The provided sample type ({illegal_sample_type}) is not supported in BALSAMIC"
             in exc.value
         )
 

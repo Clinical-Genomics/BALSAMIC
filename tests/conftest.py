@@ -30,6 +30,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
+from BALSAMIC.models.analysis import BalsamicConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
@@ -76,6 +77,21 @@ def load_test_fastq_data(test_data_dir):
 def pon_fastq_list(load_test_fastq_data) -> list:
     """Returns list of fastq names to be used in PON creation testing."""
     return load_test_fastq_data["pon_fastq_list"]
+
+
+@pytest.fixture(scope="session")
+def tumor_fastq_names(
+    load_test_fastq_data,
+) -> Dict[str, List]:
+    """Returns a list of standard tumor fastq-names."""
+    return load_test_fastq_data["standard_fastq_names"]["tumor"]
+
+@pytest.fixture(scope="session")
+def normal_fastq_names(
+    load_test_fastq_data,
+) -> Dict[str, List]:
+    """Returns a list of standard normal fastq-names."""
+    return load_test_fastq_data["standard_fastq_names"]["normal"]
 
 @pytest.fixture(scope="session")
 def fastq_names_duplicate_assigned_fastq_patterns(
@@ -189,19 +205,15 @@ def case_id_tumor_only_pon() -> str:
     """Create mock case-id for TGA PON tumor-only."""
     return "sample_tumor_only_pon"
 
-
-
 @pytest.fixture(scope="session")
 def case_id_tumor_only_umi() -> str:
     """Creates mock case-id for TGA tumor-only UMI workflow."""
     return "sample_tumor_only_umi"
 
-
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_fastqdir() -> str:
     """Mock case ID for dummy fastqdir."""
     return "sample_tumor_normal_fastqdir"
-
 
 @pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
@@ -487,8 +499,8 @@ def fastq_dir(case_id_tumor_normal_fastqdir: str, analysis_dir: str, request):
         Path.unlink(fastq_dir / fastq)
 
 
-@pytest.fixture(scope="session", params=fastq_patterns(), ids=fastq_pattern_ids())
-def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) -> str:
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, tumor_fastq_names: List[str]) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-only.
     """
@@ -496,29 +508,39 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, request) ->
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
-    fastq_test_dict = request.param
-    for fastq in fastq_test_dict["tumor"]:
+    for fastq in tumor_fastq_names:
         Path(fastq_dir, fastq).touch()
 
     yield fastq_dir.as_posix()
 
-    for fastq in fastq_test_dict["tumor"]:
-        Path.unlink(fastq_dir / fastq)
+@pytest.fixture(scope="session")
+def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str, tumor_fastq_names: List[str], normal_fastq_names: List[str]) -> str:
+    """
+    Creates and returns the directory containing the FASTQs for tumor-normal.
+    """
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
 
+    # Fill the fastq path folder with the test fastq-files
+    for fastq in tumor_fastq_names:
+        Path(fastq_dir, fastq).touch()
+
+    for fastq in normal_fastq_names:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_qc(analysis_dir: str, case_id_tumor_only_qc: str) -> str:
+def fastq_dir_tumor_only_qc(analysis_dir: str, case_id_tumor_only_qc: str, tumor_fastq_names: List[str]) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_qc, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
-    fastq_test_dict = fastq_patterns()[0]
-    for fastq in fastq_test_dict["tumor"]:
+    for fastq in tumor_fastq_names:
         Path(fastq_dir, fastq).touch()
 
     yield fastq_dir.as_posix()
-
 
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_w_dummy_vep(
@@ -636,13 +658,13 @@ def fastq_dir_tumor_only_umi(
 
 
 @pytest.fixture(scope="session", params=fastq_patterns(), ids=fastq_pattern_ids())
-def fastq_dir_tumor_normal(
+def fastq_dir_tumor_normal_parameterize(
     analysis_dir: str, case_id_tumor_normal: str, request
 ) -> str:
     """
-    Creates and returns the directory containing the FASTQs for tumor-normal.
+    Creates and returns the directory containing the FASTQs for tumor-normal once for each fastq-name structure.
     """
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq")
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq_parameterize")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
@@ -845,7 +867,6 @@ def fastq_dir_tumor_normal_extrafile(
 
 
 @pytest.fixture(scope="session")
-
 def snakemake_job_script(tmp_path_factory, tumor_normal_config):
     """Create a dummy snakemake jobscript"""
     script_dir = tmp_path_factory.mktemp("snakemake_script")
@@ -931,10 +952,6 @@ def tumor_only_config(
             ],
         )
 
-    qc_dir = Path(analysis_dir, case_id_tumor_only, "analysis", "qc")
-    qc_dir.mkdir(parents=True, exist_ok=False)
-    copy_tree("tests/test_data/qc_files/analysis/qc/", qc_dir.as_posix())
-
     return Path(
         analysis_dir,
         case_id_tumor_only,
@@ -1015,6 +1032,89 @@ def tumor_normal_config(
         f"{case_id_tumor_normal}.{FileType.JSON}",
     ).as_posix()
 
+
+@pytest.fixture(scope="session")
+def tumor_normal_config(
+    case_id_tumor_normal: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal: str,
+    balsamic_cache: str,
+    background_variant_file: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "--case-id",
+                case_id_tumor_normal,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal,
+                "--background-variants",
+                background_variant_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+                "--swegen-snv",
+                swegen_snv_frequency_path,
+                "--swegen-sv",
+                swegen_sv_frequency_path,
+                "--clinical-snv-observations",
+                clinical_snv_observations_path,
+                "--clinical-sv-observations",
+                clinical_sv_observations_path,
+                "--cancer-somatic-sv-observations",
+                somatic_sv_observations_path,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations_path,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations_path,
+            ],
+        )
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_normal,
+        f"{case_id_tumor_normal}.{FileType.JSON}",
+    ).as_posix()
+
+@pytest.fixture(scope="session")
+def balsamic_model(
+    config_dict: Dict,
+) -> BalsamicConfigModel:
+    """Return BalsamicConfigModel parsed from static tumor normal config dict."""
+    # Initialize balsamic model
+    balsamic_config = BalsamicConfigModel.parse_obj(config_dict)
+    return balsamic_config
 
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc(
@@ -1422,12 +1522,12 @@ def tumor_only_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    swegen_snv_frequency: str,
-    swegen_sv_frequency: str,
-    clinical_snv_observations: str,
-    clinical_sv_observations: str,
-    cancer_germline_snv_observations: str,
-    cancer_somatic_snv_observations: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
 
@@ -1455,17 +1555,17 @@ def tumor_only_wgs_config(
                 "--tumor-sample-name",
                 tumor_sample_name,
                 "--swegen-snv",
-                swegen_snv_frequency,
+                swegen_snv_frequency_path,
                 "--swegen-sv",
-                swegen_sv_frequency,
+                swegen_sv_frequency_path,
                 "--clinical-snv-observations",
-                clinical_snv_observations,
+                clinical_snv_observations_path,
                 "--clinical-sv-observations",
-                clinical_sv_observations,
+                clinical_sv_observations_path,
                 "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations,
+                cancer_germline_snv_observations_path,
                 "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations,
+                cancer_somatic_snv_observations_path,
             ],
         )
 

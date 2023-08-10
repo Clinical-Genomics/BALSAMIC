@@ -12,7 +12,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, FastqName, SampleType
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
@@ -28,7 +28,7 @@ from BALSAMIC.utils.cli import (
     check_executable,
     job_id_dump_to_yaml,
     generate_h5,
-    get_pon_sample_dict,
+    get_pon_sample_list,
     get_sample_list,
     get_fastq_info,
     get_config_path,
@@ -48,9 +48,7 @@ from BALSAMIC.utils.rule import (
     get_threads,
     get_delivery_id,
     get_rule_output,
-    get_sample_type_from_prefix,
-    get_fastqpatterns,
-    get_bam_names,
+    get_sample_type_from_prefix
 )
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
@@ -732,138 +730,6 @@ def test_get_sample_type_from_prefix(config_dict):
     # THEN the retrieved sample type should match the expected one
     assert sample_type == "tumor"
 
-
-def test_get_bam_names(sample_config, tumor_sample_name, normal_sample_name):
-    """Tests assignment of bamfile names to sample_dict"""
-    bam_dir = "tests/test_data/id1/analysis/" + "/bam/"
-    sample_dict = dict(sample_config["samples"])
-    analysis_type = sample_config["analysis"]["analysis_type"]
-
-    assert analysis_type == "paired"
-
-    bam_dict_tumor = get_bam_names(
-        tumor_sample_name, sample_dict, bam_dir, analysis_type
-    )
-    bam_dict_normal = get_bam_names(
-        normal_sample_name, sample_dict, bam_dir, analysis_type
-    )
-    bam_dict_tumor_expected = {
-        "align_sort_bamlist": [f"{bam_dir}ACC1_align_sort_ACC1_S1_L001_R.bam"],
-        "final_bam": f"{bam_dir}tumor.ACC1.dedup.realign.bam",
-    }
-    bam_dict_normal_expected = {
-        "align_sort_bamlist": [f"{bam_dir}ACC2_align_sort_ACC2_S1_L001_R.bam"],
-        "final_bam": f"{bam_dir}normal.ACC2.dedup.realign.bam",
-    }
-
-    assert bam_dict_tumor == bam_dict_tumor_expected
-    assert bam_dict_normal == bam_dict_normal_expected
-
-
-def test_get_pon_bam_name(pon_creation_config):
-    """Tests assignment of bamfile names to sample_dict with pon as analysis_type"""
-    bam_dir = "tests/test_data/id1/analysis/" + "bam/"
-    config_dict = json.load(open(pon_creation_config, "r"))
-    sample_dict = config_dict["samples"]
-    analysis_type = config_dict["analysis"]["analysis_type"]
-    test_sample = "ACCN1"
-
-    assert analysis_type == "pon"
-    assert test_sample in sample_dict
-
-    sample_dict[test_sample]["bam"] = get_bam_names(
-        test_sample, sample_dict, bam_dir, analysis_type
-    )
-
-    bam_dict_pon_expected = {
-        "align_sort_bamlist": [
-            f"{bam_dir}{test_sample}_align_sort_1_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
-            f"{bam_dir}{test_sample}_align_sort_2_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
-        ],
-        "final_bam": f"{bam_dir}normal.{test_sample}.dedup.bam",
-    }
-
-    assert sample_dict[test_sample]["bam"] == bam_dict_pon_expected
-
-
-def test_get_fastqpatterns(sample_config, tumor_sample_name, normal_sample_name):
-    """Tests proper extraction of fastq patterns from sample_dict"""
-
-    # Verify the extraction of fastq patterns for all samples
-    sample_dict = dict(sample_config["samples"])
-    fastq_patterns_all = get_fastqpatterns(sample_dict)
-    fastq_patterns_all_expected = ["ACC1_S1_L001_R", "ACC2_S1_L001_R"]
-    assert fastq_patterns_all == fastq_patterns_all_expected
-
-    # Verify the extraction of fastq patterns for the tumor sample
-    fastq_patterns_tumor = get_fastqpatterns(sample_dict, tumor_sample_name)
-    fastq_patterns_tumor_expected = ["ACC1_S1_L001_R"]
-    assert fastq_patterns_tumor == fastq_patterns_tumor_expected
-
-    # Verify the extraction of fastq patterns for the normal sample
-    fastq_patterns_normal = get_fastqpatterns(sample_dict, normal_sample_name)
-    fastq_patterns_normal_expected = ["ACC2_S1_L001_R"]
-    assert fastq_patterns_normal == fastq_patterns_normal_expected
-
-
-def test_get_sample_list(
-    tumor_sample_name: str, normal_sample_name: str, fastq_dir: str
-):
-    """Tests sample dictionary retrieval."""
-
-    samples: List = get_sample_list(
-        tumor_sample_name=tumor_sample_name,
-        normal_sample_name=normal_sample_name,
-        fastq_path=fastq_dir,
-    )
-    assert samples[0].name == tumor_sample_name
-    assert samples[1].name == normal_sample_name
-    assert samples[0].type == "tumor"
-    assert samples[1].type == "normal"
-    assert samples[0].fastq_info
-    assert samples[1].fastq_info
-
-
-def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3):
-    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
-    # GIVEN a fastq_dir with these files: ACC1_XXXXX_R_1.fastq.gz and ACC1_XXXXX_R_2.fastq.gz and sample name ACC1
-
-    # WHEN calling the get_fastq_info function
-    fastq_dict = get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3)
-
-    # THEN check that the fastq_dict matches the expected fastq_dict
-    expected_fastq_dict = {
-        "ACC1_XXXXX_R": {
-            "fwd": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_1.fastq.gz",
-            "rev": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_2.fastq.gz",
-        }
-    }
-    assert fastq_dict == expected_fastq_dict
-
-
-def test_get_fastq_info_empty_fastq_dir(tumor_sample_name, empty_fastq_dir):
-    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
-    # GIVEN an empty fastq_dir and a sample name
-
-    # WHEN calling get_fastq_info
-    # THEN the following error should be found
-    with pytest.raises(
-        FileNotFoundError, match="No fastq files found in supplied fastq-path"
-    ):
-        get_fastq_info(tumor_sample_name, empty_fastq_dir)
-
-
-def test_get_fastq_info_double_assigned_fastq_pattern(
-    tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns
-):
-    """Tests if get_fastq_info correctly reports error of finding double-assigned fastq-patterns"""
-    # GIVEN an empty fastq_dir and a sample name
-
-    # WHEN calling get_fastq_info
-    # THEN the following error should be found
-    with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
-        get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns)
-
 def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
 
@@ -993,3 +859,237 @@ def test_get_analysis_fastq_files_directory_no_fastqs(
         assert fastq.is_symlink()
         assert fastq.resolve().is_file()
         assert fastq_dir == fastq.resolve().parent.as_posix()
+
+
+def test_get_all_sample_names(balsamic_model):
+    """Validate retrieval of all sample names in analysis from BalsamicConfigModel."""
+    sample_names = balsamic_model.get_all_sample_names()
+    assert ["ACC1", "ACC2"] == sample_names
+
+def test_get_fastq_patterns_by_sample(balsamic_model, tumor_sample_name, normal_sample_name):
+    """Validate retrieval of fastq-pattern by sample from BalsamicConfigModel."""
+    def compare_fastq_pattern_lists(expected: List[str], found: List[str]):
+        assert all(fastq_pattern in found for fastq_pattern in expected), "Not all expected fastq patterns found."
+        assert len(expected) == len(found), "Not same number of fastq patterns"
+
+    tumor_fastq_patterns_expected = ["HXXXXXXX_ACC1_S01_L001", "HXXXXXXX_ACC1_S01_L002"]
+    normal_fastq_patterns_expected = ["HXXXXXXX_ACC2_S01_L001", "HXXXXXXX_ACC2_S01_L002"]
+    fastq_patterns_all_expected = tumor_fastq_patterns_expected + normal_fastq_patterns_expected
+
+    tumor_fastq_patterns = balsamic_model.get_fastq_patterns_by_sample([tumor_sample_name])
+    normal_fastq_patterns = balsamic_model.get_fastq_patterns_by_sample([normal_sample_name])
+    fastq_patterns_all = balsamic_model.get_fastq_patterns_by_sample([tumor_sample_name, normal_sample_name])
+
+    compare_fastq_pattern_lists(tumor_fastq_patterns_expected, tumor_fastq_patterns)
+    compare_fastq_pattern_lists(normal_fastq_patterns_expected, normal_fastq_patterns)
+    compare_fastq_pattern_lists(fastq_patterns_all_expected, fastq_patterns_all)
+
+def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
+    """Validate retrieval of fastq-files by sample and fastq-type from BalsamicConfigModel."""
+    def compare_fastq_file_lists(expected: List[str], found: List[str]):
+        assert all(fastq_file in found for fastq_file in expected), "Not all expected fastq files found."
+        assert len(expected) == len(found), "Not same number of fastq files"
+
+    fwd_fastq_files_expected = [
+        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
+        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz"
+    ]
+    rev_fastq_files_expected = [
+        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
+        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
+    ]
+    fastq_files_expected = fwd_fastq_files_expected + rev_fastq_files_expected
+    normal_fastq = "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz"
+
+    fwd_fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.FWD])
+    rev_fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.REV])
+    fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.FWD, FastqName.REV])
+
+    compare_fastq_file_lists(fastq_files_expected, fwd_fastq_files)
+    compare_fastq_file_lists(rev_fastq_files_expected, rev_fastq_files)
+    compare_fastq_file_lists(fastq_files_expected, fastq_files)
+    assert normal_fastq not in fastq_files
+
+def test_fastq_by_fastq_pattern(balsamic_model):
+    """Validate retrieval of fastq-file by fastq-pattern and fastq-type from BalsamicConfigModel."""
+
+    fastq_pattern = "HXXXXXXX_ACC2_S01_L002"
+    expected_fwd = "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz"
+    expected_rev = "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
+
+    fwd_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.FWD)
+    rev_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.REV)
+
+    assert fwd_fastq == expected_fwd
+    assert rev_fastq == expected_rev
+
+
+def test_sample_name_by_type(balsamic_model):
+    """Validate retrieval of sample name by sample type from BalsamicConfigModel."""
+
+    tumor_name_expected = "ACC1"
+    normal_name_expected = "ACC2"
+
+    # Given sample type
+    tumor_name_retrieved = balsamic_model.get_sample_name_by_type(SampleType.TUMOR)
+    normal_name_retrieved = balsamic_model.get_sample_name_by_type(SampleType.NORMAL)
+
+    # Then the retrieved sample name should match the expected
+    assert tumor_name_retrieved == tumor_name_expected
+    assert normal_name_retrieved == normal_name_expected
+
+def test_sample_type_by_name(balsamic_model):
+    """Validate retrieval of sample type by sample name from BalsamicConfigModel."""
+
+    tumor_name_expected = "ACC1"
+    normal_name_expected = "ACC2"
+
+    # Given sample type
+    tumor_name_retrieved = balsamic_model.get_sample_type_by_name(SampleType.TUMOR)
+    normal_name_retrieved = balsamic_model.get_sample_type_by_name(SampleType.NORMAL)
+
+    # Then the retrieved sample name should match the expected
+    assert tumor_name_retrieved == tumor_name_expected
+    assert normal_name_retrieved == normal_name_expected
+
+def test_bam_name_per_lane():
+    """"""
+    pass
+
+def test_get_final_bam_name():
+    """"""
+    pass
+
+def test_get_bam_names(sample_config, tumor_sample_name, normal_sample_name):
+    """Tests assignment of bamfile names to sample_dict"""
+
+
+
+    bam_dir = "tests/test_data/id1/analysis/" + "/bam/"
+    sample_dict = dict(sample_config["samples"])
+    analysis_type = sample_config["analysis"]["analysis_type"]
+
+    assert analysis_type == "paired"
+
+    bam_dict_tumor = get_bam_names(
+        tumor_sample_name, sample_dict, bam_dir, analysis_type
+    )
+    bam_dict_normal = get_bam_names(
+        normal_sample_name, sample_dict, bam_dir, analysis_type
+    )
+    bam_dict_tumor_expected = {
+        "align_sort_bamlist": [f"{bam_dir}ACC1_align_sort_ACC1_S1_L001_R.bam"],
+        "final_bam": f"{bam_dir}tumor.ACC1.dedup.realign.bam",
+    }
+    bam_dict_normal_expected = {
+        "align_sort_bamlist": [f"{bam_dir}ACC2_align_sort_ACC2_S1_L001_R.bam"],
+        "final_bam": f"{bam_dir}normal.ACC2.dedup.realign.bam",
+    }
+
+    assert bam_dict_tumor == bam_dict_tumor_expected
+    assert bam_dict_normal == bam_dict_normal_expected
+
+
+def test_get_pon_bam_name(pon_creation_config):
+    """Tests assignment of bamfile names to sample_dict with pon as analysis_type"""
+    bam_dir = "tests/test_data/id1/analysis/" + "bam/"
+    config_dict = json.load(open(pon_creation_config, "r"))
+    sample_dict = config_dict["samples"]
+    analysis_type = config_dict["analysis"]["analysis_type"]
+    test_sample = "ACCN1"
+
+    assert analysis_type == "pon"
+    assert test_sample in sample_dict
+
+    sample_dict[test_sample]["bam"] = get_bam_names(
+        test_sample, sample_dict, bam_dir, analysis_type
+    )
+
+    bam_dict_pon_expected = {
+        "align_sort_bamlist": [
+            f"{bam_dir}{test_sample}_align_sort_1_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
+            f"{bam_dir}{test_sample}_align_sort_2_171015_HJ7TLDSX5_{test_sample}_XXXXXX_R.bam",
+        ],
+        "final_bam": f"{bam_dir}normal.{test_sample}.dedup.bam",
+    }
+
+    assert sample_dict[test_sample]["bam"] == bam_dict_pon_expected
+
+
+def test_get_fastqpatterns(sample_config, tumor_sample_name, normal_sample_name):
+    """Tests proper extraction of fastq patterns from sample_dict"""
+
+    # Verify the extraction of fastq patterns for all samples
+    sample_dict = dict(sample_config["samples"])
+    fastq_patterns_all = get_fastqpatterns(sample_dict)
+    fastq_patterns_all_expected = ["ACC1_S1_L001_R", "ACC2_S1_L001_R"]
+    assert fastq_patterns_all == fastq_patterns_all_expected
+
+    # Verify the extraction of fastq patterns for the tumor sample
+    fastq_patterns_tumor = get_fastqpatterns(sample_dict, tumor_sample_name)
+    fastq_patterns_tumor_expected = ["ACC1_S1_L001_R"]
+    assert fastq_patterns_tumor == fastq_patterns_tumor_expected
+
+    # Verify the extraction of fastq patterns for the normal sample
+    fastq_patterns_normal = get_fastqpatterns(sample_dict, normal_sample_name)
+    fastq_patterns_normal_expected = ["ACC2_S1_L001_R"]
+    assert fastq_patterns_normal == fastq_patterns_normal_expected
+
+
+def test_get_sample_list(
+    tumor_sample_name: str, normal_sample_name: str, fastq_dir: str
+):
+    """Tests sample dictionary retrieval."""
+
+    samples: List = get_sample_list(
+        tumor_sample_name=tumor_sample_name,
+        normal_sample_name=normal_sample_name,
+        fastq_path=fastq_dir,
+    )
+    assert samples[0].name == tumor_sample_name
+    assert samples[1].name == normal_sample_name
+    assert samples[0].type == "tumor"
+    assert samples[1].type == "normal"
+    assert samples[0].fastq_info
+    assert samples[1].fastq_info
+
+
+def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3):
+    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
+    # GIVEN a fastq_dir with these files: ACC1_XXXXX_R_1.fastq.gz and ACC1_XXXXX_R_2.fastq.gz and sample name ACC1
+
+    # WHEN calling the get_fastq_info function
+    fastq_dict = get_fastq_info(tumor_sample_name, fastq_dir_tumor_only_single_id3)
+
+    # THEN check that the fastq_dict matches the expected fastq_dict
+    expected_fastq_dict = {
+        "ACC1_XXXXX_R": {
+            "fwd": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_1.fastq.gz",
+            "rev": f"{fastq_dir_tumor_only_single_id3}/ACC1_XXXXX_R_2.fastq.gz",
+        }
+    }
+    assert fastq_dict == expected_fastq_dict
+
+
+def test_get_fastq_info_empty_fastq_dir(tumor_sample_name, empty_fastq_dir):
+    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
+    # GIVEN an empty fastq_dir and a sample name
+
+    # WHEN calling get_fastq_info
+    # THEN the following error should be found
+    with pytest.raises(
+        FileNotFoundError, match="No fastq files found in supplied fastq-path"
+    ):
+        get_fastq_info(tumor_sample_name, empty_fastq_dir)
+
+
+def test_get_fastq_info_double_assigned_fastq_pattern(
+    tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns
+):
+    """Tests if get_fastq_info correctly reports error of finding double-assigned fastq-patterns"""
+    # GIVEN an empty fastq_dir and a sample name
+
+    # WHEN calling get_fastq_info
+    # THEN the following error should be found
+    with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
+        get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns)
