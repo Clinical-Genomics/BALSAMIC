@@ -218,11 +218,11 @@
             "name": "ACC1",
             "type": "tumor",
             "fastq_info": {
-                "HXXXXXXX_ACC1_S01_L001": {
+                "HXXXXXXX_ACC1_S01_L001_R": {
                     "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
                     "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz"
                 },
-                "HXXXXXXX_ACC1_S01_L002": {
+                "HXXXXXXX_ACC1_S01_L002_R": {
                     "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
                     "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
                 }
@@ -232,11 +232,11 @@
             "name": "ACC2",
             "type": "normal",
             "fastq_info": {
-                "HXXXXXXX_ACC2_S01_L002": {
+                "HXXXXXXX_ACC2_S01_L002_R": {
                     "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz",
                     "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
                 },
-                "HXXXXXXX_ACC2_S01_L001": {
+                "HXXXXXXX_ACC2_S01_L001_R": {
                     "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
                     "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz"
                 }

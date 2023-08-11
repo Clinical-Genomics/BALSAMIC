@@ -140,28 +140,6 @@
             }
         }
     ],
-    "test_fastq_info_illegal_fastq_pairs": [
-        {
-            "name": "ACC1",
-            "type": "tumor",
-            "fastq_info": {
-                "HXXXXXXX_ACC1_S01_L001_FWD_001": {
-                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L001_FWD_001_1.fastq.gz",
-                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC1_S01_L001_REV_001_2.fastq.gz"
-                }
-            }
-        },
-        {
-            "name": "ACC2",
-            "type": "normal",
-            "fastq_info": {
-                "HXXXXXXX_ACC2_S01_L001_R": {
-                    "fwd": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
-                    "rev": "tests/test_data/fastq_lanes/HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz"
-                }
-            }
-        }
-    ],
     "fastq_fails": {
         "duplicate_fastq_patterns": {
             "tumor": [
@@ -171,16 +149,32 @@
                 "ACC1_S1_L001_R_2.fastq.gz"
             ]
         },
-        "duplicate_fastq_patterns_model": {
-            "tumor": [
-                "ACC1_S1_L001_R1_001.fastq.gz",
-                "ACC1_S1_L001_R2_001.fastq.gz"
-            ],
-            "normal": [
-                "TEST_S1_L001_R1_001.fastq.gz",
-                "TEST_S1_L001_R2_001.fastq.gz"
-            ]
+        "duplicate_fastq_patterns_model": [
+        {
+            "name": "ACC1",
+            "type": "tumor",
+            "fastq_info": {
+                "ACC1_S1_L001_R": {
+                    "fwd": "ACC1_S1_L001_R1_001.fastq.gz",
+                    "rev": "ACC1_S1_L001_R2_001.fastq.gz"
+                }
+            }
         },
+        {
+            "name": "S1",
+            "type": "normal",
+            "fastq_info": {
+                "ACC1_S1_L001_R": {
+                    "fwd": "ACC1_S1_L001_R1_001.fastq.gz",
+                    "rev": "ACC1_S1_L001_R2_001.fastq.gz"
+                },
+                "NICEPREFIX_S1_L001_R": {
+                    "fwd": "NICEPREFIX_S1_L001_R1_001.fastq.gz",
+                    "rev": "NICEPREFIX_S1_L001_R2_001.fastq.gz"
+                }
+            }
+        }
+        ],
         "illegal_normal_sample_name": {
             "tumor": ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz"],
             "normal": [

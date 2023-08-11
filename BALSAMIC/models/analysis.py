@@ -378,37 +378,13 @@ class FastqInfoModel(BaseModel):
     fwd: FilePath
     rev: FilePath
 
-    @root_validator
-    def validate_fastq_pairs_in_fastq_pattern(cls, values: Dict[str, Path]):
-        """
-        Requirements to pass fastq-inputs for a sample:
-        - All forward and reverse fastq pairs must be of the same length
-        - All forward and reverse fastq pairs must have exactly 1 difference in their names
-        """
-        fwd_fastq_name = values[FastqName.FWD].name
-        rev_fastq_name = values[FastqName.REV].name
+    @validator("fwd")
+    def fwd_path_as_abspath_str(cls, value):
+        return Path(value).resolve().as_posix()
 
-        if len(fwd_fastq_name) != len(rev_fastq_name):
-            error_message = (
-                f"Fastq pair does not have names of equal length:"
-                f"fwd: {fwd_fastq_name} rev: {rev_fastq_name}"
-            )
-            raise ValidationError(error_message)
-
-        # Fastq files in a pair must have file-names with maximum 1 character difference
-        count_str_diff: int = sum(
-            fwd_char != rev_char
-            for fwd_char, rev_char in zip(fwd_fastq_name, rev_fastq_name)
-        )
-
-        if count_str_diff != 1:
-            error_message = (
-                f"Fastq pair does not have exactly 1 differences ({count_str_diff}),"
-                f"Fwd: {fwd_fastq_name} Rev: {rev_fastq_name}"
-            )
-            raise ValidationError(error_message)
-
-        return {FastqName.FWD: values[FastqName.FWD].as_posix(), FastqName.REV: values[FastqName.REV].as_posix()}
+    @validator("rev")
+    def rev_path_as_abspath_str(cls, value):
+        return Path(value).resolve().as_posix()
 
 
 class SampleInstanceModel(BaseModel):
@@ -522,9 +498,7 @@ class ConfigModel(BaseModel):
 
     @validator("samples")
     def no_duplicate_fastq_patterns(cls, samples):
-        """
-        Validate that no duplicate fastq patterns have been assigned in dict
-        """
+        """Validate that no duplicate fastq patterns have been assigned in dict."""
         fastq_info_values = set()
         for sample in samples:
             for fastq_pattern in sample.fastq_info.keys():
@@ -616,7 +590,6 @@ class ConfigModel(BaseModel):
 
         All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
 
-
         def get_all_fwd_rev_values(samples):
             fwd_rev_values = []
             for sample in samples:
@@ -635,14 +608,12 @@ class ConfigModel(BaseModel):
         fastqs_assigned = set(get_all_fwd_rev_values(samples))
 
         unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
-        unassigned_fastqs = []
         if unassigned_fastqs:
             error_message = f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
             raise ValidationError(error_message)
 
         return samples
 """
-
 
 class PonBalsamicConfigModel(ConfigModel):
     """Summarizes config models in preparation for export

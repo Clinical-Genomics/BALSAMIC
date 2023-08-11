@@ -7,12 +7,11 @@ import sys
 import os
 from pathlib import Path
 from unittest import mock
-from typing import List
+from typing import List, Dict
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
-
 
 from BALSAMIC.models.analysis import FastqInfoModel
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, FastqName, SampleType
@@ -68,33 +67,28 @@ def test_remove_unnecessary_spaces():
     assert formatted_string == "Developing Balsamic brings me joy"
 
 
-def test_get_pon_sample_dict(
-    fastq_dir_pon: str, tumor_sample_name: str, normal_sample_name: str
-):
+def test_get_pon_sample_dict(pon_config_dict: str):
     """Tests sample PON dictionary retrieval."""
 
     # GIVEN a FASTQ directory
-
-    # GIVEN the expected sample dictionary
-    samples_expected: dict = {
-        "ACC1": {"type": "normal"},
-        "ACCN1": {"type": "normal"},
-        "ACCN2": {"type": "normal"},
-        "ACCN3": {"type": "normal"},
-        "ACCN4": {"type": "normal"},
-        "ACCN5": {"type": "normal"},
-        "ACCN6": {"type": "normal"},
-    }
-
+    fastq_dir_pon = pon_config_dict["analysis"]["fastq_path"]
     # WHEN retrieving PON samples
-    samples: dict = get_pon_sample_dict(fastq_dir_pon)
+    samples: List = get_pon_sample_list(fastq_dir_pon)
+
+    # Modify input dict to be full path to fastq files
+    pon_config_dict = pon_config_dict.copy()
+    for sample in pon_config_dict["samples"]:
+        for fastq_pattern, values in sample["fastq_info"].items():
+            values["fwd"] = Path(values["fwd"]).resolve().as_posix()
+            values["rev"] = Path(values["rev"]).resolve().as_posix()
+
 
     # THEN the samples should be retrieved from the FASTQ directory
-    for sample in samples:
-        assert (
-            sample in samples_expected
-            and samples[sample]["type"] == samples_expected[sample]["type"]
-        )
+    # And match the expected structure of pre-designed PON-config
+    for sample_model in samples:
+        sample_dict = sample_model.dict()
+        assert sample_dict in pon_config_dict["samples"]
+
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -571,7 +565,7 @@ def test_get_panel_chrom():
     assert len(get_panel_chrom(panel_bed_file)) > 0
 
 
-def test_convert_deliverables_tags():
+def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
     """Test generation of delivery tags."""
 
     # GIVEN a deliverables dict and a sample config dict
@@ -603,7 +597,7 @@ def test_convert_deliverables_tags():
             },
         ]
     }
-    sample_config_dict = {"samples": {"ACC1": {"type": "tumor"}}}
+    sample_config_dict = {"samples": tumor_normal_fastq_info_correct}
 
     # WHEN running the convert function
     delivery_json: dict = convert_deliverables_tags(
@@ -830,155 +824,6 @@ def test_get_analysis_fastq_files_directory_no_fastqs(
         assert fastq_dir == fastq.resolve().parent.as_posix()
 
 
-def test_get_all_sample_names(balsamic_model):
-    """Validate retrieval of all sample names in analysis from BalsamicConfigModel."""
-    sample_names = balsamic_model.get_all_sample_names()
-    assert ["ACC1", "ACC2"] == sample_names
-
-def test_get_fastq_patterns_by_sample(balsamic_model, tumor_sample_name, normal_sample_name):
-    """Validate retrieval of fastq-pattern by sample from BalsamicConfigModel."""
-    def compare_fastq_pattern_lists(expected: List[str], found: List[str]):
-        assert all(fastq_pattern in found for fastq_pattern in expected), "Not all expected fastq patterns found."
-        assert len(expected) == len(found), "Not same number of fastq patterns"
-
-    tumor_fastq_patterns_expected = ["HXXXXXXX_ACC1_S01_L001", "HXXXXXXX_ACC1_S01_L002"]
-    normal_fastq_patterns_expected = ["HXXXXXXX_ACC2_S01_L001", "HXXXXXXX_ACC2_S01_L002"]
-    fastq_patterns_all_expected = tumor_fastq_patterns_expected + normal_fastq_patterns_expected
-
-    tumor_fastq_patterns = balsamic_model.get_fastq_patterns_by_sample([tumor_sample_name])
-    normal_fastq_patterns = balsamic_model.get_fastq_patterns_by_sample([normal_sample_name])
-    fastq_patterns_all = balsamic_model.get_fastq_patterns_by_sample([tumor_sample_name, normal_sample_name])
-
-    compare_fastq_pattern_lists(tumor_fastq_patterns_expected, tumor_fastq_patterns)
-    compare_fastq_pattern_lists(normal_fastq_patterns_expected, normal_fastq_patterns)
-    compare_fastq_pattern_lists(fastq_patterns_all_expected, fastq_patterns_all)
-
-def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
-    """Validate retrieval of fastq-files by sample and fastq-type from BalsamicConfigModel."""
-    def compare_fastq_file_lists(expected: List[str], found: List[str]):
-        assert all(fastq_file in found for fastq_file in expected), "Not all expected fastq files found."
-        assert len(expected) == len(found), "Not same number of fastq files"
-
-    fwd_fastq_files_expected = [
-        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
-        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz"
-    ]
-    rev_fastq_files_expected = [
-        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
-        "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
-    ]
-    fastq_files_expected = fwd_fastq_files_expected + rev_fastq_files_expected
-    normal_fastq = "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz"
-
-    fwd_fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.FWD])
-    rev_fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.REV])
-    fastq_files = balsamic_model.get_all_fastqs_for_sample(tumor_sample_name, [FastqName.FWD, FastqName.REV])
-
-    compare_fastq_file_lists(fwd_fastq_files_expected, fwd_fastq_files)
-    compare_fastq_file_lists(rev_fastq_files_expected, rev_fastq_files)
-    compare_fastq_file_lists(fastq_files_expected, fastq_files)
-    assert normal_fastq not in fastq_files
-
-def test_fastq_by_fastq_pattern(balsamic_model):
-    """Validate retrieval of fastq-file by fastq-pattern and fastq-type from BalsamicConfigModel."""
-
-    fastq_pattern = "HXXXXXXX_ACC2_S01_L002"
-    expected_fwd = "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz"
-    expected_rev = "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
-
-    fwd_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.FWD)
-    rev_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.REV)
-
-    assert fwd_fastq == expected_fwd
-    assert rev_fastq == expected_rev
-
-
-def test_sample_name_by_type(balsamic_model):
-    """Validate retrieval of sample name by sample type from BalsamicConfigModel."""
-
-    tumor_name_expected = "ACC1"
-    normal_name_expected = "ACC2"
-
-    # Given sample type
-    tumor_name_retrieved = balsamic_model.get_sample_name_by_type(SampleType.TUMOR)
-    normal_name_retrieved = balsamic_model.get_sample_name_by_type(SampleType.NORMAL)
-
-    # Then the retrieved sample name should match the expected
-    assert tumor_name_retrieved == tumor_name_expected
-    assert normal_name_retrieved == normal_name_expected
-
-def test_sample_type_by_name(balsamic_model):
-    """Validate retrieval of sample type by sample name from BalsamicConfigModel."""
-
-    tumor_name = "ACC1"
-    normal_name = "ACC2"
-
-    # Given sample name
-    tumor_type_retrieved = balsamic_model.get_sample_type_by_name(tumor_name)
-    normal_type_retrieved = balsamic_model.get_sample_type_by_name(normal_name)
-
-    # Then the retrieved sample type should match the expected
-    assert tumor_type_retrieved == SampleType.TUMOR
-    assert normal_type_retrieved == SampleType.NORMAL
-
-def test_get_bam_name_per_lane(balsamic_model):
-    """Validate retrieval of per lane bam names by sample name."""
-    def compare_bam_file_lists(expected: List[str], found: List[str]):
-        assert all(bam_file in found for bam_file in expected), "Not all expected bam files found."
-        assert len(expected) == len(found), "Not same number of bam files"
-
-    # Fastq patterns for ACC2 in config.json
-    normal_lane1_fastq_pattern = "HXXXXXXX_ACC2_S01_L001"
-    normal_lane2_fastq_pattern = "HXXXXXXX_ACC2_S01_L002"
-
-    # Given bam_dir path and sample name
-    normal_name = "ACC2"
-    result_dir = balsamic_model.analysis.result
-    bam_dir = os.path.join(result_dir, "bam", "")
-
-    # When retrieving all per lane bam names for sample
-    bam_names = balsamic_model.get_bam_name_per_lane(bam_dir, normal_name)
-
-    # Then the bam names for all fastq patterns should be retrieved and match the expected format
-    expected_bam_name_lane1 = f"{bam_dir}{normal_name}_align_sort_{normal_lane1_fastq_pattern}.bam"
-    expected_bam_name_lane2 = f"{bam_dir}{normal_name}_align_sort_{normal_lane2_fastq_pattern}.bam"
-    expected_bam_names = [expected_bam_name_lane1, expected_bam_name_lane2]
-    compare_bam_file_lists(expected_bam_names, bam_names)
-
-def test_get_final_bam_name(balsamic_model):
-    """Validate retrieval of final bam name by either sample type or sample name."""
-
-    # Given bam_dir path and sample name or sample type
-    sample_name = "ACC1"
-    sample_type = SampleType.TUMOR
-    result_dir = balsamic_model.analysis.result
-    bam_dir = os.path.join(result_dir, "bam", "")
-
-    # When retrieving final bam file name by sample name or sample type
-    bam_name_sample_name = balsamic_model.get_final_bam_name(bam_dir, sample_name=sample_name)
-    bam_name_sample_type = balsamic_model.get_final_bam_name(bam_dir, sample_type=sample_type)
-
-    # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
-    assert expected_final_bam_name == bam_name_sample_name
-    assert bam_name_sample_name == bam_name_sample_type
-
-def test_get_final_bam_name_pon(balsamic_pon_model):
-    """Validate retrieval of final bam name for PON by either sample type or sample name."""
-
-    # Given bam_dir path and sample name or sample type
-    sample_name = "ACCN6"
-    sample_type = SampleType.NORMAL
-    result_dir = balsamic_pon_model.analysis.result
-    bam_dir = os.path.join(result_dir, "bam", "")
-
-    # When retrieving final bam file name by sample name or sample type
-    bam_name_sample_name = balsamic_pon_model.get_final_bam_name(bam_dir, sample_name=sample_name)
-
-    # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
-    assert expected_final_bam_name == bam_name_sample_name
-
 def test_get_sample_list(
     tumor_sample_name: str, normal_sample_name: str, fastq_dir_tumor_normal: str
 ):
@@ -1039,3 +884,5 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
     # THEN the following error should be found
     with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
         get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns)
+
+

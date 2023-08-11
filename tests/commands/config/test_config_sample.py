@@ -6,7 +6,6 @@ import graphviz
 
 from pathlib import Path
 
-from pydantic import ValidationError
 from tests.conftest import MOCKED_OS_ENVIRON
 
 
@@ -110,176 +109,6 @@ def test_tumor_only_config(
     assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
 
 
-def test_detection_unassigned_fastq_file(
-    invoke_cli,
-    case_id_tumor_normal: str,
-    tumor_sample_name: str,
-    normal_sample_name: str,
-    analysis_dir: str,
-    fastq_dir_tumor_normal_extrafile: str,
-    balsamic_cache: str,
-    panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-):
-    """Test tumor normal balsamic config case command with a fastq dir containing unassigned fastq-files."""
-
-    # GIVEN a case ID, fastq files, and an analysis dir
-    # WHEN creating a case analysis
-    # THEN creation of config-file should fail with ValidationError from pydantic
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        result = invoke_cli(
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal,
-                "--gender",
-                "male",
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_extrafile,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-            ],
-        )
-
-    assert result.exit_code == 1
-    exception = result.exception
-    assert isinstance(exception, ValidationError)
-    error_message = str(exception)
-    assert (
-        "Fastqs in fastq-dir not assigned to sample config"
-        in error_message
-    )
-
-def test_detect_duplicate_fastq_pattern(
-    invoke_cli,
-    case_id_tumor_normal: str,
-    tumor_sample_name: str,
-    normal_sample_name_problematic: str,
-    analysis_dir: str,
-    fastq_dir_tumor_duplicate_fastqpatterns_model: str,
-    balsamic_cache: str,
-    panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-):
-    """
-    Test tumor normal balsamic config case command with sample name and fastq names causing duplicate assigned fastq files and patterns.
-    """
-
-    # GIVEN a case ID, fastq files, and an analysis dir
-    # WHEN creating a case analysis
-    # THEN creation of config-file should fail with ValidationError from pydantic
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        result = invoke_cli(
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal,
-                "--gender",
-                "male",
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_duplicate_fastqpatterns_model,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name_problematic,
-            ],
-        )
-    assert result.exit_code == 1
-    exception = result.exception
-    assert isinstance(exception, ValidationError)
-    error_message = str(exception)
-    assert (
-        "Duplicate FastqPattern found"
-        in error_message
-    )
-
-
-def test_tumor_normal_config_illegal_sample_name(
-    invoke_cli,
-    case_id_tumor_normal: str,
-    tumor_sample_name: str,
-    illegal_normal_sample_name_v2: str,
-    analysis_dir: str,
-    fastq_dir_tumor_normal_illegal_normal_name: str,
-    balsamic_cache: str,
-    panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-):
-    """Test tumor normal balsamic config case command with sample-names that include each other."""
-
-    # GIVEN a case ID, fastq files, and an analysis dir
-    # WHEN creating a case analysis
-    # THEN creation of config-file should fail with ValidationError from pydantic
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        result = invoke_cli(
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal,
-                "--gender",
-                "male",
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_illegal_normal_name,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                illegal_normal_sample_name_v2,
-            ],
-        )
-    exception = result.exception
-    assert isinstance(exception, ValidationError)
-    error_message = str(exception)
-    assert (
-        "Sample name 'ACC2_NORMAL' contains an underscore (_). Underscores are not allowed."
-        in error_message
-    )
-    assert result.exit_code == 1
-
-
 def test_run_without_permissions(
     invoke_cli,
     case_id_tumor_only: str,
@@ -319,10 +148,10 @@ def test_run_without_permissions(
 
 def test_tumor_only_umi_config_background_file(
     invoke_cli,
-    case_id_tumor_only_umi: str,
+    case_id_tumor_only: str,
     tumor_sample_name: str,
     analysis_dir: str,
-    fastq_dir_tumor_only_umi: str,
+    fastq_dir_tumor_only: str,
     balsamic_cache: str,
     panel_bed_file: str,
     background_variant_file: str,
@@ -337,13 +166,13 @@ def test_tumor_only_umi_config_background_file(
             "config",
             "case",
             "--case-id",
-            case_id_tumor_only_umi,
+            case_id_tumor_only,
             "--analysis-workflow",
             "balsamic-umi",
             "--analysis-dir",
             analysis_dir,
             "--fastq-path",
-            fastq_dir_tumor_only_umi,
+            fastq_dir_tumor_only,
             "-p",
             panel_bed_file,
             "--background-variants",
@@ -367,8 +196,8 @@ def test_pon_cnn_file(
     balsamic_cache: str,
     panel_bed_file: str,
     pon_cnn_path: str,
-    fastq_dir_tumor_only_pon_cnn: str,
-    case_id_tumor_only_pon_cnn: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
 ):
     """Test balsamic config case with a PON reference."""
 
@@ -380,11 +209,11 @@ def test_pon_cnn_file(
             "config",
             "case",
             "--case-id",
-            case_id_tumor_only_pon_cnn,
+            case_id_tumor_only,
             "--analysis-dir",
             analysis_dir,
             "--fastq-path",
-            fastq_dir_tumor_only_pon_cnn,
+            fastq_dir_tumor_only,
             "-p",
             panel_bed_file,
             "--pon-cnn",

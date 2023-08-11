@@ -399,16 +399,18 @@ def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> 
 
     for delivery_file in delivery_json["files"]:
         file_tags = delivery_file["tag"].split(",")
-        for sample in sample_config_dict["samples"]:
-            sample_type = sample_config_dict["samples"][sample]["type"]
-            if sample == delivery_file["id"]:
+        sample_list = sample_config_dict["samples"]
+        for sample_dict in sample_list:
+            sample_type = sample_dict["type"]
+            sample_name = sample_dict["name"]
+            if sample_name == delivery_file["id"]:
                 for tag_index, tag in enumerate(file_tags):
-                    if tag == sample or tag == sample.replace("_", "-"):
-                        file_tags[tag_index] = sample
-                if sample not in file_tags:
-                    file_tags.append(sample)
+                    if tag == sample_name or tag == sample_name.replace("_", "-"):
+                        file_tags[tag_index] = sample_name
+                if sample_name not in file_tags:
+                    file_tags.append(sample_name)
             if sample_type == delivery_file["id"]:
-                delivery_file["id"] = sample
+                delivery_file["id"] = sample_name
             if sample_type in file_tags:
                 file_tags.remove(sample_type)
         delivery_file["tag"] = list(set(file_tags))
@@ -472,3 +474,4 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
 
         return analysis_fastq_path.as_posix()
     return fastq_path
+
