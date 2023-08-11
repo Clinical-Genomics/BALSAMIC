@@ -6,7 +6,7 @@ on:
 jobs:
   main:
     name: Docker release image build and publish
-    if:  startsWith(github.head_ref, "release_v")
+    if:  startsWith(github.head_ref, "update-docker")
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
