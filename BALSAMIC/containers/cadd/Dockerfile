@@ -8,8 +8,7 @@ LABEL about.description="CADD for BALSAMIC"
 
 RUN apt-get update && \
      apt-get -y upgrade && \
-     apt-get -y install -y --no-install-recommends \
-     tabix \
+     apt-get -y install --no-install-recommends \
      unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
