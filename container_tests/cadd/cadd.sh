@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "CADD.sh" "snakemake" "tabix")
+valid_commands=( "CADD.sh" "snakemake" )
 
 for valid_command in "${valid_commands[@]}"
 do
