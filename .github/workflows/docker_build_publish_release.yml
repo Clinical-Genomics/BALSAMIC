@@ -1,8 +1,8 @@
 name: Build and publish release containers
 on:
   pull_request:
-    branches:
-      - "master"
+#    branches:
+#      - "master"
 jobs:
   main:
     name: Docker release image build and publish
