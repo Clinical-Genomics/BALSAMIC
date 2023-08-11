@@ -404,9 +404,6 @@ def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> 
             sample_type = sample_dict["type"]
             sample_name = sample_dict["name"]
             if sample_name == delivery_file["id"]:
-                for tag_index, tag in enumerate(file_tags):
-                    if tag == sample_name or tag == sample_name.replace("_", "-"):
-                        file_tags[tag_index] = sample_name
                 if sample_name not in file_tags:
                     file_tags.append(sample_name)
             if sample_type == delivery_file["id"]:

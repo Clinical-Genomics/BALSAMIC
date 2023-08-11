@@ -139,34 +139,14 @@ def normal_sample_name() -> str:
     return "ACC2"
 
 @pytest.fixture(scope="session")
-def normal_sample_name_problematic() -> str:
-    """
-    Creates problematic normal sample name.
-    """
-    return "S1"
-
-@pytest.fixture(scope="session")
 def illegal_normal_sample_name() -> str:
     """Mock illegal normal sample name."""
     return "ACC1_NORMAL"
-
-
-@pytest.fixture(scope="session")
-def illegal_normal_sample_name_v2() -> str:
-    """Mock illegal normal sample name."""
-    return "ACC2_NORMAL"
-
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only() -> str:
     """Create mock case-id for TGA tumor-only."""
     return "sample_tumor_only"
-
-@pytest.fixture(scope="session")
-def case_id_tumor_normal_qc_canfam() -> str:
-    """Create mock case-id for tumor normal QC canfam tumor-only."""
-    return "sample_canfam_tumor_normal_qc"
-
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_w_dummy_vep() -> str:
@@ -604,22 +584,6 @@ def fastq_dir_tumor_normal_qc(analysis_dir: str, case_id_tumor_normal_qc: str, t
     yield fastq_dir.as_posix()
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_qc_canfam(analysis_dir: str, case_id_tumor_normal_qc_canfam: str, tumor_fastq_names: List[str], normal_fastq_names: List[str]) -> str:
-    """Creates and returns the directory containing the FASTQs for tumor-normal QC workflow."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal_qc_canfam, "fastq")
-    fastq_dir.mkdir(parents=True, exist_ok=True)
-
-    # Fill the fastq path folder with the test fastq-files
-    for fastq in tumor_fastq_names:
-        Path(fastq_dir, fastq).touch()
-
-    for fastq in normal_fastq_names:
-        Path(fastq_dir, fastq).touch()
-
-    yield fastq_dir.as_posix()
-
-
-@pytest.fixture(scope="session")
 def fastq_dir_tumor_only_qc(analysis_dir: str, case_id_tumor_only_qc: str, tumor_fastq_names: List[str]) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_qc, "fastq")
@@ -1021,69 +985,6 @@ def tumor_normal_config_qc(
         case_id_tumor_normal_qc,
         f"{case_id_tumor_normal_qc}.{FileType.JSON}",
     ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_normal_config_qc_canfam(
-    case_id_tumor_normal_qc_canfam: str,
-    tumor_sample_name: str,
-    normal_sample_name: str,
-    analysis_dir: str,
-    fastq_dir_tumor_normal_qc_canfam: str,
-    balsamic_cache: str,
-    background_variant_file: str,
-    panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-    analysis_workflow_qc: str,
-    genome_version_canfam: str,
-) -> str:
-    """
-    Invoke balsamic config sample to create sample configuration file for tumor-normal TGA QC workflow with canfam.
-    """
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "-p",
-                panel_bed_file,
-                "--case-id",
-                case_id_tumor_normal_qc_canfam,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_qc_canfam,
-                "--background-variants",
-                background_variant_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-                "--analysis-workflow",
-                analysis_workflow_qc,
-                "--genome-version",
-                genome_version_canfam,
-            ],
-        )
-
-    return Path(
-        analysis_dir,
-        case_id_tumor_normal_qc_canfam,
-        f"{case_id_tumor_normal_qc_canfam}.{FileType.JSON}",
-    ).as_posix()
-
 
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc_wgs(
