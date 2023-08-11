@@ -1,4 +1,4 @@
-name: Build and publish develop containers
+name: Docker develop containers
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ on:
       - "BALSAMIC/containers/**"
 jobs:
   main:
-    name: Docker develop image build and publish
+    name: Build and publish
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
