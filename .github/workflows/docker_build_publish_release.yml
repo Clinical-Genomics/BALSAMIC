@@ -1,12 +1,12 @@
 name: Build and publish release containers
 on:
   pull_request:
-#    branches:
-#      - "master"
+    branches:
+      - "master"
 jobs:
   main:
     name: Docker release image build and publish
-    if:  startsWith(github.head_ref, "update-docker")
+    if:  startsWith(github.head_ref, 'update-docker')
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
