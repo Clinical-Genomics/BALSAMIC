@@ -1,8 +1,13 @@
 FROM condaforge/mambaforge:23.1.0-4
 
+LABEL maintainer="BALSAMIC development team"
 LABEL base.image="condaforge/mambaforge:23.1.0.4"
-LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
-LABEL about.documentation="https://balsamic.readthedocs.io/"
+LABEL container="tabix"
+LABEL software="tabix"
+LABEL software.version="1.16"
+LABEL about.summary="Combined Annotation Dependent Depletion (CADD)"
+LABEL about.home="https://cadd.gs.washington.edu/"
+LABEL about.documentation="https://cadd.gs.washington.edu/info"
 LABEL about.license="MIT License (MIT)"
 LABEL about.description="CADD for BALSAMIC"
 
