@@ -4,10 +4,10 @@ on:
     branches:
       - "develop"
   pull_request:
+    branches-ignore:
+      - "master"
     paths:
       - "BALSAMIC/containers/**"
-    branches-ignore:
-      - "release_*"
 jobs:
   main:
     name: Docker develop image build and publish
