@@ -264,7 +264,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
             "[fastq_patternX]" (str): FastqInfoModel.
     """
 
-    fastq_dict: Dict[str: FastqInfoModel] = {}
+    fastq_dict: Dict[str:FastqInfoModel] = {}
     for suffix in FASTQ_SUFFIXES:
         fwd_suffix = FASTQ_SUFFIXES[suffix][FastqName.FWD]
         rev_suffix = FASTQ_SUFFIXES[suffix][FastqName.REV]
@@ -282,8 +282,10 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
                 fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
 
                 if fastqpair_pattern in fastq_dict:
-                    error_message = f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern}" \
-                                    f" already assigned to dictionary for sample: {sample_name}"
+                    error_message = (
+                        f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern}"
+                        f" already assigned to dictionary for sample: {sample_name}"
+                    )
                     LOG.error(error_message)
                     raise BalsamicError(error_message)
 
@@ -343,8 +345,10 @@ def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
 
     num_samples = len(sample_names)
     if num_samples < 6:
-        error_message = f"Number of samples detected in supplied fastq path ({num_samples})," \
-                        f"not sufficient for PON generation. Sample names detected: {sample_names}"
+        error_message = (
+            f"Number of samples detected in supplied fastq path ({num_samples}),"
+            f"not sufficient for PON generation. Sample names detected: {sample_names}"
+        )
         LOG.error(error_message)
         raise BalsamicError(error_message)
 
@@ -471,4 +475,3 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
 
         return analysis_fastq_path.as_posix()
     return fastq_path
-

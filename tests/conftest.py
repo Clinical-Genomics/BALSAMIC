@@ -67,11 +67,13 @@ def test_data_dir() -> str:
     """
     return "tests/test_data"
 
+
 @pytest.fixture(scope="session")
 def load_test_fastq_data(test_data_dir):
     """Returns dict from loaded json containing strings of fastq-names."""
     fastq_test_info_path = Path(test_data_dir, "fastq_test_info.json").as_posix()
     return read_json(fastq_test_info_path)
+
 
 @pytest.fixture(scope="session")
 def pon_fastq_list(load_test_fastq_data) -> list:
@@ -86,12 +88,14 @@ def tumor_fastq_names(
     """Returns a list of standard tumor fastq-names."""
     return load_test_fastq_data["standard_fastq_names"]["tumor"]
 
+
 @pytest.fixture(scope="session")
 def normal_fastq_names(
     load_test_fastq_data,
 ) -> Dict[str, List]:
     """Returns a list of standard normal fastq-names."""
     return load_test_fastq_data["standard_fastq_names"]["normal"]
+
 
 @pytest.fixture(scope="session")
 def fastq_names_duplicate_assigned_fastq_patterns(
@@ -100,6 +104,7 @@ def fastq_names_duplicate_assigned_fastq_patterns(
     """Returns dict with list of fastq file names for testing of duplicate assigned fastq patterns."""
     return load_test_fastq_data["fastq_fails"]["duplicate_fastq_patterns"]
 
+
 @pytest.fixture(scope="session")
 def sample_list_duplicate_assigned_fastq_patterns_model(
     load_test_fastq_data,
@@ -107,45 +112,54 @@ def sample_list_duplicate_assigned_fastq_patterns_model(
     """Returns List of sample-dicts with fastq-dicts with duplicate assigned fastq patterns."""
     return load_test_fastq_data["fastq_fails"]["duplicate_fastq_patterns_model"]
 
+
 @pytest.fixture(scope="session")
 def tumor_normal_fastq_info_correct(load_test_fastq_data) -> Dict[str, Dict]:
     """Mock tumor normal fastq info in sample_dict"""
     return load_test_fastq_data["test_fastq_info"]
+
 
 @pytest.fixture(scope="session")
 def analysis_workflow_qc():
     """Return string for balsamic QC workflow."""
     return "balsamic-qc"
 
+
 @pytest.fixture(scope="session")
 def genome_version_canfam():
     """Return string to specify Canfam reference for QC workflow."""
     return "canfam3"
+
 
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
     """Return a non-existent files directory path."""
     return tmp_path_factory.mktemp("session_tests")
 
+
 @pytest.fixture(scope="session")
 def tumor_sample_name() -> str:
     """Create mock name for tumor sample."""
     return "ACC1"
+
 
 @pytest.fixture(scope="session")
 def normal_sample_name() -> str:
     """Create mock name for normal sample."""
     return "ACC2"
 
+
 @pytest.fixture(scope="session")
 def illegal_normal_sample_name() -> str:
     """Mock illegal normal sample name."""
     return "ACC1_NORMAL"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_only() -> str:
     """Create mock case-id for TGA tumor-only."""
     return "sample_tumor_only"
+
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_w_dummy_vep() -> str:
@@ -172,24 +186,29 @@ def case_id_pon() -> str:
     """
     return "sample_pon_creation"
 
+
 def case_id_tumor_only_pon() -> str:
     """Create mock case-id for TGA PON tumor-only."""
     return "sample_tumor_only_pon"
+
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_umi() -> str:
     """Creates mock case-id for TGA tumor-only UMI workflow."""
     return "sample_tumor_only_umi"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_fastqdir() -> str:
     """Mock case ID for dummy fastqdir."""
     return "sample_tumor_normal_fastqdir"
 
+
 @pytest.fixture(scope="session")
 def case_id_tumor_normal() -> str:
     """Create mock case-id for TGA tumor-normal."""
     return "sample_tumor_normal"
+
 
 @pytest.fixture(scope="session")
 def case_id_tumor_normal_qc() -> str:
@@ -213,6 +232,7 @@ def case_id_tumor_only_wgs() -> str:
 def case_id_tumor_normal_wgs() -> str:
     """Create mock case-id for WGS tumor-normal."""
     return "sample_tumor_normal_wgs"
+
 
 @pytest.fixture
 def cli_runner():
@@ -291,34 +311,44 @@ def config_path(test_data_dir: str) -> str:
     """Created path for config json file."""
     return Path(test_data_dir, f"config.{FileType.JSON}").as_posix()
 
+
 @pytest.fixture(scope="session")
 def config_dict(config_path: str) -> str:
     """Read and return config from json."""
     return read_json(config_path)
 
+
 @pytest.fixture(scope="session")
 def config_dict_w_singularity(config_dict: str, balsamic_cache: str) -> str:
     """Read and return config from json with singularity image path."""
     modify_dict = config_dict.copy()
-    modify_dict["singularity"] = {"image": f"{balsamic_cache}/{balsamic_version}/containers"}
+    modify_dict["singularity"] = {
+        "image": f"{balsamic_cache}/{balsamic_version}/containers"
+    }
     return modify_dict
+
 
 @pytest.fixture(scope="session")
 def pon_config_path(test_data_dir: str) -> str:
     """Created path for PON config json file."""
     return Path(test_data_dir, f"config_pon.{FileType.JSON}").as_posix()
 
+
 @pytest.fixture(scope="session")
 def pon_config_dict(pon_config_path: str) -> str:
     """Read and return PON config from json."""
     return read_json(pon_config_path)
 
+
 @pytest.fixture(scope="session")
 def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> str:
     """Read and return PON config from json with singularity image path."""
     modify_pon_config_dict = pon_config_dict.copy()
-    modify_pon_config_dict["singularity"] = {"image": f"{balsamic_cache}/{balsamic_version}/containers"}
+    modify_pon_config_dict["singularity"] = {
+        "image": f"{balsamic_cache}/{balsamic_version}/containers"
+    }
     return modify_pon_config_dict
+
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
@@ -490,7 +520,9 @@ def fastq_dir(case_id_tumor_normal_fastqdir: str, analysis_dir: str, request):
 
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, tumor_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_only(
+    analysis_dir: str, case_id_tumor_only: str, tumor_fastq_names: List[str]
+) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-only.
     """
@@ -503,8 +535,11 @@ def fastq_dir_tumor_only(analysis_dir: str, case_id_tumor_only: str, tumor_fastq
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_pon_cnn(analysis_dir: str, case_id_tumor_only_pon_cnn: str, tumor_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_only_pon_cnn(
+    analysis_dir: str, case_id_tumor_only_pon_cnn: str, tumor_fastq_names: List[str]
+) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-only w pon cnn.
     """
@@ -517,8 +552,11 @@ def fastq_dir_tumor_only_pon_cnn(analysis_dir: str, case_id_tumor_only_pon_cnn: 
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str, tumor_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_only_wgs(
+    analysis_dir: str, case_id_tumor_only_wgs: str, tumor_fastq_names: List[str]
+) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-only WGS.
     """
@@ -531,8 +569,14 @@ def fastq_dir_tumor_only_wgs(analysis_dir: str, case_id_tumor_only_wgs: str, tum
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str, tumor_fastq_names: List[str], normal_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_normal(
+    analysis_dir: str,
+    case_id_tumor_normal: str,
+    tumor_fastq_names: List[str],
+    normal_fastq_names: List[str],
+) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-normal.
     """
@@ -548,8 +592,14 @@ def fastq_dir_tumor_normal(analysis_dir: str, case_id_tumor_normal: str, tumor_f
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str, tumor_fastq_names: List[str], normal_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_normal_wgs(
+    analysis_dir: str,
+    case_id_tumor_normal_wgs: str,
+    tumor_fastq_names: List[str],
+    normal_fastq_names: List[str],
+) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-normal WGS.
     """
@@ -565,8 +615,14 @@ def fastq_dir_tumor_normal_wgs(analysis_dir: str, case_id_tumor_normal_wgs: str,
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_qc(analysis_dir: str, case_id_tumor_normal_qc: str, tumor_fastq_names: List[str], normal_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_normal_qc(
+    analysis_dir: str,
+    case_id_tumor_normal_qc: str,
+    tumor_fastq_names: List[str],
+    normal_fastq_names: List[str],
+) -> str:
     """
     Creates and returns the directory containing the FASTQs for tumor-normal QC workflow.
     """
@@ -582,8 +638,11 @@ def fastq_dir_tumor_normal_qc(analysis_dir: str, case_id_tumor_normal_qc: str, t
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_qc(analysis_dir: str, case_id_tumor_only_qc: str, tumor_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_only_qc(
+    analysis_dir: str, case_id_tumor_only_qc: str, tumor_fastq_names: List[str]
+) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_qc, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -594,11 +653,10 @@ def fastq_dir_tumor_only_qc(analysis_dir: str, case_id_tumor_only_qc: str, tumor
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
 def fastq_dir_tumor_only_w_dummy_vep(
-    analysis_dir: str,
-    case_id_tumor_only_w_dummy_vep: str,
-    tumor_fastq_names: List[str]
+    analysis_dir: str, case_id_tumor_only_w_dummy_vep: str, tumor_fastq_names: List[str]
 ) -> str:
     """Creates and returns the directory containing the FASTQs."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_w_dummy_vep, "fastq")
@@ -646,7 +704,6 @@ def empty_fastq_dir(analysis_dir: str, case_id_tumor_normal: str) -> str:
     yield fastq_dir.as_posix()
 
 
-
 @pytest.fixture(scope="session", params=fastq_patterns(), ids=fastq_pattern_ids())
 def fastq_dir_tumor_normal_parameterize(
     analysis_dir: str, case_id_tumor_normal: str, request
@@ -692,17 +749,20 @@ def fastq_dir_tumor_duplicate_fastqpatterns(
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
 def config_w_fastq_dir_for_duplicate_fastqpatterns_model(
     analysis_dir: str,
     case_id_tumor_normal: str,
     sample_list_duplicate_assigned_fastq_patterns_model: List[Dict],
-    config_dict_w_singularity: Dict
+    config_dict_w_singularity: Dict,
 ) -> str:
     """Creates and returns the directory containing the FASTQs to test duplicate fastq-patterns to test model."""
 
     fastq_dir: Path = Path(
-        analysis_dir, case_id_tumor_normal, "fastq_duplicate_assigned_fastq_patterns_model"
+        analysis_dir,
+        case_id_tumor_normal,
+        "fastq_duplicate_assigned_fastq_patterns_model",
     )
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
@@ -725,8 +785,14 @@ def config_w_fastq_dir_for_duplicate_fastqpatterns_model(
 
     return modified_dict
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_extrafile(analysis_dir: str, case_id_tumor_normal: str, tumor_fastq_names: List[str], normal_fastq_names: List[str]) -> str:
+def fastq_dir_tumor_normal_extrafile(
+    analysis_dir: str,
+    case_id_tumor_normal: str,
+    tumor_fastq_names: List[str],
+    normal_fastq_names: List[str],
+) -> str:
     """Creates and returns the directory containing the FASTQs to test detection of unassigned fastq-files."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq_extrafile")
     fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -744,6 +810,7 @@ def fastq_dir_tumor_normal_extrafile(analysis_dir: str, case_id_tumor_normal: st
     Path(fastq_dir, extra_file2).touch()
 
     yield fastq_dir.as_posix()
+
 
 @pytest.fixture(scope="session")
 def snakemake_job_script(tmp_path_factory, tumor_normal_config):
@@ -766,6 +833,7 @@ def fixture_config_helpers():
     """Return helper for case config files"""
     return ConfigHelper()
 
+
 @pytest.fixture(scope="session")
 def balsamic_model(
     config_dict_w_singularity: Dict,
@@ -775,14 +843,18 @@ def balsamic_model(
     balsamic_config = BalsamicConfigModel.parse_obj(config_dict_w_singularity)
     return balsamic_config
 
+
 @pytest.fixture(scope="session")
 def balsamic_pon_model(
     pon_config_dict_w_singularity: Dict,
 ) -> PonBalsamicConfigModel:
     """Return PonBalsamicConfigModel parsed from static PON config dict."""
     # Initialize balsamic PON model
-    balsamic_pon_config = PonBalsamicConfigModel.parse_obj(pon_config_dict_w_singularity)
+    balsamic_pon_config = PonBalsamicConfigModel.parse_obj(
+        pon_config_dict_w_singularity
+    )
     return balsamic_pon_config
+
 
 @pytest.fixture(scope="session")
 def tumor_only_config(
@@ -854,6 +926,7 @@ def tumor_only_config(
         case_id_tumor_only,
         f"{case_id_tumor_only}.{FileType.JSON}",
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_normal_config(
@@ -929,6 +1002,7 @@ def tumor_normal_config(
         f"{case_id_tumor_normal}.{FileType.JSON}",
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc(
     case_id_tumor_normal_qc: str,
@@ -985,6 +1059,7 @@ def tumor_normal_config_qc(
         f"{case_id_tumor_normal_qc}.{FileType.JSON}",
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def tumor_normal_config_qc_wgs(
     case_id_tumor_normal_qc_wgs: str,
@@ -1028,7 +1103,7 @@ def tumor_normal_config_qc_wgs(
                 "--normal-sample-name",
                 normal_sample_name,
                 "--analysis-workflow",
-                analysis_workflow_qc
+                analysis_workflow_qc,
             ],
         )
 
@@ -1037,6 +1112,7 @@ def tumor_normal_config_qc_wgs(
         case_id_tumor_normal_qc_wgs,
         f"{case_id_tumor_normal_qc_wgs}.{FileType.JSON}",
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(
@@ -1105,6 +1181,7 @@ def tumor_normal_wgs_config(
         case_id_tumor_normal_wgs,
         f"{case_id_tumor_normal_wgs}.{FileType.JSON}",
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_only_config_w_dummy_vep(
@@ -1206,6 +1283,7 @@ def tumor_only_config_qc(
     return Path(
         analysis_dir, case_id_tumor_only_qc, f"{case_id_tumor_only_qc}.{FileType.JSON}"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def tumor_only_wgs_config(

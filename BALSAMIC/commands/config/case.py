@@ -256,7 +256,9 @@ def case_config(
             "analysis_workflow": analysis_workflow,
         },
         reference=reference_dict,
-        singularity={"image": os.path.join(balsamic_cache, balsamic_version, "containers")},
+        singularity={
+            "image": os.path.join(balsamic_cache, balsamic_version, "containers")
+        },
         background_variants=background_variants,
         samples=get_sample_list(
             tumor_sample_name=tumor_sample_name,

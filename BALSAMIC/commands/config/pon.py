@@ -140,7 +140,9 @@ def pon_config(
         },
         samples=get_pon_sample_list(fastq_path),
         reference=reference_dict,
-        singularity={"image": os.path.join(balsamic_cache, balsamic_version, "containers")},
+        singularity={
+            "image": os.path.join(balsamic_cache, balsamic_version, "containers")
+        },
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,

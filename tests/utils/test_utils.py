@@ -49,7 +49,7 @@ from BALSAMIC.utils.rule import (
     get_threads,
     get_delivery_id,
     get_rule_output,
-    get_sample_type_from_sample_name
+    get_sample_type_from_sample_name,
 )
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
@@ -67,7 +67,7 @@ def test_remove_unnecessary_spaces():
     assert formatted_string == "Developing Balsamic brings me joy"
 
 
-def test_get_pon_sample_dict(pon_config_dict: str):
+def test_get_pon_sample_dict(pon_config_dict: Dict):
     """Tests sample PON dictionary retrieval."""
 
     # GIVEN a FASTQ directory
@@ -76,19 +76,17 @@ def test_get_pon_sample_dict(pon_config_dict: str):
     samples: List = get_pon_sample_list(fastq_dir_pon)
 
     # Modify input dict to be full path to fastq files
-    pon_config_dict = pon_config_dict.copy()
+    pon_config_dict = copy.deepcopy(pon_config_dict)
     for sample in pon_config_dict["samples"]:
         for fastq_pattern, values in sample["fastq_info"].items():
             values["fwd"] = Path(values["fwd"]).resolve().as_posix()
             values["rev"] = Path(values["rev"]).resolve().as_posix()
-
 
     # THEN the samples should be retrieved from the FASTQ directory
     # And match the expected structure of pre-designed PON-config
     for sample_model in samples:
         sample_dict = sample_model.dict()
         assert sample_dict in pon_config_dict["samples"]
-
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -334,6 +332,7 @@ def test_get_vcf_invalid_variant_caller(sample_config):
     with pytest.raises(KeyError):
         # THEN a key error should be raised for a not supported caller
         get_vcf(sample_config, variant_callers, [sample_config["analysis"]["case_id"]])
+
 
 def test_createDir(tmp_path):
     # GIVEN a directory path
@@ -694,6 +693,7 @@ def test_get_sample_type_from_sample_name(config_dict):
     # THEN the retrieved sample type should match the expected one
     assert sample_type == SampleType.TUMOR
 
+
 def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
 
@@ -858,8 +858,10 @@ def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only):
     fastq_info2_expected = FastqInfoModel(fwd=fwd2_expected, rev=rev2_expected)
 
     # THEN check that the fastq_dict matches the expected fastq_dict
-    expected_fastq_dict = {"1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected,
-                           "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected}
+    expected_fastq_dict = {
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected,
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected,
+    }
     assert fastq_dict == expected_fastq_dict
 
 
@@ -885,5 +887,3 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
     # THEN the following error should be found
     with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
         get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns)
-
-

@@ -21,7 +21,6 @@ from BALSAMIC.utils.cli import (
 )
 
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -198,7 +197,6 @@ def analysis(
     resultpath = sample_config["analysis"]["result"]
     benchmarkpath = sample_config["analysis"]["benchmark"]
     case_name = sample_config["analysis"]["case_id"]
-    sample_dict = sample_config["samples"]
 
     if run_analysis:
         # if not dry run, then create (new) log/script directory
@@ -216,8 +214,8 @@ def analysis(
         os.makedirs(scriptpath, exist_ok=True)
         os.makedirs(benchmarkpath, exist_ok=True)
 
-    # Initialize balsamic model
-    balsamic_config = BalsamicConfigModel.parse_obj(sample_config)
+    # Initialize balsamic model to run validation tests
+    BalsamicConfigModel.parse_obj(sample_config)
 
     analysis_type = sample_config["analysis"]["analysis_type"]
     analysis_workflow = sample_config["analysis"]["analysis_workflow"]

@@ -336,16 +336,15 @@ class AnalysisModel(BaseModel):
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return (
-                Path(
-                    values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
-                ).as_posix()
-                + f"_BALSAMIC_{balsamic_version}_graph.pdf"
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
+            ).as_posix()
+            + f"_BALSAMIC_{balsamic_version}_graph.pdf"
         )
 
     @validator("config_creation_date")
     def datetime_as_string(cls, value):
         return datetime.now().strftime("%Y-%m-%d %H:%M")
-
 
 
 class AnalysisPonModel(AnalysisModel):
@@ -451,29 +450,29 @@ class PanelModel(BaseModel):
 
 class ConfigModel(BaseModel):
     """
-        Parent class providing common functions and variables for different balsamic workflows.
+    Parent class providing common functions and variables for different balsamic workflows.
 
-        Attributes:
-            QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
-            samples : Field(List[SampleInstanceModel]); List containing samples submitted for analysis
-            reference : Field(Dict); dictionary containing paths to reference genome files
-            panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
-            bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
-            bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
-            singularity : Field(Dict); path to singularity container of BALSAMIC
+    Attributes:
+        QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
+        samples : Field(List[SampleInstanceModel]); List containing samples submitted for analysis
+        reference : Field(Dict); dictionary containing paths to reference genome files
+        panel : Field(PanelModel(optional)); variables relevant to PANEL BED if capture kit is used
+        bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
+        bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
+        singularity : Field(Dict); path to singularity container of BALSAMIC
 
-        This class also contains functions that help retrieve sample and file information,
-        facilitating BALSAMIC run operations in Snakemake.
+    This class also contains functions that help retrieve sample and file information,
+    facilitating BALSAMIC run operations in Snakemake.
 
-        Functions:
-            - get_all_sample_names: Return all sample names in the analysis.
-            - get_fastq_patterns_by_sample: Return all fastq patterns for given samples.
-            - get_all_fastqs_for_sample: Return all fastqs for a sample.
-            - get_fastq_by_fastq_pattern: Return fastq file path for requested fastq pattern and type.
-            - get_sample_name_by_type: Return sample name for requested sample type.
-            - get_sample_type_by_name: Return sample type for requested sample name.
-            - get_bam_name_per_lane: Return list of bam file names for all fastq patterns of a sample.
-            - get_final_bam_name: Return final bam name for downstream analysis.
+    Functions:
+        - get_all_sample_names: Return all sample names in the analysis.
+        - get_fastq_patterns_by_sample: Return all fastq patterns for given samples.
+        - get_all_fastqs_for_sample: Return all fastqs for a sample.
+        - get_fastq_by_fastq_pattern: Return fastq file path for requested fastq pattern and type.
+        - get_sample_name_by_type: Return sample name for requested sample type.
+        - get_sample_type_by_name: Return sample type for requested sample name.
+        - get_bam_name_per_lane: Return list of bam file names for all fastq patterns of a sample.
+        - get_final_bam_name: Return final bam name for downstream analysis.
     """
 
     QC: QCModel
@@ -522,7 +521,9 @@ class ConfigModel(BaseModel):
                 fastq_pattern_list.extend(sample.fastq_info.keys())
         return fastq_pattern_list
 
-    def get_all_fastqs_for_sample(self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]) -> List[str]:
+    def get_all_fastqs_for_sample(
+        self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]
+    ) -> List[str]:
         """Return all fastqs (optionally only [fastq/rev]) involved in analysis of sample."""
         fastq_list = []
         for sample in self.samples:
@@ -543,7 +544,10 @@ class ConfigModel(BaseModel):
                 elif fastq_type == FastqName.REV:
                     return sample.fastq_info[fastq_pattern].rev
                 else:
-                    raise ValueError(f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: {fastq_type}")
+                    raise ValueError(
+                        f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: {fastq_type}"
+                    )
+
     def get_sample_name_by_type(self, sample_type: str) -> str:
         """Return sample name for requested sample type."""
         for sample in self.samples:
@@ -562,14 +566,20 @@ class ConfigModel(BaseModel):
         for sample in self.samples:
             if sample.name == sample_name:
                 for fastq_pattern in sample.fastq_info:
-                    bam_names.append(f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam")
+                    bam_names.append(
+                        f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam"
+                    )
         return bam_names
 
-    def get_final_bam_name(self, bam_dir: str, sample_name: str = None, sample_type: str = None) -> str:
+    def get_final_bam_name(
+        self, bam_dir: str, sample_name: str = None, sample_type: str = None
+    ) -> str:
         """Return final bam name to be used in downstream analysis."""
 
         if sample_name is None and sample_type is None:
-            raise ValueError("Either sample_name or sample_type must be provided to get the final bam name.")
+            raise ValueError(
+                "Either sample_name or sample_type must be provided to get the final bam name."
+            )
 
         if sample_name is None:
             sample_name = self.get_sample_name_by_type(sample_type)
@@ -583,6 +593,7 @@ class ConfigModel(BaseModel):
         else:
             # For every analysis except PON, the name of the final processed bamfile is defined here
             return f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
+
 
 """
     @validator("samples")
@@ -615,6 +626,7 @@ class ConfigModel(BaseModel):
         return samples
 """
 
+
 class PonBalsamicConfigModel(ConfigModel):
     """Summarizes config models in preparation for export
 
@@ -623,6 +635,7 @@ class PonBalsamicConfigModel(ConfigModel):
     """
 
     analysis: AnalysisPonModel
+
 
 class BalsamicConfigModel(ConfigModel):
     """Summarizes config models in preparation for export

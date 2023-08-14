@@ -105,10 +105,13 @@ class BioinfoTools(StrEnum):
     VCF2CYTOSURE: str = "vcf2cytosure"
     VCFANNO: str = "vcfanno"
 
+
 class FastqName(StrEnum):
     """List of bioinformatics tools in Balsamic."""
+
     FWD: str = "fwd"
     REV: str = "rev"
+
 
 FASTQ_SUFFIXES: Dict[str, Dict] = {
     "1": {"fwd": "_1.fastq.gz", "rev": "_2.fastq.gz"},

@@ -6,7 +6,6 @@ from pathlib import Path
 from pydantic import ValidationError
 
 
-
 def test_run_analysis_dragen(invoke_cli, tumor_only_wgs_config):
     # GIVEN a WGS config file
     # WHEN running analysis
@@ -46,9 +45,7 @@ def test_run_analysis_tumor_normal_dry_run(invoke_cli, tumor_normal_config):
     assert result.exit_code == 0
 
 
-def test_run_analysis_tumor_only_dry_run(
-    invoke_cli, tumor_only_config
-):
+def test_run_analysis_tumor_only_dry_run(invoke_cli, tumor_only_config):
     # GIVEN a tumor-only config file
     # WHEN running analysis
     result = invoke_cli(

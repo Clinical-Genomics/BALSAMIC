@@ -123,6 +123,7 @@ def get_capture_kit(config):
     else:
         return None
 
+
 def get_sample_type_from_sample_name(config, sample_name):
     """
     input: case config file from BALSAMIC, and sample_name
@@ -131,6 +132,7 @@ def get_sample_type_from_sample_name(config, sample_name):
     for sample in config["samples"]:
         if sample_name == sample["name"]:
             return sample["type"]
+
 
 def get_result_dir(config):
     """
