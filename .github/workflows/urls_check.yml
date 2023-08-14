@@ -4,7 +4,7 @@ on:
 jobs:
   main:
     name: Find broken cache and documentation links
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Git checkout
         id: git_checkout
