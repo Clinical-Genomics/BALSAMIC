@@ -14,4 +14,4 @@ jobs:
         uses: lycheeverse/lychee-action@v1.8.0
         with:
           args: --verbose --no-progress './BALSAMIC/constants/cache.py' './docs/*.rst'
-          fail: false
+          fail: true
