@@ -1,0 +1,18 @@
+name: Check URLs
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linkChecker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        id: git_checkout
+        uses: actions/checkout@v3
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.8.0
+        with:
+          args: --verbose --no-progress './BALSAMIC/constants/cache.py'
+          fail: true
