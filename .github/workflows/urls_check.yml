@@ -4,7 +4,7 @@ on:
   pull_request:
 jobs:
   main:
-    name: Find broken cache and docs links
+    name: Find broken cache and documentation links
     runs-on: ubuntu-20.04
     steps:
       - name: Git checkout
