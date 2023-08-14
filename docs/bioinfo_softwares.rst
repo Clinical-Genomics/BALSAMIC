@@ -75,7 +75,7 @@ manta
 multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
-:Article: `Bioinformatics` `<http://dx.doi.org/10.1093/bioinformatics/btw354>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
 :Version: `1.12`
 
 mosdepth

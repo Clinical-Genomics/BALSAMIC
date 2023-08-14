@@ -13,13 +13,13 @@ References and other resources
 #. **ClinVar**\ : ClinVar aggregates information about genomic variation and its relationship to human health. https://www.ncbi.nlm.nih.gov/clinvar/ Download link: ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar_20171029.vcf.gz
 #. **SweGen**\ : This dataset contains whole-genome variant frequencies for 1000 Swedish individuals generated within the SweGen project. Download link:  https://swefreq.nbis.se/
 #. **ExAC**\ : The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate and harmonize exome sequencing data from a wide variety of large-scale sequencing projects, and to make summary data available for the wider scientific community. http://exac.broadinstitute.org/ Download link: ftp://ftp.broadinstitute.org/pub/ExAC_release/release1/ExAC.r1.sites.vep.vcf.gz
-#. **GTEx**\ : The Genotype-Tissue Expression (GTEx) project aims to provide to the scientific community a resource with which to study human gene expression and regulation and its relationship to genetic variation. https://gtexportal.org/static/ Download URL by applying through: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v6.p1
+#. **GTEx**\ : The Genotype-Tissue Expression (GTEx) project aims to provide to the scientific community a resource with which to study human gene expression and regulation and its relationship to genetic variation. https://www.gtexportal.org/home/ Download URL by applying through: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v6.p1
 #. **OMIM**\ : OMIM®, Online Mendelian Inheritance in Man®, An Online Catalog of Human Genes and Genetic Disorders. https://www.omim.org/ Download link: https://omim.org/downloads/ (registration required)
 #. **Drug resistance**\ : An effort by Cosmic to annotate mutations identified in the literature as resistance mutations, including those conferring acquired resistance (after treatment) and intrinsic resistance (before treatment). Available through Cosmic: http://cancer.sanger.ac.uk/cosmic/drug_resistance
 #. **Mutational signatures**\ : Signatures of Mutational Processes in Human Cancer. Available through Cosmic: http://cancer.sanger.ac.uk/cosmic/signatures
 #. **DGVa**\ : The Database of Genomic Variants archive (DGVa) is a repository that provides archiving, accessioning and distribution of publicly available genomic structural variants, in all species. https://www.ebi.ac.uk/dgva
 #. **Cancer genomics workflow**\ : MGI's CWL Cancer Pipelines. https://github.com/genome/cancer-genomics-workflow/wiki
-#. **GIAB**\ : The priority of GIAB is authoritative characterization of human genomes for use in analytical validation and technology development, optimization, and demonstration. http://jimb.stanford.edu/giab/ and https://github.com/genome-in-a-bottle Download links: http://jimb.stanford.edu/giab-resources
+#. **GIAB**\ : The priority of GIAB is authoritative characterization of human genomes for use in analytical validation and technology development, optimization, and demonstration. https://github.com/genome-in-a-bottle
 #. **dbNSFP**\ : dbNSFP is a database developed for functional prediction and annotation of all potential non-synonymous single-nucleotide variants (nsSNVs) in the human genome. https://sites.google.com/site/jpopgen/dbNSFP
 #. **1000Genomes**\ : The goal of the 1000 Genomes Project was to find most genetic variants with frequencies of at least 1% in the populations studied. http://www.internationalgenome.org/ Download link: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/
 #. **HapMap3**\ : The International HapMap Project was an organization that aimed to develop a haplotype map (HapMap) of the human genome, to describe the common patterns of human genetic variation. HapMap 3 is the third phase of the International HapMap project. http://www.sanger.ac.uk/resources/downloads/human/hapmap3.html Download link: ftp://ftp.ncbi.nlm.nih.gov/hapmap/
@@ -27,7 +27,6 @@ References and other resources
 #. **dbVar**\ : dbVar is NCBI's database of genomic structural variation – insertions, deletions, duplications, inversions, mobile element insertions, translocations, and complex chromosomal rearrangements https://www.ncbi.nlm.nih.gov/dbvar Download link: https://www.ncbi.nlm.nih.gov/dbvar/content/ftp_manifest/
 #. **Drug sensitivity in cancer**\ : Identifying molecular features of cancers that predict response to anti-cancer drugs. http://www.cancerrxgene.org/ Download link: ftp://ftp.sanger.ac.uk/pub4/cancerrxgene/releases
 #. **VarSome**\ : VarSome is a knowledge base and aggregator for human genomic variants. https://varsome.com/about/
-#. **Google Genomics Public Data**\ : Google Genomics helps the life science community organize the world’s genomic information and make it accessible and useful. and http://googlegenomics.readthedocs.io
 
 Sample datasets
 ---------------
@@ -59,7 +58,7 @@ Relevant publications
 #. **Mutational signature reviews:**
 
    * Helleday, T., Eshtad, S., & Nik-Zainal, S. (2014). Mechanisms underlying mutational signatures in human cancers. Nature Reviews Genetics, 15(9), 585–598. https://doi.org/10.1038/nrg3729
-   * Alexandrov, L. B., & Stratton, M. R. (2014). Mutational signatures: The patterns of somatic mutations hidden in cancer genomes. Current Opinion in Genetics and Development, 24(1), 52–60. https://doi.org/10.1016/j.gde.2013.11.01
+   * Alexandrov, L. B., & Stratton, M. R. (2014). Mutational signatures: The patterns of somatic mutations hidden in cancer genomes. Current Opinion in Genetics and Development, 24(1), 52–60. https://doi.org/10.1016/j.gde.2013.11.014
 
 #. **Review on structural variation detection tools**\ :
 
@@ -81,12 +80,8 @@ Methods and tools
 *Excluding multiple method comparison or benchmarking tools*
 
 
-*
-  **BreakDancer**\ : Chen, K., Wallis, J. W., Mclellan, M. D., Larson, D. E., Kalicki, J. M., Pohl, C. S., … Elaine, R. (2013). BreakDancer - An algorithm for high resolution mapping of genomic structure variation. Nature Methods, 6(9), 677–681. https://doi.org/10.1038/nmeth.1363.BreakDancer
-
-*
-  **Pindel**\ : Ye, K., Schulz, M. H., Long, Q., Apweiler, R., & Ning, Z. (2009). Pindel: A pattern growth approach to detect break points of large deletions and medium sized insertions from paired-end short reads. Bioinformatics, 25(21), 2865–2871. https://doi.org/10.1093/bioinformatics/btp394
-
+* **BreakDancer**\ : Chen, K., Wallis, J. W., Mclellan, M. D., Larson, D. E., Kalicki, J. M., Pohl, C. S., … Elaine, R. (2013). BreakDancer - An algorithm for high resolution mapping of genomic structure variation. Nature Methods, 6(9), 677–681. https://doi.org/10.1038/nmeth.1363
+* **Pindel**\ : Ye, K., Schulz, M. H., Long, Q., Apweiler, R., & Ning, Z. (2009). Pindel: A pattern growth approach to detect break points of large deletions and medium sized insertions from paired-end short reads. Bioinformatics, 25(21), 2865–2871. https://doi.org/10.1093/bioinformatics/btp394
 * **SVDetect**\ : Zeitouni, B., Boeva, V., Janoueix-Lerosey, I., Loeillet, S., Legoix-né, P., Nicolas, A., … Barillot, E. (2010). SVDetect: A tool to identify genomic structural variations from paired-end and mate-pair sequencing data. Bioinformatics, 26(15), 1895–1896. https://doi.org/10.1093/bioinformatics/btq293
 * **Purityest**\ : Su, X., Zhang, L., Zhang, J., Meric-bernstam, F., & Weinstein, J. N. (2012). Purityest: Estimating purity of human tumor samples using next-generation sequencing data. Bioinformatics, 28(17), 2265–2266. https://doi.org/10.1093/bioinformatics/bts365
 * **PurBayes**\ : Larson, N. B., & Fridley, B. L. (2013). PurBayes: Estimating tumor cellularity and subclonality in next-generation sequencing data. Bioinformatics, 29(15), 1888–1889. https://doi.org/10.1093/bioinformatics/btt293
@@ -168,7 +163,6 @@ Methods and tools
 #. **BWA**\ : BWA is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome. It consists of three algorithms: BWA-backtrack, BWA-SW and BWA-MEM. http://bio-bwa.sourceforge.net/
 #. **wgsim**\ : Wgsim is a small tool for simulating sequence reads from a reference genome. It is able to simulate diploid genomes with SNPs and insertion/deletion (INDEL) polymorphisms, and simulate reads with uniform substitution sequencing errors. https://github.com/lh3/wgsim
 #. **dwgsim**\ : Whole genome simulation can be performed with dwgsim. dwgsim is based off of wgsim found in SAMtools. https://github.com/nh13/DWGSIM
-#. **ABSOLUTE**\ : ABSOLUTE can estimate purity/ploidy, and from that compute absolute copy-number and mutation multiplicities. http://archive.broadinstitute.org/cancer/cga/absolute
 #. **THetA**\ : Tumor Heterogeneity Analysis. This algorithm estimates tumor purity and clonal/subclonal copy number aberrations directly from high-throughput DNA sequencing data. https://github.com/raphael-group/THetA
 #. **Skewer**\ : Adapter trimming, similar to cutadapt. https://github.com/relipmoc/skewer
 #. **Phylowgs**\ : Application for inferring subclonal composition and evolution from whole-genome sequencing data. https://github.com/morrislab/phylowgs
