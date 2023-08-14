@@ -9,7 +9,7 @@ one is included: usage and parameters, and relevant external links.
 ascatNgs
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/cancerit/ascatNgs>`_
-:Article: `PNAS` `<https://www.pnas.org/doi/full/10.1073/pnas.1009843107/>`_
+:Article: `PNAS` `<https://doi.org/10.1073/pnas.1009843107>`_
 :Version: `4.5.0`
 
 bcftools
