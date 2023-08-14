@@ -1,15 +1,13 @@
 FROM condaforge/mambaforge:23.1.0-4
 
-LABEL maintainer="BALSAMIC development team"
-LABEL base.image="condaforge/mambaforge:23.1.0.4"
-LABEL container="tabix"
-LABEL software="tabix"
+LABEL maintainer="Clinical Genomics"
+LABEL base.image="condaforge/mambaforge:23.1.0-4"
+LABEL software="cadd"
 LABEL software.version="1.16"
 LABEL about.summary="Combined Annotation Dependent Depletion (CADD)"
 LABEL about.home="https://cadd.gs.washington.edu/"
 LABEL about.documentation="https://cadd.gs.washington.edu/info"
 LABEL about.license="MIT License (MIT)"
-LABEL about.description="CADD for BALSAMIC"
 
 RUN apt-get update && \
      apt-get -y upgrade && \
@@ -21,12 +19,10 @@ RUN apt-get update && \
 ## Install snakemake
 RUN conda install -c conda-forge -c bioconda snakemake=7.32.2
 
-## Donwload CADD repository
+## Donwload and extract CADD repository
 RUN wget --no-verbose \
     https://github.com/kircherlab/CADD-scripts/archive/CADD1.6.zip \
     -O /opt/conda/share/CADD1.6.zip
-
-## Extract CADD directory
 RUN unzip -o /opt/conda/share/CADD1.6.zip -d /opt/conda/share/ && \
     rm /opt/conda/share/CADD1.6.zip && \
     mv /opt/conda/share/CADD-scripts-CADD1.6 /opt/conda/share/CADD-scripts
