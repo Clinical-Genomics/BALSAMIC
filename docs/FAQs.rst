@@ -76,7 +76,7 @@ Release from `develop`:
 #. Switch to the `develop` branch: `git checkout develop`.
 #. Merge the latest changes from master into develop: `git merge master`.
 #. Resolve any conflicts, commit the changes, and push them to the develop branch.
-#. Create a new release branch: `git checkout -B release_vX.X.X` (adhere strictly to the naming convention for compatibility with container publishing GitHub Actions).
+#. Create a new `release` branch: `git checkout -B release_vX.X.X`. Adhere strictly to the naming convention for compatibility with container publishing GitHub Actions. Failure to do so may result in the unavailability of containers for download in this particular version.
 #. Update the version number `X.X.X` in the `CHANGELOG.rst`.
 #. Open a pull request for the `release` branch, and after obtaining approval, merge it into `master`.
 #. Move back to `master` branch: `git checkout master`.
@@ -84,6 +84,7 @@ Release from `develop`:
 #. Use `bumpversion` to increment the version (choose `major`, `minor`, or `patch`): `bumpversion --verbose [major/minor/patch]`.
 #. Push the version increment changes: `git push`.
 #. Push the tags for the new version: `git push --tags`.
+#. Merge the changes into the `develop` branch (`git checkout develop && git merge master`).
 
 **Note**
 
