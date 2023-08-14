@@ -104,16 +104,7 @@ Methods and tools
 *Tool sets and softwares required at various steps of pipeline development*
 
 
-#.
-   **Teaser**\ : NGS readmapping benchmarking.
-
-
-   * http://teaser.cibiv.univie.ac.at/
-   * https://github.com/Cibiv/Teaser
-
-#.
-   **FastQC**\ : Quality control tool. https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-
+#.**FastQC**\ : Quality control tool. https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 #. **Cutadapt**\ : Adapter removal tool. https://cutadapt.readthedocs.io/en/stable/
 #. **Trim Galore!**\ : FastQC and Cutadapt wrapper. https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/
 #. **Picardtools**\ : BAM/SAM/VCF/CRAM manipulator. http://broadinstitute.github.io/picard/
@@ -143,8 +134,7 @@ Methods and tools
 #. **AscatNGS**\ : Allele-Specific Copy Number Analysis of Tumors, tumor purity and ploidy https://github.com/cancerit/ascatNgs
 #. **MutationalPatterns**\ : R package for extracting and visualizing mutational patterns in base substitution catalogues https://github.com/UMCUGenetics/MutationalPatterns
 #. **desconstructSigs**\ : identification of mutational signatures within a single tumor sample https://github.com/raerose01/deconstructSigs
-#. **treeOmics**\ : Decrypting somatic mutation patterns to reveal the evolution of cancer
-   https://github.com/johannesreiter/treeomics
+#. **treeOmics**\ : Decrypting somatic mutation patterns to reveal the evolution of cancer https://github.com/johannesreiter/treeomics
 #. **controlFreeC**\ : Copy number and allelic content caller http://boevalab.com/FREEC/
 #. **MuTect2**\ : Call somatic SNPs and indels via local re-assembly of haplotypes https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2
 #. **Annovar**\ : annotation of detected genetic variation http://annovar.openbioinformatics.org/en/latest/
