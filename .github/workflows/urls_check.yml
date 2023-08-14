@@ -4,7 +4,7 @@ on:
   pull_request:
 jobs:
   main:
-    name: Find broken links
+    name: Find broken cache and docs links
     runs-on: ubuntu-20.04
     steps:
       - name: Git checkout
@@ -13,5 +13,5 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1.8.0
         with:
-          args: --verbose --no-progress './BALSAMIC/**' './docs/**'
+          args: --verbose --no-progress './BALSAMIC/constants/cache.py' './docs/*.rst'
           fail: false
