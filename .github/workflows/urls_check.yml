@@ -1,0 +1,17 @@
+name: Check URLs
+on:
+  push:
+  pull_request:
+jobs:
+  main:
+    name: Find broken cache and documentation links
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Git checkout
+        id: git_checkout
+        uses: actions/checkout@v3
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.8.0
+        with:
+          args: --verbose './BALSAMIC/constants/cache.py' './docs/*.rst'
+          fail: true
