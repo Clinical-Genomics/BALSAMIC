@@ -6,9 +6,9 @@ rule bam_compress:
         bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fasta = config["reference"]["reference_genome"]
     output:
-        cram_done = bam_dir + "{sample}.bam_compressed"
+        cram_done = Path(bam_dir, "{sample}.bam_compressed").as_posix()
     benchmark:
-        Path(benchmark_dir, "SamtoolsCompressCram_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "bam_compress_" + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:

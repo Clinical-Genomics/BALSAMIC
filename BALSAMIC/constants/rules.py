@@ -128,7 +128,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/report.rule",
-            "snakemake_rules/variant_calling/mergetype_normal.rule",
             "snakemake_rules/quality_control/somalier.rule",
         ],
         "align": ["snakemake_rules/align/sentieon_alignment.rule"],
@@ -157,8 +156,6 @@ DELIVERY_RULES: List[str] = [
     "collect_custom_qc_metrics",
     "cnv_report",
     # Alignment
-    "mergeBam_tumor",
-    "mergeBam_normal",
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
     # Germline

@@ -360,13 +360,6 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller = [var_caller for var_caller in somatic_caller if "umi" not in var_caller]
     somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
 
-# Adding code for testing, removing merge_bam from wgs analysis
-
-if "snakemake_rules/variant_calling/mergetype_tumor.rule" in rules_to_include:
-    rules_to_include.remove("snakemake_rules/variant_calling/mergetype_tumor.rule")
-if "snakemake_rules/variant_calling/mergetype_normal.rule" in rules_to_include:
-    rules_to_include.remove("snakemake_rules/variant_calling/mergetype_normal.rule")
-
 # Add rule for DRAGEN
 if "dragen" in config:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
