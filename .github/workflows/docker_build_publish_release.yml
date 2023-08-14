@@ -7,7 +7,7 @@ jobs:
   main:
     name: Build and publish
     if:  startsWith(github.head_ref, 'release_v')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
