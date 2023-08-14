@@ -1,12 +1,11 @@
 name: Check URLs
-
 on:
   push:
   pull_request:
-
 jobs:
-  linkChecker:
-    runs-on: ubuntu-latest
+  main:
+    name: Find broken links
+    runs-on: ubuntu-20.04
     steps:
       - name: Git checkout
         id: git_checkout
