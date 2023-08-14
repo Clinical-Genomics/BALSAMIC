@@ -112,7 +112,6 @@ def tumor_normal_fastq_info_correct(load_test_fastq_data) -> Dict[str, Dict]:
     """Mock tumor normal fastq info in sample_dict"""
     return load_test_fastq_data["test_fastq_info"]
 
-
 @pytest.fixture(scope="session")
 def analysis_workflow_qc():
     """Return string for balsamic QC workflow."""

@@ -23,6 +23,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from typing import List, Dict
 from BALSAMIC.constants.analysis import FastqName, SampleType
 import os
+import copy
 from pathlib import Path
 
 def test_vcfattributes():
@@ -152,7 +153,7 @@ def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct
     """Test sample instance model error raise."""
 
     # GIVEN a sample dictionary with an invalid sample type
-    samples: List[Dict] = tumor_normal_fastq_info_correct
+    samples: List[Dict] = copy.deepcopy(tumor_normal_fastq_info_correct)
     illegal_sample_type: str = "affected"
     tumor_dict = samples[0]
     tumor_dict["type"] = illegal_sample_type
@@ -314,7 +315,8 @@ def test_illegal_sample_name(tumor_normal_fastq_info_correct, illegal_normal_sam
     """Test sample instance model detection of illegal sample name containing underscore."""
 
     # GIVEN a sample dictionary with an invalid sample name
-    samples: List[Dict] = tumor_normal_fastq_info_correct
+    modify_sample_dict = copy.deepcopy(tumor_normal_fastq_info_correct)
+    samples: List[Dict] = modify_sample_dict
     normal_dict = samples[1]
     normal_dict["name"] = illegal_normal_sample_name
 

@@ -597,6 +597,7 @@ def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
             },
         ]
     }
+
     sample_config_dict = {"samples": tumor_normal_fastq_info_correct}
 
     # WHEN running the convert function
@@ -606,9 +607,9 @@ def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
 
     # THEN prefix strings should be replaced with sample name
     for delivery_file in delivery_json["files"]:
-        assert delivery_file["id"] == "ACC1"
         assert "ACC1" in delivery_file["tag"]
         assert "tumor" not in delivery_file["tag"]
+        assert delivery_file["id"] == "ACC1"
 
 
 def test_check_executable_exists():
