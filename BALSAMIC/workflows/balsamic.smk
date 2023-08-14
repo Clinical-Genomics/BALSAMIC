@@ -7,6 +7,7 @@ import tempfile
 import glob
 
 from pathlib import Path
+from typing import List
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
@@ -46,28 +47,30 @@ LOG = logging.getLogger(__name__)
 logging.getLogger("filelock").setLevel("WARN")
 
 # Get case id/name
-case_id = balsamic.analysis.case_id
+case_id: str = balsamic.analysis.case_id
 # Get analysis dir
-analysis_dir_home = balsamic.analysis.analysis_dir
-analysis_dir = os.path.join(analysis_dir_home, "analysis", case_id, "")
+analysis_dir_home: str = balsamic.analysis.analysis_dir
+analysis_dir: str = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir = os.path.join(balsamic.analysis.result, "")
+result_dir: str = os.path.join(balsamic.analysis.result, "")
 
 # Create a temporary directory with trailing /
-tmp_dir = os.path.join(result_dir, "tmp", "")
+tmp_dir: str = os.path.join(result_dir, "tmp", "")
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-benchmark_dir = balsamic.analysis.benchmark
+benchmark_dir: str = balsamic.analysis.benchmark
+fastq_dir: str = os.path.join(result_dir, "fastq", "")
+bam_dir: str = os.path.join(result_dir, "bam", "")
+cnv_dir: str = os.path.join(result_dir, "cnv", "")
+fastqc_dir: str = os.path.join(result_dir, "fastqc", "")
+vcf_dir: str = os.path.join(result_dir, "vcf", "")
+vep_dir: str = os.path.join(result_dir, "vep", "")
+qc_dir: str = os.path.join(result_dir, "qc", "")
+delivery_dir: str = os.path.join(result_dir, "delivery", "")
+umi_dir: str = os.path.join(result_dir, "umi", "")
+umi_qc_dir: str = qc_dir + "umi_qc/"
 
-result_dir_subdirs = ["fastq", "bam", "cnv", "fastqc", "vcf", "vep", "qc", "delivery", "umi"]
-
-for directory_name in result_dir_subdirs:
-    globals()[f"{directory_name}_dir"] = os.path.join(result_dir, directory_name, "")
-
-umi_qc_dir = qc_dir + "umi_qc/"
-
-singularity_image = balsamic.singularity['image']
 
 # Annotations
 research_annotations = []
@@ -80,10 +83,12 @@ clinical_sv = ""
 somatic_sv = ""
 swegen_sv = ""
 
-sample_names = balsamic.get_all_sample_names()
-tumor_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
+# Run information
+singularity_image: str = balsamic.singularity['image']
+sample_names: List[str] = balsamic.get_all_sample_names()
+tumor_sample: str = balsamic.get_sample_name_by_type(SampleType.TUMOR)
 if balsamic.analysis.analysis_type == "paired":
-    normal_sample = balsamic.get_sample_name_by_type(SampleType.NORMAL)
+    normal_sample: str = balsamic.get_sample_name_by_type(SampleType.NORMAL)
 
 
 # vcfanno annotations

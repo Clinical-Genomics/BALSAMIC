@@ -5,10 +5,12 @@ import logging
 import tempfile
 
 from pathlib import Path
+from typing import List
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
 
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.analysis import FastqName, SampleType
 from BALSAMIC.utils.exc import BalsamicError
@@ -34,31 +36,33 @@ LOG = logging.getLogger(__name__)
 logging.getLogger("filelock").setLevel("WARN")
 
 # Get case id/name
-case_id = balsamic.analysis.case_id
+case_id: str = balsamic.analysis.case_id
 # Get analysis dir
-analysis_dir_home = balsamic.analysis.analysis_dir
-analysis_dir = os.path.join(analysis_dir_home, "analysis", case_id, "")
+analysis_dir_home: str = balsamic.analysis.analysis_dir
+analysis_dir: str = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir = os.path.join(balsamic.analysis.result, "")
+result_dir: str = os.path.join(balsamic.analysis.result, "")
 
 # Create a temporary directory with trailing /
-tmp_dir = os.path.join(result_dir, "tmp", "" )
+tmp_dir: str = os.path.join(result_dir, "tmp", "")
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
-result_dir_subdirs = ["fastq", "bam", "fastqc", "vcf", "qc", "delivery"]
+# Directories
+benchmark_dir: str = balsamic.analysis.benchmark
+fastq_dir: str = os.path.join(result_dir, "fastq", "")
+bam_dir: str = os.path.join(result_dir, "bam", "")
+fastqc_dir: str = os.path.join(result_dir, "fastqc", "")
+vcf_dir: str = os.path.join(result_dir, "vcf", "")
+qc_dir: str = os.path.join(result_dir, "qc", "")
+delivery_dir: str = os.path.join(result_dir, "delivery", "")
 
-for directory_name in result_dir_subdirs:
-    globals()[f"{directory_name}_dir"] = os.path.join(result_dir, directory_name, "")
 
-benchmark_dir = balsamic.analysis.benchmark
-
-
-singularity_image = balsamic.singularity['image']
-
-sample_names = balsamic.get_all_sample_names()
-tumor_sample = balsamic.get_sample_name_by_type(SampleType.TUMOR)
+# Run information
+singularity_image: str = balsamic.singularity['image']
+sample_names: List[str] = balsamic.get_all_sample_names()
+tumor_sample: str = balsamic.get_sample_name_by_type(SampleType.TUMOR)
 if balsamic.analysis.analysis_type == "paired":
-    normal_sample = balsamic.get_sample_name_by_type(SampleType.NORMAL)
+    normal_sample: str = balsamic.get_sample_name_by_type(SampleType.NORMAL)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
@@ -66,9 +70,6 @@ params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
-
-# Set case id/name
-case_id = config["analysis"]["case_id"]
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -101,30 +102,19 @@ LOG.info('Genome version set to %s', config["reference"]["genome_version"])
 # Set temporary dir environment variable
 os.environ['TMPDIR'] = get_result_dir(config)
 
+# Include rules
 analysis_type = config['analysis']["analysis_type"]
+sequence_type = config['analysis']["sequencing_type"]
 
-rules_to_include = [
-                "snakemake_rules/quality_control/fastp.rule",
-                "snakemake_rules/quality_control/fastqc.rule",
-                "snakemake_rules/align/bam_compress.rule",
-                "snakemake_rules/quality_control/multiqc.rule",
-                "snakemake_rules/align/sentieon_alignment.rule",
-                "snakemake_rules/quality_control/qc_metrics.rule",
-                "snakemake_rules/quality_control/samtools_qc.rule"
-]
-if config["analysis"]["sequencing_type"] == 'wgs':
-    rules_to_include.append("snakemake_rules/quality_control/picard_wgs.rule")
-    rules_to_include.append("snakemake_rules/quality_control/sentieon_qc_metrics.rule")
-else:
-    rules_to_include.append("snakemake_rules/quality_control/picard.rule")
-    rules_to_include.append("snakemake_rules/quality_control/sambamba_depth.rule")
-    rules_to_include.append("snakemake_rules/quality_control/mosdepth.rule")
+rules_to_include = []
+for workflow_type, value in SNAKEMAKE_RULES.items():
+    if workflow_type in ["common", analysis_type + "_" + sequence_type]:
+        rules_to_include.extend(value.get("qc", []) + value.get("align", []))
+rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
 
-
-if "paired" in config['analysis']['analysis_type']:
-    # Somalier only implemented for hg38 and hg19
-    if "canfam3" not in config["reference"]["reference_genome"]:
-        rules_to_include.append("snakemake_rules/quality_control/somalier.rule")
+# Somalier only implemented for hg38 and hg19
+if "canfam3" in config["reference"]["reference_genome"]:
+    rules_to_include.remove("snakemake_rules/quality_control/somalier.rule")
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()

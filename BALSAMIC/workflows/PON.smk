@@ -7,7 +7,7 @@ import tempfile
 import os
 import logging
 
-
+from typing import List
 from BALSAMIC.utils.exc import BalsamicError
 
 
@@ -33,36 +33,33 @@ logging.getLogger("filelock").setLevel("WARN")
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 # Get case id/name
-case_id = balsamic.analysis.case_id
+case_id: str = balsamic.analysis.case_id
 # Get analysis dir
-analysis_dir_home = balsamic.analysis.analysis_dir
-analysis_dir = os.path.join(analysis_dir_home, "analysis", case_id, "")
+analysis_dir_home: str = balsamic.analysis.analysis_dir
+analysis_dir: str = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir = os.path.join(balsamic.analysis.result, "")
+result_dir: str = os.path.join(balsamic.analysis.result, "")
 
 # Create a temporary directory with trailing /
-tmp_dir = os.path.join(result_dir, "tmp", "" )
+tmp_dir: str = os.path.join(result_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-benchmark_dir = balsamic.analysis.benchmark
+benchmark_dir: str = balsamic.analysis.benchmark
+fastq_dir: str = os.path.join(result_dir, "fastq", "")
+bam_dir: str = os.path.join(result_dir, "ban", "")
+cnv_dir: str = os.path.join(result_dir, "cnv", "")
+qc_dir: str = os.path.join(result_dir, "qc", "")
 
-result_dir_subdirs = ["fastq", "bam", "cnv", "qc"]
 
-for directory_name in result_dir_subdirs:
-    globals()[f"{directory_name}_dir"] = os.path.join(result_dir, directory_name, "")
-
-
-reffasta = config["reference"]["reference_genome"]
-refgene_flat = config["reference"]["refgene_flat"]
-access_5kb_hg19 = config["reference"]["access_regions"]
-
-target_bed = config["panel"]["capture_kit"]
-version = config["analysis"]["pon_version"]
-
-singularity_image = balsamic.singularity['image']
-
-sample_names = balsamic.get_all_sample_names()
+# Run information
+reffasta: str = config["reference"]["reference_genome"]
+refgene_flat: str = config["reference"]["refgene_flat"]
+access_5kb_hg19: str = config["reference"]["access_regions"]
+target_bed: str = config["panel"]["capture_kit"]
+version: str = config["analysis"]["pon_version"]
+singularity_image: str = balsamic.singularity['image']
+sample_names: List[str] = balsamic.get_all_sample_names()
 
 
 

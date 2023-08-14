@@ -2,6 +2,7 @@
 from typing import Dict, List
 
 from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.analysis import AnalysisType, AnalysisWorkflow, SequencingType, WorkflowSolution
 
 common_cache_rules: List[str] = [
     "snakemake_rules/cache/singularity_containers.rule",
@@ -21,6 +22,7 @@ canfam_cache_rules: List[str] = common_cache_rules + [
     "snakemake_rules/cache/refseq_canfam.rule"
 ]
 
+
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
         "concatenate": ["snakemake_rules/concatenation/concatenation.rule"],
@@ -31,7 +33,8 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/quality_control/samtools_qc.rule",
         ],
-        "align": ["snakemake_rules/align/bam_compress.rule"],
+        "align": ["snakemake_rules/align/sentieon_alignment.rule",
+                  "snakemake_rules/align/bam_compress.rule"],
         "varcall": [
             "snakemake_rules/variant_calling/germline_sv.rule",
             "snakemake_rules/variant_calling/sentieon_quality_filter.rule",
@@ -45,7 +48,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     },
     "single_targeted": {
         "qc": [
-            "snakemake_rules/quality_control/GATK.rule",
             "snakemake_rules/quality_control/picard.rule",
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
@@ -55,7 +57,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
-            "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -74,7 +75,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     },
     "paired_targeted": {
         "qc": [
-            "snakemake_rules/quality_control/GATK.rule",
             "snakemake_rules/quality_control/picard.rule",
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
@@ -87,7 +87,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
-            "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -111,7 +110,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/report.rule",
         ],
-        "align": ["snakemake_rules/align/sentieon_alignment.rule"],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
@@ -130,7 +128,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/report.rule",
             "snakemake_rules/quality_control/somalier.rule",
         ],
-        "align": ["snakemake_rules/align/sentieon_alignment.rule"],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
