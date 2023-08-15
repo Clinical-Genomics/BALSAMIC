@@ -339,10 +339,10 @@ def test_illegal_sample_name(
 
 
 def test_detect_duplicate_fastq_pattern(
-    config_w_fastq_dir_for_duplicate_fastqpatterns_model: Dict,
+    config_w_fastq_dir_for_duplicate_fastq_patterns_model: Dict,
 ):
     """Test balsamic models ability to detect duplicate assigned fastq patterns."""
-    config_dict = config_w_fastq_dir_for_duplicate_fastqpatterns_model
+    config_dict = config_w_fastq_dir_for_duplicate_fastq_patterns_model
     # Initialize balsamic model
     with pytest.raises(ValueError) as exc:
         BalsamicConfigModel.parse_obj(config_dict)

@@ -33,7 +33,6 @@ shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
-logging.getLogger("filelock").setLevel("WARN")
 
 # Get case id/name
 case_id: str = balsamic.analysis.case_id

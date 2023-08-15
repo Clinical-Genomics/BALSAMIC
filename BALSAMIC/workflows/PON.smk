@@ -27,7 +27,6 @@ shell.prefix("set -eo pipefail; ")
 localrules: all
 
 LOG = logging.getLogger(__name__)
-logging.getLogger("filelock").setLevel("WARN")
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)

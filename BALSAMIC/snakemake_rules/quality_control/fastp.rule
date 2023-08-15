@@ -34,26 +34,26 @@ if 'quality_trim' in config['QC'].keys():
 rule fastp_umi:
     """Fastq UMI data pre-processing."""
     input:
-        fastq_r1 = lambda wildcards: balsamic.get_fastq_by_fastq_pattern(wildcards.fastqpattern, FastqName.FWD),
-        fastq_r2 = lambda wildcards: balsamic.get_fastq_by_fastq_pattern(wildcards.fastqpattern, FastqName.REV)
+        fastq_r1 = lambda wildcards: balsamic.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
+        fastq_r2 = lambda wildcards: balsamic.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
-        fastq_r1 = temp(fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"),
-        json = qc_dir + "fastp/{fastqpattern}_fastp_umi.json",
-        html = qc_dir + "fastp/{fastqpattern}_fastp_umi.html",
+        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.umi_optimized.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.umi_optimized.fastq.gz"),
+        json = qc_dir + "fastp/{fastq_pattern}_fastp_umi.json",
+        html = qc_dir + "fastp/{fastq_pattern}_fastp_umi.html",
     benchmark:
-        Path(benchmark_dir, "fastp_umi" + "{fastqpattern}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_umi" + "{fastq_pattern}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
         qc = " ".join(fastp_param_qc),
         adapter = " ".join(fastp_param_adapter),
-        fastqpattern = "{fastqpattern}",
+        fastq_pattern = "{fastq_pattern}",
     threads:
         get_threads(cluster_config, 'fastp_umi')
     message:
-        "Quality control and trimming input fastq for {params.fastqpattern}"
+        "Quality control and trimming input fastq for {params.fastq_pattern}"
     shell:
         """
 export TMPDIR={params.tmpdir};
@@ -76,26 +76,26 @@ fastp \
 rule fastp:
     """Fastq data pre-processing."""
     input:
-        fastq_r1 = fastq_dir + "{fastqpattern}_1.umi_optimized.fastq.gz",
-        fastq_r2 = fastq_dir + "{fastqpattern}_2.umi_optimized.fastq.gz"
+        fastq_r1 = fastq_dir + "{fastq_pattern}_1.umi_optimized.fastq.gz",
+        fastq_r2 = fastq_dir + "{fastq_pattern}_2.umi_optimized.fastq.gz"
     output:
-        fastq_r1 = temp(fastq_dir + "{fastqpattern}_1.fp.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{fastqpattern}_2.fp.fastq.gz"),
-        json = qc_dir + "fastp/{fastqpattern}_fastp.json",
-        html = qc_dir + "fastp/{fastqpattern}_fastp.html"
+        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),
+        json = qc_dir + "fastp/{fastq_pattern}_fastp.json",
+        html = qc_dir + "fastp/{fastq_pattern}_fastp.html"
     benchmark:
-        Path(benchmark_dir, "fastp_" + "{fastqpattern}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_" + "{fastq_pattern}.tsv").as_posix()
     singularity: 
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
         umi = " ".join(fastp_param_umi),
         minimum_length = config["QC"]["min_seq_length"],
-        fastqpattern = "{fastqpattern}",
+        fastq_pattern = "{fastq_pattern}",
     threads:
         get_threads(cluster_config, 'fastp')
     message:
-        "Quality control and trimming of umi optimized fastq file for {params.fastqpattern}"
+        "Quality control and trimming of umi optimized fastq file for {params.fastq_pattern}"
     shell:
         """
 export TMPDIR={params.tmpdir};

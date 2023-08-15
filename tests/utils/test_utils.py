@@ -878,7 +878,7 @@ def test_get_fastq_info_empty_fastq_dir(tumor_sample_name, empty_fastq_dir):
 
 
 def test_get_fastq_info_double_assigned_fastq_pattern(
-    tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns
+    tumor_sample_name, fastq_dir_tumor_duplicate_fastq_patterns
 ):
     """Tests if get_fastq_info correctly reports error of finding double-assigned fastq-patterns"""
     # GIVEN an empty fastq_dir and a sample name
@@ -886,4 +886,4 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
     # WHEN calling get_fastq_info
     # THEN the following error should be found
     with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
-        get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastqpatterns)
+        get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastq_patterns)

@@ -731,7 +731,7 @@ def fastq_dir_tumor_normal_parameterize(
 
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_duplicate_fastqpatterns(
+def fastq_dir_tumor_duplicate_fastq_patterns(
     analysis_dir: str,
     case_id_tumor_normal: str,
     fastq_names_duplicate_assigned_fastq_patterns: Dict,
@@ -750,7 +750,7 @@ def fastq_dir_tumor_duplicate_fastqpatterns(
 
 
 @pytest.fixture(scope="session")
-def config_w_fastq_dir_for_duplicate_fastqpatterns_model(
+def config_w_fastq_dir_for_duplicate_fastq_patterns_model(
     analysis_dir: str,
     case_id_tumor_normal: str,
     sample_list_duplicate_assigned_fastq_patterns_model: List[Dict],
