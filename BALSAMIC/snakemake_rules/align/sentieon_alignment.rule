@@ -7,7 +7,7 @@ rule sentieon_align_sort:
         fastq_r2 = Path(fastq_dir, "{fastq_pattern}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bamout = Path(bam_dir, "{sample}_align_sort_{fastq_pattern}.bam").as_posix()
+        bam_out = Path(bam_dir, "{sample}_align_sort_{fastq_pattern}.bam").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_align_sort_{sample}_{fastq_pattern}.tsv").as_posix()
     params:
@@ -21,7 +21,8 @@ rule sentieon_align_sort:
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
     message:
-        "Align fastq reads using sentieon bwa-mem and sort reads using samtools for sampletype: {params.sample_type} : {params.sample_id}, {params.fastq_pattern}"
+        ("Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample type: "
+        "{params.sample_type} : {params.sample_id}, {params.fastq_pattern}")
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -35,7 +36,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -K 50000000 \
 {input.ref} {input.fastq_r1} {input.fastq_r2} \
 | {params.sentieon_exec} util sort \
--o {output.bamout} \
+-o {output.bam_out} \
 -t {threads} \
 --block_size 3G \
 --sam2bam -i -;
@@ -58,7 +59,8 @@ rule sentieon_dedup:
     threads:
         get_threads(cluster_config, 'sentieon_dedup')
     message:
-        "Collects read information using sentieon LocusCollector and mark duplicated reads for sample: {params.sample_id}"
+        ("Collects read information using sentieon LocusCollector and mark duplicated reads. "
+         "Current sample: {params.sample_id}")
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -66,18 +68,18 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
+shell_bam_files=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
 
 {params.sentieon_exec} driver \
 -t {threads} \
--i $shellbamfiles \
+-i $shell_bam_files \
 --algo LocusCollector \
 --fun score_info \
 {output.score};
 
 {params.sentieon_exec} driver \
 -t {threads} \
--i $shellbamfiles \
+-i $shell_bam_files \
 --algo Dedup \
 --score_info {output.score} \
 --metrics {output.metrics} \

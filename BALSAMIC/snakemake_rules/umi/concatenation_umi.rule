@@ -3,8 +3,10 @@
 
 rule concatenate_umi_reads:
     input:
-        fastqs_fwd = lambda wildcards: expand(fastq_dir + "{fastq_pattern}_1.umi_optimized.fastq.gz", fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = [wildcards.sample])),
-        fastqs_rev = lambda wildcards: expand(fastq_dir + "{fastq_pattern}_2.umi_optimized.fastq.gz", fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = [wildcards.sample]))
+        fastqs_fwd = lambda wildcards: expand(fastq_dir + "{fastq_pattern}_1.umi_optimized.fastq.gz",
+            fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = [wildcards.sample])),
+        fastqs_rev = lambda wildcards: expand(fastq_dir + "{fastq_pattern}_2.umi_optimized.fastq.gz",
+            fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = [wildcards.sample]))
     output:
         fastq_fwd = fastq_dir + "concat.{sample}_1.umi_optimized.fastq.gz",
         fastq_rev = fastq_dir + "concat.{sample}_2.umi_optimized.fastq.gz"
