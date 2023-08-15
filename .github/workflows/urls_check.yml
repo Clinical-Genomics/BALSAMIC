@@ -1,6 +1,9 @@
 name: Check URLs
 on:
   push:
+    branches:
+      - master
+      - develop
 jobs:
   main:
     name: Find broken cache and documentation links
