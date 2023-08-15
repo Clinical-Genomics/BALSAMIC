@@ -85,6 +85,8 @@ Release from `develop`:
 #. Push the version increment changes: `git push`.
 #. Push the tags for the new version: `git push --tags`.
 #. Merge the changes into the `develop` branch (`git checkout develop && git merge master`).
+#. Use the release branch to verify/validate the new version.
+#. Once the verification/validation process is successfully completed and approved, proceed with the deployment to production.
 
 **Note**
 
