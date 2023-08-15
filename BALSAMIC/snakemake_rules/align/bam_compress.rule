@@ -13,12 +13,11 @@ rule bam_compress:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        sample_type = lambda wildcards: balsamic.get_sample_type_by_name(wildcards.sample),
         cram = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample).replace(".bam", ".cram")
     threads:
         get_threads(cluster_config, "bam_compress")
     message:
-        "Compressing bam to cram for {params.sample_type} : {params.sample_id}"
+        "Compressing bam to cram for {params.sample_id}"
     shell:
         """
 samtools view -h -T {input.fasta} --threads {threads} -C -o {params.cram} {input.bam}; 

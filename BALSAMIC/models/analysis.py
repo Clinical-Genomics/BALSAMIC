@@ -554,10 +554,12 @@ class ConfigModel(BaseModel):
             if sample.type == sample_type:
                 return sample.name
 
-    def get_sample_type_by_name(self, sample_name: str) -> str:
-        """Return sample type for requested sample name."""
+    def get_sample_type_by_name(self, sample_name: str, uppercase: bool = False) -> str:
+        """Return sample type for requested sample name, optionally return it capitalized"""
         for sample in self.samples:
             if sample.name == sample_name:
+                if uppercase:
+                    return sample.type.upper()
                 return sample.type
 
     def get_bam_name_per_lane(self, bam_dir: str, sample_name: str) -> List[str]:

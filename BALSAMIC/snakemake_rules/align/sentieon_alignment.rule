@@ -16,7 +16,7 @@ rule sentieon_align_sort:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = "{sample}",
-        sample_type = lambda wildcards: balsamic.get_sample_type_by_name(wildcards.sample),
+        sample_type = lambda wildcards: balsamic.get_sample_type_by_name(wildcards.sample, uppercase=True),
         fastq_pattern = "{fastq_pattern}"
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
