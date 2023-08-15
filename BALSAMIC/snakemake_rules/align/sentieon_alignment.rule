@@ -44,7 +44,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_dedup:
     input:
-        bamfiles = lambda wildcards: balsamic.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
+        bam_files = lambda wildcards: balsamic.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
@@ -68,7 +68,7 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-shell_bam_files=$(echo {input.bamfiles} | sed 's/ / -i /g') ;
+shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 
 {params.sentieon_exec} driver \
 -t {threads} \
