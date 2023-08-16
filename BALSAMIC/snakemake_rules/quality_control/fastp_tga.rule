@@ -20,7 +20,7 @@ rule fastp_remove_umi:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
-        fastp_settings = " ".join(fastp_param_umi),
+        fastp_param_umi = " ".join(fastp_param_umi),
         fastq_pattern = "{fastq_pattern}",
     threads:
         get_threads(cluster_config, 'fastp_umi')
@@ -67,8 +67,8 @@ if 'quality_trim' in config['QC'].keys():
 rule fastp_quality_trim:
     """Fastq data pre-processing after removal of UMIs."""
     input:
-        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.umi_removed.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.umi_removed.fastq.gz")
+        fastq_r1 = fastq_dir + "{fastq_pattern}_1.umi_removed.fastq.gz",
+        fastq_r2 = fastq_dir + "{fastq_pattern}_2.umi_removed.fastq.gz"
     output:
         fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
         fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),
@@ -86,7 +86,7 @@ rule fastp_quality_trim:
     threads:
         get_threads(cluster_config, 'fastp')
     message:
-        "Quality control and trimming of UMI-removed fastqs for fastq pattern: {params.fastq_pattern}"
+        "Quality and adapter trimming for fastqs for fastq pattern: {params.fastq_pattern}"
     shell:
         """
 export TMPDIR={params.tmpdir};
