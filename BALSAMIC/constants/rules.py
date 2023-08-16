@@ -27,7 +27,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
         "concatenate": ["snakemake_rules/concatenation/concatenation.rule"],
         "qc": [
-            "snakemake_rules/quality_control/fastp.rule",
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
@@ -48,6 +47,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     },
     "single_targeted": {
         "qc": [
+            "snakemake_rules/quality_control/fastp_tga.rule",
             "snakemake_rules/quality_control/picard.rule",
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
@@ -75,6 +75,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     },
     "paired_targeted": {
         "qc": [
+            "snakemake_rules/quality_control/fastp_tga.rule",
             "snakemake_rules/quality_control/picard.rule",
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
@@ -106,6 +107,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     },
     "single_wgs": {
         "qc": [
+            "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/report.rule",
@@ -123,6 +125,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     },
     "paired_wgs": {
         "qc": [
+            "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/report.rule",

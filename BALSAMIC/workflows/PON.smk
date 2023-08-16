@@ -12,7 +12,7 @@ from BALSAMIC.utils.exc import BalsamicError
 
 
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.analysis import FastqName, SampleType
+from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
@@ -88,12 +88,17 @@ baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
 pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
 
-config["rules"] = [
-    "snakemake_rules/quality_control/fastp.rule",
-    "snakemake_rules/align/sentieon_alignment.rule",
-]
+sequence_type = config['analysis']["sequencing_type"]
+rules_to_include = []
+if sequence_type == SequencingType.TARGETED:
+    rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
+else:
+    rules_to_include.append("snakemake_rules/quality_control/fastp_wgs.rule")
 
-for r in config["rules"]:
+rules_to_include.append("snakemake_rules/align/sentieon_alignment.rule")
+
+
+for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()
 
 rule all:
