@@ -23,6 +23,7 @@ Changed:
 * Implemented parallel trimming and alignment in all workflows per lane https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * All bam-QC tools take the final dedup.realign bamfile as input https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Validation of pydantic models done both during config and run https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Refactored fastp rules, and changed order of UMI-trimming and quality trimming https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
 * Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
 * Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
@@ -41,6 +42,7 @@ Fixed:
 Removed:
 ^^^^^^^
 * Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
+* Quality trimming of fastqs for UMI workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 
 [12.0.2]
 --------
