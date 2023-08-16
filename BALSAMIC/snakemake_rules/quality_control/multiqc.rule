@@ -65,7 +65,7 @@ else:
 
     # mosdepth metrics
     mosdepth_metrics_wildcard = ["mosdepth.global.dist.txt", "mosdepth.region.dist.txt",
-                                 "mosdepth.summary.txt", "per-base.bed.gz" "regions.bed.gz"]
+                                 "mosdepth.summary.txt", "per-base.bed.gz", "regions.bed.gz"]
     multiqc_input.extend(expand(bam_dir + "{sample}_tumor.{mosdepth_wc}",
         sample=tumor_sample, mosdepth_wc = mosdepth_metrics_wildcard))
     if config['analysis']['analysis_type'] == "paired":
