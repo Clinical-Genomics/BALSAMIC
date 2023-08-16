@@ -23,7 +23,7 @@ rule fastp_remove_umi:
         fastp_param_umi = " ".join(fastp_param_umi),
         fastq_pattern = "{fastq_pattern}",
     threads:
-        get_threads(cluster_config, 'fastp_umi')
+        get_threads(cluster_config, 'fastp_remove_umi')
     message:
         "Trimming away UMI sequences for fastqs in fastq pattern: {params.fastq_pattern}"
     shell:
@@ -84,7 +84,7 @@ rule fastp_quality_trim:
         adapter = " ".join(fastp_param_adapter),
         fastq_pattern = "{fastq_pattern}"
     threads:
-        get_threads(cluster_config, 'fastp')
+        get_threads(cluster_config, 'fastp_quality_trim')
     message:
         "Quality and adapter trimming for fastqs for fastq pattern: {params.fastq_pattern}"
     shell:
