@@ -38,4 +38,3 @@ RUN cd /opt \
     && git checkout v1.0.3 \
     && make STATIC=1 PARALLEL=1 all \
     && make install \
-
