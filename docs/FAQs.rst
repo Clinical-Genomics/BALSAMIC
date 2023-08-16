@@ -37,7 +37,7 @@ In theory, this should be the same if the read length is always 151bp. But the r
 
 **How does the `umi extract` tool handle sequencing adapters?  Do the input reads always need to be adapter removed fastq reads**
 
-The presence of 5' adapter sequences can cause issues for the Sentieon `umi extract` tool, as the extract tool will not correctly identify the UMI sequence. If 5' adapter contamination is found in the data, before processing with the `umi extract` tool, these adapter sequences needed to be removed with a third-party trimming tool. 
+The presence of 5' adapter sequences can cause issues for the Sentieon `umi extract` tool, as the extract tool will not correctly identify the UMI sequence. If 5' adapter contamination is found in the data, before processing with the `umi extract` tool, these adapter sequences needed to be removed with a third-party trimming tool.
 3' adapter contamination is much more common and can occur when the insert size is shorter than the sequence read length. The Sentieon `umi consensus` tool will correctly identify and handle 3' adapter/barcode contamination during consensus read creation.
 
 **How does Sentieon `umi consensus` tool handles paired-end reads**
@@ -46,7 +46,7 @@ The `umi consensus` tool will merge overlapping read pairs when it can, but it i
 
 .. figure:: images/sentieon_consensus.jpg
 
-    Figure3: Figure taken from Sentieon document. 
+    Figure3: Figure taken from Sentieon document.
 
 **Purpose of consensus-filtering step in the UMIworkflow**
 
@@ -66,33 +66,30 @@ Our release model looks like in the figure below:
 
 .. figure:: images/git_releasemodel.png
 
-**Requirements:** bumpversion
+If changes are hotfixes/patches, make a release from the `master` branch. Otherwise, make a release from the `develop`
+branch.
 
-`pip install bumpversion`
+Release from `develop`:
 
-If changes are hotfixes/patches, make a release from master.
-Else make a release from develop.
-
-If decided to make a release version from `develop`, do the following to release a balsamic new version:
-
-1. `git checkout master && git pull`
-2. `git checkout develop`
-3. `git merge master`
-4.  Fix all possible conflicts and `git push`
-5. `git checkout -B release_X.X.X`
-
-Change X.X.X version of the release in the CHANGELOG.rst
-
-Make a pull request to master at this point. After pull request is approved and merge it into master:
-
-1. `git checkout master`
-2. `git pull`
-3. `bumpversion --verbose [major/minor/patch]`
-4. `git push`
-5. `git push --tags`
+#. Switch to the master branch `git checkout master`.
+#. Pull the latest changes `git pull`.
+#. Switch to the `develop` branch: `git checkout develop`.
+#. Merge the latest changes from master into develop: `git merge master`.
+#. Resolve any conflicts, commit the changes, and push them to the develop branch.
+#. Create a new `release` branch: `git checkout -B release_vX.X.X`. Adhere strictly to the naming convention for compatibility with container publishing GitHub Actions. Failure to do so may result in the unavailability of containers for download in this particular version.
+#. Update the version number `X.X.X` in the `CHANGELOG.rst`.
+#. Open a pull request for the `release` branch, and after obtaining approval, merge it into `master`.
+#. Move back to `master` branch: `git checkout master`.
+#. Fetch the latest changes: `git pull`.
+#. Use `bumpversion` to increment the version (choose `major`, `minor`, or `patch`): `bumpversion --verbose [major/minor/patch]`.
+#. Push the version increment changes: `git push`.
+#. Push the tags for the new version: `git push --tags`.
+#. Merge the changes into the `develop` branch (`git checkout develop && git merge master`).
+#. Use the release branch to verify/validate the new version.
+#. Once the verification/validation process is successfully completed and approved, proceed with the deployment to production.
 
 **Note**
 
-- Never force rebase commits into either `master` or `develop` branches.
-- When merging pull requests commits into `master` branch, use **Create a merge commit**, which helps to capture all the commit history. On contrary, when merging pull requests into `develop` branch, use **Squash and merge** button, which combines multiple commits messages into one commit.
-
+* Never force rebase commits into `master` or `develop`.
+* For pull requests to `master`, opt for `Create a merge commit` to capture full commit history.
+* For pull requests to `develop`, use `Squash and merge` to combine commit messages.
