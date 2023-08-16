@@ -22,8 +22,8 @@ RUN conda update -n base conda && \
 ## Donwload and extract CADD repository
 RUN wget --no-verbose \
     https://github.com/kircherlab/CADD-scripts/archive/CADD1.6.zip \
-    -O /opt/conda/share/CADD1.6.zip
-RUN unzip -o /opt/conda/share/CADD1.6.zip -d /opt/conda/share/ && \
+    -O /opt/conda/share/CADD1.6.zip && \
+    unzip -o /opt/conda/share/CADD1.6.zip -d /opt/conda/share/ && \
     rm /opt/conda/share/CADD1.6.zip && \
     mv /opt/conda/share/CADD-scripts-CADD1.6 /opt/conda/share/CADD-scripts
 
