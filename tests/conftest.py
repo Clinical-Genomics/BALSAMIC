@@ -944,6 +944,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.CNVKIT.value: "docker://clinicalgenomics/balsamic:develop-varcall_cnvkit",
         DockerContainers.COVERAGE_QC.value: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
         DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
+        DockerContainers.CADD.value: "docker://clinicalgenomics/balsamic:develop-cadd",
     }
 
 

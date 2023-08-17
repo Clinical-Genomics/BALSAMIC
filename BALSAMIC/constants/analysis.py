@@ -103,6 +103,7 @@ class BioinfoTools(StrEnum):
     VARDICT: str = "vardict"
     VCF2CYTOSURE: str = "vcf2cytosure"
     VCFANNO: str = "vcfanno"
+    CADD: str = "cadd"
 
 
 BIOINFO_TOOL_ENV: Dict[str, str] = {
@@ -133,4 +134,5 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.ASCAT.value: DockerContainers.ASCAT.value,
     BioinfoTools.VCF2CYTOSURE.value: DockerContainers.VCF2CYTOSURE.value,
     BioinfoTools.SOMALIER.value: DockerContainers.SOMALIER.value,
+    BioinfoTools.CADD.value: DockerContainers.CADD.value,
 }
