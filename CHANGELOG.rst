@@ -3,7 +3,7 @@
 
 Fixed:
 ^^^^^^
-* Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
+* Missing `Number` in VCF header for SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
 
 Changed:
 ^^^^^^^^
