@@ -9,7 +9,7 @@ one is included: usage and parameters, and relevant external links.
 ascatNgs
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/cancerit/ascatNgs>`_
-:Article: `PNAS` `<https://www.pnas.org/doi/full/10.1073/pnas.1009843107/>`_
+:Article: `PNAS` `<https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097604/>`_
 :Version: `4.5.0`
 
 bcftools
@@ -75,13 +75,13 @@ manta
 multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
-:Article: `Bioinformatics` `<http://dx.doi.org/10.1093/bioinformatics/btw354>`_
+:Article: `Bioinformatics` `<http://doi.org/10.1093/bioinformatics/btw354>`_
 :Version: `1.12`
 
 mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
-:Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/34/5/867/4583630?login=true>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btx699>`_
 :Version: `0.3.3`
 
 picard

@@ -7,7 +7,7 @@ It is recommended to follow a system to standardize the commit messages loosely.
 **Code formatting**
 ^^^^^^^^^^^^^^^^^^^
 
-BALSAMIC is using Black (https://github.com/psf/black) as code formatter.
+BALSAMIC is using Black as code formatter: https://github.com/psf/black
 
 
 **Conventional commits and PRs**

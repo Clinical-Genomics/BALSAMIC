@@ -29,12 +29,11 @@ References and other resources
 #. **VarSome**\ : VarSome is a knowledge base and aggregator for human genomic variants. https://varsome.com/about/
 #. **Google Genomics Public Data**\ : Google Genomics helps the life science community organize the world’s genomic information and make it accessible and useful. and http://googlegenomics.readthedocs.io
 #. **CADD**\ : CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome. CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings.
+
 Sample datasets
 ---------------
 
-
-
-#. **TCRB**\ : he Texas Cancer Research Biobank (TCRB) was created to bridge the gap between doctors and scientific researchers to improve the prevention, diagnosis and treatment of cancer. This work occurred with funding from the Cancer Prevention & Research Institute of Texas (CPRIT) from 2010-2014. http://txcrb.org/data.html Article: https://www.nature.com/articles/sdata201610
+#. **TCRB**\ : The Texas Cancer Research Biobank (TCRB) was created to bridge the gap between doctors and scientific researchers to improve the prevention, diagnosis and treatment of cancer. This work occurred with funding from the Cancer Prevention & Research Institute of Texas (CPRIT) from 2010-2014. http://txcrb.org/data.html Article: https://www.nature.com/articles/sdata201610
 
 Relevant publications
 ---------------------

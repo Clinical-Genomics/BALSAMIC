@@ -33,8 +33,9 @@
     :hidden:
     :maxdepth: 1
 
+    README
     git_etiquette
     snakemake_etiquette
-    README
+    container_etiquette
     semver
     FAQs
