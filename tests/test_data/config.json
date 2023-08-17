@@ -208,7 +208,7 @@
         "script": "tests/test_data/id1/scripts/",
         "log": "tests/test_data/id1/logs/",
         "result": "tests/test_data/id1/analysis/",
-        "benchmark": "tests/test_data/id1/analysis/id1/benchmarks/",
+        "benchmark": "tests/test_data/id1/benchmarks/",
         "config_creation_date": "yyyy-mm-dd xx",
         "BALSAMIC_version": "12.0.2",
         "dag": "tests/test_data/id1_analysis.json_BALSAMIC_12.0.2_graph.pdf"

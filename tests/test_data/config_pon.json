@@ -249,7 +249,7 @@
         "script": "tests/test_data/id1/scripts/",
         "log": "tests/test_data/id1/logs/",
         "result": "tests/test_data/id1/analysis",
-        "benchmark": "tests/test_data/id1/analysis/id1/benchmarks/",
+        "benchmark": "tests/test_data/id1/benchmarks/",
         "dag": "tests/test_data/id1/id1_BALSAMIC_12.0.2_graph.pdf",
         "BALSAMIC_version": "12.0.2",
         "config_creation_date": "2023-08-10 10:07",
