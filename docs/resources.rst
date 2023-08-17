@@ -14,7 +14,7 @@ References and other resources
 #. **SweGen**\ : This dataset contains whole-genome variant frequencies for 1000 Swedish individuals generated within the SweGen project. Download link:  https://swefreq.nbis.se/
 #. **ExAC**\ : The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate and harmonize exome sequencing data from a wide variety of large-scale sequencing projects, and to make summary data available for the wider scientific community. http://exac.broadinstitute.org/ Download link: ftp://ftp.broadinstitute.org/pub/ExAC_release/release1/ExAC.r1.sites.vep.vcf.gz
 #. **GTEx**\ : The Genotype-Tissue Expression (GTEx) project aims to provide to the scientific community a resource with which to study human gene expression and regulation and its relationship to genetic variation. https://gtexportal.org/static/ Download URL by applying through: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v6.p1
-#. **OMIM**\ : OMIM®, Online Mendelian Inheritance in Man®, An Online Catalog of Human Genes and Genetic Disorders. https://www.omim.org/ Download link: https://omim.org/downloads/ (registration required)
+#. **OMIM**\ : OMIM®, Online Mendelian Inheritance in Man®, An Online Catalog of Human Genes and Genetic Disorders. https://www.omim.org/ Download link: https://omim.org/downloads/ (registration required) 
 #. **Drug resistance**\ : An effort by Cosmic to annotate mutations identified in the literature as resistance mutations, including those conferring acquired resistance (after treatment) and intrinsic resistance (before treatment). Available through Cosmic: http://cancer.sanger.ac.uk/cosmic/drug_resistance
 #. **Mutational signatures**\ : Signatures of Mutational Processes in Human Cancer. Available through Cosmic: http://cancer.sanger.ac.uk/cosmic/signatures
 #. **DGVa**\ : The Database of Genomic Variants archive (DGVa) is a repository that provides archiving, accessioning and distribution of publicly available genomic structural variants, in all species. https://www.ebi.ac.uk/dgva
@@ -42,14 +42,14 @@ Relevant publications
 *Including methodological benchmarking*
 
 
-#.
+#. 
    **MSK-IMPACT:**
 
 
-   *
+   * 
      **Original pipeline**\ : Cheng, D. T., Mitchell, T. N., Zehir, A., Shah, R. H., Benayed, R., Syed, A., … Berger, M. F. (2015). Memorial sloan kettering-integrated mutation profiling of actionable cancer targets (MSK-IMPACT): A hybridization capture-based next-generation sequencing clinical assay for solid tumor molecular oncology. Journal of Molecular Diagnostics, 17(3), 251–264. https://doi.org/10.1016/j.jmoldx.2014.12.006
 
-   *
+   * 
      **Case study**\ : Cheng, D. T., Prasad, M., Chekaluk, Y., Benayed, R., Sadowska, J., Zehir, A., … Zhang, L. (2017). Comprehensive detection of germline variants by MSK-IMPACT, a clinical diagnostic platform for solid tumor molecular oncology and concurrent cancer predisposition testing. BMC Medical Genomics, 10(1), 33. https://doi.org/10.1186/s12920-017-0271-4
 
    * **Case study**\ : Zehir, A., Benayed, R., Shah, R. H., Syed, A., Middha, S., Kim, H. R., … Berger, M. F. (2017). Mutational landscape of metastatic cancer revealed from prospective clinical sequencing of 10,000 patients. Nature Medicine, 23(6), 703–713. https://doi.org/10.1038/nm.4333
@@ -81,10 +81,10 @@ Methods and tools
 *Excluding multiple method comparison or benchmarking tools*
 
 
-*
+* 
   **BreakDancer**\ : Chen, K., Wallis, J. W., Mclellan, M. D., Larson, D. E., Kalicki, J. M., Pohl, C. S., … Elaine, R. (2013). BreakDancer - An algorithm for high resolution mapping of genomic structure variation. Nature Methods, 6(9), 677–681. https://doi.org/10.1038/nmeth.1363.BreakDancer
 
-*
+* 
   **Pindel**\ : Ye, K., Schulz, M. H., Long, Q., Apweiler, R., & Ning, Z. (2009). Pindel: A pattern growth approach to detect break points of large deletions and medium sized insertions from paired-end short reads. Bioinformatics, 25(21), 2865–2871. https://doi.org/10.1093/bioinformatics/btp394
 
 * **SVDetect**\ : Zeitouni, B., Boeva, V., Janoueix-Lerosey, I., Loeillet, S., Legoix-né, P., Nicolas, A., … Barillot, E. (2010). SVDetect: A tool to identify genomic structural variations from paired-end and mate-pair sequencing data. Bioinformatics, 26(15), 1895–1896. https://doi.org/10.1093/bioinformatics/btq293
@@ -104,14 +104,14 @@ Methods and tools
 *Tool sets and softwares required at various steps of pipeline development*
 
 
-#.
+#. 
    **Teaser**\ : NGS readmapping benchmarking.
 
 
    * http://teaser.cibiv.univie.ac.at/
    * https://github.com/Cibiv/Teaser
 
-#.
+#. 
    **FastQC**\ : Quality control tool. https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 
 #. **Cutadapt**\ : Adapter removal tool. https://cutadapt.readthedocs.io/en/stable/
