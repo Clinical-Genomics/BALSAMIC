@@ -7,7 +7,6 @@ Git etiquette
 
 BALSAMIC is using Black (https://github.com/psf/black) as code formatter.
 
-
 **Conventional commits and PRs**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -15,19 +14,17 @@ PRs should follow the following keywords in the title: https://www.conventionalc
 
 Commit messages are recommended to following the following similar to PRs:
 
-
-#. **feat**\ : Introducing a new features. This includes but not limited to workflows, SnakeMake rule, cli, and plugins. In other words, anything that is new and fundamental change will also go here. Enhancements and optimizations will go into refactor.
-#. **fix**\ : This is essentially a patch. Included but not limited to: bug fixes, hotfixes, and any patch to address a known issue.
-#. **doc**\ : Any changes to the documentation are part of doc subject line, included but not limited to docstrings, cli-help, readme, tutorial, documentation, CHANGELOG, and addition of ipython/jupyter notebook in the form of tutorial.
-#. **test**\ : Any changes to the tests are part of test subject line. This includes adding, removing or updating of the following: unittests, validation/verification dataset, and test related configs.
-#. **refactor**\ : Refactoring refers to a rather broad term. Any style changes, code enhancement, and analysis optimization.
-#. **version**\ : Any changes to .bumpversion config and or change of version will be specified with this. This includes comments within .bumpversion, structure of .bumpversion, etc.
+#. **feat**: Introducing a new features. This includes but not limited to workflows, SnakeMake rule, cli, and plugins. In other words, anything that is new and fundamental change will also go here. Enhancements and optimizations will go into refactor.
+#. **fix**: This is essentially a patch. Included but not limited to: bug fixes, hotfixes, and any patch to address a known issue.
+#. **doc**: Any changes to the documentation are part of doc subject line, included but not limited to docstrings, cli-help, readme, tutorial, documentation, CHANGELOG, and addition of ipython/jupyter notebook in the form of tutorial.
+#. **test**: Any changes to the tests are part of test subject line. This includes adding, removing or updating of the following: unittests, validation/verification dataset, and test related configs.
+#. **refactor**: Refactoring refers to a rather broad term. Any style changes, code enhancement, and analysis optimization.
+#. **version**: Any changes to .bumpversion config and or change of version will be specified with this. This includes comments within .bumpversion, structure of .bumpversion, etc.
 
 **Scope**
 ^^^^^^^^^
 
 Scope is specified within parenthesis. It show the *scope* of the subject line. The following scope are valid:
-
 
 * cli
 * style
@@ -42,7 +39,6 @@ Note: If scope is broad or matching with multiple (it shouldn't, but if it does)
 ^^^^^^^^^^^
 
 It's better to start Git commit message with the following words:
-
 
 * added
 * removed
