@@ -98,7 +98,11 @@ def initialize(
         )
         raise click.Abort()
 
-    release_version: str = get_release_version(cache_version)
+    release_version: str = (
+        CacheVersion.DEVELOP.value
+        if cache_version == CacheVersion.DEVELOP
+        else get_release_version(cache_version)
+    )
     out_dir: Path = Path(out_dir, release_version).absolute()
     references_dir: Path = Path(out_dir, genome_version)
     genome_dir = Path(references_dir, "genome")
