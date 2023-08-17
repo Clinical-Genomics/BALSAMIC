@@ -6,12 +6,6 @@ sphinx==6.2.1
 sphinx-argparse==0.4.0
 sphinx-click==3.0.2
 sphinx_rtd_theme==1.2.2
-sphinxcontrib-napoleon==0.7
 furo==2023.7.26
 cyvcf2
-pydantic==1.10.12
-graphviz==0.20.1
-snakemake==7.32.0
-colorclass==2.2.2
-toml==0.10.2
 
