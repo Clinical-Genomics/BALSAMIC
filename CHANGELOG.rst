@@ -1,5 +1,6 @@
 [X.X.X]
 -------
+
 Added:
 ^^^^^^
 * Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
@@ -13,6 +14,7 @@ Added:
 * Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
 * Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
 * Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
+* `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
 
 Changed:
 ^^^^^^^^
@@ -30,6 +32,7 @@ Changed:
 * Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
 * Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 
 Fixed:
 ^^^^^^
@@ -38,18 +41,21 @@ Fixed:
 * vcf2cytosure container missing constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1198
 * Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
 * Fix SVDB annotation intermediate rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1218
+* Broken documentation links https://github.com/Clinical-Genomics/BALSAMIC/pull/1226
 
 Removed:
 ^^^^^^^
 * Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
 * Quality trimming of fastqs for UMI workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
+
 
 [12.0.2]
 --------
 
 Fixed:
 ^^^^^^
-* Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
+* Missing `Number` in VCF header for SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
 
 Changed:
 ^^^^^^^^

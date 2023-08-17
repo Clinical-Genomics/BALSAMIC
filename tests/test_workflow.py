@@ -126,5 +126,6 @@ def test_workflow_qc_tumor_normal_hg19(
             "SENTIEON_LICENSE": sentieon_license,
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
+
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)

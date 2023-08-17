@@ -1,17 +1,17 @@
-name: Build and push master and develop container
+name: Docker release containers
 on:
-  push:
+  pull_request:
     branches:
-      - master
-      - develop
+      - "master"
 jobs:
   main:
-    name: Docker image build push
-    runs-on: ubuntu-20.04
+    name: Build and publish
+    if:  startsWith(github.head_ref, 'release_v')
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
-        container-name: [align_qc, annotate, coverage_qc, varcall_cnvkit, varcall_py27, varcall_py3, balsamic, delly, vcf2cytosure, cnvpytor, somalier, ascatNgs]
+        container-name: [align_qc, annotate, ascatNgs, cadd, cnvpytor, coverage_qc, delly, somalier, varcall_cnvkit, varcall_py3, varcall_py27, vcf2cytosure]
     steps:
       - name: Git checkout
         id: git_checkout
@@ -19,7 +19,7 @@ jobs:
       - name: Get branch name
         id: get_branch_name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF##*/}}" >> $GITHUB_OUTPUT
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -39,3 +39,11 @@ jobs:
           tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
           build-args: CONTAINER_NAME=${{ matrix.container-name }}
           provenance: false
+      - name: Test container
+        id: docker_test_container
+        shell: bash
+        run: |
+          docker run \
+          -v $(readlink -f container_tests):/container_tests \
+          clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }} \
+          bash /container_tests/${{ matrix.container-name }}/${{ matrix.container-name }}.sh

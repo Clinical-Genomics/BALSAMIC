@@ -30,7 +30,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinxcontrib.napoleon",
+    "sphinx.ext.napoleon",
     "sphinx_click",
     "sphinxarg.ext",
     "recommonmark",
@@ -56,7 +56,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 # html_theme = 'sphinx_rtd_theme'
-html_logo = "../BALSAMIC/assets/balsamic_logo.png"
+html_logo = "../BALSAMIC/assets/images/balsamic_logo.png"
 html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
