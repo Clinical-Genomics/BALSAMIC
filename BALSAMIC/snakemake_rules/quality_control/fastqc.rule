@@ -2,30 +2,28 @@
 # coding: utf-8
 
 rule fastqc:
-    """Perform quality control checks on raw sequence data"""
+    """Perform quality control checks on raw sequence data."""
     input:
-        sample_fastqs = lambda wildcards: balsamic.get_all_fastqs_for_sample(sample_name = wildcards.sample, fastq_types = [FastqName.FWD, FastqName.REV])
+        fastq = input_fastq_dir + "{fastq_file_names}.fastq.gz"
     output:
-        fastqccomplete = fastqc_dir + "{sample}_fastqc.completed"
+        fastqccomplete = fastqc_dir + "{fastq_file_names}_fastqc.zip"
     benchmark:
-        Path(benchmark_dir, "fastqc_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "fastqc_{fastq_file_names}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
         fastqc_dir = fastqc_dir,
-        sample_id = "{sample}",
+        fastq_file_name = "{fastq_file_names}",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
     threads: get_threads(cluster_config, "fastqc")
     message:
-        "Running FastQC on {params.sample_id}"
+        "Running FastQC on {params.fastq_file_name}"
     shell:
         """
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.sample_fastqs} \
+fastqc --threads {threads} {input.fastq} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
- 
-echo "Ran FastQC on {input.sample_fastqs}" >> {output.fastqccomplete}
         """

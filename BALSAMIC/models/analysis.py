@@ -535,6 +535,21 @@ class ConfigModel(BaseModel):
                         fastq_list.append(fastq_info.rev)
         return fastq_list
 
+    def get_all_fastq_names(self, remove_suffix: bool = True) -> List[str]:
+        """Return all fastq_names involved in analysis, optionally remove fastq.gz suffix."""
+        fastq_list = []
+        for sample in self.samples:
+            for fastq_info in sample.fastq_info.values():
+                fwd_name = os.path.basename(fastq_info.fwd)
+                rev_name = os.path.basename(fastq_info.rev)
+                if remove_suffix:
+                    fastq_list.append(fwd_name.replace(".fastq.gz", ""))
+                    fastq_list.append(rev_name.replace(".fastq.gz", ""))
+                else:
+                    fastq_list.append(fwd_name)
+                    fastq_list.append(rev_name)
+        return fastq_list
+
     def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
         """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
         for sample in self.samples:

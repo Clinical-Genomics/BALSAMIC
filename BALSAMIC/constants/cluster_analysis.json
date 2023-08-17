@@ -54,7 +54,7 @@
 	},
 	"fastqc":{
 		"time": "12:00:00",
-		"n": 8
+		"n": 4
 	},
 	"fastp_quality_trim":{
 		"time": "24:00:00",

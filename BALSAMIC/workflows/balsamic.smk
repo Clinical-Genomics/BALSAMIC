@@ -58,6 +58,7 @@ tmp_dir: str = os.path.join(result_dir, "tmp", "")
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
+input_fastq_dir: str = balsamic.analysis.fastq_path + "/"
 benchmark_dir: str = balsamic.analysis.benchmark
 fastq_dir: str = os.path.join(result_dir, "fastq", "")
 bam_dir: str = os.path.join(result_dir, "bam", "")
