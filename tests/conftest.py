@@ -38,6 +38,12 @@ from .helpers import ConfigHelper, Map
 MOCKED_OS_ENVIRON = "os.environ"
 
 
+@pytest.fixture(scope="session", name="balsamic_version")
+def fixture_balsamic_version() -> str:
+    """Return a dummy Balsamic version."""
+    return "1.0.0"
+
+
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
     """Return a non-existent files directory path."""

@@ -1,5 +1,5 @@
 """Balsamic cache specific constants."""
-from typing import Dict
+from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.class_types import StrEnum
@@ -33,7 +33,13 @@ class ContainerVersion(StrEnum):
     """Balsamic container versions."""
 
     DEVELOP: str = "develop"
+    MAJOR: str = "major"
+    MINOR: str = "minor"
+    PATCH: str = "patch"
     RELEASE: str = "release"
+
+
+CONTAINER_VERSIONS: List[str] = [version.value for version in ContainerVersion]
 
 
 class DockerContainers(StrEnum):
