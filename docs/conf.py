@@ -55,7 +55,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 # html_theme = 'sphinx_rtd_theme'
-html_logo = "../BALSAMIC/assets/balsamic_logo.png"
+html_logo = "../BALSAMIC/assets/images/balsamic_logo.png"
 html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
