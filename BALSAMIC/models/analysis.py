@@ -515,10 +515,12 @@ class ConfigModel(BaseModel):
 
     def get_fastq_patterns_by_sample(self, sample_names: List[str]) -> List[str]:
         """Return all fastq_patterns for a given sample."""
-        fastq_pattern_list = []
-        for sample in self.samples:
-            if sample.name in sample_names:
-                fastq_pattern_list.extend(sample.fastq_info.keys())
+        fastq_pattern_list = [
+            fastq_pattern
+            for sample in self.samples
+            if sample.name in sample_names
+            for fastq_pattern in sample.fastq_info.keys()
+        ]
         return fastq_pattern_list
 
     def get_all_fastqs_for_sample(
@@ -537,17 +539,14 @@ class ConfigModel(BaseModel):
 
     def get_all_fastq_names(self, remove_suffix: bool = True) -> List[str]:
         """Return all fastq_names involved in analysis, optionally remove fastq.gz suffix."""
-        fastq_list = []
-        for sample in self.samples:
-            for fastq_info in sample.fastq_info.values():
-                fwd_name = os.path.basename(fastq_info.fwd)
-                rev_name = os.path.basename(fastq_info.rev)
-                if remove_suffix:
-                    fastq_list.append(fwd_name.replace(".fastq.gz", ""))
-                    fastq_list.append(rev_name.replace(".fastq.gz", ""))
-                else:
-                    fastq_list.append(fwd_name)
-                    fastq_list.append(rev_name)
+        fastq_list = [
+            os.path.basename(fastq_path).replace(".fastq.gz", "")
+            if remove_suffix
+            else os.path.basename(fastq_path)
+            for sample in self.samples
+            for fastq_info in sample.fastq_info.values()
+            for fastq_path in [fastq_info.fwd, fastq_info.rev]
+        ]
         return fastq_list
 
     def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
@@ -582,10 +581,12 @@ class ConfigModel(BaseModel):
         bam_names = []
         for sample in self.samples:
             if sample.name == sample_name:
-                for fastq_pattern in sample.fastq_info:
-                    bam_names.append(
+                bam_names.extend(
+                    [
                         f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam"
-                    )
+                        for fastq_pattern in sample.fastq_info
+                    ]
+                )
         return bam_names
 
     def get_final_bam_name(
@@ -606,10 +607,12 @@ class ConfigModel(BaseModel):
 
         if self.analysis.analysis_type == "pon":
             # Only dedup is necessary for panel of normals
-            return f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+            final_bam_suffix = "dedup"
         else:
             # For every analysis except PON, the name of the final processed bamfile is defined here
-            return f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
+            final_bam_suffix = "dedup.realign"
+
+        return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
 
 
 """
