@@ -6,5 +6,6 @@ sphinx==4.2.0
 sphinx-argparse==0.3.1
 sphinx-click==3.0.2
 sphinx_rtd_theme==1.0.0
+sphinxcontrib-napoleon==0.7
 furo==2021.10.9
 cyvcf2

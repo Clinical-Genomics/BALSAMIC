@@ -5,10 +5,11 @@ Tools and software
 BALSAMIC ( **version** = 12.0.2 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
+
 ascatNgs
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/cancerit/ascatNgs>`_
-:Article: `PNAS` `<https://doi.org/10.1073/pnas.1009843107>`_
+:Article: `PNAS` `<https://www.pnas.org/doi/full/10.1073/pnas.1009843107/>`_
 :Version: `4.5.0`
 
 bcftools
@@ -74,7 +75,7 @@ manta
 multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
-:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
+:Article: `Bioinformatics` `<http://dx.doi.org/10.1093/bioinformatics/btw354>`_
 :Version: `1.12`
 
 mosdepth

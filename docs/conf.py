@@ -30,7 +30,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
+    "sphinxcontrib.napoleon",
     "sphinx_click",
     "sphinxarg.ext",
     "recommonmark",
