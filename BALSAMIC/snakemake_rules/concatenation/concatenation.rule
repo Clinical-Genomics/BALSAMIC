@@ -1,0 +1,23 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+rule concatenate:
+    """Merge fastq files into a single one."""
+    output:
+        fastq = concat_dir + "{sample}_R_{read}.fastq.gz"
+    benchmark:
+        Path(benchmark_dir, "{sample}_R_{read}.tsv").as_posix()
+    params:
+        fastq_dir = fastq_dir,
+        concat_dir = concat_dir,
+        sample = "{sample}",
+        read = "{read}"
+    threads:
+        get_threads(cluster_config, "concatenate")
+    message:
+        "Sample {params.sample} and read {params.read} FASTQ concatenation"
+    shell:
+        """
+        mkdir -p {params.concat_dir}
+        cat {params.fastq_dir}/*{params.sample}*_R_{params.read}.fastq.gz > {output.fastq}
+        """

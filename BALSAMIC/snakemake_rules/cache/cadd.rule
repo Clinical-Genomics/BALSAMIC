@@ -1,0 +1,23 @@
+"""Rules to process  reference files."""
+
+
+rule index_cadd:
+    """Index CADD reference files."""
+    input:
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}",
+        cadd_snv=cache_config.references.cadd_snv.file_path
+    output:
+        cadd_snv_tbi=f"{cache_config.references.cadd_snv.file_path}.{FileType.TBI}"
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}"
+    threads: get_threads(cluster_config=cluster_config, rule_name="index_cadd")
+    message:
+        "Indexing CADD file {input.cadd_snv}"
+    benchmark:
+        f"{cache_config.references.cadd_snv.file_path}.{FileType.TBI}.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.cadd_snv.file_path}.{FileType.TBI}.{FileType.LOG}",
+    shell:
+        """
+        tabix -s 1 -b 2 -e 2 "{input.cadd_snv}" &> "{log}"
+        """

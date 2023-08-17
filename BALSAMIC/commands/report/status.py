@@ -4,7 +4,6 @@ import json
 import click
 import snakemake
 
-from pathlib import Path
 from colorclass import Color
 
 from BALSAMIC.utils.cli import get_snakefile
@@ -55,7 +54,7 @@ def status(context, sample_config, show_only_missing, print_files):
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
     reference_genome = sample_config_dict["reference"]["reference_genome"]
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
 
     if os.path.isfile(os.path.join(result_dir, "analysis_finish")):
         snakemake.snakemake(
@@ -81,7 +80,7 @@ def status(context, sample_config, show_only_missing, print_files):
             quiet=True,
         )
     summary = [i.split("\t") for i in summary]
-    summary_dict = [dict(zip(summary[0], value)) for value in summary[1:]]
+    summary_dict = [dict(zip(summary[1], value)) for value in summary[2:]]
 
     existing_files = set()
     missing_files = set()
