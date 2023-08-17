@@ -12,6 +12,7 @@ Added:
 * Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
 * Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
 * Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
+* `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
 * Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
 
 Changed:
@@ -44,7 +45,7 @@ Removed:
 
 Fixed:
 ^^^^^^
-* Missing `Number` in VCF header for SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
+* Missing `Number` in VCF header for SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1203
 
 Changed:
 ^^^^^^^^

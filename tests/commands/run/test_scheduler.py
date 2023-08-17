@@ -191,7 +191,6 @@ def test_qsub_scheduler():
 
 def test_read_sample_config_err(panel_bed_file: str):
     with pytest.raises(Exception):
-
         # GIVEN a bed file instead of json file
 
         # WHEN calling read_sample_config
