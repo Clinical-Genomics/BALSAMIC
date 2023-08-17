@@ -2,7 +2,7 @@
 import click
 
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, CACHE_VERSIONS
 from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
 
 OPTION_GENOME_VERSION = click.option(
@@ -94,4 +94,12 @@ OPTION_QUIET = click.option(
     default=False,
     is_flag=True,
     help="Instruct Snakemake to not output any progress or rule information",
+)
+
+OPTION_CACHE_VERSION = click.option(
+    "--cache-version",
+    show_default=True,
+    default=CacheVersion.RELEASE,
+    type=click.Choice(CACHE_VERSIONS),
+    help="Cache version to be used for init or analysis",
 )
