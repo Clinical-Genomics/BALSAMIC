@@ -1,13 +1,17 @@
-name: Build and push master and develop container
+name: Docker develop containers
 on:
   push:
     branches:
-      - master
-      - develop
+      - "develop"
+  pull_request:
+    branches-ignore:
+      - "master"
+    paths:
+      - "BALSAMIC/containers/**"
 jobs:
   main:
-    name: Docker image build push
-    runs-on: ubuntu-20.04
+    name: Build and publish
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
@@ -16,10 +20,6 @@ jobs:
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v3
-      - name: Get branch name
-        id: get_branch_name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -36,6 +36,14 @@ jobs:
         with:
           file: BALSAMIC/containers/${{ matrix.container-name }}/Dockerfile
           push: true
-          tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
+          tags: clinicalgenomics/balsamic:develop-${{ matrix.container-name }}
           build-args: CONTAINER_NAME=${{ matrix.container-name }}
           provenance: false
+      - name: Test container
+        id: docker_test_container
+        shell: bash
+        run: |
+          docker run \
+          -v $(readlink -f container_tests):/container_tests \
+          clinicalgenomics/balsamic:develop-${{ matrix.container-name }} \
+          bash /container_tests/${{ matrix.container-name }}/${{ matrix.container-name }}.sh

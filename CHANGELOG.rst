@@ -37,7 +37,7 @@ Fixed:
 Removed:
 ^^^^^^^
 * Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
-* Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1220
+* Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
 
 [12.0.2]
 --------

@@ -11,17 +11,12 @@ on:
 jobs:
   pytest_coveralls:
     name: run PyTest
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       # Checkout BALSAMIC
       - name: Git checkout
         id: git_checkout
         uses: actions/checkout@v3
-      # Get branch name
-      - name: Get branch name
-        id: get_branch_name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
       # Conda env create
       - name: setup conda
         id: setup_conda
