@@ -9,7 +9,6 @@ from typing import Union, List, Optional
 
 import click
 
-from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.init.options import (
     OPTION_OUT_DIR,
     OPTION_COSMIC_KEY,
@@ -36,7 +35,7 @@ from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
-from BALSAMIC.utils.cache import get_containers
+from BALSAMIC.utils.cache import get_containers, get_release_version
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
@@ -99,7 +98,8 @@ def initialize(
         )
         raise click.Abort()
 
-    out_dir: Path = Path(out_dir, balsamic_version).absolute()
+    release_version: str = get_release_version(cache_version)
+    out_dir: Path = Path(out_dir, release_version).absolute()
     references_dir: Path = Path(out_dir, genome_version)
     genome_dir = Path(references_dir, "genome")
     variants_dir = Path(references_dir, "variants")
@@ -113,7 +113,7 @@ def initialize(
 
     references: Union[ReferencesHg, ReferencesCanFam] = REFERENCE_FILES[genome_version]
     cache_config: CacheConfig = CacheConfig(
-        analysis={"case_id": f"reference.{genome_version}.v{balsamic_version}"},
+        analysis={"case_id": f"reference.{genome_version}.v{release_version}"},
         references_dir=references_dir.as_posix(),
         genome_dir=genome_dir.as_posix(),
         variants_dir=variants_dir.as_posix(),
