@@ -93,9 +93,7 @@ Table of potentially affected steps in Storage and Upload of files:
 | Processes                                | Affected in current version | Affected workflows     | 
 |------------------------------------------|-----------------------------|------------------------|
 | New files to be delivered                | Yes/No                      | ALL / TGA / WGS / UMI  | 
-| Changes of file-names of delivered files | Yes/No                      | ALL / TGA / WGS / UMI  | 
 | New files to be stored                   | Yes/No                      | ALL / TGA / WGS / UMI  | 
-| Changes of file-names of stored files    | Yes/No                      | ALL / TGA / WGS / UMI  | 
 | Changes to Housekeeper IDs               | Yes/No                      | ALL / TGA / WGS / UMI  | 
 | Changes to Scout yaml creation           | Yes/No                      | ALL / TGA / WGS / UMI  | 
 
