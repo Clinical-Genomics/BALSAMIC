@@ -349,6 +349,7 @@ def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> 
     }
     return modify_pon_config_dict
 
+
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
     """Return path for panel bed file."""
