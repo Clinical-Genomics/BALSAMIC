@@ -15,6 +15,7 @@ Install Sphinx and extensions:
 
 .. code-block::
 
+   cd /path/to/BALSAMIC
    python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .
    cd docs
    pip install -r requirements.txt -r ../requirements-dev.txt
