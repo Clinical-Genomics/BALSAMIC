@@ -13,7 +13,7 @@ Added:
 * Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
 * Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 * `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
-* `Container ettiquette` to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/11
+* `Container ettiquette` to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1132
 
 Changed:
 ^^^^^^^^

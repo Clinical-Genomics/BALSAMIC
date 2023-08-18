@@ -32,7 +32,7 @@ bwa
 cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
-:Article: `PLOS Computational Biology` `<http://dx.doi.org/10.1371/journal.pcbi.1004873>`_
+:Article: `PLOS Computational Biology` `<https://doi.org/10.1371/journal.pcbi.1004873>`_
 :Version: `0.9.9`
 
 delly
@@ -56,7 +56,7 @@ fastp
 fastqc
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/s-andrews/FastQC>`_
-:Article: `Babraham` `<http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
+:Article: `Babraham` `<https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 :Version: `0.11.9`
 
 gatk
@@ -74,7 +74,7 @@ manta
 multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
-:Article: `Bioinformatics` `<http://doi.org/10.1093/bioinformatics/btw354>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
 :Version: `1.12`
 
 mosdepth

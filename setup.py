@@ -35,7 +35,6 @@ requirements: List[str] = [
     "cyvcf2==0.30.22",
     "datrie==0.8.2",
     "defusedxml==0.7.1",
-    "docutils==0.20.1",
     "dpath==2.1.6",
     "fasteners==0.18",
     "fastjsonschema==2.18.0",
