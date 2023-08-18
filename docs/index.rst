@@ -33,8 +33,7 @@
     :hidden:
     :maxdepth: 1
 
-    git_etiquette
-    snakemake_etiquette
     README
+    programming_guide
     semver
     FAQs

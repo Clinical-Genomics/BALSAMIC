@@ -25,6 +25,7 @@ References and other resources
 #. **dbVar**: dbVar is NCBI's database of genomic structural variation – insertions, deletions, duplications, inversions, mobile element insertions, translocations, and complex chromosomal rearrangements https://www.ncbi.nlm.nih.gov/dbvar Download link: https://www.ncbi.nlm.nih.gov/dbvar/content/ftp_manifest/
 #. **Drug sensitivity in cancer**: Identifying molecular features of cancers that predict response to anti-cancer drugs. http://www.cancerrxgene.org/ Download link: ftp://ftp.sanger.ac.uk/pub4/cancerrxgene/releases
 #. **VarSome**: VarSome is a knowledge base and aggregator for human genomic variants. https://varsome.com/about/
+#. **CADD**\ : CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome. CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings.
 
 Sample datasets
 ---------------

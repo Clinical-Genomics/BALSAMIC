@@ -8,7 +8,7 @@ one is included: usage and parameters, and relevant external links.
 ascatNgs
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/cancerit/ascatNgs>`_
-:Article: `PNAS` `<https://doi.org/10.1073/pnas.1009843107>`_
+:Article: `PNAS` `<https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097604/>`_
 :Version: `4.5.0`
 
 bcftools
@@ -32,7 +32,7 @@ bwa
 cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
-:Article: `PLOS Computational Biology` `<http://dx.doi.org/10.1371/journal.pcbi.1004873>`_
+:Article: `PLOS Computational Biology` `<https://doi.org/10.1371/journal.pcbi.1004873>`_
 :Version: `0.9.9`
 
 delly
@@ -56,7 +56,7 @@ fastp
 fastqc
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/s-andrews/FastQC>`_
-:Article: `Babraham` `<http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
+:Article: `Babraham` `<https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 :Version: `0.11.9`
 
 gatk
@@ -80,7 +80,7 @@ multiqc
 mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
-:Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/34/5/867/4583630?login=true>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btx699>`_
 :Version: `0.3.3`
 
 picard
