@@ -86,30 +86,38 @@ description, and status (Pass/Fail).
 | `uphippo`      | UMI, tumor-only    | Fail (`GC dropout=1.650392`)                          | Pass/Fail |
 | `equalbug`     | UMI, tumor-normal  | Fail (`GC_DROPOUT=1.087173` and `RELATEDNESS=-0.524`) | Pass/Fail |
 
-### Storage and Upload Integrity Verifications
+- [ ] This section has been verified successfully
 
-Table of potentially affected steps in Storage and Upload of files:
+### Storage, Delivery and Upload Integrity Verifications
 
-| Processes                                | Affected in current version | Affected workflows     | 
-|------------------------------------------|-----------------------------|------------------------|
-| New files to be delivered                | Yes/No                      | ALL / TGA / WGS / UMI  | 
-| New files to be stored                   | Yes/No                      | ALL / TGA / WGS / UMI  | 
-| Changes to Housekeeper IDs               | Yes/No                      | ALL / TGA / WGS / UMI  | 
-| Changes to Scout yaml creation           | Yes/No                      | ALL / TGA / WGS / UMI  | 
+<!--
+Table of potentially affected steps in storage, clinical delivery, and upload of files.
+-->
 
+| Processes                           | Affected in current version | Affected workflows     | 
+|-------------------------------------|-----------------------------|------------------------|
+| New files to be stored              | Yes/No                      | ALL / TGA / WGS / UMI  |
+| New files to be delivered           | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| New files to be uploaded to Scout   | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| Changes to Housekeeper IDs          | Yes/No                      | ALL / TGA / WGS / UMI  | 
+| Changes to Scout upload             | Yes/No                      | ALL / TGA / WGS / UMI  |
+
+<!--
 For each affected workflow above, verify that all required files are stored, delivered and uploaded.
-
 If none are affected, this step can be ignored. 
+-->
 
-| Case ID        | Analysis type      | File  status | 
-|----------------|--------------------|--------------|
-| `acetuna`      | QC, tumor-only     | Pass/Fail/NA |
-| `civilsole`    | WGS, tumor-only    | Pass/Fail/NA |
-| `fleetjay`     | WGS, tumor-normal  | Pass/Fail/NA |
-| `setamoeba`    | TGA, tumor-only    | Pass/Fail/NA |
-| `unitedbeagle` | TGA, tumor-normal  | Pass/Fail/NA |
-| `uphippo`      | UMI, tumor-only    | Pass/Fail/NA |
-| `equalbug`     | UMI, tumor-normal  | Pass/Fail/NA |
+| Case ID        | Analysis type       | Storage status | Delivery status | Upload  status | 
+|----------------|---------------------|----------------|----------------|----------------|
+| `acetuna`      | QC, tumor-only      | Pass/Fail/NA   | Pass/Fail/NA   | Pass/Fail/NA   | 
+| `civilsole`    | WGS, tumor-only     | Pass/Fail/NA   | Pass/Fail/NA   | Pass/Fail/NA   |
+| `fleetjay`     | WGS, tumor-normal   | Pass/Fail/NA   | Pass/Fail/NA   | Pass/Fail/NA   | 
+| `setamoeba`    | TGA, tumor-only     | Pass/Fail/NA   | Pass/Fail/NA   | Pass/Fail/NA   | 
+| `unitedbeagle` | TGA, tumor-normal   | Pass/Fail/NA   | Pass/Fail/NA   | Pass/Fail/NA   | 
+| `uphippo`      | UMI, tumor-only     | Pass/Fail/NA   | Pass/Fail/NA   | Pass/Fail/NA   | 
+| `equalbug`     | UMI, tumor-normal   | Pass/Fail/NA   | Pass/Fail/NA   | Pass/Fail/NA   | 
+
+- [ ] This section has been verified successfully, or been identified as irrelevant for the current verification
 
 ### Version Specific Verification Cases
 
@@ -118,6 +126,8 @@ If none are affected, this step can be ignored.
 | `TC001`  | [Analysis type]   | Pass/Fail   | Pass/Fail |
 | `TC002`  | [Analysis type]   | Pass/Fail   | Pass/Fail |
 
+
+- [ ] This section has been verified successfully, or been identified as irrelevant for the current verification
 
 ### Test [Test 1]
 
