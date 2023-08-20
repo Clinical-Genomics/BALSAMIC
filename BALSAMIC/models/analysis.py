@@ -508,6 +508,39 @@ class ConfigModel(BaseModel):
                 fastq_info_values.add(fastq_pattern)
         return samples
 
+    @validator("samples")
+    def no_unassigned_fastqs_in_fastq_dir(cls, samples):
+        """All fastq files in the supplied fastq-dir must have been assigned to the sample-dict."""
+        def get_all_fwd_rev_values(samples) -> List[str]:
+            # Return all fastq files in analysis
+            fwd_rev_values = []
+            for sample in samples:
+                for fastq_pattern in sample.fastq_info.values():
+                    fwd_rev_values.append(fastq_pattern.fwd)
+                    fwd_rev_values.append(fastq_pattern.rev)
+            return fwd_rev_values
+
+        def get_fastq_path(samples) -> str:
+            # Return fastq_path from first fastq_fwd_path
+            for sample in samples:
+                for fastq_pattern in sample.fastq_info.values():
+                    return os.path.dirname(fastq_pattern.fwd)
+
+        fastq_path = get_fastq_path(samples)
+
+        # Get a set of all fastq files in fastq-directory
+        fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
+
+        # Look for fastqs in sample dict
+        fastqs_assigned = set(get_all_fwd_rev_values(samples))
+
+        unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
+        if unassigned_fastqs:
+            error_message = f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
+            raise ValidationError(error_message)
+
+        return samples
+
     def get_all_sample_names(self) -> List[str]:
         """Return all sample names in the analysis."""
         sample_list = [sample.name for sample in self.samples]
@@ -613,38 +646,6 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup.realign"
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
-
-
-"""
-    @validator("samples")
-    def no_unassigned_fastqs_in_fastq_dir(cls, samples, values):
-
-        All fastq files in the supplied fastq-dir must have been assigned to the sample-dict.
-
-        def get_all_fwd_rev_values(samples):
-            fwd_rev_values = []
-            for sample in samples:
-                for fastq_pattern in sample.fastq_info.values():
-                    fwd_rev_values.append(fastq_pattern.fwd)
-                    fwd_rev_values.append(fastq_pattern.rev)
-            return fwd_rev_values
-
-        # Access fastq_path from analysis
-        fastq_path = values["analysis"].fastq_path
-
-        # Get a set of all fastq files in fastq-directory
-        fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
-
-        # Look for fastqs in sample dict
-        fastqs_assigned = set(get_all_fwd_rev_values(samples))
-
-        unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
-        if unassigned_fastqs:
-            error_message = f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
-            raise ValidationError(error_message)
-
-        return samples
-"""
 
 
 class PonBalsamicConfigModel(ConfigModel):

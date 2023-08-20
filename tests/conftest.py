@@ -1,5 +1,6 @@
 import json
 import os
+import copy
 from datetime import datetime
 from functools import partial
 from pathlib import Path
@@ -321,7 +322,7 @@ def config_dict(config_path: str) -> str:
 @pytest.fixture(scope="session")
 def config_dict_w_singularity(config_dict: str, balsamic_cache: str) -> str:
     """Read and return config from json with singularity image path."""
-    modify_dict = config_dict.copy()
+    modify_dict = copy.deepcopy(config_dict)
     modify_dict["singularity"] = {
         "image": f"{balsamic_cache}/{balsamic_version}/containers"
     }
@@ -787,29 +788,37 @@ def config_w_fastq_dir_for_duplicate_fastq_patterns_model(
 
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_normal_extrafile(
+def tumor_normal_extrafile_config(
     analysis_dir: str,
     case_id_tumor_normal: str,
-    tumor_fastq_names: List[str],
-    normal_fastq_names: List[str],
+    config_dict_w_singularity: Dict,
 ) -> str:
     """Creates and returns the directory containing the FASTQs to test detection of unassigned fastq-files."""
     fastq_dir: Path = Path(analysis_dir, case_id_tumor_normal, "fastq_extrafile")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
-    for fastq in tumor_fastq_names:
-        Path(fastq_dir, fastq).touch()
+    extra_fastq_file_config = copy.deepcopy(config_dict_w_singularity)
+    samples_list = extra_fastq_file_config["samples"]
+    for sample_dict in samples_list:
+        for fastq_pattern, values in sample_dict["fastq_info"].items():
+            fwd_fastq_path = f"{fastq_dir}/{os.path.basename(values['fwd'])}"
+            rev_fastq_path = f"{fastq_dir}/{os.path.basename(values['rev'])}"
+            values["fwd"] = fwd_fastq_path
+            values["rev"] = rev_fastq_path
+            Path(fwd_fastq_path).touch()
+            Path(rev_fastq_path).touch()
+    extra_fastq_file_config["samples"] = samples_list
+    extra_fastq_file_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
 
-    for fastq in normal_fastq_names:
-        Path(fastq_dir, fastq).touch()
-
+    # Add extra files not assigned to dict
     extra_file1 = "ACC3fail_S1_L001_R1_001.fastq.gz"
     extra_file2 = "ACC3fail_S1_L001_R2_001.fastq.gz"
     Path(fastq_dir, extra_file1).touch()
     Path(fastq_dir, extra_file2).touch()
 
-    yield fastq_dir.as_posix()
+    # Returned modified dict
+    return extra_fastq_file_config
 
 
 @pytest.fixture(scope="session")

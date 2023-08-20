@@ -353,11 +353,14 @@ def test_detect_duplicate_fastq_pattern(
     )
 
 
-def test_detection_unassigned_fastq_file(
-    fastq_dir_tumor_normal_extrafile: str, config_dict_w_singularity: Dict
-):
+def test_detection_unassigned_fastq_file(tumor_normal_extrafile_config: Dict):
     """Test instantiating balsamic model with fastq dir containing unassigned fastq-files."""
-    pass
+    # config_dict = tumor_normal_extrafile_config
+    # Initialize balsamic model
+    with pytest.raises(ValidationError) as exc:
+        BalsamicConfigModel.parse_obj(tumor_normal_extrafile_config)
+
+    assert (f"Fastqs in fastq-dir not assigned to sample config:" in str(exc.value))
 
 
 def test_get_all_sample_names(balsamic_model):
