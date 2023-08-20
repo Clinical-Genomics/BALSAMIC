@@ -23,8 +23,8 @@ if 'quality_trim' in config['QC'].keys():
 rule fastp_quality_trim:
     """Fastq data pre-processing."""
     input:
-        fastq_r1 = lambda wildcards: balsamic.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
-        fastq_r2 = lambda wildcards: balsamic.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
+        fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
+        fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
         fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
         fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),

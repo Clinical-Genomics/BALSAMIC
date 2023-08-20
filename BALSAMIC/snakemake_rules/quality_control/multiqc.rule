@@ -1,17 +1,17 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-multiqc_input = [balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)]
+multiqc_input = [config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)]
 multiqc_input.extend(expand(bam_dir + "{sample}.bam_compressed", sample=sample_names))
 multiqc_input.append(bam_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
 multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
     sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
 # fastqc metrics
-multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=balsamic.get_all_fastq_names()))
+multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=config_model.get_all_fastq_names()))
 
 if config['analysis']['analysis_type'] == "paired":
-    multiqc_input.append(balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample))
+    multiqc_input.append(config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample))
     multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
     multiqc_input.append(bam_dir + "normal.{}.dedup.metrics".format(normal_sample))
 
@@ -24,9 +24,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/{fastq_pattern}_fastp.json",
-        fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = sample_names)))
+        fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
     multiqc_input.extend(expand(qc_dir + "fastp/{fastq_pattern}_fastp.html",
-        fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = sample_names)))
+        fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
 
 
     # Picard metrics
@@ -47,9 +47,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 else:
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/{fastq_pattern}_fastp.json",
-        fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = sample_names)))
+        fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
     multiqc_input.extend(expand(qc_dir + "fastp/{fastq_pattern}_fastp.html",
-        fastq_pattern=balsamic.get_fastq_patterns_by_sample(sample_names = sample_names)))
+        fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
 
     # picard metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.insertsizemetric", sample=tumor_sample))

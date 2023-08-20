@@ -27,7 +27,7 @@ from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
 # Initialize BalsamicConfigModel
-balsamic = BalsamicConfigModel.parse_obj(config)
+config_model = BalsamicConfigModel.parse_obj(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -35,20 +35,20 @@ shell.prefix("set -eo pipefail; ")
 LOG = logging.getLogger(__name__)
 
 # Get case id/name
-case_id: str = balsamic.analysis.case_id
+case_id: str = config_model.analysis.case_id
 # Get analysis dir
-analysis_dir_home: str = balsamic.analysis.analysis_dir
+analysis_dir_home: str = config_model.analysis.analysis_dir
 analysis_dir: str = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir: str = os.path.join(balsamic.analysis.result, "")
+result_dir: str = os.path.join(config_model.analysis.result, "")
 
 # Create a temporary directory with trailing /
 tmp_dir: str = os.path.join(result_dir, "tmp", "")
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-input_fastq_dir: str = balsamic.analysis.fastq_path + "/"
-benchmark_dir: str = balsamic.analysis.benchmark
+input_fastq_dir: str = config_model.analysis.fastq_path + "/"
+benchmark_dir: str = config_model.analysis.benchmark
 fastq_dir: str = os.path.join(result_dir, "fastq", "")
 bam_dir: str = os.path.join(result_dir, "bam", "")
 fastqc_dir: str = os.path.join(result_dir, "fastqc", "")
@@ -58,11 +58,11 @@ delivery_dir: str = os.path.join(result_dir, "delivery", "")
 
 
 # Run information
-singularity_image: str = balsamic.singularity['image']
-sample_names: List[str] = balsamic.get_all_sample_names()
-tumor_sample: str = balsamic.get_sample_name_by_type(SampleType.TUMOR)
-if balsamic.analysis.analysis_type == "paired":
-    normal_sample: str = balsamic.get_sample_name_by_type(SampleType.NORMAL)
+singularity_image: str = config_model.singularity['image']
+sample_names: List[str] = config_model.get_all_sample_names()
+tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
+if config_model.analysis.analysis_type == "paired":
+    normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)

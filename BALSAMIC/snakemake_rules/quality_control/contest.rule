@@ -5,8 +5,8 @@
 
 rule gatk_contest:
     input:
-        bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
-        bamT = balsamic.get_final_bam_name(bam_dir, tumor_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = config_model.get_final_bam_name(bam_dir, tumor_sample),
         fa = config["reference"]["reference_genome"],
         popvcf = result_dir + "popvcf.vcf",
     output:

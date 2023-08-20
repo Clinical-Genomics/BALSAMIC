@@ -5,7 +5,7 @@
 
 rule PreparePopVCF:
     input:
-        bam = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         ref1kg = config["reference"]["vcf_1kg"],
     output:
         popvcf = result_dir + "popvcf.vcf"

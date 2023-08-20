@@ -16,7 +16,7 @@ rule sentieon_align_sort:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = "{sample}",
-        sample_type = lambda wildcards: balsamic.get_sample_type_by_name(wildcards.sample, uppercase=True),
+        sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
         fastq_pattern = "{fastq_pattern}"
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
@@ -44,7 +44,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_dedup:
     input:
-        bam_files = lambda wildcards: balsamic.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
+        bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),

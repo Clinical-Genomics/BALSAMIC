@@ -4,9 +4,9 @@
 rule concatenate:
     """Merge fastq files per lane into a single forward and reverse fastq."""
     input:
-        fwd_fastqs = lambda wildcards: balsamic.get_all_fastqs_for_sample(
+        fwd_fastqs = lambda wildcards: config_model.get_all_fastqs_for_sample(
             sample_name = wildcards.sample, fastq_types = [FastqName.FWD]),
-        rev_fastqs = lambda wildcards: balsamic.get_all_fastqs_for_sample(
+        rev_fastqs = lambda wildcards: config_model.get_all_fastqs_for_sample(
             sample_name = wildcards.sample, fastq_types = [FastqName.REV])
     output:
         concat_fwd = fastq_dir + "{sample}_concat_R_1.fp.fastq.gz",

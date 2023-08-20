@@ -16,7 +16,7 @@ rule sentieon_base_calibration:
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["known_indel_1kg"],
         dbsnp = config["reference"]["dbsnp"],
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
     output:
         recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),
         qual_recal = Path(bam_dir, "{sample_type}.recal.csv").as_posix(),
@@ -75,7 +75,7 @@ rm -rf {params.tmpdir};
 
 rule sentieon_TNhaplotyper_tumor_only:
     input:
-        bam = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         recal_data_table = expand(bam_dir + "tumor.merged.recal_data.table"),
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
@@ -125,7 +125,7 @@ rule sentieon_TNscope_tumor_only:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
-        bam = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         recal = expand(bam_dir + "tumor.recal_data.table")
     output:
         vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",

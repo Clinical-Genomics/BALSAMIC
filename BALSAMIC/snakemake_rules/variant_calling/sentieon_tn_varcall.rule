@@ -9,7 +9,7 @@ rule sentieon_base_calibration:
         mills = config["reference"]["mills_1kg"],
         indel_1kg = config["reference"]["known_indel_1kg"],
         dbsnp = config["reference"]["dbsnp"],
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
     output:
         recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),
         qual_recal = Path(bam_dir, "{sample_type}.recal.csv").as_posix(),
@@ -69,8 +69,8 @@ rule sentieon_TNscope:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
-        bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bamN = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         recalT = expand(bam_dir + "tumor.recal_data.table"),
         recalN = expand(bam_dir + "normal.recal_data.table"),
     output:

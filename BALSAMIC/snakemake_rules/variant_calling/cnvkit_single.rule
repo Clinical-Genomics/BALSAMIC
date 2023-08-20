@@ -12,7 +12,7 @@ def get_pon_cnn(config):
 rule cnvkit_single:
     input:
         access_bed = config["reference"]["access_regions"],
-        bamT = balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         baits_bed = config["panel"]["capture_kit"],
         fasta = config["reference"]["reference_genome"],
         refgene_flat = config["reference"]["refgene_flat"],

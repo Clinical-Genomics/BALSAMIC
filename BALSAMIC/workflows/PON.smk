@@ -20,7 +20,7 @@ from BALSAMIC.models.analysis import BalsamicWorkflowConfig, PonBalsamicConfigMo
 
 
 # Initialize BalsamicConfigModel
-balsamic = PonBalsamicConfigModel.parse_obj(config)
+config_model = PonBalsamicConfigModel.parse_obj(config)
 
 shell.prefix("set -eo pipefail; ")
 
@@ -32,19 +32,19 @@ LOG = logging.getLogger(__name__)
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 # Get case id/name
-case_id: str = balsamic.analysis.case_id
+case_id: str = config_model.analysis.case_id
 # Get analysis dir
-analysis_dir_home: str = balsamic.analysis.analysis_dir
+analysis_dir_home: str = config_model.analysis.analysis_dir
 analysis_dir: str = os.path.join(analysis_dir_home, "analysis", case_id, "")
 # Get result dir
-result_dir: str = os.path.join(balsamic.analysis.result, "")
+result_dir: str = os.path.join(config_model.analysis.result, "")
 
 # Create a temporary directory with trailing /
 tmp_dir: str = os.path.join(result_dir, "tmp", "" )
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-benchmark_dir: str = balsamic.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark
 fastq_dir: str = os.path.join(result_dir, "fastq", "")
 bam_dir: str = os.path.join(result_dir, "ban", "")
 cnv_dir: str = os.path.join(result_dir, "cnv", "")
@@ -57,8 +57,8 @@ refgene_flat: str = config["reference"]["refgene_flat"]
 access_5kb_hg19: str = config["reference"]["access_regions"]
 target_bed: str = config["panel"]["capture_kit"]
 version: str = config["analysis"]["pon_version"]
-singularity_image: str = balsamic.singularity['image']
-sample_names: List[str] = balsamic.get_all_sample_names()
+singularity_image: str = config_model.singularity['image']
+sample_names: List[str] = config_model.get_all_sample_names()
 
 
 
@@ -129,7 +129,7 @@ cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtar
 
 rule create_coverage:
     input:
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         target_bed = cnv_dir + "target.bed",
         antitarget_bed = cnv_dir + "antitarget.bed"
     output:

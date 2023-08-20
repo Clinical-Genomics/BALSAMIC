@@ -10,7 +10,7 @@ rule picard_CollectHsMetrics:
     input:
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
         bed = config["panel"]["capture_kit"],
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"],
     output:
         mrkdup = bam_dir + "{sample}.dedup.realign.hsmetric"
@@ -53,7 +53,7 @@ METRIC_ACCUMULATION_LEVEL=ALL_READS;
 
 rule picard_CollectAlignmentSummaryMetrics:
     input:
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"]
     output:
         bam_dir + "{sample}.dedup.realign.alignmetric"
@@ -88,7 +88,7 @@ METRIC_ACCUMULATION_LEVEL=LIBRARY;
 
 rule picard_CollectInsertSizeMetrics:
     input:
-        bam = lambda wildcards: balsamic.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
     output:
         pdf = bam_dir + "{sample}.dedup.realign.insertsizemetric.pdf",
         txt = bam_dir + "{sample}.dedup.realign.insertsizemetric"
