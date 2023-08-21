@@ -439,10 +439,12 @@ class PanelModel(BaseModel):
 
     @validator("capture_kit")
     def path_as_abspath_str(cls, value):
+        """Converts FilePath to string."""
         return Path(value).resolve().as_posix()
 
     @validator("pon_cnn")
     def pon_abspath_as_str(cls, value):
+        """Converts FilePath to string."""
         if value:
             return Path(value).resolve().as_posix()
         return None
@@ -687,7 +689,8 @@ class BalsamicConfigModel(ConfigModel):
     background_variants: Optional[FilePath]
 
     @validator("background_variants")
-    def fl_abspath_as_str(cls, background_variants: FilePath):
+    def background_variants_abspath_as_str(cls, background_variants: FilePath):
+        """Converts FilePath to string."""
         if background_variants:
             return Path(background_variants).resolve().as_posix()
         return None
