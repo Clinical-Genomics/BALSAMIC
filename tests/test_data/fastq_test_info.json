@@ -13,6 +13,36 @@
                 "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz"
             ]
         },
+    "samples_standard_fastq_names": [
+        {
+            "name": "ACC1",
+            "type": "tumor",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACC1_XXXXXX": {
+                    "fwd": "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+                    "rev": "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACC1_XXXXXX": {
+                    "fwd": "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+                    "rev": "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "name": "ACC2",
+            "type": "normal",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACC2_XXXXXX": {
+                    "fwd": "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+                    "rev": "1_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACC2_XXXXXX": {
+                    "fwd": "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+                    "rev": "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz"
+                }
+            }
+        }
+    ],
     "fastq_pattern_types": [
         {
             "id": "1",
@@ -110,6 +140,106 @@
         "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
         "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz"
     ],
+    "pon_samples_standard_fastq_names": [
+        {
+            "type": "normal",
+            "name": "ACC1",
+            "fastq_info": {
+                "2_171015_HJ7TLDSX5_ACC1_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACC1_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACC1_XXXXXX_R_2.fastq.gz"
+                },
+                "1_171015_HJ7TLDSX5_ACC1_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACC1_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACC1_XXXXXX_R_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "type": "normal",
+            "name": "ACCN5",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACCN5_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACCN5_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN5_XXXXXX_R_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "type": "normal",
+            "name": "ACCN2",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACCN2_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACCN2_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN2_XXXXXX_R_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "type": "normal",
+            "name": "ACCN6",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACCN6_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN6_XXXXXX_R_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "type": "normal",
+            "name": "ACCN1",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACCN1_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACCN1_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN1_XXXXXX_R_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "type": "normal",
+            "name": "ACCN4",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACCN4_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACCN4_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN4_XXXXXX_R_2.fastq.gz"
+                }
+            }
+        },
+        {
+            "type": "normal",
+            "name": "ACCN3",
+            "fastq_info": {
+                "1_171015_HJ7TLDSX5_ACCN3_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/1_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_2.fastq.gz"
+                },
+                "2_171015_HJ7TLDSX5_ACCN3_XXXXXX_R": {
+                    "fwd": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_1.fastq.gz",
+                    "rev": "tests/test_data/fastq_pon/2_171015_HJ7TLDSX5_ACCN3_XXXXXX_R_2.fastq.gz"
+                }
+            }
+        }
+    ],
     "test_fastq_info": [
         {
             "name": "ACC1",
@@ -174,13 +304,6 @@
                 }
             }
         }
-        ],
-        "illegal_normal_sample_name": {
-            "tumor": ["ACC1_S1_L001_R1_001.fastq.gz", "ACC1_S1_L001_R2_001.fastq.gz"],
-            "normal": [
-                "ACC2_NORMAL_S1_L001_R1_001.fastq.gz",
-                "ACC2_NORMAL_S1_L001_R2_001.fastq.gz"
-            ]
-        }
+        ]
     }
 }

@@ -131,11 +131,11 @@ def test_analysis_model(test_data_dir: str):
         assert "not supported" in excinfo.value
 
 
-def test_sample_instance_model(config_dict):
+def test_sample_instance_model(config_dict_w_fastqs):
     """Test sample instance model initialisation."""
 
     # GIVEN a sample list
-    sample_list = config_dict["samples"]
+    sample_list = config_dict_w_fastqs["samples"]
 
     # WHEN parsing the sample dictionary
     for idx, sample in enumerate(sample_list):
@@ -353,12 +353,11 @@ def test_detect_duplicate_fastq_pattern(
     )
 
 
-def test_detection_unassigned_fastq_file(tumor_normal_extrafile_config: Dict):
+def test_detection_unassigned_fastq_file(config_tumor_normal_extrafile: Dict):
     """Test instantiating balsamic model with fastq dir containing unassigned fastq-files."""
-    # config_dict = tumor_normal_extrafile_config
     # Initialize balsamic model
-    with pytest.raises(ValidationError) as exc:
-        BalsamicConfigModel.parse_obj(tumor_normal_extrafile_config)
+    with pytest.raises(ValueError) as exc:
+        BalsamicConfigModel.parse_obj(config_tumor_normal_extrafile)
 
     assert (f"Fastqs in fastq-dir not assigned to sample config:" in str(exc.value))
 
@@ -380,11 +379,9 @@ def test_get_fastq_patterns_by_sample(
         ), "Not all expected fastq patterns found."
         assert len(expected) == len(found), "Not same number of fastq patterns"
 
-    tumor_fastq_patterns_expected = ["HXXXXXXX_ACC1_S01_L001", "HXXXXXXX_ACC1_S01_L002"]
-    normal_fastq_patterns_expected = [
-        "HXXXXXXX_ACC2_S01_L001",
-        "HXXXXXXX_ACC2_S01_L002",
-    ]
+    tumor_fastq_patterns_expected = ["1_171015_HJ7TLDSX5_ACC1_XXXXXX", "2_171015_HJ7TLDSX5_ACC1_XXXXXX"]
+    normal_fastq_patterns_expected = ["1_171015_HJ7TLDSX5_ACC2_XXXXXX", "2_171015_HJ7TLDSX5_ACC2_XXXXXX"]
+
     fastq_patterns_all_expected = (
         tumor_fastq_patterns_expected + normal_fastq_patterns_expected
     )
@@ -413,20 +410,20 @@ def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
             found_file_names.append(os.path.basename(found_file))
         assert all(
             fastq_file in found_file_names for fastq_file in expected
-        ), "Not all expected fastq files found."
+        ), f"Not all expected fastq files found. {expected}: {found_file_names}"
         assert len(expected) == len(found), "Not same number of fastq files"
 
     fwd_fastq_files_expected = [
-        "HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
-        "HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
     ]
     rev_fastq_files_expected = [
-        "HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz",
-        "HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
     ]
     fastq_files_expected = fwd_fastq_files_expected + rev_fastq_files_expected
 
-    normal_fastq = "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz"
+    normal_fastq = "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz"
 
     fwd_fastq_files = balsamic_model.get_all_fastqs_for_sample(
         tumor_sample_name, [FastqName.FWD]
@@ -447,9 +444,9 @@ def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
 def test_fastq_by_fastq_pattern(balsamic_model):
     """Validate retrieval of fastq-file by fastq-pattern and fastq-type from BalsamicConfigModel."""
 
-    fastq_pattern = "HXXXXXXX_ACC2_S01_L002"
-    expected_fwd = "HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz"
-    expected_rev = "HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
+    fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
+    expected_fwd = "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz"
+    expected_rev = "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz"
 
     fwd_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.FWD)
     rev_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.REV)
@@ -498,8 +495,8 @@ def test_get_bam_name_per_lane(balsamic_model):
         assert len(expected) == len(found), "Not same number of bam files"
 
     # Fastq patterns for ACC2 in config.json
-    normal_lane1_fastq_pattern = "HXXXXXXX_ACC2_S01_L001"
-    normal_lane2_fastq_pattern = "HXXXXXXX_ACC2_S01_L002"
+    normal_lane1_fastq_pattern = "1_171015_HJ7TLDSX5_ACC2_XXXXXX"
+    normal_lane2_fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
 
     # Given bam_dir path and sample name
     normal_name = "ACC2"

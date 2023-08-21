@@ -2,6 +2,9 @@
 # coding: utf-8
 
 multiqc_input = [config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)]
+
+multiqc_input.extend(expand(bam_dir + "tumor.{sample}.dedup.realign.bam".format(tumor_sample))
+
 multiqc_input.extend(expand(bam_dir + "{sample}.bam_compressed", sample=sample_names))
 multiqc_input.append(bam_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
 multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",

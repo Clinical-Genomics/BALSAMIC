@@ -81,6 +81,19 @@ def pon_fastq_list(load_test_fastq_data) -> list:
     """Returns list of fastq names to be used in PON creation testing."""
     return load_test_fastq_data["pon_fastq_list"]
 
+@pytest.fixture(scope="session")
+def standard_samples_list(
+    load_test_fastq_data,
+) -> Dict[str, List]:
+    """Returns a list of standard tumor normal sample dicts."""
+    return load_test_fastq_data["samples_standard_fastq_names"]
+
+@pytest.fixture(scope="session")
+def standard_samples_list_pon(
+    load_test_fastq_data,
+) -> Dict[str, List]:
+    """Returns a list of standard tumor normal sample dicts for PON."""
+    return load_test_fastq_data["pon_samples_standard_fastq_names"]
 
 @pytest.fixture(scope="session")
 def tumor_fastq_names(
@@ -328,7 +341,6 @@ def config_dict_w_singularity(config_dict: str, balsamic_cache: str) -> str:
     }
     return modify_dict
 
-
 @pytest.fixture(scope="session")
 def pon_config_path(test_data_dir: str) -> str:
     """Created path for PON config json file."""
@@ -344,7 +356,7 @@ def pon_config_dict(pon_config_path: str) -> str:
 @pytest.fixture(scope="session")
 def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> str:
     """Read and return PON config from json with singularity image path."""
-    modify_pon_config_dict = pon_config_dict.copy()
+    modify_pon_config_dict = copy.deepcopy(pon_config_dict)
     modify_pon_config_dict["singularity"] = {
         "image": f"{balsamic_cache}/{balsamic_version}/containers"
     }
@@ -750,6 +762,65 @@ def fastq_dir_tumor_duplicate_fastq_patterns(
 
     yield fastq_dir.as_posix()
 
+@pytest.fixture(scope="session")
+def config_dict_w_fastqs(analysis_dir: str, case_id_tumor_normal: str, config_dict_w_singularity: str, standard_samples_list: List[Dict]) -> str:
+    """Change samples-list in config and create test fastq-files."""
+
+    fastq_dir: Path = Path(
+        analysis_dir,
+        case_id_tumor_normal,
+        "fastq_standard_names",
+    )
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    # Change fastq_path to be the newly created test fastq dir
+    modified_config = copy.deepcopy(config_dict_w_singularity)
+    modified_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
+
+    # Fill the fastq path folder with the test fastq-files
+    samples = standard_samples_list
+    for sample_dict in samples:
+        for fastq_pattern, values in sample_dict["fastq_info"].items():
+            values["fwd"] = fastq_dir.joinpath(values["fwd"]).as_posix()
+            values["rev"] = fastq_dir.joinpath(values["rev"]).as_posix()
+            # Create dummy fastq files
+            Path(values["fwd"]).touch()
+            Path(values["rev"]).touch()
+
+    # Modify input config sample list to correspond to current test sample list
+    modified_config["samples"] = samples
+
+    return modified_config
+
+@pytest.fixture(scope="session")
+def pon_config_dict_w_fastq(analysis_dir: str, case_id_pon, pon_config_dict_w_singularity: str, balsamic_cache: str, standard_samples_list_pon: List[Dict]) -> str:
+    """Create fastqs and modify pon config to contain created fastq paths."""
+    fastq_dir: Path = Path(
+        analysis_dir,
+        case_id_pon,
+        "fastq_standard_names_pon",
+    )
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    pon_config_w_fastq = copy.deepcopy(pon_config_dict_w_singularity)
+    pon_config_w_fastq["analysis"]["fastq_path"] = fastq_dir.as_posix()
+
+    # Fill the fastq path folder with the test fastq-files
+    samples_list = standard_samples_list_pon
+    for sample_dict in samples_list:
+        for fastq_pattern, values in sample_dict["fastq_info"].items():
+            fwd_fastq_path = f"{fastq_dir}/{os.path.basename(values['fwd'])}"
+            rev_fastq_path = f"{fastq_dir}/{os.path.basename(values['rev'])}"
+            values["fwd"] = fwd_fastq_path
+            values["rev"] = rev_fastq_path
+            Path(fwd_fastq_path).touch()
+            Path(rev_fastq_path).touch()
+
+    # Modify input config sample list to correspond to current test sample list
+    pon_config_w_fastq["samples"] = samples_list
+
+    return pon_config_w_fastq
+
 
 @pytest.fixture(scope="session")
 def config_w_fastq_dir_for_duplicate_fastq_patterns_model(
@@ -768,12 +839,12 @@ def config_w_fastq_dir_for_duplicate_fastq_patterns_model(
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Change fastq_path to be the newly created test fastq dir
-    modified_dict = config_dict_w_singularity.copy()
-    modified_dict["analysis"]["fastq_path"] = fastq_dir.as_posix()
+    modified_config = copy.deepcopy(config_dict_w_singularity)
+    modified_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
 
     # Fill the fastq path folder with the test fastq-files
-    sample_list = sample_list_duplicate_assigned_fastq_patterns_model
-    for sample_dict in sample_list:
+    samples = sample_list_duplicate_assigned_fastq_patterns_model
+    for sample_dict in samples:
         for fastq_pattern, values in sample_dict["fastq_info"].items():
             values["fwd"] = fastq_dir.joinpath(values["fwd"]).as_posix()
             values["rev"] = fastq_dir.joinpath(values["rev"]).as_posix()
@@ -782,13 +853,13 @@ def config_w_fastq_dir_for_duplicate_fastq_patterns_model(
             Path(values["rev"]).touch()
 
     # Modify input config sample list to correspond to current test sample list
-    modified_dict["samples"] = sample_list
+    modified_config["samples"] = samples
 
-    return modified_dict
+    return modified_config
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_extrafile_config(
+def config_tumor_normal_extrafile(
     analysis_dir: str,
     case_id_tumor_normal: str,
     config_dict_w_singularity: Dict,
@@ -798,8 +869,12 @@ def tumor_normal_extrafile_config(
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
-    extra_fastq_file_config = copy.deepcopy(config_dict_w_singularity)
-    samples_list = extra_fastq_file_config["samples"]
+    modified_config = copy.deepcopy(config_dict_w_singularity)
+
+    # Change fastq_path to be the newly created test fastq dir
+    modified_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
+
+    samples_list = modified_config["samples"]
     for sample_dict in samples_list:
         for fastq_pattern, values in sample_dict["fastq_info"].items():
             fwd_fastq_path = f"{fastq_dir}/{os.path.basename(values['fwd'])}"
@@ -808,8 +883,7 @@ def tumor_normal_extrafile_config(
             values["rev"] = rev_fastq_path
             Path(fwd_fastq_path).touch()
             Path(rev_fastq_path).touch()
-    extra_fastq_file_config["samples"] = samples_list
-    extra_fastq_file_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
+    modified_config["samples"] = samples_list
 
     # Add extra files not assigned to dict
     extra_file1 = "ACC3fail_S1_L001_R1_001.fastq.gz"
@@ -818,7 +892,7 @@ def tumor_normal_extrafile_config(
     Path(fastq_dir, extra_file2).touch()
 
     # Returned modified dict
-    return extra_fastq_file_config
+    return modified_config
 
 
 @pytest.fixture(scope="session")
@@ -845,22 +919,22 @@ def fixture_config_helpers():
 
 @pytest.fixture(scope="session")
 def balsamic_model(
-    config_dict_w_singularity: Dict,
+    config_dict_w_fastqs: Dict,
 ) -> BalsamicConfigModel:
     """Return BalsamicConfigModel parsed from static tumor normal config dict."""
     # Initialize balsamic model
-    balsamic_config = BalsamicConfigModel.parse_obj(config_dict_w_singularity)
+    balsamic_config = BalsamicConfigModel.parse_obj(config_dict_w_fastqs)
     return balsamic_config
 
 
 @pytest.fixture(scope="session")
 def balsamic_pon_model(
-    pon_config_dict_w_singularity: Dict,
+    pon_config_dict_w_fastq: Dict,
 ) -> PonBalsamicConfigModel:
     """Return PonBalsamicConfigModel parsed from static PON config dict."""
     # Initialize balsamic PON model
     balsamic_pon_config = PonBalsamicConfigModel.parse_obj(
-        pon_config_dict_w_singularity
+        pon_config_dict_w_fastq
     )
     return balsamic_pon_config
 
