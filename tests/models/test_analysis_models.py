@@ -348,7 +348,7 @@ def test_detect_duplicate_fastq_pattern(
         BalsamicConfigModel.parse_obj(config_dict)
 
     assert (
-        f"Duplicate FastqPattern found: ACC1_S1_L001_R across multiple samples"
+        f"Duplicate FastqPattern(s) found: ACC1_S1_L001_R across multiple samples"
         in str(exc.value)
     )
 

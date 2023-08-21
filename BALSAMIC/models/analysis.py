@@ -499,13 +499,14 @@ class ConfigModel(BaseModel):
     def no_duplicate_fastq_patterns(cls, samples):
         """Validate that no duplicate fastq patterns have been assigned in dict."""
         fastq_info_values = set()
+
         for sample in samples:
-            for fastq_pattern in sample.fastq_info.keys():
-                if fastq_pattern in fastq_info_values:
-                    raise ValueError(
-                        f"Duplicate FastqPattern found: {fastq_pattern} across multiple samples"
-                    )
-                fastq_info_values.add(fastq_pattern)
+            duplicates = [pattern for pattern in sample.fastq_info.keys() if pattern in fastq_info_values]
+            fastq_info_values.update(sample.fastq_info.keys())
+
+        if duplicates:
+            raise ValueError(f"Duplicate FastqPattern(s) found: {', '.join(duplicates)} across multiple samples")
+
         return samples
 
     @validator("samples")
