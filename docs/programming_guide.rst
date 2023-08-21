@@ -1,6 +1,6 @@
-======================
-Programming etiquettes
-======================
+=================
+Coding etiquettes
+=================
 
 * Structure the code properly
 * Maintain good and consistent naming convention

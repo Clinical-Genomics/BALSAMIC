@@ -11,15 +11,15 @@ LABEL about.documentation="http://www.htslib.org/doc/#manual-pages"
 LABEL about.license="MIT License (MIT)"
 
 RUN apt-get update && \
-     apt-get -y upgrade && \
-     apt-get -y  install --no-install-recommends \
-     samtools=1.13-4 bcftools=1.13-1 tabix=1.13+ds-2build1 && \
-     apt-get clean && \
-     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get -y upgrade && \
+    apt-get -y install --no-install-recommends \
+        samtools=1.13-4 bcftools=1.13-1 tabix=1.13+ds-2build1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN adduser --disabled-password --gecos '' ubuntu &&\
 chsh -s /bin/bash && mkdir -p /home/ubuntu
 
-USER    ubuntu
+USER ubuntu
 WORKDIR /home/ubuntu
 CMD ["/bin/bash"]
