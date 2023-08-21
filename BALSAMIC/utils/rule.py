@@ -3,6 +3,7 @@ import re
 
 import toml
 import glob
+from typing import List, Dict
 import logging
 from pathlib import Path
 import snakemake
@@ -390,3 +391,65 @@ def dump_toml(annotations: list) -> str:
     for annotation in annotations:
         toml_annotations += toml.dumps(annotation)
     return toml_annotations
+
+
+def get_fastp_parameters(config: Dict) -> Dict:
+    """Returns a dictionary with parameters for the fastp rules.
+
+    Args:
+        config: The case config json read as a dictionary
+
+    Returns:
+        fastp_parameters_dict: Dictionary with 1 or 2 lists, depending on if sequencing type has UMIs or not.
+
+    """
+    fastp_parameters_dict = {}
+
+    # Add UMI trimming for TGA
+    if config["analysis"]["sequencing_type"] != SequencingType.WGS:
+        fastp_parameters_dict["fastp_trim_umi"] = [
+            "--umi",
+            "--umi_loc per_read",
+            "--umi_len",
+            config["QC"]["umi_trim_length"],
+            "--umi_prefix",
+            "UMI",
+            "--dont_eval_duplication",
+        ]
+
+    # Add quality and adapter trimming parameters
+    fastp_trim_qual = list()
+    fastp_trim_adapter = list()
+    if config["QC"]["quality_trim"]:
+        fastp_trim_qual.extend(
+            [
+                "--trim_tail1",
+                "1",
+                "--n_base_limit",
+                "50",
+                "--length_required",
+                config["QC"]["min_seq_length"],
+                "--low_complexity_filter",
+                "--trim_poly_g",
+            ]
+        )
+    else:
+        fastp_trim_qual.extend(
+            [
+                "--disable_quality_filtering",
+                "--disable_length_filtering",
+                "--disable_trim_poly_g",
+            ]
+        )
+
+    if not config["QC"]["adapter_trim"]:
+        fastp_trim_adapter.extend(["--disable_adapter_trimming"])
+    else:
+        fastp_trim_adapter.extend(["--detect_adapter_for_pe"])
+
+    fastp_trim_qual.extend(["--dont_eval_duplication"])
+
+    fastp_parameters_dict["fastp_trim_qual"] = fastp_trim_qual
+    fastp_parameters_dict["fastp_trim_adapter"] = fastp_trim_adapter
+
+    return fastp_parameters_dict

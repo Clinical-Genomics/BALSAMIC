@@ -14,7 +14,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.utils.io import write_finish_file
-from BALSAMIC.utils.rule import get_threads, get_result_dir
+from BALSAMIC.utils.rule import get_fastp_parameters, get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.models.analysis import BalsamicWorkflowConfig, PonBalsamicConfigModel
 
@@ -60,7 +60,8 @@ version: str = config["analysis"]["pon_version"]
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
 
-
+# Fastp parameters
+fastp_parameters = get_fastp_parameters(config)
 
 # Find and set Sentieon binary and license server from env variables
 try:

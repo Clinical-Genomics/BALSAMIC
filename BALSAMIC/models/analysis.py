@@ -511,6 +511,7 @@ class ConfigModel(BaseModel):
     @validator("samples")
     def no_unassigned_fastqs_in_fastq_dir(cls, samples):
         """All fastq files in the supplied fastq-dir must have been assigned to the sample-dict."""
+
         def get_all_fwd_rev_values(samples) -> List[str]:
             # Return all fastq files in analysis
             fwd_rev_values = []

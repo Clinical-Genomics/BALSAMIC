@@ -1,10 +1,6 @@
 """Rules for TGA fastq pre-processing: removal UMIs and quality and adapter-trimming."""
 
-fastp_param_umi = list()
-fastp_param_umi.extend(["--umi","--umi_loc per_read", "--umi_len", config['QC']['umi_trim_length'], "--umi_prefix","UMI"])
-fastp_param_umi.extend(["--dont_eval_duplication"])
-
-rule fastp_remove_umi:
+rule fastp_umi_trim:
     """Fastq TGA data pre-processing to remove UMIs."""
     input:
         fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
@@ -20,7 +16,7 @@ rule fastp_remove_umi:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
-        fastp_param_umi = " ".join(fastp_param_umi),
+        fastp_trim_umi = " ".join(fastp_parameters["fastp_trim_umi"]),
         fastq_pattern = "{fastq_pattern}",
     threads:
         get_threads(cluster_config, 'fastp_remove_umi')
@@ -42,27 +38,9 @@ fastp \
 --disable_quality_filtering \
 --disable_length_filtering \
 --disable_trim_poly_g \
-{params.fastp_param_umi};
+{params.fastp_trim_umi};
         """
 
-if 'quality_trim' in config['QC'].keys():
-    fastp_param_qc = list()
-    fastp_param_adapter = list()
-    if config['QC']['quality_trim']:
-        fastp_param_qc.extend(["--trim_tail1", "1", "--n_base_limit", "50",
-                            "--length_required", config["QC"]["min_seq_length"],
-                            "--low_complexity_filter", "--trim_poly_g"])
-    else:
-        fastp_param_qc.extend(["--disable_quality_filtering",
-                               "--disable_length_filtering",
-                               "--disable_trim_poly_g"])
-
-    if not config['QC']['adapter_trim']:
-        fastp_param_adapter.extend(["--disable_adapter_trimming"])
-    else:
-        fastp_param_adapter.extend(["--detect_adapter_for_pe"])
-
-    fastp_param_qc.extend(["--dont_eval_duplication"])
 
 rule fastp_quality_trim:
     """Fastq data pre-processing after removal of UMIs."""
@@ -80,8 +58,8 @@ rule fastp_quality_trim:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
-        qc = " ".join(fastp_param_qc),
-        adapter = " ".join(fastp_param_adapter),
+        quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
+        adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         fastq_pattern = "{fastq_pattern}"
     threads:
         get_threads(cluster_config, 'fastp_quality_trim')
@@ -100,6 +78,6 @@ fastp \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.qc} \
-{params.adapter};
+{params.quality_trim} \
+{params.adapter_trim};
         """

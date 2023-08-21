@@ -1,25 +1,6 @@
 """Rules for WGS fastq pre-processing: quality and adapter-trimming."""
 
 
-if 'quality_trim' in config['QC'].keys():
-    fastp_param_qc = list()
-    fastp_param_adapter = list()
-    if config['QC']['quality_trim']:
-        fastp_param_qc.extend(["--trim_tail1", "1", "--n_base_limit", "50",
-                            "--length_required", config["QC"]["min_seq_length"],
-                            "--low_complexity_filter", "--trim_poly_g"])
-    else:
-        fastp_param_qc.extend(["--disable_quality_filtering",
-                               "--disable_length_filtering",
-                               "--disable_trim_poly_g"])
-
-    if not config['QC']['adapter_trim']:
-        fastp_param_adapter.extend(["--disable_adapter_trimming"])
-    else:
-        fastp_param_adapter.extend(["--detect_adapter_for_pe"])
-
-    fastp_param_qc.extend(["--dont_eval_duplication"])
-
 rule fastp_quality_trim:
     """Fastq data pre-processing."""
     input:
@@ -36,8 +17,8 @@ rule fastp_quality_trim:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
-        qc = " ".join(fastp_param_qc),
-        adapter = " ".join(fastp_param_adapter),
+        quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
+        adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         fastq_pattern = "{fastq_pattern}"
     threads:
         get_threads(cluster_config, 'fastp')
@@ -56,6 +37,6 @@ fastp \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.qc} \
-{params.adapter};
+{params.quality_trim} \
+{params.adapter_trim};
         """

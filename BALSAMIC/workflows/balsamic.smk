@@ -24,7 +24,7 @@ from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, Ba
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf,
+from BALSAMIC.utils.rule import (get_fastp_parameters, get_variant_callers, get_rule_output, get_result_dir, get_vcf,
                                  get_threads, get_script_path, get_sequencing_type,
                                  get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
@@ -186,6 +186,9 @@ COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
 VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
+
+# Fastp parameters
+fastp_parameters = get_fastp_parameters(config)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)

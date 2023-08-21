@@ -20,7 +20,7 @@ from BALSAMIC.utils.io import write_json, write_finish_file
 
 from BALSAMIC.models.analysis import BalsamicWorkflowConfig, BalsamicConfigModel
 
-from BALSAMIC.utils.rule import (get_rule_output, get_result_dir,
+from BALSAMIC.utils.rule import (get_fastp_parameters, get_rule_output, get_result_dir,
                                  get_script_path, get_threads,
                                  get_sequencing_type, get_capture_kit)
 
@@ -66,6 +66,9 @@ if config_model.analysis.analysis_type == "paired":
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
+
+# Fastp parameters
+fastp_parameters = get_fastp_parameters(config)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
