@@ -17,7 +17,7 @@ rule samtools_qc:
     threads:
         get_threads(cluster_config, "samtools_qc")
     message:
-        "Picard marking duplicates and samtool indexing for sample: {params.sample_id}"
+        "Calculating alignment stats for sample: {params.sample_id}"
     shell:
         """
 samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
