@@ -501,11 +501,17 @@ class ConfigModel(BaseModel):
         fastq_info_values = set()
 
         for sample in samples:
-            duplicates = [pattern for pattern in sample.fastq_info.keys() if pattern in fastq_info_values]
+            duplicates = [
+                pattern
+                for pattern in sample.fastq_info.keys()
+                if pattern in fastq_info_values
+            ]
             fastq_info_values.update(sample.fastq_info.keys())
 
         if duplicates:
-            raise ValueError(f"Duplicate FastqPattern(s) found: {', '.join(duplicates)} across multiple samples")
+            raise ValueError(
+                f"Duplicate FastqPattern(s) found: {', '.join(duplicates)} across multiple samples"
+            )
 
         return samples
 
@@ -545,24 +551,22 @@ class ConfigModel(BaseModel):
 
     def get_all_sample_names(self) -> List[str]:
         """Return all sample names in the analysis."""
-        sample_list = [sample.name for sample in self.samples]
-        return sample_list
+        return [sample.name for sample in self.samples]
 
     def get_fastq_patterns_by_sample(self, sample_names: List[str]) -> List[str]:
         """Return all fastq_patterns for a given sample."""
-        fastq_pattern_list = [
+        return [
             fastq_pattern
             for sample in self.samples
             if sample.name in sample_names
             for fastq_pattern in sample.fastq_info.keys()
         ]
-        return fastq_pattern_list
 
     def get_all_fastqs_for_sample(
         self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]
     ) -> List[str]:
         """Return all fastqs (optionally only [fastq/rev]) involved in analysis of sample."""
-        fastq_list = []
+        fastq_list: List = []
         for sample in self.samples:
             if sample.name == sample_name:
                 for fastq_info in sample.fastq_info.values():
@@ -574,15 +578,24 @@ class ConfigModel(BaseModel):
 
     def get_all_fastq_names(self, remove_suffix: bool = True) -> List[str]:
         """Return all fastq_names involved in analysis, optionally remove fastq.gz suffix."""
-        fastq_list = [
-            os.path.basename(fastq_path).replace(".fastq.gz", "")
-            if remove_suffix
-            else os.path.basename(fastq_path)
-            for sample in self.samples
-            for fastq_info in sample.fastq_info.values()
-            for fastq_path in [fastq_info.fwd, fastq_info.rev]
-        ]
-        return fastq_list
+        fastq_names = []
+        for sample in self.samples:
+            for fastq_pattern, fastqs in sample.fastq_info.items():
+                if remove_suffix:
+                    fastq_names.extend(
+                        [
+                            os.path.basename(fastqs["fwd"]).replace(".fastq.gz", ""),
+                            os.path.basename(fastqs["rev"]).replace(".fastq.gz", ""),
+                        ]
+                    )
+                else:
+                    fastq_names.extend(
+                        [
+                            os.path.basename(fastqs["fwd"]),
+                            os.path.basename(fastqs["rev"]),
+                        ]
+                    )
+        return fastq_names
 
     def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
         """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
