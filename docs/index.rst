@@ -1,7 +1,7 @@
 .. include:: ../README.rst
 
 .. toctree::
-   :caption: Getting started
+   :caption: Installation and Usage
    :name: getting_started
    :hidden:
    :maxdepth: 1
@@ -12,7 +12,7 @@
 
 
 .. toctree::
-   :caption: Detailed documentation
+   :caption: Analysis and Interpretation
    :name: detailed documentation
    :hidden:
    :maxdepth: 1

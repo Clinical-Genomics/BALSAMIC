@@ -1,10 +1,10 @@
-===========
-Etiquettes
-===========
+======================
+Programming etiquettes
+======================
 
 * Structure the code properly
 * Maintain good and consistent naming convention
-* Keep it Simple
+* Keep it simple
 * Don’t repeat yourself
 
 
