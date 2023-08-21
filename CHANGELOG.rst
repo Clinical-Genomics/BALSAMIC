@@ -14,6 +14,7 @@ Added:
 * Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 * `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
 * `Container ettiquette` to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1132
+* `htslib` (samtools, bcftools tabix) container https://github.com/Clinical-Genomics/BALSAMIC/pull/11
 
 Changed:
 ^^^^^^^^
