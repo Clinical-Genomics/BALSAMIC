@@ -111,6 +111,8 @@ for workflow_type, value in SNAKEMAKE_RULES.items():
     if workflow_type in ["common", analysis_type + "_" + sequence_type]:
         rules_to_include.extend(value.get("qc", []) + value.get("align", []))
 rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
+if "snakemake_rules/quality_control/report.rule" in rules_to_include:
+    rules_to_include = [rule for rule in rules_to_include if "quality_control/report.rule" not in rule]
 
 # Somalier only implemented for hg38 and hg19
 if "canfam3" in config["reference"]["reference_genome"]:
