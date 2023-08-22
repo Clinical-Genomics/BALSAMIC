@@ -17,6 +17,7 @@ from BALSAMIC.models.analysis import (
     AnalysisPonModel,
     FastqInfoModel,
     BalsamicConfigModel,
+    PonBalsamicConfigModel,
 )
 from pydantic import ValidationError
 from BALSAMIC.utils.exc import BalsamicError
