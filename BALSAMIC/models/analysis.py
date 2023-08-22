@@ -399,15 +399,6 @@ class SampleInstanceModel(BaseModel):
     name: str
     fastq_info: Dict[str, FastqInfoModel]
 
-    @validator("type")
-    def sample_type_literal(cls, value):
-        """Validate balsamic supported sample type."""
-        if value not in set(SampleType):
-            raise ValueError(
-                f"The provided sample type ({value}) is not supported in BALSAMIC"
-            )
-        return value
-
 
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided
