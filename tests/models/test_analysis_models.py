@@ -93,9 +93,10 @@ def test_varcaller_attribute():
     # GIVEN invalid input arguments
     invalid_args = {"mutation": "strange", "type": "unacceptable"}
     # THEN should trigger ValueError
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValidationError) as excinfo:
         VarcallerAttribute.parse_obj(invalid_args)
-        assert "not a valid argument" in excinfo.value
+    assert ("strange is not a valid mutation type" in str(excinfo.value))
+    assert ("unacceptable is not not a valid mutation class" in str(excinfo.value))
 
 
 def test_analysis_model(test_data_dir: str):
@@ -128,7 +129,7 @@ def test_analysis_model(test_data_dir: str):
     # THEN should trigger ValueError
     with pytest.raises(ValueError) as excinfo:
         AnalysisModel.parse_obj(invalid_args)
-        assert "not supported" in excinfo.value
+    assert "not supported" in str(excinfo.value)
 
 
 def test_sample_instance_model(config_dict_w_fastqs):
@@ -499,10 +500,10 @@ def test_illegal_fastqtype_get_fastq_by_fastq_pattern(balsamic_model):
 
     with pytest.raises(ValueError) as excinfo:
         balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, "forward")
-        assert (
-            f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: forward"
-            in excinfo.value
-        )
+    assert (
+        f"fastq_type must be either {FastqName.FWD} or {FastqName.REV}, not: forward"
+        in str(excinfo.value)
+    )
 
 
 def test_sample_name_by_type(balsamic_model):
@@ -588,6 +589,23 @@ def test_get_final_bam_name(balsamic_model):
     expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
+
+
+def test_no_info_error_get_final_bam_name(balsamic_model):
+    """Validate raise ValueError by not sample type or sample name."""
+
+    # Given bam_dir path
+    result_dir = balsamic_model.analysis.result
+    bam_dir = os.path.join(result_dir, "bam", "")
+
+    # When retrieving final bam file name without supplying sample name or sample type
+    # ValueError should be raised
+    with pytest.raises(ValueError) as excinfo:
+        balsamic_model.get_final_bam_name(bam_dir)
+    assert (
+        f"Either sample_name or sample_type must be provided to get the final bam name."
+        in str(excinfo.value)
+    )
 
 
 def test_get_final_bam_name_pon(balsamic_pon_model):

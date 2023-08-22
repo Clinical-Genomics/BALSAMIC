@@ -602,16 +602,15 @@ class ConfigModel(BaseModel):
 
     def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
         """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
+        if fastq_type not in [FastqName.FWD, FastqName.REV]:
+            raise ValueError(
+                f"fastq_type must be either {FastqName.FWD} or {FastqName.REV}, not: {fastq_type}"
+            )
+
         for sample in self.samples:
             if fastq_pattern in sample.fastq_info:
-                if fastq_type == FastqName.FWD:
-                    return sample.fastq_info[fastq_pattern].fwd
-                elif fastq_type == FastqName.REV:
-                    return sample.fastq_info[fastq_pattern].rev
-                else:
-                    raise ValueError(
-                        f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: {fastq_type}"
-                    )
+                return sample.fastq_info[fastq_pattern].fwd if fastq_type == FastqName.FWD else sample.fastq_info[
+                    fastq_pattern].rev
 
     def get_sample_name_by_type(self, sample_type: str) -> str:
         """Return sample name for requested sample type."""
