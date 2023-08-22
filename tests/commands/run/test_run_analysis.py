@@ -4,6 +4,7 @@ import json
 from unittest import mock
 from pathlib import Path
 
+
 def test_run_analysis_dragen(invoke_cli, tumor_only_wgs_config):
     # GIVEN a WGS config file
     # WHEN running analysis

@@ -95,8 +95,8 @@ def test_varcaller_attribute():
     # THEN should trigger ValueError
     with pytest.raises(ValidationError) as excinfo:
         VarcallerAttribute.parse_obj(invalid_args)
-    assert ("strange is not a valid mutation type" in str(excinfo.value))
-    assert ("unacceptable is not not a valid mutation class" in str(excinfo.value))
+    assert "strange is not a valid mutation type" in str(excinfo.value)
+    assert "unacceptable is not not a valid mutation class" in str(excinfo.value)
 
 
 def test_analysis_model(test_data_dir: str):
