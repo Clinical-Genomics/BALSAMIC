@@ -67,26 +67,19 @@ def test_remove_unnecessary_spaces():
     assert formatted_string == "Developing Balsamic brings me joy"
 
 
-def test_get_pon_sample_dict(pon_config_dict: Dict):
+def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
     """Tests sample PON dictionary retrieval."""
 
     # GIVEN a FASTQ directory
-    fastq_dir_pon = pon_config_dict["analysis"]["fastq_path"]
+    fastq_dir_pon = pon_config_dict_w_fastq["analysis"]["fastq_path"]
     # WHEN retrieving PON samples
     samples: List = get_pon_sample_list(fastq_dir_pon)
-
-    # Modify input dict to be full path to fastq files
-    pon_config_dict = copy.deepcopy(pon_config_dict)
-    for sample in pon_config_dict["samples"]:
-        for fastq_pattern, values in sample["fastq_info"].items():
-            values["fwd"] = Path(values["fwd"]).resolve().as_posix()
-            values["rev"] = Path(values["rev"]).resolve().as_posix()
 
     # THEN the samples should be retrieved from the FASTQ directory
     # And match the expected structure of pre-designed PON-config
     for sample_model in samples:
         sample_dict = sample_model.dict()
-        assert sample_dict in pon_config_dict["samples"]
+        assert sample_dict in pon_config_dict_w_fastq["samples"]
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):

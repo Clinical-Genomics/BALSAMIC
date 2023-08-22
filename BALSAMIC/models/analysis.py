@@ -585,15 +585,15 @@ class ConfigModel(BaseModel):
                 if remove_suffix:
                     fastq_names.extend(
                         [
-                            os.path.basename(fastqs["fwd"]).replace(".fastq.gz", ""),
-                            os.path.basename(fastqs["rev"]).replace(".fastq.gz", ""),
+                            os.path.basename(fastqs.fwd).replace(".fastq.gz", ""),
+                            os.path.basename(fastqs.rev).replace(".fastq.gz", ""),
                         ]
                     )
                 else:
                     fastq_names.extend(
                         [
-                            os.path.basename(fastqs["fwd"]),
-                            os.path.basename(fastqs["rev"]),
+                            os.path.basename(fastqs.fwd),
+                            os.path.basename(fastqs.rev),
                         ]
                     )
         return fastq_names
