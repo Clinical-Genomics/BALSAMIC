@@ -447,6 +447,37 @@ def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
     assert normal_fastq not in fastq_files
 
 
+def test_get_all_fastq_names(balsamic_model):
+    """Validate retrieval of all fastq-files from BalsamicConfigModel and optional removal of suffix."""
+
+    all_fastqs_expected = [
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+        "1_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz",
+        "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2.fastq.gz",
+    ]
+    all_fastqs_expected_wo_suffix = [
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1",
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX_2",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_1",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX_2",
+        "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1",
+        "1_171015_HJ7TLDSX5_ACC2_XXXXXX_2",
+        "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1",
+        "2_171015_HJ7TLDSX5_ACC2_XXXXXX_2",
+    ]
+
+    all_fastqs = balsamic_model.get_all_fastq_names()
+    all_fastqs_wo_suffix = balsamic_model.get_all_fastq_names(remove_suffix=True)
+
+    assert all_fastqs == all_fastqs_expected
+    assert all_fastqs_wo_suffix == all_fastqs_expected_wo_suffix
+
+
 def test_fastq_by_fastq_pattern(balsamic_model):
     """Validate retrieval of fastq-file by fastq-pattern and fastq-type from BalsamicConfigModel."""
 

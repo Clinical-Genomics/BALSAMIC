@@ -9,7 +9,7 @@ multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
     sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
 # fastqc metrics
-multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=config_model.get_all_fastq_names()))
+multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=config_model.get_all_fastq_names(remove_suffix = True)))
 
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample))

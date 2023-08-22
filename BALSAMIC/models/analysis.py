@@ -579,7 +579,7 @@ class ConfigModel(BaseModel):
                         fastq_list.append(fastq_info.rev)
         return fastq_list
 
-    def get_all_fastq_names(self, remove_suffix: bool = True) -> List[str]:
+    def get_all_fastq_names(self, remove_suffix: bool = False) -> List[str]:
         """Return all fastq_names involved in analysis, optionally remove fastq.gz suffix."""
         fastq_names = []
         for sample in self.samples:
