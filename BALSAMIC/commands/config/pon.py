@@ -171,4 +171,3 @@ def pon_config(
 
     generate_graph(config_collection_dict, config_path)
     LOG.info(f"BALSAMIC PON workflow has been configured successfully!")
-

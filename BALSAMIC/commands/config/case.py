@@ -300,4 +300,3 @@ def case_config(
 
     generate_graph(config_collection_dict, config_path)
     LOG.info(f"BALSAMIC Workflow has been configured successfully!")
-
