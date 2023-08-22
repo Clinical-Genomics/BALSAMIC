@@ -81,6 +81,7 @@ def pon_fastq_list(load_test_fastq_data) -> list:
     """Returns list of fastq names to be used in PON creation testing."""
     return load_test_fastq_data["pon_fastq_list"]
 
+
 @pytest.fixture(scope="session")
 def standard_samples_list(
     load_test_fastq_data,
@@ -88,12 +89,14 @@ def standard_samples_list(
     """Returns a list of standard tumor normal sample dicts."""
     return load_test_fastq_data["samples_standard_fastq_names"]
 
+
 @pytest.fixture(scope="session")
 def standard_samples_list_pon(
     load_test_fastq_data,
 ) -> Dict[str, List]:
     """Returns a list of standard tumor normal sample dicts for PON."""
     return load_test_fastq_data["pon_samples_standard_fastq_names"]
+
 
 @pytest.fixture(scope="session")
 def tumor_fastq_names(
@@ -340,6 +343,7 @@ def config_dict_w_singularity(config_dict: str, balsamic_cache: str) -> str:
         "image": f"{balsamic_cache}/{balsamic_version}/containers"
     }
     return modify_dict
+
 
 @pytest.fixture(scope="session")
 def pon_config_path(test_data_dir: str) -> str:
@@ -762,8 +766,14 @@ def fastq_dir_tumor_duplicate_fastq_patterns(
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def config_dict_w_fastqs(analysis_dir: str, case_id_tumor_normal: str, config_dict_w_singularity: str, standard_samples_list: List[Dict]) -> str:
+def config_dict_w_fastqs(
+    analysis_dir: str,
+    case_id_tumor_normal: str,
+    config_dict_w_singularity: str,
+    standard_samples_list: List[Dict],
+) -> str:
     """Change samples-list in config and create test fastq-files."""
 
     fastq_dir: Path = Path(
@@ -792,8 +802,15 @@ def config_dict_w_fastqs(analysis_dir: str, case_id_tumor_normal: str, config_di
 
     return modified_config
 
+
 @pytest.fixture(scope="session")
-def pon_config_dict_w_fastq(analysis_dir: str, case_id_pon, pon_config_dict_w_singularity: str, balsamic_cache: str, standard_samples_list_pon: List[Dict]) -> str:
+def pon_config_dict_w_fastq(
+    analysis_dir: str,
+    case_id_pon,
+    pon_config_dict_w_singularity: str,
+    balsamic_cache: str,
+    standard_samples_list_pon: List[Dict],
+) -> str:
     """Create fastqs and modify pon config to contain created fastq paths."""
     fastq_dir: Path = Path(
         analysis_dir,
@@ -933,9 +950,7 @@ def balsamic_pon_model(
 ) -> PonBalsamicConfigModel:
     """Return PonBalsamicConfigModel parsed from static PON config dict."""
     # Initialize balsamic PON model
-    balsamic_pon_config = PonBalsamicConfigModel.parse_obj(
-        pon_config_dict_w_fastq
-    )
+    balsamic_pon_config = PonBalsamicConfigModel.parse_obj(pon_config_dict_w_fastq)
     return balsamic_pon_config
 
 

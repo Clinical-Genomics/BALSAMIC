@@ -359,7 +359,7 @@ def test_detection_unassigned_fastq_file(config_tumor_normal_extrafile: Dict):
     with pytest.raises(ValueError) as exc:
         BalsamicConfigModel.parse_obj(config_tumor_normal_extrafile)
 
-    assert (f"Fastqs in fastq-dir not assigned to sample config:" in str(exc.value))
+    assert f"Fastqs in fastq-dir not assigned to sample config:" in str(exc.value)
 
 
 def test_get_all_sample_names(balsamic_model):
@@ -379,8 +379,14 @@ def test_get_fastq_patterns_by_sample(
         ), "Not all expected fastq patterns found."
         assert len(expected) == len(found), "Not same number of fastq patterns"
 
-    tumor_fastq_patterns_expected = ["1_171015_HJ7TLDSX5_ACC1_XXXXXX", "2_171015_HJ7TLDSX5_ACC1_XXXXXX"]
-    normal_fastq_patterns_expected = ["1_171015_HJ7TLDSX5_ACC2_XXXXXX", "2_171015_HJ7TLDSX5_ACC2_XXXXXX"]
+    tumor_fastq_patterns_expected = [
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX",
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX",
+    ]
+    normal_fastq_patterns_expected = [
+        "1_171015_HJ7TLDSX5_ACC2_XXXXXX",
+        "2_171015_HJ7TLDSX5_ACC2_XXXXXX",
+    ]
 
     fastq_patterns_all_expected = (
         tumor_fastq_patterns_expected + normal_fastq_patterns_expected

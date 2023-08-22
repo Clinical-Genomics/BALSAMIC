@@ -546,7 +546,9 @@ class ConfigModel(BaseModel):
 
         unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
         if unassigned_fastqs:
-            raise ValueError(f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}")
+            raise ValueError(
+                f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
+            )
 
         return samples
 
