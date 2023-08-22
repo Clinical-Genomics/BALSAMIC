@@ -328,7 +328,7 @@ def test_detect_duplicate_fastq_pattern(
         BalsamicConfigModel.parse_obj(config_dict)
 
     assert (
-        f"Duplicate FastqPattern(s) found: ACC1_S1_L001_R across multiple samples"
+        "Duplicate FastqPattern(s) found: ACC1_S1_L001_R across multiple samples"
         in str(exc.value)
     )
 
@@ -339,7 +339,7 @@ def test_detection_unassigned_fastq_file(config_tumor_normal_extrafile: Dict):
     with pytest.raises(ValueError) as exc:
         BalsamicConfigModel.parse_obj(config_tumor_normal_extrafile)
 
-    assert f"Fastqs in fastq-dir not assigned to sample config:" in str(exc.value)
+    assert "Fastqs in fastq-dir not assigned to sample config:" in str(exc.value)
 
 
 def test_get_all_sample_names(balsamic_model: BalsamicConfigModel):
@@ -586,7 +586,7 @@ def test_no_info_error_get_final_bam_name(balsamic_model: BalsamicConfigModel):
     with pytest.raises(ValueError) as excinfo:
         balsamic_model.get_final_bam_name(bam_dir)
     assert (
-        f"Either sample_name or sample_type must be provided to get the final bam name."
+        "Either sample_name or sample_type must be provided to get the final bam name."
         in str(excinfo.value)
     )
 

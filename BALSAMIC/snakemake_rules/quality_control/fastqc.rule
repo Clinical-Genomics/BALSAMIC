@@ -6,7 +6,7 @@ rule fastqc:
     input:
         fastq = input_fastq_dir + "{fastq_file_names}.fastq.gz"
     output:
-        fastqccomplete = fastqc_dir + "{fastq_file_names}_fastqc.zip"
+        fastqc_zip = fastqc_dir + "{fastq_file_names}_fastqc.zip"
     benchmark:
         Path(benchmark_dir, "fastqc_{fastq_file_names}.tsv").as_posix()
     singularity:
