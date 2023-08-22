@@ -14,7 +14,12 @@ from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.models.analysis import FastqInfoModel
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, FastqName, SampleType, SequencingType
+from BALSAMIC.constants.analysis import (
+    BIOINFO_TOOL_ENV,
+    FastqName,
+    SampleType,
+    SequencingType,
+)
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
@@ -881,6 +886,7 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
     # THEN the following error should be found
     with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
         get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastq_patterns)
+
 
 def test_get_fastp_parameters(config_dict_w_singularity):
     """Validate correct retrieval of WGS and TGA specific fastp parameters."""

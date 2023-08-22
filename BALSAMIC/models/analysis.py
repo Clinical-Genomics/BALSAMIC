@@ -609,8 +609,11 @@ class ConfigModel(BaseModel):
 
         for sample in self.samples:
             if fastq_pattern in sample.fastq_info:
-                return sample.fastq_info[fastq_pattern].fwd if fastq_type == FastqName.FWD else sample.fastq_info[
-                    fastq_pattern].rev
+                return (
+                    sample.fastq_info[fastq_pattern].fwd
+                    if fastq_type == FastqName.FWD
+                    else sample.fastq_info[fastq_pattern].rev
+                )
 
     def get_sample_name_by_type(self, sample_type: str) -> str:
         """Return sample name for requested sample type."""
