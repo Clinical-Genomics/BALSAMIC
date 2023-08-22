@@ -53,6 +53,7 @@ class DockerContainers(StrEnum):
     CNVPYTOR: str = "cnvpytor"
     COVERAGE_QC: str = "coverage_qc"
     DELLY: str = "delly"
+    HTSLIB: str = "htslib"
     PYTHON_3: str = "varcall_py3"
     PYTHON_27: str = "varcall_py27"
     SOMALIER: str = "somalier"

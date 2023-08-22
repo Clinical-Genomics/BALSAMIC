@@ -1,6 +1,9 @@
-=========
-Build doc
-=========
+=======================
+Documentation Guidline
+=======================
+
+BALSAMIC uses Sphinx to build the documentation, see the official documentation of Sphinx: https://www.sphinx-doc.org/en/master/index.html
+
 
 Following steps explains how to build documents locally.
 

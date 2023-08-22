@@ -1,0 +1,4 @@
+- samtools=1.13
+- bcftools=1.13
+- tabix=1.13
+- bgzip=1.13
