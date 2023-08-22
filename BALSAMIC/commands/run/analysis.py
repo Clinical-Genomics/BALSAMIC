@@ -209,10 +209,10 @@ def analysis(
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
 
-    if not os.path.exists(logpath):
-        os.makedirs(logpath, exist_ok=True)
-        os.makedirs(scriptpath, exist_ok=True)
-        os.makedirs(benchmarkpath, exist_ok=True)
+    # Create directories for logs, scripts and benchmark files
+    os.makedirs(logpath, exist_ok=True)
+    os.makedirs(scriptpath, exist_ok=True)
+    os.makedirs(benchmarkpath, exist_ok=True)
 
     # Initialize balsamic model to run validation tests
     BalsamicConfigModel.parse_obj(sample_config)
