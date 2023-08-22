@@ -169,11 +169,6 @@ def pon_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"PON config file saved successfully - {config_path}")
 
-    try:
-        generate_graph(config_collection_dict, config_path)
-        LOG.info(f"BALSAMIC PON workflow has been configured successfully!")
-    except ValueError:
-        LOG.error(
-            f'BALSAMIC PON dag graph generation failed - {config_collection_dict["analysis"]["dag"]}'
-        )
-        raise click.Abort()
+    generate_graph(config_collection_dict, config_path)
+    LOG.info(f"BALSAMIC PON workflow has been configured successfully!")
+
