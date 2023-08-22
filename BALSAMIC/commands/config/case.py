@@ -289,10 +289,10 @@ def case_config(
     # Create result directory
     os.makedirs(resultpath, exist_ok=True)
 
-    if not os.path.exists(logpath):
-        os.makedirs(logpath, exist_ok=True)
-        os.makedirs(scriptpath, exist_ok=True)
-        os.makedirs(benchmarkpath, exist_ok=True)
+    # Create directories for logs, scripts and benchmark files
+    os.makedirs(logpath, exist_ok=True)
+    os.makedirs(scriptpath, exist_ok=True)
+    os.makedirs(benchmarkpath, exist_ok=True)
 
     config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
