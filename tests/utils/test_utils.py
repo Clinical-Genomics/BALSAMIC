@@ -88,7 +88,7 @@ def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
         assert sample_dict in pon_config_dict_w_fastq["samples"]
 
 
-def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
+def test_get_variant_callers_wrong_analysis_type(tumor_normal_config: Dict):
     # GIVEN a wrong analysis_type
     wrong_analysis_type = "cohort"
     workflow = "BALSAMIC"
@@ -109,7 +109,7 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_workflow(tumor_normal_config):
+def test_get_variant_callers_wrong_workflow(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     wrong_workflow = "MIP"
     mutation_type = "SNV"
@@ -128,7 +128,7 @@ def test_get_variant_callers_wrong_workflow(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
+def test_get_variant_callers_wrong_mutation_type(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     workflow = "BALSAMIC"
     wrong_mutation_type = "INDEL"
@@ -149,7 +149,7 @@ def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
+def test_get_variant_callers_wrong_mutation_class(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     workflow = "BALSAMIC"
     mutation_type = "SNV"
@@ -170,7 +170,7 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config):
+def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     workflow = "BALSAMIC"
     mutation_type = "SNV"
@@ -308,7 +308,7 @@ def test_get_snakefile():
             assert Path(snakefile).is_file()
 
 
-def test_get_vcf(sample_config):
+def test_get_vcf(sample_config: Dict):
     # GIVEN a sample_config dict and a variant callers list
     variant_callers = ["tnscope", "vardict", "manta"]
 
@@ -366,7 +366,7 @@ def test_createDir(tmp_path):
     assert Path(test_log_dir_created).is_dir()
 
 
-def test_get_result_dir(sample_config):
+def test_get_result_dir(sample_config: Dict):
     # WHEN a sample_config dict
     # GIVEN a sample_config dict
     # THEN get_result_dir should return result directory
@@ -425,7 +425,7 @@ def test_write_json_error(tmp_path: Path):
         assert write_json(ref_json, tmp_path)
 
 
-def test_read_json(config_path):
+def test_read_json(config_path: str):
     """Test data extraction from a BALSAMIC config JSON file."""
 
     # GIVEN a config path
@@ -678,7 +678,7 @@ def test_generate_h5_capture_no_output(tmp_path):
     assert actual_output == None
 
 
-def test_get_sample_type_from_sample_name(config_dict):
+def test_get_sample_type_from_sample_name(config_dict: Dict):
     """Test sample type extraction from a extracted config file."""
 
     # GIVEN a config dictionary
@@ -778,7 +778,7 @@ def test_get_analysis_fastq_files_directory(fastq_dir: str):
 
 def test_get_analysis_fastq_files_directory_exception(
     fastq_dir: str,
-    case_id_tumor_only,
+    case_id_tumor_only: str,
     tmp_path_factory: TempPathFactory,
     caplog: LogCaptureFixture,
 ):
@@ -842,7 +842,7 @@ def test_get_sample_list(
     assert samples[1].fastq_info
 
 
-def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only):
+def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
     """Validates that get_fastq_info assigns fastq info as expected."""
     # GIVEN a fastq_dir and sample name ACC1
 
@@ -864,7 +864,7 @@ def test_get_fastq_info(tumor_sample_name, fastq_dir_tumor_only):
     assert fastq_dict == expected_fastq_dict
 
 
-def test_get_fastq_info_empty_fastq_dir(tumor_sample_name, empty_fastq_dir):
+def test_get_fastq_info_empty_fastq_dir(tumor_sample_name: str, empty_fastq_dir: str):
     """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
     # GIVEN an empty fastq_dir and a sample name
 
@@ -877,7 +877,7 @@ def test_get_fastq_info_empty_fastq_dir(tumor_sample_name, empty_fastq_dir):
 
 
 def test_get_fastq_info_double_assigned_fastq_pattern(
-    tumor_sample_name, fastq_dir_tumor_duplicate_fastq_patterns
+    tumor_sample_name: str, fastq_dir_tumor_duplicate_fastq_patterns: str
 ):
     """Tests if get_fastq_info correctly reports error of finding double-assigned fastq-patterns"""
     # GIVEN an empty fastq_dir and a sample name
@@ -888,7 +888,7 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
         get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastq_patterns)
 
 
-def test_get_fastp_parameters(config_dict_w_singularity):
+def test_get_fastp_parameters(config_dict_w_singularity: Dict):
     """Validate correct retrieval of WGS and TGA specific fastp parameters."""
     config_dict = copy.deepcopy(config_dict_w_singularity)
 

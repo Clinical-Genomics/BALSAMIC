@@ -132,7 +132,7 @@ def test_analysis_model(test_data_dir: str):
     assert "not supported" in str(excinfo.value)
 
 
-def test_sample_instance_model(config_dict_w_fastqs):
+def test_sample_instance_model(config_dict_w_fastqs: Dict):
     """Test sample instance model initialisation."""
 
     # GIVEN a sample list
@@ -151,7 +151,7 @@ def test_sample_instance_model(config_dict_w_fastqs):
         assert sample.dict() == sample_dict_copy
 
 
-def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct):
+def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct: Dict):
     """Test sample instance model error raise."""
 
     # GIVEN a sample dictionary with an invalid sample type
@@ -318,7 +318,7 @@ def test_analysis_pon_model(test_data_dir: str):
 
 
 def test_illegal_sample_name(
-    tumor_normal_fastq_info_correct, illegal_normal_sample_name
+    tumor_normal_fastq_info_correct: Dict, illegal_normal_sample_name: str
 ):
     """Test sample instance model detection of illegal sample name containing underscore."""
 
@@ -363,14 +363,14 @@ def test_detection_unassigned_fastq_file(config_tumor_normal_extrafile: Dict):
     assert f"Fastqs in fastq-dir not assigned to sample config:" in str(exc.value)
 
 
-def test_get_all_sample_names(balsamic_model):
+def test_get_all_sample_names(balsamic_model: BalsamicConfigModel):
     """Validate retrieval of all sample names in analysis from BalsamicConfigModel."""
     sample_names = balsamic_model.get_all_sample_names()
     assert ["ACC1", "ACC2"] == sample_names
 
 
 def test_get_fastq_patterns_by_sample(
-    balsamic_model, tumor_sample_name, normal_sample_name
+    balsamic_model: BalsamicConfigModel, tumor_sample_name: str, normal_sample_name: str
 ):
     """Validate retrieval of fastq-pattern by sample from BalsamicConfigModel."""
 
@@ -408,7 +408,7 @@ def test_get_fastq_patterns_by_sample(
     compare_fastq_pattern_lists(fastq_patterns_all_expected, fastq_patterns_all)
 
 
-def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
+def test_get_all_fastqs_for_sample(balsamic_model: BalsamicConfigModel, tumor_sample_name: str):
     """Validate retrieval of fastq-files by sample and fastq-type from BalsamicConfigModel."""
 
     def compare_fastq_file_lists(expected: List[str], found: List[str]):
@@ -448,7 +448,7 @@ def test_get_all_fastqs_for_sample(balsamic_model, tumor_sample_name):
     assert normal_fastq not in fastq_files
 
 
-def test_get_all_fastq_names(balsamic_model):
+def test_get_all_fastq_names(balsamic_model: BalsamicConfigModel):
     """Validate retrieval of all fastq-files from BalsamicConfigModel and optional removal of suffix."""
 
     all_fastqs_expected = [
@@ -479,7 +479,7 @@ def test_get_all_fastq_names(balsamic_model):
     assert all_fastqs_wo_suffix == all_fastqs_expected_wo_suffix
 
 
-def test_fastq_by_fastq_pattern(balsamic_model):
+def test_fastq_by_fastq_pattern(balsamic_model: BalsamicConfigModel):
     """Validate retrieval of fastq-file by fastq-pattern and fastq-type from BalsamicConfigModel."""
 
     fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
@@ -493,7 +493,7 @@ def test_fastq_by_fastq_pattern(balsamic_model):
     assert os.path.basename(rev_fastq) == expected_rev
 
 
-def test_illegal_fastqtype_get_fastq_by_fastq_pattern(balsamic_model):
+def test_illegal_fastqtype_get_fastq_by_fastq_pattern(balsamic_model: BalsamicConfigModel):
     """Validate raise exception for illegal fastqtype BalsamicConfigModel."""
 
     fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
@@ -506,7 +506,7 @@ def test_illegal_fastqtype_get_fastq_by_fastq_pattern(balsamic_model):
     )
 
 
-def test_sample_name_by_type(balsamic_model):
+def test_sample_name_by_type(balsamic_model: BalsamicConfigModel):
     """Validate retrieval of sample name by sample type from BalsamicConfigModel."""
 
     tumor_name_expected = "ACC1"
@@ -521,7 +521,7 @@ def test_sample_name_by_type(balsamic_model):
     assert normal_name_retrieved == normal_name_expected
 
 
-def test_sample_type_by_name(balsamic_model):
+def test_sample_type_by_name(balsamic_model: BalsamicConfigModel):
     """Validate retrieval of sample type by sample name from BalsamicConfigModel."""
 
     tumor_name = "ACC1"
@@ -536,7 +536,7 @@ def test_sample_type_by_name(balsamic_model):
     assert normal_type_retrieved == SampleType.NORMAL
 
 
-def test_get_bam_name_per_lane(balsamic_model):
+def test_get_bam_name_per_lane(balsamic_model: BalsamicConfigModel):
     """Validate retrieval of per lane bam names by sample name."""
 
     def compare_bam_file_lists(expected: List[str], found: List[str]):
@@ -568,7 +568,7 @@ def test_get_bam_name_per_lane(balsamic_model):
     compare_bam_file_lists(expected_bam_names, bam_names)
 
 
-def test_get_final_bam_name(balsamic_model):
+def test_get_final_bam_name(balsamic_model: BalsamicConfigModel):
     """Validate retrieval of final bam name by either sample type or sample name."""
 
     # Given bam_dir path and sample name or sample type
@@ -591,7 +591,7 @@ def test_get_final_bam_name(balsamic_model):
     assert bam_name_sample_name == bam_name_sample_type
 
 
-def test_no_info_error_get_final_bam_name(balsamic_model):
+def test_no_info_error_get_final_bam_name(balsamic_model: BalsamicConfigModel):
     """Validate raise ValueError by not sample type or sample name."""
 
     # Given bam_dir path
@@ -608,7 +608,7 @@ def test_no_info_error_get_final_bam_name(balsamic_model):
     )
 
 
-def test_get_final_bam_name_pon(balsamic_pon_model):
+def test_get_final_bam_name_pon(balsamic_pon_model: PonBalsamicConfigModel):
     """Validate retrieval of final bam name for PON by either sample type or sample name."""
 
     # Given bam_dir path and sample name or sample type
