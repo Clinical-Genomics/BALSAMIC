@@ -492,6 +492,19 @@ def test_fastq_by_fastq_pattern(balsamic_model):
     assert os.path.basename(rev_fastq) == expected_rev
 
 
+def test_illegal_fastqtype_get_fastq_by_fastq_pattern(balsamic_model):
+    """Validate raise exception for illegal fastqtype BalsamicConfigModel."""
+
+    fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
+
+    with pytest.raises(ValueError) as excinfo:
+        balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, "forward")
+        assert (
+            f"fastq_type must be either {FastqName.FWD} or {FastqName.REV} not: forward"
+            in excinfo.value
+        )
+
+
 def test_sample_name_by_type(balsamic_model):
     """Validate retrieval of sample name by sample type from BalsamicConfigModel."""
 
