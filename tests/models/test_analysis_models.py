@@ -387,7 +387,9 @@ def test_get_fastq_patterns_by_sample(
     compare_fastq_pattern_lists(fastq_patterns_all_expected, fastq_patterns_all)
 
 
-def test_get_all_fastqs_for_sample(balsamic_model: BalsamicConfigModel, tumor_sample_name: str):
+def test_get_all_fastqs_for_sample(
+    balsamic_model: BalsamicConfigModel, tumor_sample_name: str
+):
     """Validate retrieval of fastq-files by sample and fastq-type from BalsamicConfigModel."""
 
     def compare_fastq_file_lists(expected: List[str], found: List[str]):
@@ -472,7 +474,9 @@ def test_fastq_by_fastq_pattern(balsamic_model: BalsamicConfigModel):
     assert os.path.basename(rev_fastq) == expected_rev
 
 
-def test_illegal_fastqtype_get_fastq_by_fastq_pattern(balsamic_model: BalsamicConfigModel):
+def test_illegal_fastqtype_get_fastq_by_fastq_pattern(
+    balsamic_model: BalsamicConfigModel,
+):
     """Validate raise exception for illegal fastqtype BalsamicConfigModel."""
 
     fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
