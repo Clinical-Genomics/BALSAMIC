@@ -1,6 +1,9 @@
-=========
-Build doc
-=========
+=======================
+Documentation Guidline
+=======================
+
+BALSAMIC uses Sphinx to build the documentation, see the official documentation of Sphinx: https://www.sphinx-doc.org/en/master/index.html
+
 
 Following steps explains how to build documents locally.
 
@@ -15,6 +18,7 @@ Install Sphinx and extensions:
 
 .. code-block::
 
+   cd /path/to/BALSAMIC
    python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .
    cd docs
    pip install -r requirements.txt -r ../requirements-dev.txt
