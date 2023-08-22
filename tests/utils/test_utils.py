@@ -14,7 +14,7 @@ from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.models.analysis import FastqInfoModel
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, FastqName, SampleType
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, FastqName, SampleType, SequencingType
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
@@ -50,6 +50,7 @@ from BALSAMIC.utils.rule import (
     get_delivery_id,
     get_rule_output,
     get_sample_type_from_sample_name,
+    get_fastp_parameters,
 )
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
@@ -880,3 +881,38 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
     # THEN the following error should be found
     with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
         get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastq_patterns)
+
+def test_get_fastp_parameters(config_dict_w_singularity):
+    """Validate correct retrieval of WGS and TGA specific fastp parameters."""
+    config_dict = copy.deepcopy(config_dict_w_singularity)
+
+    # GIVEN WGS config with quality trim
+    config_dict["analysis"]["sequencing_type"] = SequencingType.WGS
+    config_dict["QC"]["quality_trim"] = True
+    fastp_params_wgs = get_fastp_parameters(config_dict)
+    # THEN no UMI trimming should be active
+    assert "fastp_trim_umi" not in fastp_params_wgs
+    # THEN quality trimming should be active
+    assert "--n_base_limit" in fastp_params_wgs["fastp_trim_qual"]
+
+    # GIVEN WGS config without quality trim
+    config_dict["QC"]["quality_trim"] = False
+    fastp_params_wgs = get_fastp_parameters(config_dict)
+    # THEN no quality trimming should be done
+    assert "--n_base_limit" not in fastp_params_wgs["fastp_trim_qual"]
+    assert "--disable_quality_filtering" in fastp_params_wgs["fastp_trim_qual"]
+
+    # GIVEN TGA with adapter trimming active
+    config_dict["analysis"]["sequencing_type"] = SequencingType.TARGETED
+    config_dict["QC"]["adapter_trim"] = True
+    fastp_params_tga = get_fastp_parameters(config_dict)
+    # THEN UMI trimming should be active
+    assert "fastp_trim_umi" in fastp_params_tga
+    # THEN adapter trimming should be done
+    assert "--detect_adapter_for_pe" in fastp_params_tga["fastp_trim_adapter"]
+
+    # GIVEN TGA without adapter trimming active
+    config_dict["QC"]["adapter_trim"] = False
+    fastp_params_tga = get_fastp_parameters(config_dict)
+    # THEN no adapter trimming should be done
+    assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
