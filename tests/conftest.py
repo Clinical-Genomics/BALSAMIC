@@ -147,36 +147,25 @@ def genome_version_canfam():
     """Return string to specify Canfam reference for QC workflow."""
     return "canfam3"
 
-
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
     """Return a non-existent files directory path."""
     return tmp_path_factory.mktemp("session_tests")
-
 
 @pytest.fixture(scope="session")
 def tumor_sample_name() -> str:
     """Create mock name for tumor sample."""
     return "ACC1"
 
-
 @pytest.fixture(scope="session")
 def normal_sample_name() -> str:
     """Create mock name for normal sample."""
     return "ACC2"
 
-
-@pytest.fixture(scope="session")
-def illegal_normal_sample_name() -> str:
-    """Mock illegal normal sample name."""
-    return "ACC1_NORMAL"
-
-
 @pytest.fixture(scope="session")
 def case_id_tumor_only() -> str:
     """Create mock case-id for TGA tumor-only."""
     return "sample_tumor_only"
-
 
 @pytest.fixture(scope="session")
 def case_id_tumor_only_w_dummy_vep() -> str:

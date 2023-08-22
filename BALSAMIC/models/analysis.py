@@ -408,17 +408,6 @@ class SampleInstanceModel(BaseModel):
             )
         return value
 
-    @validator("name")
-    def no_underscore_in_sample_name(cls, name: str):
-        """
-        Sample names are not allowed to contain underscores, to avoid risk of wrongly assigned fastq-files.
-        """
-        if "_" in name:
-            raise ValueError(
-                f"Sample name '{name}' contains an underscore (_). Underscores are not allowed."
-            )
-        return name
-
 
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided

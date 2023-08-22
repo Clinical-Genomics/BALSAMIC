@@ -318,28 +318,6 @@ def test_analysis_pon_model(test_data_dir: str):
     )
 
 
-def test_illegal_sample_name(
-    tumor_normal_fastq_info_correct: Dict, illegal_normal_sample_name: str
-):
-    """Test sample instance model detection of illegal sample name containing underscore."""
-
-    # GIVEN a sample dictionary with an invalid sample name
-    modify_sample_dict = copy.deepcopy(tumor_normal_fastq_info_correct)
-    samples: List[Dict] = modify_sample_dict
-    normal_dict = samples[1]
-    normal_dict["name"] = illegal_normal_sample_name
-
-    # WHEN parsing the sample dictionary
-    # THEN a ValueError should be triggered
-    with pytest.raises(ValueError) as exc:
-        SampleInstanceModel.parse_obj(normal_dict)
-
-    assert (
-        f"Sample name '{illegal_normal_sample_name}' contains an underscore (_). Underscores are not allowed."
-        in str(exc.value)
-    )
-
-
 def test_detect_duplicate_fastq_pattern(
     config_w_fastq_dir_for_duplicate_fastq_patterns_model: Dict,
 ):
