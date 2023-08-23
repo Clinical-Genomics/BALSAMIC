@@ -1,9 +1,11 @@
 """Balsamic commands common options."""
 import click
 
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, CACHE_VERSIONS
+from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
+from BALSAMIC.utils.cli import validate_cache_version
 
 OPTION_GENOME_VERSION = click.option(
     "-g",
@@ -99,7 +101,8 @@ OPTION_QUIET = click.option(
 OPTION_CACHE_VERSION = click.option(
     "--cache-version",
     show_default=True,
-    default=CacheVersion.RELEASE,
-    type=click.Choice(CACHE_VERSIONS),
-    help="Cache version to be used for init or analysis",
+    default=balsamic_version,
+    type=click.STRING,
+    callback=validate_cache_version,
+    help="Cache version to be used for init or analysis. Use 'develop' or 'X.X.X'.",
 )

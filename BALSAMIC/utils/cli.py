@@ -8,6 +8,7 @@ from io import StringIO
 from pathlib import Path
 from typing import Dict, Optional, List
 
+import click
 import graphviz
 import snakemake
 import yaml
@@ -379,3 +380,16 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
 
         return analysis_fastq_path.as_posix()
     return fastq_path
+
+
+def validate_cache_version(version: str) -> str:
+    """Validate the provided cache version."""
+    if version == "develop":
+        return version
+    version_parts: List[str] = version.split(".")
+    if len(version_parts) == 3 and all(part.isdigit() for part in version_parts):
+        return f"release_v{version}"
+    else:
+        raise click.BadParameter(
+            "Invalid cache version format. Use 'develop' or 'X.X.X'."
+        )

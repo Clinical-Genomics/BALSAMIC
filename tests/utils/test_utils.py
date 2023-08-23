@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from unittest import mock
 
+import click
 import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
@@ -32,6 +33,7 @@ from BALSAMIC.utils.cli import (
     get_config_path,
     get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
+    validate_cache_version,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
@@ -884,3 +886,55 @@ def test_get_analysis_fastq_files_directory_no_fastqs(
         assert fastq.is_symlink()
         assert fastq.resolve().is_file()
         assert fastq_dir == fastq.resolve().parent.as_posix()
+
+
+def test_validate_cache_version_develop():
+    """Test develop cache version validation."""
+
+    # GIVEN a develop cache version
+    cli_version: str = "develop"
+
+    # WHEN validating the provided version
+    version: str = validate_cache_version(cli_version)
+
+    # THEN the correct version should be returned
+    assert version == "develop"
+
+
+def test_validate_cache_version_release():
+    """Test release cache version validation."""
+
+    # GIVEN a release cache version
+    cli_version: str = "1.2.3"
+
+    # WHEN validating the provided version
+    version: str = validate_cache_version(cli_version)
+
+    # THEN the correct version should be returned
+    assert version == f"release_v{cli_version}"
+
+
+def test_validate_cache_version_non_digit():
+    """Test non digit release cache version validation."""
+
+    # GIVEN an incorrect release cache version
+    cli_version: str = "a.b.c"
+
+    # WHEN validating the provided version
+
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_cache_version(cli_version)
+
+
+def test_validate_cache_version_wrong_format():
+    """Test wrong format release cache version validation."""
+
+    # GIVEN an incorrect release cache version
+    cli_version: str = "1.2"
+
+    # WHEN validating the provided version
+
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_cache_version(cli_version)
