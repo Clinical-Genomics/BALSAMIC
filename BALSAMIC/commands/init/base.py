@@ -30,12 +30,12 @@ from BALSAMIC.commands.options import (
     OPTION_CACHE_VERSION,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
-from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, REFERENCE_FILES
+from BALSAMIC.constants.cache import GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
-from BALSAMIC.utils.cache import get_containers, get_release_version
+from BALSAMIC.utils.cache import get_containers
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
@@ -65,7 +65,7 @@ LOG = logging.getLogger(__name__)
 def initialize(
     context: click.Context,
     out_dir: str,
-    cache_version: CacheVersion,
+    cache_version: str,
     cosmic_key: str,
     genome_version: GenomeVersion,
     snakefile: Path,
@@ -98,11 +98,7 @@ def initialize(
         )
         raise click.Abort()
 
-    release_version: str = (
-        CacheVersion.DEVELOP.value
-        if cache_version == CacheVersion.DEVELOP
-        else get_release_version(cache_version)
-    )
+    release_version: str = cache_version.replace("release_v", "")
     out_dir: Path = Path(out_dir, release_version).absolute()
     references_dir: Path = Path(out_dir, genome_version)
     genome_dir = Path(references_dir, "genome")

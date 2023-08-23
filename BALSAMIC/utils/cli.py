@@ -382,7 +382,9 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
     return fastq_path
 
 
-def validate_cache_version(version: str) -> str:
+def validate_cache_version(
+    _ctx: click.Context, _param: click.Parameter, version: str
+) -> str:
     """Validate the provided cache version."""
     if version == "develop":
         return version
