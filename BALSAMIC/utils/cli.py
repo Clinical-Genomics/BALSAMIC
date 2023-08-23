@@ -394,5 +394,5 @@ def validate_cache_version(
         return f"release_v{version}"
     else:
         raise click.BadParameter(
-            "Invalid cache version format. Use 'develop' or 'X.X.X'."
+            f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
         )

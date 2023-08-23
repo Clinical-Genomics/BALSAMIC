@@ -3,7 +3,7 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.cache import GenomeVersion, CacheVersion
 from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
 from BALSAMIC.utils.cli import validate_cache_version
 
@@ -104,5 +104,5 @@ OPTION_CACHE_VERSION = click.option(
     default=balsamic_version,
     type=click.STRING,
     callback=validate_cache_version,
-    help="Cache version to be used for init or analysis. Use 'develop' or 'X.X.X'.",
+    help=f"Cache version to be used for init or analysis. Use '{CacheVersion.DEVELOP}' or 'X.X.X'.",
 )
