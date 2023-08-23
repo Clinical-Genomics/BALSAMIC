@@ -1,5 +1,5 @@
 """Balsamic cache specific constants."""
-from typing import Dict, List
+from typing import Dict
 
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.class_types import StrEnum
