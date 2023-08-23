@@ -29,6 +29,12 @@ class Species(StrEnum):
     HOMO_SAPIENS: str = "homo_sapiens_merged"
 
 
+class CacheVersion(StrEnum):
+    """Balsamic cache versions."""
+
+    DEVELOP: str = "develop"
+
+
 class DockerContainers(StrEnum):
     """Docker containers names."""
 

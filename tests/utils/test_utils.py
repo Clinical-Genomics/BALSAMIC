@@ -13,6 +13,7 @@ from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
@@ -892,13 +893,13 @@ def test_validate_cache_version_develop():
     """Test develop cache version validation."""
 
     # GIVEN a develop cache version
-    cli_version: str = "develop"
+    cli_version: str = CacheVersion.DEVELOP
 
     # WHEN validating the provided version
     version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
 
     # THEN the correct version should be returned
-    assert version == "develop"
+    assert version == CacheVersion.DEVELOP
 
 
 def test_validate_cache_version_release():

@@ -15,6 +15,7 @@ import yaml
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 
@@ -386,7 +387,7 @@ def validate_cache_version(
     _ctx: click.Context, _param: click.Parameter, version: str
 ) -> str:
     """Validate the provided cache version."""
-    if version == "develop":
+    if version == CacheVersion.DEVELOP:
         return version
     version_parts: List[str] = version.split(".")
     if len(version_parts) == 3 and all(part.isdigit() for part in version_parts):
