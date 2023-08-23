@@ -895,7 +895,7 @@ def test_validate_cache_version_develop():
     cli_version: str = "develop"
 
     # WHEN validating the provided version
-    version: str = validate_cache_version(None, None, cli_version)
+    version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
 
     # THEN the correct version should be returned
     assert version == "develop"
@@ -908,7 +908,7 @@ def test_validate_cache_version_release():
     cli_version: str = "1.2.3"
 
     # WHEN validating the provided version
-    version: str = validate_cache_version(None, None, cli_version)
+    version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
 
     # THEN the correct version should be returned
     assert version == f"release_v{cli_version}"
@@ -924,7 +924,7 @@ def test_validate_cache_version_non_digit():
 
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
-        validate_cache_version(None, None, cli_version)
+        validate_cache_version(click.Context, click.Parameter, cli_version)
 
 
 def test_validate_cache_version_wrong_format():
@@ -937,4 +937,4 @@ def test_validate_cache_version_wrong_format():
 
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
-        validate_cache_version(None, None, cli_version)
+        validate_cache_version(click.Context, click.Parameter, cli_version)
