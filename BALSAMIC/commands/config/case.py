@@ -118,6 +118,12 @@ LOG = logging.getLogger(__name__)
     "--normal-sample-name", type=str, required=False, help="Normal sample name"
 )
 @click.option(
+    "--cadd-annotations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Path of CADD annotations",
+)
+@click.option(
     "--clinical-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
@@ -197,6 +203,7 @@ def case_config(
     analysis_dir,
     tumor_sample_name,
     normal_sample_name,
+    cadd_annotations,
     clinical_snv_observations,
     clinical_sv_observations,
     cancer_germline_snv_observations,
@@ -217,6 +224,12 @@ def case_config(
     )
     with open(reference_config, "r") as config_file:
         reference_dict = json.load(config_file)
+
+    cadd_annotations_path = {
+        "cadd_annotations": cadd_annotations,
+    }
+    if cadd_annotations is not None:
+        reference_dict.update(cadd_annotations_path)
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,

@@ -2,6 +2,7 @@
 # coding: utf-8
 # NGS filters for merged SVs and CNVs
 
+
 rule bcftools_filter_sv_research:
   input:
     vcf_sv_research = vep_dir + "SV.somatic.{case_name}.svdb.research.vcf.gz",

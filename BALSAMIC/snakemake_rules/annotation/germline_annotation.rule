@@ -1,0 +1,81 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+# Germline variants annotation module.
+
+
+rule vep_germline_tumor:
+  input:
+    vcf = vcf_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
+    cosmic = config["reference"]["cosmic"]
+  output:
+    vcf_tumor = vep_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, "vep_germline_{var_type}.tumor.{var_caller}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
+    sample = 'tumor',
+    vep_cache = config["reference"]["vep_dir"],
+    vep_defaults = params.vep.vep_filters
+  threads:
+    get_threads(cluster_config, 'vep_germline')
+  message:
+    "Running vep annotation on germline variants for {params.sample} sample"
+  shell:
+        """
+vep_path=$(dirname $(readlink -f $(which vep)));
+export PERL5LIB=;
+
+vep \
+--dir $vep_path \
+--dir_cache {params.vep_cache} \
+--dir_plugins $vep_path \
+--input_file {input.vcf} \
+--output_file {output.vcf_tumor} \
+--fork {threads} \
+{params.vep_defaults} \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA;
+
+tabix -p vcf -f {output.vcf_tumor};
+
+        """
+
+
+rule vep_germline_normal:
+  input:
+    vcf = vcf_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
+    cosmic = config["reference"]["cosmic"]
+  output:
+    vcf_normal = vep_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
+  benchmark:
+    Path(benchmark_dir, "vep_germline_{var_type}.normal.{var_caller}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
+    sample = 'normal',
+    vep_cache = config["reference"]["vep_dir"],
+    vep_defaults = params.vep.vep_filters
+  threads:
+    get_threads(cluster_config, 'vep_germline')
+  message:
+    "Running vep annotation on germline variants for {params.sample} sample"
+  shell:
+        """
+vep_path=$(dirname $(readlink -f $(which vep)));
+export PERL5LIB=;
+
+vep \
+--dir $vep_path \
+--dir_cache {params.vep_cache} \
+--dir_plugins $vep_path \
+--input_file {input.vcf} \
+--output_file {output.vcf_normal} \
+--fork {threads} \
+{params.vep_defaults} \
+--custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA;
+
+tabix -p vcf -f {output.vcf_normal};
+
+        """
