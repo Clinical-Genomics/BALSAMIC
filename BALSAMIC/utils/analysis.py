@@ -43,7 +43,9 @@ def get_singularity_bind_paths(
         )
     if sample_config.get("cadd_annotations"):
         cadd_annotations_path: Path = Path(sample_config.get("cadd_annotations"))
-        cadd_annotations_dest_path: Path = "/opt/conda/share/CADD-scripts/data/annotations"
+        cadd_annotations_dest_path: Path = (
+            "/opt/conda/share/CADD-scripts/data/annotations"
+        )
         singularity_bind_paths.append(
             SingularityBindPath(
                 source=cadd_annotations_path, destination=cadd_annotations_dest_path
