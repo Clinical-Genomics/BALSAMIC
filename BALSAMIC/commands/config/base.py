@@ -1,16 +1,16 @@
-#!/usr/bin/env python
+"""Balsamic configuration file generation base commands."""
 import click
 
-from BALSAMIC.commands.config.case import case_config as case_command
-from BALSAMIC.commands.config.pon import pon_config as pon_command
+from BALSAMIC.commands.config.case import case_config
+from BALSAMIC.commands.config.pon import pon_config
 
 
 @click.group()
 @click.pass_context
-def config(context):
+def config():
     """Create config files required for running the pipeline."""
     pass
 
 
-config.add_command(case_command)
-config.add_command(pon_command)
+config.add_command(case_config)
+config.add_command(pon_config)
