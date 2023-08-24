@@ -100,6 +100,7 @@ rule sentieon_realign:
     benchmark:
         Path(benchmark_dir, "sentieon_realign_{sample_type}.{sample}.tsv").as_posix()
     params:
+        housekeeper_id = {"id": "{sample}", "tags": lambda wildcards: config_model.get_sample_type_by_name(sample_name = wildcards.sample)},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],

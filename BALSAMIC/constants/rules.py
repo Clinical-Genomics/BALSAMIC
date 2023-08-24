@@ -164,6 +164,7 @@ DELIVERY_RULES: List[str] = [
     # Alignment
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
+    "sentieon_alignment",
     # Germline
     "vep_germline_tumor",
     "vep_germline_normal",
