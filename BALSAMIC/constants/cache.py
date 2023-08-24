@@ -29,11 +29,10 @@ class Species(StrEnum):
     HOMO_SAPIENS: str = "homo_sapiens_merged"
 
 
-class ContainerVersion(StrEnum):
-    """Balsamic container versions."""
+class CacheVersion(StrEnum):
+    """Balsamic cache versions."""
 
     DEVELOP: str = "develop"
-    RELEASE: str = "release"
 
 
 class DockerContainers(StrEnum):
