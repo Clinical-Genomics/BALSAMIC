@@ -44,7 +44,7 @@ Snakemake cli given that there is a proper config file created.
    * - Dependencies
      - |snakemake_badge| |singularity_badge|
    * - Contributors
-     - @ashwini06, @ivadym, @khurrammaqbool, @keyvanelhami, @mropat, @imsarath
+     - @ashwini06, @ivadym, @khurrammaqbool, @keyvanelhami, @mropat, @imsarath, @rannick, @fevac, @mathiasbio 
 
 
 .. |code_cov_badge| image:: https://codecov.io/gh/Clinical-Genomics/BALSAMIC/branch/develop/graph/badge.svg?token=qP68U3PNwV 
