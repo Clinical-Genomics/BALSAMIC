@@ -111,7 +111,7 @@ svdb
 ~~~~
 :Source code: `Github` `<https://github.com/J35P312/SVDB>`_
 :Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
-:Version: `2.6.0`
+:Version: `2.8.1`
 
 tabix
 ~~~~~~
@@ -123,7 +123,7 @@ tiddit
 ~~~~~~
 :Source code: `Github` `<https://github.com/SciLifeLab/TIDDIT>`_
 :Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
-:Version: `3.0.0`
+:Version: `3.3.2`
 
 vardict
 ~~~~~~~
@@ -141,4 +141,4 @@ vcf2cytosure
 ~~~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/NBISweden/vcf2cytosure>`_
 :Article: `-`
-:Version: `0.7.1`
+:Version: `0.8`
