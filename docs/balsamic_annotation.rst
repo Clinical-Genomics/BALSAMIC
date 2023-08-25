@@ -1,6 +1,6 @@
-***********************************
+**********************
 Annotation resources
-***********************************
+**********************
 
 BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep`` and ``vcfanno``. Somatic structural variants (SVs), somatic copy-number variants (CNVs) and germline single nucleotide variants are annotated using only ``ensembl-vep``. All SVs and CNVs are merged using ``SVDB`` before annotating for `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)` analyses.
 
@@ -90,6 +90,16 @@ The values for `ORIGIN` are described below:
    * - COSMIC_AA
      - peptide annotation
 
+`BALSAMIC` adds the following annotation for SNVs from `CADD` database using ``vcfanno``.
+
+.. list-table:: CADD
+   :widths: 50 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+   * - CADD
+     - Combined Annotation Dependent Depletion
 
 Where relevant, `BALSAMIC` uses `ensembl-vep` to annotate somatic and germline SNVs and somatic SVs/CNVs from `1000genomes (phase3)`, `ClinVar`, `ESP, HGMD-PUBLIC`, `dbSNP`, `gencode`, `gnomAD`, `polyphen`, `refseq`, and `sift` databases.
 The following annotations are added by `ensembl-vep`.

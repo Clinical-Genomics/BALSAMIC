@@ -1,10 +1,6 @@
-# vim: syntax=python tabstop=4 expandtab
-# coding: utf-8
-
-""" Script to include variant caller information to the VCF info field and output to new VCF file """
+""" Script to include variant caller information to the VCF info field and output to new VCF file."""
 
 import click
-import gzip
 from cyvcf2 import VCF, Writer
 
 

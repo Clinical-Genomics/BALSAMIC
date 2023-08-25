@@ -19,8 +19,8 @@ rule manta_tumor_normal:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = get_sample_id_by_type(config["samples"], "tumor"),
+        normal = get_sample_id_by_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         manta_install_path = "/opt/conda/share/manta-1.6.0-2"
     threads:
@@ -192,7 +192,7 @@ rule ascat_tumor_normal:
         fa = config["reference"]["reference_genome"] ,
         bamN = bam_dir + normal_bam,
         bamT = bam_dir + tumor_bam,
-        gccorrection = config["reference"]["ascat_gccorrection"],
+        gccorrection = config["reference"]["ascat_gc_correction"],
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
         ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.copynumber.txt.gz",
@@ -415,8 +415,8 @@ rule svdb_merge_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-        tumor = get_sample_type(config["samples"], "tumor"),
-        normal = get_sample_type(config["samples"], "normal"),
+        tumor = get_sample_id_by_type(config["samples"], "tumor"),
+        normal = get_sample_id_by_type(config["samples"], "normal"),
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_callers_prio)

@@ -51,28 +51,18 @@
         "dag": "tests/test_data/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
     },
     "samples": {
-        "concatenated_tumor_XXXXXX_R": {
-            "file_prefix": "concatenated_tumor_XXXXXX_R",
-            "sample_name" : "ACC1",
-            "type": "tumor",
-            "readpair_suffix": ["1", "2"]
-        },
-        "concatenated_normal_XXXXXX_R": {
-            "file_prefix": "concatenated_normal_XXXXXX_R",
-            "sample_name" : "ACC2",
-            "type": "normal",
-            "readpair_suffix": ["1", "2"]
-        }
+        "ACC1": {"type": "tumor"},
+        "ACC2": {"type": "normal"}
     },
     "reference": {
         "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
         "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-        "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-        "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
         "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
         "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-        "vep": "tests/test_data/references/vep/",
-        "exon_bed": "tests/test_data/references/genome/refseq.flat.bed",
+        "vep_dir": "tests/test_data/references/vep/",
+        "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
         "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz"
     },
     "panel": {
@@ -80,6 +70,5 @@
         "chrom": ["18", "14", "11", "4", "10", "12", "3", "5", "13", "20", "7", "2",
                   "8", "21", "15", "9", "17", "16", "22", "19", "1", "6"]
     },
-    "conda_env_yaml": "BALSAMIC/config/balsamic_env.yaml",
     "rule_directory": "BALSAMIC/"
 }

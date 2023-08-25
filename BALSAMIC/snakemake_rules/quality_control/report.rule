@@ -9,8 +9,6 @@ rule cnv_report:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
         cnv_report_script= get_script_path("generate_cnv_report.py"),
-    singularity:
-        Path(singularity_image, "balsamic.sif").as_posix()
     threads:
         get_threads(cluster_config, "cnv_report")
     message:

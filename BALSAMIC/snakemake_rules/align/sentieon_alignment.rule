@@ -1,14 +1,11 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-# Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
-
-
 rule sentieon_align_sort:
     input:
         ref = config["reference"]["reference_genome"],
-        read1 = Path(fastq_dir, "{sample}_1.fp.fastq.gz").as_posix(),
-        read2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
+        fastq_r1 = Path(analysis_fastq_dir, "{sample}_R_1.fp.fastq.gz").as_posix(),
+        fastq_r2 = Path(analysis_fastq_dir, "{sample}_R_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bamout = Path(bam_dir, "{sample}.bam").as_posix()
@@ -35,7 +32,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -R {params.header} \
 -t {threads} \
 -K 50000000 \
-{input.ref} {input.read1} {input.read2} \
+{input.ref} {input.fastq_r1} {input.fastq_r2} \
 | {params.sentieon_exec} util sort \
 -o {output.bamout} \
 -t {threads} \
@@ -91,7 +88,7 @@ rule sentieon_realign:
     input:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
-        indel_1kg = config["reference"]["1kg_known_indel"],
+        indel_1kg = config["reference"]["known_indel_1kg"],
         bam = Path(bam_dir, "{sample}.dedup.bam").as_posix()
     output:
         bam = Path(bam_dir, "{sample}.dedup.realign.bam").as_posix()

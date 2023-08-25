@@ -1,25 +1,23 @@
-import os
 import json
 import logging
+import os
 from pathlib import Path
 
 import click
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender
+from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import (
     get_sample_dict,
     get_panel_chrom,
     get_bioinfo_tools_version,
-    create_fastq_symlink,
     generate_graph,
+    get_analysis_fastq_files_directory,
 )
-from BALSAMIC.constants.common import (
-    CONTAINERS_CONDA_ENV_PATH,
-    BIOINFO_TOOL_ENV,
-    GENDER_OPTIONS,
-)
-from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.models import BalsamicConfigModel
+from BALSAMIC.utils.io import write_json
+from BALSAMIC.models.analysis import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +34,7 @@ LOG = logging.getLogger(__name__)
     required=False,
     default="female",
     show_default=True,
-    type=click.Choice(GENDER_OPTIONS),
+    type=click.Choice([Gender.FEMALE, Gender.MALE]),
     help="Case associated gender",
 )
 @click.option(
@@ -68,6 +66,12 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     is_flag=True,
     help="Trim adapters from reads in fastq",
+)
+@click.option(
+    "--fastq-path",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help="Path to directory containing unconcatenated fastqs",
 )
 @click.option(
     "-p",
@@ -109,24 +113,10 @@ LOG = logging.getLogger(__name__)
     help="Root analysis path to store analysis logs and results. \
                                      The final path will be analysis-dir/sample-id",
 )
+@click.option("--tumor-sample-name", type=str, required=True, help="Tumor sample name")
 @click.option(
-    "-t",
-    "--tumor",
-    type=click.Path(exists=True, resolve_path=True),
-    required=True,
-    multiple=True,
-    help="Fastq files for tumor sample.",
+    "--normal-sample-name", type=str, required=False, help="Normal sample name"
 )
-@click.option(
-    "-n",
-    "--normal",
-    type=click.Path(exists=True, resolve_path=True),
-    required=False,
-    multiple=True,
-    help="Fastq files for normal sample.",
-)
-@click.option("--tumor-sample-name", help="Tumor sample name")
-@click.option("--normal-sample-name", help="Normal sample name")
 @click.option(
     "--clinical-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
@@ -140,10 +130,10 @@ LOG = logging.getLogger(__name__)
     help="VCF path of clinical SV observations (WGS analysis workflow)",
 )
 @click.option(
-    "--cancer-all-snv-observations",
+    "--cancer-germline-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF path of cancer SNV normal observations (WGS analysis workflow)",
+    help="VCF path of cancer germline SNV normal observations (WGS analysis workflow)",
 )
 @click.option(
     "--cancer-somatic-snv-observations",
@@ -200,17 +190,16 @@ def case_config(
     umi_trim_length,
     adapter_trim,
     quality_trim,
+    fastq_path,
     panel_bed,
     background_variants,
     pon_cnn,
     analysis_dir,
-    tumor,
-    normal,
     tumor_sample_name,
     normal_sample_name,
     clinical_snv_observations,
     clinical_sv_observations,
-    cancer_all_snv_observations,
+    cancer_germline_snv_observations,
     cancer_somatic_snv_observations,
     cancer_somatic_sv_observations,
     swegen_snv,
@@ -220,31 +209,19 @@ def case_config(
     container_version,
     analysis_workflow,
 ):
-
-    try:
-        samples = get_sample_dict(
-            tumor=tumor,
-            normal=normal,
-            tumor_sample_name=tumor_sample_name,
-            normal_sample_name=normal_sample_name,
-        )
-    except AttributeError:
-        LOG.error(f"File name is invalid, use convention [SAMPLE_ID]_R_[1,2].fastq.gz")
-        raise click.Abort()
-
     if container_version:
         balsamic_version = container_version
 
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as f:
-        reference_dict = json.load(f)["reference"]
+    with open(reference_config, "r") as config_file:
+        reference_dict = json.load(config_file)
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
-        "cancer_all_snv_observations": cancer_all_snv_observations,
+        "cancer_germline_snv_observations": cancer_germline_snv_observations,
         "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
@@ -269,19 +246,24 @@ def case_config(
             "case_id": case_id,
             "gender": gender,
             "analysis_dir": analysis_dir,
-            "analysis_type": "paired" if normal else "single",
+            "fastq_path": get_analysis_fastq_files_directory(
+                case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
+            ),
+            "analysis_type": "paired" if normal_sample_name else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
         },
         reference=reference_dict,
         singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
         background_variants=background_variants,
-        samples=samples,
+        samples=get_sample_dict(
+            tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
+        ),
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,
-            container_conda_env_path=CONTAINERS_CONDA_ENV_PATH,
+            container_conda_env_path=CONTAINERS_DIR,
         ),
         panel={
             "capture_kit": panel_bed,
@@ -293,22 +275,8 @@ def case_config(
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("Config file generated successfully")
 
-    Path.mkdir(
-        Path(config_collection_dict["analysis"]["fastq_path"]),
-        parents=True,
-        exist_ok=True,
-    )
-    LOG.info("Directories created successfully")
-
-    create_fastq_symlink(
-        casefiles=(tumor + normal),
-        symlink_dir=Path(config_collection_dict["analysis"]["fastq_path"]),
-    )
-    LOG.info(f"Symlinks generated successfully")
-
-    config_path = Path(analysis_dir) / case_id / (case_id + ".json")
-    with open(config_path, "w+") as fh:
-        fh.write(json.dumps(config_collection_dict, indent=4))
+    config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
+    write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
     try:

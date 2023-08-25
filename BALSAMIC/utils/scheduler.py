@@ -87,7 +87,6 @@ class QsubScheduler:
         self.time = None
 
     def build_cmd(self):
-
         resource_params = ""
         depend = ""
         qsub_options = list()

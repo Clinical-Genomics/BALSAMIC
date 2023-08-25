@@ -7,7 +7,7 @@
 rule genmod_score_vardict:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
-    rankscore = config["reference"]["rankscore"]
+    rank_score = config["reference"]["rank_score"]
   output:
     vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.ranked.vcf.gz",
   benchmark:
@@ -22,7 +22,7 @@ rule genmod_score_vardict:
     ("Scoring annotated vardict variants using genmod for {params.case_name}")
   shell:
     """
-genmod score -r -c {input.rankscore} {input.vcf} | \
+genmod score -r -c {input.rank_score} {input.vcf} | \
 
 bcftools view -o {output.vcf_pass} -O z;
 
