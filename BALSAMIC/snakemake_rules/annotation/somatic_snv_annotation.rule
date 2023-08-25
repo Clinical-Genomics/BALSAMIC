@@ -41,7 +41,7 @@ rule cadd_annotate_somaticINDEL_research:
   shell:
         """
 CADD.sh -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
-tabix -s 1 -b 2 -e 2 -c "##" -f {output.cadd_indel_research}
+
         """
 
 
@@ -63,6 +63,8 @@ rule bcftools_annotate_somaticINDEL_research:
     "Running bcftools to annotate INDELs on {params.message_text}"
   shell:
         """
+tabix -s 1 -b 2 -e 2 -c "##" -f {input.cadd_indel_research}        
+
 bcftools annotate --regions 1 --output-type v \
 --columns Chrom,Pos,Ref,Alt,-,CADD \
 --annotations {input.cadd_indel_research} \
