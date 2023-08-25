@@ -35,8 +35,14 @@ cnvkit
 :Article: `PLOS Computational Biology` `<https://doi.org/10.1371/journal.pcbi.1004873>`_
 :Version: `0.9.9`
 
+cnvpytor
+~~~~~~~~
+:Source code: `GitHub` `<https://github.com/abyzovlab/CNVpytor/>
+:Article: `GigaSciences` `<https://doi.org/10.1093/gigascience/giab074>`
+:Version: `1.2.1`
+
 delly
-~~~~~~~
+~~~~~
 :Source code: `GitHub` `<https://github.com/dellytools/delly>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/28/18/i333/245403>`_
 :Version: `1.0.3`
@@ -65,23 +71,28 @@ gatk
 :Article: `Current Protocols in Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25431634/>`_
 :Version: `3.8`
 
+genmod
+~~~~~~
+:Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
+:Version: `0.2.16`
+
 manta
 ~~~~~
 :Source code: `GitHub` `<https://github.com/Illumina/manta>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btv710>`_
 :Version: `1.6.0`
 
-multiqc
-~~~~~~~
-:Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
-:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.12`
-
 mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btx699>`_
 :Version: `0.3.3`
+
+multiqc
+~~~~~~~
+:Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
+:Version: `1.12`
 
 picard
 ~~~~~~
@@ -106,6 +117,12 @@ sentieon-tools
 :Source code: `Commercial Tool` `<https://www.sentieon.com/>`_
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
 :Version: `202010.02`
+
+Somalier
+~~~~~~~~
+:Source code: `Github` `<https://github.com/brentp/somalier>`_
+:Article: `Genome Medicine` `<https://doi.org/10.1186/s13073-020-00761-2>`_
+:Version: `0.2.16`
 
 svdb
 ~~~~
