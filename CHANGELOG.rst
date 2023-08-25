@@ -1,3 +1,49 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+* Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
+* `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
+* `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
+* Annotate SNVs with cancer germline SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
+* Annotate SNVs with somatic SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
+* Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
+* Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
+* Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
+* `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
+* `Container ettiquette` to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1132
+* `htslib` (samtools, bcftools tabix) container https://github.com/Clinical-Genomics/BALSAMIC/pull/1234
+* Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
+
+Changed:
+^^^^^^^^
+* Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
+* Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
+* Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
+* Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
+* Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
+* Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
+* Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
+
+Fixed:
+^^^^^^
+* vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
+* Link external fastqs to case folder & create case directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1195
+* vcf2cytosure container missing constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1198
+* Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
+* Fix SVDB annotation intermediate rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1218
+* Broken documentation links https://github.com/Clinical-Genomics/BALSAMIC/pull/1226
+* Updated contributors in main README https://github.com/Clinical-Genomics/BALSAMIC/pull/1237
+
+Removed:
+^^^^^^^^
+* Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
+* Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
+
 [12.0.2]
 --------
 
