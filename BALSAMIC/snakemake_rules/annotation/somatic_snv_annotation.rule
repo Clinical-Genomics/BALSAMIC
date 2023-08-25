@@ -56,6 +56,7 @@ rule bcftools_annotate_somaticINDEL_research:
   singularity:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
+    header_line = temp(f"{vep_dir}cadd_header_line.txt"),
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
   threads:
     get_threads(cluster_config, "bcftools_annotate_somaticINDEL_research")
@@ -63,9 +64,13 @@ rule bcftools_annotate_somaticINDEL_research:
     "Running bcftools to annotate INDELs on {params.message_text}"
   shell:
         """
+echo '##INFO=<ID=CADD,Number=1,Type=Float,Description=\"The Combined Annotation Dependent Depletion score\">' >\
+ {params.header_line}
+
 tabix -s 1 -b 2 -e 2 -c "##" -f {input.cadd_indel_research}        
 
-bcftools annotate --regions 1 --output-type v \
+bcftools annotate --output-type v \
+--header-lines {params.header_line} \
 --columns Chrom,Pos,Ref,Alt,-,CADD \
 --annotations {input.cadd_indel_research} \
 --output  {output.vcf_indel_research}  \
