@@ -152,18 +152,16 @@ def pon_config(
     ).dict(by_alias=True, exclude_none=True)
     LOG.info("PON config model instantiated successfully")
 
-    logpath = config_collection_dict["analysis"]["log"]
-    scriptpath = config_collection_dict["analysis"]["script"]
-    resultpath = config_collection_dict["analysis"]["result"]
-    benchmarkpath = config_collection_dict["analysis"]["benchmark"]
+    result_path: Path = Path(config_collection_dict["analysis"]["result"])
+    log_path: Path = Path(config_collection_dict["analysis"]["log"])
+    script_path: Path = Path(config_collection_dict["analysis"]["script"])
+    benchmark_path: Path = Path(config_collection_dict["analysis"]["benchmark"])
 
-    # Create result directory
-    os.makedirs(resultpath, exist_ok=True)
+    # Create directories for results, logs, scripts and benchmark files
+    analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
 
-    # Create directories for logs, scripts and benchmark files
-    os.makedirs(logpath, exist_ok=True)
-    os.makedirs(scriptpath, exist_ok=True)
-    os.makedirs(benchmarkpath, exist_ok=True)
+    for analysis_sub_dir in analysis_directories_list:
+        analysis_sub_dir.mkdir(exist_ok=True)
 
     config_path = Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
