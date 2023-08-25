@@ -1,7 +1,6 @@
 """Balsamic commands init options."""
 import click
 
-from BALSAMIC.constants.cache import ContainerVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.utils.cli import get_config_path
 
@@ -11,15 +10,6 @@ OPTION_OUT_DIR = click.option(
     required=True,
     type=click.Path(exists=True),
     help="Output directory for singularity containers and reference files",
-)
-
-OPTION_CONTAINER_VERSION = click.option(
-    "-v",
-    "--container-version",
-    show_default=True,
-    default=ContainerVersion.RELEASE,
-    type=click.Choice([ContainerVersion.DEVELOP, ContainerVersion.RELEASE]),
-    help="Container version to be downloaded",
 )
 
 OPTION_COSMIC_KEY = click.option(
