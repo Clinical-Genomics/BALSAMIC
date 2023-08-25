@@ -200,6 +200,10 @@ def config_dict(config_path: str) -> str:
     """Read and return config from json."""
     return read_json(config_path)
 
+@pytest.fixture(scope="session")
+def cadd_annotations(test_data_dir: str) -> str:
+    """Return path for CADD annotations."""
+    return Path(test_data_dir, "references", "cadd").as_posix()
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
@@ -434,6 +438,7 @@ def tumor_only_config(
     background_variant_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cadd_annotations: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -471,6 +476,8 @@ def tumor_only_config(
                 background_variant_file,
                 "--tumor-sample-name",
                 tumor_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
                 "--swegen-snv",
                 swegen_snv_frequency_path,
                 "--swegen-sv",
@@ -511,6 +518,7 @@ def tumor_normal_config(
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cadd_annotations: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -550,6 +558,8 @@ def tumor_normal_config(
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
                 "--swegen-snv",
                 swegen_snv_frequency_path,
                 "--swegen-sv",
@@ -587,6 +597,7 @@ def tumor_only_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cadd_annotations: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -620,6 +631,8 @@ def tumor_only_wgs_config(
                 balsamic_cache,
                 "--tumor-sample-name",
                 tumor_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
                 "--swegen-snv",
                 swegen_snv_frequency_path,
                 "--swegen-sv",
@@ -654,6 +667,7 @@ def tumor_normal_wgs_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cadd_annotations: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -689,6 +703,8 @@ def tumor_normal_wgs_config(
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
                 "--swegen-snv",
                 swegen_snv_frequency_path,
                 "--swegen-sv",

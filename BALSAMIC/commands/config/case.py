@@ -120,7 +120,7 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "--cadd-annotations",
     type=click.Path(exists=True, resolve_path=True),
-    required=True,
+    required=False,
     help="Path of CADD annotations",
 )
 @click.option(
