@@ -118,7 +118,7 @@ sentieon-tools
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
 :Version: `202010.02`
 
-Somalier
+somalier
 ~~~~~~~~
 :Source code: `Github` `<https://github.com/brentp/somalier>`_
 :Article: `Genome Medicine` `<https://doi.org/10.1186/s13073-020-00761-2>`_
