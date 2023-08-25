@@ -37,6 +37,7 @@ Fixed:
 * Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
 * Fix SVDB annotation intermediate rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1218
 * Broken documentation links https://github.com/Clinical-Genomics/BALSAMIC/pull/1226
+* Updated contributors in main README https://github.com/Clinical-Genomics/BALSAMIC/pull/1237
 
 Removed:
 ^^^^^^^^
