@@ -117,7 +117,7 @@ tabix
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/tabix>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/27/5/718/262743>`_
-:Version: `1.11`
+:Version: `>=1.11`
 
 tiddit
 ~~~~~~
