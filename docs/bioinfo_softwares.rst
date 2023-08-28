@@ -29,6 +29,12 @@ bwa
 :Article: `Bioinformatics` `<https://arxiv.org/abs/1303.3997>`_
 :Version: `0.7.17`
 
+cadd
+~~~~
+:Source code: `GitHub` `<https://github.com/kircherlab/CADD-scripts/>`_
+:Article: `Nature Genetics` `<https://dx.doi.org/10.1038/ng.2892>`_
+:Version: `1.6`
+
 cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
