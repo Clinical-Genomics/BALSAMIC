@@ -200,10 +200,12 @@ def config_dict(config_path: str) -> str:
     """Read and return config from json."""
     return read_json(config_path)
 
+
 @pytest.fixture(scope="session")
 def cadd_annotations(test_data_dir: str) -> str:
     """Return path for CADD annotations."""
     return Path(test_data_dir, "references", "cadd").as_posix()
+
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
