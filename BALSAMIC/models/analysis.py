@@ -1,18 +1,15 @@
-import logging
-import re
 import glob
+import logging
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
 
-
-from pydantic import BaseModel, validator, Field, root_validator, ValidationError
+from pydantic import BaseModel, validator, Field
 from pydantic.types import DirectoryPath, FilePath
-from collections import defaultdict
 
 from BALSAMIC import __version__ as balsamic_version
-
 from BALSAMIC.constants.analysis import (
     Gender,
     AnalysisType,
@@ -24,7 +21,6 @@ from BALSAMIC.constants.analysis import (
     WorkflowSolution,
     FastqName,
 )
-
 
 LOG = logging.getLogger(__name__)
 
@@ -305,17 +301,17 @@ class AnalysisModel(BaseModel):
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
         return (
-            Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
-            + "/"
+                Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
+                + "/"
         )
 
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
         return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "scripts"
-            ).as_posix()
-            + "/"
+                Path(
+                    values.get("analysis_dir"), values.get("case_id"), "scripts"
+                ).as_posix()
+                + "/"
         )
 
     @validator("result")
@@ -327,19 +323,19 @@ class AnalysisModel(BaseModel):
     @validator("benchmark")
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
         return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "benchmarks"
-            ).as_posix()
-            + "/"
+                Path(
+                    values.get("analysis_dir"), values.get("case_id"), "benchmarks"
+                ).as_posix()
+                + "/"
         )
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
-            ).as_posix()
-            + f"_BALSAMIC_{balsamic_version}_graph.pdf"
+                Path(
+                    values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
+                ).as_posix()
+                + f"_BALSAMIC_{balsamic_version}_graph.pdf"
         )
 
     @validator("config_creation_date")
@@ -370,19 +366,13 @@ class AnalysisPonModel(AnalysisModel):
 
 
 class FastqInfoModel(BaseModel):
-    """
-    Holds filepaths for forward and reverse reads for a fastq_pattern.
-    """
+    """Holds filepaths for forward and reverse reads for a fastq_pattern."""
 
     fwd: FilePath
     rev: FilePath
 
-    @validator("fwd")
-    def fwd_path_as_abspath_str(cls, value):
-        return Path(value).resolve().as_posix()
-
-    @validator("rev")
-    def rev_path_as_abspath_str(cls, value):
+    @validator("fwd", "rev")
+    def fastq_path_as_abspath_str(cls, value):
         return Path(value).resolve().as_posix()
 
 
@@ -417,18 +407,12 @@ class PanelModel(BaseModel):
     chrom: Optional[List[str]]
     pon_cnn: Optional[FilePath]
 
-    @validator("capture_kit")
-    def path_as_abspath_str(cls, value):
-        """Converts FilePath to string."""
-        return Path(value).resolve().as_posix()
-
-    @validator("pon_cnn")
-    def pon_abspath_as_str(cls, value):
-        """Converts FilePath to string."""
+    @validator("pon_cnn", "capture_kit")
+    def file_abspath_as_str(cls, value):
+        """Converts path to string."""
         if value:
             return Path(value).resolve().as_posix()
         return None
-
 
 class ConfigModel(BaseModel):
     """
@@ -480,15 +464,21 @@ class ConfigModel(BaseModel):
     @validator("samples")
     def no_duplicate_fastq_patterns(cls, samples):
         """Validate that no duplicate fastq patterns have been assigned in dict."""
-        fastq_info_values = set()
+        fastq_pattern_counts = {}
 
+        # Count Fastq pattern occurrence
         for sample in samples:
-            duplicates = [
-                pattern
-                for pattern in sample.fastq_info.keys()
-                if pattern in fastq_info_values
-            ]
-            fastq_info_values.update(sample.fastq_info.keys())
+            for fastq_pattern in sample.fastq_info.keys():
+                if fastq_pattern not in fastq_pattern_counts:
+                    fastq_pattern_counts[fastq_pattern] = 1
+                else:
+                    fastq_pattern_counts[fastq_pattern] += 1
+
+        # Look for duplicates
+        duplicates = []
+        for fastq_pattern in fastq_pattern_counts:
+            if fastq_pattern_counts[fastq_pattern] > 1:
+                duplicates.append(fastq_pattern)
 
         if duplicates:
             raise ValueError(
@@ -546,7 +536,7 @@ class ConfigModel(BaseModel):
         ]
 
     def get_all_fastqs_for_sample(
-        self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]
+            self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]
     ) -> List[str]:
         """Return all fastqs (optionally only [fastq/rev]) involved in analysis of sample."""
         fastq_list: List = []
@@ -623,7 +613,7 @@ class ConfigModel(BaseModel):
         return bam_names
 
     def get_final_bam_name(
-        self, bam_dir: str, sample_name: str = None, sample_type: str = None
+            self, bam_dir: str, sample_name: str = None, sample_type: str = None
     ) -> str:
         """Return final bam name to be used in downstream analysis."""
 
