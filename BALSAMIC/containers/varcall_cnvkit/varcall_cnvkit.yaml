@@ -41,18 +41,19 @@ dependencies:
   - bioconductor-variantannotation=1.40.0
   - bioconductor-xvector=0.34.0
   - bioconductor-zlibbioc=1.40.0
+  - boltons=23.0.0
   - brotlipy=0.7.0
   - bwidget=1.9.14
   - bzip2=1.0.8
-  - c-ares=1.18.1
-  - ca-certificates=2022.12.7
+  - c-ares=1.19.1
+  - ca-certificates=2023.5.7
   - cairo=1.16.0
-  - certifi=2022.12.7
+  - certifi=2023.5.7
   - cffi=1.15.1
   - chardet=4.0.0
-  - conda=22.11.1
+  - conda=23.5.2
   - conda-package-handling=2.0.2
-  - conda-package-streaming=0.7.0
+  - conda-package-streaming=0.8.0
   - cryptography=39.0.0
   - curl=7.86.0
   - expat=2.5.0
@@ -79,49 +80,53 @@ dependencies:
   - icu=70.1
   - idna=2.10
   - jpeg=9e
+  - jsonpatch=1.32
+  - jsonpointer=2.0
   - kernel-headers_linux-64=2.6.32
   - keyutils=1.6.1
   - krb5=1.19.3
   - ld_impl_linux-64=2.39
-  - lerc=3.0
+  - lerc=4.0.0
   - libblas=3.9.0
   - libcblas=3.9.0
   - libcurl=7.86.0
-  - libdeflate=1.10
+  - libdeflate=1.13
   - libedit=3.1.20191231
   - libev=4.33
+  - libexpat=2.5.0
   - libffi=3.4.2
   - libgcc-devel_linux-64=10.4.0
-  - libgcc-ng=12.2.0
-  - libgfortran-ng=12.2.0
-  - libgfortran5=12.2.0
+  - libgcc-ng=13.1.0
+  - libgfortran-ng=13.1.0
+  - libgfortran5=13.1.0
   - libglib=2.74.1
-  - libgomp=12.2.0
+  - libgomp=13.1.0
   - libiconv=1.17
   - liblapack=3.9.0
   - libnghttp2=1.51.0
   - libnsl=2.0.0
-  - libopenblas=0.3.21
+  - libopenblas=0.3.23
   - libpng=1.6.39
   - libsanitizer=10.4.0
   - libssh2=1.10.0
   - libstdcxx-devel_linux-64=10.4.0
-  - libstdcxx-ng=12.2.0
+  - libstdcxx-ng=13.1.0
   - libtiff=4.4.0
-  - libuuid=2.32.1
-  - libwebp-base=1.2.4
+  - libuuid=2.38.1
+  - libwebp-base=1.3.1
   - libxcb=1.13
   - libxml2=2.9.14
   - libzlib=1.2.13
   - make=4.3
-  - ncurses=6.3
-  - openssl=1.1.1t
-  - pango=1.50.12
+  - ncurses=6.4
+  - openssl=1.1.1u
+  - packaging=23.1
+  - pango=1.50.14
   - pcre2=10.37
   - perl=5.32.1
-  - pip=23.0
+  - pip=23.2
   - pixman=0.40.0
-  - pluggy=1.0.0
+  - pluggy=1.2.0
   - pthread-stubs=0.4
   - pycosat=0.6.4
   - pycparser=2.20
@@ -136,21 +141,22 @@ dependencies:
   - r-bit=4.0.5
   - r-bit64=4.0.5
   - r-bitops=1.0_7
-  - r-blob=1.2.3
-  - r-cachem=1.0.6
-  - r-cli=3.6.0
+  - r-blob=1.2.4
+  - r-cachem=1.0.8
+  - r-cli=3.6.1
   - r-colorspace=2.1_0
+  - r-cpp11=0.4.3
   - r-crayon=1.5.2
   - r-curl=4.3.3
   - r-data.table=1.14.2
   - r-dbi=1.1.3
   - r-dbplyr=2.3.0
   - r-digest=0.6.31
-  - r-dplyr=1.1.0
+  - r-dplyr=1.1.2
   - r-ellipsis=0.3.2
   - r-fansi=1.0.4
   - r-farver=2.1.1
-  - r-fastmap=1.1.0
+  - r-fastmap=1.1.1
   - r-filelock=1.0.2
   - r-formatr=1.14
   - r-futile.logger=1.4.3
@@ -160,28 +166,28 @@ dependencies:
   - r-ggplot2=3.4.0
   - r-glue=1.6.2
   - r-gridextra=2.3
-  - r-gtable=0.3.1
-  - r-hms=1.1.2
-  - r-httr=1.4.4
+  - r-gtable=0.3.3
+  - r-hms=1.1.3
+  - r-httr=1.4.6
   - r-isoband=0.2.7
-  - r-jsonlite=1.8.4
+  - r-jsonlite=1.8.5
   - r-labeling=0.4.2
   - r-lambda.r=1.2.4
-  - r-lattice=0.20_45
+  - r-lattice=0.21_8
   - r-lifecycle=1.0.2
   - r-magrittr=2.0.3
-  - r-mass=7.3_58.2
-  - r-matrix=1.5_3
-  - r-matrixstats=0.63.0
+  - r-mass=7.3_58.3
+  - r-matrix=1.5_4.1
+  - r-matrixstats=1.0.0
   - r-mclust=6.0.0
   - r-memoise=2.0.1
-  - r-mgcv=1.8_41
+  - r-mgcv=1.8_42
   - r-mime=0.12
   - r-munsell=0.5.0
   - r-nlme=3.1_162
   - r-openssl=2.0.5
   - r-optparse=1.7.1
-  - r-pillar=1.8.1
+  - r-pillar=1.9.0
   - r-pkgconfig=2.0.3
   - r-plogr=0.2.0
   - r-png=0.1_8
@@ -192,21 +198,21 @@ dependencies:
   - r-rappdirs=0.3.3
   - r-rcolorbrewer=1.1_3
   - r-rcpp=1.0.10
-  - r-rcurl=1.98_1.10
+  - r-rcurl=1.98_1.12
   - r-restfulr=0.0.15
   - r-rjson=0.2.21
   - r-rlang=1.0.5
-  - r-rsqlite=2.2.20
+  - r-rsqlite=2.3.1
   - r-scales=1.2.1
   - r-snow=0.4_4
   - r-stringi=1.7.12
   - r-stringr=1.4.1
-  - r-sys=3.4.1
-  - r-tibble=3.1.8
+  - r-sys=3.4.2
+  - r-tibble=3.2.1
   - r-tidyselect=1.1.2
   - r-utf8=1.2.3
   - r-vctrs=0.4.2
-  - r-vgam=1.1_7
+  - r-vgam=1.1_8
   - r-viridislite=0.4.1
   - r-withr=2.5.0
   - r-xml=3.99_0.11
@@ -214,10 +220,10 @@ dependencies:
   - r-yaml=2.3.7
   - readline=8.1
   - requests=2.25.1
-  - ruamel.yaml=0.17.21
+  - ruamel.yaml=0.17.32
   - ruamel.yaml.clib=0.2.7
   - sed=4.8
-  - setuptools=67.1.0
+  - setuptools=68.0.0
   - six=1.16.0
   - sqlite=3.36.0
   - sysroot_linux-64=2.12
@@ -226,18 +232,17 @@ dependencies:
   - tktable=2.10
   - toolz=0.12.0
   - tqdm=4.61.2
-  - tzdata=2021a
   - urllib3=1.26.6
   - wheel=0.36.2
   - xorg-kbproto=1.0.7
   - xorg-libice=1.0.10
   - xorg-libsm=1.2.3
-  - xorg-libx11=1.7.2
-  - xorg-libxau=1.0.9
+  - xorg-libx11=1.8.4
+  - xorg-libxau=1.0.11
   - xorg-libxdmcp=1.1.3
   - xorg-libxext=1.3.4
   - xorg-libxrender=0.9.10
-  - xorg-libxt=1.2.1
+  - xorg-libxt=1.3.0
   - xorg-renderproto=0.11.1
   - xorg-xextproto=7.3.0
   - xorg-xproto=7.0.31
@@ -247,29 +252,55 @@ dependencies:
   - zstandard=0.19.0
   - zstd=1.5.2
   - pip:
+      - apricot-select==0.6.1
       - biopython==1.79
+      - cmake==3.26.4
       - cnvkit==0.9.9
-      - contourpy==1.0.7
+      - contourpy==1.1.0
       - cycler==0.11.0
-      - fonttools==4.38.0
-      - importlib-resources==5.10.2
+      - cython==3.0.0
+      - filelock==3.12.2
+      - fonttools==4.41.0
+      - importlib-metadata==6.8.0
+      - importlib-resources==6.0.0
+      - jinja2==3.1.2
       - joblib==0.17.0
       - kiwisolver==1.4.4
-      - matplotlib==3.7.0
-      - networkx==3.0
-      - numpy==1.24.2
-      - packaging==23.0
+      - lit==16.0.6
+      - llvmlite==0.40.1
+      - markupsafe==2.1.3
+      - matplotlib==3.7.2
+      - mpmath==1.3.0
+      - networkx==3.1
+      - nose==1.3.7
+      - numba==0.57.1
+      - numpy==1.24.4
+      - nvidia-cublas-cu11==11.10.3.66
+      - nvidia-cuda-cupti-cu11==11.7.101
+      - nvidia-cuda-nvrtc-cu11==11.7.99
+      - nvidia-cuda-runtime-cu11==11.7.99
+      - nvidia-cudnn-cu11==8.5.0.96
+      - nvidia-cufft-cu11==10.9.0.58
+      - nvidia-curand-cu11==10.2.10.91
+      - nvidia-cusolver-cu11==11.4.0.1
+      - nvidia-cusparse-cu11==11.7.4.91
+      - nvidia-nccl-cu11==2.14.3
+      - nvidia-nvtx-cu11==11.7.91
       - pandas==1.5.3
-      - pillow==9.4.0
-      - pomegranate==0.14.8
-      - pyfaidx==0.7.1
+      - pillow==10.0.0
+      - pomegranate==1.0.0
+      - pyfaidx==0.7.2.1
       - pyparsing==3.0.9
-      - pysam==0.20.0
+      - pysam==0.21.0
       - python-dateutil==2.8.2
-      - pytz==2022.7.1
-      - pyyaml==6.0
-      - reportlab==3.6.12
+      - pytz==2023.3
+      - reportlab==4.0.4
       - scikit-learn==1.0.2
-      - scipy==1.10.0
-      - threadpoolctl==3.1.0
-      - zipp==3.13.0
+      - scipy==1.10.1
+      - sympy==1.12
+      - threadpoolctl==3.2.0
+      - torch==2.0.1
+      - triton==2.0.0
+      - typing-extensions==4.7.1
+      - tzdata==2023.3
+      - zipp==3.16.2

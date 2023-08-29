@@ -1,31 +1,25 @@
-import json
-import subprocess
-import pytest
-import sys
+"""Test helper functions."""
 import copy
-import collections
-
-import shutil
-from unittest import mock
+import json
 import logging
-
+import subprocess
+import sys
 from pathlib import Path
+from unittest import mock
 
+import click
+import pytest
 from _pytest.logging import LogCaptureFixture
+from _pytest.tmpdir import TempPathFactory
 
-from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
-
-from BALSAMIC.constants.common import CONTAINERS_CONDA_ENV_PATH, BIOINFO_TOOL_ENV
-from BALSAMIC.constants.reference import REFERENCE_FILES
-
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.cache import CacheVersion
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
-    SnakeMake,
     CaptureStdout,
-    iterdict,
     get_snakefile,
     createDir,
-    get_config,
     get_file_status_string,
     find_file_index,
     get_panel_chrom,
@@ -35,16 +29,16 @@ from BALSAMIC.utils.cli import (
     check_executable,
     job_id_dump_to_yaml,
     generate_h5,
-    get_md5,
-    create_md5,
     get_sample_dict,
     get_pon_sample_dict,
-    get_fastq_files_directory,
+    get_config_path,
+    get_resolved_fastq_files_directory,
+    get_analysis_fastq_files_directory,
+    validate_cache_version,
 )
-from BALSAMIC.utils.io import read_json, write_json, read_yaml
-
+from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
+from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
 from BALSAMIC.utils.rule import (
-    get_chrom,
     get_vcf,
     get_sample_id_by_type,
     get_picard_mrkdup,
@@ -53,10 +47,23 @@ from BALSAMIC.utils.rule import (
     get_result_dir,
     get_threads,
     get_delivery_id,
-    get_reference_output_files,
     get_rule_output,
     get_sample_type_from_prefix,
 )
+from BALSAMIC.utils.utils import remove_unnecessary_spaces
+
+
+def test_remove_unnecessary_spaces():
+    """Tests removal of unnecessary spaces from a string."""
+
+    # GIVEN a string with unnecessary spaces
+    string: str = "  Developing Balsamic   brings  me    joy "
+
+    # WHEN calling the function
+    formatted_string: str = remove_unnecessary_spaces(string)
+
+    # THEN the extra spaces are removed
+    assert formatted_string == "Developing Balsamic brings me joy"
 
 
 def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
@@ -162,25 +169,11 @@ def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config):
         )
 
 
-def test_get_reference_output_files():
-    # GIVEN a reference genome version
-    genome_ver = "hg38"
-    file_type = "fasta"
-
-    # WHEN getting list of valid types
-    fasta_files = get_reference_output_files(REFERENCE_FILES[genome_ver], file_type)
-
-    # THEN it should return list of file
-    assert "Homo_sapiens_assembly38.fasta" in fasta_files
-
-
 def test_get_bioinfo_tools_version():
     """Test bioinformatics tools and version extraction."""
 
     # GIVEN a tools dictionary
-    bioinfo_tools: dict = get_bioinfo_tools_version(
-        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
-    )
+    bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the versions are correctly retrieved
     assert set(bioinfo_tools["picard"]).issubset({"2.27.1"})
@@ -191,9 +184,7 @@ def test_get_bioinfo_pip_tools_version():
     """Test bioinformatics tools and version extraction for a PIP specific tool."""
 
     # GIVEN a tools dictionary
-    bioinfo_tools: dict = get_bioinfo_tools_version(
-        BIOINFO_TOOL_ENV, CONTAINERS_CONDA_ENV_PATH
-    )
+    bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the PIP specific packages are correctly retrieved
     assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.9"})
@@ -243,79 +234,6 @@ def test_get_file_extension_known_ext():
     assert file_extension == actual_extension
 
 
-def test_iterdict(reference):
-    """GIVEN a dict for iteration"""
-    # WHEN passing dict to this function
-    dict_gen = iterdict(reference)
-
-    # THEN it will create dict generator, we can iterate it, get the key, values as string
-    for key, value in dict_gen:
-        assert isinstance(key, str)
-        assert isinstance(value, str)
-
-
-def test_snakemake_local():
-    # GIVEN required params
-    snakemake_local = SnakeMake()
-    snakemake_local.working_dir = "this_path/snakemake"
-    snakemake_local.snakefile = "workflow/variantCalling_paired"
-    snakemake_local.configfile = "sample_config.json"
-    snakemake_local.run_mode = "local"
-    snakemake_local.use_singularity = True
-    snakemake_local.singularity_bind = ["path_1", "path_2"]
-    snakemake_local.forceall = True
-
-    # WHEN calling the build command
-    shell_command = snakemake_local.build_cmd()
-
-    # THEN it will contruct the snakemake command to run
-    assert isinstance(shell_command, str)
-    assert "workflow/variantCalling_paired" in shell_command
-    assert "sample_config.json" in shell_command
-    assert "this_path/snakemake" in shell_command
-    assert "--dryrun" in shell_command
-    assert "--forceall" in shell_command
-
-
-def test_snakemake_slurm():
-    # GIVEN required params
-    snakemake_slurm = SnakeMake()
-    snakemake_slurm.case_name = "test_case"
-    snakemake_slurm.working_dir = "this_path/snakemake"
-    snakemake_slurm.snakefile = "worflow/variantCalling_paired"
-    snakemake_slurm.configfile = "sample_config.json"
-    snakemake_slurm.run_mode = "cluster"
-    snakemake_slurm.cluster_config = "cluster_config.json"
-    snakemake_slurm.scheduler = "sbatch.py"
-    snakemake_slurm.log_path = "logs/"
-    snakemake_slurm.script_path = "scripts/"
-    snakemake_slurm.result_path = "results/"
-    snakemake_slurm.qos = "normal"
-    snakemake_slurm.account = "development"
-    snakemake_slurm.profile = "slurm"
-    snakemake_slurm.mail_type = "FAIL"
-    snakemake_slurm.mail_user = "john.doe@example.com"
-    snakemake_slurm.sm_opt = ("containers",)
-    snakemake_slurm.quiet = True
-    snakemake_slurm.use_singularity = True
-    snakemake_slurm.singularity_bind = ["path_1", "path_2"]
-    snakemake_slurm.run_analysis = True
-
-    # WHEN calling the build command
-    shell_command = snakemake_slurm.build_cmd()
-
-    # THEN constructing snakecommand for slurm runner
-    assert isinstance(shell_command, str)
-    assert "worflow/variantCalling_paired" in shell_command
-    assert "sample_config.json" in shell_command
-    assert "this_path/snakemake" in shell_command
-    assert "--dryrun" not in shell_command
-    assert "sbatch.py" in shell_command
-    assert "test_case" in shell_command
-    assert "containers" in shell_command
-    assert "--quiet" in shell_command
-
-
 def test_get_script_path():
     # GIVEN list of scripts
     custom_scripts = ["refseq_sql.awk"]
@@ -345,9 +263,7 @@ def test_get_snakefile():
     # WHEN asking to see snakefile for paired
     for reference_genome in ["hg19", "hg38", "canfam3"]:
         for analysis_type, analysis_workflow in workflow:
-            snakefile = get_snakefile(
-                analysis_type, analysis_workflow, reference_genome
-            )
+            snakefile = get_snakefile(analysis_type, analysis_workflow)
 
             pipeline = ""
             if (
@@ -356,10 +272,8 @@ def test_get_snakefile():
                 and analysis_workflow != "balsamic-umi"
             ):
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
-            elif analysis_type == "generate_ref" and reference_genome != "canfam3":
+            elif analysis_type == "generate_ref":
                 pipeline = "BALSAMIC/workflows/reference.smk"
-            elif analysis_type == "generate_ref" and reference_genome == "canfam3":
-                pipeline = "BALSAMIC/workflows/reference-canfam3.smk"
             elif analysis_type == "pon":
                 pipeline = "BALSAMIC/workflows/PON.smk"
             elif analysis_workflow == "balsamic-qc":
@@ -370,32 +284,6 @@ def test_get_snakefile():
             assert snakefile.startswith("/")
             assert pipeline in snakefile
             assert Path(snakefile).is_file()
-
-
-def test_get_chrom(config_files):
-    # Given a panel bed file
-    bed_file = config_files["panel_bed_file"]
-    actual_chrom = [
-        "10",
-        "11",
-        "16",
-        "17",
-        "18",
-        "19",
-        "2",
-        "3",
-        "4",
-        "6",
-        "7",
-        "9",
-        "X",
-    ]
-
-    # WHEN passing this bed file
-    test_chrom = get_chrom(bed_file)
-
-    # THEN It should return list of chrom presents in that bed file
-    assert set(actual_chrom) == set(test_chrom)
 
 
 def test_get_vcf(sample_config):
@@ -523,23 +411,17 @@ def test_capturestdout():
     assert "".join(captured_stdout_message) == test_stdout_message
 
 
-def test_get_config():
-    # GIVEN the config files name
-    config_files = ["sample", "analysis"]
-    # WHEN passing file names
-    for config_file in config_files:
-        # THEN return the config files path
-        assert get_config(config_file)
+def test_get_config_path(cluster_analysis_config_path: str):
+    """Test return of a config path given its type."""
 
+    # GIVEN an analysis config path
 
-def test_get_config_wrong_config():
-    # GIVEN the config files name
-    config_file = "non_existing_config"
+    # WHEN retrieving the cluster analysis configuration
+    cluster_analysis: Path = get_config_path(ClusterConfigType.ANALYSIS)
 
-    # WHEN passing file names
-    # THEN return the config files path
-    with pytest.raises(FileNotFoundError):
-        assert get_config(config_file)
+    # THEN an analysis cluster json should be returned
+    assert cluster_analysis.exists()
+    assert cluster_analysis.as_posix() == cluster_analysis_config_path
 
 
 def test_write_json(tmp_path, reference):
@@ -553,7 +435,7 @@ def test_write_json(tmp_path, reference):
     output = output_json.read_text()
 
     # THEN It will create a json file with given dict
-    for key, value in iterdict(reference):
+    for key, value in reference.items():
         assert key in output
         assert value in output
 
@@ -659,9 +541,9 @@ def test_read_yaml_error():
         assert f"The YAML file {yaml_path} was not found" in str(file_exc)
 
 
-def test_get_threads(config_files):
+def test_get_threads(cluster_analysis_config_path: str):
     # GIVEN cluster config file and rule name
-    cluster_config = json.load(open(config_files["cluster_json"], "r"))
+    cluster_config = json.load(open(cluster_analysis_config_path, "r"))
     rule_name = "sentieon_align_sort"
 
     # WHEN passing cluster_config and rule_name
@@ -757,7 +639,6 @@ def test_convert_deliverables_tags():
 
 
 def test_check_executable_exists():
-
     # GIVEN an existing executable command
     test_command = "ls"
 
@@ -767,7 +648,6 @@ def test_check_executable_exists():
 
 
 def test_check_executable_not_existing():
-
     # GIVEN an existing executable command
     test_command = "twenty_twenty_was_bad"
 
@@ -777,7 +657,6 @@ def test_check_executable_not_existing():
 
 
 def test_job_id_dump_to_yaml(tmp_path):
-
     # GIVEN a file with one job id per line, a key (case name), and an output file name
     dummy_dir = tmp_path / "job_id_dump_dir"
     dummy_dir.mkdir()
@@ -796,7 +675,6 @@ def test_job_id_dump_to_yaml(tmp_path):
 
 
 def test_generate_h5(tmp_path):
-
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
@@ -812,7 +690,6 @@ def test_generate_h5(tmp_path):
 
 
 def test_generate_h5_capture_no_output(tmp_path):
-
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
     dummy_path.mkdir()
@@ -827,41 +704,6 @@ def test_generate_h5_capture_no_output(tmp_path):
         actual_output = generate_h5(dummy_job_name, dummy_job_id, dummy_path)
 
     assert actual_output == None
-
-
-def test_get_md5(tmp_path):
-
-    # GIVEN a dummy file
-    dummy_dir = tmp_path / "md5"
-    dummy_dir.mkdir()
-    dummy_file = dummy_dir / "dummy_file.dump"
-    dummy_file.write_text("Awesome Text")
-
-    # THEN md5 returned should be
-    assert get_md5(dummy_file) == "3945B39E"
-
-
-def test_create_md5(tmp_path):
-
-    # GIVEN a path to a md5 file and reference dummy files
-    ref_dir = tmp_path / "references"
-    ref_dir.mkdir()
-    dummy_ref_file1 = ref_dir / "reference_file1.dump"
-    dummy_ref_file1.write_text("Test reference1")
-    dummy_ref_file2 = ref_dir / "reference_file2.dump"
-    dummy_ref_file2.write_text("Test reference2")
-    dummy_reference_dict = {
-        "reference_dummy1": str(dummy_ref_file1),
-        "reference_dummy2": str(dummy_ref_file2),
-    }
-    dummy_dir = tmp_path / "md5"
-    dummy_dir.mkdir()
-    dummy_file = dummy_dir / "dummy_file.dump"
-
-    create_md5(dummy_reference_dict, dummy_file)
-
-    # THEN md5 file exists
-    assert dummy_file.exists()
 
 
 def test_get_rule_output(snakemake_fastqc_rule):
@@ -945,27 +787,155 @@ def test_get_pon_sample_dict(
     assert samples == samples_expected
 
 
-def test_get_fastq_files_directory(fastq_dir: str):
-    """Test get unlinked input files directory."""
+def test_get_resolved_fastq_files_directory(fastq_dir: str):
+    """Test get fastq directory for unlinked fastqs."""
 
-    # GIVEN an input fast path
+    # GIVEN an input fastq path
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_fastq_files_directory(fastq_dir)
+    input_dir: str = get_resolved_fastq_files_directory(fastq_dir)
 
     # THEN the fastq directory should be returned
-    assert input_directory == fastq_dir
+    assert input_dir == fastq_dir
 
 
-def test_get_input_symlinked_files_path(fastq_dir: str, tmp_path: Path):
-    """Test remove symlinks from a directory."""
+def test_get_resolved_fastq_files_directory_symlinked_files(
+    fastq_dir: str, tmp_path: Path
+):
+    """Test get fastq directory for symlinked files."""
 
     # GIVEN a temporary fast path containing symlinked files
     for file in Path(fastq_dir).iterdir():
         Path(tmp_path, file.name).symlink_to(file)
 
     # WHEN  extracting the input files common path
-    input_directory: str = get_fastq_files_directory(str(tmp_path))
+    input_dir: str = get_resolved_fastq_files_directory(str(tmp_path))
 
     # THEN the real fastq directory should be returned
-    assert input_directory == fastq_dir
+    assert input_dir == fastq_dir
+
+
+def test_write_finish_file(json_file: Path):
+    """Test finish analysis completion file generation."""
+
+    # GIVEN a file path to write to
+
+    # WHEN writing a json file after an analysis has been completed
+    write_finish_file(file_path=json_file.as_posix())
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(json_file)
+
+
+def test_get_analysis_fastq_files_directory(fastq_dir: str):
+    """Test get analysis fastq directory when it already exists in case folder."""
+
+    # GIVEN an input fastq path
+
+    # WHEN getting the analysis fastq directory
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=Path(fastq_dir).parents[1].as_posix(), fastq_path=fastq_dir
+    )
+
+    # THEN the original fastq directory should be returned
+    assert input_dir == fastq_dir
+
+
+def test_get_analysis_fastq_files_directory_exception(
+    fastq_dir: str,
+    case_id_tumor_only,
+    tmp_path_factory: TempPathFactory,
+    caplog: LogCaptureFixture,
+):
+    """Test get analysis fastq directory when it already exists in case folder but another path is provided."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an input fastq path and an external case directory
+    case_dir: str = tmp_path_factory.mktemp(case_id_tumor_only).as_posix()
+
+    # WHEN getting the analysis fastq directory twice
+    _input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+
+    # THEN the fastq directory should be located inside the case directory and the linking should have been skipped
+    assert input_dir == Path(case_dir, "fastq").as_posix()
+    assert "Skipping linking" in caplog.text
+
+
+def test_get_analysis_fastq_files_directory_no_fastqs(
+    fastq_dir: str, tmp_path_factory: TempPathFactory, case_id_tumor_only: str
+):
+    """Test get analysis fastq directory when the provided fastq directory is outside the case folder."""
+
+    # GIVEN an external input fastq path and a case directory
+    case_dir: str = tmp_path_factory.mktemp(case_id_tumor_only).as_posix()
+
+    # WHEN getting the analysis fastq directory
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+
+    # THEN the fastq directory should be located inside the case directory
+    assert input_dir == Path(case_dir, "fastq").as_posix()
+
+    # THEN the case fast files should have been linked to the provided fastq directory
+    for fastq in Path(input_dir).iterdir():
+        assert fastq.is_symlink()
+        assert fastq.resolve().is_file()
+        assert fastq_dir == fastq.resolve().parent.as_posix()
+
+
+def test_validate_cache_version_develop():
+    """Test develop cache version validation."""
+
+    # GIVEN a develop cache version
+    cli_version: str = CacheVersion.DEVELOP
+
+    # WHEN validating the provided version
+    version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
+
+    # THEN the correct version should be returned
+    assert version == CacheVersion.DEVELOP
+
+
+def test_validate_cache_version_release():
+    """Test release cache version validation."""
+
+    # GIVEN a release cache version
+    cli_version: str = "1.2.3"
+
+    # WHEN validating the provided version
+    version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
+
+    # THEN the correct version should be returned
+    assert version == f"release_v{cli_version}"
+
+
+def test_validate_cache_version_non_digit():
+    """Test non digit release cache version validation."""
+
+    # GIVEN an incorrect release cache version
+    cli_version: str = "a.b.c"
+
+    # WHEN validating the provided version
+
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_cache_version(click.Context, click.Parameter, cli_version)
+
+
+def test_validate_cache_version_wrong_format():
+    """Test wrong format release cache version validation."""
+
+    # GIVEN an incorrect release cache version
+    cli_version: str = "1.2"
+
+    # WHEN validating the provided version
+
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_cache_version(click.Context, click.Parameter, cli_version)

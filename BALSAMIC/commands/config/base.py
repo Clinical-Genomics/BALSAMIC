@@ -8,7 +8,7 @@ from BALSAMIC.commands.config.pon import pon_config as pon_command
 @click.group()
 @click.pass_context
 def config(context):
-    "create config files required for running the pipeline."
+    """Create config files required for running the pipeline."""
     pass
 
 

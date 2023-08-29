@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+"""Script to generate CNV reports."""
 import os
 from pathlib import Path
 from typing import List, Tuple
 
 import click
-
-from fpdf import FPDF
 from PIL import Image
+from fpdf import FPDF
 
 
 @click.command(short_help="Merge statistics and plots into a single CNV report")
@@ -113,7 +112,7 @@ def add_plots_to_pdf(pdf: PDF, plot_paths: List[Path]) -> PDF:
 
         # Image position & resizing
         img = Image.open(path)
-        img.thumbnail(img_size, Image.ANTIALIAS)
+        img.thumbnail(img_size, Image.LANCZOS)
         pdf.image(img, img_xy[0], img_xy[1])
 
     return pdf

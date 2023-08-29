@@ -1,25 +1,23 @@
-import os
 import json
 import logging
+import os
 from pathlib import Path
 
 import click
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender
+from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import (
     get_sample_dict,
     get_panel_chrom,
     get_bioinfo_tools_version,
     generate_graph,
+    get_analysis_fastq_files_directory,
 )
-from BALSAMIC.constants.common import (
-    CONTAINERS_CONDA_ENV_PATH,
-    BIOINFO_TOOL_ENV,
-    GENDER_OPTIONS,
-)
-from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.models import BalsamicConfigModel
+from BALSAMIC.models.analysis import BalsamicConfigModel
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +34,7 @@ LOG = logging.getLogger(__name__)
     required=False,
     default="female",
     show_default=True,
-    type=click.Choice(GENDER_OPTIONS),
+    type=click.Choice([Gender.FEMALE, Gender.MALE]),
     help="Case associated gender",
 )
 @click.option(
@@ -217,8 +215,8 @@ def case_config(
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as f:
-        reference_dict = json.load(f)["reference"]
+    with open(reference_config, "r") as config_file:
+        reference_dict = json.load(config_file)
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
@@ -248,7 +246,9 @@ def case_config(
             "case_id": case_id,
             "gender": gender,
             "analysis_dir": analysis_dir,
-            "fastq_path": fastq_path,
+            "fastq_path": get_analysis_fastq_files_directory(
+                case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
+            ),
             "analysis_type": "paired" if normal_sample_name else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
@@ -263,7 +263,7 @@ def case_config(
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,
-            container_conda_env_path=CONTAINERS_CONDA_ENV_PATH,
+            container_conda_env_path=CONTAINERS_DIR,
         ),
         panel={
             "capture_kit": panel_bed,

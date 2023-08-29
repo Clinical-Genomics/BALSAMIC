@@ -11,12 +11,13 @@ from snakemake.exceptions import RuleException, WorkflowError
 
 from PyPDF2 import PdfFileMerger
 
+from BALSAMIC.constants.paths import SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR, BALSAMIC_DIR
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
-from BALSAMIC.utils.io import write_json, read_yaml
+from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
 
-from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
@@ -24,13 +25,14 @@ from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_resul
                                  get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type,
                                  get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
-                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations)
+                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
+                                 get_cancer_somatic_snv_observations, get_somatic_sv_observations)
 
-from BALSAMIC.constants.common import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE
+from BALSAMIC.constants.analysis import MutationType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
-from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 
 
 shell.executable("/bin/bash")
@@ -69,8 +71,10 @@ research_annotations = []
 clinical_annotations = []
 clinical_snv_obs = ""
 cancer_germline_snv_obs = ""
+cancer_somatic_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
+somatic_sv = ""
 swegen_sv = ""
 
 # vcfanno annotations
@@ -125,7 +129,7 @@ if "clinical_snv_observations" in config["reference"]:
         }]
     }
     )
-    clinical_snv_obs = get_clinical_snv_observations(config)
+    clinical_snv_obs: str = get_clinical_snv_observations(config)
 
 if "cancer_germline_snv_observations" in config["reference"]:
     clinical_annotations.append( {
@@ -137,14 +141,28 @@ if "cancer_germline_snv_observations" in config["reference"]:
         }]
     }
     )
-    cancer_germline_snv_obs = get_cancer_germline_snv_observations(config)
+    cancer_germline_snv_obs: str = get_cancer_germline_snv_observations(config)
+
+if "cancer_somatic_snv_observations" in config["reference"]:
+    clinical_annotations.append( {
+        'annotation': [{
+            'file': get_cancer_somatic_snv_observations(config),
+            'fields': ["Frq", "Obs", "Hom"],
+            'ops': ["self", "self", "self"],
+            'names': ["Cancer_Somatic_Frq", "Cancer_Somatic_Obs", "Cancer_Somatic_Hom"]
+        }]
+    }
+    )
+    cancer_somatic_snv_obs: str = get_cancer_somatic_snv_observations(config)
 
 if "clinical_sv_observations" in config["reference"]:
-    clinical_sv = get_clinical_sv_observations(config)
+    clinical_sv: str = get_clinical_sv_observations(config)
 
+if "cancer_somatic_sv_observations" in config["reference"]:
+    somatic_sv: str = get_somatic_sv_observations(config)
 
 if "swegen_sv_frequency" in config["reference"]:
-    swegen_sv = get_swegen_sv(config)
+    swegen_sv: str = get_swegen_sv(config)
 
 
 # picarddup flag
@@ -182,8 +200,8 @@ try:
     else:
         config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
+    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
+    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
 
 except KeyError as error:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
@@ -244,7 +262,7 @@ germline_caller = []
 somatic_caller = []
 somatic_caller_cnv = []
 somatic_caller_sv = []
-for m in MUTATION_TYPE:
+for m in set(MutationType):
     germline_caller_balsamic = get_variant_callers(config=config,
                                             analysis_type=config['analysis']['analysis_type'],
                                             workflow_solution="BALSAMIC",
@@ -346,7 +364,7 @@ LOG.info(f"The following somatic variant callers will be included in the workflo
 
 
 for r in rules_to_include:
-    include: Path(RULE_DIRECTORY, r).as_posix()
+    include: Path(BALSAMIC_DIR, r).as_posix()
 
 # Define common and analysis specific outputs
 quality_control_results = [
@@ -548,7 +566,7 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
+        from BALSAMIC.utils.metrics import validate_qc_metrics
 
         # Perform validation of extracted QC metrics
         try:
@@ -557,12 +575,11 @@ rule all:
             LOG.error(val_exc)
             raise BalsamicError
 
-        # Delete a temporal directory tree
+        # Remove temporary directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
         # Finish timestamp file
-        with open(str(output.finish_file), mode="w") as finish_file:
-            finish_file.write("%s\n" % datetime.datetime.now())
+        write_finish_file(file_path=output.finish_file)

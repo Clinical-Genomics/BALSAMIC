@@ -1,22 +1,23 @@
-import os
-import shutil
 import logging
-import sys
+import os
 import re
 import subprocess
-from pathlib import Path
-from io import StringIO
+import sys
 from distutils.spawn import find_executable
-import zlib
+from io import StringIO
+from pathlib import Path
 from typing import Dict, Optional, List
 
-import yaml
-import snakemake
+import click
 import graphviz
+import snakemake
+import yaml
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.constants.cache import CacheVersion
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.paths import CONSTANTS_DIR
 
 LOG = logging.getLogger(__name__)
 
@@ -35,155 +36,6 @@ class CaptureStdout(list):
         self.extend(self._stringio.getvalue().splitlines())
         del self._stringio  # free up some memory
         sys.stdout = self._stdout
-
-
-class SnakeMake:
-    """
-    To build a snakemake command using cli options
-
-    Params:
-    case_name       - analysis case name
-    working_dir     - working directory for snakemake
-    configfile      - sample configuration file (json) output of balsamic-config-sample
-    run_mode        - run mode - cluster or local shell run
-    cluster_config  - cluster config json file
-    scheduler       - slurm command constructor
-    log_path        - log file path
-    script_path     - file path for slurm scripts
-    result_path     - result directory
-    qos             - QOS for sbatch jobs
-    account         - scheduler(e.g. slurm) account
-    mail_user       - email to account to send job run status
-    forceall        - To add '--forceall' option for snakemake
-    run_analysis    - To run pipeline
-    use_singularity - To use singularity
-    singularity_bind- Singularity bind path
-    quiet           - Quiet mode for snakemake
-    singularity_arg - Singularity arguments to pass to snakemake
-    sm_opt          - snakemake additional options
-    disable_variant_caller - Disable variant caller
-    dragen          - enable/disable dragen suite
-    slurm_profiler  - enable slurm profiler
-    """
-
-    def __init__(self):
-        self.case_name = str()
-        self.working_dir = str()
-        self.snakefile = str()
-        self.configfile = str()
-        self.run_mode = str()
-        self.profile = str()
-        self.cluster_config = str()
-        self.scheduler = str()
-        self.log_path = str()
-        self.script_path = str()
-        self.result_path = str()
-        self.qos = str()
-        self.account = str()
-        self.mail_type = str()
-        self.mail_user = str()
-        self.forceall = False
-        self.run_analysis = False
-        self.quiet = False
-        self.report = str()
-        self.use_singularity = True
-        self.singularity_bind = str()
-        self.singularity_arg = str()
-        self.sm_opt = str()
-        self.disable_variant_caller = str()
-        self.dragen = False
-        self.slurm_profiler = str()
-
-    def build_cmd(self):
-        forceall = str()
-        quiet_mode = str()
-        sm_opt = str()
-        cluster_cmd = str()
-        dryrun = str()
-        report = str()
-        snakemake_config_key_value = list()
-
-        if self.forceall:
-            forceall = "--forceall"
-
-        if self.report:
-            report = "--report {}".format(self.report)
-
-        if self.quiet:
-            quiet_mode = " --quiet "
-
-        if self.sm_opt:
-            sm_opt = " ".join(self.sm_opt)
-
-        if not self.run_analysis:
-            dryrun = "--dryrun"
-
-        if self.disable_variant_caller:
-            snakemake_config_key_value.append(
-                f"disable_variant_caller={self.disable_variant_caller}"
-            )
-
-        if self.dragen:
-            snakemake_config_key_value.append("dragen=True")
-
-        if snakemake_config_key_value:
-            snakemake_config_key_value.insert(0, "--config")
-
-        if self.use_singularity:
-            self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
-            for bind_path in self.singularity_bind:
-                self.singularity_arg += " --bind {}:{}".format(bind_path, bind_path)
-            self.singularity_arg += "' "
-
-        if self.run_mode == "cluster":
-            sbatch_cmd = (
-                " '{} {} "
-                " --sample-config {} --profile {} "
-                " --account {} --qos {} "
-                " --log-dir {} --script-dir {} "
-                " --result-dir {} ".format(
-                    sys.executable,
-                    self.scheduler,
-                    self.configfile,
-                    self.profile,
-                    self.account,
-                    self.qos,
-                    self.log_path,
-                    self.script_path,
-                    self.result_path,
-                )
-            )
-
-            if self.slurm_profiler:
-                sbatch_cmd += " --slurm-profiler {}".format(self.slurm_profiler)
-
-            if self.mail_user:
-                sbatch_cmd += " --mail-user {} ".format(self.mail_user)
-
-            if self.mail_type:
-                sbatch_cmd += " --mail-type {} ".format(self.mail_type)
-
-            sbatch_cmd += " {dependencies} '"
-
-            cluster_cmd = (
-                " --immediate-submit -j 999 "
-                "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
-                "--cluster-config {} --cluster {} ".format(
-                    self.case_name, self.cluster_config, sbatch_cmd
-                )
-            )
-
-        # Merge snakmake config key value list
-        snakemake_config_key_value = " ".join(snakemake_config_key_value)
-
-        sm_cmd = (
-            f" snakemake --notemp -p "
-            f" --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
-            f" {self.cluster_config} {self.singularity_arg} {quiet_mode} "
-            f" {forceall} {dryrun} {cluster_cmd} "
-            f" {report} {snakemake_config_key_value} {sm_opt}"
-        )
-        return sm_cmd
 
 
 def add_doc(docstring):
@@ -222,39 +74,14 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def iterdict(dic):
-    """dictionary iteration - returns generator"""
-    for key, value in dic.items():
-        if isinstance(value, dict):
-            yield from iterdict(value)
-        else:
-            yield key, value
-
-
-def get_schedulerpy():
-    """
-    Returns a string path for scheduler.py
-    """
-
-    p = Path(__file__).parents[1]
-    scheduler = str(Path(p, "utils", "scheduler.py"))
-
-    return scheduler
-
-
-def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome="hg19"):
-    """
-    Return a string path for variant calling snakefile.
-    """
+def get_snakefile(analysis_type, analysis_workflow="balsamic") -> str:
+    """Return a string path for the specific snakemake file."""
 
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
 
     if analysis_type == "generate_ref":
         snakefile = Path(p, "workflows", "reference.smk")
-        if "canfam3" in reference_genome:
-            snakefile = Path(p, "workflows", "reference-canfam3.smk")
-            return str(snakefile)
 
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
@@ -265,17 +92,9 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome=
     return str(snakefile)
 
 
-def get_config(config_name):
-    """
-    Return a string path for config file.
-    """
-
-    p = Path(__file__).parents[1]
-    config_file = str(Path(p, "config", config_name + ".json"))
-    if Path(config_file).exists():
-        return config_file
-    else:
-        raise FileNotFoundError(f"Config for {config_name} was not found.")
+def get_config_path(config_type: ClusterConfigType) -> Path:
+    """Return a config path given its type."""
+    return Path(CONSTANTS_DIR, config_type + ".json")
 
 
 def find_file_index(file_path):
@@ -392,7 +211,7 @@ def bioinfo_tool_version_conda(
 
 
 def get_bioinfo_tools_version(
-    bioinfo_tools: dict, container_conda_env_path: os.PathLike
+    bioinfo_tools: dict, container_conda_env_path: Path
 ) -> dict:
     """Parses the names and versions of bioinfo tools
     used by BALSAMIC from config YAML into a dict.
@@ -458,9 +277,6 @@ def generate_graph(config_collection_dict, config_path):
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
                 analysis_workflow=config_collection_dict["analysis"][
                     "analysis_workflow"
-                ],
-                reference_genome=config_collection_dict["reference"][
-                    "reference_genome"
                 ],
             ),
             dryrun=True,
@@ -539,26 +355,7 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
         yaml.dump({case_name: jobid_list}, jobid_out)
 
 
-def get_md5(filename):
-    with open(filename, "rb") as fh:
-        hashed = 0
-        while True:
-            s = fh.read(65536)
-            if not s:
-                break
-            hashed = zlib.crc32(s, hashed)
-    return "%08X" % (hashed & 0xFFFFFFFF)
-
-
-def create_md5(reference, check_md5):
-    """create a md5 file for all reference data"""
-    with open(check_md5, "w") as fh:
-        for key, value in reference.items():
-            if os.path.isfile(value):
-                fh.write(get_md5(value) + " " + value + "\n")
-
-
-def get_fastq_files_directory(directory: str) -> str:
+def get_resolved_fastq_files_directory(directory: str) -> str:
     """Return the absolute path for the directory containing the input fastq files."""
     input_files: List[Path] = [
         file.absolute() for file in Path(directory).glob("*.fastq.gz")
@@ -566,3 +363,36 @@ def get_fastq_files_directory(directory: str) -> str:
     if not input_files or not input_files[0].is_symlink():
         return directory
     return os.path.commonpath([file.resolve().as_posix() for file in input_files])
+
+
+def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
+    """Return analysis fastq directory, linking the fastq files if necessary."""
+    analysis_fastq_path: Path = Path(case_dir, "fastq")
+    analysis_fastq_path.mkdir(parents=True, exist_ok=True)
+    if Path(case_dir) not in Path(fastq_path).parents:
+        for fastq in Path(fastq_path).glob("*.fastq.gz"):
+            try:
+                Path(analysis_fastq_path, fastq.name).symlink_to(fastq)
+                LOG.info(f"Created link for {fastq} in {analysis_fastq_path}")
+            except FileExistsError:
+                LOG.warning(
+                    f"File {Path(analysis_fastq_path, fastq.name)} exists. Skipping linking."
+                )
+
+        return analysis_fastq_path.as_posix()
+    return fastq_path
+
+
+def validate_cache_version(
+    _ctx: click.Context, _param: click.Parameter, version: str
+) -> str:
+    """Validate the provided cache version."""
+    if version == CacheVersion.DEVELOP:
+        return version
+    version_parts: List[str] = version.split(".")
+    if len(version_parts) == 3 and all(part.isdigit() for part in version_parts):
+        return f"release_v{version}"
+    else:
+        raise click.BadParameter(
+            f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
+        )

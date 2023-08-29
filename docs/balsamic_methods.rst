@@ -5,7 +5,7 @@ Method description
 Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 12.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 12.0.2) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using BWA MEM v0.7.17 :superscript:`4`.
@@ -27,7 +27,7 @@ to annotate somatic variants for their population allele frequency from gnomAD v
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 12.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 12.0.2) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
@@ -47,7 +47,7 @@ to annotate somatic single nucleotide variants for their population allele frequ
 UMI Data Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 12.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 12.0.2) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 UMI tag extraction and consensus generation were performed using Sentieon tools v202010.02 :superscript:`15`.
@@ -70,7 +70,7 @@ We used three commercially available products from SeraCare [Material numbers: 0
 1. Foroughi-Asl, H., Jeggari, A., Maqbool, K., Ivanchuk, V., Elhami, K., & Wirta, V. BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (Version v8.2.10) [Computer software]. https://github.com/Clinical-Genomics/BALSAMIC
 2. Babraham Bioinformatics - FastQC A Quality Control tool for High Throughput Sequence Data. Accessed June 22, 2020. https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 3. Chen S, Zhou Y, Chen Y, Gu J. fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics. 2018;34(17):i884-i890. https://doi.org/10.1093/bioinformatics/bty560
-4. Li H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. arXiv:1303.3997v2 [q-bio.GN]
+4. Li H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. https://doi.org/10.48550/arXiv.1303.3997
 5. Li H, Handsaker B, Wysoker A, Fennell T, Ruan J., Homer N., Marth G., Abecasis G., Durbin R. and 1000 Genome Project Data Processing Subgroup (2009) The Sequence alignment/map (SAM) format and SAMtools. Bioinformatics, 25, 2078-9. https://doi.org/10.1093/bioinformatics/btp352
 6. Picard Tools - By Broad Institute. Accessed June 22, 2020. https://broadinstitute.github.io/picard/
 7. Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016;32(19):3047-3048. https://doi.org/10.1093/bioinformatics/btw354
@@ -84,10 +84,10 @@ We used three commercially available products from SeraCare [Material numbers: 0
 15. Donald Freed, Rafael Aldana, Jessica A. Weber, Jeremy S. Edwards. The Sentieon Genomics Tools - A fast and accurate solution to variant calling from next-generation sequence data. Bioinformatics. 2016, Volume 32,Issue 8. https://doi.org/10.1093/bioinformatics/btv710
 16. Donald Freed, Renke Pan, Rafael Aldana. TNscope: Accurate Detection of Somatic Mutations with Haplotype-based Variant Candidate Detection and Machine Learning Filtering. bioRvix. https://doi.org/10.1101/250647
 17. Keiran MR, Peter VL, David CW, David J, Andrew M, Adam PB , Jon WT, Patrick T, Serena Nik-Zainal, Peter J C. ascatNgs: Identifying Somatically Acquired Copy-Number Alterations from Whole-Genome Sequencing Data. Curr Protoc Bioinformatics. 2016. https://doi.org/10.1002/cpbi.17
-18. Karczewski, K.J., Francioli, L.C., Tiao, G. et al. The mutational constraint spectrum quantified from variation in 141,456 humans. Nature 581, 434–443. 2020. https://doi.org/10.1038/s41586-020-2308-7
-19. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF1-0710-0671/
-20. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF05-0710-0672/
-21. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF01-0710-0673/
+18. Karczewski, K.J., Francioli, L.C., Tiao, G. et al. The mutational constraint spectrum quantified from variation in 141,456 humans. Nature 581, 434–443 (2020). https://doi.org/10.1038/s41586-020-2308-7
+19. Seraseq ctDNA Complete Reference Material AF 1%. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF1-0710-0671/
+20. Seraseq ctDNA Complete Reference Material AF 0.5%. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF05-0710-0672/
+21. Seraseq ctDNA Complete Reference Material AF 0.1%. https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF01-0710-0673/
 22. Ameur, A., Dahlberg, J., Olason, P. et al. SweGen: a whole-genome data resource of genetic variability in a cross-section of the Swedish population. Eur J Hum Genet 25, 1253–1260 (2017). https://doi.org/10.1038/ejhg.2017.130
 23. Milovan Suvakov, Arijit Panda, Colin Diesh, Ian Holmes, Alexej Abyzov, CNVpytor: a tool for copy number variation detection and analysis from read depth and allele imbalance in whole-genome sequencing, GigaScience, Volume 10, Issue 11, November 2021, giab074, https://doi.org/10.1093/gigascience/giab074
 24. Rentzsch P., Witten D., Cooper G.M., Shendure J., Kircher M. CADD: predicting the deleteriousness of variants throughout the human genome. Nucleic Acids Res. 2018. https://doi.org/10.1093/nar/gky1016. PubMed PMID: 30371827.
