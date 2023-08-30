@@ -4,7 +4,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
 
 from pydantic import BaseModel, validator, Field
 from pydantic.types import DirectoryPath, FilePath
@@ -254,6 +254,7 @@ class AnalysisModel(BaseModel):
     dag: Optional[str]
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
+    pon_version: Optional[str]
 
     class Config:
         validate_all = True
@@ -342,19 +343,11 @@ class AnalysisModel(BaseModel):
     def datetime_as_string(cls, value):
         return datetime.now().strftime("%Y-%m-%d %H:%M")
 
-
-class AnalysisPonModel(AnalysisModel):
-    """Pydantic model containing PON workflow variables
-
-    Attributes:
-        pon_version: Field(str); version of the PON generated file
-    """
-
-    pon_version: str
-
     @validator("pon_version")
     def validate_pon_version(cls, value):
         """Checks that the version matches the following syntax: v<int>"""
+        if value is None:
+            return value
 
         match = re.fullmatch("^v[1-9]\d*$", value)
         if not match:
@@ -417,7 +410,7 @@ class PanelModel(BaseModel):
 
 class ConfigModel(BaseModel):
     """
-    Parent class providing common functions and variables for different balsamic workflows.
+    Class providing common functions and variables for different balsamic workflows.
 
     Attributes:
         QC : Field(QCmodel); variables relevant for fastq preprocessing and QC
@@ -427,6 +420,9 @@ class ConfigModel(BaseModel):
         bioinfo_tools : Field(dict); dictionary of bioinformatics software and which conda/container they are in
         bioinfo_tools_version : Field(dict); dictionary of bioinformatics software and their versions used for the analysis
         singularity : Field(Dict); path to singularity container of BALSAMIC
+        vcf : Field(VCFmodel); variables relevant for variant calling pipeline
+        background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
+        analysis: Field(AnalysisModel); Pydantic model containing workflow variables
 
     This class also contains functions that help retrieve sample and file information,
     facilitating BALSAMIC run operations in Snakemake.
@@ -449,6 +445,11 @@ class ConfigModel(BaseModel):
     bioinfo_tools: Dict
     bioinfo_tools_version: Dict
     panel: Optional[PanelModel]
+    vcf: Optional[VCFModel]
+    background_variants: Optional[FilePath]
+    analysis: AnalysisModel
+
+    # Union[AnalysisPonModel, AnalysisModel]
 
     @validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):
@@ -461,6 +462,13 @@ class ConfigModel(BaseModel):
         for k, v in singularity.items():
             singularity[k] = Path(v).resolve().as_posix()
         return singularity
+
+    @validator("background_variants")
+    def background_variants_abspath_as_str(cls, background_variants: FilePath):
+        """Converts FilePath to string."""
+        if background_variants:
+            return Path(background_variants).resolve().as_posix()
+        return None
 
     @validator("samples")
     def no_duplicate_fastq_patterns(cls, samples):
@@ -642,38 +650,6 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup.realign"
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
-
-
-class PonBalsamicConfigModel(ConfigModel):
-    """Summarizes config models in preparation for export
-
-    Attributes:
-        analysis : Field(AnalysisPonModel); Pydantic model containing PON workflow variables
-    """
-
-    analysis: AnalysisPonModel
-
-
-class BalsamicConfigModel(ConfigModel):
-    """Summarizes config models in preparation for export
-
-    Attributes:
-        vcf : Field(VCFmodel); variables relevant for variant calling pipeline
-        analysis: Field(AnalysisModel); Pydantic model containing workflow variables
-        background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
-    """
-
-    vcf: Optional[VCFModel]
-    analysis: AnalysisModel
-    background_variants: Optional[FilePath]
-
-    @validator("background_variants")
-    def background_variants_abspath_as_str(cls, background_variants: FilePath):
-        """Converts FilePath to string."""
-        if background_variants:
-            return Path(background_variants).resolve().as_posix()
-        return None
-
 
 class UMIParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.

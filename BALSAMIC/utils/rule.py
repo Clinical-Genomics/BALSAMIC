@@ -17,7 +17,7 @@ from BALSAMIC.constants.analysis import (
     WorkflowSolution,
 )
 from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
-from BALSAMIC.models.analysis import BalsamicConfigModel
+from BALSAMIC.models.analysis import ConfigModel
 
 LOG = logging.getLogger(__name__)
 
@@ -394,7 +394,7 @@ def dump_toml(annotations: list) -> str:
     return toml_annotations
 
 
-def get_fastp_parameters(config_model: BalsamicConfigModel) -> Dict:
+def get_fastp_parameters(config_model: ConfigModel) -> Dict:
     """Returns a dictionary with parameters for the fastp rules.
 
     Args:
@@ -412,7 +412,7 @@ def get_fastp_parameters(config_model: BalsamicConfigModel) -> Dict:
             "--umi",
             "--umi_loc per_read",
             "--umi_len",
-            BalsamicConfigModel.QC.umi_trim_length,
+            config_model.QC.umi_trim_length,
             "--umi_prefix",
             "UMI",
             "--dont_eval_duplication",

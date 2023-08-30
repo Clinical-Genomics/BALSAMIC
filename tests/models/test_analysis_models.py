@@ -14,10 +14,8 @@ from BALSAMIC.models.analysis import (
     UMIParamsTNscope,
     ParamsVardict,
     ParamsVEP,
-    AnalysisPonModel,
     FastqInfoModel,
-    BalsamicConfigModel,
-    PonBalsamicConfigModel,
+    ConfigModel,
 )
 from pydantic import ValidationError
 from BALSAMIC.utils.exc import BalsamicError
@@ -280,7 +278,7 @@ def test_params_vep():
     assert test_vep_built.vep_filters == "all defaults params"
 
 
-def test_analysis_pon_model(test_data_dir: str):
+def test_analysis_model_for_PON(test_data_dir: str):
     """Tests PON model parsing."""
 
     # GIVEN valid input arguments
@@ -295,7 +293,7 @@ def test_analysis_pon_model(test_data_dir: str):
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisPonModel.parse_obj(valid_args)
+    assert AnalysisModel.parse_obj(valid_args)
 
     # GIVEN an invalid version argument
     invalid_args = {
@@ -310,7 +308,7 @@ def test_analysis_pon_model(test_data_dir: str):
 
     # THEN should trigger ValueError
     with pytest.raises(ValidationError) as excinfo:
-        AnalysisPonModel.parse_obj(invalid_args)
+        AnalysisModel.parse_obj(invalid_args)
 
     assert (
         f"The provided version ({invalid_args['pon_version']}) does not follow the defined syntax (v<int>)"
@@ -325,7 +323,7 @@ def test_detect_duplicate_fastq_pattern(
     config_dict = config_w_fastq_dir_for_duplicate_fastq_patterns_model
     # Initialize balsamic model
     with pytest.raises(ValueError) as exc:
-        BalsamicConfigModel.parse_obj(config_dict)
+        ConfigModel.parse_obj(config_dict)
 
     assert (
         "Duplicate FastqPattern(s) found: ACC1_S1_L001_R across multiple samples"
@@ -337,21 +335,21 @@ def test_detection_unassigned_fastq_file(config_tumor_normal_extrafile: Dict):
     """Test instantiating balsamic model with fastq dir containing unassigned fastq-files."""
     # Initialize balsamic model
     with pytest.raises(ValueError) as exc:
-        BalsamicConfigModel.parse_obj(config_tumor_normal_extrafile)
+        ConfigModel.parse_obj(config_tumor_normal_extrafile)
 
     assert "Fastqs in fastq-dir not assigned to sample config:" in str(exc.value)
 
 
-def test_get_all_sample_names(balsamic_model: BalsamicConfigModel):
-    """Validate retrieval of all sample names in analysis from BalsamicConfigModel."""
+def test_get_all_sample_names(balsamic_model: ConfigModel):
+    """Validate retrieval of all sample names in analysis from ConfigModel."""
     sample_names = balsamic_model.get_all_sample_names()
     assert ["ACC1", "ACC2"] == sample_names
 
 
 def test_get_fastq_patterns_by_sample(
-    balsamic_model: BalsamicConfigModel, tumor_sample_name: str, normal_sample_name: str
+    balsamic_model: ConfigModel, tumor_sample_name: str, normal_sample_name: str
 ):
-    """Validate retrieval of fastq-pattern by sample from BalsamicConfigModel."""
+    """Validate retrieval of fastq-pattern by sample from ConfigModel."""
 
     def compare_fastq_pattern_lists(expected: List[str], found: List[str]):
         assert all(
@@ -388,9 +386,9 @@ def test_get_fastq_patterns_by_sample(
 
 
 def test_get_all_fastqs_for_sample(
-    balsamic_model: BalsamicConfigModel, tumor_sample_name: str
+    balsamic_model: ConfigModel, tumor_sample_name: str
 ):
-    """Validate retrieval of fastq-files by sample and fastq-type from BalsamicConfigModel."""
+    """Validate retrieval of fastq-files by sample and fastq-type from ConfigModel."""
 
     def compare_fastq_file_lists(expected: List[str], found: List[str]):
         found_file_names = []
@@ -429,8 +427,8 @@ def test_get_all_fastqs_for_sample(
     assert normal_fastq not in fastq_files
 
 
-def test_get_all_fastq_names(balsamic_model: BalsamicConfigModel):
-    """Validate retrieval of all fastq-files from BalsamicConfigModel and optional removal of suffix."""
+def test_get_all_fastq_names(balsamic_model: ConfigModel):
+    """Validate retrieval of all fastq-files from ConfigModel and optional removal of suffix."""
 
     all_fastqs_expected = [
         "1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz",
@@ -460,8 +458,8 @@ def test_get_all_fastq_names(balsamic_model: BalsamicConfigModel):
     assert all_fastqs_wo_suffix == all_fastqs_expected_wo_suffix
 
 
-def test_fastq_by_fastq_pattern(balsamic_model: BalsamicConfigModel):
-    """Validate retrieval of fastq-file by fastq-pattern and fastq-type from BalsamicConfigModel."""
+def test_fastq_by_fastq_pattern(balsamic_model: ConfigModel):
+    """Validate retrieval of fastq-file by fastq-pattern and fastq-type from ConfigModel."""
 
     fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
     expected_fwd = "2_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz"
@@ -474,8 +472,8 @@ def test_fastq_by_fastq_pattern(balsamic_model: BalsamicConfigModel):
     assert os.path.basename(rev_fastq) == expected_rev
 
 
-def test_sample_name_by_type(balsamic_model: BalsamicConfigModel):
-    """Validate retrieval of sample name by sample type from BalsamicConfigModel."""
+def test_sample_name_by_type(balsamic_model: ConfigModel):
+    """Validate retrieval of sample name by sample type from ConfigModel."""
 
     tumor_name_expected = "ACC1"
     normal_name_expected = "ACC2"
@@ -489,8 +487,8 @@ def test_sample_name_by_type(balsamic_model: BalsamicConfigModel):
     assert normal_name_retrieved == normal_name_expected
 
 
-def test_sample_type_by_name(balsamic_model: BalsamicConfigModel):
-    """Validate retrieval of sample type by sample name from BalsamicConfigModel."""
+def test_sample_type_by_name(balsamic_model: ConfigModel):
+    """Validate retrieval of sample type by sample name from ConfigModel."""
 
     tumor_name = "ACC1"
     normal_name = "ACC2"
@@ -504,7 +502,7 @@ def test_sample_type_by_name(balsamic_model: BalsamicConfigModel):
     assert normal_type_retrieved == SampleType.NORMAL
 
 
-def test_get_bam_name_per_lane(balsamic_model: BalsamicConfigModel):
+def test_get_bam_name_per_lane(balsamic_model: ConfigModel):
     """Validate retrieval of per lane bam names by sample name."""
 
     def compare_bam_file_lists(expected: List[str], found: List[str]):
@@ -536,7 +534,7 @@ def test_get_bam_name_per_lane(balsamic_model: BalsamicConfigModel):
     compare_bam_file_lists(expected_bam_names, bam_names)
 
 
-def test_get_final_bam_name(balsamic_model: BalsamicConfigModel):
+def test_get_final_bam_name(balsamic_model: ConfigModel):
     """Validate retrieval of final bam name by either sample type or sample name."""
 
     # Given bam_dir path and sample name or sample type
@@ -559,7 +557,7 @@ def test_get_final_bam_name(balsamic_model: BalsamicConfigModel):
     assert bam_name_sample_name == bam_name_sample_type
 
 
-def test_no_info_error_get_final_bam_name(balsamic_model: BalsamicConfigModel):
+def test_no_info_error_get_final_bam_name(balsamic_model: ConfigModel):
     """Validate raise ValueError by not sample type or sample name."""
 
     # Given bam_dir path
@@ -576,7 +574,7 @@ def test_no_info_error_get_final_bam_name(balsamic_model: BalsamicConfigModel):
     )
 
 
-def test_get_final_bam_name_pon(balsamic_pon_model: PonBalsamicConfigModel):
+def test_get_final_bam_name_pon(balsamic_pon_model: ConfigModel):
     """Validate retrieval of final bam name for PON by either sample type or sample name."""
 
     # Given bam_dir path and sample name or sample type

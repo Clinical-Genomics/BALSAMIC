@@ -18,7 +18,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.io import write_json, write_finish_file
 
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, BalsamicConfigModel
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
 
 from BALSAMIC.utils.rule import (get_fastp_parameters, get_rule_output, get_result_dir,
                                  get_script_path, get_threads,
@@ -26,8 +26,8 @@ from BALSAMIC.utils.rule import (get_fastp_parameters, get_rule_output, get_resu
 
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
-# Initialize BalsamicConfigModel
-config_model = BalsamicConfigModel.parse_obj(config)
+# Initialize ConfigModel
+config_model = ConfigModel.parse_obj(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")

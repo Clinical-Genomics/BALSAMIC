@@ -31,7 +31,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
-from BALSAMIC.models.analysis import BalsamicConfigModel, PonBalsamicConfigModel
+from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
@@ -931,20 +931,20 @@ def fixture_config_helpers():
 @pytest.fixture(scope="session")
 def balsamic_model(
     config_dict_w_fastqs: Dict,
-) -> BalsamicConfigModel:
-    """Return BalsamicConfigModel parsed from static tumor normal config dict."""
+) -> ConfigModel:
+    """Return ConfigModel parsed from static tumor normal config dict."""
     # Initialize balsamic model
-    balsamic_config = BalsamicConfigModel.parse_obj(config_dict_w_fastqs)
+    balsamic_config = ConfigModel.parse_obj(config_dict_w_fastqs)
     return balsamic_config
 
 
 @pytest.fixture(scope="session")
 def balsamic_pon_model(
     pon_config_dict_w_fastq: Dict,
-) -> PonBalsamicConfigModel:
-    """Return PonBalsamicConfigModel parsed from static PON config dict."""
-    # Initialize balsamic PON model
-    balsamic_pon_config = PonBalsamicConfigModel.parse_obj(pon_config_dict_w_fastq)
+) -> ConfigModel:
+    """Return ConfigModel parsed from static PON config dict."""
+    # Initialize ConfigModel
+    balsamic_pon_config = ConfigModel.parse_obj(pon_config_dict_w_fastq)
     return balsamic_pon_config
 
 

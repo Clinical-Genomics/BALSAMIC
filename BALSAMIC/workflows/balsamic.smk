@@ -20,7 +20,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
 from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
 
-from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, BalsamicConfigModel
+from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, ConfigModel
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
@@ -37,8 +37,8 @@ from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTING
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 
-# Initialize BalsamicConfigModel
-config_model = BalsamicConfigModel.parse_obj(config)
+# Initialize ConfigModel
+config_model = ConfigModel.parse_obj(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")

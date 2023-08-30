@@ -7,7 +7,7 @@ from pathlib import Path
 
 import click
 
-from BALSAMIC.models.analysis import BalsamicConfigModel
+from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import SCHEDULER_PATH
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -193,7 +193,7 @@ def analysis(
         sample_config = json.load(sample_fh)
 
     # Initialize balsamic model to run validation tests
-    config_model = BalsamicConfigModel.parse_obj(sample_config)
+    config_model = ConfigModel.parse_obj(sample_config)
 
     case_name = config_model.analysis.case_id
 

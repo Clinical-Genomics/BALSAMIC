@@ -17,7 +17,7 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.models.analysis import BalsamicConfigModel
+from BALSAMIC.models.analysis import ConfigModel
 
 LOG = logging.getLogger(__name__)
 
@@ -239,7 +239,7 @@ def case_config(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
 
-    config_collection_dict = BalsamicConfigModel(
+    config_collection_dict = ConfigModel(
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,

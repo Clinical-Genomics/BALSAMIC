@@ -16,11 +16,11 @@ from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_fastp_parameters, get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, PonBalsamicConfigModel
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
 
 
-# Initialize BalsamicConfigModel
-config_model = PonBalsamicConfigModel.parse_obj(config)
+# Initialize ConfigModel
+config_model = ConfigModel.parse_obj(config)
 
 shell.prefix("set -eo pipefail; ")
 

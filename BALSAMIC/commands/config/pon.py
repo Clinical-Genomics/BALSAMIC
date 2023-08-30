@@ -14,7 +14,7 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.models.analysis import PonBalsamicConfigModel
+from BALSAMIC.models.analysis import ConfigModel
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
@@ -122,7 +122,7 @@ def pon_config(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
 
-    config_collection_dict = PonBalsamicConfigModel(
+    config_collection_dict = ConfigModel(
         QC={
             "adapter_trim": adapter_trim,
             "quality_trim": quality_trim,
