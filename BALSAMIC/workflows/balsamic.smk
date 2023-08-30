@@ -7,7 +7,7 @@ import tempfile
 import glob
 
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
@@ -188,7 +188,7 @@ SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
 
 # Fastp parameters
-fastp_parameters = get_fastp_parameters(config_model)
+fastp_parameters: Dict = get_fastp_parameters(config_model)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)

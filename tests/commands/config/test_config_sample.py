@@ -238,7 +238,7 @@ def test_dag_graph_success_tumor_only(tumor_only_config: str):
     assert Path(json.load(open(tumor_only_config))["analysis"]["dag"]).exists()
 
 
-def test_dag_graph_success_tumor_only_w_pon(tumor_only_pon_config: str):
+def test_dag_graph_success_tumor_only_pon(tumor_only_pon_config: str):
     """Test DAG graph building success."""
 
     # WHEN creating config using standard CLI input and setting Sentieon env vars

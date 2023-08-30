@@ -5,7 +5,7 @@ import logging
 import tempfile
 
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
@@ -68,7 +68,7 @@ if config_model.analysis.analysis_type == "paired":
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 # Fastp parameters
-fastp_parameters = get_fastp_parameters(config_model)
+fastp_parameters: Dict = get_fastp_parameters(config_model)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":

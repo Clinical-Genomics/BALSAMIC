@@ -37,14 +37,13 @@ from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 
 MOCKED_OS_ENVIRON = "os.environ"
-
+TEST_DATA_DIR = "tests/test_data"
 
 def fastq_patterns() -> list:
     """
     Returns a list of dicts containing different formatted fastq-file names to be used in parameterized tests.
     """
-    test_data_dir = "tests/test_data"
-    fastq_test_info_path = Path(test_data_dir, "fastq_test_info.json").as_posix()
+    fastq_test_info_path = Path(TEST_DATA_DIR, "fastq_test_info.json").as_posix()
     fastq_test_info_dict = read_json(fastq_test_info_path)
     return fastq_test_info_dict["fastq_pattern_types"]
 
@@ -53,8 +52,7 @@ def fastq_pattern_ids() -> list:
     """
     Returns a list of IDs for the parameterized testing of different fastq file name formats.
     """
-    test_data_dir = "tests/test_data"
-    fastq_test_info_path = Path(test_data_dir, "fastq_test_info.json").as_posix()
+    fastq_test_info_path = Path(TEST_DATA_DIR, "fastq_test_info.json").as_posix()
     fastq_test_info_dict = read_json(fastq_test_info_path)
     fastq_pattern_types = fastq_test_info_dict["fastq_pattern_types"]
     fastq_pattern_ids = ["FastqPattern{}".format(p["id"]) for p in fastq_pattern_types]
@@ -66,7 +64,7 @@ def test_data_dir() -> str:
     """
     Creates path for test data directory.
     """
-    return "tests/test_data"
+    return TEST_DATA_DIR
 
 
 @pytest.fixture(scope="session")

@@ -7,7 +7,7 @@ import tempfile
 import os
 import logging
 
-from typing import List
+from typing import List, Dict
 from BALSAMIC.utils.exc import BalsamicError
 
 
@@ -52,16 +52,16 @@ qc_dir: str = os.path.join(result_dir, "qc", "")
 
 
 # Run information
-reffasta: str = config["reference"]["reference_genome"]
-refgene_flat: str = config["reference"]["refgene_flat"]
-access_5kb_hg19: str = config["reference"]["access_regions"]
-target_bed: str = config["panel"]["capture_kit"]
-version: str = config["analysis"]["pon_version"]
+reffasta: str = config_model.reference["reference_genome"]
+refgene_flat: str = config_model.reference["refgene_flat"]
+access_5kb_hg19: str = config_model.reference["access_regions"]
+target_bed: str = config_model.panel.capture_kit
+version: str = config_model.analysis.pon_version
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
 
 # Fastp parameters
-fastp_parameters = get_fastp_parameters(config_model)
+fastp_parameters: Dict = get_fastp_parameters(config_model)
 
 # Find and set Sentieon binary and license server from env variables
 try:
