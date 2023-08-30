@@ -28,6 +28,7 @@ Changed:
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
 * Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
+* Tools versions in doc https:/github.com/Clinical-Genomics/BALSAMIC/pull/1239
 
 Fixed:
 ^^^^^^
