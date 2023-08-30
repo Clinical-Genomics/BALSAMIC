@@ -779,6 +779,13 @@ def config_dict_w_fastqs(
     modified_config = copy.deepcopy(config_dict_w_singularity)
     modified_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
 
+    # Create analysis_dirs
+    analysis_sub_dirs = ["script", "log", "result", "benchmark"]
+    for analysis_sub_dir in analysis_sub_dirs:
+        analysis_sub_dir_path: Path = Path(analysis_dir, case_id_tumor_normal, analysis_sub_dir)
+        analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
+        modified_config["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
+
     # Fill the fastq path folder with the test fastq-files
     samples = standard_samples_list
     for sample_dict in samples:
@@ -813,6 +820,13 @@ def pon_config_dict_w_fastq(
 
     pon_config_w_fastq = copy.deepcopy(pon_config_dict_w_singularity)
     pon_config_w_fastq["analysis"]["fastq_path"] = fastq_dir.as_posix()
+
+    # Create analysis_dirs and modify config
+    analysis_sub_dirs = ["script", "log", "result", "benchmark"]
+    for analysis_sub_dir in analysis_sub_dirs:
+        analysis_sub_dir_path: Path = Path(analysis_dir, case_id_pon, analysis_sub_dir)
+        analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
+        pon_config_w_fastq["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
 
     # Fill the fastq path folder with the test fastq-files
     samples_list = standard_samples_list_pon
