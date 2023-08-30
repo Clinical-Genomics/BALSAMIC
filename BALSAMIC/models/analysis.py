@@ -301,17 +301,17 @@ class AnalysisModel(BaseModel):
     @validator("log")
     def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
         return (
-                Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
-                + "/"
+            Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
+            + "/"
         )
 
     @validator("script")
     def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
         return (
-                Path(
-                    values.get("analysis_dir"), values.get("case_id"), "scripts"
-                ).as_posix()
-                + "/"
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), "scripts"
+            ).as_posix()
+            + "/"
         )
 
     @validator("result")
@@ -323,19 +323,19 @@ class AnalysisModel(BaseModel):
     @validator("benchmark")
     def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
         return (
-                Path(
-                    values.get("analysis_dir"), values.get("case_id"), "benchmarks"
-                ).as_posix()
-                + "/"
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), "benchmarks"
+            ).as_posix()
+            + "/"
         )
 
     @validator("dag")
     def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
         return (
-                Path(
-                    values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
-                ).as_posix()
-                + f"_BALSAMIC_{balsamic_version}_graph.pdf"
+            Path(
+                values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
+            ).as_posix()
+            + f"_BALSAMIC_{balsamic_version}_graph.pdf"
         )
 
     @validator("config_creation_date")
@@ -413,6 +413,7 @@ class PanelModel(BaseModel):
         if value:
             return Path(value).resolve().as_posix()
         return None
+
 
 class ConfigModel(BaseModel):
     """
@@ -536,7 +537,7 @@ class ConfigModel(BaseModel):
         ]
 
     def get_all_fastqs_for_sample(
-            self, sample_name: str, fastq_types: Optional[List[FastqName]] = None
+        self, sample_name: str, fastq_types: Optional[List[FastqName]] = None
     ) -> List[str]:
         """Return all fastqs (optionally only [fwd/rev]) involved in analysis of sample."""
 
@@ -574,7 +575,9 @@ class ConfigModel(BaseModel):
                     )
         return fastq_names
 
-    def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: FastqName) -> str:
+    def get_fastq_by_fastq_pattern(
+        self, fastq_pattern: str, fastq_type: FastqName
+    ) -> str:
         """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
         for sample in self.samples:
             if fastq_pattern in sample.fastq_info:
@@ -610,7 +613,7 @@ class ConfigModel(BaseModel):
         return bam_names
 
     def get_final_bam_name(
-            self, bam_dir: str, sample_name: str = None, sample_type: str = None
+        self, bam_dir: str, sample_name: str = None, sample_type: str = None
     ) -> str:
         """Return final bam name to be used in downstream analysis."""
 
@@ -620,11 +623,15 @@ class ConfigModel(BaseModel):
             )
 
         sample_name = (
-            self.get_sample_name_by_type(sample_type) if not sample_name else sample_name
+            self.get_sample_name_by_type(sample_type)
+            if not sample_name
+            else sample_name
         )
 
         sample_type = (
-            self.get_sample_type_by_name(sample_name) if not sample_type else sample_type
+            self.get_sample_type_by_name(sample_name)
+            if not sample_type
+            else sample_type
         )
 
         if self.analysis.analysis_type == AnalysisType.PON:

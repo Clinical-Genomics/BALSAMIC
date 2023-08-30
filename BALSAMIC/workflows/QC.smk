@@ -68,7 +68,7 @@ if config_model.analysis.analysis_type == "paired":
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 # Fastp parameters
-fastp_parameters = get_fastp_parameters(config)
+fastp_parameters = get_fastp_parameters(config_model)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":

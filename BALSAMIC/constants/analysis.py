@@ -119,8 +119,10 @@ FASTQ_SUFFIXES: Dict[str, Dict] = {
     "2": {"fwd": "_R1_001.fastq.gz", "rev": "_R2_001.fastq.gz"},
 }
 
-class PonParams(StrEnum):
+
+class PonParams:
     """Parameters related to the PON creation workflow."""
+
     MIN_PON_SAMPLES: int = 6
 
 

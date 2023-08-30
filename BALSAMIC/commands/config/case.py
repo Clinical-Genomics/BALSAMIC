@@ -292,7 +292,6 @@ def case_config(
     for analysis_sub_dir in analysis_directories_list:
         analysis_sub_dir.mkdir(exist_ok=True)
 
-
     config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")

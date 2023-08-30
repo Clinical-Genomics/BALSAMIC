@@ -251,23 +251,6 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
-def look_for_fastqs(sample_name, fastq_path, suffix_id):
-    """
-    placeholder
-    """
-    suffix_fastq_dict = {}
-
-    fwd_suffix = FASTQ_SUFFIXES[suffix_id][FastqName.FWD]
-    rev_suffix = FASTQ_SUFFIXES[suffix_id][FastqName.REV]
-
-    fastq_fwd_regex = re.compile(r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$")
-    fwd_fastqs = [f"{fastq_path}/{fastq}" for fastq in os.listdir(fastq_path) if fastq_fwd_regex.match(fastq)]
-
-    for fwd_fastq in fwd_fastqs:
-        fastq_pair_pattern = Path(fwd_fastq).name.replace(fwd_suffix, "")
-        suffix_fastq_dict[fastq_pair_pattern] = FastqInfoModel(fwd=fwd_fastq, rev=fwd_fastq.replace(fwd_suffix, rev_suffix))
-
-    return suffix_fastq_dict
 
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoModel]:
     """Returns a dictionary of fastq-pattern/s and FastqInfoModel instance/s for a sample.
@@ -280,12 +263,24 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
         fastq_dict: (Dict) with format:
             "[fastq_patternX]" (str): FastqInfoModel.
     """
-
     fastq_dict: Dict[str, FastqInfoModel] = {}
 
-    for suffix_id in FASTQ_SUFFIXES:
-        suffix_fastq_dict = look_for_fastqs(sample_name, fastq_path, suffix_id)
-        for fastq_pair_pattern in suffix_fastq_dict:
+    for suffix_id, suffix_values in FASTQ_SUFFIXES.items():
+        suffix_fwd = suffix_values[FastqName.FWD]
+        suffix_rev = suffix_values[FastqName.REV]
+
+        fastq_fwd_regex = re.compile(
+            r"(^|.*_)" + sample_name + r"_.*" + suffix_fwd + r"$"
+        )
+
+        fwd_fastqs = [
+            f"{fastq_path}/{fastq}"
+            for fastq in os.listdir(fastq_path)
+            if fastq_fwd_regex.match(fastq)
+        ]
+
+        for fwd_fastq in fwd_fastqs:
+            fastq_pair_pattern = Path(fwd_fastq).name.replace(suffix_fwd, "")
             if fastq_pair_pattern in fastq_dict:
                 error_message = (
                     f"Fastq name conflict. Fastq pair pattern {fastq_pair_pattern}"
@@ -293,7 +288,10 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
                 )
                 LOG.error(error_message)
                 raise BalsamicError(error_message)
-            fastq_dict[fastq_pair_pattern] = suffix_fastq_dict[fastq_pair_pattern]
+
+            fastq_dict[fastq_pair_pattern] = FastqInfoModel(
+                fwd=fwd_fastq, rev=fwd_fastq.replace(suffix_fwd, suffix_rev)
+            )
 
     if not fastq_dict:
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"

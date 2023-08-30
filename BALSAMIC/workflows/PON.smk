@@ -61,7 +61,7 @@ singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
 
 # Fastp parameters
-fastp_parameters = get_fastp_parameters(config)
+fastp_parameters = get_fastp_parameters(config_model)
 
 # Find and set Sentieon binary and license server from env variables
 try:

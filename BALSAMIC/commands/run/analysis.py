@@ -218,7 +218,6 @@ def analysis(
     for analysis_sub_dir in analysis_directories_list:
         analysis_sub_dir.mkdir(exist_ok=True)
 
-
     analysis_type = config_model.analysis.analysis_type
     analysis_workflow = config_model.analysis.analysis_workflow
     analysis_dir: Path = Path(config_model.analysis.analysis_dir)
