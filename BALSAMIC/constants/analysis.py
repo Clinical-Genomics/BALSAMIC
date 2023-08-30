@@ -108,7 +108,7 @@ class BioinfoTools(StrEnum):
 
 
 class FastqName(StrEnum):
-    """List of bioinformatics tools in Balsamic."""
+    """Fastq name parameters."""
 
     FWD: str = "fwd"
     REV: str = "rev"
@@ -118,6 +118,11 @@ FASTQ_SUFFIXES: Dict[str, Dict] = {
     "1": {"fwd": "_1.fastq.gz", "rev": "_2.fastq.gz"},
     "2": {"fwd": "_R1_001.fastq.gz", "rev": "_R2_001.fastq.gz"},
 }
+
+class PonParams(StrEnum):
+    """Parameters related to the PON creation workflow."""
+    MIN_PON_SAMPLES: int = 6
+
 
 BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BEDTOOLS.value: DockerContainers.ALIGN_QC.value,

@@ -18,7 +18,7 @@ from colorclass import Color
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
 from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName
+from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName, PonParams
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 
@@ -251,6 +251,23 @@ def get_bioinfo_tools_version(
                 }
     return bioinfo_tools_version
 
+def look_for_fastqs(sample_name, fastq_path, suffix_id):
+    """
+    placeholder
+    """
+    suffix_fastq_dict = {}
+
+    fwd_suffix = FASTQ_SUFFIXES[suffix_id][FastqName.FWD]
+    rev_suffix = FASTQ_SUFFIXES[suffix_id][FastqName.REV]
+
+    fastq_fwd_regex = re.compile(r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$")
+    fwd_fastqs = [f"{fastq_path}/{fastq}" for fastq in os.listdir(fastq_path) if fastq_fwd_regex.match(fastq)]
+
+    for fwd_fastq in fwd_fastqs:
+        fastq_pair_pattern = Path(fwd_fastq).name.replace(fwd_suffix, "")
+        suffix_fastq_dict[fastq_pair_pattern] = FastqInfoModel(fwd=fwd_fastq, rev=fwd_fastq.replace(fwd_suffix, rev_suffix))
+
+    return suffix_fastq_dict
 
 def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoModel]:
     """Returns a dictionary of fastq-pattern/s and FastqInfoModel instance/s for a sample.
@@ -264,34 +281,19 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
             "[fastq_patternX]" (str): FastqInfoModel.
     """
 
-    fastq_dict: Dict[str:FastqInfoModel] = {}
-    for suffix in FASTQ_SUFFIXES:
-        fwd_suffix = FASTQ_SUFFIXES[suffix][FastqName.FWD]
-        rev_suffix = FASTQ_SUFFIXES[suffix][FastqName.REV]
+    fastq_dict: Dict[str, FastqInfoModel] = {}
 
-        fastq_fwd_regex = re.compile(
-            r"(^|.*_)" + sample_name + r"_.*" + fwd_suffix + r"$"
-        )
-        fwd_fastqs = [
-            f"{fastq_path}/{fastq}"
-            for fastq in os.listdir(fastq_path)
-            if fastq_fwd_regex.match(fastq)
-        ]
-        if fwd_fastqs:
-            for fwd_fastq in fwd_fastqs:
-                fastqpair_pattern = os.path.basename(fwd_fastq).replace(fwd_suffix, "")
-
-                if fastqpair_pattern in fastq_dict:
-                    error_message = (
-                        f"Fastq name conflict. Fastq pair pattern {fastqpair_pattern}"
-                        f" already assigned to dictionary for sample: {sample_name}"
-                    )
-                    LOG.error(error_message)
-                    raise BalsamicError(error_message)
-
-                fastq_dict[fastqpair_pattern] = FastqInfoModel(
-                    fwd=fwd_fastq, rev=fwd_fastq.replace(fwd_suffix, rev_suffix)
+    for suffix_id in FASTQ_SUFFIXES:
+        suffix_fastq_dict = look_for_fastqs(sample_name, fastq_path, suffix_id)
+        for fastq_pair_pattern in suffix_fastq_dict:
+            if fastq_pair_pattern in fastq_dict:
+                error_message = (
+                    f"Fastq name conflict. Fastq pair pattern {fastq_pair_pattern}"
+                    f" already assigned to dictionary for sample: {sample_name}"
                 )
+                LOG.error(error_message)
+                raise BalsamicError(error_message)
+            fastq_dict[fastq_pair_pattern] = suffix_fastq_dict[fastq_pair_pattern]
 
     if not fastq_dict:
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
@@ -336,17 +338,14 @@ def get_sample_list(
 def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
     """Returns a list of SampleInstanceModels to be used in PON generation."""
     sample_list: List[SampleInstanceModel] = []
-
     sample_names = set()
 
     for fastq in Path(fastq_path).glob("*.fastq.gz"):
-        sample_name: str = fastq.name.split("_")[-4]
-        sample_names.add(sample_name)
+        sample_names.add(fastq.name.split("_")[-4])
 
-    num_samples = len(sample_names)
-    if num_samples < 6:
+    if len(sample_names) < PonParams.MIN_PON_SAMPLES:
         error_message = (
-            f"Number of samples detected in supplied fastq path ({num_samples}),"
+            f"Number of samples detected in supplied fastq path ({len(sample_names)}),"
             f"not sufficient for PON generation. Sample names detected: {sample_names}"
         )
         LOG.error(error_message)

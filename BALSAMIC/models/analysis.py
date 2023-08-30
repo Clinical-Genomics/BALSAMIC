@@ -536,9 +536,13 @@ class ConfigModel(BaseModel):
         ]
 
     def get_all_fastqs_for_sample(
-            self, sample_name: str, fastq_types: List = [FastqName.FWD, FastqName.REV]
+            self, sample_name: str, fastq_types: Optional[List[FastqName]] = None
     ) -> List[str]:
-        """Return all fastqs (optionally only [fastq/rev]) involved in analysis of sample."""
+        """Return all fastqs (optionally only [fwd/rev]) involved in analysis of sample."""
+
+        if fastq_types is None:
+            fastq_types = [FastqName.FWD, FastqName.REV]
+
         fastq_list: List = []
         for sample in self.samples:
             if sample.name == sample_name:
@@ -557,26 +561,21 @@ class ConfigModel(BaseModel):
                 if remove_suffix:
                     fastq_names.extend(
                         [
-                            os.path.basename(fastqs.fwd).replace(".fastq.gz", ""),
-                            os.path.basename(fastqs.rev).replace(".fastq.gz", ""),
+                            Path(fastqs.fwd).name.replace(".fastq.gz", ""),
+                            Path(fastqs.rev).name.replace(".fastq.gz", ""),
                         ]
                     )
                 else:
                     fastq_names.extend(
                         [
-                            os.path.basename(fastqs.fwd),
-                            os.path.basename(fastqs.rev),
+                            Path(fastqs.fwd).name,
+                            Path(fastqs.rev).name,
                         ]
                     )
         return fastq_names
 
-    def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: str) -> str:
+    def get_fastq_by_fastq_pattern(self, fastq_pattern: str, fastq_type: FastqName) -> str:
         """Return fastq file path for requested fastq pair pattern and fastq type: [fwd/rev]."""
-        if fastq_type not in [FastqName.FWD, FastqName.REV]:
-            raise ValueError(
-                f"fastq_type must be either {FastqName.FWD} or {FastqName.REV}, not: {fastq_type}"
-            )
-
         for sample in self.samples:
             if fastq_pattern in sample.fastq_info:
                 return (
@@ -595,9 +594,7 @@ class ConfigModel(BaseModel):
         """Return sample type for requested sample name, optionally return it capitalized"""
         for sample in self.samples:
             if sample.name == sample_name:
-                if uppercase:
-                    return sample.type.upper()
-                return sample.type
+                return sample.type.upper() if uppercase else sample.type
 
     def get_bam_name_per_lane(self, bam_dir: str, sample_name: str) -> List[str]:
         """Return list of bam-file names for all fastq_patterns of a sample."""
@@ -617,18 +614,20 @@ class ConfigModel(BaseModel):
     ) -> str:
         """Return final bam name to be used in downstream analysis."""
 
-        if sample_name is None and sample_type is None:
+        if not sample_name and not sample_type:
             raise ValueError(
                 "Either sample_name or sample_type must be provided to get the final bam name."
             )
 
-        if sample_name is None:
-            sample_name = self.get_sample_name_by_type(sample_type)
+        sample_name = (
+            self.get_sample_name_by_type(sample_type) if not sample_name else sample_name
+        )
 
-        if sample_type is None:
-            sample_type = self.get_sample_type_by_name(sample_name)
+        sample_type = (
+            self.get_sample_type_by_name(sample_name) if not sample_type else sample_type
+        )
 
-        if self.analysis.analysis_type == "pon":
+        if self.analysis.analysis_type == AnalysisType.PON:
             # Only dedup is necessary for panel of normals
             final_bam_suffix = "dedup"
         else:

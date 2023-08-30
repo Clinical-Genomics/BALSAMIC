@@ -1,8 +1,8 @@
 """Rules for WGS fastq pre-processing: quality and adapter-trimming."""
 
 
-rule fastp_quality_trim:
-    """Fastq data pre-processing."""
+rule fastp_quality_trim_wgs:
+    """Fastq data pre-processing for WGS."""
     input:
         fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
         fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)

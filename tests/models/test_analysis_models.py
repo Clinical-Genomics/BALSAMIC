@@ -414,13 +414,13 @@ def test_get_all_fastqs_for_sample(
     normal_fastq = "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz"
 
     fwd_fastq_files = balsamic_model.get_all_fastqs_for_sample(
-        tumor_sample_name, [FastqName.FWD]
+        sample_name = tumor_sample_name, fastq_types = [FastqName.FWD]
     )
     rev_fastq_files = balsamic_model.get_all_fastqs_for_sample(
-        tumor_sample_name, [FastqName.REV]
+        sample_name = tumor_sample_name, fastq_types = [FastqName.REV]
     )
     fastq_files = balsamic_model.get_all_fastqs_for_sample(
-        tumor_sample_name, [FastqName.FWD, FastqName.REV]
+        sample_name= tumor_sample_name, fastq_types = [FastqName.FWD, FastqName.REV]
     )
 
     compare_fastq_file_lists(fwd_fastq_files_expected, fwd_fastq_files)
@@ -472,21 +472,6 @@ def test_fastq_by_fastq_pattern(balsamic_model: BalsamicConfigModel):
 
     assert os.path.basename(fwd_fastq) == expected_fwd
     assert os.path.basename(rev_fastq) == expected_rev
-
-
-def test_illegal_fastqtype_get_fastq_by_fastq_pattern(
-    balsamic_model: BalsamicConfigModel,
-):
-    """Validate raise exception for illegal fastqtype BalsamicConfigModel."""
-
-    fastq_pattern = "2_171015_HJ7TLDSX5_ACC2_XXXXXX"
-
-    with pytest.raises(ValueError) as excinfo:
-        balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, "forward")
-    assert (
-        f"fastq_type must be either {FastqName.FWD} or {FastqName.REV}, not: forward"
-        in str(excinfo.value)
-    )
 
 
 def test_sample_name_by_type(balsamic_model: BalsamicConfigModel):

@@ -42,7 +42,7 @@ fastp \
         """
 
 
-rule fastp_quality_trim:
+rule fastp_quality_trim_tga:
     """Fastq data pre-processing after removal of UMIs."""
     input:
         fastq_r1 = fastq_dir + "{fastq_pattern}_1.umi_removed.fastq.gz",
