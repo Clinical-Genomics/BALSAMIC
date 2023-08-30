@@ -13,7 +13,7 @@ from click.testing import CliRunner
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode, AnalysisWorkflow
 from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import (
     ClusterConfigType,
@@ -137,13 +137,13 @@ def tumor_normal_fastq_info_correct(load_test_fastq_data) -> Dict[str, Dict]:
 @pytest.fixture(scope="session")
 def analysis_workflow_qc():
     """Return string for balsamic QC workflow."""
-    return "balsamic-qc"
+    return AnalysisWorkflow.BALSAMIC_QC
 
 
 @pytest.fixture(scope="session")
 def genome_version_canfam():
     """Return string to specify Canfam reference for QC workflow."""
-    return "canfam3"
+    return GenomeVersion.CanFam3
 
 
 @pytest.fixture(scope="session", name="session_tmp_path")
@@ -171,9 +171,9 @@ def case_id_tumor_only() -> str:
 
 
 @pytest.fixture(scope="session")
-def case_id_tumor_only_w_dummy_vep() -> str:
+def case_id_tumor_only_dummy_vep() -> str:
     """Mock TGA tumor-only case ID for dummy vep file testing."""
-    return "sample_tumor_only_w_dummy_vep"
+    return "sample_tumor_only_dummy_vep"
 
 
 @pytest.fixture(scope="session")
@@ -664,11 +664,11 @@ def fastq_dir_tumor_only_qc(
 
 
 @pytest.fixture(scope="session")
-def fastq_dir_tumor_only_w_dummy_vep(
-    analysis_dir: str, case_id_tumor_only_w_dummy_vep: str, tumor_fastq_names: List[str]
+def fastq_dir_tumor_only_dummy_vep(
+    analysis_dir: str, case_id_tumor_only_dummy_vep: str, tumor_fastq_names: List[str]
 ) -> str:
     """Creates and returns the directory containing the FASTQs."""
-    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_w_dummy_vep, "fastq")
+    fastq_dir: Path = Path(analysis_dir, case_id_tumor_only_dummy_vep, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     # Fill the fastq path folder with the test fastq-files
@@ -676,7 +676,7 @@ def fastq_dir_tumor_only_w_dummy_vep(
         Path(fastq_dir, fastq).touch()
 
     vep_dir: Path = Path(
-        analysis_dir, case_id_tumor_only_w_dummy_vep, "analysis", "vep"
+        analysis_dir, case_id_tumor_only_dummy_vep, "analysis", "vep"
     )
     vep_dir.mkdir(parents=True, exist_ok=True)
     vep_test_file = (
@@ -1288,12 +1288,12 @@ def tumor_normal_wgs_config(
 
 
 @pytest.fixture(scope="session")
-def tumor_only_config_w_dummy_vep(
-    case_id_tumor_only_w_dummy_vep: str,
+def tumor_only_config_dummy_vep(
+    case_id_tumor_only_dummy_vep: str,
     tumor_sample_name: str,
     balsamic_cache: str,
     analysis_dir: str,
-    fastq_dir_tumor_only_w_dummy_vep: str,
+    fastq_dir_tumor_only_dummy_vep: str,
     panel_bed_file: str,
     background_variant_file: str,
     sentieon_license: str,
@@ -1315,11 +1315,11 @@ def tumor_only_config_w_dummy_vep(
                 "config",
                 "case",
                 "--case-id",
-                case_id_tumor_only_w_dummy_vep,
+                case_id_tumor_only_dummy_vep,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir_tumor_only_w_dummy_vep,
+                fastq_dir_tumor_only_dummy_vep,
                 "-p",
                 panel_bed_file,
                 "--balsamic-cache",
@@ -1332,8 +1332,8 @@ def tumor_only_config_w_dummy_vep(
         )
     return Path(
         analysis_dir,
-        case_id_tumor_only_w_dummy_vep,
-        f"{case_id_tumor_only_w_dummy_vep}.{FileType.JSON}",
+        case_id_tumor_only_dummy_vep,
+        f"{case_id_tumor_only_dummy_vep}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -1659,11 +1659,11 @@ def qc_extracted_metrics(metrics_yaml_path: str) -> dict:
 
 @pytest.fixture(scope="function")
 def snakemake_bcftools_filter_vardict_research_tumor_only(
-    tumor_only_config_w_dummy_vep, helpers
+    tumor_only_config_dummy_vep, helpers
 ):
     """bcftools_filter_vardict_research_tumor_only snakemake mock rule"""
 
-    helpers.read_config(tumor_only_config_w_dummy_vep)
+    helpers.read_config(tumor_only_config_dummy_vep)
     vep_path = os.path.join(
         helpers.analysis_dir,
         helpers.case_id,
