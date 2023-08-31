@@ -865,6 +865,13 @@ def config_w_fastq_dir_for_duplicate_fastq_patterns_model(
     modified_config = copy.deepcopy(config_dict_w_singularity)
     modified_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
 
+    # Create analysis_dirs and modify config
+    analysis_sub_dirs = ["script", "log", "result", "benchmark"]
+    for analysis_sub_dir in analysis_sub_dirs:
+        analysis_sub_dir_path: Path = Path(analysis_dir, case_id_tumor_normal, analysis_sub_dir)
+        analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
+        modified_config["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
+
     # Fill the fastq path folder with the test fastq-files
     samples = sample_list_duplicate_assigned_fastq_patterns_model
     for sample_dict in samples:
@@ -896,6 +903,13 @@ def config_tumor_normal_extrafile(
 
     # Change fastq_path to be the newly created test fastq dir
     modified_config["analysis"]["fastq_path"] = fastq_dir.as_posix()
+
+    # Create analysis_dirs and modify config
+    analysis_sub_dirs = ["script", "log", "result", "benchmark"]
+    for analysis_sub_dir in analysis_sub_dirs:
+        analysis_sub_dir_path: Path = Path(analysis_dir, case_id_tumor_normal, analysis_sub_dir)
+        analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
+        modified_config["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
 
     samples_list = modified_config["samples"]
     for sample_dict in samples_list:

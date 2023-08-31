@@ -263,7 +263,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
         fastq_dict: (Dict) with format:
             "[fastq_patternX]" (str): FastqInfoModel.
     """
-    fastq_dict: Dict[str, FastqInfoModel] = {}
+    fastq_dict: Dict[str, Dict] = {}
 
     for suffix_id, suffix_values in FASTQ_SUFFIXES.items():
         suffix_fwd = suffix_values[FastqName.FWD]
@@ -289,9 +289,10 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
                 LOG.error(error_message)
                 raise BalsamicError(error_message)
 
-            fastq_dict[fastq_pair_pattern] = FastqInfoModel(
-                fwd=fwd_fastq, rev=fwd_fastq.replace(suffix_fwd, suffix_rev)
-            )
+            fastq_dict[fastq_pair_pattern] = {
+                "fwd": fwd_fastq,
+                "rev": fwd_fastq.replace(suffix_fwd, suffix_rev)
+            }
 
     if not fastq_dict:
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
@@ -313,22 +314,17 @@ def get_sample_list(
     Returns:
         sample_list: List containing SampleInstanceModel/s.
     """
-    sample_list: List[SampleInstanceModel] = [
-        SampleInstanceModel(
-            name=tumor_sample_name,
-            type=SampleType.TUMOR,
-            fastq_info=get_fastq_info(tumor_sample_name, fastq_path),
-        )
-    ]
+    sample_list: List[Dict] = [{
+        "name": tumor_sample_name,
+        "type": SampleType.TUMOR,
+        "fastq_info": get_fastq_info(tumor_sample_name, fastq_path),
+    }]
 
     if normal_sample_name:
-        sample_list.append(
-            SampleInstanceModel(
-                name=normal_sample_name,
-                type=SampleType.NORMAL,
-                fastq_info=get_fastq_info(normal_sample_name, fastq_path),
-            )
-        )
+        sample_list.append({
+            "name": normal_sample_name,
+            "type": SampleType.NORMAL,
+            "fastq_info": get_fastq_info(normal_sample_name, fastq_path)})
 
     return sample_list
 
@@ -350,13 +346,11 @@ def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
         raise BalsamicError(error_message)
 
     for sample_name in sample_names:
-        sample_list.append(
-            SampleInstanceModel(
-                name=sample_name,
-                type=SampleType.NORMAL,
-                fastq_info=get_fastq_info(sample_name, fastq_path),
-            )
-        )
+        sample_list.append({
+            "name": sample_name,
+            "type": SampleType.NORMAL,
+            "fastq_info": get_fastq_info(sample_name, fastq_path)})
+
     return sample_list
 
 

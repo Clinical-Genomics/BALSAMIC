@@ -83,8 +83,7 @@ def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
 
     # THEN the samples should be retrieved from the FASTQ directory
     # And match the expected structure of pre-designed PON-config
-    for sample_model in samples:
-        sample_dict = sample_model.dict()
+    for sample_dict in samples:
         assert sample_dict in pon_config_dict_w_fastq["samples"]
 
 
@@ -834,12 +833,12 @@ def test_get_sample_list(
         normal_sample_name=normal_sample_name,
         fastq_path=fastq_dir_tumor_normal,
     )
-    assert samples[0].name == tumor_sample_name
-    assert samples[1].name == normal_sample_name
-    assert samples[0].type == "tumor"
-    assert samples[1].type == "normal"
-    assert samples[0].fastq_info
-    assert samples[1].fastq_info
+    assert samples[0]["name"] == tumor_sample_name
+    assert samples[1]["name"] == normal_sample_name
+    assert samples[0]["type"] == "tumor"
+    assert samples[1]["type"] == "normal"
+    assert samples[0]["fastq_info"]
+    assert samples[1]["fastq_info"]
 
 
 def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):

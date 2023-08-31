@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Union
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, validator, Field, root_validator
 from pydantic.types import DirectoryPath, FilePath
 
 from BALSAMIC import __version__ as balsamic_version
@@ -496,32 +496,26 @@ class ConfigModel(BaseModel):
 
         return samples
 
-    @validator("samples")
-    def no_unassigned_fastqs_in_fastq_dir(cls, samples):
+    @root_validator(pre=True)
+    def no_unassigned_fastqs_in_fastq_dir(cls, values):
         """All fastq files in the supplied fastq-dir must have been assigned to the sample-dict."""
 
         def get_all_fwd_rev_values(samples) -> List[str]:
             # Return all fastq files in analysis
             fwd_rev_values = []
             for sample in samples:
-                for fastq_pattern in sample.fastq_info.values():
-                    fwd_rev_values.append(fastq_pattern.fwd)
-                    fwd_rev_values.append(fastq_pattern.rev)
+                for fastq_pattern in sample["fastq_info"]:
+                    fwd_rev_values.append(sample["fastq_info"][fastq_pattern][FastqName.FWD])
+                    fwd_rev_values.append(sample["fastq_info"][fastq_pattern][FastqName.REV])
             return fwd_rev_values
 
-        def get_fastq_path(samples) -> str:
-            # Return fastq_path from first fastq_fwd_path
-            for sample in samples:
-                for fastq_pattern in sample.fastq_info.values():
-                    return os.path.dirname(fastq_pattern.fwd)
-
-        fastq_path = get_fastq_path(samples)
+        fastq_path = values["analysis"]["fastq_path"]
 
         # Get a set of all fastq files in fastq-directory
         fastqs_in_fastq_path = set(glob.glob(f"{fastq_path}/*fastq.gz"))
 
         # Look for fastqs in sample dict
-        fastqs_assigned = set(get_all_fwd_rev_values(samples))
+        fastqs_assigned = set(get_all_fwd_rev_values(values["samples"]))
 
         unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
         if unassigned_fastqs:
@@ -529,7 +523,7 @@ class ConfigModel(BaseModel):
                 f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
             )
 
-        return samples
+        return values
 
     def get_all_sample_names(self) -> List[str]:
         """Return all sample names in the analysis."""
