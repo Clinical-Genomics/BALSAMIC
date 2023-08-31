@@ -35,20 +35,20 @@ params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 case_id: str = config_model.analysis.case_id
 # Get analysis dir
 analysis_dir_home: str = config_model.analysis.analysis_dir
-analysis_dir: str = os.path.join(analysis_dir_home, "analysis", case_id, "")
+analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
 # Get result dir
-result_dir: str = os.path.join(config_model.analysis.result, "")
+result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
 # Create a temporary directory with trailing /
-tmp_dir: str = os.path.join(result_dir, "tmp", "" )
+tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
 benchmark_dir: str = config_model.analysis.benchmark
-fastq_dir: str = os.path.join(result_dir, "fastq", "")
-bam_dir: str = os.path.join(result_dir, "ban", "")
-cnv_dir: str = os.path.join(result_dir, "cnv", "")
-qc_dir: str = os.path.join(result_dir, "qc", "")
+fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
+bam_dir: str = Path(result_dir, "bam", "").as_posix() + "/"
+cnv_dir: str = Path(result_dir, "cnv", "").as_posix() + "/"
+qc_dir: str = Path(result_dir, "qc", "").as_posix() + "/"
 
 
 # Run information

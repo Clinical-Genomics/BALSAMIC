@@ -49,27 +49,27 @@ LOG = logging.getLogger(__name__)
 case_id: str = config_model.analysis.case_id
 # Get analysis dir
 analysis_dir_home: str = config_model.analysis.analysis_dir
-analysis_dir: str = os.path.join(analysis_dir_home, "analysis", case_id, "")
+analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
 # Get result dir
-result_dir: str = os.path.join(config_model.analysis.result, "")
+result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
 # Create a temporary directory with trailing /
-tmp_dir: str = os.path.join(result_dir, "tmp", "")
+tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
 input_fastq_dir: str = config_model.analysis.fastq_path + "/"
 benchmark_dir: str = config_model.analysis.benchmark
-fastq_dir: str = os.path.join(result_dir, "fastq", "")
-bam_dir: str = os.path.join(result_dir, "bam", "")
-cnv_dir: str = os.path.join(result_dir, "cnv", "")
-fastqc_dir: str = os.path.join(result_dir, "fastqc", "")
-vcf_dir: str = os.path.join(result_dir, "vcf", "")
-vep_dir: str = os.path.join(result_dir, "vep", "")
-qc_dir: str = os.path.join(result_dir, "qc", "")
-delivery_dir: str = os.path.join(result_dir, "delivery", "")
-umi_dir: str = os.path.join(result_dir, "umi", "")
-umi_qc_dir: str = qc_dir + "umi_qc/"
+fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
+bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
+cnv_dir: str = Path(result_dir, "cnv").as_posix() + "/"
+fastqc_dir: str = Path(result_dir, "fastqc").as_posix() + "/"
+vcf_dir: str = Path(result_dir, "vcf").as_posix() + "/"
+vep_dir: str = Path(result_dir, "vep").as_posix() + "/"
+qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
+delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
+umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
+umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 
 
 # Annotations
@@ -382,9 +382,9 @@ for r in rules_to_include:
 
 # Define common and analysis specific outputs
 quality_control_results = [
-    os.path.join(qc_dir,case_id + "_metrics_deliverables.yaml"),
-    os.path.join(qc_dir, "multiqc_report.html"),
-    os.path.join(qc_dir, "multiqc_data/multiqc_data.json")
+    Path(qc_dir, case_id + "_metrics_deliverables.yaml").as_posix(),
+    Path(qc_dir, "multiqc_report.html").as_posix(),
+    Path(qc_dir, "multiqc_data/multiqc_data.json").as_posix()
 ]
 
 # Analysis results
@@ -558,7 +558,7 @@ if 'delivery' in config:
         output_files_ready.extend(files_to_deliver)
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
-    delivery_ready = os.path.join(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk")
+    delivery_ready = Path(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk").as_posix()
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
 
@@ -570,7 +570,7 @@ rule all:
     input:
         quality_control_results + analysis_specific_results
     output:
-        finish_file = os.path.join(get_result_dir(config), "analysis_finish")
+        finish_file = Path(get_result_dir(config), "analysis_finish").as_posix()
     params:
         tmp_dir = tmp_dir,
         case_name = config["analysis"]["case_id"],
