@@ -3,7 +3,7 @@
 # Germline variants annotation module.
 
 
-rule vep_germline_tumor:
+rule vep_annotate_germlineVAR_tumor:
   input:
     vcf = vcf_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
     cosmic = config["reference"]["cosmic"]
@@ -42,7 +42,7 @@ tabix -p vcf -f {output.vcf_tumor};
         """
 
 
-rule vep_germline_normal:
+rule vep_annotate_germlineVAR_normal:
   input:
     vcf = vcf_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
     cosmic = config["reference"]["cosmic"]

@@ -19,7 +19,7 @@ rule bcftools_get_somaticINDEL_research:
     "Running bcftools to get INDELs from {params.message_text}"
   shell:
         """
-bcftools view --output-type v --output-file {output.vcf_indel_research} --types indels {input.vcf_research};
+bcftools view --threads {threads} --output-type v --output-file {output.vcf_indel_research} --types indels {input.vcf_research};
 tabix -p vcf -f  {output.vcf_indel_research} 
         """
 
@@ -69,7 +69,7 @@ echo '##INFO=<ID=CADD,Number=1,Type=Float,Description=\"The Combined Annotation 
 
 tabix -s 1 -b 2 -e 2 -c "##" -f {input.cadd_indel_research}        
 
-bcftools annotate --output-type v \
+bcftools annotate --threads {threads} --output-type v \
 --header-lines {params.header_line} \
 --columns Chrom,Pos,Ref,Alt,-,CADD \
 --annotations {input.cadd_indel_research} \

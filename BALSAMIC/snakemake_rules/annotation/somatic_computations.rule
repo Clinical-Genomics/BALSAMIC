@@ -58,3 +58,4 @@ bcftools view --types snps,indels --apply-filters PASS {params.tmpdir}/temp.vcf.
 
 rm -r {params.tmpdir};
         """
+
