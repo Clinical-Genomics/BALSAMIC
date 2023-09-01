@@ -228,7 +228,7 @@ def case_config(
     cadd_annotations_path = {
         "cadd_annotations": cadd_annotations,
     }
-    if cadd_annotations is not None:
+    if cadd_annotations:
         reference_dict.update(cadd_annotations_path)
 
     variants_observations = {

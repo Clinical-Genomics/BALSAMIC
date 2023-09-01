@@ -56,7 +56,7 @@ rule svdb_annotate_somatic_research_sv:
   threads:
     get_threads(cluster_config, "svdb_annotate_somatic_research_sv")
   message:
-    "Running vep annotation for structural and copy number variants on {params.message_text}"
+    "Running SVDB for annotating research SVs with Swegen database on {params.message_text}"
   shell:
         """
 if [[ -f "{params.swegen_sv_frequency}" ]]; then

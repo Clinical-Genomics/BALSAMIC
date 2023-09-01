@@ -94,31 +94,30 @@ rule vep_annotate_somaticSNV_research:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-    tmpvcf_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz",
+    tmp_vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz"),
     vcfanno_research_annotations = dump_toml(research_annotations),
     vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_annotate_somaticSNV_research")
   message:
-    "Running vep annotation for single nuceotide variants on {params.message_text}"
+    "Running vep annotation on SNVs and INDELs in {params.message_text}"
   shell:
         """
 vep_path=$(dirname $(readlink -f $(which vep)));
-tmpvcf_research={params.tmpvcf_research};
 export PERL5LIB=;
 
 echo \'{params.vcfanno_research_annotations}\' > {output.vcfanno_research_toml};
 
 vcfanno -p {threads} {output.vcfanno_research_toml} {input.vcf_snv_research} \
 | bcftools reheader --threads {threads} -s {input.header} \
-| bcftools view --threads {threads} -O z -o $tmpvcf_research ;
+| bcftools view --threads {threads} -O z -o {params.tmp_vcf_research} ;
 
 vep \
 --dir $vep_path \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
---input_file $tmpvcf_research \
+--input_file {params.tmp_vcf_research} \
 --output_file {output.vcf_snv_research} \
 --fork {threads} \
 {params.vep_defaults} \
@@ -126,7 +125,7 @@ vep \
 
 tabix -p vcf -f {output.vcf_snv_research};
 
-rm $tmpvcf_research;
+rm {params.tmp_vcf_research};
         """
 
 rule vcfanno_annotate_somaticSNV_clinical:
