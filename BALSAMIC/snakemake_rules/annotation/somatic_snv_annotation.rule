@@ -134,7 +134,6 @@ rule vcfanno_annotate_somaticSNV_clinical:
     header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
   output:
     vcf_snv_clinical = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz"),
-    vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
   benchmark:
     Path(benchmark_dir, "vcfanno_somatic_clinical_snv.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
@@ -145,6 +144,7 @@ rule vcfanno_annotate_somaticSNV_clinical:
     cancer_germline_snv = cancer_germline_snv_obs,
     cancer_somatic_snv = cancer_somatic_snv_obs,
     vcfanno_clinical_annotations = dump_toml(clinical_annotations),
+    vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
   threads:
     get_threads(cluster_config, "vcfanno_annotate_somaticSNV_clinical")
   message:
@@ -152,8 +152,8 @@ rule vcfanno_annotate_somaticSNV_clinical:
   shell:
         """
 if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" ]]; then
-    echo \'{params.vcfanno_clinical_annotations}\' > {output.vcfanno_clinical_toml};
-    vcfanno -p {threads} {output.vcfanno_clinical_toml} {input.vcf_snv_research} | \
+    echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml};
+    vcfanno -p {threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
     bcftools reheader --threads {threads} -s {input.header} | \
     bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};
 else
@@ -162,4 +162,5 @@ fi
 
 tabix -p vcf -f {output.vcf_snv_clinical};
         """
+
 
