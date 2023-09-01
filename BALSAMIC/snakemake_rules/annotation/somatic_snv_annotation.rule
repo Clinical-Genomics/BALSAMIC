@@ -162,3 +162,4 @@ fi
 
 tabix -p vcf -f {output.vcf_snv_clinical};
         """
+
