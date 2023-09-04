@@ -39,6 +39,7 @@ from .helpers import ConfigHelper, Map
 MOCKED_OS_ENVIRON = "os.environ"
 TEST_DATA_DIR = "tests/test_data"
 
+
 def fastq_patterns() -> list:
     """
     Returns a list of dicts containing different formatted fastq-file names to be used in parameterized tests.
@@ -359,10 +360,12 @@ def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> 
     }
     return modify_pon_config_dict
 
+
 @pytest.fixture(scope="session")
 def cadd_annotations(test_data_dir: str) -> str:
     """Return path for CADD annotations."""
     return Path(test_data_dir, "references", "cadd").as_posix()
+
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
@@ -680,9 +683,7 @@ def fastq_dir_tumor_only_dummy_vep(
     for fastq in tumor_fastq_names:
         Path(fastq_dir, fastq).touch()
 
-    vep_dir: Path = Path(
-        analysis_dir, case_id_tumor_only_dummy_vep, "analysis", "vep"
-    )
+    vep_dir: Path = Path(analysis_dir, case_id_tumor_only_dummy_vep, "analysis", "vep")
     vep_dir.mkdir(parents=True, exist_ok=True)
     vep_test_file = (
         "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
@@ -787,7 +788,9 @@ def config_dict_w_fastqs(
     # Create analysis_dirs
     analysis_sub_dirs = ["script", "log", "result", "benchmark"]
     for analysis_sub_dir in analysis_sub_dirs:
-        analysis_sub_dir_path: Path = Path(analysis_dir, case_id_tumor_normal, analysis_sub_dir)
+        analysis_sub_dir_path: Path = Path(
+            analysis_dir, case_id_tumor_normal, analysis_sub_dir
+        )
         analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
         modified_config["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
 
@@ -831,7 +834,9 @@ def pon_config_dict_w_fastq(
     for analysis_sub_dir in analysis_sub_dirs:
         analysis_sub_dir_path: Path = Path(analysis_dir, case_id_pon, analysis_sub_dir)
         analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
-        pon_config_w_fastq["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
+        pon_config_w_fastq["analysis"][
+            analysis_sub_dir
+        ] = analysis_sub_dir_path.as_posix()
 
     # Fill the fastq path folder with the test fastq-files
     samples_list = standard_samples_list_pon
@@ -873,7 +878,9 @@ def config_w_fastq_dir_for_duplicate_fastq_patterns_model(
     # Create analysis_dirs and modify config
     analysis_sub_dirs = ["script", "log", "result", "benchmark"]
     for analysis_sub_dir in analysis_sub_dirs:
-        analysis_sub_dir_path: Path = Path(analysis_dir, case_id_tumor_normal, analysis_sub_dir)
+        analysis_sub_dir_path: Path = Path(
+            analysis_dir, case_id_tumor_normal, analysis_sub_dir
+        )
         analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
         modified_config["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
 
@@ -912,7 +919,9 @@ def config_tumor_normal_extrafile(
     # Create analysis_dirs and modify config
     analysis_sub_dirs = ["script", "log", "result", "benchmark"]
     for analysis_sub_dir in analysis_sub_dirs:
-        analysis_sub_dir_path: Path = Path(analysis_dir, case_id_tumor_normal, analysis_sub_dir)
+        analysis_sub_dir_path: Path = Path(
+            analysis_dir, case_id_tumor_normal, analysis_sub_dir
+        )
         analysis_sub_dir_path.mkdir(parents=True, exist_ok=True)
         modified_config["analysis"][analysis_sub_dir] = analysis_sub_dir_path.as_posix()
 

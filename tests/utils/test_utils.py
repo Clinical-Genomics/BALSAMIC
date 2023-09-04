@@ -918,6 +918,7 @@ def test_get_fastp_parameters(balsamic_model: ConfigModel):
     # THEN no adapter trimming should be done
     assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
 
+
 def test_validate_cache_version_develop():
     """Test develop cache version validation."""
 

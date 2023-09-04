@@ -385,9 +385,7 @@ def test_get_fastq_patterns_by_sample(
     compare_fastq_pattern_lists(fastq_patterns_all_expected, fastq_patterns_all)
 
 
-def test_get_all_fastqs_for_sample(
-    balsamic_model: ConfigModel, tumor_sample_name: str
-):
+def test_get_all_fastqs_for_sample(balsamic_model: ConfigModel, tumor_sample_name: str):
     """Validate retrieval of fastq-files by sample and fastq-type from ConfigModel."""
 
     def compare_fastq_file_lists(expected: List[str], found: List[str]):
@@ -412,13 +410,13 @@ def test_get_all_fastqs_for_sample(
     normal_fastq = "1_171015_HJ7TLDSX5_ACC2_XXXXXX_1.fastq.gz"
 
     fwd_fastq_files = balsamic_model.get_all_fastqs_for_sample(
-        sample_name = tumor_sample_name, fastq_types = [FastqName.FWD]
+        sample_name=tumor_sample_name, fastq_types=[FastqName.FWD]
     )
     rev_fastq_files = balsamic_model.get_all_fastqs_for_sample(
-        sample_name = tumor_sample_name, fastq_types = [FastqName.REV]
+        sample_name=tumor_sample_name, fastq_types=[FastqName.REV]
     )
     fastq_files = balsamic_model.get_all_fastqs_for_sample(
-        sample_name= tumor_sample_name, fastq_types = [FastqName.FWD, FastqName.REV]
+        sample_name=tumor_sample_name, fastq_types=[FastqName.FWD, FastqName.REV]
     )
 
     compare_fastq_file_lists(fwd_fastq_files_expected, fwd_fastq_files)

@@ -505,8 +505,12 @@ class ConfigModel(BaseModel):
             fwd_rev_values = []
             for sample in samples:
                 for fastq_pattern in sample["fastq_info"]:
-                    fwd_rev_values.append(sample["fastq_info"][fastq_pattern][FastqName.FWD])
-                    fwd_rev_values.append(sample["fastq_info"][fastq_pattern][FastqName.REV])
+                    fwd_rev_values.append(
+                        sample["fastq_info"][fastq_pattern][FastqName.FWD]
+                    )
+                    fwd_rev_values.append(
+                        sample["fastq_info"][fastq_pattern][FastqName.REV]
+                    )
             return fwd_rev_values
 
         fastq_path = values["analysis"]["fastq_path"]
@@ -644,6 +648,7 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup.realign"
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
+
 
 class UMIParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.

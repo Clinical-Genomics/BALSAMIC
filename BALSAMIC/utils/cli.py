@@ -294,7 +294,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
 
             fastq_dict[fastq_pair_pattern] = {
                 "fwd": fwd_fastq,
-                "rev": fwd_fastq.replace(suffix_fwd, suffix_rev)
+                "rev": fwd_fastq.replace(suffix_fwd, suffix_rev),
             }
 
     if not fastq_dict:
@@ -317,17 +317,22 @@ def get_sample_list(
     Returns:
         sample_list: List containing SampleInstanceModel/s.
     """
-    sample_list: List[Dict] = [{
-        "name": tumor_sample_name,
-        "type": SampleType.TUMOR,
-        "fastq_info": get_fastq_info(tumor_sample_name, fastq_path),
-    }]
+    sample_list: List[Dict] = [
+        {
+            "name": tumor_sample_name,
+            "type": SampleType.TUMOR,
+            "fastq_info": get_fastq_info(tumor_sample_name, fastq_path),
+        }
+    ]
 
     if normal_sample_name:
-        sample_list.append({
-            "name": normal_sample_name,
-            "type": SampleType.NORMAL,
-            "fastq_info": get_fastq_info(normal_sample_name, fastq_path)})
+        sample_list.append(
+            {
+                "name": normal_sample_name,
+                "type": SampleType.NORMAL,
+                "fastq_info": get_fastq_info(normal_sample_name, fastq_path),
+            }
+        )
 
     return sample_list
 
@@ -349,10 +354,13 @@ def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
         raise BalsamicError(error_message)
 
     for sample_name in sample_names:
-        sample_list.append({
-            "name": sample_name,
-            "type": SampleType.NORMAL,
-            "fastq_info": get_fastq_info(sample_name, fastq_path)})
+        sample_list.append(
+            {
+                "name": sample_name,
+                "type": SampleType.NORMAL,
+                "fastq_info": get_fastq_info(sample_name, fastq_path),
+            }
+        )
 
     return sample_list
 
@@ -469,6 +477,7 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
 
         return analysis_fastq_path.as_posix()
     return Path(fastq_path).as_posix()
+
 
 def validate_cache_version(
     _ctx: click.Context, _param: click.Parameter, version: str
