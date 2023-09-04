@@ -184,11 +184,19 @@
 		"time": "4:00:00",
 		"n": 12
 	},
-	"vep_somatic_research_snv": {
+	"bcftools_get_somaticINDEL_research": {
+		"time": "1:00:00",
+		"n": 36
+	},
+	"cadd_annotate_somaticINDEL_research": {
 		"time": "18:00:00",
 		"n": 36
 	},
-	"vep_somatic_clinical_snv": {
+	"vep_annotate_somaticSNV_research": {
+		"time": "18:00:00",
+		"n": 36
+	},
+	"vcfanno_annotate_somaticSNV_clinical": {
 		"time": "18:00:00",
 		"n" : 36
 	},
