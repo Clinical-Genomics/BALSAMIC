@@ -465,4 +465,4 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
                 )
 
         return analysis_fastq_path.as_posix()
-    return fastq_path
+    return analysis_fastq_path.as_posix()
