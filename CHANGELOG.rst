@@ -17,6 +17,8 @@ Added:
 * `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
 * `Container ettiquette` to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1132
 * `htslib` (samtools, bcftools tabix) container https://github.com/Clinical-Genomics/BALSAMIC/pull/1234
+* Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
+* `CADD` scores for INDELs https://github.com/Clinical-Genomics/BALSAMIC/pull/1238
 
 Changed:
 ^^^^^^^^
@@ -35,6 +37,7 @@ Changed:
 * Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
 * Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
+* Tools versions in doc https:/github.com/Clinical-Genomics/BALSAMIC/pull/1239
 
 Fixed:
 ^^^^^^
@@ -44,6 +47,7 @@ Fixed:
 * Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
 * Fix SVDB annotation intermediate rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1218
 * Broken documentation links https://github.com/Clinical-Genomics/BALSAMIC/pull/1226
+* Updated contributors in main README https://github.com/Clinical-Genomics/BALSAMIC/pull/1237
 
 Removed:
 ^^^^^^^^

@@ -1,25 +1,21 @@
 """Test helper functions."""
-import copy
 import json
 import logging
 import subprocess
 import sys
-import os
 from pathlib import Path
 from unittest import mock
 from typing import List, Dict
 
+import click
 import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
-from BALSAMIC.constants.analysis import (
-    BIOINFO_TOOL_ENV,
-    FastqName,
-    SampleType,
-    SequencingType,
-)
+
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
+from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
@@ -41,6 +37,7 @@ from BALSAMIC.utils.cli import (
     get_config_path,
     get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
+    validate_cache_version,
 )
 
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
@@ -920,3 +917,54 @@ def test_get_fastp_parameters(balsamic_model: ConfigModel):
     fastp_params_tga = get_fastp_parameters(balsamic_model)
     # THEN no adapter trimming should be done
     assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
+
+def test_validate_cache_version_develop():
+    """Test develop cache version validation."""
+
+    # GIVEN a develop cache version
+    cli_version: str = CacheVersion.DEVELOP
+
+    # WHEN validating the provided version
+    version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
+
+    # THEN the correct version should be returned
+    assert version == CacheVersion.DEVELOP
+
+
+def test_validate_cache_version_release():
+    """Test release cache version validation."""
+
+    # GIVEN a release cache version
+    cli_version: str = "1.2.3"
+
+    # WHEN validating the provided version
+    version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
+
+    # THEN the correct version should be returned
+    assert version == f"release_v{cli_version}"
+
+
+def test_validate_cache_version_non_digit():
+    """Test non digit release cache version validation."""
+
+    # GIVEN an incorrect release cache version
+    cli_version: str = "a.b.c"
+
+    # WHEN validating the provided version
+
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_cache_version(click.Context, click.Parameter, cli_version)
+
+
+def test_validate_cache_version_wrong_format():
+    """Test wrong format release cache version validation."""
+
+    # GIVEN an incorrect release cache version
+    cli_version: str = "1.2"
+
+    # WHEN validating the provided version
+
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_cache_version(click.Context, click.Parameter, cli_version)

@@ -3,7 +3,6 @@
 # NGS filters for various scenarios
 
 
-
 rule bcftools_filter_tnscope_research_tumor_only:
   input:
     vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",

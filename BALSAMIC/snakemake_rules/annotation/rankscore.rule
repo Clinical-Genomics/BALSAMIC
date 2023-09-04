@@ -3,7 +3,6 @@
 # Rank variants according to a rankscore model
 
 
-
 rule genmod_score_vardict:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",

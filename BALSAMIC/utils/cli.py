@@ -1,6 +1,5 @@
 import os
 import logging
-import glob
 
 import re
 import subprocess
@@ -10,15 +9,19 @@ from io import StringIO
 from pathlib import Path
 from typing import Dict, Optional, List
 
-import yaml
-import snakemake
+
+import click
 import graphviz
+import snakemake
+import yaml
+
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName, PonParams
+from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
 
@@ -466,3 +469,17 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
 
         return analysis_fastq_path.as_posix()
     return Path(fastq_path).as_posix()
+
+def validate_cache_version(
+    _ctx: click.Context, _param: click.Parameter, version: str
+) -> str:
+    """Validate the provided cache version."""
+    if version == CacheVersion.DEVELOP:
+        return version
+    version_parts: List[str] = version.split(".")
+    if len(version_parts) == 3 and all(part.isdigit() for part in version_parts):
+        return f"release_v{version}"
+    else:
+        raise click.BadParameter(
+            f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
+        )

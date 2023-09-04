@@ -46,7 +46,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_sv_quality_filter.rule",
         ],
         "annotate": [
-            "snakemake_rules/annotation/vep.rule",
+            "snakemake_rules/annotation/somatic_snv_annotation.rule",
+            "snakemake_rules/annotation/somatic_sv_annotation.rule",
+            "snakemake_rules/annotation/somatic_computations.rule",
+            "snakemake_rules/annotation/germline_annotation.rule",
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
         ],

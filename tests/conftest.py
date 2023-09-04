@@ -300,6 +300,7 @@ def reference():
         "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
         "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
         "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
+        "cadd_annotations": "tests/test_data/references/cadd/",
     }
 
 
@@ -358,6 +359,10 @@ def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> 
     }
     return modify_pon_config_dict
 
+@pytest.fixture(scope="session")
+def cadd_annotations(test_data_dir: str) -> str:
+    """Return path for CADD annotations."""
+    return Path(test_data_dir, "references", "cadd").as_posix()
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
@@ -985,6 +990,7 @@ def tumor_only_config(
     background_variant_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cadd_annotations: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -1022,6 +1028,8 @@ def tumor_only_config(
                 background_variant_file,
                 "--tumor-sample-name",
                 tumor_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
                 "--swegen-snv",
                 swegen_snv_frequency_path,
                 "--swegen-sv",
@@ -1058,6 +1066,7 @@ def tumor_normal_config(
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cadd_annotations: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -1097,6 +1106,8 @@ def tumor_normal_config(
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
                 "--swegen-snv",
                 swegen_snv_frequency_path,
                 "--swegen-sv",

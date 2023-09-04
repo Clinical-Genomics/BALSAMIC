@@ -9,10 +9,8 @@ from typing import Union, List, Optional
 
 import click
 
-from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.init.options import (
     OPTION_OUT_DIR,
-    OPTION_CONTAINER_VERSION,
     OPTION_COSMIC_KEY,
     OPTION_SNAKEFILE,
     OPTION_CLUSTER_CONFIG,
@@ -29,9 +27,10 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL,
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
+    OPTION_CACHE_VERSION,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
-from BALSAMIC.constants.cache import GenomeVersion, ContainerVersion, REFERENCE_FILES
+from BALSAMIC.constants.cache import GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
 from BALSAMIC.models.snakemake import SnakemakeExecutable
@@ -47,7 +46,7 @@ LOG = logging.getLogger(__name__)
     "init", short_help="Download singularity containers and build the reference cache"
 )
 @OPTION_OUT_DIR
-@OPTION_CONTAINER_VERSION
+@OPTION_CACHE_VERSION
 @OPTION_COSMIC_KEY
 @OPTION_GENOME_VERSION
 @OPTION_SNAKEFILE
@@ -66,7 +65,7 @@ LOG = logging.getLogger(__name__)
 def initialize(
     context: click.Context,
     out_dir: str,
-    container_version: ContainerVersion,
+    cache_version: str,
     cosmic_key: str,
     genome_version: GenomeVersion,
     snakefile: Path,
@@ -99,7 +98,8 @@ def initialize(
         )
         raise click.Abort()
 
-    out_dir: Path = Path(out_dir, balsamic_version).absolute()
+    release_version: str = cache_version.replace("release_v", "")
+    out_dir: Path = Path(out_dir, release_version).absolute()
     references_dir: Path = Path(out_dir, genome_version)
     genome_dir = Path(references_dir, "genome")
     variants_dir = Path(references_dir, "variants")
@@ -113,7 +113,7 @@ def initialize(
 
     references: Union[ReferencesHg, ReferencesCanFam] = REFERENCE_FILES[genome_version]
     cache_config: CacheConfig = CacheConfig(
-        analysis={"case_id": f"reference.{genome_version}.v{balsamic_version}"},
+        analysis={"case_id": f"reference.{genome_version}.{release_version}"},
         references_dir=references_dir.as_posix(),
         genome_dir=genome_dir.as_posix(),
         variants_dir=variants_dir.as_posix(),
@@ -122,7 +122,7 @@ def initialize(
         genome_version=genome_version,
         cosmic_key=cosmic_key,
         bioinfo_tools=BIOINFO_TOOL_ENV,
-        containers=get_containers(container_version),
+        containers=get_containers(cache_version),
         references=references,
         references_date=datetime.now().strftime("%Y-%m-%d %H:%M"),
     )
