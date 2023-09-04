@@ -366,7 +366,7 @@ class FastqInfoModel(BaseModel):
 
     @validator("fwd", "rev")
     def fastq_path_as_abspath_str(cls, value):
-        return Path(value).resolve().as_posix()
+        return Path(value).as_posix()
 
 
 class SampleInstanceModel(BaseModel):
