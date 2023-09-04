@@ -17,7 +17,7 @@ Added:
 * `htslib` (samtools, bcftools tabix) container https://github.com/Clinical-Genomics/BALSAMIC/pull/1234
 * Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
 * `CADD` scores for INDELs https://github.com/Clinical-Genomics/BALSAMIC/pull/1238
-* `CADD` reference to tests https://githuc.com/Clinical-Genomics/BALSAMIC/pull/12
+* `CADD` reference to tests https://githuc.com/Clinical-Genomics/BALSAMIC/pull/1241
 
 Changed:
 ^^^^^^^^
