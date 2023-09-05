@@ -278,7 +278,7 @@ def test_params_vep():
     assert test_vep_built.vep_filters == "all defaults params"
 
 
-def test_analysis_model_for_PON(test_data_dir: str):
+def test_analysis_model_for_pon(test_data_dir: str):
     """Tests PON model parsing."""
 
     # GIVEN valid input arguments
