@@ -38,6 +38,7 @@ from .helpers import ConfigHelper, Map
 
 MOCKED_OS_ENVIRON = "os.environ"
 
+
 def fastq_patterns() -> list:
     """
     Returns a list of dicts containing different formatted fastq-file names to be used in parameterized tests.

@@ -415,7 +415,9 @@ def test_get_all_fastqs_for_sample(balsamic_model: ConfigModel, tumor_sample_nam
     rev_fastq_files = balsamic_model.get_all_fastqs_for_sample(
         sample_name=tumor_sample_name, fastq_types=[FastqName.REV]
     )
-    fastq_files = balsamic_model.get_all_fastqs_for_sample(sample_name=tumor_sample_name)
+    fastq_files = balsamic_model.get_all_fastqs_for_sample(
+        sample_name=tumor_sample_name
+    )
 
     compare_fastq_file_lists(fwd_fastq_files_expected, fwd_fastq_files)
     compare_fastq_file_lists(rev_fastq_files_expected, rev_fastq_files)
