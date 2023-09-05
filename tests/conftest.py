@@ -22,7 +22,7 @@ from BALSAMIC.constants.cluster import (
     ClusterProfile,
 )
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import CONSTANTS_DIR
+from BALSAMIC.constants.paths import CONSTANTS_DIR, TEST_DATA_DIR, FASTQ_TEST_INFO
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.cache import (
     CacheAnalysis,
@@ -37,14 +37,12 @@ from BALSAMIC.utils.io import read_json, read_yaml
 from .helpers import ConfigHelper, Map
 
 MOCKED_OS_ENVIRON = "os.environ"
-TEST_DATA_DIR = "tests/test_data"
-
 
 def fastq_patterns() -> list:
     """
     Returns a list of dicts containing different formatted fastq-file names to be used in parameterized tests.
     """
-    fastq_test_info_path = Path(TEST_DATA_DIR, "fastq_test_info.json").as_posix()
+    fastq_test_info_path = Path(FASTQ_TEST_INFO).as_posix()
     fastq_test_info_dict = read_json(fastq_test_info_path)
     return fastq_test_info_dict["fastq_pattern_types"]
 
@@ -53,7 +51,7 @@ def fastq_pattern_ids() -> list:
     """
     Returns a list of IDs for the parameterized testing of different fastq file name formats.
     """
-    fastq_test_info_path = Path(TEST_DATA_DIR, "fastq_test_info.json").as_posix()
+    fastq_test_info_path = Path(FASTQ_TEST_INFO).as_posix()
     fastq_test_info_dict = read_json(fastq_test_info_path)
     fastq_pattern_types = fastq_test_info_dict["fastq_pattern_types"]
     fastq_pattern_ids = ["FastqPattern{}".format(p["id"]) for p in fastq_pattern_types]
@@ -61,7 +59,7 @@ def fastq_pattern_ids() -> list:
 
 
 @pytest.fixture(scope="session")
-def test_data_dir() -> str:
+def test_data_dir() -> Path:
     """
     Creates path for test data directory.
     """
@@ -69,9 +67,9 @@ def test_data_dir() -> str:
 
 
 @pytest.fixture(scope="session")
-def load_test_fastq_data(test_data_dir):
+def load_test_fastq_data(test_data_dir) -> Dict:
     """Returns dict from loaded json containing strings of fastq-names."""
-    fastq_test_info_path = Path(test_data_dir, "fastq_test_info.json").as_posix()
+    fastq_test_info_path = Path(FASTQ_TEST_INFO).as_posix()
     return read_json(fastq_test_info_path)
 
 
