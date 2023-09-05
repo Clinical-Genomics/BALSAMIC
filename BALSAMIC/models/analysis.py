@@ -4,7 +4,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Dict
 
 from pydantic import BaseModel, validator, Field, root_validator
 from pydantic.types import DirectoryPath, FilePath
@@ -448,8 +448,6 @@ class ConfigModel(BaseModel):
     vcf: Optional[VCFModel]
     background_variants: Optional[FilePath]
     analysis: AnalysisModel
-
-    # Union[AnalysisPonModel, AnalysisModel]
 
     @validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):

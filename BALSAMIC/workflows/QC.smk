@@ -12,7 +12,7 @@ from snakemake.exceptions import RuleException, WorkflowError
 
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.analysis import FastqName, SampleType
+from BALSAMIC.constants.analysis import FastqName, SampleType, AnalysisType
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import check_executable, generate_h5
@@ -61,7 +61,7 @@ delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
 tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
-if config_model.analysis.analysis_type == "paired":
+if config_model.analysis.analysis_type == AnalysisType.PAIRED
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
 # parse parameters as constants to workflows
