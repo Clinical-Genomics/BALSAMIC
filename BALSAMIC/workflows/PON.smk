@@ -87,7 +87,7 @@ panel_name = os.path.split(target_bed)[1].replace('.bed','')
 coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=config["samples"], cov=['target','antitarget'])
 baited_beds = expand(cnv_dir + "{cov}.bed", cov=['target','antitarget'])
 pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
-pon_finish = expand(analysis_dir + "/" + "analysis_PON_finish")
+pon_finish = expand(analysis_dir + "analysis_PON_finish")
 
 sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
