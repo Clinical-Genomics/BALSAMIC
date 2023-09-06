@@ -5,7 +5,16 @@ from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cache import GenomeVersion, CacheVersion
 from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
+from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
 from BALSAMIC.utils.cli import validate_cache_version
+
+OPTION_LOG_LEVEL = click.option(
+    "--log-level",
+    default=LogLevel.INFO.value,
+    type=click.Choice(LOG_LEVELS),
+    help="Logging level in terms of urgency",
+    show_default=True,
+)
 
 OPTION_GENOME_VERSION = click.option(
     "-g",

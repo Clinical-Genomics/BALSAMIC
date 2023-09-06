@@ -7,29 +7,24 @@ import coloredlogs
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.config.base import config as config_command
 from BALSAMIC.commands.init.base import initialize as init_command
+from BALSAMIC.commands.options import OPTION_LOG_LEVEL
 from BALSAMIC.commands.plugins.base import plugins as plugins_command
 from BALSAMIC.commands.report.base import report as report_command
 from BALSAMIC.commands.run.base import run as run_command
-from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
+from BALSAMIC.constants.constants import LogLevel
 from BALSAMIC.utils.cli import add_doc as doc
 
 LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option(
-    "--log-level",
-    default=LogLevel.INFO.value,
-    type=click.Choice(LOG_LEVELS),
-    help="Logging level in terms of urgency",
-    show_default=True,
-)
+@OPTION_LOG_LEVEL
 @click.version_option(version=balsamic_version)
 @click.pass_context
 @doc(
     f"Balsamic {balsamic_version}: Bioinformatic Analysis Pipeline for Somatic Mutations in Cancer"
 )
-def cli(context, log_level):
+def cli(context: click.Context, log_level: LogLevel):
     coloredlogs.DEFAULT_FIELD_STYLES = {
         "asctime": {"color": "green"},
         "hostname": {"color": "magenta"},
