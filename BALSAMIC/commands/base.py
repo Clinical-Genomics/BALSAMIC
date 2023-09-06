@@ -42,7 +42,7 @@ def cli(context, log_level):
         fmt="%(programname)s %(hostname)s %(asctime)s %(name)s pid:%(process)d [%(levelname)s] %(message)s",
     )
     LOG.info(f"Running BALSAMIC version {balsamic_version}")
-    context.obj["log_level"] = log_level
+    context.obj = {"log_level": log_level}
 
 
 cli.add_command(run_command)
