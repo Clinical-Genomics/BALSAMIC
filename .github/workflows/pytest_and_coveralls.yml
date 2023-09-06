@@ -4,10 +4,6 @@ on:
     paths-ignore:
       - "CHANGELOG.rst"
       - "docs/**"
-  pull_request:
-    paths-ignore:
-      - "CHANGELOG.rst"
-      - "docs/**"
 jobs:
   pytest_coveralls:
     name: run PyTest
