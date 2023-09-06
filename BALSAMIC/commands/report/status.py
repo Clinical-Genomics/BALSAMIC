@@ -45,7 +45,7 @@ def status(context, sample_config, show_only_missing, print_files):
     """
     cli for status sub-command.
     """
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.debug("Reading input sample config")
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)

@@ -6,7 +6,8 @@ from BALSAMIC.commands.config.pon import pon_config
 
 
 @click.group()
-def config():
+@click.pass_context
+def config(context: click.Context):
     """Create config files required for running the pipeline."""
     pass
 

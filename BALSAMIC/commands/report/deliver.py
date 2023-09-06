@@ -65,7 +65,7 @@ def deliver(
     cli for deliver sub-command.
     Writes <case_id>.hk in result_directory.
     """
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.debug("Reading input sample config")
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)

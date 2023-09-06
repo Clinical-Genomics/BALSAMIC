@@ -30,7 +30,7 @@ def scout(context, sample_config, snv_vcf, sv_vcf, customer_id, tumor, normal):
     """
     Create a scout config.yaml file
     """
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.info("Adding scout cancer template to delivery directory")
 
     with open(sample_config, "r") as fn:

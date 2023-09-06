@@ -27,12 +27,9 @@ LOG = logging.getLogger(__name__)
 @click.version_option(version=balsamic_version)
 @click.pass_context
 @doc(
-    """BALSAMIC {version}: Bioinformatic Analysis pipeLine for
-        SomAtic MutatIons in Cancer""".format(
-        version=balsamic_version
-    )
+    f"Balsamic {balsamic_version}: Bioinformatic Analysis Pipeline for Somatic Mutations in Cancer"
 )
-def cli(context, loglevel):
+def cli(context, log_level):
     coloredlogs.DEFAULT_FIELD_STYLES = {
         "asctime": {"color": "green"},
         "hostname": {"color": "magenta"},
@@ -41,14 +38,11 @@ def cli(context, loglevel):
         "name": {"color": "blue"},
     }
     coloredlogs.install(
-        level=loglevel,
+        level=log_level,
         fmt="%(programname)s %(hostname)s %(asctime)s %(name)s pid:%(process)d [%(levelname)s] %(message)s",
     )
-    LOG.info("Running BALSAMIC version %s", balsamic_version)
-
-    context.obj = {}
-    context.obj["loglevel"] = loglevel
-    # LOG.info(f"BALSAMIC started with log level {loglevel}.")
+    LOG.info(f"Running BALSAMIC version {balsamic_version}")
+    context.obj["log_level"] = log_level
 
 
 cli.add_command(run_command)

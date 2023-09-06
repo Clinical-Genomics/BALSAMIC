@@ -82,7 +82,7 @@ def initialize(
     quiet: bool,
 ) -> None:
     """Validate inputs and download reference caches and containers."""
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}")
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}")
 
     if run_mode == RunMode.CLUSTER and not run_analysis:
         LOG.info("Changing run-mode to local on dry-run")

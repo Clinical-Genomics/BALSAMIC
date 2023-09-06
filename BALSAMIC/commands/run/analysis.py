@@ -176,7 +176,7 @@ def analysis(
     """
     Runs BALSAMIC workflow on the provided sample's config file
     """
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
 
     if run_mode == "cluster" and not run_analysis:
         LOG.info("Changing run-mode to local on dry-run")
