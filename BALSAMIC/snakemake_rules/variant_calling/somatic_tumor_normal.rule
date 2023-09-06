@@ -6,8 +6,8 @@
 rule vardict_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = bam_dir + "normal.merged.bam",
-        bamT = bam_dir + "tumor.merged.bam",
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
@@ -83,8 +83,8 @@ rm -rf {params.tmpdir};
 
 rule sentieon_TNhaplotyper:
     input:
-        bamT = bam_dir + "tumor.merged.bam",
-        bamN = bam_dir + "normal.merged.bam",
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         interval = config["panel"]["capture_kit"],
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],

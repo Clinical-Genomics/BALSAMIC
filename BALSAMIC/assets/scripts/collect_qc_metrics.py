@@ -13,7 +13,7 @@ from BALSAMIC.utils.io import read_json
 from BALSAMIC.utils.rule import (
     get_capture_kit,
     get_sequencing_type,
-    get_sample_type_from_prefix,
+    get_sample_type_from_sample_name,
     get_analysis_type,
 )
 
@@ -171,11 +171,10 @@ def get_metric_condition(
     """Returns a condition associated to a sample and sequencing type"""
 
     sequencing_type = get_sequencing_type(config)
-    try:
-        sample_type = get_sample_type_from_prefix(config, sample)
-    except KeyError:
+    sample_type = get_sample_type_from_sample_name(config, sample)
+    if not sample_type:
         # Deletes pair orientation information from the sample name (insertSize metrics)
-        sample_type = get_sample_type_from_prefix(config, sample.split("_")[0])
+        sample_type = get_sample_type_from_sample_name(config, sample.split("_")[0])
 
     req_metrics = requested_metrics[metric]["condition"]
     if sequencing_type == "wgs" and (
@@ -200,9 +199,13 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                 # Ignore UMI and reverse reads metrics
                 if "umi" not in k:
                     if k in requested_metrics:
+                        # example of possible sample-formats below from "report_saved_raw_data":
+                        # tumor.ACCXXXXXX
+                        # tumor.ACCXXXXXX_FR
+                        # extracted below for id to: ACCXXXXXX
                         output_metrics.append(
                             Metric(
-                                id=sample.split("_")[0],
+                                id=sample.split(".")[1].split("_")[0],
                                 input=get_multiqc_data_source(
                                     multiqc_data, sample, source
                                 ),
@@ -212,7 +215,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                                 condition=get_metric_condition(
                                     config,
                                     requested_metrics,
-                                    sample,
+                                    sample.split(".")[1].split("_")[0],
                                     k,
                                 ),
                             ).dict()

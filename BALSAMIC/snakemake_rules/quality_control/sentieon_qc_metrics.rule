@@ -14,7 +14,7 @@ def repeat(param, values):
 
 rule sentieon_wgs_metrics:
     input:
-        bam = bam_dir + '{sample}.dedup.bam',
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         reference = config["reference"]["reference_genome"]
     output:
         wgs_metrics = qc_dir + "{sample}_sentieon_wgs_metrics.txt",

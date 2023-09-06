@@ -3,7 +3,6 @@
 # NGS filters for various scenarios
 
 
-
 rule bcftools_filter_vardict_research_tumor_normal:
   input:
     vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.vcf.gz",

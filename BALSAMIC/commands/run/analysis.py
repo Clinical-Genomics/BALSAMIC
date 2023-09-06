@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import SCHEDULER_PATH
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -18,6 +19,7 @@ from BALSAMIC.utils.cli import (
     job_id_dump_to_yaml,
     get_config_path,
 )
+
 
 LOG = logging.getLogger(__name__)
 
@@ -190,31 +192,35 @@ def analysis(
     with open(sample_config_path, "r") as sample_fh:
         sample_config = json.load(sample_fh)
 
-    logpath = sample_config["analysis"]["log"]
-    scriptpath = sample_config["analysis"]["script"]
-    resultpath = sample_config["analysis"]["result"]
-    benchmarkpath = sample_config["analysis"]["benchmark"]
-    case_name = sample_config["analysis"]["case_id"]
+    # Initialize balsamic model to run validation tests
+    config_model = ConfigModel.parse_obj(sample_config)
+
+    case_name = config_model.analysis.case_id
+
+    # Create directories for results, logs, scripts and benchmark files
+    result_path: Path = Path(config_model.analysis.result)
+    log_path: Path = Path(config_model.analysis.log)
+    script_path: Path = Path(config_model.analysis.script)
+    benchmark_path: Path = Path(config_model.analysis.benchmark)
+
+    analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
+
+    for analysis_sub_dir in analysis_directories_list:
+        analysis_sub_dir.mkdir(exist_ok=True)
 
     if run_analysis:
-        # if not dry run, then create (new) log/script directory
-        for dirpath, dirnames, files in os.walk(logpath):
-            if files:
-                logpath = createDir(logpath, [])
-                scriptpath = createDir(scriptpath, [])
-                sample_config["analysis"]["benchmark"] = createDir(benchmarkpath, [])
+        # if not dry run, and current existing log-dir is not empty, then create (new) log/script directory
+        existing_log_files = os.listdir(log_path.as_posix())
+        if existing_log_files:
+            log_path = createDir(log_path.as_posix(), [])
+            script_path = createDir(script_path.as_posix(), [])
 
-    # Create result directory
-    os.makedirs(resultpath, exist_ok=True)
+    for analysis_sub_dir in analysis_directories_list:
+        analysis_sub_dir.mkdir(exist_ok=True)
 
-    if not os.path.exists(logpath):
-        os.makedirs(logpath, exist_ok=True)
-        os.makedirs(scriptpath, exist_ok=True)
-        os.makedirs(benchmarkpath, exist_ok=True)
-
-    analysis_type = sample_config["analysis"]["analysis_type"]
-    analysis_workflow = sample_config["analysis"]["analysis_workflow"]
-    analysis_dir: Path = Path(sample_config["analysis"]["analysis_dir"])
+    analysis_type = config_model.analysis.analysis_type
+    analysis_workflow = config_model.analysis.analysis_workflow
+    analysis_dir: Path = Path(config_model.analysis.analysis_dir)
     snakefile: Path = (
         snake_file if snake_file else get_snakefile(analysis_type, analysis_workflow)
     )
@@ -229,16 +235,16 @@ def analysis(
         disable_variant_caller=disable_variant_caller,
         dragen=dragen,
         force=force_all,
-        log_dir=logpath,
+        log_dir=log_path.as_posix(),
         mail_type=mail_type,
         mail_user=mail_user,
         profile=profile,
         qos=qos,
         quiet=quiet,
-        result_dir=resultpath,
+        result_dir=result_path.as_posix(),
         run_analysis=run_analysis,
         run_mode=run_mode,
-        script_dir=scriptpath,
+        script_dir=script_path.as_posix(),
         singularity_bind_paths=get_singularity_bind_paths(sample_config),
         snakefile=snakefile,
         snakemake_options=snakemake_opt,
@@ -250,8 +256,8 @@ def analysis(
     )
 
     if run_analysis and run_mode == "cluster":
-        jobid_dump = Path(logpath, f"{case_name}.sacct")
-        jobid_yaml = Path(resultpath, f"{profile}_jobids.yaml")
+        jobid_dump = Path(log_path, f"{case_name}.sacct")
+        jobid_yaml = Path(result_path, f"{profile}_jobids.yaml")
         job_id_dump_to_yaml(
             job_id_dump=jobid_dump, job_id_yaml=jobid_yaml, case_name=case_name
         )

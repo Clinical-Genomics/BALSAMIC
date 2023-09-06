@@ -33,7 +33,7 @@
 	},
 	"bwa_mem": {
 		"time": "08:00:00",
-		"n": 16
+		"n": 6
 	},
 	"concatenate": {
 		"time": "00:30:00",
@@ -54,15 +54,15 @@
 	},
 	"fastqc":{
 		"time": "12:00:00",
-		"n": 5
+		"n": 4
 	},
-	"fastp":{
-		"time": "12:00:00",
-		"n": 8
-	},
-	"fastp_umi":{
+	"fastp_quality_trim":{
 		"time": "24:00:00",
-		"n": 8
+		"n": 4
+	},
+	"fastp_remove_umi":{
+		"time": "12:00:00",
+		"n": 4
 	},
 	"manta_germline": {
 		"time": "05:00:00",
@@ -76,17 +76,9 @@
 		"time": "10:00:00",
 		"n": 12
 	},
-	"mergeBam_normal": {
-		"time": "12:00:00",
-		"n": 36
-	},
 	"mergeBam_normal_gatk": {
 		"time": "04:30:00",
 		"n": 8
-	},
-	"mergeBam_tumor": {
-		"time": "30:00:00",
-		"n": 36
 	},
 	"mergeBam_tumor_gatk": {
 		"time": "04:30:00",
@@ -130,7 +122,7 @@
 	},
 	"sentieon_align_sort": {
 		"time": "24:00:00",
-		"n": 36
+		"n": 12
 	},
 	"sentieon_base_calibration": {
 		"time": "24:00:00",
@@ -184,11 +176,19 @@
 		"time": "4:00:00",
 		"n": 12
 	},
-	"vep_somatic_research_snv": {
+	"bcftools_get_somaticINDEL_research": {
+		"time": "1:00:00",
+		"n": 36
+	},
+	"cadd_annotate_somaticINDEL_research": {
 		"time": "18:00:00",
 		"n": 36
 	},
-	"vep_somatic_clinical_snv": {
+	"vep_annotate_somaticSNV_research": {
+		"time": "18:00:00",
+		"n": 36
+	},
+	"vcfanno_annotate_somaticSNV_clinical": {
 		"time": "18:00:00",
 		"n" : 36
 	},
@@ -347,5 +347,13 @@
 	"somalier_relate": {
 		"time": "01:00:00",
 		"n": 1
+	},
+	"bam_compress": {
+		"time": "04:00:00",
+		"n": 20
+	},
+	"samtools_qc": {
+		"time": "04:00:00",
+		"n": 16
 	}
 }

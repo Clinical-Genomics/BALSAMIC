@@ -1,0 +1,42 @@
+"""Rules for WGS fastq pre-processing: quality and adapter-trimming."""
+
+
+rule fastp_quality_trim_wgs:
+    """Fastq data pre-processing for WGS."""
+    input:
+        fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
+        fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
+    output:
+        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),
+        json = qc_dir + "fastp/{fastq_pattern}_fastp.json",
+        html = qc_dir + "fastp/{fastq_pattern}_fastp.html"
+    benchmark:
+        Path(benchmark_dir, "fastp_quality_trim" + "{fastq_pattern}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
+    params:
+        tmpdir = tmp_dir,
+        quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
+        adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
+        fastq_pattern = "{fastq_pattern}"
+    threads:
+        get_threads(cluster_config, 'fastp')
+    message:
+        "Quality control and trimming of UMI-removed fastqs for fastq pattern: {params.fastq_pattern}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+
+fastp \
+--thread {threads} \
+--in1 {input.fastq_r1} \
+--in2 {input.fastq_r2} \
+--out1 {output.fastq_r1} \
+--out2 {output.fastq_r2} \
+--json {output.json} \
+--html {output.html} \
+--overrepresentation_analysis \
+{params.quality_trim} \
+{params.adapter_trim};
+        """

@@ -1,10 +1,10 @@
 """Test helper functions."""
-import copy
 import json
 import logging
 import subprocess
 import sys
 from pathlib import Path
+from typing import List, Dict
 from unittest import mock
 
 import click
@@ -12,10 +12,11 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
     get_snakefile,
@@ -29,8 +30,9 @@ from BALSAMIC.utils.cli import (
     check_executable,
     job_id_dump_to_yaml,
     generate_h5,
-    get_sample_dict,
-    get_pon_sample_dict,
+    get_pon_sample_list,
+    get_sample_list,
+    get_fastq_info,
     get_config_path,
     get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
@@ -40,15 +42,14 @@ from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
 from BALSAMIC.utils.rule import (
     get_vcf,
-    get_sample_id_by_type,
-    get_picard_mrkdup,
     get_variant_callers,
     get_script_path,
     get_result_dir,
     get_threads,
     get_delivery_id,
     get_rule_output,
-    get_sample_type_from_prefix,
+    get_sample_type_from_sample_name,
+    get_fastp_parameters,
 )
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
@@ -66,7 +67,21 @@ def test_remove_unnecessary_spaces():
     assert formatted_string == "Developing Balsamic brings me joy"
 
 
-def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
+def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
+    """Tests sample PON dictionary retrieval."""
+
+    # GIVEN a FASTQ directory
+    fastq_dir_pon = pon_config_dict_w_fastq["analysis"]["fastq_path"]
+    # WHEN retrieving PON samples
+    samples: List = get_pon_sample_list(fastq_dir_pon)
+
+    # THEN the samples should be retrieved from the FASTQ directory
+    # And match the expected structure of pre-designed PON-config
+    for sample_dict in samples:
+        assert sample_dict in pon_config_dict_w_fastq["samples"]
+
+
+def test_get_variant_callers_wrong_analysis_type(tumor_normal_config: Dict):
     # GIVEN a wrong analysis_type
     wrong_analysis_type = "cohort"
     workflow = "BALSAMIC"
@@ -87,7 +102,7 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_workflow(tumor_normal_config):
+def test_get_variant_callers_wrong_workflow(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     wrong_workflow = "MIP"
     mutation_type = "SNV"
@@ -106,7 +121,7 @@ def test_get_variant_callers_wrong_workflow(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
+def test_get_variant_callers_wrong_mutation_type(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     workflow = "BALSAMIC"
     wrong_mutation_type = "INDEL"
@@ -127,7 +142,7 @@ def test_get_variant_callers_wrong_mutation_type(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
+def test_get_variant_callers_wrong_mutation_class(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     workflow = "BALSAMIC"
     mutation_type = "SNV"
@@ -148,7 +163,7 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config):
         )
 
 
-def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config):
+def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     workflow = "BALSAMIC"
     mutation_type = "SNV"
@@ -267,9 +282,9 @@ def test_get_snakefile():
 
             pipeline = ""
             if (
-                analysis_type in ["single", "paired"]
-                and analysis_workflow != "balsamic-qc"
-                and analysis_workflow != "balsamic-umi"
+                    analysis_type in ["single", "paired"]
+                    and analysis_workflow != "balsamic-qc"
+                    and analysis_workflow != "balsamic-umi"
             ):
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
             elif analysis_type == "generate_ref":
@@ -286,7 +301,7 @@ def test_get_snakefile():
             assert Path(snakefile).is_file()
 
 
-def test_get_vcf(sample_config):
+def test_get_vcf(sample_config: Dict):
     # GIVEN a sample_config dict and a variant callers list
     variant_callers = ["tnscope", "vardict", "manta"]
 
@@ -309,57 +324,6 @@ def test_get_vcf_invalid_variant_caller(sample_config):
     with pytest.raises(KeyError):
         # THEN a key error should be raised for a not supported caller
         get_vcf(sample_config, variant_callers, [sample_config["analysis"]["case_id"]])
-
-
-def test_get_sample_id_by_type(sample_config: dict, tumor_sample_name: str):
-    """Test get sample ID by biological type."""
-
-    # GIVEN a sample configuration dictionary and a tumor sample type
-    sample_type: str = "tumor"
-
-    # WHEN getting the sample ID
-    sample_id: str = get_sample_id_by_type(
-        samples=sample_config["samples"], type=sample_type
-    )
-
-    # THEN it should correspond to the tumor sample name
-    assert sample_id == tumor_sample_name
-
-
-def test_get_sample_id_by_type_error(
-    sample_config: dict, tumor_sample_name: str, caplog: LogCaptureFixture
-):
-    """Test get sample ID by type when an invalid biological type is provided."""
-    caplog.set_level(logging.ERROR)
-
-    # GIVEN a sample configuration dictionary and an incorrect sample type
-    sample_type: str = "affected"
-
-    # WHEN getting the sample ID
-    with pytest.raises(BalsamicError):
-        get_sample_id_by_type(samples=sample_config["samples"], type=sample_type)
-
-        # THEN it sould raise a BalsamicError
-        assert f"There is no sample ID for the {sample_type} sample type" in caplog.text
-
-
-def test_get_picard_mrkdup(sample_config):
-    # WHEN passing sample_config
-    picard_str = get_picard_mrkdup(sample_config)
-
-    # THEN It will return the picard str as rmdup
-    assert "mrkdup" == picard_str
-
-
-def test_get_picard_mrkdup_rmdup(sample_config):
-    # WHEN passing sample_config
-    sample_config_rmdup = copy.deepcopy(sample_config)
-    sample_config_rmdup["QC"]["picard_rmdup"] = True
-
-    picard_str = get_picard_mrkdup(sample_config_rmdup)
-
-    # THEN It will return the picard str as rmdup
-    assert "rmdup" == picard_str
 
 
 def test_createDir(tmp_path):
@@ -395,7 +359,7 @@ def test_createDir(tmp_path):
     assert Path(test_log_dir_created).is_dir()
 
 
-def test_get_result_dir(sample_config):
+def test_get_result_dir(sample_config: Dict):
     # WHEN a sample_config dict
     # GIVEN a sample_config dict
     # THEN get_result_dir should return result directory
@@ -454,7 +418,7 @@ def test_write_json_error(tmp_path: Path):
         assert write_json(ref_json, tmp_path)
 
 
-def test_read_json(config_path):
+def test_read_json(config_path: str):
     """Test data extraction from a BALSAMIC config JSON file."""
 
     # GIVEN a config path
@@ -491,7 +455,7 @@ def test_read_yaml(metrics_yaml_path):
     dropout_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.mrkdup.hsmetric",
+        "input": "ACC1.dedup.realign.hsmetric",
         "name": "GC_DROPOUT",
         "step": "multiqc_picard_HsMetrics",
         "value": 0.027402,
@@ -501,7 +465,7 @@ def test_read_yaml(metrics_yaml_path):
     ins_size_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.insertsizemetric",
+        "input": "ACC1.dedup.realign.insertsizemetric",
         "name": "MEAN_INSERT_SIZE",
         "step": "multiqc_picard_insertSize",
         "value": 201.813054,
@@ -511,7 +475,7 @@ def test_read_yaml(metrics_yaml_path):
     dups_metric = {
         "header": None,
         "id": "ACC1",
-        "input": "ACC1.sorted.mrkdup.txt",
+        "input": "tumor.ACC1.dedup.metrics",
         "name": "PERCENT_DUPLICATION",
         "step": "multiqc_picard_dups",
         "value": 0.391429,
@@ -592,7 +556,7 @@ def test_get_panel_chrom():
     assert len(get_panel_chrom(panel_bed_file)) > 0
 
 
-def test_convert_deliverables_tags():
+def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
     """Test generation of delivery tags."""
 
     # GIVEN a deliverables dict and a sample config dict
@@ -624,7 +588,8 @@ def test_convert_deliverables_tags():
             },
         ]
     }
-    sample_config_dict = {"samples": {"ACC1": {"type": "tumor"}}}
+
+    sample_config_dict = {"samples": tumor_normal_fastq_info_correct}
 
     # WHEN running the convert function
     delivery_json: dict = convert_deliverables_tags(
@@ -633,9 +598,9 @@ def test_convert_deliverables_tags():
 
     # THEN prefix strings should be replaced with sample name
     for delivery_file in delivery_json["files"]:
-        assert delivery_file["id"] == "ACC1"
         assert "ACC1" in delivery_file["tag"]
         assert "tumor" not in delivery_file["tag"]
+        assert delivery_file["id"] == "ACC1"
 
 
 def test_check_executable_exists():
@@ -706,85 +671,48 @@ def test_generate_h5_capture_no_output(tmp_path):
     assert actual_output == None
 
 
-def test_get_rule_output(snakemake_fastqc_rule):
-    """Tests retrieval of existing output files from a specific workflow."""
-
-    # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
-    rules = snakemake_fastqc_rule
-    rule_name = "fastqc"
-    output_file_wildcards = {
-        "sample": ["ACC1", "tumor", "normal"],
-        "case_name": "sample_tumor_only",
-    }
-
-    # THEN retrieve the output files
-    output_files = get_rule_output(rules, rule_name, output_file_wildcards)
-
-    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
-    assert len(output_files) == 2
-    for file in output_files:
-        # Expected file names
-        assert (
-            Path(file[0]).name == "ACC1_R_1.fastq.gz"
-            or Path(file[0]).name == "ACC1_R_2.fastq.gz"
-        )
-        # Expected tags
-        assert (
-            file[3] == "1,fastqc,quality-trimmed-seq-fastqc"
-            or file[3] == "2,fastqc,quality-trimmed-seq-fastqc"
-        )
-
-
-def test_get_sample_type_from_prefix(config_dict):
+def test_get_sample_type_from_sample_name(config_dict: Dict):
     """Test sample type extraction from a extracted config file."""
 
     # GIVEN a config dictionary
 
     # GIVEN a sample name
-    sample = "ACC1"
+    sample_name = "ACC1"
 
     # WHEN calling the function
-    sample_type = get_sample_type_from_prefix(config_dict, sample)
+    sample_type = get_sample_type_from_sample_name(config_dict, sample_name)
 
     # THEN the retrieved sample type should match the expected one
-    assert sample_type == "tumor"
+    assert sample_type == SampleType.TUMOR
 
 
-def test_get_sample_dict(tumor_sample_name: str, normal_sample_name: str):
-    """Tests sample dictionary retrieval."""
+def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
+    """Tests retrieval of existing output files from a specific workflow."""
 
-    # GIVEN a tumor and a normal sample names
-
-    # GIVEN the expected dictionary output
-    samples_expected: dict = {
-        tumor_sample_name: {"type": "tumor"},
-        normal_sample_name: {"type": "normal"},
+    # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
+    rules = snakemake_bcftools_filter_vardict_research_tumor_only
+    rule_name = "bcftools_filter_vardict_research_tumor_only"
+    output_file_wildcards = {
+        "sample": ["ACC1", "tumor", "normal"],
+        "case_name": "sample_tumor_only",
+        "var_type": ["CNV", "SNV", "SV"],
     }
+    # THEN retrieve the output files
+    output_files = get_rule_output(rules, rule_name, output_file_wildcards)
 
-    # WHEN getting the sample dictionary
-    samples: dict = get_sample_dict(
-        tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
-    )
-
-    # THEN the dictionary should be correctly formatted
-    assert samples == samples_expected
-
-
-def test_get_pon_sample_dict(
-    fastq_dir: str, tumor_sample_name: str, normal_sample_name: str
-):
-    """Tests sample PON dictionary retrieval."""
-
-    # GIVEN a FASTQ directory
-
-    # GIVEN the expected sample dictionary
-    samples_expected: dict = {"ACC1": {"type": "normal"}, "ACC2": {"type": "normal"}}
-
-    # WHEN retrieving PON samples
-    samples: dict = get_pon_sample_dict(fastq_dir)
-
-    # THEN the samples should be retrieved from the FASTQ directory
-    assert samples == samples_expected
+    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
+    assert len(output_files) == 1
+    for file in output_files:
+        # Expected file names
+        assert (
+                Path(file[0]).name
+                == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+        )
+        # Expected tags
+        assert (
+                file[3]
+                == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+        )
 
 
 def test_get_resolved_fastq_files_directory(fastq_dir: str):
@@ -800,11 +728,11 @@ def test_get_resolved_fastq_files_directory(fastq_dir: str):
 
 
 def test_get_resolved_fastq_files_directory_symlinked_files(
-    fastq_dir: str, tmp_path: Path
+        fastq_dir: str, tmp_path: Path
 ):
     """Test get fastq directory for symlinked files."""
 
-    # GIVEN a temporary fast path containing symlinked files
+    # GIVEN a temporary fastq path containing symlinked files
     for file in Path(fastq_dir).iterdir():
         Path(tmp_path, file.name).symlink_to(file)
 
@@ -842,10 +770,10 @@ def test_get_analysis_fastq_files_directory(fastq_dir: str):
 
 
 def test_get_analysis_fastq_files_directory_exception(
-    fastq_dir: str,
-    case_id_tumor_only,
-    tmp_path_factory: TempPathFactory,
-    caplog: LogCaptureFixture,
+        fastq_dir: str,
+        case_id_tumor_only: str,
+        tmp_path_factory: TempPathFactory,
+        caplog: LogCaptureFixture,
 ):
     """Test get analysis fastq directory when it already exists in case folder but another path is provided."""
     caplog.set_level(logging.INFO)
@@ -867,7 +795,7 @@ def test_get_analysis_fastq_files_directory_exception(
 
 
 def test_get_analysis_fastq_files_directory_no_fastqs(
-    fastq_dir: str, tmp_path_factory: TempPathFactory, case_id_tumor_only: str
+        fastq_dir: str, tmp_path_factory: TempPathFactory, case_id_tumor_only: str
 ):
     """Test get analysis fastq directory when the provided fastq directory is outside the case folder."""
 
@@ -887,6 +815,105 @@ def test_get_analysis_fastq_files_directory_no_fastqs(
         assert fastq.is_symlink()
         assert fastq.resolve().is_file()
         assert fastq_dir == fastq.resolve().parent.as_posix()
+
+
+def test_get_sample_list(
+        tumor_sample_name: str, normal_sample_name: str, fastq_dir_tumor_normal: str
+):
+    """Tests sample dictionary retrieval."""
+
+    samples: List = get_sample_list(
+        tumor_sample_name=tumor_sample_name,
+        normal_sample_name=normal_sample_name,
+        fastq_path=fastq_dir_tumor_normal,
+    )
+    assert samples[0]["name"] == tumor_sample_name
+    assert samples[1]["name"] == normal_sample_name
+    assert samples[0]["type"] == "tumor"
+    assert samples[1]["type"] == "normal"
+    assert samples[0]["fastq_info"]
+    assert samples[1]["fastq_info"]
+
+
+def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
+    """Validates that get_fastq_info assigns fastq info as expected."""
+    # GIVEN a fastq_dir and sample name ACC1
+
+    # WHEN calling the get_fastq_info function
+    fastq_dict = get_fastq_info(tumor_sample_name, fastq_dir_tumor_only)
+
+    fwd1_expected = f"{fastq_dir_tumor_only}/1_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz"
+    rev1_expected = f"{fastq_dir_tumor_only}/1_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"
+    fwd2_expected = f"{fastq_dir_tumor_only}/2_171015_HJ7TLDSX5_ACC1_XXXXXX_1.fastq.gz"
+    rev2_expected = f"{fastq_dir_tumor_only}/2_171015_HJ7TLDSX5_ACC1_XXXXXX_2.fastq.gz"
+    fastq_info1_expected = FastqInfoModel(fwd=fwd1_expected, rev=rev1_expected)
+    fastq_info2_expected = FastqInfoModel(fwd=fwd2_expected, rev=rev2_expected)
+
+    # THEN check that the fastq_dict matches the expected fastq_dict
+    expected_fastq_dict = {
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected,
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected,
+    }
+    assert fastq_dict == expected_fastq_dict
+
+
+def test_get_fastq_info_empty_fastq_dir(tumor_sample_name: str, empty_fastq_dir: str):
+    """Tests if get_fastq_info correctly reports errors of not finding any fastq-files"""
+    # GIVEN an empty fastq_dir and a sample name
+
+    # WHEN calling get_fastq_info
+    # THEN the following error should be found
+    with pytest.raises(
+            BalsamicError, match=f"No fastqs found for: {tumor_sample_name}"
+    ):
+        get_fastq_info(tumor_sample_name, empty_fastq_dir)
+
+
+def test_get_fastq_info_double_assigned_fastq_pattern(
+        tumor_sample_name: str, fastq_dir_tumor_duplicate_fastq_patterns: str
+):
+    """Tests if get_fastq_info correctly reports error of finding double-assigned fastq-patterns"""
+    # GIVEN an empty fastq_dir and a sample name
+
+    # WHEN calling get_fastq_info
+    # THEN the following error should be found
+    with pytest.raises(BalsamicError, match="Fastq name conflict. Fastq pair pattern"):
+        get_fastq_info(tumor_sample_name, fastq_dir_tumor_duplicate_fastq_patterns)
+
+
+def test_get_fastp_parameters(balsamic_model: ConfigModel):
+    """Validate correct retrieval of WGS and TGA specific fastp parameters."""
+
+    # GIVEN WGS config with quality trim
+    balsamic_model.analysis.sequencing_type = SequencingType.WGS
+    balsamic_model.QC.quality_trim = True
+    fastp_params_wgs = get_fastp_parameters(balsamic_model)
+    # THEN no UMI trimming should be active
+    assert "fastp_trim_umi" not in fastp_params_wgs
+    # THEN quality trimming should be active
+    assert "--n_base_limit" in fastp_params_wgs["fastp_trim_qual"]
+
+    # GIVEN WGS config without quality trim
+    balsamic_model.QC.quality_trim = False
+    fastp_params_wgs = get_fastp_parameters(balsamic_model)
+    # THEN no quality trimming should be done
+    assert "--n_base_limit" not in fastp_params_wgs["fastp_trim_qual"]
+    assert "--disable_quality_filtering" in fastp_params_wgs["fastp_trim_qual"]
+
+    # GIVEN TGA with adapter trimming active
+    balsamic_model.analysis.sequencing_type = SequencingType.TARGETED
+    balsamic_model.QC.adapter_trim = True
+    fastp_params_tga = get_fastp_parameters(balsamic_model)
+    # THEN UMI trimming should be active
+    assert "fastp_trim_umi" in fastp_params_tga
+    # THEN adapter trimming should be done
+    assert "--detect_adapter_for_pe" in fastp_params_tga["fastp_trim_adapter"]
+
+    # GIVEN TGA without adapter trimming active
+    balsamic_model.QC.adapter_trim = False
+    fastp_params_tga = get_fastp_parameters(balsamic_model)
+    # THEN no adapter trimming should be done
+    assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
 
 
 def test_validate_cache_version_develop():

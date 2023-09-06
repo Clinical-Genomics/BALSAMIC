@@ -21,7 +21,7 @@ rule collect_custom_qc_metrics:
     output:
         yaml = qc_dir + config["analysis"]["case_id"] + "_metrics_deliverables.yaml"
     params:
-        config_path = analysis_dir + config["analysis"]["case_id"] + ".json",
+        config_path = f"{analysis_dir_home}/{case_id}/{case_id}.json",
         collect_qc_metrics_script = get_script_path("collect_qc_metrics.py"),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "qc-metrics"}
     threads:

@@ -5,16 +5,16 @@
 
 rule mosdepth_coverage:
     input:
-        bam = bam_dir + "{sample}" + ".sorted." + picarddup + ".bam",
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         bed = config["panel"]["capture_kit"]
     output:
-        bam_dir + "{sample}.mosdepth.global.dist.txt",
-        bam_dir + "{sample}.mosdepth.region.dist.txt",
-        bam_dir + "{sample}.mosdepth.summary.txt",
-        bam_dir + "{sample}.per-base.bed.gz",
-        bam_dir + "{sample}.regions.bed.gz"
+        bam_dir + "{sample}_{sample_type}.mosdepth.global.dist.txt",
+        bam_dir + "{sample}_{sample_type}.mosdepth.region.dist.txt",
+        bam_dir + "{sample}_{sample_type}.mosdepth.summary.txt",
+        bam_dir + "{sample}_{sample_type}.per-base.bed.gz",
+        bam_dir + "{sample}_{sample_type}.regions.bed.gz"
     benchmark:
-        Path(benchmark_dir, "mosdepth_coverage_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "mosdepth_coverage_" + "{sample}_{sample_type}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix()
     params:
@@ -40,6 +40,6 @@ mosdepth \
 --flag {params.samflag} \
 --quantize {params.quantize} \
 --threads {threads} \
-{params.output_dir}/{params.sample_name} \
+{params.output_dir}/{params.sample_name}_{wildcards.sample_type} \
 {input.bam};
         """
