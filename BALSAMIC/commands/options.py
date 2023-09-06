@@ -6,6 +6,7 @@ from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cache import GenomeVersion, CacheVersion
 from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
 from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
+from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import validate_cache_version
 
 OPTION_LOG_LEVEL = click.option(
@@ -114,4 +115,17 @@ OPTION_CACHE_VERSION = click.option(
     type=click.STRING,
     callback=validate_cache_version,
     help=f"Cache version to be used for init or analysis. Use '{CacheVersion.DEVELOP}' or 'X.X.X'.",
+)
+
+OPTION_SAMPLE_CONFIG = click.option(
+    "--sample-config",
+    "-s",
+    required=True,
+    help="Sample configuration file",
+)
+
+OPTION_DISABLE_VARIANT_CALLER = click.option(
+    "--disable-variant-caller",
+    help=f"Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid "
+    f"values are: {list(VCF_DICT.keys())}",
 )

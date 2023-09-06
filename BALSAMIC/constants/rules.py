@@ -2,12 +2,6 @@
 from typing import Dict, List
 
 from BALSAMIC.constants.cache import GenomeVersion
-from BALSAMIC.constants.analysis import (
-    AnalysisType,
-    AnalysisWorkflow,
-    SequencingType,
-    WorkflowSolution,
-)
 
 common_cache_rules: List[str] = [
     "snakemake_rules/cache/singularity_containers.rule",
@@ -26,7 +20,6 @@ hg_cache_rules: List[str] = common_cache_rules + [
 canfam_cache_rules: List[str] = common_cache_rules + [
     "snakemake_rules/cache/refseq_canfam.rule"
 ]
-
 
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
@@ -157,7 +150,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         GenomeVersion.CanFam3: canfam_cache_rules,
     },
 }
-
 
 DELIVERY_RULES: List[str] = [
     # QC

@@ -1,8 +1,8 @@
 """Balsamic configuration file generation base commands."""
 import click
 
-from BALSAMIC.commands.config.case import case_config
-from BALSAMIC.commands.config.pon import pon_config
+from BALSAMIC.commands.config.case import case_config as case_command
+from BALSAMIC.commands.config.pon import pon_config as pon_command
 
 
 @click.group()
@@ -12,5 +12,5 @@ def config(context: click.Context):
     pass
 
 
-config.add_command(case_config)
-config.add_command(pon_config)
+config.add_command(case_command)
+config.add_command(pon_command)
