@@ -4,19 +4,20 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Dict
 from unittest import mock
+from typing import List, Dict
 
 import click
 import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
+from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
+
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
-from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
     get_snakefile,
@@ -38,8 +39,10 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
     validate_cache_version,
 )
+
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
+
 from BALSAMIC.utils.rule import (
     get_vcf,
     get_variant_callers,

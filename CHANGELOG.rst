@@ -18,10 +18,7 @@ Added:
 * `Container ettiquette` to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1132
 * `htslib` (samtools, bcftools tabix) container https://github.com/Clinical-Genomics/BALSAMIC/pull/1234
 * Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
-<<<<<<< HEAD
-=======
 * `CADD` scores for INDELs https://github.com/Clinical-Genomics/BALSAMIC/pull/1238
->>>>>>> dcd4413823144cebdcb69a81793b40785fe8ce87
 
 Changed:
 ^^^^^^^^
