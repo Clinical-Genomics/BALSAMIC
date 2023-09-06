@@ -148,7 +148,7 @@ cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn}
 
 rule create_reference:
     input:
-        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config["samples"], prefix=["target", "antitarget"]),
+        cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config_model.get_all_sample_names(), prefix=["target", "antitarget"]),
         ref = reffasta
     output:
         ref_cnn = pon_reference
