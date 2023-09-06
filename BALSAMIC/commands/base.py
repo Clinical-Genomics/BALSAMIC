@@ -1,33 +1,27 @@
-"""
-Entry cli for balsamic
-"""
+"""Balsamic CLI."""
 import logging
+
 import click
 import coloredlogs
 
-# Subcommands
-from BALSAMIC.commands.run.base import run as run_command
-from BALSAMIC.commands.init.base import initialize as init_command
-from BALSAMIC.commands.report.base import report as report_command
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.config.base import config as config_command
+from BALSAMIC.commands.init.base import initialize as init_command
 from BALSAMIC.commands.plugins.base import plugins as plugins_command
-
-# CLI commands and decorators
+from BALSAMIC.commands.report.base import report as report_command
+from BALSAMIC.commands.run.base import run as run_command
+from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
 from BALSAMIC.utils.cli import add_doc as doc
 
-# Get version
-from BALSAMIC import __version__ as balsamic_version
-
 LOG = logging.getLogger(__name__)
-LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 @click.group()
 @click.option(
-    "--loglevel",
-    default="INFO",
+    "--log-level",
+    default=LogLevel.INFO.value,
     type=click.Choice(LOG_LEVELS),
-    help="Set the level of log output.",
+    help="Logging level in terms of urgency",
     show_default=True,
 )
 @click.version_option(version=balsamic_version)
@@ -39,7 +33,6 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     )
 )
 def cli(context, loglevel):
-    "BALSAMIC"
     coloredlogs.DEFAULT_FIELD_STYLES = {
         "asctime": {"color": "green"},
         "hostname": {"color": "magenta"},
