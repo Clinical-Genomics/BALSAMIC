@@ -176,7 +176,7 @@ def bioinfo_tool_version_non_conda(packages: dict, bioinfo_tools: dict) -> dict:
 
 
 def bioinfo_tool_version_conda(
-        packages: list, bioinfo_tools: dict, current_bioinfo_tool_version: dict
+    packages: list, bioinfo_tools: dict, current_bioinfo_tool_version: dict
 ) -> dict:
     """Parses conda environment dictionary and extracts dependencies as version
 
@@ -214,7 +214,7 @@ def bioinfo_tool_version_conda(
 
 
 def get_bioinfo_tools_version(
-        bioinfo_tools: dict, container_conda_env_path: Path
+    bioinfo_tools: dict, container_conda_env_path: Path
 ) -> dict:
     """Parses the names and versions of bioinfo tools
     used by BALSAMIC from config YAML into a dict.
@@ -303,7 +303,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
 
 
 def get_sample_list(
-        tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
+    tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
 ) -> List[Dict]:
     """Returns a list of SampleInstanceModel/s given the names of the tumor and/or normal samples.
     Args:
@@ -477,7 +477,7 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
 
 
 def validate_cache_version(
-        _ctx: click.Context, _param: click.Parameter, version: str
+    _ctx: click.Context, _param: click.Parameter, version: str
 ) -> str:
     """Validate the provided cache version."""
     if version == CacheVersion.DEVELOP:

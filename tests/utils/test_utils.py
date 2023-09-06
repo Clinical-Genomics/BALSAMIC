@@ -282,9 +282,9 @@ def test_get_snakefile():
 
             pipeline = ""
             if (
-                    analysis_type in ["single", "paired"]
-                    and analysis_workflow != "balsamic-qc"
-                    and analysis_workflow != "balsamic-umi"
+                analysis_type in ["single", "paired"]
+                and analysis_workflow != "balsamic-qc"
+                and analysis_workflow != "balsamic-umi"
             ):
                 pipeline = "BALSAMIC/workflows/balsamic.smk"
             elif analysis_type == "generate_ref":
@@ -705,13 +705,13 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     for file in output_files:
         # Expected file names
         assert (
-                Path(file[0]).name
-                == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+            Path(file[0]).name
+            == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
         )
         # Expected tags
         assert (
-                file[3]
-                == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+            file[3]
+            == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
         )
 
 
@@ -728,7 +728,7 @@ def test_get_resolved_fastq_files_directory(fastq_dir: str):
 
 
 def test_get_resolved_fastq_files_directory_symlinked_files(
-        fastq_dir: str, tmp_path: Path
+    fastq_dir: str, tmp_path: Path
 ):
     """Test get fastq directory for symlinked files."""
 
@@ -770,10 +770,10 @@ def test_get_analysis_fastq_files_directory(fastq_dir: str):
 
 
 def test_get_analysis_fastq_files_directory_exception(
-        fastq_dir: str,
-        case_id_tumor_only: str,
-        tmp_path_factory: TempPathFactory,
-        caplog: LogCaptureFixture,
+    fastq_dir: str,
+    case_id_tumor_only: str,
+    tmp_path_factory: TempPathFactory,
+    caplog: LogCaptureFixture,
 ):
     """Test get analysis fastq directory when it already exists in case folder but another path is provided."""
     caplog.set_level(logging.INFO)
@@ -795,7 +795,7 @@ def test_get_analysis_fastq_files_directory_exception(
 
 
 def test_get_analysis_fastq_files_directory_no_fastqs(
-        fastq_dir: str, tmp_path_factory: TempPathFactory, case_id_tumor_only: str
+    fastq_dir: str, tmp_path_factory: TempPathFactory, case_id_tumor_only: str
 ):
     """Test get analysis fastq directory when the provided fastq directory is outside the case folder."""
 
@@ -818,7 +818,7 @@ def test_get_analysis_fastq_files_directory_no_fastqs(
 
 
 def test_get_sample_list(
-        tumor_sample_name: str, normal_sample_name: str, fastq_dir_tumor_normal: str
+    tumor_sample_name: str, normal_sample_name: str, fastq_dir_tumor_normal: str
 ):
     """Tests sample dictionary retrieval."""
 
@@ -864,13 +864,13 @@ def test_get_fastq_info_empty_fastq_dir(tumor_sample_name: str, empty_fastq_dir:
     # WHEN calling get_fastq_info
     # THEN the following error should be found
     with pytest.raises(
-            BalsamicError, match=f"No fastqs found for: {tumor_sample_name}"
+        BalsamicError, match=f"No fastqs found for: {tumor_sample_name}"
     ):
         get_fastq_info(tumor_sample_name, empty_fastq_dir)
 
 
 def test_get_fastq_info_double_assigned_fastq_pattern(
-        tumor_sample_name: str, fastq_dir_tumor_duplicate_fastq_patterns: str
+    tumor_sample_name: str, fastq_dir_tumor_duplicate_fastq_patterns: str
 ):
     """Tests if get_fastq_info correctly reports error of finding double-assigned fastq-patterns"""
     # GIVEN an empty fastq_dir and a sample name
