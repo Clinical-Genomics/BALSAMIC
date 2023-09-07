@@ -32,17 +32,17 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("deliver", short_help="Creates a JSON report file with output files")
-@OPTION_SAMPLE_CONFIG
-@OPTION_RULES_TO_DELIVER
 @OPTION_DELIVERY_MODE
 @OPTION_DISABLE_VARIANT_CALLER
+@OPTION_RULES_TO_DELIVER
+@OPTION_SAMPLE_CONFIG
 @click.pass_context
 def deliver(
     context: click.Context,
-    sample_config: str,
-    rules_to_deliver: List[str],
     delivery_mode: RuleDeliveryMode,
     disable_variant_caller: str,
+    rules_to_deliver: List[str],
+    sample_config: str,
 ):
     """Deliver command to write <case_id>.hk with the output analysis files."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")

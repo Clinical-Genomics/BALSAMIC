@@ -21,15 +21,15 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("status", short_help="Print the analysis file status.")
+@OPTION_PRINT_FILES
 @OPTION_SAMPLE_CONFIG
 @OPTION_SHOW_ONLY_MISSING_FILES
-@OPTION_PRINT_FILES
 @click.pass_context
 def status(
     context: click.Context,
+    print_files: bool,
     sample_config: str,
     show_only_missing: bool,
-    print_files: bool,
 ):
     """Analysis status CLI command."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")

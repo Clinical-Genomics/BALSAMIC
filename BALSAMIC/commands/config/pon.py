@@ -36,30 +36,30 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("pon", short_help="Create a sample config file for PON analysis")
-@OPTION_CASE_ID
-@OPTION_UMI
-@OPTION_UMI_TRIM_LENGTH
-@OPTION_QUALITY_TRIM
 @OPTION_ADAPTER_TRIM
-@OPTION_PANEL_BED
-@OPTION_BALSAMIC_CACHE
 @OPTION_ANALYSIS_DIR
+@OPTION_BALSAMIC_CACHE
+@OPTION_CASE_ID
 @OPTION_FASTQ_PATH
 @OPTION_GENOME_VERSION
+@OPTION_PANEL_BED
 @OPTION_PON_VERSION
+@OPTION_QUALITY_TRIM
+@OPTION_UMI
+@OPTION_UMI_TRIM_LENGTH
 @click.pass_context
 def pon_config(
     context: click.Context,
-    case_id: str,
-    umi: bool,
-    umi_trim_length: bool,
-    quality_trim: bool,
     adapter_trim: bool,
-    panel_bed: Path,
-    balsamic_cache: Path,
     analysis_dir: Path,
+    balsamic_cache: Path,
+    case_id: str,
     fastq_path: Path,
     genome_version: GenomeVersion,
+    panel_bed: Path,
+    quality_trim: bool,
+    umi: bool,
+    umi_trim_length: bool,
     version: str,
 ):
     reference_config = os.path.join(

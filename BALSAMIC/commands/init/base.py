@@ -52,39 +52,39 @@ LOG = logging.getLogger(__name__)
 )
 @OPTION_OUT_DIR
 @OPTION_CACHE_VERSION
-@OPTION_COSMIC_KEY
-@OPTION_GENOME_VERSION
-@OPTION_SNAKEFILE
-@OPTION_RUN_MODE
-@OPTION_CLUSTER_CONFIG
-@OPTION_CLUSTER_PROFILE
-@OPTION_CLUSTER_QOS
 @OPTION_CLUSTER_ACCOUNT
+@OPTION_CLUSTER_CONFIG
 @OPTION_CLUSTER_MAIL
 @OPTION_CLUSTER_MAIL_TYPE
-@OPTION_SNAKEMAKE_OPT
+@OPTION_CLUSTER_PROFILE
+@OPTION_CLUSTER_QOS
+@OPTION_COSMIC_KEY
 @OPTION_FORCE_ALL
-@OPTION_RUN_ANALYSIS
+@OPTION_GENOME_VERSION
 @OPTION_QUIET
+@OPTION_RUN_ANALYSIS
+@OPTION_RUN_MODE
+@OPTION_SNAKEFILE
+@OPTION_SNAKEMAKE_OPT
 @click.pass_context
 def initialize(
     context: click.Context,
-    out_dir: str,
+    account: Optional[str],
     cache_version: str,
-    cosmic_key: str,
-    genome_version: GenomeVersion,
-    snakefile: Path,
-    run_mode: RunMode,
     cluster_config: Path,
+    cosmic_key: str,
+    force_all: bool,
+    genome_version: GenomeVersion,
+    mail_type: Optional[ClusterMailType],
+    mail_user: Optional[str],
+    out_dir: str,
     profile: ClusterProfile,
     qos: QOS,
-    account: Optional[str],
-    mail_user: Optional[str],
-    mail_type: Optional[ClusterMailType],
-    snakemake_opt: List[str],
-    force_all: bool,
-    run_analysis: bool,
     quiet: bool,
+    run_analysis: bool,
+    run_mode: RunMode,
+    snakefile: Path,
+    snakemake_opt: List[str],
 ) -> None:
     """Validate inputs and download reference caches and containers."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}")

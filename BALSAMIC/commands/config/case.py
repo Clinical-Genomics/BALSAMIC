@@ -51,59 +51,59 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("case", short_help="Create a sample config file from input sample data")
-@OPTION_CASE_ID
-@OPTION_GENDER
-@OPTION_UMI
-@OPTION_UMI_TRIM_LENGTH
-@OPTION_QUALITY_TRIM
 @OPTION_ADAPTER_TRIM
-@OPTION_FASTQ_PATH
-@OPTION_PANEL_BED
-@OPTION_BACKGROUND_VARIANTS
-@OPTION_PON_CNN
-@OPTION_BALSAMIC_CACHE
-@OPTION_CONTAINER_VERSION
 @OPTION_ANALYSIS_DIR
-@OPTION_TUMOR_SAMPLE_NAME
-@OPTION_NORMAL_SAMPLE_NAME
+@OPTION_ANALYSIS_WORKFLOW
+@OPTION_BACKGROUND_VARIANTS
+@OPTION_BALSAMIC_CACHE
 @OPTION_CADD_ANNOTATIONS
-@OPTION_CLINICAL_SNV_OBSERVATIONS
-@OPTION_CLINICAL_SV_OBSERVATIONS
 @OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
+@OPTION_CASE_ID
+@OPTION_CLINICAL_SNV_OBSERVATIONS
+@OPTION_CLINICAL_SV_OBSERVATIONS
+@OPTION_CONTAINER_VERSION
+@OPTION_FASTQ_PATH
+@OPTION_GENDER
+@OPTION_GENOME_VERSION
+@OPTION_NORMAL_SAMPLE_NAME
+@OPTION_PANEL_BED
+@OPTION_PON_CNN
+@OPTION_QUALITY_TRIM
 @OPTION_SWEGEN_SNV
 @OPTION_SWEGEN_SV
-@OPTION_GENOME_VERSION
-@OPTION_ANALYSIS_WORKFLOW
+@OPTION_TUMOR_SAMPLE_NAME
+@OPTION_UMI
+@OPTION_UMI_TRIM_LENGTH
 @click.pass_context
 def case_config(
     context: click.Context,
-    case_id: str,
-    gender: Gender,
-    umi: bool,
-    umi_trim_length: int,
-    quality_trim: bool,
     adapter_trim: bool,
-    fastq_path: Path,
-    panel_bed: Path,
-    background_variants: Path,
-    pon_cnn: Path,
-    balsamic_cache: Path,
-    container_version: str,
     analysis_dir: Path,
-    tumor_sample_name: str,
-    normal_sample_name: str,
+    analysis_workflow: AnalysisWorkflow,
+    background_variants: Path,
+    balsamic_cache: Path,
     cadd_annotations: Path,
-    clinical_snv_observations: Path,
-    clinical_sv_observations: Path,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
     cancer_somatic_sv_observations: Path,
+    case_id: str,
+    clinical_snv_observations: Path,
+    clinical_sv_observations: Path,
+    container_version: str,
+    fastq_path: Path,
+    gender: Gender,
+    genome_version: GenomeVersion,
+    normal_sample_name: str,
+    panel_bed: Path,
+    pon_cnn: Path,
+    quality_trim: bool,
     swegen_snv: Path,
     swegen_sv: Path,
-    genome_version: GenomeVersion,
-    analysis_workflow: AnalysisWorkflow,
+    tumor_sample_name: str,
+    umi: bool,
+    umi_trim_length: int,
 ):
     if container_version:
         balsamic_version = container_version

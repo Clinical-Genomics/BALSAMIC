@@ -3,7 +3,6 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import Gender, AnalysisWorkflow, ANALYSIS_WORKFLOWS
-from BALSAMIC.constants.cache import GenomeVersion, GENOME_VERSIONS
 
 OPTION_CASE_ID = click.option(
     "--case-id",
@@ -173,7 +172,6 @@ OPTION_SWEGEN_SV = click.option(
     required=False,
     help="VCF path of Swegen SV frequency database (WGS analysis workflow)",
 )
-
 
 OPTION_ANALYSIS_WORKFLOW = click.option(
     "-w",
