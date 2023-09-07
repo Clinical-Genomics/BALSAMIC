@@ -39,6 +39,7 @@ Changed:
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 * Tools versions in doc https:/github.com/Clinical-Genomics/BALSAMIC/pull/1239
 * Reuse common Balsamic CLI options https://github.com/Clinical-Genomics/BALSAMIC/pull/1242
+* Add Add cache version option to config case https://github.com/Clinical-Genomics/BALSAMIC/pull/1244
 
 Fixed:
 ^^^^^^
