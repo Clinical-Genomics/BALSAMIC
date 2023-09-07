@@ -1,6 +1,5 @@
-import os
 import logging
-
+import os
 import re
 import subprocess
 import sys
@@ -9,21 +8,20 @@ from io import StringIO
 from pathlib import Path
 from typing import Dict, Optional, List
 
-
 import click
 import graphviz
 import snakemake
 import yaml
-
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
-from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName, PonParams
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
+from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
+from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
@@ -100,7 +98,7 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic") -> str:
 
 def get_config_path(config_type: ClusterConfigType) -> Path:
     """Return a config path given its type."""
-    return Path(CONSTANTS_DIR, config_type + ".json")
+    return Path(CONSTANTS_DIR, f"{config_type}.{FileType.JSON}")
 
 
 def find_file_index(file_path):

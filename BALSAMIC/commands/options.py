@@ -2,9 +2,15 @@
 import click
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.constants.analysis import RunMode
+from BALSAMIC.constants.analysis import RunMode, RUN_MODES
 from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, GENOME_VERSIONS
-from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
+from BALSAMIC.constants.cluster import (
+    ClusterProfile,
+    QOS,
+    CLUSTER_PROFILES,
+    QOS_OPTIONS,
+    CLUSTER_MAIL_TYPES,
+)
 from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import validate_cache_version
@@ -30,7 +36,7 @@ OPTION_RUN_MODE = click.option(
     "--run-mode",
     show_default=True,
     default=RunMode.CLUSTER,
-    type=click.Choice([RunMode.CLUSTER, RunMode.LOCAL]),
+    type=click.Choice(RUN_MODES),
     help="Run mode to execute Balsamic workflows",
 )
 
@@ -39,7 +45,7 @@ OPTION_CLUSTER_PROFILE = click.option(
     "--profile",
     show_default=True,
     default=ClusterProfile.SLURM,
-    type=click.Choice([ClusterProfile.SLURM, ClusterProfile.QSUB]),
+    type=click.Choice(CLUSTER_PROFILES),
     help="Cluster profile to submit jobs",
 )
 
@@ -47,12 +53,14 @@ OPTION_CLUSTER_QOS = click.option(
     "--qos",
     show_default=True,
     default=QOS.LOW,
-    type=click.Choice([QOS.LOW, QOS.NORMAL, QOS.HIGH, QOS.EXPRESS]),
+    type=click.Choice(QOS_OPTIONS),
     help="QOS for cluster jobs",
 )
 
 OPTION_CLUSTER_ACCOUNT = click.option(
-    "--account", type=click.STRING, help="Cluster account to run jobs"
+    "--account",
+    type=click.STRING,
+    help="Cluster account to run jobs",
 )
 
 OPTION_CLUSTER_MAIL = click.option(
@@ -63,17 +71,7 @@ OPTION_CLUSTER_MAIL = click.option(
 
 OPTION_CLUSTER_MAIL_TYPE = click.option(
     "--mail-type",
-    type=click.Choice(
-        [
-            ClusterMailType.ALL,
-            ClusterMailType.BEGIN,
-            ClusterMailType.END,
-            ClusterMailType.FAIL,
-            ClusterMailType.NONE,
-            ClusterMailType.REQUEUE,
-            ClusterMailType.TIME_LIMIT,
-        ]
-    ),
+    type=click.Choice(CLUSTER_MAIL_TYPES),
     help="The mail type triggering cluster emails",
 )
 
@@ -88,7 +86,7 @@ OPTION_FORCE_ALL = click.option(
     show_default=True,
     default=False,
     is_flag=True,
-    help="Force execution",
+    help="Force execution. This is equivalent to Snakemake --forceall.",
 )
 
 OPTION_RUN_ANALYSIS = click.option(
@@ -121,6 +119,7 @@ OPTION_SAMPLE_CONFIG = click.option(
     "-s",
     "--sample-config",
     required=True,
+    type=click.Path(),
     help="Sample configuration file",
 )
 
@@ -128,4 +127,11 @@ OPTION_DISABLE_VARIANT_CALLER = click.option(
     "--disable-variant-caller",
     help=f"Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid "
     f"values are: {list(VCF_DICT.keys())}",
+)
+
+OPTION_SNAKEFILE = click.option(
+    "-S",
+    "--snakefile",
+    type=click.Path(),
+    help="Custom Snakefile for internal testing",
 )

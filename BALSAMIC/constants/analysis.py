@@ -12,6 +12,9 @@ class RunMode(StrEnum):
     LOCAL: str = "local"
 
 
+RUN_MODES: List[RunMode] = [mode.value for mode in RunMode]
+
+
 class Gender(StrEnum):
     """Sex options."""
 

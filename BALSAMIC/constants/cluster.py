@@ -1,4 +1,6 @@
 """Balsamic cluster and submission specific constants."""
+from typing import List
+
 from BALSAMIC.utils.class_types import StrEnum
 
 
@@ -19,6 +21,9 @@ class ClusterProfile(StrEnum):
     QSUB: str = "qsub"
 
 
+CLUSTER_PROFILES: List[ClusterProfile] = [profile.value for profile in ClusterProfile]
+
+
 class ClusterAccount(StrEnum):
     """Cluster job submission account."""
 
@@ -34,6 +39,9 @@ class QOS(StrEnum):
     EXPRESS: str = "express"
 
 
+QOS_OPTIONS: List[QOS] = [qos.value for qos in QOS]
+
+
 class ClusterMailType(StrEnum):
     """Cluster job mail type notification."""
 
@@ -44,3 +52,6 @@ class ClusterMailType(StrEnum):
     NONE: str = "NONE"
     REQUEUE: str = "REQUEUE"
     TIME_LIMIT: str = "TIME_LIMIT"
+
+
+CLUSTER_MAIL_TYPES: List[ClusterMailType] = [type.value for type in ClusterMailType]
