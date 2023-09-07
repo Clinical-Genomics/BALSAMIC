@@ -9,11 +9,6 @@ from typing import Union, List, Optional
 
 import click
 
-from BALSAMIC.commands.init.options import (
-    OPTION_OUT_DIR,
-    OPTION_COSMIC_KEY,
-    OPTION_CLUSTER_CONFIG,
-)
 from BALSAMIC.commands.options import (
     OPTION_RUN_MODE,
     OPTION_CLUSTER_PROFILE,
@@ -28,6 +23,9 @@ from BALSAMIC.commands.options import (
     OPTION_QUIET,
     OPTION_CACHE_VERSION,
     OPTION_SNAKEFILE,
+    OPTION_OUT_DIR,
+    OPTION_CLUSTER_CONFIG,
+    OPTION_COSMIC_KEY,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import GenomeVersion, REFERENCE_FILES

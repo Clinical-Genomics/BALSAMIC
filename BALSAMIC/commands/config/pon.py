@@ -5,20 +5,20 @@ import os
 from pathlib import Path
 
 import click
-from BALSAMIC.commands.options import OPTION_GENOME_VERSION
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.commands.config.options import (
+from BALSAMIC.commands.options import (
+    OPTION_GENOME_VERSION,
+    OPTION_ADAPTER_TRIM,
+    OPTION_ANALYSIS_DIR,
+    OPTION_BALSAMIC_CACHE,
     OPTION_CASE_ID,
+    OPTION_FASTQ_PATH,
+    OPTION_PANEL_BED,
+    OPTION_PON_VERSION,
+    OPTION_QUALITY_TRIM,
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
-    OPTION_QUALITY_TRIM,
-    OPTION_ADAPTER_TRIM,
-    OPTION_PANEL_BED,
-    OPTION_BALSAMIC_CACHE,
-    OPTION_ANALYSIS_DIR,
-    OPTION_FASTQ_PATH,
-    OPTION_PON_VERSION,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.cache import GenomeVersion

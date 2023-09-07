@@ -7,8 +7,8 @@ import click
 import snakemake
 from colorclass import Color
 
-from BALSAMIC.commands.options import OPTION_SAMPLE_CONFIG
-from BALSAMIC.commands.report.options import (
+from BALSAMIC.commands.options import (
+    OPTION_SAMPLE_CONFIG,
     OPTION_PRINT_FILES,
     OPTION_SHOW_ONLY_MISSING_FILES,
 )

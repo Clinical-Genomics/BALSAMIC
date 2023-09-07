@@ -9,7 +9,6 @@ from typing import List
 
 import click
 
-from BALSAMIC.commands.init.options import OPTION_CLUSTER_CONFIG
 from BALSAMIC.commands.options import (
     OPTION_SNAKEFILE,
     OPTION_SAMPLE_CONFIG,
@@ -24,8 +23,10 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
     OPTION_DISABLE_VARIANT_CALLER,
+    OPTION_BENCHMARK,
+    OPTION_CLUSTER_CONFIG,
+    OPTION_DRAGEN,
 )
-from BALSAMIC.commands.run.options import OPTION_DRAGEN, OPTION_BENCHMARK
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cluster import (
     ClusterConfigType,

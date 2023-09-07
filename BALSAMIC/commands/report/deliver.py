@@ -14,10 +14,8 @@ import yaml
 from BALSAMIC.commands.options import (
     OPTION_SAMPLE_CONFIG,
     OPTION_DISABLE_VARIANT_CALLER,
-)
-from BALSAMIC.commands.report.options import (
-    OPTION_RULES_TO_DELIVER,
     OPTION_DELIVERY_MODE,
+    OPTION_RULES_TO_DELIVER,
 )
 from BALSAMIC.constants.analysis import RunMode, RuleDeliveryMode
 from BALSAMIC.constants.rules import DELIVERY_RULES
