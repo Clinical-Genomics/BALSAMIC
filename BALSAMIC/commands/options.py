@@ -169,14 +169,6 @@ OPTION_CLUSTER_QOS = click.option(
     help="QOS for cluster jobs",
 )
 
-OPTION_CONTAINER_VERSION = click.option(
-    "--container-version",
-    show_default=True,
-    default=balsamic_version,
-    type=click.Choice(["develop", "master", balsamic_version]),
-    help="Container for BALSAMIC version to download",
-)
-
 OPTION_COSMIC_KEY = click.option(
     "-c",
     "--cosmic-key",
