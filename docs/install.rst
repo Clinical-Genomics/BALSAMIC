@@ -67,7 +67,7 @@ NOTE: This process can take couple of hours
   # Note:
   # 1. COSMIC key is in variable $COSMIC_KEY
   # 2. For genome version hg38, set --genome-version to hg38
-  # 3. For using develop container version, set --container-version to develop
+  # 3. For using develop container version, set --cache-version to develop
   # 4. For submitting jobs to slurm cluster, use option --account
 
   balsamic init --outdir ~/balsamic_cache \
