@@ -212,8 +212,8 @@ def analysis(
         # if not dry run, and current existing log-dir is not empty, then create (new) log/script directory
         existing_log_files = os.listdir(log_path.as_posix())
         if existing_log_files:
-            log_path = createDir(log_path.as_posix(), [])
-            script_path = createDir(script_path.as_posix(), [])
+            log_path = Path(createDir(log_path.as_posix(), []))
+            script_path = Path(createDir(script_path.as_posix(), []))
 
     for analysis_sub_dir in analysis_directories_list:
         analysis_sub_dir.mkdir(exist_ok=True)
