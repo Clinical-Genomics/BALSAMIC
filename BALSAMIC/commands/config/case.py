@@ -1,7 +1,6 @@
 """Balsamic config case CLI."""
 import json
 import logging
-import os
 from pathlib import Path
 
 import click
@@ -105,10 +104,10 @@ def case_config(
     umi: bool,
     umi_trim_length: int,
 ):
-    reference_config = os.path.join(
+    reference_config: Path = Path(
         balsamic_cache, cache_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as config_file:
+    with open(reference_config.as_posix(), "r") as config_file:
         reference_dict = json.load(config_file)
 
     cadd_annotations_path = {
@@ -156,7 +155,7 @@ def case_config(
         },
         reference=reference_dict,
         singularity={
-            "image": os.path.join(balsamic_cache, cache_version, "containers")
+            "image": Path(balsamic_cache, cache_version, "containers").as_posix()
         },
         background_variants=background_variants,
         samples=get_sample_list(
