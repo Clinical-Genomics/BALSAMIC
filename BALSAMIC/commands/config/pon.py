@@ -1,9 +1,11 @@
+"""Balsamic panel of normals config case CLI."""
 import json
 import logging
 import os
 from pathlib import Path
 
 import click
+from BALSAMIC.commands.options import OPTION_GENOME_VERSION
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.config.options import (
@@ -16,7 +18,6 @@ from BALSAMIC.commands.config.options import (
     OPTION_BALSAMIC_CACHE,
     OPTION_ANALYSIS_DIR,
     OPTION_FASTQ_PATH,
-    OPTION_GENOME_VERSION,
     OPTION_PON_VERSION,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV

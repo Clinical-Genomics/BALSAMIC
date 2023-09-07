@@ -3,7 +3,7 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cache import GenomeVersion, CacheVersion
+from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, GENOME_VERSIONS
 from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
 from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
 from BALSAMIC.constants.workflow_params import VCF_DICT
@@ -22,7 +22,7 @@ OPTION_GENOME_VERSION = click.option(
     "--genome-version",
     show_default=True,
     default=GenomeVersion.HG19,
-    type=click.Choice([GenomeVersion.HG19, GenomeVersion.HG38, GenomeVersion.CanFam3]),
+    type=click.Choice(GENOME_VERSIONS),
     help="Type and build version of the reference genome",
 )
 
@@ -118,8 +118,8 @@ OPTION_CACHE_VERSION = click.option(
 )
 
 OPTION_SAMPLE_CONFIG = click.option(
-    "--sample-config",
     "-s",
+    "--sample-config",
     required=True,
     help="Sample configuration file",
 )

@@ -174,13 +174,6 @@ OPTION_SWEGEN_SV = click.option(
     help="VCF path of Swegen SV frequency database (WGS analysis workflow)",
 )
 
-OPTION_GENOME_VERSION = click.option(
-    "-g",
-    "--genome-version",
-    default=GenomeVersion.HG19.value,
-    type=click.Choice(GENOME_VERSIONS),
-    help="Reference files genome version",
-)
 
 OPTION_ANALYSIS_WORKFLOW = click.option(
     "-w",

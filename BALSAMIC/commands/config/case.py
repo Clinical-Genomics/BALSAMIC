@@ -30,9 +30,9 @@ from BALSAMIC.commands.config.options import (
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
     OPTION_SWEGEN_SNV,
     OPTION_SWEGEN_SV,
-    OPTION_GENOME_VERSION,
     OPTION_ANALYSIS_WORKFLOW,
 )
+from BALSAMIC.commands.options import OPTION_GENOME_VERSION
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender, AnalysisWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.paths import CONTAINERS_DIR
