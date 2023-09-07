@@ -33,7 +33,7 @@ OPTION_UMI_TRIM_LENGTH = click.option(
     default=5,
     show_default=True,
     type=click.INT,
-    help="Trim N bases from reads in FASTQ",
+    help="Trim N bases from reads in FASTQ file",
 )
 
 OPTION_QUALITY_TRIM = click.option(
@@ -41,7 +41,7 @@ OPTION_QUALITY_TRIM = click.option(
     default=True,
     show_default=True,
     is_flag=True,
-    help="Trim low quality reads in FASTQ",
+    help="Trim low quality reads in FASTQ file",
 )
 
 OPTION_ADAPTER_TRIM = click.option(
@@ -49,14 +49,14 @@ OPTION_ADAPTER_TRIM = click.option(
     default=True,
     show_default=True,
     is_flag=True,
-    help="Trim adapters from reads in FASTQ",
+    help="Trim adapters from reads in FASTQ file",
 )
 
 OPTION_FASTQ_PATH = click.option(
     "--fastq-path",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
-    help="Path to directory containing unconcatenated FASTQs",
+    help="Path to directory containing unconcatenated FASTQ files",
 )
 
 OPTION_PANEL_BED = click.option(
@@ -64,7 +64,7 @@ OPTION_PANEL_BED = click.option(
     "--panel-bed",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="Panel bed file for variant calling",
+    help="Panel bed file of target regions",
 )
 
 OPTION_BACKGROUND_VARIANTS = click.option(
@@ -189,4 +189,12 @@ OPTION_ANALYSIS_WORKFLOW = click.option(
     show_default=True,
     type=click.Choice(ANALYSIS_WORKFLOWS),
     help="Balsamic analysis workflow to be executed",
+)
+
+OPTION_PON_VERSION = click.option(
+    "-v",
+    "--version",
+    default="v1",
+    type=str,
+    help="Version of the PON file to be generated",
 )
