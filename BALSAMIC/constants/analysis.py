@@ -35,6 +35,11 @@ class AnalysisWorkflow(StrEnum):
     BALSAMIC_UMI: str = "balsamic-umi"
 
 
+ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [
+    workflow.value for workflow in AnalysisWorkflow
+]
+
+
 class SequencingType(StrEnum):
     """Sequencing carried out."""
 

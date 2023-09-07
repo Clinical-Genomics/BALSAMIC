@@ -24,8 +24,8 @@ def test_config_case(invoke_cli):
     # WHEN asking to show params for config-sample
     result = invoke_cli(["config", "case", "--help"])
 
-    # THEN It should show all params reuired for config-sample
-    assert "sample-id" in result.output
+    # THEN It should show all params required for config-sample
+    assert "--case-id" in result.output
     assert result.exit_code == 0
 
 
