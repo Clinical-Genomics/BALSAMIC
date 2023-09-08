@@ -23,6 +23,7 @@ Added:
 
 Changed:
 ^^^^^^^^
+* Changed samples in case_config.json from being a dict to a list of dicts  https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
 * Refactor bam and fastq inputs in snakemake to call pydantic model functions https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
