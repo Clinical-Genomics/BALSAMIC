@@ -1,9 +1,16 @@
 name: pytests
 on:
-  push:
+  pull_request:
     paths-ignore:
       - "CHANGELOG.rst"
       - "docs/**"
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "CHANGELOG.rst"
+      - "docs/**"
+
 jobs:
   pytest_coveralls:
     name: run PyTest
