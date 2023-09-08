@@ -481,12 +481,13 @@ def validate_cache_version(
     _ctx: click.Context, _param: click.Parameter, version: str
 ) -> str:
     """Validate the provided cache version."""
-    if version == CacheVersion.DEVELOP:
-        return version
     version_parts: List[str] = version.split(".")
-    if len(version_parts) == 3 and all(part.isdigit() for part in version_parts):
-        return f"release_v{version}"
-    else:
-        raise click.BadParameter(
-            f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
-        )
+    if (
+        version == CacheVersion.DEVELOP
+        or len(version_parts) == 3
+        and all(part.isdigit() for part in version_parts)
+    ):
+        return version
+    raise click.BadParameter(
+        f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
+    )
