@@ -8,9 +8,9 @@ rule bcftools_get_somaticINDEL_research:
   output:
     vcf_indel_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.indel.research.vcf.gz",
   benchmark:
-    Path(benchmark_dir,"vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
-    Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
   threads:
@@ -29,9 +29,9 @@ rule cadd_annotate_somaticINDEL_research:
   output:
     cadd_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.tsv.gz",
   benchmark:
-    Path(benchmark_dir,"vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
-    Path(singularity_image,config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
+    Path(singularity_image, config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
   threads:
@@ -52,9 +52,9 @@ rule bcftools_annotate_somaticINDEL_research:
   output:
     vcf_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
   benchmark:
-    Path(benchmark_dir,"vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
-    Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     header_line = temp(f"{vep_dir}cadd_header_line.txt"),
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
