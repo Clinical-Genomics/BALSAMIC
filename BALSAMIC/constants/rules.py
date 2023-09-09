@@ -170,9 +170,9 @@ DELIVERY_RULES: List[str] = [
     "bam_compress_tumor",
     "bam_compress_normal",
     # Germline
-    "vep_germline_tumor",
-    "vep_germline_normal",
     "vcfheader_rename_germline",
+    "vep_annotate_germlineVAR_tumor",
+    "vep_annotate_germlineVAR_normal",
     # SNVs
     "bcftools_view_split_variant",
     "bcftools_filter_tnscope_research_tumor_only",
