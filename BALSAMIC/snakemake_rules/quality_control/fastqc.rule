@@ -2,23 +2,22 @@
 # coding: utf-8
 
 rule fastqc:
-    """Perform quality control checks on raw sequence data"""
+    """Perform quality control checks on raw sequence data."""
     input:
-        fastq = concat_dir + "{sample}_R_{read}.fastq.gz",
+        fastq = input_fastq_dir + "{fastq_file_names}.fastq.gz"
     output:
-        fastqc = fastqc_dir + "{sample}_R_{read}_fastqc.zip",
+        fastqc_zip = fastqc_dir + "{fastq_file_names}_fastqc.zip"
     benchmark:
-        Path(benchmark_dir, "fastqc_{sample}_R_{read}.tsv").as_posix()
+        Path(benchmark_dir, "fastqc_{fastq_file_names}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
         fastqc_dir = fastqc_dir,
-        sample = "{sample}",
-        read = "{read}",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        fastq_file_name = "{fastq_file_names}",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
     threads: get_threads(cluster_config, "fastqc")
     message:
-        "Running FastQC on {params.sample} and read {params.read}"
+        "Running FastQC on {params.fastq_file_name}"
     shell:
         """
 mkdir -p {params.tmpdir};

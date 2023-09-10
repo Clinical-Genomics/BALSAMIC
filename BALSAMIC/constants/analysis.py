@@ -83,6 +83,7 @@ class BioinfoTools(StrEnum):
     BWA: str = "bwa"
     CNVKIT: str = "cnvkit"
     CNVPYTOR: str = "cnvpytor"
+    COMPRESS: str = "compress"
     CSVKIT: str = "csvkit"
     DELLY: str = "delly"
     VEP: str = "ensembl-vep"
@@ -106,9 +107,29 @@ class BioinfoTools(StrEnum):
     CADD: str = "cadd"
 
 
+class FastqName(StrEnum):
+    """Fastq name parameters."""
+
+    FWD: str = "fwd"
+    REV: str = "rev"
+
+
+FASTQ_SUFFIXES: Dict[str, Dict] = {
+    "1": {"fwd": "_1.fastq.gz", "rev": "_2.fastq.gz"},
+    "2": {"fwd": "_R1_001.fastq.gz", "rev": "_R2_001.fastq.gz"},
+}
+
+
+class PonParams:
+    """Parameters related to the PON creation workflow."""
+
+    MIN_PON_SAMPLES: int = 6
+
+
 BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BEDTOOLS.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.BWA.value: DockerContainers.ALIGN_QC.value,
+    BioinfoTools.COMPRESS.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.FASTQC.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.SAMTOOLS.value: DockerContainers.ALIGN_QC.value,
     BioinfoTools.PICARD.value: DockerContainers.ALIGN_QC.value,
