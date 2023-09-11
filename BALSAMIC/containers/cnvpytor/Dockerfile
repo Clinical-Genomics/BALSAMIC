@@ -19,11 +19,11 @@ RUN apt-get update && \
      apt-get clean && \
      rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install --upgrade pip
+RUN python -m pip install --upgrade --no-cache-dir pip
 RUN python -m venv ${VENV}
 ENV PATH="${VENV}/bin:$PATH"
 
-RUN pip install seaborn==0.12.2
+RUN pip install --no-cache-dir seaborn==0.12.2
 
 RUN cd /opt &&\
     git clone https://github.com/abyzovlab/CNVpytor.git &&\
