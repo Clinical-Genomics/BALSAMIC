@@ -10,7 +10,6 @@ LABEL about.home="https://github.com/abyzovlab/CNVpytor"
 LABEL about.documentation="https://github.com/abyzovlab/CNVpytor/wiki"
 LABEL about.license="MIT License (MIT)"
 
-ARG CONTAINER_NAME
 ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
 
@@ -28,7 +27,7 @@ RUN pip install seaborn==0.12.2
 
 RUN cd /opt &&\
     git clone https://github.com/abyzovlab/CNVpytor.git &&\
-    cd /opt/${CONTAINER_NAME}/ &&\
+    cd /opt/CNVpytor/ &&\
     git checkout v1.3.1 &&\
 	pip install --no-cache-dir -e . && \
     cnvpytor -download
