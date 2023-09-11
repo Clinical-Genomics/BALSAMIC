@@ -14,10 +14,10 @@ ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
 
 RUN apt-get update && \
-     apt-get -y upgrade && \
-     apt-get -y install -y --no-install-recommends git && \
-     apt-get clean && \
-     rm -rf /var/lib/apt/lists/*
+    apt-get -y upgrade && \
+    apt-get -y install --no-install-recommends git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN python -m pip install --upgrade --no-cache-dir pip
 RUN python -m venv ${VENV}
@@ -25,31 +25,31 @@ ENV PATH="${VENV}/bin:$PATH"
 
 RUN pip install --no-cache-dir seaborn==0.12.2
 
-RUN cd /opt &&\
-    git clone https://github.com/abyzovlab/CNVpytor.git &&\
-    cd /opt/CNVpytor/ &&\
-    git checkout v1.3.1 &&\
-	pip install --no-cache-dir -e . && \
+RUN cd /opt && \
+    git clone https://github.com/abyzovlab/CNVpytor.git && \
+    cd /opt/CNVpytor/ && \
+    git checkout v1.3.1 && \
+    pip install --no-cache-dir . && \
     cnvpytor -download
 
 FROM python:3.11-slim
 
 RUN apt-get update && \
-     apt-get -y upgrade && \
-     apt-get -y install -y --no-install-recommends tabix && \
-     apt-get clean && \
-     rm -rf /var/lib/apt/lists/*
+    apt-get -y upgrade && \
+    apt-get -y install --no-install-recommends tabix && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
 
-COPY --from=builder /opt /opt
+COPY --from=builder ${WORK_DIR} ${WORK_DIR}
 
 ENV PATH="${VENV}/bin:$PATH"
 
-RUN adduser --disabled-password --gecos '' ubuntu &&\
+RUN adduser --disabled-password --gecos '' ubuntu && \
 chsh -s /bin/bash && mkdir -p /home/ubuntu
 
-USER    ubuntu
+USER ubuntu
 WORKDIR /home/ubuntu
 CMD ["/bin/bash"]
