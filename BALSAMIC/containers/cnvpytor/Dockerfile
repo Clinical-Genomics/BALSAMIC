@@ -32,7 +32,7 @@ RUN cd /opt &&\
 	pip install --no-cache-dir -e . && \
     cnvpytor -download
 
-from python:3.11-slim
+FROM python:3.11-slim
 
 RUN apt-get update && \
      apt-get -y upgrade && \
