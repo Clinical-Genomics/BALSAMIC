@@ -1,15 +1,5 @@
 FROM python:3.11-slim AS builder
 
-LABEL base.image="python:3.11-slim"
-LABEL maintainer="Clinical Genomics"
-LABEL about.contact="support@clinicalgenomics.se"
-LABEL software="cnvpytor"
-LABEL software.version="1.3.1"
-LABEL about.summary="A tool for CNV discovery and genotyping from depth-of-coverage by mapped reads"
-LABEL about.home="https://github.com/abyzovlab/CNVpytor"
-LABEL about.documentation="https://github.com/abyzovlab/CNVpytor/wiki"
-LABEL about.license="MIT License (MIT)"
-
 ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
 
@@ -33,6 +23,16 @@ RUN cd /opt && \
     cnvpytor -download
 
 FROM python:3.11-slim
+
+LABEL base.image="python:3.11-slim"
+LABEL maintainer="Clinical Genomics"
+LABEL about.contact="support@clinicalgenomics.se"
+LABEL software="cnvpytor"
+LABEL software.version="1.3.1"
+LABEL about.summary="A tool for CNV discovery and genotyping from depth-of-coverage by mapped reads"
+LABEL about.home="https://github.com/abyzovlab/CNVpytor"
+LABEL about.documentation="https://github.com/abyzovlab/CNVpytor/wiki"
+LABEL about.license="MIT License (MIT)"
 
 RUN apt-get update && \
     apt-get -y upgrade && \
