@@ -3,7 +3,7 @@
 
 rule cnv_report:
     input:
-        cnv_data= cnv_data_paths
+        cnv_data = cnv_data_paths
     output:
         cnv_report_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.pdf"
     params:

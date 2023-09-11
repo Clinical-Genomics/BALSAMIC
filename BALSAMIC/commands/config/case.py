@@ -10,14 +10,14 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import (
-    get_sample_dict,
+    get_sample_list,
     get_panel_chrom,
     get_bioinfo_tools_version,
     generate_graph,
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.models.analysis import BalsamicConfigModel
+from BALSAMIC.models.analysis import ConfigModel
 
 LOG = logging.getLogger(__name__)
 
@@ -248,7 +248,11 @@ def case_config(
         }
     )
 
-    config_collection_dict = BalsamicConfigModel(
+    analysis_fastq_dir: str = get_analysis_fastq_files_directory(
+        case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
+    )
+
+    config_collection_dict = ConfigModel(
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
@@ -259,18 +263,20 @@ def case_config(
             "case_id": case_id,
             "gender": gender,
             "analysis_dir": analysis_dir,
-            "fastq_path": get_analysis_fastq_files_directory(
-                case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
-            ),
+            "fastq_path": analysis_fastq_dir,
             "analysis_type": "paired" if normal_sample_name else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
         },
         reference=reference_dict,
-        singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
+        singularity={
+            "image": os.path.join(balsamic_cache, balsamic_version, "containers")
+        },
         background_variants=background_variants,
-        samples=get_sample_dict(
-            tumor_sample_name=tumor_sample_name, normal_sample_name=normal_sample_name
+        samples=get_sample_list(
+            tumor_sample_name=tumor_sample_name,
+            normal_sample_name=normal_sample_name,
+            fastq_path=analysis_fastq_dir,
         ),
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
@@ -286,17 +292,22 @@ def case_config(
         if panel_bed
         else None,
     ).dict(by_alias=True, exclude_none=True)
-    LOG.info("Config file generated successfully")
+    LOG.info("Balsamic config model instantiated successfully")
+
+    result_path: Path = Path(config_collection_dict["analysis"]["result"])
+    log_path: Path = Path(config_collection_dict["analysis"]["log"])
+    script_path: Path = Path(config_collection_dict["analysis"]["script"])
+    benchmark_path: Path = Path(config_collection_dict["analysis"]["benchmark"])
+
+    # Create directories for results, logs, scripts and benchmark files
+    analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
+
+    for analysis_sub_dir in analysis_directories_list:
+        analysis_sub_dir.mkdir(exist_ok=True)
 
     config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
-    try:
-        generate_graph(config_collection_dict, config_path)
-        LOG.info(f"BALSAMIC Workflow has been configured successfully!")
-    except ValueError as e:
-        LOG.error(
-            f'BALSAMIC dag graph generation failed - {config_collection_dict["analysis"]["dag"]}',
-        )
-        raise click.Abort()
+    generate_graph(config_collection_dict, config_path)
+    LOG.info(f"BALSAMIC Workflow has been configured successfully!")

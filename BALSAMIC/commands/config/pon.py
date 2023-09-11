@@ -10,11 +10,11 @@ from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.utils.cli import (
     generate_graph,
     get_bioinfo_tools_version,
-    get_pon_sample_dict,
+    get_pon_sample_list,
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.models.analysis import PonBalsamicConfigModel
+from BALSAMIC.models.analysis import ConfigModel
 
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
@@ -77,7 +77,8 @@ LOG = logging.getLogger(__name__)
     "--fastq-path",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
-    help="Path directing to list of PON fastq samples.",
+    help="Path directing to list of PON fastq samples. NOTE: Fastq-files in directory requires this structure:"
+    " X_X_X_[sampleID]_XXXXXX_R_2.fastq.gz",
 )
 @click.option(
     "-g",
@@ -121,7 +122,7 @@ def pon_config(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
 
-    config_collection_dict = PonBalsamicConfigModel(
+    config_collection_dict = ConfigModel(
         QC={
             "adapter_trim": adapter_trim,
             "quality_trim": quality_trim,
@@ -137,9 +138,11 @@ def pon_config(
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
-        samples=get_pon_sample_dict(fastq_path),
+        samples=get_pon_sample_list(fastq_path),
         reference=reference_dict,
-        singularity=os.path.join(balsamic_cache, balsamic_version, "containers"),
+        singularity={
+            "image": os.path.join(balsamic_cache, balsamic_version, "containers")
+        },
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(
             bioinfo_tools=BIOINFO_TOOL_ENV,
@@ -147,17 +150,22 @@ def pon_config(
         ),
         panel={"capture_kit": panel_bed} if panel_bed else None,
     ).dict(by_alias=True, exclude_none=True)
-    LOG.info("PON config file generated successfully")
+    LOG.info("PON config model instantiated successfully")
+
+    result_path: Path = Path(config_collection_dict["analysis"]["result"])
+    log_path: Path = Path(config_collection_dict["analysis"]["log"])
+    script_path: Path = Path(config_collection_dict["analysis"]["script"])
+    benchmark_path: Path = Path(config_collection_dict["analysis"]["benchmark"])
+
+    # Create directories for results, logs, scripts and benchmark files
+    analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
+
+    for analysis_sub_dir in analysis_directories_list:
+        analysis_sub_dir.mkdir(exist_ok=True)
 
     config_path = Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"PON config file saved successfully - {config_path}")
 
-    try:
-        generate_graph(config_collection_dict, config_path)
-        LOG.info(f"BALSAMIC PON workflow has been configured successfully!")
-    except ValueError:
-        LOG.error(
-            f'BALSAMIC PON dag graph generation failed - {config_collection_dict["analysis"]["dag"]}'
-        )
-        raise click.Abort()
+    generate_graph(config_collection_dict, config_path)
+    LOG.info(f"BALSAMIC PON workflow has been configured successfully!")

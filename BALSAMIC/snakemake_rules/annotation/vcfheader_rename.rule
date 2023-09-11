@@ -15,7 +15,7 @@ rule vcfheader_rename_germline:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "genotype"},
         sample_name = "NORMAL",
-        sample_id = get_sample_id_by_type(config["samples"], "normal")
+        sample_id = config_model.get_sample_name_by_type(SampleType.NORMAL)
     threads:
         get_threads(cluster_config,'vcfheader_rename_germline')
     message:

@@ -134,7 +134,7 @@ def test_get_multiqc_data_source(multiqc_data_path):
     """test multiqc source extraction from multiqc_data.json analysis file"""
 
     # GIVEN input parameters and the multiqc data
-    sample = "ACC1"
+    sample = "tumor.ACC1"
     source_name_hs_metrics = "multiqc_picard_HsMetrics"
     source_name_dup = "multiqc_picard_dups"
 
@@ -142,8 +142,8 @@ def test_get_multiqc_data_source(multiqc_data_path):
         multiqc_data = json.load(f)
 
     # GIVEN an expected output
-    source_hs_metrics = "ACC1.sorted.mrkdup.hsmetric"
-    source_dup = "ACC1.sorted.mrkdup.txt"
+    source_hs_metrics = "ACC1.dedup.realign.hsmetric"
+    source_dup = "tumor.ACC1.dedup.metrics"
 
     # WHEN extracting the source of a specific sample and collection of metrics
     out_source_hs_metrics = get_multiqc_data_source(

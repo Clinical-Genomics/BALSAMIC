@@ -1,5 +1,6 @@
-import logging
 import os
+import logging
+
 import re
 import subprocess
 import sys
@@ -8,13 +9,18 @@ from io import StringIO
 from pathlib import Path
 from typing import Dict, Optional, List
 
+
 import click
 import graphviz
 import snakemake
 import yaml
+
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
+from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName, PonParams
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
@@ -249,23 +255,114 @@ def get_bioinfo_tools_version(
     return bioinfo_tools_version
 
 
-def get_sample_dict(
-    tumor_sample_name: str, normal_sample_name: Optional[str]
-) -> Dict[str, dict]:
-    """Returns a sample dictionary given the names of the tumor and/or normal samples."""
-    sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
+def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoModel]:
+    """Returns a dictionary of fastq-pattern/s and FastqInfoModel instance/s for a sample.
+
+    Args:
+        sample_name: (str). The name of the sample for which fastq-files will be searched for in the fastq_path.
+        fastq_path: (str). Path to where the fastq-files should be found for the supplied sample_name.
+
+    Returns:
+        fastq_dict: (Dict) with format:
+            "[fastq_patternX]" (str): FastqInfoModel.
+    """
+    fastq_dict: Dict[str, Dict] = {}
+
+    for suffix_id, suffix_values in FASTQ_SUFFIXES.items():
+        suffix_fwd = suffix_values[FastqName.FWD]
+        suffix_rev = suffix_values[FastqName.REV]
+
+        fastq_fwd_regex = re.compile(
+            r"(^|.*_)" + sample_name + r"_.*" + suffix_fwd + r"$"
+        )
+
+        fwd_fastqs = [
+            f"{fastq_path}/{fastq}"
+            for fastq in os.listdir(fastq_path)
+            if fastq_fwd_regex.match(fastq)
+        ]
+
+        for fwd_fastq in fwd_fastqs:
+            fastq_pair_pattern = Path(fwd_fastq).name.replace(suffix_fwd, "")
+            if fastq_pair_pattern in fastq_dict:
+                error_message = (
+                    f"Fastq name conflict. Fastq pair pattern {fastq_pair_pattern}"
+                    f" already assigned to dictionary for sample: {sample_name}"
+                )
+                LOG.error(error_message)
+                raise BalsamicError(error_message)
+
+            fastq_dict[fastq_pair_pattern] = {
+                "fwd": fwd_fastq,
+                "rev": fwd_fastq.replace(suffix_fwd, suffix_rev),
+            }
+
+    if not fastq_dict:
+        error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
+        LOG.error(error_message)
+        raise BalsamicError(error_message)
+
+    return fastq_dict
+
+
+def get_sample_list(
+    tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
+) -> List[Dict]:
+    """Returns a list of SampleInstanceModel/s given the names of the tumor and/or normal samples.
+    Args:
+        tumor_sample_name (str). The sample_name of the tumor.
+        normal_sample_name (str). The sample_name of the normal, if it exists.
+        fastq_path: (str). The path to the fastq-files for the supplied samples.
+
+    Returns:
+        sample_list: List containing SampleInstanceModel/s.
+    """
+    sample_list: List[Dict] = [
+        {
+            "name": tumor_sample_name,
+            "type": SampleType.TUMOR,
+            "fastq_info": get_fastq_info(tumor_sample_name, fastq_path),
+        }
+    ]
+
     if normal_sample_name:
-        sample_dict.update({normal_sample_name: {"type": "normal"}})
-    return sample_dict
+        sample_list.append(
+            {
+                "name": normal_sample_name,
+                "type": SampleType.NORMAL,
+                "fastq_info": get_fastq_info(normal_sample_name, fastq_path),
+            }
+        )
+
+    return sample_list
 
 
-def get_pon_sample_dict(directory: str) -> Dict[str, dict]:
-    """Returns a PON sample dictionary."""
-    sample_dict: Dict[str, dict] = {}
-    for file in Path(directory).glob("*.fastq.gz"):
-        sample_name: str = file.name.split("_")[-4]
-        sample_dict.update({sample_name: {"type": "normal"}})
-    return sample_dict
+def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
+    """Returns a list of SampleInstanceModels to be used in PON generation."""
+    sample_list: List[SampleInstanceModel] = []
+    sample_names = set()
+
+    for fastq in Path(fastq_path).glob("*.fastq.gz"):
+        sample_names.add(fastq.name.split("_")[-4])
+
+    if len(sample_names) < PonParams.MIN_PON_SAMPLES:
+        error_message = (
+            f"Number of samples detected in supplied fastq path ({len(sample_names)}),"
+            f"not sufficient for PON generation. Sample names detected: {sample_names}"
+        )
+        LOG.error(error_message)
+        raise BalsamicError(error_message)
+
+    for sample_name in sample_names:
+        sample_list.append(
+            {
+                "name": sample_name,
+                "type": SampleType.NORMAL,
+                "fastq_info": get_fastq_info(sample_name, fastq_path),
+            }
+        )
+
+    return sample_list
 
 
 def generate_graph(config_collection_dict, config_path):
@@ -308,16 +405,15 @@ def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> 
 
     for delivery_file in delivery_json["files"]:
         file_tags = delivery_file["tag"].split(",")
-        for sample in sample_config_dict["samples"]:
-            sample_type = sample_config_dict["samples"][sample]["type"]
-            if sample == delivery_file["id"]:
-                for tag_index, tag in enumerate(file_tags):
-                    if tag == sample or tag == sample.replace("_", "-"):
-                        file_tags[tag_index] = sample
-                if sample not in file_tags:
-                    file_tags.append(sample)
+        sample_list = sample_config_dict["samples"]
+        for sample_dict in sample_list:
+            sample_type = sample_dict["type"]
+            sample_name = sample_dict["name"]
+            if sample_name == delivery_file["id"]:
+                if sample_name not in file_tags:
+                    file_tags.append(sample_name)
             if sample_type == delivery_file["id"]:
-                delivery_file["id"] = sample
+                delivery_file["id"] = sample_name
             if sample_type in file_tags:
                 file_tags.remove(sample_type)
         delivery_file["tag"] = list(set(file_tags))
@@ -380,7 +476,7 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
                 )
 
         return analysis_fastq_path.as_posix()
-    return fastq_path
+    return Path(fastq_path).as_posix()
 
 
 def validate_cache_version(

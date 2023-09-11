@@ -10,10 +10,10 @@ rule picard_CollectHsMetrics:
     input:
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
         bed = config["panel"]["capture_kit"],
-        bam = bam_dir + "{sample}.sorted." + picarddup + ".bam",
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"],
     output:
-        mrkdup = bam_dir + "{sample}.sorted." + picarddup + ".hsmetric"
+        mrkdup = bam_dir + "{sample}.dedup.realign.hsmetric"
     benchmark:
         Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
     singularity:
@@ -53,10 +53,10 @@ METRIC_ACCUMULATION_LEVEL=ALL_READS;
 
 rule picard_CollectAlignmentSummaryMetrics:
     input:
-        bam = bam_dir + "{sample}.sorted.bam",
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"]
     output:
-        bam_dir + "{sample}.sorted.alignmetric"
+        bam_dir + "{sample}.dedup.realign.alignmetric"
     benchmark:
         Path(benchmark_dir, "CollectAlignmentSummaryMetrics_" + "{sample}.tsv").as_posix()
     singularity:
@@ -88,10 +88,10 @@ METRIC_ACCUMULATION_LEVEL=LIBRARY;
 
 rule picard_CollectInsertSizeMetrics:
     input:
-        bam = bam_dir + "{sample}.sorted.bam"
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
     output:
-        pdf = bam_dir + "{sample}.sorted.insertsizemetric.pdf",
-        txt = bam_dir + "{sample}.sorted.insertsizemetric"
+        pdf = bam_dir + "{sample}.dedup.realign.insertsizemetric.pdf",
+        txt = bam_dir + "{sample}.dedup.realign.insertsizemetric"
     benchmark:
         Path(benchmark_dir, "picard_CollectInsertSizeMetrics_" + "{sample}.tsv").as_posix()
     singularity:

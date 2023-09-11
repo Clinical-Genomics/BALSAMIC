@@ -6,12 +6,12 @@
 rule mergeBam_tumor_umiconsensus:
     input:
         fasta = config["reference"]["reference_genome"],
-        bam = expand(umi_dir + "{mysample}_consensusfiltered_umi.bam", mysample = tumor_sample)
+        bam = expand(umi_dir + "{sample}_consensusfiltered_umi.bam", sample = tumor_sample)
     output:
         bam = umi_dir + "tumor_umi_consensusfiltered.merged.bam",
         cram = umi_dir + "tumor_umi_consensusfiltered.merged.cram"
     benchmark:
-        Path(benchmark_dir,'mergeBam_tumor_umiconsensus_' + "{mysample}.tsv".format(mysample=tumor_sample)).as_posix()
+        Path(benchmark_dir,'mergeBam_tumor_umiconsensus_' + "{sample}.tsv".format(sample=tumor_sample)).as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:

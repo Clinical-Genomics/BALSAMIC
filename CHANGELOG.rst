@@ -6,6 +6,8 @@ Added:
 * Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
+* Samtools stats, flagstat, idxstat to WGS workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Functionality for dynamically assigning fastq-info to sample dict in config from input fastq-dir https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Annotate SNVs with cancer germline SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
 * Annotate SNVs with somatic SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
@@ -21,8 +23,15 @@ Added:
 
 Changed:
 ^^^^^^^^
+* Changed samples in case_config.json from being a dict to a list of dicts  https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
+* Refactor bam and fastq inputs in snakemake to call pydantic model functions https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Standardised alignment workflows to WGS-workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Implemented parallel trimming and alignment in all workflows per lane https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* All bam-QC tools take the final dedup.realign bamfile as input https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Validation of pydantic models done both during config and run https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Refactored fastp rules, and changed order of UMI-trimming and quality trimming https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
 * Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
 * Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
@@ -46,7 +55,9 @@ Fixed:
 Removed:
 ^^^^^^^^
 * Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
+* Quality trimming of fastqs for UMI workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
+
 
 [12.0.2]
 --------

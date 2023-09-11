@@ -12,8 +12,8 @@ rule cnvkit_paired:
     input:
         access_bed = config["reference"]["access_regions"],
         fasta = config["reference"]["reference_genome"],
-        bamN = bam_dir + "normal.merged" + ".bam",
-        bamT = bam_dir + "tumor.merged" + ".bam",
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         snv_vcf_tumor = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
