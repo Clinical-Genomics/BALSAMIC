@@ -1,22 +1,56 @@
-FROM continuumio/miniconda3:4.10.3-alpine
+FROM python:3.11-slim AS builder
 
-LABEL base.image="continuumio/miniconda3:4.10.3-alpine"
-LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
-LABEL about.documentation="https://balsamic.readthedocs.io/"
+LABEL base.image="python:3.11-slim"
+LABEL maintainer="Clinical Genomics"
+LABEL about.contact="support@clinicalgenomics.se"
+LABEL software="cnvpytor"
+LABEL software.version="1.3.1"
+LABEL about.summary="A tool for CNV discovery and genotyping from depth-of-coverage by mapped reads"
+LABEL about.home="https://github.com/abyzovlab/CNVpytor"
+LABEL about.documentation="https://github.com/abyzovlab/CNVpytor/wiki"
 LABEL about.license="MIT License (MIT)"
-LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-ENV PATH="/opt/conda/bin/:${PATH}"
-
-RUN apk add --no-cache bash gcc git
-
-ARG WORK_DIR=project
 ARG CONTAINER_NAME
+ENV WORK_DIR /opt
+ENV VENV ${WORK_DIR}/venv
 
-# Copy all project files
-COPY . /${WORK_DIR}
+RUN apt-get update && \
+     apt-get -y upgrade && \
+     apt-get -y install -y --no-install-recommends git && \
+     apt-get clean && \
+     rm -rf /var/lib/apt/lists/*
 
-RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+RUN python -m pip install --upgrade pip
+RUN python -m venv ${VENV}
+ENV PATH="${VENV}/bin:$PATH"
 
-# Clean work environment
-RUN rm -rf /${WORK_DIR:?} && conda clean --all --yes
+RUN pip install seaborn==0.12.2
+
+RUN cd /opt &&\
+    git clone https://github.com/abyzovlab/CNVpytor.git &&\
+    cd /opt/${CONTAINER_NAME}/ &&\
+    git checkout v1.3.1 &&\
+	pip install --no-cache-dir -e . && \
+    cnvpytor -download
+
+from python:3.11-slim
+
+RUN apt-get update && \
+     apt-get -y upgrade && \
+     apt-get -y install -y --no-install-recommends tabix && \
+     apt-get clean && \
+     rm -rf /var/lib/apt/lists/*
+
+ENV WORK_DIR /opt
+ENV VENV ${WORK_DIR}/venv
+
+COPY --from=builder /opt /opt
+
+ENV PATH="${VENV}/bin:$PATH"
+
+RUN adduser --disabled-password --gecos '' ubuntu &&\
+chsh -s /bin/bash && mkdir -p /home/ubuntu
+
+USER    ubuntu
+WORKDIR /home/ubuntu
+CMD ["/bin/bash"]
