@@ -283,7 +283,7 @@ OPTION_PON_VERSION = click.option(
     "-v",
     "--version",
     default="v1",
-    type=str,
+    type=click.STRING,
     help="Version of the PON file to be generated",
 )
 
