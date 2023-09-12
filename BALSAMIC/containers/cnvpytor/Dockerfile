@@ -15,9 +15,9 @@ ENV PATH="${VENV}/bin:$PATH"
 
 RUN pip install --no-cache-dir seaborn==0.12.2
 
-RUN cd /opt && \
+RUN cd ${WORK_DIR} && \
     git clone https://github.com/abyzovlab/CNVpytor.git && \
-    cd /opt/CNVpytor/ && \
+    cd ${WORK_DIR}/CNVpytor/ && \
     git checkout v1.3.1 && \
     pip install --no-cache-dir . && \
     cnvpytor -download
@@ -48,7 +48,7 @@ COPY --from=builder ${WORK_DIR} ${WORK_DIR}
 ENV PATH="${VENV}/bin:$PATH"
 
 RUN adduser --disabled-password --gecos '' ubuntu && \
-chsh -s /bin/bash && mkdir -p /home/ubuntu
+    chsh -s /bin/bash && mkdir -p /home/ubuntu
 
 USER ubuntu
 WORKDIR /home/ubuntu
