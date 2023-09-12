@@ -67,6 +67,7 @@ def filter(ctx: click.Context):
         vcfpy.OrderedDict(
             [
                 ("ID", "AF_T_MAX"),
+                ("Number", "."),
                 ("Type", "Float"),
                 (
                     "Description",
@@ -80,6 +81,7 @@ def filter(ctx: click.Context):
         vcfpy.OrderedDict(
             [
                 ("ID", "AF_N_MAX"),
+                ("Number", "."),
                 ("Type", "Float"),
                 (
                     "Description",
@@ -364,6 +366,7 @@ def rescue_bnds(ctx: click.Context):
         vcfpy.OrderedDict(
             [
                 ("ID", "BND_ID"),
+                ("Number", "."),
                 ("Type", "String"),
                 ("Description", "Unique ID for BND-variants, SVID + REGIONA"),
             ]

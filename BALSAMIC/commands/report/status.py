@@ -1,51 +1,38 @@
-import os
-import logging
+"""Balsamic status report CLI."""
 import json
+import logging
+import os
+
 import click
 import snakemake
-
 from colorclass import Color
 
-from BALSAMIC.utils.cli import get_snakefile
+from BALSAMIC.commands.options import (
+    OPTION_SAMPLE_CONFIG,
+    OPTION_PRINT_FILES,
+    OPTION_SHOW_ONLY_MISSING_FILES,
+)
 from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.cli import get_file_status_string
+from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.rule import get_result_dir
 
 LOG = logging.getLogger(__name__)
 
 
-@click.command(
-    "status",
-    short_help="Creates a YAML file with output from variant caller and alignment.",
-)
-@click.option(
-    "-s",
-    "--sample-config",
-    required=True,
-    help="Sample config file. Output of balsamic config sample",
-)
-@click.option(
-    "-m",
-    "--show-only-missing",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="Only show missing files.",
-)
-@click.option(
-    "-p",
-    "--print-files",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="Print list of files. Otherwise only final count will be printed.",
-)
+@click.command("status", short_help="Print the analysis file status.")
+@OPTION_PRINT_FILES
+@OPTION_SAMPLE_CONFIG
+@OPTION_SHOW_ONLY_MISSING_FILES
 @click.pass_context
-def status(context, sample_config, show_only_missing, print_files):
-    """
-    cli for status sub-command.
-    """
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+def status(
+    context: click.Context,
+    print_files: bool,
+    sample_config: str,
+    show_only_missing: bool,
+):
+    """Analysis status CLI command."""
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.debug("Reading input sample config")
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)
@@ -53,8 +40,7 @@ def status(context, sample_config, show_only_missing, print_files):
     result_dir = get_result_dir(sample_config_dict)
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
-    reference_genome = sample_config_dict["reference"]["reference_genome"]
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
 
     if os.path.isfile(os.path.join(result_dir, "analysis_finish")):
         snakemake.snakemake(

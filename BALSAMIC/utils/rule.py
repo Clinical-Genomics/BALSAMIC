@@ -1,34 +1,25 @@
 import os
 import re
-from typing import Optional
 
 import toml
+import glob
+from typing import List, Dict
 import logging
 from pathlib import Path
 import snakemake
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import find_file_index
-from BALSAMIC.constants.common import (
-    MUTATION_TYPE,
-    MUTATION_CLASS,
-    SEQUENCING_TYPE,
-    WORKFLOW_SOLUTION,
-    ANALYSIS_TYPES,
+from BALSAMIC.constants.analysis import (
+    AnalysisType,
+    SequencingType,
+    MutationOrigin,
+    MutationType,
+    WorkflowSolution,
 )
 from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
+from BALSAMIC.models.analysis import ConfigModel
 
 LOG = logging.getLogger(__name__)
-
-
-def get_chrom(panelfile):
-    """
-    input: a panel bedfile
-    output: list of chromosomes in the bedfile
-    """
-
-    lines = [line.rstrip("\n") for line in open(panelfile, "r")]
-    chrom = list(set([s.split("\t")[0] for s in lines]))
-    return chrom
 
 
 def get_vcf(config, var_caller, sample):
@@ -78,19 +69,19 @@ def get_variant_callers(
     """
 
     valid_variant_callers = list()
-    if mutation_type not in MUTATION_TYPE:
+    if mutation_type not in set(MutationType):
         raise WorkflowRunError(f"{mutation_type} is not a valid mutation type.")
 
-    if workflow_solution not in WORKFLOW_SOLUTION:
+    if workflow_solution not in set(WorkflowSolution):
         raise WorkflowRunError(f"{workflow_solution} is not a valid workflow solution.")
 
-    if analysis_type not in ANALYSIS_TYPES:
+    if analysis_type not in set(AnalysisType):
         raise WorkflowRunError(f"{analysis_type} is not a valid analysis type.")
 
-    if mutation_class not in MUTATION_CLASS:
+    if mutation_class not in set(MutationOrigin):
         raise WorkflowRunError(f"{mutation_class} is not a valid mutation class.")
 
-    if sequencing_type not in SEQUENCING_TYPE:
+    if sequencing_type not in set(SequencingType):
         raise WorkflowRunError(f"{sequencing_type} is not a valid sequencing type.")
 
     for variant_caller_name, variant_caller_params in config["vcf"].items():
@@ -135,27 +126,14 @@ def get_capture_kit(config):
         return None
 
 
-def get_sample_id_by_type(samples: dict, type: str) -> str:
-    """Return sample ID given a sample biological type."""
-    for sample_id in samples:
-        if samples[sample_id]["type"] == type:
-            return sample_id
-    LOG.error(f"There is no sample ID for the {type} sample type")
-    raise BalsamicError
-
-
-def get_sample_type_from_prefix(config, sample):
+def get_sample_type_from_sample_name(config, sample_name):
     """
-    input: case config file from BALSAMIC
+    input: case config file from BALSAMIC, and sample_name
     output: sample type
     """
-
-    try:
-        return config["samples"][sample]["type"]
-    except KeyError:
-        raise KeyError(
-            f"The provided sample prefix {sample} does not exist for {config['analysis']['case_id']}."
-        )
+    for sample in config["samples"]:
+        if sample_name == sample["name"]:
+            return sample["type"]
 
 
 def get_result_dir(config):
@@ -165,21 +143,6 @@ def get_result_dir(config):
     """
 
     return config["analysis"]["result"]
-
-
-def get_picard_mrkdup(config):
-    """
-    input: sample config file output from BALSAMIC
-    output: mrkdup or rmdup strings
-    """
-
-    picard_str = "mrkdup"
-
-    if "picard_rmdup" in config["QC"]:
-        if config["QC"]["picard_rmdup"] == True:
-            picard_str = "rmdup"
-
-    return picard_str
 
 
 def get_script_path(script_name: str):
@@ -214,7 +177,6 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
     output_files = list()
     # Extract housekeeper tags from rule's params value
     housekeeper = getattr(rules, rule_name).params.housekeeper_id
-
     # Get temp_output files
     temp_files = getattr(rules, rule_name).rule.temp_output
 
@@ -224,7 +186,6 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
     for output_name in output_file_names:
         output_file = getattr(rules, rule_name).output[output_name]
 
-        LOG.debug("Found following potential output files: {}".format(output_file))
         for file_wildcard_list in snakemake.utils.listfiles(output_file):
             file_to_store = file_wildcard_list[0]
             # Do not store file if it is a temp() output
@@ -238,7 +199,6 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
 
             file_extension = get_file_extension(file_to_store)
             file_to_store_index = find_file_index(file_to_store)
-
             base_tags = list(file_wildcard_list[1])
             base_tags.append(output_name)
 
@@ -263,7 +223,7 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             composit_tag = "-".join([housekeeper["tags"], output_name])
             file_tags = base_tags + [composit_tag]
 
-            # replace all instsances of "_" with "-", since housekeeper doesn't like _
+            # replace all instances of "_" with "-", since housekeeper doesn't like _
             file_tags = [t.replace("_", "-") for t in file_tags]
 
             LOG.debug("Found the following delivery id: {}".format(delivery_id))
@@ -328,28 +288,6 @@ def get_delivery_id(
     return delivery_id
 
 
-def get_reference_output_files(
-    reference_files_dict: dict, file_type: str, gzip: bool = None
-) -> list:
-    """Returns list of files matching a file_type from reference files
-
-    Args:
-        reference_files_dict: A validated dict model from reference
-        file_type: a file type string, e.g. vcf, fasta
-        gzip: a list of boolean
-
-    Returns:
-        ref_vcf_list: list of file_type files that are found in reference_files_dict
-    """
-    ref_vcf_list = []
-    for reference_key, reference_item in reference_files_dict.items():
-        if reference_item["file_type"] == file_type:
-            if gzip is not None and reference_item["gzip"] != gzip:
-                continue
-            ref_vcf_list.append(reference_item["output_file"])
-    return ref_vcf_list
-
-
 def get_clinical_snv_observations(config: dict) -> str:
     """Returns path for clinical snv observations
 
@@ -374,6 +312,19 @@ def get_cancer_germline_snv_observations(config: dict) -> str:
 
     """
     return Path(config["reference"]["cancer_germline_snv_observations"]).as_posix()
+
+
+def get_cancer_somatic_snv_observations(config: dict) -> str:
+    """Returns path for cancer somatic snv observations
+
+    Args:
+        config: a config dictionary
+
+    Returns:
+        Path for cancer-somatic-snv-observations vcf file
+
+    """
+    return Path(config["reference"]["cancer_somatic_snv_observations"]).as_posix()
 
 
 def get_swegen_snv(config: dict) -> str:
@@ -402,6 +353,19 @@ def get_clinical_sv_observations(config: dict) -> str:
     return Path(config["reference"]["clinical_sv_observations"]).as_posix()
 
 
+def get_somatic_sv_observations(config: dict) -> str:
+    """Returns path for somatic sv observations
+
+    Args:
+        config: a config dictionary
+
+    Returns:
+        Path for cancer_somatic_sv_observations vcf file
+
+    """
+    return Path(config["reference"]["cancer_somatic_sv_observations"]).as_posix()
+
+
 def get_swegen_sv(config: dict) -> str:
     """Returns path for swegen sv frequencies
 
@@ -415,18 +379,6 @@ def get_swegen_sv(config: dict) -> str:
     return Path(config["reference"]["swegen_sv_frequency"]).as_posix()
 
 
-def get_toml(annotation: dict) -> str:
-    """Returns annotation in toml format
-
-    Args:
-        annotation: a dict containing annotation resource
-
-    Returns:
-        toml_annotation: a string in toml format
-    """
-    return toml.dumps(annotation)
-
-
 def dump_toml(annotations: list) -> str:
     """Returns list of converted annotation in toml format
 
@@ -438,5 +390,67 @@ def dump_toml(annotations: list) -> str:
     """
     toml_annotations = ""
     for annotation in annotations:
-        toml_annotations += get_toml(annotation)
+        toml_annotations += toml.dumps(annotation)
     return toml_annotations
+
+
+def get_fastp_parameters(config_model: ConfigModel) -> Dict:
+    """Returns a dictionary with parameters for the fastp rules.
+
+    Args:
+        config_model: The case config json instantiated as the ConfigModel
+
+    Returns:
+        fastp_parameters_dict: Dictionary with 1 or 2 lists, depending on if sequencing type has UMIs or not.
+
+    """
+    fastp_parameters_dict = {}
+
+    # Add UMI trimming for TGA
+    if config_model.analysis.sequencing_type != SequencingType.WGS:
+        fastp_parameters_dict["fastp_trim_umi"] = [
+            "--umi",
+            "--umi_loc per_read",
+            "--umi_len",
+            config_model.QC.umi_trim_length,
+            "--umi_prefix",
+            "UMI",
+            "--dont_eval_duplication",
+        ]
+
+    # Add quality and adapter trimming parameters
+    fastp_trim_qual = list()
+    fastp_trim_adapter = list()
+    if config_model.QC.quality_trim:
+        fastp_trim_qual.extend(
+            [
+                "--trim_tail1",
+                "1",
+                "--n_base_limit",
+                "50",
+                "--length_required",
+                config_model.QC.min_seq_length,
+                "--low_complexity_filter",
+                "--trim_poly_g",
+            ]
+        )
+    else:
+        fastp_trim_qual.extend(
+            [
+                "--disable_quality_filtering",
+                "--disable_length_filtering",
+                "--disable_trim_poly_g",
+            ]
+        )
+
+    if not config_model.QC.adapter_trim:
+        fastp_trim_adapter.extend(["--disable_adapter_trimming"])
+    else:
+        fastp_trim_adapter.extend(["--detect_adapter_for_pe"])
+
+    fastp_trim_qual.extend(["--dont_eval_duplication"])
+
+    fastp_parameters_dict["fastp_trim_qual"] = fastp_trim_qual
+    fastp_parameters_dict["fastp_trim_adapter"] = fastp_trim_adapter
+
+    return fastp_parameters_dict

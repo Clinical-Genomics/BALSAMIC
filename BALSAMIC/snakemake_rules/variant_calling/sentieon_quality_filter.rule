@@ -4,7 +4,7 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
     rule bcftools_quality_filter_tnscope_tumor_only:
       input:
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-        wgs_calling_file = config["reference"]["wgs_calling_interval"],
+        wgs_calling_file = config["reference"]["wgs_calling_regions"],
       output:
         vcf_snv_research = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
       benchmark:
@@ -21,7 +21,7 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
         sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
         case_name = config["analysis"]["case_id"],
-      threads: 
+      threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_only')
       message:
         "Quality filtering WGS tumor-only tnscope variants using bcftools for {params.case_name}"
@@ -36,7 +36,7 @@ bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include 'FORMAT/AF < {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
@@ -49,7 +49,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
     rule bcftools_quality_filter_tnscope_tumor_normal:
       input:
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-        wgs_calling_file = config["reference"]["wgs_calling_interval"],
+        wgs_calling_file = config["reference"]["wgs_calling_regions"],
       output:
         vcf_snv_research = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
       benchmark:

@@ -1,77 +1,95 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 import os
+import re
 import logging
 import tempfile
+import glob
 
 from pathlib import Path
+from typing import List, Dict
 from yapf.yapflib.yapf_api import FormatFile
 
 from snakemake.exceptions import RuleException, WorkflowError
 
 from PyPDF2 import PdfFileMerger
 
+from BALSAMIC.constants.paths import SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR, BALSAMIC_DIR
 from BALSAMIC.utils.exc import BalsamicError
 
 from BALSAMIC.utils.cli import (check_executable, generate_h5)
-from BALSAMIC.utils.io import write_json, read_yaml
+from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
 
-from BALSAMIC.utils.models import VarCallerFilter, BalsamicWorkflowConfig
+from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, ConfigModel
 
 from BALSAMIC.utils.workflowscripts import plot_analysis
 
-from BALSAMIC.utils.rule import (get_variant_callers, get_rule_output, get_result_dir, get_vcf, get_picard_mrkdup,
-                                 get_sample_id_by_type, get_threads, get_script_path, get_sequencing_type,
+from BALSAMIC.utils.rule import (get_fastp_parameters, get_variant_callers, get_rule_output, get_result_dir, get_vcf,
+                                 get_threads, get_script_path, get_sequencing_type,
                                  get_capture_kit,
                                  get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
-                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations)
+                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
+                                 get_cancer_somatic_snv_observations, get_somatic_sv_observations)
 
-from BALSAMIC.constants.common import SENTIEON_DNASCOPE, SENTIEON_TNSCOPE, RULE_DIRECTORY, MUTATION_TYPE
+from BALSAMIC.constants.analysis import MutationType, FastqName, SampleType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
 from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
-from BALSAMIC.constants.workflow_rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 
+# Initialize ConfigModel
+config_model = ConfigModel.parse_obj(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
 LOG = logging.getLogger(__name__)
-logging.getLogger("filelock").setLevel("WARN")
+
+# Get case id/name
+case_id: str = config_model.analysis.case_id
+# Get analysis dir
+analysis_dir_home: str = config_model.analysis.analysis_dir
+analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
+# Get result dir
+result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
 # Create a temporary directory with trailing /
-tmp_dir = os.path.join(get_result_dir(config), "tmp", "" )
+tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
-# Set case id/name
-case_id = config["analysis"]["case_id"]
-
 # Directories
-fastq_dir =  config["analysis"]["fastq_path"]
-analysis_dir = config["analysis"]["analysis_dir"] + "/" +case_id + "/"
-benchmark_dir = config["analysis"]["benchmark"]
-analysis_fastq_dir = get_result_dir(config) + "/fastq/"
-concat_dir = get_result_dir(config) + "/concat/"
-bam_dir = get_result_dir(config) + "/bam/"
-cnv_dir = get_result_dir(config) + "/cnv/"
-fastqc_dir = get_result_dir(config) + "/fastqc/"
-result_dir = get_result_dir(config) + "/"
-vcf_dir = get_result_dir(config) + "/vcf/"
-vep_dir = get_result_dir(config) + "/vep/"
-qc_dir = get_result_dir(config) + "/qc/"
-delivery_dir = get_result_dir(config) + "/delivery/"
-umi_dir = get_result_dir(config) + "/umi/"
-umi_qc_dir = qc_dir + "umi_qc/"
-singularity_image = config['singularity']['image']
+input_fastq_dir: str = config_model.analysis.fastq_path + "/"
+benchmark_dir: str = config_model.analysis.benchmark
+fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
+bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
+cnv_dir: str = Path(result_dir, "cnv").as_posix() + "/"
+fastqc_dir: str = Path(result_dir, "fastqc").as_posix() + "/"
+vcf_dir: str = Path(result_dir, "vcf").as_posix() + "/"
+vep_dir: str = Path(result_dir, "vep").as_posix() + "/"
+qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
+delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
+umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
+umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
+
 
 # Annotations
 research_annotations = []
 clinical_annotations = []
 clinical_snv_obs = ""
 cancer_germline_snv_obs = ""
+cancer_somatic_snv_obs = ""
 swegen_snv = ""
 clinical_sv = ""
+somatic_sv = ""
 swegen_sv = ""
+
+# Run information
+singularity_image: str = config_model.singularity['image']
+sample_names: List[str] = config_model.get_all_sample_names()
+tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
+if config_model.analysis.analysis_type == "paired":
+    normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
+
 
 # vcfanno annotations
 research_annotations.append( {
@@ -104,6 +122,7 @@ research_annotations.append( {
 }
 )
 
+
 if "swegen_snv_frequency" in config["reference"]:
     research_annotations.append( {
         'annotation': [{
@@ -125,7 +144,7 @@ if "clinical_snv_observations" in config["reference"]:
         }]
     }
     )
-    clinical_snv_obs = get_clinical_snv_observations(config)
+    clinical_snv_obs: str = get_clinical_snv_observations(config)
 
 if "cancer_germline_snv_observations" in config["reference"]:
     clinical_annotations.append( {
@@ -137,18 +156,30 @@ if "cancer_germline_snv_observations" in config["reference"]:
         }]
     }
     )
-    cancer_germline_snv_obs = get_cancer_germline_snv_observations(config)
+    cancer_germline_snv_obs: str = get_cancer_germline_snv_observations(config)
+
+if "cancer_somatic_snv_observations" in config["reference"]:
+    clinical_annotations.append( {
+        'annotation': [{
+            'file': get_cancer_somatic_snv_observations(config),
+            'fields': ["Frq", "Obs", "Hom"],
+            'ops': ["self", "self", "self"],
+            'names': ["Cancer_Somatic_Frq", "Cancer_Somatic_Obs", "Cancer_Somatic_Hom"]
+        }]
+    }
+    )
+    cancer_somatic_snv_obs: str = get_cancer_somatic_snv_observations(config)
 
 if "clinical_sv_observations" in config["reference"]:
-    clinical_sv = get_clinical_sv_observations(config)
+    clinical_sv: str = get_clinical_sv_observations(config)
 
+if "cancer_somatic_sv_observations" in config["reference"]:
+    somatic_sv: str = get_somatic_sv_observations(config)
 
 if "swegen_sv_frequency" in config["reference"]:
-    swegen_sv = get_swegen_sv(config)
+    swegen_sv: str = get_swegen_sv(config)
 
 
-# picarddup flag
-picarddup = get_picard_mrkdup(config)
 
 # Varcaller filter settings
 COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
@@ -156,17 +187,15 @@ VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
 
+# Fastp parameters
+fastp_parameters: Dict = get_fastp_parameters(config_model)
+
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
-
-# Sample names for tumor or normal
-tumor_sample = get_sample_id_by_type(config["samples"], "tumor")
-if config['analysis']['analysis_type'] == "paired":
-    normal_sample = get_sample_id_by_type(config["samples"], "normal")
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
@@ -182,8 +211,8 @@ try:
     else:
         config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE
+    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
+    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
 
 except KeyError as error:
     LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
@@ -244,7 +273,7 @@ germline_caller = []
 somatic_caller = []
 somatic_caller_cnv = []
 somatic_caller_sv = []
-for m in MUTATION_TYPE:
+for m in set(MutationType):
     germline_caller_balsamic = get_variant_callers(config=config,
                                             analysis_type=config['analysis']['analysis_type'],
                                             workflow_solution="BALSAMIC",
@@ -339,6 +368,9 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller = [var_caller for var_caller in somatic_caller if "umi" not in var_caller]
     somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
 
+# Add rule for DRAGEN
+if "dragen" in config:
+    rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
@@ -346,13 +378,13 @@ LOG.info(f"The following somatic variant callers will be included in the workflo
 
 
 for r in rules_to_include:
-    include: Path(RULE_DIRECTORY, r).as_posix()
+    include: Path(BALSAMIC_DIR, r).as_posix()
 
 # Define common and analysis specific outputs
 quality_control_results = [
-    os.path.join(qc_dir,case_id + "_metrics_deliverables.yaml"),
-    os.path.join(qc_dir, "multiqc_report.html"),
-    os.path.join(qc_dir, "multiqc_data/multiqc_data.json")
+    Path(qc_dir, case_id + "_metrics_deliverables.yaml").as_posix(),
+    Path(qc_dir, "multiqc_report.html").as_posix(),
+    Path(qc_dir, "multiqc_data/multiqc_data.json").as_posix()
 ]
 
 # Analysis results
@@ -411,7 +443,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     )
     # UMI
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
-        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth",sample=config["samples"]))
+        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config_model.get_all_sample_names()))
         if background_variant_file:
             analysis_specific_results.extend(
                 expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])
@@ -493,7 +525,7 @@ if 'benchmark_plots' in config:
 
 if 'delivery' in config:
     wildcard_dict = {
-        "sample": list(config["samples"].keys())+["tumor", "normal"],
+        "sample": sample_names,
         "case_name": case_id,
         "allow_missing": True
     }
@@ -526,19 +558,19 @@ if 'delivery' in config:
         output_files_ready.extend(files_to_deliver)
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
-    delivery_ready = os.path.join(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk")
+    delivery_ready = Path(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk").as_posix()
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
 
 
 wildcard_constraints:
-    sample = "|".join(list(config["samples"]))
+    sample = "|".join(sample_names)
 
 rule all:
     input:
         quality_control_results + analysis_specific_results
     output:
-        finish_file = os.path.join(get_result_dir(config), "analysis_finish")
+        finish_file = Path(get_result_dir(config), "analysis_finish").as_posix()
     params:
         tmp_dir = tmp_dir,
         case_name = config["analysis"]["case_id"],
@@ -548,7 +580,7 @@ rule all:
         import datetime
         import shutil
 
-        from BALSAMIC.utils.qc_metrics import validate_qc_metrics
+        from BALSAMIC.utils.metrics import validate_qc_metrics
 
         # Perform validation of extracted QC metrics
         try:
@@ -557,12 +589,11 @@ rule all:
             LOG.error(val_exc)
             raise BalsamicError
 
-        # Delete a temporal directory tree
+        # Remove temporary directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
         # Finish timestamp file
-        with open(str(output.finish_file), mode="w") as finish_file:
-            finish_file.write("%s\n" % datetime.datetime.now())
+        write_finish_file(file_path=output.finish_file)

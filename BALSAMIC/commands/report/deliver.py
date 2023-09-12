@@ -1,69 +1,49 @@
-import os
-import sys
-import logging
+"""Balsamic report delivery CLI."""
 import json
-import yaml
+import logging
+import os
+import subprocess
+import sys
+from pathlib import Path
+from typing import List
+
 import click
 import snakemake
-import subprocess
-from pathlib import Path
+import yaml
 
+from BALSAMIC.commands.options import (
+    OPTION_SAMPLE_CONFIG,
+    OPTION_DISABLE_VARIANT_CALLER,
+    OPTION_DELIVERY_MODE,
+    OPTION_RULES_TO_DELIVER,
+)
+from BALSAMIC.constants.analysis import RunMode, RuleDeliveryMode
+from BALSAMIC.constants.rules import DELIVERY_RULES
+from BALSAMIC.models.snakemake import SnakemakeExecutable
+from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.cli import get_file_extension
 from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.cli import SnakeMake
-from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.rule import get_result_dir
-from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.constants.workflow_rules import DELIVERY_RULES
 
 LOG = logging.getLogger(__name__)
 
 
-@click.command(
-    "deliver",
-    short_help="Creates a YAML file with output from variant caller and alignment.",
-)
-@click.option(
-    "--sample-config",
-    "-s",
-    required=True,
-    help="Sample config file. Output of balsamic config sample",
-)
-@click.option(
-    "-r",
-    "--rules-to-deliver",
-    multiple=True,
-    help=f"Specify a rule to deliver. Delivery mode selected via --delivery-mode option."
-    f"Current available rules to deliver are: {', '.join(DELIVERY_RULES)} ",
-)
-@click.option(
-    "-m",
-    "--delivery-mode",
-    type=click.Choice(["a", "r"]),
-    default="a",
-    show_default=True,
-    help="a: append rules-to-deliver to current delivery options. "
-    "r: reset current rules to delivery to only the ones specified",
-)
-@click.option(
-    "--disable-variant-caller",
-    help=f"Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid "
-    f"values are: {list(VCF_DICT.keys())}",
-)
+@click.command("deliver", short_help="Creates a report file with output files")
+@OPTION_DELIVERY_MODE
+@OPTION_DISABLE_VARIANT_CALLER
+@OPTION_RULES_TO_DELIVER
+@OPTION_SAMPLE_CONFIG
 @click.pass_context
 def deliver(
-    context,
-    sample_config,
-    rules_to_deliver,
-    delivery_mode,
-    disable_variant_caller,
+    context: click.Context,
+    delivery_mode: RuleDeliveryMode,
+    disable_variant_caller: str,
+    rules_to_deliver: List[str],
+    sample_config: str,
 ):
-    """
-    cli for deliver sub-command.
-    Writes <case_id>.hk in result_directory.
-    """
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    """Deliver command to write <case_id>.hk with the output analysis files."""
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.debug("Reading input sample config")
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)
@@ -74,7 +54,7 @@ def deliver(
         rules_to_deliver = default_rules_to_deliver
 
     rules_to_deliver = list(rules_to_deliver)
-    if delivery_mode == "a":
+    if delivery_mode == RuleDeliveryMode.APPEND:
         rules_to_deliver.extend(default_rules_to_deliver)
 
     case_name = sample_config_dict["analysis"]["case_id"]
@@ -88,34 +68,31 @@ def deliver(
 
     analysis_type = sample_config_dict["analysis"]["analysis_type"]
     analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
-    reference_genome = sample_config_dict["reference"]["reference_genome"]
-    snakefile = get_snakefile(analysis_type, analysis_workflow, reference_genome)
+    snakefile = get_snakefile(analysis_type, analysis_workflow)
 
-    report_file_name = os.path.join(
-        yaml_write_directory, sample_config_dict["analysis"]["case_id"] + "_report.html"
-    )
-    LOG.info("Creating report file {}".format(report_file_name))
+    report_path = Path(yaml_write_directory, f"{case_name}_report.html")
+    LOG.info(f"Creating report file {report_path.as_posix()}")
 
-    # write report.html file
-    report = SnakeMake()
-    report.case_name = case_name
-    report.working_dir = os.path.join(
-        sample_config_dict["analysis"]["analysis_dir"],
-        sample_config_dict["analysis"]["case_id"],
-        "BALSAMIC_run",
+    LOG.info(f"Delivering {analysis_workflow} workflow...")
+    working_dir = Path(
+        sample_config_dict["analysis"]["analysis_dir"], case_name, "BALSAMIC_run"
     )
-    report.report = report_file_name
-    report.configfile = sample_config
-    report.snakefile = snakefile
-    report.run_mode = "local"
-    report.use_singularity = False
-    report.run_analysis = True
-    report.sm_opt = ["--quiet"]
-    if disable_variant_caller:
-        report.disable_variant_caller = disable_variant_caller
-    cmd = sys.executable + " -m  " + report.build_cmd()
-    subprocess.check_output(cmd.split(), shell=False)
-    LOG.info(f"Workflow report file {report_file_name}")
+    snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
+        case_id=case_name,
+        config_path=sample_config,
+        disable_variant_caller=disable_variant_caller,
+        report_path=report_path,
+        run_analysis=True,
+        run_mode=RunMode.LOCAL,
+        snakefile=snakefile,
+        snakemake_options=["--quiet"],
+        working_dir=working_dir,
+    )
+    subprocess.check_output(
+        f"{sys.executable} -m {snakemake_executable.get_command()}".split(),
+        shell=False,
+    )
+    LOG.info(f"Workflow report file {report_path.as_posix()}")
 
     snakemake.snakemake(
         snakefile=snakefile,
@@ -144,9 +121,9 @@ def deliver(
     # Add Housekeeper file to report
     delivery_json["files"].append(
         {
-            "path": report_file_name,
+            "path": report_path.as_posix(),
             "step": "balsamic_delivery",
-            "format": get_file_extension(report_file_name),
+            "format": get_file_extension(report_path.as_posix()),
             "tag": ["balsamic-report"],
             "id": case_name,
         }

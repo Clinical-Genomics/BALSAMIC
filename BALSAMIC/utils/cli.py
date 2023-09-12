@@ -1,21 +1,26 @@
-import os
-import shutil
 import logging
-import sys
+import os
 import re
 import subprocess
-from pathlib import Path
-from io import StringIO
+import sys
 from distutils.spawn import find_executable
-import zlib
+from io import StringIO
+from pathlib import Path
 from typing import Dict, Optional, List
 
-import yaml
-import snakemake
+import click
 import graphviz
+import snakemake
+import yaml
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName, PonParams
+from BALSAMIC.constants.cache import CacheVersion
+from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.constants import FileType
+from BALSAMIC.constants.paths import CONSTANTS_DIR
+from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -35,155 +40,6 @@ class CaptureStdout(list):
         self.extend(self._stringio.getvalue().splitlines())
         del self._stringio  # free up some memory
         sys.stdout = self._stdout
-
-
-class SnakeMake:
-    """
-    To build a snakemake command using cli options
-
-    Params:
-    case_name       - analysis case name
-    working_dir     - working directory for snakemake
-    configfile      - sample configuration file (json) output of balsamic-config-sample
-    run_mode        - run mode - cluster or local shell run
-    cluster_config  - cluster config json file
-    scheduler       - slurm command constructor
-    log_path        - log file path
-    script_path     - file path for slurm scripts
-    result_path     - result directory
-    qos             - QOS for sbatch jobs
-    account         - scheduler(e.g. slurm) account
-    mail_user       - email to account to send job run status
-    forceall        - To add '--forceall' option for snakemake
-    run_analysis    - To run pipeline
-    use_singularity - To use singularity
-    singularity_bind- Singularity bind path
-    quiet           - Quiet mode for snakemake
-    singularity_arg - Singularity arguments to pass to snakemake
-    sm_opt          - snakemake additional options
-    disable_variant_caller - Disable variant caller
-    dragen          - enable/disable dragen suite
-    slurm_profiler  - enable slurm profiler
-    """
-
-    def __init__(self):
-        self.case_name = str()
-        self.working_dir = str()
-        self.snakefile = str()
-        self.configfile = str()
-        self.run_mode = str()
-        self.profile = str()
-        self.cluster_config = str()
-        self.scheduler = str()
-        self.log_path = str()
-        self.script_path = str()
-        self.result_path = str()
-        self.qos = str()
-        self.account = str()
-        self.mail_type = str()
-        self.mail_user = str()
-        self.forceall = False
-        self.run_analysis = False
-        self.quiet = False
-        self.report = str()
-        self.use_singularity = True
-        self.singularity_bind = str()
-        self.singularity_arg = str()
-        self.sm_opt = str()
-        self.disable_variant_caller = str()
-        self.dragen = False
-        self.slurm_profiler = str()
-
-    def build_cmd(self):
-        forceall = str()
-        quiet_mode = str()
-        sm_opt = str()
-        cluster_cmd = str()
-        dryrun = str()
-        report = str()
-        snakemake_config_key_value = list()
-
-        if self.forceall:
-            forceall = "--forceall"
-
-        if self.report:
-            report = "--report {}".format(self.report)
-
-        if self.quiet:
-            quiet_mode = " --quiet "
-
-        if self.sm_opt:
-            sm_opt = " ".join(self.sm_opt)
-
-        if not self.run_analysis:
-            dryrun = "--dryrun"
-
-        if self.disable_variant_caller:
-            snakemake_config_key_value.append(
-                f"disable_variant_caller={self.disable_variant_caller}"
-            )
-
-        if self.dragen:
-            snakemake_config_key_value.append("dragen=True")
-
-        if snakemake_config_key_value:
-            snakemake_config_key_value.insert(0, "--config")
-
-        if self.use_singularity:
-            self.singularity_arg = "--use-singularity --singularity-args ' --cleanenv "
-            for bind_path in self.singularity_bind:
-                self.singularity_arg += " --bind {}:{}".format(bind_path, bind_path)
-            self.singularity_arg += "' "
-
-        if self.run_mode == "cluster":
-            sbatch_cmd = (
-                " '{} {} "
-                " --sample-config {} --profile {} "
-                " --account {} --qos {} "
-                " --log-dir {} --script-dir {} "
-                " --result-dir {} ".format(
-                    sys.executable,
-                    self.scheduler,
-                    self.configfile,
-                    self.profile,
-                    self.account,
-                    self.qos,
-                    self.log_path,
-                    self.script_path,
-                    self.result_path,
-                )
-            )
-
-            if self.slurm_profiler:
-                sbatch_cmd += " --slurm-profiler {}".format(self.slurm_profiler)
-
-            if self.mail_user:
-                sbatch_cmd += " --mail-user {} ".format(self.mail_user)
-
-            if self.mail_type:
-                sbatch_cmd += " --mail-type {} ".format(self.mail_type)
-
-            sbatch_cmd += " {dependencies} '"
-
-            cluster_cmd = (
-                " --immediate-submit -j 999 "
-                "--jobname BALSAMIC.{}.{{rulename}}.{{jobid}}.sh "
-                "--cluster-config {} --cluster {} ".format(
-                    self.case_name, self.cluster_config, sbatch_cmd
-                )
-            )
-
-        # Merge snakmake config key value list
-        snakemake_config_key_value = " ".join(snakemake_config_key_value)
-
-        sm_cmd = (
-            f" snakemake --notemp -p "
-            f" --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
-            f" {self.cluster_config} {self.singularity_arg} {quiet_mode} "
-            f" {forceall} {dryrun} {cluster_cmd} "
-            f" {report} {snakemake_config_key_value} {sm_opt}"
-        )
-        return sm_cmd
 
 
 def add_doc(docstring):
@@ -222,39 +78,14 @@ def createDir(path, interm_path=[]):
         return os.path.abspath(path)
 
 
-def iterdict(dic):
-    """dictionary iteration - returns generator"""
-    for key, value in dic.items():
-        if isinstance(value, dict):
-            yield from iterdict(value)
-        else:
-            yield key, value
-
-
-def get_schedulerpy():
-    """
-    Returns a string path for scheduler.py
-    """
-
-    p = Path(__file__).parents[1]
-    scheduler = str(Path(p, "utils", "scheduler.py"))
-
-    return scheduler
-
-
-def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome="hg19"):
-    """
-    Return a string path for variant calling snakefile.
-    """
+def get_snakefile(analysis_type, analysis_workflow="balsamic") -> str:
+    """Return a string path for the specific snakemake file."""
 
     p = Path(__file__).parents[1]
     snakefile = Path(p, "workflows", "balsamic.smk")
 
     if analysis_type == "generate_ref":
         snakefile = Path(p, "workflows", "reference.smk")
-        if "canfam3" in reference_genome:
-            snakefile = Path(p, "workflows", "reference-canfam3.smk")
-            return str(snakefile)
 
     if analysis_type == "pon":
         snakefile = Path(p, "workflows", "PON.smk")
@@ -265,17 +96,9 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic", reference_genome=
     return str(snakefile)
 
 
-def get_config(config_name):
-    """
-    Return a string path for config file.
-    """
-
-    p = Path(__file__).parents[1]
-    config_file = str(Path(p, "config", config_name + ".json"))
-    if Path(config_file).exists():
-        return config_file
-    else:
-        raise FileNotFoundError(f"Config for {config_name} was not found.")
+def get_config_path(config_type: ClusterConfigType) -> Path:
+    """Return a config path given its type."""
+    return Path(CONSTANTS_DIR, f"{config_type}.{FileType.JSON}")
 
 
 def find_file_index(file_path):
@@ -392,7 +215,7 @@ def bioinfo_tool_version_conda(
 
 
 def get_bioinfo_tools_version(
-    bioinfo_tools: dict, container_conda_env_path: os.PathLike
+    bioinfo_tools: dict, container_conda_env_path: Path
 ) -> dict:
     """Parses the names and versions of bioinfo tools
     used by BALSAMIC from config YAML into a dict.
@@ -430,23 +253,114 @@ def get_bioinfo_tools_version(
     return bioinfo_tools_version
 
 
-def get_sample_dict(
-    tumor_sample_name: str, normal_sample_name: Optional[str]
-) -> Dict[str, dict]:
-    """Returns a sample dictionary given the names of the tumor and/or normal samples."""
-    sample_dict: Dict[str, dict] = {tumor_sample_name: {"type": "tumor"}}
+def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoModel]:
+    """Returns a dictionary of fastq-pattern/s and FastqInfoModel instance/s for a sample.
+
+    Args:
+        sample_name: (str). The name of the sample for which fastq-files will be searched for in the fastq_path.
+        fastq_path: (str). Path to where the fastq-files should be found for the supplied sample_name.
+
+    Returns:
+        fastq_dict: (Dict) with format:
+            "[fastq_patternX]" (str): FastqInfoModel.
+    """
+    fastq_dict: Dict[str, Dict] = {}
+
+    for suffix_id, suffix_values in FASTQ_SUFFIXES.items():
+        suffix_fwd = suffix_values[FastqName.FWD]
+        suffix_rev = suffix_values[FastqName.REV]
+
+        fastq_fwd_regex = re.compile(
+            r"(^|.*_)" + sample_name + r"_.*" + suffix_fwd + r"$"
+        )
+
+        fwd_fastqs = [
+            f"{fastq_path}/{fastq}"
+            for fastq in os.listdir(fastq_path)
+            if fastq_fwd_regex.match(fastq)
+        ]
+
+        for fwd_fastq in fwd_fastqs:
+            fastq_pair_pattern = Path(fwd_fastq).name.replace(suffix_fwd, "")
+            if fastq_pair_pattern in fastq_dict:
+                error_message = (
+                    f"Fastq name conflict. Fastq pair pattern {fastq_pair_pattern}"
+                    f" already assigned to dictionary for sample: {sample_name}"
+                )
+                LOG.error(error_message)
+                raise BalsamicError(error_message)
+
+            fastq_dict[fastq_pair_pattern] = {
+                "fwd": fwd_fastq,
+                "rev": fwd_fastq.replace(suffix_fwd, suffix_rev),
+            }
+
+    if not fastq_dict:
+        error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
+        LOG.error(error_message)
+        raise BalsamicError(error_message)
+
+    return fastq_dict
+
+
+def get_sample_list(
+    tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
+) -> List[Dict]:
+    """Returns a list of SampleInstanceModel/s given the names of the tumor and/or normal samples.
+    Args:
+        tumor_sample_name (str). The sample_name of the tumor.
+        normal_sample_name (str). The sample_name of the normal, if it exists.
+        fastq_path: (str). The path to the fastq-files for the supplied samples.
+
+    Returns:
+        sample_list: List containing SampleInstanceModel/s.
+    """
+    sample_list: List[Dict] = [
+        {
+            "name": tumor_sample_name,
+            "type": SampleType.TUMOR,
+            "fastq_info": get_fastq_info(tumor_sample_name, fastq_path),
+        }
+    ]
+
     if normal_sample_name:
-        sample_dict.update({normal_sample_name: {"type": "normal"}})
-    return sample_dict
+        sample_list.append(
+            {
+                "name": normal_sample_name,
+                "type": SampleType.NORMAL,
+                "fastq_info": get_fastq_info(normal_sample_name, fastq_path),
+            }
+        )
+
+    return sample_list
 
 
-def get_pon_sample_dict(directory: str) -> Dict[str, dict]:
-    """Returns a PON sample dictionary."""
-    sample_dict: Dict[str, dict] = {}
-    for file in Path(directory).glob("*.fastq.gz"):
-        sample_name: str = file.name.split("_")[-4]
-        sample_dict.update({sample_name: {"type": "normal"}})
-    return sample_dict
+def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
+    """Returns a list of SampleInstanceModels to be used in PON generation."""
+    sample_list: List[SampleInstanceModel] = []
+    sample_names = set()
+
+    for fastq in Path(fastq_path).glob("*.fastq.gz"):
+        sample_names.add(fastq.name.split("_")[-4])
+
+    if len(sample_names) < PonParams.MIN_PON_SAMPLES:
+        error_message = (
+            f"Number of samples detected in supplied fastq path ({len(sample_names)}),"
+            f"not sufficient for PON generation. Sample names detected: {sample_names}"
+        )
+        LOG.error(error_message)
+        raise BalsamicError(error_message)
+
+    for sample_name in sample_names:
+        sample_list.append(
+            {
+                "name": sample_name,
+                "type": SampleType.NORMAL,
+                "fastq_info": get_fastq_info(sample_name, fastq_path),
+            }
+        )
+
+    return sample_list
 
 
 def generate_graph(config_collection_dict, config_path):
@@ -458,9 +372,6 @@ def generate_graph(config_collection_dict, config_path):
                 analysis_type=config_collection_dict["analysis"]["analysis_type"],
                 analysis_workflow=config_collection_dict["analysis"][
                     "analysis_workflow"
-                ],
-                reference_genome=config_collection_dict["reference"][
-                    "reference_genome"
                 ],
             ),
             dryrun=True,
@@ -492,16 +403,15 @@ def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> 
 
     for delivery_file in delivery_json["files"]:
         file_tags = delivery_file["tag"].split(",")
-        for sample in sample_config_dict["samples"]:
-            sample_type = sample_config_dict["samples"][sample]["type"]
-            if sample == delivery_file["id"]:
-                for tag_index, tag in enumerate(file_tags):
-                    if tag == sample or tag == sample.replace("_", "-"):
-                        file_tags[tag_index] = sample
-                if sample not in file_tags:
-                    file_tags.append(sample)
+        sample_list = sample_config_dict["samples"]
+        for sample_dict in sample_list:
+            sample_type = sample_dict["type"]
+            sample_name = sample_dict["name"]
+            if sample_name == delivery_file["id"]:
+                if sample_name not in file_tags:
+                    file_tags.append(sample_name)
             if sample_type == delivery_file["id"]:
-                delivery_file["id"] = sample
+                delivery_file["id"] = sample_name
             if sample_type in file_tags:
                 file_tags.remove(sample_type)
         delivery_file["tag"] = list(set(file_tags))
@@ -539,26 +449,7 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
         yaml.dump({case_name: jobid_list}, jobid_out)
 
 
-def get_md5(filename):
-    with open(filename, "rb") as fh:
-        hashed = 0
-        while True:
-            s = fh.read(65536)
-            if not s:
-                break
-            hashed = zlib.crc32(s, hashed)
-    return "%08X" % (hashed & 0xFFFFFFFF)
-
-
-def create_md5(reference, check_md5):
-    """create a md5 file for all reference data"""
-    with open(check_md5, "w") as fh:
-        for key, value in reference.items():
-            if os.path.isfile(value):
-                fh.write(get_md5(value) + " " + value + "\n")
-
-
-def get_fastq_files_directory(directory: str) -> str:
+def get_resolved_fastq_files_directory(directory: str) -> str:
     """Return the absolute path for the directory containing the input fastq files."""
     input_files: List[Path] = [
         file.absolute() for file in Path(directory).glob("*.fastq.gz")
@@ -566,3 +457,36 @@ def get_fastq_files_directory(directory: str) -> str:
     if not input_files or not input_files[0].is_symlink():
         return directory
     return os.path.commonpath([file.resolve().as_posix() for file in input_files])
+
+
+def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
+    """Return analysis fastq directory, linking the fastq files if necessary."""
+    analysis_fastq_path: Path = Path(case_dir, "fastq")
+    analysis_fastq_path.mkdir(parents=True, exist_ok=True)
+    if Path(case_dir) not in Path(fastq_path).parents:
+        for fastq in Path(fastq_path).glob("*.fastq.gz"):
+            try:
+                Path(analysis_fastq_path, fastq.name).symlink_to(fastq)
+                LOG.info(f"Created link for {fastq} in {analysis_fastq_path}")
+            except FileExistsError:
+                LOG.warning(
+                    f"File {Path(analysis_fastq_path, fastq.name)} exists. Skipping linking."
+                )
+
+        return analysis_fastq_path.as_posix()
+    return Path(fastq_path).as_posix()
+
+
+def validate_cache_version(
+    _ctx: click.Context, _param: click.Parameter, version: str
+) -> str:
+    """Validate the provided cache version."""
+    if version == CacheVersion.DEVELOP:
+        return version
+    version_parts: List[str] = version.split(".")
+    if len(version_parts) == 3 and all(part.isdigit() for part in version_parts):
+        return f"release_v{version}"
+    else:
+        raise click.BadParameter(
+            f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
+        )

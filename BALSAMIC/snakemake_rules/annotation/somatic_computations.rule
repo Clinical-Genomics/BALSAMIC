@@ -1,0 +1,61 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+# Computation of TMB and other somatic/oncology related scores.
+
+
+rule tmb_calculation:
+  input:
+    vep_research = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.research.vcf.gz",
+  output:
+    tmb = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.balsamic_stat"
+  benchmark:
+    Path(benchmark_dir, "tmb_calculation_{var_type}.somatic.{case_name}.{var_caller}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
+    af_cutoff = "0.05",
+    bed = config["panel"]["capture_kit"] if "panel" in config else "",
+    message_text = "{var_type}.somatic.{case_name}.{var_caller}.research",
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+  threads:
+    get_threads(cluster_config, "vep")
+  message:
+    "Calculating TMB score for {params.message_text}"
+  shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+if [ \"{params.bed}\" == \"\" ]; then region_size=3101.78817; else region_size=$(awk '{{s+=$3-$2}}END{{print s/1e6}}' {params.bed}); fi;
+
+echo -e '##INFO=<ID=AF_TUMOR,Number=1,Type=Float,Description="Allele Frequency of Tumor Sample">' > {params.tmpdir}/vcf_header
+
+bcftools query -s TUMOR \
+-f '%CHROM\\t%POS\\t[%AF]\\n' \
+{input.vep_research} \
+| bgzip -c > {params.tmpdir}/tumor.txt.gz;
+
+tabix -f -s1 -b2 -e2 {params.tmpdir}/tumor.txt.gz;
+
+bcftools view -s TUMOR {input.vep_research} \
+| bcftools annotate -s TUMOR \
+-a {params.tmpdir}/tumor.txt.gz \
+-h {params.tmpdir}/vcf_header \
+-c CHROM,POS,INFO/AF_TUMOR \
+-O z -o {params.tmpdir}/temp.vcf.gz;
+
+tabix -f -p vcf {params.tmpdir}/temp.vcf.gz;
+
+bcftools view --types snps,indels --apply-filters PASS {params.tmpdir}/temp.vcf.gz \
+| bcftools filter -i "INFO/AF_TUMOR>={params.af_cutoff}" \
+| filter_vep --filter 'not Existing_variation' \
+| filter_vep --filter 'not COSMIC' \
+| filter_vep --filter 'not non_coding_transcript_exon_variant' \
+| filter_vep --filter 'not non_coding_transcript_variant' \
+| filter_vep --filter 'not feature_truncation' -C \
+| awk -v region=${{region_size}} '{{print $NF/region}}' > {output.tmb};
+
+rm -r {params.tmpdir};
+        """
+

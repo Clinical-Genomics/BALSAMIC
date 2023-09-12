@@ -2,14 +2,13 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 12.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 12.0.2 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
-
 
 ascatNgs
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/cancerit/ascatNgs>`_
-:Article: `PNAS` `<https://www.pnas.org/doi/full/10.1073/pnas.1009843107/>`_
+:Article: `PNAS` `<https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097604/>`_
 :Version: `4.5.0`
 
 bcftools
@@ -30,14 +29,26 @@ bwa
 :Article: `Bioinformatics` `<https://arxiv.org/abs/1303.3997>`_
 :Version: `0.7.17`
 
+cadd
+~~~~
+:Source code: `GitHub` `<https://github.com/kircherlab/CADD-scripts/>`_
+:Article: `Nature Genetics` `<https://dx.doi.org/10.1038/ng.2892>`_
+:Version: `1.6`
+
 cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
-:Article: `PLOS Computational Biology` `<http://dx.doi.org/10.1371/journal.pcbi.1004873>`_
+:Article: `PLOS Computational Biology` `<https://doi.org/10.1371/journal.pcbi.1004873>`_
 :Version: `0.9.9`
 
+cnvpytor
+~~~~~~~~
+:Source code: `GitHub` `<https://github.com/abyzovlab/CNVpytor/>
+:Article: `GigaSciences` `<https://doi.org/10.1093/gigascience/giab074>`
+:Version: `1.3.1`
+
 delly
-~~~~~~~
+~~~~~
 :Source code: `GitHub` `<https://github.com/dellytools/delly>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/28/18/i333/245403>`_
 :Version: `1.0.3`
@@ -57,7 +68,7 @@ fastp
 fastqc
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/s-andrews/FastQC>`_
-:Article: `Babraham` `<http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
+:Article: `Babraham` `<https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 :Version: `0.11.9`
 
 gatk
@@ -66,23 +77,28 @@ gatk
 :Article: `Current Protocols in Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25431634/>`_
 :Version: `3.8`
 
+genmod
+~~~~~~
+:Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
+:Version: `0.2.16`
+
 manta
 ~~~~~
 :Source code: `GitHub` `<https://github.com/Illumina/manta>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btv710>`_
 :Version: `1.6.0`
 
-multiqc
-~~~~~~~
-:Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
-:Article: `Bioinformatics` `<http://dx.doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.12`
-
 mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
-:Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/34/5/867/4583630?login=true>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btx699>`_
 :Version: `0.3.3`
+
+multiqc
+~~~~~~~
+:Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
+:Version: `1.12`
 
 picard
 ~~~~~~
@@ -108,23 +124,29 @@ sentieon-tools
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
 :Version: `202010.02`
 
+somalier
+~~~~~~~~
+:Source code: `Github` `<https://github.com/brentp/somalier>`_
+:Article: `Genome Medicine` `<https://doi.org/10.1186/s13073-020-00761-2>`_
+:Version: `0.2.16`
+
 svdb
 ~~~~
 :Source code: `Github` `<https://github.com/J35P312/SVDB>`_
 :Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
-:Version: `2.6.0`
+:Version: `2.8.1`
 
 tabix
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/tabix>`_
 :Article: `Bioinformatics` `<https://academic.oup.com/bioinformatics/article/27/5/718/262743>`_
-:Version: `1.11`
+:Version: `>=1.11`
 
 tiddit
 ~~~~~~
 :Source code: `Github` `<https://github.com/SciLifeLab/TIDDIT>`_
 :Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
-:Version: `3.0.0`
+:Version: `3.3.2`
 
 vardict
 ~~~~~~~
@@ -142,4 +164,4 @@ vcf2cytosure
 ~~~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/NBISweden/vcf2cytosure>`_
 :Article: `-`
-:Version: `0.7.1`
+:Version: `0.8`

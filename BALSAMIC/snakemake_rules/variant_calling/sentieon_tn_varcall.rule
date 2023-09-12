@@ -7,12 +7,12 @@ rule sentieon_base_calibration:
     input:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
-        indel_1kg = config["reference"]["1kg_known_indel"],
+        indel_1kg = config["reference"]["known_indel_1kg"],
         dbsnp = config["reference"]["dbsnp"],
-        bam = Path(bam_dir, "{sample_type}.merged.bam").as_posix()
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
     output:
-        recal_data_table = Path(bam_dir, "{sample_type}.merged.recal_data.table").as_posix(),
-        qual_recal = Path(bam_dir, "{sample_type}.merged.recal.csv").as_posix(),
+        recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),
+        qual_recal = Path(bam_dir, "{sample_type}.recal.csv").as_posix(),
         qual_recal_plot = Path(bam_dir, "{sample_type}.recal.pdf").as_posix(),
     benchmark:
         Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
@@ -69,10 +69,10 @@ rule sentieon_TNscope:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
         cosmic = config["reference"]["cosmic"],
-        bamT = expand(bam_dir + "tumor.merged.bam"),
-        bamN = expand(bam_dir + "normal.merged.bam"),
-        recalT = expand(bam_dir + "tumor.merged.recal_data.table"),
-        recalN = expand(bam_dir + "normal.merged.recal_data.table"),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        recalT = expand(bam_dir + "tumor.recal_data.table"),
+        recalN = expand(bam_dir + "normal.recal_data.table"),
     output:
         vcf_tnscope = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",

@@ -12,10 +12,10 @@ def get_pon_cnn(config):
 rule cnvkit_single:
     input:
         access_bed = config["reference"]["access_regions"],
-        bamT = bam_dir  + "tumor.merged.bam",
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         baits_bed = config["panel"]["capture_kit"],
         fasta = config["reference"]["reference_genome"],
-        refflat = config["reference"]["refflat"],
+        refgene_flat = config["reference"]["refgene_flat"],
         snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
     output:
         cns = cnv_dir + "tumor.merged" + ".cns",
@@ -54,7 +54,7 @@ export PURECN='/opt/conda/lib/R/library/PureCN/extdata/PureCN.R'
 
 # create target and anti-target bed files
 cnvkit.py target {input.baits_bed} \
---annotate {input.refflat} \
+--annotate {input.refgene_flat} \
 --split \
 --output {params.cnv_dir}/targets.bed;
 

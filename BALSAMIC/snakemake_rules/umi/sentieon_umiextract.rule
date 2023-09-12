@@ -6,8 +6,8 @@
 
 rule sentieon_umiextract:
     input:
-        fastq_r1 = analysis_fastq_dir + "{sample}_R_1.umi_optimized.fastq.gz",
-        fastq_r2 = analysis_fastq_dir + "{sample}_R_2.umi_optimized.fastq.gz"
+        fastq_r1 = fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
+        fastq_r2 = fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz"
     output:
         ds_umi = temp(umi_dir + "{sample}_umiextract.fastq.gz")
     benchmark:
@@ -17,7 +17,7 @@ rule sentieon_umiextract:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        ds_params= params.umiextract.read_structure,
+        ds_params = params.umiextract.read_structure,
         sample = "{sample}"
     threads:
         get_threads(cluster_config, "sentieon_umiextract")

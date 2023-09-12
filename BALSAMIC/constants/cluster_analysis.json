@@ -1,0 +1,359 @@
+{
+	"__default__": {
+		"name": "BALSAMIC.{rule}.{wildcards}",
+		"time": "12:00:00",
+		"n": 8,
+		"mail_type": "FAIL",
+		"partition": "core"
+	},
+	"all": {
+		"mail_type": "END",
+		"time": "00:15:00",
+		"n": 1
+	},
+	"CollectAlignmentSummaryMetrics": {
+		"time": "03:30:00",
+		"n": 8
+	},
+	"CollectHsMetrics": {
+		"time": "03:30:00",
+		"n": 8
+	},
+	"CollectInsertSizeMetrics": {
+		"time": "03:30:00",
+		"n": 8
+	},
+	"IndelRealigner": {
+		"time": "15:00:00",
+		"n": 10
+	},
+	"picard_markduplicates": {
+		"time": "06:00:00",
+		"n": 8
+	},
+	"bwa_mem": {
+		"time": "08:00:00",
+		"n": 6
+	},
+	"concatenate": {
+		"time": "00:30:00",
+		"n": 1
+	},
+	"cnvkit_paired": {
+		"time": "12:00:00",
+		"n": 10
+	},
+	"dragen_align_call_tumor_only": {
+		"time": "10:00:00",
+		"n": 36,
+		"partition": "dragen"
+	},
+	"cnvkit_single": {
+		"time": "12:00:00",
+		"n": 10
+	},
+	"fastqc":{
+		"time": "12:00:00",
+		"n": 4
+	},
+	"fastp_quality_trim":{
+		"time": "24:00:00",
+		"n": 4
+	},
+	"fastp_remove_umi":{
+		"time": "12:00:00",
+		"n": 4
+	},
+	"manta_germline": {
+		"time": "05:00:00",
+		"n": 16
+	},
+	"manta_tumor_only": {
+		"time": "10:00:00",
+		"n": 12
+	},
+	"manta_tumor_normal": {
+		"time": "10:00:00",
+		"n": 12
+	},
+	"mergeBam_normal_gatk": {
+		"time": "04:30:00",
+		"n": 8
+	},
+	"mergeBam_tumor_gatk": {
+		"time": "04:30:00",
+		"n": 8
+	},
+	"multiqc": {
+		"time": "00:15:00",
+		"n": 4
+	},
+	"sambamba_exon_depth": {
+		"time": "06:00:00",
+		"n": 8
+	},
+	"sambamba_panel_depth": {
+		"time": "02:30:00",
+		"n": 8
+	},
+	"samtools_sort_index": {
+		"time": "01:30:00",
+		"n": 16
+	},
+	"sentieon_DNAscope": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_TNhaplotyper": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_TNhaplotyper_tumor_only": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_TNscope": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_TNscope_tumor_only": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_align_sort": {
+		"time": "24:00:00",
+		"n": 12
+	},
+	"sentieon_base_calibration": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_dedup": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_realign": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_filter_TNscope": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"somatic_snv_indel_vcf_merge": {
+		"time": "06:00:00",
+		"n": 10
+	},
+	"vardict_merge": {
+		"time": "01:30:00",
+		"n": 5
+	},
+	"vardict_tumor_normal": {
+		"time": "12:00:00",
+		"n": 10
+	},
+	"vardict_tumor_only": {
+		"time": "10:00:00",
+		"n": 10
+	},
+	"sentieon_bwa_umiextract": {
+		"time": "8:00:00",
+		"n": 36
+	},
+	"sentieon_consensuscall_umi": {
+		"time": "6:00:00",
+		"n": 36
+	},
+	"sentieon_bwa_umiconsensus": {
+		"time": "8:00:00",
+		"n": 36
+	},
+	"sentieon_consensusfilter_umi": {
+		"time": "4:00:00",
+		"n": 10
+	},
+	"sentieon_tnscope_umi": {
+		"time": "4:00:00",
+		"n": 12
+	},
+	"bcftools_get_somaticINDEL_research": {
+		"time": "1:00:00",
+		"n": 36
+	},
+	"cadd_annotate_somaticINDEL_research": {
+		"time": "18:00:00",
+		"n": 36
+	},
+	"vep_annotate_somaticSNV_research": {
+		"time": "18:00:00",
+		"n": 36
+	},
+	"vcfanno_annotate_somaticSNV_clinical": {
+		"time": "18:00:00",
+		"n" : 36
+	},
+	"vep_somatic_research_sv": {
+		"time": "12:00:00",
+		"n": 36
+	},
+	"svdb_annotate_somatic_research_sv": {
+		"time": "12:00:00",
+		"n": 8
+	},
+	"svdb_annotate_clinical_obs_somatic_clinical_sv": {
+		"time": "10:00:00",
+		"n": 8
+	},
+	"svdb_annotate_somatic_obs_somatic_clinical_sv": {
+		"time": "10:00:00",
+		"n": 8
+	},
+	"vep_germline": {
+		"time": "06:00:00",
+		"n": 10
+	},
+	"picard_umiaware": {
+		"time": "4:00:00",
+		"n": 12
+	},
+	"bcftools_query_generatebackgroundaf_umitable": {
+		"time": "2:00:00",
+		"n": 8
+	},
+	"samtools_view_calculatemeanfamilydepth_umi": {
+		"time": "2:00:00",
+		"n": 8
+	},
+	"bcftools_query_calculatenoiseAF_umi": {
+		"time": "2:00:00",
+		"n": 8
+	},
+	"delly_tumor_normal": {
+		"time": "12:00:00",
+		"n": 36
+	},
+	"delly_tumor_only": {
+		"time": "10:00:00",
+		"n": 36
+	},
+	"ascat_tumor_normal": {
+		"time": "12:00:00",
+		"n": 36
+	},
+	"cnv_report": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"collect_custom_qc_metrics": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"svdb_merge_tumor_normal": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"svdb_merge_tumor_only": {
+		"time": "02:00:00",
+		"n": 8
+	},
+	"tiddit_sv_tumor_only": {
+		"time": "10:00:00",
+		"n": 24
+	},
+	"tiddit_sv_tumor_normal": {
+		"time": "12:00:00",
+		"n": 24
+	},
+	"cnvpytor_tumor_only": {
+		"time": "05:00:00",
+		"n": 24
+	},
+	"bcftools_process_SV_CNV": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"vcf2cytosure_convert": {
+		"time": "02:00:00",
+		"n": 8
+	},
+	"bcftools_filter_svdb_research": {
+		"time": "02:00:00",
+		"n": 8
+	},
+	"bcftools_filter_svdb_clinical": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"vcfheader_rename_germline": {
+		"time": "01:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_research_tumor_only": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_clinical_tumor_only": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_research_tumor_normal": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_clinical_tumor_normal": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_research_tumor_only": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_clinical_tumor_only": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_umi_research_tumor_only": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_tnscope_umi_tumor_only": {
+		"time": ":03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_research_tumor_normal": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_vardict_clinical_tumor_normal": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"bcftools_filter_TNscope_umi_research_tumor_normal": {
+		"time": "04:00:00",
+		"n": 8
+	},
+	"bcftools_filter_TNscope_umi_clinical_tumor_normal": {
+		"time": "03:00:00",
+		"n": 8
+	},
+	"somalier_extract_normal": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"somalier_extract_tumor": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"somalier_relate": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"bam_compress": {
+		"time": "04:00:00",
+		"n": 20
+	},
+	"samtools_qc": {
+		"time": "04:00:00",
+		"n": 16
+	}
+}

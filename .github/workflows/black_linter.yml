@@ -2,12 +2,12 @@ name: Black linter and code formatter
 on: [pull_request]
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.7'
+          python-version: '3.11'
       - uses: psf/black@stable
         with:
           options: "--check --verbose"
