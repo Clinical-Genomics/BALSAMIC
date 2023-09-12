@@ -1,8 +1,23 @@
 """General use constants."""
+from typing import List
+
 from BALSAMIC.utils.class_types import StrEnum
 
 EXIT_SUCCESS: int = 0
 EXIT_FAIL: int = 1
+
+
+class LogLevel(StrEnum):
+    NOTSET = "NOTSET"
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    FATAL = "FATAL"
+    CRITICAL = "CRITICAL"
+
+
+LOG_LEVELS: List[LogLevel] = [level.value for level in LogLevel]
 
 
 class FileType(StrEnum):

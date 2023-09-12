@@ -1,17 +1,24 @@
+"""Balsamic report delivery CLI."""
 import json
 import logging
 import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 import click
 import snakemake
 import yaml
 
-from BALSAMIC.constants.analysis import RunMode
+from BALSAMIC.commands.options import (
+    OPTION_SAMPLE_CONFIG,
+    OPTION_DISABLE_VARIANT_CALLER,
+    OPTION_DELIVERY_MODE,
+    OPTION_RULES_TO_DELIVER,
+)
+from BALSAMIC.constants.analysis import RunMode, RuleDeliveryMode
 from BALSAMIC.constants.rules import DELIVERY_RULES
-from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.cli import convert_deliverables_tags
 from BALSAMIC.utils.cli import get_file_extension
@@ -22,50 +29,21 @@ from BALSAMIC.utils.rule import get_result_dir
 LOG = logging.getLogger(__name__)
 
 
-@click.command(
-    "deliver",
-    short_help="Creates a YAML file with output from variant caller and alignment.",
-)
-@click.option(
-    "--sample-config",
-    "-s",
-    required=True,
-    help="Sample config file. Output of balsamic config sample",
-)
-@click.option(
-    "-r",
-    "--rules-to-deliver",
-    multiple=True,
-    help=f"Specify a rule to deliver. Delivery mode selected via --delivery-mode option."
-    f"Current available rules to deliver are: {', '.join(DELIVERY_RULES)} ",
-)
-@click.option(
-    "-m",
-    "--delivery-mode",
-    type=click.Choice(["a", "r"]),
-    default="a",
-    show_default=True,
-    help="a: append rules-to-deliver to current delivery options. "
-    "r: reset current rules to delivery to only the ones specified",
-)
-@click.option(
-    "--disable-variant-caller",
-    help=f"Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid "
-    f"values are: {list(VCF_DICT.keys())}",
-)
+@click.command("deliver", short_help="Creates a report file with output files")
+@OPTION_DELIVERY_MODE
+@OPTION_DISABLE_VARIANT_CALLER
+@OPTION_RULES_TO_DELIVER
+@OPTION_SAMPLE_CONFIG
 @click.pass_context
 def deliver(
-    context,
-    sample_config,
-    rules_to_deliver,
-    delivery_mode,
-    disable_variant_caller,
+    context: click.Context,
+    delivery_mode: RuleDeliveryMode,
+    disable_variant_caller: str,
+    rules_to_deliver: List[str],
+    sample_config: str,
 ):
-    """
-    cli for deliver sub-command.
-    Writes <case_id>.hk in result_directory.
-    """
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}.")
+    """Deliver command to write <case_id>.hk with the output analysis files."""
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.debug("Reading input sample config")
     with open(sample_config, "r") as fn:
         sample_config_dict = json.load(fn)
@@ -76,7 +54,7 @@ def deliver(
         rules_to_deliver = default_rules_to_deliver
 
     rules_to_deliver = list(rules_to_deliver)
-    if delivery_mode == "a":
+    if delivery_mode == RuleDeliveryMode.APPEND:
         rules_to_deliver.extend(default_rules_to_deliver)
 
     case_name = sample_config_dict["analysis"]["case_id"]

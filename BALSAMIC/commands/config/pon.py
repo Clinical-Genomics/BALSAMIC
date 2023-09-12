@@ -1,12 +1,29 @@
-import os
+"""Balsamic panel of normals config case CLI."""
 import json
 import logging
+import os
 from pathlib import Path
 
 import click
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.commands.options import (
+    OPTION_GENOME_VERSION,
+    OPTION_ADAPTER_TRIM,
+    OPTION_ANALYSIS_DIR,
+    OPTION_BALSAMIC_CACHE,
+    OPTION_CASE_ID,
+    OPTION_FASTQ_PATH,
+    OPTION_PANEL_BED,
+    OPTION_PON_VERSION,
+    OPTION_QUALITY_TRIM,
+    OPTION_UMI,
+    OPTION_UMI_TRIM_LENGTH,
+)
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.utils.cli import (
     generate_graph,
     get_bioinfo_tools_version,
@@ -14,103 +31,36 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
 )
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.models.analysis import ConfigModel
-
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command("pon", short_help="Create a sample config file for PON analysis")
-@click.option("--case-id", required=True, help="Sample id used for reporting analysis")
-@click.option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help=(
-        "UMI processing steps for samples with UMI tags."
-        "For WGS cases,by default UMI is disabled."
-    ),
-)
-@click.option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=int,
-    help="Trimming first N bases from reads in fastq file",
-)
-@click.option(
-    "--quality-trim/--no-quality-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trimming low quality reads in fastq file",
-)
-@click.option(
-    "--adapter-trim/--no-adapter-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Preprocess fastq reads by trimming adapters",
-)
-@click.option(
-    "-p",
-    "--panel-bed",
-    type=click.Path(exists=True, resolve_path=True),
-    required=False,
-    help="Panel bed file for calculating target regions.",
-)
-@click.option(
-    "--balsamic-cache",
-    type=click.Path(exists=True, resolve_path=True),
-    required=True,
-    help="Path to BALSAMIC cache",
-)
-@click.option(
-    "--analysis-dir",
-    type=click.Path(exists=True, resolve_path=True),
-    required=True,
-    help="Root analysis path directory.",
-)
-@click.option(
-    "--fastq-path",
-    type=click.Path(exists=True, resolve_path=True),
-    required=True,
-    help="Path directing to list of PON fastq samples. NOTE: Fastq-files in directory requires this structure:"
-    " X_X_X_[sampleID]_XXXXXX_R_2.fastq.gz",
-)
-@click.option(
-    "-g",
-    "--genome-version",
-    default="hg19",
-    type=click.Choice(["hg19"]),
-    help=(
-        "Genome version to prepare reference. Path to genome"
-        "will be <outdir>/genome_version"
-    ),
-)
-@click.option(
-    "-v",
-    "--version",
-    default="v1",
-    type=str,
-    help="Version of the PON file to be generated",
-)
+@OPTION_ADAPTER_TRIM
+@OPTION_ANALYSIS_DIR
+@OPTION_BALSAMIC_CACHE
+@OPTION_CASE_ID
+@OPTION_FASTQ_PATH
+@OPTION_GENOME_VERSION
+@OPTION_PANEL_BED
+@OPTION_PON_VERSION
+@OPTION_QUALITY_TRIM
+@OPTION_UMI
+@OPTION_UMI_TRIM_LENGTH
 @click.pass_context
 def pon_config(
-    context,
-    case_id,
-    analysis_dir,
-    fastq_path,
-    panel_bed,
-    quality_trim,
-    umi,
-    umi_trim_length,
-    adapter_trim,
-    genome_version,
-    balsamic_cache,
-    version,
+    context: click.Context,
+    adapter_trim: bool,
+    analysis_dir: Path,
+    balsamic_cache: Path,
+    case_id: str,
+    fastq_path: Path,
+    genome_version: GenomeVersion,
+    panel_bed: Path,
+    quality_trim: bool,
+    umi: bool,
+    umi_trim_length: bool,
+    version: str,
 ):
     reference_config = os.path.join(
         balsamic_cache, balsamic_version, genome_version, "reference.json"

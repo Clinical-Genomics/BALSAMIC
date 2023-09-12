@@ -158,7 +158,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     },
 }
 
-
 DELIVERY_RULES: List[str] = [
     # QC
     "multiqc",
