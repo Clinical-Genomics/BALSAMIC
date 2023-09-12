@@ -371,14 +371,14 @@ OPTION_SWEGEN_SNV = click.option(
     "--swegen-snv",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF path of Swegen SNV frequency database (WGS analysis workflow)",
+    help="VCF path of Swegen SNV frequency database",
 )
 
 OPTION_SWEGEN_SV = click.option(
     "--swegen-sv",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF path of Swegen SV frequency database (WGS analysis workflow)",
+    help="VCF path of Swegen SV frequency database",
 )
 
 OPTION_TUMOR_SAMPLE_NAME = click.option(
