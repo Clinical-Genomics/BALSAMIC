@@ -49,7 +49,7 @@ rule all:
             data=cache_config.get_analysis_references().dict(),
         )
         write_json(
-            json_obj=json.loads(analysis_references),
+            json_obj=analysis_references,
             path=Path(cache_config.references_dir, "reference.json").as_posix(),
         )
         write_finish_file(file_path=output.finish_file)
