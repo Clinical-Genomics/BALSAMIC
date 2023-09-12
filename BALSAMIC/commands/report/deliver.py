@@ -29,7 +29,7 @@ from BALSAMIC.utils.rule import get_result_dir
 LOG = logging.getLogger(__name__)
 
 
-@click.command("deliver", short_help="Creates a JSON report file with output files")
+@click.command("deliver", short_help="Creates a report file with output files")
 @OPTION_DELIVERY_MODE
 @OPTION_DISABLE_VARIANT_CALLER
 @OPTION_RULES_TO_DELIVER
