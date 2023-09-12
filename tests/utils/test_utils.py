@@ -54,7 +54,7 @@ from BALSAMIC.utils.rule import (
     get_sample_type_from_sample_name,
     get_fastp_parameters,
 )
-from BALSAMIC.utils.utils import remove_unnecessary_spaces
+from BALSAMIC.utils.utils import remove_unnecessary_spaces, get_relative_paths_dict
 
 
 def test_remove_unnecessary_spaces():
@@ -68,6 +68,21 @@ def test_remove_unnecessary_spaces():
 
     # THEN the extra spaces are removed
     assert formatted_string == "Developing Balsamic brings me joy"
+
+
+def test_relative_paths_in_dict(session_tmp_path: Path, reference_file: Path):
+    """Test return of a dictionary with relative paths to a provided base path."""
+
+    # GIVEN a base path and a dictionary with absolute paths
+    absolute_paths: Dict[str, Path] = {"reference": reference_file}
+
+    # WHEN generating the relative paths dictionary
+    relative_paths: Dict[str, Path] = get_relative_paths_dict(
+        base_path=session_tmp_path, data=absolute_paths
+    )
+
+    # THEN a dictionary with relative paths should be returned
+    assert relative_paths == {"reference": Path(reference_file.name)}
 
 
 def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
