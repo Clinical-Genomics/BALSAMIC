@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir seaborn==0.12.2
 
 RUN cd ${WORK_DIR} && \
     git clone https://github.com/abyzovlab/CNVpytor.git && \
-    cd ${WORK_DIR}/CNVpytor/ && \
+    cd CNVpytor && \
     git checkout v1.3.1 && \
     pip install --no-cache-dir . && \
     cnvpytor -download
