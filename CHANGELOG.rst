@@ -51,6 +51,7 @@ Fixed:
 * Fix SVDB annotation intermediate rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1218
 * Broken documentation links https://github.com/Clinical-Genomics/BALSAMIC/pull/1226
 * Updated contributors in main README https://github.com/Clinical-Genomics/BALSAMIC/pull/1237
+* CNVpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1246
 
 Removed:
 ^^^^^^^^
