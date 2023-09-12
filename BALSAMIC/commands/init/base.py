@@ -9,12 +9,6 @@ from typing import Union, List, Optional
 
 import click
 
-from BALSAMIC.commands.init.options import (
-    OPTION_OUT_DIR,
-    OPTION_COSMIC_KEY,
-    OPTION_SNAKEFILE,
-    OPTION_CLUSTER_CONFIG,
-)
 from BALSAMIC.commands.options import (
     OPTION_RUN_MODE,
     OPTION_CLUSTER_PROFILE,
@@ -28,15 +22,24 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_QUIET,
     OPTION_CACHE_VERSION,
+    OPTION_SNAKEFILE,
+    OPTION_OUT_DIR,
+    OPTION_CLUSTER_CONFIG,
+    OPTION_COSMIC_KEY,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import GenomeVersion, REFERENCE_FILES
-from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile
+from BALSAMIC.constants.cluster import (
+    ClusterMailType,
+    QOS,
+    ClusterProfile,
+    ClusterConfigType,
+)
 from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
-from BALSAMIC.utils.cli import get_snakefile
+from BALSAMIC.utils.cli import get_snakefile, get_config_path
 from BALSAMIC.utils.io import write_json, generate_workflow_graph
 
 LOG = logging.getLogger(__name__)
@@ -47,42 +50,42 @@ LOG = logging.getLogger(__name__)
 )
 @OPTION_OUT_DIR
 @OPTION_CACHE_VERSION
-@OPTION_COSMIC_KEY
-@OPTION_GENOME_VERSION
-@OPTION_SNAKEFILE
-@OPTION_RUN_MODE
-@OPTION_CLUSTER_CONFIG
-@OPTION_CLUSTER_PROFILE
-@OPTION_CLUSTER_QOS
 @OPTION_CLUSTER_ACCOUNT
+@OPTION_CLUSTER_CONFIG
 @OPTION_CLUSTER_MAIL
 @OPTION_CLUSTER_MAIL_TYPE
-@OPTION_SNAKEMAKE_OPT
+@OPTION_CLUSTER_PROFILE
+@OPTION_CLUSTER_QOS
+@OPTION_COSMIC_KEY
 @OPTION_FORCE_ALL
-@OPTION_RUN_ANALYSIS
+@OPTION_GENOME_VERSION
 @OPTION_QUIET
+@OPTION_RUN_ANALYSIS
+@OPTION_RUN_MODE
+@OPTION_SNAKEFILE
+@OPTION_SNAKEMAKE_OPT
 @click.pass_context
 def initialize(
     context: click.Context,
-    out_dir: str,
+    account: Optional[str],
     cache_version: str,
-    cosmic_key: str,
-    genome_version: GenomeVersion,
-    snakefile: Path,
-    run_mode: RunMode,
     cluster_config: Path,
+    cosmic_key: str,
+    force_all: bool,
+    genome_version: GenomeVersion,
+    mail_type: Optional[ClusterMailType],
+    mail_user: Optional[str],
+    out_dir: str,
     profile: ClusterProfile,
     qos: QOS,
-    account: Optional[str],
-    mail_user: Optional[str],
-    mail_type: Optional[ClusterMailType],
-    snakemake_opt: List[str],
-    force_all: bool,
-    run_analysis: bool,
     quiet: bool,
+    run_analysis: bool,
+    run_mode: RunMode,
+    snakefile: Path,
+    snakemake_opt: List[str],
 ) -> None:
     """Validate inputs and download reference caches and containers."""
-    LOG.info(f"BALSAMIC started with log level {context.obj['loglevel']}")
+    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}")
 
     if run_mode == RunMode.CLUSTER and not run_analysis:
         LOG.info("Changing run-mode to local on dry-run")
@@ -144,7 +147,9 @@ def initialize(
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         case_id=cache_config.analysis.case_id,
-        cluster_config_path=cluster_config,
+        cluster_config_path=cluster_config
+        if cluster_config
+        else get_config_path(ClusterConfigType.CACHE),
         config_path=config_path,
         force=force_all,
         log_dir=log_dir,

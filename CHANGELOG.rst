@@ -40,6 +40,7 @@ Changed:
 * Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 * Tools versions in doc https:/github.com/Clinical-Genomics/BALSAMIC/pull/1239
+* Reuse common Balsamic CLI options https://github.com/Clinical-Genomics/BALSAMIC/pull/1242
 
 Fixed:
 ^^^^^^

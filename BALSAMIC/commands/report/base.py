@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+"""Balsamic report CLI."""
 import click
 
 from BALSAMIC.commands.report.deliver import deliver as deliver_command
@@ -7,8 +7,8 @@ from BALSAMIC.commands.report.status import status as status_command
 
 @click.group()
 @click.pass_context
-def report(context):
-    """Various command to create report, check status, and prepare delivery files"""
+def report(context: click.Context):
+    """Command to generate delivery files and check analysis status."""
     pass
 
 

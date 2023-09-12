@@ -1,5 +1,5 @@
 """Balsamic analysis workflow constants."""
-from typing import Dict
+from typing import Dict, List
 
 from BALSAMIC.constants.cache import DockerContainers
 from BALSAMIC.utils.class_types import StrEnum
@@ -10,6 +10,9 @@ class RunMode(StrEnum):
 
     CLUSTER: str = "cluster"
     LOCAL: str = "local"
+
+
+RUN_MODES: List[RunMode] = [mode.value for mode in RunMode]
 
 
 class Gender(StrEnum):
@@ -33,6 +36,11 @@ class AnalysisWorkflow(StrEnum):
     BALSAMIC: str = "balsamic"
     BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
+
+
+ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [
+    workflow.value for workflow in AnalysisWorkflow
+]
 
 
 class SequencingType(StrEnum):
@@ -71,6 +79,16 @@ class WorkflowSolution(StrEnum):
     DRAGEN: str = "DRAGEN"
     SENTIEON: str = "Sentieon"
     SENTIEON_UMI: str = "Sentieon_umi"
+
+
+class RuleDeliveryMode(StrEnum):
+    """Rules to deliver mode."""
+
+    APPEND: str = "append"
+    RESET: str = "reset"
+
+
+RULE_DELIVERY_MODES: List[RuleDeliveryMode] = [mode.value for mode in RuleDeliveryMode]
 
 
 class BioinfoTools(StrEnum):

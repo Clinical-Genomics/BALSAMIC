@@ -1,5 +1,5 @@
 """Balsamic cache specific constants."""
-from typing import Dict
+from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.class_types import StrEnum
@@ -14,6 +14,9 @@ class GenomeVersion(StrEnum):
     HG19: str = "hg19"
     HG38: str = "hg38"
     CanFam3: str = "canfam3"
+
+
+GENOME_VERSIONS: List[GenomeVersion] = [version.value for version in GenomeVersion]
 
 
 class GRCHVersion(StrEnum):
