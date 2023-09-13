@@ -13,7 +13,7 @@ rule picard_CollectHsMetrics:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"],
     output:
-        mrkdup = bam_dir + "{sample}.dedup.realign.hsmetric"
+        hs_metrics = bam_dir + "{sample}.dedup.realign.hsmetric"
     benchmark:
         Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
     singularity:
@@ -43,7 +43,7 @@ CollectHsMetrics \
 BI={input.bam}.picard.bedintervals \
 TI={input.bam}.picard.bedintervals \
 I={input.bam} \
-O={output.mrkdup} \
+O={output.hs_metrics} \
 R={input.fa} \
 BAIT_SET_NAME={params.baitsetname} \
 COVERAGE_CAP=50000 \

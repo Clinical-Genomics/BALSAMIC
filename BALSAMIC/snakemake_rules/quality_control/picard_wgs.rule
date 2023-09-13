@@ -7,6 +7,50 @@ picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cy
                            "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 
 
+rule picard_CollectHsMetrics_WGS:
+    input:
+        fadict = (config_model.reference["reference_genome"]).replace(".fasta",".dict"),
+        bed = config_model.reference["refgene_bed"],
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        fa = config_model.reference["reference_genome"],
+    output:
+        hs_metrics = qc_dir + "{sample}.dedup.realign.hsmetric"
+    benchmark:
+        Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = memory,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        bed_name = os.path.basename(config_model.reference["refgene_bed"]),
+        sample = '{sample}'
+    threads:
+        get_threads(cluster_config, 'picard_CollectHsMetrics')
+    message:
+        "Calculating picard HsMetrics for sample '{params.sample}'"
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+BedToIntervalList \
+I={input.bed} \
+O={input.bam}.picard.bedintervals \
+SD={input.fadict};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectHsMetrics \
+BI={input.bam}.picard.bedintervals \
+TI={input.bam}.picard.bedintervals \
+I={input.bam} \
+O={output.hs_metrics} \
+R={input.fa} \
+BAIT_SET_NAME={params.bed_name} \
+COVERAGE_CAP=50000 \
+METRIC_ACCUMULATION_LEVEL=ALL_READS;
+      """
+
 
 rule picard_CollectMultipleMetrics:
     input:

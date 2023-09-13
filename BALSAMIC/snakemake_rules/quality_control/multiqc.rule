@@ -37,15 +37,16 @@ if config["analysis"]["sequencing_type"] == 'wgs':
         sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}",
         sample=sample_names, metrics_wc=picard_metrics_wildcard))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.hsmetric", sample=sample_names))
 
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=sample_names))
 
     if config["analysis"]["analysis_workflow"] != "balsamic-qc":
-        multiqc_input.append(bam_dir+"tumor.recal_data.table")
+        multiqc_input.append(bam_dir + "tumor.recal_data.table")
         if config['analysis']['analysis_type'] == "paired":
-            multiqc_input.append(bam_dir+"normal.recal_data.table")
+            multiqc_input.append(bam_dir + "normal.recal_data.table")
 
 else:
     # fastp metrics
