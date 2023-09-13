@@ -20,7 +20,7 @@ rule picard_CollectHsMetrics_WGS:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
-        mem = memory,
+        mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         bed_name = os.path.basename(config_model.reference["refgene_bed"]),
         sample = '{sample}'
