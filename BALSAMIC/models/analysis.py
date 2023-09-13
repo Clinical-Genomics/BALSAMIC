@@ -1,13 +1,12 @@
 import glob
 import logging
-import os
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
 
-from pydantic import BaseModel, validator, Field, root_validator
-from pydantic.types import DirectoryPath, FilePath
+from pydantic.v1.types import DirectoryPath, FilePath
+from pydantic.v1 import BaseModel, validator, Field, root_validator
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import (

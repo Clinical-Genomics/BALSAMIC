@@ -1,9 +1,9 @@
 """Snakemake related models."""
 import sys
 from pathlib import Path
-from typing import Dict, Optional, List
+from typing import Optional, List
 
-from pydantic import BaseModel, FilePath, DirectoryPath, validator
+from pydantic.v1 import BaseModel, FilePath, DirectoryPath, validator
 
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile, MAX_JOBS

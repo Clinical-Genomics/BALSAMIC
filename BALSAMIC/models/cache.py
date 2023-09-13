@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, List, Any, Union
 
-from pydantic import BaseModel, AnyUrl, DirectoryPath, validator, FilePath
+from pydantic.v1 import BaseModel, AnyUrl, DirectoryPath, validator, FilePath
 
 from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
 from BALSAMIC.constants.constants import FileType, BwaIndexFileType

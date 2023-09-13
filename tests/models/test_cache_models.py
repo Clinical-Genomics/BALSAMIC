@@ -4,7 +4,7 @@ from typing import Dict, Any, List
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from BALSAMIC.constants.cache import (
     GRCHVersion,

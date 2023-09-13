@@ -1,6 +1,13 @@
 """Test module for Balsamic common models."""
-import pytest
+import copy
+import os
+from pathlib import Path
+from typing import List, Dict
 
+import pytest
+from pydantic.v1 import ValidationError
+
+from BALSAMIC.constants.analysis import FastqName, SampleType
 from BALSAMIC.models.analysis import (
     VCFAttributes,
     VarCallerFilter,
@@ -14,16 +21,8 @@ from BALSAMIC.models.analysis import (
     UMIParamsTNscope,
     ParamsVardict,
     ParamsVEP,
-    FastqInfoModel,
     ConfigModel,
 )
-from pydantic import ValidationError
-from BALSAMIC.utils.exc import BalsamicError
-from typing import List, Dict
-from BALSAMIC.constants.analysis import FastqName, SampleType
-import os
-import copy
-from pathlib import Path
 
 
 def test_vcfattributes():
