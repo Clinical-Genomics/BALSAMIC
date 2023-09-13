@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import Dict
 
 import click
 
@@ -22,6 +23,7 @@ from BALSAMIC.commands.options import (
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.utils.cli import (
@@ -30,7 +32,8 @@ from BALSAMIC.utils.cli import (
     get_pon_sample_list,
     get_analysis_fastq_files_directory,
 )
-from BALSAMIC.utils.io import write_json
+from BALSAMIC.utils.io import write_json, read_json
+from BALSAMIC.utils.utils import get_absolute_paths_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -64,16 +67,14 @@ def pon_config(
     umi_trim_length: bool,
     version: str,
 ):
-    reference_config = os.path.join(
-        balsamic_cache, cache_version, genome_version, "reference.json"
+    references_path: Path = Path(balsamic_cache, cache_version, genome_version)
+    references: Dict[str, Path] = get_absolute_paths_dict(
+        base_path=references_path,
+        data=read_json(Path(references_path, f"reference.{FileType.JSON}").as_posix()),
     )
-    with open(reference_config, "r") as config_file:
-        reference_dict = json.load(config_file)
-
     fastq_path: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
-
     config_collection_dict = ConfigModel(
         QC={
             "adapter_trim": adapter_trim,
@@ -91,7 +92,7 @@ def pon_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
         },
         samples=get_pon_sample_list(fastq_path),
-        reference=reference_dict,
+        reference=references,
         singularity={
             "image": Path(balsamic_cache, cache_version, "containers").as_posix()
         },
