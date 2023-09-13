@@ -8,7 +8,6 @@ from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.config.base import config as config_command
 from BALSAMIC.commands.init.base import initialize as init_command
 from BALSAMIC.commands.options import OPTION_LOG_LEVEL
-from BALSAMIC.commands.plugins.base import plugins as plugins_command
 from BALSAMIC.commands.report.base import report as report_command
 from BALSAMIC.commands.run.base import run as run_command
 from BALSAMIC.constants.constants import LogLevel
@@ -43,5 +42,4 @@ def cli(context: click.Context, log_level: LogLevel):
 cli.add_command(run_command)
 cli.add_command(report_command)
 cli.add_command(config_command)
-cli.add_command(plugins_command)
 cli.add_command(init_command)
