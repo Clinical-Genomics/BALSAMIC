@@ -8,9 +8,9 @@ def remove_unnecessary_spaces(string: str) -> str:
     return " ".join(string.split())
 
 
-def get_relative_paths_dict(base_path: Path, data: Dict[str, Path]) -> Dict[str, Path]:
+def get_relative_paths_dict(base_path: Path, data: Dict[str, Path]) -> Dict[str, str]:
     """Return a dictionary containing relative paths with respect to a given base path."""
-    return {key: path.relative_to(base_path) for key, path in data.items()}
+    return {key: path.relative_to(base_path).as_posix() for key, path in data.items()}
 
 
 def get_absolute_paths_dict(base_path: Path, data: Dict[str, Path]) -> Dict[str, Path]:

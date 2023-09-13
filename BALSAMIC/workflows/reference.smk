@@ -44,7 +44,7 @@ rule all:
         finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
     threads: get_threads(cluster_config=cluster_config, rule_name="all")
     run:
-        analysis_references: Dict[str, Path] = get_relative_paths_dict(
+        analysis_references: Dict[str, str] = get_relative_paths_dict(
             base_path=cache_config.references_dir,
             data=cache_config.get_analysis_references().dict(),
         )

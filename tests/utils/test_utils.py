@@ -81,12 +81,12 @@ def test_relative_paths_dict(session_tmp_path: Path, reference_file: Path):
     absolute_paths: Dict[str, Path] = {"reference": reference_file}
 
     # WHEN generating the relative paths dictionary
-    relative_paths: Dict[str, Path] = get_relative_paths_dict(
+    relative_paths: Dict[str, str] = get_relative_paths_dict(
         base_path=session_tmp_path, data=absolute_paths
     )
 
     # THEN a dictionary with relative paths should be returned
-    assert relative_paths == {"reference": Path(reference_file.name)}
+    assert relative_paths == {"reference": reference_file.name}
 
 
 def test_absolute_paths_dict(session_tmp_path: Path, reference_file: Path):
