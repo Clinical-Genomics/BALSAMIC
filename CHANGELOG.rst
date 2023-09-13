@@ -20,6 +20,7 @@ Added:
 * Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
 * `CADD` scores for INDELs https://github.com/Clinical-Genomics/BALSAMIC/pull/1238
 * `CADD` reference to tests https://githuc.com/Clinical-Genomics/BALSAMIC/pull/1241
+* Add cache version option to config case https://github.com/Clinical-Genomics/BALSAMIC/pull/1244
 
 Changed:
 ^^^^^^^^

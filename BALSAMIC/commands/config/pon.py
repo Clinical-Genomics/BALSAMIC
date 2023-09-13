@@ -6,7 +6,6 @@ from pathlib import Path
 
 import click
 
-from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
     OPTION_GENOME_VERSION,
     OPTION_ADAPTER_TRIM,
@@ -19,6 +18,7 @@ from BALSAMIC.commands.options import (
     OPTION_QUALITY_TRIM,
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
+    OPTION_CACHE_VERSION,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.cache import GenomeVersion
@@ -39,6 +39,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_ADAPTER_TRIM
 @OPTION_ANALYSIS_DIR
 @OPTION_BALSAMIC_CACHE
+@OPTION_CACHE_VERSION
 @OPTION_CASE_ID
 @OPTION_FASTQ_PATH
 @OPTION_GENOME_VERSION
@@ -53,6 +54,7 @@ def pon_config(
     adapter_trim: bool,
     analysis_dir: Path,
     balsamic_cache: Path,
+    cache_version: str,
     case_id: str,
     fastq_path: Path,
     genome_version: GenomeVersion,
@@ -63,7 +65,7 @@ def pon_config(
     version: str,
 ):
     reference_config = os.path.join(
-        balsamic_cache, balsamic_version, genome_version, "reference.json"
+        balsamic_cache, cache_version, genome_version, "reference.json"
     )
     with open(reference_config, "r") as config_file:
         reference_dict = json.load(config_file)
@@ -91,7 +93,7 @@ def pon_config(
         samples=get_pon_sample_list(fastq_path),
         reference=reference_dict,
         singularity={
-            "image": os.path.join(balsamic_cache, balsamic_version, "containers")
+            "image": Path(balsamic_cache, cache_version, "containers").as_posix()
         },
         bioinfo_tools=BIOINFO_TOOL_ENV,
         bioinfo_tools_version=get_bioinfo_tools_version(

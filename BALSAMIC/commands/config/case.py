@@ -1,7 +1,6 @@
 """Balsamic config case CLI."""
 import json
 import logging
-import os
 from pathlib import Path
 
 import click
@@ -20,7 +19,6 @@ from BALSAMIC.commands.options import (
     OPTION_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
     OPTION_CLINICAL_SV_OBSERVATIONS,
-    OPTION_CONTAINER_VERSION,
     OPTION_FASTQ_PATH,
     OPTION_GENDER,
     OPTION_NORMAL_SAMPLE_NAME,
@@ -32,6 +30,7 @@ from BALSAMIC.commands.options import (
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
+    OPTION_CACHE_VERSION,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender, AnalysisWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
@@ -56,6 +55,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_ANALYSIS_WORKFLOW
 @OPTION_BACKGROUND_VARIANTS
 @OPTION_BALSAMIC_CACHE
+@OPTION_CACHE_VERSION
 @OPTION_CADD_ANNOTATIONS
 @OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
@@ -63,7 +63,6 @@ LOG = logging.getLogger(__name__)
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
 @OPTION_CLINICAL_SV_OBSERVATIONS
-@OPTION_CONTAINER_VERSION
 @OPTION_FASTQ_PATH
 @OPTION_GENDER
 @OPTION_GENOME_VERSION
@@ -84,6 +83,7 @@ def case_config(
     analysis_workflow: AnalysisWorkflow,
     background_variants: Path,
     balsamic_cache: Path,
+    cache_version: str,
     cadd_annotations: Path,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
@@ -91,7 +91,6 @@ def case_config(
     case_id: str,
     clinical_snv_observations: Path,
     clinical_sv_observations: Path,
-    container_version: str,
     fastq_path: Path,
     gender: Gender,
     genome_version: GenomeVersion,
@@ -105,13 +104,10 @@ def case_config(
     umi: bool,
     umi_trim_length: int,
 ):
-    if container_version:
-        balsamic_version = container_version
-
-    reference_config = os.path.join(
-        balsamic_cache, balsamic_version, genome_version, "reference.json"
+    reference_config: Path = Path(
+        balsamic_cache, cache_version, genome_version, "reference.json"
     )
-    with open(reference_config, "r") as config_file:
+    with open(reference_config.as_posix(), "r") as config_file:
         reference_dict = json.load(config_file)
 
     cadd_annotations_path = {
@@ -159,7 +155,7 @@ def case_config(
         },
         reference=reference_dict,
         singularity={
-            "image": os.path.join(balsamic_cache, balsamic_version, "containers")
+            "image": Path(balsamic_cache, cache_version, "containers").as_posix()
         },
         background_variants=background_variants,
         samples=get_sample_list(

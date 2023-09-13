@@ -101,8 +101,7 @@ def initialize(
         )
         raise click.Abort()
 
-    release_version: str = cache_version.replace("release_v", "")
-    out_dir: Path = Path(out_dir, release_version).absolute()
+    out_dir: Path = Path(out_dir, cache_version).absolute()
     references_dir: Path = Path(out_dir, genome_version)
     genome_dir = Path(references_dir, "genome")
     variants_dir = Path(references_dir, "variants")
@@ -116,7 +115,7 @@ def initialize(
 
     references: Union[ReferencesHg, ReferencesCanFam] = REFERENCE_FILES[genome_version]
     cache_config: CacheConfig = CacheConfig(
-        analysis={"case_id": f"reference.{genome_version}.{release_version}"},
+        analysis={"case_id": f"reference.{genome_version}.{cache_version}"},
         references_dir=references_dir.as_posix(),
         genome_dir=genome_dir.as_posix(),
         variants_dir=variants_dir.as_posix(),

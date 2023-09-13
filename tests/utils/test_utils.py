@@ -942,7 +942,7 @@ def test_validate_cache_version_release():
     version: str = validate_cache_version(click.Context, click.Parameter, cli_version)
 
     # THEN the correct version should be returned
-    assert version == f"release_v{cli_version}"
+    assert version == cli_version
 
 
 def test_validate_cache_version_non_digit():
