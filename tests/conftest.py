@@ -494,7 +494,7 @@ def references_dir(test_data_dir) -> Path:
 def balsamic_cache(
     tmp_path_factory: TempPathFactory, reference: Dict[str, Path], references_dir: Path
 ) -> str:
-    """Create and return the path for balsamic-cache"""
+    """Create and return the path for balsamic-cache."""
     balsamic_cache: Path = tmp_path_factory.mktemp("balsamic_cache")
     # Mocked containers directory
     container: Path = Path(balsamic_cache, balsamic_version, "containers")
