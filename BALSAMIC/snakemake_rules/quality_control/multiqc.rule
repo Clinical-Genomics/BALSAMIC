@@ -38,10 +38,25 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}",
         sample=sample_names, metrics_wc=picard_metrics_wildcard))
     multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.hsmetric", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.sum_metrics", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.chart", sample=sample_names))
 
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=sample_names))
+
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_mq_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand( qc_dir + "{sample}_sentieon_qd_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_summary.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_aln_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_insertsize_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_seqartifact_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_metrics.pdf", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_qd_metrics.pdf", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_mq_metrics.pdf", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_insertsize_metrics.pdf", sample=sample_names))
 
     if config["analysis"]["analysis_workflow"] != "balsamic-qc":
         multiqc_input.append(bam_dir + "tumor.recal_data.table")

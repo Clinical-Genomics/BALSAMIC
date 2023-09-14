@@ -51,6 +51,40 @@ COVERAGE_CAP=50000 \
 METRIC_ACCUMULATION_LEVEL=ALL_READS;
       """
 
+rule picard_CollectGcBiasMetrics:
+    input:
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        fa = config_model.reference["reference_genome"],
+    output:
+        gc_bias_metrics = qc_dir + "{sample}.dedup.realign.gc_bias_metrics",
+        gc_bias_sum_metrics = qc_dir + "{sample}.dedup.realign.gc_bias_metrics.sum_metrics",
+        gc_bias_sum_chart = qc_dir + "{sample}.dedup.realign.gc_bias_metrics.chart"
+    benchmark:
+        Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        bed_name = os.path.basename(config_model.reference["refgene_bed"]),
+        sample = '{sample}'
+    threads:
+        get_threads(cluster_config, 'picard_CollectHsMetrics')
+    message:
+        "Calculating picard HsMetrics for sample '{params.sample}'"
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectGcBiasMetrics \
+I={input.bam} \
+O={output.gc_bias_metrics} \
+R={input.fa} \
+S={output.gc_bias_sum_metrics} \
+CHART={output.gc_bias_sum_chart} ;
+      """
 
 rule picard_CollectMultipleMetrics:
     input:
