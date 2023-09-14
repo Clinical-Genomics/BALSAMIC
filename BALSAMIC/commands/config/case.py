@@ -1,7 +1,7 @@
 """Balsamic config case CLI."""
-import json
 import logging
 from pathlib import Path
+from typing import Dict
 
 import click
 
@@ -34,6 +34,7 @@ from BALSAMIC.commands.options import (
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender, AnalysisWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.analysis import ConfigModel
@@ -44,7 +45,8 @@ from BALSAMIC.utils.cli import (
     generate_graph,
     get_analysis_fastq_files_directory,
 )
-from BALSAMIC.utils.io import write_json
+from BALSAMIC.utils.io import write_json, read_json
+from BALSAMIC.utils.utils import get_absolute_paths_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -104,18 +106,14 @@ def case_config(
     umi: bool,
     umi_trim_length: int,
 ):
-    reference_config: Path = Path(
-        balsamic_cache, cache_version, genome_version, "reference.json"
+    references_path: Path = Path(balsamic_cache, cache_version, genome_version)
+    references: Dict[str, Path] = get_absolute_paths_dict(
+        base_path=references_path,
+        data=read_json(Path(references_path, f"reference.{FileType.JSON}").as_posix()),
     )
-    with open(reference_config.as_posix(), "r") as config_file:
-        reference_dict = json.load(config_file)
-
-    cadd_annotations_path = {
-        "cadd_annotations": cadd_annotations,
-    }
+    cadd_annotations_path = {"cadd_annotations": cadd_annotations}
     if cadd_annotations:
-        reference_dict.update(cadd_annotations_path)
-
+        references.update(cadd_annotations_path)
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
@@ -125,7 +123,7 @@ def case_config(
         "swegen_snv_frequency": swegen_snv,
         "swegen_sv_frequency": swegen_sv,
     }
-    reference_dict.update(
+    references.update(
         {
             observations: path
             for observations, path in variants_observations.items()
@@ -153,7 +151,7 @@ def case_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
         },
-        reference=reference_dict,
+        reference=references,
         singularity={
             "image": Path(balsamic_cache, cache_version, "containers").as_posix()
         },
