@@ -42,6 +42,7 @@ Changed:
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 * Tools versions in doc https:/github.com/Clinical-Genomics/BALSAMIC/pull/1239
 * Reuse common Balsamic CLI options https://github.com/Clinical-Genomics/BALSAMIC/pull/1242
+* Update pydantic to v2 while maintaining support for v1 models https://github.com/Clinical-Genomics/BALSAMIC/pull/1253
 
 Fixed:
 ^^^^^^
