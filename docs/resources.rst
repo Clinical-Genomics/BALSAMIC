@@ -133,7 +133,7 @@ Methods and tools
 #. **VEP**: Variant Effect Predictor https://www.ensembl.org/info/docs/tools/vep/index.html
 #. **Probablistic2020**: Simulates somatic mutations, and calls statistically significant oncogenes and tumor suppressor genes based on a randomization-based test  https://github.com/KarchinLab/probabilistic2020
 #. **2020plus**: Classifies genes as an oncogene, tumor suppressor gene, or as a non-driver gene by using Random Forests https://github.com/KarchinLab/2020plus
-#. **vtools**: variant tools is a software tool for the manipulation, annotation, selection, simulation, and analysis of variants in the context of next-gen sequencing analysis. http://varianttools.sourceforge.net/Main/HomePage
+#. **vtools**: variant tools is a software tool for the manipulation, annotation, selection, simulation, and analysis of variants in the context of next-gen sequencing analysis. https://vatlab.github.io/vat-docs/
 #. **vt**: A variant tool set that discovers short variants from Next Generation Sequencing data. https://genome.sph.umich.edu/wiki/Vt and https://github.com/atks/vt
 #. **CNVnator**: a tool for CNV discovery and genotyping from depth-of-coverage by mapped reads. https://github.com/abyzovlab/CNVnator
 #.  **CNVpytor**: a tool for copy number variation detection and analysis from read depth and allele imbalance in whole-genome sequencing. https://github.com/abyzovlab/CNVpytor
