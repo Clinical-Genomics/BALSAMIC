@@ -1,6 +1,5 @@
 FROM python:3.10-slim
 
-
 LABEL base.image="python:3.10-slim"
 LABEL maintainer="Clinical Genomics"
 LABEL about.contact="support@clinicalgenomics.se"
