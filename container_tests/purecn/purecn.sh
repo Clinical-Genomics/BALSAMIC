@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "Rscript $PURECN/PureCN.R" "R" )
+valid_commands=( "R" )
 
 for valid_command in "${valid_commands[@]}"
 do
