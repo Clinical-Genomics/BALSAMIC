@@ -50,6 +50,7 @@ class DockerContainers(StrEnum):
     COVERAGE_QC: str = "coverage_qc"
     DELLY: str = "delly"
     HTSLIB: str = "htslib"
+    PURECN: str = "purecn"
     PYTHON_3: str = "varcall_py3"
     PYTHON_27: str = "varcall_py27"
     SOMALIER: str = "somalier"
