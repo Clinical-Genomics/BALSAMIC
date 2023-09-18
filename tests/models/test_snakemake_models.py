@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 import pytest
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from BALSAMIC.constants.cluster import (
     ClusterMailType,

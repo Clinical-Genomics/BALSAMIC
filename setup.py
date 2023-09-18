@@ -78,7 +78,7 @@ requirements: List[str] = [
     "pyasn1==0.5.0",
     "pyasn1-modules==0.3.0",
     "pycparser==2.21",
-    "pydantic==1.10.12",
+    "pydantic>=2.0",
     "Pygments==2.15.1",
     "pyOpenSSL==23.2.0",
     "pyparsing==3.0.9",
