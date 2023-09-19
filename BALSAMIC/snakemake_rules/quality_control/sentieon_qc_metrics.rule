@@ -69,7 +69,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo SequenceArtifactMetricsAlgo {output.seq_artifact_metrics};
 
 {params.sentieon_exec} plot \
-GCbias -o {output.plot_gc_bias_metrics} {output.gc_bias_metrics} \
+GCBias -o {output.plot_gc_bias_metrics} {output.gc_bias_metrics} \
 QualDistribution -o {output.plot_mean_qual_metrics} {output.mean_qual_metrics} \
 MeanQualityByCycle -o {output.plot_mean_qual_metrics} {output.mean_qual_metrics} \
 InsertSizeMetricAlgo -o {output.plot_insert_size_metrics} {output.insert_size_metrics} \
