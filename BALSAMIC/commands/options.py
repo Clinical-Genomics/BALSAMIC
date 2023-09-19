@@ -24,7 +24,6 @@ from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import validate_cache_version
 
-
 OPTION_ADAPTER_TRIM = click.option(
     "--adapter-trim/--no-adapter-trim",
     default=True,
@@ -167,14 +166,6 @@ OPTION_CLUSTER_QOS = click.option(
     default=QOS.LOW,
     type=click.Choice(QOS_OPTIONS),
     help="QOS for cluster jobs",
-)
-
-OPTION_CONTAINER_VERSION = click.option(
-    "--container-version",
-    show_default=True,
-    default=balsamic_version,
-    type=click.Choice(["develop", "master", balsamic_version]),
-    help="Container for BALSAMIC version to download",
 )
 
 OPTION_COSMIC_KEY = click.option(

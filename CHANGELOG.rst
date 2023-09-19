@@ -20,6 +20,9 @@ Added:
 * Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
 * `CADD` scores for INDELs https://github.com/Clinical-Genomics/BALSAMIC/pull/1238
 * `CADD` reference to tests https://githuc.com/Clinical-Genomics/BALSAMIC/pull/1241
+* Add cache version option to config case https://github.com/Clinical-Genomics/BALSAMIC/pull/1244
+* `cnvkit` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1252
+* `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
 
 Changed:
 ^^^^^^^^
@@ -42,6 +45,8 @@ Changed:
 * Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
 * Tools versions in doc https:/github.com/Clinical-Genomics/BALSAMIC/pull/1239
 * Reuse common Balsamic CLI options https://github.com/Clinical-Genomics/BALSAMIC/pull/1242
+* Update `reference.json` file to use relative paths https://github.com/Clinical-Genomics/BALSAMIC/pull/1251
+* Update pydantic to v2 while maintaining support for v1 models https://github.com/Clinical-Genomics/BALSAMIC/pull/1253
 
 Fixed:
 ^^^^^^
@@ -59,7 +64,7 @@ Removed:
 * Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
 * Quality trimming of fastqs for UMI workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
-
+* Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
 
 [12.0.2]
 --------

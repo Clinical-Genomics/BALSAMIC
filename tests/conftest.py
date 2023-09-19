@@ -1,6 +1,7 @@
+import copy
 import json
 import os
-import copy
+import shutil
 from datetime import datetime
 from functools import partial
 from pathlib import Path
@@ -22,8 +23,9 @@ from BALSAMIC.constants.cluster import (
     ClusterProfile,
 )
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import CONSTANTS_DIR, TEST_DATA_DIR, FASTQ_TEST_INFO
+from BALSAMIC.constants.paths import CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.models.cache import (
     CacheAnalysis,
     CacheConfig,
@@ -31,9 +33,8 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
     AnalysisReferencesHg,
 )
-from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
-from BALSAMIC.utils.io import read_json, read_yaml
+from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
 
 MOCKED_OS_ENVIRON = "os.environ"
@@ -274,33 +275,33 @@ def cluster_analysis_config_path() -> str:
 def reference():
     """Return a dictionary for reference json model."""
     return {
-        "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
-        "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-        "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-        "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
-        "known_indel_1kg": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
-        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
-        "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-        "vep_dir": "tests/test_data/references/vep/",
-        "refgene_flat": "tests/test_data/references/genome/refseq.flat",
-        "refgene_txt": "tests/test_data/references/genome/refGene.txt",
-        "wgs_calling_regions": "tests/test_data/references/genome/wgs_calling_regions.v1",
-        "genome_chrom_size": "tests/test_data/references/genome/hg19.chrom.sizes",
-        "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
-        "rank_score": "tests/test_data/references/genome/cancer_rank_model_-v0.1-.ini",
-        "access_regions": "tests/test_data/references/genome/access-5k-mappable.hg19.bed",
-        "delly_exclusion": "tests/test_data/references/genome/delly_exclusion.tsv",
-        "delly_exclusion_converted": "tests/test_data/references/genome/delly_exclusion_converted.tsv",
-        "delly_mappability": "tests/test_data/references/genome/delly_mappability.gz",
-        "delly_mappability_gindex": "tests/test_data/references/genome/delly_mappability.gz.gzi",
-        "delly_mappability_findex": "tests/test_data/references/genome/delly_mappability.fai",
-        "ascat_gc_correction": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
-        "ascat_chr_y_loci": "tests/test_data/references/genome/GRCh37_Y.loci",
-        "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
-        "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz",
-        "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
-        "cadd_annotations": "tests/test_data/references/cadd/",
+        "reference_genome": "genome/human_g1k_v37_decoy.fasta",
+        "dbsnp": "variants/dbsnp_grch37_b138.vcf.gz",
+        "vcf_1kg": "variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "hc_vcf_1kg": "variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "known_indel_1kg": "variants/1kg_known_indels_b37.vcf.gz",
+        "mills_1kg": "variants/mills_1kg_index.vcf.gz",
+        "gnomad_variant": "variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+        "cosmic": "variants/cosmic_coding_muts_v89.vcf.gz",
+        "vep_dir": "vep/",
+        "refgene_flat": "genome/refseq.flat",
+        "refgene_txt": "genome/refGene.txt",
+        "wgs_calling_regions": "genome/wgs_calling_regions.v1",
+        "genome_chrom_size": "genome/hg19.chrom.sizes",
+        "refgene_bed": "genome/refseq.flat.bed",
+        "rank_score": "genome/cancer_rank_model_-v0.1-.ini",
+        "access_regions": "genome/access-5k-mappable.hg19.bed",
+        "delly_exclusion": "genome/delly_exclusion.tsv",
+        "delly_exclusion_converted": "genome/delly_exclusion_converted.tsv",
+        "delly_mappability": "genome/delly_mappability.gz",
+        "delly_mappability_gindex": "genome/delly_mappability.gz.gzi",
+        "delly_mappability_findex": "genome/delly_mappability.fai",
+        "ascat_gc_correction": "genome/GRCh37_SnpGcCorrections.tsv",
+        "ascat_chr_y_loci": "genome/GRCh37_Y.loci",
+        "clinvar": "genome/clinvar.vcf.gz",
+        "somalier_sites": "variants/GRCh37.somalier.sites.vcf.gz",
+        "cadd_snv": "variants/hg19.cadd_snv.tsv.gz",
+        "cadd_annotations": "cadd/",
     }
 
 
@@ -484,24 +485,27 @@ def no_write_perm_path(tmp_path_factory) -> str:
 
 
 @pytest.fixture(scope="session")
-def balsamic_cache(tmp_path_factory, reference):
-    """Create and return the path for balsamic-cache"""
-    cache_dir = tmp_path_factory.mktemp("balsmic_cache")
+def references_dir(test_data_dir) -> Path:
+    """Return a references directory path."""
+    return Path(test_data_dir, "references")
 
-    cache_container = cache_dir / balsamic_version / "containers" / "align_qc"
-    cache_container.mkdir(parents=True, exist_ok=True)
-    cache_container_example = cache_container / "example.sif"
-    cache_container_example.touch()
 
-    cache_reference = cache_dir / balsamic_version / "hg19"
-    cache_reference.mkdir(parents=True, exist_ok=True)
-
-    cache_reference_json = cache_reference / f"reference.{FileType.JSON}"
-    cache_reference_json.touch()
-    with open(cache_reference_json, "w") as fp:
-        json.dump(reference, fp)
-
-    return cache_dir.as_posix()
+@pytest.fixture(scope="session")
+def balsamic_cache(
+    tmp_path_factory: TempPathFactory, reference: Dict[str, Path], references_dir: Path
+) -> str:
+    """Create and return the path for balsamic-cache."""
+    balsamic_cache: Path = tmp_path_factory.mktemp("balsamic_cache")
+    # Mocked containers directory
+    container: Path = Path(balsamic_cache, balsamic_version, "containers")
+    container.mkdir(parents=True, exist_ok=True)
+    # Mocked cache directory
+    hg19_reference: Path = Path(balsamic_cache, balsamic_version, "hg19")
+    shutil.copytree(references_dir, hg19_reference)
+    reference_json: Path = Path(hg19_reference, f"reference.{FileType.JSON}")
+    reference_json.touch()
+    write_json(json_obj=reference, path=reference_json.as_posix())
+    return balsamic_cache.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -1793,6 +1797,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
         DockerContainers.CADD.value: "docker://clinicalgenomics/balsamic:develop-cadd",
         DockerContainers.HTSLIB.value: "docker://clinicalgenomics/balsamic:develop-htslib",
+        DockerContainers.PURECN.value: "docker://clinicalgenomics/balsamic:develop-purecn",
     }
 
 

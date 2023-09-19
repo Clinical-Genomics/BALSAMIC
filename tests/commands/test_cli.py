@@ -54,23 +54,6 @@ def test_report_status(invoke_cli):
     assert result.exit_code == 0
 
 
-def test_plugins(invoke_cli):
-    # GIVEN want to see config-sample params with help option
-    # WHEN asking to show params for config-sample
-    result = invoke_cli(["plugins", "--help"])
-
-    # THEN It should show all params reuired for config-sample
-    assert result.exit_code == 0
-
-
-def test_plugins_scout(invoke_cli):
-    # WHEN invoking command with missing options
-    result = invoke_cli(["plugins", "scout", "--help"])
-
-    # THEN It should throw missing option error
-    assert result.exit_code == 0
-
-
 def test_run(invoke_cli):
     # WHEN asking to options for run command
     result = invoke_cli(["run", "--help"])
