@@ -26,6 +26,7 @@ Added:
 
 Changed:
 ^^^^^^^^
+* Changed CN header field in cnvpytor in cnvpytor_tumor_only to be Float instead of Integer https://github.com/Clinical-Genomics/BALSAMIC/pull/1182
 * Changed samples in case_config.json from being a dict to a list of dicts  https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
 * Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
