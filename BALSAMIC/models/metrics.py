@@ -42,13 +42,6 @@ class Metric(BaseModel):
     value: Any = ...
     condition: Optional[MetricCondition] = ...
 
-    @validator("name")
-    def validate_name(cls, name, values):
-        """Updates the name if the source is FastQC."""
-        if "fastqc-percent_duplicates" in name:
-            return "PERCENT_DUPLICATION_R" + values["input"].split("_")[-2]
-        return name
-
 
 class MetricValidation(BaseModel):
     """Defines the metric validation model.
