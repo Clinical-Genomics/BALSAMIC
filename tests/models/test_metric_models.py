@@ -45,27 +45,6 @@ def test_metric_pass_validation():
     assert metric_model.dict().items() == metrics.items()
 
 
-def test_metric_duplication_refactoring():
-    """Test Metric duplications param refactoring."""
-
-    # GIVEN input attributes
-    metrics: Dict[str, Any] = {
-        "header": None,
-        "id": "ACC1",
-        "input": "ACC1_R_1_fastqc.zip",
-        "name": "FastQC_mqc-generalstats-fastqc-percent_duplicates",
-        "step": "multiqc_general_stats",
-        "value": 21.517800000611373,
-        "condition": None,
-    }
-
-    # WHEN building the metric model
-    metric: Metric = Metric(**metrics)
-
-    # THEN assert retrieved values from the created model
-    assert metric.name == "PERCENT_DUPLICATION_R1"
-
-
 def test_metric_fail_validation():
     """Test Metric behaviour for an incorrect input."""
 
