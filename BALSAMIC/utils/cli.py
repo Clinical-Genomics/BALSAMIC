@@ -495,7 +495,7 @@ def validate_cache_version(
 
 def get_current_conda_environment() -> str:
     """Return current conda environment."""
-    conda_env = os.environ.get("CONDA_DEFAULT_ENV")
+    conda_env: str = os.environ.get("CONDA_DEFAULT_ENV")
     if conda_env:
         return conda_env
     raise click.UsageError(
