@@ -129,7 +129,8 @@ OPTION_CLINICAL_SV_OBSERVATIONS = click.option(
 
 OPTION_CONDA_ENV = click.option(
     "--conda-env",
-    default=get_current_conda_environment,
+    default=get_current_conda_environment(),
+    show_default=True,
     type=click.STRING,
     help="Conda environment name to use. If not provided, the current environment will be used by default.",
 )
