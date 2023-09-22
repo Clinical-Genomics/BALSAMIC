@@ -5,10 +5,11 @@ import shutil
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Generator
 from unittest import mock
 
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
 
@@ -2192,3 +2193,17 @@ def fixture_snakemake_executable_validated_data(
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
     }
+
+
+@pytest.fixture(scope="session")
+def conda_env() -> str:
+    """Test conda environment."""
+    return "test_environment"
+
+
+@pytest.fixture
+def set_conda_env_var(conda_env: str, monkeypatch: MonkeyPatch) -> Generator:
+    """A fixture to set the CONDA_DEFAULT_ENV environment variable temporarily."""
+    monkeypatch.setenv("CONDA_DEFAULT_ENV", "test_environment")
+    yield
+    monkeypatch.delenv("CONDA_DEFAULT_ENV")

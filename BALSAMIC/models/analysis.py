@@ -230,6 +230,7 @@ class AnalysisModel(BaseModel):
         dag : Field(optional); Path where DAG graph of workflow will be stored
         BALSAMIC_version  : Field(optional); Current version of BALSAMIC
         config_creation_date  : Field(optional); Timestamp when config was created
+        conda_env : Field(required); Conda environment to run the analysis in
 
     Raises:
         ValueError:
@@ -254,6 +255,7 @@ class AnalysisModel(BaseModel):
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
     pon_version: Optional[str]
+    conda_env: str
 
     class Config:
         validate_all = True

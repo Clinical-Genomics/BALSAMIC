@@ -5,11 +5,12 @@ import subprocess
 import sys
 from pathlib import Path
 from unittest import mock
-from typing import List, Dict
+from typing import List, Dict, Generator
 
 import click
 import pytest
 from _pytest.logging import LogCaptureFixture
+from _pytest.monkeypatch import MonkeyPatch
 from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
@@ -38,6 +39,7 @@ from BALSAMIC.utils.cli import (
     get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
     validate_cache_version,
+    get_current_conda_environment,
 )
 
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
@@ -1003,3 +1005,30 @@ def test_validate_cache_version_wrong_format():
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
         validate_cache_version(click.Context, click.Parameter, cli_version)
+
+
+def test_get_current_conda_environment_with_env_var(
+    set_conda_env_var: Generator, conda_env: str
+):
+    """Test get_current_conda_environment when CONDA_DEFAULT_ENV is set."""
+
+    # GIVEN a conda environment
+
+    # WHEN getting the current environment
+    current_conda_env: str = get_current_conda_environment()
+
+    # THEN the correct environment should be returned
+    assert current_conda_env == conda_env
+
+
+def test_get_current_conda_environment_without_env_var(monkeypatch: MonkeyPatch):
+    """Test get_current_conda_environment when CONDA_DEFAULT_ENV is not set."""
+
+    # GIVEN an environment without conda
+    monkeypatch.delenv("CONDA_DEFAULT_ENV")
+
+    # WHEN getting the current environment
+
+    # THEN a click error should be returned
+    with pytest.raises(click.UsageError):
+        get_current_conda_environment()

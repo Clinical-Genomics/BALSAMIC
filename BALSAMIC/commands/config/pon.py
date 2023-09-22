@@ -20,6 +20,7 @@ from BALSAMIC.commands.options import (
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
     OPTION_CACHE_VERSION,
+    OPTION_CONDA_ENV,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
 from BALSAMIC.constants.cache import GenomeVersion
@@ -44,6 +45,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
 @OPTION_CASE_ID
+@OPTION_CONDA_ENV
 @OPTION_FASTQ_PATH
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
@@ -59,6 +61,7 @@ def pon_config(
     balsamic_cache: Path,
     cache_version: str,
     case_id: str,
+    conda_env: str,
     fastq_path: Path,
     genome_version: GenomeVersion,
     panel_bed: Path,
@@ -90,6 +93,7 @@ def pon_config(
             "pon_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
+            "conda_env": conda_env,
         },
         samples=get_pon_sample_list(fastq_path),
         reference=references,

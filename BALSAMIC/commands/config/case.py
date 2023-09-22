@@ -31,6 +31,7 @@ from BALSAMIC.commands.options import (
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
     OPTION_CACHE_VERSION,
+    OPTION_CONDA_ENV,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender, AnalysisWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
@@ -65,6 +66,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
 @OPTION_CLINICAL_SV_OBSERVATIONS
+@OPTION_CONDA_ENV
 @OPTION_FASTQ_PATH
 @OPTION_GENDER
 @OPTION_GENOME_VERSION
@@ -93,6 +95,7 @@ def case_config(
     case_id: str,
     clinical_snv_observations: Path,
     clinical_sv_observations: Path,
+    conda_env: str,
     fastq_path: Path,
     gender: Gender,
     genome_version: GenomeVersion,
@@ -150,6 +153,7 @@ def case_config(
             "analysis_type": "paired" if normal_sample_name else "single",
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
+            "conda_env": conda_env,
         },
         reference=references,
         singularity={

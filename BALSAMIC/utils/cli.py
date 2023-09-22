@@ -491,3 +491,13 @@ def validate_cache_version(
     raise click.BadParameter(
         f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
     )
+
+
+def get_current_conda_environment() -> str:
+    """Return current conda environment."""
+    conda_env = os.environ.get("CONDA_DEFAULT_ENV")
+    if conda_env:
+        return conda_env
+    raise click.UsageError(
+        "Could not determine the current conda environment. Make sure you are using conda."
+    )

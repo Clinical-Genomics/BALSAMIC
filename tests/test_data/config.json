@@ -209,6 +209,7 @@
         "log": "placeholder/logs/",
         "result": "placeholder/analysis/",
         "benchmark": "placeholder/benchmarks/",
+        "conda_env": "test_environment",
         "config_creation_date": "yyyy-mm-dd xx",
         "BALSAMIC_version": "12.0.2",
         "dag": "tests/test_data/id1_analysis.json_BALSAMIC_12.0.2_graph.pdf"

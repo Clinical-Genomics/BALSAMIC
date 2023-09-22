@@ -22,7 +22,7 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.cli import validate_cache_version
+from BALSAMIC.utils.cli import validate_cache_version, get_current_conda_environment
 
 OPTION_ADAPTER_TRIM = click.option(
     "--adapter-trim/--no-adapter-trim",
@@ -125,6 +125,13 @@ OPTION_CLINICAL_SV_OBSERVATIONS = click.option(
     type=click.Path(exists=True, resolve_path=True),
     required=False,
     help="VCF path of clinical SV observations (WGS analysis workflow)",
+)
+
+OPTION_CONDA_ENV = click.option(
+    "--conda-env",
+    default=get_current_conda_environment,
+    type=click.STRING,
+    help="Conda environment name to use. If not provided, the current environment will be used by default.",
 )
 
 OPTION_CLUSTER_ACCOUNT = click.option(

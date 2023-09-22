@@ -97,7 +97,7 @@ def test_varcaller_attribute():
     assert "unacceptable is not not a valid mutation class" in str(excinfo.value)
 
 
-def test_analysis_model(test_data_dir: str):
+def test_analysis_model(test_data_dir: str, conda_env: str):
     """Test analysis model instantiation."""
 
     # GIVEN valid input arguments
@@ -109,6 +109,7 @@ def test_analysis_model(test_data_dir: str):
         "analysis_dir": test_data_dir,
         "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic-umi",
+        "conda_env": conda_env,
     }
 
     # THEN we can successfully create a config dict
@@ -277,7 +278,7 @@ def test_params_vep():
     assert test_vep_built.vep_filters == "all defaults params"
 
 
-def test_analysis_model_for_pon(test_data_dir: str):
+def test_analysis_model_for_pon(test_data_dir: str, conda_env: str):
     """Tests PON model parsing."""
 
     # GIVEN valid input arguments
@@ -289,6 +290,7 @@ def test_analysis_model_for_pon(test_data_dir: str):
         "fastq_path": test_data_dir,
         "analysis_workflow": "balsamic",
         "pon_version": "v1",
+        "conda_env": conda_env,
     }
 
     # THEN we can successfully create a config dict
