@@ -11,6 +11,8 @@ rule cnv_report:
         cnv_report_script= get_script_path("generate_cnv_report.py"),
     threads:
         get_threads(cluster_config, "cnv_report")
+    conda:
+        config_model.analysis.conda_env
     message:
         "Generating CNV report PDF"
     shell:
