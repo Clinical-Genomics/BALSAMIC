@@ -17,6 +17,8 @@ rule concatenate:
         fastq_dir = fastq_dir,
         sample = "{sample}",
         read = "{read}"
+    conda:
+        config_model.analysis.conda_env
     threads:
         get_threads(cluster_config, "concatenate")
     message:

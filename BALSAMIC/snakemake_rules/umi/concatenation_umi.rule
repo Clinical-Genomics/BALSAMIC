@@ -18,6 +18,8 @@ rule concatenate_umi_reads:
     params:
         fastq_dir=config["analysis"]["fastq_path"],
         sample="{sample}",
+    conda:
+        config_model.analysis.conda_env
     threads:
         get_threads(cluster_config, "concatenate")
     message:
