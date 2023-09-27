@@ -20,20 +20,13 @@ COV_WINDOW_SIZES = {"o": 100000,
 
 @click.group()
 @click.option(
-    "-s",
-    "--sample-id",
-    required=True,
-    type=str,
-    help="Sample ID.",
-)
-@click.option(
     "-o",
     "--output-file",
     required=True,
     type=click.Path(exists=False),
     help="Name of output-file.",
 )
-def cli(sample_id, output_file):
+def cli(output_file):
     """
     GENS pre-processing tool
     """
