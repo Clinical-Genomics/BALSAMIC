@@ -47,6 +47,7 @@ Changed:
 * Reuse common Balsamic CLI options https://github.com/Clinical-Genomics/BALSAMIC/pull/1242
 * Update `reference.json` file to use relative paths https://github.com/Clinical-Genomics/BALSAMIC/pull/1251
 * Update pydantic to v2 while maintaining support for v1 models https://github.com/Clinical-Genomics/BALSAMIC/pull/1253
+* Migrate Snakemake models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1268
 
 Fixed:
 ^^^^^^
