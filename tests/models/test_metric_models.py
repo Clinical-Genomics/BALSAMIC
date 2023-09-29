@@ -4,11 +4,7 @@ from typing import Any, Dict
 
 import pytest
 
-from BALSAMIC.models.metrics import (
-    MetricValidation,
-    Metric,
-    MetricCondition,
-)
+from BALSAMIC.models.metrics import MetricValidation, Metric, MetricCondition
 
 
 def test_metric_condition():
@@ -21,7 +17,7 @@ def test_metric_condition():
     metric_model: MetricCondition = MetricCondition(**metric_condition)
 
     # THEN assert retrieved values from the created model
-    assert metric_model.dict().items() == metric_condition.items()
+    assert dict(metric_model) == metric_condition
 
 
 def test_metric_pass_validation():
@@ -35,14 +31,14 @@ def test_metric_pass_validation():
         "name": "MEDIAN_TARGET_COVERAGE",
         "step": "multiqc_picard_HsMetrics",
         "value": 2393.0,
-        "condition": {"norm": "gt", "threshold": 1000.0},
+        "condition": MetricCondition(norm="gt", threshold=1000.0),
     }
 
     # WHEN building the metric model
     metric_model: Metric = Metric(**metrics)
 
     # THEN assert retrieved values from the created model
-    assert metric_model.dict().items() == metrics.items()
+    assert dict(metric_model) == metrics
 
 
 def test_metric_fail_validation():
@@ -54,7 +50,7 @@ def test_metric_fail_validation():
     # THEN the model raises an error due to an incomplete input
     with pytest.raises(ValueError) as input_exc:
         Metric(**invalid_input)
-    assert "field required" in str(input_exc.value)
+    assert "Field required" in str(input_exc.value)
 
 
 def test_metric_validation_pass(qc_extracted_metrics: dict):
@@ -64,10 +60,10 @@ def test_metric_validation_pass(qc_extracted_metrics: dict):
     model: MetricValidation = MetricValidation(metrics=qc_extracted_metrics)
 
     # THEN assert retrieved values from the created model
-    assert model.dict()["metrics"] == qc_extracted_metrics
+    assert model.model_dump()["metrics"] == qc_extracted_metrics
 
 
-def test_metric_validation_fail(qc_extracted_metrics: dict):
+def test_metric_validation_fail(qc_extracted_metrics: dict, caplog):
     """Test MetricValidation for an overly restrictive metric condition."""
 
     # GIVEN input attributes with a value that does not meet the filtering condition
