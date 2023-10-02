@@ -562,6 +562,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
     assert expected_final_bam_name == bam_name_sample_type
 
+
 def test_no_info_error_get_final_bam_name(balsamic_model: ConfigModel):
     """Validate raise ValueError by not sample type or sample name."""
 
