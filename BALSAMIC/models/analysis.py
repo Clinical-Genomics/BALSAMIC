@@ -642,7 +642,7 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup"
         else:
             # For every analysis except PON, the name of the final processed bamfile is defined here
-            final_bam_suffix = "dedup.realign"
+            final_bam_suffix = "dedup"
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
 

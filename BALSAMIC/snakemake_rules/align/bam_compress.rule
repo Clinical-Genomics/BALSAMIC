@@ -6,7 +6,7 @@ rule bam_compress_tumor:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fasta = config_model.reference["reference_genome"]
     output:
-        cram = Path(bam_dir, "tumor.{sample}.dedup.realign.cram").as_posix()
+        cram = Path(bam_dir, "tumor.{sample}.dedup.cram").as_posix()
     benchmark:
         Path(benchmark_dir, "bam_compress_" + "{sample}.tsv").as_posix()
     singularity:
@@ -29,7 +29,7 @@ rule bam_compress_normal:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fasta = config_model.reference["reference_genome"]
     output:
-        cram = Path(bam_dir, "normal.{sample}.dedup.realign.cram").as_posix()
+        cram = Path(bam_dir, "normal.{sample}.dedup.cram").as_posix()
     benchmark:
         Path(benchmark_dir, "bam_compress_" + "{sample}.tsv").as_posix()
     singularity:
