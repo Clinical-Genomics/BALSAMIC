@@ -1,15 +1,14 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-
-rule sentieon_DNAscope:
+rule sentieon_DNAscope_gnomad:
     input:
         ref = config["reference"]["reference_genome"],
-        dbsnp = config["reference"]["dbsnp"],
+        gnomad_af5 = config["reference"]["gnomad_min_af5"],
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         recal_table = bam_dir + "{sample_type}.recal_data.table"
     output:
-        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
+        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope_gnomad_af5.vcf.gz",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pcr_model = params.common.pcr_model,
@@ -22,7 +21,7 @@ rule sentieon_DNAscope:
     threads:
         get_threads(cluster_config, 'sentieon_DNAscope')
     message:
-        "Calling germline variants using Sentieon DNAscope for {params.sample}"
+        "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
     shell:
       """
 mkdir -p {params.tmpdir};
@@ -38,7 +37,30 @@ export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 -q {input.recal_table} \
 --algo DNAscope \
 --pcr_indel_mode {params.pcr_model} \
--d {input.dbsnp} {output.vcf};
+--given {input.gnomad_af5} {output.vcf};
 
 rm -rf {params.tmpdir};
+      """
+
+rule gatk_collectreadcounts:
+    input:
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
+        genome_interval = config["reference"]["genome_interval"]
+    output:
+        readcounts_hd55 = bam_dir + "{sample_type}.",
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sample = "{sample_type}"
+    benchmark:
+        Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample_type}.tsv").as_posix()
+    threads:
+        get_threads(cluster_config, 'sentieon_DNAscope')
+    message:
+        "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
+    shell:
+      """
+gatk CollectReadCounts -I {input.bam} \
+-L {input.genome_interval} \
+--interval-merging-rule OVERLAPPING_ONLY \
+-O $out/subject_rd_intervals.hdf5
       """

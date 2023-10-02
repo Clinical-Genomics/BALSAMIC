@@ -21,6 +21,10 @@ from BALSAMIC.commands.options import (
     OPTION_CLINICAL_SV_OBSERVATIONS,
     OPTION_FASTQ_PATH,
     OPTION_GENDER,
+    OPTION_GENS,
+    OPTION_GENOME_INTERVAL,
+    OPTION_GENS_COV_PON,
+    OPTION_GNOMAD_AF5,
     OPTION_NORMAL_SAMPLE_NAME,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
@@ -68,6 +72,10 @@ LOG = logging.getLogger(__name__)
 @OPTION_FASTQ_PATH
 @OPTION_GENDER
 @OPTION_GENOME_VERSION
+@OPTION_GENS
+@OPTION_GENOME_INTERVAL
+@OPTION_GENS_COV_PON
+@OPTION_GNOMAD_AF5
 @OPTION_NORMAL_SAMPLE_NAME
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
@@ -96,6 +104,10 @@ def case_config(
     fastq_path: Path,
     gender: Gender,
     genome_version: GenomeVersion,
+    gens: bool,
+    genome_interval: Path,
+    gens_coverage_pon: Path,
+    gnomad_min_af5: Path,
     normal_sample_name: str,
     panel_bed: Path,
     pon_cnn: Path,
@@ -114,6 +126,25 @@ def case_config(
     cadd_annotations_path = {"cadd_annotations": cadd_annotations}
     if cadd_annotations:
         references.update(cadd_annotations_path)
+
+    if gens:
+        if not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
+            raise click.BadParameter('All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required when --gens is provided.')
+
+        gens_ref_files = {
+            "genome_interval": genome_interval,
+            "gens_coverage_pon": gens_coverage_pon,
+            "gnomad_min_af5": gnomad_min_af5
+        }
+
+        references.update(
+            {
+                gens_file: path
+                for gens_file, path in gens_ref_files.items()
+                if path is not None
+            }
+        )
+
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,

@@ -24,6 +24,7 @@ from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import validate_cache_version
 
+
 OPTION_ADAPTER_TRIM = click.option(
     "--adapter-trim/--no-adapter-trim",
     default=True,
@@ -230,6 +231,33 @@ OPTION_GENOME_VERSION = click.option(
     default=GenomeVersion.HG19,
     type=click.Choice(GENOME_VERSIONS),
     help="Type and build version of the reference genome",
+)
+
+OPTION_GENS = click.option(
+    "--gens",
+    is_flag=True,
+    help="Generate files to upload to GENS.",
+)
+
+OPTION_GENOME_INTERVAL = click.option(
+    "--genome-interval",
+    required=False,
+    type=click.Path(exists=True, resolve_path=True),
+    help="Genome 100 bp interval-file (created with gatk PreprocessIntervals), used for GENS pre-processing.",
+)
+
+OPTION_GENS_COV_PON = click.option(
+    "--gens-coverage-pon",
+    required=False,
+    type=click.Path(exists=True, resolve_path=True),
+    help="GENS PON file, either male or female (created with gatk CreateReadCountPanelOfNormals), used for GENS pre-processing.",
+)
+
+OPTION_GNOMAD_AF5 = click.option(
+    "--gnomad-min-af5",
+    required=False,
+    type=click.Path(exists=True, resolve_path=True),
+    help="Gnomad VCF filtered to keep >= 0.05 AF, used for GENS pre-processing.",
 )
 
 OPTION_LOG_LEVEL = click.option(
