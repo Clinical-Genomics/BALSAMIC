@@ -88,3 +88,40 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
         """
 
+
+rule sentieon_realign:
+    input:
+        ref = config["reference"]["reference_genome"],
+        mills = config["reference"]["mills_1kg"],
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        indel_1kg = config["reference"]["known_indel_1kg"]
+    output:
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.realign.bam").as_posix()
+    benchmark:
+        Path(benchmark_dir, "sentieon_realign_{sample_type}.{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+         sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, 'sentieon_realign')
+    message:
+        "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} driver \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+--algo Realigner \
+-k {input.mills} \
+-k {input.indel_1kg} \
+{output}; 
+        """
+
