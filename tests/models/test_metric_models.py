@@ -63,7 +63,7 @@ def test_metric_validation_pass(qc_extracted_metrics: dict):
     assert model.model_dump()["metrics"] == qc_extracted_metrics
 
 
-def test_metric_validation_fail(qc_extracted_metrics: dict, caplog):
+def test_metric_validation_fail(qc_extracted_metrics: dict):
     """Test MetricValidation for an overly restrictive metric condition."""
 
     # GIVEN input attributes with a value that does not meet the filtering condition
