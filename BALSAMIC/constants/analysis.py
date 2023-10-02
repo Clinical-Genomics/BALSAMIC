@@ -163,7 +163,7 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BCFTOOLS.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.TABIX.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.BGZIP.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.GATK.value: DockerContainers.PYTHON_3.value,
+    BioinfoTools.GATK.value: DockerContainers.GATK.value,
     BioinfoTools.VARDICT.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.SVDB.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.TIDDIT.value: DockerContainers.PYTHON_3.value,

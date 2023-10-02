@@ -8,7 +8,7 @@ rule sentieon_DNAscope_gnomad:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         recal_table = bam_dir + "{sample_type}.recal_data.table"
     output:
-        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope_gnomad_af5.vcf.gz",
+        gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample_type}.dnascope_gnomad_af5.vcf.gz",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pcr_model = params.common.pcr_model,
@@ -47,20 +47,110 @@ rule gatk_collectreadcounts:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         genome_interval = config["reference"]["genome_interval"]
     output:
-        readcounts_hd55 = bam_dir + "{sample_type}.",
+        readcounts_hdf5 = cnv_dir + "{sample_type}.collectreadcounts.hdf5"
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample = "{sample_type}"
     benchmark:
-        Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample_type}.tsv").as_posix()
+        Path(benchmark_dir, 'gatk_collectreadcounts_' + "{sample_type}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     threads:
-        get_threads(cluster_config, 'sentieon_DNAscope')
+        get_threads(cluster_config, 'gatk_collectreadcounts')
     message:
-        "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
+        "Running GATK CollectReadCounts on {params.sample} for GENS."
     shell:
       """
-gatk CollectReadCounts -I {input.bam} \
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};  
+    
+gatk --java-options "-XX:-UseLargePages -Xmx20g" CollectReadCounts -I {input.bam} \
 -L {input.genome_interval} \
+--tmp-dir {params.tmpdir} \
 --interval-merging-rule OVERLAPPING_ONLY \
--O $out/subject_rd_intervals.hdf5
+-O {output.readcounts_hdf5}
+
+rm -rf {params.tmpdir}
       """
+
+rule gatk_denoisereadcounts:
+    input:
+        readcounts_hdf5 = bam_dir + "{sample_type}.collectreadcounts.hdf5",
+        gens_pon = config["reference"]["gens_coverage_pon"]
+    output:
+        denoised_cr = cnv_dir + "{sample_type}.denoisedCR.tsv",
+        standardized_cr = cnv_dir + "{sample_type}.standardizedCR.tsv"
+    params:
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+        sample="{sample_type}"
+    benchmark:
+        Path(benchmark_dir,'gatk_denoisereadcounts_' + "{sample_type}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
+    threads:
+        get_threads(cluster_config,'gatk_denoisereadcounts')
+    message:
+        "Running GATK DenoiseReadCounts on {params.sample} for GENS."
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};  
+  
+gatk --java-options "-Xmx35g" DenoiseReadCounts 
+-I {input.readcounts_hdf5} \
+--count-panel-of-normals {input.gens_pon} \
+--tmp-dir {params.tmpdir} \
+--standardized-copy-ratios {output.standardized_cr} \
+--denoised-copy-ratios {output.denoised_cr}
+  
+rm -rf {params.tmpdir}
+        """
+
+rule gens_preprocessing:
+    input:
+        denoised_cr = bam_dir + "{sample_type}.denoisedCR.tsv",
+        gnomad_af5_vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope_gnomad_af5.vcf.gz",
+    output:
+        gens_baf_bed = cnv_dir + "{sample_type}.baf.bed",
+        gens_cov_bed = cnv_dir + "{sample_type}.cov.bed"
+    params:
+        gens_preprocessing = get_script_path("preprocess_gens.py"),
+        sample="{sample_type}"
+    benchmark:
+        Path(benchmark_dir,'gens_preprocessing_' + "{sample_type}.tsv").as_posix()
+    threads:
+        get_threads(cluster_config,'gatk_denoisereadcounts')
+    message:
+        "Formatting output for GENS for sample: {params.sample}."
+    shell:
+        """
+{params.gens_preprocessing} -o {output.gens_baf_bed} calc-bafs --vcf-file {input.gnomad_af5_vcf}
+{params.gens_preprocessing} -o {output.gens_cov_bed} calculate-coverage-data --normalised-coverage-path {input.denoised_cr}
+        """
+
+rule finalize_gens_outputfiles:
+    input:
+        gens_baf_bed = cnv_dir + "{sample_type}.baf.bed",
+        gens_cov_bed = cnv_dir + "{sample_type}.cov.bed"
+    output:
+        gens_baf_bed_bgz = cnv_dir + "{sample_type}.baf.bed.gz",
+        gens_cov_bed_bgz = cnv_dir + "{sample_type}.cov.bed.gz",
+        gens_baf_bed_tbi = cnv_dir + "{sample_type}.baf.bed.gz.tbi",
+        gens_cov_bed_tbi = cnv_dir + "{sample_type}.cov.bed.gz.tbi"
+    params:
+        sample="{sample_type}"
+    benchmark:
+        Path(benchmark_dir,'finalize_gens_outputfiles' + "{sample_type}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("bgzip") + ".sif").as_posix()
+    threads:
+        get_threads(cluster_config, 'bgzip')
+    message:
+        "Formatting output for GENS for sample: {params.sample}."
+    shell:
+        """
+bgzip {input.gens_baf_bed}
+bgzip {input.gens_cov_bed}
+tabix {input.gens_baf_bed}.gz
+tabix {input.gens_cov_bed}.gz
+        """

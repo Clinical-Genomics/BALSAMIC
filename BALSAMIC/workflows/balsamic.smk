@@ -487,9 +487,20 @@ if config['analysis']['analysis_type'] == "single":
         expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
     )
 
-# GENS
+# GENS Outputs
 if config["analysis"]["sequencing_type"] == "wgs" and "gens_coverage_pon" in config["reference"]:
-    analysis_specific_results.extend([
+    analysis_specific_results.extend(
+        expand(cnv_dir + "{sample}.baf.bed.gz", sample=sample_names)
+    )
+    analysis_specific_results.extend(
+        expand(cnv_dir + "{sample}.cov.bed.gz", sample=sample_names)
+    )
+    analysis_specific_results.extend(
+        expand(cnv_dir + "{sample}.baf.bed.gz.tbi", sample=sample_names)
+    )
+    analysis_specific_results.extend(
+        expand(cnv_dir + "{sample}.cov.bed.gz.tbi", sample=sample_names)
+    )
 
 # Dragen
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":

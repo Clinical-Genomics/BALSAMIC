@@ -11,6 +11,11 @@
 		"time": "00:15:00",
 		"n": 1
 	},
+	"bgzip": {
+		"mail_type": "END",
+		"time": "01:00:00",
+		"n": 1
+	},
 	"CollectAlignmentSummaryMetrics": {
 		"time": "03:30:00",
 		"n": 8
@@ -63,6 +68,14 @@
 	"fastp_remove_umi":{
 		"time": "12:00:00",
 		"n": 4
+	},
+	"gatk_collectreadcounts":{
+		"time": "10:00:00",
+		"n": 5
+	},
+	"gatk_denoisereadcounts":{
+		"time": "10:00:00",
+		"n": 5
 	},
 	"manta_germline": {
 		"time": "05:00:00",

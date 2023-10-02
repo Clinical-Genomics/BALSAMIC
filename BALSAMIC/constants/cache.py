@@ -55,6 +55,7 @@ class DockerContainers(StrEnum):
     PYTHON_27: str = "varcall_py27"
     SOMALIER: str = "somalier"
     VCF2CYTOSURE: str = "vcf2cytosure"
+    GATK: str = "gatk"
 
 
 REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
