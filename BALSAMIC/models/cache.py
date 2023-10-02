@@ -1,9 +1,10 @@
 """Balsamic reference cache models."""
 import logging
 from pathlib import Path
-from typing import Dict, Optional, List, Any, Union
+from typing import Dict, Optional, List, Union
 
-from pydantic.v1 import BaseModel, AnyUrl, DirectoryPath, validator, FilePath
+from pydantic import BaseModel, AnyUrl, DirectoryPath, FilePath, field_validator
+from pydantic_core.core_schema import FieldValidationInfo
 
 from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
 from BALSAMIC.constants.constants import FileType, BwaIndexFileType
@@ -31,8 +32,8 @@ class ReferenceUrl(BaseModel):
     gzip: bool
     file_name: str
     dir_name: str
-    file_path: Optional[str]
-    secret: Optional[str]
+    file_path: Optional[str] = None
+    secret: Optional[str] = None
 
 
 class References(BaseModel):
@@ -277,15 +278,15 @@ class CacheConfig(BaseModel):
     variants_dir: Path
     vep_dir: Path
     genome_version: GenomeVersion
-    cosmic_key: Optional[str]
+    cosmic_key: Optional[str] = None
     bioinfo_tools: dict
     containers: Dict[str, str]
     references: Union[ReferencesHg, ReferencesCanFam]
     references_date: str
 
-    @validator("references")
+    @field_validator("references")
     def validate_references(
-        cls, references: References, values: Dict[str, Any]
+        cls, references: References, info: FieldValidationInfo
     ) -> References:
         """Validate the reference output paths."""
         for model in references:
@@ -294,7 +295,7 @@ class CacheConfig(BaseModel):
             reference_key, reference = model[0], model[1]
             reference.file_path = (
                 Path(
-                    values.get("references_dir"),
+                    info.data.get("references_dir"),
                     reference.dir_name,
                     reference.file_name,
                 ).as_posix()
@@ -302,7 +303,7 @@ class CacheConfig(BaseModel):
                 else None
             )
             reference.secret = (
-                values.get("cosmic_key") if "cosmic" in reference_key else None
+                info.data.get("cosmic_key") if "cosmic" in reference_key else None
             )
         return references
 
