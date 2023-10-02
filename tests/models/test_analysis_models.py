@@ -7,7 +7,7 @@ from typing import List, Dict
 import pytest
 from pydantic.v1 import ValidationError
 
-from BALSAMIC.constants.analysis import FastqName, SampleType
+from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.models.analysis import (
     VCFAttributes,
     VarCallerFilter,
@@ -553,6 +553,14 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
 
+    # WHEN changing sequencing_type to WGS
+    balsamic_model.analysis.sequencing_type = SequencingType.WGS
+    # Then retrieved final bam names should have realignment suffix
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
+    bam_name_sample_type = balsamic_model.get_final_bam_name(
+        bam_dir, sample_type=sample_type
+    )
+    assert expected_final_bam_name == bam_name_sample_type
 
 def test_no_info_error_get_final_bam_name(balsamic_model: ConfigModel):
     """Validate raise ValueError by not sample type or sample name."""
