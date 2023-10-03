@@ -885,8 +885,8 @@ def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
 
     # THEN check that the fastq_dict matches the expected fastq_dict
     expected_fastq_dict = {
-        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected,
-        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected,
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.dict(exclude_none=True),
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.dict(exclude_none=True),
     }
     assert fastq_dict == expected_fastq_dict
 
