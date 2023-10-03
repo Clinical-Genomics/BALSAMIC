@@ -89,6 +89,7 @@ def calc_bafs(vcf_file: str):
                 variant = variants[variant_id]
                 if skip_count == req_skip_count:
                     v_start = int(variant["start"])
+                    v_chrom = variant["chr"]
                     v_af = variant["af"]
                     baf_out.write(f"{prefix}_{v_chrom}\t{v_start}\t{v_start + 1}\t{v_af}\n")
                     skip_count = 0

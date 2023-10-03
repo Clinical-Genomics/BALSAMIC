@@ -5,19 +5,19 @@ rule sentieon_DNAscope_gnomad:
     input:
         ref = config["reference"]["reference_genome"],
         gnomad_af5 = config["reference"]["gnomad_min_af5"],
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
-        recal_table = bam_dir + "{sample_type}.recal_data.table"
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        recal_table = bam_dir + "{sample}.recal_data.table"
     output:
-        gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample_type}.dnascope_gnomad_af5.vcf.gz",
+        gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pcr_model = params.common.pcr_model,
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
-        sample = "{sample_type}"
+        sample = "{sample}"
     benchmark:
-        Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample_type}.tsv").as_posix()
+        Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample}.tsv").as_posix()
     threads:
         get_threads(cluster_config, 'sentieon_DNAscope')
     message:
@@ -44,15 +44,15 @@ rm -rf {params.tmpdir};
 
 rule gatk_collectreadcounts:
     input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         genome_interval = config["reference"]["genome_interval"]
     output:
-        readcounts_hdf5 = cnv_dir + "{sample_type}.collectreadcounts.hdf5"
+        readcounts_hdf5 = cnv_dir + "{sample}.collectreadcounts.hdf5"
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample = "{sample_type}"
+        sample = "{sample}"
     benchmark:
-        Path(benchmark_dir, 'gatk_collectreadcounts_' + "{sample_type}.tsv").as_posix()
+        Path(benchmark_dir, 'gatk_collectreadcounts_' + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     threads:
@@ -75,16 +75,16 @@ rm -rf {params.tmpdir}
 
 rule gatk_denoisereadcounts:
     input:
-        readcounts_hdf5 = bam_dir + "{sample_type}.collectreadcounts.hdf5",
+        readcounts_hdf5 = bam_dir + "{sample}.collectreadcounts.hdf5",
         gens_pon = config["reference"]["gens_coverage_pon"]
     output:
-        denoised_cr = cnv_dir + "{sample_type}.denoisedCR.tsv",
-        standardized_cr = cnv_dir + "{sample_type}.standardizedCR.tsv"
+        denoised_cr = cnv_dir + "{sample}.denoisedCR.tsv",
+        standardized_cr = cnv_dir + "{sample}.standardizedCR.tsv"
     params:
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
-        sample="{sample_type}"
+        sample="{sample}"
     benchmark:
-        Path(benchmark_dir,'gatk_denoisereadcounts_' + "{sample_type}.tsv").as_posix()
+        Path(benchmark_dir,'gatk_denoisereadcounts_' + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     threads:
@@ -108,16 +108,16 @@ rm -rf {params.tmpdir}
 
 rule gens_preprocessing:
     input:
-        denoised_cr = bam_dir + "{sample_type}.denoisedCR.tsv",
-        gnomad_af5_vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope_gnomad_af5.vcf.gz",
+        denoised_cr = bam_dir + "{sample}.denoisedCR.tsv",
+        gnomad_af5_vcf = vcf_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
     output:
-        gens_baf_bed = cnv_dir + "{sample_type}.baf.bed",
-        gens_cov_bed = cnv_dir + "{sample_type}.cov.bed"
+        gens_baf_bed = cnv_dir + "{sample}.baf.bed",
+        gens_cov_bed = cnv_dir + "{sample}.cov.bed"
     params:
         gens_preprocessing = get_script_path("preprocess_gens.py"),
-        sample="{sample_type}"
+        sample="{sample}"
     benchmark:
-        Path(benchmark_dir,'gens_preprocessing_' + "{sample_type}.tsv").as_posix()
+        Path(benchmark_dir,'gens_preprocessing_' + "{sample}.tsv").as_posix()
     threads:
         get_threads(cluster_config,'gatk_denoisereadcounts')
     message:
@@ -130,17 +130,17 @@ rule gens_preprocessing:
 
 rule finalize_gens_outputfiles:
     input:
-        gens_baf_bed = cnv_dir + "{sample_type}.baf.bed",
-        gens_cov_bed = cnv_dir + "{sample_type}.cov.bed"
+        gens_baf_bed = cnv_dir + "{sample}.baf.bed",
+        gens_cov_bed = cnv_dir + "{sample}.cov.bed"
     output:
-        gens_baf_bed_bgz = cnv_dir + "{sample_type}.baf.bed.gz",
-        gens_cov_bed_bgz = cnv_dir + "{sample_type}.cov.bed.gz",
-        gens_baf_bed_tbi = cnv_dir + "{sample_type}.baf.bed.gz.tbi",
-        gens_cov_bed_tbi = cnv_dir + "{sample_type}.cov.bed.gz.tbi"
+        gens_baf_bed_bgz = cnv_dir + "{sample}.baf.bed.gz",
+        gens_cov_bed_bgz = cnv_dir + "{sample}.cov.bed.gz",
+        gens_baf_bed_tbi = cnv_dir + "{sample}.baf.bed.gz.tbi",
+        gens_cov_bed_tbi = cnv_dir + "{sample}.cov.bed.gz.tbi"
     params:
-        sample="{sample_type}"
+        sample="{sample}"
     benchmark:
-        Path(benchmark_dir,'finalize_gens_outputfiles' + "{sample_type}.tsv").as_posix()
+        Path(benchmark_dir,'finalize_gens_outputfiles' + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bgzip") + ".sif").as_posix()
     threads:
