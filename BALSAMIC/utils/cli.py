@@ -300,7 +300,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
                     "fwd_resolved": Path(fwd_fastq).resolve().as_posix(),
                     "rev_resolved": Path(rev_fastq).resolve().as_posix(),
                 }
-            )
+            ) if Path(fwd_fastq).is_symlink() or Path(rev_fastq).is_symlink() else None
 
     if not fastq_dict:
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
