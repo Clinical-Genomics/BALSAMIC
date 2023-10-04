@@ -146,7 +146,7 @@ def test_sample_instance_model(config_dict_w_fastqs: Dict):
             values["rev"] = Path(values["rev"]).resolve().as_posix()
 
         # THEN the sample model should be correctly initialised
-        assert sample.dict() == sample_dict_copy
+        assert sample.dict(exclude_none=True) == sample_dict_copy
 
 
 def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct: Dict):

@@ -557,6 +557,20 @@ def fastq_dir_tumor_only(
 
 
 @pytest.fixture(scope="session")
+def fastq_dir_symlinked(
+    tumor_fastq_names: List[str], session_tmp_path: Path, reference_file: Path
+) -> Path:
+    """Return directory containing symlinked FASTQs for tumor-only."""
+    fastq_dir: Path = Path(session_tmp_path, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+    for fastq in tumor_fastq_names:
+        Path(session_tmp_path, fastq).touch()
+    for fastq in tumor_fastq_names:
+        Path(fastq_dir, fastq).symlink_to(reference_file)
+    return fastq_dir
+
+
+@pytest.fixture(scope="session")
 def fastq_dir_tumor_only_pon_cnn(
     analysis_dir: str, case_id_tumor_only_pon_cnn: str, tumor_fastq_names: List[str]
 ) -> str:
