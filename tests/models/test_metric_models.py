@@ -17,7 +17,7 @@ def test_metric_condition():
     metric_model: MetricCondition = MetricCondition(**metric_condition)
 
     # THEN assert retrieved values from the created model
-    assert dict(metric_model) == metric_condition
+    assert metric_model.model_dump() == metric_condition
 
 
 def test_metric_pass_validation():
@@ -31,14 +31,14 @@ def test_metric_pass_validation():
         "name": "MEDIAN_TARGET_COVERAGE",
         "step": "multiqc_picard_HsMetrics",
         "value": 2393.0,
-        "condition": MetricCondition(norm="gt", threshold=1000.0),
+        "condition": {"norm": "gt", "threshold": 1000.0},
     }
 
     # WHEN building the metric model
     metric_model: Metric = Metric(**metrics)
 
     # THEN assert retrieved values from the created model
-    assert dict(metric_model) == metrics
+    assert metric_model.model_dump() == metrics
 
 
 def test_metric_fail_validation():
