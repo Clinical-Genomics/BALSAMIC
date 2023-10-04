@@ -1,5 +1,4 @@
 import copy
-import json
 import os
 import shutil
 from datetime import datetime
@@ -11,6 +10,7 @@ from unittest import mock
 import pytest
 from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
+from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
@@ -2043,9 +2043,9 @@ def fixture_analysis_references_hg(
 
 
 @pytest.fixture(scope="session", name="reference_url")
-def fixture_reference_url() -> str:
+def fixture_reference_url() -> Url:
     """Return dummy reference url."""
-    return "gs://gatk-legacy-bundles/b37/reference.vcf.gz"
+    return Url("gs://gatk-legacy-bundles/b37/reference.vcf.gz")
 
 
 @pytest.fixture(scope="session", name="reference_file")
@@ -2058,7 +2058,7 @@ def fixture_reference_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="reference_url_data")
 def fixture_reference_url_data(
-    reference_url: str, reference_file: Path, cosmic_key: str
+    reference_url: Url, reference_file: Path, cosmic_key: str
 ) -> Dict[str, Any]:
     """return reference url model data."""
     return {

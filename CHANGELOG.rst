@@ -51,6 +51,7 @@ Changed:
 * `PCT_PF_READS_IMPROPER_PAIRS` QC threshold lowered to 5% https://github.com/Clinical-Genomics/BALSAMIC/issues/1265
 * Migrate Metrics models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1270
 * Migrate Snakemake models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1268
+* Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
 
 Fixed:
 ^^^^^^
