@@ -19,5 +19,8 @@ labels: ["Feature"]
 ## Can be closed when
 *Link the issues needed to be closed for this to be implemented*
 
+## Infrastructure changes
+*Create/Link issues in cg or servers needed for this feature*
+
 ## Blockers
 *Anything preventing this from happening?* 
