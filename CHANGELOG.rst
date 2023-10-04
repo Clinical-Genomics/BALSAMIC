@@ -60,6 +60,7 @@ Fixed:
 * Updated contributors in main README https://github.com/Clinical-Genomics/BALSAMIC/pull/1237
 * CNVpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1246
 * Restored balsamic container in UMI concatenation rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1261
+* CNVpytor container, fixing numpy version https://github.com/Clinical-Genomics/BALSAMIC/pull/1273
 
 Removed:
 ^^^^^^^^
