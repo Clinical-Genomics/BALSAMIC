@@ -362,8 +362,10 @@ class FastqInfoModel(BaseModel):
 
     fwd: FilePath
     rev: FilePath
+    fwd_resolved: Optional[FilePath]
+    rev_resolved: Optional[FilePath]
 
-    @validator("fwd", "rev")
+    @validator("fwd", "rev", "fwd_resolved", "rev_resolved")
     def fastq_path_as_abspath_str(cls, value):
         return Path(value).as_posix()
 

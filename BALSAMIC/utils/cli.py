@@ -290,10 +290,17 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
                 LOG.error(error_message)
                 raise BalsamicError(error_message)
 
+            rev_fastq: str = fwd_fastq.replace(suffix_fwd, suffix_rev)
             fastq_dict[fastq_pair_pattern] = {
                 "fwd": fwd_fastq,
-                "rev": fwd_fastq.replace(suffix_fwd, suffix_rev),
+                "rev": rev_fastq,
             }
+            fastq_dict[fastq_pair_pattern].update(
+                {
+                    "fwd_resolved": Path(fwd_fastq).resolve().as_posix(),
+                    "rev_resolved": Path(rev_fastq).resolve().as_posix(),
+                }
+            ) if Path(fwd_fastq).is_symlink() or Path(rev_fastq).is_symlink() else None
 
     if not fastq_dict:
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
