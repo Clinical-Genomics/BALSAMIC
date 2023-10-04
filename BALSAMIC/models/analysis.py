@@ -362,8 +362,10 @@ class FastqInfoModel(BaseModel):
 
     fwd: FilePath
     rev: FilePath
+    fwd_resolved: Optional[FilePath]
+    rev_resolved: Optional[FilePath]
 
-    @validator("fwd", "rev")
+    @validator("fwd", "rev", "fwd_resolved", "rev_resolved")
     def fastq_path_as_abspath_str(cls, value):
         return Path(value).as_posix()
 
@@ -640,8 +642,11 @@ class ConfigModel(BaseModel):
         if self.analysis.analysis_type == AnalysisType.PON:
             # Only dedup is necessary for panel of normals
             final_bam_suffix = "dedup"
+        elif self.analysis.sequencing_type == SequencingType.TARGETED:
+            # Only dedup is necessary for TGA
+            final_bam_suffix = "dedup"
         else:
-            # For every analysis except PON, the name of the final processed bamfile is defined here
+            # For WGS the bamfiles are realigned
             final_bam_suffix = "dedup.realign"
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
