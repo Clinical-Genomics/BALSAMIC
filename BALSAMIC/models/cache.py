@@ -3,8 +3,14 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, List, Union
 
-from pydantic import BaseModel, AnyUrl, DirectoryPath, FilePath, field_validator
-from pydantic_core.core_schema import FieldValidationInfo
+from pydantic import (
+    BaseModel,
+    AnyUrl,
+    DirectoryPath,
+    FilePath,
+    field_validator,
+    ValidationInfo,
+)
 
 from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
 from BALSAMIC.constants.constants import FileType, BwaIndexFileType
@@ -286,7 +292,7 @@ class CacheConfig(BaseModel):
 
     @field_validator("references")
     def validate_references(
-        cls, references: References, info: FieldValidationInfo
+        cls, references: References, info: ValidationInfo
     ) -> References:
         """Validate the reference output paths."""
         for model in references:
