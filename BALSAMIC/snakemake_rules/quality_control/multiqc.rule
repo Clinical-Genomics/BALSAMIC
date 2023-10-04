@@ -7,13 +7,18 @@ multiqc_input.append(qc_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
 multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
     sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
-multiqc_input.extend(expand(bam_dir + "tumor.{sample}.dedup.realign.cram", sample=tumor_sample))
+if config["analysis"]["sequencing_type"] == 'wgs':
+    final_bam_suffix = "dedup.realign"
+else:
+    final_bam_suffix = "dedup"
+
+multiqc_input.extend(expand(bam_dir + "tumor.{sample}.{final_bam_suffix}.cram", sample=tumor_sample, final_bam_suffix=final_bam_suffix))
 
 # fastqc metrics
 multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=config_model.get_all_fastq_names(remove_suffix = True)))
 
 if config['analysis']['analysis_type'] == "paired":
-    multiqc_input.extend(expand(bam_dir + "normal.{sample}.dedup.realign.cram", sample=normal_sample))
+    multiqc_input.extend(expand(bam_dir + "normal.{sample}.{final_bam_suffix}.cram", sample=normal_sample, final_bam_suffix=final_bam_suffix))
     multiqc_input.append(config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample))
     multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
     multiqc_input.append(qc_dir + "normal.{}.dedup.metrics".format(normal_sample))
