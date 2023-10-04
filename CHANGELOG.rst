@@ -68,6 +68,7 @@ Removed:
 * Quality trimming of fastqs for UMI workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
 * Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
+* Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
 
 [12.0.2]
 --------
