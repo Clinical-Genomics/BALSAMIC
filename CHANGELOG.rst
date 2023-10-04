@@ -24,6 +24,7 @@ Added:
 * `cnvkit` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1252
 * `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
 * `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
+* Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
 
 Changed:
 ^^^^^^^^
@@ -49,6 +50,7 @@ Changed:
 * Update `reference.json` file to use relative paths https://github.com/Clinical-Genomics/BALSAMIC/pull/1251
 * Update pydantic to v2 while maintaining support for v1 models https://github.com/Clinical-Genomics/BALSAMIC/pull/1253
 * `PCT_PF_READS_IMPROPER_PAIRS` QC threshold lowered to 5% https://github.com/Clinical-Genomics/BALSAMIC/issues/1265
+* Migrate Metrics models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1270
 
 Fixed:
 ^^^^^^
@@ -61,6 +63,7 @@ Fixed:
 * Updated contributors in main README https://github.com/Clinical-Genomics/BALSAMIC/pull/1237
 * CNVpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1246
 * Restored balsamic container in UMI concatenation rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1261
+* CNVpytor container, fixing numpy version https://github.com/Clinical-Genomics/BALSAMIC/pull/1273
 
 Removed:
 ^^^^^^^^
@@ -68,6 +71,7 @@ Removed:
 * Quality trimming of fastqs for UMI workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
 * Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
+* Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
 
 [12.0.2]
 --------

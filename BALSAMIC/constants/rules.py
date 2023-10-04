@@ -168,6 +168,8 @@ DELIVERY_RULES: List[str] = [
     "mergeBam_normal_umiconsensus",
     "bam_compress_tumor",
     "bam_compress_normal",
+    "bam_compress_tumor_wgs",
+    "bam_compress_normal_wgs",
     # Germline
     "vcfheader_rename_germline",
     "vep_annotate_germlineVAR_tumor",
