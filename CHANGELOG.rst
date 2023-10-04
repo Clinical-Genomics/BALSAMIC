@@ -23,6 +23,7 @@ Added:
 * Add cache version option to config case https://github.com/Clinical-Genomics/BALSAMIC/pull/1244
 * `cnvkit` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1252
 * `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
+* Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
 
 Changed:
 ^^^^^^^^
