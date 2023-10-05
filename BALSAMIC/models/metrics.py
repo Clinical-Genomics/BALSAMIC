@@ -1,8 +1,8 @@
 """QC validation metrics model."""
 import logging
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Annotated
 
-from pydantic.v1 import BaseModel, validator
+from pydantic import BaseModel, AfterValidator
 
 from BALSAMIC.constants.metrics import VALID_OPS
 
@@ -34,20 +34,26 @@ class Metric(BaseModel):
         condition (MetricCondition, required) : Metric validation condition.
     """
 
-    header: Optional[str]
+    header: Optional[str] = None
     id: str
     input: str
     name: str
     step: str
-    value: Any = ...
-    condition: Optional[MetricCondition] = ...
+    value: Any
+    condition: Optional[MetricCondition]
 
-    @validator("name")
-    def validate_name(cls, name, values):
-        """Updates the name if the source is FastQC."""
-        if "fastqc-percent_duplicates" in name:
-            return "PERCENT_DUPLICATION_R" + values["input"].split("_")[-2]
-        return name
+
+def validate_metric(metric: Metric):
+    """Checks if a metric meets its filtering condition."""
+    if metric.condition and not VALID_OPS[metric.condition.norm](
+        metric.value, metric.condition.threshold
+    ):
+        raise ValueError(
+            f"QC metric {metric.name}: {metric.value} validation has failed. "
+            f"(Condition: {metric.condition.norm} {metric.condition.threshold}, ID: {metric.id})."
+        )
+    LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
+    return metric
 
 
 class MetricValidation(BaseModel):
@@ -57,17 +63,4 @@ class MetricValidation(BaseModel):
         metrics (List[Metric], required) : Metric model to validate.
     """
 
-    metrics: List[Metric]
-
-    @validator("metrics", each_item=True)
-    def validate_metrics(cls, metric):
-        """Checks if a metric meets its filtering condition."""
-        if metric.condition and not VALID_OPS[metric.condition.norm](
-            metric.value, metric.condition.threshold
-        ):
-            raise ValueError(
-                f"QC metric {metric.name}: {metric.value} validation has failed. "
-                f"(Condition: {metric.condition.norm} {metric.condition.threshold}, ID: {metric.id})."
-            )
-        LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
-        return metric
+    metrics: List[Annotated[Metric, AfterValidator(validate_metric)]]
