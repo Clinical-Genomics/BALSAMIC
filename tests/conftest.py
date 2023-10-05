@@ -1812,6 +1812,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.CADD.value: "docker://clinicalgenomics/balsamic:develop-cadd",
         DockerContainers.HTSLIB.value: "docker://clinicalgenomics/balsamic:develop-htslib",
         DockerContainers.PURECN.value: "docker://clinicalgenomics/balsamic:develop-purecn",
+        DockerContainers.GATK.value: "docker://clinicalgenomics/balsamic:develop-gatk",
     }
 
 
