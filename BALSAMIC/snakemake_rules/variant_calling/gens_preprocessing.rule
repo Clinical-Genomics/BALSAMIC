@@ -108,8 +108,8 @@ rm -rf {params.tmpdir}
 
 rule gens_preprocessing:
     input:
-        denoised_cr = bam_dir + "{sample}.denoisedCR.tsv",
-        gnomad_af5_vcf = vcf_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
+        denoised_cr = cnv_dir + "{sample}.denoisedCR.tsv",
+        gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
     output:
         gens_baf_bed = cnv_dir + "{sample}.baf.bed",
         gens_cov_bed = cnv_dir + "{sample}.cov.bed"
