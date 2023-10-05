@@ -49,7 +49,6 @@ class DockerContainers(StrEnum):
     CNVPYTOR: str = "cnvpytor"
     COVERAGE_QC: str = "coverage_qc"
     DELLY: str = "delly"
-    GATK: str = "gatk"
     HTSLIB: str = "htslib"
     PURECN: str = "purecn"
     PYTHON_3: str = "varcall_py3"
