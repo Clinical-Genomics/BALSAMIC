@@ -75,7 +75,7 @@ rm -rf {params.tmpdir}
 
 rule gatk_denoisereadcounts:
     input:
-        readcounts_hdf5 = bam_dir + "{sample}.collectreadcounts.hdf5",
+        readcounts_hdf5 = cnv_dir + "{sample}.collectreadcounts.hdf5",
         gens_pon = config["reference"]["gens_coverage_pon"]
     output:
         denoised_cr = cnv_dir + "{sample}.denoisedCR.tsv",
