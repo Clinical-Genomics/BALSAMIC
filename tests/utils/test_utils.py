@@ -239,7 +239,7 @@ def test_get_bioinfo_pip_tools_version():
     bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the PIP specific packages are correctly retrieved
-    assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.9"})
+    assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.10"})
 
 
 def test_get_delivery_id():

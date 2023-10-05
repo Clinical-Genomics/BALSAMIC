@@ -1792,7 +1792,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.ALIGN_QC.value: "docker://clinicalgenomics/balsamic:develop-align_qc",
         DockerContainers.ANNOTATE.value: "docker://clinicalgenomics/balsamic:develop-annotate",
         DockerContainers.PYTHON_27.value: "docker://clinicalgenomics/balsamic:develop-varcall_py27",
-        DockerContainers.CNVKIT.value: "docker://clinicalgenomics/balsamic:develop-varcall_cnvkit",
+        DockerContainers.CNVKIT.value: "docker://clinicalgenomics/balsamic:develop-cnvkit",
         DockerContainers.COVERAGE_QC.value: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
         DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
         DockerContainers.CADD.value: "docker://clinicalgenomics/balsamic:develop-cadd",
