@@ -76,8 +76,10 @@ def calc_bafs(vcf_file: str):
         variant_id += 1
 
     # Step 4: Printing warnings
-    print(f"Warning: Can't calc AF for a number of variants: {count_invalid_vars}.")
-    print(f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}.")
+    if count_invalid_vars:
+        print(f"Warning: Can't calc AF for a number of variants: {count_invalid_vars}.")
+    if illegal_chromosomes:
+        print(f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}.")
 
     # Step 5: Writing output to a file
     output_file = click.get_current_context().parent.params['output_file']
@@ -107,7 +109,10 @@ def extract_variant_info(variant):
     variant_info["alt"] = variant[4]
     variant_sample = variant[9]
     variant_info["sample"] = variant_sample
+    if variant_sample.split(":")[0] == "./.":
+        return None
     allele_depths = variant_sample.split(":")[1]
+    #print(variant_sample)
     VD = int(allele_depths.split(",")[1])
     DP = int(variant_sample.split(":")[2])
     try:
