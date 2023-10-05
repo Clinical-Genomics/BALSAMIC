@@ -1,5 +1,4 @@
 import copy
-import json
 import os
 import shutil
 from datetime import datetime
@@ -11,6 +10,7 @@ from unittest import mock
 import pytest
 from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
+from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
@@ -554,6 +554,20 @@ def fastq_dir_tumor_only(
         Path(fastq_dir, fastq).touch()
 
     yield fastq_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir_symlinked(
+    tumor_fastq_names: List[str], session_tmp_path: Path, reference_file: Path
+) -> Path:
+    """Return directory containing symlinked FASTQs for tumor-only."""
+    fastq_dir: Path = Path(session_tmp_path, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+    for fastq in tumor_fastq_names:
+        Path(session_tmp_path, fastq).touch()
+    for fastq in tumor_fastq_names:
+        Path(fastq_dir, fastq).symlink_to(reference_file)
+    return fastq_dir
 
 
 @pytest.fixture(scope="session")
@@ -1798,6 +1812,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.CADD.value: "docker://clinicalgenomics/balsamic:develop-cadd",
         DockerContainers.HTSLIB.value: "docker://clinicalgenomics/balsamic:develop-htslib",
         DockerContainers.PURECN.value: "docker://clinicalgenomics/balsamic:develop-purecn",
+        DockerContainers.GATK.value: "docker://clinicalgenomics/balsamic:develop-gatk",
     }
 
 
@@ -2029,9 +2044,9 @@ def fixture_analysis_references_hg(
 
 
 @pytest.fixture(scope="session", name="reference_url")
-def fixture_reference_url() -> str:
+def fixture_reference_url() -> Url:
     """Return dummy reference url."""
-    return "gs://gatk-legacy-bundles/b37/reference.vcf.gz"
+    return Url("gs://gatk-legacy-bundles/b37/reference.vcf.gz")
 
 
 @pytest.fixture(scope="session", name="reference_file")
@@ -2044,7 +2059,7 @@ def fixture_reference_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="reference_url_data")
 def fixture_reference_url_data(
-    reference_url: str, reference_file: Path, cosmic_key: str
+    reference_url: Url, reference_file: Path, cosmic_key: str
 ) -> Dict[str, Any]:
     """return reference url model data."""
     return {

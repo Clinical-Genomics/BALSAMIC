@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 import pytest
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from BALSAMIC.constants.cluster import (
     ClusterMailType,
@@ -29,7 +29,7 @@ def test_singularity_bind_path_model(singularity_bind_path_data: Dict[str, Path]
     )
 
     # THEN the model should have been correctly built
-    assert singularity_bind_path_model.dict() == singularity_bind_path_data
+    assert dict(singularity_bind_path_model) == singularity_bind_path_data
 
 
 def test_snakemake_model(
@@ -46,7 +46,7 @@ def test_snakemake_model(
     )
 
     # THEN the model should have been correctly built
-    assert snakemake_model.dict() == snakemake_executable_validated_data
+    assert dict(snakemake_model) == snakemake_executable_validated_data
 
 
 def test_snakemake_model_empty():

@@ -128,7 +128,10 @@ def initialize(
         references=references,
         references_date=datetime.now().strftime("%Y-%m-%d %H:%M"),
     )
-    write_json(json.loads(cache_config.json(exclude_none=True)), config_path.as_posix())
+    write_json(
+        json_obj=json.loads(cache_config.model_dump_json(exclude_none=True)),
+        path=config_path.as_posix(),
+    )
     LOG.info(f"Reference workflow configured successfully ({config_path.as_posix()})")
 
     snakefile: Path = (

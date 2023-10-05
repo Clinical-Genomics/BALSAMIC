@@ -17,7 +17,7 @@ from BALSAMIC.utils.utils import get_relative_paths_dict
 LOG = logging.getLogger(__name__)
 
 # Balsamic cache configuration model
-cache_config: CacheConfig = CacheConfig.parse_obj(config)
+cache_config: CacheConfig = CacheConfig.model_validate(config)
 
 # Temporary directory and shell options
 os.environ["TMPDIR"] = cache_config.references_dir.as_posix()
@@ -46,7 +46,7 @@ rule all:
     run:
         analysis_references: Dict[str, str] = get_relative_paths_dict(
             base_path=cache_config.references_dir,
-            data=cache_config.get_analysis_references().dict(),
+            data=cache_config.get_analysis_references().model_dump(),
         )
         write_json(
             json_obj=analysis_references,
