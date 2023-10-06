@@ -250,7 +250,6 @@ class AnalysisReferencesHg(AnalysisReferences):
     wgs_calling_regions: FilePath
 
 
-
 class CacheAnalysis(BaseModel):
     """
     Reference analysis configuration model.
