@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 import click
-from pathlib import Path
 import io
+from pathlib import Path
+from typing import Dict, List, Tuple
 
-
+# Chromosome names allowed in baf files
 ALLOWED_CHR_LIST = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
+
+# How many variants to skip per zoom-level
 BAF_SKIP_N = {"o": 135,
               "a": 30,
               "b": 8,
               "c": 3,
               "d": 1}
+
+# The size of each coverage region per zoom-level
 COV_WINDOW_SIZES = {"o": 100000,
                     "a": 25000,
                     "b": 5000,
@@ -36,33 +41,33 @@ def cli(output_file):
     "--vcf-file",
     required=True,
     type=click.Path(exists=True),
-    help="Input VCF from germline-caller with SNVs & InDels from DNAscope.",
+    help="Input VCF from germline-caller with SNVs & InDels from DNAscope, called with --given gnomad_af_0.05.vcf ",
 )
 def calc_bafs(vcf_file: str):
     """
+    Processes vcf-file from DNAscope into a bed-file format for GENS, with different number of variants for each zoom-level.
 
     Args:
-        vcf_file:
+        vcf_file: From DNAscope created with --given argument using gnomad_af_min_0.05.vcf.
 
-    Returns:
-
+    Outputs bed-file in file-name specified in output-file.
     """
     print("Calculating BAFs from VCF...")
-    vcf_file = Path(vcf_file)
-    vcf_lines = vcf_file.read_text().splitlines()
+    vcf_file: Path = Path(vcf_file)
+    vcf_lines: List = vcf_file.read_text().splitlines()
 
     # Step 2: Initializing variables
-    count_invalid_vars = 0
-    illegal_chromosomes = {}
+    count_invalid_vars: int = 0
+    illegal_chromosomes: Dict = {}
     variants = {}
-    variant_id = 0
+    variant_id: int = 0
 
     # Step 3: Processing each variant
     for variant_line in vcf_lines:
         if variant_line.startswith("#"):
             continue
 
-        variant = extract_variant_info(variant_line)
+        variant: Dict = extract_variant_info(variant_line)
         if not variant:
             count_invalid_vars += 1
             continue
@@ -82,43 +87,65 @@ def calc_bafs(vcf_file: str):
         print(f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}.")
 
     # Step 5: Writing output to a file
-    output_file = click.get_current_context().parent.params['output_file']
+    output_file: str = click.get_current_context().parent.params['output_file']
     with open(output_file, 'w') as baf_out:
         for prefix in BAF_SKIP_N:
             req_skip_count = int(BAF_SKIP_N[prefix])
             skip_count = int(req_skip_count)
             for variant_id in variants:
-                variant = variants[variant_id]
+                variant: Dict = variants[variant_id]
                 if skip_count == req_skip_count:
-                    v_start = int(variant["start"])
-                    v_chrom = variant["chr"]
-                    v_af = variant["af"]
+                    v_start: int = int(variant["start"])
+                    v_chrom: str = variant["chr"]
+                    v_af: float = variant["af"]
                     baf_out.write(f"{prefix}_{v_chrom}\t{v_start}\t{v_start + 1}\t{v_af}\n")
                     skip_count = 0
                 else:
                     skip_count += 1
 
 
-def extract_variant_info(variant):
-    variant_info = {}
-    variant = variant.split("\t")
-    variant_info["chr"] = variant[0]
-    variant_info["start"] = variant[1]
-    variant_info["dbsnp"] = variant[2]
-    variant_info["ref"] = variant[3]
-    variant_info["alt"] = variant[4]
-    variant_sample = variant[9]
-    variant_info["sample"] = variant_sample
-    if variant_sample.split(":")[0] == "./.":
-        return None
-    allele_depths = variant_sample.split(":")[1]
-    #print(variant_sample)
-    VD = int(allele_depths.split(",")[1])
-    DP = int(variant_sample.split(":")[2])
+def extract_variant_info(variant: str):
+    """
+    Extracts genetic variant information.
+
+    Args:
+        variant (str): Tab-separated string representing a genetic variant.
+
+    Returns:
+        dict or None: Dictionary with variant details ('chr', 'start', 'ref', 'alt', 'sample', 'af').
+        Returns None for uninformative samples or division by zero.
+
+    Raises:
+        ValueError: If variant string lacks expected fields.
+
+    Example:
+        variant_string = "chr1\t1000\t.\tA\tT\t.\t.\t.\tGT:AD:DP:GQ:PL\t0/1:10,5:15:45:45,0,20"
+        extract_variant_info(variant_string)
+        {'chr': 'chr1', 'start': '1000', 'ref': 'A', 'alt': 'T', 'sample': '0/1:10,5:15:45:45,0,20', 'af': 0.333333}
+    """
+    fields: List = variant.split("\t")
     try:
-        variant_info["af"] = float(round(VD/DP, 6))
-    except ZeroDivisionError:
+        variant_info = {
+            "chr": fields[0],
+            "start": fields[1],
+            "ref": fields[3],
+            "alt": fields[4],
+            "sample": fields[9]
+        }
+    except IndexError:
+        raise ValueError("Invalid variant string format")
+
+    if variant_info["sample"].split(":")[0] == "./.":
         return None
+
+    try:
+        allele_depths = variant_info["sample"].split(":")[1]
+        VD = int(allele_depths.split(",")[1])
+        DP = int(variant_info["sample"].split(":")[2])
+        variant_info["af"] = round(VD / DP, 6)
+    except (ValueError, ZeroDivisionError, IndexError):
+        return None
+
     return variant_info
 
 @cli.command()
@@ -147,6 +174,47 @@ def calculate_coverage_data(normalised_coverage_path: str) -> None:
             window_size = COV_WINDOW_SIZES[prefix]
             generate_cov_bed(normalised_coverage_path, window_size, prefix, cov_out)
 
+def write_coverage_region(
+    prefix: str,
+    region_chr: str,
+    region_start: int,
+    region_end: int,
+    reg_ratios: List[float],
+    cov_out: io.TextIOWrapper
+) -> None:
+    """
+    Write coverage region information to an output file.
+
+    Args:
+        prefix (str): Prefix for the output.
+        region_chr (str): Chromosome for the region.
+        region_start (int): Start position of the region.
+        region_end (int): End position of the region.
+        reg_ratios (List[float]): List of log2 ratios.
+        cov_out (io.TextIOWrapper): Output file.
+
+    Returns:
+        None
+    """
+    mid_point = region_start + (region_end - region_start) // 2
+    cov_out.write(f"{prefix}_{region_chr}\t{mid_point - 1}\t{mid_point}\t{mean(reg_ratios)}\n")
+
+def extract_coverage_line_values(coverage_line: str) -> Tuple[str, int, int, float]:
+    """
+    Extract coverage region values from a coverage line.
+
+    Args:
+        coverage_line (str): A line containing coverage and genomic position information.
+
+    Returns:
+        Tuple[str, int, int, float]: Extracted values (chr, start, end, log2_ratio).
+    """
+    # Extract coverage region values
+    chr_start_stop_ratio: List = coverage_line.strip().split('\t')
+    chr: str = chr_start_stop_ratio[0]
+    start, end = int(chr_start_stop_ratio[1]), int(chr_start_stop_ratio[2])
+    log2_ratio: float = float(chr_start_stop_ratio[3])
+    return chr, start, end, log2_ratio
 
 def mean(nums: list) -> float:
     """
@@ -168,7 +236,7 @@ def generate_cov_bed(
     cov_out: io.TextIOWrapper
 ) -> None:
     """
-    Generate coverage data.
+    Merge coverage data into coverage regions for GENS.
 
     Args:
         normalised_coverage: Path to normalised coverage file.
@@ -179,43 +247,41 @@ def generate_cov_bed(
     Returns:
         None
     """
-    region_start, region_end, region_chr, force_end = None, None, None, False
-    reg_ratios = []
 
-    normalised_coverage = normalised_coverage_path.read_text().splitlines()
-    for line in normalised_coverage:
-        if line.startswith('@') or line.startswith('CONTIG'):
+    normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
+
+    first_cov_line: bool = True
+    for coverage_line in normalised_coverage:
+        if coverage_line.startswith('@') or coverage_line.startswith('CONTIG'):
             continue
-        chr_start_stop_ratio = line.strip().split('\t')
-        start, end = int(chr_start_stop_ratio[1]), int(chr_start_stop_ratio[2])
-        chr = chr_start_stop_ratio[0]
-        log2_ratio = chr_start_stop_ratio[3]
 
-        orig_end = end
-
-        if not region_start:
-            region_start, region_end, region_chr = start, end, chr
-
-        if chr == region_chr:
-            if start - region_end < window_size:
-                reg_ratios.append(float(log2_ratio))
-                region_end = end
-            else:
-                force_end = True
-                end = region_end
+        if first_cov_line:
+            region_chr, region_start, region_end, log2_ratio = extract_coverage_line_values(coverage_line)
+            chr, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
+            reg_ratios: List = [log2_ratio]
+            first_cov_line: bool = False
+            start_new_region: bool = False
         else:
-            force_end = True
-            end = region_end
+            chr, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
-        if end - region_start + 1 >= window_size or force_end:
-            mid_point = region_start + (end - region_start) // 2
-            cov_out.write(f"{prefix}_{region_chr}\t{mid_point-1}\t{mid_point}\t{mean(reg_ratios)}\n")
-            region_start, region_end, region_chr, reg_ratios = None, None, None, []
+        if region_end - region_start + 1 >= window_size:
+            write_coverage_region(prefix, region_chr, region_start, region_end, reg_ratios, cov_out)
+            start_new_region: bool = True
 
-        if force_end:
-            region_start, region_end, region_chr = start, orig_end, chr
-            reg_ratios.append(float(log2_ratio))
-            force_end = None
+        if chr != region_chr:
+            write_coverage_region(prefix, region_chr, region_start, region_end, reg_ratios, cov_out)
+            start_new_region: bool = True
+
+        if start_new_region:
+            region_chr, region_start, region_end, log2_ratio = extract_coverage_line_values(coverage_line)
+            reg_ratios: List = [log2_ratio]
+            start_new_region: bool = False
+        else:
+            region_end = end
+            reg_ratios.append(log2_ratio)
+
+    # Output last line:
+    write_coverage_region(prefix, region_chr, region_start, region_end, reg_ratios, cov_out)
 
 
 if __name__ == "__main__":
