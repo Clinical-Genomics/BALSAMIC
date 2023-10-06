@@ -43,7 +43,7 @@ jobs:
         id: docker_prune_containers
         shell: bash
         run: |
-          docker system prune -a
+          docker system prune -a -f
       - name: Test container
         id: docker_test_container
         shell: bash
