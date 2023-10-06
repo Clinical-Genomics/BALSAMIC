@@ -39,6 +39,11 @@ jobs:
           tags: clinicalgenomics/balsamic:develop-${{ matrix.container-name }}
           build-args: CONTAINER_NAME=${{ matrix.container-name }}
           provenance: false
+      - name: Prune containers
+        id: docker_prune_containers
+        shell: bash
+        run: |
+          docker system prune -a
       - name: Test container
         id: docker_test_container
         shell: bash
