@@ -302,6 +302,7 @@ def reference():
         "somalier_sites": "variants/GRCh37.somalier.sites.vcf.gz",
         "cadd_snv": "variants/hg19.cadd_snv.tsv.gz",
         "cadd_annotations": "cadd/",
+        "simple_repeat": "genome/simpleRepeat.txt.gz",
     }
 
 
@@ -2013,6 +2014,7 @@ def fixture_analysis_references_hg_data(
             cache_config.references.ascat_gc_correction.file_path
         ),
         "cadd_snv": Path(cache_config.references.cadd_snv.file_path),
+        "simpe_repeat": Path(cache_config.references.simple_repeat.file_path),
         "clinvar": clinvar_file,
         "cosmic": cosmic_file,
         "dbsnp": dbsnp_file,

@@ -103,6 +103,7 @@ class ReferencesHg(References):
         ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
         ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
         cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
+        simple_repeat (ReferenceUrl)            : Simple repeats
         clinvar (ReferenceUrl)                  : ClinVar reference.
         cosmic (ReferenceUrl)                   : COSMIC database's variants as VCF.
         dbsnp (ReferenceUrl)                    : dbSNP VCF file.
@@ -125,6 +126,7 @@ class ReferencesHg(References):
     ascat_chr_y_loci: ReferenceUrl
     ascat_gc_correction: ReferenceUrl
     cadd_snv: ReferenceUrl
+    simple_repeat: ReferenceUrl
     clinvar: ReferenceUrl
     cosmic: ReferenceUrl
     dbsnp: ReferenceUrl
@@ -208,6 +210,7 @@ class AnalysisReferencesHg(AnalysisReferences):
         ascat_chr_y_loci (FilePath)          : Chromosome Y loci.
         ascat_gc_correction (FilePath)       : Genome GC correction bins.
         cadd_snv (FilePath)                  : CADD SNV annotation file.
+        simple_repeat (FilePath)             : Simple repeats.
         clinvar (FilePath)                   : ClinVar reference.
         cosmic (FilePath)                    : COSMIC database's variants as VCF.
         dbsnp (FilePath)                     : dbSNP VCF file.
@@ -229,6 +232,7 @@ class AnalysisReferencesHg(AnalysisReferences):
     ascat_chr_y_loci: FilePath
     ascat_gc_correction: FilePath
     cadd_snv: FilePath
+    simple_repeat: FilePath
     clinvar: FilePath
     cosmic: FilePath
     dbsnp: FilePath
@@ -244,6 +248,7 @@ class AnalysisReferencesHg(AnalysisReferences):
     vcf_1kg: FilePath
     vep_dir: DirectoryPath
     wgs_calling_regions: FilePath
+
 
 
 class CacheAnalysis(BaseModel):
@@ -395,6 +400,7 @@ class CacheConfig(BaseModel):
             self.references.ascat_chr_y_loci.file_path,
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
+            self.references.simple_repeat.file_path,
             f"{self.references.clinvar.file_path}.{FileType.GZ}",
             f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
@@ -428,6 +434,7 @@ class CacheConfig(BaseModel):
             ascat_chr_y_loci=self.references.ascat_chr_y_loci.file_path,
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,
             cadd_snv=self.references.cadd_snv.file_path,
+            simple_repeat=self.references.simple_repeat.file_path,
             clinvar=f"{self.references.clinvar.file_path}.{FileType.GZ}",
             cosmic=f"{self.references.cosmic.file_path}.{FileType.GZ}",
             dbsnp=f"{self.references.dbsnp.file_path}.{FileType.GZ}",

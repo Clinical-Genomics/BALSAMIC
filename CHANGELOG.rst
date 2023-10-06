@@ -25,7 +25,7 @@ Added:
 * `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
 * `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
 * Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
-* `LOH` to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/12
+* `LOH` to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 
 Changed:
 ^^^^^^^^
