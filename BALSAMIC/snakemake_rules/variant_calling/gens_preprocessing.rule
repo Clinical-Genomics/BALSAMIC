@@ -35,7 +35,7 @@ export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 -i {input.bam} \
 --algo DNAscope \
 --pcr_indel_mode {params.pcr_model} \
---given {input.gnomad_af5} {output.vcf};
+--given {input.gnomad_af5} {output.gnomad_af5_vcf};
 
 rm -rf {params.tmpdir};
       """
