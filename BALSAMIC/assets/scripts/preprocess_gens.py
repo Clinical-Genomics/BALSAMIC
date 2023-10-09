@@ -5,21 +5,40 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 # Chromosome names allowed in baf files
-ALLOWED_CHR_LIST = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
+ALLOWED_CHR_LIST = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "X",
+    "Y",
+    "MT",
+]
 
 # How many variants to skip per zoom-level
-BAF_SKIP_N = {"o": 135,
-              "a": 30,
-              "b": 8,
-              "c": 3,
-              "d": 1}
+BAF_SKIP_N = {"o": 135, "a": 30, "b": 8, "c": 3, "d": 1}
 
 # The size of each coverage region per zoom-level
-COV_WINDOW_SIZES = {"o": 100000,
-                    "a": 25000,
-                    "b": 5000,
-                    "c": 1000,
-                    "d": 100}
+COV_WINDOW_SIZES = {"o": 100000, "a": 25000, "b": 5000, "c": 1000, "d": 100}
+
 
 @click.group()
 @click.option(
@@ -34,6 +53,7 @@ def cli(output_file):
     GENS pre-processing tool
     """
     pass
+
 
 @cli.command()
 @click.option(
@@ -84,11 +104,13 @@ def calc_bafs(vcf_file: str):
     if count_invalid_vars:
         print(f"Warning: Can't calc AF for a number of variants: {count_invalid_vars}.")
     if illegal_chromosomes:
-        print(f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}.")
+        print(
+            f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}."
+        )
 
     # Step 5: Writing output to a file
-    output_file: str = click.get_current_context().parent.params['output_file']
-    with open(output_file, 'w') as baf_out:
+    output_file: str = click.get_current_context().parent.params["output_file"]
+    with open(output_file, "w") as baf_out:
         for prefix in BAF_SKIP_N:
             req_skip_count = int(BAF_SKIP_N[prefix])
             skip_count = int(req_skip_count)
@@ -98,7 +120,9 @@ def calc_bafs(vcf_file: str):
                     v_start: int = int(variant["start"])
                     v_chrom: str = variant["chr"]
                     v_af: float = variant["af"]
-                    baf_out.write(f"{prefix}_{v_chrom}\t{v_start}\t{v_start + 1}\t{v_af}\n")
+                    baf_out.write(
+                        f"{prefix}_{v_chrom}\t{v_start}\t{v_start + 1}\t{v_af}\n"
+                    )
                     skip_count = 0
                 else:
                     skip_count += 1
@@ -130,7 +154,7 @@ def extract_variant_info(variant: str):
             "start": fields[1],
             "ref": fields[3],
             "alt": fields[4],
-            "sample": fields[9]
+            "sample": fields[9],
         }
     except IndexError:
         raise ValueError("Invalid variant string format")
@@ -147,6 +171,7 @@ def extract_variant_info(variant: str):
         return None
 
     return variant_info
+
 
 @cli.command()
 @click.option(
@@ -168,11 +193,12 @@ def calculate_coverage_data(normalised_coverage_path: str) -> None:
     """
     print("Calculating coverage data")
     normalised_coverage_path = Path(normalised_coverage_path)
-    output_file = click.get_current_context().parent.params['output_file']
-    with open(output_file, 'w') as cov_out:
+    output_file = click.get_current_context().parent.params["output_file"]
+    with open(output_file, "w") as cov_out:
         for prefix in COV_WINDOW_SIZES:
             window_size = COV_WINDOW_SIZES[prefix]
             generate_cov_bed(normalised_coverage_path, window_size, prefix, cov_out)
+
 
 def write_coverage_region(
     prefix: str,
@@ -180,7 +206,7 @@ def write_coverage_region(
     region_start: int,
     region_end: int,
     reg_ratios: List[float],
-    cov_out: io.TextIOWrapper
+    cov_out: io.TextIOWrapper,
 ) -> None:
     """
     Write coverage region information to an output file.
@@ -197,7 +223,10 @@ def write_coverage_region(
         None
     """
     mid_point = region_start + (region_end - region_start) // 2
-    cov_out.write(f"{prefix}_{region_chr}\t{mid_point - 1}\t{mid_point}\t{mean(reg_ratios)}\n")
+    cov_out.write(
+        f"{prefix}_{region_chr}\t{mid_point - 1}\t{mid_point}\t{mean(reg_ratios)}\n"
+    )
+
 
 def extract_coverage_line_values(coverage_line: str) -> Tuple[str, int, int, float]:
     """
@@ -210,11 +239,12 @@ def extract_coverage_line_values(coverage_line: str) -> Tuple[str, int, int, flo
         Tuple[str, int, int, float]: Extracted values (chr, start, end, log2_ratio).
     """
     # Extract coverage region values
-    chr_start_stop_ratio: List = coverage_line.strip().split('\t')
+    chr_start_stop_ratio: List = coverage_line.strip().split("\t")
     chr: str = chr_start_stop_ratio[0]
     start, end = int(chr_start_stop_ratio[1]), int(chr_start_stop_ratio[2])
     log2_ratio: float = float(chr_start_stop_ratio[3])
     return chr, start, end, log2_ratio
+
 
 def mean(nums: list) -> float:
     """
@@ -233,7 +263,7 @@ def generate_cov_bed(
     normalised_coverage_path: Path,
     window_size: int,
     prefix: str,
-    cov_out: io.TextIOWrapper
+    cov_out: io.TextIOWrapper,
 ) -> None:
     """
     Merge coverage data into coverage regions for GENS.
@@ -252,11 +282,16 @@ def generate_cov_bed(
 
     first_cov_line: bool = True
     for coverage_line in normalised_coverage:
-        if coverage_line.startswith('@') or coverage_line.startswith('CONTIG'):
+        if coverage_line.startswith("@") or coverage_line.startswith("CONTIG"):
             continue
 
         if first_cov_line:
-            region_chr, region_start, region_end, log2_ratio = extract_coverage_line_values(coverage_line)
+            (
+                region_chr,
+                region_start,
+                region_end,
+                log2_ratio,
+            ) = extract_coverage_line_values(coverage_line)
             chr, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
             reg_ratios: List = [log2_ratio]
             first_cov_line: bool = False
@@ -265,15 +300,24 @@ def generate_cov_bed(
             chr, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
         if region_end - region_start + 1 >= window_size:
-            write_coverage_region(prefix, region_chr, region_start, region_end, reg_ratios, cov_out)
+            write_coverage_region(
+                prefix, region_chr, region_start, region_end, reg_ratios, cov_out
+            )
             start_new_region: bool = True
 
         if chr != region_chr:
-            write_coverage_region(prefix, region_chr, region_start, region_end, reg_ratios, cov_out)
+            write_coverage_region(
+                prefix, region_chr, region_start, region_end, reg_ratios, cov_out
+            )
             start_new_region: bool = True
 
         if start_new_region:
-            region_chr, region_start, region_end, log2_ratio = extract_coverage_line_values(coverage_line)
+            (
+                region_chr,
+                region_start,
+                region_end,
+                log2_ratio,
+            ) = extract_coverage_line_values(coverage_line)
             reg_ratios: List = [log2_ratio]
             start_new_region: bool = False
         else:
@@ -281,7 +325,9 @@ def generate_cov_bed(
             reg_ratios.append(log2_ratio)
 
     # Output last line:
-    write_coverage_region(prefix, region_chr, region_start, region_end, reg_ratios, cov_out)
+    write_coverage_region(
+        prefix, region_chr, region_start, region_end, reg_ratios, cov_out
+    )
 
 
 if __name__ == "__main__":

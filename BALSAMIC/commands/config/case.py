@@ -129,12 +129,14 @@ def case_config(
 
     if gens:
         if not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
-            raise click.BadParameter('All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required when --gens is provided.')
+            raise click.BadParameter(
+                "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required when --gens is provided."
+            )
 
         gens_ref_files = {
             "genome_interval": genome_interval,
             "gens_coverage_pon": gens_coverage_pon,
-            "gnomad_min_af5": gnomad_min_af5
+            "gnomad_min_af5": gnomad_min_af5,
         }
 
         references.update(

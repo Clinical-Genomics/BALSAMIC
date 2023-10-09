@@ -94,7 +94,7 @@ rule gatk_denoisereadcounts:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};  
   
-gatk --java-options "-Xmx35g" DenoiseReadCounts 
+gatk --java-options "-Xmx35g" DenoiseReadCounts  \
 -I {input.readcounts_hdf5} \
 --count-panel-of-normals {input.gens_pon} \
 --tmp-dir {params.tmpdir} \
