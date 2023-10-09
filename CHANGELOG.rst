@@ -25,6 +25,7 @@ Added:
 * `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
 * `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
 * Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
+* Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 
 Changed:
 ^^^^^^^^

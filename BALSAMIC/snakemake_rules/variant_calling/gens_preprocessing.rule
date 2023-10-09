@@ -123,7 +123,7 @@ rule gens_preprocessing:
     shell:
         """
 {params.gens_preprocessing} -o {output.gens_baf_bed} calc-bafs --vcf-file {input.gnomad_af5_vcf}
-{params.gens_preprocessing} -o {output.gens_cov_bed} calculate-coverage-data --normalised-coverage-path {input.denoised_cr}
+{params.gens_preprocessing} -o {output.gens_cov_bed} calc-cov --normalised-coverage-path {input.denoised_cr}
         """
 
 rule finalize_gens_outputfiles:

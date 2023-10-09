@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import click
+import gzip
 import io
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -73,8 +74,13 @@ def calc_bafs(vcf_file: str):
     Outputs bed-file in file-name specified in output-file.
     """
     print("Calculating BAFs from VCF...")
-    vcf_file: Path = Path(vcf_file)
-    vcf_lines: List = vcf_file.read_text().splitlines()
+    # Step 1: Read file
+    vcf_file_path: Path = Path(vcf_file)
+    if vcf_file_path.suffix == ".gz":
+        with gzip.open(vcf_file_path, "rt") as file:
+            vcf_lines = file.read().splitlines()
+    else:
+        vcf_lines: List = vcf_file.read_text().splitlines()
 
     # Step 2: Initializing variables
     count_invalid_vars: int = 0
@@ -181,7 +187,7 @@ def extract_variant_info(variant: str):
     type=click.Path(exists=True),
     help="Input normalised coverage from GATK DenoiseReadCounts.",
 )
-def calculate_coverage_data(normalised_coverage_path: str) -> None:
+def calc_cov(normalised_coverage_path: str) -> None:
     """
     Calculate coverage data.
 
