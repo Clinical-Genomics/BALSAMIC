@@ -312,7 +312,7 @@ def generate_cov_bed(
 
         if first_cov_line:
             (
-                region_chr,
+                region_chrom,
                 region_start,
                 region_end,
                 log2_ratio,
@@ -322,23 +322,23 @@ def generate_cov_bed(
             start_new_region: bool = False
             continue
         else:
-            chr, _, end, log2_ratio = extract_coverage_line_values(coverage_line)
+            chrom, _, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
         if region_end - region_start + 1 >= window_size:
             write_coverage_region(
-                prefix, region_chr, region_start, region_end, reg_ratios, cov_out
+                prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
             )
             start_new_region: bool = True
 
-        if chr != region_chr:
+        if chrom != region_chrom:
             write_coverage_region(
-                prefix, region_chr, region_start, region_end, reg_ratios, cov_out
+                prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
             )
             start_new_region: bool = True
 
         if start_new_region:
             (
-                region_chr,
+                region_chrom,
                 region_start,
                 region_end,
                 log2_ratio,
@@ -351,7 +351,7 @@ def generate_cov_bed(
 
     # Output last line:
     write_coverage_region(
-        prefix, region_chr, region_start, region_end, reg_ratios, cov_out
+        prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
     )
 
 
