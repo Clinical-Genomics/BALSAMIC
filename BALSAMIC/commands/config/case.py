@@ -21,7 +21,6 @@ from BALSAMIC.commands.options import (
     OPTION_CLINICAL_SV_OBSERVATIONS,
     OPTION_FASTQ_PATH,
     OPTION_GENDER,
-    OPTION_GENS,
     OPTION_GENOME_INTERVAL,
     OPTION_GENS_COV_PON,
     OPTION_GNOMAD_AF5,
@@ -72,7 +71,6 @@ LOG = logging.getLogger(__name__)
 @OPTION_FASTQ_PATH
 @OPTION_GENDER
 @OPTION_GENOME_VERSION
-@OPTION_GENS
 @OPTION_GENOME_INTERVAL
 @OPTION_GENS_COV_PON
 @OPTION_GNOMAD_AF5
@@ -104,7 +102,6 @@ def case_config(
     fastq_path: Path,
     gender: Gender,
     genome_version: GenomeVersion,
-    gens: bool,
     genome_interval: Path,
     gens_coverage_pon: Path,
     gnomad_min_af5: Path,
@@ -127,10 +124,10 @@ def case_config(
     if cadd_annotations:
         references.update(cadd_annotations_path)
 
-    if gens:
+    if any([genome_interval, gens_coverage_pon, gnomad_min_af5]):
         if not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
             raise click.BadParameter(
-                "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required when --gens is provided."
+                "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
             )
 
         gens_ref_files = {

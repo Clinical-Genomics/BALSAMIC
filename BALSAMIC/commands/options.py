@@ -233,12 +233,6 @@ OPTION_GENOME_VERSION = click.option(
     help="Type and build version of the reference genome",
 )
 
-OPTION_GENS = click.option(
-    "--gens",
-    is_flag=True,
-    help="Generate files to upload to GENS.",
-)
-
 OPTION_GENOME_INTERVAL = click.option(
     "--genome-interval",
     required=False,
