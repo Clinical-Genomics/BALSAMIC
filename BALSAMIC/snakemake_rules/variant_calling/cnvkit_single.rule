@@ -29,6 +29,7 @@ rule cnvkit_segment_CNV_research:
         cnv_dir = cnv_dir,
         min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
+        sample_id = "TUMOR",
         pon = " " if pon_cnn is None else pon_cnn,
     message:
         ("Segmenting genomic regions using CNVkit for {params.case_name}")
@@ -87,6 +88,7 @@ fi
 # segmentattion methods (-m): cbs: reccommended for mid-size target panels and exomes
 # drop bins with 0  read depth and bins whose log2 values deviating from avg
 cnvkit.py segment {output.cnr} \
+--sample-id {params.sample_id} \
 --output {output.cns} \
 --method cbs \
 --drop-low-coverage \
@@ -106,12 +108,14 @@ rule purecn_call_CNV_research:
         snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         segment= cnv_dir + "tumor.seg",
         cnr = cnv_dir + "tumor.merged.cnr",
+        genomic_repeats = config["reference"]["simple_repeat"]
     output:
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         purity_pdf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
         loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
         loh_genes = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
-        cnv_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.csv"
+        cnv_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.csv",
+        cnv_vcf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.vcf"
     benchmark:
         Path(benchmark_dir, 'purecn_call_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -141,14 +145,16 @@ export PURECN='/opt/PureCN/PureCN.R'
 purecn_status="true"
 {{
 Rscript $PURECN \
+--parallel \
 --out {params.tmpdir} \
+--out-vcf {output.cnv_vcf} \
 --sampleid {params.sample_id} \
 --tumor {input.cnr} \
---segfile {input.segment} \
+--seg-file {input.segment} \
 --vcf  {input.snv_vcf} \
 --genome {params.genome} \
---funsegmentation Hclust \
---force --postoptimize \
+--fun-segmentation Hclust \
+--force --post-optimize \
 --seed 124;
 }} || purecn_status="false"
 

@@ -33,6 +33,8 @@ rule cnvkit_segment_CNV_research:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
         case_name = config["analysis"]["case_id"],
+        sample_id = "TUMOR",
+        normal_id = "NORMAL",
         tumor_name = "tumor.merged",
         min_mapq = params.common.min_mapq,
         pon = " " if pon_cnn is None else pon_cnn,
@@ -118,6 +120,8 @@ fi
 # segmentattion methods (-m): cbs: reccommended for mid-size target panels and exomes
 # drop bins with 0  read depth and bins whose log2 values deviating from avg
 cnvkit.py segment {output.cnr} \
+--sample-id {params.sample_id} \
+--normal-id {params.normal_id} \
 --output {output.cns} \
 --method cbs \
 --drop-low-coverage \
@@ -175,11 +179,11 @@ Rscript $PURECN \
 --out {params.tmpdir} \
 --sampleid {params.sample_id} \
 --tumor {input.cnr} \
---segfile {input.segment} \
+--seg-file {input.segment} \
 --vcf  {input.snv_merged} \
 --genome {params.genome} \
---funsegmentation Hclust \
---force --postoptimize \
+--fun-segmentation Hclust \
+--force --post-optimize \
 --seed 124;
 }} || purecn_status="false"
 
