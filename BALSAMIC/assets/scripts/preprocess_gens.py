@@ -82,39 +82,10 @@ def calc_bafs(vcf_file: str):
     else:
         vcf_lines: List = vcf_file.read_text().splitlines()
 
-    # Step 2: Initializing variables
-    count_invalid_vars: int = 0
-    illegal_chromosomes: Dict = {}
-    variants = {}
-    variant_id: int = 0
+    # Step 2: Processing each variant
+    variants: Dict = process_variants(vcf_lines)
 
-    # Step 3: Processing each variant
-    for variant_line in vcf_lines:
-        if variant_line.startswith("#"):
-            continue
-
-        variant: Dict = extract_variant_info(variant_line)
-        if not variant:
-            count_invalid_vars += 1
-            continue
-
-        v_chrom = variant["chr"]
-        if v_chrom not in ALLOWED_CHR_LIST:
-            illegal_chromosomes[v_chrom] = illegal_chromosomes.get(v_chrom, 0) + 1
-            continue
-
-        variants[variant_id] = variant
-        variant_id += 1
-
-    # Step 4: Printing warnings
-    if count_invalid_vars:
-        print(f"Warning: Can't calc AF for a number of variants: {count_invalid_vars}.")
-    if illegal_chromosomes:
-        print(
-            f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}."
-        )
-
-    # Step 5: Writing output to a file
+    # Step 3: Writing output to a file
     output_file: str = click.get_current_context().parent.params["output_file"]
     with open(output_file, "w") as baf_out:
         for prefix in BAF_SKIP_N:
@@ -133,6 +104,53 @@ def calc_bafs(vcf_file: str):
                 else:
                     skip_count += 1
 
+
+def process_variants(vcf_lines):
+    """
+    Process VCF lines to extract valid variants.
+
+    Args:
+        vcf_lines (List[str]): List of VCF lines to be processed.
+
+    Returns:
+        dict: A dictionary containing valid variants with variant IDs as keys and variant info as values.
+
+    This function takes a list of VCF lines, processes them, and extracts valid variants.
+    Variants are stored in a dictionary with variant IDs as keys and variant information as values.
+    If any invalid variants are encountered, appropriate warnings are printed.
+
+    Example usage:
+        vcf_lines: List = [...]  # List of VCF lines
+        valid_variants: Dict = process_variants(vcf_lines)
+    """
+    count_invalid_vars: int = 0
+    illegal_chromosomes: Dict = {}
+    variants = {}
+    variant_id: int = 0
+    for variant_line in vcf_lines:
+        if variant_line.startswith("#"):
+            continue
+
+        variant: Dict = extract_variant_info(variant_line)
+        if not variant:
+            count_invalid_vars += 1
+            continue
+
+        v_chrom = variant["chr"]
+        if v_chrom not in ALLOWED_CHR_LIST:
+            illegal_chromosomes[v_chrom] = illegal_chromosomes.get(v_chrom, 0) + 1
+            continue
+
+        variants[variant_id] = variant
+        variant_id += 1
+
+    if count_invalid_vars:
+        print(f"Warning: Can't calc AF for a number of variants: {count_invalid_vars}.")
+    if illegal_chromosomes:
+        print(
+            f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}."
+        )
+    return variants
 
 def extract_variant_info(variant: str):
     """
