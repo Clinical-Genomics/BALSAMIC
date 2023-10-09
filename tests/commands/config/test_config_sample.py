@@ -344,12 +344,16 @@ def test_missing_required_gens_arguments(
             "--gens-coverage-pon",
             gens_cov_pon_file,
             "--gnomad-min-af5",
-            gens_min_5_af_gnomad_file
+            gens_min_5_af_gnomad_file,
         ],
     )
     # THEN the CLI should exit code 2 and display an informative error message
     assert result.exit_code == 2
-    assert "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS." in result.output
+    assert (
+        "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
+        in result.output
+    )
+
 
 def test_config_w_gens_arguments(
     invoke_cli,
@@ -360,8 +364,8 @@ def test_config_w_gens_arguments(
     case_id_tumor_only: str,
     gens_cov_pon_file: str,
     gens_min_5_af_gnomad_file: str,
-    gens_hg19_interval_list: str
-    ):
+    gens_hg19_interval_list: str,
+):
     """Test balsamic config case with GENS arguments."""
 
     # GIVEN CLI arguments including optional GENS input-files
@@ -386,12 +390,9 @@ def test_config_w_gens_arguments(
             "--gnomad-min-af5",
             gens_min_5_af_gnomad_file,
             "--genome-interval",
-            gens_hg19_interval_list
+            gens_hg19_interval_list,
         ],
     )
     # THEN a config should be created and exist
     assert result.exit_code == 0
     assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
-
-
-

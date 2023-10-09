@@ -152,6 +152,7 @@ def process_variants(vcf_lines):
         )
     return variants
 
+
 def extract_variant_info(variant: str):
     """
     Extracts genetic variant information.

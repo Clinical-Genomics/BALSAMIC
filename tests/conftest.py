@@ -366,20 +366,32 @@ def cadd_annotations(test_data_dir: str) -> str:
     """Return path for CADD annotations."""
     return Path(test_data_dir, "references", "cadd").as_posix()
 
+
 @pytest.fixture(scope="session")
 def gens_cov_pon_file(test_data_dir: str) -> str:
     """Return path for dummy GENS male PON file."""
-    return Path(test_data_dir, "references", "gens", "grch37_gens_male_pon_100bp.hdf5").as_posix()
+    return Path(
+        test_data_dir, "references", "gens", "grch37_gens_male_pon_100bp.hdf5"
+    ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def gens_min_5_af_gnomad_file(test_data_dir: str) -> str:
     """Return path for dummy GENS minimum af 5 gnomad file."""
-    return Path(test_data_dir, "references", "gens", "gnomad.genomes.r2.1.1.sites_0.05AF.vcf.gz").as_posix()
+    return Path(
+        test_data_dir, "references", "gens", "gnomad.genomes.r2.1.1.sites_0.05AF.vcf.gz"
+    ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def gens_hg19_interval_list(test_data_dir: str) -> str:
     """Return path for dummy hg19 genome 100bp interval list used in GENS."""
-    return Path(test_data_dir, "references", "gens", "grch37_gens_targets_preprocessed_100bp.interval_list").as_posix()
+    return Path(
+        test_data_dir,
+        "references",
+        "gens",
+        "grch37_gens_targets_preprocessed_100bp.interval_list",
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
