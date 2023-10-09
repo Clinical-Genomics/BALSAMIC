@@ -316,10 +316,10 @@ def generate_cov_bed(
                 region_end,
                 log2_ratio,
             ) = extract_coverage_line_values(coverage_line)
-            chr, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
             reg_ratios: List = [log2_ratio]
             first_cov_line: bool = False
             start_new_region: bool = False
+            continue
         else:
             chr, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
