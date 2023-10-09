@@ -207,6 +207,7 @@ DELIVERY_RULES: List[str] = [
     "cnvkit_single",
     "cnvkit_paired",
     "vcf2cytosure_convert",
+    "finalize_gens_outputfiles",
     # TMB
     "tmb_calculation",
 ]
