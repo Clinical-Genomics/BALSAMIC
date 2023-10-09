@@ -321,7 +321,7 @@ def generate_cov_bed(
             start_new_region: bool = False
             continue
         else:
-            chr, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
+            chr, _, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
         if region_end - region_start + 1 >= window_size:
             write_coverage_region(
